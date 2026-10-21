@@ -1,0 +1,49 @@
+{
+  "kind": "R13_SECTION27_CURATION_ONLY",
+  "reviewSourceSha": "68bb1809698435416656cb7b51ed0c1f5f1a545a",
+  "decision": "BLOCKED_PENDING_SOURCE_REVIEW_AND_RUNTIME",
+  "signatureVerified": false,
+  "files": [
+    {
+      "path": "ci-failed-workflow.json",
+      "bytes": 9701,
+      "sha256": "fd3cd82407453b92720becbb746865d912ffb431eec56806114bb5e8365260d9"
+    },
+    {
+      "path": "ci-source-preflight-failure.log.txt",
+      "bytes": 599,
+      "sha256": "3ef2bda83522ff41a12dd19f7e18f1887257efd3904439e2eab706dab2a4d2ff"
+    },
+    {
+      "path": "inputs.json",
+      "bytes": 894,
+      "sha256": "7113ff00949cc2f95b6c3c12507e9b28785c3f75a8172a562d25386bcc34aa86"
+    },
+    {
+      "path": "inventory-correction.json",
+      "bytes": 976,
+      "sha256": "7b5b5f5a0be29b2ecb2c3251df3933b36cda95c6b977243369bcb54715fe95ac"
+    },
+    {
+      "path": "operator.mjs.txt",
+      "bytes": 7736,
+      "sha256": "87da0fc9e7f7a56d1f23c09b639c7cb7f8830cbb9886ad9c95da5ed8a6515f57"
+    },
+    {
+      "path": "release-entry-fix.json",
+      "bytes": 1228,
+      "sha256": "a73fd2c4e45e941a3eebc93d4bcc68c69ed04e1df9bc18ab731f27b206b239a3"
+    },
+    {
+      "path": "review-limits.json",
+      "bytes": 987,
+      "sha256": "6ef59303ac36994506c51ec16261e8ef6063ac7893d2afe05f014ea158b867dc"
+    },
+    {
+      "path": "section27-source-links.json",
+      "bytes": 318090,
+      "sha256": "43fc2798313cfc2e90d7c8d6254d8cef8abf016ad2498d2fa04559c0746ff965"
+    }
+  ],
+  "ciLogScope": "Selected failure lines only; full raw log outside Git; original raw digest retained in excerpt"
+}

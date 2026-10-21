@@ -1,0 +1,226 @@
+{
+  "kind": "R14_BUILT_API_REVIEWER_CONSENT_DIAGNOSTIC",
+  "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+  "apiBundleSha256": "13f042467b11f4b9d8615d1e021ca1c982fe8b928e4cc98faace4a990e20e7c2",
+  "cleanReleaseArtifact": false,
+  "syntheticOnly": true,
+  "freshEapProcessing": false,
+  "certificateDeliveryExercised": false,
+  "reviewerConsentDeliveryExercised": true,
+  "productionAcceptance": false,
+  "passed": true,
+  "observations": [
+    {
+      "phase": "student-logins",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "phase": "student-logins",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "phase": "student-logins",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "phase": "student-logins",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "phase": "reviewer-mfa-enrollment",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "phase": "reviewer-mfa-enrollment",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "phase": "reviewer-mfa-enrollment",
+      "method": "POST",
+      "path": "/api/v1/auth/mfa/enroll",
+      "status": 200
+    },
+    {
+      "phase": "reviewer-mfa-enrollment",
+      "method": "POST",
+      "path": "/api/v1/auth/mfa/confirm",
+      "status": 200
+    },
+    {
+      "phase": "reviewer-mfa-enrollment",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "phase": "reviewer-mfa-enrollment",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "phase": "reviewer-mfa-enrollment",
+      "method": "GET",
+      "path": "/api/v1/auth/mfa",
+      "status": 200
+    },
+    {
+      "phase": "authorized-review-open",
+      "method": "POST",
+      "path": "/api/v1/admin/student-document-reviews/705b7455-37dd-40b2-b994-55cde1b8a997/open",
+      "status": 200
+    },
+    {
+      "phase": "reviewer-content",
+      "method": "GET",
+      "path": "/api/v1/admin/student-document-reviews/705b7455-37dd-40b2-b994-55cde1b8a997/content?expectedVersion=1&expiresAt=1792543920464",
+      "status": 200
+    },
+    {
+      "phase": "foreign-student-content",
+      "method": "GET",
+      "path": "/api/v1/admin/student-document-reviews/705b7455-37dd-40b2-b994-55cde1b8a997/content?expectedVersion=1&expiresAt=1792543920464",
+      "status": 403
+    },
+    {
+      "phase": "consent-withdrawal-during-storage-io",
+      "method": "PUT",
+      "path": "/api/v1/student/application-trackers/c33fdb55-43e1-4492-8b53-e0d9706d2110/documents/0edb29bf-3611-415a-a25a-f6c2933dd5a4/review-consent",
+      "status": 204
+    },
+    {
+      "phase": "consent-withdrawal-during-storage-io",
+      "method": "GET",
+      "path": "/api/v1/admin/student-document-reviews/705b7455-37dd-40b2-b994-55cde1b8a997/content?expectedVersion=1&expiresAt=1792543920464",
+      "status": 404
+    },
+    {
+      "phase": "consent-withdrawal-during-storage-io",
+      "method": "GET",
+      "path": "/api/v1/admin/student-document-reviews/705b7455-37dd-40b2-b994-55cde1b8a997/content?expectedVersion=1&expiresAt=1792543920464",
+      "status": 404
+    },
+    {
+      "phase": "consent-withdrawal-during-storage-io",
+      "method": "POST",
+      "path": "/api/v1/admin/student-document-reviews/705b7455-37dd-40b2-b994-55cde1b8a997/open",
+      "status": 404
+    },
+    {
+      "phase": "review-expiry",
+      "method": "POST",
+      "path": "/api/v1/admin/student-document-reviews/8ffa2e5a-d836-4b5b-b1ff-510be74c3e54/open",
+      "status": 200
+    },
+    {
+      "phase": "review-expiry",
+      "method": "GET",
+      "path": "/api/v1/admin/student-document-reviews/8ffa2e5a-d836-4b5b-b1ff-510be74c3e54/content?expectedVersion=1&expiresAt=1792543863758",
+      "status": 404
+    },
+    {
+      "phase": "corrupt-provider-bytes",
+      "method": "POST",
+      "path": "/api/v1/admin/student-document-reviews/3be31c1f-0a23-4e3a-8f34-d4edd015645f/open",
+      "status": 200
+    },
+    {
+      "phase": "corrupt-provider-bytes",
+      "method": "GET",
+      "path": "/api/v1/admin/student-document-reviews/3be31c1f-0a23-4e3a-8f34-d4edd015645f/content?expectedVersion=1&expiresAt=1792543923944",
+      "status": 404
+    },
+    {
+      "phase": "logout",
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "status": 200
+    },
+    {
+      "phase": "logout",
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "status": 200
+    },
+    {
+      "phase": "logout",
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "status": 200
+    }
+  ],
+  "calls": [
+    {
+      "path": "/v1/capabilities/readiness",
+      "method": "GET",
+      "signed": true
+    },
+    {
+      "path": "/v1/capabilities/readiness",
+      "method": "GET",
+      "signed": true
+    },
+    {
+      "path": "/v1/capabilities/readiness",
+      "method": "GET",
+      "signed": true
+    },
+    {
+      "path": "/v1/capabilities/readiness",
+      "method": "GET",
+      "signed": true
+    },
+    {
+      "path": "/v1/assets/read",
+      "method": "POST",
+      "signed": true
+    },
+    {
+      "path": "/v1/assets/read",
+      "method": "POST",
+      "signed": true
+    },
+    {
+      "path": "/v1/assets/read",
+      "method": "POST",
+      "signed": true
+    }
+  ],
+  "role": {
+    "role": "post28_r11_actor",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "rolreplication": false
+  },
+  "actualMfaEnrolledAndConfirmedViaHttp": true,
+  "noConfirmedCredentialFixtureInserted": true,
+  "reviewerPdfDigestMatched": true,
+  "providerUrlNeverExposedToReviewer": true,
+  "consentWithdrawalBeforeBytesReturned": true,
+  "oldAuthenticatedPathDeniedAfterWithdrawal": true,
+  "initialBindingAndConsentPreserved": true,
+  "expiredAuthenticatedPathDeniedBeforeProvider": true,
+  "corruptBytesNeverReturnedAsPdf": true,
+  "historicalOriginalRowsPreserved": true,
+  "finalReadCalls": 3,
+  "providerGrantCalls": 0,
+  "boundary": "BUILT_API_AUTHENTICATED_REVIEW_WITH_REAL_CONSENT_WITHDRAWAL_DURING_IO",
+  "cleanup": {
+    "apiStopped": true,
+    "providerStopped": true
+  }
+}

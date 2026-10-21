@@ -1,0 +1,23 @@
+{
+  "sourceSha": "819216eba0d09afb3048235e310e2854ef54779d",
+  "executionContext": "Unit RED/GREEN runs used working trees based on 157debd then 4244b94; raw reports retain their own timestamps and paths. Final changes were committed in 4244b94 and 819216e.",
+  "trackRed": {
+    "passed": 1,
+    "failed": 2
+  },
+  "trackGreen": {
+    "passed": 3,
+    "failed": 0
+  },
+  "accessRed": {
+    "failed": 1,
+    "unselected": 3
+  },
+  "accessGreen": {
+    "passed": 4,
+    "failed": 0
+  },
+  "reasonForRelatedRerun": "Same component accessType expression and options changed; only this four-case file was rerun.",
+  "browserEvidenceSeparate": true,
+  "fullR09Acceptance": false
+}

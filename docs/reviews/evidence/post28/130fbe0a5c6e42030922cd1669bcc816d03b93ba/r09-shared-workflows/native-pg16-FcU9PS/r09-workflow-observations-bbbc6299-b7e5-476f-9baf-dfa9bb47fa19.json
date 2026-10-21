@@ -1,0 +1,53 @@
+{
+  "kind": "POST28_R09_SHARED_WORKFLOW_INTEGRATION",
+  "sourceSha": "130fbe0a5c6e42030922cd1669bcc816d03b93ba",
+  "syntheticOnly": true,
+  "productionAcceptance": false,
+  "externalProvidersEnabled": false,
+  "fullR09Acceptance": false,
+  "observations": [
+    {
+      "case": "CANONICAL_GRAPH_RELATIONSHIPS",
+      "majorId": "f5b1000c-507b-4c22-a9a3-92190296604c",
+      "lookalikeId": "54c0c708-bd12-4eab-a099-9d9bdba8efcd",
+      "universityIds": [
+        "8b65d913-f619-4d2f-9a9c-9f37ebfa54da",
+        "178c5da2-4cdc-4573-a767-b0b7e3923572",
+        "1186b89e-d54f-492f-955b-0133b47c6f86"
+      ],
+      "scholarshipIds": [
+        "3df6e5e2-a11b-4c7d-85a7-1ce86b0ce8d0",
+        "12a9d13f-e1c0-4728-b213-14d52a3b6593",
+        "b1a9969a-01b9-4dc5-b33d-c14ba6b0423e"
+      ],
+      "courseIds": [
+        "0a2e6d64-223b-417e-b7f0-ab3cdf33babd",
+        "b5a972f8-d324-4e0d-960a-76b022c3d94c",
+        "71a9a4dc-ea3a-4239-8432-2344d73734e6"
+      ],
+      "allThreeOwnersPaged": true,
+      "allThreeOwnersWithdrawn": true,
+      "pages": 3,
+      "uniqueOwnerIds": true,
+      "inverseOwnerIds": true,
+      "withdrawnId": "178c5da2-4cdc-4573-a767-b0b7e3923572",
+      "afterWithdrawalTotal": 2,
+      "realOwnerReadOutage": "UNAVAILABLE_TOTAL_NULL",
+      "recovered": true,
+      "browserTransport": true,
+      "builtGraphUi": false,
+      "historicalPublicationFixture": true
+    }
+  ],
+  "role": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledger": false
+  },
+  "browserVersion": "155.0.4283.62",
+  "boundary": "ACTUAL_SOURCE_ROUTERS_REAL_JWT_DB_CAPABILITIES_NOT_BUILT_ADMIN_UI_OR_MFA"
+}

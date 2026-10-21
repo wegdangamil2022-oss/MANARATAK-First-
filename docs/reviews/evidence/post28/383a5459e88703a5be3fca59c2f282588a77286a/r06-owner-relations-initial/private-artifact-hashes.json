@@ -1,0 +1,22 @@
+[
+  {
+    "name": "R06-suites/owner-relations-9cireM/vitest.json",
+    "sha256": "dc64b87892d5d8df6bc4aa1b1e174668be93255b09d384245340f0a31cbaac80",
+    "bytes": 7232
+  },
+  {
+    "name": "R06-suites/owner-relations-9cireM/discovery.json",
+    "sha256": "f99636e7ba14f38a5e7da3c2fc799d8ab01e182baf43e0d0e70fd6591c6c03e5",
+    "bytes": 3815
+  },
+  {
+    "name": "R06-setup/result.json",
+    "sha256": "6ad4df7d2e09cdacf800f3e660f9ac984599deda865fe9a46b0e204c59d4c62b",
+    "bytes": 2965
+  },
+  {
+    "name": "R06-setup/checks.json",
+    "sha256": "6a95f8e724451a02d94d300cdfcd8e3fe9f36348029c4a0b0a96a1624afd2c4d",
+    "bytes": 1393
+  }
+]

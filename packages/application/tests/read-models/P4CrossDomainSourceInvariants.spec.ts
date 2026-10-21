@@ -10,7 +10,10 @@ describe('P4 cross-domain read-model source invariants', () => {
     expect(service).toContain('listPublishedCoursesForMajor(major.id');
     expect(service).not.toContain('listPublished({ major: major.displayName');
     expect(service).not.toContain('listPublishedCoursesForMajor(major.displayName');
-    expect(service).toContain('Boolean(program.degreeLevelId)');
+    expect(service).toContain('isPublicUniversityProgram(program)');
+    const policy=read('packages/domain/src/public-boundaries/PublicOwnerPolicy.ts');
+    expect(policy).toContain('degreeLevelId');
+    expect(policy).toContain('currentPublishedVersionId');
     expect(service).toContain('publishedMajorIds.has(program.majorId)');
   });
 

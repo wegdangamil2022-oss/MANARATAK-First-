@@ -1,0 +1,10 @@
+{
+  "sourceSha": "a3c0dde6d9f323ccc703bbae9610b828d0ed1f41",
+  "runId": 39321618633,
+  "jobId": 118296822155,
+  "artifactId": 12219953293,
+  "zipBytes": 635,
+  "zipSha256": "05b2e11e3f833435e15500ed5380841a295a18367c53a157310ecbc36265cf2b",
+  "verifiedAgainstGitHubArtifactDigest": true,
+  "allowlistedEntry": "post28-r08-redis-result.json"
+}

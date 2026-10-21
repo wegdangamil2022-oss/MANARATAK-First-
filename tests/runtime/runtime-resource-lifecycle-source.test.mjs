@@ -42,7 +42,7 @@ test('SIGTERM/SIGINT drain HTTP and close resources exactly through idempotent l
   assert.doesNotMatch(server, /await stopPollingWorkers\(\)/);
   const polling = read('apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts');
   assert.match(polling, /clearInterval\(timer\)/);
-  assert.match(polling, /await Promise\.allSettled\(Array\.from\(inFlightTasks\)\)/);
+  assert.match(polling, /await Promise\.allSettled\(\[\.\.\.inFlightTasks\]\)/);
   assert.match(server, /Promise\.race\(\[/);
   assert.match(server, /SHUTDOWN_TIMEOUT_MS/);
   assert.match(server, /server\.closeAllConnections\?\.\(\)/);

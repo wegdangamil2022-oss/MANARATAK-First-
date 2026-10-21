@@ -1,0 +1,169 @@
+{
+  "sourceSha": "4f9573332afe83ed2aa804f36494b520c574fe6d",
+  "observedAt": "2026-10-19T21:32:37.674Z",
+  "combinedStatus": "pending",
+  "statuses": [],
+  "checks": [
+    {
+      "id": 118318406254,
+      "name": "Linux x64 review image and native runtime",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326541345/job/118318406254"
+    },
+    {
+      "id": 118318254417,
+      "name": "Retrieve and verify immutable artifacts from Actions storage",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326541345/job/118318254417"
+    },
+    {
+      "id": 118317924419,
+      "name": "Linux x64 review image and native runtime",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554160/job/118317924419"
+    },
+    {
+      "id": 118317762976,
+      "name": "Retrieve and verify immutable artifacts from Actions storage",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554160/job/118317762976"
+    },
+    {
+      "id": 118315962498,
+      "name": "CodeQL",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/runs/118315962498"
+    },
+    {
+      "id": 118313803174,
+      "name": "Translation quality gates",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554160/job/118313803174"
+    },
+    {
+      "id": 118313803100,
+      "name": "Full source closure gates",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554160/job/118313803100"
+    },
+    {
+      "id": 118313803037,
+      "name": "R08 isolated Redis and Linux worker shutdown",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554160/job/118313803037"
+    },
+    {
+      "id": 118313802899,
+      "name": "source-hardening",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554098/job/118313802899"
+    },
+    {
+      "id": 118313802868,
+      "name": "secret-scan",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554046/job/118313802868"
+    },
+    {
+      "id": 118313802795,
+      "name": "Deployment configuration",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554160/job/118313802795"
+    },
+    {
+      "id": 118313802775,
+      "name": "dependency-review",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554046/job/118313802775"
+    },
+    {
+      "id": 118313802697,
+      "name": "codeql",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554046/job/118313802697"
+    },
+    {
+      "id": 118313802575,
+      "name": "dependency-audit",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554046/job/118313802575"
+    },
+    {
+      "id": 118313802548,
+      "name": "homepage",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554177/job/118313802548"
+    },
+    {
+      "id": 118313802469,
+      "name": "architecture-guards",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554028/job/118313802469"
+    },
+    {
+      "id": 118313802262,
+      "name": "source",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554032/job/118313802262"
+    },
+    {
+      "id": 118313802250,
+      "name": "isolated-source-fixtures",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554094/job/118313802250"
+    },
+    {
+      "id": 118313802234,
+      "name": "fixture-contracts",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326554105/job/118313802234"
+    },
+    {
+      "id": 118313760302,
+      "name": "Translation quality gates",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326541345/job/118313760302"
+    },
+    {
+      "id": 118313760112,
+      "name": "Deployment configuration",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326541345/job/118313760112"
+    },
+    {
+      "id": 118313759957,
+      "name": "Full source closure gates",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326541345/job/118313759957"
+    },
+    {
+      "id": 118313759831,
+      "name": "R08 isolated Redis and Linux worker shutdown",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39326541345/job/118313759831"
+    }
+  ]
+}

@@ -94,6 +94,7 @@ export class StudentDocumentReviewUseCases {
     return { binding, tracker, asset };
   }
   async open(bindingId: string, reviewerId: string) {
+    if (!reviewerId.trim()) throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
     const { binding, tracker, asset } = await this.context(bindingId, reviewerId);
     if (!this.repository.recordDocumentReviewAccess)
       throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
@@ -107,12 +108,8 @@ export class StudentDocumentReviewUseCases {
       ),
       ttl = Math.min(60, Math.floor((deadline - Date.now()) / 1000));
     if (ttl < 1) throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
-    const grant = await this.lifecycle.requestDeliveryGrant({
-      assetId: binding.assetId,
-      expiresInSeconds: ttl,
-    });
-    if (!Number.isFinite(Date.parse(grant.expiresAt)) || Date.parse(grant.expiresAt) > deadline)
-      throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
+    const deliveryExpiresAt = Math.min(deadline, Date.now() + ttl * 1000);
+    this.lifecycle.assertAuthenticatedDeliveryConfigured();
     await this.context(bindingId, reviewerId);
     return {
       id: binding.id,
@@ -127,8 +124,27 @@ export class StudentDocumentReviewUseCases {
       ),
       documentExpiresAt: binding.expiresAt,
       consentUntil: binding.reviewConsentUntil,
-      delivery: { url: grant.url, headers: grant.headers, expiresAt: grant.expiresAt },
+      delivery: { kind: 'AUTHENTICATED_REVIEW' as const, path: `/admin/student-document-reviews/${encodeURIComponent(binding.id)}/content?expectedVersion=${tracker.version}&expiresAt=${deliveryExpiresAt}`, expiresAt: new Date(deliveryExpiresAt).toISOString() },
     };
+  }
+  async readContent(bindingId: string, reviewerId: string, expectedVersion: number, expiresAt: number) {
+    if (!reviewerId.trim() || !Number.isSafeInteger(expectedVersion) || expectedVersion < 1 || !Number.isSafeInteger(expiresAt) || expiresAt <= Date.now() || expiresAt > Date.now() + 60_000)
+      throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
+    const before = await this.context(bindingId, reviewerId);
+    if (expiresAt > before.binding.reviewConsentUntil!.getTime() || expiresAt > before.binding.retentionUntil.getTime() ||
+        expiresAt > (before.binding.expiresAt?.getTime() ?? Infinity) || expiresAt > (before.asset.retention?.expiresAt?.getTime() ?? Infinity))
+      throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
+    if (before.tracker.version !== expectedVersion) throw new Error('STUDENT_DOCUMENT_REVIEW_STALE');
+    if (!this.repository.recordDocumentReviewAccess) throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
+    await this.repository.recordDocumentReviewAccess(bindingId, expectedVersion, reviewerId);
+    const content = await this.lifecycle.readAuthenticatedDelivery(before.binding.assetId);
+    const after = await this.context(bindingId, reviewerId);
+    if (expiresAt <= Date.now() || after.tracker.version !== expectedVersion || after.binding.assetId !== before.binding.assetId ||
+        after.asset.checksum?.hash.toLowerCase() !== content.checksumSha256 ||
+        after.asset.metadata.mimeType !== content.mimeType ||
+        !['application/pdf', 'image/png', 'image/jpeg'].includes(content.mimeType))
+      throw new Error('STUDENT_DOCUMENT_REVIEW_STALE');
+    return content;
   }
   async attest(
     bindingId: string,

@@ -1,0 +1,62 @@
+[
+  {
+    "name": "r05-historical-baseline",
+    "command": [
+      "node",
+      "scripts/database/initialize-post28-upgrade.mjs",
+      "23897bdaa66d966eef15c85f44288589ecbcdf2b",
+      "--historical-fixtures"
+    ],
+    "sourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+    "startedUtc": "2026-10-16T16:11:08.902469+00:00",
+    "finishedUtc": "2026-10-16T16:11:30.435632+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-OLXAHc/r05-historical-baseline-20261016T161130433681Z.log",
+    "sha256": "b5e9017dcd1670bd98afc813bb4b804cd629652e107d02061428ce7ad3ef8bae"
+  },
+  {
+    "name": "r05-representative-backup",
+    "command": [
+      "env",
+      "DATABASE_MUTATION_PURPOSE=maintenance",
+      "node",
+      "scripts/database/verify-post28-upgrade-backup.mjs",
+      "backup"
+    ],
+    "sourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+    "startedUtc": "2026-10-16T16:11:59.493762+00:00",
+    "finishedUtc": "2026-10-16T16:12:06.440108+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-OLXAHc/r05-representative-backup-20261016T161206438244Z.log",
+    "sha256": "fd4da354e1627e6bc172dbd02e5143e9a3baa72d4970e73753a2fcd7db5ad302"
+  },
+  {
+    "name": "r05-representative-backup-verify",
+    "command": [
+      "env",
+      "DATABASE_MUTATION_PURPOSE=maintenance",
+      "node",
+      "scripts/database/verify-post28-upgrade-backup.mjs",
+      "verify"
+    ],
+    "sourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+    "startedUtc": "2026-10-16T16:12:33.816635+00:00",
+    "finishedUtc": "2026-10-16T16:13:06.103292+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-OLXAHc/r05-representative-backup-verify-20261016T161306100652Z.log",
+    "sha256": "0fdfd410cca0054d49c8240f829ce83eb1129df71d1ac0d8405d77070d319b42"
+  },
+  {
+    "name": "r05-preupgrade-audit",
+    "command": [
+      "node",
+      "scripts/database/audit-post28-upgrade.mjs"
+    ],
+    "sourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+    "startedUtc": "2026-10-16T16:13:15.938895+00:00",
+    "finishedUtc": "2026-10-16T16:13:44.841343+00:00",
+    "exitCode": 2,
+    "log": "/workspace/scratch/post28/labs/lab-OLXAHc/r05-preupgrade-audit-20261016T161344837549Z.log",
+    "sha256": "d02231a814dd48bb3c9ecd05784c1ae55ad779820d4a0e9eb034395b52e0587b"
+  }
+]

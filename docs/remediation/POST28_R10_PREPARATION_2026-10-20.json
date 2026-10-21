@@ -1,0 +1,28 @@
+{
+  "kind": "POST28_R10_PROGRESS",
+  "sourceValidationSha": "fd4c4eb",
+  "runtimeEvidenceSourceSha": "b53ce95404a96ab1fbcb45d08cdb11aacfc7a9ee",
+  "state": "PREPARATION_AND_READ_ONLY_VERIFIER_COMPLETE_RESTORE_NOT_EXECUTED",
+  "tableCount": 282,
+  "syntheticRows": 175,
+  "assetCount": 1,
+  "writeDenied": true,
+  "tamperRejected": true,
+  "restoreExecuted": false,
+  "formalR10Acceptance": false,
+  "productionAcceptance": false,
+  "evidenceIndex": "docs/reviews/evidence/post28/b53ce95404a96ab1fbcb45d08cdb11aacfc7a9ee/r10-preparation/evidence-index.json",
+  "tests": {
+    "snapshotCasesPassed": 8,
+    "recoveryGuardCasesPassed": 16,
+    "backupContractCasesPassed": 7,
+    "symlinkCasesLocal": "EPERM_UNIX_CI_REQUIRED"
+  },
+  "next": [
+    "INDEPENDENT_TECHNICAL_REVIEW",
+    "SIGNED_EXACT_TARGET_AUTHORIZATION",
+    "TLS_VERIFIED_TRANSPORT_AND_PRODUCTION_DENY_IDENTITY",
+    "RESTORE_AND_READ_ONLY_PARITY",
+    "RECOVERED_EVENT_WATERMARK_AND_SERVICE_RECOVERY_TIMING"
+  ]
+}

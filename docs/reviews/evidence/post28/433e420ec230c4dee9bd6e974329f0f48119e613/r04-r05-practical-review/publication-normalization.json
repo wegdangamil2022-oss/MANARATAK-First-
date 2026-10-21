@@ -1,0 +1,54 @@
+{
+  "originalRuntimeEvidenceRewritten": false,
+  "publicCopiesNormalizedBeforeSealing": true,
+  "files": [
+    {
+      "file": "GREENFIELD_MIGRATION_PARITY.json",
+      "privateOriginalBytes": 571,
+      "privateOriginalSha256": "a49c600ef71725ebb50fcc63d86affbdacbb78c4d4746e3bbb0e4b4135e4519d",
+      "publishedSha256": "a49c600ef71725ebb50fcc63d86affbdacbb78c4d4746e3bbb0e4b4135e4519d",
+      "policy": "JSON_VALUE_PRESERVING_PRETTY_UTF8_LF",
+      "privateOriginalRetained": true
+    },
+    {
+      "file": "migration-ledger-comparison.json",
+      "privateOriginalBytes": 380,
+      "privateOriginalSha256": "dfb89245993cb16a61bebb711adb254467506d8791777d0f552afa29e522e2d9",
+      "publishedSha256": "1e38dc7196ee60777e6b0df1ae847a3f08a1c5598f95b6d094fa462b43760bf8",
+      "policy": "JSON_VALUE_PRESERVING_PRETTY_UTF8_LF",
+      "privateOriginalRetained": true
+    },
+    {
+      "file": "migration-ledger-after-redeploy-comparison.json",
+      "privateOriginalBytes": 380,
+      "privateOriginalSha256": "dfb89245993cb16a61bebb711adb254467506d8791777d0f552afa29e522e2d9",
+      "publishedSha256": "1e38dc7196ee60777e6b0df1ae847a3f08a1c5598f95b6d094fa462b43760bf8",
+      "policy": "JSON_VALUE_PRESERVING_PRETTY_UTF8_LF",
+      "privateOriginalRetained": true
+    },
+    {
+      "file": "replayed-db-to-schema.diff.sql",
+      "privateOriginalBytes": 25,
+      "privateOriginalSha256": "198913094e3f41610eb893459ab65a3c79991b65d4ef5fcb8c325ebe52ebf1ed",
+      "publishedSha256": "728442980e143e18c2aa9bd7d747a8ea8d85f510529e7540f90f35ea9dd1b268",
+      "policy": "PRISMA_DIFF_MESSAGE_LF_SINGLE_TERMINAL_NEWLINE",
+      "privateOriginalRetained": true
+    },
+    {
+      "file": "migrations-to-schema.diff.sql",
+      "privateOriginalBytes": 25,
+      "privateOriginalSha256": "198913094e3f41610eb893459ab65a3c79991b65d4ef5fcb8c325ebe52ebf1ed",
+      "publishedSha256": "728442980e143e18c2aa9bd7d747a8ea8d85f510529e7540f90f35ea9dd1b268",
+      "policy": "PRISMA_DIFF_MESSAGE_LF_SINGLE_TERMINAL_NEWLINE",
+      "privateOriginalRetained": true
+    },
+    {
+      "file": "postgres-catalog-summary.json",
+      "privateOriginalBytes": 109,
+      "privateOriginalSha256": "489739021f7a9c67029c53885e1ed3e775c575a4180179e5ead34dfb72b36a2a",
+      "publishedSha256": "f46e2aed83d7170efc47ce4024a8abaf329870139405028b46280d524069624c",
+      "policy": "JSON_VALUE_PRESERVING_PRETTY_UTF8_LF",
+      "privateOriginalRetained": true
+    }
+  ]
+}

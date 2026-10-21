@@ -7,6 +7,8 @@ import { PrismaAssetUsageRegistryGateway } from '../../src/asset-platform/Prisma
 import { assertAssetReferenceIntegrityInstalled } from '../../src/asset-platform/AssetReferenceIntegrityReadiness';
 import { destructiveDatabaseTestsEnabled } from '../courses/disposableDatabaseGuard';
 
+import {assertPost28RuntimeTarget} from '../../../../tests/database/post28-runtime-target.mjs';
+
 const prefix = 'eap-reference-disposable-';
 const permitted = process.env.EAP_EPHEMERAL_DB_TESTS === 'true' && destructiveDatabaseTestsEnabled();
 const disposable = permitted ? describe : describe.skip;
@@ -22,7 +24,8 @@ disposable('EAP canonical owner/lifecycle serialization on disposable PostgreSQL
     const rehearsalUrl = 'postgresql://eap_ci:eap_ci_disposable_only@127.0.0.1:55432/manaratak_eap_ci_test?schema=public';
     const localRehearsal = process.env.EAP_LOCAL_DISPOSABLE_DB_TESTS === 'true' &&
       process.env.DATABASE_URL === rehearsalUrl && process.env.DIRECT_URL === rehearsalUrl;
-    if (process.env.DATABASE_URL !== ciUrl && !localRehearsal) throw new Error('EAP_DISPOSABLE_LOCAL_POSTGRES_REQUIRED');
+    if (process.env.POST28_ISOLATED_EXECUTION === 'YES') await assertPost28RuntimeTarget();
+    else if (process.env.DATABASE_URL !== ciUrl && !localRehearsal) throw new Error('EAP_DISPOSABLE_LOCAL_POSTGRES_REQUIRED');
     prisma = new PrismaClient(); await prisma.$connect();
     await assertAssetReferenceIntegrityInstalled(prisma);
   });

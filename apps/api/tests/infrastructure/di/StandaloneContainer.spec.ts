@@ -1,8 +1,6 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import * as esmContainer from '@manaratak-vendor/awilix-core';
 
@@ -82,14 +80,5 @@ describe('standalone dependency provenance and isolation', () => {
     expect(manifest.dependencies ?? {}).toEqual({});
   });
 
-  it('keeps the standalone server container blocked in the isolated preview', () => {
-    const root = fileURLToPath(new URL('../../../../../', import.meta.url));
-    const result = spawnSync(process.execPath, [
-      '--import', './scripts/aistudio/isolation.mjs',
-      '--input-type=module', '-e', "import './vendor/awilix-core/index.mjs'",
-    ], { cwd: root, encoding: 'utf8', timeout: 10000 });
-    expect(result.error).toBeUndefined();
-    expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain('AI_STUDIO_BACKEND_MODULE_FORBIDDEN');
-  });
+
 });

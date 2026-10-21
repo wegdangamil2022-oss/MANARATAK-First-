@@ -7,6 +7,7 @@ const csrfManager = CsrfClientManager.getInstance(API_BASE_URL);
 export interface AdminRequestOptions extends RequestInit {
   /** Reuse this value when retrying the same semantic command. */
   idempotencyKey?: string;
+  responseType?: 'json' | 'blob';
 }
 
 export function createAdminIdempotencyKey(): string {
@@ -290,7 +291,7 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
   if (isMutation(options.method) && !headers.has('Idempotency-Key')) {
     headers.set('Idempotency-Key', options.idempotencyKey || createAdminIdempotencyKey());
   }
-  const { idempotencyKey: _idempotencyKey, ...fetchOptions } = options;
+  const { idempotencyKey: _idempotencyKey, responseType, ...fetchOptions } = options;
 
   const requestOptions: RequestInit = {
     ...fetchOptions,
@@ -354,6 +355,7 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
   }
 
   if (response.status === 204) return undefined as T;
+  if (responseType === 'blob') return await response.blob() as T;
   const wirePayload: unknown = await response.json();
   const payload = response.headers.get('X-Import-Envelope-Version') === '2' &&
     wirePayload && typeof wirePayload === 'object' && 'data' in wirePayload
@@ -440,6 +442,7 @@ export const adminApiClient = {
   },
 
   request: adminRequest,
+  requestBlob: (endpoint: string, options: AdminRequestOptions = {}) => adminRequest<Blob>(endpoint, {...options, responseType: 'blob', redirect: 'error', cache: 'no-store'}),
 
   listInternationalTests(params?: Record<string, string>) {
     const searchParams = new URLSearchParams();

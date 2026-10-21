@@ -1,0 +1,23 @@
+{
+  "kind": "R12_CURRENT_ARTIFACT_TRANSFER_BLOCK",
+  "artifactId": 12288633610,
+  "sourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "publishedArchiveSha256": "bc43f19e0435e834890af468ef340c0832f967beab403d2054116200493ba327",
+  "attempts": [
+    {
+      "channel": "GitHub connector",
+      "result": "TRANSPORT_HTTP_REQUEST_FAILED"
+    },
+    {
+      "channel": "GitHub signed archive through configured credential helper",
+      "result": "TRANSFER_TIMEOUT_CURL_28"
+    }
+  ],
+  "archiveDigestVerified": false,
+  "partialArchiveUsed": false,
+  "databaseCreated": false,
+  "apiStarted": false,
+  "workerStarted": false,
+  "existingDatabasesTouched": false,
+  "productionTouched": false
+}

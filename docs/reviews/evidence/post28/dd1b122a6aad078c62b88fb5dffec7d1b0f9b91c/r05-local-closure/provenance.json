@@ -1,0 +1,47 @@
+{
+  "sourceSha": "dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c",
+  "runId": "6788aa7c-ecd9-4735-b262-05b4d7995891",
+  "scope": "ISOLATED_SYNTHETIC_LOCAL_ONLY",
+  "functionalImplementationSha": "d5ea087e894281b95c9b263ea97ce0278697d26f",
+  "independentReviewedSourceSha": "966fa067397073a7c67ec5f938284c6913f97515",
+  "candidateDifference": "independent review document only",
+  "parentRuntime": {
+    "sourceSha": "6dc778605d1344b99011b3074ee2b2648d182550",
+    "runId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+    "evidence": "docs/reviews/evidence/post28/6dc778605d1344b99011b3074ee2b2648d182550/r05-delegated-remediation/evidence-index.json"
+  },
+  "providerExecutionRebound": false,
+  "oldNegativeEvidencePreserved": true,
+  "backupArchivesPrivateOutsideCheckout": true,
+  "pgVersion": "16.15",
+  "pgBinarySha256": "19e73deb1152b3b505f2e1fd579191427f9eb3b3f800754968e7214b24edf31d",
+  "incident": {
+    "kind": "CLEAN_SOURCE_CREATOR_RACE",
+    "emptyOwnedCluster": "native-pg16-gdLVMX",
+    "effect": "Independent report appeared during creator; preflight correctly rejected dirty source, no restore/apply ran. Owned empty cluster stopped; reviewed report committed; completely fresh iTJXlT created at clean dd1b122."
+  },
+  "testPolicy": {
+    "newExecutions": [
+      "fresh inherited restore",
+      "actual PG sequence fence",
+      "promotion response loss/resume/canonical completion/replay",
+      "postfixture strict baseline and fresh backup structural restore",
+      "preapply cancellation",
+      "lock timeout rollback",
+      "blocked-query cancellation rollback",
+      "Prisma109to110deploy",
+      "strict preservation and ledger/catalog/schema parity",
+      "previous client and delivery/privacy after110",
+      "redeploy no effects"
+    ],
+    "notRepeated": [
+      "PDF Defender scans",
+      "MuPDF rasterization",
+      "full build",
+      "browser suites",
+      "general regression suites",
+      "successful unaffected unit suites"
+    ],
+    "directAffectedRecheckReason": "Trust/history measured immediately before apply and after110; exact catalog/content measured after intentional failures and redeploy to prove rollback/idempotency."
+  }
+}

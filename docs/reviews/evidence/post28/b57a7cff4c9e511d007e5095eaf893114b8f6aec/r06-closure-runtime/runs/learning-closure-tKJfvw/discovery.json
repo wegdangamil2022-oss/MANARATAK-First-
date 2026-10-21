@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Post28 learning completion and certificate trust boundaries on PostgreSQL > persists enrollment audit and authoritative outbox without issuing a certificate",
+    "file": "tests/database/post28-learning-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 learning completion and certificate trust boundaries on PostgreSQL > rejects completion below full progress without partial completion audit or event",
+    "file": "tests/database/post28-learning-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 learning completion and certificate trust boundaries on PostgreSQL > atomically commits completed enrollment completion audit and versioned credential signal only",
+    "file": "tests/database/post28-learning-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 learning completion and certificate trust boundaries on PostgreSQL > does not duplicate a completion audit or signal on sequential retry",
+    "file": "tests/database/post28-learning-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 learning completion and certificate trust boundaries on PostgreSQL > serializes completion from independent connections into exactly one completion and event",
+    "file": "tests/database/post28-learning-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 learning completion and certificate trust boundaries on PostgreSQL > rolls completion enrollment and audit back on the actual PostgreSQL outbox failure boundary",
+    "file": "tests/database/post28-learning-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 learning completion and certificate trust boundaries on PostgreSQL > refuses external linked course enrollment progress and completion without local writes",
+    "file": "tests/database/post28-learning-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 learning completion and certificate trust boundaries on PostgreSQL > rejects a persisted external-course certificate claim despite eligible completion payload",
+    "file": "tests/database/post28-learning-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 learning completion and certificate trust boundaries on PostgreSQL > acknowledges persisted noncredential completion as a no-op without any issuance",
+    "file": "tests/database/post28-learning-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 learning completion and certificate trust boundaries on PostgreSQL > fails closed for native credential completion when no approved active template exists",
+    "file": "tests/database/post28-learning-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 learning completion and certificate trust boundaries on PostgreSQL > rejects wrong event domain type version and delivery idempotency identity before issuing",
+    "file": "tests/database/post28-learning-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 learning completion and certificate trust boundaries on PostgreSQL > real completion worker dispatches noncredential events and records missing authority as retryable failure",
+    "file": "tests/database/post28-learning-closure.database.spec.mjs"
+  }
+]

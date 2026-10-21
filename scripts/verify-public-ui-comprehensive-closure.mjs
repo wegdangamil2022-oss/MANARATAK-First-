@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { hasClientAuthStorage } from './lib/public-auth-source-policy.mjs';
+import { readDictionaryEntries } from './translation/dictionary-source.mjs';
 
 const root = process.cwd();
 const read = (p) => fs.readFileSync(path.join(root,p),'utf8');
@@ -32,6 +33,8 @@ const webSrcFiles=walk('apps/web/src');
 const allWebSrc=webSrcFiles.filter(p=>!/[.](?:spec|test|stories)[.]tsx?$/.test(p)).map(read).join('\n');
 const router='apps/web/src/router/index.tsx';
 const studentWorkspace='apps/web/src/features/students/StudentWorkspacePage.tsx';
+const studentShell='apps/web/src/features/students/StudentWorkspaceShell.tsx';
+const studentStyles='apps/web/src/features/students/student-workspace.css';
 
 function relativeLuminance(hex) {
   const raw = hex.replace('#','');
@@ -96,14 +99,15 @@ const detailFiles=[
 ].map(f=>`apps/web/src/features/public-template/components/${f}`);
 for(const p of detailFiles) check(`DETAIL_HEADER_${path.basename(p).replace(/\W/g,'_')}`,(p.endsWith('/ExamDetailModal.tsx') ? contains(p,'<ExamDetails {...props}') && contains('packages/ui/src/public-tests/ExamDetails.tsx','<header') : contains(p,'DetailSectionHeader')),p);
 check('DETAIL_NO_TEXT_BACK',!/>\s*العودة\s*</.test(allPublic),'no standalone return text buttons');
-check('DETAIL_BACK_ARIA',contains('apps/web/src/features/public-template/components/DetailUi.tsx',"aria-label={mode === 'close' ? 'إغلاق' : 'العودة'}"),'accessible close/back control');
+check('DETAIL_BACK_ARIA',contains('apps/web/src/features/public-template/components/DetailUi.tsx',"aria-label={mode === 'close' ? publicT('public_close') : publicT('public_back')}"),'accessible close/back control');
 for(const p of ['ScholarshipDetailModal.tsx','UniversityDetailModal.tsx','MajorDetailModal.tsx','CountryDetailModal.tsx','ExamDetailModal.tsx'].map(f=>`apps/web/src/features/public-template/components/${f}`)) check(`DETAIL_CLOSE_MODE_${path.basename(p).replace(/\W/g,'_')}`,(p.endsWith('/ExamDetailModal.tsx') ? contains(p,'<ExamDetails {...props}') && contains('packages/ui/src/public-tests/ExamDetails.tsx','onClick={onClose}') && contains('packages/ui/src/public-tests/ExamDetails.tsx','aria-label={t("إغلاق")}') : contains(p,'mode="close"')),p);
 check('DETAIL_SCROLL_TARGET',contains('apps/web/src/features/public-template/components/DetailUi.tsx','scrollIntoView'),'search anchor scroll');
 check('DETAIL_TEMP_HIGHLIGHT',contains('apps/web/src/features/public-template/components/DetailUi.tsx','mn-search-term-mark'),'temporary matched phrase highlight');
 
 // Roadmap + notifications
 const roadmap='apps/web/src/features/public-template/components/RoadmapPreview.tsx';
-for(const text of ['حدّد هدفك الأكاديمي','اكتشف وقارن الفرص','تحقق من الأهلية والمتطلبات','جهّز طلبك','احفظ وتابع تقدمك']) check(`ROADMAP_${checks.length}`,contains(roadmap,text),text);
+const publicArabic = new Map(readDictionaryEntries(read('apps/web/src/i18n/ar.ts')).map(entry => [entry.key, entry.value]));
+for(const [key,text] of [['public_set_your_academic_goal','حدّد هدفك الأكاديمي'],['public_discover_and_compare_opportunities','اكتشف وقارن الفرص'],['public_check_eligibility_and_requirements','تحقق من الأهلية والمتطلبات'],['public_prepare_your_application','جهّز طلبك'],['public_save_and_track_your_progress','احفظ وتابع تقدمك']]) check(`ROADMAP_${checks.length}`,contains(roadmap,key) && contains(roadmap,'publicT(step.title)') && publicArabic.get(key) === text,text);
 const notifications='apps/web/src/features/public-template/components/PushNotificationCenter.tsx';
 check('NOTIFY_LUCIDE',/from 'lucide-react'/.test(read(notifications)),'Lucide notifications');
 check('NOTIFY_NO_EMOJI',!/[🔥🎓⏰📚❯]/u.test(allPublic),'legacy notification emoji removed');
@@ -145,7 +149,7 @@ check('DIRECT_CAREER_INJECT',contains(app,'careersForView') && contains(app,'set
 
 // Router / single-admin architecture
 check('ROUTER_USES_OUTLET',contains(router,'<Outlet />'),'matched public child routes render');
-check('ROUTER_TOOL_EXECUTION',contains(router,"path: 'tools/:toolKey'") && contains(router,'element: <StudentToolPage />'),'tool execution route active');
+check('ROUTER_TOOL_EXECUTION',contains(router,"path: 'tools/:toolKey'") && contains(router,'element: <StudentToolPreviewRoute />') && contains(router,"if (import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype')") && contains(router,'return <Navigate replace to={target} />;') && contains(router,'return <StudentToolPage />;'),'explicit prototype redirect retains the executable live tool route');
 check('NO_SHADOW_ADMIN_DIR',!exists('apps/web/src/features/admin-preview'),'apps/admin remains the only admin UI');
 check('NO_LOCAL_ADMIN_SWITCH',notContains(router,'VITE_LOCAL_ADMIN_READ_ONLY'),'no local shadow-admin switch');
 check('CANONICAL_ADMIN_REDIRECT',contains(router,"path: 'admin/*'") && contains(router,'CanonicalAdminRedirect'),'legacy /admin routes redirect to canonical admin');
@@ -157,7 +161,7 @@ check('HEADER_MIN_WIDTH',contains(header,'min-w-0'),'header flex shrink safety')
 check('HEADER_LOGO_HOME',contains(header,'ManaratakLogo') && /onClick=\{[^}]*on/.test(read(header)),'logo interactive');
 check('HEADER_BRAND_VISIBLE_TINY',contains(css,'max-width: 359px') && !/max-width:\s*359px[^}]*span:first-child[^}]*display:\s*none/s.test(read(css)),'MANARATAK remains visible');
 check('STUDENT_WORKSPACE_SEMANTIC',contains('apps/web/src/features/students/StudentWorkspacePage.tsx','var(--mn-') && !/(#044A37|#087A55|font-black)/i.test(read('apps/web/src/features/students/StudentWorkspacePage.tsx')),'live student workspace theme');
-check('STUDENT_WORKSPACE_HERO_INVERSE',/className="[^"]*\bmn-inverse\b[^"]*\bbg-gradient-to-br\b/.test(read(studentWorkspace)),'semantic inverse hero context');
+check('STUDENT_WORKSPACE_HERO_INVERSE',contains(studentWorkspace,'<StudentWorkspaceShell') && /className="[^"]*\bmn-student-identity-header\b[^\"]*\bmn-inverse\b/.test(read(studentShell)) && /\.mn-student-workspace \.mn-student-identity-header\s*\{\s*background-image: linear-gradient\(/.test(read(studentStyles)),'shared shell retains semantic inverse context and external gradient styling');
 check('STUDENT_WORKSPACE_MOBILE_STATS',/className="[^"]*\bgrid-cols-2\b[^"]*\bgap-[\d.]+/.test(read(studentWorkspace)),'two compact stats per row on mobile');
 check('STUDENT_WORKSPACE_ICON_UI',contains(studentWorkspace,'<Folder') && contains(studentWorkspace,'<ArrowLeft') && contains(studentWorkspace,'<X'),'Lucide workspace affordances');
 check('TOOL_ROUTE_SEMANTIC',contains('apps/web/src/features/student-tools/StudentToolPage.tsx','mn-page-shell'),'student tool live route themed');

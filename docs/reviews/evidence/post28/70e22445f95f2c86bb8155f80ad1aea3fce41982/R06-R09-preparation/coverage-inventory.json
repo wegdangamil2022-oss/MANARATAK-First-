@@ -1,0 +1,13 @@
+{
+  "name": "coverage-inventory",
+  "command": "node scripts/database/prepare-post28-r06-r09.mjs /workspace/post28-private/r06-r09-70e22445f95f2c86bb8155f80ad1aea3fce41982/R06-R09-preparation.json",
+  "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T03:18:53.971026+00:00",
+  "endedAt": "2026-10-16T03:18:54.077835+00:00",
+  "exitCode": 0,
+  "logSha256": "87c920711dd1140f350c15a14bd9b12df72231d46825b4683cb541f3a52e4ef4",
+  "nodeVersion": "22.16.0",
+  "databaseConnected": false
+}

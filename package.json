@@ -5,12 +5,9 @@
   "type": "module",
   "scripts": {
     "bootstrap": "npm install && npm run build",
-    "dev": "node scripts/aistudio/run.mjs web dev",
-    "dev:aistudio": "node scripts/aistudio/run.mjs web dev",
-    "dev:admin": "node scripts/aistudio/run.mjs admin dev",
+    "dev": "npm run dev -w @manaratak/web",
+    "dev:admin": "npm run dev -w @manaratak/admin",
     "dev:full": "npm run dev -w @manaratak/web",
-    "build:aistudio": "node scripts/aistudio/run.mjs web build",
-    "verify:aistudio": "node scripts/aistudio/verify.mjs",
     "build": "npm run build --workspaces --if-present",
     "build:cached": "turbo run build",
     "start": "node server.js",
@@ -163,7 +160,11 @@
     "test:node": "node scripts/testing/run-node-unit-tests.mjs",
     "certificates:template:export": "tsc -b packages/shared && tsx scripts/certificates/export-approved-template.ts",
     "notifications:source:verify": "tsc -b apps/api apps/admin && vitest run tests/notifications/section23.spec.ts packages/application/tests/students/StudentApplicationReminderDeliveryPolicy.spec.ts",
-    "ci:preflight": "node scripts/ci/source-preflight.mjs"
+    "ci:preflight": "node scripts/ci/source-preflight.mjs",
+    "post28:db:preflight": "node scripts/database/post28-preflight.mjs",
+    "post28:db:discover": "node scripts/database/post28-suite-discovery.mjs",
+    "post28:db:test": "node scripts/database/run-post28-suite.mjs",
+    "post28:db:create": "node scripts/database/create-post28-lab.mjs"
   },
   "dependencies": {
     "@e965/xlsx": "0.20.3",
@@ -184,7 +185,7 @@
     "react-router-dom": "^7.18.1",
     "redis": "^6.2.1",
     "tailwind-merge": "^3.6.0",
-    "vite": "^6.2.3"
+    "vite": "^6.4.5"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
@@ -227,6 +228,6 @@
   },
   "engines": {
     "node": ">=22.16.0 <23",
-    "npm": ">=10"
+    "npm": ">=10.9.0 <11"
   }
 }

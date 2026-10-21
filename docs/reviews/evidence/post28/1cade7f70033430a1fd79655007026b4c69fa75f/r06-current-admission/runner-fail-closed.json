@@ -1,0 +1,9 @@
+{
+  "sourceSha": "1c02e579ab550c48aef6a8aa29a99139efc141f8",
+  "command": "node scripts/database/run-post28-suite.mjs admission-import-concurrency",
+  "exitCode": 1,
+  "diagnostic": "POST28_HISTORICAL_PRE111_CASE_NOT_CURRENT_ACCEPTANCE",
+  "noDatabaseCredentialsProvided": true,
+  "rejectedBeforeAuthorizationAndDatabasePreflight": true,
+  "oldAssertionsAndMinimumTenPreserved": true
+}

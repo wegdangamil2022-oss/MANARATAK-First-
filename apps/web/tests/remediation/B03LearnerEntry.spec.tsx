@@ -5,7 +5,7 @@ import { CourseLearnerPage } from '../../src/features/learning/CourseLearnerPage
 import type { CourseLearnerWorkspaceDto } from '../../src/api/client';
 import { ApiClient } from '../../src/api/client';
 import { consumePostLoginReturn } from '../../src/features/students/postLoginIntent';
-const route = vi.hoisted(() => ({ courseId: 'owner-a', locale: 'en' }));
+const route = vi.hoisted(() => ({ courseId: 'owner-a', locale: 'en', search: '', hash: '' }));
 vi.mock('../../src/api/client', () => ({
   ApiClient: { getStudentCourseWorkspace: vi.fn(), enrollStudentCourse: vi.fn() },
 }));
@@ -13,7 +13,8 @@ vi.mock('react-router-dom', () => ({
   useParams: () => route,
   useLocation: () => ({
     pathname: `/${route.locale}/student/courses/${route.courseId}`,
-    search: '',
+    search: route.search,
+    hash: route.hash,
   }),
   Link: ({
     to,
@@ -44,6 +45,8 @@ const snapshot = (progress = 37) =>
 beforeEach(() => {
   vi.clearAllMocks();
   route.courseId = 'owner-a';
+  route.search = '';
+  route.hash = '';
   const values = new Map<string, string>();
   vi.stubGlobal('sessionStorage', {
     getItem: (k: string) => values.get(k) ?? null,
@@ -60,12 +63,14 @@ async function mount() {
 }
 describe('B03 real learner entry', () => {
   it('preserves the exact localized course return for an anonymous student', async () => {
+    route.search = '?lesson=intro';
+    route.hash = '#progress';
     vi.mocked(ApiClient.getStudentCourseWorkspace).mockRejectedValue(
       new Error('STUDENT_AUTHENTICATION_REQUIRED'),
     );
     const view = await mount();
     expect(view.root.findByType('a').props.href).toBe('/en/login');
-    expect(consumePostLoginReturn('new-student')).toBe('/en/student/courses/owner-a');
+    expect(consumePostLoginReturn('new-student')).toBe('/en/student/courses/owner-a?lesson=intro#progress');
     expect(ApiClient.enrollStudentCourse).not.toHaveBeenCalled();
     act(() => view.unmount());
   });

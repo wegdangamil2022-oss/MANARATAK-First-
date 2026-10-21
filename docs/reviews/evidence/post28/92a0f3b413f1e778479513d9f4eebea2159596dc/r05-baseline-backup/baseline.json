@@ -1,0 +1,55 @@
+{
+  "kind": "POST28_R05_PREDECESSOR_BASELINE",
+  "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+  "predecessorSha": "23897bdaa66d966eef15c85f44288589ecbcdf2b",
+  "runId": "ae7be4ce-3403-4001-8fd3-52c78235e721",
+  "identities": [
+    {
+      "label": "DB-U",
+      "database": "manaratak_post28_upgrade_test",
+      "role": "post28_upgrader",
+      "serverIdentity": "7697294871089496108",
+      "databaseOid": "16387",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    },
+    {
+      "label": "DB-V",
+      "database": "manaratak_post28_upgrade_verify_test",
+      "role": "post28_verifier",
+      "serverIdentity": "7697294871089496108",
+      "databaseOid": "16469",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 0,
+      "probeReadOnly": true
+    }
+  ],
+  "ledger": {
+    "expected": 109,
+    "applied": 109,
+    "checksumsMatched": 109,
+    "partial": 0,
+    "rolledBack": 0
+  },
+  "publicTables": 282,
+  "previousClientGenerated": true,
+  "previousClientReadProbes": {
+    "providerCount": 18,
+    "countryCount": 0
+  },
+  "previousClientVersion": "5.22.0",
+  "sourceSchemaSha256": "56966e566cbcd7ea60966d3954a4368630753f35a265e24b8ece354387450d45",
+  "generationSchemaSha256": "0f912aa2a9ce5e85fd3689780d9c4cf7e5127b158e145899c160ea8add60c678",
+  "generatedSchemaSha256": "d3685f78322597c76ea227a78e389f34933e9bfe607b03074aaba53484eaf14f",
+  "applicationRows": 63,
+  "catalog": {
+    "unvalidated": 9,
+    "invalid_indexes": 0
+  },
+  "representativeFixturesProvisioned": false,
+  "upgradeExecuted": false,
+  "R05Accepted": false
+}

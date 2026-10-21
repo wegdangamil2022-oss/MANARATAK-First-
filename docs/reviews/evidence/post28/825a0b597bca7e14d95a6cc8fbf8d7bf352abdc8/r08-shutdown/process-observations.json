@@ -1,0 +1,35 @@
+{
+  "provenance": "Observed structured stdout, transcribed from tool output; not raw log bytes",
+  "sourceSha": "825a0b597bca7e14d95a6cc8fbf8d7bf352abdc8",
+  "platform": "win32",
+  "cases": [
+    {
+      "mode": "OWNER",
+      "signal": "IPC_STOP",
+      "durationMs": 83.7233,
+      "newClaimsAfterStop": 0,
+      "workerState": "STOPPED",
+      "readinessEvidenceFresh": false
+    },
+    {
+      "mode": "STUDENT",
+      "signal": "IPC_STOP",
+      "durationMs": 87.16049999999998,
+      "newClaimsAfterStop": 0,
+      "workerState": "STOPPED",
+      "readinessEvidenceFresh": false
+    },
+    {
+      "mode": "hung-monitoring",
+      "signal": "IPC_STOP",
+      "configuredBudgetMs": 15000,
+      "elapsedMs": 15020.917,
+      "exitCode": 1,
+      "scope": "Actual shutdown body extracted unchanged from server.ts, isolated real HTTP listener and hung monitoring adapter; not full built API"
+    }
+  ],
+  "linuxSIGTERMExecuted": false,
+  "linuxBehavior": "Tests select real SIGTERM automatically on Linux in Node unit discovery",
+  "realRedisUsed": false,
+  "externalProvidersUsed": false
+}

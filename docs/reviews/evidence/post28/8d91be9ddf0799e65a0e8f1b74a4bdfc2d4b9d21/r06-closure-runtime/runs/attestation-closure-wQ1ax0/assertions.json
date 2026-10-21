@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "HTTP refuses cached attestation after review permission withdrawal",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "passed",
+    "durationMs": 133.03024800000003,
+    "failureFirstLines": []
+  }
+]

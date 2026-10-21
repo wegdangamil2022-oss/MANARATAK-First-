@@ -1,0 +1,81 @@
+import fs from 'node:fs';import path from 'node:path';import os from 'node:os';import crypto from 'node:crypto';import net from 'node:net';
+import assert from 'node:assert/strict';import {spawn,spawnSync,execFileSync} from 'node:child_process';
+import {runBoundedReadProbe} from './r07-filtered/scripts/performance/BoundedReadProbe.mjs';
+import {verificationRestoreList} from './r07-filtered/scripts/database/post28-backup-contract.mjs';
+import {verifyReleaseManifest} from './r07-filtered/scripts/release/lib/ReleaseContracts.mjs';
+import {verifyRuntimeLayer} from './r07-filtered/scripts/release/lib/RuntimeLayerPolicy.mjs';
+const work=import.meta.dirname,repo=path.join(work,'r07-filtered'),bin=path.join(work,'pg16-binaries/pgsql/bin');
+const sha=execFileSync('git',['rev-parse','HEAD'],{cwd:repo,encoding:'utf8'}).trim();
+const policy=JSON.parse(fs.readFileSync(path.join(repo,'config/testing/r11-local-read-diagnostic.json'))),hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+const json=(p,v)=>fs.writeFileSync(p,JSON.stringify(v,null,2)+'\n');
+assert.equal(execFileSync('git',['status','--porcelain'],{cwd:repo,encoding:'utf8'}).trim(),'');
+assert.equal(execFileSync('git',['diff','--name-only',policy.expectedApiSourceSha,sha,'--',...policy.artifactReuseRequiresUnchanged],{cwd:repo,encoding:'utf8'}).trim(),'');
+const artifacts=path.join(work,'r10-major-fix-candidate'),manifest=verifyReleaseManifest(path.join(artifacts,'artifacts'),policy.expectedApiSourceSha);
+verifyRuntimeLayer(path.join(artifacts,'api-boot-root'),manifest,JSON.parse(fs.readFileSync(path.join(artifacts,'api-boot-root/runtime-layer.json'))));
+const created=spawnSync(process.execPath,['scripts/database/create-post28-native-lab.mjs'],{cwd:repo,env:{...process.env,NODE_ENV:'test',POST28_LOCAL_LAB_CREATE:'YES',POST28_LOCAL_LAB_PROFILE:'transactions',POST28_NATIVE_PG_BIN:bin,POST28_LAB_ROOT:work},encoding:'utf8',windowsHide:true,timeout:90000});
+if(created.status!==0)throw Error('R11_NEW_LAB_FAILED:'+created.stderr);
+const state=JSON.parse(created.stdout.trim()),lab=state.directory;
+fs.writeFileSync(path.join(work,'r11-mfa-current-lab.txt'),lab);
+const privateEnv=Object.fromEntries(fs.readFileSync(state.envFile,'utf8').trim().split(/\r?\n/).map(l=>{const i=l.indexOf('=');return[l.slice(0,i),l.slice(i+1)];}));
+const bootstrap=fs.readFileSync(path.join(lab,'bootstrap-password'),'utf8').trim(),setup=new URL(privateEnv.POST28_TRANSACTION_SETUP_URL),readerPassword=crypto.randomBytes(24).toString('hex');
+const database='manaratak_r11_load_'+crypto.randomBytes(8).toString('hex');
+const pgEnv=(role,password,db)=>({...process.env,PGHOST:'127.0.0.1',PGPORT:String(state.port),PGDATABASE:db,PGUSER:role,PGPASSWORD:password,PGSSLMODE:'disable'});
+const sql=(query,role='post28_r11_actor',password=readerPassword,db=database)=>{const r=spawnSync(path.join(bin,'psql.exe'),['-X','-At','-v','ON_ERROR_STOP=1'],{input:query,env:pgEnv(role,password,db),encoding:'utf8',windowsHide:true,timeout:10000});if(r.status!==0)throw Error('R11_SQL_FAILED:'+r.stderr.replaceAll(password,'[REDACTED]'));return r.stdout.trim();};
+const bootSql=(q,db=database)=>sql(q,'post28_bootstrap',bootstrap,db);
+let api,closed,apiLog='',scenarioFixture;
+try{
+ assert.equal(Number(fs.readFileSync(path.join(state.dataDirectory,'postmaster.pid'),'utf8').split('\n')[0]),state.postmasterPid);
+ assert.equal(hash(fs.readFileSync(path.join(bin,'postgres.exe'))),state.postgresBinarySha256);
+ bootSql(`CREATE DATABASE "${database}" OWNER post28_bootstrap TEMPLATE template0 ENCODING 'UTF8' LC_COLLATE 'C' LC_CTYPE 'C'; REVOKE ALL ON DATABASE "${database}" FROM PUBLIC; GRANT CONNECT ON DATABASE "${database}" TO post28_tx_migrator;`,'postgres');
+ bootSql(`CREATE EXTENSION pg_trgm; ALTER SCHEMA public OWNER TO post28_tx_migrator; REVOKE ALL ON SCHEMA public FROM PUBLIC; GRANT USAGE,CREATE ON SCHEMA public TO post28_tx_migrator;`);
+ const donor=path.join(work,'native-pg16-JTNxRe'),dump=path.join(donor,'reviewed-source.dump'),auth=JSON.parse(JSON.parse(fs.readFileSync(path.join(donor,'restore-authorization.json'))).payload);
+ assert.equal(hash(fs.readFileSync(dump)),auth.databaseBackupSha256);
+ const listed=execFileSync(path.join(bin,'pg_restore.exe'),['--list',dump],{encoding:'utf8',windowsHide:true});
+ const list=path.join(lab,'synthetic-clone.list');fs.writeFileSync(list,verificationRestoreList(listed).text);
+ const cloned=spawnSync(path.join(bin,'pg_restore.exe'),['--no-owner','--no-acl','--exit-on-error','--use-list',list,'--dbname',database,dump],{env:pgEnv(setup.username,decodeURIComponent(setup.password),database),encoding:'utf8',windowsHide:true,timeout:120000});
+ fs.writeFileSync(path.join(lab,'synthetic-clone.log'),(cloned.stdout??'')+(cloned.stderr??''));assert.equal(cloned.status,0,'NEW_DB_L_SYNTHETIC_CLONE');
+ bootSql(`CREATE ROLE post28_r11_actor LOGIN PASSWORD '${readerPassword}' NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS; GRANT CONNECT ON DATABASE "${database}" TO post28_r11_actor; GRANT USAGE ON SCHEMA public TO post28_r11_actor; GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public TO post28_r11_actor; REVOKE INSERT,UPDATE,DELETE ON public."_prisma_migrations" FROM post28_r11_actor; REVOKE UPDATE,DELETE ON public."AuditRecord",public."FinancialLedgerEntryRecord" FROM post28_r11_actor; GRANT USAGE,SELECT ON ALL SEQUENCES IN SCHEMA public TO post28_r11_actor; ALTER ROLE post28_r11_actor SET default_transaction_read_only=off; ALTER ROLE post28_r11_actor SET statement_timeout='2000ms'; ALTER ROLE post28_r11_actor SET lock_timeout='1000ms'; GRANT EXECUTE ON FUNCTION pg_control_system() TO post28_r11_actor;`);
+ const identity=JSON.parse(sql(`SELECT json_build_object('database',current_database(),'role',current_user,'serverIdentity',(SELECT system_identifier::text FROM pg_control_system()),'readOnly',current_setting('default_transaction_read_only'),'superuser',rolsuper,'createRole',rolcreaterole,'createDatabase',rolcreatedb,'bypassRls',rolbypassrls,'replication',rolreplication) FROM pg_roles WHERE rolname=current_user;`));
+ assert.equal(identity.serverIdentity,state.serverIdentity);assert.equal(identity.readOnly,'off');for(const k of ['superuser','createRole','createDatabase','bypassRls','replication'])assert.equal(identity[k],false);
+ const tables=JSON.parse(sql(`SELECT json_agg(tablename ORDER BY tablename) FROM pg_tables WHERE schemaname='public';`));
+ const counts=sql(tables.map(t=>`SELECT json_build_object('table',${"'"+t.replaceAll("'","''")+"'"},'rows',(SELECT count(*) FROM public."${t.replaceAll('"','""')}"));`).join('\n')).split('\n').map(v=>JSON.parse(v));
+ const indexes=JSON.parse(sql(`SELECT json_agg(json_build_object('table',tablename,'name',indexname,'definition',indexdef) ORDER BY indexname) FROM pg_indexes WHERE schemaname='public';`));
+ const collation=JSON.parse(sql(`SELECT json_build_object('collation',datcollate,'ctype',datctype,'encoding',pg_encoding_to_char(encoding)) FROM pg_database WHERE datname=current_database();`));
+ json(path.join(lab,'dataset.json'),{workloadSourceSha:sha,apiSourceSha:manifest.sourceSha,logicalTarget:'DB-L',physicalTarget:database,identity,donorDumpSha256:auth.databaseBackupSha256,rowCounts:counts,indexes,collation,representativeLaunchDataset:false,ordinaryReaderOnly:false,ordinaryScenarioRole:true,newCluster:true,previousSuitesRepeated:false});
+
+ const {createRequire}=await import('node:module'),require=createRequire(path.join(repo,'package.json')),{PrismaClient}=require('@prisma/client');
+ const fixtureUrl=new URL(privateEnv.POST28_TRANSACTION_SETUP_URL);fixtureUrl.pathname='/'+database;
+ const fixtureDb=new PrismaClient({datasources:{db:{url:fixtureUrl.href}},log:[],errorFormat:'minimal'});
+ try{
+  scenarioFixture={id:crypto.randomUUID(),namespace:'R11-'+crypto.randomUUID(),email:crypto.randomUUID()+'@example.invalid',password:crypto.randomBytes(24).toString('base64url'),mfaEncryptionKey:crypto.randomBytes(32).toString('hex')};
+  const salt=crypto.randomBytes(16),passwordHash='scrypt:16384:8:1:'+salt.toString('hex')+':'+crypto.scryptSync(scenarioFixture.password,salt,64).toString('hex');
+  await fixtureDb.roleRecord.upsert({where:{id:'student'},create:{id:'student',name:'Student',description:'R11 synthetic role',permissions:[],policyIds:[]},update:{}});
+  await fixtureDb.roleRecord.create({data:{id:'r11-admin',name:'R11 synthetic CMS viewer',description:'Synthetic isolated MFA viewer',permissions:['admin:access','admin:cms:view'],policyIds:[]}});
+  await fixtureDb.identityRecord.create({data:{id:scenarioFixture.id,type:'Human',status:'ACTIVE',createdBy:'R11_SYNTHETIC',user:{create:{displayName:scenarioFixture.namespace,primaryEmail:scenarioFixture.email,isEmailVerified:true}},account:{create:{accessState:'Active'}},credentials:{create:{type:'password',passwordHash}},roleAssignments:{create:{id:crypto.randomUUID(),roleId:'r11-admin'}}}});
+  await fixtureDb.studentWorkspace.createMany({data:[scenarioFixture.id,...Array.from({length:0},()=>crypto.randomUUID())].map(studentReferenceId=>({studentReferenceId,status:'ACTIVE',displayName:scenarioFixture.namespace,metadata:{private:'R11_PRIVATE_SENTINEL'}}))});
+  fs.writeFileSync(path.join(lab,'scenario-private.json'),JSON.stringify(scenarioFixture));
+ }finally{await fixtureDb.$disconnect();}
+ const runtime=path.join(lab,'api-boot-root');fs.mkdirSync(runtime);
+ for(const name of ['apps','node_modules','packages','vendor','package.json','package-lock.json','runtime-layer.json'])if(fs.existsSync(path.join(artifacts,'api-boot-root',name)))fs.cpSync(path.join(artifacts,'api-boot-root',name),path.join(runtime,name),{recursive:true});
+ verifyRuntimeLayer(runtime,manifest,JSON.parse(fs.readFileSync(path.join(runtime,'runtime-layer.json'))));
+ const port=await new Promise(resolve=>{const s=net.createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p));});});
+ const dbUrl=new URL(`postgresql://post28_r11_actor@127.0.0.1:${state.port}/${database}`);dbUrl.password=readerPassword;dbUrl.searchParams.set('connection_limit','3');
+ const apiOrigin='http://127.0.0.1:'+port; const webPort=await new Promise(resolve=>{const s=net.createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p));});});const origin='https://127.0.0.1:'+webPort;
+ api=spawn(process.execPath,['apps/api/dist/server.cjs'],{cwd:runtime,env:{SystemRoot:process.env.SystemRoot,PATH:path.dirname(process.execPath),NODE_ENV:'test',PORT:String(port),DATABASE_URL:dbUrl.href,DIRECT_URL:dbUrl.href,DATABASE_REQUIRED:'true',RELEASE_SOURCE_SHA:manifest.sourceSha,HEALTH_DEPLOYMENT_REVISION:manifest.sourceSha,ADMIN_AUTH_MODE:'strict',TRUST_PROXY_HOPS:'1',SECURE_COOKIE:'true',MANARATAK_MFA_ENCRYPTION_KEY:scenarioFixture.mfaEncryptionKey,CORS_ORIGIN:origin,PUBLIC_WEB_URL:origin,ADMIN_WEB_URL:origin+'/admin',BACKGROUND_WORKER_ENABLED:'false',STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED:'false',OWNER_DOMAIN_OUTBOX_WORKER_ENABLED:'false',CERTIFICATE_COMPLETION_WORKER_ENABLED:'false'},windowsHide:true,stdio:['ignore','pipe','pipe']});
+ api.stdout.on('data',b=>apiLog+=b);api.stderr.on('data',b=>apiLog+=b);closed=new Promise(resolve=>api.once('exit',resolve));
+ for(let i=0;i<100;i++){try{const r=await fetch(apiOrigin+'/api/v1/monitoring/health/readiness',{signal:AbortSignal.timeout(1000)});if(r.status===200)break;}catch{}if(i===99)throw Error('R11_API_NOT_READY');await new Promise(r=>setTimeout(r,100));}
+
+ const worker=spawn(process.execPath,['--import','tsx',path.join(work,'r11-admin-mfa-worker.mjs')],{cwd:repo,env:{SystemRoot:process.env.SystemRoot,PATH:path.dirname(process.execPath),NODE_ENV:'test',DATABASE_URL:dbUrl.href,R11_LAB:lab,R11_API_ORIGIN:apiOrigin,R11_WEB_ORIGIN:origin,R11_API_PID:String(api.pid),TSX_TSCONFIG_PATH:path.join(repo,'tsconfig.base.json')},windowsHide:true,stdio:['ignore','pipe','pipe']});
+ let workerLog='';worker.stdout.on('data',b=>{workerLog+=b;process.stdout.write(b);});worker.stderr.on('data',b=>workerLog+=b);
+ const exit=await new Promise(resolve=>worker.once('exit',resolve));
+ fs.writeFileSync(path.join(lab,'scenario-worker.log'),[dbUrl.href,readerPassword,scenarioFixture.email,scenarioFixture.password,scenarioFixture.mfaEncryptionKey].reduce((s,v)=>s.replaceAll(v,'[REDACTED]'),workerLog).replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]'));
+ if(exit!==0)throw Error('R11_SCENARIO_WORKER_FAILED_'+exit);
+}catch(error){console.error('R11_OPERATOR_ERROR',error.stack);throw error;}finally{
+ if(api&&api.exitCode===null){api.kill();await closed;}
+ fs.writeFileSync(path.join(lab,'api.log'),[bootstrap,readerPassword,privateEnv.DATABASE_URL,privateEnv.POST28_TRANSACTION_SETUP_URL,...(scenarioFixture?[scenarioFixture.email,scenarioFixture.password,scenarioFixture.mfaEncryptionKey]:[])].reduce((s,v)=>s.replaceAll(v,'[REDACTED]'),apiLog).replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]'));
+ assert.equal(Number(fs.readFileSync(path.join(state.dataDirectory,'postmaster.pid'),'utf8').split('\n')[0]),state.postmasterPid);
+ const actual=execFileSync('powershell.exe',['-NoProfile','-Command',`(Get-Process -Id ${state.postmasterPid}).Path`],{encoding:'utf8',windowsHide:true}).trim();assert.equal(fs.realpathSync(actual),fs.realpathSync(path.join(bin,'postgres.exe')));
+ const stopped=spawnSync(path.join(bin,'pg_ctl.exe'),['-D',state.dataDirectory,'-m','fast','-w','stop'],{stdio:'ignore',windowsHide:true,timeout:30000}).status===0;
+ json(path.join(lab,'cleanup.json'),{stopped,apiStopped:!api||api.exitCode!==null||api.signalCode!==null,existingDatabasesTouched:false});assert.equal(stopped,true);console.log(JSON.stringify({lab,stopped}));
+}
+

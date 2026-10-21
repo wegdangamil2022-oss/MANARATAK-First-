@@ -15,6 +15,13 @@ interface LearningPathTransactionContext extends AtomicPersistenceContext {
 }
 type Db = PrismaClient | Prisma.TransactionClient;
 const json = (value: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
+function certificateEligible(snapshot: unknown): boolean {
+  if(!snapshot||typeof snapshot!=='object'||Array.isArray(snapshot))return false;
+  const policy=(snapshot as Record<string,unknown>).certificateEligibility;
+  return Boolean(policy&&typeof policy==='object'&&!Array.isArray(policy)&&
+    (policy as Record<string,unknown>).schemaVersion===1&&(policy as Record<string,unknown>).enabled===true);
+}
+const certificatePolicy=(enabled:boolean)=>({schemaVersion:1,enabled});
 
 export class PrismaLearningPathRepository implements ITransactionalLearningPathRepository {
   public constructor(private readonly prisma: PrismaClient, private readonly transactionBound = false) {}
@@ -51,7 +58,7 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
           learningPathId: path.id,
           versionNumber: 1,
           status: LearningPathStatus.DRAFT,
-          snapshot: json({ title: path.title, description: path.description, isStrictlyOrdered:path.isStrictlyOrdered,completionLogic:path.completionLogic,courses }),
+          snapshot: json({ title: path.title, description: path.description, isStrictlyOrdered:path.isStrictlyOrdered,completionLogic:path.completionLogic,courses,certificateEligibility:certificatePolicy(data.certificateEligible===true) }),
           courses: { create: courses.map(item => ({
             courseId: item.courseId,
             position: item.position,
@@ -61,7 +68,7 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
         },
         include: { courses: true },
       });
-      return this.map(path, version.courses);
+      return this.map(path, version.courses,version.snapshot);
     });
   }
 
@@ -72,7 +79,7 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
       where: { learningPathId_versionNumber: { learningPathId: id, versionNumber: path.version } },
       include: { courses: true },
     });
-    return this.map(path, version?.courses ?? []);
+    return this.map(path, version?.courses ?? [],version?.snapshot);
   }
 
   public async findBySlug(slug: string): Promise<LearningPathDto | null> {
@@ -87,7 +94,7 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
     ]);
     if(!path || !version) return null;
     const snapshot=version.snapshot && typeof version.snapshot==='object' && !Array.isArray(version.snapshot)?version.snapshot:{};
-    return this.map({...path,title:typeof snapshot.title==='string'?snapshot.title:path.title,description:typeof snapshot.description==='string'||snapshot.description===null?snapshot.description:path.description,isStrictlyOrdered:typeof snapshot.isStrictlyOrdered==='boolean'?snapshot.isStrictlyOrdered:path.isStrictlyOrdered,completionLogic:snapshot.completionLogic==='ALL'||snapshot.completionLogic==='ALL_REQUIRED'?snapshot.completionLogic:path.completionLogic,version:versionNumber,status:version.status},version.courses);
+    return this.map({...path,title:typeof snapshot.title==='string'?snapshot.title:path.title,description:typeof snapshot.description==='string'||snapshot.description===null?snapshot.description:path.description,isStrictlyOrdered:typeof snapshot.isStrictlyOrdered==='boolean'?snapshot.isStrictlyOrdered:path.isStrictlyOrdered,completionLogic:snapshot.completionLogic==='ALL'||snapshot.completionLogic==='ALL_REQUIRED'?snapshot.completionLogic:path.completionLogic,version:versionNumber,status:version.status},version.courses,version.snapshot);
   }
 
   public async list(options={page:1,pageSize:50}): Promise<LearningPathDto[]> {
@@ -99,7 +106,7 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
         where: { learningPathId_versionNumber: { learningPathId: path.id, versionNumber: path.version } },
         include: { courses: true },
       });
-      return this.map(path, version?.courses ?? []);
+      return this.map(path, version?.courses ?? [],version?.snapshot);
     }));
   }
 
@@ -112,9 +119,9 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
     const path=await this.prisma.learningPath.update({where:{id},data:{title:input.title,description:input.description,isStrictlyOrdered:input.isStrictlyOrdered,completionLogic:input.completionLogic,version:{increment:1}}});
     const courses=input.courses ?? [];
     const version=await this.prisma.learningPathVersion.create({data:{learningPathId:id,versionNumber:path.version,status:LearningPathStatus.DRAFT,
-      snapshot:json({title:path.title,description:path.description,isStrictlyOrdered:path.isStrictlyOrdered,completionLogic:path.completionLogic,previousVersion:current.version,courses}),
+      snapshot:json({title:path.title,description:path.description,isStrictlyOrdered:path.isStrictlyOrdered,completionLogic:path.completionLogic,previousVersion:current.version,courses,certificateEligibility:certificatePolicy(input.certificateEligible===true)}),
       courses:{create:courses.map(item=>({courseId:item.courseId,position:item.position,required:item.required,prerequisiteCourseIds:json(item.prerequisiteCourseIds)}))}},include:{courses:true}});
-    return this.map(path,version.courses);
+    return this.map(path,version.courses,version.snapshot);
   }
 
   public async updateStatus(id: string, status: LearningPathStatus): Promise<LearningPathDto> {
@@ -134,7 +141,7 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
           learningPathId: id,
           versionNumber: nextVersion,
           status,
-          snapshot: json({ title: path.title, description: path.description, isStrictlyOrdered:path.isStrictlyOrdered,completionLogic:path.completionLogic,previousVersion: current.version }),
+          snapshot: json({ title: path.title, description: path.description, isStrictlyOrdered:path.isStrictlyOrdered,completionLogic:path.completionLogic,previousVersion: current.version,certificateEligibility:certificatePolicy(certificateEligible(currentVersion.snapshot)) }),
           courses: { create: currentVersion.courses.map(item => ({
             courseId: item.courseId,
             position: item.position,
@@ -143,7 +150,7 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
           })) },
         }, include: { courses: true },
       });
-      return this.map(path, version.courses);
+      return this.map(path, version.courses,version.snapshot);
     });
   }
 
@@ -175,9 +182,9 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
     return candidate.$transaction(tx => work(tx), { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
   }
 
-  private map(path: any, courses: any[]): LearningPathDto {
+  private map(path: any, courses: any[],snapshot?:unknown): LearningPathDto {
     return {
-      id: path.id, publicId: path.publicId, slug: path.slug, title: path.title, description: path.description,
+      id: path.id, publicId: path.publicId, slug: path.slug, title: path.title, description: path.description,certificateEligible:certificateEligible(snapshot),
       status: path.status as LearningPathStatus, version: path.version,
       isStrictlyOrdered: path.isStrictlyOrdered, completionLogic: path.completionLogic as 'ALL_REQUIRED' | 'ALL',
       courses: [...courses].sort((a,b) => a.position - b.position).map(item => ({

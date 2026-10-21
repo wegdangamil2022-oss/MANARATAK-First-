@@ -1,0 +1,330 @@
+{
+  "kind": "POST28_R13_PREPARATION_REVIEW_PACKET",
+  "observedAt": "2026-10-20T20:19:18.310Z",
+  "sourceSha": "56e14b1ef0aad35d48a67299feb3481233ae230f",
+  "decision": "BLOCKED",
+  "status": "REVIEW_PACKET_PREPARED_FORMAL_VALIDATION_STAGING_BLOCKED",
+  "nonAuthoritative": true,
+  "signatureVerified": false,
+  "productionAcceptance": false,
+  "validationExecuted": false,
+  "stagingExecuted": false,
+  "promotionInvoked": false,
+  "keysGenerated": false,
+  "testsRepeated": false,
+  "existingArtifacts": {
+    "sourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+    "manifestSha256": "c3f53aca7f0d8251ffbe9141dbe22fb6b89ab51ecc15d097f94e8877b8aac2cb",
+    "sourceLedger": {
+      "taskInventorySha256": "643d2feb6493fa8c7ee285199399c94f2151c014ccf35c77ab7867c8e99ccb31",
+      "section27Closed": false
+    },
+    "units": [
+      {
+        "unit": "api",
+        "file": "manaratak-api-4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b.tar",
+        "sha256": "86ea6fb08569187a94f2a9d4d774c544e989fa329f2f72552dcd3a2ffba09459",
+        "size": 31078400
+      },
+      {
+        "unit": "web",
+        "file": "manaratak-web-4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b.tar",
+        "sha256": "dd9d78ed94e8b4b7168f1439726ce2a92f96e61b9f2311d9ecdcbab1e497dbf1",
+        "size": 11653120
+      },
+      {
+        "unit": "admin",
+        "file": "manaratak-admin-4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b.tar",
+        "sha256": "ccaa2e9335bdfd74e60c8a4497df91e0960e6bc6e4635d3719e9bda70ab3cde8",
+        "size": 8355840
+      }
+    ],
+    "sbom": {
+      "file": "release-sbom.cdx.json",
+      "sha256": "c9ea783e642734df1b473a9fa2d7eb8674450b3f5031da1e0841a75daaf1bcb7"
+    },
+    "sourceIdentityRebound": false
+  },
+  "evidenceIndices": [
+    {
+      "index": "docs/reviews/evidence/post28/4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b/r11-linux/evidence-index.json",
+      "files": 12,
+      "sha256": "eb21ee7b2b0a210acfde4f95d27df4bef8769c390f322d26418deb2007c9f321",
+      "signatureVerified": false,
+      "historicalSourceIdentityPreserved": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/70230e082e03f73761eee6437858c074839fb8d2/r12-worker-assets/evidence-index.json",
+      "files": 29,
+      "sha256": "6397a07e9a617c05e377aca6a717dbd2429036ae5ccea2797d591362bb970d25",
+      "signatureVerified": false,
+      "historicalSourceIdentityPreserved": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/005595313b0ae1ff940fec44454f441f516c8d8e/r12-api-runtime/evidence-index.json",
+      "files": 19,
+      "sha256": "f1216f83e0f0df20d72ea5e00c050682974eacaf3bd90ebcba24fff3a03ce34f",
+      "signatureVerified": false,
+      "historicalSourceIdentityPreserved": true
+    }
+  ],
+  "stageReferences": [
+    {
+      "id": "R00",
+      "state": "BASELINE_AND_INVENTORY_PRESENT_GENERAL_ACCEPTANCE_OPEN",
+      "reference": "docs/remediation/POST28_R00_BASELINE_2026-10-16.md"
+    },
+    {
+      "id": "R01",
+      "state": "SOURCE_FIXES_AND_EVIDENCE_PRESENT_REMOTE_CI_NOT_REVALIDATED",
+      "reference": "docs/remediation/POST28_R01_REVALIDATION_2026-10-16.md"
+    },
+    {
+      "id": "R02",
+      "state": "SOURCE_GUARDS_AND_LOCAL_DB_EVIDENCE_PRESENT_FORMAL_COVERAGE_OPEN",
+      "reference": "docs/remediation/POST28_R02_REVALIDATION_2026-10-16.md"
+    },
+    {
+      "id": "R03",
+      "state": "LOCAL_ISOLATION_EVIDENCED_FULL_ENVIRONMENT_ACCEPTANCE_OPEN",
+      "reference": "docs/remediation/POST28_LOCAL_R03_R04_EXECUTION_2026-10-16.md"
+    },
+    {
+      "id": "R04",
+      "state": "HISTORICAL_LOCAL_SCOPE_CLOSED_ONLY",
+      "reference": "docs/remediation/POST28_R04_LOCAL_CLOSURE_2026-10-16.md"
+    },
+    {
+      "id": "R05",
+      "state": "CLOSED_LOCAL_SYNTHETIC_SCOPE",
+      "reference": "docs/remediation/POST28_R05_LOCAL_CLOSURE_2026-10-19.md"
+    },
+    {
+      "id": "R06",
+      "state": "CORE_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+      "reference": "docs/remediation/POST28_R06_CORE_CLOSURE_2026-10-19.md"
+    },
+    {
+      "id": "R07",
+      "state": "CORE_LINUX_DIAGNOSTIC_COMPLETE_POST111",
+      "reference": "docs/remediation/POST28_R07_POST111_DIAGNOSTIC_2026-10-19.md"
+    },
+    {
+      "id": "R08",
+      "state": "PRACTICAL_SCOPE_CLOSED_FOR_R09_LOCAL_ONLY",
+      "reference": "docs/remediation/POST28_R08_R09_PREPARATION_2026-10-16.md"
+    },
+    {
+      "id": "R09",
+      "state": "PRACTICAL_SCOPE_CLOSED_OWNER_ACCEPTED_DOCUMENTED_EXCEPTIONS",
+      "reference": "docs/remediation/POST28_R08_R09_PREPARATION_2026-10-16.md"
+    },
+    {
+      "id": "R10",
+      "state": "LOCAL_INTEGRATED_DIAGNOSTIC_RECOVERY_COMPLETE_PROVIDER_CONTROLS_NOT_PROVISIONED",
+      "reference": "docs/remediation/POST28_R10_OPERATIONAL_RECOVERY_2026-10-20.md"
+    },
+    {
+      "id": "R11",
+      "state": "PRACTICAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+      "reference": "docs/remediation/POST28_R11_PRACTICAL_CLOSEOUT_2026-10-20.md"
+    },
+    {
+      "id": "R12",
+      "state": "LOCAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_RELEASE_BLOCKERS",
+      "reference": "docs/remediation/POST28_R12_PRACTICAL_CLOSEOUT_2026-10-20.md"
+    }
+  ],
+  "blockers": [
+    {
+      "id": "R13-B01",
+      "reason": "SOURCE_SECTION_27_AND_INVENTORY_NOT_ACCEPTED",
+      "evidence": {
+        "section27Closed": false,
+        "manifestSection27Closed": false,
+        "inventoryCoverage": "HEADING_ID_CANDIDATES_OWNER_CURATING_REQUIRED"
+      },
+      "resolution": "Complete source review and task curation before freezing C2; do not flip declarations without evidence"
+    },
+    {
+      "id": "R13-B02",
+      "reason": "NO_FINAL_C2_OR_EXACT_SHA_RUNTIME_PACKAGE",
+      "evidence": {
+        "inspectedSourceSha": "56e14b1ef0aad35d48a67299feb3481233ae230f",
+        "localArtifactSourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+        "sameSha": false
+      },
+      "resolution": "Freeze clean C2 after source acceptance; build once and execute only mandatory exact-SHA gates then"
+    },
+    {
+      "id": "R13-B03",
+      "reason": "NO_SIGNED_INDEPENDENT_EVIDENCE_INPUTS",
+      "evidence": {
+        "sourceEnvelopeVerified": false,
+        "runtimeEnvelopeVerified": false,
+        "approvalEnvelopeVerified": false
+      },
+      "resolution": "Obtain separately authorized source/runtime/approval signers and linked fresh evidence; no generated approval keys"
+    },
+    {
+      "id": "R13-B04",
+      "reason": "PRIOR_FORMAL_GATE_EXCEPTIONS_REMAIN",
+      "evidence": {
+        "r11": [
+          "E1",
+          "E2",
+          "E3",
+          "E4",
+          "E5"
+        ],
+        "r12": [
+          "R12-E01",
+          "R12-E02",
+          "R12-E03",
+          "R12-E04"
+        ]
+      },
+      "resolution": "Resolve recorded release blockers before signing formal runtime acceptance"
+    },
+    {
+      "id": "R13-B05",
+      "reason": "TRACEABILITY_AND_MANDATORY_DOMAIN_ACCEPTANCE_INCOMPLETE",
+      "evidence": {
+        "relationships": 77,
+        "cases": 42,
+        "domainRows": 26,
+        "sourceCatalogDoesNotProveExecution": true
+      },
+      "resolution": "Review row evidence on actual target/candidate, preserving historical evidence and qualified outcomes"
+    },
+    {
+      "id": "R13-B06",
+      "reason": "VALIDATION_STAGING_TARGETS_AND_AUTHORITY_NOT_PROVEN",
+      "evidence": {
+        "validationExecuted": false,
+        "stagingExecuted": false,
+        "linuxTargetIsNotHostingAuthority": true
+      },
+      "resolution": "Provide reviewed target identities and protected-environment authority after prerequisite evidence; keep promotion disabled"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "config/release/source-release-policy.json",
+      "sha256": "0c411f4436c678f37e4d49baa1f98e22529fd93a494e49a1b344235208299240",
+      "bytes": 673,
+      "gitBlobSha256": "0c411f4436c678f37e4d49baa1f98e22529fd93a494e49a1b344235208299240"
+    },
+    {
+      "path": "config/release/section-task-inventory.json",
+      "sha256": "643d2feb6493fa8c7ee285199399c94f2151c014ccf35c77ab7867c8e99ccb31",
+      "bytes": 16918,
+      "gitBlobSha256": "643d2feb6493fa8c7ee285199399c94f2151c014ccf35c77ab7867c8e99ccb31"
+    },
+    {
+      "path": "docs/reviews/section-27-task-status.json",
+      "sha256": "d0185b03571905028311932f0deeb55cdf6dc33374cd538e44775a9f4da620db",
+      "bytes": 17492,
+      "gitBlobSha256": "073f989ba58cd74799aa000801119d7ef81314a059c52169e8f194064679ee29"
+    },
+    {
+      "path": "docs/remediation/post28-readiness-20261016/relationships.json",
+      "sha256": "4e8b28bc292c2a5e020aa08e513f59db24d299f8018c63a3c58e97bcd8a6af12",
+      "bytes": 78633,
+      "gitBlobSha256": "4e8b28bc292c2a5e020aa08e513f59db24d299f8018c63a3c58e97bcd8a6af12"
+    },
+    {
+      "path": "docs/remediation/post28-readiness-20261016/cases.json",
+      "sha256": "ad55ee927c99326e5785178f70c3861e79be3a6c3b7af4b7540709eb7897dc2f",
+      "bytes": 38304,
+      "gitBlobSha256": "ad55ee927c99326e5785178f70c3861e79be3a6c3b7af4b7540709eb7897dc2f"
+    },
+    {
+      "path": "docs/remediation/post28-readiness-20261016/decisions.json",
+      "sha256": "6606defbf37bbacaea66bdb0dc19cc979dcc6db7813fce40c17677c8b85a78fd",
+      "bytes": 11264,
+      "gitBlobSha256": "1ae820722861a43ad9a4cdf57a5885c046d72bcbca3352020cf71aaace1fcc88"
+    },
+    {
+      "path": "docs/remediation/POST28_R06_CONTINUATION_MATRIX_2026-10-18.json",
+      "sha256": "0f501c920297dd483dbed7bb19b5ecdf3da6ab740ed84931a9a0b33ee4fcc98d",
+      "bytes": 56056,
+      "gitBlobSha256": "262210634b86d433bd76d670f8193617b881af40085cc4a8cf274b9ff30a11a7"
+    },
+    {
+      "path": "docs/remediation/POST28_UNIFIED_WORK_INDEX_2026-10-19.json",
+      "sha256": "e4c80914b11f2af8bcae26dfc7b79e2c1043229cea735a7bd48e119d6de8c440",
+      "bytes": 19216,
+      "gitBlobSha256": "e4c80914b11f2af8bcae26dfc7b79e2c1043229cea735a7bd48e119d6de8c440"
+    },
+    {
+      "path": "docs/remediation/POST28_R11_PRACTICAL_CLOSEOUT_2026-10-20.json",
+      "sha256": "f2828e0646fd190f2239095aa64f7f56e33d559b9300a7511088ea899a7cd88b",
+      "bytes": 3432,
+      "gitBlobSha256": "f2828e0646fd190f2239095aa64f7f56e33d559b9300a7511088ea899a7cd88b"
+    },
+    {
+      "path": "docs/remediation/POST28_R12_PRACTICAL_CLOSEOUT_2026-10-20.json",
+      "sha256": "1059be32e6666c7dd59b37205778a1729ed763125b70b4336f3c3f5e0d0bd13e",
+      "bytes": 4111,
+      "gitBlobSha256": "1059be32e6666c7dd59b37205778a1729ed763125b70b4336f3c3f5e0d0bd13e"
+    },
+    {
+      "path": "docs/remediation/POST28_ISOLATED_VALIDATION_EXECUTION_PLAN_v1.3_2026-10-16.md",
+      "sha256": "956e4c59215cf9496e7ed967e48697e9d4c1914b5e862cc4156eabbbb26c8c1c",
+      "bytes": 149341,
+      "gitBlobSha256": "956e4c59215cf9496e7ed967e48697e9d4c1914b5e862cc4156eabbbb26c8c1c"
+    },
+    {
+      "path": "docs/reviews/ARCHITECTURAL_SECURITY_VERIFIED_FINDINGS_2026-10-15.md",
+      "sha256": "1d69d5793fe0ca3f566a085196c4019be86036501c8355e8a4cae0eae47476fa",
+      "bytes": 71238,
+      "gitBlobSha256": "5835e3c3e5d7cab8d2758129c5131b0a13697c09356ceaa2874e8e1529275b9a"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b/r11-linux/evidence-index.json",
+      "sha256": "eb21ee7b2b0a210acfde4f95d27df4bef8769c390f322d26418deb2007c9f321",
+      "bytes": 3070,
+      "gitBlobSha256": "eb21ee7b2b0a210acfde4f95d27df4bef8769c390f322d26418deb2007c9f321"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/70230e082e03f73761eee6437858c074839fb8d2/r12-worker-assets/evidence-index.json",
+      "sha256": "6397a07e9a617c05e377aca6a717dbd2429036ae5ccea2797d591362bb970d25",
+      "bytes": 5698,
+      "gitBlobSha256": "6397a07e9a617c05e377aca6a717dbd2429036ae5ccea2797d591362bb970d25"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/005595313b0ae1ff940fec44454f441f516c8d8e/r12-api-runtime/evidence-index.json",
+      "sha256": "f1216f83e0f0df20d72ea5e00c050682974eacaf3bd90ebcba24fff3a03ce34f",
+      "bytes": 3911,
+      "gitBlobSha256": "f1216f83e0f0df20d72ea5e00c050682974eacaf3bd90ebcba24fff3a03ce34f"
+    },
+    {
+      "path": "docs/remediation/ARCHITECTURAL_SECURITY_CLOSURE_REGISTER_2026-10-15.json",
+      "bytes": 29018,
+      "sha256": "01a2946677c30651a9b2d8a385ba633f34ffae43cbbeb188a980bf4350b39a01",
+      "gitBlobSha256": "01a2946677c30651a9b2d8a385ba633f34ffae43cbbeb188a980bf4350b39a01"
+    }
+  ],
+  "priorDeliveryCi": {
+    "sourceSha": "b597a387cbaaacd935adf33b42ec1131940982b7",
+    "status": "in_progress",
+    "result": null,
+    "observedAt": "2026-10-20T20:21:05.020Z",
+    "allCiNotAssumed": true
+  },
+  "sourceReleasePolicy": {
+    "maximumEvidenceAgeHours": 24,
+    "authorityStatus": "PENDING_SIGNED_OWNER_APPROVAL"
+  },
+  "traceabilityCatalog": {
+    "sections": 27,
+    "relationships": 77,
+    "cases": 42,
+    "historicalPartialCaseRowsLinked": 26,
+    "fsa": 24,
+    "findings": 54,
+    "exactReviewShaAcceptance": false
+  },
+  "inputHashScope": "sha256=checkout bytes at clean source; gitBlobSha256=canonical Git blob at sourceSha"
+}

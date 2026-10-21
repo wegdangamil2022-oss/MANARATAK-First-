@@ -1,0 +1,6 @@
+{
+  "caseExact": "CD019 actual link result serialization and freshness > treats an exact equal-time replay as a read-only result",
+  "fullDiscoveryCases": 9,
+  "selectedCases": 1,
+  "fullProfileAcceptance": false
+}

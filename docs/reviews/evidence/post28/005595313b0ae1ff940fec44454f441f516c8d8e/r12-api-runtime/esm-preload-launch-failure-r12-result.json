@@ -1,0 +1,40 @@
+{
+  "kind": "R12_LOCAL_API_STOP_START_ROLLBACK",
+  "operatorSourceSha": "005595313b0ae1ff940fec44454f441f516c8d8e",
+  "currentCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "previousCandidateSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "runtimeDependencySourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "sharedLockedWindowsDependencies": true,
+  "differentApiImplementationDemonstrated": false,
+  "workersEnabled": false,
+  "loopbackListenAdapter": true,
+  "loopbackAdapterSha256": "f3118853245f8b0f64d0f4713e9d13d42f665982fd30ba08ff407588dea37c75",
+  "previousWorkerRuntimeCompatible": false,
+  "formalR12Acceptance": false,
+  "productionAcceptance": false,
+  "observations": [
+    {
+      "stopped": "current",
+      "portClosed": true,
+      "stopMilliseconds": 0.7132999999998901
+    }
+  ],
+  "passed": false,
+  "applicationRole": {
+    "role": "post28_r12_actor",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "rolreplication": false
+  },
+  "failure": {
+    "phase": "CURRENT",
+    "code": "R12_CURRENT_API_NOT_READY",
+    "message": "R12_CURRENT_API_NOT_READY"
+  },
+  "cleanup": {
+    "apisStopped": true,
+    "gatewayStopped": true
+  }
+}

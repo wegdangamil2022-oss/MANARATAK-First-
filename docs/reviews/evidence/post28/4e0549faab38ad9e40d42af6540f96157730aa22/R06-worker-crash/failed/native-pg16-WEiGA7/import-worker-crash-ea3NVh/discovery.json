@@ -1,0 +1,22 @@
+[
+  {
+    "name": "CD035 actual durable worker process crash and screening receipts > runs the real worker handler import protocol receipt and checkpoint exactly once",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-import-worker-crash.database.spec.mjs"
+  },
+  {
+    "name": "CD035 actual durable worker process crash and screening receipts > recovers a killed child AFTER_RECEIPT without screening again or duplicate receipt",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-import-worker-crash.database.spec.mjs"
+  },
+  {
+    "name": "CD035 actual durable worker process crash and screening receipts > recovers a killed child AFTER_ACK without screening again or duplicate receipt",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-import-worker-crash.database.spec.mjs"
+  },
+  {
+    "name": "CD035 actual durable worker process crash and screening receipts > keeps an uncertain killed pre-receipt dispatch in manual review instead of automatically replaying",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-import-worker-crash.database.spec.mjs"
+  },
+  {
+    "name": "CD035 actual durable worker process crash and screening receipts > refuses changed content for the same durable receipt identity without overwriting evidence",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-import-worker-crash.database.spec.mjs"
+  }
+]

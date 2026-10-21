@@ -1,0 +1,251 @@
+[
+  {
+    "name": "compatibility",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "packages/infrastructure/tests/international-tests/InternationalTestGovernanceCloseout.spec.ts",
+      "packages/infrastructure/tests/international-tests/PrismaInternationalTestRepository.spec.ts",
+      "packages/infrastructure/tests/cms/CmsSection16Gaps.spec.ts",
+      "packages/domain/tests/cms/CmsPublishingPolicy.spec.ts"
+    ],
+    "sourceSha": "8dde53cb3d57037a1086ee044cd14588cc025046",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:06:45.662362+00:00",
+    "finishedUtc": "2026-10-16T14:06:55.254162+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/8dde53cb3d57037a1086ee044cd14588cc025046/R04-reconciliation/compatibility-20261016T140655236951Z.log",
+    "sha256": "4e90f8ee78a7d87d3ebc0ae63e7f03a388210c1a1bce98552a12ba9f6e21af1f"
+  },
+  {
+    "name": "tsc",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/typescript/bin/tsc",
+      "-b",
+      "packages/infrastructure"
+    ],
+    "sourceSha": "8dde53cb3d57037a1086ee044cd14588cc025046",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:07:25.097659+00:00",
+    "finishedUtc": "2026-10-16T14:07:26.143651+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/8dde53cb3d57037a1086ee044cd14588cc025046/R04-reconciliation/tsc-20261016T140726127247Z.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "architecture",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/architecture/verify-source-architecture-guards.mjs"
+    ],
+    "sourceSha": "8dde53cb3d57037a1086ee044cd14588cc025046",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:07:26.172377+00:00",
+    "finishedUtc": "2026-10-16T14:07:27.255699+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/8dde53cb3d57037a1086ee044cd14588cc025046/R04-reconciliation/architecture-20261016T140727240357Z.log",
+    "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659"
+  },
+  {
+    "name": "preflight",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "--test",
+      "tests/database/post28-neon-preflight.test.mjs"
+    ],
+    "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:09:09.415094+00:00",
+    "finishedUtc": "2026-10-16T14:09:10.813326+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/8d92b20967af3972a5d4f6d4ebc50eb415c0bd63/R04-reconciliation/preflight-20261016T140910796091Z.log",
+    "sha256": "7d7635270d3885e97619e9087da403db92443c869080fa35423d35c3f01ac042"
+  },
+  {
+    "name": "architecture",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/architecture/verify-source-architecture-guards.mjs"
+    ],
+    "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:09:10.847560+00:00",
+    "finishedUtc": "2026-10-16T14:09:11.945140+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/8d92b20967af3972a5d4f6d4ebc50eb415c0bd63/R04-reconciliation/architecture-20261016T140911926256Z.log",
+    "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659"
+  },
+  {
+    "name": "quality",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/quality/verify-source-quality.mjs"
+    ],
+    "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:09:33.634571+00:00",
+    "finishedUtc": "2026-10-16T14:09:37.675567+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/8d92b20967af3972a5d4f6d4ebc50eb415c0bd63/R04-reconciliation/quality-20261016T140937659230Z.log",
+    "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073"
+  },
+  {
+    "name": "eslint",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/eslint/bin/eslint.js",
+      "scripts/database/prisma-env-diff.mjs",
+      "scripts/database/post28-psql.mjs",
+      "tests/database/greenfield-migration-parity-source.test.mjs",
+      "tests/database/post28-schema-reconciliation.test.mjs"
+    ],
+    "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:09:37.708420+00:00",
+    "finishedUtc": "2026-10-16T14:09:39.379272+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/8d92b20967af3972a5d4f6d4ebc50eb415c0bd63/R04-reconciliation/eslint-20261016T140939350640Z.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "seed-source",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/database/seed-orchestrator.mjs",
+      "source-verify"
+    ],
+    "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:10:31.842588+00:00",
+    "finishedUtc": "2026-10-16T14:10:32.698056+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/8d92b20967af3972a5d4f6d4ebc50eb415c0bd63/R04-reconciliation/seed-source-20261016T141032677954Z.log",
+    "sha256": "c030ae986d67bc5a9571561a059f712a0b7d21cb5296b5f947aeaf8948c623a5"
+  },
+  {
+    "name": "dry-run-currencies",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/tsx/dist/cli.mjs",
+      "scripts/dry-run-reference-currencies.ts"
+    ],
+    "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:10:48.713008+00:00",
+    "finishedUtc": "2026-10-16T14:10:52.495215+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/8d92b20967af3972a5d4f6d4ebc50eb415c0bd63/R04-reconciliation/dry-run-currencies-20261016T141052457266Z.log",
+    "sha256": "8192f77674a2b99d2ba704189e088ba588033423aee3584268d3457cd2fac1f5"
+  },
+  {
+    "name": "dry-run-languages",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/tsx/dist/cli.mjs",
+      "scripts/dry-run-reference-languages.ts"
+    ],
+    "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:10:48.698745+00:00",
+    "finishedUtc": "2026-10-16T14:10:52.571453+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/8d92b20967af3972a5d4f6d4ebc50eb415c0bd63/R04-reconciliation/dry-run-languages-20261016T141052546892Z.log",
+    "sha256": "ea1b9c490e128c4e34e7d5a7c2ac2b60f87346ca7cdee80aeddf07c78a1d9538"
+  },
+  {
+    "name": "dry-run-countries",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/tsx/dist/cli.mjs",
+      "scripts/dry-run-reference-countries.ts"
+    ],
+    "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:10:48.698868+00:00",
+    "finishedUtc": "2026-10-16T14:10:52.608399+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/8d92b20967af3972a5d4f6d4ebc50eb415c0bd63/R04-reconciliation/dry-run-countries-20261016T141052592143Z.log",
+    "sha256": "592f3226243249f313271bee11e5482686c5a9e3bbefdd91703600590ae7aad3"
+  },
+  {
+    "name": "seed-approval-contract",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "packages/application/tests/reference-data/ReferenceDataImportHandoffService.spec.ts",
+      "packages/application/tests/reference-data/ReferenceDataSeedApplyService.spec.ts"
+    ],
+    "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:11:32.803608+00:00",
+    "finishedUtc": "2026-10-16T14:11:38.090063+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/8d92b20967af3972a5d4f6d4ebc50eb415c0bd63/R04-reconciliation/seed-approval-contract-20261016T141138072270Z.log",
+    "sha256": "5d628fb5e88a8565c10cf0cdac3e822b3fea76d6cb641a87f9c8c27da597503e"
+  },
+  {
+    "name": "affected-final",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "--test",
+      "tests/database/post28-schema-reconciliation.test.mjs",
+      "tests/database/post28-r04-r05-preparation.test.mjs",
+      "tests/remediation/w2-migration-recovery-source.test.mjs",
+      "tests/database/greenfield-migration-parity-source.test.mjs",
+      "tests/database/post28-isolation.test.mjs"
+    ],
+    "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:12:06.196929+00:00",
+    "finishedUtc": "2026-10-16T14:12:09.657586+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/8d92b20967af3972a5d4f6d4ebc50eb415c0bd63/R04-reconciliation/affected-final-20261016T141209641585Z.log",
+    "sha256": "e30ff380569a7941b6f7f9348aa4cbfb4c775467ef7f2993fe39a4dc5748e232"
+  }
+]

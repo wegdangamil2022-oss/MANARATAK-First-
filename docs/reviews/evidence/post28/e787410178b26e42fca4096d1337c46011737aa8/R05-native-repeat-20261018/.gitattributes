@@ -1,0 +1,5 @@
+* -text whitespace=cr-at-eol
+# Preserve tool output bytes, including trailing spaces and blank lines.
+*.log -whitespace
+*.pdf binary
+*.png binary

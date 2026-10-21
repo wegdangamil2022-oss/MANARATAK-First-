@@ -62,7 +62,7 @@ describe('Live country mapping and bounded discovery', () => {
     expect(country.scholarshipsCount).toBeNull();
     expect(mapCountry(dto, 'ar').popularCities).toEqual(['صنعاء']);
   });
-  it('loads a single 20-item discovery page and forwards search filters to the owner', async () => {
+  it('loads bounded preview and featured pages, deduplicates them and forwards search filters', async () => {
     const spy = vi
       .spyOn(ApiClient, 'getStudyDestinations')
       .mockResolvedValue({
@@ -74,9 +74,11 @@ describe('Live country mapping and bounded discovery', () => {
         hasMore: true,
         nextCursor: null,
       });
-    await loadPublishedCountries('en');
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenLastCalledWith({ page: 1, pageSize: 20 });
+    const countries=await loadPublishedCountries('en');
+    expect(countries).toHaveLength(1);
+    expect(spy).toHaveBeenCalledTimes(2);
+    expect(spy).toHaveBeenNthCalledWith(1,{ page: 1, pageSize: 20 });
+    expect(spy).toHaveBeenNthCalledWith(2,{ page: 1, pageSize: 8,isFeatured:true });
     await searchPublishedCountries({ page: 3, q: 'Yemen', region: 'Asia' }, 'en');
     expect(spy).toHaveBeenLastCalledWith({ page: 3, q: 'Yemen', region: 'Asia', pageSize: 20 });
     spy.mockRestore();

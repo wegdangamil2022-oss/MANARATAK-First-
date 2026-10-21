@@ -1,0 +1,122 @@
+{
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 0,
+  "numFailedTestSuites": 2,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 6,
+  "numPassedTests": 1,
+  "numFailedTests": 5,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1792544764058,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "private certificate provider capabilities"
+          ],
+          "fullName": "private certificate provider capabilities refuses provider URL for CERTIFICATE_PDF before contacting storage",
+          "status": "failed",
+          "title": "refuses provider URL for CERTIFICATE_PDF before contacting storage",
+          "duration": 13.406699999999546,
+          "failureMessages": [
+            "Error: promise resolved \"{ …(4) }\" instead of rejecting\n    at _Assertion.__VITEST_REJECTS__ (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1696:22)\n    at C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/CertificateArtifactGrantPolicy.spec.ts:14:183\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private certificate provider capabilities"
+          ],
+          "fullName": "private certificate provider capabilities refuses provider URL for CERTIFICATE_PREVIEW before contacting storage",
+          "status": "failed",
+          "title": "refuses provider URL for CERTIFICATE_PREVIEW before contacting storage",
+          "duration": 1.5370999999995547,
+          "failureMessages": [
+            "Error: promise resolved \"{ …(4) }\" instead of rejecting\n    at _Assertion.__VITEST_REJECTS__ (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1696:22)\n    at C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/CertificateArtifactGrantPolicy.spec.ts:14:183\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private certificate provider capabilities"
+          ],
+          "fullName": "private certificate provider capabilities refuses provider URL for STUDENT_CERTIFICATE_PDF before contacting storage",
+          "status": "failed",
+          "title": "refuses provider URL for STUDENT_CERTIFICATE_PDF before contacting storage",
+          "duration": 1.2960999999995693,
+          "failureMessages": [
+            "Error: promise resolved \"{ …(4) }\" instead of rejecting\n    at _Assertion.__VITEST_REJECTS__ (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1696:22)\n    at C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/CertificateArtifactGrantPolicy.spec.ts:14:183\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private certificate provider capabilities"
+          ],
+          "fullName": "private certificate provider capabilities refuses provider URL for STUDENT_CERTIFICATE_PREVIEW before contacting storage",
+          "status": "failed",
+          "title": "refuses provider URL for STUDENT_CERTIFICATE_PREVIEW before contacting storage",
+          "duration": 0.931800000000294,
+          "failureMessages": [
+            "Error: promise resolved \"{ …(4) }\" instead of rejecting\n    at _Assertion.__VITEST_REJECTS__ (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1696:22)\n    at C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/CertificateArtifactGrantPolicy.spec.ts:14:183\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private certificate provider capabilities"
+          ],
+          "fullName": "private certificate provider capabilities preserves non-artifact certificate evidence grants",
+          "status": "passed",
+          "title": "preserves non-artifact certificate evidence grants",
+          "duration": 0.8864999999996144,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private certificate provider capabilities"
+          ],
+          "fullName": "private certificate provider capabilities fails closed if certificate usage lookup is unavailable",
+          "status": "failed",
+          "title": "fails closed if certificate usage lookup is unavailable",
+          "duration": 1.0946999999996478,
+          "failureMessages": [
+            "Error: promise resolved \"{ …(4) }\" instead of rejecting\n    at _Assertion.__VITEST_REJECTS__ (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1696:22)\n    at C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/CertificateArtifactGrantPolicy.spec.ts:17:241\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1792544770474,
+      "endTime": 1792544770494.0947,
+      "status": "failed",
+      "message": "",
+      "name": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/CertificateArtifactGrantPolicy.spec.ts"
+    }
+  ]
+}

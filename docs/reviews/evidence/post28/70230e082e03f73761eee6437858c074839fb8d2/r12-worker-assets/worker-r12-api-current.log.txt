@@ -1,0 +1,4 @@
+[Bootstrap] Server successfully started on port 56752
+{"level":30,"time":"2026-10-20T19:50:46.258Z","timestamp":"2026-10-20T19:50:46.258Z","correlationId":"5ad625f2-dc49-4e05-ba39-5594b58cb800","context":{"method":"GET","url":"/api/v1/monitoring/health/readiness","statusCode":200,"durationMs":123,"correlationId":"5ad625f2-dc49-4e05-ba39-5594b58cb800"},"msg":"HTTP GET /api/v1/monitoring/health/readiness 200 - 123ms"}
+[Bootstrap] SIGTERM received; readiness is DOWN and graceful drain has started.
+[Bootstrap] Graceful shutdown completed.

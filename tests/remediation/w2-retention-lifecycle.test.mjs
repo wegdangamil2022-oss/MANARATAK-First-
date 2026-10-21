@@ -20,7 +20,7 @@ test('MNT-AUD-0081 failed attempts remain retryable while applied decisions are 
  const {RetentionSweepUseCase}=load('packages/application/src/retention/RetentionSweepUseCase.ts',{'@manaratak/domain':domain});
  const candidate={owner:domain.RetentionOwner.IMPORT,recordId:'i',expiresAt:new Date('2026-09-01T00:00:00Z')}; let tries=0; const rows=[];
  const gateway={owner:domain.RetentionOwner.IMPORT,listDue:async()=>[candidate],applyDecision:async()=>{tries++; if(tries===1)throw new Error('temporary'); return 'APPLIED';}};
- const decisions={hasTerminalDecision:async(key)=>rows.some(x=>x.decisionKey===key&&['APPLIED','SKIPPED'].includes(x.result)),append:async(x)=>rows.push(x)};
+ const decisions={hasTerminalDecision:async(key)=>rows.some(x=>x.decisionKey===key&&x.result==='APPLIED'),append:async(x)=>rows.push(x)};
  const uc=new RetentionSweepUseCase([gateway],decisions); const now=new Date('2026-09-07T00:00:00Z');
  const first=await uc.execute({now}); assert.equal(first.failed,1); assert.equal(tries,1);
  const second=await uc.execute({now}); assert.equal(second.applied,1); assert.equal(tries,2);

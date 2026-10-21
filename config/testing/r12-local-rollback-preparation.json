@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "scope": "LOCAL_SCOPED_ROLLBACK_DIAGNOSTIC_COMPLETE",
+  "currentCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "previousCandidateSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "previousWorkerPackaging": "Embedded polling runtime in the API artifact; source equality alone does not prove runtime compatibility",
+  "unitsAllowedForRehearsal": [
+    "api"
+  ],
+  "unitsExcludedFromRollback": [
+    "admin",
+    "web"
+  ],
+  "deploymentMode": "STOP_START_ONLY_NO_OVERLAPPING_API_PROCESSES",
+  "incidentOwner": "Delegated project manager, isolated local diagnostic only",
+  "canaryBudget": {
+    "approvedBy": "Delegated project manager under owner authorization, local diagnostic only",
+    "maximumRequests": 24,
+    "maximumConcurrency": 1,
+    "durationSeconds": 60,
+    "maximumUnexpectedErrors": 0
+  },
+  "maximumApiReadinessWaitSeconds": 15,
+  "maximumDrainWaitSeconds": 20,
+  "target": "NEW_ISOLATED_SYNTHETIC_POSTGRES16_CLUSTER_ONLY",
+  "protectedTables": [
+    "FinancialLedgerEntryRecord",
+    "FinancialTransactionRecord",
+    "FinancialAccountRecord",
+    "FinanceInvoiceRecord",
+    "FinancePaymentRecord",
+    "FinanceWalletRecord",
+    "FinanceWalletHoldRecord",
+    "FinanceCommandRecord",
+    "StudentPrivacyConsentDecision",
+    "StudentApplicationDocumentBinding",
+    "CmsPublishedContent",
+    "AuditRecord",
+    "TransactionalOutboxRecord",
+    "ApiIdempotencyRecord"
+  ],
+  "requiredRuntimeProof": [
+    "current-and-previous-artifacts-available-and-digest-verified",
+    "same-reviewed-forward-schema-with-no-down-migration",
+    "current-api-process-stopped-before-previous-api-starts",
+    "fixed-loopback-routing-and-private-synthetic-key-continuity",
+    "previous-api-preserves-session-csrf-and-replays-new-receipt-without-another-effect",
+    "historical-protected-rows-and-financial-counts-preserved",
+    "previous-worker-drain-lease-and-newer-event-receipt-compatibility-tested-separately"
+  ],
+  "formalCanaryApproved": false,
+  "previousApiRuntimeCompatible": true,
+  "previousWorkerRuntimeCompatible": false,
+  "rehearsalExecuted": true,
+  "formalR12Acceptance": false,
+  "productionAllowed": false,
+  "externalProviderEffectsAllowed": false,
+  "downMigrationsAllowed": false,
+  "deleteReceiptsOrLedgerAllowed": false,
+  "r11FormalExceptionsRemainOpen": true,
+  "currentArtifactLocallyVerified": true,
+  "rehearsalScope": "API stop/start receipt/session continuity; built StudentWorkspace identity worker redelivery and in-flight stop; real-PG lease ownership CAS; frozen-source real-PG asset byte and new-grant lifecycle contracts",
+  "runtimeEvidence": "docs/reviews/evidence/post28/005595313b0ae1ff940fec44454f441f516c8d8e/r12-api-runtime/evidence-index.json",
+  "previousBuiltStudentWorkspaceWorkerScopedCompatible": true,
+  "allWorkerRoutesAccepted": false,
+  "localInFlightWorkerDrainProven": true,
+  "windowsSignalTransport": "IPC invokes built SIGTERM handler; not Linux OS delivery",
+  "realPostgresStaleLeaseFencingProven": true,
+  "assetFrozenSourceContractsProven": true,
+  "assetBuiltHttpDeliveryAccepted": false,
+  "practicalLocalScopeComplete": true,
+  "workerAssetEvidence": "docs/reviews/evidence/post28/70230e082e03f73761eee6437858c074839fb8d2/r12-worker-assets/evidence-index.json",
+  "releaseBlockers": [
+    "R12-E01",
+    "R12-E02",
+    "R12-E03",
+    "R12-E04"
+  ]
+}

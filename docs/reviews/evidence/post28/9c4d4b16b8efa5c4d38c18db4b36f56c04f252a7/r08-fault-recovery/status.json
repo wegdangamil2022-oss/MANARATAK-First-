@@ -1,0 +1,25 @@
+{
+  "sourceSha": "9c4d4b16b8efa5c4d38c18db4b36f56c04f252a7",
+  "runs": [
+    {
+      "directory": "r08-provider-outcomes-JBHPDB",
+      "success": true,
+      "passed": 2,
+      "failed": 0,
+      "unselectedOrHookSkipped": 0,
+      "selection": {
+        "caseExact": null,
+        "fullDiscoveryCases": 2,
+        "selectedCases": 2,
+        "fullProfileAcceptance": true
+      }
+    }
+  ],
+  "fullR08Acceptance": false,
+  "productionAcceptance": false,
+  "appRole": "post28_app",
+  "secretsRetained": false,
+  "cleanupVerified": true,
+  "setupAuthority": "Separate migrator for the new empty lab only; application tests used no elevated role",
+  "note": "Actual runtime assertions passed on this source; scoped selection excludes other cases explicitly."
+}

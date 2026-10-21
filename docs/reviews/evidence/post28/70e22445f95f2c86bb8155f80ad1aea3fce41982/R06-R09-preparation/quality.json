@@ -1,0 +1,13 @@
+{
+  "name": "quality",
+  "command": "npm run quality:source",
+  "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T03:18:43.049559+00:00",
+  "endedAt": "2026-10-16T03:18:46.708399+00:00",
+  "exitCode": 0,
+  "logSha256": "8da3e12185549330fd7da4e28e9bde9bde31bb13fe1c2321e77859983ec6e0bd",
+  "nodeVersion": "22.16.0",
+  "databaseConnected": false
+}

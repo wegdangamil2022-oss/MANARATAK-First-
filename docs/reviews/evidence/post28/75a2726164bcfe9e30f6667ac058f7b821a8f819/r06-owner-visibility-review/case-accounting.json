@@ -1,0 +1,125 @@
+{
+  "baselineDistinctSuccessfulDatabaseCases": 267,
+  "newDistinctSuccessfulDatabaseCases": 16,
+  "cumulativeDistinctSuccessfulDatabaseCases": 283,
+  "distinctByNewSuite": {
+    "dec05-owner-atomic": 8,
+    "course-major-visibility": 8
+  },
+  "newCases": {
+    "dec05-owner-atomic": [
+      "Post28 DEC05 owner command atomic lifecycle > commits rejection derived invalidation owner version audit and outbox together",
+      "Post28 DEC05 owner command atomic lifecycle > reconciles removed source terms through the owner transaction and preserves independent links",
+      "Post28 DEC05 owner command atomic lifecycle > refuses stale command replay before any relation audit or outbox mutation",
+      "Post28 DEC05 owner command atomic lifecycle > requires unpublication before reviewing a published structure then performs actual unpublish and rejection",
+      "Post28 DEC05 owner command atomic lifecycle > rolls all owner and relation writes back on actual PostgreSQL failure in auditRecord",
+      "Post28 DEC05 owner command atomic lifecycle > rolls all owner and relation writes back on actual PostgreSQL failure in transactionalOutboxRecord",
+      "Post28 DEC05 owner command atomic lifecycle > serializes concurrent owner commands and rejects the stale version without duplicate effects",
+      "Post28 DEC05 owner command atomic lifecycle > withdraws an approved taxonomy projection when its source provenance changes"
+    ],
+    "course-major-visibility": [
+      "Post28 course major public visibility and degree facet contract > allows an approved major relationship without profile and does not infer degree from training text",
+      "Post28 course major public visibility and degree facet contract > hides PROPOSED projections before public page and count",
+      "Post28 course major public visibility and degree facet contract > hides REVIEW_REQUIRED projections before public page and count",
+      "Post28 course major public visibility and degree facet contract > refreshes the next no-store HTTP graph after source reconciliation and preserves independent valid links",
+      "Post28 course major public visibility and degree facet contract > rejects an unsupported degree filter rather than returning an unfiltered successful response",
+      "Post28 course major public visibility and degree facet contract > rejects an unsupported profile filter rather than inferring an academic degree",
+      "Post28 course major public visibility and degree facet contract > withdraws courses when their target major becomes ARCHIVED",
+      "Post28 course major public visibility and degree facet contract > withdraws courses when their target major becomes DRAFT"
+    ]
+  },
+  "affectedExistingRegressionCases": {
+    "dec05-taxonomy-invalidation": [
+      "Post28 DEC05 taxonomy rejection and dependent projection > does not silently approve withdrawn projections when the taxonomy is reapproved",
+      "Post28 DEC05 taxonomy rejection and dependent projection > preserves independent reviewed major links and all provenance rows",
+      "Post28 DEC05 taxonomy rejection and dependent projection > rejects a foreign course identity without modifying its link or projection",
+      "Post28 DEC05 taxonomy rejection and dependent projection > repeated and concurrent rejection through two connections converges without deleting history",
+      "Post28 DEC05 taxonomy rejection and dependent projection > rolls link resolution and projections back on a real PostgreSQL statement failure",
+      "Post28 DEC05 taxonomy rejection and dependent projection > withdraws only the rejected taxonomy derived major projection from the next public read"
+    ]
+  },
+  "existingRegressionCountNotAdded": 6,
+  "runs": [
+    {
+      "sourceSha": "d7376ee239b11caaf6ce6f39ed24b7ed425eef15",
+      "runId": "f38f84bf-75fe-4105-b04e-d14c671db08b",
+      "suite": "dec05-owner-atomic",
+      "discovered": 8,
+      "executed": 8,
+      "passed": 1,
+      "failed": 7,
+      "skipped": 0,
+      "fullProfilePassed": false,
+      "alreadyInBaselineDistinctCount": false,
+      "R06Accepted": false,
+      "evidence": "docs/reviews/evidence/post28/d7376ee239b11caaf6ce6f39ed24b7ed425eef15/r06-owner-visibility-runtime/runs/dec05-owner-atomic-kfWoxX/status.json"
+    },
+    {
+      "sourceSha": "c2b3af690ee32dc02ea0e021153d0a312e17321a",
+      "runId": "f212d750-29ce-4c51-817e-71115184eecc",
+      "suite": "dec05-taxonomy-invalidation",
+      "discovered": 6,
+      "executed": 6,
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "fullProfilePassed": true,
+      "alreadyInBaselineDistinctCount": true,
+      "R06Accepted": false,
+      "evidence": "docs/reviews/evidence/post28/c2b3af690ee32dc02ea0e021153d0a312e17321a/r06-owner-visibility-runtime/runs/dec05-taxonomy-invalidation-pNUZJy/status.json"
+    },
+    {
+      "sourceSha": "c2b3af690ee32dc02ea0e021153d0a312e17321a",
+      "runId": "f212d750-29ce-4c51-817e-71115184eecc",
+      "suite": "dec05-owner-atomic",
+      "discovered": 8,
+      "executed": 8,
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "fullProfilePassed": true,
+      "alreadyInBaselineDistinctCount": false,
+      "R06Accepted": false,
+      "evidence": "docs/reviews/evidence/post28/c2b3af690ee32dc02ea0e021153d0a312e17321a/r06-owner-visibility-runtime/runs/dec05-owner-atomic-0Niz9F/status.json"
+    },
+    {
+      "sourceSha": "f250cb498327b3811e5b77d54ca3dc548e3a8cfc",
+      "runId": "016cbed2-90a4-4956-93f3-1aacafe782bb",
+      "suite": "course-major-visibility",
+      "discovered": 8,
+      "executed": 8,
+      "passed": 4,
+      "failed": 4,
+      "skipped": 0,
+      "fullProfilePassed": false,
+      "alreadyInBaselineDistinctCount": false,
+      "R06Accepted": false,
+      "evidence": "docs/reviews/evidence/post28/f250cb498327b3811e5b77d54ca3dc548e3a8cfc/r06-owner-visibility-runtime/runs/course-major-visibility-XNfRze/status.json"
+    },
+    {
+      "sourceSha": "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+      "runId": "12c52173-5c2f-462b-b8f4-c47f34a709a6",
+      "suite": "course-major-visibility",
+      "discovered": 8,
+      "executed": 8,
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "fullProfilePassed": true,
+      "alreadyInBaselineDistinctCount": false,
+      "R06Accepted": false,
+      "evidence": "docs/reviews/evidence/post28/75a2726164bcfe9e30f6667ac058f7b821a8f819/r06-owner-visibility-runtime/runs/course-major-visibility-98aGAZ/status.json"
+    }
+  ],
+  "aggregateExecuted": 38,
+  "aggregatePassed": 27,
+  "aggregateFailed": 11,
+  "aggregateSkipped": 0,
+  "fullR06Acceptance": false,
+  "limitations": [
+    "Owner command tests exercise real coordinator/repository/audit/outbox, not HTTP/JWT authorization.",
+    "No external storage/payment/certificate service success proof.",
+    "Public source reconciliation proof covers current terms and next no-store HTTP query, not full worker/import URL-refresh/browser cache matrix.",
+    "Fresh databases and contracts share one verified disposable memory-backed server; no crash-durability/server-fault isolation claim."
+  ]
+}

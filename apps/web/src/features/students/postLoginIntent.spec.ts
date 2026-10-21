@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CsrfClientManager } from '@manaratak/shared';
 import { ApiClient } from '../../api/client';
-import { consumePostLoginReturn, preservePostLoginReturn, rememberAuthenticatedIdentity } from './postLoginIntent';
+import { consumePostLoginReturn, isStudentPostLoginDestination, preservePostLoginReturn, rememberAuthenticatedIdentity } from './postLoginIntent';
 
 function storage() {
   const entries = new Map<string, string>();
@@ -18,6 +18,35 @@ afterEach(() => {
 });
 
 describe('student account switch after logout', () => {
+  it('admits localized learner return destinations while rejecting administration and external paths', () => {
+    expect(isStudentPostLoginDestination('/en/student/courses/course-a?lesson=intro#progress')).toBe(true);
+    expect(isStudentPostLoginDestination('/ar/student/courses/course-a')).toBe(true);
+    expect(isStudentPostLoginDestination('/admin/courses')).toBe(false);
+    expect(isStudentPostLoginDestination('/en/admin/courses')).toBe(false);
+    expect(isStudentPostLoginDestination('/en/student-admin')).toBe(false);
+    expect(isStudentPostLoginDestination('/\t/attacker.example/student')).toBe(false);
+  });
+
+  it('rejects return URLs that browser normalization turns into an external destination', () => {
+    const session = storage(); vi.stubGlobal('sessionStorage', session);
+    const unsafe = '/\t/attacker.example/account';
+    expect(new URL(unsafe, 'https://manaratak.invalid').origin).toBe('https://attacker.example');
+    preservePostLoginReturn(unsafe);
+    expect(consumePostLoginReturn('student-a')).toBeNull();
+    session.setItem('manaratak_post_login_return', JSON.stringify({ path: unsafe }));
+    expect(consumePostLoginReturn('student-a')).toBeNull();
+    expect(session.getItem('manaratak_post_login_return')).toBeNull();
+  });
+
+  it('preserves a localized learner deep link with its query and fragment exactly once', () => {
+    const session = storage(); vi.stubGlobal('sessionStorage', session);
+    rememberAuthenticatedIdentity('student-a');
+    const destination = '/en/student/courses/synthetic-course?lesson=intro#progress';
+    preservePostLoginReturn(destination);
+    expect(consumePostLoginReturn('student-a')).toBe(destination);
+    expect(consumePostLoginReturn('student-a')).toBeNull();
+  });
+
   it('clears the previous account cache and pending action when accounts switch without logout', () => {
     const local = storage(); const session = storage();
     vi.stubGlobal('localStorage', local); vi.stubGlobal('sessionStorage', session);

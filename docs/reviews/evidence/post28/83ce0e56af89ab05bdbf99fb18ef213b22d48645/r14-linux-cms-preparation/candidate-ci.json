@@ -1,0 +1,43 @@
+{
+  "sourceSha": "83ce0e56af89ab05bdbf99fb18ef213b22d48645",
+  "runId": 39601999968,
+  "observedAt": "2026-10-21T12:54:46.329Z",
+  "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39601999968",
+  "jobs": [
+    {
+      "id": 119229089399,
+      "name": "Full source closure gates",
+      "status": "in_progress",
+      "conclusion": null,
+      "completedAt": null,
+      "currentOrFailedSteps": [
+        "Unit and source integration tests"
+      ]
+    },
+    {
+      "id": 119229089506,
+      "name": "R08 isolated Redis and Linux worker shutdown",
+      "status": "completed",
+      "conclusion": "success",
+      "completedAt": "2026-10-21T12:47:55Z",
+      "currentOrFailedSteps": []
+    },
+    {
+      "id": 119229089632,
+      "name": "Deployment configuration",
+      "status": "completed",
+      "conclusion": "success",
+      "completedAt": "2026-10-21T12:45:39Z",
+      "currentOrFailedSteps": []
+    },
+    {
+      "id": 119229089771,
+      "name": "Translation quality gates",
+      "status": "completed",
+      "conclusion": "success",
+      "completedAt": "2026-10-21T12:46:14Z",
+      "currentOrFailedSteps": []
+    }
+  ],
+  "allSixJobsSucceeded": false
+}

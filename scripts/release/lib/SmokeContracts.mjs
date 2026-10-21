@@ -1,3 +1,4 @@
+import {staticScriptEntries} from './StaticScriptPolicy.mjs';
 import { READINESS_PATH, requireSha } from './ReleaseContracts.mjs';
 export function unitUrl(base, pathname = '') {
   const url = new URL(base);
@@ -74,6 +75,16 @@ export async function runSmoke({ api, web, admin, sha }, fetcher = fetch) {
       /Platform is initializing|Please build web assets/i.test(html)
     )
       throw new Error('SMOKE_BUILT_HTML_INVALID');
+    for(const entry of staticScriptEntries(html)) {
+      const origin=new URL(unitUrl(base,'/')),scriptUrl=new URL(entry,origin);
+      if(scriptUrl.origin!==origin.origin||!scriptUrl.pathname.startsWith(origin.pathname))
+        throw new Error('SMOKE_SCRIPT_ORIGIN_OR_BASE_INVALID');
+      const script=await response(scriptUrl.href,fetcher);
+      if(!/^(?:application|text)\/(?:javascript|ecmascript)(?:;|$)/i.test(script.headers.get('content-type')??''))
+        throw new Error('SMOKE_SCRIPT_CONTENT_TYPE_INVALID');
+      const body=await readBounded(script,16_000_000);
+      if(!body.trim()||/^\s*(?:<!doctype|<html)/i.test(body))throw new Error('SMOKE_SCRIPT_BODY_INVALID');
+    }
   }
   return { status: 'PASS', sha, units: ['api', 'web', 'admin'] };
 }

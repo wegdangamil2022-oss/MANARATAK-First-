@@ -307,7 +307,7 @@ export interface ImportedCourse {
   level: string;
   duration: string;
   studyFree: boolean;
-  freeCertificate: boolean;
+  freeCertificate: boolean | null;
   certificateType: string;
   topics: string[];
   directCourseUrl: string;

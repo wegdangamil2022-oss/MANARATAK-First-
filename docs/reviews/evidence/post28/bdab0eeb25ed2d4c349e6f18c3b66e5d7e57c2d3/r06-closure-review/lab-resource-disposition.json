@@ -1,0 +1,49 @@
+{
+  "taskLocalForwardersStopped": [
+    {
+      "runId": "8a561e5f-5c01-4b7a-bf4a-6c6a15446012",
+      "sourceSha": "55179686b04f328d9705be0352509b403868956a",
+      "forwarderStopped": true,
+      "databaseAndVolumePreserved": true
+    },
+    {
+      "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+      "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+      "forwarderStopped": true,
+      "databaseAndVolumePreserved": true
+    },
+    {
+      "runId": "1dc55377-c2e6-44b7-b14f-f9b059e05f6a",
+      "sourceSha": "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+      "forwarderStopped": true,
+      "databaseAndVolumePreserved": true
+    },
+    {
+      "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+      "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+      "forwarderStopped": true,
+      "databaseAndVolumePreserved": true
+    },
+    {
+      "runId": "cfa44835-dab1-4217-a145-3ad7a722e200",
+      "sourceSha": "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+      "forwarderStopped": true,
+      "databaseAndVolumePreserved": true
+    },
+    {
+      "runId": "a96d8bdd-da83-4820-a773-d2cc54c0cb09",
+      "sourceSha": "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+      "forwarderStopped": true,
+      "databaseAndVolumePreserved": true
+    },
+    {
+      "runId": "0319dc3a-34dd-4b45-845c-2dada93941c4",
+      "sourceSha": "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3",
+      "forwarderStopped": true,
+      "databaseAndVolumePreserved": true
+    }
+  ],
+  "databaseDeletionPerformed": false,
+  "volumesDeleted": false,
+  "historicalLabsTouched": false
+}

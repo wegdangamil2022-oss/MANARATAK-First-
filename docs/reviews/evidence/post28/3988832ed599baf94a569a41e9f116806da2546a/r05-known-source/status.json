@@ -1,0 +1,14 @@
+{
+  "sourceSha": "3988832ed599baf94a569a41e9f116806da2546a",
+  "runId": "738a8fc8-5581-44a0-ad3e-98e2a4722013",
+  "baseline109": true,
+  "backupAndRestoreVerified": true,
+  "auditExitCode": 2,
+  "orphanCount": 1,
+  "technicalOwnerApprovals": [],
+  "assetLifecycleExecuted": false,
+  "upgrade110Executed": false,
+  "R05": "BLOCKED",
+  "priorFailureEvidencePreserved": true,
+  "latestUserDirection": "Continue independent R06; does not supply missing assets/student technical reviews."
+}

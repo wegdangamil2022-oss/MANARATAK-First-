@@ -1,0 +1,32 @@
+{
+  "sourceSha": "d1770592c2ec171b14b6e755b3e138dfa2beed4a",
+  "runId": "ba99d4f2-2e14-40de-bb68-b5f726089e7e",
+  "branch": "feat/post28-r07-artifact-preparation",
+  "newRuntime": "REVIEWED_PRISMA111_MIGRATION_AND_TARGETED_DIRECT_WRITER_PROOF",
+  "inheritedBasicOperationEvidence": "docs/reviews/evidence/post28/a8210404f63e2408fc911be74ff91bf8bc47aa8e/R07-owner-priority-browser/evidence-index.json",
+  "browserProofRebound": false,
+  "pdfProvidersRepeated": false,
+  "buildRepeated": false,
+  "generalSuitesRepeated": false,
+  "applicationSourceDependenciesUnchanged": true,
+  "review": "docs/remediation/POST28_R06_NULL_IDENTITY_ROLLOUT_REVIEW_2026-10-19.md",
+  "sourceTests": {
+    "newTransitionTests": 6,
+    "affectedProvisioningTests": 36,
+    "totalPass": 42,
+    "fail": 0
+  },
+  "sourceQuality": "PASS",
+  "persistenceBoundary": "PASS",
+  "initializerNodeSyntax": "PASS",
+  "firstAttempt": {
+    "lab": "native-pg16-Azusya",
+    "sourceSha": "e28e79883280963b9ac09675a0a0a10c08a60e15",
+    "phase": "before111 verifier structural restore",
+    "result": "PostgreSQL unexpectedly disconnected during CREATE INDEX in verifier restore; cleanup refused missing process identity and its error obscured original restore error. Partial verifier not reused, no deletion/reset/resolve; clean fresh final lab run used continuous parent.",
+    "cause": "Not conclusively established; continuous parent final run succeeded.",
+    "migration111Invoked": false
+  },
+  "finalLabStopped": true,
+  "productionAuthorized": false
+}

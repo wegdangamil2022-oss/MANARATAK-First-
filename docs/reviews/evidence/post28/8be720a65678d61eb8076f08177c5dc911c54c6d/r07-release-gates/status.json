@@ -1,0 +1,48 @@
+{
+  "kind": "R07_RELEASE_GATE_PROGRESS",
+  "sourceSha": "8be720a65678d61eb8076f08177c5dc911c54c6d",
+  "recordedAt": "2026-10-19T15:37:08.835Z",
+  "coreLocalDiagnostic": "COMPLETE_AT_4c7b01cbac1d49688a0f32273316fc370109bcb0",
+  "formalR07Acceptance": false,
+  "productionAcceptance": false,
+  "C2": false,
+  "promotionAuthorized": false,
+  "R05": "PASS_LOCAL_ONLY_UNCHANGED",
+  "R06": "CORE_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS_UNCHANGED",
+  "gates": {
+    "fullCI": {
+      "status": "QUEUED_NOT_ACCEPTED",
+      "runId": 39278772529,
+      "sourceSha": "8be720a65678d61eb8076f08177c5dc911c54c6d",
+      "priorFailuresCorrectedLocally": true
+    },
+    "fourSymlinkCases": {
+      "status": "PASS_LINUX_SCOPED",
+      "sourceSha": "5b9c4e4502d2ea9168e223a4f2a465ef799b6662",
+      "runId": 39277252905,
+      "jobId": 118144736774,
+      "tests": [
+        "static build refuses symlink-file",
+        "static build refuses symlink-parent",
+        "static build refuses metadata-symlink",
+        "artifact input inspection rejects symlinks before tar packaging"
+      ]
+    },
+    "releaseArtifactRetrieval": {
+      "status": "IMPLEMENTED_NOT_EXECUTED",
+      "store": "GitHub Actions storage already used by repository CI",
+      "productionStoreAuthorityGranted": false,
+      "checks": [
+        "same-run exact-SHA artifact name",
+        "separate clean runner directory",
+        "independently retained manifest SHA256",
+        "every unit/SBOM digest and size"
+      ]
+    },
+    "linuxHostingReview": {
+      "status": "PREPARED_NOT_EXECUTED",
+      "reviewTarget": "Linux x64 / Node22 / PostgreSQL16",
+      "actualHostingEndpointsSupplied": false
+    }
+  }
+}

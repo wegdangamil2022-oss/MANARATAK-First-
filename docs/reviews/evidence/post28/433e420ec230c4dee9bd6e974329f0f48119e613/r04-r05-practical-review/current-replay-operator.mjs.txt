@@ -1,0 +1,53 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {spawnSync,execFileSync} from 'node:child_process';
+import {createRequire} from 'node:module';
+import {assertNativeLabState,nativePgEnvironment} from './r07-filtered/scripts/database/post28-native-lab-policy.mjs';
+import {measureUpgradeCatalog} from './r07-filtered/scripts/database/post28-upgrade-catalog.mjs';
+import {migrationInventory,verifyMigrationLedger} from './r07-filtered/scripts/database/post28-migration-inventory.mjs';
+const work=import.meta.dirname,repo=path.join(work,'r07-filtered'),bin=path.join(work,'pg16-binaries/pgsql/bin');
+const sha=execFileSync('git',['rev-parse','HEAD'],{cwd:repo,encoding:'utf8'}).trim();
+const result={kind:'POST28_R04_CURRENT_CHAIN_REPLAY',sourceSha:sha,startedAt:new Date().toISOString(),existingDatabasesTouched:false,requiredSeedRerun:false,providerCallsMade:false};
+let state,contract;
+try{
+ const created=spawnSync(process.execPath,['scripts/database/create-post28-native-lab.mjs'],{cwd:repo,encoding:'utf8',windowsHide:true,timeout:120000,env:{...process.env,NODE_ENV:'test',POST28_LOCAL_LAB_CREATE:'YES',POST28_LOCAL_LAB_PROFILE:'greenfield',POST28_NATIVE_PG_BIN:bin,POST28_LAB_ROOT:work}});
+ assert.equal(created.status,0,'NEW_LAB_CREATION_REQUIRED');state=JSON.parse(created.stdout.trim());contract=JSON.parse(fs.readFileSync(state.contractFile,'utf8'));
+ assertNativeLabState(state,contract,sha,state.directory);
+ result.runId=state.runId;result.postgresVersion=state.postgresVersion;
+ const labEnv=Object.fromEntries(fs.readFileSync(state.envFile,'utf8').trim().split(/\r?\n/).map(line=>{const i=line.indexOf('=');return [line.slice(0,i),line.slice(i+1)];}));
+ const environment={...process.env,...labEnv,PATH:path.dirname(process.execPath)+';'+bin+';'+process.env.PATH,GREENFIELD_VERIFY_OUTPUT_DIR:path.join(state.directory,'R04-current'),GREENFIELD_DATABASE_IS_DISPOSABLE:'true',GREENFIELD_SHADOW_DATABASE_IS_DISPOSABLE:'true'};
+ for(const key of Object.keys(environment))if(key.startsWith('PG'))delete environment[key];
+ const replay=spawnSync('C:/Program Files/Git/bin/bash.exe',['scripts/database/verify-greenfield-migration-parity.sh'],{cwd:repo,env:environment,encoding:'utf8',windowsHide:true,timeout:240000,maxBuffer:8*1024*1024});
+ const secrets=[...new Set([labEnv.DATABASE_URL,labEnv.GREENFIELD_SHADOW_DATABASE_URL,labEnv.POST28_APP_PASSWORD,...[labEnv.DATABASE_URL,labEnv.GREENFIELD_SHADOW_DATABASE_URL].map(value=>new URL(value).password)])];
+ const redact=value=>secrets.reduce((text,secret)=>text.replaceAll(secret,'[REDACTED]'),String(value??'')).replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]');
+ fs.writeFileSync(path.join(state.directory,'R04-current-command.log'),redact(replay.stdout)+redact(replay.stderr));
+ result.replayExit=replay.status;
+ assert.equal(replay.status,0,'CURRENT_GREENFIELD_REPLAY_FAILED');
+ const out=environment.GREENFIELD_VERIFY_OUTPUT_DIR;
+ result.parity=JSON.parse(fs.readFileSync(path.join(out,'GREENFIELD_MIGRATION_PARITY.json'),'utf8'));
+ assert.equal(result.parity.sourceSha,sha);assert.equal(result.parity.expectedMigrations,111);assert.equal(result.parity.appliedMigrations,111);
+ const inventory=migrationInventory(repo);
+ const {PrismaClient}=createRequire(path.join(repo,'package.json'))('@prisma/client');
+ const catalogs=[];result.targets=[];
+ for(const [label,url] of [['DB-G',labEnv.GREENFIELD_DATABASE_URL],['DB-S',labEnv.GREENFIELD_SHADOW_DATABASE_URL]]){
+  const client=new PrismaClient({datasources:{db:{url}},log:[],errorFormat:'minimal'});
+  try{
+   const catalog=await measureUpgradeCatalog(client);catalogs.push(catalog);
+   const ledger=await client.$transaction(async tx=>{await tx.$executeRawUnsafe('SET TRANSACTION READ ONLY');return tx.$queryRawUnsafe('SELECT migration_name,checksum,started_at::text,finished_at::text,rolled_back_at::text,applied_steps_count FROM public._prisma_migrations ORDER BY started_at,id');});
+   const ledgerProof=verifyMigrationLedger(inventory,ledger);
+   assert(catalog.catalog.constraints.every(c=>c.validated));assert(catalog.catalog.indexes.every(i=>i.valid&&i.ready&&i.live));assert(catalog.catalog.triggers.every(t=>t.enabled==='O'||t.enabled==='A'));
+   result.targets.push({label,ledgerProof,tables:catalog.tables.length,foreignKeys:catalog.catalog.constraints.filter(c=>c.type==='f').length,checks:catalog.catalog.constraints.filter(c=>c.type==='c').length,indexes:catalog.catalog.indexes.length,userTriggers:catalog.catalog.triggers.length,catalogSha256:catalog.catalogSha256,allConstraintsValidated:true,allIndexesValidReadyLive:true,allUserTriggersEnabled:true});
+  }finally{await client.$disconnect();}
+ }
+ assert.equal(catalogs[0].catalogSha256,catalogs[1].catalogSha256);result.greenfieldShadowCatalogsIdentical=true;
+ const app=new URL(labEnv.DATABASE_URL);app.username='post28_app';app.password=labEnv.POST28_APP_PASSWORD;
+ const appRead=spawnSync(path.join(bin,'psql.exe'),['-X','-At','-c',`SELECT json_build_object('schemaCreate',has_schema_privilege(current_user,'public','CREATE'),'tableDmlGrants',(SELECT count(*) FROM pg_tables WHERE schemaname='public' AND (has_table_privilege(current_user,quote_ident(schemaname)||'.'||quote_ident(tablename),'INSERT') OR has_table_privilege(current_user,quote_ident(schemaname)||'.'||quote_ident(tablename),'UPDATE') OR has_table_privilege(current_user,quote_ident(schemaname)||'.'||quote_ident(tablename),'DELETE'))),'ledgerRead',has_table_privilege(current_user,'public._prisma_migrations','SELECT'));`],{env:nativePgEnvironment(state,app.href,{readOnly:true}),encoding:'utf8',windowsHide:true,timeout:10000});
+ assert.equal(appRead.status,0);result.appPrivileges=JSON.parse(appRead.stdout);assert.deepEqual(result.appPrivileges,{schemaCreate:false,tableDmlGrants:0,ledgerRead:false});
+ result.pass=true;
+}catch(error){result.pass=false;result.error=error.message?.includes('CURRENT_GREENFIELD_REPLAY_FAILED')?'CURRENT_GREENFIELD_REPLAY_FAILED':error.code??'R04_CURRENT_REPLAY_ASSERTION_FAILED';process.exitCode=1;}
+finally{
+ if(state){assertNativeLabState(state,contract,sha,state.directory);const stop=spawnSync(path.join(bin,'pg_ctl.exe'),['-D',state.dataDirectory,'-m','fast','-w','stop'],{encoding:'utf8',windowsHide:true,timeout:30000});result.cleanup={ownedClusterStopped:stop.status===0,postmasterPidRemoved:!fs.existsSync(path.join(state.dataDirectory,'postmaster.pid'))};if(stop.status!==0)process.exitCode=1;}
+ result.finishedAt=new Date().toISOString();fs.writeFileSync(path.join(work,'r04-current-replay-result.json'),JSON.stringify(result,null,2)+'\n');
+ console.log(JSON.stringify(result));
+}

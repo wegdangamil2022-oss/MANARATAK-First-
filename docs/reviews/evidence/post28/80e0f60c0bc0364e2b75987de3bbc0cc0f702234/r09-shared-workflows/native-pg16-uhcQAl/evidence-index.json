@@ -1,0 +1,107 @@
+{
+  "kind": "POST28_R09_RAW_WORKFLOW_EVIDENCE",
+  "sourceSha": "80e0f60c0bc0364e2b75987de3bbc0cc0f702234",
+  "syntheticOnly": true,
+  "productionAcceptance": false,
+  "fullR09Acceptance": false,
+  "cleanup": {
+    "sourceSha": "80e0f60c0bc0364e2b75987de3bbc0cc0f702234",
+    "runId": "73975753-b2b5-4cb9-95b5-36f7e2159429",
+    "exit": 0,
+    "stopped": true,
+    "existingDatabasesTouched": false
+  },
+  "cases": [
+    {
+      "title": "authors reviews publishes and withdraws current CMS snapshots using three actual capabilities",
+      "status": "failed",
+      "sourceSha": "80e0f60c0bc0364e2b75987de3bbc0cc0f702234",
+      "evidence": "docs/reviews/evidence/post28/80e0f60c0bc0364e2b75987de3bbc0cc0f702234/r09-shared-workflows/native-pg16-uhcQAl/R06-suites/r09-integrated-workflows-aYfUUV/vitest.json"
+    },
+    {
+      "title": "completes an actual lesson and issues one signed certificate across two consumers then verifies and revokes it",
+      "status": "failed",
+      "sourceSha": "80e0f60c0bc0364e2b75987de3bbc0cc0f702234",
+      "evidence": "docs/reviews/evidence/post28/80e0f60c0bc0364e2b75987de3bbc0cc0f702234/r09-shared-workflows/native-pg16-uhcQAl/R06-suites/r09-integrated-workflows-aYfUUV/vitest.json"
+    },
+    {
+      "title": "keeps original student document bindings consent and private invoices unchanged on foreign access and mutation",
+      "status": "passed",
+      "sourceSha": "80e0f60c0bc0364e2b75987de3bbc0cc0f702234",
+      "evidence": "docs/reviews/evidence/post28/80e0f60c0bc0364e2b75987de3bbc0cc0f702234/r09-shared-workflows/native-pg16-uhcQAl/R06-suites/r09-integrated-workflows-aYfUUV/vitest.json"
+    },
+    {
+      "title": "pays a real synthetic invoice once across concurrent HTTP replays with one balanced ledger effect",
+      "status": "failed",
+      "sourceSha": "80e0f60c0bc0364e2b75987de3bbc0cc0f702234",
+      "evidence": "docs/reviews/evidence/post28/80e0f60c0bc0364e2b75987de3bbc0cc0f702234/r09-shared-workflows/native-pg16-uhcQAl/R06-suites/r09-integrated-workflows-aYfUUV/vitest.json"
+    }
+  ],
+  "files": [
+    {
+      "path": "cleanup.json",
+      "bytes": 160,
+      "sha256": "fa8d3ef8bd9921bb00e4ab1f1882642a4c9a158899ae0a39042d069071f8da1b"
+    },
+    {
+      "path": "initialize.log",
+      "bytes": 4390,
+      "sha256": "ae97d45f5dc941287a8e5f7df49ae4d895478e508b58952eb78b2241156c628a"
+    },
+    {
+      "path": "R06-setup/0-validate.log",
+      "bytes": 144,
+      "sha256": "9bac6f2900d82077fd9ba3d76d872874f55c2b9bf30c910010cf33354fcf9dd6"
+    },
+    {
+      "path": "R06-setup/1-migrate.log",
+      "bytes": 16275,
+      "sha256": "44365f85280784b86acd030074bbfaeb071c0514fa7d7c3f061f7079824f31bb"
+    },
+    {
+      "path": "R06-setup/2-migrate.log",
+      "bytes": 258,
+      "sha256": "5c084876c56c29cd0989470f1de449b4ecb351c6c47cca73caf1751c6093e8fc"
+    },
+    {
+      "path": "R06-setup/3-migrate.log",
+      "bytes": 25,
+      "sha256": "198913094e3f41610eb893459ab65a3c79991b65d4ef5fcb8c325ebe52ebf1ed"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "7e882f6b7aa9d30aa0a779a89710b07e40beec242d91268ba854b36d7edd49b4"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 5431,
+      "sha256": "e5f027a14d8a852d8640525eb4d59382d60dd6a677a049ccd9a14105fbf4cae6"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-aYfUUV\\discovery.json",
+      "bytes": 1469,
+      "sha256": "a9b5891fcb5847a763f379b460d8349eb6c5b281e67a83d3b31027b01815f720"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-aYfUUV\\selection.json",
+      "bytes": 106,
+      "sha256": "fe3f92ec7f436d720a08e61934e2b6e94365fae5152a8b18482d63be57d6fe19"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-aYfUUV\\vitest.json",
+      "bytes": 5668,
+      "sha256": "cedd74a5edce70a93d1b0cb7831616754581ecbb9ff4f80cb18ed62ff8c00f1a"
+    },
+    {
+      "path": "r09-workflow-observations.json",
+      "bytes": 837,
+      "sha256": "6d40f2c088a1ec7056260ada6380bab4199d5950416f5913cd3507115199116c"
+    },
+    {
+      "path": "suite.log",
+      "bytes": 3400,
+      "sha256": "8a6079482cff13c19e22eaa13a36d560507ef302d247bd6d41ed68ae583947a0"
+    }
+  ]
+}

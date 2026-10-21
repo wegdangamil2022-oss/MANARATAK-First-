@@ -1,0 +1,12 @@
+
+> manaratak-2.0-monorepo@0.0.0 db:generate
+> prisma generate --schema=packages/infrastructure/prisma/schema.prisma
+
+Prisma schema loaded from packages\infrastructure\prisma\schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to .\node_modules\@prisma\client in 2.70s
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+

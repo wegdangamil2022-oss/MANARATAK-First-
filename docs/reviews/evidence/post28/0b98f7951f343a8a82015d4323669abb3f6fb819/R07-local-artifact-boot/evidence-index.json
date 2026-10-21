@@ -1,0 +1,150 @@
+{
+  "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "checks.json",
+      "bytes": 3175,
+      "sha256": "ecd01a3ba68528dbc8bca1ab764eb6470e433982ebaf9d320466818ab7107d7a"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 1376,
+      "sha256": "037fe82ab4bd2409e4bdb6ff9a4f07066e4859e050a7d86ae4f34dc7b6e7271a"
+    },
+    {
+      "path": "runtime-layer.json",
+      "bytes": 2162,
+      "sha256": "801e127e0cf1a7399a7e9e3139836f480f97a718844bc0264f4ab67c6330c633"
+    },
+    {
+      "path": "local-api-boot.json",
+      "bytes": 877,
+      "sha256": "5053b75be4c5ae7f54c04896b34493c0489914aaa20cd93d5d4157c15e081a4e"
+    },
+    {
+      "path": "local-api-boot.log",
+      "bytes": 420,
+      "sha256": "114f1c5c5840725a9e076c3fc7a961e2777ff67e81e931ae519f6d2ddba0fa2d"
+    },
+    {
+      "path": "static-boot.json",
+      "bytes": 6589,
+      "sha256": "55512c179e7d097fce8fe04d54ea99fb013faf77e20683f4f688699cc12539c6"
+    },
+    {
+      "path": "static-boot-expired-cert-original.json",
+      "bytes": 821,
+      "sha256": "f0e8a17695a595fe57d15c0940dce10b51636bf67cf790074e9658b7f0b257a2"
+    },
+    {
+      "path": "prisma-generate.log",
+      "bytes": 484,
+      "sha256": "09050aaa99d5857969062e8c0c51f069fe821b55d63320ba4fa19ff8c75b147d"
+    },
+    {
+      "path": "api-build.log",
+      "bytes": 862,
+      "sha256": "c42e1ed9189abb65132af50a30f9fc7f3dbd3398ddbee6c472305546bb835d70"
+    },
+    {
+      "path": "web-build.log",
+      "bytes": 790,
+      "sha256": "017dd5f566892d052810d7312be2a8d1ddcd990e3409d3ed153088c9e33871ad"
+    },
+    {
+      "path": "admin-build.log",
+      "bytes": 1426,
+      "sha256": "d95351bcfe0c7f8d42bc27c43f8a31b763bad86d8ac549f99879fd956da3d8f4"
+    },
+    {
+      "path": "package.log",
+      "bytes": 83,
+      "sha256": "557bf320c36e8805a6b238548557120027f13db7cb56e4e827e5dadc549c1d8d"
+    },
+    {
+      "path": "runtime-install.log",
+      "bytes": 611,
+      "sha256": "595e33d4ad9bfcb686e39c71b5716c4bcfe8cdb024ecaf28a7de126bd950ee8f"
+    },
+    {
+      "path": "artifacts/release-manifest.json",
+      "bytes": 1923,
+      "sha256": "ba72d029253d63adbcfb58c5d73d5730b4be1a52a664d18b436f3014277459e9"
+    },
+    {
+      "path": "artifacts/release-sbom.cdx.json",
+      "bytes": 113384,
+      "sha256": "968b98daa38d1b7111fb557c591b79188b69d0bec79cf72b930c0b77cd2810ff"
+    },
+    {
+      "path": "artifacts/SHA256SUMS",
+      "bytes": 465,
+      "sha256": "02539a1d1e4e0a4b1baf6c8bc33615d00ba7f9930b08fd15366f74ad889b0b19"
+    },
+    {
+      "path": "lab/targets.json",
+      "bytes": 667,
+      "sha256": "e98515ebbea2a166d82d16de986c3c26d136b5ecf03e67d47efb0ef7024641ec"
+    },
+    {
+      "path": "lab/target-preflight.log",
+      "bytes": 426,
+      "sha256": "a0bf9f9705895c28e8b1ea50f76f29be74621ba4835a7ba83bf7565380935014"
+    },
+    {
+      "path": "lab/stage-initialize-setup.log",
+      "bytes": 32,
+      "sha256": "a3be39f80f69cd395e918b5b8b3198c0b7a3a37e093e7d36b5c518bc8a9c8354"
+    },
+    {
+      "path": "lab/R07-setup/checks.json",
+      "bytes": 688,
+      "sha256": "bd1db4e50eb50193c3708c692ef3fc8b32c5b7d5c6264391be7757cc0588cc1c"
+    },
+    {
+      "path": "lab/R07-setup-retry/checks.json",
+      "bytes": 688,
+      "sha256": "bd1db4e50eb50193c3708c692ef3fc8b32c5b7d5c6264391be7757cc0588cc1c"
+    },
+    {
+      "path": "lab/R07-setup-retry/result.json",
+      "bytes": 977,
+      "sha256": "7e05d9d9abc1321974217a08f4f51910d417d1eb6744903abf8333ee362f0da0"
+    },
+    {
+      "path": "r07-current-tests.log",
+      "bytes": 20940,
+      "sha256": "07667d0adbc4f561ad6d740bc47f6852de95779df6446901821a8233fd99260a"
+    },
+    {
+      "path": "r07-current-tests-gnu.log",
+      "bytes": 18644,
+      "sha256": "5f13391cffb18751ec04fc910640623282b027750529341872923cb16d9a9085"
+    },
+    {
+      "path": "helpers/r07-provision-local.mjs",
+      "bytes": 4014,
+      "sha256": "b3fbd27d6a1ca5e3cfa33db0cbe8abc6e3737d99ae22b14b0911d9513685acfb"
+    },
+    {
+      "path": "helpers/r07-provision-resume-local.mjs",
+      "bytes": 4101,
+      "sha256": "ea79cb64bf3aecb5fc1128fb909da878cfc324a6186a6e66613c0128ebc2cc95"
+    },
+    {
+      "path": "helpers/r07-local-api-probe.mjs",
+      "bytes": 3674,
+      "sha256": "5858e48abc1b2730adade88994be8b16b0385dd59d573043ac01f5f7718dfe11"
+    },
+    {
+      "path": "result.json",
+      "bytes": 660,
+      "sha256": "e260de497616b087cb2c0db738d900b0f053e9d03c9b67ec9611d6fed221b811"
+    }
+  ]
+}

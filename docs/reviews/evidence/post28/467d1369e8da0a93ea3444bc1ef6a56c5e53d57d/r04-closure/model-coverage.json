@@ -1,0 +1,1217 @@
+{
+  "expectedModels": 281,
+  "matched": 281,
+  "missing": [],
+  "unexpectedApplicationTables": [],
+  "models": [
+    {
+      "model": "Settings",
+      "table": "Settings"
+    },
+    {
+      "model": "ImportSourceRegistryEntry",
+      "table": "ImportSourceRegistryEntry"
+    },
+    {
+      "model": "ScholarshipImportVerificationDecision",
+      "table": "ScholarshipImportVerificationDecision"
+    },
+    {
+      "model": "ScholarshipImportCanonicalResolutionDecision",
+      "table": "ScholarshipImportCanonicalResolutionDecision"
+    },
+    {
+      "model": "SettingDefinitionRecord",
+      "table": "SettingDefinitionRecord"
+    },
+    {
+      "model": "SettingAssignmentRecord",
+      "table": "SettingAssignmentRecord"
+    },
+    {
+      "model": "SettingVersionRecord",
+      "table": "SettingVersionRecord"
+    },
+    {
+      "model": "ImportBatch",
+      "table": "ImportBatch"
+    },
+    {
+      "model": "ImportRecord",
+      "table": "ImportRecord"
+    },
+    {
+      "model": "ImportScreeningReceipt",
+      "table": "ImportScreeningReceipt"
+    },
+    {
+      "model": "ImportMappingProfile",
+      "table": "ImportMappingProfile"
+    },
+    {
+      "model": "ImportReviewAssignment",
+      "table": "ImportReviewAssignment"
+    },
+    {
+      "model": "ImportSourceObservation",
+      "table": "ImportSourceObservation"
+    },
+    {
+      "model": "ImportRateBudget",
+      "table": "ImportRateBudget"
+    },
+    {
+      "model": "Course",
+      "table": "Course"
+    },
+    {
+      "model": "CourseModule",
+      "table": "CourseModule"
+    },
+    {
+      "model": "CourseLesson",
+      "table": "CourseLesson"
+    },
+    {
+      "model": "CourseLessonAsset",
+      "table": "CourseLessonAsset"
+    },
+    {
+      "model": "CourseQuiz",
+      "table": "CourseQuiz"
+    },
+    {
+      "model": "CourseQuestionBank",
+      "table": "CourseQuestionBank"
+    },
+    {
+      "model": "CourseQuestion",
+      "table": "CourseQuestion"
+    },
+    {
+      "model": "CourseEnrollment",
+      "table": "CourseEnrollment"
+    },
+    {
+      "model": "CourseLessonProgress",
+      "table": "CourseLessonProgress"
+    },
+    {
+      "model": "CourseQuizAttempt",
+      "table": "CourseQuizAttempt"
+    },
+    {
+      "model": "CourseCompletion",
+      "table": "CourseCompletion"
+    },
+    {
+      "model": "CourseVersion",
+      "table": "CourseVersion"
+    },
+    {
+      "model": "CourseQuestionVersion",
+      "table": "CourseQuestionVersion"
+    },
+    {
+      "model": "CourseEnrollmentPolicy",
+      "table": "CourseEnrollmentPolicy"
+    },
+    {
+      "model": "LearningPath",
+      "table": "LearningPath"
+    },
+    {
+      "model": "LearningPathVersion",
+      "table": "LearningPathVersion"
+    },
+    {
+      "model": "LearningPathCourse",
+      "table": "LearningPathCourse"
+    },
+    {
+      "model": "LearningPathEnrollment",
+      "table": "LearningPathEnrollment"
+    },
+    {
+      "model": "CertificateIssuer",
+      "table": "CertificateIssuer"
+    },
+    {
+      "model": "CertificateAuthorityDelegation",
+      "table": "CertificateAuthorityDelegation"
+    },
+    {
+      "model": "CertificateTemplate",
+      "table": "CertificateTemplate"
+    },
+    {
+      "model": "CertificateTemplateVersion",
+      "table": "CertificateTemplateVersion"
+    },
+    {
+      "model": "Certificate",
+      "table": "Certificate"
+    },
+    {
+      "model": "CertificateIssuanceInbox",
+      "table": "CertificateIssuanceInbox"
+    },
+    {
+      "model": "CertificateLedgerEntry",
+      "table": "CertificateLedgerEntry"
+    },
+    {
+      "model": "CertificateVerificationLog",
+      "table": "CertificateVerificationLog"
+    },
+    {
+      "model": "CourseTaxonomyResolution",
+      "table": "CourseTaxonomyResolution"
+    },
+    {
+      "model": "CourseAcademicTaxonomyLink",
+      "table": "CourseAcademicTaxonomyLink"
+    },
+    {
+      "model": "CourseMajorProjection",
+      "table": "CourseMajorProjection"
+    },
+    {
+      "model": "CourseInternationalTestRelationship",
+      "table": "CourseInternationalTestRelationship"
+    },
+    {
+      "model": "ExternalCourseProvider",
+      "table": "ExternalCourseProvider"
+    },
+    {
+      "model": "ExternalCourseProviderAlias",
+      "table": "ExternalCourseProviderAlias"
+    },
+    {
+      "model": "ExternalCourseProviderDomain",
+      "table": "ExternalCourseProviderDomain"
+    },
+    {
+      "model": "CourseSourceIdentity",
+      "table": "CourseSourceIdentity"
+    },
+    {
+      "model": "CourseSourceUrlHistory",
+      "table": "CourseSourceUrlHistory"
+    },
+    {
+      "model": "CourseImportAnalysis",
+      "table": "CourseImportAnalysis"
+    },
+    {
+      "model": "CourseFieldProvenance",
+      "table": "CourseFieldProvenance"
+    },
+    {
+      "model": "EnterpriseEventRecord",
+      "table": "EnterpriseEventRecord"
+    },
+    {
+      "model": "BackgroundJobRecord",
+      "table": "BackgroundJobRecord"
+    },
+    {
+      "model": "BackgroundJobExecutionRecord",
+      "table": "BackgroundJobExecutionRecord"
+    },
+    {
+      "model": "BackgroundJobDeadLetterRecord",
+      "table": "BackgroundJobDeadLetterRecord"
+    },
+    {
+      "model": "TransactionalOutboxRecord",
+      "table": "TransactionalOutboxRecord"
+    },
+    {
+      "model": "University",
+      "table": "University"
+    },
+    {
+      "model": "UniversityCampus",
+      "table": "UniversityCampus"
+    },
+    {
+      "model": "UniversityOrganizationUnit",
+      "table": "UniversityOrganizationUnit"
+    },
+    {
+      "model": "UniversityAcademicProgram",
+      "table": "UniversityAcademicProgram"
+    },
+    {
+      "model": "UniversityProgramCampus",
+      "table": "UniversityProgramCampus"
+    },
+    {
+      "model": "UniversityProgramAdmissionRequirement",
+      "table": "UniversityProgramAdmissionRequirement"
+    },
+    {
+      "model": "UniversityTuitionProfile",
+      "table": "UniversityTuitionProfile"
+    },
+    {
+      "model": "UniversityAccommodationProfile",
+      "table": "UniversityAccommodationProfile"
+    },
+    {
+      "model": "UniversityRanking",
+      "table": "UniversityRanking"
+    },
+    {
+      "model": "UniversitySourceRecord",
+      "table": "UniversitySourceRecord"
+    },
+    {
+      "model": "UniversityTranslation",
+      "table": "UniversityTranslation"
+    },
+    {
+      "model": "UniversityLocalizedText",
+      "table": "UniversityLocalizedText"
+    },
+    {
+      "model": "UniversityImportChangeSet",
+      "table": "UniversityImportChangeSet"
+    },
+    {
+      "model": "UniversityImportChange",
+      "table": "UniversityImportChange"
+    },
+    {
+      "model": "Scholarship",
+      "table": "Scholarship"
+    },
+    {
+      "model": "ScholarshipBenefit",
+      "table": "ScholarshipBenefit"
+    },
+    {
+      "model": "ScholarshipDegreeTarget",
+      "table": "ScholarshipDegreeTarget"
+    },
+    {
+      "model": "ScholarshipMajorTarget",
+      "table": "ScholarshipMajorTarget"
+    },
+    {
+      "model": "ScholarshipEligibilityItem",
+      "table": "ScholarshipEligibilityItem"
+    },
+    {
+      "model": "ScholarshipRequiredDocument",
+      "table": "ScholarshipRequiredDocument"
+    },
+    {
+      "model": "ScholarshipSourceEvidence",
+      "table": "ScholarshipSourceEvidence"
+    },
+    {
+      "model": "ScholarshipUniversityLink",
+      "table": "ScholarshipUniversityLink"
+    },
+    {
+      "model": "ScholarshipVersion",
+      "table": "ScholarshipVersion"
+    },
+    {
+      "model": "ScholarshipSponsorContext",
+      "table": "ScholarshipSponsorContext"
+    },
+    {
+      "model": "ScholarshipApplicationCycle",
+      "table": "ScholarshipApplicationCycle"
+    },
+    {
+      "model": "ScholarshipEligibilityRuleVersion",
+      "table": "ScholarshipEligibilityRuleVersion"
+    },
+    {
+      "model": "ScholarshipAwardPackageVersion",
+      "table": "ScholarshipAwardPackageVersion"
+    },
+    {
+      "model": "Major",
+      "table": "Major"
+    },
+    {
+      "model": "MajorVersion",
+      "table": "MajorVersion"
+    },
+    {
+      "model": "MajorLevelProfile",
+      "table": "MajorLevelProfile"
+    },
+    {
+      "model": "MajorContentSection",
+      "table": "MajorContentSection"
+    },
+    {
+      "model": "MajorAlias",
+      "table": "MajorAlias"
+    },
+    {
+      "model": "MajorRelationship",
+      "table": "MajorRelationship"
+    },
+    {
+      "model": "MajorClassificationMapping",
+      "table": "MajorClassificationMapping"
+    },
+    {
+      "model": "MajorSource",
+      "table": "MajorSource"
+    },
+    {
+      "model": "FellowshipDefinition",
+      "table": "FellowshipDefinition"
+    },
+    {
+      "model": "InternationalTest",
+      "table": "InternationalTest"
+    },
+    {
+      "model": "InternationalTestFamily",
+      "table": "InternationalTestFamily"
+    },
+    {
+      "model": "InternationalTestProvider",
+      "table": "InternationalTestProvider"
+    },
+    {
+      "model": "InternationalTestVersion",
+      "table": "InternationalTestVersion"
+    },
+    {
+      "model": "InternationalTestDeliveryModeProfile",
+      "table": "InternationalTestDeliveryModeProfile"
+    },
+    {
+      "model": "InternationalTestVariant",
+      "table": "InternationalTestVariant"
+    },
+    {
+      "model": "InternationalTestSection",
+      "table": "InternationalTestSection"
+    },
+    {
+      "model": "InternationalTestScoreScale",
+      "table": "InternationalTestScoreScale"
+    },
+    {
+      "model": "InternationalTestFeeMetadata",
+      "table": "InternationalTestFeeMetadata"
+    },
+    {
+      "model": "InternationalTestOfficialLink",
+      "table": "InternationalTestOfficialLink"
+    },
+    {
+      "model": "InternationalTestAvailability",
+      "table": "InternationalTestAvailability"
+    },
+    {
+      "model": "InternationalTestPreparationMaterial",
+      "table": "InternationalTestPreparationMaterial"
+    },
+    {
+      "model": "InternationalTestEvidence",
+      "table": "InternationalTestEvidence"
+    },
+    {
+      "model": "InternationalTestVersionScoreScale",
+      "table": "InternationalTestVersionScoreScale"
+    },
+    {
+      "model": "InternationalTestSession",
+      "table": "InternationalTestSession"
+    },
+    {
+      "model": "InternationalTestCenter",
+      "table": "InternationalTestCenter"
+    },
+    {
+      "model": "InternationalTestRequirement",
+      "table": "InternationalTestRequirement"
+    },
+    {
+      "model": "InternationalTestPolicy",
+      "table": "InternationalTestPolicy"
+    },
+    {
+      "model": "InternationalTestCountryRelationship",
+      "table": "InternationalTestCountryRelationship"
+    },
+    {
+      "model": "InternationalTestLanguageRelationship",
+      "table": "InternationalTestLanguageRelationship"
+    },
+    {
+      "model": "InternationalTestAcademicTaxonomyRelationship",
+      "table": "InternationalTestAcademicTaxonomyRelationship"
+    },
+    {
+      "model": "InternationalTestDegreeRelationship",
+      "table": "InternationalTestDegreeRelationship"
+    },
+    {
+      "model": "InternationalTestEquivalencyMapping",
+      "table": "InternationalTestEquivalencyMapping"
+    },
+    {
+      "model": "InternationalTestContentBlock",
+      "table": "InternationalTestContentBlock"
+    },
+    {
+      "model": "AssetRecord",
+      "table": "AssetRecord"
+    },
+    {
+      "model": "StudentWorkspace",
+      "table": "StudentWorkspace"
+    },
+    {
+      "model": "StudentSupportOwnerReadObservation",
+      "table": "StudentSupportOwnerReadObservation"
+    },
+    {
+      "model": "StudentSavedItem",
+      "table": "StudentSavedItem"
+    },
+    {
+      "model": "StudentApplicationTracker",
+      "table": "StudentApplicationTracker"
+    },
+    {
+      "model": "StudentApplicationChecklistItem",
+      "table": "StudentApplicationChecklistItem"
+    },
+    {
+      "model": "StudentSavedCollection",
+      "table": "StudentSavedCollection"
+    },
+    {
+      "model": "StudentTimelineEntry",
+      "table": "StudentTimelineEntry"
+    },
+    {
+      "model": "StudentRecentActivity",
+      "table": "StudentRecentActivity"
+    },
+    {
+      "model": "StudentRecentlyViewed",
+      "table": "StudentRecentlyViewed"
+    },
+    {
+      "model": "StudentLearningProjection",
+      "table": "StudentLearningProjection"
+    },
+    {
+      "model": "StudentCertificateReadProjection",
+      "table": "StudentCertificateReadProjection"
+    },
+    {
+      "model": "StudentSearchHistory",
+      "table": "StudentSearchHistory"
+    },
+    {
+      "model": "StudentWorkspaceSnapshot",
+      "table": "StudentWorkspaceSnapshot"
+    },
+    {
+      "model": "StudentNotificationProjection",
+      "table": "StudentNotificationProjection"
+    },
+    {
+      "model": "StudentPrivacyConsentDecision",
+      "table": "StudentPrivacyConsentDecision"
+    },
+    {
+      "model": "StudentPersonalStatistics",
+      "table": "StudentPersonalStatistics"
+    },
+    {
+      "model": "StudentWorkspaceEventInbox",
+      "table": "StudentWorkspaceEventInbox"
+    },
+    {
+      "model": "CmsContentNode",
+      "table": "CmsContentNode"
+    },
+    {
+      "model": "CmsContentDomainLink",
+      "table": "CmsContentDomainLink"
+    },
+    {
+      "model": "CmsLocalizedContent",
+      "table": "CmsLocalizedContent"
+    },
+    {
+      "model": "CmsCategory",
+      "table": "CmsCategory"
+    },
+    {
+      "model": "CmsTag",
+      "table": "CmsTag"
+    },
+    {
+      "model": "CmsContentTag",
+      "table": "CmsContentTag"
+    },
+    {
+      "model": "CmsContentAttachment",
+      "table": "CmsContentAttachment"
+    },
+    {
+      "model": "CmsWorkflowReview",
+      "table": "CmsWorkflowReview"
+    },
+    {
+      "model": "CmsContentRevision",
+      "table": "CmsContentRevision"
+    },
+    {
+      "model": "CmsPublishedContent",
+      "table": "CmsPublishedContent"
+    },
+    {
+      "model": "CmsEditorialLedger",
+      "table": "CmsEditorialLedger"
+    },
+    {
+      "model": "CmsRedirect",
+      "table": "CmsRedirect"
+    },
+    {
+      "model": "CmsSitePublishedSnapshot",
+      "table": "CmsSitePublishedSnapshot"
+    },
+    {
+      "model": "CmsNavigationMenu",
+      "table": "CmsNavigationMenu"
+    },
+    {
+      "model": "CmsNavigationNode",
+      "table": "CmsNavigationNode"
+    },
+    {
+      "model": "CmsBlockSchema",
+      "table": "CmsBlockSchema"
+    },
+    {
+      "model": "CmsContentBlock",
+      "table": "CmsContentBlock"
+    },
+    {
+      "model": "CmsAnnouncement",
+      "table": "CmsAnnouncement"
+    },
+    {
+      "model": "CmsScheduledJob",
+      "table": "CmsScheduledJob"
+    },
+    {
+      "model": "IdentityRecord",
+      "table": "IdentityRecord"
+    },
+    {
+      "model": "CredentialRecord",
+      "table": "CredentialRecord"
+    },
+    {
+      "model": "EmailVerificationTokenRecord",
+      "table": "EmailVerificationTokenRecord"
+    },
+    {
+      "model": "PasswordResetTokenRecord",
+      "table": "PasswordResetTokenRecord"
+    },
+    {
+      "model": "UserRecord",
+      "table": "UserRecord"
+    },
+    {
+      "model": "AccountRecord",
+      "table": "AccountRecord"
+    },
+    {
+      "model": "RoleRecord",
+      "table": "RoleRecord"
+    },
+    {
+      "model": "PolicyRecord",
+      "table": "PolicyRecord"
+    },
+    {
+      "model": "RoleAssignmentRecord",
+      "table": "RoleAssignmentRecord"
+    },
+    {
+      "model": "AdminEmergencyAccessRecord",
+      "table": "AdminEmergencyAccessRecord"
+    },
+    {
+      "model": "AuditRecord",
+      "table": "AuditRecord"
+    },
+    {
+      "model": "RetentionDecisionRecord",
+      "table": "RetentionDecisionRecord"
+    },
+    {
+      "model": "ReferenceCountry",
+      "table": "ReferenceCountry"
+    },
+    {
+      "model": "ReferenceCurrency",
+      "table": "ReferenceCurrency"
+    },
+    {
+      "model": "ReferenceLanguage",
+      "table": "ReferenceLanguage"
+    },
+    {
+      "model": "StudyDestinationProfile",
+      "table": "StudyDestinationProfile"
+    },
+    {
+      "model": "StudyDestinationStudyLanguage",
+      "table": "StudyDestinationStudyLanguage"
+    },
+    {
+      "model": "ReferenceCity",
+      "table": "ReferenceCity"
+    },
+    {
+      "model": "ReferenceVersionRecord",
+      "table": "ReferenceVersionRecord"
+    },
+    {
+      "model": "ReferenceAliasRecord",
+      "table": "ReferenceAliasRecord"
+    },
+    {
+      "model": "ReferenceProviderMappingRecord",
+      "table": "ReferenceProviderMappingRecord"
+    },
+    {
+      "model": "ReferenceRelationshipRecord",
+      "table": "ReferenceRelationshipRecord"
+    },
+    {
+      "model": "AdministrativeRegion",
+      "table": "AdministrativeRegion"
+    },
+    {
+      "model": "DegreeLevel",
+      "table": "DegreeLevel"
+    },
+    {
+      "model": "AcademicTaxonomyNode",
+      "table": "AcademicTaxonomyNode"
+    },
+    {
+      "model": "AcademicTaxonomyEdge",
+      "table": "AcademicTaxonomyEdge"
+    },
+    {
+      "model": "AcademicTaxonomyAlias",
+      "table": "AcademicTaxonomyAlias"
+    },
+    {
+      "model": "AcademicStandardMapping",
+      "table": "AcademicStandardMapping"
+    },
+    {
+      "model": "SessionRecord",
+      "table": "SessionRecord"
+    },
+    {
+      "model": "AIRegistryRecord",
+      "table": "AIRegistryRecord"
+    },
+    {
+      "model": "AIPromptVersionRecord",
+      "table": "AIPromptVersionRecord"
+    },
+    {
+      "model": "AIPromptDeploymentRecord",
+      "table": "AIPromptDeploymentRecord"
+    },
+    {
+      "model": "AICapabilityPromptBindingRecord",
+      "table": "AICapabilityPromptBindingRecord"
+    },
+    {
+      "model": "AIQuotaReservationRecord",
+      "table": "AIQuotaReservationRecord"
+    },
+    {
+      "model": "AIProviderCircuitRecord",
+      "table": "AIProviderCircuitRecord"
+    },
+    {
+      "model": "AIExecutionRecord",
+      "table": "AIExecutionRecord"
+    },
+    {
+      "model": "AIAsyncJobRecord",
+      "table": "AIAsyncJobRecord"
+    },
+    {
+      "model": "AIExecutionSpanRecord",
+      "table": "AIExecutionSpanRecord"
+    },
+    {
+      "model": "AIUsageRecord",
+      "table": "AIUsageRecord"
+    },
+    {
+      "model": "AIWorkflowVersionRecord",
+      "table": "AIWorkflowVersionRecord"
+    },
+    {
+      "model": "AIWorkflowRunRecord",
+      "table": "AIWorkflowRunRecord"
+    },
+    {
+      "model": "AIWorkflowStepRunRecord",
+      "table": "AIWorkflowStepRunRecord"
+    },
+    {
+      "model": "AIEvaluationRunRecord",
+      "table": "AIEvaluationRunRecord"
+    },
+    {
+      "model": "AIKnowledgeSourceRecord",
+      "table": "AIKnowledgeSourceRecord"
+    },
+    {
+      "model": "AIEmbeddingRecord",
+      "table": "AIEmbeddingRecord"
+    },
+    {
+      "model": "AIIndexingRunRecord",
+      "table": "AIIndexingRunRecord"
+    },
+    {
+      "model": "AIIncidentEventRecord",
+      "table": "AIIncidentEventRecord"
+    },
+    {
+      "model": "StudentToolDefinitionRecord",
+      "table": "StudentToolDefinitionRecord"
+    },
+    {
+      "model": "StudentToolVersionRecord",
+      "table": "StudentToolVersionRecord"
+    },
+    {
+      "model": "StudentToolDependencyRecord",
+      "table": "StudentToolDependencyRecord"
+    },
+    {
+      "model": "StudentToolExecutionRecord",
+      "table": "StudentToolExecutionRecord"
+    },
+    {
+      "model": "FinanceInvoiceRecord",
+      "table": "FinanceInvoiceRecord"
+    },
+    {
+      "model": "FinancePaymentRecord",
+      "table": "FinancePaymentRecord"
+    },
+    {
+      "model": "FinancePaymentAttemptRecord",
+      "table": "FinancePaymentAttemptRecord"
+    },
+    {
+      "model": "FinancialAccountRecord",
+      "table": "FinancialAccountRecord"
+    },
+    {
+      "model": "FinancialTransactionRecord",
+      "table": "FinancialTransactionRecord"
+    },
+    {
+      "model": "FinancialLedgerEntryRecord",
+      "table": "FinancialLedgerEntryRecord"
+    },
+    {
+      "model": "FinanceWalletRecord",
+      "table": "FinanceWalletRecord"
+    },
+    {
+      "model": "FinanceWalletHoldRecord",
+      "table": "FinanceWalletHoldRecord"
+    },
+    {
+      "model": "FinanceExchangeRateRecord",
+      "table": "FinanceExchangeRateRecord"
+    },
+    {
+      "model": "FinanceTransferRecord",
+      "table": "FinanceTransferRecord"
+    },
+    {
+      "model": "FinanceApprovalRecord",
+      "table": "FinanceApprovalRecord"
+    },
+    {
+      "model": "FinanceApprovalDecisionRecord",
+      "table": "FinanceApprovalDecisionRecord"
+    },
+    {
+      "model": "FinanceRefundRecord",
+      "table": "FinanceRefundRecord"
+    },
+    {
+      "model": "FinanceDocumentRecord",
+      "table": "FinanceDocumentRecord"
+    },
+    {
+      "model": "FinanceInstallmentPlanRecord",
+      "table": "FinanceInstallmentPlanRecord"
+    },
+    {
+      "model": "FinanceCommissionRecord",
+      "table": "FinanceCommissionRecord"
+    },
+    {
+      "model": "FinanceEstimateRecord",
+      "table": "FinanceEstimateRecord"
+    },
+    {
+      "model": "ServiceCatalogRecord",
+      "table": "ServiceCatalogRecord"
+    },
+    {
+      "model": "ServiceCatalogCountryRecord",
+      "table": "ServiceCatalogCountryRecord"
+    },
+    {
+      "model": "ServiceCatalogLanguageRecord",
+      "table": "ServiceCatalogLanguageRecord"
+    },
+    {
+      "model": "ServiceRequestRecord",
+      "table": "ServiceRequestRecord"
+    },
+    {
+      "model": "ServiceProviderRecord",
+      "table": "ServiceProviderRecord"
+    },
+    {
+      "model": "ServiceProviderServiceRecord",
+      "table": "ServiceProviderServiceRecord"
+    },
+    {
+      "model": "ServicePackageRecord",
+      "table": "ServicePackageRecord"
+    },
+    {
+      "model": "ServicePackageItemRecord",
+      "table": "ServicePackageItemRecord"
+    },
+    {
+      "model": "ServicePricingRecord",
+      "table": "ServicePricingRecord"
+    },
+    {
+      "model": "ServiceDiscountRecord",
+      "table": "ServiceDiscountRecord"
+    },
+    {
+      "model": "ServicePromotionRecord",
+      "table": "ServicePromotionRecord"
+    },
+    {
+      "model": "ServiceAvailabilitySlotRecord",
+      "table": "ServiceAvailabilitySlotRecord"
+    },
+    {
+      "model": "ServiceBookingRecord",
+      "table": "ServiceBookingRecord"
+    },
+    {
+      "model": "ServiceBookingItemRecord",
+      "table": "ServiceBookingItemRecord"
+    },
+    {
+      "model": "ServiceWorkflowDefinitionRecord",
+      "table": "ServiceWorkflowDefinitionRecord"
+    },
+    {
+      "model": "ServiceWorkflowExecutionRecord",
+      "table": "ServiceWorkflowExecutionRecord"
+    },
+    {
+      "model": "ServiceDeliveryArtifactRecord",
+      "table": "ServiceDeliveryArtifactRecord"
+    },
+    {
+      "model": "CareerEmployerRecord",
+      "table": "CareerEmployerRecord"
+    },
+    {
+      "model": "CareerJobPostingRecord",
+      "table": "CareerJobPostingRecord"
+    },
+    {
+      "model": "CareerProfileRecord",
+      "table": "CareerProfileRecord"
+    },
+    {
+      "model": "CareerApplicationRecord",
+      "table": "CareerApplicationRecord"
+    },
+    {
+      "model": "CareerAlumniProfileRecord",
+      "table": "CareerAlumniProfileRecord"
+    },
+    {
+      "model": "WorkflowControlRecord",
+      "table": "WorkflowControlRecord"
+    },
+    {
+      "model": "ApiServiceControlRecord",
+      "table": "ApiServiceControlRecord"
+    },
+    {
+      "model": "SharedComponentControlRecord",
+      "table": "SharedComponentControlRecord"
+    },
+    {
+      "model": "WorkflowExecutionProjection",
+      "table": "WorkflowExecutionProjection"
+    },
+    {
+      "model": "ApiServiceExposureProjection",
+      "table": "ApiServiceExposureProjection"
+    },
+    {
+      "model": "SharedComponentRenderingProjection",
+      "table": "SharedComponentRenderingProjection"
+    },
+    {
+      "model": "NotificationTemplateRecord",
+      "table": "NotificationTemplateRecord"
+    },
+    {
+      "model": "NotificationIntentRecord",
+      "table": "NotificationIntentRecord"
+    },
+    {
+      "model": "NotificationChannelDelivery",
+      "table": "NotificationChannelDelivery"
+    },
+    {
+      "model": "NotificationRateReservation",
+      "table": "NotificationRateReservation"
+    },
+    {
+      "model": "NotificationDeliveryReceipt",
+      "table": "NotificationDeliveryReceipt"
+    },
+    {
+      "model": "ApiIdempotencyRecord",
+      "table": "ApiIdempotencyRecord"
+    },
+    {
+      "model": "ApiSearchRequestRecord",
+      "table": "ApiSearchRequestRecord"
+    },
+    {
+      "model": "ReferenceOwnerImportReview",
+      "table": "ReferenceOwnerImportReview"
+    },
+    {
+      "model": "ReferenceStandardSnapshot",
+      "table": "ReferenceStandardSnapshot"
+    },
+    {
+      "model": "AcademicTaxonomyImportReview",
+      "table": "AcademicTaxonomyImportReview"
+    },
+    {
+      "model": "InternationalTestGovernance",
+      "table": "InternationalTestGovernance"
+    },
+    {
+      "model": "InternationalTestPublicationSnapshot",
+      "table": "InternationalTestPublicationSnapshot"
+    },
+    {
+      "model": "InternationalTestEvidenceHistory",
+      "table": "InternationalTestEvidenceHistory"
+    },
+    {
+      "model": "NewMajorCandidateDecision",
+      "table": "NewMajorCandidateDecision"
+    },
+    {
+      "model": "MajorPublicationSnapshot",
+      "table": "MajorPublicationSnapshot"
+    },
+    {
+      "model": "FinanceCommandRecord",
+      "table": "FinanceCommandRecord"
+    },
+    {
+      "model": "FinanceReconciliationSnapshot",
+      "table": "FinanceReconciliationSnapshot"
+    },
+    {
+      "model": "FinanceReconciliationIssueRecord",
+      "table": "FinanceReconciliationIssueRecord"
+    },
+    {
+      "model": "FinanceAdjustmentCaseRecord",
+      "table": "FinanceAdjustmentCaseRecord"
+    },
+    {
+      "model": "AuditWorkspaceRecord",
+      "table": "AuditWorkspaceRecord"
+    },
+    {
+      "model": "AuditAlertOccurrenceRecord",
+      "table": "AuditAlertOccurrenceRecord"
+    },
+    {
+      "model": "AssetRenditionRecord",
+      "table": "AssetRenditionRecord"
+    },
+    {
+      "model": "SettingsGovernanceRecord",
+      "table": "SettingsGovernanceRecord"
+    },
+    {
+      "model": "MajorImportOwnerReview",
+      "table": "MajorImportOwnerReview"
+    },
+    {
+      "model": "UniversityProgramStudyProfile",
+      "table": "UniversityProgramStudyProfile"
+    },
+    {
+      "model": "UniversityProgramStudyLanguage",
+      "table": "UniversityProgramStudyLanguage"
+    },
+    {
+      "model": "UniversityProgramIntake",
+      "table": "UniversityProgramIntake"
+    },
+    {
+      "model": "OwnerTranslationTransferReceipt",
+      "table": "OwnerTranslationTransferReceipt"
+    },
+    {
+      "model": "StudentApplicationDocumentBinding",
+      "table": "StudentApplicationDocumentBinding"
+    },
+    {
+      "model": "StudentToolTestDiscoveryLink",
+      "table": "StudentToolTestDiscoveryLink"
+    },
+    {
+      "model": "ServiceTestDiscoveryLink",
+      "table": "ServiceTestDiscoveryLink"
+    },
+    {
+      "model": "ScholarshipReferenceTransition",
+      "table": "ScholarshipReferenceTransition"
+    }
+  ],
+  "foreignKeyMatchSemantics": "SIMPLE for all measured FKs",
+  "nonemptyTables": [
+    {
+      "name": "AcademicTaxonomyAlias",
+      "rows": 39
+    },
+    {
+      "name": "AcademicTaxonomyEdge",
+      "rows": 152
+    },
+    {
+      "name": "AcademicTaxonomyNode",
+      "rows": 163
+    },
+    {
+      "name": "AssetRecord",
+      "rows": 3
+    },
+    {
+      "name": "AuditRecord",
+      "rows": 1969
+    },
+    {
+      "name": "DegreeLevel",
+      "rows": 7
+    },
+    {
+      "name": "ExternalCourseProvider",
+      "rows": 18
+    },
+    {
+      "name": "ExternalCourseProviderAlias",
+      "rows": 6
+    },
+    {
+      "name": "ExternalCourseProviderDomain",
+      "rows": 39
+    },
+    {
+      "name": "ImportScreeningReceipt",
+      "rows": 622
+    },
+    {
+      "name": "ReferenceAliasRecord",
+      "rows": 48
+    },
+    {
+      "name": "ReferenceCountry",
+      "rows": 194
+    },
+    {
+      "name": "ReferenceCurrency",
+      "rows": 168
+    },
+    {
+      "name": "ReferenceLanguage",
+      "rows": 260
+    },
+    {
+      "name": "ReferenceOwnerImportReview",
+      "rows": 622
+    },
+    {
+      "name": "ReferenceVersionRecord",
+      "rows": 642
+    },
+    {
+      "name": "StudentToolDefinitionRecord",
+      "rows": 83
+    },
+    {
+      "name": "StudentToolDependencyRecord",
+      "rows": 4
+    },
+    {
+      "name": "StudentToolVersionRecord",
+      "rows": 83
+    },
+    {
+      "name": "TransactionalOutboxRecord",
+      "rows": 1969
+    }
+  ],
+  "uniqueConstraints": 35,
+  "primaryKeys": 282
+}

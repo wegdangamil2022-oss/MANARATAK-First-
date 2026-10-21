@@ -1,0 +1,26 @@
+{
+  "kind": "R12_FROZEN_SOURCE_REAL_POSTGRES_FENCING_AND_ASSET_CONTRACTS",
+  "operatorSourceSha": "70230e082e03f73761eee6437858c074839fb8d2",
+  "previousCandidateSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "currentCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "actualBuiltApiAssetHttpTest": false,
+  "providerKind": "LOCAL_IN_PROCESS_SYNTHETIC_BYTES_ONLY",
+  "formalAcceptance": false,
+  "productionAllowed": false,
+  "passed": false,
+  "applicationRole": {
+    "role": "post28_r12_actor",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "rolreplication": false
+  },
+  "failure": {
+    "message": "spawnSync git ENOENT"
+  },
+  "cleanup": {
+    "apisStopped": true,
+    "externalProvidersContacted": false
+  }
+}

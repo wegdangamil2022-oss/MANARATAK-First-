@@ -1,0 +1,26 @@
+{
+  "sourceSha": "6e42d922c79053b67107cd8722390bff1f273986",
+  "node": "22.16.0",
+  "results": [
+    {
+      "app": "web",
+      "status": 200,
+      "host": "127.0.0.1",
+      "port": 54954,
+      "frameOptions": "DENY",
+      "frameAncestors": "none",
+      "apiRequested": false
+    },
+    {
+      "app": "admin",
+      "status": 200,
+      "host": "127.0.0.1",
+      "port": 54956,
+      "frameOptions": "DENY",
+      "frameAncestors": "none",
+      "apiRequested": false
+    }
+  ],
+  "browserExecuted": false,
+  "backendConnected": false
+}

@@ -1,0 +1,27 @@
+{
+  "sourceSha": "59fdad6b651ccf6637be277d4539f7f21654b1f7",
+  "tree": "961294b567b7cbcd4bd7086d9b4019b183e07be4",
+  "lockSha256": "75269332ee9c7c5b5b66b753a5ac5e94427668cd27b1db20b26291499306b4ee",
+  "schemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59",
+  "fixtureDefinitionSha256": "b28649642d6d5cdaac27b1d124a8564d723729505c58e87dc02352905b1f50f7",
+  "generatedClientSchemaSha256": "cd9fdff87ed21b2680f6dda774376a0dd5e2acb52e472519877c4fc88b0f5969",
+  "node": "22.16.0",
+  "prisma": "5.22.0",
+  "runId": "f988bff0-a1a2-4e03-9559-b23bce40bda9",
+  "image": "postgres@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+  "containerId": "50c29e564dfa070c34a2dbedb946cbefd7f4b634c380cd0dd16172d19b8c0959",
+  "port": 15432,
+  "target": {
+    "label": "DB-T",
+    "database": "manaratak_post28_transactions_test",
+    "role": "post28_app",
+    "serverIdentity": "7697334031230324779",
+    "databaseOid": "16386",
+    "postgresMajor": 16,
+    "timezone": "UTC",
+    "publicTables": 282,
+    "probeReadOnly": true
+  },
+  "startedAtEpochMs": 1792175271355,
+  "assertionEndEpochMs": 1792175274178.6826
+}

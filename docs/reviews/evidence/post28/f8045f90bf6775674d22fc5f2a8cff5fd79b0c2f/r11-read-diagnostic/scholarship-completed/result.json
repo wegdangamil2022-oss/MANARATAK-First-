@@ -1,0 +1,477 @@
+{
+  "workloadSourceSha": "f8045f90bf6775674d22fc5f2a8cff5fd79b0c2f",
+  "apiSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "policySha256": "baeb919a5351027031ba345c8e1b797ad7eff054d79c08f3d6e81da453496aef",
+  "logicalTarget": "DB-L",
+  "newCluster": true,
+  "readOnlyRole": {
+    "database": "manaratak_r11_load_7bbb9268f9d77acc",
+    "role": "post28_r11_reader",
+    "serverIdentity": "7698790706126187972",
+    "readOnly": "on",
+    "superuser": false,
+    "createRole": false,
+    "createDatabase": false,
+    "bypassRls": false,
+    "replication": false
+  },
+  "previousSuitesRepeated": false,
+  "results": [
+    {
+      "category": "scholarship-filters",
+      "kind": "R11_BOUNDED_READ_DIAGNOSTIC",
+      "sourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+      "status": "COMPLETED_DIAGNOSTIC",
+      "abortReason": null,
+      "route": "/api/v1/public/scholarships",
+      "query": "?locale=en&limit=20&search=R09",
+      "elapsedSeconds": 60.431858,
+      "sampleCount": 30,
+      "p50Ms": 15.187799999999697,
+      "p95Ms": 49.609199999998964,
+      "p99Ms": 58.5625,
+      "throughput": 0.4964269011884427,
+      "transferBytes": 31530,
+      "errorCount": 0,
+      "timeoutCount": 0,
+      "observations": [
+        {
+          "status": 200,
+          "latencyMs": 13.013500000000931,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 17.511600000005274,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 12.094600000003993,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 49.609199999998964,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 12.043299999997544,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 15.032800000000861,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 12.820800000001327,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 11.355499999997846,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 16.02350000000297,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 12.641999999999825,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 14.379300000000512,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 10.895599999996193,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 27.031999999999243,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 15.35679999999411,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 11.287700000000768,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 11.573499999998603,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 20.49770000000717,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 12.19199999999546,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 15.187799999999697,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 58.5625,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 21.31369999999879,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 11.374599999995553,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 20.405099999989034,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 13.076000000000931,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 19.172500000000582,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 15.270500000013271,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 15.74179999998887,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 19.224400000006426,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 29.996400000003632,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        },
+        {
+          "status": 200,
+          "latencyMs": 22.629799999995157,
+          "bytes": 1051,
+          "timedOut": false,
+          "failed": false
+        }
+      ],
+      "resources": [
+        {
+          "cpuPercent": 0,
+          "residentMemoryBytes": 186060800,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:40:34.352Z",
+          "ageMs": 0
+        },
+        {
+          "cpuPercent": 0,
+          "residentMemoryBytes": 186060800,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:40:34.352Z",
+          "ageMs": 92
+        },
+        {
+          "cpuPercent": 0.1075213322323149,
+          "residentMemoryBytes": 185573376,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:40:36.774Z",
+          "ageMs": 0
+        },
+        {
+          "cpuPercent": 0.1075213322323149,
+          "residentMemoryBytes": 185573376,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:40:36.774Z",
+          "ageMs": 1716
+        },
+        {
+          "cpuPercent": 0.06487709682776947,
+          "residentMemoryBytes": 186716160,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:40:40.788Z",
+          "ageMs": 0
+        },
+        {
+          "cpuPercent": 0.06487709682776947,
+          "residentMemoryBytes": 186716160,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:40:40.788Z",
+          "ageMs": 1704
+        },
+        {
+          "cpuPercent": 0,
+          "residentMemoryBytes": 187559936,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:40:44.764Z",
+          "ageMs": 0
+        },
+        {
+          "cpuPercent": 0,
+          "residentMemoryBytes": 187559936,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:40:44.764Z",
+          "ageMs": 1738
+        },
+        {
+          "cpuPercent": 0.19497130022460693,
+          "residentMemoryBytes": 187625472,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:40:48.771Z",
+          "ageMs": 0
+        },
+        {
+          "cpuPercent": 0.19497130022460693,
+          "residentMemoryBytes": 187625472,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:40:48.771Z",
+          "ageMs": 1748
+        },
+        {
+          "cpuPercent": 0.06436398088647223,
+          "residentMemoryBytes": 189870080,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:40:52.817Z",
+          "ageMs": 0
+        },
+        {
+          "cpuPercent": 0.06436398088647223,
+          "residentMemoryBytes": 189870080,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:40:52.817Z",
+          "ageMs": 1716
+        },
+        {
+          "cpuPercent": 0.13082977476345978,
+          "residentMemoryBytes": 190779392,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:40:56.798Z",
+          "ageMs": 0
+        },
+        {
+          "cpuPercent": 0.13082977476345978,
+          "residentMemoryBytes": 190779392,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:40:56.798Z",
+          "ageMs": 1758
+        },
+        {
+          "cpuPercent": 1.163728897715988,
+          "residentMemoryBytes": 156626944,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:00.826Z",
+          "ageMs": 0
+        },
+        {
+          "cpuPercent": 1.163728897715988,
+          "residentMemoryBytes": 156626944,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:00.826Z",
+          "ageMs": 1720
+        },
+        {
+          "cpuPercent": 0.06523463593854376,
+          "residentMemoryBytes": 157577216,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:04.818Z",
+          "ageMs": 0
+        },
+        {
+          "cpuPercent": 0.06523463593854376,
+          "residentMemoryBytes": 157577216,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:04.818Z",
+          "ageMs": 1756
+        },
+        {
+          "cpuPercent": 0.12952830970736964,
+          "residentMemoryBytes": 157536256,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:08.839Z",
+          "ageMs": 0
+        },
+        {
+          "cpuPercent": 0.12952830970736964,
+          "residentMemoryBytes": 157536256,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:08.839Z",
+          "ageMs": 1740
+        },
+        {
+          "cpuPercent": 0.19275845053047125,
+          "residentMemoryBytes": 158142464,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:12.892Z",
+          "ageMs": 0
+        },
+        {
+          "cpuPercent": 0.19275845053047125,
+          "residentMemoryBytes": 158142464,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:12.892Z",
+          "ageMs": 1706
+        },
+        {
+          "cpuPercent": 0,
+          "residentMemoryBytes": 158347264,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:16.859Z",
+          "ageMs": 0
+        },
+        {
+          "cpuPercent": 0,
+          "residentMemoryBytes": 158347264,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:16.859Z",
+          "ageMs": 1765
+        },
+        {
+          "cpuPercent": 0.064651605428666,
+          "residentMemoryBytes": 158007296,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:20.887Z",
+          "ageMs": 0
+        },
+        {
+          "cpuPercent": 0.064651605428666,
+          "residentMemoryBytes": 158007296,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:20.887Z",
+          "ageMs": 1748
+        },
+        {
+          "cpuPercent": 0,
+          "residentMemoryBytes": 158765056,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:24.893Z",
+          "ageMs": 0
+        },
+        {
+          "cpuPercent": 0,
+          "residentMemoryBytes": 158765056,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:24.893Z",
+          "ageMs": 1748
+        },
+        {
+          "cpuPercent": 0.12952830970736964,
+          "residentMemoryBytes": 158871552,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:28.914Z",
+          "ageMs": 0
+        },
+        {
+          "cpuPercent": 0.12952830970736964,
+          "residentMemoryBytes": 158871552,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:28.914Z",
+          "ageMs": 1751
+        },
+        {
+          "cpuPercent": 0.1953125,
+          "residentMemoryBytes": 159211520,
+          "activeConnections": 4,
+          "sampledAt": "2026-10-20T16:41:32.914Z",
+          "ageMs": 0
+        }
+      ],
+      "concurrency": 1,
+      "maximumRequestsPerSecond": 0.5,
+      "productionAcceptance": false,
+      "representativeLaunchDataset": false,
+      "sloAcceptance": false
+    }
+  ],
+  "productionAcceptance": false,
+  "sloAcceptance": false
+}

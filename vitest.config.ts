@@ -1,16 +1,23 @@
 import { defineConfig } from 'vitest/config';
+import {nodeTestFiles} from './scripts/testing/node-test-files.mjs';
 
 export default defineConfig({
+  esbuild: {jsx: 'automatic'},
   test: {
     globals: true,
     environment: 'node',
-    passWithNoTests: true,
+    passWithNoTests: false,
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
+      // POST28: real PostgreSQL suites have explicit isolated profiles, not source skips.
+      '**/*.database.spec.ts',
+      '**/*.database.spec.mjs',
+      'packages/infrastructure/tests/database/WholePlatformPersistence.integration.spec.ts',
       // These use node:test and must run under Node so assertion failures fail CI.
       '**/*.test.mjs',
       '**/*.test.cjs',
+      ...nodeTestFiles,
       'work/**',
       'wp-ic-10-results/**',
       'wp12-11-evidence/**',

@@ -1,0 +1,17 @@
+{
+  "sourceSha": "cbb99ac63bb4497df9c07cf3e16611d27bcd3396",
+  "kind": "POST28_R08_PROVIDER_FAULTS",
+  "syntheticOnly": true,
+  "productionAcceptance": false,
+  "formalR08Acceptance": false,
+  "selectedCases": [
+    "recovers a lost refund response with one consumed approval and one balanced refund posting",
+    "keeps a real authorization timeout pending without redispatch or a paid invoice"
+  ],
+  "cleanup": {
+    "existingDatabasesTouched": false,
+    "databaseRemoved": true,
+    "networkRemoved": true
+  },
+  "passed": true
+}

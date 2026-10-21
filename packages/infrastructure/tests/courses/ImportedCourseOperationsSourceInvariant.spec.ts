@@ -104,7 +104,7 @@ describe('WP-IC-07 source invariants', () => {
     expect(repository).toContain('a."resolvedProviderId" = ${providerId}');
   });
 
-  it('keeps pre-Google-Studio CI source-only and tracks the full imported-course closure surface', () => {
+  it('keeps source-only CI source-only and tracks the full imported-course closure surface', () => {
     const ci = source('.github/workflows/ci.yml');
     const closure = source('.github/workflows/imported-courses-runtime-closure.yml');
     expect(ci).not.toContain('npm run test:database');
@@ -117,7 +117,12 @@ describe('WP-IC-07 source invariants', () => {
   it('writes browser evidence only after the focused runtime test succeeds', () => {
     const runner = source('scripts/wp-ic-10-browser-e2e.mjs');
     expect(runner).toContain('imported-courses-runtime-closure.spec.ts');
-    expect(runner).toContain("execFileSync('git', ['rev-parse', 'HEAD']");
-    expect(runner.indexOf('execFileSync(process.execPath')).toBeLessThan(runner.indexOf("fs.writeFileSync(path.join(outputDir, 'BROWSER_E2E.json')"));
+    expect(runner).toMatch(/execFileSync\('git',\s*\['rev-parse',\s*'HEAD'\]/);
+    expect(runner).toContain('POST28_SOURCE_CHANGED_DURING_RUN');
+    expect(runner).toContain('runtimeAcceptance:false,builtBrowserVerified:false');
+    const execution = runner.indexOf('execFileSync(process.execPath,args,');
+    const evidence = runner.search(/fs\.writeFileSync\(path\.join\(outputDir,\s*'BROWSER_E2E.json'\)/);
+    expect(execution).toBeGreaterThan(-1);
+    expect(evidence).toBeGreaterThan(execution);
   });
 });

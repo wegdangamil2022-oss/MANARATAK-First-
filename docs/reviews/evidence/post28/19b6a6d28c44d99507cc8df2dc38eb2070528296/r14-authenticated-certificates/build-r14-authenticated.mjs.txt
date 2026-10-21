@@ -1,0 +1,10 @@
+import {pathToFileURL} from 'node:url';import fs from 'node:fs';import path from 'node:path';import {createRequire} from 'node:module';import {execFileSync} from 'node:child_process';
+const work=import.meta.dirname,repo=path.join(work,'r07-filtered'),require=createRequire(path.join(repo,'package.json')),out=path.join(work,'r14-authenticated-api');
+fs.mkdirSync(out,{recursive:true});
+const sourceSha=execFileSync('git',['rev-parse','HEAD'],{cwd:repo,encoding:'utf8'}).trim();
+if(!fs.existsSync(path.join(out,'source.json')))await require('esbuild').build({absWorkingDir:repo,entryPoints:['apps/api/src/server.ts'],bundle:true,platform:'node',format:'cjs',external:['uuid','@prisma/client','@node-rs/xxhash','bcrypt','jsonwebtoken','cors','express','helmet','pdfkit','svg-to-pdfkit','fontkit'],sourcemap:true,outfile:path.join(out,'server.cjs'),metafile:true}).then(r=>fs.writeFileSync(path.join(out,'meta.json'),JSON.stringify(r.metafile)));
+fs.writeFileSync(path.join(out,'source.json'),JSON.stringify({sourceSha,kind:'SCOPED_LOCAL_DIAGNOSTIC_BUNDLE_NOT_RELEASE_ARTIFACT',lockedDependenciesReused:true})+'\n');
+const {build}=await import(pathToFileURL(path.join(repo,'node_modules/vite/dist/node/index.js')).href);
+for(const app of ['web','admin'])await build({configFile:path.join(repo,'apps',app,'vite.config.ts'),build:{outDir:path.join(work,'r14-authenticated-'+app),emptyOutDir:true}});
+fs.writeFileSync(path.join(work,'r14-authenticated-builds.json'),JSON.stringify({sourceSha,api:out,web:path.join(work,'r14-authenticated-web'),admin:path.join(work,'r14-authenticated-admin'),localDiagnostic:true})+'\n');
+console.log('R14_AUTHENTICATED_BUILDS_COMPLETE '+sourceSha);

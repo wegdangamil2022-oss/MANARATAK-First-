@@ -1,0 +1,38 @@
+{
+  "kind": "R13_PROMOTION_ENTRY_SOURCE_FIX",
+  "sourceSha": "7877604b509c61f89ad7853d45b2beda30e2c2a6",
+  "originalReviewSha": "68bb1809698435416656cb7b51ed0c1f5f1a545a",
+  "reconcileImplementationUnchanged": true,
+  "cliAuthorizationAndEvidenceBodyUnchanged": true,
+  "productionCommandExecuted": false,
+  "controllerContacted": false,
+  "tests": {
+    "newEntryAndImportTests": {
+      "passed": 2,
+      "failed": 0,
+      "redBeforeImplementation": true
+    },
+    "existingReconcileTests": {
+      "passed": 2,
+      "failed": 0,
+      "fetcher": "SYNTHETIC_IN_MEMORY",
+      "selection": "FSA012 bounded reconcile|FSA012 accepted forever"
+    },
+    "fullSuiteRepeated": false
+  },
+  "files": [
+    {
+      "path": "scripts/release/promote-environment.mjs",
+      "gitBlobSha256": "4111389ee6e5aedaca3acde791c98b14f24c4b9ab002d2f1d4eddf1d5c4a0fa0"
+    },
+    {
+      "path": "tests/release/r13-promotion-entry.test.mjs",
+      "gitBlobSha256": "a5e266902911f331196f1e71f37208f75da6439a3440a8710cc6ddfd96968266"
+    },
+    {
+      "path": "docs/operations/ENVIRONMENT_INVENTORY.md",
+      "gitBlobSha256": "4c8556807accabff776ba4a02360aef51e2387e9dd7df3a9d42c3557be57ac8d"
+    }
+  ],
+  "newCiResult": "NOT_YET_VERIFIED"
+}

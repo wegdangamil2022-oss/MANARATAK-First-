@@ -1,0 +1,42 @@
+{
+  "sourceSha": "81666a9535f2516529372fd70077e1ea46564df8",
+  "freshDirectory": true,
+  "sharedDistPresent": false,
+  "temporaryNodeModulesPresent": false,
+  "sourceFiles": [
+    {
+      "file": "scripts/release/lib/R14AdminCmsRuntime.mjs",
+      "sha256": "1425dfd0bff4331a36bec6c8d869b0b86a31287964229629efd4603fc4f2d65d"
+    },
+    {
+      "file": "scripts/release/lib/DiagnosticRequestBudget.mjs",
+      "sha256": "b9b6cc770aaacaa34be1e305ad6682fd5ac10e2578f42b17f8dc39201d228856"
+    },
+    {
+      "file": "scripts/release/lib/CmsDiagnosticLocaleContract.mjs",
+      "sha256": "b3a9203b35d7babec8d3128c41f8c0bb91e7d667eace75f5103a470e58e904ce"
+    },
+    {
+      "file": "packages/shared/src/localization/readiness.ts",
+      "sha256": "f4d616b5c735f4616088bc639aa58c5988b6c949242400041a32867669c0ae35"
+    },
+    {
+      "file": "packages/shared/src/localization/locale.ts",
+      "sha256": "05f20382f49e363802921caa6969d84fb1d74dc2ff25b914dae3c602e5e04b20"
+    },
+    {
+      "file": "packages/infrastructure/src/auth/mfa/Totp.ts",
+      "sha256": "bf96ba1e662e96d7f627dd0f287ea6bac291ab2b65c8629bc05a3d85d1ef7770"
+    }
+  ],
+  "loadedWith": "EXISTING_TSX_RUNTIME",
+  "passed": true,
+  "policyUnchanged": true,
+  "publicTemplateLocales": [
+    "ar"
+  ],
+  "databaseTouched": false,
+  "browserExecuted": false,
+  "linuxExecuted": false,
+  "formalAcceptance": false
+}

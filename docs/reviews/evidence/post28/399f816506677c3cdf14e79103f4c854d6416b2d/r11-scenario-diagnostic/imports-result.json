@@ -1,0 +1,402 @@
+{
+  "kind": "R11_BOUNDED_SCENARIO_DIAGNOSTIC",
+  "category": "imports",
+  "sourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d",
+  "status": "COMPLETED_DIAGNOSTIC",
+  "abortReason": null,
+  "sampleCount": 30,
+  "elapsedSeconds": 60.001185799999995,
+  "throughput": 0.4999901185286242,
+  "p50Ms": 6.680700000026263,
+  "p95Ms": 17.698499999998603,
+  "p99Ms": 21.128300000011222,
+  "observations": [
+    {
+      "latencyMs": 21.128300000011222,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 11.623099999997066,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 5.955900000000838,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 16.854099999996834,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 6.285399999993388,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 5.71720000001369,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 4.5763999999908265,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 9.980899999995017,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 6.589600000006612,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 12.354700000025332,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 4.233699999982491,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 17.40199999997276,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 3.8703000000095926,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 17.698499999998603,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 6.680700000026263,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 15.201399999990826,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 5.19460000001709,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 6.4416999999957625,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 6.824200000002747,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 6.093600000021979,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 6.618699999991804,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 7.53090000001248,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 7.581899999990128,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 8.03859999999986,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 6.092700000008335,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 15.5230000000156,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 5.309999999997672,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 15.923999999999069,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 4.600399999995716,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    },
+    {
+      "latencyMs": 8.160000000003492,
+      "verified": true,
+      "identityCreated": 1,
+      "replayCreated": 0
+    }
+  ],
+  "resources": [
+    {
+      "cpuPercent": 0.4868901353276353,
+      "residentMemoryBytes": 274231296,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:05.921Z"
+    },
+    {
+      "cpuPercent": 0.4868901353276353,
+      "residentMemoryBytes": 274231296,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:05.921Z",
+      "ageMs": 1721
+    },
+    {
+      "cpuPercent": 0.25983204456639225,
+      "residentMemoryBytes": 274526208,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:09.930Z"
+    },
+    {
+      "cpuPercent": 0.25983204456639225,
+      "residentMemoryBytes": 274526208,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:09.930Z",
+      "ageMs": 1727
+    },
+    {
+      "cpuPercent": 0.32422393758300133,
+      "residentMemoryBytes": 274591744,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:13.946Z"
+    },
+    {
+      "cpuPercent": 0.32422393758300133,
+      "residentMemoryBytes": 274591744,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:13.946Z",
+      "ageMs": 1724
+    },
+    {
+      "cpuPercent": 0.2596377534064473,
+      "residentMemoryBytes": 274718720,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:17.958Z"
+    },
+    {
+      "cpuPercent": 0.2596377534064473,
+      "residentMemoryBytes": 274718720,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:17.958Z",
+      "ageMs": 1724
+    },
+    {
+      "cpuPercent": 0.06494181213632585,
+      "residentMemoryBytes": 274771968,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:21.968Z"
+    },
+    {
+      "cpuPercent": 0.06494181213632585,
+      "residentMemoryBytes": 274771968,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:21.968Z",
+      "ageMs": 1729
+    },
+    {
+      "cpuPercent": 0.0648286449257323,
+      "residentMemoryBytes": 274927616,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:25.985Z"
+    },
+    {
+      "cpuPercent": 0.0648286449257323,
+      "residentMemoryBytes": 274927616,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:25.985Z",
+      "ageMs": 1725
+    },
+    {
+      "cpuPercent": 0.06469979296066253,
+      "residentMemoryBytes": 275193856,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:30.010Z"
+    },
+    {
+      "cpuPercent": 0.06469979296066253,
+      "residentMemoryBytes": 275193856,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:30.010Z",
+      "ageMs": 1714
+    },
+    {
+      "cpuPercent": 0.1953613403350838,
+      "residentMemoryBytes": 275320832,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:34.009Z"
+    },
+    {
+      "cpuPercent": 0.1953613403350838,
+      "residentMemoryBytes": 275320832,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:34.009Z",
+      "ageMs": 1728
+    },
+    {
+      "cpuPercent": 0,
+      "residentMemoryBytes": 275390464,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:38.036Z"
+    },
+    {
+      "cpuPercent": 0,
+      "residentMemoryBytes": 275390464,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:38.036Z",
+      "ageMs": 1714
+    },
+    {
+      "cpuPercent": 0.0642369676040125,
+      "residentMemoryBytes": 274714624,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:42.091Z"
+    },
+    {
+      "cpuPercent": 0.0642369676040125,
+      "residentMemoryBytes": 274714624,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:42.091Z",
+      "ageMs": 1672
+    },
+    {
+      "cpuPercent": 0,
+      "residentMemoryBytes": 275120128,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:46.067Z"
+    },
+    {
+      "cpuPercent": 0,
+      "residentMemoryBytes": 275120128,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:46.067Z",
+      "ageMs": 1711
+    },
+    {
+      "cpuPercent": 0.19497130022460693,
+      "residentMemoryBytes": 275398656,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:50.075Z"
+    },
+    {
+      "cpuPercent": 0.19497130022460693,
+      "residentMemoryBytes": 275398656,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:50.075Z",
+      "ageMs": 1711
+    },
+    {
+      "cpuPercent": 0.06497421823020626,
+      "residentMemoryBytes": 275472384,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:54.082Z"
+    },
+    {
+      "cpuPercent": 0.06497421823020626,
+      "residentMemoryBytes": 275472384,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:54.082Z",
+      "ageMs": 1722
+    },
+    {
+      "cpuPercent": 0,
+      "residentMemoryBytes": 276025344,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:58.121Z"
+    },
+    {
+      "cpuPercent": 0,
+      "residentMemoryBytes": 276025344,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:08:58.121Z",
+      "ageMs": 1697
+    },
+    {
+      "cpuPercent": 0.19487403342479423,
+      "residentMemoryBytes": 276115456,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:02.130Z"
+    },
+    {
+      "cpuPercent": 0.19487403342479423,
+      "residentMemoryBytes": 276115456,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:02.130Z",
+      "ageMs": 1702
+    }
+  ],
+  "concurrency": 1,
+  "externalProvidersAllowed": false,
+  "representativeLaunchDataset": false,
+  "sloAcceptance": false,
+  "productionAcceptance": false,
+  "queryObservations": {
+    "scope": "HARNESS_PRISMA_CLIENT_ONLY_EXCLUDES_BUILT_API",
+    "count": 139,
+    "totalEngineDurationMs": 65
+  }
+}

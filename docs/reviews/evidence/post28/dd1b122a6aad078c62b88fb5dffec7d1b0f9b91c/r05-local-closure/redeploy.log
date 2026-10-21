@@ -1,0 +1,7 @@
+Prisma schema loaded from packages\infrastructure\prisma\schema.prisma
+Datasource "db": PostgreSQL database "manaratak_post28_upgrade_test", schema "public" at "127.0.0.1:50812"
+
+110 migrations found in prisma/migrations
+
+
+No pending migrations to apply.

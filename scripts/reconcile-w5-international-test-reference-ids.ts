@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { requireDatabaseMutationGate } from './lib/require-database-mutation-gate';
 
 /**
- * W5 Google Studio reconciliation utility.
+ * W5 approved-environment reconciliation utility.
  * Default mode is read-only. Pass --apply only after the recovery/database mutation gate is closed.
  */
 const prisma = new PrismaClient();
@@ -65,7 +65,7 @@ async function main(): Promise<void> {
     unresolvedRows: unresolved.length,
     unresolved,
     databaseWrites: 0,
-    runtimeClosure: 'PENDING_GOOGLE_STUDIO',
+    runtimeClosure: 'PENDING_APPROVED_RUNTIME',
   };
 
   if (!apply) {

@@ -1,0 +1,15 @@
+
+> @manaratak/api@1.0.0 build
+> npm run typecheck && node ../../scripts/report-api-preview-configuration.mjs && esbuild src/server.ts --bundle --platform=node --format=cjs --external:uuid --external:@prisma/client --external:@node-rs/xxhash --external:bcrypt --external:jsonwebtoken --external:cors --external:express --external:helmet --external:pdfkit --external:svg-to-pdfkit --external:fontkit --sourcemap --outfile=dist/server.cjs --metafile=dist/server.meta.json
+
+
+> @manaratak/api@1.0.0 typecheck
+> node ../../scripts/verify-api-native-esm-specifiers.mjs && tsc -b && node ../../scripts/resolve-api-workspace-esm.mjs
+
+113 TypeScript files scanned; 0 invalid relative ESM specifiers
+API workspace ESM artifacts resolved: core, shared, domain, config, application, infrastructure
+
+  dist\server.cjs       9.1mb
+  dist\server.cjs.map  15.0mb
+
+Done in 529ms

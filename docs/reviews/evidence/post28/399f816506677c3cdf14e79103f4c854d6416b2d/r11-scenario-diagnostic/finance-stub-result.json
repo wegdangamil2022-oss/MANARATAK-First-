@@ -1,0 +1,432 @@
+{
+  "kind": "R11_BOUNDED_SCENARIO_DIAGNOSTIC",
+  "category": "finance-stub",
+  "sourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d",
+  "status": "COMPLETED_DIAGNOSTIC",
+  "abortReason": null,
+  "sampleCount": 30,
+  "elapsedSeconds": 59.9998578,
+  "throughput": 0.5000011850028084,
+  "p50Ms": 45.75560000000405,
+  "p95Ms": 71.19159999999101,
+  "p99Ms": 99.50229999999283,
+  "observations": [
+    {
+      "latencyMs": 99.50229999999283,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 52.9436000000278,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 47.91120000000228,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 44.73009999998612,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 44.914300000004005,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 56.311599999986356,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 45.74669999998878,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 54.757400000002235,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 51.59919999999693,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 63.50489999999991,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 44.48809999998775,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 71.19159999999101,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 45.05079999999725,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 43.02699999997276,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 45.75560000000405,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 44.15009999999893,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 42.58250000001863,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 51.89559999998892,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 40.397100000001956,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 42.39700000002631,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 46.05480000001262,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 46.45530000000144,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 43.8006999999925,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 43.13279999999213,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 50.57850000000326,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 46.02959999997984,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 44.860599999985425,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 52.717499999998836,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 41.19379999997909,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    },
+    {
+      "latencyMs": 45.9658000000054,
+      "verified": true,
+      "invoiceDueMinorUnits": "75",
+      "replayNoNewEffects": true,
+      "balanced": true
+    }
+  ],
+  "resources": [
+    {
+      "cpuPercent": 0,
+      "residentMemoryBytes": 276250624,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:05.933Z"
+    },
+    {
+      "cpuPercent": 0,
+      "residentMemoryBytes": 276250624,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:05.933Z",
+      "ageMs": 1711
+    },
+    {
+      "cpuPercent": 0.7804695304695305,
+      "residentMemoryBytes": 277278720,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:09.937Z"
+    },
+    {
+      "cpuPercent": 0.7804695304695305,
+      "residentMemoryBytes": 277278720,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:09.937Z",
+      "ageMs": 1721
+    },
+    {
+      "cpuPercent": 0.19487403342479423,
+      "residentMemoryBytes": 279191552,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:13.946Z"
+    },
+    {
+      "cpuPercent": 0.19487403342479423,
+      "residentMemoryBytes": 279191552,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:13.946Z",
+      "ageMs": 1725
+    },
+    {
+      "cpuPercent": 0.4536875725900116,
+      "residentMemoryBytes": 280465408,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:17.964Z"
+    },
+    {
+      "cpuPercent": 0.4536875725900116,
+      "residentMemoryBytes": 280465408,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:17.964Z",
+      "ageMs": 1721
+    },
+    {
+      "cpuPercent": 0.39003994008986526,
+      "residentMemoryBytes": 281268224,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:21.969Z"
+    },
+    {
+      "cpuPercent": 0.39003994008986526,
+      "residentMemoryBytes": 281268224,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:21.969Z",
+      "ageMs": 1730
+    },
+    {
+      "cpuPercent": 1.0364842454394694,
+      "residentMemoryBytes": 282976256,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:25.990Z"
+    },
+    {
+      "cpuPercent": 1.0364842454394694,
+      "residentMemoryBytes": 282976256,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:25.990Z",
+      "ageMs": 1722
+    },
+    {
+      "cpuPercent": 0.38887506222000995,
+      "residentMemoryBytes": 283680768,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:30.008Z"
+    },
+    {
+      "cpuPercent": 0.38887506222000995,
+      "residentMemoryBytes": 283680768,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:30.008Z",
+      "ageMs": 1720
+    },
+    {
+      "cpuPercent": 0.45233664185277084,
+      "residentMemoryBytes": 283369472,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:34.038Z"
+    },
+    {
+      "cpuPercent": 0.45233664185277084,
+      "residentMemoryBytes": 283369472,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:34.038Z",
+      "ageMs": 1699
+    },
+    {
+      "cpuPercent": 0.32535815425620523,
+      "residentMemoryBytes": 283557888,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:38.040Z"
+    },
+    {
+      "cpuPercent": 0.32535815425620523,
+      "residentMemoryBytes": 283557888,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:38.040Z",
+      "ageMs": 1715
+    },
+    {
+      "cpuPercent": 0.3853267570900123,
+      "residentMemoryBytes": 285982720,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:42.095Z"
+    },
+    {
+      "cpuPercent": 0.3853267570900123,
+      "residentMemoryBytes": 285982720,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:42.095Z",
+      "ageMs": 1671
+    },
+    {
+      "cpuPercent": 0.32495216704101154,
+      "residentMemoryBytes": 287002624,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:46.102Z"
+    },
+    {
+      "cpuPercent": 0.32495216704101154,
+      "residentMemoryBytes": 287002624,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:46.102Z",
+      "ageMs": 1676
+    },
+    {
+      "cpuPercent": 0.3898453093812375,
+      "residentMemoryBytes": 287240192,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:50.110Z"
+    },
+    {
+      "cpuPercent": 0.3898453093812375,
+      "residentMemoryBytes": 287240192,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:50.110Z",
+      "ageMs": 1683
+    },
+    {
+      "cpuPercent": 0.19516612540594555,
+      "residentMemoryBytes": 288145408,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:54.112Z"
+    },
+    {
+      "cpuPercent": 0.19516612540594555,
+      "residentMemoryBytes": 288145408,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:54.112Z",
+      "ageMs": 1694
+    },
+    {
+      "cpuPercent": 0.5859375,
+      "residentMemoryBytes": 288940032,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:58.113Z"
+    },
+    {
+      "cpuPercent": 0.5859375,
+      "residentMemoryBytes": 288940032,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:09:58.113Z",
+      "ageMs": 1708
+    },
+    {
+      "cpuPercent": 0.8423529899643362,
+      "residentMemoryBytes": 292872192,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:02.132Z"
+    },
+    {
+      "cpuPercent": 0.8423529899643362,
+      "residentMemoryBytes": 292872192,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:02.132Z",
+      "ageMs": 1701
+    }
+  ],
+  "concurrency": 1,
+  "externalProvidersAllowed": false,
+  "representativeLaunchDataset": false,
+  "sloAcceptance": false,
+  "productionAcceptance": false,
+  "queryObservations": {
+    "scope": "HARNESS_PRISMA_CLIENT_ONLY_EXCLUDES_BUILT_API",
+    "count": 2089,
+    "totalEngineDurationMs": 43
+  }
+}

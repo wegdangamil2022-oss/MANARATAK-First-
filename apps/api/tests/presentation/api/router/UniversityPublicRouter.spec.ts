@@ -10,7 +10,7 @@ const university = {
 };
 
 describe('UniversityPublicRouter locale contract', () => {
-  const createRepository = () => ({ listPublished: vi.fn(), findBySlug: vi.fn() });
+  const createRepository = () => ({ listPublished: vi.fn(), findPublishedBySlug: vi.fn() });
   const createApp = (repository: ReturnType<typeof createRepository>, referenceDataRepository = {
     getCountry: vi.fn().mockResolvedValue({ id: 'country-qa', iso2Code: 'QA' }),
     listCountries: vi.fn().mockResolvedValue([{ id: 'country-qa', iso2Code: 'QA', name: 'Qatar', isActive: true }, { id: 'country-ye', iso2Code: 'YE', name: 'Yemen', isActive: true }]),

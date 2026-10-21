@@ -1,0 +1,14 @@
+{
+  "sourceSha": "378fc1050d31930d782b3ceae503e6bcfda7ebc1",
+  "nodeVersion": "v22.16.0",
+  "readOnlyHead": true,
+  "url": "https://cs50.harvard.edu/x/",
+  "result": {
+    "state": "VERIFIED_DIRECT",
+    "responseCode": 200,
+    "redirectTarget": null,
+    "checkedAt": "2026-10-18T16:58:40.112Z"
+  },
+  "acceptance": false,
+  "scope": "Actual production checker public HTTPS reachability; no provider ownership approval, import or publication inferred."
+}

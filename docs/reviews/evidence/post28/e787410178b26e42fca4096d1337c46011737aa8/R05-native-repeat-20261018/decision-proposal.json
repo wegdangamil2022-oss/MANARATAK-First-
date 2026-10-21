@@ -1,0 +1,34 @@
+{
+  "kind": "POST28_R05_OWNER_DECISION_PROPOSAL",
+  "sourceSha": "e787410178b26e42fca4096d1337c46011737aa8",
+  "runId": "edc26378-2c3a-4339-9809-ebffbea31a83",
+  "status": "PENDING_INDEPENDENT_TECHNICAL_APPROVAL",
+  "sourceSha256": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+  "classification": "CONFIDENTIAL",
+  "retention": {
+    "category": "TEMPORARY",
+    "anchorProposed": "2026-10-18T13:28:22.310Z",
+    "anchorEvidence": "New synthetic bundle PDF filesystem birthtime, within the recorded baseline run; not the original missing document creation time.",
+    "expiresAtProposed": "2027-04-16T13:28:22.310Z",
+    "retryMayExtendExpiry": false
+  },
+  "legalHoldUntilProposed": null,
+  "legalHoldBasisPresent": false,
+  "requiredTechnicalAuthorities": [
+    "Assets domain owner",
+    "Student domain owner",
+    "Audit boundary owner for journal sufficiency"
+  ],
+  "documentedTechnicalApprovals": [],
+  "projectOwnerApproval": {
+    "status": "APPROVED_SCOPE_ONLY",
+    "evidence": "Explicit user reply in this conversation on 2026-10-17 (Asia/Aden)",
+    "statement": "أوافق على نطاق المشروع مع بقاء الاعتمادات التقنية مطلوبة",
+    "doesNotReplaceIndependentTechnicalApproval": true
+  },
+  "consentOrBindingChangesProposed": false,
+  "outboxRecommendation": "No invented Student event; scoped append-only remediation journal through existing Audit boundary where adequate. Requires independent technical acceptance; honor any demonstrated integration contract.",
+  "remediationExecuted": false,
+  "upgradeExecuted": false,
+  "R05Accepted": false
+}

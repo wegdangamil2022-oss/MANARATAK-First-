@@ -1,7 +1,52 @@
 import { describe, it, expect } from 'vitest';
 import { AssetValidator } from '../../../application/src/asset-platform/utils/AssetValidator';
+import { spawnSync } from 'node:child_process';
+
+function validateSvg(text: string, kind: 'PREVIEW' | 'QR' = 'PREVIEW'): void {
+  const bytes = new TextEncoder().encode(text);
+  const renderFingerprint = 'a'.repeat(64);
+  AssetValidator.validateGeneratedCertificate({
+    originalFilename: 'generated.svg', mimeType: 'image/svg+xml', fileExtension: 'svg',
+    byteSize: bytes.length, bytes, ownerType: 'Certificate', kind, renderFingerprint,
+    assetReference: `certificate:synthetic:render:${renderFingerprint}:${kind.toLowerCase()}`,
+  });
+}
 
 describe('AssetValidator', () => {
+  it('preserves generated SVG fragments and embedded font/image references', () => {
+    expect(() => validateSvg('<svg xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="paint"/></defs><style>@font-face{src:url( "data:font/woff2;base64,AAAA" )}</style><path fill="url(#paint)"/><image href="data:image/png;base64,AAAA"/><text>A &lt; B</text></svg>')).not.toThrow();
+    expect(() => validateSvg('<svg><path d="M0 0"/></svg>', 'QR')).not.toThrow();
+    expect(() => validateSvg('<svg><text>private</text></svg>', 'QR')).toThrow('CERTIFICATE_GENERATED_QR_PERSONAL_CONTENT_FORBIDDEN');
+  });
+
+  it('rejects active content and external or malformed URL references including quoted tag delimiters', () => {
+    for (const text of [
+      '<svg><script>alert(1)</script></svg>', '<svg><foreignObject/></svg>',
+      '<svg data-label=">" onload="run()"></svg>', '<svg><path onfocus = "run()"/></svg>',
+      '<svg><!DOCTYPE svg></svg>', '<svg><g',
+    ]) expect(() => validateSvg(text), text).toThrow('CERTIFICATE_GENERATED_SVG_UNSAFE');
+    for (const text of [
+      '<svg><image href="https://example.invalid/image.png"/></svg>',
+      '<svg><style>path{fill:url(https://example.invalid/paint)}</style></svg>',
+      '<svg><style>path{fill:url( "#paint\' )}</style></svg>',
+      '<svg><style>path{fill:url(!url(!)}</style></svg>',
+      '<svg><style>path{fill:url(</style></svg>',
+    ]) expect(() => validateSvg(text), text).toThrow('CERTIFICATE_GENERATED_SVG_EXTERNAL_REFERENCE');
+  });
+
+  it('bounds hostile SVG whitespace and nested URL scans in a killable child process', () => {
+    const child = spawnSync(process.execPath, ['--import', 'tsx', '--input-type=module', '-e', `
+      import assert from 'node:assert/strict';
+      import { AssetValidator } from './packages/application/src/asset-platform/utils/AssetValidator.ts';
+      const fingerprint = 'a'.repeat(64);
+      for (const text of ['<svg><'+'\\t'.repeat(200000)+'</svg>', '<svg><style>'+'url(!'.repeat(40000)+'</style></svg>']) {
+        const bytes = new TextEncoder().encode(text);
+        assert.throws(() => AssetValidator.validateGeneratedCertificate({originalFilename:'generated.svg',mimeType:'image/svg+xml',fileExtension:'svg',byteSize:bytes.length,bytes,ownerType:'Certificate',kind:'PREVIEW',renderFingerprint:fingerprint,assetReference:'certificate:synthetic:render:'+fingerprint+':preview'}));
+      }
+    `], { timeout: 8000, encoding: 'utf8', windowsHide: true });
+    expect(child.error, child.stderr).toBeUndefined();
+    expect(child.status, child.stderr).toBe(0);
+  }, 10000);
   it('passes validation for valid files', () => {
     expect(() => {
       AssetValidator.validate({

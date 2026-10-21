@@ -1,0 +1,106 @@
+{
+  "kind": "POST28_R09_CURRENT_PRACTICAL_REVIEW",
+  "localDate": "2026-10-21",
+  "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+  "status": "PRACTICAL_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+  "ci": {
+    "runId": 39506916987,
+    "result": "success",
+    "passedJobs": 6
+  },
+  "sharedSyntheticDataset": {
+    "postgresMajor": 16,
+    "role": "post28_app",
+    "expected": 5,
+    "executed": 5,
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0
+  },
+  "areasVerified": [
+    "Document and finance ownership; original consent and binding preserved",
+    "CMS three-actor author review publish withdrawal",
+    "Lesson to one signed certificate, render, verify and revoke",
+    "Concurrent synthetic wallet payment with one balanced capture",
+    "Canonical owner relationships, paging, withdrawal and unavailable versus zero"
+  ],
+  "artifact": {
+    "id": 12304986939,
+    "zipSha256": "89fa17b27e7e2f5593ac0d02b43e69f01f483f70246d22b850276022056fbe81",
+    "zipDigestVerified": true
+  },
+  "retainedEvidenceFilesMatched": 25,
+  "manualTestsOrBuildOrCiRerun": false,
+  "applicationSourceChanged": false,
+  "fullBuiltAdminCmsMfaJourneyAccepted": false,
+  "certificateProviderDeliveryGrantAccepted": false,
+  "freshEapProcessingAccepted": false,
+  "allMandatoryRowsClosed": false,
+  "formalR09Acceptance": false,
+  "productionAcceptance": false,
+  "existingDatabasesTouched": false,
+  "schemaOrMigrationChanged": false,
+  "externalProviderEnabled": false,
+  "exceptions": [
+    "R09-E01",
+    "R09-E02",
+    "R09-E03",
+    "R09-E04",
+    "R09-E05",
+    "R09-E06"
+  ],
+  "evidence": "docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r09-current-review/evidence-index.json",
+  "nextStageReview": "R10",
+  "latestAdminCmsLocalDiagnostic": {
+    "completed": true,
+    "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+    "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+    "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+    "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+    "formalAcceptance": false,
+    "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
+  },
+  "fullBuiltAdminCmsMfaJourneyLocallyDemonstrated": true,
+  "latestPrivateAssetDeliveryDiagnostic": {
+    "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+    "scope": "STUDENT_OWNED_PRIVATE_PDF_GRANT_DIAGNOSTIC_WINDOWS_ONLY",
+    "passed": true,
+    "report": "docs/remediation/POST28_PRIVATE_ASSET_RETENTION_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/evidence-index.json",
+    "certificateDeliveryExercised": false,
+    "reviewerConsentDeliveryExercised": false,
+    "instantPreIssuedUrlRevocationProved": false,
+    "formalAcceptance": false,
+    "ci": {
+      "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+      "runId": 39522846173,
+      "result": "success",
+      "passedJobs": 6
+    }
+  },
+  "latestReviewerDeliveryDiagnostic": {
+    "passed": true,
+    "scope": "BUILT_API_WINDOWS_SYNTHETIC_CONSENT_GATED_STREAM_WITH_MFA",
+    "report": "docs/remediation/POST28_REVIEWER_DELIVERY_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/evidence-index.json",
+    "formalAcceptance": false
+  },
+  "latestCertificateDeliveryDiagnostic": {
+    "scope": "WINDOWS_BUILT_API_SIGNED_CERTIFICATE_PDF_PREVIEW_TRANSPORT_DIAGNOSTIC",
+    "scopedDeliveryPassed": true,
+    "report": "docs/remediation/POST28_CERTIFICATE_DELIVERY_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/682a7ff9bcab350bf32f025b232f438874d67b97/r14-certificate-delivery/evidence-index.json",
+    "instantRevocationOfPreviouslyIssuedGrant": false,
+    "openFinding": {
+      "id": "R14-DELIVERY-01",
+      "state": "OPEN_RELEASE_REVIEW",
+      "observed": "Provider bearer URL issued before revocation returned200 afterward, within its original max300s TTL",
+      "impact": "Revocation does not invalidate capabilities already disclosed to a caller",
+      "requiredBeforeClaimingInstantRevocation": "Authenticated server content delivery with current certificate checks before and after IO, or proven provider capability fencing tied to certificate revocation",
+      "currentContract": "Temporary provider-signed URLs with bounded TTL; no existing instant invalidation protocol proved",
+      "productionScopeAccepted": false
+    },
+    "formalAcceptance": false
+  }
+}

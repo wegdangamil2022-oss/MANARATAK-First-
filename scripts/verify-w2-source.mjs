@@ -166,12 +166,13 @@ check('MNT-AUD-0088 Phase 02 active authority reconciles schema-isolation drift'
 
 
 const greenfieldParity = read('scripts/database/verify-greenfield-migration-parity.sh');
+const greenfieldDiffSource = read('scripts/database/prisma-env-diff.mjs');
 const greenfieldParityRunbook = read('docs/operations/GREENFIELD_MIGRATION_PARITY_VERIFICATION.md');
 check('MNT-AUD-0041 source contains authoritative greenfield migration replay + parity diff',
   greenfieldParity.includes('migrate deploy') &&
-  greenfieldParity.includes('--from-url') && greenfieldParity.includes('--from-migrations') &&
+  greenfieldParity.includes('--from-schema-datasource') && greenfieldParity.includes('post28-preflight.mjs --pair --require-empty') && greenfieldParity.includes('--from-migrations') &&
   greenfieldParity.includes('--to-schema-datamodel') && greenfieldParity.includes('--shadow-database-url') &&
-  greenfieldParity.includes('--exit-code'));
+  greenfieldDiffSource.includes("'--exit-code'") && greenfieldDiffSource.includes('preflightTargets') && greenfieldDiffSource.includes('runPrismaMain'));
 check('MNT-AUD-0041 verifier fails closed on unsafe targets and catalog anomalies',
   greenfieldParity.includes('GREENFIELD_DATABASE_IS_DISPOSABLE') &&
   greenfieldParity.includes('TARGET_AND_SHADOW_MUST_DIFFER') &&
@@ -192,7 +193,8 @@ check('MNT-AUD-0083 migration ledger and required counters fail closed',
   !databaseBaselineSource.includes("number | 'UNAVAILABLE'") &&
   !databaseBaselineSource.includes("return [name, 'UNAVAILABLE']"));
 check('MNT-AUD-0083 baseline manifest covers all persistence-owned models',
-  Object.keys(databaseBaselineManifest.models).length === Object.keys(persistenceManifest.models).length &&
+  JSON.stringify(Object.keys(databaseBaselineManifest.models).sort()) === JSON.stringify(Object.keys(persistenceManifest.models).sort()) &&
+  Object.entries(databaseBaselineManifest.models).every(([name, item]) => item.owner === persistenceManifest.models[name]) &&
   Object.values(databaseBaselineManifest.models).every((item) => item.required === true && Boolean(item.owner)));
 check('MNT-AUD-0083 artifacts include identity and source fingerprints',
   databaseBaselineSource.includes('databaseTargetIdentity') &&
@@ -478,7 +480,7 @@ check('MNT-AUD-0081 canonical policy distinguishes owner disposition and legal h
   retentionDomain.includes('LEGAL_HOLD_ACTIVE') && retentionDomain.includes('AUDIT_EVIDENCE_ARCHIVE') && retentionDomain.includes('IMPORT_RAW_PAYLOAD_EXPIRED') && retentionDomain.includes('ASSET_PERMANENT_POLICY'));
 check('MNT-AUD-0081 durable sweeper is retryable/idempotent and only terminal decisions suppress retry',
   retentionSweepUseCase.includes('hasTerminalDecision') && retentionSweepUseCase.includes("result: 'FAILED'") &&
-  retentionDecisionRepository.includes("result: { in: ['APPLIED', 'SKIPPED'] }") && retentionDecisionRepository.includes("input.result === 'FAILED' ? null : input.decisionKey"));
+  retentionDecisionRepository.includes("where: { decisionKey, result: 'APPLIED' }") && !retentionDecisionRepository.includes("result: { in: ['APPLIED', 'SKIPPED'] }") && retentionDecisionRepository.includes("input.result === 'FAILED' ? null : input.decisionKey"));
 check('MNT-AUD-0081 owner gateways claim before mutation and preserve owner-specific retention semantics',
   [importRetentionGateway,auditRetentionGateway,assetRetentionGateway].every((source)=>source.includes('retentionClaimToken') && source.includes('retentionClaimUntil')) &&
   importRetentionGateway.includes('retentionPurged: true') && importRetentionGateway.includes("retentionState: 'RAW_PURGED'") &&

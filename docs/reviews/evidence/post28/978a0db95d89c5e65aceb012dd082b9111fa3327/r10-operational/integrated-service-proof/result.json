@@ -1,0 +1,34 @@
+{
+  "sourceSha": "978a0db95d89c5e65aceb012dd082b9111fa3327",
+  "serviceVerifiedAt": "2026-10-20T15:34:57.313Z",
+  "apiReadiness": true,
+  "webBrowser": true,
+  "adminBrowser": true,
+  "authenticatedRead": true,
+  "studentAdminDenied": 403,
+  "observations": [
+    {
+      "route": "/health/build",
+      "status": 200,
+      "sourceSha": "978a0db95d89c5e65aceb012dd082b9111fa3327"
+    },
+    {
+      "route": "/admin/health/build",
+      "status": 200,
+      "sourceSha": "978a0db95d89c5e65aceb012dd082b9111fa3327"
+    },
+    {
+      "route": "/api/v1/monitoring/health/readiness",
+      "status": 200,
+      "sourceSha": "978a0db95d89c5e65aceb012dd082b9111fa3327"
+    }
+  ],
+  "pageErrors": [],
+  "blockedExternal": [
+    "https://images.unsplash.com"
+  ],
+  "browserVersion": "155.0.4283.62",
+  "runtimeRole": "post28_app",
+  "runtimeDatabase": "manaratak_restore_f857130eecb0bcf998b0513da157aa36",
+  "synthetic": true
+}

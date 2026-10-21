@@ -1,0 +1,139 @@
+{
+  "sourceSha": "7efa51061a9c9c1a739928d7c8799a6a74108393",
+  "mode": "clean",
+  "identities": {
+    "runtime": {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698175180326932408",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    },
+    "setup": {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_tx_migrator",
+      "serverIdentity": "7698175180326932408",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  },
+  "candidateSha256": "ae74cf355a8d6869a7e1368d98dfa7a262dc12c2e741dc0bf61ecbc81514cb9d",
+  "checks": [
+    {
+      "name": "independent ordinary application connections",
+      "passed": true,
+      "roles": [
+        "post28_app",
+        "post28_app"
+      ]
+    },
+    {
+      "name": "actual DDL failure after DROP restores original index transactionally",
+      "passed": true
+    },
+    {
+      "name": "candidate applied only to clean isolated laboratory",
+      "passed": true
+    },
+    {
+      "name": "catalog confirms full named NULL-equal unique identity",
+      "passed": true,
+      "index": {
+        "unique": true,
+        "valid": true,
+        "ready": true,
+        "nullsNotDistinct": true,
+        "unrestricted": true,
+        "plainColumns": true,
+        "keyCount": 4,
+        "columnCount": 4,
+        "columns": [
+          "academicProgramId",
+          "internationalTestId",
+          "testVariantId",
+          "testVersionId"
+        ]
+      }
+    },
+    {
+      "name": "duplicate rejected across statuses",
+      "passed": true,
+      "variantNull": true,
+      "versionNull": true
+    },
+    {
+      "name": "duplicate rejected across statuses",
+      "passed": true,
+      "variantNull": false,
+      "versionNull": true
+    },
+    {
+      "name": "duplicate rejected across statuses",
+      "passed": true,
+      "variantNull": true,
+      "versionNull": false
+    },
+    {
+      "name": "duplicate rejected across statuses",
+      "passed": true,
+      "variantNull": false,
+      "versionNull": false
+    },
+    {
+      "name": "two direct concurrent writers commit one nullable identity",
+      "passed": true
+    },
+    {
+      "name": "direct UPDATE collision rolls back without changing identity",
+      "passed": true
+    },
+    {
+      "name": "FK SET NULL collision blocks deletion without losing dependent rows",
+      "passed": true
+    },
+    {
+      "name": "companion owner mutation rolls back on duplicate insert",
+      "passed": true
+    },
+    {
+      "name": "Prisma 5.22 schema parity and ordinary client CRUD remain compatible",
+      "passed": true,
+      "prismaVersion": "5.22",
+      "schemaDiffExitCode": 0,
+      "indexNamePreserved": true,
+      "schemaFileUnchanged": true,
+      "catalogNullFlagCheckedSeparately": true
+    },
+    {
+      "name": "application role has no superuser DDL or ledger access",
+      "passed": true,
+      "role": "post28_app",
+      "rolsuper": false,
+      "ddl": false,
+      "ledger": false
+    }
+  ],
+  "compatibility": {
+    "prismaVersion": "5.22",
+    "schemaDiffExitCode": 0,
+    "indexNamePreserved": true,
+    "schemaFileUnchanged": true,
+    "catalogNullFlagCheckedSeparately": true
+  },
+  "failure": null,
+  "passed": true,
+  "activeMigrationTreeChanged": false,
+  "migrationLedgerCandidateRecorded": false,
+  "syntheticOnly": true,
+  "productionApproved": false,
+  "R04Accepted": false,
+  "R05Accepted": false
+}

@@ -19,7 +19,7 @@ describe('PublicCourseUseCases', () => {
       findByDedupKey: vi.fn(),
       findById: vi.fn(),
       findByPublicId: vi.fn(),
-      findBySlug: vi.fn(),
+      findPublishedBySlug: vi.fn(),
       updateStatus: vi.fn(),
       updateImportLink: vi.fn(),
       listByStatus: vi.fn(),
@@ -73,7 +73,7 @@ describe('PublicCourseUseCases', () => {
   });
 
   it('getCourse returns mapped DTO only if PUBLISHED', async () => {
-    mockRepo.findBySlug = vi.fn().mockResolvedValue({
+    mockRepo.findPublishedBySlug = vi.fn().mockResolvedValue({
       id: 'course-1',
       publicId: 'pub-1',
       slug: 'intro-data-science',
@@ -102,7 +102,7 @@ describe('PublicCourseUseCases', () => {
   });
 
   it('getCourse throws if not PUBLISHED', async () => {
-    mockRepo.findBySlug = vi.fn().mockResolvedValue({
+    mockRepo.findPublishedBySlug = vi.fn().mockResolvedValue({
       id: 'course-1',
       slug: 'intro-data-science',
       status: CourseStatus.READY_TO_PUBLISH,
@@ -112,7 +112,7 @@ describe('PublicCourseUseCases', () => {
     await expect(useCases.getCourse('intro-data-science')).rejects.toThrow('Course not found');
   });
   it('projects localizedNames by requested locale and strips the translation carrier', async () => {
-    mockRepo.findBySlug = vi.fn().mockResolvedValue({
+    mockRepo.findPublishedBySlug = vi.fn().mockResolvedValue({
       id: 'course-1',
       publicId: 'pub-1',
       slug: 'data-science',

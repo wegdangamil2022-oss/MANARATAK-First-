@@ -1,0 +1,29 @@
+2026-10-19T20:03:16.9854092Z Interpreted problem query "Disabling SCE" (js/angular/disabling-sce) at path /home/runner/work/_temp/codeql_databases/javascript/results/codeql/javascript-queries/AngularJS/DisablingSce.bqrs.
+2026-10-19T20:03:16.9857106Z Interpreted problem query "Insecure URL whitelist" (js/angular/insecure-url-whitelist) at path /home/runner/work/_temp/codeql_databases/javascript/results/codeql/javascript-queries/AngularJS/InsecureUrlWhitelist.bqrs.
+2026-10-19T20:03:16.9860774Z Interpreted problem query "Inefficient regular expression" (js/redos) at path /home/runner/work/_temp/codeql_databases/javascript/results/codeql/javascript-queries/Performance/ReDoS.bqrs.
+2026-10-19T20:03:16.9863889Z Interpreted pathproblem query "Polynomial regular expression used on uncontrolled data" (js/polynomial-redos) at path /home/runner/work/_temp/codeql_databases/javascript/results/codeql/javascript-queries/Performance/PolynomialReDoS.bqrs.
+2026-10-19T20:03:16.9867280Z Interpreted problem query "Replacement of a substring with itself" (js/identity-replacement) at path /home/runner/work/_temp/codeql_databases/javascript/results/codeql/javascript-queries/RegExp/IdentityReplacement.bqrs.
+2026-10-19T20:03:16.9870762Z Interpreted problem query "Enabling Electron allowRunningInsecureContent" (js/enabling-electron-insecure-content) at path /home/runner/work/_temp/codeql_databases/javascript/results/codeql/javascript-queries/Electron/AllowRunningInsecureContent.bqrs.
+2026-10-19T20:03:16.9875047Z Interpreted problem query "Disabling Electron webSecurity" (js/disabling-electron-websecurity) at path /home/runner/work/_temp/codeql_databases/javascript/results/codeql/javascript-queries/Electron/DisablingWebSecurity.bqrs.
+2026-10-19T20:03:16.9877976Z Interpreted diagnostic query "Extraction errors" (js/diagnostics/extraction-errors) at path /home/runner/work/_temp/codeql_databases/javascript/results/codeql/javascript-queries/Diagnostics/ExtractionErrors.bqrs.
+2026-10-19T20:03:16.9881045Z Interpreted diagnostic query "Extracted files" (js/diagnostics/successfully-extracted-files) at path /home/runner/work/_temp/codeql_databases/javascript/results/codeql/javascript-queries/Diagnostics/ExtractedFiles.bqrs.
+2026-10-19T20:03:16.9885207Z Interpreted metric query "Total lines of JavaScript and TypeScript code in the database" (js/summary/lines-of-code) at path /home/runner/work/_temp/codeql_databases/javascript/results/codeql/javascript-queries/Summary/LinesOfCode.bqrs.
+2026-10-19T20:03:16.9888964Z Interpreted metric query "Total lines of user written JavaScript and TypeScript code in the database" (js/summary/lines-of-user-code) at path /home/runner/work/_temp/codeql_databases/javascript/results/codeql/javascript-queries/Summary/LinesOfUserCode.bqrs.
+2026-10-19T20:03:16.9891345Z Reading source archive /home/runner/work/_temp/codeql_databases/javascript/src.zip
+2026-10-19T20:03:17.9360675Z Interpreting diagnostic messages...
+2026-10-19T20:03:17.9683105Z Found 2 raw diagnostic messages.
+2026-10-19T20:03:17.9799733Z Processed diagnostic messages (removed 0 due to limits, created 0 summary diagnostics for status page).
+2026-10-19T20:03:17.9819080Z Interpreted diagnostic messages (44ms).
+2026-10-19T20:03:18.2771208Z Exporting results to SARIF...
+2026-10-19T20:03:18.8314714Z Exported results to SARIF (554ms).
+2026-10-19T20:03:18.8738009Z ##[endgroup]
+2026-10-19T20:03:18.8738579Z Analysis produced the following diagnostic information:
+2026-10-19T20:03:18.8739594Z ##[group]Could not process some files due to syntax errors (1 result)
+2026-10-19T20:03:18.8742325Z   * scripts/archive/remediation-root/generate-uni-page.js#L444C25:25: A parse error occurred: `Unexpected token`. Check the syntax of the file. If the file is invalid, correct the error or [exclude](https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/customizing-code-scanning) the file from analysis.
+2026-10-19T20:03:18.8744265Z ##[endgroup]
+2026-10-19T20:03:18.8744396Z
+2026-10-19T20:03:18.8744866Z To speed up pull request analysis, file coverage information is only enabled when analyzing the default branch and protected branches.
+2026-10-19T20:03:18.8749922Z Post-processing sarif files: ["/home/runner/work/MANARATAK-First-/results/javascript.sarif"]
+2026-10-19T20:03:18.9073618Z Adding fingerprints to SARIF file. See https://docs.github.com/en/code-security/reference/code-scanning/sarif-support-for-code-scanning#data-for-preventing-duplicated-alerts for more information.
+2026-10-19T20:03:19.0998961Z ##[group]Uploading code scanning results
+2026-10-19T20:03:19.1837815Z Uploading results

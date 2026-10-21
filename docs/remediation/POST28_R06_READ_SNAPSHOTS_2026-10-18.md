@@ -1,0 +1,11 @@
+# R06 CD-040 public read snapshot and cursor repair — 2026-10-18
+
+Source 60c3808dc8c9dc9b08c8de0591c7bbab25234a42; run fabb8d2b-b004-4f83-bf90-c1ce73906d85; PostgreSQL postgres (PostgreSQL) 16.15, system 7698032794037541100.
+
+Actual scholarship public list and details now bind owner program selection, root reads, total and relation hydration to the same RepeatableRead transaction. Two independent PostgreSQL connections coordinate precise barriers: one withdraws the published major version, program or scholarship between the other's SQL reads. The in-flight request returns one coherent prechange snapshot; the next request reflects withdrawal. This does not promise a cross-request historical snapshot or cancellation of already returned bytes.
+
+The shared cursor helper now uses immutable id > anchor rather than requiring an existing cursor row, verified against a real relation deleted between pages. Initial attempt to delete Scholarship was correctly rejected by its immutable identity trigger (SQLSTATE23514); no trigger disabled, no historical policy changed. The revised test deletes only an owner-local relation through its allowed DML. The original six-pass/one-failure report is preserved. Details also require COMPLETE like list. University program list/facets now verify the current published version belongs to the exact major/profile, and language queries/facets require valid HTTPS evidence like the program owner read contract. Actual SQL tests prove withdrawal for foreign current-version pointers and invalid study evidence.
+
+New suite 7/7; regressions DEC01 14/14, program languages 8/8, country separation 7/7, University relations 7/7 and course-major visibility 8/8. Targeted scholarship/course repository and public use-case unit tests passed; infrastructure TypeScript and source quality passed. No schema changes, no other phase executed. Remaining grant revocation, full graph/cache/HTTP matrix and cross-request pagination semantics remain outside this batch's evidence; no blanket CD-040 acceptance.
+
+Evidence: docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots/evidence-index.json. Actual database cases: 51 passed, zero failed/skipped in final runs. New distinct 7; repeats 44; cumulative 325 across SHAs, not one current-head acceptance run. R06 remains 0/26 accepted.

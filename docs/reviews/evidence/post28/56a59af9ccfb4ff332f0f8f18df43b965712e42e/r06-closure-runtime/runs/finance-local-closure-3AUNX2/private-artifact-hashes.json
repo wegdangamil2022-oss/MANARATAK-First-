@@ -1,0 +1,17 @@
+[
+  {
+    "name": "R06-suites/finance-local-closure-3AUNX2/vitest.json",
+    "sha256": "69b9fd8f7d539ffc0a62b365e21d7ee1de91911459b064a3371a080808e9d9d1",
+    "bytes": 7798
+  },
+  {
+    "name": "R06-suites/finance-local-closure-3AUNX2/discovery.json",
+    "sha256": "2fa9018cca9461c5f9fc67ac7689d3cdf9b60752391cfaba4f0c6a8f3ba9fb61",
+    "bytes": 3956
+  },
+  {
+    "name": "R06-suites/finance-local-closure-3AUNX2/selection.json",
+    "sha256": "b260a2d0019d1a2a74a04788ba59349159d1e2a210b7ca285502f940c9d6d1fc",
+    "bytes": 108
+  }
+]

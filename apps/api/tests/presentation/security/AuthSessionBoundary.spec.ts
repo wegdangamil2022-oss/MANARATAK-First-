@@ -6,9 +6,10 @@ import {AuthRouter} from '../../../src/presentation/api/router/AuthRouter';
 import {SecurityMiddlewareFactory} from '../../../src/presentation/security/SecurityMiddlewareFactory';
 import {SecurityService} from '@manaratak/infrastructure';
 import {CsrfClientManager} from '@manaratak/shared';
+import type {IRateLimiter} from '@manaratak/core';
 
 function fixture() {
- const consume=vi.fn(async()=>({allowed:true,remaining:5,resetTime:Date.now()+60_000}));
+ const consume=vi.fn<IRateLimiter['consume']>(async()=>({allowed:true,remaining:5,resetTime:Date.now()+60_000}));
  const security=new SecurityService({consume} as never,{signingSecret:'b02-synthetic-csrf-material-e7c4b0a2d6f8e1c3b5a7d9f0'});
  let refresh='session-one';
  const tokens=()=>({accessToken:'test-access',refreshToken:refresh});

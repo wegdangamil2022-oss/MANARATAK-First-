@@ -1,0 +1,15 @@
+# R06/R07 integrated artifact gateway implementation
+
+Source c9264f40eef75ca5ab5142707f30f4203d381d60. New executable code connects the unpacked Web/Admin artifacts and API behind one loopback HTTPS origin. The tool is packaged inside both frontend archives and runs from the unpacked Web archive without checkout or node_modules. API uses its separately installed and freshly unpacked runtime layer. No source API TypeScript is used at boot.
+
+Security boundary: operator-specified API origin must be HTTP on literal 127.0.0.1 with an explicit port, no credentials/path/query/fragment. Client requests cannot choose the upstream. Before opening ingress the tool validates current API readiness protocol 2, exact source SHA, exact 200, status UP and freshness. HTTP hop headers and caller forwarding headers are removed, new forwarding metadata is set, response cookies are preserved, requests are streamed with a 32MiB cap and bounded timeouts, and upstream failure is JSON 502 with no SPA fallback. This local diagnostic tool is not a production ingress replacement.
+
+Five targeted transport/static tests pass, including fixed upstream configuration, readiness mismatch/staleness, POST body/cookie transport, forwarding-header replacement and API failure. Source quality passes. The new test first failed because the tool did not exist; no unrelated test packs were repeated.
+
+Actual fresh build/unpack integration on PostgreSQL 16.15 system 7698151154215130672 (110/110 migration checksums, schema parity, application role read-only on 281 tables): 11 verified HTTPS observations cover both build endpoints, both HTML entries, API readiness, unauthenticated me/CSRF denial, canonical public Course API, missing JS denial, allowed-origin credentialed CORS preflight and no foreign-origin allowance. TLS certificate was explicitly trusted; certificate validation remained enabled. API and gateway were terminated after the run. Authenticated login/refresh/logout/browser session lifecycle is not claimed. Synthetic transport tests preserve a Secure HttpOnly cookie but are not an authenticated-session acceptance test.
+
+Earlier probe assumptions incorrectly expected application/json for canonical problem+json errors and used /api/v1/courses instead of the actual /api/v1/public/courses route. Both failed probe results are preserved; the corrected final probe passes. A relative-output invocation was rejected before starting build; the absolute-output build completed once for this source.
+
+No database migration file, auth policy, production CORS configuration or historical Consent/Binding changed. The local test-only CORS origin and trust-proxy hop reflect this exact loopback topology. No Neon, existing databases, deployment or main merge. R06 and R07 remain unaccepted; prior symlink EPERM failures, authenticated browser/session coverage, full source CI and final gates remain.
+
+Evidence: docs/reviews/evidence/post28/c9264f40eef75ca5ab5142707f30f4203d381d60/R07-integrated-artifact-gateway/evidence-index.json.

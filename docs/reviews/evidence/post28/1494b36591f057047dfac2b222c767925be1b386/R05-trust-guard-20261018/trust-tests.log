@@ -1,0 +1,112 @@
+TAP version 13
+# Subtest: replays actual PG16 ACTIVE row without rewriting quarantine scan locators to clean
+ok 1 - replays actual PG16 ACTIVE row without rewriting quarantine scan locators to clean
+  ---
+  duration_ms: 2.5737
+  type: 'test'
+  ...
+# Subtest: rejects a completed activation whose expected digest differs from actual bytes
+ok 2 - rejects a completed activation whose expected digest differs from actual bytes
+  ---
+  duration_ms: 1.4621
+  type: 'test'
+  ...
+# Subtest: trust check accepts distinct raw and sanitized digests without claiming owner approval
+ok 3 - trust check accepts distinct raw and sanitized digests without claiming owner approval
+  ---
+  duration_ms: 0.3219
+  type: 'test'
+  ...
+# Subtest: rejects FK existence with INITIATED row
+ok 4 - rejects FK existence with INITIATED row
+  ---
+  duration_ms: 0.2034
+  type: 'test'
+  ...
+# Subtest: rejects foreign owner
+ok 5 - rejects foreign owner
+  ---
+  duration_ms: 0.2329
+  type: 'test'
+  ...
+# Subtest: rejects original-file recovery claim
+ok 6 - rejects original-file recovery claim
+  ---
+  duration_ms: 0.1437
+  type: 'test'
+  ...
+# Subtest: rejects permanent retention shortcut
+ok 7 - rejects permanent retention shortcut
+  ---
+  duration_ms: 0.2328
+  type: 'test'
+  ...
+# Subtest: rejects retry extends fixed deadline
+ok 8 - rejects retry extends fixed deadline
+  ---
+  duration_ms: 0.1733
+  type: 'test'
+  ...
+# Subtest: rejects expired asset
+ok 9 - rejects expired asset
+  ---
+  duration_ms: 0.3854
+  type: 'test'
+  ...
+# Subtest: rejects fabricated legal hold
+ok 10 - rejects fabricated legal hold
+  ---
+  duration_ms: 0.4571
+  type: 'test'
+  ...
+# Subtest: rejects raw checksum substituted
+ok 11 - rejects raw checksum substituted
+  ---
+  duration_ms: 0.2792
+  type: 'test'
+  ...
+# Subtest: rejects scan without byte binding
+ok 12 - rejects scan without byte binding
+  ---
+  duration_ms: 0.1481
+  type: 'test'
+  ...
+# Subtest: rejects missing sanitizer evidence
+ok 13 - rejects missing sanitizer evidence
+  ---
+  duration_ms: 0.1413
+  type: 'test'
+  ...
+# Subtest: rejects pending activation
+ok 14 - rejects pending activation
+  ---
+  duration_ms: 0.1177
+  type: 'test'
+  ...
+# Subtest: rejects unscanned sanitized output
+ok 15 - rejects unscanned sanitized output
+  ---
+  duration_ms: 0.1142
+  type: 'test'
+  ...
+# Subtest: rejects changed consent
+ok 16 - rejects changed consent
+  ---
+  duration_ms: 0.1394
+  type: 'test'
+  ...
+# Subtest: rejects changed financial history
+ok 17 - rejects changed financial history
+  ---
+  duration_ms: 0.2423
+  type: 'test'
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 105.0675

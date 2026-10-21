@@ -1,0 +1,18 @@
+[
+  {
+    "file": "packages/infrastructure/src/students/PrismaStudentApplicationTrackerRepository.ts",
+    "baselineWarnings": 24,
+    "currentWarnings": 24,
+    "baselineErrors": 0,
+    "currentErrors": 0,
+    "newWarnings": 0
+  },
+  {
+    "file": "packages/infrastructure/tests/students/PrismaStudentApplicationTrackerRepository.spec.ts",
+    "baselineWarnings": 11,
+    "currentWarnings": 11,
+    "baselineErrors": 0,
+    "currentErrors": 0,
+    "newWarnings": 0
+  }
+]

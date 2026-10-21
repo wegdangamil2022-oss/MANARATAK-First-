@@ -1,0 +1,74 @@
+{
+  "operatorSourceSha": "005595313b0ae1ff940fec44454f441f516c8d8e",
+  "currentArtifact": {
+    "id": 12288633610,
+    "bytes": 12991141,
+    "sha256": "bc43f19e0435e834890af468ef340c0832f967beab403d2054116200493ba327",
+    "transfer": "GitHub connector storage downloaded with Windows Invoke-WebRequest TLS1.2",
+    "digestVerified": true
+  },
+  "entries": [
+    {
+      "label": "current",
+      "sourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+      "archiveSha256": "86ea6fb08569187a94f2a9d4d774c544e989fa329f2f72552dcd3a2ffba09459",
+      "serverEntrySha256": "675537227264207dd704ad59b8bd6c8bb3174680ab093f12c8f0a1192039a311",
+      "artifactEntryUnchanged": true
+    },
+    {
+      "label": "previous",
+      "sourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+      "archiveSha256": "77019e10245a3cbe0530810de6d383529f25f23e00f0a9b5cb31eb07865f71d0",
+      "serverEntrySha256": "675537227264207dd704ad59b8bd6c8bb3174680ab093f12c8f0a1192039a311",
+      "artifactEntryUnchanged": true
+    }
+  ],
+  "wrongCurrentSourceRejectedBeforeOutput": true,
+  "databaseUnchangedByReadOnlyInspector": true,
+  "apiStopBeforePreviousStart": true,
+  "loopbackListenersVerified": true,
+  "receiptRowsUnchangedAfterReplayAndNegativeProbes": true,
+  "outboxRowsUnchangedAfterReplayAndNegativeProbes": true,
+  "originalProtectedRowsPreserved": true,
+  "auditRowsAddedAfterCurrent": 2,
+  "auditAppendCausalityNotIndividuallyMeasured": true,
+  "financialCounts": {
+    "FinancialLedgerEntryRecord": {
+      "before": 10,
+      "after": 10
+    },
+    "FinancialTransactionRecord": {
+      "before": 5,
+      "after": 5
+    },
+    "FinancialAccountRecord": {
+      "before": 4,
+      "after": 4
+    },
+    "FinanceInvoiceRecord": {
+      "before": 3,
+      "after": 3
+    },
+    "FinancePaymentRecord": {
+      "before": 0,
+      "after": 0
+    },
+    "FinanceWalletRecord": {
+      "before": 1,
+      "after": 1
+    },
+    "FinanceWalletHoldRecord": {
+      "before": 1,
+      "after": 1
+    },
+    "FinanceCommandRecord": {
+      "before": 5,
+      "after": 5
+    }
+  },
+  "firstFunctionalRunNotUsedForNetworkIsolation": true,
+  "gracefulWorkerDrainVerified": false,
+  "previousWorkerRuntimeCompatible": false,
+  "formalR12Acceptance": false,
+  "productionAcceptance": false
+}

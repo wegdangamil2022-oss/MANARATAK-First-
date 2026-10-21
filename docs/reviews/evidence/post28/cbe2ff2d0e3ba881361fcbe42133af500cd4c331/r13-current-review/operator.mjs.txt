@@ -1,0 +1,38 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
+import {verifyEvidenceIndex} from './r07-filtered/scripts/lib/verify-evidence-index.mjs';
+const work=import.meta.dirname,repo=path.join(work,'r07-filtered');
+const head=execFileSync('git',['rev-parse','HEAD'],{cwd:repo,encoding:'utf8'}).trim();
+const hash=b=>createHash('sha256').update(b).digest('hex'),read=f=>JSON.parse(fs.readFileSync(f,'utf8').replace(/^\uFEFF/,''));
+const sourceIndex='docs/reviews/evidence/post28/92eb66e5ab572ab51f19c5db14ed3fa2329a3072/r13-practical-closeout/evidence-index.json';
+const indexes=[sourceIndex,
+'docs/reviews/evidence/post28/1cade7f70033430a1fd79655007026b4c69fa75f/r06-current-admission/evidence-index.json',
+'docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r07-current-closure/evidence-index.json',
+'docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r08-current-review/evidence-index.json',
+'docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r09-current-review/evidence-index.json',
+'docs/reviews/evidence/post28/d83ee3e9513af2fd61dc2e7681cb99e3c6dff466/r10-current-offline-review/evidence-index.json',
+'docs/reviews/evidence/post28/2934821ae7de16fd65531c5df41684eb104a8e5c/r11-current-review/evidence-index.json',
+'docs/reviews/evidence/post28/0b13ba91ea8fc3d008d0ced45187d880cf88eb12/r12-current-review/evidence-index.json'];
+const retained=indexes.map(index=>({index,...verifyEvidenceIndex(path.join(repo,index),{root:repo,gitRef:'HEAD'})}));
+const review=read(path.join(repo,path.dirname(sourceIndex),'section27-reviewed-source.json'));
+assert.equal(review.taskCount,38);assert.equal(review.tasks.length,38);assert.equal(review.referenceOnlyTasksRemaining,0);assert.equal(review.sectionClosed,false);
+const tasks=read(path.join(repo,'config/release/section-task-inventory.json')).sections.find(s=>s.section===27).taskIds;
+assert.deepEqual(review.tasks.map(t=>t.id).sort(),[...tasks].sort());
+const files=new Map();
+// The 60 implementation links belong to tasks; review groups also cite 5 ancillary files.
+for(const task of review.tasks)for(const f of task.implementation){if(files.has(f.path))assert.equal(files.get(f.path),f.sha256);files.set(f.path,f.sha256);}
+assert.equal(files.size,60);
+for(const [file,digest] of files)assert.equal(hash(execFileSync('git',['show',head+':'+file],{cwd:repo})),digest);
+assert.equal(execFileSync('git',['diff','--name-only','92eb66e5ab572ab51f19c5db14ed3fa2329a3072',head,'--','apps','packages','vendor','package.json','package-lock.json'],{cwd:repo,encoding:'utf8'}).trim(),'');
+const dest=path.join(repo,'docs/reviews/evidence/post28',head,'r13-current-review');fs.mkdirSync(dest,{recursive:true});
+const write=(name,data)=>fs.writeFileSync(path.join(dest,name),JSON.stringify(data,null,2)+'\n');
+const ci={"sourceSha":"2934821ae7de16fd65531c5df41684eb104a8e5c","runId":39514942840,"observedAt":"2026-10-20T23:41:21.189Z","passedJobs":6,"jobs":[{"id":118944731182,"name":"R08 isolated Redis and Linux worker shutdown","status":"completed","conclusion":"success"},{"id":118944731577,"name":"Translation quality gates","status":"completed","conclusion":"success"},{"id":118944731714,"name":"Full source closure gates","status":"completed","conclusion":"success"},{"id":118944731747,"name":"Deployment configuration","status":"completed","conclusion":"success"},{"id":118948514913,"name":"Retrieve and verify immutable artifacts from Actions storage","status":"completed","conclusion":"success"},{"id":118948638025,"name":"Linux x64 review image and native runtime","status":"completed","conclusion":"success"}]};
+assert.equal(ci.passedJobs,6);assert(ci.jobs.every(j=>j.status==='completed'&&j.conclusion==='success'));
+write('r11-ci-completed.json',ci);
+write('review-summary.json',{kind:'R13_CURRENT_PRACTICAL_REVIEW',reviewSourceSha:head,verifiedAt:new Date().toISOString(),retainedEvidence:retained,section27TasksMatched:38,implementationSourceHashesMatched:60,sourceSection27Closed:false,applicationSourceChanged:false,releaseRuntimeGuardChanged:true,fix:'Strict finite numeric RPO/RTO in signed runtime evidence acceptance',targetedTests:{beforeFix:{passed:1,failed:2},afterFix:{passed:3,failed:0},invalidRuntimeValuesChecked:20,relatedR12TestsPassed:2,repeatReason:'Same acceptanceDetails function modified',targetedEslintPassed:true},sourceSignoffCreated:false,independentReviewClaimed:false,newRuntimeOrBuildOrDatabaseDrill:false,historicalEvidenceRebound:false,validationExecuted:false,stagingExecuted:false,formalR13Acceptance:false,productionAcceptance:false,eligibleForProductionReview:false,releaseDecision:'BLOCKED',remainingReleaseBlockers:['R13-E01','R13-E02','R13-E03','R13-E04','R13-E05'],executionIssue:'Sandbox shell and patch calls unresponsive; reviewed local commands outside sandbox succeeded; no safety guard bypassed'});
+fs.copyFileSync(path.join(work,'collect-r13-current-review.mjs'),path.join(dest,'operator.mjs.txt'));
+write('evidence-index.json',{kind:'R13_CURRENT_REVIEW_EVIDENCE',sourceSha:head,files:fs.readdirSync(dest).filter(n=>n!=='evidence-index.json').sort().map(name=>{const b=fs.readFileSync(path.join(dest,name));return {path:name,bytes:b.length,sha256:hash(b)};})});
+console.log(JSON.stringify({head,destination:dest,retainedFiles:retained.reduce((n,r)=>n+r.files,0),sourceFiles:files.size,taskIds:tasks.length,r11CiPassedJobs:ci.passedJobs,releaseDecision:'BLOCKED'}));

@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Post28 actual111 admission identity enforcement > rejects duplicate and rolls back a colliding update for variant=false version=false",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-admission-null-identity.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual111 admission identity enforcement > rejects duplicate and rolls back a colliding update for variant=true version=false",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-admission-null-identity.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual111 admission identity enforcement > rejects duplicate and rolls back a colliding update for variant=false version=true",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-admission-null-identity.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual111 admission identity enforcement > rejects duplicate and rolls back a colliding update for variant=true version=true",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-admission-null-identity.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual111 admission identity enforcement > rejects FK SET NULL collision without deleting the variant or either requirement",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-admission-null-identity.database.spec.mjs"
+  }
+]

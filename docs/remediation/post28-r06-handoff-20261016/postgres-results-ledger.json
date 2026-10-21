@@ -1,0 +1,3088 @@
+{
+  "kind": "POST28_R06_FORMAL_HANDOFF_POSTGRES_LEDGER",
+  "sourceStateSha": "6429b6ee85018351f4e2d9c8006be92d2d706a17",
+  "distinctSuccessfulDatabaseCases": 283,
+  "distinctBySuite": {
+    "leases": 2,
+    "core-transactions": 8,
+    "assets": 39,
+    "owner-workflows": 19,
+    "document-consent": 10,
+    "university-relations": 7,
+    "owner-relations": 20,
+    "http-finance": 14,
+    "relation-commands": 8,
+    "scholarship-admin": 18,
+    "scholarship-public-relations": 4,
+    "university-geography": 18,
+    "attestation-closure": 14,
+    "owner-http-closure": 12,
+    "learning-closure": 12,
+    "finance-provider-safety": 6,
+    "reference-import-closure": 18,
+    "finance-local-closure": 14,
+    "dec03-free-study": 8,
+    "dec05-taxonomy-invalidation": 6,
+    "dec01-program-pairs": 10,
+    "dec05-owner-atomic": 8,
+    "course-major-visibility": 8
+  },
+  "handoffNewExecutionCount": 0,
+  "countChain": "85 + 42 + 22 + 18 + 76 + 14 + 10 + 16 = 283; 42=20+14+8;22=18+4",
+  "rules": [
+    "Do not add repeated runs, selected-case exclusions, discovery, source tests or backups to distinct count.",
+    "Records may include summary/status descriptions of the same run; never sum this inventory.",
+    "Names/full counts/SHA and preserved failures live in original accounting and evidence files.",
+    "283 is accumulated across documented SHAs; no claim that 283 passed together on the handoff HEAD.",
+    "Geography is18 distinct passes across initial and selected runs; not a final full-profile pass.",
+    "http-finance original selected run was later verified read-only; preserve its original runner gate failure."
+  ],
+  "accountingSources": [
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-continuation/case-accounting.json",
+      "sha256": "1f0b047b6f331f4553100146e6236e9a281cdb4d0b6cf9bc49a93edd68eae11f",
+      "accounting": {
+        "baselineDistinct": 149,
+        "initial": {
+          "sourceSha": "59fdad6b651ccf6637be277d4539f7f21654b1f7",
+          "discovered": 18,
+          "executed": 18,
+          "passed": 13,
+          "failed": 5,
+          "skipped": 0,
+          "productDefects": 2,
+          "fixtureErrorsDueToExistingDatabaseConstraints": 3
+        },
+        "final": {
+          "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+          "fullDiscoveryPerRun": 18,
+          "selectedRuns": 9,
+          "executed": 9,
+          "passed": 9,
+          "failed": 0,
+          "selectedSkipped": 0,
+          "excludedPerRun": 17,
+          "distinctNewPassingCases": 5,
+          "repeatedAffectedRegressionCases": 4,
+          "caseNames": [
+            "Post28 real university canonical geography owner commands > rejects a deprecated country even when its legacy active flag remains true",
+            "Post28 real university canonical geography owner commands > continues to reject inactive country and city flags and retired region lifecycle",
+            "Post28 real university canonical geography owner commands > serializes two valid geography writers with exactly one current owner revision winner",
+            "Post28 real university canonical geography owner commands > database rejects an inactive region whose lifecycle still says active",
+            "Post28 real university canonical geography owner commands > commits matching campus geography through normalized owner details and atomic audit outbox",
+            "Post28 real university canonical geography owner commands > commits matching canonical root geography with actor audit outbox and owner revision",
+            "Post28 real university canonical geography owner commands > database rejects contradictory city country codes despite individually valid canonical IDs",
+            "Post28 real university canonical geography owner commands > rolls root geography revision and audit back at the actual PostgreSQL outbox failure boundary",
+            "Post28 real university canonical geography owner commands > rejects a deprecated city even when its legacy active flag remains true"
+          ]
+        },
+        "newDistinctSuccessfulCases": 18,
+        "cumulativeDistinctSuccessfulDatabaseCases": 167,
+        "fullProfileAcceptance": false,
+        "fullRequiredCasesAccepted": 0,
+        "R04": "PASS_LOCAL_UNCHANGED",
+        "R05": "BLOCKED",
+        "R06": "PARTIAL"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+      "sha256": "d0f5302441aea684f23b24593ce9e9571f67ca58f86886c8c51ca113728bd31a",
+      "accounting": {
+        "baselineDistinctSuccessfulDatabaseCases": 167,
+        "newDistinctSuccessfulDatabaseCases": 76,
+        "cumulativeDistinctSuccessfulDatabaseCases": 243,
+        "distinctBySuite": {
+          "attestation-closure": 14,
+          "owner-http-closure": 12,
+          "learning-closure": 12,
+          "finance-provider-safety": 6,
+          "reference-import-closure": 18,
+          "finance-local-closure": 14
+        },
+        "aggregateExecutionAttempts": 113,
+        "aggregatePassedAttempts": 85,
+        "aggregateFailedAttempts": 28,
+        "aggregateSelectedSkipped": 0,
+        "repeatedPassingAttemptsExcludedFromDistinctCount": 9,
+        "cases": {
+          "attestation-closure": [
+            "Post28 real document attestation owner asset and HTTP boundaries > HTTP records real JWT reviewer and current persisted review permission",
+            "Post28 real document attestation owner asset and HTTP boundaries > HTTP refuses a caller lacking review permission before a decision",
+            "Post28 real document attestation owner asset and HTTP boundaries > HTTP refuses cached attestation after review permission withdrawal",
+            "Post28 real document attestation owner asset and HTTP boundaries > commits verified attestation bound to canonical scholarship cycle version and real asset checksum",
+            "Post28 real document attestation owner asset and HTTP boundaries > fails closed when the actual scholarship cycle or owner publication is withdrawn",
+            "Post28 real document attestation owner asset and HTTP boundaries > persists an explicit rejected attestation without granting verified status",
+            "Post28 real document attestation owner asset and HTTP boundaries > real asset policy refuses another owner and untrusted bytes before any attestation",
+            "Post28 real document attestation owner asset and HTTP boundaries > real delivery service refuses opening bytes when secure storage capability is absent",
+            "Post28 real document attestation owner asset and HTTP boundaries > refuses self review and malformed validity or evidence without an audit",
+            "Post28 real document attestation owner asset and HTTP boundaries > rejects a stale attestation revision atomically",
+            "Post28 real document attestation owner asset and HTTP boundaries > rejects attestation after consent withdrawal",
+            "Post28 real document attestation owner asset and HTTP boundaries > rejects repeat decisions and removes the decided binding from the real review queue",
+            "Post28 real document attestation owner asset and HTTP boundaries > rolls attestation tracker timeline and audit back at real PostgreSQL outbox failure",
+            "Post28 real document attestation owner asset and HTTP boundaries > serializes two independent reviewers to one decision timeline audit and outbox"
+          ],
+          "owner-http-closure": [
+            "Post28 owner HTTP closure with current persisted authority > HTTP binds university geography audit to the authenticated JWT actor",
+            "Post28 owner HTTP closure with current persisted authority > HTTP denies an admin without university permission before root writes",
+            "Post28 owner HTTP closure with current persisted authority > HTTP denies invoice action permission despite generic finance access",
+            "Post28 owner HTTP closure with current persisted authority > HTTP executes invoice issuance under both finance and action permission with JWT audit actor",
+            "Post28 owner HTTP closure with current persisted authority > HTTP refuses cached invoice response when action permission alone is withdrawn",
+            "Post28 owner HTTP closure with current persisted authority > HTTP refuses university writes and cached replay after permission withdrawal",
+            "Post28 owner HTTP closure with current persisted authority > HTTP rejects a foreign region and leaves root revision audit and outbox unchanged",
+            "Post28 owner HTTP closure with current persisted authority > HTTP rejects deprecated country and city canonical references",
+            "Post28 owner HTTP closure with current persisted authority > HTTP rejects missing revision stale revision and missing CSRF",
+            "Post28 owner HTTP closure with current persisted authority > HTTP replays an authorized invoice issue using one owner receipt and one audit event",
+            "Post28 owner HTTP closure with current persisted authority > HTTP replays authorized university commands without duplicate mutation",
+            "Post28 owner HTTP closure with current persisted authority > HTTP session revocation prevents university cached replay"
+          ],
+          "learning-closure": [
+            "Post28 learning completion and certificate trust boundaries on PostgreSQL > acknowledges persisted noncredential completion as a no-op without any issuance",
+            "Post28 learning completion and certificate trust boundaries on PostgreSQL > atomically commits completed enrollment completion audit and versioned credential signal only",
+            "Post28 learning completion and certificate trust boundaries on PostgreSQL > does not duplicate a completion audit or signal on sequential retry",
+            "Post28 learning completion and certificate trust boundaries on PostgreSQL > fails closed for native credential completion when no approved active template exists",
+            "Post28 learning completion and certificate trust boundaries on PostgreSQL > persists enrollment audit and authoritative outbox without issuing a certificate",
+            "Post28 learning completion and certificate trust boundaries on PostgreSQL > real completion worker dispatches noncredential events and records missing authority as retryable failure",
+            "Post28 learning completion and certificate trust boundaries on PostgreSQL > refuses external linked course enrollment progress and completion without local writes",
+            "Post28 learning completion and certificate trust boundaries on PostgreSQL > rejects a persisted external-course certificate claim despite eligible completion payload",
+            "Post28 learning completion and certificate trust boundaries on PostgreSQL > rejects completion below full progress without partial completion audit or event",
+            "Post28 learning completion and certificate trust boundaries on PostgreSQL > rejects wrong event domain type version and delivery idempotency identity before issuing",
+            "Post28 learning completion and certificate trust boundaries on PostgreSQL > rolls completion enrollment and audit back on the actual PostgreSQL outbox failure boundary",
+            "Post28 learning completion and certificate trust boundaries on PostgreSQL > serializes completion from independent connections into exactly one completion and event"
+          ],
+          "finance-provider-safety": [
+            "Post28 provider absence refund and settlement safety on PostgreSQL > does not consume refund approval or reserve execution when its original payment provider is unconfigured",
+            "Post28 provider absence refund and settlement safety on PostgreSQL > does not settle or post a ledger transaction without configured bank evidence",
+            "Post28 provider absence refund and settlement safety on PostgreSQL > reconciliation reports unavailable providers while preserving unresolved financial status",
+            "Post28 provider absence refund and settlement safety on PostgreSQL > refuses a bank transfer request before reservation when the bank provider is absent",
+            "Post28 provider absence refund and settlement safety on PostgreSQL > refuses another refund target approval without consuming either approval",
+            "Post28 provider absence refund and settlement safety on PostgreSQL > rejects over-refund and noncaptured original payment without creating a second refund"
+          ],
+          "reference-import-closure": [
+            "Post28 canonical test language and imported source contracts > approved provider domains reject lookalike external hosts and accept the exact owned host",
+            "Post28 canonical test language and imported source contracts > blocks publishing a raw external source without persisted direct-link verification",
+            "Post28 canonical test language and imported source contracts > deduplicates one provider native language key across two actual connections",
+            "Post28 canonical test language and imported source contracts > does not publish source language labels without a reviewed canonical reference",
+            "Post28 canonical test language and imported source contracts > does not treat an unresolved named test as an approved canonical requirement",
+            "Post28 canonical test language and imported source contracts > forbids uncontrolled imported provider origin and URL identity edits before any owner mutation",
+            "Post28 canonical test language and imported source contracts > keeps provider headquarters separate from course study geography",
+            "Post28 canonical test language and imported source contracts > preserves separate source identities for each language version and provider",
+            "Post28 canonical test language and imported source contracts > projects a resolved scholarship test document backed by its own published version",
+            "Post28 canonical test language and imported source contracts > public course card and list withdraw a previously resolved language after canonical deprecation",
+            "Post28 canonical test language and imported source contracts > public course list excludes raw language only records without canonical proof",
+            "Post28 canonical test language and imported source contracts > records supplied synthetic redirect evidence once and retains original first seen provenance",
+            "Post28 canonical test language and imported source contracts > rejects a stale link-check result after a controlled URL replacement without changing history",
+            "Post28 canonical test language and imported source contracts > rejects inactive and deprecated canonical languages despite a valid language FK",
+            "Post28 canonical test language and imported source contracts > resolves an active canonical course language through its actual repository",
+            "Post28 canonical test language and imported source contracts > withdraws a hidden canonical test from scholarship public requirements even when status remains published",
+            "Post28 canonical test language and imported source contracts > withdraws archived test requirements from scholarship public projection",
+            "Post28 canonical test language and imported source contracts > withdraws test requirements when the currently referenced version is no longer published"
+          ],
+          "finance-local-closure": [
+            "Post28 independent local credit installments and wallet obligation invariants > captures an owned hold into a balanced ledger settlement once and clears its invoice",
+            "Post28 independent local credit installments and wallet obligation invariants > commits a future balanced installment schedule with the invoice revision",
+            "Post28 independent local credit installments and wallet obligation invariants > commits one credit note ledger adjustment and durable replay receipt",
+            "Post28 independent local credit installments and wallet obligation invariants > prevents two connections reserving more than one wallet available balance",
+            "Post28 independent local credit installments and wallet obligation invariants > rejects a foreign wallet payer without an obligation reservation",
+            "Post28 independent local credit installments and wallet obligation invariants > rejects over-credit and denomination mismatch without ledger or receipt mutation",
+            "Post28 independent local credit installments and wallet obligation invariants > rejects wrong sum mixed denomination and past installment dates atomically",
+            "Post28 independent local credit installments and wallet obligation invariants > replays installments without a second plan and rejects a different schedule for the same key",
+            "Post28 independent local credit installments and wallet obligation invariants > requires current revision for credit notes before any partial mutation",
+            "Post28 independent local credit installments and wallet obligation invariants > reserves and releases an owned invoice hold without changing the opening ledger balance",
+            "Post28 independent local credit installments and wallet obligation invariants > rolls captured hold ledger and invoice payment back when PostgreSQL rejects outbox persistence",
+            "Post28 independent local credit installments and wallet obligation invariants > rolls credit note invoice ledger audit outbox and receipt back on PostgreSQL failure",
+            "Post28 independent local credit installments and wallet obligation invariants > rolls hold reservation wallet and invoice revisions back with its failed audit outbox receipt boundary",
+            "Post28 independent local credit installments and wallet obligation invariants > serializes independent installment writers into one plan and one invoice revision"
+          ]
+        },
+        "runs": [
+          {
+            "discovered": 14,
+            "executed": 14,
+            "passed": 11,
+            "failed": 3,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 0,
+            "fullProfilePassed": false,
+            "sourceSha": "55179686b04f328d9705be0352509b403868956a",
+            "suite": "attestation-closure",
+            "runId": "8a561e5f-5c01-4b7a-bf4a-6c6a15446012",
+            "caseExact": null,
+            "originalRunnerGate": "FAILED_TESTS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/55179686b04f328d9705be0352509b403868956a/r06-closure-runtime/runs/attestation-closure-7Wj9iX/status.json"
+          },
+          {
+            "discovered": 12,
+            "executed": 12,
+            "passed": 0,
+            "failed": 12,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 0,
+            "fullProfilePassed": false,
+            "sourceSha": "55179686b04f328d9705be0352509b403868956a",
+            "suite": "learning-closure",
+            "runId": "8a561e5f-5c01-4b7a-bf4a-6c6a15446012",
+            "caseExact": null,
+            "originalRunnerGate": "FAILED_TESTS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/55179686b04f328d9705be0352509b403868956a/r06-closure-runtime/runs/learning-closure-wlWkX5/status.json"
+          },
+          {
+            "discovered": 12,
+            "executed": 12,
+            "passed": 10,
+            "failed": 2,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 0,
+            "fullProfilePassed": false,
+            "sourceSha": "55179686b04f328d9705be0352509b403868956a",
+            "suite": "owner-http-closure",
+            "runId": "8a561e5f-5c01-4b7a-bf4a-6c6a15446012",
+            "caseExact": null,
+            "originalRunnerGate": "FAILED_TESTS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/55179686b04f328d9705be0352509b403868956a/r06-closure-runtime/runs/owner-http-closure-W6wlyF/status.json"
+          },
+          {
+            "discovered": 14,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 13,
+            "fullProfilePassed": false,
+            "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "suite": "attestation-closure",
+            "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+            "caseExact": "Post28 real document attestation owner asset and HTTP boundaries > serializes two independent reviewers to one decision timeline two scoped audits and outbox",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/attestation-closure-MV1HaC/status.json"
+          },
+          {
+            "discovered": 14,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 13,
+            "fullProfilePassed": false,
+            "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "suite": "attestation-closure",
+            "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+            "caseExact": "Post28 real document attestation owner asset and HTTP boundaries > commits verified attestation bound to canonical scholarship cycle version and real asset checksum",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/attestation-closure-j2M3sF/status.json"
+          },
+          {
+            "discovered": 14,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 13,
+            "fullProfilePassed": false,
+            "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "suite": "attestation-closure",
+            "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+            "caseExact": "Post28 real document attestation owner asset and HTTP boundaries > HTTP records real JWT reviewer and current persisted review permission",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/attestation-closure-rIJ6X4/status.json"
+          },
+          {
+            "discovered": 14,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 13,
+            "fullProfilePassed": false,
+            "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "suite": "attestation-closure",
+            "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+            "caseExact": "Post28 real document attestation owner asset and HTTP boundaries > HTTP refuses cached attestation after review permission withdrawal",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/attestation-closure-wQ1ax0/status.json"
+          },
+          {
+            "discovered": 12,
+            "executed": 12,
+            "passed": 11,
+            "failed": 1,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 0,
+            "fullProfilePassed": false,
+            "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "suite": "learning-closure",
+            "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+            "caseExact": null,
+            "originalRunnerGate": "FAILED_TESTS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/learning-closure-0rkxcD/status.json"
+          },
+          {
+            "discovered": 12,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 11,
+            "fullProfilePassed": false,
+            "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "suite": "owner-http-closure",
+            "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+            "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP refuses university writes and cached replay after permission withdrawal",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/owner-http-closure-0TMgVX/status.json"
+          },
+          {
+            "discovered": 12,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 11,
+            "fullProfilePassed": false,
+            "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "suite": "owner-http-closure",
+            "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+            "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP replays an authorized invoice issue using one owner receipt and one audit event",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/owner-http-closure-0Xb8u9/status.json"
+          },
+          {
+            "discovered": 12,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 11,
+            "fullProfilePassed": false,
+            "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "suite": "owner-http-closure",
+            "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+            "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP replays authorized university commands without duplicate mutation",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/owner-http-closure-KYbwZd/status.json"
+          },
+          {
+            "discovered": 12,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 11,
+            "fullProfilePassed": false,
+            "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "suite": "owner-http-closure",
+            "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+            "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP binds university geography audit to the authenticated JWT actor",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/owner-http-closure-etjBF4/status.json"
+          },
+          {
+            "discovered": 12,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 11,
+            "fullProfilePassed": false,
+            "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "suite": "owner-http-closure",
+            "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+            "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP refuses cached invoice response when action permission alone is withdrawn",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/owner-http-closure-h5UK66/status.json"
+          },
+          {
+            "discovered": 6,
+            "executed": 6,
+            "passed": 5,
+            "failed": 1,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 0,
+            "fullProfilePassed": false,
+            "sourceSha": "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+            "suite": "finance-provider-safety",
+            "runId": "1dc55377-c2e6-44b7-b14f-f9b059e05f6a",
+            "caseExact": null,
+            "originalRunnerGate": "FAILED_TESTS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/b57a7cff4c9e511d007e5095eaf893114b8f6aec/r06-closure-runtime/runs/finance-provider-safety-Y22yHr/status.json"
+          },
+          {
+            "discovered": 12,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 11,
+            "fullProfilePassed": false,
+            "sourceSha": "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+            "suite": "learning-closure",
+            "runId": "1dc55377-c2e6-44b7-b14f-f9b059e05f6a",
+            "caseExact": "Post28 learning completion and certificate trust boundaries on PostgreSQL > real completion worker dispatches noncredential events and records missing authority as retryable failure",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/b57a7cff4c9e511d007e5095eaf893114b8f6aec/r06-closure-runtime/runs/learning-closure-tKJfvw/status.json"
+          },
+          {
+            "discovered": 18,
+            "executed": 18,
+            "passed": 13,
+            "failed": 5,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 0,
+            "fullProfilePassed": false,
+            "sourceSha": "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+            "suite": "reference-import-closure",
+            "runId": "1dc55377-c2e6-44b7-b14f-f9b059e05f6a",
+            "caseExact": null,
+            "originalRunnerGate": "FAILED_TESTS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/b57a7cff4c9e511d007e5095eaf893114b8f6aec/r06-closure-runtime/runs/reference-import-closure-jVJ95V/status.json"
+          },
+          {
+            "discovered": 6,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 5,
+            "fullProfilePassed": false,
+            "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+            "suite": "finance-provider-safety",
+            "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+            "caseExact": "Post28 provider absence refund and settlement safety on PostgreSQL > does not consume refund approval or reserve execution when its original payment provider is unconfigured",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/finance-provider-safety-atFe9I/status.json"
+          },
+          {
+            "discovered": 6,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 5,
+            "fullProfilePassed": false,
+            "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+            "suite": "finance-provider-safety",
+            "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+            "caseExact": "Post28 provider absence refund and settlement safety on PostgreSQL > refuses another refund target approval without consuming either approval",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/finance-provider-safety-bxjePW/status.json"
+          },
+          {
+            "discovered": 18,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 17,
+            "fullProfilePassed": false,
+            "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+            "suite": "reference-import-closure",
+            "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+            "caseExact": "Post28 canonical test language and imported source contracts > does not publish source language labels without a reviewed canonical reference",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-2mj9rW/status.json"
+          },
+          {
+            "discovered": 18,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 17,
+            "fullProfilePassed": false,
+            "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+            "suite": "reference-import-closure",
+            "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+            "caseExact": "Post28 canonical test language and imported source contracts > resolves an active canonical course language through its actual repository",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-B4f1Wz/status.json"
+          },
+          {
+            "discovered": 18,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 17,
+            "fullProfilePassed": false,
+            "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+            "suite": "reference-import-closure",
+            "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+            "caseExact": "Post28 canonical test language and imported source contracts > projects a resolved scholarship test document backed by its own published version",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-ESByGh/status.json"
+          },
+          {
+            "discovered": 18,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 17,
+            "fullProfilePassed": false,
+            "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+            "suite": "reference-import-closure",
+            "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+            "caseExact": "Post28 canonical test language and imported source contracts > blocks publishing a raw external source without persisted direct-link verification",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-LEHnng/status.json"
+          },
+          {
+            "discovered": 18,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 17,
+            "fullProfilePassed": false,
+            "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+            "suite": "reference-import-closure",
+            "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+            "caseExact": "Post28 canonical test language and imported source contracts > withdraws test requirements when the currently referenced version is no longer published",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-PWAhYP/status.json"
+          },
+          {
+            "discovered": 18,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 17,
+            "fullProfilePassed": false,
+            "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+            "suite": "reference-import-closure",
+            "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+            "caseExact": "Post28 canonical test language and imported source contracts > rejects inactive and deprecated canonical languages despite a valid language FK",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-ZBM5ly/status.json"
+          },
+          {
+            "discovered": 18,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 17,
+            "fullProfilePassed": false,
+            "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+            "suite": "reference-import-closure",
+            "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+            "caseExact": "Post28 canonical test language and imported source contracts > public course card and list withdraw a previously resolved language after canonical deprecation",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-dm1fmC/status.json"
+          },
+          {
+            "discovered": 18,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 17,
+            "fullProfilePassed": false,
+            "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+            "suite": "reference-import-closure",
+            "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+            "caseExact": "Post28 canonical test language and imported source contracts > withdraws a hidden canonical test from scholarship public requirements even when status remains published",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-kt5FvO/status.json"
+          },
+          {
+            "discovered": 18,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 17,
+            "fullProfilePassed": false,
+            "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+            "suite": "reference-import-closure",
+            "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+            "caseExact": "Post28 canonical test language and imported source contracts > public course list excludes raw language only records without canonical proof",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-n8KBoR/status.json"
+          },
+          {
+            "discovered": 14,
+            "executed": 14,
+            "passed": 11,
+            "failed": 3,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 0,
+            "fullProfilePassed": false,
+            "sourceSha": "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+            "suite": "finance-local-closure",
+            "runId": "cfa44835-dab1-4217-a145-3ad7a722e200",
+            "caseExact": null,
+            "originalRunnerGate": "FAILED_TESTS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/56a59af9ccfb4ff332f0f8f18df43b965712e42e/r06-closure-runtime/runs/finance-local-closure-3AUNX2/status.json"
+          },
+          {
+            "discovered": 14,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 13,
+            "fullProfilePassed": false,
+            "sourceSha": "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+            "suite": "finance-local-closure",
+            "runId": "a96d8bdd-da83-4820-a773-d2cc54c0cb09",
+            "caseExact": "Post28 independent local credit installments and wallet obligation invariants > replays installments without a second plan and rejects a different schedule for the same key",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9/r06-closure-runtime/runs/finance-local-closure-JWluJ8/status.json"
+          },
+          {
+            "discovered": 14,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 13,
+            "fullProfilePassed": false,
+            "sourceSha": "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+            "suite": "finance-local-closure",
+            "runId": "a96d8bdd-da83-4820-a773-d2cc54c0cb09",
+            "caseExact": "Post28 independent local credit installments and wallet obligation invariants > captures an owned hold into a balanced ledger settlement once and clears its invoice",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9/r06-closure-runtime/runs/finance-local-closure-dApLmf/status.json"
+          },
+          {
+            "discovered": 14,
+            "executed": 1,
+            "passed": 0,
+            "failed": 1,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 13,
+            "fullProfilePassed": false,
+            "sourceSha": "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+            "suite": "finance-local-closure",
+            "runId": "a96d8bdd-da83-4820-a773-d2cc54c0cb09",
+            "caseExact": "Post28 independent local credit installments and wallet obligation invariants > commits one credit note ledger adjustment and durable replay receipt",
+            "originalRunnerGate": "FAILED_TESTS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9/r06-closure-runtime/runs/finance-local-closure-pl8kc5/status.json"
+          },
+          {
+            "discovered": 14,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "selectedSkipped": 0,
+            "rawExcludedAssertions": 13,
+            "fullProfilePassed": false,
+            "sourceSha": "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3",
+            "suite": "finance-local-closure",
+            "runId": "0319dc3a-34dd-4b45-845c-2dada93941c4",
+            "caseExact": "Post28 independent local credit installments and wallet obligation invariants > commits one credit note ledger adjustment and durable replay receipt",
+            "originalRunnerGate": "PASS",
+            "R04": "PASS_LOCAL_UNCHANGED",
+            "R05": "BLOCKED",
+            "R06": "PARTIAL",
+            "productionAcceptance": false,
+            "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-runtime/runs/finance-local-closure-IF3Ajm/status.json"
+          }
+        ],
+        "productionAcceptance": false,
+        "R06": "PARTIAL_NOT_CLOSED"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/70f851ea862ba13f3c63abf6a25871ae1b358a7e/r06-dec-policy-review/case-accounting.json",
+      "sha256": "bed0352b75ce8c7dfe3f501eb571e7131867edd2c99e778a4539d3a734276853",
+      "accounting": {
+        "baselineDistinctSuccessfulDatabaseCases": 243,
+        "newDistinctSuccessfulDatabaseCases": 14,
+        "cumulativeDistinctSuccessfulDatabaseCases": 257,
+        "distinctBySuite": {
+          "dec03-free-study": 8,
+          "dec05-taxonomy-invalidation": 6
+        },
+        "cases": {
+          "dec03-free-study": [
+            "Post28 DEC03 actual free study publication and UI contract > FX COURSE 01 study false certificate false obeys owner free study rule",
+            "Post28 DEC03 actual free study publication and UI contract > FX COURSE 01 study false certificate true obeys owner free study rule",
+            "Post28 DEC03 actual free study publication and UI contract > FX COURSE 01 study true certificate false obeys owner free study rule",
+            "Post28 DEC03 actual free study publication and UI contract > FX COURSE 01 study true certificate true obeys owner free study rule",
+            "Post28 DEC03 actual free study publication and UI contract > free classification does not bypass persisted link source verification",
+            "Post28 DEC03 actual free study publication and UI contract > free paid certificate publication rolls owner version audit and outbox back on actual PostgreSQL failure",
+            "Post28 DEC03 actual free study publication and UI contract > keeps unknown certificate cost unknown on the actual API and UI while allowing free study",
+            "Post28 DEC03 actual free study publication and UI contract > relationship filters return the same paid certificate free study owner"
+          ],
+          "dec05-taxonomy-invalidation": [
+            "Post28 DEC05 taxonomy rejection and dependent projection > does not silently approve withdrawn projections when the taxonomy is reapproved",
+            "Post28 DEC05 taxonomy rejection and dependent projection > preserves independent reviewed major links and all provenance rows",
+            "Post28 DEC05 taxonomy rejection and dependent projection > rejects a foreign course identity without modifying its link or projection",
+            "Post28 DEC05 taxonomy rejection and dependent projection > repeated and concurrent rejection through two connections converges without deleting history",
+            "Post28 DEC05 taxonomy rejection and dependent projection > rolls link resolution and projections back on a real PostgreSQL statement failure",
+            "Post28 DEC05 taxonomy rejection and dependent projection > withdraws only the rejected taxonomy derived major projection from the next public read"
+          ]
+        },
+        "runs": [
+          {
+            "sourceSha": "00b304441865e9ebbcc45a32e5fbeecbaef6fa44",
+            "runId": "1331d112-5b65-458d-97b8-0c3e83d46e42",
+            "suite": "dec03-free-study",
+            "discovered": 8,
+            "selected": 8,
+            "executed": 8,
+            "passed": 1,
+            "failed": 7,
+            "skipped": 0,
+            "unselected": 0,
+            "caseExact": null,
+            "fullProfilePassed": false,
+            "R06Accepted": false,
+            "evidence": "docs/reviews/evidence/post28/00b304441865e9ebbcc45a32e5fbeecbaef6fa44/r06-dec-policy-runtime/runs/dec03-free-study-8if7rG/status.json"
+          },
+          {
+            "sourceSha": "a78b6b94dc31cc6cc280c42314cf47e544a8b929",
+            "runId": "d3154458-1cf7-4170-9480-c7485b5cfd41",
+            "suite": "dec03-free-study",
+            "discovered": 8,
+            "selected": 8,
+            "executed": 8,
+            "passed": 8,
+            "failed": 0,
+            "skipped": 0,
+            "unselected": 0,
+            "caseExact": null,
+            "fullProfilePassed": true,
+            "R06Accepted": false,
+            "evidence": "docs/reviews/evidence/post28/a78b6b94dc31cc6cc280c42314cf47e544a8b929/r06-dec-policy-runtime/runs/dec03-free-study-cgwIfA/status.json"
+          },
+          {
+            "sourceSha": "19f4a713e3dd58ee4e0c94d2484a19759c7dbdfa",
+            "runId": "597ef5a8-9024-409c-94d9-9d0fd754a04f",
+            "suite": "dec05-taxonomy-invalidation",
+            "discovered": 6,
+            "selected": 1,
+            "executed": 1,
+            "passed": 0,
+            "failed": 1,
+            "skipped": 0,
+            "unselected": 5,
+            "caseExact": "Post28 DEC05 taxonomy rejection and dependent projection > withdraws only the rejected taxonomy derived major projection from the next public read",
+            "fullProfilePassed": false,
+            "R06Accepted": false,
+            "evidence": "docs/reviews/evidence/post28/19f4a713e3dd58ee4e0c94d2484a19759c7dbdfa/r06-dec-policy-runtime/runs/dec05-taxonomy-invalidation-27P2Qg/status.json"
+          },
+          {
+            "sourceSha": "70f851ea862ba13f3c63abf6a25871ae1b358a7e",
+            "runId": "9447b2a0-382f-46a7-abc2-30b8fcd20293",
+            "suite": "dec05-taxonomy-invalidation",
+            "discovered": 6,
+            "selected": 6,
+            "executed": 6,
+            "passed": 6,
+            "failed": 0,
+            "skipped": 0,
+            "unselected": 0,
+            "caseExact": null,
+            "fullProfilePassed": true,
+            "R06Accepted": false,
+            "evidence": "docs/reviews/evidence/post28/70f851ea862ba13f3c63abf6a25871ae1b358a7e/r06-dec-policy-runtime/runs/dec05-taxonomy-invalidation-jwqSdN/status.json"
+          }
+        ],
+        "notes": [
+          "Repeated passes excluded from distinct count.",
+          "Initial DEC03 7 failures include policy guard differences and expected error-code differences.",
+          "Initial DEC05 selected attempt failed in fixture construction before the reviewed method; not a demonstrated pre-fix product failure.",
+          "DEC03 first fixed-run invocation failed input gate (maintenance purpose missing); zero tests executed; corrected without source or target relabelling."
+        ],
+        "fullRequiredCasesAccepted": 0,
+        "R06": "PARTIAL",
+        "productionAcceptance": false
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/7c15845d5a7af8572b6cef15e3222a3c8fc98e76/r06-dec01-review/case-accounting.json",
+      "sha256": "c52b805544e81c12f1ca90511e33f43fd8c1b2d5985152aebf94ff19ed5ea459",
+      "accounting": {
+        "baselineDistinctSuccessfulDatabaseCases": 257,
+        "newDistinctSuccessfulDatabaseCases": 10,
+        "cumulativeDistinctSuccessfulDatabaseCases": 267,
+        "distinctBySuite": {
+          "dec01-program-pairs": 10
+        },
+        "cases": [
+          "Post28 DEC01 exact funded degree major program pairs > does not infer pairs from independent targets when the program relationship is unresolved",
+          "Post28 DEC01 exact funded degree major program pairs > does not use a university-only link as evidence of a funded degree major pair",
+          "Post28 DEC01 exact funded degree major program pairs > filters exact pairs before cursor pagination and preserves totals across two pages",
+          "Post28 DEC01 exact funded degree major program pairs > keeps each explicitly funded pair with exact API counts",
+          "Post28 DEC01 exact funded degree major program pairs > matches an explicit funded program without requiring duplicated independent targets",
+          "Post28 DEC01 exact funded degree major program pairs > rejects Cartesian pairs even when both independent target lists contain the requested values",
+          "Post28 DEC01 exact funded degree major program pairs > rejects a current profile version belonging to a different major and profile despite valid foreign keys",
+          "Post28 DEC01 exact funded degree major program pairs > rejects a foreign university link despite valid individual foreign keys and target lists",
+          "Post28 DEC01 exact funded degree major program pairs > rejects a major inconsistent with the explicitly requested program",
+          "Post28 DEC01 exact funded degree major program pairs > withdraws paired filter eligibility when the published profile version is withdrawn"
+        ],
+        "runs": [
+          {
+            "sourceSha": "7a6f350e2167345235fec86635b8a6c1842f00cb",
+            "runId": "9a2014e1-00d9-4ec3-9aba-72a6808c4f99",
+            "discovered": 8,
+            "executed": 8,
+            "passed": 1,
+            "failed": 7,
+            "skipped": 0,
+            "fullProfilePassed": false,
+            "R06Accepted": false,
+            "evidence": "docs/reviews/evidence/post28/7a6f350e2167345235fec86635b8a6c1842f00cb/r06-dec01-program-pairs/runs/dec01-program-pairs-TnGAJA/status.json"
+          },
+          {
+            "sourceSha": "7c15845d5a7af8572b6cef15e3222a3c8fc98e76",
+            "runId": "eedd717a-bd42-4494-b888-779870d4424a",
+            "discovered": 10,
+            "executed": 10,
+            "passed": 10,
+            "failed": 0,
+            "skipped": 0,
+            "fullProfilePassed": true,
+            "R06Accepted": false,
+            "evidence": "docs/reviews/evidence/post28/7c15845d5a7af8572b6cef15e3222a3c8fc98e76/r06-dec01-program-pairs/runs/dec01-program-pairs-6UuyQ0/status.json"
+          }
+        ],
+        "repeatedPassingAttemptsExcluded": 1,
+        "initialActualProductAssertionFailures": 7,
+        "noFixtureFailuresInThisProfile": true,
+        "fullR06Acceptance": false,
+        "limitations": [
+          "Synthetic historical published owner fixtures, real PostgreSQL and public HTTP router.",
+          "No complete owner publication, dashboard agreement or built browser acceptance.",
+          "Sequential two-page read proof, not concurrent pagination snapshot proof.",
+          "Memory-backed final lab is not crash durability or R05/R10 recovery proof."
+        ]
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/75a2726164bcfe9e30f6667ac058f7b821a8f819/r06-owner-visibility-review/case-accounting.json",
+      "sha256": "0a7dd9650a690571a3a1adb0511c06d4e5ee492b038a63c3b4221a2c41d70853",
+      "accounting": {
+        "baselineDistinctSuccessfulDatabaseCases": 267,
+        "newDistinctSuccessfulDatabaseCases": 16,
+        "cumulativeDistinctSuccessfulDatabaseCases": 283,
+        "distinctByNewSuite": {
+          "dec05-owner-atomic": 8,
+          "course-major-visibility": 8
+        },
+        "newCases": {
+          "dec05-owner-atomic": [
+            "Post28 DEC05 owner command atomic lifecycle > commits rejection derived invalidation owner version audit and outbox together",
+            "Post28 DEC05 owner command atomic lifecycle > reconciles removed source terms through the owner transaction and preserves independent links",
+            "Post28 DEC05 owner command atomic lifecycle > refuses stale command replay before any relation audit or outbox mutation",
+            "Post28 DEC05 owner command atomic lifecycle > requires unpublication before reviewing a published structure then performs actual unpublish and rejection",
+            "Post28 DEC05 owner command atomic lifecycle > rolls all owner and relation writes back on actual PostgreSQL failure in auditRecord",
+            "Post28 DEC05 owner command atomic lifecycle > rolls all owner and relation writes back on actual PostgreSQL failure in transactionalOutboxRecord",
+            "Post28 DEC05 owner command atomic lifecycle > serializes concurrent owner commands and rejects the stale version without duplicate effects",
+            "Post28 DEC05 owner command atomic lifecycle > withdraws an approved taxonomy projection when its source provenance changes"
+          ],
+          "course-major-visibility": [
+            "Post28 course major public visibility and degree facet contract > allows an approved major relationship without profile and does not infer degree from training text",
+            "Post28 course major public visibility and degree facet contract > hides PROPOSED projections before public page and count",
+            "Post28 course major public visibility and degree facet contract > hides REVIEW_REQUIRED projections before public page and count",
+            "Post28 course major public visibility and degree facet contract > refreshes the next no-store HTTP graph after source reconciliation and preserves independent valid links",
+            "Post28 course major public visibility and degree facet contract > rejects an unsupported degree filter rather than returning an unfiltered successful response",
+            "Post28 course major public visibility and degree facet contract > rejects an unsupported profile filter rather than inferring an academic degree",
+            "Post28 course major public visibility and degree facet contract > withdraws courses when their target major becomes ARCHIVED",
+            "Post28 course major public visibility and degree facet contract > withdraws courses when their target major becomes DRAFT"
+          ]
+        },
+        "affectedExistingRegressionCases": {
+          "dec05-taxonomy-invalidation": [
+            "Post28 DEC05 taxonomy rejection and dependent projection > does not silently approve withdrawn projections when the taxonomy is reapproved",
+            "Post28 DEC05 taxonomy rejection and dependent projection > preserves independent reviewed major links and all provenance rows",
+            "Post28 DEC05 taxonomy rejection and dependent projection > rejects a foreign course identity without modifying its link or projection",
+            "Post28 DEC05 taxonomy rejection and dependent projection > repeated and concurrent rejection through two connections converges without deleting history",
+            "Post28 DEC05 taxonomy rejection and dependent projection > rolls link resolution and projections back on a real PostgreSQL statement failure",
+            "Post28 DEC05 taxonomy rejection and dependent projection > withdraws only the rejected taxonomy derived major projection from the next public read"
+          ]
+        },
+        "existingRegressionCountNotAdded": 6,
+        "runs": [
+          {
+            "sourceSha": "d7376ee239b11caaf6ce6f39ed24b7ed425eef15",
+            "runId": "f38f84bf-75fe-4105-b04e-d14c671db08b",
+            "suite": "dec05-owner-atomic",
+            "discovered": 8,
+            "executed": 8,
+            "passed": 1,
+            "failed": 7,
+            "skipped": 0,
+            "fullProfilePassed": false,
+            "alreadyInBaselineDistinctCount": false,
+            "R06Accepted": false,
+            "evidence": "docs/reviews/evidence/post28/d7376ee239b11caaf6ce6f39ed24b7ed425eef15/r06-owner-visibility-runtime/runs/dec05-owner-atomic-kfWoxX/status.json"
+          },
+          {
+            "sourceSha": "c2b3af690ee32dc02ea0e021153d0a312e17321a",
+            "runId": "f212d750-29ce-4c51-817e-71115184eecc",
+            "suite": "dec05-taxonomy-invalidation",
+            "discovered": 6,
+            "executed": 6,
+            "passed": 6,
+            "failed": 0,
+            "skipped": 0,
+            "fullProfilePassed": true,
+            "alreadyInBaselineDistinctCount": true,
+            "R06Accepted": false,
+            "evidence": "docs/reviews/evidence/post28/c2b3af690ee32dc02ea0e021153d0a312e17321a/r06-owner-visibility-runtime/runs/dec05-taxonomy-invalidation-pNUZJy/status.json"
+          },
+          {
+            "sourceSha": "c2b3af690ee32dc02ea0e021153d0a312e17321a",
+            "runId": "f212d750-29ce-4c51-817e-71115184eecc",
+            "suite": "dec05-owner-atomic",
+            "discovered": 8,
+            "executed": 8,
+            "passed": 8,
+            "failed": 0,
+            "skipped": 0,
+            "fullProfilePassed": true,
+            "alreadyInBaselineDistinctCount": false,
+            "R06Accepted": false,
+            "evidence": "docs/reviews/evidence/post28/c2b3af690ee32dc02ea0e021153d0a312e17321a/r06-owner-visibility-runtime/runs/dec05-owner-atomic-0Niz9F/status.json"
+          },
+          {
+            "sourceSha": "f250cb498327b3811e5b77d54ca3dc548e3a8cfc",
+            "runId": "016cbed2-90a4-4956-93f3-1aacafe782bb",
+            "suite": "course-major-visibility",
+            "discovered": 8,
+            "executed": 8,
+            "passed": 4,
+            "failed": 4,
+            "skipped": 0,
+            "fullProfilePassed": false,
+            "alreadyInBaselineDistinctCount": false,
+            "R06Accepted": false,
+            "evidence": "docs/reviews/evidence/post28/f250cb498327b3811e5b77d54ca3dc548e3a8cfc/r06-owner-visibility-runtime/runs/course-major-visibility-XNfRze/status.json"
+          },
+          {
+            "sourceSha": "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+            "runId": "12c52173-5c2f-462b-b8f4-c47f34a709a6",
+            "suite": "course-major-visibility",
+            "discovered": 8,
+            "executed": 8,
+            "passed": 8,
+            "failed": 0,
+            "skipped": 0,
+            "fullProfilePassed": true,
+            "alreadyInBaselineDistinctCount": false,
+            "R06Accepted": false,
+            "evidence": "docs/reviews/evidence/post28/75a2726164bcfe9e30f6667ac058f7b821a8f819/r06-owner-visibility-runtime/runs/course-major-visibility-98aGAZ/status.json"
+          }
+        ],
+        "aggregateExecuted": 38,
+        "aggregatePassed": 27,
+        "aggregateFailed": 11,
+        "aggregateSkipped": 0,
+        "fullR06Acceptance": false,
+        "limitations": [
+          "Owner command tests exercise real coordinator/repository/audit/outbox, not HTTP/JWT authorization.",
+          "No external storage/payment/certificate service success proof.",
+          "Public source reconciliation proof covers current terms and next no-store HTTP query, not full worker/import URL-refresh/browser cache matrix.",
+          "Fresh databases and contracts share one verified disposable memory-backed server; no crash-durability/server-fault isolation claim."
+        ]
+      }
+    }
+  ],
+  "historicalResultRecords": [
+    {
+      "path": "docs/reviews/evidence/post28/00b304441865e9ebbcc45a32e5fbeecbaef6fa44/r06-dec-policy-runtime/runs/dec03-free-study-8if7rG/status.json",
+      "sha256": "60aa38fc241c6ff3c4d0c98b6fbb8f1ae17c296f5fa897a175ff3c19e3505c57",
+      "recordedFields": {
+        "suite": "dec03-free-study",
+        "sourceSha": "00b304441865e9ebbcc45a32e5fbeecbaef6fa44",
+        "runId": "1331d112-5b65-458d-97b8-0c3e83d46e42",
+        "discovered": 8,
+        "executed": 8,
+        "passed": 1,
+        "failed": 7,
+        "skipped": 0,
+        "caseExact": null
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/10e0ddf1fa72697dae2c5597786c0707ef6c3687/r06-document/status.json",
+      "sha256": "83dc717675c7c267c2e3f5205a56d42eaf10ae228b3b311096eacd0d33c73db6",
+      "recordedFields": {
+        "suite": "document-consent",
+        "sourceSha": "10e0ddf1fa72697dae2c5597786c0707ef6c3687",
+        "runId": "ccf07591-e627-4d26-bbea-f91ee716b2f1"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/10e0ddf1fa72697dae2c5597786c0707ef6c3687/r06-document/summary.json",
+      "sha256": "08548c5e9e5ed8e05eb6fed1fa8bdee01ecd280c94a489f767fc3035aa108443",
+      "recordedFields": {
+        "suite": "document-consent",
+        "sourceSha": "10e0ddf1fa72697dae2c5597786c0707ef6c3687",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 10,
+        "executed": 10,
+        "passed": 10,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/19f4a713e3dd58ee4e0c94d2484a19759c7dbdfa/r06-dec-policy-runtime/runs/dec05-taxonomy-invalidation-27P2Qg/status.json",
+      "sha256": "62aec8c5f154c8617760661450762352ddad9a570c747e3492a673067fa6399a",
+      "recordedFields": {
+        "suite": "dec05-taxonomy-invalidation",
+        "sourceSha": "19f4a713e3dd58ee4e0c94d2484a19759c7dbdfa",
+        "runId": "597ef5a8-9024-409c-94d9-9d0fd754a04f",
+        "discovered": 6,
+        "executed": 1,
+        "passed": 0,
+        "failed": 1,
+        "skipped": 0,
+        "caseExact": "Post28 DEC05 taxonomy rejection and dependent projection > withdraws only the rejected taxonomy derived major projection from the next public read"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/293b2eee2514b29c91a2d6f8ad3a35353cab9454/r06-http-finance/status.json",
+      "sha256": "48bc04f6d77c8ed2a7b3f2614158eea7d129f2d8f77e2e37d381be65fa5ae1ab",
+      "recordedFields": {
+        "suite": "http-finance",
+        "sourceSha": "293b2eee2514b29c91a2d6f8ad3a35353cab9454",
+        "counts": {
+          "discovered": 14,
+          "reportedTotal": 14,
+          "passed": 13,
+          "failed": 1,
+          "pendingTotal": 0,
+          "skippedAssertions": 0,
+          "todo": 0
+        },
+        "originalRunnerGate": "FAILED_TESTS",
+        "savedReportVerifierPassed": false
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/3625cfedd5eac19c31866616e65bc34a1a08783c/r06-owner/initial-14-run/summary.json",
+      "sha256": "48f58205bab31bdffc1aa26f5bce512eba98bab5a0ed28fca579bde26d48864b",
+      "recordedFields": {
+        "suite": "owner-workflows",
+        "sourceSha": "b180c75713b7967716a23dd859bc27eeaaecefc3",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 14,
+        "executed": 14,
+        "passed": 14,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/3625cfedd5eac19c31866616e65bc34a1a08783c/r06-owner/owner-workflows-summary.json",
+      "sha256": "daec1c8169e8125780bbb03e9c764ee07bff1332e3893d1737093f9056bc82c4",
+      "recordedFields": {
+        "suite": "owner-workflows",
+        "sourceSha": "3625cfedd5eac19c31866616e65bc34a1a08783c",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 19,
+        "executed": 19,
+        "passed": 19,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/383a5459e88703a5be3fca59c2f282588a77286a/r06-owner-relations-initial/status.json",
+      "sha256": "b3e91fcc23acd0118abc50aadf17b7afca299009ef4255295b1b5dbe34dd1d47",
+      "recordedFields": {
+        "suite": "owner-relations",
+        "sourceSha": "383a5459e88703a5be3fca59c2f282588a77286a",
+        "counts": {
+          "discovered": 16,
+          "reportedTotal": 16,
+          "passed": 14,
+          "failed": 2,
+          "pendingTotal": 0,
+          "skippedAssertions": 0,
+          "todo": 0
+        },
+        "originalRunnerGate": "FAILED_TESTS",
+        "savedReportVerifierPassed": false
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/41fb7c90ccb732177a160677669634982fc61173/r06-relations/status.json",
+      "sha256": "bb8c3080792c2c3fcced27eb5c3ade1c3d52b7549475ad33adadb7f05c5890f8",
+      "recordedFields": {
+        "suite": "university-relations",
+        "sourceSha": "41fb7c90ccb732177a160677669634982fc61173",
+        "runId": "69cbb0b3-c0e2-4b46-839f-9296d32583f8"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/41fb7c90ccb732177a160677669634982fc61173/r06-relations/summary.json",
+      "sha256": "507265517d76f37d1477af38427a3e1eb5f54268aededaf46126b401b6791800",
+      "recordedFields": {
+        "suite": "university-relations",
+        "sourceSha": "41fb7c90ccb732177a160677669634982fc61173",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 7,
+        "executed": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/55179686b04f328d9705be0352509b403868956a/r06-closure-runtime/runs/attestation-closure-7Wj9iX/status.json",
+      "sha256": "c839e1817d3dae80b9e0c8e754d2f6c4dd53392d3ce53b258dcff1d6d9e24c46",
+      "recordedFields": {
+        "suite": "attestation-closure",
+        "sourceSha": "55179686b04f328d9705be0352509b403868956a",
+        "runId": "8a561e5f-5c01-4b7a-bf4a-6c6a15446012",
+        "discovered": 14,
+        "executed": 14,
+        "passed": 11,
+        "failed": 3,
+        "selectedSkipped": 0,
+        "caseExact": null,
+        "originalRunnerGate": "FAILED_TESTS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/55179686b04f328d9705be0352509b403868956a/r06-closure-runtime/runs/learning-closure-wlWkX5/status.json",
+      "sha256": "11922202bf3d738ea9ae12c2a2f282bb596e2862c15e222a7766f323a1dad3aa",
+      "recordedFields": {
+        "suite": "learning-closure",
+        "sourceSha": "55179686b04f328d9705be0352509b403868956a",
+        "runId": "8a561e5f-5c01-4b7a-bf4a-6c6a15446012",
+        "discovered": 12,
+        "executed": 12,
+        "passed": 0,
+        "failed": 12,
+        "selectedSkipped": 0,
+        "caseExact": null,
+        "originalRunnerGate": "FAILED_TESTS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/55179686b04f328d9705be0352509b403868956a/r06-closure-runtime/runs/owner-http-closure-W6wlyF/status.json",
+      "sha256": "bf13a166d9c98fcfebbacfcc1acdaabca774d39ee325ec5c027413a7f8047973",
+      "recordedFields": {
+        "suite": "owner-http-closure",
+        "sourceSha": "55179686b04f328d9705be0352509b403868956a",
+        "runId": "8a561e5f-5c01-4b7a-bf4a-6c6a15446012",
+        "discovered": 12,
+        "executed": 12,
+        "passed": 10,
+        "failed": 2,
+        "selectedSkipped": 0,
+        "caseExact": null,
+        "originalRunnerGate": "FAILED_TESTS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/56a59af9ccfb4ff332f0f8f18df43b965712e42e/r06-closure-runtime/runs/finance-local-closure-3AUNX2/status.json",
+      "sha256": "ec537948557309897c96b795e61529f31bf75b2fbb6f1807192edd80a80e966e",
+      "recordedFields": {
+        "suite": "finance-local-closure",
+        "sourceSha": "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+        "runId": "cfa44835-dab1-4217-a145-3ad7a722e200",
+        "discovered": 14,
+        "executed": 14,
+        "passed": 11,
+        "failed": 3,
+        "selectedSkipped": 0,
+        "caseExact": null,
+        "originalRunnerGate": "FAILED_TESTS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/59fdad6b651ccf6637be277d4539f7f21654b1f7/r06-geography-initial/status.json",
+      "sha256": "b7b42ac34f1993183af43ec3cc3f49ff66847a3ca0162610678166922c24d141",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "59fdad6b651ccf6637be277d4539f7f21654b1f7",
+        "discovered": 18,
+        "executed": 18,
+        "passed": 13,
+        "failed": 5,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "FAILED_TESTS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6b5f8db81ef339fc7ea41b4797a4de6fc2480607/r06-scholarship-public-relations/status.json",
+      "sha256": "e46d79e50aea31020bf30e680b5dcb8c07b66ce2b0508ba0404141f1e4c79cba",
+      "recordedFields": {
+        "suite": "scholarship-public-relations",
+        "sourceSha": "6b5f8db81ef339fc7ea41b4797a4de6fc2480607",
+        "discovered": 4,
+        "executed": 4,
+        "passed": 4,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6b5f8db81ef339fc7ea41b4797a4de6fc2480607/r06-scholarship-public-relations/summary.json",
+      "sha256": "cec4fa3e285a53514522abf7551ec09e949ebc00a1a2de8e3f674f031c51ba71",
+      "recordedFields": {
+        "suite": "scholarship-public-relations",
+        "sourceSha": "6b5f8db81ef339fc7ea41b4797a4de6fc2480607",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 4,
+        "executed": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 4,
+        "fullProfileAcceptance": true,
+        "caseExact": null
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/70f851ea862ba13f3c63abf6a25871ae1b358a7e/r06-dec-policy-runtime/runs/dec05-taxonomy-invalidation-jwqSdN/status.json",
+      "sha256": "02e8ad4c49c8e0727d7629e1c4ed5232f6b123be31751a3d468bfc9aca6cbd64",
+      "recordedFields": {
+        "suite": "dec05-taxonomy-invalidation",
+        "sourceSha": "70f851ea862ba13f3c63abf6a25871ae1b358a7e",
+        "runId": "9447b2a0-382f-46a7-abc2-30b8fcd20293",
+        "discovered": 6,
+        "executed": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "caseExact": null
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/70f851ea862ba13f3c63abf6a25871ae1b358a7e/r06-dec-policy-runtime/runs/dec05-taxonomy-invalidation-jwqSdN/summary.json",
+      "sha256": "eb4bb8a9ad85f420d96cf67164d6d99a81beaa7fa24e1ae96342990363fca7ac",
+      "recordedFields": {
+        "suite": "dec05-taxonomy-invalidation",
+        "sourceSha": "70f851ea862ba13f3c63abf6a25871ae1b358a7e",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 6,
+        "executed": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 6,
+        "fullProfileAcceptance": true,
+        "caseExact": null
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/75a2726164bcfe9e30f6667ac058f7b821a8f819/r06-owner-visibility-runtime/runs/course-major-visibility-98aGAZ/status.json",
+      "sha256": "17b65a42007a0cf1bb5df2230a5184bd8b54fb0c4881167c3c8a4d4e5ed086a6",
+      "recordedFields": {
+        "suite": "course-major-visibility",
+        "sourceSha": "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+        "runId": "12c52173-5c2f-462b-b8f4-c47f34a709a6",
+        "discovered": 8,
+        "executed": 8,
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/75a2726164bcfe9e30f6667ac058f7b821a8f819/r06-owner-visibility-runtime/runs/course-major-visibility-98aGAZ/summary.json",
+      "sha256": "593a8211ed1186e6791b8864400e6efd7b5d8836e4be99b7bf56bfb9f57c8b06",
+      "recordedFields": {
+        "suite": "course-major-visibility",
+        "sourceSha": "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 8,
+        "executed": 8,
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 8,
+        "fullProfileAcceptance": true,
+        "caseExact": null
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/77ee49859b19adb923f0c98e5d6bbee3d3c75fc8/r06-scholarship-admin-initial/status.json",
+      "sha256": "c81630fc84ac92a5fb2042c4edd8e2d3c51eed69ff27a9ddf55f283a0a1a6170",
+      "recordedFields": {
+        "suite": "scholarship-admin",
+        "sourceSha": "77ee49859b19adb923f0c98e5d6bbee3d3c75fc8",
+        "discovered": 17,
+        "executed": 17,
+        "passed": 16,
+        "failed": 1,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "FAILED_TESTS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/finance-provider-safety-atFe9I/status.json",
+      "sha256": "7b8851e62a34f0d37c29a0eaad450a23eefc90f1ff3e5d7a6958297e1c4e540a",
+      "recordedFields": {
+        "suite": "finance-provider-safety",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+        "discovered": 6,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 provider absence refund and settlement safety on PostgreSQL > does not consume refund approval or reserve execution when its original payment provider is unconfigured",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/finance-provider-safety-atFe9I/summary.json",
+      "sha256": "fa99c4c1c92796d02442c417f233a2e5585f0dade96bfe75d01cc94407275d25",
+      "recordedFields": {
+        "suite": "finance-provider-safety",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 6,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 provider absence refund and settlement safety on PostgreSQL > does not consume refund approval or reserve execution when its original payment provider is unconfigured"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/finance-provider-safety-bxjePW/status.json",
+      "sha256": "3c94729a27ea9ab6b1f23339e0e3459d175910c825348cf10adcd9c594564a4a",
+      "recordedFields": {
+        "suite": "finance-provider-safety",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+        "discovered": 6,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 provider absence refund and settlement safety on PostgreSQL > refuses another refund target approval without consuming either approval",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/finance-provider-safety-bxjePW/summary.json",
+      "sha256": "09b856526c3c39b09866e21d2cf6c6e5bf70384028844c01760d5cb0f38ba2a4",
+      "recordedFields": {
+        "suite": "finance-provider-safety",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 6,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 provider absence refund and settlement safety on PostgreSQL > refuses another refund target approval without consuming either approval"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-2mj9rW/status.json",
+      "sha256": "f8050b7cbc17956bbbd6dd5985635bf03a1a948bea37f2e8d2dbb351c307d22b",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 canonical test language and imported source contracts > does not publish source language labels without a reviewed canonical reference",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-2mj9rW/summary.json",
+      "sha256": "e080b4f43736a4a0074ec1ddac564d517b2ef69a6a19c1db695ea90d75c2d120",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 canonical test language and imported source contracts > does not publish source language labels without a reviewed canonical reference"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-B4f1Wz/status.json",
+      "sha256": "1b705c5191254f55dbbb5ab108167dad071ea63246cd84aa79d683fb7c6e1762",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 canonical test language and imported source contracts > resolves an active canonical course language through its actual repository",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-B4f1Wz/summary.json",
+      "sha256": "c59fdae9b476ff551e2f6ae4183fbca6e9b50d4ed9eab9ab6142464846eadf1e",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 canonical test language and imported source contracts > resolves an active canonical course language through its actual repository"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-ESByGh/status.json",
+      "sha256": "d2ab675f14c582eb28dfcebcf9685ee3f7869cb29d44189fabc136c4a9b72537",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 canonical test language and imported source contracts > projects a resolved scholarship test document backed by its own published version",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-ESByGh/summary.json",
+      "sha256": "9b33b935bcdaa96b44a6977508564dffb10c5b57422c2f292883fc7322faf64c",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 canonical test language and imported source contracts > projects a resolved scholarship test document backed by its own published version"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-LEHnng/status.json",
+      "sha256": "7e43802d74ff46ed423c4f9944a09791131f64e72c0286fbd4f2ca02573058c3",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 canonical test language and imported source contracts > blocks publishing a raw external source without persisted direct-link verification",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-LEHnng/summary.json",
+      "sha256": "b4690a8b55d34c2daf72d99ab2ac3212bc6082be8ea354b90fe9019d949417ca",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 canonical test language and imported source contracts > blocks publishing a raw external source without persisted direct-link verification"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-PWAhYP/status.json",
+      "sha256": "1bda953f2133ddf390457216d7585a0cf6aaef1cf83bf6defd8c0ca161d71130",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 canonical test language and imported source contracts > withdraws test requirements when the currently referenced version is no longer published",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-PWAhYP/summary.json",
+      "sha256": "f0bb52e34c993ffe468cd27d9021d2dc8efd23b4cd43b520645f3892b3701669",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 canonical test language and imported source contracts > withdraws test requirements when the currently referenced version is no longer published"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-ZBM5ly/status.json",
+      "sha256": "4c09062ff3c3f0aa510466f1dc9ab8da997f87d5594abdee214230489fb18247",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 canonical test language and imported source contracts > rejects inactive and deprecated canonical languages despite a valid language FK",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-ZBM5ly/summary.json",
+      "sha256": "6a43eede5d5e58ca69938feeffd3f151c9070e844e556b001323e1c03bec8c07",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 canonical test language and imported source contracts > rejects inactive and deprecated canonical languages despite a valid language FK"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-dm1fmC/status.json",
+      "sha256": "05f05a3cc132b50002ba9c97bd9480571d6b4b92b75c05fe5fdedf562e2b263b",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 canonical test language and imported source contracts > public course card and list withdraw a previously resolved language after canonical deprecation",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-dm1fmC/summary.json",
+      "sha256": "e418c7b0e4796014e121d510f57582e5555bf6dc8e04a33c4e567ce3b8c49710",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 canonical test language and imported source contracts > public course card and list withdraw a previously resolved language after canonical deprecation"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-kt5FvO/status.json",
+      "sha256": "bd9c2540107971a0a5cb2ca481f35d4b014188575d356551f13b32fa4236423c",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 canonical test language and imported source contracts > withdraws a hidden canonical test from scholarship public requirements even when status remains published",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-kt5FvO/summary.json",
+      "sha256": "f61051a059d6117017b0c1d78c7dc60503707ca94e1de993333fa1994c4d6146",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 canonical test language and imported source contracts > withdraws a hidden canonical test from scholarship public requirements even when status remains published"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-n8KBoR/status.json",
+      "sha256": "0a7125ba7d8fc831da2e219c17e54819fa004ac8c9f907fc7b8527f424821acb",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 canonical test language and imported source contracts > public course list excludes raw language only records without canonical proof",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78b11aa1979ec6e3354f288006553846b278605e/r06-closure-runtime/runs/reference-import-closure-n8KBoR/summary.json",
+      "sha256": "a1d5666e167b4a5a39b49525dae3ff3cf96cb1fd239a753261556f63d15d1d48",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 canonical test language and imported source contracts > public course list excludes raw language only records without canonical proof"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/7c15845d5a7af8572b6cef15e3222a3c8fc98e76/r06-dec01-program-pairs/runs/dec01-program-pairs-6UuyQ0/summary.json",
+      "sha256": "c4d227b8eec484f5d91964898486bec74dbb09924175924b712267b2fb4163ee",
+      "recordedFields": {
+        "suite": "dec01-program-pairs",
+        "sourceSha": "7c15845d5a7af8572b6cef15e3222a3c8fc98e76",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 10,
+        "executed": 10,
+        "passed": 10,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 10,
+        "fullProfileAcceptance": true,
+        "caseExact": null
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/7ee6451e57b99c1a3d5edcdc9a760798b86df33c/r06-command-rollback/status.json",
+      "sha256": "cd27a2275db59b2d4447b1ff4b4275ca03513756bb7d03ec8d941a77c8e26d72",
+      "recordedFields": {
+        "suite": "relation-commands",
+        "sourceSha": "7ee6451e57b99c1a3d5edcdc9a760798b86df33c",
+        "discovered": 8,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/7ee6451e57b99c1a3d5edcdc9a760798b86df33c/r06-command-rollback/summary.json",
+      "sha256": "347489bdadb6d329fdd450b534f9f97c4fec27e37776cf4853ae680055765143",
+      "recordedFields": {
+        "suite": "relation-commands",
+        "sourceSha": "7ee6451e57b99c1a3d5edcdc9a760798b86df33c",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 8,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real atomic relation owner commands > rolls all program relations audit and owner revision back on a PostgreSQL outbox error"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/7ee6451e57b99c1a3d5edcdc9a760798b86df33c/r06-finance-rollback/status.json",
+      "sha256": "84da2d99c61ef7e7ec6b9be9582cdce3806657be6411f3944d59baaefdbdce81",
+      "recordedFields": {
+        "suite": "http-finance",
+        "sourceSha": "7ee6451e57b99c1a3d5edcdc9a760798b86df33c",
+        "discovered": 14,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/7ee6451e57b99c1a3d5edcdc9a760798b86df33c/r06-finance-rollback/summary.json",
+      "sha256": "7c8e7c90b9c84d2a33b5aa86b67dfdba5ca8c6696bdfa7eca1912c7401aff5ae",
+      "recordedFields": {
+        "suite": "http-finance",
+        "sourceSha": "7ee6451e57b99c1a3d5edcdc9a760798b86df33c",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 14,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real HTTP principal and independent finance execution > rolls approval consumption and activation back on a PostgreSQL outbox failure"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/84dbfcdff3cb274022dadf542fa4d25f1735c28b/r06-scholarship-replay-final-allowed/status.json",
+      "sha256": "377ffab9ede51dc8739fe7b682ba69e195295143ee7cfadfb72df3d0927525c6",
+      "recordedFields": {
+        "suite": "scholarship-admin",
+        "sourceSha": "84dbfcdff3cb274022dadf542fa4d25f1735c28b",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/84dbfcdff3cb274022dadf542fa4d25f1735c28b/r06-scholarship-replay-final-allowed/summary.json",
+      "sha256": "406c76a21c3a88d43aaeb60ea4b7b467159cb7482812b1ab9c7616a24893dc8e",
+      "recordedFields": {
+        "suite": "scholarship-admin",
+        "sourceSha": "84dbfcdff3cb274022dadf542fa4d25f1735c28b",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real scholarship admin relations and authorization > replays an authorized canonical command without repeating its owner version audit or outbox"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/84dbfcdff3cb274022dadf542fa4d25f1735c28b/r06-scholarship-replay-final-denied/status.json",
+      "sha256": "377ffab9ede51dc8739fe7b682ba69e195295143ee7cfadfb72df3d0927525c6",
+      "recordedFields": {
+        "suite": "scholarship-admin",
+        "sourceSha": "84dbfcdff3cb274022dadf542fa4d25f1735c28b",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/84dbfcdff3cb274022dadf542fa4d25f1735c28b/r06-scholarship-replay-final-denied/summary.json",
+      "sha256": "9c044e7f7b22a9f300fdaa806107a36dc578232a90c329b71b74da4e088ff564",
+      "recordedFields": {
+        "suite": "scholarship-admin",
+        "sourceSha": "84dbfcdff3cb274022dadf542fa4d25f1735c28b",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real scholarship admin relations and authorization > does not replay an earlier successful response after its admin permission is withdrawn"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/853fe76646c018e1fd9955034cd155311760856f/r06-runtime/core-transactions-summary.json",
+      "sha256": "f1758025d50507cb7b794449f6692f94e6f21fecc2264a977471ae01bf97330c",
+      "recordedFields": {
+        "suite": "core-transactions",
+        "sourceSha": "853fe76646c018e1fd9955034cd155311760856f",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 8,
+        "executed": 8,
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/853fe76646c018e1fd9955034cd155311760856f/r06-runtime/leases-summary.json",
+      "sha256": "da416bb45871d7b63dd7623c60868d7af224d67ada28f4979c7a00ca320c4d64",
+      "recordedFields": {
+        "suite": "leases",
+        "sourceSha": "853fe76646c018e1fd9955034cd155311760856f",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 2,
+        "executed": 2,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/853fe76646c018e1fd9955034cd155311760856f/r06-runtime/status.json",
+      "sha256": "82c6fe121ec51c20b5c747aca358cf7d49910224ea9b94477000f1953d9afff3",
+      "recordedFields": {
+        "profiles": [
+          "leases",
+          "core-transactions"
+        ],
+        "sourceSha": "853fe76646c018e1fd9955034cd155311760856f",
+        "runId": "1e11952d-1ccc-4f54-9d31-1a3a87d0258e",
+        "databaseTestsPassed": 10,
+        "databaseTestsFailed": 0,
+        "databaseTestsSkipped": 0
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/attestation-closure-MV1HaC/status.json",
+      "sha256": "b107ea7bb222301967ffe3ff14f0518e5054ab0ede868a0166daa150dc4054eb",
+      "recordedFields": {
+        "suite": "attestation-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+        "discovered": 14,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 real document attestation owner asset and HTTP boundaries > serializes two independent reviewers to one decision timeline two scoped audits and outbox",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/attestation-closure-MV1HaC/summary.json",
+      "sha256": "70fc0c2792f2b7c82481b9740e4a42da4cc15eb2f213570f8c816dfde1d31840",
+      "recordedFields": {
+        "suite": "attestation-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 14,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real document attestation owner asset and HTTP boundaries > serializes two independent reviewers to one decision timeline two scoped audits and outbox"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/attestation-closure-j2M3sF/status.json",
+      "sha256": "096a516a431b2376b1d3b66cc09d1d41fa289fbbfabe2fb3d118a7925d456a8e",
+      "recordedFields": {
+        "suite": "attestation-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+        "discovered": 14,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 real document attestation owner asset and HTTP boundaries > commits verified attestation bound to canonical scholarship cycle version and real asset checksum",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/attestation-closure-j2M3sF/summary.json",
+      "sha256": "14842e42f092d5a3c31f42bfd46069b372681d9402581e623f43dbff9fa56e49",
+      "recordedFields": {
+        "suite": "attestation-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 14,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real document attestation owner asset and HTTP boundaries > commits verified attestation bound to canonical scholarship cycle version and real asset checksum"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/attestation-closure-rIJ6X4/status.json",
+      "sha256": "74421f770be5aa6b2f88007f1efab7afd84b257a80d3e994385295610747a418",
+      "recordedFields": {
+        "suite": "attestation-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+        "discovered": 14,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 real document attestation owner asset and HTTP boundaries > HTTP records real JWT reviewer and current persisted review permission",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/attestation-closure-rIJ6X4/summary.json",
+      "sha256": "d350757fac7889121c5054560ce6db07b3cc18028e1d25465a7546305ff46232",
+      "recordedFields": {
+        "suite": "attestation-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 14,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real document attestation owner asset and HTTP boundaries > HTTP records real JWT reviewer and current persisted review permission"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/attestation-closure-wQ1ax0/status.json",
+      "sha256": "72673d9f1872b809e2b35f6ea7e80f9af37dde22a8f8e7bc47f84d1348d19304",
+      "recordedFields": {
+        "suite": "attestation-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+        "discovered": 14,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 real document attestation owner asset and HTTP boundaries > HTTP refuses cached attestation after review permission withdrawal",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/attestation-closure-wQ1ax0/summary.json",
+      "sha256": "754da6dd489a6fdfabfba022c65017b7b143760bb955b249015b7a2065e22544",
+      "recordedFields": {
+        "suite": "attestation-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 14,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real document attestation owner asset and HTTP boundaries > HTTP refuses cached attestation after review permission withdrawal"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/learning-closure-0rkxcD/status.json",
+      "sha256": "6004ec0c35230af0c2de77864824ee6a1b43fe8dc7591abc5bfe5a14a736f14e",
+      "recordedFields": {
+        "suite": "learning-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+        "discovered": 12,
+        "executed": 12,
+        "passed": 11,
+        "failed": 1,
+        "selectedSkipped": 0,
+        "caseExact": null,
+        "originalRunnerGate": "FAILED_TESTS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/owner-http-closure-0TMgVX/status.json",
+      "sha256": "c1daa36c73a729521646d5fec9febd25c43410092d6fac2112f080eac97034f5",
+      "recordedFields": {
+        "suite": "owner-http-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+        "discovered": 12,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP refuses university writes and cached replay after permission withdrawal",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/owner-http-closure-0TMgVX/summary.json",
+      "sha256": "e40cfc1da905b6c70c06778df42f4ad11fe80d9fa7d8ed6c6b01cd293c2660a2",
+      "recordedFields": {
+        "suite": "owner-http-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 12,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP refuses university writes and cached replay after permission withdrawal"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/owner-http-closure-0Xb8u9/status.json",
+      "sha256": "55bce0c4560c80975a294cd6d73d05e2a70efb1ba0eb5728a57f168b3285a260",
+      "recordedFields": {
+        "suite": "owner-http-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+        "discovered": 12,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP replays an authorized invoice issue using one owner receipt and one audit event",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/owner-http-closure-0Xb8u9/summary.json",
+      "sha256": "2f91341203627d11c450c741a09e701917a1bd4f9f317693f2c7868e6b23bbce",
+      "recordedFields": {
+        "suite": "owner-http-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 12,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP replays an authorized invoice issue using one owner receipt and one audit event"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/owner-http-closure-KYbwZd/status.json",
+      "sha256": "afb3cf7cfd700df7e215e061e245cf3ae6d87f6fd00077b345ddfde9470c0693",
+      "recordedFields": {
+        "suite": "owner-http-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+        "discovered": 12,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP replays authorized university commands without duplicate mutation",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/owner-http-closure-KYbwZd/summary.json",
+      "sha256": "32621e3bd167d5067b09175faf1de750572f4398287ca6a239c20434640a71f5",
+      "recordedFields": {
+        "suite": "owner-http-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 12,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP replays authorized university commands without duplicate mutation"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/owner-http-closure-etjBF4/status.json",
+      "sha256": "f6fa5e20e7d4ffee48916775b2fefdcef87e5b402c169f0b9ebc5a95a84adbfe",
+      "recordedFields": {
+        "suite": "owner-http-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+        "discovered": 12,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP binds university geography audit to the authenticated JWT actor",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/owner-http-closure-etjBF4/summary.json",
+      "sha256": "31ce8bc114190e35e71e15c4e056bff8ef2c64afddb88c2e141fa1376ad3d7d9",
+      "recordedFields": {
+        "suite": "owner-http-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 12,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP binds university geography audit to the authenticated JWT actor"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/owner-http-closure-h5UK66/status.json",
+      "sha256": "30aa62a336f276c67b1c4fae0d96259abee9866aec4de20bf7d94bb3d1837c39",
+      "recordedFields": {
+        "suite": "owner-http-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+        "discovered": 12,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP refuses cached invoice response when action permission alone is withdrawn",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21/r06-closure-runtime/runs/owner-http-closure-h5UK66/summary.json",
+      "sha256": "0bae26fb86a0b946e125fcf66940053bba21b21816f89b6ce98ba2116b01e7e3",
+      "recordedFields": {
+        "suite": "owner-http-closure",
+        "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 12,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP refuses cached invoice response when action permission alone is withdrawn"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/a78b6b94dc31cc6cc280c42314cf47e544a8b929/r06-dec-policy-runtime/runs/dec03-free-study-cgwIfA/status.json",
+      "sha256": "5110bd0ec3c28759b7ac5a4bc1b2ac9e6c32601731a870ab1887df9f72c6c44e",
+      "recordedFields": {
+        "suite": "dec03-free-study",
+        "sourceSha": "a78b6b94dc31cc6cc280c42314cf47e544a8b929",
+        "runId": "d3154458-1cf7-4170-9480-c7485b5cfd41",
+        "discovered": 8,
+        "executed": 8,
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0,
+        "caseExact": null
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/a78b6b94dc31cc6cc280c42314cf47e544a8b929/r06-dec-policy-runtime/runs/dec03-free-study-cgwIfA/summary.json",
+      "sha256": "71be54d36ad0ce71df4310cb20bd1f5aa65f4521ec7fb444009765d6ac701749",
+      "recordedFields": {
+        "suite": "dec03-free-study",
+        "sourceSha": "a78b6b94dc31cc6cc280c42314cf47e544a8b929",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 8,
+        "executed": 8,
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 8,
+        "fullProfileAcceptance": true,
+        "caseExact": null
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b57a7cff4c9e511d007e5095eaf893114b8f6aec/r06-closure-runtime/runs/finance-provider-safety-Y22yHr/status.json",
+      "sha256": "9f9a594e485293aed1bd716c74fb084acaa015f471a3ed449f40b6d4199b76e6",
+      "recordedFields": {
+        "suite": "finance-provider-safety",
+        "sourceSha": "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+        "runId": "1dc55377-c2e6-44b7-b14f-f9b059e05f6a",
+        "discovered": 6,
+        "executed": 6,
+        "passed": 5,
+        "failed": 1,
+        "selectedSkipped": 0,
+        "caseExact": null,
+        "originalRunnerGate": "FAILED_TESTS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b57a7cff4c9e511d007e5095eaf893114b8f6aec/r06-closure-runtime/runs/learning-closure-tKJfvw/status.json",
+      "sha256": "1d53b4dcc99775838ba193d57e2cbb2e825556fb0c40eade4d6e375efc72fe76",
+      "recordedFields": {
+        "suite": "learning-closure",
+        "sourceSha": "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+        "runId": "1dc55377-c2e6-44b7-b14f-f9b059e05f6a",
+        "discovered": 12,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 learning completion and certificate trust boundaries on PostgreSQL > real completion worker dispatches noncredential events and records missing authority as retryable failure",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b57a7cff4c9e511d007e5095eaf893114b8f6aec/r06-closure-runtime/runs/learning-closure-tKJfvw/summary.json",
+      "sha256": "92fd3ba952190e25caf62348f24483392c4783cd84eadf644ed13fd90628f116",
+      "recordedFields": {
+        "suite": "learning-closure",
+        "sourceSha": "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 12,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 learning completion and certificate trust boundaries on PostgreSQL > real completion worker dispatches noncredential events and records missing authority as retryable failure"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b57a7cff4c9e511d007e5095eaf893114b8f6aec/r06-closure-runtime/runs/reference-import-closure-jVJ95V/status.json",
+      "sha256": "af2aad1b4e15d73a3854f92dc0440820271b6cc8cd744124a833b0cf6b673811",
+      "recordedFields": {
+        "suite": "reference-import-closure",
+        "sourceSha": "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+        "runId": "1dc55377-c2e6-44b7-b14f-f9b059e05f6a",
+        "discovered": 18,
+        "executed": 18,
+        "passed": 13,
+        "failed": 5,
+        "selectedSkipped": 0,
+        "caseExact": null,
+        "originalRunnerGate": "FAILED_TESTS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9/r06-closure-runtime/runs/finance-local-closure-JWluJ8/status.json",
+      "sha256": "c866f4dda1d4caa8ae3bb86b8a60d3e99dea6272b33919bc349f795fb6719a45",
+      "recordedFields": {
+        "suite": "finance-local-closure",
+        "sourceSha": "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+        "runId": "a96d8bdd-da83-4820-a773-d2cc54c0cb09",
+        "discovered": 14,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 independent local credit installments and wallet obligation invariants > replays installments without a second plan and rejects a different schedule for the same key",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9/r06-closure-runtime/runs/finance-local-closure-JWluJ8/summary.json",
+      "sha256": "1a073ef59b2c44b828f57fe348f80dd0da5867276ef634f3ade251bc768daa51",
+      "recordedFields": {
+        "suite": "finance-local-closure",
+        "sourceSha": "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 14,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 independent local credit installments and wallet obligation invariants > replays installments without a second plan and rejects a different schedule for the same key"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9/r06-closure-runtime/runs/finance-local-closure-dApLmf/status.json",
+      "sha256": "75e2b3a6c2b9a26576245b437ee70b9651f8459ace98f89cb7824f0145368582",
+      "recordedFields": {
+        "suite": "finance-local-closure",
+        "sourceSha": "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+        "runId": "a96d8bdd-da83-4820-a773-d2cc54c0cb09",
+        "discovered": 14,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 independent local credit installments and wallet obligation invariants > captures an owned hold into a balanced ledger settlement once and clears its invoice",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9/r06-closure-runtime/runs/finance-local-closure-dApLmf/summary.json",
+      "sha256": "ab1643a3ddf0f1234d7923187b67d3df7f85b0e57736b0bc42d799ca524feef2",
+      "recordedFields": {
+        "suite": "finance-local-closure",
+        "sourceSha": "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 14,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 independent local credit installments and wallet obligation invariants > captures an owned hold into a balanced ledger settlement once and clears its invoice"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9/r06-closure-runtime/runs/finance-local-closure-pl8kc5/status.json",
+      "sha256": "8e2aa74ca761d3d9c6088a8657aa18e59c5f4dffb1828288b96864ae5d51c546",
+      "recordedFields": {
+        "suite": "finance-local-closure",
+        "sourceSha": "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+        "runId": "a96d8bdd-da83-4820-a773-d2cc54c0cb09",
+        "discovered": 14,
+        "executed": 1,
+        "passed": 0,
+        "failed": 1,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 independent local credit installments and wallet obligation invariants > commits one credit note ledger adjustment and durable replay receipt",
+        "originalRunnerGate": "FAILED_TESTS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-runtime/runs/finance-local-closure-IF3Ajm/status.json",
+      "sha256": "2763a8d3def21cab69950bb4aeec770e6796ae78390d7fef4f146a9f5f2e526c",
+      "recordedFields": {
+        "suite": "finance-local-closure",
+        "sourceSha": "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3",
+        "runId": "0319dc3a-34dd-4b45-845c-2dada93941c4",
+        "discovered": 14,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "caseExact": "Post28 independent local credit installments and wallet obligation invariants > commits one credit note ledger adjustment and durable replay receipt",
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-runtime/runs/finance-local-closure-IF3Ajm/summary.json",
+      "sha256": "5f908aae44c33bc712550529d80a647fd489048ba59a332e2569fdcc7b45e05c",
+      "recordedFields": {
+        "suite": "finance-local-closure",
+        "sourceSha": "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 14,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 independent local credit installments and wallet obligation invariants > commits one credit note ledger adjustment and durable replay receipt"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/c2b3af690ee32dc02ea0e021153d0a312e17321a/r06-owner-visibility-runtime/runs/dec05-owner-atomic-0Niz9F/status.json",
+      "sha256": "0a5128175dbfb7ca02d2052fd7e9e604a957fc2219687d3ff196806419f657eb",
+      "recordedFields": {
+        "suite": "dec05-owner-atomic",
+        "sourceSha": "c2b3af690ee32dc02ea0e021153d0a312e17321a",
+        "runId": "f212d750-29ce-4c51-817e-71115184eecc",
+        "discovered": 8,
+        "executed": 8,
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/c2b3af690ee32dc02ea0e021153d0a312e17321a/r06-owner-visibility-runtime/runs/dec05-owner-atomic-0Niz9F/summary.json",
+      "sha256": "49bc9e2925628841afcd49e6b8024166dd04738535e2ea779243f3b58a114ccc",
+      "recordedFields": {
+        "suite": "dec05-owner-atomic",
+        "sourceSha": "c2b3af690ee32dc02ea0e021153d0a312e17321a",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 8,
+        "executed": 8,
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 8,
+        "fullProfileAcceptance": true,
+        "caseExact": null
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/c2b3af690ee32dc02ea0e021153d0a312e17321a/r06-owner-visibility-runtime/runs/dec05-taxonomy-invalidation-pNUZJy/status.json",
+      "sha256": "313ca838814db09fbcf57c8bcb72cbe73d5ed11b898ea57627bb0db7761b2f4d",
+      "recordedFields": {
+        "suite": "dec05-taxonomy-invalidation",
+        "sourceSha": "c2b3af690ee32dc02ea0e021153d0a312e17321a",
+        "runId": "f212d750-29ce-4c51-817e-71115184eecc",
+        "discovered": 6,
+        "executed": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/c2b3af690ee32dc02ea0e021153d0a312e17321a/r06-owner-visibility-runtime/runs/dec05-taxonomy-invalidation-pNUZJy/summary.json",
+      "sha256": "eff65a2a826f525940ea2488b168ee37c515b6775a0f0a6b7472d247c4bfd812",
+      "recordedFields": {
+        "suite": "dec05-taxonomy-invalidation",
+        "sourceSha": "c2b3af690ee32dc02ea0e021153d0a312e17321a",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 6,
+        "executed": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 6,
+        "fullProfileAcceptance": true,
+        "caseExact": null
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/cf91e81332c722bb701b4d4ed1333710444890af/r06-scholarship-replay-intermediate-allowed/status.json",
+      "sha256": "90abb14931c3855f9f2acb5854f6bab10e2f9de0c49ad2ed539a9dfbf4a6aa17",
+      "recordedFields": {
+        "suite": "scholarship-admin",
+        "sourceSha": "cf91e81332c722bb701b4d4ed1333710444890af",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/cf91e81332c722bb701b4d4ed1333710444890af/r06-scholarship-replay-intermediate-allowed/summary.json",
+      "sha256": "3cee4ad3d43087d4819a3758925a23d4a02087497f2ab43a4b1956ab40c6f30f",
+      "recordedFields": {
+        "suite": "scholarship-admin",
+        "sourceSha": "cf91e81332c722bb701b4d4ed1333710444890af",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real scholarship admin relations and authorization > replays an authorized canonical command without repeating its owner version audit or outbox"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/cf91e81332c722bb701b4d4ed1333710444890af/r06-scholarship-replay-intermediate-denied/status.json",
+      "sha256": "90abb14931c3855f9f2acb5854f6bab10e2f9de0c49ad2ed539a9dfbf4a6aa17",
+      "recordedFields": {
+        "suite": "scholarship-admin",
+        "sourceSha": "cf91e81332c722bb701b4d4ed1333710444890af",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/cf91e81332c722bb701b4d4ed1333710444890af/r06-scholarship-replay-intermediate-denied/summary.json",
+      "sha256": "5e8c67878a0802f5003b043a6a01931f586d510e0458985492f02c2a011eb9bb",
+      "recordedFields": {
+        "suite": "scholarship-admin",
+        "sourceSha": "cf91e81332c722bb701b4d4ed1333710444890af",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real scholarship admin relations and authorization > does not replay an earlier successful response after its admin permission is withdrawn"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/d7376ee239b11caaf6ce6f39ed24b7ed425eef15/r06-owner-visibility-runtime/runs/dec05-owner-atomic-kfWoxX/status.json",
+      "sha256": "43bd45fbb62fbcaec9eb0c13f7bc8b0f9d03cd7a300629cf2eb90aa1e42b197d",
+      "recordedFields": {
+        "suite": "dec05-owner-atomic",
+        "sourceSha": "d7376ee239b11caaf6ce6f39ed24b7ed425eef15",
+        "runId": "f38f84bf-75fe-4105-b04e-d14c671db08b",
+        "discovered": 8,
+        "executed": 8,
+        "passed": 1,
+        "failed": 7,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/d8fba0c2fd911946176738beeaf4716b1c7ed4df/r06-owner-relations/status.json",
+      "sha256": "7aef7f7623761d8eef1f013a2b4280738e7058843d3a00118638a1c3e5931c1b",
+      "recordedFields": {
+        "suite": "owner-relations",
+        "sourceSha": "d8fba0c2fd911946176738beeaf4716b1c7ed4df",
+        "counts": {
+          "discovered": 20,
+          "reportedTotal": 20,
+          "passed": 20,
+          "failed": 0,
+          "pendingTotal": 0,
+          "skippedAssertions": 0,
+          "todo": 0
+        },
+        "originalRunnerGate": "PASS",
+        "savedReportVerifierPassed": false
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/d8fba0c2fd911946176738beeaf4716b1c7ed4df/r06-owner-relations/summary.json",
+      "sha256": "a7a99d1556108d7f8ff8853f7f6b7b145e0afd5efaba8687ca6aac5e8fa4d942",
+      "recordedFields": {
+        "suite": "owner-relations",
+        "sourceSha": "d8fba0c2fd911946176738beeaf4716b1c7ed4df",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 20,
+        "executed": 20,
+        "passed": 20,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/d8fba0c2fd911946176738beeaf4716b1c7ed4df/r06-university-regression/status.json",
+      "sha256": "217d628ae997d1d215e51e37ccfdf57f014db1db97e70f9b377785317e1900ae",
+      "recordedFields": {
+        "suite": "university-relations",
+        "sourceSha": "d8fba0c2fd911946176738beeaf4716b1c7ed4df",
+        "counts": {
+          "discovered": 7,
+          "reportedTotal": 7,
+          "passed": 7,
+          "failed": 0,
+          "pendingTotal": 0,
+          "skippedAssertions": 0,
+          "todo": 0
+        },
+        "originalRunnerGate": "PASS",
+        "savedReportVerifierPassed": false
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/d8fba0c2fd911946176738beeaf4716b1c7ed4df/r06-university-regression/summary.json",
+      "sha256": "3f8505575a3accfb7312f72e424e56aaebc87a6965be506710b0917792f5144e",
+      "recordedFields": {
+        "suite": "university-relations",
+        "sourceSha": "d8fba0c2fd911946176738beeaf4716b1c7ed4df",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 7,
+        "executed": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/e5369c6030cda109e6e72bc5105681135639f398/r06-runtime/assets-summary.json",
+      "sha256": "7503d5057f5b08a89911cab20cc0dd2cb1c6e8f075e31cac5c4d8aef866bba4f",
+      "recordedFields": {
+        "suite": "assets",
+        "sourceSha": "e5369c6030cda109e6e72bc5105681135639f398",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 39,
+        "executed": 39,
+        "passed": 39,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/e5369c6030cda109e6e72bc5105681135639f398/r06-runtime/status.json",
+      "sha256": "ce045301947a2551c267523dfd0c0210d31919b626d8dd95ac01956e47d03361",
+      "recordedFields": {
+        "profiles": [
+          "assets"
+        ],
+        "sourceSha": "e5369c6030cda109e6e72bc5105681135639f398",
+        "runId": "c1fe555a-b68c-48d5-bedb-9b00b6972335",
+        "databaseTestsPassed": 39,
+        "databaseTestsFailed": 0,
+        "databaseTestsSkipped": 0
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2286d37a7c7b32b9bbde03d69c43aa736252b0/r06-relation-commands/status.json",
+      "sha256": "be8bebf4cf889417280e327a3b5264f670db969c0b4342ca6cc7331c7aa80bf9",
+      "recordedFields": {
+        "suite": "relation-commands",
+        "sourceSha": "ea2286d37a7c7b32b9bbde03d69c43aa736252b0",
+        "discovered": 8,
+        "executed": 8,
+        "passed": 8,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2286d37a7c7b32b9bbde03d69c43aa736252b0/r06-relation-commands/summary.json",
+      "sha256": "550e07e7b2695c1d21cf1daadc36802db1c576d380f4c35646ee8957c87aea16",
+      "recordedFields": {
+        "suite": "relation-commands",
+        "sourceSha": "ea2286d37a7c7b32b9bbde03d69c43aa736252b0",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 8,
+        "executed": 8,
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 8,
+        "fullProfileAcceptance": true,
+        "caseExact": null
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-85peT8/status.json",
+      "sha256": "db3ad8f640500f207ab8513be125e07ed2035527a8465aece7ff7bae7fc71f43",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-85peT8/summary.json",
+      "sha256": "6c77ff249915ecf52c5c39ce5730a95a8042d9b9a7041ab1d7659c393f7b011f",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real university canonical geography owner commands > rejects a deprecated country even when its legacy active flag remains true"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-JAv94S/status.json",
+      "sha256": "db3ad8f640500f207ab8513be125e07ed2035527a8465aece7ff7bae7fc71f43",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-JAv94S/summary.json",
+      "sha256": "a13cf25775c66075ead500c8dae49db3b0ab34e9adff55a9cf8efbb1835720cc",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real university canonical geography owner commands > continues to reject inactive country and city flags and retired region lifecycle"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-QUXgcZ/status.json",
+      "sha256": "db3ad8f640500f207ab8513be125e07ed2035527a8465aece7ff7bae7fc71f43",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-QUXgcZ/summary.json",
+      "sha256": "0e715e0bbb8376633a119e942042ca8d87af1dec6f41d0bb9d123e7cf413e1c9",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real university canonical geography owner commands > serializes two valid geography writers with exactly one current owner revision winner"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-SUBCDB/status.json",
+      "sha256": "db3ad8f640500f207ab8513be125e07ed2035527a8465aece7ff7bae7fc71f43",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-SUBCDB/summary.json",
+      "sha256": "ec4674b44767d7bb4fc6f1e2da9d094ee5e238ce39bb4aadf041f373aed78ae5",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real university canonical geography owner commands > database rejects an inactive region whose lifecycle still says active"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-YikyBx/status.json",
+      "sha256": "db3ad8f640500f207ab8513be125e07ed2035527a8465aece7ff7bae7fc71f43",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-YikyBx/summary.json",
+      "sha256": "64334829093679d688e57ca6f9f20c6602264041bfa84583b1f518214b8089fb",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real university canonical geography owner commands > commits matching campus geography through normalized owner details and atomic audit outbox"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-g0fuEj/status.json",
+      "sha256": "db3ad8f640500f207ab8513be125e07ed2035527a8465aece7ff7bae7fc71f43",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-g0fuEj/summary.json",
+      "sha256": "6740d43243b2ee32e81d38da6a073558474cccda06cb8a16c01c578d9987acc1",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real university canonical geography owner commands > commits matching canonical root geography with actor audit outbox and owner revision"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-gpnKX3/status.json",
+      "sha256": "db3ad8f640500f207ab8513be125e07ed2035527a8465aece7ff7bae7fc71f43",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-gpnKX3/summary.json",
+      "sha256": "f686f147f488513b5ecb1ea78eb6dbb763238cb136cb716a5376d615a45395a9",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real university canonical geography owner commands > database rejects contradictory city country codes despite individually valid canonical IDs"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-tux9K9/status.json",
+      "sha256": "db3ad8f640500f207ab8513be125e07ed2035527a8465aece7ff7bae7fc71f43",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-tux9K9/summary.json",
+      "sha256": "bdfc7fb0dd0a2df90320755cbc17a4eecb8d22146829d5f7c0103f372c5c874d",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real university canonical geography owner commands > rolls root geography revision and audit back at the actual PostgreSQL outbox failure boundary"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-wPS3rr/status.json",
+      "sha256": "db3ad8f640500f207ab8513be125e07ed2035527a8465aece7ff7bae7fc71f43",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "discovered": 18,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "selectedSkipped": 0,
+        "originalRunnerGate": "PASS"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/ea2ab45ccbe8036800fd5af5522130eab3f37c72/r06-geography-selected/university-geography-wPS3rr/summary.json",
+      "sha256": "914c62ec3383053db44631eb772e3bd9c983e784c22648603a8f260fe34294df",
+      "recordedFields": {
+        "suite": "university-geography",
+        "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+        "kind": "POST28_DATABASE_SUITE_EXECUTION",
+        "expected": 1,
+        "executed": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "fullDiscoveryCases": 18,
+        "fullProfileAcceptance": false,
+        "caseExact": "Post28 real university canonical geography owner commands > rejects a deprecated city even when its legacy active flag remains true"
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/f14ed30f667715b309292bf113dc09e48a6d63b2/r06-http-ownership-followup/status.json",
+      "sha256": "be07e0b272436f2f0b788bb8c2f68a820dc8d6bd5c85edc25d15c3dfb556e5a9",
+      "recordedFields": {
+        "suite": "http-finance",
+        "sourceSha": "f14ed30f667715b309292bf113dc09e48a6d63b2",
+        "counts": {
+          "discovered": 14,
+          "reportedTotal": 14,
+          "passed": 1,
+          "failed": 0,
+          "pendingTotal": 13,
+          "skippedAssertions": 13,
+          "todo": 0
+        },
+        "originalRunnerGate": "REPORT_FORMAT_REJECTED",
+        "savedReportVerifierPassed": true
+      }
+    },
+    {
+      "path": "docs/reviews/evidence/post28/f250cb498327b3811e5b77d54ca3dc548e3a8cfc/r06-owner-visibility-runtime/runs/course-major-visibility-XNfRze/status.json",
+      "sha256": "359c3c207b73edd65dd085bebf0552ab147ca5e659b1ae360fa0ed1ba397ce1f",
+      "recordedFields": {
+        "suite": "course-major-visibility",
+        "sourceSha": "f250cb498327b3811e5b77d54ca3dc548e3a8cfc",
+        "runId": "016cbed2-90a4-4956-93f3-1aacafe782bb",
+        "discovered": 8,
+        "executed": 8,
+        "passed": 4,
+        "failed": 4,
+        "skipped": 0
+      }
+    }
+  ],
+  "historicalEvidenceIndex": "historical-evidence-index.json"
+}

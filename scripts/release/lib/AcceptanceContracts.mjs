@@ -164,17 +164,30 @@ export function acceptanceDetails(evidence, sha) {
   if (
     backup?.structuralRestorability !== true ||
     backup?.sloPassed !== true ||
-    !(backup?.rtoMinutes >= 0 && backup.rtoMinutes <= 60) ||
-    !(backup?.rpoMinutes >= 0 && backup.rpoMinutes <= 5) ||
+    !(Number.isFinite(backup?.rtoMinutes) && backup.rtoMinutes >= 0 && backup.rtoMinutes <= 60) ||
+    !(Number.isFinite(backup?.rpoMinutes) && backup.rpoMinutes >= 0 && backup.rpoMinutes <= 5) ||
     backup?.assetParity !== true
   )
     failures.push('RESTORE_OBJECTIVES_UNVERIFIED');
   const rollback = evidence.gates?.find((gate) => gate.id === 'rollback');
+  const rollbackBudget = rollback?.canaryBudget;
   if (
     rollback?.expandContractCompatible !== true ||
+    rollback?.previousApiCompatible !== true ||
     rollback?.previousWorkerCompatible !== true ||
+    typeof rollback?.previousSourceSha !== 'string' || !SHA.test(rollback.previousSourceSha) ||
+    rollback.previousSourceSha === sha ||
+    typeof rollback?.previousApiArtifactSha256 !== 'string' || !/^[0-9a-f]{64}$/.test(rollback.previousApiArtifactSha256) ||
+    typeof rollback?.previousWorkerArtifactSha256 !== 'string' || !/^[0-9a-f]{64}$/.test(rollback.previousWorkerArtifactSha256) ||
     rollback?.ledgerPreserved !== true ||
-    !rollback?.incidentOwner
+    typeof rollback?.incidentOwner !== 'string' || !rollback.incidentOwner.trim() ||
+    typeof rollbackBudget?.approvedBy !== 'string' || !rollbackBudget.approvedBy.trim() ||
+    !Number.isSafeInteger(rollbackBudget?.maximumRequests) || rollbackBudget.maximumRequests < 1 ||
+    !Number.isSafeInteger(rollbackBudget?.maximumConcurrency) || rollbackBudget.maximumConcurrency < 1 ||
+    rollbackBudget.maximumConcurrency > rollbackBudget.maximumRequests ||
+    !Number.isFinite(rollbackBudget?.durationSeconds) || rollbackBudget.durationSeconds <= 0 ||
+    !Number.isSafeInteger(rollbackBudget?.maximumUnexpectedErrors) || rollbackBudget.maximumUnexpectedErrors < 0 ||
+    rollbackBudget.maximumUnexpectedErrors > rollbackBudget.maximumRequests
   )
     failures.push('ROLLBACK_COMPATIBILITY_UNVERIFIED');
   const scenarios = [
@@ -208,9 +221,12 @@ export function acceptanceDetails(evidence, sha) {
     'finance-stub',
     'worker-queues',
   ]) {
-    const row = load?.categories?.find((row) => row.id === category);
+    const rows = Array.isArray(load?.categories)
+      ? load.categories.filter((row) => row?.id === category)
+      : [];
+    const row = rows[0];
     if (
-      !row ||
+      rows.length !== 1 ||
       !Number.isFinite(row.p95Ms) ||
       !Number.isFinite(row.p99Ms) ||
       !Number.isFinite(row.maximumP99Ms) ||
@@ -218,8 +234,10 @@ export function acceptanceDetails(evidence, sha) {
       row.p99Ms < row.p95Ms ||
       row.maximumP99Ms <= 0 ||
       row.p99Ms > row.maximumP99Ms ||
+      !Number.isFinite(row.durationSeconds) ||
       row.durationSeconds < 60 ||
-      !row.fixture ||
+      typeof row.fixture !== 'string' ||
+      !row.fixture.trim() ||
       row.errorBudgetPassed !== true ||
       row.poolSaturationSafe !== true ||
       row.rateLimitSafe !== true ||

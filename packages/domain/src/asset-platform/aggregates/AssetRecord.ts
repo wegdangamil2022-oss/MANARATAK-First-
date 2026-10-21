@@ -438,6 +438,11 @@ export class AssetRecord {
       this.props.locator.storageZone !== AssetStorageZone.CLEAN) {
       throw new Error('ASSET_DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET');
     }
+    const expiry = this.props.retention.expiresAt;
+    if ((this.props.retention.category === AssetRetentionCategory.TEMPORARY && !expiry) ||
+        (expiry && (!Number.isFinite(expiry.getTime()) || expiry.getTime() <= Date.now()))) {
+      throw new Error('ASSET_DELIVERY_RETENTION_EXPIRED');
+    }
     this.assertVerifiedCleanEvidence();
   }
 

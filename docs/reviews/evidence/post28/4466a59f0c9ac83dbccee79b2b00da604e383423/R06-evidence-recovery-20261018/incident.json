@@ -1,0 +1,72 @@
+{
+  "kind": "EVIDENCE_ZERO_FILL_RECOVERY",
+  "date": "2026-10-18",
+  "originalIndexSha256": "5c4eb78032b937bf6e80d0af83a9de421c30e81bcaf149abdac941a8f0ef6a9b",
+  "originalIndexChanged": false,
+  "diagnosis": "Seven uncommitted public copies contained only zero bytes, with original lengths preserved. Six private originals match the pre-existing recorded SHA256 exactly. The attributes bytes are deterministically recoverable from the original collector source and also match the recorded SHA256. Mutation origin is not proven; it coincided with a permissions/environment transition. No claim of filesystem or antivirus attribution. Collection lacked a final durable readback and precommit gate; these are now required.",
+  "entries": [
+    {
+      "path": ".gitattributes",
+      "damagedBytes": 47,
+      "damagedSha256": "140eda45fe001c0fe47edd7fc509ff1882d46fbcb7c7437d893c1fb83012e433",
+      "damagedBytesBase64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+      "allBytesZero": true,
+      "recoveredSha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807",
+      "source": "Exact original collector literal"
+    },
+    {
+      "path": "R06-setup/0-validate.log",
+      "damagedBytes": 144,
+      "damagedSha256": "81c611f35bff79491538b2f7cf201c7597a661a5c549633541c62bdc8af1613f",
+      "damagedBytesBase64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "allBytesZero": true,
+      "recoveredSha256": "9bac6f2900d82077fd9ba3d76d872874f55c2b9bf30c910010cf33354fcf9dd6",
+      "source": "Unchanged private original"
+    },
+    {
+      "path": "R06-setup/2-migrate.log",
+      "damagedBytes": 258,
+      "damagedSha256": "6bd3749a368b56ead82399ee6d06456c94bde1edab4477a48d4b48ea5e032053",
+      "damagedBytesBase64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "allBytesZero": true,
+      "recoveredSha256": "eb3bdbee497af281bc9bbffc165e83cc4c8cd8117743815c94783297aa29ce01",
+      "source": "Unchanged private original"
+    },
+    {
+      "path": "R06-setup/3-migrate.log",
+      "damagedBytes": 25,
+      "damagedSha256": "61126de1b795b976f3ac878f48e88fa77a87d7308ba57c7642b9e1068403a496",
+      "damagedBytesBase64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "allBytesZero": true,
+      "recoveredSha256": "198913094e3f41610eb893459ab65a3c79991b65d4ef5fcb8c325ebe52ebf1ed",
+      "source": "Unchanged private original"
+    },
+    {
+      "path": "runs/scholarship-country-semantics-z3n7H6/selection.json",
+      "damagedBytes": 106,
+      "damagedSha256": "34dbd6bf55d0d075d666181d9278b8387482a8b5804e44e1ddaafe6876dadc15",
+      "damagedBytesBase64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "allBytesZero": true,
+      "recoveredSha256": "355e83f494da9f75de244c5765f208065e2e6e00f0fbef27a6f306f68be1e944",
+      "source": "Unchanged private original"
+    },
+    {
+      "path": "runs/scholarship-public-relations-XF1UmJ/selection.json",
+      "damagedBytes": 106,
+      "damagedSha256": "34dbd6bf55d0d075d666181d9278b8387482a8b5804e44e1ddaafe6876dadc15",
+      "damagedBytesBase64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "allBytesZero": true,
+      "recoveredSha256": "fe3f92ec7f436d720a08e61934e2b6e94365fae5152a8b18482d63be57d6fe19",
+      "source": "Unchanged private original"
+    },
+    {
+      "path": "target-preflight.log",
+      "damagedBytes": 426,
+      "damagedSha256": "e339efcbad6ee5a9b9d07256ec7559e247c25bac0c198e7dc2fb03de517d858f",
+      "damagedBytesBase64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "allBytesZero": true,
+      "recoveredSha256": "e8e0bca0cf4d7ca28f5dcddb7e0266830403caf748b47e10213aff81668971f5",
+      "source": "Unchanged private original"
+    }
+  ]
+}

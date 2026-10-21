@@ -1,0 +1,70 @@
+{
+  "kind": "R12_CURRENT_PRACTICAL_REVIEW",
+  "reviewHead": "0b13ba91ea8fc3d008d0ced45187d880cf88eb12",
+  "reviewedAt": "2026-10-20T23:29:17.011Z",
+  "retainedEvidence": [
+    {
+      "index": "docs/reviews/evidence/post28/005595313b0ae1ff940fec44454f441f516c8d8e/r12-api-runtime/evidence-index.json",
+      "files": 19,
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/70230e082e03f73761eee6437858c074839fb8d2/r12-worker-assets/evidence-index.json",
+      "files": 29,
+      "gitRef": "HEAD",
+      "readOnly": true
+    }
+  ],
+  "frozenAssetSourceFilesMatched": 29,
+  "applicationPathsUnchangedSinceHistoricalCurrent": [
+    "apps/api",
+    "packages",
+    "vendor",
+    "package.json",
+    "package-lock.json"
+  ],
+  "guardPathsUnchanged": [
+    "scripts/release/inspect-post28-rollback-source.mjs",
+    "scripts/release/lib/AcceptanceContracts.mjs",
+    "scripts/release/lib/ReleaseContracts.mjs"
+  ],
+  "protectedPolicyKeysUnchanged": [
+    "currentCandidateSha",
+    "previousCandidateSha",
+    "unitsAllowedForRehearsal",
+    "unitsExcludedFromRollback",
+    "deploymentMode",
+    "canaryBudget",
+    "maximumApiReadinessWaitSeconds",
+    "maximumDrainWaitSeconds",
+    "target",
+    "protectedTables",
+    "requiredRuntimeProof",
+    "previousWorkerRuntimeCompatible",
+    "formalCanaryApproved",
+    "formalR12Acceptance",
+    "productionAllowed",
+    "externalProviderEffectsAllowed",
+    "downMigrationsAllowed",
+    "deleteReceiptsOrLedgerAllowed"
+  ],
+  "policyDocumentationChangedForOriginalCloseout": true,
+  "historicalApiAndStudentWorkerScopePreserved": true,
+  "generalPreviousWorkerRuntimeCompatible": false,
+  "unsupportedEventStillBlocksConsumerPromotion": true,
+  "failedCompositeFencingAttemptRelabeled": false,
+  "linuxSignalDeliveryAccepted": false,
+  "actualProviderGrantDownloadAccepted": false,
+  "formalR12Acceptance": false,
+  "productionAcceptance": false,
+  "remainingReleaseBlockers": [
+    "R12-E01",
+    "R12-E02",
+    "R12-E03",
+    "R12-E04"
+  ],
+  "testsOrBuildOrDatabaseRehearsalRerun": false,
+  "databaseConnected": false,
+  "applicationSourceChanged": false
+}

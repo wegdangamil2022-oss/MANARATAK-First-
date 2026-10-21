@@ -1,0 +1,42 @@
+﻿import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import assert from 'node:assert/strict';
+import {CertificateUseCases} from './r07-filtered/packages/application/src/certificates/use-cases/CertificateUseCases.ts';
+import {CertificateCompletionEventConsumer} from './r07-filtered/packages/application/src/certificates/use-cases/CertificateCompletionEventConsumer.ts';
+import {CertificateArtifactRenderUseCase} from './r07-filtered/packages/application/src/certificates/use-cases/CertificateArtifactRenderUseCase.ts';
+import {ProviderNeutralCertificateRenderingService} from './r07-filtered/packages/infrastructure/src/certificates/ProviderNeutralCertificateRenderingService.ts';
+import {PrismaCertificateRepository} from './r07-filtered/packages/infrastructure/src/certificates/PrismaCertificateRepository.ts';
+import {PrismaAssetRecordRepository} from './r07-filtered/packages/infrastructure/src/asset-platform/PrismaAssetRecordRepository.ts';
+import {PrismaCourseRepository} from './r07-filtered/packages/infrastructure/src/courses/PrismaCourseRepository.ts';
+import {PrismaCourseCurriculumRepository} from './r07-filtered/packages/infrastructure/src/courses/PrismaCourseCurriculumRepository.ts';
+import {PrismaCourseProgressRepository} from './r07-filtered/packages/infrastructure/src/courses/PrismaCourseProgressRepository.ts';
+import {PrismaIdentityRepository} from './r07-filtered/packages/infrastructure/src/identity/PrismaIdentityRepository.ts';
+import {CourseProgressUseCases} from './r07-filtered/packages/application/src/courses/use-cases/CourseProgressUseCases.ts';
+import {AtomicDomainMutationCoordinator} from './r07-filtered/packages/application/src/event-foundation/use-cases/AtomicDomainMutationCoordinator.ts';
+import {AtomicAuditedOutboxMutationExecutor} from './r07-filtered/packages/application/src/event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor.ts';
+import {PrismaAtomicPersistenceUnitOfWork} from './r07-filtered/packages/infrastructure/src/event-foundation/PrismaAtomicPersistenceUnitOfWork.ts';
+import {PrismaTransactionalOutboxStore} from './r07-filtered/packages/infrastructure/src/event-foundation/PrismaTransactionalOutboxStore.ts';
+import {PrismaAuditRecordRepository} from './r07-filtered/packages/infrastructure/src/audit/PrismaAuditRecordRepository.ts';
+import {AssetRecord,AssetId,AssetReference,AssetOwnerReference,AssetStorageLocator,AssetStorageZone,AssetMetadata,AssetChecksum,AssetSanitizationMetadata,AssetRetentionMetadata,AssetRetentionCategory,AssetSecurityClassification,AssetLifecycleState} from './r07-filtered/packages/domain/src/index.ts';
+export async function prepareCertificate({db,owner,lab,objects,hash}){
+ const work=import.meta.dirname,repo=new PrismaCertificateRepository(db),assets=new PrismaAssetRecordRepository(db),courses=new PrismaCourseRepository(db),curriculum=new PrismaCourseCurriculumRepository(db);
+ const template=await repo.findActiveTemplateByName('MANARATAK Signature Certificate');assert(template,'RETAINED_INDUSTRIAL_DEFAULT_TEMPLATE_MUST_BE_ACTIVE');const issuer=await repo.findIssuerById(template.issuerId);assert.equal(issuer.status,'ACTIVE');assert.equal(issuer.code,'MANARATAK');
+ const signingKeyReference=issuer.signingKeyReference,signingSecret=crypto.randomBytes(32).toString('hex');
+ // A new local test HMAC secret is injected into this disposable runtime only.
+ // No retained issuer/template approvals or historical signatures are changed.
+ const facade=new CertificateUseCases(repo,courses,assets,{signingSecret,signingKeyReference,productionLike:false,publicVerificationBaseUrl:'https://r14.example.invalid'},undefined,new PrismaIdentityRepository(db),curriculum);
+ const id=crypto.randomUUID(),course=await courses.create({publicId:id,slug:'r14-'+id,canonicalName:id,canonicalDedupKey:id,displayName:'Industrial certificate delivery source',accessType:'FREE_STUDY_AND_CERTIFICATE',originType:'NATIVE_MANARATAK_COURSE',directCourseUrl:'https://example.invalid/r14',status:'PUBLISHED',completenessStatus:'COMPLETE',certificateAvailable:true});
+ await db.studentWorkspace.create({data:{studentReferenceId:owner.id,status:'ACTIVE'}});
+ const module=await db.courseModule.create({data:{courseId:course.id,title:'Industrial module',position:1,status:'PUBLISHED'}}),lesson=await db.courseLesson.create({data:{courseId:course.id,moduleId:module.id,title:'Industrial lesson',position:1,status:'PUBLISHED',lessonType:'ARTICLE',contentText:'Industrial local certificate source'}});
+ await courses.updateStatus(course.id,'PUBLISHED');
+ const progress=new CourseProgressUseCases(courses,curriculum,new PrismaCourseProgressRepository(db),undefined,undefined,new AtomicDomainMutationCoordinator(new AtomicAuditedOutboxMutationExecutor(new PrismaAtomicPersistenceUnitOfWork(db),new PrismaAuditRecordRepository(db),new PrismaTransactionalOutboxStore(db))));
+ await progress.enroll(course.id,owner.id);await progress.markLessonProgress({courseId:course.id,studentReferenceId:owner.id,lessonId:lesson.id,progressPercentage:100,status:'COMPLETED'});await progress.completeCourse(course.id,owner.id);
+ const event=await db.transactionalOutboxRecord.findFirstOrThrow({where:{aggregateId:course.id+':'+owner.id,eventType:'CourseCompleted'}}),certificate=await new CertificateCompletionEventConsumer(facade).consume(event);assert(certificate);assert.equal(await db.certificate.count({where:{sourceEventId:event.id}}),1);
+ const artifactFiles=[],directory=path.join(lab,'certificate-artifacts');fs.mkdirSync(directory);
+ const renderer=new CertificateArtifactRenderUseCase(repo,new ProviderNeutralCertificateRenderingService({resolve:async(id,expected)=>{const bytes=fs.readFileSync(path.join(work,'native-pg16-JTNxRe/r09-materialized-assets',id+'.png'));assert.equal(hash(bytes),expected);return{bytes,mimeType:'image/png'};}}),{store:async({certificateId,artifact})=>{
+  const assetId=crypto.randomUUID(),stamp=new Date(),digest=hash(artifact.bytes),quarantine='quarantine://isolated/uploads/'+assetId+'.'+artifact.fileExtension,key='clean/'+assetId+'.'+artifact.fileExtension;
+  // Historical materialized trust fixture for transport proof, not new malware/sanitizer attestation.
+  await assets.save(new AssetRecord({id:new AssetId(assetId),reference:new AssetReference('R14-'+assetId),owner:new AssetOwnerReference(certificateId,'Certificate'),locator:new AssetStorageLocator(AssetStorageZone.CLEAN,'isolated',key),metadata:new AssetMetadata('industrial.'+artifact.fileExtension,artifact.mimeType,artifact.fileExtension,artifact.bytes.length),retention:new AssetRetentionMetadata(AssetRetentionCategory.TEMPORARY,new Date(stamp.getTime()+180*86400000)),classification:AssetSecurityClassification.INTERNAL,state:AssetLifecycleState.ACTIVE,checksum:new AssetChecksum('sha256',digest),sanitization:new AssetSanitizationMetadata(true,stamp,'Materialized synthetic historical trust fixture; no fresh EAP acceptance'),malwareScan:{status:'PASSED',scannedAt:stamp.toISOString(),locator:quarantine},uploadVerification:{locator:quarantine,byteSize:artifact.bytes.length,verifiedMimeType:artifact.mimeType,checksumSha256:digest,verifiedAt:stamp.toISOString(),signatureVerified:true}}));
+  fs.writeFileSync(path.join(directory,assetId+'.'+artifact.fileExtension),artifact.bytes,{flag:'wx'});objects.set(key,{id:assetId,bytes:Buffer.from(artifact.bytes),mime:artifact.mimeType,name:artifact.kind});artifactFiles.push({id:assetId,kind:artifact.kind,mimeType:artifact.mimeType,extension:artifact.fileExtension,sha256:digest,bytes:artifact.bytes.length});return assetId;
+ }},facade);
+ const rendered=await renderer.renderCertificate(certificate.id,'R14_SYNTHETIC_RENDERER',event.id);assert.deepEqual(artifactFiles.map(a=>a.kind),['PDF','PREVIEW','QR']);
+ return {certificateId:certificate.id,verificationCode:certificate.verificationCode,signingKeyReference,signingSecret,facade,artifactFiles,rendered,publicProof:{courseId:course.id,sourceEventId:event.id,certificateId:certificate.id,templateId:template.id,templateVersionId:template.currentVersionId,retainedIndustrialIssuerId:issuer.id,retainedIssuerAndTemplateUnchanged:true,signingKind:'NEW_EPHEMERAL_HMAC_FOR_LOCAL_TEST_ONLY_NOT_PRODUCTION_TRUST_OR_HISTORICAL_KEY_VALIDATION',artifactFiles,freshEapProcessing:false}};
+}

@@ -142,7 +142,7 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
     });
   }
   async listPendingDocumentReviews(after?:string){
-    const rows=await this.db.studentApplicationDocumentBinding.findMany({where:{reviewConsentUntil:{gt:new Date()},retentionUntil:{gt:new Date()},attestation:{equals:Prisma.DbNull},tracker:{status:'ACTIVE',workspace:{status:'ACTIVE'}},...(after?{id:{gt:after}}:{})},orderBy:{id:'asc'},take:21});
+    const rows=await this.db.studentApplicationDocumentBinding.findMany({where:{reviewConsentGrantedAt:{lte:new Date()},OR:[{expiresAt:null},{expiresAt:{gt:new Date()}}],reviewConsentUntil:{gt:new Date()},retentionUntil:{gt:new Date()},attestation:{equals:Prisma.DbNull},tracker:{status:'ACTIVE',workspace:{status:'ACTIVE'}},...(after?{id:{gt:after}}:{})},orderBy:{id:'asc'},take:21});
     return {items:rows.slice(0,20).map((row:any)=>({id:row.id,requirementName:String(row.requirementSnapshot?.displayName??'Document'),consentUntil:row.reviewConsentUntil})),hasMore:rows.length>20,nextCursor:rows.length>20?rows[19].id:null};
   }
   async findDocumentReview(bindingId:string){
@@ -152,7 +152,7 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
   }
   private async documentReviewAudit(tx:any,bindingId:string,expectedVersion:number,actorId:string,action:string,reason:string,mutateTracker=true){
     const row=await tx.studentApplicationDocumentBinding.findUnique({where:{id:bindingId},include:{tracker:{include:{workspace:{select:{status:true}}}}}});
-    if(!row||row.attestation||row.tracker.status!=='ACTIVE'||row.tracker.workspace.status!=='ACTIVE'||row.tracker.studentReferenceId===actorId||!row.reviewConsentGrantedAt||row.reviewConsentUntil<=new Date()||row.retentionUntil<=new Date()||(row.expiresAt&&row.expiresAt<=new Date()))throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
+    if(!actorId.trim()||!row||row.attestation||row.tracker.status!=='ACTIVE'||row.tracker.workspace.status!=='ACTIVE'||row.tracker.studentReferenceId===actorId||!row.reviewConsentGrantedAt||row.reviewConsentGrantedAt>new Date()||!row.reviewConsentUntil||row.reviewConsentUntil<=new Date()||row.retentionUntil<=new Date()||(row.expiresAt&&row.expiresAt<=new Date()))throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
     if(row.tracker.version!==expectedVersion)throw new Error('STUDENT_APPLICATION_TRACKER_VERSION_CONFLICT');
     if(mutateTracker)await this.cas(tx,row.tracker,{});
     else{const locked=await tx.$queryRaw(Prisma.sql`SELECT id FROM "StudentApplicationTracker" WHERE id=${row.trackerId} AND version=${expectedVersion} AND status='ACTIVE' FOR UPDATE`);if(locked.length!==1)throw new Error('STUDENT_APPLICATION_TRACKER_VERSION_CONFLICT');}

@@ -1,0 +1,86 @@
+{
+  "kind": "POST28_R11_CURRENT_PRACTICAL_REVIEW",
+  "localDate": "2026-10-21",
+  "sourceSha": "2934821ae7de16fd65531c5df41684eb104a8e5c",
+  "status": "PRACTICAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+  "fixes": [
+    "Prevent mutation after delayed resource observer exhausts duration",
+    "Keep measured latency authoritative over scenario output"
+  ],
+  "targetedTests": {
+    "newBeforeFixFailed": 2,
+    "afterFixPassed": 5,
+    "afterFixFailed": 0,
+    "afterFixSkipped": 0,
+    "existingRepeatedBecauseDirectlyAffected": 3,
+    "targetedEslintPassed": true
+  },
+  "historicalEvidenceFilesMatched": 30,
+  "historicalMeasurementsRerun": false,
+  "r10Ci": {
+    "sourceSha": "d83ee3e9513af2fd61dc2e7681cb99e3c6dff466",
+    "runId": 39513312392,
+    "result": "success",
+    "passedJobs": 6
+  },
+  "currentFixCi": {
+    "runId": 39514942840,
+    "lastObservedStatus": "completed",
+    "result": "success",
+    "passedJobs": 6
+  },
+  "practicalScopeComplete": true,
+  "formalR11Acceptance": false,
+  "formalLoadSloAcceptance": false,
+  "productionAcceptance": false,
+  "representativeLaunchDatasetPrepared": false,
+  "poolWaitMeasured": false,
+  "fullAdminCmsMfaJourneyCompleted": true,
+  "openExceptions": [
+    "E1",
+    "E2",
+    "E3",
+    "E4",
+    "E5"
+  ],
+  "databaseConnected": false,
+  "externalProviderEnabled": false,
+  "evidence": "docs/reviews/evidence/post28/2934821ae7de16fd65531c5df41684eb104a8e5c/r11-current-review/evidence-index.json",
+  "next": "REMAINING_RELEASE_TARGET_PROVIDER_TRUST_AND_CAPACITY_GATES_NO_AUTOMATIC_GO",
+  "latestAdminCmsLocalDiagnostic": {
+    "completed": true,
+    "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+    "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+    "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+    "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+    "formalAcceptance": false,
+    "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
+  },
+  "fullAdminCmsMfaJourneyScope": "AR_PUBLIC_AND_AR_EN_EDITORIAL_UNIFIED_LINUX_SAME_SHA",
+  "fullAdminCmsUnifiedLinuxJourneyCompleted": true,
+  "latestAdminCmsLinuxDiagnostic": {
+    "sourceSha": "6f7b68572f007a45d10263759800d8cbbfd49135",
+    "passed": true,
+    "scope": "LINUX_X64_NODE22_PG16_SAME_SHA_BUILT_API_WEB_ADMIN_THREE_ACTOR_MFA_AR_EN",
+    "cleanupPassed": true,
+    "drainMilliseconds": 142,
+    "allActorSessionsRevoked": true,
+    "requestBudget": {
+      "maximumRequests": 60,
+      "windowMilliseconds": 61000,
+      "count": 450,
+      "delayed": 245,
+      "maximumDelayMilliseconds": 29377,
+      "serverLimitsChanged": false,
+      "rejectedRequestsRetried": false
+    },
+    "report": "docs/remediation/POST28_R14_LINUX_CMS_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/6f7b68572f007a45d10263759800d8cbbfd49135/r14-linux-cms-runtime/evidence-index.json",
+    "formalAcceptance": false,
+    "publicTemplateLocales": [
+      "ar"
+    ],
+    "publicEnglishReleaseAccepted": false
+  }
+}

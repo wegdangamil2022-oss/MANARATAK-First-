@@ -39,4 +39,13 @@ describe('TR-WP11 public localized entity pages source contract', () => {
     expect(mapper).toContain('dto.canonicalName');
     expect(liveData).not.toContain('name: dto.localizedNames?.en');
   });
+
+  it('keeps account, saved items and trackers on the canonical student workspace after the redesign', () => {
+    const app = source('apps/web/src/features/public-template/PublicTemplateApp.tsx');
+    expect(app).toContain("from '../students/StudentWorkspacePage'");
+    expect(app).toContain('activeTab === \'account\' && <LiveStudentWorkspacePage initialTab="SUMMARY"');
+    expect(app).toContain('activeTab === \'favorites\' && <LiveStudentWorkspacePage initialTab="VAULT"');
+    expect(app).toContain('activeTab === \'tracker\' && <LiveStudentWorkspacePage initialTab="JOURNEY"');
+    expect(app).not.toContain("from './components/StudentWorkspacePage'");
+  });
 });

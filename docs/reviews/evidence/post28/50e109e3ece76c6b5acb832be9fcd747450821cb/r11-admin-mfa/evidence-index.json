@@ -1,0 +1,132 @@
+{
+  "sourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+  "apiSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+  "files": [
+    {
+      "path": "mfa-browser-result.json",
+      "sha256": "ece39f634cdf7ae6f67d9f09d4ab2ed93880663910b993dcf1d7525409fdbebd",
+      "bytes": 4192
+    },
+    {
+      "path": "mfa-protected-before.json",
+      "sha256": "c388ba3fdd879e229a9caf03cf4c6b84f718f9dbd710711b8488e2b80df74459",
+      "bytes": 2229
+    },
+    {
+      "path": "mfa-admin-cms.png",
+      "sha256": "1dfa783db1130599a6f66401392527e877e96482902797533ed4aee3b0c37830",
+      "bytes": 346618
+    },
+    {
+      "path": "cleanup.json",
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f",
+      "bytes": 81
+    },
+    {
+      "path": "dataset.json",
+      "sha256": "4f94b868482acc367caf9c57b357fb58e655127ffdbf626f458cb708d2a0164e",
+      "bytes": 332570
+    },
+    {
+      "path": "fixture-invalid-cleanup.json",
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f",
+      "bytes": 81
+    },
+    {
+      "path": "browser-unavailable-cleanup.json",
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f",
+      "bytes": 81
+    },
+    {
+      "path": "browser-unavailable-mfa-browser-failure.json",
+      "sha256": "e565f16744e6895aa49134b019a1b47069a38a60a30d27a6e13d9c2124dff3ef",
+      "bytes": 2115
+    },
+    {
+      "path": "bootstrap-race-cleanup.json",
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f",
+      "bytes": 81
+    },
+    {
+      "path": "bootstrap-race-mfa-browser-failure.json",
+      "sha256": "2950bf83471585bee6448c43545ea8df71cb889ef7682e1981d9d3990ee0dea4",
+      "bytes": 1389
+    },
+    {
+      "path": "r11-admin-mfa-worker.mjs.txt",
+      "sha256": "bb6b2781a345a5a1513c49101e508a6dae09be9d49dffb152ac05ffc77d0ebda",
+      "bytes": 8673
+    },
+    {
+      "path": "run-r11-admin-mfa.mjs.txt",
+      "sha256": "288e093e73f26075d34c48bf1690972890eb09e6784be67d653b74932a76eb43",
+      "bytes": 13658
+    },
+    {
+      "path": "build-r11-admin-fix.mjs.txt",
+      "sha256": "3eb8fcd94fbc6fd989fc602d594fac4b39d50eaedb057d30a20db78396eba6e9",
+      "bytes": 1546
+    },
+    {
+      "path": "r11-admin-build.json",
+      "sha256": "936c94fc53559d683e98870fa961f41f5f17cf89e2a7b9c5cc12ec9c11f295ad",
+      "bytes": 357
+    },
+    {
+      "path": "r11-superseded-ci.json",
+      "sha256": "ae432c1e0d06741ae6c4cd5122ba317977bbef18364a9a84c9642a6b77759813",
+      "bytes": 311
+    },
+    {
+      "path": "r07-checks-50e109e3ece76c6b5acb832be9fcd747450821cb.json",
+      "sha256": "695be6e13a60861525bd4502bd414ece3c5313b06906ba5bdb50d24de62ce16b",
+      "bytes": 3576
+    },
+    {
+      "path": "r07-curl-status-39465627242.json",
+      "sha256": "524232ecf76e8919650f34a0f5536a90d1558f6a5c27b413df37b9fcd2b20642",
+      "bytes": 9701
+    },
+    {
+      "path": "admin-built-files.json",
+      "sha256": "a9d5e3cf7e827d4a7321ae14c0e243a56820d75e8909793346c2dd8f9ccde0aa"
+    },
+    {
+      "path": "linux-33b6-ci-status.json",
+      "sha256": "18690d7a46b4ab24af778b4e42e6172ef8e5573a7771eaa21dcd3a69ee417be4",
+      "bytes": 14595
+    },
+    {
+      "path": "linux-33b6-runtime-result.json",
+      "sha256": "fe634314bcdd3be89c252804c467de272fbdcf36b8695043e8035901fdffea0e",
+      "bytes": 23581
+    },
+    {
+      "path": "linux-33b6-aborted-contention.json",
+      "sha256": "5ad31ee8827c8a400933c1262e0c159a4d87d5c2941bdfd8da5985c637863d94",
+      "bytes": 853
+    }
+  ],
+  "mixedSourceLocalDiagnostic": true,
+  "cleanReleaseCandidate": false,
+  "privateFilesExcluded": [
+    "scenario-private.json",
+    "lab.env",
+    "TOTP plaintext",
+    "encryption key",
+    "TLS private key",
+    "database dumps",
+    "API generated keys"
+  ],
+  "productionAcceptance": false,
+  "linuxAttempt": {
+    "sourceSha": "33b6daa41ed162e35461961aa39d92119c6d640c",
+    "runId": 39467554942,
+    "artifactId": 12286516552,
+    "archiveSha256": "e76960ceb75cb9f3a885160b5bafa5badd80ee2596837cbdd8a32b2523150723",
+    "result": "ABORTED_LOGIN_429_NO_CONTENTION_PAIRS",
+    "fix": "Run the bounded diagnostic before public browsing using a static same-origin document; production limits unchanged",
+    "fixExecutionVerified": false
+  }
+}

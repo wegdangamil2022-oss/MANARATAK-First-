@@ -1,0 +1,185 @@
+{
+  "kind": "finance",
+  "sourceSha": "9c4d4b16b8efa5c4d38c18db4b36f56c04f252a7",
+  "runId": "30ad9237-05b6-45f6-84cc-7a20840bb939",
+  "readOnlyInspection": true,
+  "syntheticOnly": true,
+  "effects": {
+    "payments": [
+      {
+        "id": "76ee7077-0c5b-415f-b3d1-0f8d905869c0",
+        "publicId": "fin_pay_0dcc1ec3588eac25f0e6cf2d66e1d5be",
+        "invoiceId": "bb66f38d-9f00-4994-9e16-6df58933a5ac",
+        "status": "CAPTURED",
+        "amountMinorUnits": "100",
+        "currencyCode": "USD",
+        "scale": 2,
+        "dispatchStartedAt": "2026-10-19T20:39:22.700Z",
+        "captureStartedAt": "2026-10-19T20:39:22.751Z",
+        "nextCheckAt": "2026-10-19T20:42:22.819Z"
+      },
+      {
+        "id": "d4ff46f2-c5f9-4c3f-9aa8-a06a0bf9c177",
+        "publicId": "fin_pay_ebc907510e17fa1f35425f2326857438",
+        "invoiceId": "aea5d1d8-40d9-4fe7-a960-ccf4dc814b46",
+        "status": "AUTHORIZED",
+        "amountMinorUnits": "100",
+        "currencyCode": "USD",
+        "scale": 2,
+        "dispatchStartedAt": "2026-10-19T20:41:22.936Z",
+        "captureStartedAt": "2026-10-19T20:41:22.953Z",
+        "nextCheckAt": "2026-10-19T20:43:22.953Z"
+      }
+    ],
+    "invoices": [
+      {
+        "id": "aea5d1d8-40d9-4fe7-a960-ccf4dc814b46",
+        "status": "ISSUED",
+        "dueMinorUnits": "100",
+        "currencyCode": "USD",
+        "scale": 2
+      },
+      {
+        "id": "bb66f38d-9f00-4994-9e16-6df58933a5ac",
+        "status": "PAID",
+        "dueMinorUnits": "0",
+        "currencyCode": "USD",
+        "scale": 2
+      }
+    ],
+    "ledger": [
+      {
+        "id": "bbc407d0-a6aa-417f-815e-374918392fc6",
+        "businessReferenceId": "76ee7077-0c5b-415f-b3d1-0f8d905869c0",
+        "entries": [
+          {
+            "direction": "DEBIT",
+            "amountMinorUnits": "100",
+            "currencyCode": "USD",
+            "scale": 2
+          },
+          {
+            "direction": "CREDIT",
+            "amountMinorUnits": "100",
+            "currencyCode": "USD",
+            "scale": 2
+          }
+        ]
+      }
+    ],
+    "receipts": [
+      {
+        "id": "acea2140-9adc-4e23-bd7a-54da4fc5a618",
+        "paymentId": "76ee7077-0c5b-415f-b3d1-0f8d905869c0",
+        "invoiceId": "bb66f38d-9f00-4994-9e16-6df58933a5ac",
+        "type": "RECEIPT",
+        "amountMinorUnits": "100",
+        "currencyCode": "USD",
+        "scale": 2
+      }
+    ],
+    "audits": [
+      {
+        "id": "e6c83083-5813-44aa-84b8-e8083d87f29f",
+        "action": "FINANCE_PAYMENT_ATTEMPT_STARTED",
+        "targetId": "76ee7077-0c5b-415f-b3d1-0f8d905869c0"
+      },
+      {
+        "id": "e750e7a3-8bfc-4f22-a2be-aacbf7c11efd",
+        "action": "FINANCE_PAYMENT_DISPATCH_RESERVED",
+        "targetId": "76ee7077-0c5b-415f-b3d1-0f8d905869c0"
+      },
+      {
+        "id": "684f96e4-3b4a-4aa4-9a0d-de03a396293d",
+        "action": "FINANCE_PAYMENT_AUTHORIZED",
+        "targetId": "76ee7077-0c5b-415f-b3d1-0f8d905869c0"
+      },
+      {
+        "id": "f27aecd2-0682-4547-8475-84a0d88fac6f",
+        "action": "FINANCE_PAYMENT_CAPTURE_RESERVED",
+        "targetId": "76ee7077-0c5b-415f-b3d1-0f8d905869c0"
+      },
+      {
+        "id": "aaf96b58-0ab1-4399-bb2f-78844dbf7925",
+        "action": "FINANCE_PAYMENT_RECONCILED_CAPTURED",
+        "targetId": "76ee7077-0c5b-415f-b3d1-0f8d905869c0"
+      },
+      {
+        "id": "bf542976-e638-4b88-8ba9-09a40f32daa6",
+        "action": "FINANCE_PAYMENT_ATTEMPT_STARTED",
+        "targetId": "d4ff46f2-c5f9-4c3f-9aa8-a06a0bf9c177"
+      },
+      {
+        "id": "17cc53ac-d280-4c78-a548-d68bcec67758",
+        "action": "FINANCE_PAYMENT_DISPATCH_RESERVED",
+        "targetId": "d4ff46f2-c5f9-4c3f-9aa8-a06a0bf9c177"
+      },
+      {
+        "id": "4149db1d-4557-40d8-8b57-c98e8fa5dd3f",
+        "action": "FINANCE_PAYMENT_AUTHORIZED",
+        "targetId": "d4ff46f2-c5f9-4c3f-9aa8-a06a0bf9c177"
+      },
+      {
+        "id": "144a5cc7-0304-4e81-9b9b-c001f4e12d72",
+        "action": "FINANCE_PAYMENT_CAPTURE_RESERVED",
+        "targetId": "d4ff46f2-c5f9-4c3f-9aa8-a06a0bf9c177"
+      }
+    ],
+    "outbox": [
+      {
+        "id": "0007c713-16c2-43dd-9e8c-50eb77471db2",
+        "eventType": "FINANCE_PAYMENT_ATTEMPT_STARTED",
+        "aggregateId": "76ee7077-0c5b-415f-b3d1-0f8d905869c0",
+        "state": "PENDING"
+      },
+      {
+        "id": "972e0dde-fd04-4396-811b-b50c47fd49b6",
+        "eventType": "FINANCE_PAYMENT_DISPATCH_RESERVED",
+        "aggregateId": "76ee7077-0c5b-415f-b3d1-0f8d905869c0",
+        "state": "PENDING"
+      },
+      {
+        "id": "cbdd5b4a-a089-4eda-b05a-616ecd09e417",
+        "eventType": "FINANCE_PAYMENT_AUTHORIZED",
+        "aggregateId": "76ee7077-0c5b-415f-b3d1-0f8d905869c0",
+        "state": "PENDING"
+      },
+      {
+        "id": "a108aced-b6c4-490a-adf0-69d3d693959c",
+        "eventType": "FINANCE_PAYMENT_CAPTURE_RESERVED",
+        "aggregateId": "76ee7077-0c5b-415f-b3d1-0f8d905869c0",
+        "state": "PENDING"
+      },
+      {
+        "id": "54cf10b7-02e1-4878-812b-0c82fff97908",
+        "eventType": "FINANCE_PAYMENT_RECONCILED_CAPTURED",
+        "aggregateId": "76ee7077-0c5b-415f-b3d1-0f8d905869c0",
+        "state": "PENDING"
+      },
+      {
+        "id": "1572cd7d-381d-410e-a1a2-17246ee4c523",
+        "eventType": "FINANCE_PAYMENT_ATTEMPT_STARTED",
+        "aggregateId": "d4ff46f2-c5f9-4c3f-9aa8-a06a0bf9c177",
+        "state": "PENDING"
+      },
+      {
+        "id": "6422763e-d8b2-4d8d-9835-38a08b12e5d3",
+        "eventType": "FINANCE_PAYMENT_DISPATCH_RESERVED",
+        "aggregateId": "d4ff46f2-c5f9-4c3f-9aa8-a06a0bf9c177",
+        "state": "PENDING"
+      },
+      {
+        "id": "427dbde9-7bb5-409e-b0b7-00e20e93f806",
+        "eventType": "FINANCE_PAYMENT_AUTHORIZED",
+        "aggregateId": "d4ff46f2-c5f9-4c3f-9aa8-a06a0bf9c177",
+        "state": "PENDING"
+      },
+      {
+        "id": "68c01dac-0a2b-4b55-bff0-4eb64bde0ea2",
+        "eventType": "FINANCE_PAYMENT_CAPTURE_RESERVED",
+        "aggregateId": "d4ff46f2-c5f9-4c3f-9aa8-a06a0bf9c177",
+        "state": "PENDING"
+      }
+    ]
+  }
+}

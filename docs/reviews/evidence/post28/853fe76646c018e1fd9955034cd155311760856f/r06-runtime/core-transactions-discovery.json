@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Post28 scoped R06 real PostgreSQL transaction foundation > uses two real backend sessions and the limited application role",
+    "file": "/workspace/MANARATAK-First-/tests/database/post28-core-transactions.database.spec.mjs"
+  },
+  {
+    "name": "Post28 scoped R06 real PostgreSQL transaction foundation > rejects application DDL and migration-ledger writes without changing either",
+    "file": "/workspace/MANARATAK-First-/tests/database/post28-core-transactions.database.spec.mjs"
+  },
+  {
+    "name": "Post28 scoped R06 real PostgreSQL transaction foundation > rolls invoice receipt and outbox back together after an injected precommit failure",
+    "file": "/workspace/MANARATAK-First-/tests/database/post28-core-transactions.database.spec.mjs"
+  },
+  {
+    "name": "Post28 scoped R06 real PostgreSQL transaction foundation > commits all three records, preserves exact units, and rejects duplicate receipt identity",
+    "file": "/workspace/MANARATAK-First-/tests/database/post28-core-transactions.database.spec.mjs"
+  },
+  {
+    "name": "Post28 scoped R06 real PostgreSQL transaction foundation > enforces positive payment units on real PostgreSQL",
+    "file": "/workspace/MANARATAK-First-/tests/database/post28-core-transactions.database.spec.mjs"
+  },
+  {
+    "name": "Post28 scoped R06 real PostgreSQL transaction foundation > enforces the invoice foreign key without leaving a payment row",
+    "file": "/workspace/MANARATAK-First-/tests/database/post28-core-transactions.database.spec.mjs"
+  },
+  {
+    "name": "Post28 scoped R06 real PostgreSQL transaction foundation > document owner first blocks asset deletion then rejects it after owner commit",
+    "file": "/workspace/MANARATAK-First-/tests/database/post28-core-transactions.database.spec.mjs"
+  },
+  {
+    "name": "Post28 scoped R06 real PostgreSQL transaction foundation > asset lifecycle first blocks the document writer and rejects its binding after commit",
+    "file": "/workspace/MANARATAK-First-/tests/database/post28-core-transactions.database.spec.mjs"
+  }
+]

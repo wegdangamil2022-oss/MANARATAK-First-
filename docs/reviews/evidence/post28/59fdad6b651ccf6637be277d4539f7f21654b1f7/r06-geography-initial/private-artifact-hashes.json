@@ -1,0 +1,22 @@
+[
+  {
+    "name": "R06-suites/university-geography-Y4DlcY/vitest.json",
+    "sha256": "17a4c0b06722ffa7986fc0ba52d1ac8913c8784f6112b2cbe7ebd8175c7327f6",
+    "bytes": 13081
+  },
+  {
+    "name": "R06-suites/university-geography-Y4DlcY/discovery.json",
+    "sha256": "f313d545dd2c34f66550b1391c64e50ddd2e6a9aec889095e23d3402ac020246",
+    "bytes": 4616
+  },
+  {
+    "name": "R06-setup/result.json",
+    "sha256": "310648c68305fbd9fd1c599bd39db641cdba2f1d0273d059059407497c858349",
+    "bytes": 3293
+  },
+  {
+    "name": "R06-setup/checks.json",
+    "sha256": "6d4353c9fedb7c5720c4ff72b8d8031a36426856baa70a6997f1afe89db66699",
+    "bytes": 1393
+  }
+]

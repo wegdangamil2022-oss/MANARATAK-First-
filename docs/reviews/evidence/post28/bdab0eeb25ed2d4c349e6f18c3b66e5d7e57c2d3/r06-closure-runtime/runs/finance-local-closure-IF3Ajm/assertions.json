@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "commits one credit note ledger adjustment and durable replay receipt",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "passed",
+    "durationMs": 76.3747900000003,
+    "failureFirstLines": []
+  }
+]

@@ -1,0 +1,935 @@
+{
+  "version": 2,
+  "kind": "POST28_R05_NEW_KNOWN_SOURCE_HISTORICAL_MANIFEST",
+  "stageSourceSha": "f80e3b0ab9aa29f0ea5312af3d6aa7ab461be7b7",
+  "selectedPredecessorSha": "23897bdaa66d966eef15c85f44288589ecbcdf2b",
+  "rows": [
+    {
+      "model": "ApiSearchRequestRecord",
+      "owner": "foundation_control_plane",
+      "scenario": "search-null",
+      "id": "c3cfaf85-5bfd-4544-87ab-07fdf9aebc46",
+      "data": {
+        "id": "c3cfaf85-5bfd-4544-87ab-07fdf9aebc46",
+        "actorReferenceId": null,
+        "reference": "post28-r05-legacy",
+        "scope": "PUBLIC_CATALOG",
+        "query": "synthetic legacy query",
+        "filters": [],
+        "logicalOperator": "AND",
+        "page": 1,
+        "limit": 20,
+        "state": "COMPLETED",
+        "totalCount": 0,
+        "executionTimeMs": 1,
+        "createdAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "ApiSearchRequestRecord",
+      "owner": "foundation_control_plane",
+      "scenario": "search-owned",
+      "id": "a34242c0-9c48-4b23-8c42-aa512f2bed4d",
+      "data": {
+        "id": "a34242c0-9c48-4b23-8c42-aa512f2bed4d",
+        "actorReferenceId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "reference": "post28-r05-owned",
+        "scope": "PUBLIC_CATALOG",
+        "query": "synthetic owned query",
+        "filters": [],
+        "logicalOperator": "AND",
+        "page": 1,
+        "limit": 20,
+        "state": "COMPLETED",
+        "totalCount": 0,
+        "executionTimeMs": 1,
+        "createdAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "StudentWorkspace",
+      "owner": "student",
+      "scenario": "workspace",
+      "id": "6f02c55f-2e89-4e06-83a3-b3e90ef1dd07",
+      "data": {
+        "id": "6f02c55f-2e89-4e06-83a3-b3e90ef1dd07",
+        "studentReferenceId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "status": "ACTIVE",
+        "privacyPreferences": {
+          "documentReview": false
+        },
+        "createdAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "Scholarship",
+      "owner": "scholarships",
+      "scenario": "scholarship",
+      "id": "a7e64a34-ed01-462b-840a-864bd40ffd66",
+      "data": {
+        "id": "a7e64a34-ed01-462b-840a-864bd40ffd66",
+        "publicId": "POST28-R05-scholarship",
+        "slug": "post28-r05-scholarship",
+        "canonicalName": "Synthetic scholarship",
+        "canonicalDedupKey": "post28-r05-scholarship",
+        "displayName": "Synthetic scholarship",
+        "status": "DRAFT",
+        "completenessStatus": "INCOMPLETE"
+      }
+    },
+    {
+      "model": "ScholarshipVersion",
+      "owner": "scholarships",
+      "scenario": "scholarship-version",
+      "id": "ee3e3d0e-8c86-41eb-84d2-42ebe2ea0568",
+      "data": {
+        "id": "ee3e3d0e-8c86-41eb-84d2-42ebe2ea0568",
+        "scholarshipId": "a7e64a34-ed01-462b-840a-864bd40ffd66",
+        "versionNumber": 1,
+        "status": "PUBLISHED",
+        "snapshot": {
+          "synthetic": true,
+          "source": "R05",
+          "originalVersion": 1
+        },
+        "publishedAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "StudentApplicationTracker",
+      "owner": "student",
+      "scenario": "tracker",
+      "id": "1315efb8-b2dd-40da-86d0-618c702e9052",
+      "data": {
+        "id": "1315efb8-b2dd-40da-86d0-618c702e9052",
+        "studentReferenceId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "scholarshipId": "a7e64a34-ed01-462b-840a-864bd40ffd66",
+        "cycleReferenceId": "LEGACY",
+        "ownerSnapshot": {
+          "source": "post28-r05",
+          "version": 1
+        }
+      }
+    },
+    {
+      "model": "AssetRecord",
+      "owner": "assets",
+      "scenario": "linked-asset",
+      "id": "7b3d94d5-ac23-4182-8dc9-9f68738926da",
+      "data": {
+        "id": "7b3d94d5-ac23-4182-8dc9-9f68738926da",
+        "reference": "post28-r05-linked-asset",
+        "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "ownerType": "STUDENT",
+        "lifecycleState": "ACTIVE",
+        "securityClassification": "PRIVATE",
+        "retentionCategory": "STUDENT_DOCUMENT",
+        "metadata": {
+          "synthetic": true,
+          "source": "R05",
+          "originalId": "7b3d94d5-ac23-4182-8dc9-9f68738926da"
+        },
+        "createdAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "AssetRecord",
+      "owner": "assets",
+      "scenario": "unlinked-asset",
+      "id": "76a8f104-7204-4ab7-8bad-f3090735009d",
+      "data": {
+        "id": "76a8f104-7204-4ab7-8bad-f3090735009d",
+        "reference": "post28-r05-unlinked-asset",
+        "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "ownerType": "STUDENT",
+        "lifecycleState": "ACTIVE",
+        "securityClassification": "PRIVATE",
+        "retentionCategory": "STUDENT_DOCUMENT",
+        "metadata": {
+          "synthetic": true,
+          "source": "R05",
+          "originalId": "76a8f104-7204-4ab7-8bad-f3090735009d"
+        },
+        "createdAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "StudentApplicationDocumentBinding",
+      "owner": "student",
+      "scenario": "missing-consent",
+      "id": "a8fec8ab-43bd-4556-8c5a-740bfb041421",
+      "data": {
+        "id": "a8fec8ab-43bd-4556-8c5a-740bfb041421",
+        "trackerId": "1315efb8-b2dd-40da-86d0-618c702e9052",
+        "requirementId": "c0cc2dd1-9ea5-4009-866b-f90e56c27b5c",
+        "assetId": "7b3d94d5-ac23-4182-8dc9-9f68738926da",
+        "ownerVersionId": "ee3e3d0e-8c86-41eb-84d2-42ebe2ea0568",
+        "requirementSnapshot": {
+          "synthetic": true,
+          "scenario": "missing-consent",
+          "legacySource": "post28-r05"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "retentionUntil": "2035-01-01T00:00:00.000Z",
+        "reviewConsentGrantedAt": null,
+        "reviewConsentUntil": null,
+        "attestation": {
+          "consent": "MISSING",
+          "synthetic": true
+        }
+      }
+    },
+    {
+      "model": "StudentApplicationDocumentBinding",
+      "owner": "student",
+      "scenario": "whitespace-consent",
+      "id": "9d82a071-e1ad-4d8d-8843-da5d2ac9e644",
+      "data": {
+        "id": "9d82a071-e1ad-4d8d-8843-da5d2ac9e644",
+        "trackerId": "1315efb8-b2dd-40da-86d0-618c702e9052",
+        "requirementId": "a56ee09a-8170-4fb4-883d-a613c5480a7b",
+        "assetId": "7b3d94d5-ac23-4182-8dc9-9f68738926da",
+        "ownerVersionId": "ee3e3d0e-8c86-41eb-84d2-42ebe2ea0568",
+        "requirementSnapshot": {
+          "synthetic": true,
+          "scenario": "whitespace-consent",
+          "legacySource": "post28-r05"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "retentionUntil": "2035-01-01T00:00:00.000Z",
+        "reviewConsentGrantedAt": null,
+        "reviewConsentUntil": null,
+        "attestation": {
+          "consent": "   ",
+          "synthetic": true
+        }
+      }
+    },
+    {
+      "model": "StudentApplicationDocumentBinding",
+      "owner": "student",
+      "scenario": "revoked-consent",
+      "id": "22f8f004-4c7c-4a7d-84ca-8ad7d5f2ab55",
+      "data": {
+        "id": "22f8f004-4c7c-4a7d-84ca-8ad7d5f2ab55",
+        "trackerId": "1315efb8-b2dd-40da-86d0-618c702e9052",
+        "requirementId": "0d06f731-9e72-46d8-84d8-1d7755c4d356",
+        "assetId": "7b3d94d5-ac23-4182-8dc9-9f68738926da",
+        "ownerVersionId": "ee3e3d0e-8c86-41eb-84d2-42ebe2ea0568",
+        "requirementSnapshot": {
+          "synthetic": true,
+          "scenario": "revoked-consent",
+          "legacySource": "post28-r05"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "retentionUntil": "2035-01-01T00:00:00.000Z",
+        "reviewConsentGrantedAt": null,
+        "reviewConsentUntil": null,
+        "attestation": {
+          "consent": "REVOKED",
+          "synthetic": true
+        }
+      }
+    },
+    {
+      "model": "StudentApplicationDocumentBinding",
+      "owner": "student",
+      "scenario": "future-consent",
+      "id": "2dd35cf9-2d8c-4729-838b-cac0ecff51dc",
+      "data": {
+        "id": "2dd35cf9-2d8c-4729-838b-cac0ecff51dc",
+        "trackerId": "1315efb8-b2dd-40da-86d0-618c702e9052",
+        "requirementId": "58c32dde-234d-4a3d-8226-fcb0ae8646ef",
+        "assetId": "7b3d94d5-ac23-4182-8dc9-9f68738926da",
+        "ownerVersionId": "ee3e3d0e-8c86-41eb-84d2-42ebe2ea0568",
+        "requirementSnapshot": {
+          "synthetic": true,
+          "scenario": "future-consent",
+          "legacySource": "post28-r05"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "retentionUntil": "2035-01-01T00:00:00.000Z",
+        "reviewConsentGrantedAt": "2030-01-01T00:00:00.000Z",
+        "reviewConsentUntil": "2035-01-01T00:00:00.000Z",
+        "attestation": {
+          "consent": "GRANTED",
+          "synthetic": true
+        }
+      }
+    },
+    {
+      "model": "StudentApplicationDocumentBinding",
+      "owner": "student",
+      "scenario": "valid-consent",
+      "id": "c5fee355-9d12-4c68-861c-11bcaae0c3d4",
+      "data": {
+        "id": "c5fee355-9d12-4c68-861c-11bcaae0c3d4",
+        "trackerId": "1315efb8-b2dd-40da-86d0-618c702e9052",
+        "requirementId": "f5c41351-2028-4189-877b-78a30ba10d4c",
+        "assetId": "7b3d94d5-ac23-4182-8dc9-9f68738926da",
+        "ownerVersionId": "ee3e3d0e-8c86-41eb-84d2-42ebe2ea0568",
+        "requirementSnapshot": {
+          "synthetic": true,
+          "scenario": "valid-consent",
+          "legacySource": "post28-r05"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "retentionUntil": "2035-01-01T00:00:00.000Z",
+        "reviewConsentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "reviewConsentUntil": "2035-01-01T00:00:00.000Z",
+        "attestation": {
+          "consent": "GRANTED",
+          "synthetic": true
+        }
+      }
+    },
+    {
+      "model": "StudentApplicationDocumentBinding",
+      "owner": "student",
+      "scenario": "orphan-document",
+      "id": "2a4960c9-b4be-405a-8b21-7c3b34a5034f",
+      "data": {
+        "id": "2a4960c9-b4be-405a-8b21-7c3b34a5034f",
+        "trackerId": "1315efb8-b2dd-40da-86d0-618c702e9052",
+        "requirementId": "413c5da3-86f1-4b99-87fc-78e898b34dfb",
+        "assetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+        "ownerVersionId": "ee3e3d0e-8c86-41eb-84d2-42ebe2ea0568",
+        "requirementSnapshot": {
+          "synthetic": true,
+          "scenario": "orphan-document",
+          "legacySource": "post28-r05"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "retentionUntil": "2035-01-01T00:00:00.000Z",
+        "reviewConsentGrantedAt": null,
+        "reviewConsentUntil": null,
+        "attestation": {
+          "consent": "MISSING",
+          "synthetic": true
+        }
+      }
+    },
+    {
+      "model": "StudentPrivacyConsentDecision",
+      "owner": "student",
+      "scenario": "revoked-decision",
+      "id": "947e7d8c-96ee-4853-8034-b86ab7f75cc0",
+      "data": {
+        "id": "947e7d8c-96ee-4853-8034-b86ab7f75cc0",
+        "studentReferenceId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "workspaceVersion": 1,
+        "actorId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "actorType": "STUDENT",
+        "purpose": "DOCUMENT_REVIEW",
+        "source": "POST28_SYNTHETIC",
+        "beforePreferences": {
+          "documentReview": true
+        },
+        "afterPreferences": {
+          "documentReview": false
+        },
+        "changedFields": [
+          "documentReview"
+        ],
+        "decidedAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "FinancialAccountRecord",
+      "owner": "finance",
+      "scenario": "cash-account",
+      "id": "c755e42b-f43c-4663-88ec-9a095867b589",
+      "data": {
+        "id": "c755e42b-f43c-4663-88ec-9a095867b589",
+        "publicId": "POST28-R05-cash-account",
+        "ownerReferenceId": "cce92deb-7ec6-4f56-8b64-b67168dcab6f",
+        "type": "ASSET",
+        "currencyCode": "USD",
+        "scale": 2
+      }
+    },
+    {
+      "model": "FinancialAccountRecord",
+      "owner": "finance",
+      "scenario": "wallet-account",
+      "id": "8dc9e95e-9850-49cf-84ba-35ce74da1569",
+      "data": {
+        "id": "8dc9e95e-9850-49cf-84ba-35ce74da1569",
+        "publicId": "POST28-R05-wallet-account",
+        "ownerReferenceId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "type": "LIABILITY",
+        "currencyCode": "USD",
+        "scale": 2
+      }
+    },
+    {
+      "model": "FinancialTransactionRecord",
+      "owner": "finance",
+      "scenario": "transaction",
+      "id": "2f0f1c48-8a03-4ca4-8915-017792f0d200",
+      "data": {
+        "id": "2f0f1c48-8a03-4ca4-8915-017792f0d200",
+        "publicId": "POST28-R05-TXN",
+        "correlationId": "c1d13c3b-c6f6-4e4a-8ded-c4599f05cc42",
+        "businessReferenceType": "SYNTHETIC_UPGRADE",
+        "businessReferenceId": "3062aad1-e6b5-424f-8f78-6d3b5898f6f2",
+        "idempotencyKeyHash": "316c4b7f37ca57d8431b0bdd420e0b206592e02e8cf22466c422663be7e9ee42",
+        "currencyCode": "USD",
+        "scale": 2,
+        "createdBy": "post28-r05-fixture",
+        "createdAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "FinancialLedgerEntryRecord",
+      "owner": "finance",
+      "scenario": "entry-cash-account",
+      "id": "920a7389-5001-48b6-8860-0532661902d2",
+      "data": {
+        "id": "920a7389-5001-48b6-8860-0532661902d2",
+        "transactionId": "2f0f1c48-8a03-4ca4-8915-017792f0d200",
+        "accountId": "c755e42b-f43c-4663-88ec-9a095867b589",
+        "direction": "DEBIT",
+        "amountMinorUnits": "900719925474099312345",
+        "currencyCode": "USD",
+        "scale": 2,
+        "sequence": 1,
+        "createdAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "FinancialLedgerEntryRecord",
+      "owner": "finance",
+      "scenario": "entry-wallet-account",
+      "id": "3481f6f8-96f7-41ba-8dd5-40b4f59f501b",
+      "data": {
+        "id": "3481f6f8-96f7-41ba-8dd5-40b4f59f501b",
+        "transactionId": "2f0f1c48-8a03-4ca4-8915-017792f0d200",
+        "accountId": "8dc9e95e-9850-49cf-84ba-35ce74da1569",
+        "direction": "CREDIT",
+        "amountMinorUnits": "900719925474099312345",
+        "currencyCode": "USD",
+        "scale": 2,
+        "sequence": 2,
+        "createdAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "FinanceWalletRecord",
+      "owner": "finance",
+      "scenario": "wallet",
+      "id": "958495fe-2ee3-4dc3-8116-58dbc0b1cc9e",
+      "data": {
+        "id": "958495fe-2ee3-4dc3-8116-58dbc0b1cc9e",
+        "publicId": "POST28-R05-WALLET",
+        "ownerReferenceId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "accountId": "8dc9e95e-9850-49cf-84ba-35ce74da1569",
+        "currencyCode": "USD",
+        "scale": 2,
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "model": "FinanceWalletHoldRecord",
+      "owner": "finance",
+      "scenario": "hold",
+      "id": "0f555446-285f-40a7-88d6-82b730d83e41",
+      "data": {
+        "id": "0f555446-285f-40a7-88d6-82b730d83e41",
+        "publicId": "POST28-R05-HOLD",
+        "walletId": "958495fe-2ee3-4dc3-8116-58dbc0b1cc9e",
+        "amountMinorUnits": "10000",
+        "currencyCode": "USD",
+        "scale": 2,
+        "status": "ACTIVE",
+        "businessReferenceId": "3062aad1-e6b5-424f-8f78-6d3b5898f6f2",
+        "idempotencyKeyHash": "cb280118afe61d367ceed46464b2c4fdcc7afc9fc2abdcbf0dddda20508c20d8",
+        "createdAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "FinanceInvoiceRecord",
+      "owner": "finance",
+      "scenario": "invoice",
+      "id": "3062aad1-e6b5-424f-8f78-6d3b5898f6f2",
+      "data": {
+        "id": "3062aad1-e6b5-424f-8f78-6d3b5898f6f2",
+        "publicId": "POST28-R05-INVOICE",
+        "invoiceNumber": "POST28-R05-0001",
+        "correlationId": "c1d13c3b-c6f6-4e4a-8ded-c4599f05cc42",
+        "originDomain": "POST28_SYNTHETIC",
+        "originReferenceId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "studentReferenceId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "status": "PARTIALLY_PAID",
+        "currencyCode": "USD",
+        "scale": 2,
+        "totalMinorUnits": "900719925474099312345",
+        "dueMinorUnits": "900719925474099302345",
+        "lineItems": [
+          {
+            "description": "synthetic",
+            "amountMinorUnits": "900719925474099312345"
+          }
+        ],
+        "createdAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "FinancePaymentRecord",
+      "owner": "finance",
+      "scenario": "payment",
+      "id": "6b3ac51f-30af-40a6-8de6-8df5bcca64e9",
+      "data": {
+        "id": "6b3ac51f-30af-40a6-8de6-8df5bcca64e9",
+        "publicId": "POST28-R05-PAYMENT",
+        "invoiceId": "3062aad1-e6b5-424f-8f78-6d3b5898f6f2",
+        "idempotencyKeyHash": "de8c07298f9c2e8be568ad41169d129944a5832d9205936ee87b2cc8b3de890a",
+        "currencyCode": "USD",
+        "scale": 2,
+        "amountMinorUnits": "10000",
+        "status": "CAPTURED",
+        "paymentMethod": "MANUAL",
+        "capturedAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "FinanceRefundRecord",
+      "owner": "finance",
+      "scenario": "refund",
+      "id": "588e1e49-59d5-47ca-8fea-25d57d8a0de3",
+      "data": {
+        "id": "588e1e49-59d5-47ca-8fea-25d57d8a0de3",
+        "publicId": "POST28-R05-REFUND",
+        "paymentId": "6b3ac51f-30af-40a6-8de6-8df5bcca64e9",
+        "amountMinorUnits": "100",
+        "currencyCode": "USD",
+        "scale": 2,
+        "reason": "Synthetic historical evidence only",
+        "status": "PENDING",
+        "makerId": "post28-r05-fixture"
+      }
+    },
+    {
+      "model": "FinanceCommandRecord",
+      "owner": "finance",
+      "scenario": "receipt",
+      "id": "ba9badce-a3ed-4e5b-8359-acac35f31d8b",
+      "data": {
+        "id": "ba9badce-a3ed-4e5b-8359-acac35f31d8b",
+        "actorId": "post28-r05-fixture",
+        "operation": "SYNTHETIC_RECEIPT",
+        "targetId": "3062aad1-e6b5-424f-8f78-6d3b5898f6f2",
+        "fingerprint": "f77bc07713f25aa490079c2bf38f8125de6e555a773a67d2dda4bbcfcddbbc33",
+        "response": {
+          "synthetic": true,
+          "invoiceId": "3062aad1-e6b5-424f-8f78-6d3b5898f6f2",
+          "originalAmountMinorUnits": "900719925474099312345"
+        },
+        "createdAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "CmsContentNode",
+      "owner": "cms",
+      "scenario": "cms",
+      "id": "c6288a5f-dc67-411c-8ea1-e0ba0df5303a",
+      "data": {
+        "id": "c6288a5f-dc67-411c-8ea1-e0ba0df5303a",
+        "publicId": "POST28-R05-cms",
+        "slug": "post28-r05-cms",
+        "status": "DRAFT",
+        "contentType": "ARTICLE",
+        "title": "Synthetic old publication",
+        "authorId": "post28-r05-author",
+        "ownerId": "post28-r05-owner",
+        "lastModifiedBy": "post28-r05-editor"
+      }
+    },
+    {
+      "model": "CmsLocalizedContent",
+      "owner": "cms",
+      "scenario": "cms-ar",
+      "id": "00759157-e964-4453-862c-8d2312fb81ce",
+      "data": {
+        "id": "00759157-e964-4453-862c-8d2312fb81ce",
+        "contentId": "c6288a5f-dc67-411c-8ea1-e0ba0df5303a",
+        "locale": "ar",
+        "localizedSlug": "post28-r05-cms-ar",
+        "state": "PUBLISHED",
+        "version": 2,
+        "title": "نص تجريبي تاريخي",
+        "body": "دليل صناعي لا يتضمن بيانات مستخدم",
+        "lastModifiedBy": "post28-r05-translator",
+        "publishedAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "CmsContentRevision",
+      "owner": "cms",
+      "scenario": "cms-revision",
+      "id": "41462cfa-f3f2-4098-8f3f-3f9e8d93f063",
+      "data": {
+        "id": "41462cfa-f3f2-4098-8f3f-3f9e8d93f063",
+        "localizedContentId": "00759157-e964-4453-862c-8d2312fb81ce",
+        "versionNumber": 1,
+        "reason": "Synthetic prior version",
+        "payload": {
+          "locale": "ar",
+          "body": "نص صناعي سابق",
+          "source": "R05"
+        },
+        "capturedBy": "post28-r05-editor",
+        "capturedAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "CmsPublishedContent",
+      "owner": "cms",
+      "scenario": "cms-publication",
+      "id": "a42d7f10-b436-4e09-8da3-d37818c2cb20",
+      "data": {
+        "id": "a42d7f10-b436-4e09-8da3-d37818c2cb20",
+        "contentId": "c6288a5f-dc67-411c-8ea1-e0ba0df5303a",
+        "publicId": "POST28-R05-CMS",
+        "siteIdentifier": "MANARATAK",
+        "locale": "ar",
+        "slug": "post28-r05-cms-ar",
+        "canonicalUrl": "https://post28.invalid/ar/synthetic",
+        "contentType": "ARTICLE",
+        "title": "نشر صناعي سابق",
+        "body": "دليل تاريخي صناعي ثابت",
+        "attachmentAssetIds": [],
+        "tags": [],
+        "seoMetadata": {
+          "synthetic": true
+        },
+        "versionNumber": 1,
+        "publishedAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "OwnerTranslationTransferReceipt",
+      "owner": "import",
+      "scenario": "translation-receipt",
+      "id": "2cabd285-5cf3-407c-8f99-64be62928cb1",
+      "data": {
+        "id": "2cabd285-5cf3-407c-8f99-64be62928cb1",
+        "ownerDomain": "UNIVERSITY",
+        "targetId": "8f39cff6-539d-4a6e-8ccb-32f9b28f0156",
+        "handoffId": "31e0ad9a-e68a-47bf-895e-0e6df0634979",
+        "approvalId": "b3821c8b-f1b8-4d29-8d78-af33d66b26fd",
+        "actorId": "post28-r05-translator",
+        "reviewerId": "post28-r05-reviewer",
+        "digest": "168a756ed0b2cd1fa9a9e0e3b2cd83c970e5ce238e813f7073162857ccc16f65",
+        "outcome": "APPLIED",
+        "createdAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "DegreeLevel",
+      "owner": "reference",
+      "scenario": "degree",
+      "id": "3cfe145c-891d-46b9-8855-34121407e4e8",
+      "data": {
+        "id": "3cfe145c-891d-46b9-8855-34121407e4e8",
+        "canonicalCode": "POST28_SYNTHETIC",
+        "nameEn": "Synthetic degree",
+        "nameAr": "درجة صناعية"
+      }
+    },
+    {
+      "model": "University",
+      "owner": "universities",
+      "scenario": "university",
+      "id": "8f39cff6-539d-4a6e-8ccb-32f9b28f0156",
+      "data": {
+        "id": "8f39cff6-539d-4a6e-8ccb-32f9b28f0156",
+        "publicId": "POST28-R05-university",
+        "slug": "post28-r05-university",
+        "canonicalName": "Synthetic university",
+        "canonicalDedupKey": "post28-r05-university",
+        "displayName": "Synthetic university",
+        "status": "DRAFT",
+        "completenessStatus": "INCOMPLETE"
+      }
+    },
+    {
+      "model": "UniversityTranslation",
+      "owner": "universities",
+      "scenario": "university-translation",
+      "id": "5aa6b9bd-f253-491d-853a-e4bd413a1694",
+      "data": {
+        "id": "5aa6b9bd-f253-491d-853a-e4bd413a1694",
+        "universityId": "8f39cff6-539d-4a6e-8ccb-32f9b28f0156",
+        "locale": "ar",
+        "displayName": "جامعة صناعية تاريخية",
+        "reviewStatus": "NEEDS_REVIEW",
+        "metadata": {
+          "synthetic": true,
+          "originalVersion": 1
+        }
+      }
+    },
+    {
+      "model": "UniversityAcademicProgram",
+      "owner": "universities",
+      "scenario": "program",
+      "id": "e971897c-f72b-4606-8a20-db2a3e5c9c92",
+      "data": {
+        "id": "e971897c-f72b-4606-8a20-db2a3e5c9c92",
+        "universityId": "8f39cff6-539d-4a6e-8ccb-32f9b28f0156",
+        "sourceProgramName": "Synthetic historical program",
+        "normalizedName": "synthetic historical program",
+        "degreeLevelId": "3cfe145c-891d-46b9-8855-34121407e4e8",
+        "majorMappingState": "UNRESOLVED"
+      }
+    },
+    {
+      "model": "ScholarshipDegreeTarget",
+      "owner": "scholarships",
+      "scenario": "degree-target",
+      "id": "e61d1e94-64ac-4fd3-8bc7-d63ec605fac0",
+      "data": {
+        "id": "e61d1e94-64ac-4fd3-8bc7-d63ec605fac0",
+        "scholarshipId": "a7e64a34-ed01-462b-840a-864bd40ffd66",
+        "targetKey": "post28-r05-degree",
+        "degreeLevelId": "3cfe145c-891d-46b9-8855-34121407e4e8",
+        "resolutionStatus": "RESOLVED"
+      }
+    },
+    {
+      "model": "ScholarshipDegreeTarget",
+      "owner": "scholarships",
+      "scenario": "legacy-unresolved-target",
+      "id": "dab54ddb-bf66-4ca0-83a2-99c9ddcb3709",
+      "data": {
+        "id": "dab54ddb-bf66-4ca0-83a2-99c9ddcb3709",
+        "scholarshipId": "a7e64a34-ed01-462b-840a-864bd40ffd66",
+        "targetKey": "post28-r05-legacy-label",
+        "degreeLevelId": null,
+        "sourceLabel": "Unknown legacy degree label",
+        "resolutionStatus": "PENDING"
+      }
+    },
+    {
+      "model": "Major",
+      "owner": "majors",
+      "scenario": "major",
+      "id": "00554389-147a-45e8-8cbd-54d9d1a8ed4b",
+      "data": {
+        "id": "00554389-147a-45e8-8cbd-54d9d1a8ed4b",
+        "publicId": "POST28-R05-major",
+        "slug": "post28-r05-major",
+        "canonicalName": "Synthetic major",
+        "canonicalDedupKey": "post28-r05-major",
+        "displayName": "Synthetic major",
+        "status": "DRAFT",
+        "completenessStatus": "INCOMPLETE"
+      }
+    },
+    {
+      "model": "Course",
+      "owner": "learning",
+      "scenario": "course",
+      "id": "aa839b86-d5b0-4435-851f-e6cfb5b24695",
+      "data": {
+        "id": "aa839b86-d5b0-4435-851f-e6cfb5b24695",
+        "publicId": "POST28-R05-course",
+        "slug": "post28-r05-course",
+        "canonicalName": "Synthetic course",
+        "canonicalDedupKey": "post28-r05-course",
+        "displayName": "Synthetic course",
+        "status": "DRAFT",
+        "completenessStatus": "INCOMPLETE",
+        "accessType": "FREE",
+        "originType": "INTERNAL",
+        "directCourseUrl": "https://post28.invalid/course/synthetic"
+      }
+    },
+    {
+      "model": "CourseVersion",
+      "owner": "learning",
+      "scenario": "course-version",
+      "id": "95c564fc-7627-4437-8919-90b9d1c33536",
+      "data": {
+        "id": "95c564fc-7627-4437-8919-90b9d1c33536",
+        "courseId": "aa839b86-d5b0-4435-851f-e6cfb5b24695",
+        "versionNumber": 1,
+        "reason": "Synthetic historical evidence",
+        "snapshot": {
+          "synthetic": true,
+          "originalVersion": 1
+        },
+        "createdBy": "post28-r05-fixture"
+      }
+    },
+    {
+      "model": "CourseMajorProjection",
+      "owner": "learning",
+      "scenario": "projection",
+      "id": "4b27a678-2876-4241-8056-a05d85fd5494",
+      "data": {
+        "id": "4b27a678-2876-4241-8056-a05d85fd5494",
+        "projectionKey": "post28-r05-projection",
+        "courseId": "aa839b86-d5b0-4435-851f-e6cfb5b24695",
+        "majorId": "00554389-147a-45e8-8cbd-54d9d1a8ed4b",
+        "sourceType": "MANUAL",
+        "relationshipType": "RELATED",
+        "projectionState": "PROPOSED"
+      }
+    },
+    {
+      "model": "StudentLearningProjection",
+      "owner": "student",
+      "scenario": "learning-projection",
+      "id": "b3d5c595-a2cf-423b-887a-e18415af6a3b",
+      "data": {
+        "id": "b3d5c595-a2cf-423b-887a-e18415af6a3b",
+        "studentReferenceId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "enrollmentId": "7ab47ee6-0417-4e10-8b2e-cf7c0f42dbf0",
+        "courseId": "aa839b86-d5b0-4435-851f-e6cfb5b24695",
+        "courseSlug": "post28-r05-course",
+        "courseName": "Synthetic course",
+        "status": "ACTIVE",
+        "progressPercentage": 20,
+        "enrolledAt": "2025-01-01T00:00:00.000Z",
+        "sourceEventId": "5bc5b1b6-8406-4b99-893f-f264e20117e3"
+      }
+    },
+    {
+      "model": "InternationalTest",
+      "owner": "tests",
+      "scenario": "test",
+      "id": "d6551641-8a46-4bf4-89f5-dc6600024b2c",
+      "data": {
+        "id": "d6551641-8a46-4bf4-89f5-dc6600024b2c",
+        "publicId": "POST28-R05-test",
+        "slug": "post28-r05-test",
+        "canonicalName": "Synthetic test",
+        "canonicalDedupKey": "post28-r05-test",
+        "displayName": "Synthetic test",
+        "status": "DRAFT",
+        "completenessStatus": "INCOMPLETE"
+      }
+    },
+    {
+      "model": "InternationalTestVersion",
+      "owner": "tests",
+      "scenario": "test-version",
+      "id": "526250dc-1331-451c-8568-c7c6b6b31bea",
+      "data": {
+        "id": "526250dc-1331-451c-8568-c7c6b6b31bea",
+        "testId": "d6551641-8a46-4bf4-89f5-dc6600024b2c",
+        "versionNumber": 1,
+        "status": "PUBLISHED",
+        "publishedAt": "2025-01-01T00:00:00.000Z",
+        "approvedBy": "post28-r05-reviewer",
+        "rawContentBlocks": {
+          "synthetic": true
+        }
+      }
+    },
+    {
+      "model": "InternationalTestPublicationSnapshot",
+      "owner": "tests",
+      "scenario": "test-publication",
+      "id": "526250dc-1331-451c-8568-c7c6b6b31bea",
+      "data": {
+        "id": "526250dc-1331-451c-8568-c7c6b6b31bea",
+        "testId": "d6551641-8a46-4bf4-89f5-dc6600024b2c",
+        "candidateHash": "42a79731106ba9af6965f2cc4bc3dec0c28696e64a97e00306a0f8718c54f603",
+        "payload": {
+          "synthetic": true,
+          "versionId": "526250dc-1331-451c-8568-c7c6b6b31bea",
+          "testId": "d6551641-8a46-4bf4-89f5-dc6600024b2c"
+        },
+        "reviewerId": "post28-r05-reviewer",
+        "publishedAt": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "model": "CmsBlockSchema",
+      "owner": "cms",
+      "scenario": "cms-block",
+      "id": "f1a98ab4-b4b1-42aa-8ff7-d44d02c0168c",
+      "data": {
+        "id": "f1a98ab4-b4b1-42aa-8ff7-d44d02c0168c",
+        "key": "post28-r05-block",
+        "version": 1,
+        "nameAr": "صناعي",
+        "nameEn": "Synthetic",
+        "fieldSchema": [],
+        "localizedFields": [],
+        "assetFields": [],
+        "status": "ACTIVE",
+        "createdBy": "post28-r05-fixture"
+      }
+    }
+  ],
+  "orphan": {
+    "bindingId": "2a4960c9-b4be-405a-8b21-7c3b34a5034f",
+    "missingAssetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+    "owner": "student/assets",
+    "disposition": "BLOCK_UPGRADE_UNTIL_OWNER_REVIEW_AND_REAL_LIFECYCLE",
+    "sourceEvidence": {
+      "synthetic": true,
+      "creationStage": 108,
+      "action": "NEW_CASE_SOURCE_RETAINED_ASSET_OMITTED_FROM_LOAD_PACKAGE",
+      "sourceSha256": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+      "sourcePacketSha256": "74c9413ff40dbabfc74042675e27876d31ec68682230f945589a6ecd7e7c74e5",
+      "bindingRetained": true
+    }
+  },
+  "claims": {
+    "realPersons": false,
+    "productionData": false,
+    "domainApproval": false,
+    "DECApproval": false,
+    "fullR05Acceptance": false,
+    "originalRejectedScenarioModified": false,
+    "knownSyntheticSourcePresent": true,
+    "ownerReviewApproved": false,
+    "assetRemediationExecuted": false
+  },
+  "sourcePacket": {
+    "version": 1,
+    "kind": "POST28_NEW_SYNTHETIC_KNOWN_SOURCE_CASE",
+    "sourceSha": "e787410178b26e42fca4096d1337c46011737aa8",
+    "runId": "edc26378-2c3a-4339-9809-ebffbea31a83",
+    "source": {
+      "filename": "new-synthetic-historical-document.pdf",
+      "mimeType": "application/pdf",
+      "byteSize": 636,
+      "sha256": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+      "createdForThisNewCase": true
+    },
+    "bindingId": "2a4960c9-b4be-405a-8b21-7c3b34a5034f",
+    "assetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+    "owner": {
+      "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+      "ownerType": "STUDENT"
+    },
+    "requiredReviews": {
+      "assetOwner": "assets",
+      "documentOwner": "student",
+      "status": "AWAITING_TECHNICAL_OWNER_REVIEW",
+      "approvals": []
+    },
+    "remediationContract": {
+      "ingest": "IngestAssetUseCase",
+      "lifecycle": "ProcessAssetLifecycleUseCase",
+      "directAssetInsertForbidden": true,
+      "consentOrBindingReassignmentForbidden": true,
+      "realMalwareAndSanitizationEvidenceRequired": true,
+      "retentionDecision": "PENDING_TECHNICAL_OWNER_REVIEW"
+    },
+    "claims": {
+      "originalMissingFileRecovered": false,
+      "priorRejectedEvidenceModified": false,
+      "assetCreated": false,
+      "activeCleanEvidence": false,
+      "ownerApproval": false,
+      "R05Accepted": false
+    }
+  }
+}

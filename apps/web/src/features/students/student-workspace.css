@@ -1,3 +1,20 @@
+.mn-student-workspace .mn-student-identity-header {
+  background-image: linear-gradient(105deg, #142B5F 0%, #142B5F 67%, #173E67 85%, #0E7C86 100%);
+}
+
+.mn-student-workspace .mn-student-attention-action {
+  font-size: 12px;
+  line-height: 16px;
+  padding-block: 3px;
+  padding-inline: 8px;
+}
+
+.mn-student-workspace .mn-student-summary-meta {
+  font-family: 'Cairo', sans-serif;
+  font-size: 10px;
+  line-height: 18px;
+}
+
 .mn-student-workspace[data-text-scale='LARGE'] :where(p, label, input, select, textarea, button, li, a, span) {
   font-size: max(14px, 1em);
 }

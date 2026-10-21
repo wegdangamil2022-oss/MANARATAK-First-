@@ -203,7 +203,7 @@ function normalizeLanguage(value: string): string | undefined {
   return LANGUAGE_ALIASES[key];
 }
 
-function normalizeCertificate(value: string, freeCertificate: boolean): string | undefined {
+function normalizeCertificate(value: string, freeCertificate: boolean | undefined): string | undefined {
   const normalized = stringValue(value);
   if (!normalized) return undefined;
   if (!freeCertificate && NO_CERTIFICATE.has(normalized.toLowerCase())) return 'NONE';
@@ -244,7 +244,9 @@ export class CourseImportMasterMapper {
     const identity = parseIdentity(normalizedPayload);
     const provenance = parseProvenance(normalizedPayload);
     const studyFree = yesNo(row.studyFreeRaw, 'STUDY_FREE');
-    const freeCertificate = yesNo(row.freeCertificateRaw, 'FREE_CERTIFICATE');
+    const certificateRaw = row.freeCertificateRaw.trim().toLowerCase();
+    const freeCertificate = !certificateRaw || certificateRaw === 'unknown'
+      ? undefined : yesNo(row.freeCertificateRaw, 'FREE_CERTIFICATE');
 
     if (!studyFree) throw new Error('COURSE_IMPORT_NOT_ELIGIBLE_FREE_STUDY');
 
@@ -354,7 +356,7 @@ export class CourseImportMasterMapper {
     setWhenAllowed('courseName', 'displayName', incoming.displayName);
     setWhenAllowed('courseName', 'originalSourceTitle', incoming.originalSourceTitle);
     setWhenAllowed('studyFreeRaw', 'isStudyFree', incoming.isStudyFree);
-    setWhenAllowed('freeCertificateRaw', 'isFreeCertificate', incoming.isFreeCertificate);
+    if (allowedSemanticFields.has('freeCertificateRaw')) update.isFreeCertificate = incoming.isFreeCertificate ?? null;
     if (incoming.certificateAvailable === true) {
       setWhenAllowed('freeCertificateRaw', 'certificateAvailable', true);
     }

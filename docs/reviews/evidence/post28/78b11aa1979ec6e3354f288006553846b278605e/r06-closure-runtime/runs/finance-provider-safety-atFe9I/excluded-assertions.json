@@ -1,0 +1,7 @@
+[
+  "refuses another refund target approval without consuming either approval",
+  "rejects over-refund and noncaptured original payment without creating a second refund",
+  "refuses a bank transfer request before reservation when the bank provider is absent",
+  "does not settle or post a ledger transaction without configured bank evidence",
+  "reconciliation reports unavailable providers while preserving unresolved financial status"
+]

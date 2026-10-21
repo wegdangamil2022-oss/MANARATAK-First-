@@ -1,0 +1,16 @@
+{
+  "sourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+  "runId": 39599847197,
+  "status": "in_progress",
+  "result": null,
+  "observedAtUtc": "2026-10-21T12:27:31.015Z",
+  "allSixJobsSucceeded": false,
+  "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39599847197",
+  "runtimeDiagnosticSourceSha": "241f76920e07d0211a3137efb62ec226efe4a4af",
+  "runtimeSourceUnchanged": true,
+  "changedPaths": [
+    ".env.runtime.example",
+    "docs/operations/ENVIRONMENT_INVENTORY.md"
+  ],
+  "evidence": "docs/reviews/evidence/post28/241f76920e07d0211a3137efb62ec226efe4a4af/r14-worker-route-faults/ci-inventory-fix-observation.json"
+}

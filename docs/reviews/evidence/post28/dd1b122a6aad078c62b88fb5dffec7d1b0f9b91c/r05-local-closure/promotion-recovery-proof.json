@@ -1,0 +1,20 @@
+{
+  "sourceSha": "dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c",
+  "runId": "6788aa7c-ecd9-4735-b262-05b4d7995891",
+  "operationId": "3a8eb6dd-9821-45af-ad58-f8359a649404",
+  "assetId": "e074d0ca-0dbc-453f-aa8f-d06796ff7515",
+  "manifestSha256": "0b3d7ff354e01601c67270e9d75ab5b4323ef309f056dd0f1191d82e268e4a33",
+  "parentSnapshotSha256": "6e7d2f4bd9770c497e2f5664282c1a2cfe4080c82f32569fa5d3bd3a7d63d109",
+  "actualPostgreSQL": true,
+  "actualLocalStorage": true,
+  "injectedResponseLossRecovered": true,
+  "sameDurableIntent": true,
+  "canonicalAtomicCompletion": true,
+  "replayNoEffect": true,
+  "assetDelta": 1,
+  "auditDelta": 3,
+  "originalScanEvidenceInherited": true,
+  "scansRunAgain": false,
+  "sanitizedSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+  "protectedHistoryUnchanged": true
+}

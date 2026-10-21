@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "kind": "POST28_LOCAL_STAGE_DISPOSITION",
+  "branch": "fix/post28-ci-environment-inventory-20261016",
+  "authorization": "USER_RECORD_R05_BLOCKERS_AND_CONTINUE_SCOPED_R06_2026_10_16",
+  "scope": "LOCAL_DB_T_SCOPED_TESTS_ONLY",
+  "R05": {
+    "reviewStatus": "REVIEW_COMPLETE_WITH_RECORDED_BLOCKERS",
+    "runtimeStatus": "BLOCKED",
+    "acceptance": false,
+    "evidenceSourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+    "evidence": "docs/reviews/evidence/post28/40f93b655c4835f669c6686d7301817f48f0e5c2/r05-historical/status.json",
+    "remaining": [],
+    "latestRemediation": {
+      "technicalDecision": "RESOLVED_UNDER_EXPLICIT_USER_DELEGATION",
+      "runtimeStatus": "KNOWN_SOURCE_REMEDIATION_PROVEN_UPGRADE_PENDING",
+      "acceptance": false,
+      "evidenceSourceSha": "6dc778605d1344b99011b3074ee2b2648d182550",
+      "evidence": "docs/reviews/evidence/post28/6dc778605d1344b99011b3074ee2b2648d182550/r05-delegated-remediation/status.json",
+      "handoff": "docs/remediation/POST28_R05_DELEGATED_REMEDIATION_HANDOFF_2026-10-19.md"
+    },
+    "latestClosure": {
+      "runtimeStatus": "PASS_LOCAL",
+      "acceptance": "LOCAL_SYNTHETIC_ONLY",
+      "evidenceSourceSha": "dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c",
+      "evidence": "docs/reviews/evidence/post28/dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c/r05-local-closure/closure.json",
+      "reference": "docs/remediation/POST28_R05_LOCAL_CLOSURE_2026-10-19.md"
+    },
+    "historicalSnapshotNote": "Top-level R05 BLOCKED fields preserve original scoped R06 authorization evidence; latestClosure is the current R05 local state."
+  },
+  "productionAcceptance": false,
+  "cloudMutationAuthorized": false,
+  "deploymentAuthorized": false,
+  "recordPurpose": "HISTORICAL_SCOPED_R06_AUTHORIZATION_SNAPSHOT",
+  "R06LatestClosure": {
+    "runtimeStatus": "CORE_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+    "evidence": "docs/reviews/evidence/post28/d1770592c2ec171b14b6e755b3e138dfa2beed4a/r06-core-closure/closure.json",
+    "sourceSha": "d1770592c2ec171b14b6e755b3e138dfa2beed4a",
+    "formalComprehensiveAcceptance": false,
+    "productionAcceptance": false
+  }
+}

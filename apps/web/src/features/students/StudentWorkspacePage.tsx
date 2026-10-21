@@ -959,7 +959,7 @@ function SummaryView({
                   </p>
                 </div>
                 <button type="button" onClick={() => setTab('OPPORTUNITIES')}
-                  className="mn-student-attention-action shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 dark:border-[#55B5B4]/65 bg-[#EEF7F7] dark:bg-[#1D4461] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] dark:text-[#F2FAFA] hover:bg-[#DDEFEF] dark:hover:bg-[#28617A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]" style={{ fontSize: '12px', lineHeight: '16px', paddingBlock: '3px', paddingInline: '8px' }}>
+                  className="mn-student-attention-action shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 dark:border-[#55B5B4]/65 bg-[#EEF7F7] dark:bg-[#1D4461] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] dark:text-[#F2FAFA] hover:bg-[#DDEFEF] dark:hover:bg-[#28617A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]">
                   متابعة
                 </button>
               </div>
@@ -977,7 +977,7 @@ function SummaryView({
                 <button
                   type="button"
                   onClick={() => onTogglePayments(inv.id)}
-                  className="mn-student-attention-action shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 dark:border-[#55B5B4]/65 bg-[#EEF7F7] dark:bg-[#1D4461] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] dark:text-[#F2FAFA] hover:bg-[#DDEFEF] dark:hover:bg-[#28617A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]" style={{ fontSize: '12px', lineHeight: '16px', paddingBlock: '3px', paddingInline: '8px' }}
+                  className="mn-student-attention-action shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 dark:border-[#55B5B4]/65 bg-[#EEF7F7] dark:bg-[#1D4461] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] dark:text-[#F2FAFA] hover:bg-[#DDEFEF] dark:hover:bg-[#28617A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]"
                 >
                   تفاصيل الفاتورة
                 </button>
@@ -992,7 +992,7 @@ function SummaryView({
                 <button
                   type="button"
                   onClick={() => setTab('NOTIFICATIONS')}
-                  className="mn-student-attention-action shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 dark:border-[#55B5B4]/65 bg-[#EEF7F7] dark:bg-[#1D4461] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] dark:text-[#F2FAFA] hover:bg-[#DDEFEF] dark:hover:bg-[#28617A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]" style={{ fontSize: '12px', lineHeight: '16px', paddingBlock: '3px', paddingInline: '8px' }}
+                  className="mn-student-attention-action shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 dark:border-[#55B5B4]/65 bg-[#EEF7F7] dark:bg-[#1D4461] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] dark:text-[#F2FAFA] hover:bg-[#DDEFEF] dark:hover:bg-[#28617A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]"
                 >
                   عرض
                 </button>
@@ -1120,9 +1120,8 @@ function SummaryView({
               type="button"
               onClick={() => setTab('LEARNING')}
               className="mn-student-summary-header-link inline-flex shrink-0 items-center gap-1 text-[11px] font-bold leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
-              style={{ fontSize: '11px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}
             >
-              <span style={{ fontSize: '11px', lineHeight: '18px', fontWeight: 700, fontFamily: "'Cairo', sans-serif" }}>جميع الدورات</span>
+              <span>جميع الدورات</span>
               <ChevronLeft className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -1170,8 +1169,8 @@ function SummaryView({
             </div>
             <button type="button" onClick={() => setTab('OPPORTUNITIES')}
               className="mn-student-summary-header-link inline-flex shrink-0 items-center gap-1 text-[11px] font-bold leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
-              style={{ fontSize: '11px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>
-              <span style={{ fontSize: '11px', lineHeight: '18px', fontWeight: 700, fontFamily: "'Cairo', sans-serif" }}>عرض الكل</span>
+            >
+              <span>عرض الكل</span>
               <ChevronLeft className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -1193,17 +1192,17 @@ function SummaryView({
                         {progress}%
                       </span>
                     </div>
-                    <p className="mt-0.5 truncate text-[10px] font-semibold leading-[18px] text-[#526A71] dark:text-[#C8D5DD] font-['Cairo',sans-serif]" style={{ fontSize: '10px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }} title={item.stage}>
+                    <p className="mn-student-summary-meta mt-0.5 truncate text-[10px] font-semibold leading-[18px] text-[#526A71] dark:text-[#C8D5DD] font-['Cairo',sans-serif]" title={item.stage}>
                       {item.stage}
                     </p>
                     <div className="mt-1.5 flex min-w-0 items-center justify-between gap-2">
                       {item.deadlineAt ? (
-                        <span className="inline-flex min-w-0 items-center gap-1 text-[10px] font-semibold leading-[18px] text-[#526A71] dark:text-[#C8D5DD] font-['Cairo',sans-serif]" style={{ fontSize: '10px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>
+                        <span className="mn-student-summary-meta inline-flex min-w-0 items-center gap-1 text-[10px] font-semibold leading-[18px] text-[#526A71] dark:text-[#C8D5DD] font-['Cairo',sans-serif]">
                           <CalendarClock className="h-3 w-3 shrink-0" />
-                          <span className="truncate" style={{ fontSize: '10px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>{formatDate(item.deadlineAt)}</span>
+                          <span className="mn-student-summary-meta truncate">{formatDate(item.deadlineAt)}</span>
                         </span>
                       ) : (
-                        <span className="text-[10px] font-semibold text-[#526A71] dark:text-[#C8D5DD] font-['Cairo',sans-serif]" style={{ fontSize: '10px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>لا يوجد موعد محدد</span>
+                        <span className="mn-student-summary-meta text-[10px] font-semibold text-[#526A71] dark:text-[#C8D5DD] font-['Cairo',sans-serif]">لا يوجد موعد محدد</span>
                       )}
                       <button type="button" onClick={() => setTab('OPPORTUNITIES')}
                         className="mn-student-summary-primary-action inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#142B5F] px-3 py-1.5 text-[11px] font-medium text-white dark:bg-[#D6A43B] dark:text-[#142B5F] hover:bg-[#203D74] dark:hover:bg-[#E5B54F] transition-colors font-['Cairo',sans-serif]">

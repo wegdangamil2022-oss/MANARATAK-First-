@@ -1,0 +1,116 @@
+{
+  "kind": "POST28_R07_LINUX_ARTIFACT_RUNTIME",
+  "sourceSha": "6d440363adb1477101402f00371e2319c3aae84f",
+  "imageId": "sha256:86e81ff71999bad0d316bd110d75010e93bfbff30de2530f403941f48dda83b0",
+  "node": "v22.16.0",
+  "environment": "DISPOSABLE",
+  "providerMode": "NO_EXTERNAL_EGRESS",
+  "observations": [
+    {
+      "step": "REVISION_READINESS",
+      "route": "/health/build",
+      "status": 200,
+      "sourceSha": "6d440363adb1477101402f00371e2319c3aae84f"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/admin/health/build",
+      "status": 200,
+      "sourceSha": "6d440363adb1477101402f00371e2319c3aae84f"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/api/v1/monitoring/health/readiness",
+      "status": 200,
+      "sourceSha": "6d440363adb1477101402f00371e2319c3aae84f"
+    }
+  ],
+  "network": [
+    {
+      "method": "GET",
+      "path": "/health/build",
+      "status": 200,
+      "resource": "document"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/monitoring/health/readiness",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 409,
+      "resource": "fetch"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "status": 200,
+      "resource": "fetch"
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  ],
+  "productionAcceptance": false,
+  "formalR07Acceptance": false,
+  "promotionAuthorized": false,
+  "databaseIdentity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698815078825197613",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "applicationRole": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolreplication": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledger": false
+  },
+  "browserVersion": "151.0.7922.34",
+  "cleanup": {
+    "ownedContainerStopped": true,
+    "ownedContainerRemoved": true,
+    "postgresStopped": true,
+    "postgresRemoved": true,
+    "networkRemoved": true,
+    "existingDatabasesTouched": false,
+    "apiExitCode": 0,
+    "drainMilliseconds": 186
+  },
+  "failure": "R11_CONTENTION_INVARIANT_OR_DEPENDENCY_FAILED",
+  "passed": false,
+  "completedAt": "2026-10-20T18:14:59.867Z"
+}

@@ -1,0 +1,33 @@
+{
+  "kind": "POST28_DATABASE_SUITE_EXECUTION",
+  "sourceSha": "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+  "suite": "finance-local-closure",
+  "caseExact": "Post28 independent local credit installments and wallet obligation invariants > captures an owned hold into a balanced ledger settlement once and clears its invoice",
+  "fullDiscoveryCases": 14,
+  "fullProfileAcceptance": false,
+  "authorization": {
+    "scope": "LOCAL_DB_T_SCOPED_TESTS_ONLY",
+    "R04": "PASS_LOCAL_MATCHING_SCHEMA",
+    "R05": "BLOCKED_USER_AUTHORIZED_SCOPED_R06",
+    "fullR06Acceptance": false,
+    "deploymentAuthorized": false
+  },
+  "targets": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7697366736576303148",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "expected": 1,
+  "executed": 1,
+  "passed": 1,
+  "failed": 0,
+  "skipped": 0
+}

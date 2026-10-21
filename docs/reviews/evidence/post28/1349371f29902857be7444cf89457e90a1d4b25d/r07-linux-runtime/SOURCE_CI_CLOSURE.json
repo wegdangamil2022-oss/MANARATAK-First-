@@ -1,0 +1,111 @@
+{
+  "version": 3,
+  "kind": "SOURCE_EXECUTION_REPORT",
+  "sha": "1349371f29902857be7444cf89457e90a1d4b25d",
+  "repository": "wegdangamil2022-oss/MANARATAK-First-",
+  "runId": "39315368366",
+  "checkedAt": "2026-10-19T20:09:08.002Z",
+  "sourceStatus": "EXECUTED_SOURCE_STEPS_PASSED",
+  "runtimeStatus": "UNVERIFIED",
+  "productionDecision": "BLOCKED",
+  "steps": [
+    {
+      "id": "source-quality",
+      "outcome": "success",
+      "executed": true
+    },
+    {
+      "id": "source-preflight",
+      "outcome": "success",
+      "executed": true
+    },
+    {
+      "id": "source-regressions",
+      "outcome": "success",
+      "executed": true
+    },
+    {
+      "id": "source-closure",
+      "outcome": "success",
+      "executed": true
+    },
+    {
+      "id": "prisma-source",
+      "outcome": "success",
+      "executed": true
+    },
+    {
+      "id": "typecheck",
+      "outcome": "success",
+      "executed": true
+    },
+    {
+      "id": "vercel-typecheck",
+      "outcome": "success",
+      "executed": true
+    },
+    {
+      "id": "lint",
+      "outcome": "success",
+      "executed": true
+    },
+    {
+      "id": "build",
+      "outcome": "success",
+      "executed": true
+    },
+    {
+      "id": "unit",
+      "outcome": "success",
+      "executed": true
+    },
+    {
+      "id": "artifacts",
+      "outcome": "success",
+      "executed": true
+    }
+  ],
+  "pass": true,
+  "databaseConnectionRequired": false,
+  "sourceClosureManifest": {
+    "path": "scripts/ci/source-closure-manifest.json",
+    "sha256": "ec2ddf269334d014355104027207725556b56a1d339c0b11011bb12be3564fa2",
+    "sourceGateIds": [
+      "m10-source-qc",
+      "architecture",
+      "architecture-di",
+      "admin-audit-inventory",
+      "repository-organization",
+      "remediation-waves",
+      "p7-p13-plan",
+      "p15",
+      "p16",
+      "cms-nginx-local-contract",
+      "p17",
+      "p18",
+      "p19",
+      "imports",
+      "international-tests",
+      "courses",
+      "certificates",
+      "health",
+      "finance",
+      "jobs",
+      "public-ui",
+      "ai-tools",
+      "study-destinations",
+      "academic-settings",
+      "translation",
+      "github-action-pins",
+      "recovery-source",
+      "w6-plan",
+      "w7-documentation-final",
+      "section23-notifications",
+      "section26-dashboard-contracts",
+      "section27-cross-module-contracts",
+      "section28-release-contracts"
+    ]
+  },
+  "unitCommand": "vitest run --config vitest.config.ts && npm run test:node",
+  "runtimePendingManifest": "docs/remediation/W7_RUNTIME_PENDING_CHECKS.md"
+}

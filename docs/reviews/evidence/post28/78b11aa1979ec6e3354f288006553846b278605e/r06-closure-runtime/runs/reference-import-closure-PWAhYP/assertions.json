@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "withdraws test requirements when the currently referenced version is no longer published",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 73.37096999999994,
+    "failureFirstLines": []
+  }
+]

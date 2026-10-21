@@ -1,0 +1,17 @@
+[
+  {
+    "name": "R06-suites/attestation-closure-7Wj9iX/vitest.json",
+    "sha256": "d894d87f4dbbfd0efb227e611d82174db87e13695a9b77cd4272298b92ddf25b",
+    "bytes": 7278
+  },
+  {
+    "name": "R06-suites/attestation-closure-7Wj9iX/discovery.json",
+    "sha256": "c66cd1d31aa708e6bd27390bfbddbc6a82035675476474aa5c7ce160d35627e3",
+    "bytes": 3645
+  },
+  {
+    "name": "R06-suites/attestation-closure-7Wj9iX/selection.json",
+    "sha256": "b260a2d0019d1a2a74a04788ba59349159d1e2a210b7ca285502f940c9d6d1fc",
+    "bytes": 108
+  }
+]

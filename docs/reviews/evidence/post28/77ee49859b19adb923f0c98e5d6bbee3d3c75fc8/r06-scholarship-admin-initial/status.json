@@ -1,0 +1,22 @@
+{
+  "sourceSha": "77ee49859b19adb923f0c98e5d6bbee3d3c75fc8",
+  "suite": "scholarship-admin",
+  "discovered": 17,
+  "executed": 17,
+  "passed": 16,
+  "failed": 1,
+  "selectedSkipped": 0,
+  "rawSkippedAssertions": 0,
+  "excludedByExactSelection": 0,
+  "fullProfilePassed": false,
+  "originalRunnerGate": "FAILED_TESTS",
+  "distinctNewPassingCases": 16,
+  "intermediateSupersededByFinalReplayProof": false,
+  "sourceAuditMountGateAtIntermediate": null,
+  "R04": "PASS_LOCAL_UNCHANGED",
+  "R05": "BLOCKED",
+  "R06": "PARTIAL",
+  "fullRequiredCasesAccepted": 0,
+  "externalProviderCalled": false,
+  "productionAcceptance": false
+}

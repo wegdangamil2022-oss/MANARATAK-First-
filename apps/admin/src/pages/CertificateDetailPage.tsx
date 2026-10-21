@@ -122,8 +122,12 @@ export function CertificateDetailPage() {
   const retryRendering=async()=>{if(!certificate || !renderJob?.fingerprint)return;setRenderRetryBusy(true);setError('');try{await adminApiClient.request(`/admin/certificates/${certificate.id}/render-retry`,{method:'POST',body:JSON.stringify({expectedFingerprint:renderJob.fingerprint,expectedUpdatedAt:certificate.updatedAt,reason:renderRetryReason})});setRenderRetryReason('');await load();}catch(e){setError(e instanceof Error?e.message:copy('تعذر استئناف تجهيز الملفات'));}finally{setRenderRetryBusy(false);}};
   const download = async () => {
     if (!certificate) return; setDownloadBusy(true); setError('');
-    try { const grant = await adminApiClient.request<{url:string}>(`/admin/certificates/${certificate.id}/artifacts/pdf/delivery-grant`,{method:'POST',body:'{}'});
-      const target = new URL(grant.url, window.location.origin); if (!['https:', 'http:'].includes(target.protocol)) throw new Error('Invalid download URL'); window.open(target.href,'_blank','noopener,noreferrer');
+    try {
+      const blob = await adminApiClient.requestBlob('/admin/certificates/' + encodeURIComponent(certificate.id) + '/artifacts/pdf/content');
+      if (blob.type !== 'application/pdf') throw new Error('Invalid certificate content');
+      const url = URL.createObjectURL(blob), anchor = document.createElement('a');
+      anchor.href = url; anchor.download = 'certificate.pdf'; anchor.click();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
     } catch(e) {setError(e instanceof Error ? e.message : copy("تعذر التنزيل"));} finally {setDownloadBusy(false);}
   };
 

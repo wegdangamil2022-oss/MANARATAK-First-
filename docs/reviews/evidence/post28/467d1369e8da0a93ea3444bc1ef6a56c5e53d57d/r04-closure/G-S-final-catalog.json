@@ -1,0 +1,39 @@
+{
+  "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+  "runId": "5bae63bb-1b6c-457e-af39-89c425deb896",
+  "readOnly": true,
+  "targets": [
+    {
+      "label": "DB-G",
+      "checks": {
+        "disabled_or_replica_triggers": 0,
+        "unsafe_indexes": 0,
+        "unvalidated": 0,
+        "settings_deferred": true
+      },
+      "ledger": {
+        "expected": 110,
+        "applied": 110,
+        "checksumsMatched": 110,
+        "partial": 0,
+        "rolledBack": 0
+      }
+    },
+    {
+      "label": "DB-S",
+      "checks": {
+        "disabled_or_replica_triggers": 0,
+        "unsafe_indexes": 0,
+        "unvalidated": 0,
+        "settings_deferred": true
+      },
+      "ledger": {
+        "expected": 110,
+        "applied": 110,
+        "checksumsMatched": 110,
+        "partial": 0,
+        "rolledBack": 0
+      }
+    }
+  ]
+}

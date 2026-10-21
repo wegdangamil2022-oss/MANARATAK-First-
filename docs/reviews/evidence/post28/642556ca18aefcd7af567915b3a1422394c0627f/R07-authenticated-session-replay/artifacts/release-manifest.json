@@ -1,0 +1,65 @@
+{
+  "version": 2,
+  "kind": "MANARATAK_IMMUTABLE_RELEASE",
+  "sourceSha": "642556ca18aefcd7af567915b3a1422394c0627f",
+  "nodeVersion": "v22.16.0",
+  "createdAt": "2026-10-18T23:41:18.043Z",
+  "artifacts": [
+    {
+      "unit": "api",
+      "file": "manaratak-api-642556ca18aefcd7af567915b3a1422394c0627f.tar",
+      "sha256": "afbee6a9a45457122ca7fd51272b668f6f6027538ed407b67b9dc581e80e058c",
+      "size": 31057920
+    },
+    {
+      "unit": "web",
+      "file": "manaratak-web-642556ca18aefcd7af567915b3a1422394c0627f.tar",
+      "sha256": "38d43dc017c449a1ec484df207c50079c216172f7cf0c3bf380e73356fa96560",
+      "size": 8202240
+    },
+    {
+      "unit": "admin",
+      "file": "manaratak-admin-642556ca18aefcd7af567915b3a1422394c0627f.tar",
+      "sha256": "96413a485e8fc12cb0c043cae88fa1daf346f93a5027fb6684b23f5bdec1de2c",
+      "size": 6318080
+    }
+  ],
+  "sbom": {
+    "file": "release-sbom.cdx.json",
+    "sha256": "40d097fb2e05d7bdc56ed4176e89977fee716e66a99e8711330ed915cf9fa74e"
+  },
+  "sourceLedger": {
+    "taskInventorySha256": "643d2feb6493fa8c7ee285199399c94f2151c014ccf35c77ab7867c8e99ccb31",
+    "section27Closed": false
+  },
+  "runtimeRequirements": {
+    "nodeMajor": 22,
+    "lockSha256": "2b468457bb4c706293a6b9f8eaed1b0abde34cef38225a70364a10ff4ac0e151",
+    "prismaSchemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59",
+    "generatedPrismaClientRequired": true,
+    "externalModules": [
+      "@node-rs/xxhash",
+      "@prisma/client",
+      "cors",
+      "express",
+      "fontkit",
+      "helmet",
+      "pdfkit",
+      "svg-to-pdfkit",
+      "uuid"
+    ],
+    "bootEvidence": "UNVERIFIED",
+    "deploymentUnits": [
+      "api",
+      "web",
+      "admin"
+    ]
+  },
+  "provenance": {
+    "repository": "wegdangamil2022-oss/MANARATAK-First-",
+    "workflow": "LOCAL_SOURCE_ONLY",
+    "builder": "LOCAL_SOURCE_ONLY",
+    "runId": null,
+    "runAttempt": null
+  }
+}

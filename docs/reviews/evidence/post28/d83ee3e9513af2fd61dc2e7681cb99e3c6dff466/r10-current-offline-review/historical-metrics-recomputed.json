@@ -1,0 +1,27 @@
+{
+  "kind": "LOCAL_OBSERVED_OPERATIONAL_RECOVERY",
+  "status": "PASS",
+  "incidentAt": "2026-10-20T15:34:40.313Z",
+  "serviceVerifiedAt": "2026-10-20T15:34:57.313Z",
+  "lastRecoveredEventId": "172908d9-5bf2-408b-af43-277be9576ded",
+  "lastRecoveredCommittedAt": "2026-10-20T15:34:36.870Z",
+  "sourceEventCount": 2,
+  "recoveredEventCount": 1,
+  "lostEventCount": 1,
+  "lostEventIds": [
+    "29c148b0-5f2e-44f5-bccf-d03aaa384d95"
+  ],
+  "rpoSeconds": 3.443,
+  "rtoSeconds": 17,
+  "rpoMeasurementBasis": "OBSERVED_COMMITTED_EVENT_PREFIX",
+  "integratedServiceRtoMeasured": true,
+  "scope": "LOCAL_SYNTHETIC_LOOPBACK",
+  "regionalLossMeasured": false,
+  "productionAcceptance": false,
+  "reviewSourceSha": "d83ee3e9513af2fd61dc2e7681cb99e3c6dff466",
+  "originalRecoverySourceSha": "978a0db95d89c5e65aceb012dd082b9111fa3327",
+  "measurementScope": "TWO_SYNTHETIC_COMMITTED_OUTBOX_PROBES",
+  "commitObservation": "AFTER_AUTOCOMMIT_RESPONSE",
+  "measurementRepeated": false,
+  "calculationOnly": true
+}

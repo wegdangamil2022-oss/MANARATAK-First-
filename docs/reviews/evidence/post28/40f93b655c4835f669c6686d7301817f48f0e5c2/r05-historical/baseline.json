@@ -1,0 +1,65 @@
+{
+  "kind": "POST28_R05_PREDECESSOR_BASELINE",
+  "sourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+  "predecessorSha": "23897bdaa66d966eef15c85f44288589ecbcdf2b",
+  "runId": "57cf058e-7d41-41c3-a410-ee6523853057",
+  "identities": [
+    {
+      "label": "DB-U",
+      "database": "manaratak_post28_upgrade_test",
+      "role": "post28_upgrader",
+      "serverIdentity": "7697298808856363051",
+      "databaseOid": "16387",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    },
+    {
+      "label": "DB-V",
+      "database": "manaratak_post28_upgrade_verify_test",
+      "role": "post28_verifier",
+      "serverIdentity": "7697298808856363051",
+      "databaseOid": "16469",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 0,
+      "probeReadOnly": true
+    }
+  ],
+  "ledger": {
+    "expected": 109,
+    "applied": 109,
+    "checksumsMatched": 109,
+    "partial": 0,
+    "rolledBack": 0
+  },
+  "publicTables": 282,
+  "previousClientGenerated": true,
+  "previousClientReadProbes": {
+    "providerCount": 18,
+    "countryCount": 0
+  },
+  "previousClientVersion": "5.22.0",
+  "sourceSchemaSha256": "56966e566cbcd7ea60966d3954a4368630753f35a265e24b8ece354387450d45",
+  "generationSchemaSha256": "ad7ea37863f26ad718c159b373741cff75be9f2b97861479e36f14178e2281d9",
+  "generatedSchemaSha256": "195b16cab32ee11cd2aef410b2cf77dc3ac5b138603fe40b59b91f31f90cc625",
+  "applicationRows": 109,
+  "catalog": {
+    "unvalidated": 9,
+    "invalid_indexes": 0
+  },
+  "representativeFixturesProvisioned": true,
+  "fixtureProof": {
+    "rowsCreated": 46,
+    "modelsPopulated": 36,
+    "historicalStageMigrations": 108,
+    "orphanCount": 1,
+    "triggersBypassed": false,
+    "manifestSha256": "920fa939286fc599a0914ce7ce0b7699bf0a4db3718047aa4b5a65cf68e9cda8"
+  },
+  "historicalStageSourceSha": "f80e3b0ab9aa29f0ea5312af3d6aa7ab461be7b7",
+  "ownerRemediationApproved": false,
+  "upgradeExecuted": false,
+  "R05Accepted": false
+}

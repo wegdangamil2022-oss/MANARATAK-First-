@@ -1,0 +1,13 @@
+
+ RUN  v4.1.11 C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered
+
+ ✓ tests/database/post28-r09-integrated-workflows.database.spec.mjs (4 tests | 3 skipped) 15092ms
+     ✓ authors reviews publishes and withdraws current CMS snapshots using three actual capabilities  1412ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 3 skipped (4)
+   Start at  15:40:47
+   Duration  38.24s (transform 8.92s, setup 0ms, import 22.89s, tests 15.09s, environment 0ms)
+
+JSON report written to C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/native-pg16-sGipFV/R06-suites/r09-integrated-workflows-4RolZX/vitest.json
+{"kind":"POST28_DATABASE_SUITE_EXECUTION","sourceSha":"fa28090044e6d6a84ef7db25085a098a3e955cfe","suite":"r09-integrated-workflows","caseExact":"R09 shared synthetic CMS learner certificate privacy and money workflows > authors reviews publishes and withdraws current CMS snapshots using three actual capabilities","fullDiscoveryCases":4,"fullProfileAcceptance":false,"authorization":{"migrationTransition":{"schemaUnchanged":true,"historicalPrefixMatched":110,"reviewedAppendOnlyMigration":{"name":"20261019000100_admission_null_identity","checksum":"013eb65a4295987696e3202c06a32cf5874adb389a83467f39ca37cf67bb4efa"},"scope":"LOCAL_SYNTHETIC_ONLY","productionAuthorized":false},"scope":"LOCAL_DB_T_SCOPED_TESTS_ONLY","R04":"PASS_LOCAL_MATCHING_SCHEMA","R05":"BLOCKED_USER_AUTHORIZED_SCOPED_R06","fullR06Acceptance":false,"deploymentAuthorized":false},"targets":[{"label":"DB-T","database":"manaratak_post28_transactions_test","role":"post28_app","serverIdentity":"7698728752079417756","databaseOid":"16386","postgresMajor":16,"timezone":"UTC","publicTables":282,"probeReadOnly":true}],"expected":1,"executed":1,"passed":1,"failed":0,"skipped":0}

@@ -1,0 +1,19 @@
+{
+  "kind":"POST28_R04_R05_PRACTICAL_REVIEW",
+  "localDate":"2026-10-21",
+  "sourceSha":"433e420ec230c4dee9bd6e974329f0f48119e613",
+  "branch":"feat/post28-r07-artifact-preparation",
+  "R04":{"status":"CURRENT_111_REPLAY_AND_HISTORICAL_REQUIRED_SEED_SCOPE_CLOSED_LOCAL","practicalScopeComplete":true,"formalComprehensiveAcceptance":false,"freshPairReplay":true,"migrationsPerDatabase":111,"matchingChecksumsPerDatabase":111,"freshSchemaParityBoth":true,"catalogDefinitionsIdentical":true,"redeployLedgerByteIdentical":true,"requiredSeedRerun":false,"inheritedSeedEvidenceSourceSha":"467d1369e8da0a93ea3444bc1ef6a56c5e53d57d","originalEvidenceFilesHashMatched":31,"seedSourceDigestsMatched":7,"seedOwnerCommandsUnchanged":7},
+  "R05":{"status":"EXISTING_LOCAL_SYNTHETIC_CLOSURE_REAFFIRMED","originalRuntimeSha":"dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c","originalEvidenceIndexEntriesMatched":35,"archivedPreservationRecomputed":{"models":281,"invariants":8,"financialGroups":2,"tableContentHashesMatched":281,"auditsZero":9},"unchangedCoreFiles":10,"newUpgradeExecuted":false,"newProviderExecution":false,"newIndependentApprovalClaimed":false,"remainingLocalBlockers":[]},
+  "previousSourceCi":{"sourceSha":"46c9416c340fbe21d92fd1581b75e3ce84a09520","runId":39501061767,"result":"success","passedJobs":6,"resolves":"R00_R03_E02","documentationCommitCiAssumed":false},
+  "evidence":"docs/reviews/evidence/post28/433e420ec230c4dee9bd6e974329f0f48119e613/r04-r05-practical-review/evidence-index.json",
+  "applicationOrMigrationCodeChanged":false,
+  "existingDatabasesTouched":false,
+  "ownedNewLabStopped":true,
+  "historicalEvidenceRebound":false,
+  "productionAcceptance":false,
+  "deploymentAuthorized":false,
+  "mainMerged":false,
+  "deferred":["Final-candidate full seed/scanner owner lifecycle acceptance on111","Production PDF/retention/provider/hosting and backup acceptance","Protected release and independent signing authorities"],
+  "nextStageReview":"R06"
+}

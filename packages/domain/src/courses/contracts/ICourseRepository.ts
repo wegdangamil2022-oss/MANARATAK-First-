@@ -67,12 +67,14 @@ export interface UpdateCourseDto {
 
 export interface ICourseRepository {
   assertCurrentVersion?(id: string, expectedVersion: number): Promise<void>;
+  lockPublicationReferences?(id: string): Promise<void>;
   create(data: CreateCourseDto): Promise<CourseDto>;
   update(id: string, data: UpdateCourseDto): Promise<CourseDto>;
   findByDedupKey(dedupKey: string): Promise<CourseDto | null>;
   findById(id: string): Promise<CourseDto | null>;
   findByPublicId(publicId: string): Promise<CourseDto | null>;
   findBySlug(slug: string): Promise<CourseDto | null>;
+  findPublishedBySlug(slug: string): Promise<CourseDto | null>;
   updateStatus(id: string, status: CourseStatus): Promise<void>;
   updateImportLink(id: string, sourceImportRecordId: string): Promise<void>;
   listByStatus(status: CourseStatus): Promise<CourseDto[]>;

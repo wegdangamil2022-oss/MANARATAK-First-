@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Post28 real scholarship admin relations and authorization > commits the correct program parent version cycle audit and outbox in the actual owner transaction",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > rejects a program paired with a foreign university without changing any owner facts",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > rejects absent archived and unpublished owner program proofs before mutation",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > rejects duplicate child keys without version cycle or audit changes",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > requires actor reason and current revision before committing canonical replacement",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > rolls owner links versions cycle sponsor and audit back on actual PostgreSQL outbox failure",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > serializes two owner writers and leaves one canonical version and one audit outbox pair",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > preserves immutable child ID while appending the next structural version",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > invalidates publish readiness on structural relation replacement without publishing a draft",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > rejects mutations of published and archived scholarship owners",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > denies unauthenticated admin HTTP before owner mutation",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > binds actual HTTP JWT actor and persisted RBAC permission to one audited owner write",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > denies a different role and revalidates permission withdrawal on the next new HTTP command",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > rejects missing and stale If-Match through the actual router",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > rejects forged body authority and missing CSRF before owner writes",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > rechecks the actual owner port inside the transaction after a parent withdraws between lookup and mutation",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > does not replay an earlier successful response after its admin permission is withdrawn",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship admin relations and authorization > replays an authorized canonical command without repeating its owner version audit or outbox",
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs"
+  }
+]

@@ -39,13 +39,15 @@ test('memory validation enforces row/header and memory bounds', () => {
   assert.deepEqual(failed.failures, ['ROW_COUNT_MISMATCH', 'RSS_DELTA_LIMIT_EXCEEDED']);
 });
 
-test('source-phase report requires only pre-Google-Studio evidence', () => {
+test('source-phase report requires only source-only evidence', () => {
   const pass = { pass: true, detail: 'ok', gitSha: 'sha-a' };
   const report = buildFinalReport({ ciClosure: pass, security: pass, memory: pass }, { phase: 'source', runtimeGitSha: 'sha-a' });
   assert.equal(report.pass, true);
-  assert.equal(report.runtimeClosureState, 'CODE_COMPLETE_READY_FOR_GOOGLE_STUDIO_INTEGRATION');
-  assert.equal(report.gates.find((item) => item.name === 'database')?.state, 'DEFERRED_TO_GOOGLE_STUDIO');
+  assert.equal(report.runtimeClosureState, 'CODE_COMPLETE_READY_FOR_RUNTIME_INTEGRATION');
+  assert.equal(report.gates.find((item) => item.name === 'database')?.state, 'DEFERRED_TO_APPROVED_RUNTIME');
+  assert.equal(report.version, 3);
   assert.match(renderFinalMarkdown(report), /intentionally deferred/);
+  assert.doesNotMatch(JSON.stringify(report) + renderFinalMarkdown(report), /google.?studio/i);
 });
 
 test('source-phase report blocks when a required source artifact is missing', () => {
@@ -55,16 +57,16 @@ test('source-phase report blocks when a required source artifact is missing', ()
   assert.equal(report.gates.find((item) => item.name === 'memory')?.state, 'NOT_RUN');
 });
 
-test('runtime phase closes only after Google Studio runtime gates pass', () => {
+test('runtime phase closes only after approved-environment runtime gates pass', () => {
   const pass = { pass: true, detail: 'ok', gitSha: 'sha-a' };
   const report = buildFinalReport({
     ciClosure: pass, security: pass, memory: pass, database: pass, backupRestore: pass, browserE2E: pass, runtimeSmoke: pass,
   }, { phase: 'runtime', runtimeGitSha: 'sha-a' });
   assert.equal(report.pass, true);
-  assert.equal(report.runtimeClosureState, 'GOOGLE_STUDIO_RUNTIME_VERIFIED');
+  assert.equal(report.runtimeClosureState, 'RUNTIME_VERIFIED');
 });
 
-test('failed Google Studio runtime smoke blocks runtime verification', () => {
+test('failed runtime smoke blocks runtime verification', () => {
   const pass = { pass: true, detail: 'ok', gitSha: 'sha-a' };
   const fail = { pass: false, detail: 'readiness DOWN', gitSha: 'sha-a' };
   const report = buildFinalReport({
@@ -72,6 +74,18 @@ test('failed Google Studio runtime smoke blocks runtime verification', () => {
   }, { phase: 'runtime', runtimeGitSha: 'sha-a' });
   assert.equal(report.pass, false);
   assert.equal(report.runtimeClosureState, 'BLOCKED');
+});
+
+test('retiring a hosting provider does not waive any required runtime proof', () => {
+  const pass = { pass: true, detail: 'ok', gitSha: 'sha-a' };
+  for (const missing of ['database', 'backupRestore', 'browserE2E', 'runtimeSmoke']) {
+    const gates = Object.fromEntries(['ciClosure', 'security', 'memory', 'database', 'backupRestore', 'browserE2E', 'runtimeSmoke'].map(name => [name, pass]));
+    delete gates[missing];
+    const report = buildFinalReport(gates, { phase: 'runtime', runtimeGitSha: 'sha-a' });
+    assert.equal(report.pass, false, missing);
+    assert.equal(report.runtimeClosureState, 'BLOCKED');
+    assert.equal(report.gates.find(item => item.name === missing)?.state, 'NOT_RUN');
+  }
 });
 
 test('finalization blocks missing or mixed evidence Git SHAs', () => {

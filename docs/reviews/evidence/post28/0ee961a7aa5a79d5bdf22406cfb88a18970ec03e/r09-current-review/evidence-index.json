@@ -1,0 +1,41 @@
+{
+  "kind": "R09_CURRENT_REVIEW_EVIDENCE",
+  "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+  "files": [
+    {
+      "path": "archive-receipt.json",
+      "bytes": 313,
+      "sha256": "9ac28ad38448f7a4b2ab55eba1ce6f81f6590032953d0cc2dcdc48d939584177"
+    },
+    {
+      "path": "operator.mjs.txt",
+      "bytes": 7199,
+      "sha256": "4ccc9a5d72b573d3da8c951ba3dba6519d0623052fb963a422c6f344d2cba9bd"
+    },
+    {
+      "path": "result.json",
+      "bytes": 384,
+      "sha256": "89718528bad703d04edcf95704fc0e0be86a3fac9ec6844cf00992f0241cfbaf"
+    },
+    {
+      "path": "suite-summary.json",
+      "bytes": 1230,
+      "sha256": "75a8bbf161b842e57f45299819065ae2c8f7549186cb730a37f01bb7db5b6415"
+    },
+    {
+      "path": "verification.json",
+      "bytes": 1584,
+      "sha256": "0123377fa87d858da5c93162f2613c4ce987ab9cbb6098ba86860eedb3c7fa51"
+    },
+    {
+      "path": "vitest.json",
+      "bytes": 4060,
+      "sha256": "a65a12a2b7aad129f7fbb77811acc115f8a62569ab65809ad2144c6ba54224cf"
+    },
+    {
+      "path": "workflow-observations.json",
+      "bytes": 4166,
+      "sha256": "1f6aee68f21ef8421ab92be67059ed3d6b442240811f8a8e4cb092465ed9d3f2"
+    }
+  ]
+}

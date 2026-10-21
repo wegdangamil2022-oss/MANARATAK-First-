@@ -1,0 +1,15 @@
+# R06 Student document HTTP ownership consent and replay
+
+Source 741b324c6f4f2ac1a43f7a2ab23a0523befa7a26; run 5c8f7a48-d53a-4ef6-b736-21d20d6070ff; PostgreSQL postgres (PostgreSQL) 16.15, system 7698089089140887768.
+
+Fourteen new actual PostgreSQL/JWT/HTTP identities exercise the existing StudentWorkspaceRouter with real Prisma identity, session, role, idempotency, scholarship owner, asset and tracker adapters. The owner explicitly defines tenant as current-student ownership; this report makes no institutional tenancy claim. The fixture reuses previously sanitized synthetic PDF bytes and creates isolated historical published scholarship/version/cycle/requirement and ACTIVE asset evidence. It does not rerun or attest Defender/MuPDF scanning, new source review or production provider approval. No storage delivery adapter is configured or claimed in these student binding tests.
+
+Coverage includes foreign readiness/bind/unbind/review-consent denials with byte-equivalent persisted binding/tracker facts and unchanged audit/timeline/outbox counts; own readiness without consent or event mutation; foreign asset rejection on own tracker; explicit own review-consent withdrawal preserving original binding ID and initial consent timestamp; stale delete409; already issued JWT role withdrawal403; missing CSRF403; explicit own rebind clearing review consent rather than automatically granting it; own unlink with retained AssetRecord; durable same-key replay without fresh consent/revision/event; and two actual simultaneous HTTP unlinks yielding204/409 and one owner revision/event. These operations affect only newly created synthetic records.
+
+Initial source passes9/10: the foreign review-consent withdrawal is correctly rejected with the existing generic400 STUDENT_DOCUMENT_REVIEW_UNAVAILABLE contract, while the first test incorrectly expected404. The test now requires that exact generic denial, checks no foreign identifiers leak, and preserves all no-mutation assertions. Production behavior is unchanged; original failed discovery/selection/Vitest evidence is retained. Read/bind/unbind foreign routes return404.
+
+Final source passes48 actual database cases:14 new student document HTTP cases,10 consent and24 attestation regressions. Provisioning35 and source quality pass;110 historical migration checksums match and schema diff is zero. No schema or production code changes were necessary for these route contracts. R05/R07 and all pre-existing databases remain untouched.
+
+Remaining coverage includes student asset upload/completion/list/delivery routes and genuinely issued certificate artifact delivery, broader owner graphs and owning-phase browser/provider approvals. Existing generic provider URL behavior and historical URLs are not claimed retroactively revoked. No complete scenario or formal R06 acceptance is asserted.
+
+Evidence: docs/reviews/evidence/post28/741b324c6f4f2ac1a43f7a2ab23a0523befa7a26/R06-student-document-http/evidence-index.json. Actual database cases: 48 passed, zero failed/skipped in final runs. New distinct 14; repeats 34; cumulative 430 across SHAs, not one current-head acceptance run. R06 remains 0/26 accepted.

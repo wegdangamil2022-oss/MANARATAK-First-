@@ -1,0 +1,2676 @@
+{
+  "kind": "R14_FAILED_JOURNEY_HTTP_OBSERVATIONS",
+  "sourceSha": "81666a9535f2516529372fd70077e1ea46564df8",
+  "passed": false,
+  "fullJourneyAccepted": false,
+  "httpObservations": 443,
+  "rateLimited": 0,
+  "serverErrors": 0,
+  "mfaEnrollment200": 3,
+  "mfaConfirmation200": 3,
+  "approved200": 2,
+  "authorApprovalDenied403": 2,
+  "published200": 2,
+  "archived200": 2,
+  "interpretation": "Partial server observations only; the English fallback reload did not generate the final awaited article request. No successful journey, final fingerprint or logout verification inferred.",
+  "rows": [
+    {
+      "time": "2026-10-21T16:18:44.970Z",
+      "method": "GET",
+      "path": "/api/v1/monitoring/health/readiness",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:18:45.178Z",
+      "method": "GET",
+      "path": "/api/v1/monitoring/health/readiness",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:18:45.366Z",
+      "method": "GET",
+      "path": "/api/v1/monitoring/health/readiness",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:18:45.817Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:18:45.828Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:18:45.853Z",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:18:45.896Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:18:45.999Z",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:18:46.019Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:18:46.274Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:18:46.327Z",
+      "method": "GET",
+      "path": "/api/v1/auth/mfa",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:18:46.364Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:18:46.426Z",
+      "method": "POST",
+      "path": "/api/v1/auth/mfa/enroll",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:18:46.508Z",
+      "method": "POST",
+      "path": "/api/v1/auth/mfa/confirm",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:18:46.627Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:18:46.639Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:18:46.650Z",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:01.078Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:01.172Z",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:01.188Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:01.305Z",
+      "method": "GET",
+      "path": "/api/v1/auth/mfa",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:01.309Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:01.446Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:01.447Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:01.449Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:01.495Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:01.496Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:01.502Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:01.524Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:01.525Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:01.634Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:01.642Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:01.650Z",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:01.691Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:01.775Z",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:01.790Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:02.016Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:02.063Z",
+      "method": "GET",
+      "path": "/api/v1/auth/mfa",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:02.112Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:02.164Z",
+      "method": "POST",
+      "path": "/api/v1/auth/mfa/enroll",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:02.240Z",
+      "method": "POST",
+      "path": "/api/v1/auth/mfa/confirm",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:02.362Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:02.373Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:02.380Z",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:31.091Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:31.179Z",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:31.194Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:31.312Z",
+      "method": "GET",
+      "path": "/api/v1/auth/mfa",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:31.315Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:31.443Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:31.447Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:31.448Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:31.498Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:31.502Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:31.503Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:31.534Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:31.535Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:31.639Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:31.653Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:31.668Z",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:31.707Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:46.899Z",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:46.913Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:47.155Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:47.201Z",
+      "method": "GET",
+      "path": "/api/v1/auth/mfa",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:47.243Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:47.294Z",
+      "method": "POST",
+      "path": "/api/v1/auth/mfa/enroll",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:47.371Z",
+      "method": "POST",
+      "path": "/api/v1/auth/mfa/confirm",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:19:47.488Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:47.496Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:19:47.506Z",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:20:01.074Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:20:01.162Z",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:01.178Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:01.297Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.082Z",
+      "method": "GET",
+      "path": "/api/v1/auth/mfa",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.097Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.194Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.306Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.308Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.404Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.407Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.414Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.480Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.487Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.500Z",
+      "method": "POST",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 201
+    },
+    {
+      "time": "2026-10-21T16:20:02.524Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.528Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.643Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.795Z",
+      "method": "POST",
+      "path": "/api/v1/admin/cms/content",
+      "status": 201
+    },
+    {
+      "time": "2026-10-21T16:20:02.823Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.824Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.825Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:02.855Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:03.035Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:03.124Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:03.128Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:03.135Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:03.168Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:03.237Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:03.371Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:03.398Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:03.409Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:32.104Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:32.650Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:32.964Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:32.999Z",
+      "method": "PUT",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016/localized",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:33.015Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:33.042Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/pages/http-resolve?path=%2Far%2Farticles%2Fr14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 404
+    },
+    {
+      "time": "2026-10-21T16:20:33.054Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:33.058Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:33.059Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:33.198Z",
+      "method": "POST",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016/submit-review",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:33.220Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:33.221Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:33.222Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:33.244Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:33.262Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:33.303Z",
+      "method": "POST",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016/approve",
+      "status": 403
+    },
+    {
+      "time": "2026-10-21T16:20:33.438Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:47.826Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:47.917Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:48.042Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:48.151Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:48.201Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:48.251Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:48.292Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:48.365Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:48.498Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:48.949Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:20:49.116Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:02.114Z",
+      "method": "POST",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016/approve",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:02.134Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:02.195Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:02.304Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:03.085Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:03.096Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:03.194Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:03.305Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:03.305Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:03.405Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:03.413Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:03.418Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:03.484Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:03.484Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:03.492Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.017Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.187Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.235Z",
+      "method": "POST",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016/publish",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.258Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.260Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.261Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.282Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/pages/http-resolve?path=%2Far%2Farticles%2Fr14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.300Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.343Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content/r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e?locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.827Z",
+      "method": "GET",
+      "path": "/api/v1/public/majors?locale=ar&limit=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.828Z",
+      "method": "GET",
+      "path": "/api/v1/public/international-tests?locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.833Z",
+      "method": "GET",
+      "path": "/api/v1/public/scholarships?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.833Z",
+      "method": "GET",
+      "path": "/api/v1/public/universities?locale=ar&limit=25",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.839Z",
+      "method": "GET",
+      "path": "/api/v1/study-destinations?page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.843Z",
+      "method": "GET",
+      "path": "/api/v1/study-destinations?page=1&pageSize=8&isFeatured=true",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.856Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=EXTERNAL_LINKED_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:04.859Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=NATIVE_MANARATAK_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:33.103Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=PAID_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:33.642Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=ARTICLE&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:33.961Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=NEWS&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:33.972Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=STUDY_GUIDE&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:34.007Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=CHECKLIST&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:34.042Z",
+      "method": "GET",
+      "path": "/api/v1/public/services?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:34.043Z",
+      "method": "GET",
+      "path": "/api/v1/public/student-tools?",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:34.044Z",
+      "method": "GET",
+      "path": "/api/v1/public/careers/jobs?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:34.045Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content/r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e?locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:34.170Z",
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:21:34.205Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:21:34.206Z",
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:21:34.214Z",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:21:34.600Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:34.690Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:34.691Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:34.691Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:48.826Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:48.917Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:49.043Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:49.152Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:49.201Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:49.249Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:49.613Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:49.812Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:49.853Z",
+      "method": "PUT",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016/localized",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:49.949Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:21:50.119Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/pages/http-resolve?path=%2Far%2Farticles%2Fr14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:03.092Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:03.132Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:03.178Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:03.292Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content/r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e?locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:04.082Z",
+      "method": "GET",
+      "path": "/api/v1/public/scholarships?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:04.092Z",
+      "method": "GET",
+      "path": "/api/v1/public/universities?locale=ar&limit=25",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:04.182Z",
+      "method": "GET",
+      "path": "/api/v1/public/majors?locale=ar&limit=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:04.304Z",
+      "method": "GET",
+      "path": "/api/v1/study-destinations?page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:04.305Z",
+      "method": "GET",
+      "path": "/api/v1/study-destinations?page=1&pageSize=8&isFeatured=true",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:04.397Z",
+      "method": "GET",
+      "path": "/api/v1/public/international-tests?locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:04.411Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=EXTERNAL_LINKED_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:04.415Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=NATIVE_MANARATAK_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:04.470Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=ARTICLE&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:04.477Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=NEWS&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:04.479Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=PAID_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:05.005Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=STUDY_GUIDE&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:05.182Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=CHECKLIST&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:05.204Z",
+      "method": "GET",
+      "path": "/api/v1/public/services?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:05.250Z",
+      "method": "GET",
+      "path": "/api/v1/public/student-tools?",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:05.251Z",
+      "method": "GET",
+      "path": "/api/v1/public/careers/jobs?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:05.252Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content/r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e?locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:05.272Z",
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:22:05.285Z",
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:22:05.345Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:05.797Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:22:05.809Z",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:22:05.814Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:05.817Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:05.817Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:05.838Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:05.850Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:05.855Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:34.104Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:34.649Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:34.973Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:35.480Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:35.638Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:35.680Z",
+      "method": "POST",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016/archive",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:35.712Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:35.712Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:35.713Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:35.753Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:35.979Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/pages/http-resolve?path=%2Far%2Farticles%2Fr14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 404
+    },
+    {
+      "time": "2026-10-21T16:22:36.035Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/pages/http-resolve?path=%2Far%2Farticles%2Fr14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 404
+    },
+    {
+      "time": "2026-10-21T16:22:36.223Z",
+      "method": "GET",
+      "path": "/api/v1/public/majors?locale=ar&limit=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:36.227Z",
+      "method": "GET",
+      "path": "/api/v1/public/universities?locale=ar&limit=25",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:36.229Z",
+      "method": "GET",
+      "path": "/api/v1/public/scholarships?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:36.231Z",
+      "method": "GET",
+      "path": "/api/v1/study-destinations?page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:36.234Z",
+      "method": "GET",
+      "path": "/api/v1/study-destinations?page=1&pageSize=8&isFeatured=true",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:49.826Z",
+      "method": "GET",
+      "path": "/api/v1/public/international-tests?locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:49.918Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=EXTERNAL_LINKED_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:50.042Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=NATIVE_MANARATAK_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:50.153Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=PAID_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:50.195Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=ARTICLE&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:50.242Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=NEWS&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:50.603Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=STUDY_GUIDE&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:50.802Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=CHECKLIST&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:50.822Z",
+      "method": "GET",
+      "path": "/api/v1/public/services?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:50.937Z",
+      "method": "GET",
+      "path": "/api/v1/public/careers/jobs?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:22:51.113Z",
+      "method": "GET",
+      "path": "/api/v1/public/student-tools?",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:04.086Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content/r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e?locale=ar",
+      "status": 404
+    },
+    {
+      "time": "2026-10-21T16:23:04.124Z",
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:23:04.171Z",
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:23:04.288Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:23:05.079Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content/r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e?locale=ar",
+      "status": 404
+    },
+    {
+      "time": "2026-10-21T16:23:05.090Z",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:23:05.184Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:05.303Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:05.368Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:05.408Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:05.420Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:05.428Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:05.478Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:05.478Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:05.487Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.014Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.191Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.281Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.431Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=en&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.431Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.435Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.485Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.683Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.716Z",
+      "method": "PUT",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016/localized",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.796Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/pages/http-resolve?path=%2Fen%2Farticles%2Fr14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 404
+    },
+    {
+      "time": "2026-10-21T16:23:06.814Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.837Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.837Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.838Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.895Z",
+      "method": "POST",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016/submit-review",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.918Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:06.920Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:35.108Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:35.642Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:35.970Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:36.479Z",
+      "method": "POST",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016/approve",
+      "status": 403
+    },
+    {
+      "time": "2026-10-21T16:23:36.633Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:36.717Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:36.721Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:36.723Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:36.765Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:36.766Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:36.983Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:37.044Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:37.215Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:37.216Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:37.576Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:37.695Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:37.696Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=en&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:50.837Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:50.924Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:51.048Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:51.176Z",
+      "method": "POST",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016/approve",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:51.207Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:51.256Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:51.610Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:51.811Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:51.828Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:51.946Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:23:52.123Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:05.086Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:05.134Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:05.181Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:05.298Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:06.086Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:06.098Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:06.192Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:06.557Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:06.701Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:06.713Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:06.713Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=en&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:06.723Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:06.754Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:06.815Z",
+      "method": "POST",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016/publish",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:06.847Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.015Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.190Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.264Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/pages/http-resolve?path=%2Fen%2Farticles%2Fr14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 404
+    },
+    {
+      "time": "2026-10-21T16:24:07.418Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content/r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e?locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.426Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.633Z",
+      "method": "GET",
+      "path": "/api/v1/public/scholarships?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.634Z",
+      "method": "GET",
+      "path": "/api/v1/public/universities?locale=ar&limit=25",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.682Z",
+      "method": "GET",
+      "path": "/api/v1/public/majors?locale=ar&limit=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.699Z",
+      "method": "GET",
+      "path": "/api/v1/study-destinations?page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.800Z",
+      "method": "GET",
+      "path": "/api/v1/public/international-tests?locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.808Z",
+      "method": "GET",
+      "path": "/api/v1/study-destinations?page=1&pageSize=8&isFeatured=true",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.833Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=EXTERNAL_LINKED_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.834Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=NATIVE_MANARATAK_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.835Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=PAID_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.861Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=ARTICLE&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.905Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=NEWS&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:07.905Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=STUDY_GUIDE&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:36.096Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=CHECKLIST&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:36.642Z",
+      "method": "GET",
+      "path": "/api/v1/public/services?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:36.965Z",
+      "method": "GET",
+      "path": "/api/v1/public/careers/jobs?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:37.467Z",
+      "method": "GET",
+      "path": "/api/v1/public/student-tools?",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:37.627Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content/r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e?locale=ar",
+      "status": 404
+    },
+    {
+      "time": "2026-10-21T16:24:37.694Z",
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:24:37.696Z",
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:24:37.706Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:37.753Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:24:37.755Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:37.985Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:38.043Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:38.206Z",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:24:38.214Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:38.575Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:38.689Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:38.689Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:51.825Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:51.916Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:52.044Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:52.153Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:52.272Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:52.273Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=en&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:52.609Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:52.811Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:52.827Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:52.939Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:24:53.163Z",
+      "method": "PUT",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016/localized",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:06.094Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:06.127Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/pages/http-resolve?path=%2Fen%2Farticles%2Fr14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 404
+    },
+    {
+      "time": "2026-10-21T16:25:06.181Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:06.297Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:07.086Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:07.092Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content/r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e?locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:07.277Z",
+      "method": "GET",
+      "path": "/api/v1/public/scholarships?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:07.553Z",
+      "method": "GET",
+      "path": "/api/v1/public/universities?locale=ar&limit=25",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:07.680Z",
+      "method": "GET",
+      "path": "/api/v1/public/majors?locale=ar&limit=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:07.688Z",
+      "method": "GET",
+      "path": "/api/v1/study-destinations?page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:07.696Z",
+      "method": "GET",
+      "path": "/api/v1/study-destinations?page=1&pageSize=8&isFeatured=true",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:07.713Z",
+      "method": "GET",
+      "path": "/api/v1/public/international-tests?locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:07.757Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=EXTERNAL_LINKED_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:07.774Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=NATIVE_MANARATAK_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:07.846Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=PAID_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:08.005Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=ARTICLE&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:08.181Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=NEWS&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:08.263Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=STUDY_GUIDE&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:08.410Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=CHECKLIST&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:08.412Z",
+      "method": "GET",
+      "path": "/api/v1/public/services?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:08.618Z",
+      "method": "GET",
+      "path": "/api/v1/public/student-tools?",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:08.620Z",
+      "method": "GET",
+      "path": "/api/v1/public/careers/jobs?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:08.676Z",
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:25:08.690Z",
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:25:08.796Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:08.804Z",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:08.821Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:25:08.830Z",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:25:08.862Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:08.880Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:08.913Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:08.915Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:37.104Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:37.647Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:37.968Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:38.472Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:38.636Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:38.737Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:38.861Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/redirects?siteIdentifier=manaratak&locale=en&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:38.866Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:38.866Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/navigation?siteIdentifier=manaratak&locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:38.883Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/blocks?siteIdentifier=manaratak&locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:38.985Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/announcements?siteIdentifier=manaratak&locale=en",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:39.042Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:39.228Z",
+      "method": "POST",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016/archive",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:39.247Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content/11abc7e5-71b6-4189-a703-fdb8b030d016",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:39.571Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/content?page=1&pageSize=20&siteIdentifier=manaratak&q=r14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:39.688Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:39.688Z",
+      "method": "GET",
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:52.824Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/pages/http-resolve?path=%2Fen%2Farticles%2Fr14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 404
+    },
+    {
+      "time": "2026-10-21T16:25:53.033Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/pages/http-resolve?path=%2Fen%2Farticles%2Fr14-254d99ba-7ddd-4b1c-9ebf-461a48d6f77e",
+      "status": 404
+    },
+    {
+      "time": "2026-10-21T16:25:53.212Z",
+      "method": "GET",
+      "path": "/api/v1/public/scholarships?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:53.257Z",
+      "method": "GET",
+      "path": "/api/v1/public/majors?locale=ar&limit=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:53.259Z",
+      "method": "GET",
+      "path": "/api/v1/public/universities?locale=ar&limit=25",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:53.606Z",
+      "method": "GET",
+      "path": "/api/v1/study-destinations?page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:53.809Z",
+      "method": "GET",
+      "path": "/api/v1/study-destinations?page=1&pageSize=8&isFeatured=true",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:53.821Z",
+      "method": "GET",
+      "path": "/api/v1/public/international-tests?locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:53.945Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=EXTERNAL_LINKED_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:25:54.122Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=NATIVE_MANARATAK_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:26:07.093Z",
+      "method": "GET",
+      "path": "/api/v1/public/courses?originType=PAID_COURSE&limit=3&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:26:07.126Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=ARTICLE&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:26:07.174Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=NEWS&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:26:07.290Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=STUDY_GUIDE&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:26:08.078Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&contentType=CHECKLIST&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:26:08.089Z",
+      "method": "GET",
+      "path": "/api/v1/public/services?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:26:08.270Z",
+      "method": "GET",
+      "path": "/api/v1/public/careers/jobs?limit=20&locale=ar",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:26:08.546Z",
+      "method": "GET",
+      "path": "/api/v1/public/student-tools?",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:26:08.677Z",
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:26:08.679Z",
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:26:08.682Z",
+      "method": "GET",
+      "path": "/api/v1/public/cms/content?locale=ar&page=1&pageSize=20",
+      "status": 200
+    },
+    {
+      "time": "2026-10-21T16:26:08.709Z",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401
+    },
+    {
+      "time": "2026-10-21T16:26:08.753Z",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401
+    }
+  ]
+}

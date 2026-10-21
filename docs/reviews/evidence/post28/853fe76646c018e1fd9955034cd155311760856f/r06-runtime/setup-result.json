@@ -1,0 +1,74 @@
+{
+  "kind": "POST28_R06_LOCAL_DB_T_SETUP",
+  "sourceSha": "853fe76646c018e1fd9955034cd155311760856f",
+  "runId": "1e11952d-1ccc-4f54-9d31-1a3a87d0258e",
+  "authorization": {
+    "scope": "LOCAL_DB_T_SCOPED_TESTS_ONLY",
+    "R04": "PASS_LOCAL_MATCHING_SCHEMA",
+    "R05": "BLOCKED_USER_AUTHORIZED_SCOPED_R06",
+    "fullR06Acceptance": false,
+    "deploymentAuthorized": false
+  },
+  "identities": {
+    "runtime": {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7697304472899915822",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 0,
+      "probeReadOnly": true
+    },
+    "setup": {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_tx_migrator",
+      "serverIdentity": "7697304472899915822",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 0,
+      "probeReadOnly": true
+    }
+  },
+  "finalIdentity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7697304472899915822",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "ledger": {
+    "expected": 110,
+    "applied": 110,
+    "checksumsMatched": 110,
+    "partial": 0,
+    "rolledBack": 0
+  },
+  "applicationReadTables": 281,
+  "applicationWriteTables": [
+    "BackgroundJobRecord",
+    "BackgroundJobExecutionRecord",
+    "BackgroundJobDeadLetterRecord",
+    "TransactionalOutboxRecord",
+    "AssetRecord",
+    "StudentWorkspace",
+    "StudentApplicationTracker",
+    "StudentApplicationDocumentBinding",
+    "FinanceInvoiceRecord",
+    "FinancePaymentRecord",
+    "FinanceCommandRecord"
+  ],
+  "ledgerGranted": false,
+  "DDLGranted": false,
+  "schemaDiffExitCode": 0,
+  "R06Accepted": false
+}

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { prismaDiffArguments } from '../../scripts/database/prisma-env-diff.mjs';
 
 const root = process.cwd();
 const source = readFileSync(join(root, 'scripts/database/verify-greenfield-migration-parity.sh'), 'utf8');
@@ -9,11 +10,16 @@ const runbook = readFileSync(join(root, 'docs/operations/GREENFIELD_MIGRATION_PA
 
 test('greenfield parity gate replays migrations and diffs replayed DB plus migration directory', () => {
   assert.match(source, /migrate deploy/);
-  assert.match(source, /--from-url/);
+  assert.match(source, /export DIRECT_URL="\$TARGET_URL"/);
+  assert.match(source, /--from-schema-datasource/);
+  assert.match(source, /post28-preflight\.mjs --pair --require-empty/);
+  assert.doesNotMatch(source, /node - "\$TARGET_URL"|psql "\$TARGET_URL"|--from-url "\$TARGET_URL"/);
   assert.match(source, /--from-migrations/);
   assert.match(source, /--to-schema-datamodel/);
   assert.match(source, /--shadow-database-url/);
-  assert.match(source, /--exit-code/);
+  for (const mode of ['replayed','migrations']) assert.ok(prismaDiffArguments(mode, {GREENFIELD_SHADOW_DATABASE_URL:'fixture-url'}).includes('--exit-code'));
+  assert.match(source, /prisma-env-diff\.mjs replayed/);
+  assert.match(source, /prisma-env-diff\.mjs migrations/);
 });
 
 test('greenfield parity gate fails closed on unsafe targets and incomplete catalog state', () => {
@@ -30,3 +36,12 @@ test('runbook makes migration replay authoritative and rejects db push as produc
   assert.match(runbook, /Source verification alone does not claim database parity/);
   assert.match(runbook, /db push` is not an acceptable staging\/production provisioning mechanism/);
 });
+
+ test('fresh shadow replay refuses reuse and verifies ledger without reset or role elevation',()=>{
+  const wrapper=readFileSync(join(root,'scripts/database/prisma-env-diff.mjs'),'utf8');
+  assert.match(wrapper,/label:'DB-S'[\s\S]*requireEmpty:true/);
+  assert.match(wrapper,/requireDatabaseMutationGate\('post28 fresh shadow replay',\{allowedPurposes:\['migrate'\]\},shadowEnv\)/);
+  assert.match(wrapper,/verifyMigrationLedger\(migrationInventory\(\),JSON.parse\(ledger.stdout\)\)/);
+  assert.match(wrapper,/mode==='migrations'\?prismaDiffArguments\('replayed'\):args/);
+  assert.doesNotMatch(wrapper,/ALTER ROLE|GRANT CREATE|migrate','reset/);
+ });

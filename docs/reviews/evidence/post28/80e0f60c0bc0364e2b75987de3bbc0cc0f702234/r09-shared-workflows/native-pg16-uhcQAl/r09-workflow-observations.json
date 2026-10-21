@@ -1,0 +1,28 @@
+{
+  "kind": "POST28_R09_SHARED_WORKFLOW_INTEGRATION",
+  "sourceSha": "80e0f60c0bc0364e2b75987de3bbc0cc0f702234",
+  "syntheticOnly": true,
+  "productionAcceptance": false,
+  "externalProvidersEnabled": false,
+  "fullR09Acceptance": false,
+  "observations": [
+    {
+      "case": "PRIVATE_DOCUMENT_AND_FINANCE_OWNERSHIP",
+      "bindingId": "9554b525-066a-428f-b380-0ad085728e11",
+      "originalConsentAndBindingPreserved": true,
+      "foreignReadWriteAndAssetDenied": true,
+      "financialFactsUnchanged": true
+    }
+  ],
+  "role": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledger": false
+  },
+  "browserVersion": "155.0.4283.62",
+  "boundary": "ACTUAL_SOURCE_ROUTERS_REAL_JWT_DB_CAPABILITIES_NOT_BUILT_ADMIN_UI_OR_MFA"
+}

@@ -1,0 +1,156 @@
+{
+  "kind": "R12_FROZEN_SOURCE_REAL_POSTGRES_ASSET_CONTRACTS",
+  "operatorSourceSha": "70230e082e03f73761eee6437858c074839fb8d2",
+  "previousCandidateSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "currentCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "actualBuiltApiAssetHttpTest": false,
+  "providerKind": "LOCAL_IN_PROCESS_SYNTHETIC_BYTES_ONLY",
+  "formalAcceptance": false,
+  "productionAllowed": false,
+  "passed": true,
+  "applicationRole": {
+    "role": "post28_r12_actor",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "rolreplication": false
+  },
+  "leaseFencingEvidence": "native-pg16-1T4SlV/r12-result.json:leaseFencing; not repeated",
+  "assets": {
+    "realPostgresRepository": true,
+    "frozenPreviousAndCurrentSourceEqual": true,
+    "activeBytesSha256": "6640d297ddcd5cc810fa255c6012b803f5db75e11097b165046e165e72b9e3fb",
+    "byteIntegrityBeforeAndAfter": true,
+    "corruptBytesRejected": true,
+    "temporaryGrantContract": true,
+    "providerGrantActuallyDownloaded": false,
+    "retiredNewGrantAndReadRejected": true,
+    "existingGrantRevocationNotTested": true,
+    "temporaryExpiryFixed": true,
+    "legalHoldFabricated": false,
+    "consentOrBindingCreated": false
+  },
+  "sourceFiles": [
+    {
+      "path": "packages/domain/src/asset-platform/aggregates/AssetRecord.ts",
+      "sha256": "191fb9232d1c02066cc827c166273a7ef0a97a9a5629ccd910f423f95b868bd1"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/value-objects/AssetRights.ts",
+      "sha256": "ced5720487089d3d1911d14a9683e985935b71e00605075bae965623e6812296"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/value-objects/AssetMetadata.ts",
+      "sha256": "599d6573d39d910ed2c01208aab3bd90108ed0b22ffcf1a5127c26178d803166"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/value-objects/AssetChecksum.ts",
+      "sha256": "250519a289a21985af4eb2c818204587ae5f4956b3dbbfc41c497ccfc2e8ad16"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/value-objects/AssetRetentionMetadata.ts",
+      "sha256": "b1077c96a33469ef1a98cf374cd628cc4b9dbe61722e6ea4c97cbdd714778735"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/enums/AssetLifecycleState.ts",
+      "sha256": "14908245bd17d00b7b5b1ce43648dd09549cd98c390017708a698e52b2a1a027"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/enums/AssetStorageZone.ts",
+      "sha256": "80de08c8691fda121e0d993bd921c56eb1b2dc1747c36a4eaaa722245aa84a4e"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/enums/AssetRetentionCategory.ts",
+      "sha256": "bd8b0f31d2aa8fc82343ee42915d75a95d015d7333486a2b2cda99b5b238cdae"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/events/AssetQuarantinedEvent.ts",
+      "sha256": "5d0a31ab6179ecc6b2ff1e0ed5ea3600f424f69ffe636bd1ee78c2efa7664ed0"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/events/AssetMalwareScanSucceededEvent.ts",
+      "sha256": "a122df9b45c1b4450d56f00c26252d5206eddac8403531b11c336ab134430587"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/events/AssetMalwareScanFailedEvent.ts",
+      "sha256": "7c29f120139e2dd9b24d50cbeeda5d8234139e07fb6cae75a745256378f4c5cf"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/events/AssetSanitizedEvent.ts",
+      "sha256": "c70727c97967d7d83f6d3fa01c81f0c98de4af3b272ea387fe4970a0a2daf6fe"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/events/AssetActivatedEvent.ts",
+      "sha256": "73ebbaa5eee8fc56cd312297574a838dd63f85810aa0f5a9d3ea1863f17171ff"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/events/AssetArchivedEvent.ts",
+      "sha256": "9bb44527e83d704b123e403945c07149b38b342b07533e8f31a7dd1afde69c13"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/events/AssetDeletedEvent.ts",
+      "sha256": "6e8531343cada76beaf528af5146916b7d3979a887bdc87ac45e83b8dad5c270"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/events/AssetRestoredEvent.ts",
+      "sha256": "f8ba03e616ce7cea7635d2343d38322767dc0e59000bad1b7314a3d21b3bc083"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/value-objects/AssetId.ts",
+      "sha256": "28a199826bd1f02e4c4d2e276b6a324c52655709a4a96f285aa07bdbce976a00"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/value-objects/AssetReference.ts",
+      "sha256": "3fef621c6c92ab4331821b8d507625f488b12659baa6c35506fc7904f827219a"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/value-objects/AssetOwnerReference.ts",
+      "sha256": "c762eb5399640c48f82c6a6df87e0495c07a6a0249c4d18d80a07558c6af5c1d"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/value-objects/AssetStorageLocator.ts",
+      "sha256": "db8051f2a559ad4f3c77f8d6f2a866e3ac15169b13376cdd3b2ccf4985481a62"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/value-objects/AssetSanitizationMetadata.ts",
+      "sha256": "55eac8cf1a3bd6a604f6591bc95ccbd95171fa45f84115398ee1f935dc4ea8b8"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/value-objects/AssetVersionChain.ts",
+      "sha256": "8e773c00bd9ed027a786f162dcbcc8b6724eb7226aa5e01dc66e1ca949d64c1d"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/value-objects/AssetVersion.ts",
+      "sha256": "0544be7ced40e5472c7df9657d27cc098c1196e9aaf5e2a18f1d899e9e83e7ef"
+    },
+    {
+      "path": "packages/domain/src/asset-platform/enums/AssetSecurityClassification.ts",
+      "sha256": "250a1b7298943e7fd1d292b2c30eac2a9a4f87c8aab128b1229bd21a26c33f80"
+    },
+    {
+      "path": "packages/infrastructure/src/asset-platform/PrismaAssetRecordRepository.ts",
+      "sha256": "25a81816bfffb5d452fe5620173f1a20e451164ba3f3019fac86e9f23289fb3f"
+    },
+    {
+      "path": "packages/infrastructure/src/asset-platform/AssetUsageBatchQuery.ts",
+      "sha256": "62723ac269ef7262f9282a968e5685a38e59aa003658ab36ca45f0782a37e47c"
+    },
+    {
+      "path": "packages/infrastructure/src/asset-platform/AssetReferenceIntegrityReadiness.ts",
+      "sha256": "400df84c488a71f384460ed10ba8320eae6e418b39cb93d5be70ed36a61fbba8"
+    },
+    {
+      "path": "packages/application/src/asset-platform/use-cases/ProcessAssetLifecycleUseCase.ts",
+      "sha256": "a991865cd07bd5d790c88ec73a14544ce8e1c31f7ad800473526e619719a4263"
+    },
+    {
+      "path": "packages/application/src/asset-platform/mappers/AssetRecordMapper.ts",
+      "sha256": "afdbaf2adeef8ce66ad5387710d60bb48b42d3a3e33b3176927548099a4adc70"
+    }
+  ],
+  "cleanup": {
+    "apisStopped": true,
+    "externalProvidersContacted": false
+  }
+}

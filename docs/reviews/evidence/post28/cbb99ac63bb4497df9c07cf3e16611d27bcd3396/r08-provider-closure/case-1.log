@@ -1,0 +1,13 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/home/runner/work/MANARATAK-First-/MANARATAK-First-[39m
+
+ [32m✓[39m tests/database/post28-r08-provider-outcomes.database.spec.mjs [2m([22m[2m4 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m[33m 1139[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps a real authorization timeout pending without redispatch or a paid invoice [33m 1068[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m1 passed[39m[22m[2m | [22m[33m3 skipped[39m[90m (4)[39m
+[2m   Start at [22m 22:25:20
+[2m   Duration [22m 2.95s[2m (transform 1.29s, setup 0ms, import 1.70s, tests 1.14s, environment 0ms)[22m
+
+JSON report written to /home/runner/work/_temp/r08-provider/private-labs/lab-wWlrgp/R06-suites/r08-provider-outcomes-3JT8ke/vitest.json
+{"kind":"POST28_DATABASE_SUITE_EXECUTION","sourceSha":"cbb99ac63bb4497df9c07cf3e16611d27bcd3396","suite":"r08-provider-outcomes","caseExact":"R08 signed loopback provider with persisted financial outcomes > keeps a real authorization timeout pending without redispatch or a paid invoice","fullDiscoveryCases":4,"fullProfileAcceptance":false,"authorization":{"migrationTransition":{"schemaUnchanged":true,"historicalPrefixMatched":110,"reviewedAppendOnlyMigration":{"name":"20261019000100_admission_null_identity","checksum":"013eb65a4295987696e3202c06a32cf5874adb389a83467f39ca37cf67bb4efa"},"scope":"LOCAL_SYNTHETIC_ONLY","productionAuthorized":false},"scope":"LOCAL_DB_T_SCOPED_TESTS_ONLY","R04":"PASS_LOCAL_MATCHING_SCHEMA","R05":"BLOCKED_USER_AUTHORIZED_SCOPED_R06","fullR06Acceptance":false,"deploymentAuthorized":false},"targets":[{"label":"DB-T","database":"manaratak_post28_transactions_test","role":"post28_app","serverIdentity":"7698508279161225261","databaseOid":"16386","postgresMajor":16,"timezone":"UTC","publicTables":282,"probeReadOnly":true}],"expected":1,"executed":1,"passed":1,"failed":0,"skipped":0}

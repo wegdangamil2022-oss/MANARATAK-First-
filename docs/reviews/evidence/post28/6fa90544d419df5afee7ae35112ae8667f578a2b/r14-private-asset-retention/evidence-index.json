@@ -1,0 +1,131 @@
+{
+  "kind": "POST28_SCOPED_EVIDENCE_INDEX",
+  "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+  "scope": "STUDENT_OWNED_PRIVATE_PDF_GRANT_DIAGNOSTIC_WINDOWS_ONLY",
+  "productionAcceptance": false,
+  "files": [
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/r14-private-result.json",
+      "sha256": "833d8f79b353d918e2bfee0be64d04f3850b29f4dff0aefe511733d72f971e3d",
+      "bytes": 4306,
+      "sourceOriginalSha256": "833d8f79b353d918e2bfee0be64d04f3850b29f4dff0aefe511733d72f971e3d"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/private-cleanup.json",
+      "sha256": "b6e6ba846759b7e007a5a0d07e305545a64a00bd75163c311bec9fec15d23189",
+      "bytes": 108,
+      "sourceOriginalSha256": "b6e6ba846759b7e007a5a0d07e305545a64a00bd75163c311bec9fec15d23189"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/private-protected-before.json",
+      "sha256": "c388ba3fdd879e229a9caf03cf4c6b84f718f9dbd710711b8488e2b80df74459",
+      "bytes": 2229,
+      "sourceOriginalSha256": "c388ba3fdd879e229a9caf03cf4c6b84f718f9dbd710711b8488e2b80df74459"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/private-protected-after.json",
+      "sha256": "c388ba3fdd879e229a9caf03cf4c6b84f718f9dbd710711b8488e2b80df74459",
+      "bytes": 2229,
+      "sourceOriginalSha256": "c388ba3fdd879e229a9caf03cf4c6b84f718f9dbd710711b8488e2b80df74459"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/prior-provider-signature-failure.json",
+      "sha256": "ea994eb15c119ae7307bc46b3a95e486ddfc08661c2ae5edcbc33904f6e36f0b",
+      "bytes": 2149,
+      "sourceOriginalSha256": "ea994eb15c119ae7307bc46b3a95e486ddfc08661c2ae5edcbc33904f6e36f0b"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/prior-provider-signature-cleanup.json",
+      "sha256": "b6e6ba846759b7e007a5a0d07e305545a64a00bd75163c311bec9fec15d23189",
+      "bytes": 108,
+      "sourceOriginalSha256": "b6e6ba846759b7e007a5a0d07e305545a64a00bd75163c311bec9fec15d23189"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/initial-role-fixture-cleanup.json",
+      "sha256": "de057d067e4c8f8bb2c190212713f392e176d3a74f82cf9de01c50e62cc97fd6",
+      "bytes": 110,
+      "sourceOriginalSha256": "de057d067e4c8f8bb2c190212713f392e176d3a74f82cf9de01c50e62cc97fd6"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/unit-before-fix.json",
+      "sha256": "8e50780eed372b573c903d1e8fe2929dc654ba1815eafe4bfa8dcc306711fbb1",
+      "bytes": 16467,
+      "sourceOriginalSha256": "776cc069c96555a666b5f3f7aa20c1000e3ec77c52a8576a529b41a27498287a"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/unit-intermediate-stale-dist.json",
+      "sha256": "39788385d987778204bd04c7a01efa2fe0610ca8d1e3613034b0709770861770",
+      "bytes": 50328,
+      "sourceOriginalSha256": "3b02a08ff4960f1616a44c1401ed5dceedcec22888d25856b25dfb0859803963"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/unit-after-fix.json",
+      "sha256": "d793f2cd58a5479e8d48f76a34e2d7a823a9a5016242e0c7ddaa5dc96d9bd190",
+      "bytes": 39170,
+      "sourceOriginalSha256": "b12ce5e0e974c4e41ea27067c8eb79d71247238eb0ba7a50184283b4b05e44f3"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/ci-observed.json",
+      "sha256": "b5c9eef04331b9a641a8e0a382f3a3897ba4bdecbc600d1125435b8eac2d603f",
+      "bytes": 647,
+      "sourceOriginalSha256": "cc611c5fa5efaf922cc5d84b2147005f7edbc84697cec356070cd0696055ace3"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/r14-asset-retention-typecheck.log.txt",
+      "sha256": "1581548a359f4877d8db6764c9958ac18edea2b44a7454cfe160c5ab2876de38",
+      "bytes": 543,
+      "sourceOriginalSha256": "42bab0785e9d6226dd1f99d57639406324ba0a2650b284f3b2dc5fa787d7d28e"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/r14-asset-retention-typecheck-final.log.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "sourceOriginalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/r14-asset-retention-eslint.log.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "sourceOriginalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/run-r14-private.mjs.txt",
+      "sha256": "87de04791780a05237437a2854db5b87a8bf952d966d3901bcd068d43f2e803a",
+      "bytes": 10683,
+      "sourceOriginalSha256": "87de04791780a05237437a2854db5b87a8bf952d966d3901bcd068d43f2e803a"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/r14-private-worker.mjs.txt",
+      "sha256": "4e95522eff58e63e0546c80efdd770c618615d954218f18b5a14ca2ab5277d7e",
+      "bytes": 13766,
+      "sourceOriginalSha256": "c6ed649d6b88855347872bfa0d4023244a326ae93269c7610a98f075a2567245"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/build-r14-private-api.mjs.txt",
+      "sha256": "87f90a2357b39da526c8950102945e603cf51abe8b72cee3c396a855d6ee840b",
+      "bytes": 1125,
+      "sourceOriginalSha256": "97c0758923699bcde19ad24b93a70d1283b9e2988b586492ccb29130ef0722d8"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/r12-loopback-only.mjs.txt",
+      "sha256": "f3118853245f8b0f64d0f4713e9d13d42f665982fd30ba08ff407588dea37c75",
+      "bytes": 417,
+      "sourceOriginalSha256": "f3118853245f8b0f64d0f4713e9d13d42f665982fd30ba08ff407588dea37c75"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/summary.json",
+      "sha256": "ad97a56b12d5d95d05778c38f8b667cbbd349d81495559a939fb008375965310",
+      "bytes": 3243
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/attempts.json",
+      "sha256": "c2985d48bd8a2b251e44f0d8fd29bccb7e661fdc43287fb9b169d0ac8a01edc5",
+      "bytes": 924
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/ci-latest-observed.json",
+      "sha256": "45551ae95a36371a4520bdf7914920fc3a4900ad4587717edd05b27666fafed0",
+      "bytes": 681
+    }
+  ]
+}

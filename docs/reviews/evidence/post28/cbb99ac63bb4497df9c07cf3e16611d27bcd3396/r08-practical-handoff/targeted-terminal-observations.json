@@ -1,0 +1,29 @@
+{
+  "kind": "AGENT_OBSERVED_TERMINAL_RECEIPT_NOT_RAW_RUNNER_OUTPUT",
+  "newUnitCases": {
+    "RuntimeDependencyPolicy": 2,
+    "PollingWorkerRuntime": 3,
+    "WorkerHealthObservation": 3,
+    "SecurityMiddlewareFactory": 1
+  },
+  "changedCiBoundaryContract": 1,
+  "redBeforeFix": true,
+  "passedAfterFix": true,
+  "oldUnchangedUnitCasesNotSelected": true,
+  "repeatedDirectlyAffectedCases": [
+    {
+      "file": "PollingWorkerRuntime.spec.ts",
+      "count": 3,
+      "reason": "central observation wrapper changed"
+    },
+    {
+      "file": "w7-documentation-closure.test.mjs",
+      "count": 1,
+      "reason": "CI command changed to the explicit combined mode"
+    }
+  ],
+  "apiTypecheck": "PASS_AFTER_GENERIC_RESULT_FIX",
+  "newSchemaChanges": false,
+  "newHistoricalMigrationChanges": false,
+  "fullLocalBuildRepeated": false
+}

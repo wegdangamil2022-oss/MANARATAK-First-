@@ -1,0 +1,19 @@
+
+> @manaratak/web@1.0.0 build
+> node --max-old-space-size=4096 ../../node_modules/vite/bin/vite.js build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 2498 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/cms-app-entry.js               0.21 kB
+dist/_headers                       0.71 kB
+dist/index.html                     1.31 kB │ gzip:   0.66 kB
+dist/assets/index-Chp4nGOr.css    588.61 kB │ gzip:  63.86 kB
+dist/assets/Seo-i5HzOspa.js         3.94 kB │ gzip:   1.35 kB
+dist/assets/index-BByusWL4.js      18.37 kB │ gzip:   4.74 kB
+dist/assets/index-pM2hzIQU.js      22.45 kB │ gzip:   5.11 kB
+dist/assets/index-DApLeZ7g.js      45.46 kB │ gzip:   7.98 kB
+dist/assets/index-ChOjP5kU.js   4,909.05 kB │ gzip: 828.93 kB
+✓ built in 9.62s

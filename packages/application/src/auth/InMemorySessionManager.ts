@@ -16,6 +16,8 @@ export class InMemorySessionManager implements ISessionManager {
   private readonly sessionIdByRefreshHash = new Map<string, string>();
 
   private hashToken(token: string): string {
+    // This indexes a 256-bit random opaque refresh token from JwtTokenProvider,
+    // not a human password. Password credentials use the separate scrypt verifier.
     return crypto.createHash('sha256').update(token).digest('hex');
   }
 

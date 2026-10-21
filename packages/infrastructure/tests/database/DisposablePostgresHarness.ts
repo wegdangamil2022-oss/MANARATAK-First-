@@ -5,9 +5,9 @@ export function assertDisposableDatabaseUrl(databaseUrl: string | undefined = pr
   const url = new URL(databaseUrl);
   const host = url.hostname.toLowerCase();
   const database = url.pathname.replace(/^\//, '').toLowerCase();
-  const isDisposableHost = ['localhost', '127.0.0.1', '::1'].includes(host) || /(?:ci|test|disposable|sandbox)/.test(host);
+  const isDisposableHost = ['localhost', '127.0.0.1', '::1', '[::1]'].includes(host);
   const isDisposableDatabase = /(?:ci|test|disposable|sandbox|restore)/.test(database);
-  if (!isDisposableHost && !isDisposableDatabase) {
+  if (!isDisposableHost || !isDisposableDatabase || /prod|production|live|restore/i.test(database)) {
     throw new Error(`DATABASE_INTEGRATION_REQUIRES_DISPOSABLE_TARGET:${host}/${database}`);
   }
   return databaseUrl;

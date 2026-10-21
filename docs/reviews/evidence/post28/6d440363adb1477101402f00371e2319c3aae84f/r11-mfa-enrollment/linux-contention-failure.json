@@ -1,0 +1,135 @@
+{
+  "kind": "R11_LINUX_STUDENT_CONTENTION_DIAGNOSTIC",
+  "sourceSha": "6d440363adb1477101402f00371e2319c3aae84f",
+  "status": "ABORTED",
+  "platform": "linux",
+  "pairs": [],
+  "resources": [
+    {
+      "api": {
+        "cpuPercent": 27.34,
+        "residentMemoryBytes": 122893107.2
+      },
+      "postgres": {
+        "cpuPercent": 0.02,
+        "residentMemoryBytes": 142606336
+      },
+      "applicationConnections": 6
+    },
+    {
+      "api": {
+        "cpuPercent": 0.06,
+        "residentMemoryBytes": 159698124.8
+      },
+      "postgres": {
+        "cpuPercent": 0.03,
+        "residentMemoryBytes": 145856921.6
+      },
+      "applicationConnections": 6
+    }
+  ],
+  "durationSeconds": 60,
+  "maximumPairs": 10,
+  "maximumConcurrentMutations": 2,
+  "expectedConflicts": 0,
+  "unexpectedErrors": 1,
+  "poolWaitMs": null,
+  "poolWaitReason": "No driver pool checkout timing hook; query round trip is recorded separately",
+  "representativeLaunchDataset": false,
+  "sloAcceptance": false,
+  "productionAcceptance": false,
+  "databaseBefore": [
+    {
+      "numbackends": 6,
+      "xact_commit": "944",
+      "xact_rollback": "1",
+      "blks_read": "910",
+      "blks_hit": "493970",
+      "tup_returned": "1783573",
+      "deadlocks": "0",
+      "conflicts": "0"
+    }
+  ],
+  "explain": [
+    {
+      "QUERY PLAN": [
+        {
+          "Plan": {
+            "Node Type": "Limit",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 0.14,
+            "Total Cost": 8.16,
+            "Plan Rows": 1,
+            "Plan Width": 36,
+            "Actual Startup Time": 0.017,
+            "Actual Total Time": 0.017,
+            "Actual Rows": 1,
+            "Actual Loops": 1,
+            "Shared Hit Blocks": 2,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "StudentWorkspace_studentReferenceId_key",
+                "Relation Name": "StudentWorkspace",
+                "Alias": "StudentWorkspace",
+                "Startup Cost": 0.14,
+                "Total Cost": 8.16,
+                "Plan Rows": 1,
+                "Plan Width": 36,
+                "Actual Startup Time": 0.016,
+                "Actual Total Time": 0.016,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Index Cond": "(\"studentReferenceId\" = 'd5799271-ccb7-4c46-abce-25b4faed57d5'::text)",
+                "Rows Removed by Index Recheck": 0,
+                "Shared Hit Blocks": 2,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              }
+            ]
+          },
+          "Planning": {
+            "Shared Hit Blocks": 124,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          "Planning Time": 0.271,
+          "Triggers": [],
+          "Execution Time": 0.028
+        }
+      ]
+    }
+  ],
+  "initialVersion": 1,
+  "failure": "R11_CONTENTION_INVARIANT_OR_DEPENDENCY_FAILED",
+  "logoutStatus": 200,
+  "activeSessionsAfterLogout": 0
+}

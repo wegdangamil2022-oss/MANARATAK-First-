@@ -1,0 +1,6 @@
+{
+  "caseExact": "Post28 canonical test language and imported source contracts > rejects inactive and deprecated canonical languages despite a valid language FK",
+  "fullDiscoveryCases": 18,
+  "selectedCases": 1,
+  "fullProfileAcceptance": false
+}

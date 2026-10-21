@@ -1,0 +1,9 @@
+// Local diagnostic adapter for an unchanged artifact that otherwise binds 0.0.0.0.
+import net from 'node:net';
+import assert from 'node:assert/strict';
+const original=net.Server.prototype.listen;
+net.Server.prototype.listen=function(...args){
+  assert(args.length>=2&&['0.0.0.0','127.0.0.1'].includes(args[1]),'R12_UNREVIEWED_LISTEN_SIGNATURE');
+  args[1]='127.0.0.1';
+  return Reflect.apply(original,this,args);
+};

@@ -1,0 +1,11 @@
+{
+  "sourceSha": "f55c4afeb49f59dd24d67ebf9b5323005ab9b482",
+  "newIsolatedCluster": true,
+  "serverIdentity": "7699193948644663780",
+  "postgresMajor": 16,
+  "ordinaryRole": "post28_app",
+  "passed": true,
+  "stopped": true,
+  "existingDatabasesTouched": false,
+  "scope": "REAL_CERTIFICATE_ISSUANCE_OUTBOX_REDELIVERY_AFTER_EFFECT_FAILURE_NO_PROCESS_CRASH_OR_PDF_RENDER"
+}

@@ -1,0 +1,95 @@
+{
+  "kind": "POST28_R09_PUBLIC_OWNER_CANARY",
+  "sourceSha": "819216eba0d09afb3048235e310e2854ef54779d",
+  "runId": "39348319130",
+  "status": "IN_PROGRESS_PUBLIC_OWNER_CANARY_VERIFIED",
+  "runtimeEvidence": "../r09-public-runtime/evidence-index.json",
+  "applicationCodeChanged": true,
+  "priorProofsNotReexecuted": [
+    {
+      "sourceSha": "ce0690c36759fc73ac202a679f905054b7a4607b",
+      "scope": "learner enrollment/progress/ownership/admin denial"
+    }
+  ],
+  "fixtureStatesSeededNotPublishedThroughWorkflow": true,
+  "completeCaseIds": [],
+  "partialCases": [
+    {
+      "rows": [
+        "R-062"
+      ],
+      "caseIds": [
+        "CD-019",
+        "CD-039"
+      ],
+      "verified": [
+        "three eligible native courses visible",
+        "draft archived incomplete and unresolved language hidden",
+        "private lesson text and internal optional metadata absent",
+        "successful empty result is zero"
+      ],
+      "remaining": [
+        "external provider and current URL proof",
+        "actual unavailable-versus-zero failure behavior",
+        "other public domains"
+      ]
+    },
+    {
+      "rows": [
+        "X-007"
+      ],
+      "caseIds": [
+        "CD-025"
+      ],
+      "verified": [
+        "three cursor pages match ordered persisted owner IDs",
+        "no duplicate IDs",
+        "stable total 3 on each page"
+      ],
+      "remaining": [
+        "cross-domain composite facets",
+        "publication changes between pages"
+      ]
+    },
+    {
+      "rows": [
+        "R-068"
+      ],
+      "caseIds": [
+        "CD-042"
+      ],
+      "verified": [
+        "Arabic published detail and canonical owner learner link",
+        "draft detail API 404 and UI catalog fallback without hidden title"
+      ],
+      "remaining": [
+        "explicit unavailable detail UX",
+        "SEO/noindex and full locale/accessibility/responsive matrix"
+      ]
+    },
+    {
+      "caseIds": [
+        "CD-038",
+        "CD-040"
+      ],
+      "verified": [
+        "three exact-SHA recovered units and revision readiness"
+      ],
+      "remaining": [
+        "author-review-publish-unpublish workflow",
+        "withdrawal during browser history restoration",
+        "new administrative workflows"
+      ]
+    }
+  ],
+  "checks": {
+    "passed": 23,
+    "failed": 0,
+    "pending": 0
+  },
+  "fullR09Acceptance": false,
+  "productionAcceptance": false,
+  "activeMigrationsChanged": false,
+  "historicalMatricesRewritten": false,
+  "existingDatabasesTouched": false
+}

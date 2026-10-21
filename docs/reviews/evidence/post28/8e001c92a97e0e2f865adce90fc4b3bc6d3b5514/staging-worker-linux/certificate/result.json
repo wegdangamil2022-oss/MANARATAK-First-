@@ -1,0 +1,16 @@
+{
+  "sourceSha": "8e001c92a97e0e2f865adce90fc4b3bc6d3b5514",
+  "kind": "POST28_STAGING_CERTIFICATE_WORKER_REAL_DOMAIN",
+  "syntheticOnly": true,
+  "productionAcceptance": false,
+  "formalR08Acceptance": false,
+  "selectedCases": [
+    "replays a real certificate worker delivery after a lost acknowledgement without duplicating issuance"
+  ],
+  "cleanup": {
+    "existingDatabasesTouched": false,
+    "databaseRemoved": true,
+    "networkRemoved": true
+  },
+  "passed": true
+}

@@ -1,0 +1,25 @@
+{
+  "sourceSha": "5c5152ff2c575414b0e04f7b450330b61cef2070",
+  "runs": [
+    {
+      "directory": "r08-session-processes-sZUQbh",
+      "success": true,
+      "passed": 5,
+      "failed": 0,
+      "unselectedOrHookSkipped": 0,
+      "selection": {
+        "caseExact": null,
+        "fullDiscoveryCases": 5,
+        "selectedCases": 5,
+        "fullProfileAcceptance": true
+      }
+    }
+  ],
+  "fullR08Acceptance": false,
+  "productionAcceptance": false,
+  "appRole": "post28_app",
+  "secretsRetained": false,
+  "cleanupVerified": true,
+  "setupAuthority": "Separate migrator for the new empty lab only; application tests used no elevated role",
+  "note": "Actual runtime assertions passed on this source; scoped selection excludes other cases explicitly."
+}

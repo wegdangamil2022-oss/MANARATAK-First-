@@ -12,12 +12,6 @@ function isProductionLike(env: RuntimeEnv): boolean {
 }
 
 function cookieOptions(env: RuntimeEnv) {
-  const studioPreview = !isProductionLike(env) &&
-    (env.MANARATAK_RUNTIME_PROFILE === 'google-ai-studio' || env.MANARATAK_GOOGLE_AI_STUDIO === 'true');
-  if (studioPreview) {
-    // The explicit development iframe profile requires secure, partitioned cookies.
-    return { httpOnly: true, secure: true, sameSite: 'none' as const, path: '/', partitioned: true };
-  }
   return {
     httpOnly: true,
     secure: isProductionLike(env) || env.SECURE_COOKIE === 'true',

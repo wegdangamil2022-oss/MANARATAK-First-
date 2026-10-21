@@ -9,13 +9,19 @@ export interface UniversityProgramReferenceV1 {
   majorId: string | null;
   canonicalName: string;
   displayName: string;
+  degreeLabel?: string;
+  majorLabel?: string;
+  studyLanguages?: Array<{id:string;name:string}>;
   status: string;
   publiclyEligible: boolean;
 }
+/** Every supplied dimension must match the same owner program. */
 export interface PublishedUniversityProgramQueryV1 {
+  languageReferenceId?: string;
   universityId?: string;
   academicProgramId?: string;
   degreeLevelId?: string;
+  majorId?: string;
 }
 export interface IUniversityProgramReadPort {
   /** At most 500 unique IDs; no display-name lookup or inferred parent. */

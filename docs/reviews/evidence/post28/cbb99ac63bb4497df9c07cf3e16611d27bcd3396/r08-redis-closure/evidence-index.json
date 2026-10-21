@@ -1,0 +1,22 @@
+{
+    "files":  [
+                  {
+                      "path":  ".gitattributes",
+                      "sha256":  "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+                      "bytes":  8
+                  },
+                  {
+                      "path":  "archive-receipt.json",
+                      "sha256":  "2298497c3065cd0288be265ef0158491a3948c8a4c3e19054cf04ffabc37632a",
+                      "bytes":  350
+                  },
+                  {
+                      "path":  "post28-r08-redis-result.json",
+                      "sha256":  "ae86f1a70e25e2c54ccea73881b4dc10111d3c2b9b49b81885179f9dd5399726",
+                      "bytes":  1081
+                  }
+              ],
+    "sourceSha":  "cbb99ac63bb4497df9c07cf3e16611d27bcd3396",
+    "version":  1,
+    "kind":  "POST28_R08_REDIS_EVIDENCE"
+}

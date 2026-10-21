@@ -1,0 +1,962 @@
+{
+  "numTotalTestSuites": 12,
+  "numPassedTestSuites": 12,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 73,
+  "numPassedTests": 73,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1792542800730,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline denies expired temporary retention before granting or reading bytes",
+          "status": "passed",
+          "title": "denies expired temporary retention before granting or reading bytes",
+          "duration": 9.487699999999677,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline denies invalid temporary retention before granting or reading bytes",
+          "status": "passed",
+          "title": "denies invalid temporary retention before granting or reading bytes",
+          "duration": 1.545799999999872,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline denies missing temporary retention before granting or reading bytes",
+          "status": "passed",
+          "title": "denies missing temporary retention before granting or reading bytes",
+          "duration": 1.5757999999996173,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline limits a private grant to remaining whole retention seconds",
+          "status": "passed",
+          "title": "limits a private grant to remaining whole retention seconds",
+          "duration": 1.7646000000004278,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline rejects a provider grant extending beyond the retention deadline",
+          "status": "passed",
+          "title": "rejects a provider grant extending beyond the retention deadline",
+          "duration": 0.8910999999998239,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline rejects a grant when the asset expires during provider IO",
+          "status": "passed",
+          "title": "rejects a grant when the asset expires during provider IO",
+          "duration": 0.6298000000006141,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline rejects a grant when the asset is withdrawn during provider IO",
+          "status": "passed",
+          "title": "rejects a grant when the asset is withdrawn during provider IO",
+          "duration": 1.2750000000005457,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline rejects authenticated bytes if retention expires during the read",
+          "status": "passed",
+          "title": "rejects authenticated bytes if retention expires during the read",
+          "duration": 0.9597000000003391,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline keeps an explicitly permanent asset without expiry deliverable",
+          "status": "passed",
+          "title": "keeps an explicitly permanent asset without expiry deliverable",
+          "duration": 1.131199999999808,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1792542807162,
+      "endTime": 1792542807182.131,
+      "status": "passed",
+      "message": "",
+      "name": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/AssetDeliveryRetention.spec.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B upload locator request stays INITIATED until authoritative finalization",
+          "status": "passed",
+          "title": "upload locator request stays INITIATED until authoritative finalization",
+          "duration": 3.5680000000011205,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B malware failure prevents activation",
+          "status": "passed",
+          "title": "malware failure prevents activation",
+          "duration": 3.8482999999996537,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B activation requires sanitized/validated state according to domain rules",
+          "status": "passed",
+          "title": "activation requires sanitized/validated state according to domain rules",
+          "duration": 2.0776000000005297,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B activates the sanitized quarantine object and exposes only temporary delivery grants after activation",
+          "status": "passed",
+          "title": "activates the sanitized quarantine object and exposes only temporary delivery grants after activation",
+          "duration": 1.533900000000358,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B purge is blocked when IAssetUsageRegistryGateway reports usage",
+          "status": "passed",
+          "title": "purge is blocked when IAssetUsageRegistryGateway reports usage",
+          "duration": 3.1414999999997235,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B rejects changed upload proof before scanning or promotion: {\"signatureVerified\":false}",
+          "status": "passed",
+          "title": "rejects changed upload proof before scanning or promotion: {\"signatureVerified\":false}",
+          "duration": 2.272499999999127,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B rejects changed upload proof before scanning or promotion: {\"verifiedMimeType\":\"application/x-msdownload\"}",
+          "status": "passed",
+          "title": "rejects changed upload proof before scanning or promotion: {\"verifiedMimeType\":\"application/x-msdownload\"}",
+          "duration": 0.8918000000012398,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B rejects changed upload proof before scanning or promotion: {\"byteSize\":9999}",
+          "status": "passed",
+          "title": "rejects changed upload proof before scanning or promotion: {\"byteSize\":9999}",
+          "duration": 1.4456000000009226,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B rejects changed upload proof before scanning or promotion: {\"verifiedAt\":\"not-a-date\"}",
+          "status": "passed",
+          "title": "rejects changed upload proof before scanning or promotion: {\"verifiedAt\":\"not-a-date\"}",
+          "duration": 1.212100000000646,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B persists activation intent before moving and resumes after post-move DB failure",
+          "status": "passed",
+          "title": "persists activation intent before moving and resumes after post-move DB failure",
+          "duration": 3.4565999999995256,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B does not move bytes when saving activation intent loses its revision CAS",
+          "status": "passed",
+          "title": "does not move bytes when saving activation intent loses its revision CAS",
+          "duration": 0.9804000000003725,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B does not call moveToCleanZone for quarantined or malware-failed assets",
+          "status": "passed",
+          "title": "does not call moveToCleanZone for quarantined or malware-failed assets",
+          "duration": 0.5775000000012369,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B does not archive or soft-delete active assets referenced by another owner",
+          "status": "passed",
+          "title": "does not archive or soft-delete active assets referenced by another owner",
+          "duration": 0.845499999999447,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B fails closed when uploaded binary verification rejects the content, before scanner runs",
+          "status": "passed",
+          "title": "fails closed when uploaded binary verification rejects the content, before scanner runs",
+          "duration": 0.4681000000000495,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B re-verifies and rescans sanitized output, using its updated locator and actual byte size",
+          "status": "passed",
+          "title": "re-verifies and rescans sanitized output, using its updated locator and actual byte size",
+          "duration": 0.7147000000004482,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B rejects a sanitized object that becomes infected, without promoting it",
+          "status": "passed",
+          "title": "rejects a sanitized object that becomes infected, without promoting it",
+          "duration": 0.505699999999706,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B rejects content rewritten after post-sanitization scan, before CLEAN move",
+          "status": "passed",
+          "title": "rejects content rewritten after post-sanitization scan, before CLEAN move",
+          "duration": 0.44570000000021537,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B does not call the storage provider for an ACTIVE/CLEAN record missing trust evidence",
+          "status": "passed",
+          "title": "does not call the storage provider for an ACTIVE/CLEAN record missing trust evidence",
+          "duration": 0.35459999999875436,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B refuses irreversible purge with indefinite retention before contacting the storage provider",
+          "status": "passed",
+          "title": "refuses irreversible purge with indefinite retention before contacting the storage provider",
+          "duration": 0.3877999999986059,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B fails closed when repository purge retention guard is unavailable",
+          "status": "passed",
+          "title": "fails closed when repository purge retention guard is unavailable",
+          "duration": 0.39869999999973516,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B does not scan a file until upload finalization evidence has been persisted",
+          "status": "passed",
+          "title": "does not scan a file until upload finalization evidence has been persisted",
+          "duration": 0.4701999999997497,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B detects an overwritten object after finalization without calling the malware scanner",
+          "status": "passed",
+          "title": "detects an overwritten object after finalization without calling the malware scanner",
+          "duration": 0.3802000000014232,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B does not erase bytes if persisting PURGED fails its optimistic save",
+          "status": "passed",
+          "title": "does not erase bytes if persisting PURGED fails its optimistic save",
+          "duration": 0.619699999999284,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B retains a durable PURGED tombstone and permits worker-leased cleanup retry",
+          "status": "passed",
+          "title": "retains a durable PURGED tombstone and permits worker-leased cleanup retry",
+          "duration": 0.824399999999514,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B holds uncertain archive and rejects retries before another provider effect",
+          "status": "passed",
+          "title": "holds uncertain archive and rejects retries before another provider effect",
+          "duration": 1.2469999999993888,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B does not call the archive provider when persisting ARCHIVED is rejected",
+          "status": "passed",
+          "title": "does not call the archive provider when persisting ARCHIVED is rejected",
+          "duration": 0.5895999999993364,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B restores verified CLEAN bytes before changing DELETED to ACTIVE",
+          "status": "passed",
+          "title": "restores verified CLEAN bytes before changing DELETED to ACTIVE",
+          "duration": 2.827400000000125,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B preserves recovery intent without archiving on invalid restored digest",
+          "status": "passed",
+          "title": "preserves recovery intent without archiving on invalid restored digest",
+          "duration": 0.7776999999987311,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B holds uncertain restore after failed save and prevents another provider attempt",
+          "status": "passed",
+          "title": "holds uncertain restore after failed save and prevents another provider attempt",
+          "duration": 0.835399999999936,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B refuses to start restore if clean-byte verification capability is unavailable",
+          "status": "passed",
+          "title": "refuses to start restore if clean-byte verification capability is unavailable",
+          "duration": 0.5475999999998749,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B refuses restore before contacting provider when DB lease cannot be acquired",
+          "status": "passed",
+          "title": "refuses restore before contacting provider when DB lease cannot be acquired",
+          "duration": 0.5898999999990338,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Application Layer - Slice 2B"
+          ],
+          "fullName": "Phase 05 EAP Application Layer - Slice 2B does not archive restored bytes when lease ownership becomes unknown after a DB failure",
+          "status": "passed",
+          "title": "does not archive restored bytes when lease ownership becomes unknown after a DB failure",
+          "duration": 0.7615999999998166,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1792542812813,
+      "endTime": 1792542812853.7617,
+      "status": "passed",
+      "message": "",
+      "name": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/AssetPlatformUseCases.spec.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "owner asset references require Domain delivery trust"
+          ],
+          "fullName": "owner asset references require Domain delivery trust permits a verified clean asset while retaining owner/classification/MIME checks",
+          "status": "passed",
+          "title": "permits a verified clean asset while retaining owner/classification/MIME checks",
+          "duration": 6.362699999999677,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "owner asset references require Domain delivery trust"
+          ],
+          "fullName": "owner asset references require Domain delivery trust rejects ACTIVE rows with missing or mismatched persisted proof",
+          "status": "passed",
+          "title": "rejects ACTIVE rows with missing or mismatched persisted proof",
+          "duration": 0.7766000000001441,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "owner asset references require Domain delivery trust"
+          ],
+          "fullName": "owner asset references require Domain delivery trust rejects ACTIVE rows with missing or mismatched persisted proof",
+          "status": "passed",
+          "title": "rejects ACTIVE rows with missing or mismatched persisted proof",
+          "duration": 0.5730000000003201,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "owner asset references require Domain delivery trust"
+          ],
+          "fullName": "owner asset references require Domain delivery trust rejects ACTIVE rows with missing or mismatched persisted proof",
+          "status": "passed",
+          "title": "rejects ACTIVE rows with missing or mismatched persisted proof",
+          "duration": 0.5514000000002852,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "owner asset references require Domain delivery trust"
+          ],
+          "fullName": "owner asset references require Domain delivery trust rejects ACTIVE rows with missing or mismatched persisted proof",
+          "status": "passed",
+          "title": "rejects ACTIVE rows with missing or mismatched persisted proof",
+          "duration": 0.8414000000002488,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "owner asset references require Domain delivery trust"
+          ],
+          "fullName": "owner asset references require Domain delivery trust rejects ACTIVE rows with missing or mismatched persisted proof",
+          "status": "passed",
+          "title": "rejects ACTIVE rows with missing or mismatched persisted proof",
+          "duration": 0.4687999999996464,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "owner asset references require Domain delivery trust"
+          ],
+          "fullName": "owner asset references require Domain delivery trust rejects ACTIVE rows with missing or mismatched persisted proof",
+          "status": "passed",
+          "title": "rejects ACTIVE rows with missing or mismatched persisted proof",
+          "duration": 0.6260000000002037,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "owner asset references require Domain delivery trust"
+          ],
+          "fullName": "owner asset references require Domain delivery trust rejects ACTIVE rows with missing or mismatched persisted proof",
+          "status": "passed",
+          "title": "rejects ACTIVE rows with missing or mismatched persisted proof",
+          "duration": 0.7021000000004278,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "owner asset references require Domain delivery trust"
+          ],
+          "fullName": "owner asset references require Domain delivery trust rejects ACTIVE rows with missing or mismatched persisted proof",
+          "status": "passed",
+          "title": "rejects ACTIVE rows with missing or mismatched persisted proof",
+          "duration": 1.059599999999591,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "owner asset references require Domain delivery trust"
+          ],
+          "fullName": "owner asset references require Domain delivery trust rejects malformed proof timestamps and digest format",
+          "status": "passed",
+          "title": "rejects malformed proof timestamps and digest format",
+          "duration": 0.8771000000006097,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "owner asset references require Domain delivery trust"
+          ],
+          "fullName": "owner asset references require Domain delivery trust does not let a lifecycle allowlist override authorize non-deliverable references",
+          "status": "passed",
+          "title": "does not let a lifecycle allowlist override authorize non-deliverable references",
+          "duration": 0.42479999999977736,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "owner asset references require Domain delivery trust"
+          ],
+          "fullName": "owner asset references require Domain delivery trust blocks the real Course owner use case before repository update",
+          "status": "passed",
+          "title": "blocks the real Course owner use case before repository update",
+          "duration": 1.0735999999997148,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1792542807565,
+      "endTime": 1792542807580.0735,
+      "status": "passed",
+      "message": "",
+      "name": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/AssetReferenceTrust.spec.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "bounded authenticated asset reads"
+          ],
+          "fullName": "bounded authenticated asset reads returns only size and SHA256 verified bytes after a final lifecycle check",
+          "status": "passed",
+          "title": "returns only size and SHA256 verified bytes after a final lifecycle check",
+          "duration": 4.753899999999703,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "bounded authenticated asset reads"
+          ],
+          "fullName": "bounded authenticated asset reads rejects substituted bytes before returning them",
+          "status": "passed",
+          "title": "rejects substituted bytes before returning them",
+          "duration": 2.5174999999999272,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "bounded authenticated asset reads"
+          ],
+          "fullName": "bounded authenticated asset reads rejects lifecycle withdrawal during storage IO",
+          "status": "passed",
+          "title": "rejects lifecycle withdrawal during storage IO",
+          "duration": 1.0902999999998428,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "bounded authenticated asset reads"
+          ],
+          "fullName": "bounded authenticated asset reads fails closed without a bounded storage read capability",
+          "status": "passed",
+          "title": "fails closed without a bounded storage read capability",
+          "duration": 0.4375,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1792542807173,
+      "endTime": 1792542807181.4375,
+      "status": "passed",
+      "message": "",
+      "name": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/AuthenticatedAssetRead.spec.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A",
+            "Value Objects URL Rejection"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A Value Objects URL Rejection rejects raw URLs in AssetId",
+          "status": "passed",
+          "title": "rejects raw URLs in AssetId",
+          "duration": 4.110099999999875,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A",
+            "Value Objects URL Rejection"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A Value Objects URL Rejection rejects raw URLs in AssetReference",
+          "status": "passed",
+          "title": "rejects raw URLs in AssetReference",
+          "duration": 0.5592999999998938,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A",
+            "AssetRecord Lifecycle"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A AssetRecord Lifecycle follows valid lifecycle INITIATED -> QUARANTINED -> VALIDATING -> SANITIZING -> ACTIVE",
+          "status": "passed",
+          "title": "follows valid lifecycle INITIATED -> QUARANTINED -> VALIDATING -> SANITIZING -> ACTIVE",
+          "duration": 3.59020000000055,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A",
+            "AssetRecord Lifecycle"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A AssetRecord Lifecycle does not resurrect INITIATED through manual malware failure",
+          "status": "passed",
+          "title": "does not resurrect INITIATED through manual malware failure",
+          "duration": 1.150499999999738,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A",
+            "AssetRecord Lifecycle"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A AssetRecord Lifecycle does not resurrect DELETED through manual malware failure",
+          "status": "passed",
+          "title": "does not resurrect DELETED through manual malware failure",
+          "duration": 0.471400000000358,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A",
+            "AssetRecord Lifecycle"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A AssetRecord Lifecycle does not resurrect PURGED through manual malware failure",
+          "status": "passed",
+          "title": "does not resurrect PURGED through manual malware failure",
+          "duration": 0.4618000000000393,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A",
+            "AssetRecord Lifecycle"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A AssetRecord Lifecycle does not resurrect ARCHIVED through manual malware failure",
+          "status": "passed",
+          "title": "does not resurrect ARCHIVED through manual malware failure",
+          "duration": 0.4193999999997686,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A",
+            "AssetRecord Lifecycle"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A AssetRecord Lifecycle preserves TEMPORARY policy across soft-delete/restore and refuses elapsed or missing policy",
+          "status": "passed",
+          "title": "preserves TEMPORARY policy across soft-delete/restore and refuses elapsed or missing policy",
+          "duration": 1.997799999999188,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A",
+            "AssetRecord Lifecycle"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A AssetRecord Lifecycle prevents activation when malware scan fails",
+          "status": "passed",
+          "title": "prevents activation when malware scan fails",
+          "duration": 1.0080000000007203,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A",
+            "AssetRecord Lifecycle"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A AssetRecord Lifecycle handles archive, soft delete, restore, and purge rules correctly",
+          "status": "passed",
+          "title": "handles archive, soft delete, restore, and purge rules correctly",
+          "duration": 1.235899999999674,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A rejects promotion without a persisted scan and sanitization decision",
+          "status": "passed",
+          "title": "rejects promotion without a persisted scan and sanitization decision",
+          "duration": 0.8076000000000931,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A invalidates old scan evidence after sanitizer rewrites or relocates the object",
+          "status": "passed",
+          "title": "invalidates old scan evidence after sanitizer rewrites or relocates the object",
+          "duration": 0.49020000000018626,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A does not restore deleted quarantined objects into ACTIVE",
+          "status": "passed",
+          "title": "does not restore deleted quarantined objects into ACTIVE",
+          "duration": 0.30270000000018626,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A rejects forged ACTIVE and CLEAN metadata without trusted upload and malware evidence",
+          "status": "passed",
+          "title": "rejects forged ACTIVE and CLEAN metadata without trusted upload and malware evidence",
+          "duration": 0.29389999999966676,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A does not emit quarantine events or scan until actual upload bytes are confirmed",
+          "status": "passed",
+          "title": "does not emit quarantine events or scan until actual upload bytes are confirmed",
+          "duration": 0.8068999999995867,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "Phase 05 EAP Domain Core - Slice 2A"
+          ],
+          "fullName": "Phase 05 EAP Domain Core - Slice 2A emits quarantine event when an unverified legacy QUARANTINED row is finalized",
+          "status": "passed",
+          "title": "emits quarantine event when an unverified legacy QUARANTINED row is finalized",
+          "duration": 0.2708999999995285,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1792542807920,
+      "endTime": 1792542807939.271,
+      "status": "passed",
+      "message": "",
+      "name": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/domain/tests/asset-platform/AssetRecord.spec.ts"
+    }
+  ]
+}

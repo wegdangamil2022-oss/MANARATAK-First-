@@ -1,0 +1,192 @@
+{
+  "version": 1,
+  "baselineSourceSha": "d82ff2e3b23152025a001f529a0d4abd5d160bfa",
+  "plan": "docs/remediation/POST28_ISOLATED_VALIDATION_EXECUTION_PLAN_v1.3_2026-10-16.md",
+  "planSha256": "956e4c59215cf9496e7ed967e48697e9d4c1914b5e862cc4156eabbbb26c8c1c",
+  "matrix": "docs/remediation/CROSS_PHASE_RELATIONSHIP_CLOSURE_MATRIX.md",
+  "matrixSha256": "dccb5861521537ea4fcc0e0974b4cc3a60b601faf86b8a369e35e9009cd40d65",
+  "runtimeExecuted": false,
+  "decisions": [
+    {
+      "decisionId": "DEC-01",
+      "question": "هل مصدر الحقيقة المقبول هو academicProgramId أو group/versioned target أو eligibility rule يثبت نفس زوج degree-major؟ الجداول المستقلة وحدها لا تثبت الزوج. يُمنع مطابقة source labels أو تعميم المنحة على حاصل ضرب مجموعتين.",
+      "accountableRole": "مالك P12 بالتنسيق مع P10/P11 ومعمارية P1؛ اعتماد عقد/تمثيل مستقر، اختبارات موجبة وسالبة، ثم أي migration ببوابة B05/R04.",
+      "impact": "CD-007/008 وG3 لمسار المنح BLOCKED إذا ظل البحث يُظهر زوجًا غير مدعوم.",
+      "status": "OWNER_FUNCTIONAL_DIRECTION_APPROVED",
+      "ownerApproval": {
+        "document": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md",
+        "sourceSha": "4eb9d8246a1be023a458fe0fd293dc758ce7a370",
+        "scope": "FUNCTIONAL_DIRECTION_ONLY"
+      },
+      "decisionRef": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md#dec-01",
+      "affectedCases": [
+        "CD-007",
+        "CD-008"
+      ],
+      "migrationNeeded": null,
+      "stagedRollout": null,
+      "rollbackCompatibility": null,
+      "ownerFunctionalDecision": "APPROVED",
+      "technicalDesign": "REVIEW_REQUIRED",
+      "runtimeEvidence": "PARTIAL_LOCAL_POSTGRESQL_PUBLIC_HTTP_PAIR_PROOF",
+      "acceptance": "NOT_CLOSED",
+      "implementationEvidence": "docs/remediation/POST28_R06_DEC01_PROGRAM_PAIR_EXECUTION_2026-10-16.md",
+      "fullScenarioAccepted": false
+    },
+    {
+      "decisionId": "DEC-02",
+      "question": "عرف رسميًا studyDestinationCountry وeligibleNationalityCountry وsponsorCountry وmulti-country target/cycle، وقرر كيف ينعكس IScholarshipCountryMapping على owner model الحالي. لا تُفرض cardinality متعددة على بيانات لا تمثلها.",
+      "accountableRole": "P12 + P7 + product owner؛ وثيقة مصدر/قرار وسيناريوهات البلدان.",
+      "impact": "CD-009 في نطاق multi-destination يبقى BLOCKED/استثناء نطاق معتمد؛ لا معلومات عامة كاذبة.",
+      "status": "OWNER_FUNCTIONAL_DIRECTION_APPROVED",
+      "ownerApproval": {
+        "document": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md",
+        "sourceSha": "4eb9d8246a1be023a458fe0fd293dc758ce7a370",
+        "scope": "FUNCTIONAL_DIRECTION_ONLY"
+      },
+      "decisionRef": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md#dec-02",
+      "affectedCases": [
+        "CD-009"
+      ],
+      "migrationNeeded": null,
+      "stagedRollout": null,
+      "rollbackCompatibility": null,
+      "ownerFunctionalDecision": "APPROVED",
+      "technicalDesign": "REVIEW_REQUIRED",
+      "runtimeEvidence": "PENDING_DEC_POLICY_PROOF",
+      "acceptance": "NOT_CLOSED",
+      "remainingOwnerScope": "Multi-destination cardinality not approved"
+    },
+    {
+      "decisionId": "DEC-03",
+      "question": "Phase13 guide يحتوي معيار OR، Mapper يشترط دراسة مجانية، Public/Publisher يشترطان مجانية الدراسة والشهادة معًا. أي سياسة مستقبلية ينبغي تعريفها بوضوح؛ **مرشح منطقي**: دراسة مجانية شرط الكتالوج المجاني، شهادة مجانية خاصية مستقلة، لا ضمان شهادة دون دليل.",
+      "accountableRole": "مالك P13/منتج + سلطة الوثائق: approve one normative policy ثم كل مسارات import/publish/public/UI تتطابق وتتبع الأصل.",
+      "impact": "CD-012 وR-062 لا يمران قبل حسم السياسة وإصلاح المسارات واختبارها.",
+      "status": "OWNER_FUNCTIONAL_DIRECTION_APPROVED",
+      "ownerApproval": {
+        "document": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md",
+        "sourceSha": "4eb9d8246a1be023a458fe0fd293dc758ce7a370",
+        "scope": "FUNCTIONAL_DIRECTION_ONLY"
+      },
+      "decisionRef": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md#dec-03",
+      "affectedCases": [
+        "CD-012"
+      ],
+      "migrationNeeded": null,
+      "stagedRollout": null,
+      "rollbackCompatibility": null,
+      "ownerFunctionalDecision": "APPROVED",
+      "technicalDesign": "REVIEW_REQUIRED",
+      "runtimeEvidence": "PARTIAL_LOCAL_POSTGRESQL_POLICY_PROOF",
+      "acceptance": "NOT_CLOSED",
+      "implementationEvidence": "docs/remediation/POST28_R06_DEC_POLICY_CONTINUATION_2026-10-16.md",
+      "fullScenarioAccepted": false
+    },
+    {
+      "decisionId": "DEC-04",
+      "question": "CourseMajorProjection.profileId اختياري وقراءته العامة تستخدم majorId؛ هل واجهة المنتج تعرض «دورات هذا التخصص» أم «دورات ماجستير/بكالوريوس هذا التخصص»؟ لا تحوّل مستوى دورة studyLevelRaw إلى درجة جامعية.",
+      "accountableRole": "P10/P13/P24؛ إن لم يكن facet بمستوى profile مطلوبًا، وثّق أنه غير مدعوم ولا تعرضه؛ إن طلب، اعتمد owner query وAPI وواجهة واختبارات.",
+      "impact": "CD-017 ليس إثباتًا للفصل الحالي؛ BLOCKED على الادعاء فقط.",
+      "status": "OWNER_FUNCTIONAL_DIRECTION_APPROVED",
+      "ownerApproval": {
+        "document": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md",
+        "sourceSha": "4eb9d8246a1be023a458fe0fd293dc758ce7a370",
+        "scope": "FUNCTIONAL_DIRECTION_ONLY"
+      },
+      "decisionRef": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md#dec-04",
+      "affectedCases": [
+        "CD-017"
+      ],
+      "migrationNeeded": null,
+      "stagedRollout": null,
+      "rollbackCompatibility": null,
+      "ownerFunctionalDecision": "APPROVED",
+      "technicalDesign": "REVIEW_REQUIRED",
+      "runtimeEvidence": "PARTIAL_LOCAL_POSTGRESQL_OWNER_AND_HTTP_PROOF",
+      "acceptance": "NOT_CLOSED",
+      "implementationEvidence": "docs/remediation/POST28_R06_OWNER_ATOMIC_VISIBILITY_2026-10-16.md",
+      "fullScenarioAccepted": false
+    },
+    {
+      "decisionId": "DEC-05",
+      "question": "عند رفض رابط تصنيف، تغير Mapping، أو إزالة source term، ما الحالات النهائية القانونية وكيف تحفظ decisions وaudit؟ reviewTaxonomyLink() وreconcile... لا يسلكان المسار نفسه حاليًا.",
+      "accountableRole": "P13/P10 + security/DB؛ تحديد transaction boundary، واجهة idempotent وإبطال فور public/query وربط بوابة outbox/cache.",
+      "impact": "CD-013…016 لا PASS دون سلوك ذري متكرر وnegative tests.",
+      "status": "OWNER_FUNCTIONAL_DIRECTION_APPROVED",
+      "ownerApproval": {
+        "document": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md",
+        "sourceSha": "4eb9d8246a1be023a458fe0fd293dc758ce7a370",
+        "scope": "FUNCTIONAL_DIRECTION_ONLY"
+      },
+      "decisionRef": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md#dec-05",
+      "affectedCases": [
+        "CD-013",
+        "CD-014",
+        "CD-015",
+        "CD-016"
+      ],
+      "migrationNeeded": null,
+      "stagedRollout": null,
+      "rollbackCompatibility": null,
+      "ownerFunctionalDecision": "APPROVED",
+      "technicalDesign": "REVIEW_REQUIRED",
+      "runtimeEvidence": "PARTIAL_LOCAL_POSTGRESQL_OWNER_AND_HTTP_PROOF",
+      "acceptance": "NOT_CLOSED",
+      "implementationEvidence": "docs/remediation/POST28_R06_OWNER_ATOMIC_VISIBILITY_2026-10-16.md",
+      "fullScenarioAccepted": false
+    },
+    {
+      "decisionId": "DEC-06",
+      "question": "Prisma @@unique([academicProgramId, internationalTestId, testVariantId, testVersionId]) يحتوي حقولًا nullable؛ هل المانع الفعلي تطبيق أو expression index/constraint خاص مع الاستيراد المتوازي؟",
+      "accountableRole": "P11/P9/DB؛ اختبار اتصالين Postgres وحسم علاج لا يغيّر SQL المطبق سابقًا.",
+      "impact": "CD-005 يفشل إن حدث تكرار منطقي ولو بقي schema valid.",
+      "status": "OWNER_FUNCTIONAL_DIRECTION_APPROVED",
+      "ownerApproval": {
+        "document": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md",
+        "sourceSha": "4eb9d8246a1be023a458fe0fd293dc758ce7a370",
+        "scope": "FUNCTIONAL_DIRECTION_ONLY"
+      },
+      "decisionRef": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md#dec-06",
+      "affectedCases": [
+        "CD-005"
+      ],
+      "migrationNeeded": null,
+      "stagedRollout": null,
+      "rollbackCompatibility": null,
+      "ownerFunctionalDecision": "APPROVED",
+      "technicalDesign": "REVIEW_REQUIRED",
+      "runtimeEvidence": "PENDING_DEC_POLICY_PROOF",
+      "acceptance": "NOT_CLOSED"
+    },
+    {
+      "decisionId": "DEC-07",
+      "question": "FG-024 ما زال يتطلب canonical teaching-language owner query وscope؛ لا يعوضه studyLanguageSourceLabel أو JSON count أو snapshot ناقص.",
+      "accountableRole": "مالك P11/P12/P24/المنتج مع مالك بيانات الأسواق، حسب R02-coverage.",
+      "impact": "G3/business-discovery BLOCKED للأسواق الإلزامية غير الموصولة.",
+      "status": "OWNER_FUNCTIONAL_DIRECTION_APPROVED",
+      "ownerApproval": {
+        "document": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md",
+        "sourceSha": "4eb9d8246a1be023a458fe0fd293dc758ce7a370",
+        "scope": "FUNCTIONAL_DIRECTION_ONLY"
+      },
+      "decisionRef": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md#dec-07",
+      "affectedCases": [
+        "CD-020",
+        "CD-021",
+        "CD-025",
+        "CD-033",
+        "CD-040"
+      ],
+      "migrationNeeded": null,
+      "stagedRollout": null,
+      "rollbackCompatibility": null,
+      "ownerFunctionalDecision": "APPROVED",
+      "technicalDesign": "REVIEW_REQUIRED",
+      "runtimeEvidence": "PENDING_DEC_POLICY_PROOF",
+      "acceptance": "NOT_CLOSED",
+      "remainingOwnerScope": "Mandatory launch markets deferred"
+    }
+  ],
+  "functionalApprovalSourceSha": "4eb9d8246a1be023a458fe0fd293dc758ce7a370",
+  "acceptanceUnchanged": true
+}

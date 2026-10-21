@@ -40,7 +40,7 @@ export class PublicCourseUseCases {
     slug: string,
     locale: SupportedLocale = DEFAULT_LOCALE,
   ): Promise<PublicCourseDto> {
-    const course = await this.repository.findBySlug(slug);
+    const course = await this.repository.findPublishedBySlug(slug);
 
     if (!course || course.status !== CourseStatus.PUBLISHED || course.completenessStatus !== CourseImportCompletenessState.COMPLETE || !this.publicEligible(course)) {
       throw new Error('Course not found');
@@ -146,8 +146,7 @@ export class PublicCourseUseCases {
 
   private publicEligible(course: any): boolean {
     if (course.originType !== CourseOriginType.EXTERNAL_LINKED_COURSE) return true;
-    return course.accessType === CourseAccessType.FREE_STUDY_AND_CERTIFICATE
-      && course.isStudyFree === true
-      && course.isFreeCertificate === true;
+    return [CourseAccessType.FREE_STUDY, CourseAccessType.FREE_STUDY_AND_CERTIFICATE].includes(course.accessType)
+      && course.isStudyFree === true;
   }
 }

@@ -1,0 +1,97 @@
+{
+  "kind": "POST28_LOCAL_R04_READ_ONLY_AUDIT",
+  "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+  "runId": "2ad85d94-bb98-4e15-82ee-4a4a4633ef32",
+  "targets": [
+    {
+      "label": "DB-G",
+      "database": "manaratak_post28_greenfield_test",
+      "role": "post28_migrator",
+      "serverIdentity": "7697256504203268140",
+      "databaseOid": "16387",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    },
+    {
+      "label": "DB-S",
+      "database": "manaratak_post28_shadow_test",
+      "role": "post28_shadow",
+      "serverIdentity": "7697256504203268140",
+      "databaseOid": "16471",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 0,
+      "probeReadOnly": true
+    }
+  ],
+  "ledger": {
+    "expected": 109,
+    "applied": 109,
+    "checksumsMatched": 109,
+    "partial": 0,
+    "rolledBack": 0
+  },
+  "publicTables": 282,
+  "applicationTables": 281,
+  "applicationRows": 63,
+  "foreignKeys": 313,
+  "checkConstraints": 102,
+  "unvalidatedConstraints": [
+    {
+      "table": "FinancePaymentRecord",
+      "name": "FinancePayment_positive_units",
+      "type": "c"
+    },
+    {
+      "table": "FinanceRefundRecord",
+      "name": "FinanceRefund_positive_units",
+      "type": "c"
+    },
+    {
+      "table": "FinanceTransferRecord",
+      "name": "FinanceTransfer_positive_units",
+      "type": "c"
+    },
+    {
+      "table": "FinanceWalletHoldRecord",
+      "name": "FinanceWalletHold_positive_units",
+      "type": "c"
+    },
+    {
+      "table": "FinancialLedgerEntryRecord",
+      "name": "FinanceLedger_positive_units",
+      "type": "c"
+    },
+    {
+      "table": "ServiceCatalogRecord",
+      "name": "ServiceCatalogRecord_fulfillment_policy",
+      "type": "c"
+    },
+    {
+      "table": "ServicePricingRecord",
+      "name": "ServicePricingRecord_bounded_money",
+      "type": "c"
+    },
+    {
+      "table": "SettingAssignmentRecord",
+      "name": "SettingAssignmentRecord_id_currentVersionId_fkey",
+      "type": "f"
+    },
+    {
+      "table": "StudentApplicationDocumentBinding",
+      "name": "StudentApplicationDocumentBinding_assetId_fkey",
+      "type": "f"
+    }
+  ],
+  "indexes": 1191,
+  "invalidIndexes": 0,
+  "triggers": 40,
+  "orphanAndCheckAudits": 320,
+  "violations": 0,
+  "mutationsExecuted": false,
+  "parityAccepted": false,
+  "secondDeployExecuted": false,
+  "seedExecuted": false
+}

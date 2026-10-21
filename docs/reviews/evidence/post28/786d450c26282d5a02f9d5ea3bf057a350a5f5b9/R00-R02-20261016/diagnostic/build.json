@@ -1,0 +1,10 @@
+{
+  "name": "build",
+  "command": "npm run build",
+  "sourceSha": "1ac45bc4b1c4cf84e69314d4f528cbef607d7a9d",
+  "workingTreeDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "startedAt": "2026-10-16T02:34:35.438569+00:00",
+  "endedAt": "2026-10-16T02:34:56.604943+00:00",
+  "exitCode": 1,
+  "logSha256": "be998cd5e500ddaf225e65baa82e6f55fe076839fe570c9dbca162f01cffbe80"
+}

@@ -1,0 +1,18 @@
+import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import assert from 'node:assert/strict';import{execFileSync}from'node:child_process';
+import{verifyReleaseManifest}from'./r07-filtered/scripts/release/lib/ReleaseContracts.mjs';
+const work=import.meta.dirname,zip=path.join(work,'r12-current-verified.zip'),sha='4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b',previous='c8afe5f253d132f671ecd035a0330de7794b6ee8',hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+assert.equal(hash(fs.readFileSync(zip)),'bc43f19e0435e834890af468ef340c0832f967beab403d2054116200493ba327');
+const out=fs.mkdtempSync(path.join(work,'r12-verified-unpack-')),artifacts=path.join(out,'artifacts');
+execFileSync('powershell.exe',['-NoProfile','-Command',`Expand-Archive -LiteralPath '${zip.replaceAll("'","''")}' -DestinationPath '${artifacts.replaceAll("'","''")}'`],{stdio:'pipe',windowsHide:true});
+const manifest=verifyReleaseManifest(artifacts,sha),oldArtifacts=path.join(work,'r10-major-fix-candidate/artifacts'),old=verifyReleaseManifest(oldArtifacts,previous);
+assert.equal(manifest.runtimeRequirements.lockSha256,old.runtimeRequirements.lockSha256);assert.equal(manifest.runtimeRequirements.prismaSchemaSha256,old.runtimeRequirements.prismaSchemaSha256);
+const roots={};for(const [label,directory,m]of [['current',artifacts,manifest],['previous',oldArtifacts,old]]){
+ const archive=path.relative(work,path.join(directory,m.artifacts.find(a=>a.unit==='api').file));
+ const names=execFileSync('C:/Program Files/Git/usr/bin/tar.exe',['--force-local','-tf',archive],{cwd:work,encoding:'utf8',maxBuffer:8e6}).trim().split('\n');
+ const listing=execFileSync('C:/Program Files/Git/usr/bin/tar.exe',['--force-local','-tvf',archive],{cwd:work,encoding:'utf8',maxBuffer:16e6}).trim().split('\n');
+ assert(!names.some(n=>n.startsWith('/')||n.includes('\\')||n.split('/').includes('..')));assert(listing.every(l=>/^[-d]/.test(l)));
+ const root=path.join(out,label);fs.mkdirSync(root);execFileSync('C:/Program Files/Git/usr/bin/tar.exe',['--force-local','-xf',archive,'-C',path.relative(work,root)],{cwd:work,stdio:'pipe',windowsHide:true});
+ assert(fs.statSync(path.join(root,'apps/api/dist/server.cjs')).isFile());assert(!fs.existsSync(path.join(root,'node_modules')));roots[label]=root;
+}
+const result={currentSha:sha,previousSha:previous,currentArtifacts:artifacts,previousArtifacts:oldArtifacts,roots,sharedRuntime:path.join(work,'r10-major-fix-candidate/api-boot-root'),runtimeDependencySourceSha:previous,sharedLockedWindowsDependencies:true,unitsRelabelled:false,formalReleaseRuntimeLayer:false};
+fs.writeFileSync(path.join(work,'r12-unpack.json'),JSON.stringify(result,null,2)+'\n',{flag:'wx'});console.log('R12_BOTH_API_ARCHIVES_VERIFIED_AND_FRESHLY_UNPACKED');

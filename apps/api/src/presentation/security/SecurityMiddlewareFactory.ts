@@ -89,7 +89,13 @@ export class SecurityMiddlewareFactory {
   public static createRateLimiter(securityService: ISecurityService, options: RateLimitOptions) {
     return async (req: Request, res: Response, next: NextFunction) => {
       const ip = req.ip || req.socket?.remoteAddress || 'unknown';
-      const result = await securityService.getRateLimiter().consume(ip, options.limit, options.windowMs);
+      let result;
+      try {
+        result = await securityService.getRateLimiter().consume(ip, options.limit, options.windowMs);
+      } catch (error) {
+        next(error);
+        return;
+      }
 
       res.setHeader('X-RateLimit-Limit', options.limit);
       res.setHeader('X-RateLimit-Remaining', result.remaining);

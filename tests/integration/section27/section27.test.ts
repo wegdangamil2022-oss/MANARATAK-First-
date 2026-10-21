@@ -50,7 +50,7 @@ const program: any = {
   admissionRequirements: [],
   major: {
     status: 'PUBLISHED',
-    levelProfiles: [{ degreeLevelId: 'd', status: 'PUBLISHED', currentPublishedVersionId: 'mv' }],
+    levelProfiles: [{ id: 'profile', degreeLevelId: 'd', status: 'PUBLISHED', currentPublishedVersionId: 'mv', currentPublishedVersion: { id: 'mv', majorId: 'm', profileId: 'profile', status: 'PUBLISHED' } }],
   },
 };
 const university: any = {
@@ -90,6 +90,7 @@ const req: any = {
     status: 'PUBLISHED',
     currentPublishedVersion: {
       id: 'v',
+      testId: 't',
       status: 'PUBLISHED',
       scoreScales: [{ overallMinimum: 0, overallMaximum: 9 }],
     },
@@ -209,7 +210,7 @@ function graph(universityRows: any[] = []) {
     } as any,
     {
       listPublished: async () => page(universityRows),
-      findBySlug: async () => university,
+      findPublishedBySlug: async () => university,
       listPublishedProgramGraph: async () => programs,
       listPublishedMajorGraph:async()=>({data:[{ownerId:'m'}],total:8,hasMore:true,nextCursor:'major-cursor'}),
     } as any,
@@ -290,13 +291,22 @@ test('graph: owner outage reports sanitized failure', async () => {
 });
 test('program repository: owner SQL requires exact degree/published profile before counts and cursor', async () => {
   const queries: string[] = [];
-  const repo = new PrismaUniversityRepository({
+  let transactions = 0;
+  const transaction = {
     $queryRaw: async (q: any) => {
       queries.push(q.sql);
       return queries.length === 1 ? [{ ownerId: 'p' }] : [{ total: 8n, majorTotal: 3n }];
     },
+  };
+  const repo = new PrismaUniversityRepository({
+    $transaction: async (work: (client: any) => Promise<unknown>, options: any) => {
+      transactions++;
+      assert.equal(options.isolationLevel, 'RepeatableRead');
+      return work(transaction);
+    },
   } as any);
   const data = await repo.listPublishedProgramGraph({ countryReferenceId: 'country', limit: 1 });
+  assert.equal(transactions, 1);
   assert.equal(data.total, 8);
   assert.ok(
     queries.every(

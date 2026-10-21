@@ -1,0 +1,14 @@
+{
+  "sourceSha": "3e2db8a62de7da08c7adba2c618ad428f0cfbc9a",
+  "runId": "844bb548-c945-430b-a715-ca659d92a0d6",
+  "passedDatabaseCases": 22,
+  "newDistinctCases": 6,
+  "repeatedCases": 16,
+  "cumulativeDistinctAcrossShas": 457,
+  "allAtCurrentHead": false,
+  "R06Accepted": false,
+  "deploymentAuthorized": false,
+  "runnerTestsPassed": 40,
+  "sourceQuality": "PASS",
+  "unitTestsPassed": 297
+}

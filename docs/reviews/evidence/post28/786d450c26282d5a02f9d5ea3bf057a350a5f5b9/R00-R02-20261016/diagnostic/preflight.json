@@ -1,0 +1,10 @@
+{
+  "name": "preflight",
+  "command": "npm run ci:preflight",
+  "sourceSha": "d82ff2e3b23152025a001f529a0d4abd5d160bfa",
+  "workingTreeDiffSha256": "1e60c3265574a6517fd73de652cf10f10e16ca7e021d2ae00b8d91598f777067",
+  "startedAt": "2026-10-16T02:31:12.475965+00:00",
+  "endedAt": "2026-10-16T02:31:17.326561+00:00",
+  "exitCode": 1,
+  "logSha256": "7572310f3d555392b5b91394278e8a808d3a1cfff037b1ae088b1f2e38d1feab"
+}

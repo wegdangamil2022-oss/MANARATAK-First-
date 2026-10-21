@@ -1,0 +1,40 @@
+{
+  "sourceSha": "26fe899a033ab93eb3a44b39df1c10d9600bcd87",
+  "state": "HEALTH_NAMESPACE_FIX_VERIFIED_REAL_REDIS_DIAGNOSTIC_PREPARED",
+  "fullR08Acceptance": false,
+  "productionAcceptance": false,
+  "healthKeyVersion": "v2",
+  "rolloutImpact": "Old unscoped health keys are not reused; readiness waits for a fresh completed worker iteration on the new namespace/revision",
+  "ciRunId": "39287364100",
+  "linuxSigtermResult": "PENDING",
+  "actualRedisResult": "NOT_YET_OBSERVED",
+  "labSafety": {
+    "platform": "linux-x64",
+    "postgresConnected": false,
+    "redisImage": "redis:7-alpine resolved and recorded by digest before start",
+    "freshContainer": true,
+    "loopbackRandomPort": true,
+    "rootlessRedis": true,
+    "readOnlyFilesystem": true,
+    "capabilitiesDropped": true,
+    "restrictedAclUser": "post28",
+    "defaultAclUserDisabled": true,
+    "adminCommandsNotGranted": true,
+    "keyScope": "Unique post28:r08:<run-id>: prefix",
+    "password": "Generated per run, sent through stdin, not argv or artifact",
+    "existingServiceUrlsIgnored": true,
+    "cleanup": "Container identity and ownership label checked before stop/removal"
+  },
+  "plannedProofs": [
+    "Two independent rate-limiter processes, 24 attempts, exactly 10 allowed",
+    "Namespace/revision isolation and stale health rejection",
+    "ACL denies administrative command",
+    "Owned Redis outage must reject observation instead of reporting healthy"
+  ],
+  "notClaimed": [
+    "Two actual API instances or persisted sessions",
+    "Full financial/provider reconciliation",
+    "Complete built API shutdown on Linux",
+    "Formal release or production readiness"
+  ]
+}

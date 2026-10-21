@@ -1,0 +1,312 @@
+[
+  {
+    "name": "scanner-probe",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/tsx/dist/cli.mjs",
+      "/workspace/scratch/post28/tools/seed-scanner-probe.mts"
+    ],
+    "sourceSha": "e4f5b1ed735983825172cb1bcb0e8ed8e0e17837",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:28:45.285244+00:00",
+    "finishedUtc": "2026-10-16T14:29:14.698716+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/e4f5b1ed735983825172cb1bcb0e8ed8e0e17837/R04-seed-closure/scanner-probe-20261016T142914679325Z.log",
+    "sha256": "9cef9fe5132e82eb5f288b2e34d7d8558bfa090ac0f18d43cc12bd8278f66ca0"
+  },
+  {
+    "name": "seed-contracts",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/database/post28-required-seed.spec.ts",
+      "packages/application/tests/reference-data/ReferenceOwnerCloseout.spec.ts",
+      "packages/infrastructure/tests/reference-data/ReferenceOwnerPersistenceCloseout.spec.ts",
+      "packages/application/tests/reference-data/ReferenceDataSeedApplyService.spec.ts"
+    ],
+    "sourceSha": "b645f755b1be74437e80152b4f78350bf03da14c",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:29:33.022238+00:00",
+    "finishedUtc": "2026-10-16T14:29:42.360729+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/b645f755b1be74437e80152b4f78350bf03da14c/R04-seed-closure/seed-contracts-20261016T142942344198Z.log",
+    "sha256": "ab80cb79b94945553b5d52af4a3e67e33cb2830906160b9fb005d9863226c635"
+  },
+  {
+    "name": "source-gates",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "--test",
+      "tests/database/post28-seed-approval.test.mjs",
+      "tests/remediation/w2-greenfield-seed-orchestration.test.mjs",
+      "tests/database/greenfield-migration-parity-source.test.mjs"
+    ],
+    "sourceSha": "b645f755b1be74437e80152b4f78350bf03da14c",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:30:09.825671+00:00",
+    "finishedUtc": "2026-10-16T14:30:10.985403+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/b645f755b1be74437e80152b4f78350bf03da14c/R04-seed-closure/source-gates-20261016T143010968923Z.log",
+    "sha256": "c5cd931a28c26392a3cee5c6d74a06874b91c25984cee70c7e16ef2d13db2d81"
+  },
+  {
+    "name": "final-seed-contracts",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/database/post28-required-seed.spec.ts",
+      "packages/application/tests/reference-data/ReferenceOwnerCloseout.spec.ts",
+      "packages/infrastructure/tests/reference-data/ReferenceOwnerPersistenceCloseout.spec.ts",
+      "packages/application/tests/reference-data/ReferenceDataSeedApplyService.spec.ts"
+    ],
+    "sourceSha": "0de110193d529024d407258ac9fb50c812b48a2c",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:32:41.684065+00:00",
+    "finishedUtc": "2026-10-16T14:32:50.499760+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/0de110193d529024d407258ac9fb50c812b48a2c/R04-seed-closure/final-seed-contracts-20261016T143250482915Z.log",
+    "sha256": "310182f0d94a35e2b2249c3f0ac582509eb763fb66f12f42bdfab3fb5cb29ae0"
+  },
+  {
+    "name": "script-types",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/typescript/bin/tsc",
+      "-p",
+      "/workspace/scratch/post28/seed-typecheck.json"
+    ],
+    "sourceSha": "0de110193d529024d407258ac9fb50c812b48a2c",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:32:50.529443+00:00",
+    "finishedUtc": "2026-10-16T14:32:57.225720+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/0de110193d529024d407258ac9fb50c812b48a2c/R04-seed-closure/script-types-20261016T143257208193Z.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "final-source-gates",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "--test",
+      "tests/database/post28-seed-approval.test.mjs",
+      "tests/remediation/w2-greenfield-seed-orchestration.test.mjs",
+      "tests/database/greenfield-migration-parity-source.test.mjs"
+    ],
+    "sourceSha": "0de110193d529024d407258ac9fb50c812b48a2c",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:33:32.554843+00:00",
+    "finishedUtc": "2026-10-16T14:33:33.637197+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/0de110193d529024d407258ac9fb50c812b48a2c/R04-seed-closure/final-source-gates-20261016T143333617031Z.log",
+    "sha256": "beee47e3e657d6a068087cf66c074b2e5d37f600845c5197872e6b53fea7fc16"
+  },
+  {
+    "name": "final-quality",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/quality/verify-source-quality.mjs"
+    ],
+    "sourceSha": "0de110193d529024d407258ac9fb50c812b48a2c",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:33:33.669660+00:00",
+    "finishedUtc": "2026-10-16T14:33:37.562553+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/0de110193d529024d407258ac9fb50c812b48a2c/R04-seed-closure/final-quality-20261016T143337539846Z.log",
+    "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073"
+  },
+  {
+    "name": "final-architecture",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/architecture/verify-source-architecture-guards.mjs"
+    ],
+    "sourceSha": "0de110193d529024d407258ac9fb50c812b48a2c",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:35:48.361900+00:00",
+    "finishedUtc": "2026-10-16T14:35:49.532327+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/0de110193d529024d407258ac9fb50c812b48a2c/R04-seed-closure/final-architecture-20261016T143549506464Z.log",
+    "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659"
+  },
+  {
+    "name": "final-eslint",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/eslint/bin/eslint.js",
+      "scripts/database/post28-required-seed.ts",
+      "scripts/database/post28-reference-seed-plan.ts",
+      "scripts/database/post28-seed-asset-security.ts",
+      "scripts/database/post28-seed-approval.mjs",
+      "scripts/database/seed-orchestrator.mjs",
+      "tests/database/post28-required-seed.spec.ts",
+      "tests/database/post28-seed-approval.test.mjs",
+      "tests/remediation/w2-greenfield-seed-orchestration.test.mjs",
+      "packages/infrastructure/src/import-foundation/PrismaImportScreeningReceiptStore.ts",
+      "packages/infrastructure/src/reference-data/PrismaReferenceOwnerReviewGateway.ts"
+    ],
+    "sourceSha": "0de110193d529024d407258ac9fb50c812b48a2c",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:35:49.562110+00:00",
+    "finishedUtc": "2026-10-16T14:35:51.422462+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/0de110193d529024d407258ac9fb50c812b48a2c/R04-seed-closure/final-eslint-20261016T143551405784Z.log",
+    "sha256": "a60859845c13f840c41ad7cadc6ae1c86ae72803ab97948a9a9176cd744588a0"
+  },
+  {
+    "name": "final-seed-contracts",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/database/post28-required-seed.spec.ts",
+      "packages/application/tests/reference-data/ReferenceOwnerCloseout.spec.ts",
+      "packages/infrastructure/tests/reference-data/ReferenceOwnerPersistenceCloseout.spec.ts",
+      "packages/application/tests/reference-data/ReferenceDataSeedApplyService.spec.ts"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:37:41.647486+00:00",
+    "finishedUtc": "2026-10-16T14:37:51.569546+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/467d1369e8da0a93ea3444bc1ef6a56c5e53d57d/R04-seed-closure/final-seed-contracts-20261016T143751550913Z.log",
+    "sha256": "11c139ae6c0abad9d5f31a3058454bd2635d5671be827fde802b8b1bf748ee3d"
+  },
+  {
+    "name": "final-types",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/typescript/bin/tsc",
+      "-p",
+      "/workspace/scratch/post28/seed-typecheck.json"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:37:51.601866+00:00",
+    "finishedUtc": "2026-10-16T14:37:59.131557+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/467d1369e8da0a93ea3444bc1ef6a56c5e53d57d/R04-seed-closure/final-types-20261016T143759114449Z.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "final-source-gates",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "--test",
+      "tests/database/post28-seed-approval.test.mjs",
+      "tests/remediation/w2-greenfield-seed-orchestration.test.mjs",
+      "tests/database/greenfield-migration-parity-source.test.mjs"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:39:14.474905+00:00",
+    "finishedUtc": "2026-10-16T14:39:15.704755+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/467d1369e8da0a93ea3444bc1ef6a56c5e53d57d/R04-seed-closure/final-source-gates-20261016T143915678455Z.log",
+    "sha256": "b3dd060a6b397c233f32f8724f3eb3aa44211431c9e64a03f2d62ce704bf301c"
+  },
+  {
+    "name": "final-quality",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/quality/verify-source-quality.mjs"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:39:15.750945+00:00",
+    "finishedUtc": "2026-10-16T14:39:20.060051+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/467d1369e8da0a93ea3444bc1ef6a56c5e53d57d/R04-seed-closure/final-quality-20261016T143920041868Z.log",
+    "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073"
+  },
+  {
+    "name": "final-architecture",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/architecture/verify-source-architecture-guards.mjs"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "dirty": false,
+    "startedUtc": "2026-10-16T14:39:20.091239+00:00",
+    "finishedUtc": "2026-10-16T14:39:21.479230+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/467d1369e8da0a93ea3444bc1ef6a56c5e53d57d/R04-seed-closure/final-architecture-20261016T143921461058Z.log",
+    "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659"
+  },
+  {
+    "name": "final-eslint",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/eslint/bin/eslint.js",
+      "scripts/database/post28-required-seed.ts",
+      "scripts/database/post28-reference-seed-plan.ts",
+      "scripts/database/post28-seed-asset-security.ts",
+      "scripts/database/post28-seed-approval.mjs",
+      "scripts/database/seed-orchestrator.mjs",
+      "tests/database/post28-required-seed.spec.ts",
+      "tests/database/post28-seed-approval.test.mjs",
+      "tests/remediation/w2-greenfield-seed-orchestration.test.mjs",
+      "packages/infrastructure/src/import-foundation/PrismaImportScreeningReceiptStore.ts",
+      "packages/infrastructure/src/reference-data/PrismaReferenceOwnerReviewGateway.ts"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "dirty": false,
+    "startedUtc": "2026-10-16T15:23:19.448701+00:00",
+    "finishedUtc": "2026-10-16T15:23:21.422897+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/467d1369e8da0a93ea3444bc1ef6a56c5e53d57d/R04-seed-closure/final-eslint-20261016T152321405112Z.log",
+    "sha256": "26aca98e793086dcf9d1ee803449a9ff5a0418355b85e2cda72996ddcdab71e0"
+  }
+]

@@ -1,0 +1,71 @@
+{
+  "kind": "POST28_R14_ADMIN_CMS_ARTIFACT_RUNTIME",
+  "sourceSha": "282a7aa791cb1363f8a0cc29ee661fb3acf5cb9e",
+  "imageId": "sha256:d63f4503527352063fe4c9f711239274f22e5c1ae38e296825c9fd4a46ebe77f",
+  "node": "v22.16.0",
+  "environment": "DISPOSABLE",
+  "providerMode": "NO_EXTERNAL_EGRESS",
+  "observations": [
+    {
+      "step": "REVISION_READINESS",
+      "route": "/health/build",
+      "status": 200,
+      "sourceSha": "282a7aa791cb1363f8a0cc29ee661fb3acf5cb9e"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/admin/health/build",
+      "status": 200,
+      "sourceSha": "282a7aa791cb1363f8a0cc29ee661fb3acf5cb9e"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/api/v1/monitoring/health/readiness",
+      "status": 200,
+      "sourceSha": "282a7aa791cb1363f8a0cc29ee661fb3acf5cb9e"
+    }
+  ],
+  "network": [],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "productionAcceptance": false,
+  "formalR07Acceptance": false,
+  "promotionAuthorized": false,
+  "databaseIdentity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7699145620625768492",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "applicationRole": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolreplication": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledger": false
+  },
+  "browserVersion": "151.0.7922.34",
+  "cleanup": {
+    "ownedContainerStopped": true,
+    "ownedContainerRemoved": true,
+    "postgresStopped": true,
+    "postgresRemoved": true,
+    "networkRemoved": true,
+    "existingDatabasesTouched": false,
+    "apiExitCode": 0,
+    "drainMilliseconds": 153
+  },
+  "failure": "Expected values to be strictly equal:\n\n404 !== 200\n",
+  "passed": false,
+  "completedAt": "2026-10-21T15:43:07.960Z"
+}

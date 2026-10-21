@@ -1,0 +1,17 @@
+[
+  {
+    "name": "R06-suites/reference-import-closure-jVJ95V/vitest.json",
+    "sha256": "2d522bfd0ad23acd73055f0e547f04ccaa83fd0a9298941d362e5ade338f59c6",
+    "bytes": 10234
+  },
+  {
+    "name": "R06-suites/reference-import-closure-jVJ95V/discovery.json",
+    "sha256": "7febb5842e6ff20e5bd479be884240e2223835012d1c8451eab6ea908883f8a4",
+    "bytes": 4875
+  },
+  {
+    "name": "R06-suites/reference-import-closure-jVJ95V/selection.json",
+    "sha256": "76854f0e9aad7b82edfdf40bf568f34cc1c345cfb14bb1e1c8c7939780660a33",
+    "bytes": 108
+  }
+]

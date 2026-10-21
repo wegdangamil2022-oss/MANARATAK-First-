@@ -1,0 +1,17 @@
+[
+  {
+    "name": "R06-suites/reference-import-closure-kt5FvO/vitest.json",
+    "sha256": "35fe391439e5197b931706a487db1d64b9ddeb60a6b0deac667fd18206b32f34",
+    "bytes": 7831
+  },
+  {
+    "name": "R06-suites/reference-import-closure-kt5FvO/discovery.json",
+    "sha256": "7febb5842e6ff20e5bd479be884240e2223835012d1c8451eab6ea908883f8a4",
+    "bytes": 4875
+  },
+  {
+    "name": "R06-suites/reference-import-closure-kt5FvO/selection.json",
+    "sha256": "39bbf2265ac6078edcc7a6a26f641e6c41d8260c6fe4601bc609e909bdb0a829",
+    "bytes": 274
+  }
+]

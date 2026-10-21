@@ -1,0 +1,13 @@
+{
+  "name": "audit",
+  "command": "npm audit --omit=dev --audit-level=low",
+  "sourceSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "endSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T02:49:32.271358+00:00",
+  "endedAt": "2026-10-16T02:49:33.948953+00:00",
+  "exitCode": 0,
+  "logSha256": "6d8c5c8f3d7684adb070417bd608d01ae90aa3dc26a65af03ffda4955f38d9a3",
+  "nodeVersion": "22.16.0"
+}

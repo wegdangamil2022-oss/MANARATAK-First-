@@ -1,0 +1,8 @@
+{
+  "R03LocalDatabase": "IDENTITY_AND_LIMITED_ROLE_CHECKS_PASSED",
+  "appDefaultDmlGrants": 0,
+  "R04": "NOT_REPEATED_UNCHANGED_SCHEMA_BLOCKER_FROM_17c02c32",
+  "dbTCreated": false,
+  "cloudAcceptance": false,
+  "productionAcceptance": false
+}

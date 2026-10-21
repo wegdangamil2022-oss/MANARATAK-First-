@@ -1,0 +1,41 @@
+{
+  "kind": "R14_PRIOR_CERTIFICATE_FIX_SOURCE_PRESERVATION",
+  "sourceSha": "aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b",
+  "previousProofSourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
+  "unchangedFiles": [
+    {
+      "file": "apps/api/src/presentation/api/router/AssetPlatformRouter.ts",
+      "sha256": "dc640abcfa26061d0ea01ae5683d6799dcb8fa54e9dcfcdf13bad780e03a550f"
+    },
+    {
+      "file": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts",
+      "sha256": "b1bc2c3a0cfb9c49f2b4d44e11f8eab8b989a64d2b10c15f7c74f72d69d66d66"
+    },
+    {
+      "file": "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts",
+      "sha256": "8e6ef21fe92205ecfefe4723dfbd01b34db3c4d900caf515ffd5f16fc698b21f"
+    },
+    {
+      "file": "packages/application/src/asset-platform/use-cases/ProcessAssetLifecycleUseCase.ts",
+      "sha256": "e64d4c2df6f1ec038f22d291ea2d2fcdc39241f7f8acf167639a2b4860757b6a"
+    },
+    {
+      "file": "packages/application/src/certificates/services/CertificateArtifactDelivery.ts",
+      "sha256": "7ec1c0e2b570232354d5345d187560e54f1b0ed955790003eb251f10c5853eca"
+    },
+    {
+      "file": "apps/web/src/api/client.ts",
+      "sha256": "5fee7cd6311c6d178911c6aa5db2330d9cc0cf05215f153dd21b7cc4e5b77cd2"
+    },
+    {
+      "file": "apps/web/src/features/certificates/StudentCertificateActions.tsx",
+      "sha256": "29970bb0258b2e018d8837fb67550466662470f05d4480f68339362ac564620d"
+    },
+    {
+      "file": "apps/admin/src/pages/CertificateDetailPage.tsx",
+      "sha256": "f758e78a580c6cfb3ba65d52ef070fb25199cd3752bd115cfa9b040996274883"
+    }
+  ],
+  "newRuntimeProofClaimed": false,
+  "formalAcceptance": false
+}

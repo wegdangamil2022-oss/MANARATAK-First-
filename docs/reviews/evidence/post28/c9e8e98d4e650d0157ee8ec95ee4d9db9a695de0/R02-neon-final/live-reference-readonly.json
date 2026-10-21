@@ -1,0 +1,115 @@
+{
+  "kind": "POST28_NEON_REFERENCE_READ_ONLY_OBSERVATION",
+  "observedAt": "2026-10-16 12:39:48 UTC",
+  "sourceSha": "c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0",
+  "transport": "AUTHORIZED_NEON_MCP_NOT_CODEX_PRISMA",
+  "project": {
+    "id": "lively-feather-03681988",
+    "pgMajor": 16,
+    "region": "aws-eu-central-1"
+  },
+  "branch": {
+    "id": "br-patient-recipe-bahs1ix7",
+    "name": "post28-validation",
+    "projectId": "lively-feather-03681988",
+    "parentId": "br-divine-bar-ba692h5z",
+    "default": false,
+    "primary": false,
+    "state": "ready"
+  },
+  "endpoint": {
+    "id": "ep-restless-wind-badta11i",
+    "host": "ep-restless-wind-badta11i.c-8.eu-central-1.aws.neon.tech",
+    "branchId": "br-patient-recipe-bahs1ix7",
+    "projectId": "lively-feather-03681988"
+  },
+  "requestedDatabase": "manaratak_test",
+  "requestedRole": "manaratak_test_owner",
+  "sqlTransactionReadOnly": true,
+  "sqlResult": {
+    "database": "manaratak_test",
+    "role": "manaratak_test_owner",
+    "sessionRole": "manaratak_test_owner",
+    "databaseOid": "16394",
+    "postgresMajor": 16,
+    "timezone": "GMT",
+    "probeReadOnly": true,
+    "sessionReplicationRole": "origin",
+    "tls": false,
+    "tlsVersion": null,
+    "superuser": false,
+    "createRole": true,
+    "createDatabase": true,
+    "replication": true,
+    "bypassRls": true,
+    "privilegedMembership": true,
+    "globalWrite": true,
+    "globalRead": true,
+    "databaseOwner": true,
+    "databaseCreate": true,
+    "canConnect": true,
+    "schemaUsage": true,
+    "schemaCreate": true,
+    "otherSchemaCreate": false,
+    "ownsRelations": false,
+    "publicTables": 0,
+    "unvalidatedConstraints": 0,
+    "invalidIndexes": 0
+  },
+  "workspace": {
+    "sourceSha": "c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0",
+    "cleanSource": true,
+    "secretPresence": {
+      "DATABASE_URL": false,
+      "DIRECT_URL": false,
+      "GREENFIELD_DATABASE_URL": false,
+      "GREENFIELD_SHADOW_DATABASE_URL": false,
+      "NEON_API_KEY": false,
+      "POST28_TARGET_CONTRACT_FILE": false
+    },
+    "networkPolicy": {
+      "version": 1,
+      "vpn_configured": false,
+      "http_proxy": "http://proxy:8080",
+      "http_network_policy": {
+        "type": "unrestricted"
+      },
+      "tcp_connect_proxy": "http://proxy:8088",
+      "tcp_network_access": {
+        "domains": [],
+        "ip_ranges": []
+      }
+    },
+    "neonIdentitySqlSha256": "e3d37db6a3cd6f0164d29ef2bc7ba1708276464cf9c3e14455a1788cebe35b68"
+  },
+  "managedEnvironment": {
+    "observationsCurrent": true,
+    "networkPolicy": {
+      "mode": "unrestricted",
+      "state": "enforced"
+    },
+    "secretBindings": [],
+    "runtimeVariables": [],
+    "outboundIdentities": []
+  },
+  "result": {
+    "mcpReadOnlyConnection": "VERIFIED",
+    "directCodexPrismaConnection": "BLOCKED",
+    "directTlsVerified": false,
+    "limitedRuntimeRoleVerified": false,
+    "DB_G": "NOT_CREATED",
+    "DB_S": "NOT_CREATED",
+    "R02Core": "PARTIAL",
+    "R03": "BLOCKED",
+    "runtimeAcceptance": false,
+    "mutationsExecuted": false
+  },
+  "blockers": [
+    "No configured execution secrets or private target contract",
+    "No exact PostgreSQL Direct TCP grant",
+    "Only owner role exists; live SQL confirms elevated permissions",
+    "MCP SQL session TLS=false; no direct strict Prisma TLS proof",
+    "No authorized disposable G/S target pair created",
+    "Remote mutation adapter and independent authorization still required before R04"
+  ]
+}

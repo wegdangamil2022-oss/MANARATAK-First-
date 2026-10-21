@@ -1,0 +1,8 @@
+{
+  "sourceSha": "433e420ec230c4dee9bd6e974329f0f48119e613",
+  "runId": "1abeb0d1-7754-4d9e-a5f8-645fff53ab45",
+  "ledgerBeforeSha256": "0be77cbcd52cf3843a2fddacebc92a94e1c6016ca1e5bffa6a951c2738a29301",
+  "ledgerAfterSha256": "0be77cbcd52cf3843a2fddacebc92a94e1c6016ca1e5bffa6a951c2738a29301",
+  "allLedgerRowsByteIdentical": true,
+  "entries": 111
+}

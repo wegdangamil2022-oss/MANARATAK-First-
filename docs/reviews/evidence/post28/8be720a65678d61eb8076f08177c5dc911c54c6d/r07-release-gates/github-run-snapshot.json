@@ -1,0 +1,39 @@
+{
+  "observedAt": "2026-10-19T15:36:20.2049024+00:00",
+  "runId": 39278772529,
+  "sourceSha": "8be720a65678d61eb8076f08177c5dc911c54c6d",
+  "jobs": [
+    {
+      "id": 118149103531,
+      "name": "Translation quality gates",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-10-19T15:32:23Z",
+      "runner_name": null
+    },
+    {
+      "id": 118149103711,
+      "name": "Full source closure gates",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-10-19T15:32:23Z",
+      "runner_name": null
+    },
+    {
+      "id": 118149103755,
+      "name": "Isolated Google AI Studio Web preview",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-10-19T15:32:23Z",
+      "runner_name": null
+    },
+    {
+      "id": 118149103872,
+      "name": "Deployment configuration",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-10-19T15:32:23Z",
+      "runner_name": null
+    }
+  ]
+}

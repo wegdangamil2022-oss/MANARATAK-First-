@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {SafeImportedCourseLinkChecker} from './r06-runtime/packages/infrastructure/src/courses/SafeImportedCourseLinkChecker.ts';
+const cwd=new URL('./r06-runtime/',import.meta.url);
+const sha=execFileSync('git',['rev-parse','HEAD'],{cwd,encoding:'utf8'}).trim();
+if(execFileSync('git',['status','--porcelain'],{cwd,encoding:'utf8'}).trim())throw Error('CLEAN_SOURCE_REQUIRED');
+const url='https://cs50.harvard.edu/x/';
+const result=await new SafeImportedCourseLinkChecker().check({url,allowedDomains:['cs50.harvard.edu'],directCoursePathPatterns:['^/x/$']});
+const proof={sourceSha:sha,nodeVersion:process.version,readOnlyHead:true,url,result,acceptance:false,scope:'Actual production checker public HTTPS reachability; no provider ownership approval, import or publication inferred.'};
+fs.writeFileSync(new URL('./r06-public-source-frozen-probe.json',import.meta.url),JSON.stringify(proof,null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify(proof));
+if(result.state!=='VERIFIED_DIRECT'||result.responseCode!==200)process.exitCode=1;

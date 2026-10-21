@@ -1,0 +1,31 @@
+[
+  {
+    "name": "r06-owner-approval-db-t-setup",
+    "command": [
+      "node",
+      "scripts/database/initialize-post28-transactions.mjs"
+    ],
+    "sourceSha": "3625cfedd5eac19c31866616e65bc34a1a08783c",
+    "startedUtc": "2026-10-16T16:59:29.964785+00:00",
+    "finishedUtc": "2026-10-16T16:59:43.287252+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-0CHyaf/r06-owner-approval-db-t-setup-20261016T165943285287Z.log",
+    "sha256": "e6f7606b8a9d7b274e6d3ecd893f2a8b6401c826238b585c6584df037b38e0b2"
+  },
+  {
+    "name": "r06-owner-workflows-final",
+    "command": [
+      "env",
+      "DATABASE_MUTATION_PURPOSE=maintenance",
+      "node",
+      "scripts/database/run-post28-suite.mjs",
+      "owner-workflows"
+    ],
+    "sourceSha": "3625cfedd5eac19c31866616e65bc34a1a08783c",
+    "startedUtc": "2026-10-16T16:59:56.879799+00:00",
+    "finishedUtc": "2026-10-16T17:00:03.570240+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-0CHyaf/r06-owner-workflows-final-20261016T170003568262Z.log",
+    "sha256": "c2a40b0c3f303cb0c0b105387350fd64b8e4759eae15849ae21cab72757e39df"
+  }
+]

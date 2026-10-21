@@ -1,0 +1,21 @@
+{
+  "kind": "POST28_ISOLATED_API_BOOT_DIAGNOSTIC",
+  "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+  "node": "v22.16.0",
+  "startedAt": "2026-10-16T22:24:26.905Z",
+  "finishedAt": "2026-10-16T22:24:35.653Z",
+  "databaseTarget": "UNAVAILABLE_LOOPBACK_PORT",
+  "externalProviderConfigurationSupplied": false,
+  "productionContact": false,
+  "checkoutPresent": false,
+  "independentlyInstalledRuntime": true,
+  "exit": {
+    "code": 1,
+    "signal": null
+  },
+  "timedOut": false,
+  "bootVerified": false,
+  "readinessVerified": false,
+  "stageAccepted": false,
+  "logSha256": "dbcd73b7f20bf820cef42955cea746d5296cdb51e34db581d7dbafca626c7624"
+}

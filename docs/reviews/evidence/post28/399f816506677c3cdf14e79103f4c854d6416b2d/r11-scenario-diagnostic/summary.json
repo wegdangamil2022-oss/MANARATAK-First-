@@ -1,0 +1,95 @@
+{
+  "status": "FIVE_BOUNDED_LOCAL_SCENARIO_DIAGNOSTICS_COMPLETE_FULL_SLO_OPEN",
+  "sourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d",
+  "apiSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "lab": "native-pg16-UdSQDL",
+  "scenarios": [
+    {
+      "category": "student-writes",
+      "status": "COMPLETED_DIAGNOSTIC",
+      "samples": 30,
+      "p50Ms": 23.107700000000477,
+      "p95Ms": 55.34599999999773,
+      "p99Ms": 60.205699999998615,
+      "throughput": 0.49989557014907726,
+      "abortReason": null,
+      "maxCpuPercent": 1.229296066252588,
+      "maxResidentMemoryBytes": 351629312,
+      "maxConnections": 4
+    },
+    {
+      "category": "admin-scans",
+      "status": "COMPLETED_DIAGNOSTIC",
+      "samples": 30,
+      "p50Ms": 4.276599999997416,
+      "p95Ms": 13.486100000009174,
+      "p99Ms": 24.26169999999547,
+      "throughput": 0.4998761040413597,
+      "abortReason": null,
+      "maxCpuPercent": 0.339437782412235,
+      "maxResidentMemoryBytes": 274075648,
+      "maxConnections": 4
+    },
+    {
+      "category": "imports",
+      "status": "COMPLETED_DIAGNOSTIC",
+      "samples": 30,
+      "p50Ms": 6.680700000026263,
+      "p95Ms": 17.698499999998603,
+      "p99Ms": 21.128300000011222,
+      "throughput": 0.4999901185286242,
+      "abortReason": null,
+      "maxCpuPercent": 0.4868901353276353,
+      "maxResidentMemoryBytes": 276115456,
+      "maxConnections": 4
+    },
+    {
+      "category": "finance-stub",
+      "status": "COMPLETED_DIAGNOSTIC",
+      "samples": 30,
+      "p50Ms": 45.75560000000405,
+      "p95Ms": 71.19159999999101,
+      "p99Ms": 99.50229999999283,
+      "throughput": 0.5000011850028084,
+      "abortReason": null,
+      "maxCpuPercent": 1.0364842454394694,
+      "maxResidentMemoryBytes": 292872192,
+      "maxConnections": 4
+    },
+    {
+      "category": "worker-queues",
+      "status": "COMPLETED_DIAGNOSTIC",
+      "samples": 30,
+      "p50Ms": 13.209000000002561,
+      "p95Ms": 36.52650000000722,
+      "p99Ms": 36.858299999992596,
+      "throughput": 0.499919443814023,
+      "abortReason": null,
+      "maxCpuPercent": 0.6481251037000165,
+      "maxResidentMemoryBytes": 298082304,
+      "maxConnections": 4
+    }
+  ],
+  "invariants": {
+    "historicalRowsPreserved": true,
+    "protectedBeforeSha256": "71d837b10dc6c13041b085e4251cd9ac63fc91ce372fcb12f3ee79d5e0d75958",
+    "consentUnchanged": true,
+    "bindingUnchanged": true,
+    "importsCreated": 30,
+    "initialUrlReceipts": 30,
+    "syntheticInvoices": 30,
+    "financialReplaysWithoutNewEffects": true,
+    "queueProcessed": 30,
+    "queueRemaining": 0,
+    "queueLeaseLosses": 0,
+    "queueSinkDuplicateSafe": true,
+    "externalProvidersUsed": false
+  },
+  "cleanup": {
+    "stopped": true,
+    "apiStopped": true,
+    "existingDatabasesTouched": false
+  },
+  "formalAcceptance": false,
+  "productionAcceptance": false
+}

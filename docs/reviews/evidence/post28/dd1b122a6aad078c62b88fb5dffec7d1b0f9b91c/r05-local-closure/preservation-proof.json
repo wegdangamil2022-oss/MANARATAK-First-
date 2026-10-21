@@ -1,0 +1,19 @@
+{
+  "sourceSha": "dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c",
+  "runId": "6788aa7c-ecd9-4735-b262-05b4d7995891",
+  "kind": "POST28_UPGRADE_PRESERVATION_COMPARISON",
+  "models": 281,
+  "invariants": 8,
+  "financialGroups": 2,
+  "runtimeAcceptance": false,
+  "note": "Comparison only; measured producer provenance, ledger, catalog, backup and compatibility execution remain mandatory.",
+  "all281ApplicationTablesByteIdentical": true,
+  "ledgerCount": 110,
+  "historical109ChecksumsPreserved": true,
+  "noFailedLedgerRows": true,
+  "nineAuditsZero": true,
+  "allConstraintsValidated": true,
+  "indexesValid": true,
+  "triggersOriginEnabled": true,
+  "exactFinancialTotalsPreserved": true
+}

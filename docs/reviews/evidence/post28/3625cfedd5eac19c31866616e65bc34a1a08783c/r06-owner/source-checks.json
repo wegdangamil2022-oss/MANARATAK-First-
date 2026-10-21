@@ -1,0 +1,108 @@
+[
+  {
+    "name": "affected-source",
+    "command": [
+      "node",
+      "--test",
+      "tests/database/post28-transaction-provisioning.test.mjs",
+      "tests/database/post28-lab-profile.test.mjs",
+      "tests/database/post28-isolation.test.mjs"
+    ],
+    "sourceSha": "3625cfedd5eac19c31866616e65bc34a1a08783c",
+    "dirty": false,
+    "startedUtc": "2026-10-16T16:58:44.896794+00:00",
+    "finishedUtc": "2026-10-16T16:58:48.118958+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/3625cfedd5eac19c31866616e65bc34a1a08783c/R06-owner-approval/affected-source-20261016T165848096726Z.log",
+    "sha256": "046aab81fcfd35e8f3358303d9375eded99dfbcbce0096221ad7ab2559568cab"
+  },
+  {
+    "name": "architecture",
+    "command": [
+      "node",
+      "scripts/architecture/verify-source-architecture-guards.mjs"
+    ],
+    "sourceSha": "3625cfedd5eac19c31866616e65bc34a1a08783c",
+    "dirty": false,
+    "startedUtc": "2026-10-16T16:58:48.162142+00:00",
+    "finishedUtc": "2026-10-16T16:58:48.574339+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/3625cfedd5eac19c31866616e65bc34a1a08783c/R06-owner-approval/architecture-20261016T165848553400Z.log",
+    "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659"
+  },
+  {
+    "name": "source-quality",
+    "command": [
+      "node",
+      "scripts/quality/verify-source-quality.mjs"
+    ],
+    "sourceSha": "3625cfedd5eac19c31866616e65bc34a1a08783c",
+    "dirty": false,
+    "startedUtc": "2026-10-16T16:58:48.615970+00:00",
+    "finishedUtc": "2026-10-16T16:58:50.834966+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/3625cfedd5eac19c31866616e65bc34a1a08783c/R06-owner-approval/source-quality-20261016T165850817870Z.log",
+    "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073"
+  },
+  {
+    "name": "eslint",
+    "command": [
+      "npx",
+      "eslint",
+      "tests/database/post28-owner-workflows.database.spec.mjs",
+      "tests/database/post28-transaction-provisioning.test.mjs",
+      "scripts/database/post28-transaction-provisioning.mjs",
+      "config/testing/post28-database-suites.mjs"
+    ],
+    "sourceSha": "3625cfedd5eac19c31866616e65bc34a1a08783c",
+    "dirty": false,
+    "startedUtc": "2026-10-16T16:59:30.655729+00:00",
+    "finishedUtc": "2026-10-16T16:59:32.440472+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/3625cfedd5eac19c31866616e65bc34a1a08783c/R06-owner-approval/eslint-20261016T165932420003Z.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "inventory",
+    "command": [
+      "node",
+      "scripts/aistudio/environment.mjs",
+      "--check"
+    ],
+    "sourceSha": "3625cfedd5eac19c31866616e65bc34a1a08783c",
+    "dirty": false,
+    "startedUtc": "2026-10-16T16:59:32.475701+00:00",
+    "finishedUtc": "2026-10-16T16:59:35.467699+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/3625cfedd5eac19c31866616e65bc34a1a08783c/R06-owner-approval/inventory-20261016T165935449380Z.log",
+    "sha256": "bb266cc1bd5a240e887f0ba6a4ef1ea84b0bfdfa95de4cb33e522db7bb074d7a"
+  },
+  {
+    "name": "secrets",
+    "command": [
+      "node",
+      "scripts/security/scan-secrets.mjs"
+    ],
+    "sourceSha": "3625cfedd5eac19c31866616e65bc34a1a08783c",
+    "dirty": false,
+    "startedUtc": "2026-10-16T16:59:35.503772+00:00",
+    "finishedUtc": "2026-10-16T16:59:36.913843+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/3625cfedd5eac19c31866616e65bc34a1a08783c/R06-owner-approval/secrets-20261016T165936896009Z.log",
+    "sha256": "3de807246fbf1b4154aef489bce0b436cd05f7c9e9369d94fb8bcc067c2f828b"
+  },
+  {
+    "name": "repository-organization",
+    "command": [
+      "node",
+      "scripts/verify/verify-final-repository-organization.mjs"
+    ],
+    "sourceSha": "3625cfedd5eac19c31866616e65bc34a1a08783c",
+    "dirty": false,
+    "startedUtc": "2026-10-16T16:59:36.945739+00:00",
+    "finishedUtc": "2026-10-16T16:59:39.839888+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/3625cfedd5eac19c31866616e65bc34a1a08783c/R06-owner-approval/repository-organization-20261016T165939820724Z.log",
+    "sha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129"
+  }
+]

@@ -168,3 +168,35 @@ describe('PrismaStudentApplicationTrackerRepository atomic notification outbox',
     }));
   });
 });
+
+
+describe('student document review consent boundaries',()=>{
+  function fixture(overrides:Record<string,unknown>={}){
+    const row={id:'binding',trackerId:'tracker',attestation:null,
+      reviewConsentGrantedAt:new Date(Date.now()-1000),reviewConsentUntil:new Date(Date.now()+60000),
+      retentionUntil:new Date(Date.now()+120000),expiresAt:null,
+      tracker:{status:'ACTIVE',version:1,studentReferenceId:'student',workspace:{status:'ACTIVE'}},...overrides};
+    const tx={studentApplicationDocumentBinding:{findUnique:vi.fn().mockResolvedValue(row)},
+      $queryRaw:vi.fn().mockResolvedValue([{id:'tracker'}]),auditRecord:{create:vi.fn()}};
+    return {tx,repo:new PrismaStudentApplicationTrackerRepository(mockTransaction(tx) as unknown as ConstructorParameters<typeof PrismaStudentApplicationTrackerRepository>[0])};
+  }
+  it.each(['','   '])('rejects a blank reviewer before writing an access audit (%j)',async(actor)=>{
+    const {tx,repo}=fixture();
+    await expect(repo.recordDocumentReviewAccess('binding',1,actor)).rejects.toThrow('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
+    expect(tx.auditRecord.create).not.toHaveBeenCalled();
+  });
+  it('rejects consent whose start is in the future before writing an audit',async()=>{
+    const {tx,repo}=fixture({reviewConsentGrantedAt:new Date(Date.now()+30000)});
+    await expect(repo.recordDocumentReviewAccess('binding',1,'reviewer')).rejects.toThrow('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
+    expect(tx.auditRecord.create).not.toHaveBeenCalled();
+  });
+  it('limits the pending queue to consent already started and documents not expired',async()=>{
+    const findMany=vi.fn().mockResolvedValue([]);
+    const repo=new PrismaStudentApplicationTrackerRepository({studentApplicationDocumentBinding:{findMany}} as unknown as ConstructorParameters<typeof PrismaStudentApplicationTrackerRepository>[0]);
+    await repo.listPendingDocumentReviews();
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({where:expect.objectContaining({
+      reviewConsentGrantedAt:{lte:expect.any(Date)},
+      OR:[{expiresAt:null},{expiresAt:{gt:expect.any(Date)}}],
+    })}));
+  });
+});

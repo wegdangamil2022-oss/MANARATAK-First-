@@ -1,0 +1,50 @@
+{
+  "sourceSha": "70230e082e03f73761eee6437858c074839fb8d2",
+  "observedAt": "2026-10-20T19:56:51.245Z",
+  "combinedStatus": "pending",
+  "statuses": [],
+  "checks": [
+    {
+      "id": 118849711430,
+      "name": "Linux x64 review image and native runtime",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39485486289/job/118849711430"
+    },
+    {
+      "id": 118849553091,
+      "name": "Retrieve and verify immutable artifacts from Actions storage",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39485486289/job/118849553091"
+    },
+    {
+      "id": 118844671182,
+      "name": "R08 isolated Redis and Linux worker shutdown",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39485486289/job/118844671182"
+    },
+    {
+      "id": 118844671174,
+      "name": "Deployment configuration",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39485486289/job/118844671174"
+    },
+    {
+      "id": 118844671078,
+      "name": "Full source closure gates",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39485486289/job/118844671078"
+    },
+    {
+      "id": 118844670655,
+      "name": "Translation quality gates",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39485486289/job/118844670655"
+    }
+  ]
+}

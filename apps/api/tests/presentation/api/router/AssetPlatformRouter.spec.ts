@@ -13,7 +13,7 @@ describe('AssetPlatformRouter', () => {
       metadata: { originalFilename: 'test.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 64 }, restoreOperation: operation, archiveOperation: { ...operation, phase: 'RECOVERY_REQUIRED' } };
     const app = express();
     app.use('/assets', AssetPlatformRouter.create({ ingestAssetUseCase: {} as any, processAssetLifecycleUseCase: {} as any,
-      assetRecordRepository: { findAdminDetails: vi.fn(async () => ({ asset, governance: {} })) } as any }));
+      assetRecordRepository: { findAdminDetails: vi.fn(async () => ({ asset, governance: {updatedAt:new Date('2026-10-09T00:00:00Z')} })) } as any }));
     const response = await request(app).get('/assets/pending');
     expect(response.status).toBe(200); expect(response.body.securityEvidence.restorePhase).toBe('RECOVERY_REQUIRED');
     expect(response.body.securityEvidence.archivePhase).toBe('RECOVERY_REQUIRED');
@@ -51,6 +51,14 @@ describe('AssetPlatformRouter', () => {
     }));
     return app;
   };
+
+  it('returns an audited migration response for blocked certificate capabilities', async () => {
+    const lifecycle=createMockProcessLifecycleUseCase(),save=vi.fn(async()=>{});
+    lifecycle.requestDeliveryGrant.mockRejectedValue(new Error('CERTIFICATE_AUTHENTICATED_DELIVERY_REQUIRED'));
+    const app=express();app.use(express.json());app.use('/assets',AssetPlatformRouter.create({ingestAssetUseCase:createMockIngestUseCase() as never,processAssetLifecycleUseCase:lifecycle as never,auditRecordRepo:{save} as never}));
+    const response=await request(app).post('/assets/private-certificate/delivery-grant').send({});
+    expect(response.status).toBe(410);expect(response.body).toEqual({error:'CERTIFICATE_AUTHENTICATED_DELIVERY_REQUIRED'});expect(save).toHaveBeenCalledTimes(1);
+  });
 
   it('POST /assets/upload-locator requests upload locator', async () => {
     const ingestUseCase = createMockIngestUseCase();

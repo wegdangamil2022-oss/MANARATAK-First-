@@ -1,0 +1,6 @@
+{
+  "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP replays an authorized invoice issue using one owner receipt and one audit event",
+  "fullDiscoveryCases": 12,
+  "selectedCases": 1,
+  "fullProfileAcceptance": false
+}

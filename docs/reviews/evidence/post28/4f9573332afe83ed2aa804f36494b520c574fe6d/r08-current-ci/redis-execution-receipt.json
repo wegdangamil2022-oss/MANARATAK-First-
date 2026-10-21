@@ -1,0 +1,32 @@
+{
+  "sourceSha": "4f9573332afe83ed2aa804f36494b520c574fe6d",
+  "runId": "92ae33ba-c241-4647-8d01-ee30df40e398",
+  "productionAcceptance": false,
+  "fullR08Acceptance": false,
+  "localEphemeralOnly": true,
+  "redisImageDigest": "redis@sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499",
+  "result": {
+    "sourceSha": "4f9573332afe83ed2aa804f36494b520c574fe6d",
+    "independentCounterProcesses": 2,
+    "requests": 24,
+    "allowed": 10,
+    "namespaceIsolation": true,
+    "revisionIsolation": true,
+    "staleRejected": true,
+    "restrictedAcl": true,
+    "redisOutageRejected": true,
+    "signedWebhook": {
+      "independentProcesses": 2,
+      "accepted": 1,
+      "replayed": 1,
+      "tamperedRejected": true,
+      "invalidDoesNotConsumeNonce": true,
+      "staleRejected": true,
+      "outageRejected": true,
+      "financialMutationClaimed": false
+    },
+    "fullApiSessionsVerified": false
+  },
+  "passed": true,
+  "ownedContainerRemoved": true
+}

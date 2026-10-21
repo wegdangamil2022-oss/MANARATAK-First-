@@ -1,0 +1,71 @@
+{
+  "kind": "POST28_R14_ADMIN_CMS_ARTIFACT_RUNTIME",
+  "sourceSha": "81666a9535f2516529372fd70077e1ea46564df8",
+  "imageId": "sha256:8a4ff4eb7d64efe7d7917b6cf3eecbfecf86757f79966af17b3d83ea7d35c6bf",
+  "node": "v22.16.0",
+  "environment": "DISPOSABLE",
+  "providerMode": "NO_EXTERNAL_EGRESS",
+  "observations": [
+    {
+      "step": "REVISION_READINESS",
+      "route": "/health/build",
+      "status": 200,
+      "sourceSha": "81666a9535f2516529372fd70077e1ea46564df8"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/admin/health/build",
+      "status": 200,
+      "sourceSha": "81666a9535f2516529372fd70077e1ea46564df8"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/api/v1/monitoring/health/readiness",
+      "status": 200,
+      "sourceSha": "81666a9535f2516529372fd70077e1ea46564df8"
+    }
+  ],
+  "network": [],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "productionAcceptance": false,
+  "formalR07Acceptance": false,
+  "promotionAuthorized": false,
+  "databaseIdentity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7699156266266021933",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "applicationRole": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolreplication": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledger": false
+  },
+  "browserVersion": "151.0.7922.34",
+  "cleanup": {
+    "ownedContainerStopped": true,
+    "ownedContainerRemoved": true,
+    "postgresStopped": true,
+    "postgresRemoved": true,
+    "networkRemoved": true,
+    "existingDatabasesTouched": false,
+    "apiExitCode": 0,
+    "drainMilliseconds": 120
+  },
+  "failure": "page.waitForResponse: Timeout 90000ms exceeded while waiting for event \"response\"",
+  "passed": false,
+  "completedAt": "2026-10-21T16:27:23.572Z"
+}

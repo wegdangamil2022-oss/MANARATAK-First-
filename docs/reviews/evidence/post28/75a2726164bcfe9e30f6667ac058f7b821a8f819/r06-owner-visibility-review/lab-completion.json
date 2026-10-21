@@ -1,0 +1,34 @@
+[
+  {
+    "sourceSha": "d7376ee239b11caaf6ce6f39ed24b7ed425eef15",
+    "runId": "f38f84bf-75fe-4105-b04e-d14c671db08b",
+    "database": "manaratak_post28_tx_f38f84bf75fe4105b04ed14c671db08b_test",
+    "forwarderStopped": true,
+    "databaseAndParentContainerPreserved": true,
+    "physicalServerShared": true
+  },
+  {
+    "sourceSha": "c2b3af690ee32dc02ea0e021153d0a312e17321a",
+    "runId": "f212d750-29ce-4c51-817e-71115184eecc",
+    "database": "manaratak_post28_tx_f212d75029ce4c51817e71115184eecc_test",
+    "forwarderStopped": true,
+    "databaseAndParentContainerPreserved": true,
+    "physicalServerShared": true
+  },
+  {
+    "sourceSha": "f250cb498327b3811e5b77d54ca3dc548e3a8cfc",
+    "runId": "016cbed2-90a4-4956-93f3-1aacafe782bb",
+    "database": "manaratak_post28_tx_016cbed290a4495693f31aacafe782bb_test",
+    "forwarderStopped": true,
+    "databaseAndParentContainerPreserved": true,
+    "physicalServerShared": true
+  },
+  {
+    "sourceSha": "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+    "runId": "12c52173-5c2f-462b-b8f4-c47f34a709a6",
+    "database": "manaratak_post28_tx_12c521735c2f462bb8f4c47f34a709a6_test",
+    "forwarderStopped": true,
+    "databaseAndParentContainerPreserved": true,
+    "physicalServerShared": true
+  }
+]

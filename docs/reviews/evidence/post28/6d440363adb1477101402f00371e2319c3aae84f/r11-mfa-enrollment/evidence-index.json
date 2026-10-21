@@ -1,0 +1,78 @@
+{
+  "sourceSha": "6d440363adb1477101402f00371e2319c3aae84f",
+  "apiSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+  "files": [
+    {
+      "path": "mfa-browser-result.json",
+      "bytes": 6250,
+      "sha256": "7fa676956a0dda9de002f2b3db64f438224400c5d4d05af252b0f35d891c7919"
+    },
+    {
+      "path": "mfa-protected-before.json",
+      "bytes": 2229,
+      "sha256": "c388ba3fdd879e229a9caf03cf4c6b84f718f9dbd710711b8488e2b80df74459"
+    },
+    {
+      "path": "mfa-enrollment-confirmed.png",
+      "bytes": 55012,
+      "sha256": "9a6478253bbf824a188a6d675057a6bd8e9f73145bbab597e129bca5c0436ee4"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 81,
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f"
+    },
+    {
+      "path": "dataset.json",
+      "bytes": 332570,
+      "sha256": "3cc0f8115e56358d79cd529336915ab71364e5d9bb01cdf9c06ab80fe6639d39"
+    },
+    {
+      "path": "run-r11-enrollment.mjs.txt",
+      "bytes": 13666,
+      "sha256": "d434c7ffe56c5f017fae6d3a36fe7db8f1e1616d8f6ac0cd030afda8cc71a18b"
+    },
+    {
+      "path": "r11-enrollment-worker.mjs.txt",
+      "bytes": 10349,
+      "sha256": "e5b1c2b080ba9b5aa06e49883916867801adaf3cf1fdc9705ec7cf4a3e3a892a"
+    },
+    {
+      "path": "artifact-source-reuse.json",
+      "bytes": 970,
+      "sha256": "642c10598bf33775cd6805ed708ce4fb36028d2f8f0f5150c432179a3edb5e7f"
+    },
+    {
+      "path": "linux-runtime-failure.json",
+      "bytes": 2936,
+      "sha256": "00616cad8444db60477147ac2f473f66983a4f93f21589f32313f8cb08f1a33d"
+    },
+    {
+      "path": "linux-contention-failure.json",
+      "bytes": 4127,
+      "sha256": "e4ce9bcc273755e4d49f97c827e74918c4e5382c8e62b94f82002f87e9441687"
+    }
+  ],
+  "mixedSourceLocalDiagnostic": true,
+  "cleanReleaseCandidate": false,
+  "preconfirmedCredentialInserted": false,
+  "secretAndCredentialFilesExcluded": true,
+  "productionAcceptance": false,
+  "linuxAttempt": {
+    "sourceSha": "6d440363adb1477101402f00371e2319c3aae84f",
+    "runId": 39470081274,
+    "artifactId": 12287753866,
+    "archiveSha256": "54ae000bd0f5dd0872fe3ef188e095d4df283c9d351b5bf87d45f1f59b4c4a7a",
+    "status": "ABORTED_FIRST_PAIR_ASSERTION",
+    "loginStatus": 200,
+    "writeStatuses": [
+      200,
+      409
+    ],
+    "logoutStatus": 200,
+    "activeSessionsAfterLogout": 0,
+    "rateLimitFailureResolved": true,
+    "diagnosticAccepted": false
+  }
+}

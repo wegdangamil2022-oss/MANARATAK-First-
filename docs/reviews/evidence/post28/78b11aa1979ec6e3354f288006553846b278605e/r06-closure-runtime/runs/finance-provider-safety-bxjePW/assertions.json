@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-finance-provider-safety.database.spec.mjs",
+    "title": "refuses another refund target approval without consuming either approval",
+    "ancestors": [
+      "Post28 provider absence refund and settlement safety on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 113.41182799999979,
+    "failureFirstLines": []
+  }
+]

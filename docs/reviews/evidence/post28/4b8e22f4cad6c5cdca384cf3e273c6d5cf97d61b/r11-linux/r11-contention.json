@@ -1,0 +1,332 @@
+{
+  "kind": "R11_LINUX_STUDENT_CONTENTION_DIAGNOSTIC",
+  "sourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "status": "COMPLETED_DIAGNOSTIC",
+  "platform": "linux",
+  "pairs": [
+    {
+      "index": 0,
+      "latencyMs": 75.48919400000159,
+      "successfulWrites": 1,
+      "expectedConflicts": 1,
+      "replayNoNewVersion": true,
+      "queryRoundTripMs": 0.726886000000377
+    },
+    {
+      "index": 1,
+      "latencyMs": 159.5060319999975,
+      "successfulWrites": 1,
+      "expectedConflicts": 1,
+      "replayNoNewVersion": true,
+      "queryRoundTripMs": 0.5415229999998701
+    },
+    {
+      "index": 2,
+      "latencyMs": 29.779531000000134,
+      "successfulWrites": 1,
+      "expectedConflicts": 1,
+      "replayNoNewVersion": true,
+      "queryRoundTripMs": 0.4516440000006696
+    },
+    {
+      "index": 3,
+      "latencyMs": 31.51520299999538,
+      "successfulWrites": 1,
+      "expectedConflicts": 1,
+      "replayNoNewVersion": true,
+      "queryRoundTripMs": 0.44792600000073435
+    },
+    {
+      "index": 4,
+      "latencyMs": 30.188003000002936,
+      "successfulWrites": 1,
+      "expectedConflicts": 1,
+      "replayNoNewVersion": true,
+      "queryRoundTripMs": 0.4800619999950868
+    },
+    {
+      "index": 5,
+      "latencyMs": 28.52324999999837,
+      "successfulWrites": 1,
+      "expectedConflicts": 1,
+      "replayNoNewVersion": true,
+      "queryRoundTripMs": 0.461076999999932
+    },
+    {
+      "index": 6,
+      "latencyMs": 26.206865000000107,
+      "successfulWrites": 1,
+      "expectedConflicts": 1,
+      "replayNoNewVersion": true,
+      "queryRoundTripMs": 0.4640900000013062
+    },
+    {
+      "index": 7,
+      "latencyMs": 134.9833030000009,
+      "successfulWrites": 1,
+      "expectedConflicts": 1,
+      "replayNoNewVersion": true,
+      "queryRoundTripMs": 0.44253000000026077
+    },
+    {
+      "index": 8,
+      "latencyMs": 108.95085000000836,
+      "successfulWrites": 1,
+      "expectedConflicts": 1,
+      "replayNoNewVersion": true,
+      "queryRoundTripMs": 0.4353689999989001
+    },
+    {
+      "index": 9,
+      "latencyMs": 81.24655599999824,
+      "successfulWrites": 1,
+      "expectedConflicts": 1,
+      "replayNoNewVersion": true,
+      "queryRoundTripMs": 0.5018080000008922
+    }
+  ],
+  "resources": [
+    {
+      "api": {
+        "cpuPercent": 0,
+        "residentMemoryBytes": 131386572.8
+      },
+      "postgres": {
+        "cpuPercent": 0.03,
+        "residentMemoryBytes": 143759769.6
+      },
+      "applicationConnections": 6
+    },
+    {
+      "api": {
+        "cpuPercent": 0.03,
+        "residentMemoryBytes": 166723584
+      },
+      "postgres": {
+        "cpuPercent": 0.02,
+        "residentMemoryBytes": 145961779.2
+      },
+      "applicationConnections": 6
+    },
+    {
+      "api": {
+        "cpuPercent": 0,
+        "residentMemoryBytes": 169240166.4
+      },
+      "postgres": {
+        "cpuPercent": 0,
+        "residentMemoryBytes": 146905497.6
+      },
+      "applicationConnections": 6
+    },
+    {
+      "api": {
+        "cpuPercent": 0,
+        "residentMemoryBytes": 221354393.6
+      },
+      "postgres": {
+        "cpuPercent": 0.01,
+        "residentMemoryBytes": 148792934.4
+      },
+      "applicationConnections": 6
+    },
+    {
+      "api": {
+        "cpuPercent": 0.03,
+        "residentMemoryBytes": 185073664
+      },
+      "postgres": {
+        "cpuPercent": 0.03,
+        "residentMemoryBytes": 149317222.4
+      },
+      "applicationConnections": 6
+    },
+    {
+      "api": {
+        "cpuPercent": 0,
+        "residentMemoryBytes": 186856243.2
+      },
+      "postgres": {
+        "cpuPercent": 0.02,
+        "residentMemoryBytes": 149422080
+      },
+      "applicationConnections": 6
+    },
+    {
+      "api": {
+        "cpuPercent": 0,
+        "residentMemoryBytes": 187485388.8
+      },
+      "postgres": {
+        "cpuPercent": 0.02,
+        "residentMemoryBytes": 150260940.8
+      },
+      "applicationConnections": 6
+    },
+    {
+      "api": {
+        "cpuPercent": 0.01,
+        "residentMemoryBytes": 188009676.8
+      },
+      "postgres": {
+        "cpuPercent": 0.03,
+        "residentMemoryBytes": 150156083.2
+      },
+      "applicationConnections": 6
+    },
+    {
+      "api": {
+        "cpuPercent": 0.02,
+        "residentMemoryBytes": 188324249.6
+      },
+      "postgres": {
+        "cpuPercent": 0.03,
+        "residentMemoryBytes": 150051225.6
+      },
+      "applicationConnections": 6
+    },
+    {
+      "api": {
+        "cpuPercent": 0.04,
+        "residentMemoryBytes": 215482368
+      },
+      "postgres": {
+        "cpuPercent": 0.03,
+        "residentMemoryBytes": 150260940.8
+      },
+      "applicationConnections": 6
+    },
+    {
+      "api": {
+        "cpuPercent": 0.05,
+        "residentMemoryBytes": 219047526.4
+      },
+      "postgres": {
+        "cpuPercent": 0.03,
+        "residentMemoryBytes": 150260940.8
+      },
+      "applicationConnections": 6
+    }
+  ],
+  "durationSeconds": 60,
+  "maximumPairs": 10,
+  "maximumConcurrentMutations": 2,
+  "expectedConflicts": 10,
+  "unexpectedErrors": 0,
+  "poolWaitMs": null,
+  "poolWaitReason": "No driver pool checkout timing hook; query round trip is recorded separately",
+  "representativeLaunchDataset": false,
+  "sloAcceptance": false,
+  "productionAcceptance": false,
+  "databaseBefore": [
+    {
+      "numbackends": 6,
+      "xact_commit": "974",
+      "xact_rollback": "2",
+      "blks_read": "910",
+      "blks_hit": "496812",
+      "tup_returned": "1788848",
+      "deadlocks": "0",
+      "conflicts": "0"
+    }
+  ],
+  "explain": [
+    {
+      "QUERY PLAN": [
+        {
+          "Plan": {
+            "Node Type": "Limit",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 0.14,
+            "Total Cost": 8.16,
+            "Plan Rows": 1,
+            "Plan Width": 36,
+            "Actual Startup Time": 0.02,
+            "Actual Total Time": 0.021,
+            "Actual Rows": 1,
+            "Actual Loops": 1,
+            "Shared Hit Blocks": 2,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "StudentWorkspace_studentReferenceId_key",
+                "Relation Name": "StudentWorkspace",
+                "Alias": "StudentWorkspace",
+                "Startup Cost": 0.14,
+                "Total Cost": 8.16,
+                "Plan Rows": 1,
+                "Plan Width": 36,
+                "Actual Startup Time": 0.02,
+                "Actual Total Time": 0.02,
+                "Actual Rows": 1,
+                "Actual Loops": 1,
+                "Index Cond": "(\"studentReferenceId\" = '6db0d0aa-5cd3-4ff6-b82e-40fc0022c528'::text)",
+                "Rows Removed by Index Recheck": 0,
+                "Shared Hit Blocks": 2,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              }
+            ]
+          },
+          "Planning": {
+            "Shared Hit Blocks": 124,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          "Planning Time": 0.215,
+          "Triggers": [],
+          "Execution Time": 0.031
+        }
+      ]
+    }
+  ],
+  "initialVersion": 1,
+  "elapsedSeconds": 60.00305169,
+  "databaseAfter": [
+    {
+      "numbackends": 6,
+      "xact_commit": "1334",
+      "xact_rollback": "23",
+      "blks_read": "932",
+      "blks_hit": "501675",
+      "tup_returned": "1790964",
+      "deadlocks": "0",
+      "conflicts": "0"
+    }
+  ],
+  "finalVersion": 11,
+  "p50Ms": 31.51520299999538,
+  "p95Ms": 159.5060319999975,
+  "p99Ms": 159.5060319999975,
+  "pairThroughput": 0.16665819018112676,
+  "logoutStatus": 200,
+  "activeSessionsAfterLogout": 0
+}

@@ -1,0 +1,26 @@
+{
+  "sourceSha": "383a5459e88703a5be3fca59c2f282588a77286a",
+  "suite": "owner-relations",
+  "counts": {
+    "discovered": 16,
+    "reportedTotal": 16,
+    "passed": 14,
+    "failed": 2,
+    "pendingTotal": 0,
+    "skippedAssertions": 0,
+    "todo": 0
+  },
+  "selectedResult": null,
+  "fullProfilePassed": false,
+  "originalRunnerGate": "FAILED_TESTS",
+  "savedReportVerifierPassed": false,
+  "distinctNewPassingCases": 0,
+  "diagnosticOnly": true,
+  "regressionNotAdditional": false,
+  "R04": "PASS_LOCAL_UNCHANGED",
+  "R05": "BLOCKED",
+  "R06": "PARTIAL",
+  "fullRequiredCasesAccepted": 0,
+  "externalProviderCalled": false,
+  "productionAcceptance": false
+}

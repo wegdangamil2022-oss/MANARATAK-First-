@@ -1,0 +1,10 @@
+{
+  "sourceSha": "7b265fc63f4e42f30560f64ce01a9f575ccf6a33",
+  "executionContext": "Working tree based on a7455c7; tested component/script/dependency changes committed unchanged in 7b265fc. Original browser report preserves actual HEAD at invocation.",
+  "fullApplication": false,
+  "immutableArtifact": false,
+  "dispositionApplied": false,
+  "dependency": "dompurify@3.4.17",
+  "officialReference": "https://github.com/cure53/DOMPurify#readme",
+  "formalR09Acceptance": false
+}

@@ -1,0 +1,41 @@
+{
+  "sourceSha": "f1af66699bf74faf8f57fdfbcc260d67ffa05a44",
+  "profile": "--r14-admin-cms-fixtures",
+  "newNativePostgres16Cluster": true,
+  "identity": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "rolreplication": false
+  },
+  "rights": {
+    "ddl": false,
+    "migration_write": false,
+    "credential_insert": true,
+    "credential_update": true,
+    "editorial_insert": true
+  },
+  "actorsSeeded": [
+    {
+      "kind": "author",
+      "id": "7e7bd3d5-12b7-41f8-a0eb-0a045e818e35"
+    },
+    {
+      "kind": "reviewer",
+      "id": "87cf9eb7-245b-4c5c-bd7a-0e6a0b0545e3"
+    },
+    {
+      "kind": "publisher",
+      "id": "472c5988-a731-49f3-80d9-78d152eb8c1e"
+    }
+  ],
+  "ordinaryRoleRealEncryptedMfaBeginConfirm": true,
+  "consumedTotpReplayRejected": true,
+  "passwordCredentialUnchanged": true,
+  "passwordHashSha256": "1024f728a62962e9c2a082a056cdf6f57d831bf2606bc1cfc78b73068e512ffc",
+  "browserExecuted": false,
+  "linuxExecuted": false,
+  "productionAcceptance": false
+}

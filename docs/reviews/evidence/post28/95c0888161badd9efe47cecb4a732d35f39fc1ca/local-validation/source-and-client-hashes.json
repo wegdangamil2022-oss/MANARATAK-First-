@@ -1,0 +1,10 @@
+{
+  "sourceSha": "95c0888161badd9efe47cecb4a732d35f39fc1ca",
+  "sha256": {
+    "packages/infrastructure/prisma/schema.prisma": "56966e566cbcd7ea60966d3954a4368630753f35a265e24b8ece354387450d45",
+    "package-lock.json": "75269332ee9c7c5b5b66b753a5ac5e94427668cd27b1db20b26291499306b4ee",
+    "node_modules/.prisma/client/schema.prisma": "5313811c52de26d85e9eed7b7540f62faa3c6225f565b675c7108a66299eed3c"
+  },
+  "schemaAndMigrationSourcesUnchangedSinceR04Trial": true,
+  "note": "Generated Prisma schema formatting differs from canonical source; separate hashes retained."
+}

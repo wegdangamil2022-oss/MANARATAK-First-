@@ -1,0 +1,52 @@
+{
+  "sourceSha": "d927710984de2fb7ffbf56e71cd742eaeb44536a",
+  "runId": 39628696516,
+  "observedAt": "2026-10-21T16:00:17.479Z",
+  "jobs": [
+    {
+      "id": 119320728225,
+      "name": "Full source closure gates",
+      "status": "completed",
+      "conclusion": "success",
+      "currentOrFailedSteps": []
+    },
+    {
+      "id": 119320728625,
+      "name": "Deployment configuration",
+      "status": "completed",
+      "conclusion": "success",
+      "currentOrFailedSteps": []
+    },
+    {
+      "id": 119320728649,
+      "name": "Translation quality gates",
+      "status": "completed",
+      "conclusion": "success",
+      "currentOrFailedSteps": []
+    },
+    {
+      "id": 119320728739,
+      "name": "R08 isolated Redis and Linux worker shutdown",
+      "status": "completed",
+      "conclusion": "success",
+      "currentOrFailedSteps": []
+    },
+    {
+      "id": 119326626813,
+      "name": "Retrieve and verify immutable artifacts from Actions storage",
+      "status": "completed",
+      "conclusion": "success",
+      "currentOrFailedSteps": []
+    },
+    {
+      "id": 119326814171,
+      "name": "Linux x64 review image and native runtime",
+      "status": "completed",
+      "conclusion": "failure",
+      "currentOrFailedSteps": [
+        "Exercise R14 three-actor CMS MFA lifecycle in Arabic and English at one artifact SHA"
+      ]
+    }
+  ],
+  "allSixJobsSucceeded": false
+}

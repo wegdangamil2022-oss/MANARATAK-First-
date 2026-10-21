@@ -15,7 +15,7 @@
       "durationSeconds": 2.25,
       "cause": "Static-render fixtures used root classic JSX config; automatic-JSX Admin cards therefore had no React identifier.",
       "correction": "Runner explicitly selects apps/admin/tsconfig.json through TSX_TSCONFIG_PATH.",
-      "evidence": "evidence/section-26/source-tests.txt"
+      "evidence": "docs/reviews/evidence/section-26-initial-20261014/source-tests.txt"
     },
     {
       "command": "node node_modules/typescript/bin/tsc -b apps/api apps/admin",
@@ -23,14 +23,14 @@
       "exitCode": 2,
       "cause": "Only reported diagnostic: redundant unused reviewParams hook in the CMS Status component inherited from section 24.",
       "correction": "Removed only the unused hook, pushed main correction 4af2c2cf and retained it in section 26.",
-      "evidence": "evidence/section-26/typecheck.txt",
+      "evidence": "docs/reviews/evidence/section-26-initial-20261014/typecheck.txt",
       "limits": "Compiler not repeated; later actor-alias, finance staleness and DI metadata refinements were not rechecked."
     },
     {
       "command": "git diff --cached --check",
       "status": "PASS",
       "exitCode": 0,
-      "evidence": "evidence/section-26/whitespace.txt"
+      "evidence": "docs/reviews/evidence/section-26-initial-20261014/whitespace.txt"
     }
   ],
   "testsRepeated": false,

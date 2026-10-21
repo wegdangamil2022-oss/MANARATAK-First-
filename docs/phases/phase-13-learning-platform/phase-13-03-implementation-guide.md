@@ -407,8 +407,8 @@ export const GlobalCourseImportSchema = z.object({
     courseContent: z.string().optional(),
     shortDescription: z.string().optional(),
   })).optional(),
-}).refine(data => data.isFreeCourse === true || data.isFreeCertificate === true, {
-  message: "External course must be completely free OR offer a free certificate to be eligible for the Global Courses Catalog.",
+}).refine(data => data.isFreeCourse === true, {
+  message: "DEC-03: study must be free; certificate cost is independent and must not be inferred.",
   path: ["isFreeCourse", "isFreeCertificate"]
 });
 ```

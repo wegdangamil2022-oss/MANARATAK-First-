@@ -44,6 +44,19 @@ export class StudentDocumentReviewRouter {
         });
       })().catch(next);
     });
+    router.get('/:id/content', (req, res, next) => {
+      void (async () => {
+        const {expectedVersion, expiresAt} = z.object({expectedVersion: z.coerce.number().int().positive(), expiresAt: z.coerce.number().int().positive().safe()}).strict().parse(req.query);
+        const content = await useCases.readContent(z.string().uuid().parse(req.params.id), req.authUserId!, expectedVersion, expiresAt);
+        // Permission can be withdrawn while storage IO is in flight.
+        const permission = await cradle.authEvaluatorService.evaluatePermission(req.authUserId!, 'admin:students:documents:review', {ip: req.ip, requestTime: new Date()});
+        if (!permission.isGranted) return void res.status(403).json({error: 'DOCUMENT_REVIEW_PERMISSION_DENIED'});
+        res.setHeader('Content-Type', content.mimeType);
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('Content-Disposition', 'inline; filename="document"');
+        res.send(Buffer.from(content.bytes));
+      })().catch(next);
+    });
     router.post('/:id/attest', (req, res, next) => {
       void (async () => {
         const body = z

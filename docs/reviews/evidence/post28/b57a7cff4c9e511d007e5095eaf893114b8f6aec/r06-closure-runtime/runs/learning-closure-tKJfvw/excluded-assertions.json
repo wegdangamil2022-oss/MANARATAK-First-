@@ -1,0 +1,13 @@
+[
+  "persists enrollment audit and authoritative outbox without issuing a certificate",
+  "rejects completion below full progress without partial completion audit or event",
+  "atomically commits completed enrollment completion audit and versioned credential signal only",
+  "does not duplicate a completion audit or signal on sequential retry",
+  "serializes completion from independent connections into exactly one completion and event",
+  "rolls completion enrollment and audit back on the actual PostgreSQL outbox failure boundary",
+  "refuses external linked course enrollment progress and completion without local writes",
+  "rejects a persisted external-course certificate claim despite eligible completion payload",
+  "acknowledges persisted noncredential completion as a no-op without any issuance",
+  "fails closed for native credential completion when no approved active template exists",
+  "rejects wrong event domain type version and delivery idempotency identity before issuing"
+]

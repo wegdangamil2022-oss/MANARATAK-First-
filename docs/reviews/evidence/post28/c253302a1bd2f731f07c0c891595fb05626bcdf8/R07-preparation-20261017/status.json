@@ -1,0 +1,374 @@
+{
+  "version": 1,
+  "kind": "POST28_R07_C1_PREPARATION",
+  "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+  "initialSourceSha": "bd112aaebb7c72e80bda390c4370aef990ef55e1",
+  "branch": "feat/post28-r07-artifact-preparation",
+  "observedR06Head": "da3f4ce100a128422b7b9c64c472a4afda14d441",
+  "state": "PREPARED_WITH_BLOCKERS",
+  "R07Accepted": false,
+  "releasePhase": "C1_DIAGNOSTIC_ONLY",
+  "C2Executed": false,
+  "promotionAuthorized": false,
+  "productionContact": false,
+  "build": {
+    "version": 1,
+    "kind": "POST28_R07_DIAGNOSTIC_BUILD",
+    "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+    "nodeVersion": "v22.16.0",
+    "lockSha256": "2b468457bb4c706293a6b9f8eaed1b0abde34cef38225a70364a10ff4ac0e151",
+    "schemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59",
+    "generatedClientSchemaSha256": "cd9fdff87ed21b2680f6dda774376a0dd5e2acb52e472519877c4fc88b0f5969",
+    "manifestSha256": "073994b5e4f014eae1fa94870a52b7277d7ccfa9d78979541532c85dd1457597",
+    "sbomSha256": "680d9edef6f1e670e3680bbf3a64100c2b6113ab34e09e82774a7b5550f3f3c9",
+    "units": [
+      {
+        "unit": "api",
+        "artifactSha256": "62e1199aef1f160a6764abca65195adceffa29bdce702fadb0d40a2776af101c",
+        "bytes": 30965760,
+        "freshUnpackInspected": true,
+        "processBooted": false
+      },
+      {
+        "unit": "web",
+        "artifactSha256": "bf63ee27dcf040fa2c6827a1835e863c495b83361eb13d08248670bb7f38a441",
+        "bytes": 8192000,
+        "freshUnpackInspected": true,
+        "processBooted": false
+      },
+      {
+        "unit": "admin",
+        "artifactSha256": "c8cc17b5f67bcf2c218d32bba8f0a8802bac526c235532e40641e74990738385",
+        "bytes": 6318080,
+        "freshUnpackInspected": true,
+        "processBooted": false
+      }
+    ],
+    "runtimeBootVerified": false,
+    "databaseConnected": false,
+    "stageAccepted": false,
+    "promotionAuthorized": false
+  },
+  "runtimeLayer": {
+    "kind": "POST28_DIAGNOSTIC_RUNTIME_LAYER",
+    "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+    "node": "v22.16.0",
+    "nodeMajor": 22,
+    "os": "win32",
+    "architecture": "x64",
+    "engineFile": "query_engine-windows.dll.node",
+    "engineSha256": "7d58cada77c5833e57d2ab4ad61ea2948247b2caa8575066b2fe3bc7e4ea4e5a",
+    "generatedSchemaSha256": "cd9fdff87ed21b2680f6dda774376a0dd5e2acb52e472519877c4fc88b0f5969",
+    "lockSha256": "2b468457bb4c706293a6b9f8eaed1b0abde34cef38225a70364a10ff4ac0e151",
+    "sourceSchemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59",
+    "formattedSourceSchemaSha256": "cd9fdff87ed21b2680f6dda774376a0dd5e2acb52e472519877c4fc88b0f5969",
+    "formattedSchemaMatches": true,
+    "installExitCode": 0,
+    "installLogSha256": "a95805a8a93c515e5bfdcfe4a4fd1986a89ac185fbc5f290c71cb893470be431",
+    "installCommand": [
+      "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node.exe",
+      "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node_modules\\npm\\bin\\npm-cli.js",
+      "ci",
+      "--omit=dev",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund"
+    ],
+    "verification": {
+      "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+      "nativeLoaded": true,
+      "modules": [
+        "@node-rs/xxhash",
+        "@prisma/client",
+        "cors",
+        "express",
+        "fontkit",
+        "helmet",
+        "pdfkit",
+        "svg-to-pdfkit",
+        "uuid"
+      ],
+      "stageAccepted": false
+    },
+    "runtimeArchiveSha256": "9e42c1d74c0cc340deb0d7bf4a9a21c449dcc370062eb06b584c8461022d7500",
+    "runtimeArchiveBytes": 429588480,
+    "freshUnpackVerified": {
+      "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+      "nativeLoaded": true,
+      "modules": [
+        "@node-rs/xxhash",
+        "@prisma/client",
+        "cors",
+        "express",
+        "fontkit",
+        "helmet",
+        "pdfkit",
+        "svg-to-pdfkit",
+        "uuid"
+      ],
+      "stageAccepted": false
+    },
+    "generatedClientCopiedFromCleanBuild": true,
+    "checkoutPresent": false,
+    "stageAccepted": false,
+    "promotionAuthorized": false
+  },
+  "staticHttp": {
+    "kind": "POST28_R07_STATIC_ARTIFACT_HTTPS_DIAGNOSTIC",
+    "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+    "measuredAt": "2026-10-16T22:22:31.204Z",
+    "node": "v22.16.0",
+    "os": "win32",
+    "architecture": "x64",
+    "certificateSha256": "15a7b71097c95c8dde2f2c8b5aa486ab618796535096400ce633115f7af468ad",
+    "observations": [
+      {
+        "url": "https://127.0.0.1:62002/health/build",
+        "status": 200,
+        "contentType": "application/json",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "4d453005e00b4f14fd877f45e12741a7d8356be182ec72d6f099f9e9b653f448"
+      },
+      {
+        "url": "https://127.0.0.1:62002/",
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "4a008fd4bcd177a0ac9780c6956bc8866045aac0cc0b4bd51ef695171e20a539"
+      },
+      {
+        "url": "https://127.0.0.1:62002/assets/index-1HUVRhSc.js",
+        "status": 200,
+        "contentType": "application/javascript",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "7e30a230ce65997283ef1e3ea3f1713934b3ea300d17ccec186ea277415f420e"
+      },
+      {
+        "url": "https://127.0.0.1:62002/fonts/cairo.css",
+        "status": 200,
+        "contentType": "text/css",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "6547dbd101c39865bf42fc24e0a57a1e74d9f47db6798c16ff42c4c41ed1fa01"
+      },
+      {
+        "url": "https://127.0.0.1:62002/assets/index-B5x8q1L7.css",
+        "status": 200,
+        "contentType": "text/css",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "f6625e902627a7538817b4421bfe66634dac76fa7e2b546dfaebd3d29b37f532"
+      },
+      {
+        "url": "https://127.0.0.1:62002/fonts/cairo-0.woff2",
+        "status": 200,
+        "contentType": "font/woff2",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "748022f50c427456ad66031e855349be3448ee1f05a5f1eb59574ebe0c686749"
+      },
+      {
+        "url": "https://127.0.0.1:62002/fonts/cairo-1.woff2",
+        "status": 200,
+        "contentType": "font/woff2",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "da6ada83c3a87c2f0211325dc0a123702e1d4a940958b3e943ac4f37b31d5371"
+      },
+      {
+        "url": "https://127.0.0.1:62002/fonts/cairo-2.woff2",
+        "status": 200,
+        "contentType": "font/woff2",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "82c13cbd1352d76e97c3d335caa912ae68fecdc3949a43cf8d149eb892384c1b"
+      },
+      {
+        "url": "https://127.0.0.1:62002/assets/definitely-missing.js",
+        "status": 404,
+        "contentType": "application/json",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+      },
+      {
+        "url": "https://127.0.0.1:62002/api/v1/monitoring/health/readiness",
+        "status": 503,
+        "contentType": "application/json",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "d93364fc24d7f4de9f925f1244b3e9f64e8a3e67dfcedbb0d5f1fd5d5bf6670e"
+      },
+      {
+        "url": "https://127.0.0.1:62005/admin/health/build",
+        "status": 200,
+        "contentType": "application/json",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "cf9ab0bb4c6b00d5a11a809efbdf6199f6d749f57a242f7f47170b1731d0da62"
+      },
+      {
+        "url": "https://127.0.0.1:62005/admin/",
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "92297ab5d1c831c68f851cb8af1522b0224aa07d011f2e4f3e30e6939512117a"
+      },
+      {
+        "url": "https://127.0.0.1:62005/admin/assets/index-DTKs2rvk.js",
+        "status": 200,
+        "contentType": "application/javascript",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "0dd9a06d993d90a7037f06f68ce97ec8f2297937b1ac0474841c2a7a6802e90b"
+      },
+      {
+        "url": "https://127.0.0.1:62005/admin/assets/index-Y2KYC6eE.css",
+        "status": 200,
+        "contentType": "text/css",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "8dfb3358c558d9f67bb32df708599c66c100ce66aba103d076e8c366ec615ecc"
+      },
+      {
+        "url": "https://127.0.0.1:62005/admin/fonts/cairo-0.woff2",
+        "status": 200,
+        "contentType": "font/woff2",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "748022f50c427456ad66031e855349be3448ee1f05a5f1eb59574ebe0c686749"
+      },
+      {
+        "url": "https://127.0.0.1:62005/admin/fonts/cairo-1.woff2",
+        "status": 200,
+        "contentType": "font/woff2",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "da6ada83c3a87c2f0211325dc0a123702e1d4a940958b3e943ac4f37b31d5371"
+      },
+      {
+        "url": "https://127.0.0.1:62005/admin/fonts/cairo-2.woff2",
+        "status": 200,
+        "contentType": "font/woff2",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "82c13cbd1352d76e97c3d335caa912ae68fecdc3949a43cf8d149eb892384c1b"
+      },
+      {
+        "url": "https://127.0.0.1:62005/admin/assets/definitely-missing.js",
+        "status": 404,
+        "contentType": "application/json",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+      },
+      {
+        "url": "https://127.0.0.1:62005/api/v1/monitoring/health/readiness",
+        "status": 503,
+        "contentType": "application/json",
+        "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+        "bodySha256": "d93364fc24d7f4de9f925f1244b3e9f64e8a3e67dfcedbb0d5f1fd5d5bf6670e"
+      }
+    ],
+    "processes": [
+      {
+        "unit": "web",
+        "pid": 5196,
+        "terminated": {
+          "code": null,
+          "signal": "SIGTERM"
+        },
+        "portClosed": true,
+        "logSha256": "4e3e8b3ea901a900a38968d3462ba7784d25298897892cc0643cea598e2d2974",
+        "checkoutPresent": false,
+        "inheritedNodeModules": false
+      },
+      {
+        "unit": "admin",
+        "pid": 13000,
+        "terminated": {
+          "code": null,
+          "signal": "SIGTERM"
+        },
+        "portClosed": true,
+        "logSha256": "120c3d23bd4212d9a81b399768773bf9b805eb959e2d837e1ffe1cefd64d8d0c",
+        "checkoutPresent": false,
+        "inheritedNodeModules": false
+      }
+    ],
+    "outcome": "STATIC_HTTP_VALIDATED",
+    "failure": null,
+    "apiReadinessVerified": false,
+    "stageAccepted": false,
+    "promotionAuthorized": false
+  },
+  "apiBoot": {
+    "kind": "POST28_ISOLATED_API_BOOT_DIAGNOSTIC",
+    "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+    "node": "v22.16.0",
+    "startedAt": "2026-10-16T22:24:26.905Z",
+    "finishedAt": "2026-10-16T22:24:35.653Z",
+    "databaseTarget": "UNAVAILABLE_LOOPBACK_PORT",
+    "externalProviderConfigurationSupplied": false,
+    "productionContact": false,
+    "checkoutPresent": false,
+    "independentlyInstalledRuntime": true,
+    "exit": {
+      "code": 1,
+      "signal": null
+    },
+    "timedOut": false,
+    "bootVerified": false,
+    "readinessVerified": false,
+    "stageAccepted": false,
+    "logSha256": "dbcd73b7f20bf820cef42955cea746d5296cdb51e34db581d7dbafca626c7624"
+  },
+  "checks": {
+    "newRegressionTests": {
+      "executed": 17,
+      "passed": 17,
+      "failed": 0,
+      "skipped": 0
+    },
+    "preflight": {
+      "executed": 36,
+      "passed": 36,
+      "failed": 0,
+      "skipped": 0
+    },
+    "architectureGuardTests": {
+      "executed": 12,
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0
+    },
+    "broaderReleaseTests": {
+      "sourceSha": "c2c5c7de70d81b5c8110eae6dd589dab0ec60e11",
+      "executed": 96,
+      "passed": 90,
+      "failed": 6,
+      "skipped": 0,
+      "failureClass": "WINDOWS_SYMLINK_PERMISSION_EPERM",
+      "rerunOnFinalCandidate": false
+    }
+  },
+  "blocked": [
+    "R05 historical upgrade acceptance",
+    "R06 incomplete and moving source branch",
+    "No provisioned approved PostgreSQL/Redis/storage lab in this desktop environment",
+    "API readiness, TLS/CORS/cookies and full three-unit wiring not verified",
+    "Six symlink fixtures require a capable OS/session; no skip/relaxation",
+    "External source CI for candidate not obtained",
+    "Linux runtime/image digest and protected artifact store not verified"
+  ],
+  "remoteCI": {
+    "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+    "observedAt": "2026-10-16T22:28:18.393Z",
+    "checks": [
+      {
+        "name": "Vercel Preview Comments",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/runs/117223722389"
+      }
+    ],
+    "statuses": [
+      {
+        "context": "Vercel",
+        "state": "success",
+        "description": "Deployment has completed",
+        "url": "https://vercel.com/manatratk/manaratak-2-preview-2026/7qFtpY1xKMnz71ZF2RbxjrwVP3qu",
+        "createdAt": "2026-10-16T22:23:33Z"
+      }
+    ],
+    "fullSourceCiVerified": false,
+    "artifactBootVerified": false,
+    "explicitDeploymentCommandIssued": false
+  }
+}

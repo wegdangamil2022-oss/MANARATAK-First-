@@ -32,7 +32,7 @@ test('MNT-AUD-0076 lifecycle denial revokes sessions and is enforced at authenti
 
 test('MNT-AUD-0065 compatibility control plane uses the same strict session and lifecycle boundary', () => {
   const app = read('apps/api/src/app.ts');
-  assert.match(app, /const protectControlPlane = [\s\S]*createAdminGuard\(\{ mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator \}\)/);
+  assert.match(app, /const protectControlPlane = [\s\S]*createAdminGuard\(\{\s*mfaUseCases:\s*container\.resolve\('mfaUseCases'\),\s*mode:\s*adminAuthMode,\s*tokenProvider:\s*adminTokenProvider,\s*sessionManager:\s*adminSessionManager,\s*principalAccessValidator\s*,?\s*\}\)/);
 
   const guard = read('apps/api/src/presentation/security/SecurityMiddlewareFactory.ts');
   assert.match(guard, /payload\.sessionId/);

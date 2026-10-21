@@ -1,0 +1,25 @@
+{
+  "sourceSha": "79edc70482e6cab8e012909caf6f912a15a6d942",
+  "runs": [
+    {
+      "directory": "r08-outbox-chain-sW25L9",
+      "success": true,
+      "passed": 1,
+      "failed": 0,
+      "unselectedOrHookSkipped": 5,
+      "selection": {
+        "caseExact": "R08 actual outbox processes to student inbox > late activation cannot undo the current role revocation projected by another worker",
+        "fullDiscoveryCases": 6,
+        "selectedCases": 1,
+        "fullProfileAcceptance": false
+      }
+    }
+  ],
+  "fullR08Acceptance": false,
+  "productionAcceptance": false,
+  "appRole": "post28_app",
+  "secretsRetained": false,
+  "cleanupVerified": true,
+  "setupAuthority": "Separate migrator for the new empty lab only; application tests used no elevated role",
+  "note": "Actual runtime assertions passed on this source; scoped selection excludes other cases explicitly."
+}

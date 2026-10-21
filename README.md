@@ -1,11 +1,11 @@
 # MANARATAK 2.0
 
 The official repository is **wegdangamil2022-oss/MANARATAK-First-**.
-It contains the complete monorepo and the latest Google AI Studio UI changes.
+It contains the complete API/Web/Admin monorepo.
 From the repository root, run `npm ci` then `npm run dev` (Public Web, port 3000).
-No backend secret is needed for this preview. Admin: `npm run dev:admin`.
-See [Google AI Studio setup and isolation](docs/operations/GOOGLE_AI_STUDIO.md)
-and the [environment inventory](docs/operations/GOOGLE_AI_STUDIO_ENVIRONMENT.md).
+Admin: `npm run dev:admin`. Configure backend capabilities explicitly for an isolated runtime.
+See [local development](docs/operations/LOCAL_DEVELOPMENT.md)
+and the [environment inventory](docs/operations/ENVIRONMENT_INVENTORY.md).
 The former MANARATAK_FINAL and Manaratal-Final repositories are historical references only; do not push changes to them.
 See [repository adoption and restoration](docs/operations/OFFICIAL_REPOSITORY.md).
 
@@ -13,11 +13,13 @@ MANARATAK is an npm-workspaces monorepo containing the public web application, A
 
 ## Current Status
 
+For the current POST28 work branch, R00–R09 implementation/evidence map, pending gates and resume order, read the [unified work index](docs/remediation/POST28_UNIFIED_WORK_INDEX_2026-10-19.md). Historical phase notes below do not supersede its source-specific local evidence.
+
 - Source remediation through WP10 is prepared.
-- Phase 10 source freeze is prepared; final freeze is pending Google Studio.
+- Phase 10 source freeze is prepared; final acceptance follows the current work index.
 - Phase 11 University contracts are prepared; University bulk import is blocked.
 - University Stage 1 source Dry Run covers 10,723 rows; imported records remain 0.
-- Clean PostgreSQL provisioning/migration, build, tests, and runtime validation remain pending runtime execution; no database mutation is implied by source readiness.
+- Isolated local PostgreSQL migration/seed and a packaged API/Web/Admin browser diagnostic have source-specific evidence in the unified index; cloud/production acceptance and the remaining formal gates are still open.
 - This repository is not declared Production Ready.
 
 Database operations are governed by `docs/operations/GREENFIELD_DATABASE_PROVISIONING.md`; remediation state is tracked separately from runtime/database evidence.

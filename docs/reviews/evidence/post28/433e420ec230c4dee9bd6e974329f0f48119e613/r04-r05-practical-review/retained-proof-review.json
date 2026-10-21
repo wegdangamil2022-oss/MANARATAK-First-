@@ -1,0 +1,124 @@
+{
+  "kind": "POST28_R04_R05_RETAINED_EVIDENCE_REVIEW",
+  "reviewedAt": "2026-10-20T21:46:24.345Z",
+  "currentSourceSha": "433e420ec230c4dee9bd6e974329f0f48119e613",
+  "r04OriginalSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+  "r04EvidenceGitBlobHashesMatched": 31,
+  "r05OriginalSha": "dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c",
+  "r05EvidenceIndex": {
+    "files": 35,
+    "sourceSha": "dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c",
+    "gitRef": "HEAD",
+    "readOnly": true
+  },
+  "strictArchivedPreservationRecomputed": {
+    "kind": "POST28_UPGRADE_PRESERVATION_COMPARISON",
+    "models": 281,
+    "invariants": 8,
+    "financialGroups": 2,
+    "runtimeAcceptance": false,
+    "note": "Comparison only; measured producer provenance, ledger, catalog, backup and compatibility execution remain mandatory."
+  },
+  "applicationTableContentHashesMatched": 281,
+  "nineArchivedAuditsZero": true,
+  "currentMigrationTransition": {
+    "schemaUnchanged": true,
+    "historicalPrefixMatched": 110,
+    "reviewedAppendOnlyMigration": {
+      "name": "20261019000100_admission_null_identity",
+      "checksum": "013eb65a4295987696e3202c06a32cf5874adb389a83467f39ca37cf67bb4efa"
+    },
+    "scope": "LOCAL_SYNTHETIC_ONLY",
+    "productionAuthorized": false
+  },
+  "seedDirectToolingUnchanged": true,
+  "seedSourceDigests": [
+    {
+      "step": "reference-currencies",
+      "path": "workspace/reference-data/currencies/MANARATAK_ISO4217_Currencies_CLEAN_IMPORT_READY.csv",
+      "sha256": "469c05ffce2fec934ea59ab1ab468ef232e945897193371258e8b0efdd01937f"
+    },
+    {
+      "step": "reference-languages",
+      "path": "workspace/reference-data/languages/MANARATAK_Languages_CLEAN_IMPORT_READY.csv",
+      "sha256": "f2967c5d32360049841a3d22b540416351fec42a3df5b2128d60f57d8979184c"
+    },
+    {
+      "step": "reference-countries",
+      "path": "workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx",
+      "sha256": "f596c0b4a9bc9227f2b008f81a7f61104d95211cb75c2f73cf5edb9565ad6f75"
+    },
+    {
+      "step": "degree-levels",
+      "path": "packages/application/src/degree-level/DegreeLevelSeedService.ts",
+      "sha256": "1a5e1fade135f73d08d89a16931a7e3c554ee00d1fb49ef85040f65807df62b5"
+    },
+    {
+      "step": "academic-taxonomy-isced-f",
+      "path": "packages/domain/src/academic-taxonomy/isced-f-baseline.ts",
+      "sha256": "db396914f498c7dca5eadd93dc693ba26b799d6d0642271f2612c556463a1893"
+    },
+    {
+      "step": "external-course-providers",
+      "path": "packages/infrastructure/src/courses/ExternalCourseProviderSeed.ts",
+      "sha256": "279ab69f7cb5a589d946c7cdbd3d1de389bd21405b364a1ae74255526e7d73f3"
+    },
+    {
+      "step": "student-tools-registry",
+      "path": "packages/application/src/student-tools/OfficialStudentToolRegistry.ts",
+      "sha256": "d5af8c7452d5ac9cd67495ba1fe92093634fd52abbeac1bb082d6187c7c11cf9"
+    }
+  ],
+  "unchangedR05CoreFiles": [
+    {
+      "file": "scripts/database/post28-r05-staging.mjs",
+      "sha256": "aae77c3ad0a76bd2b104a782016f33e168fea7fa6b0ff5e02e309b8edb8641c9"
+    },
+    {
+      "file": "scripts/database/remediate-post28-known-source.mjs",
+      "sha256": "a759d973953a9fb2ecabe88bc728399b53b31256d299f326107adaea538e7010"
+    },
+    {
+      "file": "scripts/database/post28-r05-known-source.mjs",
+      "sha256": "0ec95c1e6a204536d35b39ca0bb29e5a41acc9d0855372b5bdba0a510b88eb0a"
+    },
+    {
+      "file": "scripts/database/post28-r05-trust-policy.mjs",
+      "sha256": "74697a3794e95250b3ded59f528396d6a85ca0d6a482467641d16bb7ba32a1b5"
+    },
+    {
+      "file": "scripts/database/post28-upgrade-preservation.mjs",
+      "sha256": "8609293eb374ce3fcf723dd39691e5375eb0bbddccc8c2c9b7dcccddb6ff0941"
+    },
+    {
+      "file": "scripts/database/post28-backup-contract.mjs",
+      "sha256": "42afcc73cfa6ea7f6c877a7bdd8a13ca46cde6d20f6d71e87fd5217b4ed1a8e9"
+    },
+    {
+      "file": "scripts/database/post28-upgrade-measurement.mjs",
+      "sha256": "7f96396d78be74a3796d3188bacb05ee0341f28aaeb6f022db3e2c306edb715a"
+    },
+    {
+      "file": "scripts/database/post28-upgrade-catalog.mjs",
+      "sha256": "3dbbc6ac08a7123fd99b9f031b5b7f9d27876a4cf00a34e87332afc1f8d69e96"
+    },
+    {
+      "file": "packages/infrastructure/src/asset-platform/PrismaAssetRecordRepository.ts",
+      "sha256": "25a81816bfffb5d452fe5620173f1a20e451164ba3f3019fac86e9f23289fb3f"
+    },
+    {
+      "file": "packages/infrastructure/src/asset-platform/LocalAssetStorageGateway.ts",
+      "sha256": "e3cb12d0884c45421ce7bec986867cfc8e0542ec04bae84be00198cd3c39220a"
+    }
+  ],
+  "assetScopeDelta": [
+    "packages/application/src/asset-platform/utils/AssetValidator.ts"
+  ],
+  "assetValidatorDeltaAssessment": "Previously shipped R07 SVG-only certificate parser hardening; ordinary upload/PDF validation unchanged. This is a scoped source review, not a new independent approval or live PDF/provider execution.",
+  "newIndependentApprovalClaimed": false,
+  "archivedRuntimeEvidenceRebound": false,
+  "originalR05MissingFileClaimedRecovered": false,
+  "realPdfScanRepeated": false,
+  "upgradeRehearsalRepeated": false,
+  "productionAcceptance": false
+}

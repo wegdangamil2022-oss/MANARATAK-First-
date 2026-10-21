@@ -1,0 +1,13 @@
+{
+  "name": "typecheck",
+  "command": "npm run typecheck",
+  "sourceSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "endSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T02:48:07.038229+00:00",
+  "endedAt": "2026-10-16T02:48:22.100670+00:00",
+  "exitCode": 0,
+  "logSha256": "4ec075231d9f52f5dd547ac8e7270c71a0b769e01d64ea0048dbf6cbb20c028b",
+  "nodeVersion": "22.16.0"
+}

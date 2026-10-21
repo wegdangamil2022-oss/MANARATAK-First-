@@ -148,3 +148,5 @@ it('does not permanently disable refresh after a CSRF/permission 403',async()=>{
  security.fetchWithCsrf.mockResolvedValueOnce(Response.json({error:{code:'CSRF_TOKEN_INVALID'}},{status:403})).mockResolvedValueOnce(refreshed());
  expect(await performAdminRefresh()).toBe(false);expect(await performAdminRefresh()).toBe(true);
 });
+
+describe('authenticated document binary reads',()=>{it('uses the existing session with no redirect or cache and returns binary data',async()=>{const {adminApiClient}=await import('./client');adminApiClient.setAdminAuthStatus('AUTHORIZED');security.fetchWithCsrf.mockResolvedValue(new Response(new Uint8Array([1,2,3]),{headers:{'Content-Type':'application/pdf'}}));const result=await adminApiClient.requestBlob('/admin/student-document-reviews/binding/content?expectedVersion=1');expect(Array.from(new Uint8Array(await result.arrayBuffer()))).toEqual([1,2,3]);const options=security.fetchWithCsrf.mock.calls[0][1];expect(options.credentials).toBe('include');expect(options.redirect).toBe('error');expect(options.cache).toBe('no-store');expect(options.responseType).toBeUndefined();});});

@@ -1,0 +1,17 @@
+{
+  "observedRepositoryHead": "601cb572d7ca4663c4d18f7fbf95342c2845bbd3",
+  "operatorSha256": "e633aaa1cb5cedf8c07448550e7900c35b7c3990e56c0f1bd14b21577089ac4c",
+  "files": [
+    {
+      "path": "previous-source-review.json",
+      "sha256": "a7eae7f1ae5849f633a573ac8ef8322fc23482fdb1573a66cd5528a21d9e8008"
+    },
+    {
+      "path": "artifact-transfer-block.json",
+      "sha256": "c425b02b513031023eab9c05bd32a7e025e19133f1611761dcb3256a3bcb3dca"
+    }
+  ],
+  "rehearsalExecuted": false,
+  "formalR12Acceptance": false,
+  "productionAcceptance": false
+}

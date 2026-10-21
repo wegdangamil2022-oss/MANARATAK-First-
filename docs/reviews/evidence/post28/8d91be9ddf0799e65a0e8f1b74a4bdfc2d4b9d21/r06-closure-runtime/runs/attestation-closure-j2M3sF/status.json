@@ -1,0 +1,18 @@
+{
+  "discovered": 14,
+  "executed": 1,
+  "passed": 1,
+  "failed": 0,
+  "selectedSkipped": 0,
+  "rawExcludedAssertions": 13,
+  "fullProfilePassed": false,
+  "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+  "suite": "attestation-closure",
+  "runId": "1124d2d7-1b3f-4273-95d1-832481d363d2",
+  "caseExact": "Post28 real document attestation owner asset and HTTP boundaries > commits verified attestation bound to canonical scholarship cycle version and real asset checksum",
+  "originalRunnerGate": "PASS",
+  "R04": "PASS_LOCAL_UNCHANGED",
+  "R05": "BLOCKED",
+  "R06": "PARTIAL",
+  "productionAcceptance": false
+}

@@ -1,0 +1,14 @@
+Prisma schema loaded from ..\native-pg16-b3OgjJ\predecessor110\schema.prisma
+Datasource "db": PostgreSQL database "manaratak_post28_upgrade_test", schema "public" at "127.0.0.1:51387"
+
+110 migrations found in prisma/migrations
+
+Applying migration `20261016150000_post28_schema_reconciliation`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20261016150000_post28_schema_reconciliation/
+    └─ migration.sql
+      
+All migrations have been successfully applied.

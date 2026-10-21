@@ -1,0 +1,30 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
+import {verifyEvidenceIndex} from './r07-filtered/scripts/lib/verify-evidence-index.mjs';
+const work=import.meta.dirname,repo=path.join(work,'r07-filtered');
+const sha=execFileSync('git',['rev-parse','HEAD'],{cwd:repo,encoding:'utf8'}).trim();
+const dest=path.join(repo,'docs/reviews/evidence/post28',sha,'r11-current-review');
+const read=file=>JSON.parse(fs.readFileSync(file,'utf8').replace(/^\uFEFF/,''));
+const hash=b=>createHash('sha256').update(b).digest('hex');
+const priorCi=read(path.join(work,'r11-review-ci-observed.json')),fixCi=read(path.join(work,'r11-fix-ci-observed.json'));
+assert.equal(priorCi.sourceSha,'d83ee3e9513af2fd61dc2e7681cb99e3c6dff466');assert.equal(priorCi.runId,39513312392);assert.equal(priorCi.result,'success');assert.equal(priorCi.jobs.length,6);assert(priorCi.jobs.every(j=>j.conclusion==='success'));
+assert.equal(fixCi.sourceSha,sha);assert.equal(fixCi.runs.length,1);assert.equal(fixCi.runs[0].head_sha,sha);
+const retained=[];
+for(const index of [
+ 'docs/reviews/evidence/post28/4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b/r11-linux/evidence-index.json',
+ 'docs/reviews/evidence/post28/6d440363adb1477101402f00371e2319c3aae84f/r11-mfa-enrollment/evidence-index.json',
+ 'docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r07-current-closure/evidence-index.json',
+])retained.push({index,...verifyEvidenceIndex(path.join(repo,index),{root:repo,gitRef:'HEAD'})});
+const contention=read(path.join(repo,'docs/reviews/evidence/post28/4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b/r11-linux/r11-contention.json'));
+assert.equal(contention.status,'COMPLETED_DIAGNOSTIC');assert.equal(contention.pairs.length,10);assert.equal(contention.expectedConflicts,10);assert.equal(contention.unexpectedErrors,0);assert.equal(contention.poolWaitMs,null);assert.equal(contention.sloAcceptance,false);
+const preparation=read(path.join(repo,'config/testing/r11-load-preparation.json'));
+assert.equal(preparation.approval.approvedBy,null);assert.equal(preparation.formalAcceptance,false);assert.equal(preparation.dataset.fixture,null);
+fs.mkdirSync(dest,{recursive:true});const write=(name,data)=>fs.writeFileSync(path.join(dest,name),JSON.stringify(data,null,2)+'\n');
+write('r10-fix-ci-completed.json',priorCi);write('r11-fix-ci-observed.json',fixCi);
+write('review-summary.json',{kind:'R11_CURRENT_DIAGNOSTIC_REVIEW',sourceSha:sha,reviewedAt:new Date().toISOString(),fixes:['Recheck deadline after awaiting resource observer before starting mutation','Measured latency takes precedence over scenario-returned properties'],targetedTests:{newBeforeFix:{executed:2,passed:0,failed:2},afterFix:{executed:5,passed:5,failed:0,skipped:0},existingTestsRepeated:3,repeatReason:'Directly affected shared scenario runner',targetedEslintPassed:true},retainedEvidence:retained,historicalContention:{sourceSha:contention.sourceSha,pairs:10,expectedConflicts:10,unexpectedErrors:0,poolWaitMs:null,sloAcceptance:false},historicalMeasurementsRebound:false,historicalMeasurementRerun:false,representativeLaunchDatasetPrepared:false,fullAdminCmsMfaJourneyCompleted:false,formalR11Acceptance:false,productionAcceptance:false,existingDatabasesTouched:false,remainingExceptions:['E1','E2','E3','E4','E5']});
+fs.copyFileSync(path.join(work,'collect-r11-current-review.mjs'),path.join(dest,'operator.mjs.txt'));
+write('evidence-index.json',{kind:'R11_CURRENT_REVIEW_EVIDENCE',sourceSha:sha,files:fs.readdirSync(dest).filter(n=>n!=='evidence-index.json').sort().map(name=>{const b=fs.readFileSync(path.join(dest,name));return {path:name,bytes:b.length,sha256:hash(b)};})});
+console.log(JSON.stringify({sourceSha:sha,destination:dest,retainedFiles:retained.reduce((n,r)=>n+r.files,0),r10Ci:'success',r11FixCi:fixCi.runs[0].status}));

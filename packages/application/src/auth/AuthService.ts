@@ -61,8 +61,15 @@ export class AuthService implements IAuthService {
     const nextRefreshToken = await this.tokenProvider.generateRefreshToken();
     const nextSessionId = randomUUID();
     const currentSession = await this.sessionManager.findRefreshSession(refreshToken);
-    if (!currentSession || !await this.principalAccessValidator.isAuthenticationAllowed(currentSession.userId)) {
-      if (currentSession) await this.sessionManager.revokeAllSessions(currentSession.userId);
+    if (!currentSession) {
+      // Active-session lookup intentionally excludes consumed parents. The
+      // atomic store must still inspect them to revoke descendants on replay.
+      const unexpected = await this.sessionManager.consumeAndRotateRefreshSession(refreshToken, nextRefreshToken, nextSessionId);
+      if (unexpected) await this.sessionManager.revokeSession(unexpected.userId, nextRefreshToken);
+      throw new InvalidTokenException('Session revoked, expired, replayed, or invalid');
+    }
+    if (!await this.principalAccessValidator.isAuthenticationAllowed(currentSession.userId)) {
+      await this.sessionManager.revokeAllSessions(currentSession.userId);
       throw new InvalidTokenException('Session revoked, expired, replayed, or invalid');
     }
 

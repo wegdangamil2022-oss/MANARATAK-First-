@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "kind": "greenfield-migration-parity",
+  "pass": true,
+  "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+  "migrationChainSha256": "542a3b4a6f90a50dda5e10bdb062bb2b4eae16e211e79c110417cd3dea8c2ab7",
+  "ledgerSha256": "957c6797584ee7f766a888b8998832311bdf07a1c352d6edca666c367d2a89e3",
+  "expectedMigrations": 110,
+  "appliedMigrations": 110,
+  "invalidIndexes": 0,
+  "unvalidatedConstraints": 0,
+  "unexpectedUserSchemas": 0,
+  "idempotentRedeployVerified": true,
+  "requiredSeedStatus": "NOT_EXECUTED_BY_THIS_VERIFIER",
+  "adr": "ADR-028"
+}

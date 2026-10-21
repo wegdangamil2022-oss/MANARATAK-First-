@@ -1,0 +1,13 @@
+{
+  "name": "tooling-eslint",
+  "command": "node node_modules/eslint/bin/eslint.js scripts/database/post28-migration-inventory.mjs scripts/database/verify-post28-migration-ledger.mjs scripts/database/post28-upgrade-preservation.mjs scripts/database/compare-post28-upgrade.mjs scripts/database/prepare-post28-acceptance.mjs scripts/database/post28-neon-policy.mjs tests/database/post28-r04-r05-preparation.test.mjs",
+  "sourceSha": "3deef4557f181d6d7a3fd05e959990ac1bbfd36a",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T03:06:57.997486+00:00",
+  "finishedAt": "2026-10-16T03:06:58.761204+00:00",
+  "exitCode": 0,
+  "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "nodeVersion": "22.16.0",
+  "databaseConnected": false
+}

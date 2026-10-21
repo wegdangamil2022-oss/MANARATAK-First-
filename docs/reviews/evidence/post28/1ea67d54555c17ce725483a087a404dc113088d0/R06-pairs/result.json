@@ -1,0 +1,15 @@
+{
+  "sourceSha": "1ea67d54555c17ce725483a087a404dc113088d0",
+  "runId": "d560f43b-1ab1-42c0-af86-c3d1a5fe9ee4",
+  "passedDatabaseCases": 18,
+  "newDistinctCases": 4,
+  "repeatedCases": 14,
+  "unitPassed": 19,
+  "cumulativeDistinctAcrossShas": 310,
+  "all310AtCurrentHead": false,
+  "R06Accepted": false,
+  "typecheck": "PASS infrastructure/web/admin --force with local R06 workspace links",
+  "lint": "0 errors, 9 existing any warnings",
+  "secretScan": "PASS",
+  "sourceQuality": "PASS"
+}

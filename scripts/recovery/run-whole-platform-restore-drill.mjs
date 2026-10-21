@@ -2,9 +2,16 @@
 import childProcess from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import os from 'node:os';
+import { verificationRestoreList } from '../database/post28-backup-contract.mjs';
+import { verifyDatabaseSnapshot } from './DatabaseSnapshot.mjs';
+import { recoveryTlsRoot, recoveryPrismaUrl, recoveryLibpqEnvironment, RECOVERY_SENTINEL_SQL } from './RecoveryConnection.mjs';
+import { localRecoveryTarget } from './LocalRecoveryTarget.mjs';
 import { required, requireSha } from '../release/lib/ReleaseContracts.mjs';
 import {
   recoveryTarget,
+  databaseIdentity,
   recoveryInputs,
   databaseSentinel,
   restoreObjectives,
@@ -14,7 +21,10 @@ export async function executeRestore(
   { readSentinel, restoreDatabase, verifyDatabase, now = Date.now },
 ) {
   const startedAt = now();
-  const { target, proof } = recoveryTarget(
+  const { target, proof } = input.localCreationAssertion ? localRecoveryTarget(
+    databaseIdentity(input.databaseUrl),input.assertion,input.publicKey,input.sha,
+    input.localCreationAssertion,input.localCreationPublicKey,startedAt,
+  ) : recoveryTarget(
     input.databaseUrl,
     input.assertion,
     input.publicKey,
@@ -56,34 +66,37 @@ export async function executeRestore(
     snapshotId: assets.snapshotId,
     sha: input.sha,
     environment: 'DISPOSABLE',
+    rpoMeasurementBasis: 'BACKUP_CAPTURE_TIMESTAMP_PROXY_NOT_RECOVERED_EVENT_WATERMARK',
+    integratedServiceRtoMeasured: false,
+    formalR10Acceptance: false,
+    productionAcceptance: false,
+    scope: proof.scope === 'LOCAL_SYNTHETIC_LOOPBACK' ? proof.scope : 'AUTHORIZED_DISPOSABLE',
     startedAt: new Date(startedAt).toISOString(),
     completedAt: new Date(completedAt).toISOString(),
   };
 }
-if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   if (process.env.RECOVERY_DRILL_EXECUTION_AUTHORIZED !== 'true')
     throw new Error('RECOVERY_DRILL_NOT_AUTHORIZED');
   const input = {
+    requireDatabaseSnapshot: true,
+    requireTlsRoot: true,
+    tlsRootCertificateFile: required('PGSSLROOTCERT'),
     databaseUrl: required('DATABASE_URL'),
     databaseBackup: required('RECOVERY_DATABASE_BACKUP_FILE'),
     assetDirectory: required('RECOVERY_ASSET_RESTORE_DIR'),
     assetManifest: required('RECOVERY_ASSET_MANIFEST'),
     assertion: JSON.parse(required('RECOVERY_DISPOSABLE_ASSERTION_JSON')),
     publicKey: required('RECOVERY_AUTHORITY_PUBLIC_KEY'),
+    localCreationAssertion: process.env.RECOVERY_LOCAL_CREATION_ASSERTION_JSON ? JSON.parse(process.env.RECOVERY_LOCAL_CREATION_ASSERTION_JSON) : undefined,
+    localCreationPublicKey: process.env.RECOVERY_LOCAL_CREATION_PUBLIC_KEY,
     sha: requireSha(required('SOURCE_SHA')),
     objectives: JSON.parse(
       fs.readFileSync('config/recovery/production-recovery-contract.json', 'utf8'),
     ).objectives,
   };
-  const connection = (target) => ({
-    ...process.env,
-    PGSSLMODE: 'verify-full',
-    PGHOST: target.host,
-    PGPORT: target.port,
-    PGDATABASE: target.database,
-    PGUSER: target.role,
-    PGPASSWORD: target.password,
-  });
+  const rootCertificate = () => recoveryTlsRoot(input.tlsRootCertificateFile,JSON.parse(input.assertion.payload).tlsRootCertificateSha256);
+  const connection = (target) => recoveryLibpqEnvironment(target,rootCertificate());
   const run = (command, args, target, options = {}) =>
     childProcess.execFileSync(command, args, { env: connection(target), ...options });
   const result = await executeRestore(input, {
@@ -97,7 +110,7 @@ if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
             '-v',
             'ON_ERROR_STOP=1',
             '-c',
-            `SELECT json_build_object('serverIdentity',(SELECT system_identifier::text FROM pg_control_system()),'database',current_database(),'role',current_user,'superuser',r.rolsuper,'createRole',r.rolcreaterole,'createDatabase',r.rolcreatedb,'targetFingerprint',g.target_fingerprint,'disposableInstanceId',g.disposable_instance_id,'sentinelOwnedByRestoreRole',pg_get_userbyid(c.relowner)=current_user,'sentinelWritableByRestoreRole',has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE')) FROM pg_roles r JOIN manaratak_recovery_control.disposable_guard g ON g.guard_key='restore-target' JOIN pg_class c ON c.oid='manaratak_recovery_control.disposable_guard'::regclass WHERE r.rolname=current_user;`,
+            RECOVERY_SENTINEL_SQL,
           ],
           target,
           { encoding: 'utf8' },
@@ -106,12 +119,19 @@ if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
     restoreDatabase: async (target, backup) => {
       if (!/\.(dump|backup)$/i.test(backup))
         throw new Error('RECOVERY_CUSTOM_FORMAT_BACKUP_REQUIRED');
-      run(
+      const list = verificationRestoreList(run('pg_restore',['--list',backup],target,{encoding:'utf8'}));
+      const temporary = fs.mkdtempSync(path.join(os.tmpdir(),'manaratak-restore-list-'));
+      const listFile = path.join(temporary,'restore.list');
+      fs.writeFileSync(listFile,list.text,{flag:'wx',mode:0o600});
+      try { run(
         'pg_restore',
         [
           '--clean',
           '--if-exists',
           '--no-owner',
+          '--no-acl',
+          '--use-list',
+          listFile,
           '--exit-on-error',
           '--dbname',
           target.database,
@@ -119,33 +139,19 @@ if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
         ],
         target,
         { stdio: 'inherit' },
-      );
+      ); } finally { fs.rmSync(temporary,{recursive:true,force:true}); }
     },
     verifyDatabase: async (target, proof) => {
-      run('npm', ['run', 'test:database'], target, {
-        stdio: 'inherit',
-        env: {
-          ...connection(target),
-          DATABASE_URL: input.databaseUrl,
-          MANARATAK_DATABASE_INTEGRATION_ENABLED: 'true',
-        },
-      });
-      const checked = JSON.parse(
-        run(
-          'psql',
-          [
-            '-X',
-            '-At',
-            '-v',
-            'ON_ERROR_STOP=1',
-            '-c',
-            `SELECT json_build_object('snapshotId',snapshot_id,'assetReferencesMatched',asset_references_matched) FROM manaratak_recovery_snapshot WHERE snapshot_id='${proof.snapshotId}';`,
-          ],
-          target,
-          { encoding: 'utf8' },
-        ),
-      );
-      return checked;
+      const { PrismaClient } = await import('@prisma/client');
+      const client = new PrismaClient({datasources:{db:{url:recoveryPrismaUrl(input.databaseUrl,rootCertificate())}},log:[],errorFormat:'minimal'});
+      try {
+        const manifest = JSON.parse(fs.readFileSync(input.assetManifest,'utf8'));
+        const checked = await verifyDatabaseSnapshot(client,manifest.databaseSnapshot,manifest.files);
+        // Recheck independently owned sentinel after pg_restore as well.
+        const [guard] = await client.$queryRawUnsafe(RECOVERY_SENTINEL_SQL);
+        databaseSentinel(guard?.value,target,proof);
+        return {...checked,snapshotId:proof.snapshotId};
+      } finally { await client.$disconnect(); }
     },
   });
   const out = process.env.RECOVERY_EVIDENCE_FILE || 'recovery-evidence/RESTORE_DRILL.json';

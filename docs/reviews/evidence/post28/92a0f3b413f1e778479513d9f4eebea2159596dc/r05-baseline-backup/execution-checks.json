@@ -1,0 +1,111 @@
+[
+  {
+    "name": "r05-baseline",
+    "command": [
+      "node",
+      "scripts/database/initialize-post28-upgrade.mjs",
+      "23897bdaa66d966eef15c85f44288589ecbcdf2b"
+    ],
+    "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+    "startedUtc": "2026-10-16T15:55:37.900231+00:00",
+    "finishedUtc": "2026-10-16T15:56:11.192258+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-3c9lno/r05-baseline-20261016T155611189848Z.log",
+    "sha256": "fd70b8f42da40b60d01752aa2bbb3338ef5e91432d9feb30d3045377e64948f2"
+  },
+  {
+    "name": "r05-backup",
+    "command": [
+      "env",
+      "DATABASE_MUTATION_PURPOSE=maintenance",
+      "node",
+      "scripts/database/verify-post28-upgrade-backup.mjs",
+      "backup"
+    ],
+    "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+    "startedUtc": "2026-10-16T15:56:20.963104+00:00",
+    "finishedUtc": "2026-10-16T15:56:30.303823+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-3c9lno/r05-backup-20261016T155630301543Z.log",
+    "sha256": "5825ed3f9a3488d16c9f3ea9b947daa6b08f3d2e052b76f97bf5087bf8859408"
+  },
+  {
+    "name": "r05-negative-missing-v-binding",
+    "command": [
+      "env",
+      "-u",
+      "POST28_UPGRADE_VERIFY_MUTATION_TARGET",
+      "DATABASE_MUTATION_PURPOSE=maintenance",
+      "node",
+      "scripts/database/verify-post28-upgrade-backup.mjs",
+      "verify"
+    ],
+    "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+    "startedUtc": "2026-10-16T15:56:36.544265+00:00",
+    "finishedUtc": "2026-10-16T15:56:36.670944+00:00",
+    "exitCode": 1,
+    "log": "/workspace/scratch/post28/labs/lab-3c9lno/r05-negative-missing-v-binding-20261016T155636668866Z.log",
+    "sha256": "b7e8699a0916b8330c3cab089436c3de4a38423d8c0fbfed05033c85ff3dafda"
+  },
+  {
+    "name": "r05-negative-backup-tamper",
+    "command": [
+      "env",
+      "DATABASE_MUTATION_PURPOSE=maintenance",
+      "node",
+      "scripts/database/verify-post28-upgrade-backup.mjs",
+      "verify"
+    ],
+    "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+    "startedUtc": "2026-10-16T15:56:38.075865+00:00",
+    "finishedUtc": "2026-10-16T15:56:46.922236+00:00",
+    "exitCode": 1,
+    "log": "/workspace/scratch/post28/labs/lab-3c9lno/r05-negative-backup-tamper-20261016T155646920108Z.log",
+    "sha256": "158d4ac6953176c22b0f75ba37133ab87ae672617e15285f493f21755ead57e7"
+  },
+  {
+    "name": "r03-v-still-empty",
+    "command": [
+      "node",
+      "scripts/database/post28-preflight.mjs",
+      "--require-empty"
+    ],
+    "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+    "startedUtc": "2026-10-16T15:56:56.174281+00:00",
+    "finishedUtc": "2026-10-16T15:56:56.385216+00:00",
+    "exitCode": 1,
+    "log": "/workspace/scratch/post28/labs/lab-3c9lno/r03-v-still-empty-20261016T155656382928Z.log",
+    "sha256": "e0b1bd01ada1b07ead476a1ccd88520dfb0a4e92a47b67fc5a9d196fb334dd7d"
+  },
+  {
+    "name": "r03-v-still-empty-corrected",
+    "command": [
+      "node",
+      "--input-type=module",
+      "-e",
+      "import path from 'node:path';process.env.DATABASE_URL=process.env.UPGRADE_VERIFY_DATABASE_URL;process.env.POST28_TARGET_LABEL='DB-V';process.argv=[process.execPath,path.resolve('scripts/database/post28-preflight.mjs'),'--require-empty'];await import('./scripts/database/post28-preflight.mjs');"
+    ],
+    "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+    "startedUtc": "2026-10-16T15:57:14.255909+00:00",
+    "finishedUtc": "2026-10-16T15:57:14.457448+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-3c9lno/r03-v-still-empty-corrected-20261016T155714454771Z.log",
+    "sha256": "9bf453b34b663688962af701deae85ff55c471fde71b12b8603bd52e3c53c036"
+  },
+  {
+    "name": "r05-backup-verify",
+    "command": [
+      "env",
+      "DATABASE_MUTATION_PURPOSE=maintenance",
+      "node",
+      "scripts/database/verify-post28-upgrade-backup.mjs",
+      "verify"
+    ],
+    "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+    "startedUtc": "2026-10-16T15:57:20.666288+00:00",
+    "finishedUtc": "2026-10-16T15:57:50.160851+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-3c9lno/r05-backup-verify-20261016T155750158407Z.log",
+    "sha256": "42e337f7f54b57c0a51258aedadb94bb374261455179ab790257a3a7c69e2bf8"
+  }
+]

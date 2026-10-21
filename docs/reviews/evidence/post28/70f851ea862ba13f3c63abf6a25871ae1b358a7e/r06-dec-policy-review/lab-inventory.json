@@ -1,0 +1,74 @@
+[
+  {
+    "profile": "transactions",
+    "sourceSha": "70f851ea862ba13f3c63abf6a25871ae1b358a7e",
+    "runId": "9447b2a0-382f-46a7-abc2-30b8fcd20293",
+    "image": "postgres@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+    "containerName": "post28-pg16-9447b2a0",
+    "createdAt": "2026-10-16T21:11:11.554Z",
+    "forwarderStoppedByThisRound": true,
+    "databasesAndVolumesPreserved": true,
+    "runtimeSuiteDirectories": 1,
+    "unusedLabNotRuntimeProof": false
+  },
+  {
+    "profile": "transactions",
+    "sourceSha": "00b304441865e9ebbcc45a32e5fbeecbaef6fa44",
+    "runId": "1331d112-5b65-458d-97b8-0c3e83d46e42",
+    "image": "postgres@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+    "containerName": "post28-pg16-1331d112",
+    "createdAt": "2026-10-16T20:58:37.799Z",
+    "forwarderStoppedByThisRound": true,
+    "databasesAndVolumesPreserved": true,
+    "runtimeSuiteDirectories": 1,
+    "unusedLabNotRuntimeProof": false
+  },
+  {
+    "profile": "transactions",
+    "sourceSha": "a78b6b94dc31cc6cc280c42314cf47e544a8b929",
+    "runId": "d3154458-1cf7-4170-9480-c7485b5cfd41",
+    "image": "postgres@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+    "containerName": "post28-pg16-d3154458",
+    "createdAt": "2026-10-16T21:08:18.818Z",
+    "forwarderStoppedByThisRound": true,
+    "databasesAndVolumesPreserved": true,
+    "runtimeSuiteDirectories": 1,
+    "unusedLabNotRuntimeProof": false
+  },
+  {
+    "profile": "upgrade",
+    "sourceSha": "3988832ed599baf94a569a41e9f116806da2546a",
+    "runId": "738a8fc8-5581-44a0-ad3e-98e2a4722013",
+    "image": "postgres@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+    "containerName": "post28-pg16-738a8fc8",
+    "createdAt": "2026-10-16T21:02:02.226Z",
+    "forwarderStoppedByThisRound": true,
+    "databasesAndVolumesPreserved": true,
+    "runtimeSuiteDirectories": 0,
+    "unusedLabNotRuntimeProof": false
+  },
+  {
+    "profile": "transactions",
+    "sourceSha": "abae9e8dd0d0b815515e079cb3907a4be617e216",
+    "runId": "2ba79228-fcd0-4c9e-9e89-574633155c0f",
+    "image": "postgres@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+    "containerName": "post28-pg16-2ba79228",
+    "createdAt": "2026-10-16T21:10:56.026Z",
+    "forwarderStoppedByThisRound": true,
+    "databasesAndVolumesPreserved": true,
+    "runtimeSuiteDirectories": 0,
+    "unusedLabNotRuntimeProof": true
+  },
+  {
+    "profile": "transactions",
+    "sourceSha": "19f4a713e3dd58ee4e0c94d2484a19759c7dbdfa",
+    "runId": "597ef5a8-9024-409c-94d9-9d0fd754a04f",
+    "image": "postgres@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+    "containerName": "post28-pg16-597ef5a8",
+    "createdAt": "2026-10-16T21:10:09.537Z",
+    "forwarderStoppedByThisRound": true,
+    "databasesAndVolumesPreserved": true,
+    "runtimeSuiteDirectories": 1,
+    "unusedLabNotRuntimeProof": false
+  }
+]

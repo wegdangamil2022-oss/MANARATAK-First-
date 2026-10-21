@@ -1,0 +1,88 @@
+[
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "FX COURSE 01 study true certificate true obeys owner free study rule",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "FX COURSE 01 study true certificate false obeys owner free study rule",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "Error: IMPORTED_COURSE_FREE_STUDY_AND_CERTIFICATE_REQUIRED"
+    ]
+  },
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "FX COURSE 01 study false certificate true obeys owner free study rule",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "Error: expected [Function] to throw error including 'IMPORTED_COURSE_FREE_STUDY_REQUIRED' but got 'IMPORTED_COURSE_FREE_STUDY_AND_CERTIF…'"
+    ]
+  },
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "FX COURSE 01 study false certificate false obeys owner free study rule",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "Error: expected [Function] to throw error including 'IMPORTED_COURSE_FREE_STUDY_REQUIRED' but got 'IMPORTED_COURSE_FREE_STUDY_AND_CERTIF…'"
+    ]
+  },
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "keeps unknown certificate cost unknown on the actual API and UI while allowing free study",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "Error: IMPORTED_COURSE_FREE_STUDY_AND_CERTIFICATE_REQUIRED"
+    ]
+  },
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "relationship filters return the same paid certificate free study owner",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "Error: IMPORTED_COURSE_FREE_STUDY_AND_CERTIFICATE_REQUIRED"
+    ]
+  },
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "free classification does not bypass persisted link source verification",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "Error: expected [Function] to throw error including 'DIRECT_LINK_VERIFICATION_REQUIRED' but got 'IMPORTED_COURSE_FREE_STUDY_AND_CERTIF…'"
+    ]
+  },
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "free paid certificate publication rolls owner version audit and outbox back on actual PostgreSQL failure",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "Error: expected Error: IMPORTED_COURSE_FREE_STUDY_AND_CER… to match object { code: 'P2010', …(1) }"
+    ]
+  }
+]

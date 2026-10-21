@@ -1,0 +1,34 @@
+{
+  "phase": "R05",
+  "status": "BLOCKED",
+  "progress": "PREDECESSOR_AND_TOOLING_VERIFIED",
+  "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+  "predecessorSha": "23897bdaa66d966eef15c85f44288589ecbcdf2b",
+  "runId": "ae7be4ce-3403-4001-8fd3-52c78235e721",
+  "sourceTests": {
+    "passed": 225,
+    "failed": 0,
+    "skipped": 0
+  },
+  "runtimeNegativeChecks": {
+    "passed": 2,
+    "failed": 0
+  },
+  "baselineMigrations": 109,
+  "baselineChecksumMatches": 109,
+  "publicTables": 282,
+  "generatedPreviousClient": "5.22.0",
+  "backupVerifiedOnSeparateDBV": true,
+  "sourceUnchanged": true,
+  "representativeFixturesProvisioned": false,
+  "targetMigration110Executed": false,
+  "previousClientAfterUpgradeExecuted": false,
+  "interruptionRetryExecuted": false,
+  "cloudAcceptance": false,
+  "R06Started": false,
+  "remaining": [
+    "Representative historical fixture manifest/producer and owner reviewed orphan handling",
+    "Fresh backup of representative baseline, not just migration seeded rows",
+    "Actual 109-to-110 upgrade with lock budgets, interruption/resume, full invariants and previous client after upgrade"
+  ]
+}

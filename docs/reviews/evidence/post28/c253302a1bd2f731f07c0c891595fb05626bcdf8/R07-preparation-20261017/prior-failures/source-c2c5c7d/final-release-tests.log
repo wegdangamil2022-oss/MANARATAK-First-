@@ -1,0 +1,661 @@
+TAP version 13
+# Subtest: POSIX npm execution keeps argument boundaries
+ok 1 - POSIX npm execution keeps argument boundaries
+  ---
+  duration_ms: 2.1288
+  type: 'test'
+  ...
+# Subtest: Windows npm invokes JavaScript through Node without shell interpolation
+ok 2 - Windows npm invokes JavaScript through Node without shell interpolation
+  ---
+  duration_ms: 157.6444
+  type: 'test'
+  ...
+# Subtest: missing Windows npm CLI fails before execution
+ok 3 - missing Windows npm CLI fails before execution
+  ---
+  duration_ms: 1.1634
+  type: 'test'
+  ...
+# Subtest: GNU tar roundtrip accepts absolute Windows output locations via local paths
+ok 4 - GNU tar roundtrip accepts absolute Windows output locations via local paths
+  ---
+  duration_ms: 121.0912
+  type: 'test'
+  ...
+# Subtest: static build refuses missing
+ok 5 - static build refuses missing
+  ---
+  duration_ms: 29.768
+  type: 'test'
+  ...
+# Subtest: static build refuses empty
+ok 6 - static build refuses empty
+  ---
+  duration_ms: 35.0317
+  type: 'test'
+  ...
+# Subtest: static build refuses symlink-file
+not ok 7 - static build refuses symlink-file
+  ---
+  duration_ms: 6.2248
+  type: 'test'
+  location: 'C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\r07-filtered\\tests\\release\\post28-r07-static-runtime.test.mjs:15:117'
+  failureType: 'testCodeFailure'
+  error: "EPERM: operation not permitted, symlink 'C:\\Users\\HP\\AppData\\Local\\Temp\\post28-static-RyOGfR\\index.html' -> 'C:\\Users\\HP\\AppData\\Local\\Temp\\post28-static-RyOGfR\\assets\\app.js'"
+  code: 'EPERM'
+  stack: |-
+    Object.symlinkSync (node:fs:1890:11)
+    TestContext.<anonymous> (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/release/post28-r07-static-runtime.test.mjs:21:56)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: static build refuses symlink-parent
+not ok 8 - static build refuses symlink-parent
+  ---
+  duration_ms: 7.6851
+  type: 'test'
+  location: 'C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\r07-filtered\\tests\\release\\post28-r07-static-runtime.test.mjs:15:117'
+  failureType: 'testCodeFailure'
+  error: "EPERM: operation not permitted, symlink 'C:\\Users\\HP\\AppData\\Local\\Temp\\post28-static-jH8O24\\renamed' -> 'C:\\Users\\HP\\AppData\\Local\\Temp\\post28-static-jH8O24\\assets'"
+  code: 'EPERM'
+  stack: |-
+    Object.symlinkSync (node:fs:1890:11)
+    TestContext.<anonymous> (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/release/post28-r07-static-runtime.test.mjs:22:106)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: static build refuses traversal
+ok 9 - static build refuses traversal
+  ---
+  duration_ms: 16.7915
+  type: 'test'
+  ...
+# Subtest: static build refuses external
+ok 10 - static build refuses external
+  ---
+  duration_ms: 15.7821
+  type: 'test'
+  ...
+# Subtest: static build refuses metadata-symlink
+not ok 11 - static build refuses metadata-symlink
+  ---
+  duration_ms: 3.9501
+  type: 'test'
+  location: 'C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\r07-filtered\\tests\\release\\post28-r07-static-runtime.test.mjs:15:117'
+  failureType: 'testCodeFailure'
+  error: "EPERM: operation not permitted, symlink 'C:\\Users\\HP\\AppData\\Local\\Temp\\post28-static-2jAfaA\\metadata.json' -> 'C:\\Users\\HP\\AppData\\Local\\Temp\\post28-static-2jAfaA\\manaratak-build.json'"
+  code: 'EPERM'
+  stack: |-
+    Object.symlinkSync (node:fs:1890:11)
+    TestContext.<anonymous> (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/release/post28-r07-static-runtime.test.mjs:24:128)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: valid same-unit JS entry is BUILT
+ok 12 - valid same-unit JS entry is BUILT
+  ---
+  duration_ms: 5.9965
+  type: 'test'
+  ...
+# Subtest: smoke refuses SPA fallback
+ok 13 - smoke refuses SPA fallback
+  ---
+  duration_ms: 41.9109
+  type: 'test'
+  ...
+# Subtest: smoke refuses HTML mislabeled as JS
+ok 14 - smoke refuses HTML mislabeled as JS
+  ---
+  duration_ms: 2.8748
+  type: 'test'
+  ...
+# Subtest: smoke refuses empty JS
+ok 15 - smoke refuses empty JS
+  ---
+  duration_ms: 4.8838
+  type: 'test'
+  ...
+# Subtest: smoke refuses missing JS
+ok 16 - smoke refuses missing JS
+  ---
+  duration_ms: 1.4258
+  type: 'test'
+  ...
+# Subtest: smoke refuses redirect
+ok 17 - smoke refuses redirect
+  ---
+  duration_ms: 2.3266
+  type: 'test'
+  ...
+# Subtest: smoke requests actual scripts for both built units
+ok 18 - smoke requests actual scripts for both built units
+  ---
+  duration_ms: 2.22
+  type: 'test'
+  ...
+# Subtest: artifact input inspection rejects symlinks before tar packaging
+not ok 19 - artifact input inspection rejects symlinks before tar packaging
+  ---
+  duration_ms: 31.8841
+  type: 'test'
+  location: 'C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\r07-filtered\\tests\\release\\post28-r07-static-runtime.test.mjs:40:1'
+  failureType: 'testCodeFailure'
+  error: "EPERM: operation not permitted, symlink 'C:\\Users\\HP\\AppData\\Local\\Temp\\post28-static-xORCiE\\index.html' -> 'C:\\Users\\HP\\AppData\\Local\\Temp\\post28-static-xORCiE\\assets\\link'"
+  code: 'EPERM'
+  stack: |-
+    Object.symlinkSync (node:fs:1890:11)
+    TestContext.<anonymous> (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/release/post28-r07-static-runtime.test.mjs:42:80)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: packager rejects dirty source or existing output before altering static inputs
+ok 20 - packager rejects dirty source or existing output before altering static inputs
+  ---
+  duration_ms: 705.5569
+  type: 'test'
+  ...
+# Subtest: R06-R09 inventory identifies 26 mandatory R06 cases without claiming runtime coverage
+ok 21 - R06-R09 inventory identifies 26 mandatory R06 cases without claiming runtime coverage
+  ---
+  duration_ms: 413.5298
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: valid
+ok 22 - runtime layer policy: valid
+  ---
+  duration_ms: 34.291
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: source
+ok 23 - runtime layer policy: source
+  ---
+  duration_ms: 5.3548
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: os
+ok 24 - runtime layer policy: os
+  ---
+  duration_ms: 5.7135
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: architecture
+ok 25 - runtime layer policy: architecture
+  ---
+  duration_ms: 5.3783
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: lock
+ok 26 - runtime layer policy: lock
+  ---
+  duration_ms: 24.5202
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: schema
+ok 27 - runtime layer policy: schema
+  ---
+  duration_ms: 19.7989
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: engine
+ok 28 - runtime layer policy: engine
+  ---
+  duration_ms: 11.9535
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: missing-engine
+ok 29 - runtime layer policy: missing-engine
+  ---
+  duration_ms: 5.0327
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: external-fallback
+ok 30 - runtime layer policy: external-fallback
+  ---
+  duration_ms: 11.5836
+  type: 'test'
+  ...
+# Subtest: runtime imports follow real esbuild output, excluding builtins and unused declarations
+ok 31 - runtime imports follow real esbuild output, excluding builtins and unused declarations
+  ---
+  duration_ms: 56.4146
+  type: 'test'
+  ...
+# Subtest: missing API output or required Prisma import fails the runtime contract
+ok 32 - missing API output or required Prisma import fails the runtime contract
+  ---
+  duration_ms: 0.7386
+  type: 'test'
+  ...
+# Subtest: artifact handler serves actual assets and refuses API/asset fallback and revision drift
+ok 33 - artifact handler serves actual assets and refuses API/asset fallback and revision drift
+  ---
+  duration_ms: 121.3373
+  type: 'test'
+  ...
+# Subtest: FSA003 readiness path matches actual public monitoring mount/route
+ok 34 - FSA003 readiness path matches actual public monitoring mount/route
+  ---
+  duration_ms: 4.4197
+  type: 'test'
+  ...
+# Subtest: FSA003 API base composition does not duplicate api/v1
+ok 35 - FSA003 API base composition does not duplicate api/v1
+  ---
+  duration_ms: 0.7833
+  type: 'test'
+  ...
+# Subtest: FSA007 smoke accepts exact ready revision and built three-unit contracts
+ok 36 - FSA007 smoke accepts exact ready revision and built three-unit contracts
+  ---
+  duration_ms: 31.4439
+  type: 'test'
+  ...
+# Subtest: FSA007 smoke rejects HTTP 301
+ok 37 - FSA007 smoke rejects HTTP 301
+  ---
+  duration_ms: 0.9497
+  type: 'test'
+  ...
+# Subtest: FSA007 smoke rejects HTTP 302
+ok 38 - FSA007 smoke rejects HTTP 302
+  ---
+  duration_ms: 0.8799
+  type: 'test'
+  ...
+# Subtest: FSA007 smoke rejects HTTP 307
+ok 39 - FSA007 smoke rejects HTTP 307
+  ---
+  duration_ms: 0.6518
+  type: 'test'
+  ...
+# Subtest: FSA007 smoke rejects HTTP 308
+ok 40 - FSA007 smoke rejects HTTP 308
+  ---
+  duration_ms: 2.2309
+  type: 'test'
+  ...
+# Subtest: FSA007 smoke rejects HTTP 404
+ok 41 - FSA007 smoke rejects HTTP 404
+  ---
+  duration_ms: 0.6214
+  type: 'test'
+  ...
+# Subtest: FSA007 smoke rejects HTTP 503
+ok 42 - FSA007 smoke rejects HTTP 503
+  ---
+  duration_ms: 1.0032
+  type: 'test'
+  ...
+# Subtest: FSA007 rejects health {"body":{"status":"DOWN"}}
+ok 43 - FSA007 rejects health {"body":{"status":"DOWN"}}
+  ---
+  duration_ms: 1.3898
+  type: 'test'
+  ...
+# Subtest: FSA007 rejects health {"body":{"protocolVersion":1}}
+ok 44 - FSA007 rejects health {"body":{"protocolVersion":1}}
+  ---
+  duration_ms: 0.9454
+  type: 'test'
+  ...
+# Subtest: FSA007 rejects health {"body":{"code":"UNKNOWN"}}
+ok 45 - FSA007 rejects health {"body":{"code":"UNKNOWN"}}
+  ---
+  duration_ms: 0.8471
+  type: 'test'
+  ...
+# Subtest: FSA007 rejects health {"body":{"timestamp":"invalid"}}
+ok 46 - FSA007 rejects health {"body":{"timestamp":"invalid"}}
+  ---
+  duration_ms: 0.7356
+  type: 'test'
+  ...
+# Subtest: FSA007 rejects health {"contentType":"text/html"}
+ok 47 - FSA007 rejects health {"contentType":"text/html"}
+  ---
+  duration_ms: 0.2689
+  type: 'test'
+  ...
+# Subtest: FSA007 rejects health {"revision":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
+ok 48 - FSA007 rejects health {"revision":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
+  ---
+  duration_ms: 0.461
+  type: 'test'
+  ...
+# Subtest: FSA008 smoke rejects placeholder/unbuilt html
+ok 49 - FSA008 smoke rejects placeholder/unbuilt html
+  ---
+  duration_ms: 0.9235
+  type: 'test'
+  ...
+# Subtest: FSA008 smoke rejects another static build
+ok 50 - FSA008 smoke rejects another static build
+  ---
+  duration_ms: 0.6687
+  type: 'test'
+  ...
+# Subtest: FSA008 missing static artifact is UNBUILT and server serves503
+ok 51 - FSA008 missing static artifact is UNBUILT and server serves503
+  ---
+  duration_ms: 1.3573
+  type: 'test'
+  ...
+# Subtest: FSA008 stamp matches exact static unit and source
+ok 52 - FSA008 stamp matches exact static unit and source
+  ---
+  duration_ms: 5.044
+  type: 'test'
+  ...
+# Subtest: FSA009 rejects nonTLS/user-info origins
+ok 53 - FSA009 rejects nonTLS/user-info origins
+  ---
+  duration_ms: 0.2727
+  type: 'test'
+  ...
+# Subtest: FSA010/011 source manifest exact three units/digests runtime requirement descriptor
+ok 54 - FSA010/011 source manifest exact three units/digests runtime requirement descriptor
+  ---
+  duration_ms: 18.056
+  type: 'test'
+  ...
+# Subtest: FSA011 missing or wrong expected source fails
+ok 55 - FSA011 missing or wrong expected source fails
+  ---
+  duration_ms: 13.6599
+  type: 'test'
+  ...
+# Subtest: FSA011 empty unit inventory never verifies
+ok 56 - FSA011 empty unit inventory never verifies
+  ---
+  duration_ms: 12.6942
+  type: 'test'
+  ...
+# Subtest: FSA011 digest tampering rejected
+ok 57 - FSA011 digest tampering rejected
+  ---
+  duration_ms: 12.1092
+  type: 'test'
+  ...
+# Subtest: FSA011 artifact traversal cannot read out of boundary
+ok 58 - FSA011 artifact traversal cannot read out of boundary
+  ---
+  duration_ms: 17.1676
+  type: 'test'
+  ...
+# Subtest: FSA011 symlink artifact rejected
+not ok 59 - FSA011 symlink artifact rejected
+  ---
+  duration_ms: 4.0334
+  type: 'test'
+  location: 'C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\r07-filtered\\tests\\release\\section28.test.mjs:280:1'
+  failureType: 'testCodeFailure'
+  error: "EPERM: operation not permitted, symlink 'C:\\Users\\HP\\AppData\\Local\\Temp\\manaratak-section28-3bs3lu\\web.tar' -> 'C:\\Users\\HP\\AppData\\Local\\Temp\\manaratak-section28-3bs3lu\\api.tar'"
+  code: 'EPERM'
+  stack: |-
+    Object.symlinkSync (node:fs:1890:11)
+    TestContext.<anonymous> (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/release/section28.test.mjs:283:6)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: FSA011 signed proof checked against independently supplied key
+ok 60 - FSA011 signed proof checked against independently supplied key
+  ---
+  duration_ms: 2.5446
+  type: 'test'
+  ...
+# Subtest: FSA011 signed stale/another-sha proof rejected
+ok 61 - FSA011 signed stale/another-sha proof rejected
+  ---
+  duration_ms: 2.6866
+  type: 'test'
+  ...
+# Subtest: FSA022 source/runtime require different trust keys before verdict
+ok 62 - FSA022 source/runtime require different trust keys before verdict
+  ---
+  duration_ms: 11.2942
+  type: 'test'
+  ...
+# Subtest: FSA012 accepted response is PENDING, not completed deployment
+ok 63 - FSA012 accepted response is PENDING, not completed deployment
+  ---
+  duration_ms: 2.9495
+  type: 'test'
+  ...
+# Subtest: FSA012 exact terminal unit/digest facts accepted
+ok 64 - FSA012 exact terminal unit/digest facts accepted
+  ---
+  duration_ms: 2.8824
+  type: 'test'
+  ...
+# Subtest: FSA012 partial/failed/wrong digest rejected
+ok 65 - FSA012 partial/failed/wrong digest rejected
+  ---
+  duration_ms: 4.6222
+  type: 'test'
+  ...
+# Subtest: FSA012 bounded reconcile polls accepted until terminal
+ok 66 - FSA012 bounded reconcile polls accepted until terminal
+  ---
+  duration_ms: 3.7571
+  type: 'test'
+  ...
+# Subtest: FSA012 accepted forever times out, never emits healthy evidence
+ok 67 - FSA012 accepted forever times out, never emits healthy evidence
+  ---
+  duration_ms: 2.8073
+  type: 'test'
+  ...
+# Subtest: FSA004/005/006/016/019/020/021 mandatory runtime skip stays BLOCKED
+ok 68 - FSA004/005/006/016/019/020/021 mandatory runtime skip stays BLOCKED
+  ---
+  duration_ms: 1.143
+  type: 'test'
+  ...
+# Subtest: FSA022 independent logical source/runtime states accept complete fixture only
+ok 69 - FSA022 independent logical source/runtime states accept complete fixture only
+  ---
+  duration_ms: 0.369
+  type: 'test'
+  ...
+# Subtest: FSA023 missing one source task reviewer cannot close section
+ok 70 - FSA023 missing one source task reviewer cannot close section
+  ---
+  duration_ms: 0.2542
+  type: 'test'
+  ...
+# Subtest: FSA023 actual owner-curation-pending inventory blocks even all claimed pass
+ok 71 - FSA023 actual owner-curation-pending inventory blocks even all claimed pass
+  ---
+  duration_ms: 0.5146
+  type: 'test'
+  ...
+# Subtest: FSA023 stale evidence and duplicate gate not PASS
+ok 72 - FSA023 stale evidence and duplicate gate not PASS
+  ---
+  duration_ms: 0.2534
+  type: 'test'
+  ...
+# Subtest: FSA004…021 mere PASS booleans lack required execution details
+ok 73 - FSA004…021 mere PASS booleans lack required execution details
+  ---
+  duration_ms: 0.8475
+  type: 'test'
+  ...
+# Subtest: FSA006 26-domain fixture matrix cannot use page-load-only evidence
+ok 74 - FSA006 26-domain fixture matrix cannot use page-load-only evidence
+  ---
+  duration_ms: 0.2649
+  type: 'test'
+  ...
+# Subtest: FSA006 full attributable matrix assertions accepted without any live execution
+ok 75 - FSA006 full attributable matrix assertions accepted without any live execution
+  ---
+  duration_ms: 0.4641
+  type: 'test'
+  ...
+# Subtest: FSA014 independently signed literal isolated target accepted
+ok 76 - FSA014 independently signed literal isolated target accepted
+  ---
+  duration_ms: 14.9793
+  type: 'test'
+  ...
+# Subtest: FSA014 reject /production before mutating
+ok 77 - FSA014 reject /production before mutating
+  ---
+  duration_ms: 4.5046
+  type: 'test'
+  ...
+# Subtest: FSA014 reject /test-production before mutating
+ok 78 - FSA014 reject /test-production before mutating
+  ---
+  duration_ms: 3.2071
+  type: 'test'
+  ...
+# Subtest: FSA014 reject /manaratak_restore_11111111111111111111111111111111 before mutating
+ok 79 - FSA014 reject /manaratak_restore_11111111111111111111111111111111 before mutating
+  ---
+  duration_ms: 3.8058
+  type: 'test'
+  ...
+# Subtest: FSA014 same source/target, missing second party denied
+ok 80 - FSA014 same source/target, missing second party denied
+  ---
+  duration_ms: 7.0427
+  type: 'test'
+  ...
+# Subtest: FSA014 production fingerprint target denied
+ok 81 - FSA014 production fingerprint target denied
+  ---
+  duration_ms: 3.8039
+  type: 'test'
+  ...
+# Subtest: FSA014 DB sentinel privileges/instance independently rechecked
+ok 82 - FSA014 DB sentinel privileges/instance independently rechecked
+  ---
+  duration_ms: 3.511
+  type: 'test'
+  ...
+# Subtest: FSA018 corrupted backup aborts before even sentinel SQL
+ok 83 - FSA018 corrupted backup aborts before even sentinel SQL
+  ---
+  duration_ms: 34.3157
+  type: 'test'
+  ...
+# Subtest: FSA018 corrupt asset aborts before all SQL
+ok 84 - FSA018 corrupt asset aborts before all SQL
+  ---
+  duration_ms: 6.766
+  type: 'test'
+  ...
+# Subtest: FSA018 traversal asset aborts before all SQL
+ok 85 - FSA018 traversal asset aborts before all SQL
+  ---
+  duration_ms: 14.0639
+  type: 'test'
+  ...
+# Subtest: FSA018 symlink asset rejected
+not ok 86 - FSA018 symlink asset rejected
+  ---
+  duration_ms: 3.1801
+  type: 'test'
+  location: 'C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\r07-filtered\\tests\\release\\section28.test.mjs:673:1'
+  failureType: 'testCodeFailure'
+  error: "EPERM: operation not permitted, symlink 'C:\\Users\\HP\\AppData\\Local\\Temp\\manaratak-section28-enR82E\\db.dump' -> 'C:\\Users\\HP\\AppData\\Local\\Temp\\manaratak-section28-enR82E\\assets\\a.txt'"
+  code: 'EPERM'
+  stack: |-
+    Object.symlinkSync (node:fs:1890:11)
+    TestContext.<anonymous> (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/release/section28.test.mjs:676:6)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: FSA017 measured >60min restore fails even structural success
+ok 87 - FSA017 measured >60min restore fails even structural success
+  ---
+  duration_ms: 0.3009
+  type: 'test'
+  ...
+# Subtest: FSA017 >5min backup currency fails
+ok 88 - FSA017 >5min backup currency fails
+  ---
+  duration_ms: 0.1123
+  type: 'test'
+  ...
+# Subtest: FSA014/017/018 full fake restore ordering and objective result without commands
+ok 89 - FSA014/017/018 full fake restore ordering and objective result without commands
+  ---
+  duration_ms: 15.6883
+  type: 'test'
+  ...
+# Subtest: FSA015 unsigned/stale backup readiness cannot pass
+ok 90 - FSA015 unsigned/stale backup readiness cannot pass
+  ---
+  duration_ms: 1.3812
+  type: 'test'
+  ...
+# Subtest: FSA015 missing numeric PITR proof cannot be mistaken for pass
+ok 91 - FSA015 missing numeric PITR proof cannot be mistaken for pass
+  ---
+  duration_ms: 1.134
+  type: 'test'
+  ...
+# Subtest: FSA-FG024 typed mandatory market owner chain is available
+ok 92 - FSA-FG024 typed mandatory market owner chain is available
+  ---
+  duration_ms: 0.3584
+  type: 'test'
+  ...
+# Subtest: FSA-FG024 draft-only chain incomplete; zero distinct; partial unavailable
+ok 93 - FSA-FG024 draft-only chain incomplete; zero distinct; partial unavailable
+  ---
+  duration_ms: 0.193
+  type: 'test'
+  ...
+# Subtest: FSA-FG024 optional zero market does not block mandatory scope, no production claim
+ok 94 - FSA-FG024 optional zero market does not block mandatory scope, no production claim
+  ---
+  duration_ms: 0.14
+  type: 'test'
+  ...
+# Subtest: FSA001 source evidence writer preserves skipped gate and never declares runtime pass
+ok 95 - FSA001 source evidence writer preserves skipped gate and never declares runtime pass
+  ---
+  duration_ms: 82.8037
+  type: 'test'
+  ...
+# Subtest: FSA002/013 corrected repository while deployment/recovery remain explicit opt-in
+ok 96 - FSA002/013 corrected repository while deployment/recovery remain explicit opt-in
+  ---
+  duration_ms: 0.5374
+  type: 'test'
+  ...
+1..96
+# tests 96
+# suites 0
+# pass 90
+# fail 6
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1469.6794

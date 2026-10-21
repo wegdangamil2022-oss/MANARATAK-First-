@@ -37,6 +37,18 @@ class TestTokenProvider implements ITokenProvider {
 }
 
 describe('AuthService and Package Helpers', () => {
+  it('revokes the rotated refresh family on replay through AuthService while preserving another login', async () => {
+    const tokens = new TestTokenProvider();
+    const sessions = new InMemorySessionManager();
+    const auth = new AuthService(tokens, sessions, allowPrincipal, { verify: async () => true });
+    const first = await auth.login('user-123', 'synthetic-password');
+    const independent = await auth.login('user-123', 'synthetic-password');
+    const rotated = await auth.refreshTokens(first.refreshToken);
+    expect(await sessions.findRefreshSession(rotated.refreshToken)).not.toBeNull();
+    await expect(auth.refreshTokens(first.refreshToken)).rejects.toThrow('Session revoked, expired, replayed, or invalid');
+    expect(await sessions.findRefreshSession(rotated.refreshToken)).toBeNull();
+    expect(await sessions.findRefreshSession(independent.refreshToken)).not.toBeNull();
+  });
   describe('ICredentialVerifier and Login', () => {
     it('login without credential fails', async () => {
       const tokenProvider = new TestTokenProvider();

@@ -1,0 +1,151 @@
+{
+  "kind": "POST28_R14_LINUX_API_ROLLBACK",
+  "sourceSha": "77ca2767ce571c3f520cdb95d8651e681c21a08c",
+  "imageId": "sha256:cfebc82bb3585e46ffb9bd79fc481fff12d67947dbf2e1a033ab95a2d88fc31e",
+  "node": "v22.16.0",
+  "environment": "DISPOSABLE",
+  "providerMode": "NO_EXTERNAL_EGRESS",
+  "observations": [
+    {
+      "step": "REVISION_READINESS",
+      "route": "/health/build",
+      "status": 200,
+      "sourceSha": "77ca2767ce571c3f520cdb95d8651e681c21a08c"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/admin/health/build",
+      "status": 200,
+      "sourceSha": "77ca2767ce571c3f520cdb95d8651e681c21a08c"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/api/v1/monitoring/health/readiness",
+      "status": 200,
+      "sourceSha": "77ca2767ce571c3f520cdb95d8651e681c21a08c"
+    }
+  ],
+  "network": [
+    {
+      "method": "GET",
+      "path": "/health/build",
+      "status": 200,
+      "resource": "document"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "productionAcceptance": false,
+  "formalR07Acceptance": false,
+  "promotionAuthorized": false,
+  "rollbackImage": {
+    "currentSourceSha": "77ca2767ce571c3f520cdb95d8651e681c21a08c",
+    "previousSourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+    "sharedLockedDependencyLayer": true,
+    "differentApiImplementationDemonstrated": false,
+    "downMigrationsAllowed": false,
+    "formalAcceptance": false,
+    "imageId": "sha256:5b8e961e81363bae578c08d1a74242b67edb7e332d546d5360d27a76b1c111e9",
+    "previousManifestSha256": "f17c7d7a33efa90f51618fcb602e0f6a414cd62bef45e6bb43ffdfade0397c71",
+    "previousApiArtifactSha256": "af2b7f37632e20e1f178d068593466066dd73bd24279b433c8a160e63233d510",
+    "nativeProbe": {
+      "sourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+      "nativeLoaded": true,
+      "modules": [
+        "@node-rs/xxhash",
+        "@prisma/client",
+        "cors",
+        "express",
+        "fontkit",
+        "helmet",
+        "pdfkit",
+        "svg-to-pdfkit",
+        "uuid"
+      ],
+      "stageAccepted": false
+    },
+    "previousRuntimeBooted": false
+  },
+  "databaseIdentity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7699181518054740013",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "applicationRole": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolreplication": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledger": false,
+    "ledgerRead": false
+  },
+  "migrationObserverRole": {
+    "role": "post28_migration_observer",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolreplication": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledgerread": true,
+    "ledgerwrite": false,
+    "applicationdataread": false,
+    "defaultreadonly": "on",
+    "memberships": 0
+  },
+  "browserVersion": "151.0.7922.34",
+  "cleanup": {
+    "ownedContainerStopped": true,
+    "ownedContainerRemoved": true,
+    "postgresStopped": true,
+    "postgresRemoved": true,
+    "networkRemoved": true,
+    "existingDatabasesTouched": false,
+    "apiExitCode": 0,
+    "drainMilliseconds": 123
+  },
+  "failure": "Expected values to be strictly equal:\n+ actual - expected\n\n+ null\n- 'fb1a375eba5d09d3f7a01d5515270ed2cf011280'\n",
+  "passed": false,
+  "completedAt": "2026-10-21T17:56:49.915Z"
+}

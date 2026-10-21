@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "kind": "POST28_R08_SHUTDOWN_EVIDENCE",
+  "sourceSha": "825a0b597bca7e14d95a6cc8fbf8d7bf352abdc8",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "checks.json",
+      "bytes": 2191,
+      "sha256": "9dbd88c80a6c38e8ce557adfe02dfd4560b8cf71dd4e9ed63aefdb0850ed69b9"
+    },
+    {
+      "path": "process-observations.json",
+      "bytes": 1094,
+      "sha256": "055117d38942b4f58e0dbf75835dceae467462587032fe47333e40868f3b7142"
+    },
+    {
+      "path": "source-files.json",
+      "bytes": 1939,
+      "sha256": "4b9bdd87b8965bfc9d333b2023c55736b37fb3dd5614e14405ef35c97722851c"
+    },
+    {
+      "path": "status.json",
+      "bytes": 1077,
+      "sha256": "06d3b0eaa57ce293a247512347224d3d4e1f329515d64a1589ee013ec5cde0db"
+    }
+  ]
+}

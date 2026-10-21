@@ -22,6 +22,7 @@ export class EapCertificateArtifactStore implements ICertificateArtifactStore {
     private readonly lifecycle: ProcessAssetLifecycleUseCase,
   ) {}
   public async store(input: CertificateArtifactStoreInput): Promise<string> {
+    const sourceSha256 = createHash('sha256').update(input.artifact.bytes).digest('hex');
     const referenceValue = `certificate:${input.certificateId}:render:${input.renderFingerprint}:${input.artifact.kind.toLowerCase()}`;
     const classification =
       input.artifact.kind === 'QR'
@@ -68,6 +69,14 @@ export class EapCertificateArtifactStore implements ICertificateArtifactStore {
       record.classification !== classification
     )
       throw new Error('CERTIFICATE_ARTIFACT_EXISTING_SECURITY_MISMATCH');
+    // Sanitization may replace the upload checksum and size. Bind retries to
+    // the immutable generated source, not to the transformed CLEAN bytes.
+    const provenance = record.metadata.extraMetadata?.certificateGenerated as Record<string, unknown> | undefined;
+    if (provenance?.source !== 'Phase14' || provenance.kind !== input.artifact.kind ||
+        provenance.renderFingerprint !== input.renderFingerprint ||
+        provenance.sourceByteSize !== input.artifact.bytes.byteLength ||
+        provenance.sourceSha256 !== sourceSha256)
+      throw new Error('CERTIFICATE_ARTIFACT_SOURCE_MISMATCH');
     if (record.state === AssetLifecycleState.ACTIVE) {
       record.assertCanDeliver();
       return record.id.value;
@@ -98,7 +107,7 @@ export class EapCertificateArtifactStore implements ICertificateArtifactStore {
       if (
         !record ||
         record.uploadVerification?.checksumSha256.toLowerCase() !==
-          createHash('sha256').update(input.artifact.bytes).digest('hex')
+          sourceSha256
       )
         throw new Error('CERTIFICATE_ARTIFACT_UPLOAD_HASH_MISMATCH');
     }
@@ -108,7 +117,7 @@ export class EapCertificateArtifactStore implements ICertificateArtifactStore {
         AssetLifecycleState.VALIDATING,
       ].includes(record.state) &&
       record.uploadVerification?.checksumSha256.toLowerCase() !==
-        createHash('sha256').update(input.artifact.bytes).digest('hex')
+        sourceSha256
     )
       throw new Error('CERTIFICATE_ARTIFACT_UPLOAD_HASH_MISMATCH');
     if (record.state === AssetLifecycleState.QUARANTINED)

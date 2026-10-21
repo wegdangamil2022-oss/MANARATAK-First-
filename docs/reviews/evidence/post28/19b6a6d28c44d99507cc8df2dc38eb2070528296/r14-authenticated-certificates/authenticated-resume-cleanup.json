@@ -1,0 +1,9 @@
+{
+  "ownedIsolatedClusterResumed": true,
+  "originalServerIdentityVerified": true,
+  "stopped": true,
+  "apiStopped": true,
+  "providerStopped": true,
+  "existingNonLabDatabasesTouched": false,
+  "workerCode": 0
+}

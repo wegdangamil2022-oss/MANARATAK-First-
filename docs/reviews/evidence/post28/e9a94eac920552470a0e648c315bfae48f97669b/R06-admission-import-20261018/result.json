@@ -1,0 +1,32 @@
+{
+  "sourceSha": "e9a94eac920552470a0e648c315bfae48f97669b",
+  "runId": "33b39e57-4baf-4e71-bca2-3c674718d831",
+  "postgresVersion": "postgres (PostgreSQL) 16.15",
+  "serverIdentity": "7698024190297209788",
+  "newDatabaseCases": 10,
+  "repeatedDatabaseCases": 8,
+  "finalPassed": 18,
+  "finalFailed": 0,
+  "finalSkipped": 0,
+  "cumulativeDistinctAcrossSources": 306,
+  "all306RunAtOneHead": false,
+  "CD005": "PARTIAL_APPLICATION_IMPORT_FIXED_DATABASE_GATE_REMAINS",
+  "R06Closed": false,
+  "R05OrR07Modified": false,
+  "proposedIndexApplied": false,
+  "prismaMigrationChanges": 0,
+  "applicationDmlTables": 83,
+  "previousDmlTables": 81,
+  "addedTables": [
+    "UniversityImportChangeSet",
+    "UniversityImportChange"
+  ],
+  "knownDirectNullableDuplicateGapStillProven": true,
+  "failedAttemptsPreserved": 2,
+  "initialUnitFailure": {
+    "kind": "STALE_TEST_FIXTURE",
+    "expected": "UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH",
+    "actual": "UNIVERSITY_CAMPUS_COUNTRY_NOT_ACTIVE",
+    "repair": "Declare actual ACTIVE country/city fixture flags; do not weaken validator."
+  }
+}

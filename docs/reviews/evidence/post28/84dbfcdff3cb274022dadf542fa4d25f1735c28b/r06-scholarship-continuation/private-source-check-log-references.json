@@ -1,0 +1,101 @@
+{
+  "note": "Development checks retain original timestamps; no dirty-source diagnostic is relabeled as clean-SHA database evidence. Initial audit coverage rejection is preserved and final gate succeeds without modifying its rules.",
+  "logs": [
+    {
+      "name": "scholarship-config-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "modifiedAtEpoch": 1792173876.088492
+    },
+    {
+      "name": "scholarship-provisioning.log",
+      "bytes": 5318,
+      "sha256": "8e0c307c27c926321d33f1c7e6a31c729526112069b68c4730e0b88a0580e28b",
+      "modifiedAtEpoch": 1792173804.7587595
+    },
+    {
+      "name": "scholarship-final-provisioning.log",
+      "bytes": 5319,
+      "sha256": "c0aa282d0689baa530abf77d6dd21f8c1f3adb4df9e485743804ae1e11ac8408",
+      "modifiedAtEpoch": 1792173973.5942724
+    },
+    {
+      "name": "scholarship-public-provisioning.log",
+      "bytes": 5584,
+      "sha256": "a7cfddcc7404f94139da1dd022fd08ddeeb8ea0872cd073cc724dbc85f83ee5b",
+      "modifiedAtEpoch": 1792174095.8998337
+    },
+    {
+      "name": "scholarship-replay-source.log",
+      "bytes": 1301,
+      "sha256": "d9ef418e29ab499f96ff608a3171ed797a99bbde666d8be4138688286269d60b",
+      "modifiedAtEpoch": 1792173941.4057412
+    },
+    {
+      "name": "scholarship-replay-source-final.log",
+      "bytes": 1300,
+      "sha256": "b9ac05e8c4f5c019beb28149c2bd6f7771c179f85cd172415fd749c7c81e93a3",
+      "modifiedAtEpoch": 1792174200.8408027
+    },
+    {
+      "name": "scholarship-api-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "modifiedAtEpoch": 1792173956.3379948
+    },
+    {
+      "name": "scholarship-api-typecheck-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "modifiedAtEpoch": 1792174228.0570095
+    },
+    {
+      "name": "scholarship-audit-coverage.log",
+      "bytes": 1253,
+      "sha256": "d5e44f2916b7a6171021b69e9447680a69393df56295c5e66bbd437c4c8f1e59",
+      "modifiedAtEpoch": 1792174119.4920805
+    },
+    {
+      "name": "scholarship-audit-coverage-final.log",
+      "bytes": 131,
+      "sha256": "f8e8ae0e832cf9249bb6835079bc4369a6411e7b514f7d621b16f68bc6e411ae",
+      "modifiedAtEpoch": 1792174201.5728066
+    },
+    {
+      "name": "scholarship-audit-source.log",
+      "bytes": 4468,
+      "sha256": "1ea7e7477f7ea4dbcaf1d7c1e28e615782b9e03e336676ea0d7cd78229e3d93e",
+      "modifiedAtEpoch": 1792174120.2280874
+    },
+    {
+      "name": "scholarship-app-lint.log",
+      "bytes": 7232,
+      "sha256": "b55eb20ba00a1938ad6c70ad3412e26f307178660b7d5f1060797d1a008937e5",
+      "modifiedAtEpoch": 1792174121.0960956
+    },
+    {
+      "name": "scholarship-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "modifiedAtEpoch": 1792173779.7120395
+    },
+    {
+      "name": "scholarship-fix-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "modifiedAtEpoch": 1792173941.4097412
+    },
+    {
+      "name": "scholarship-boundary-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "modifiedAtEpoch": 1792174201.5888066
+    },
+    {
+      "name": "scholarship-public-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "modifiedAtEpoch": 1792174095.2153103
+    }
+  ]
+}

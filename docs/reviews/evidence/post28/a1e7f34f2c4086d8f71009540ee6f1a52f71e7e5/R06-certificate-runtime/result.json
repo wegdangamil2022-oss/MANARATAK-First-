@@ -1,0 +1,15 @@
+{
+  "sourceSha": "a1e7f34f2c4086d8f71009540ee6f1a52f71e7e5",
+  "runId": "0bbdc873-52e6-452f-8128-d0a8a91cbe2a",
+  "passedDatabaseCases": 27,
+  "newDistinctCases": 8,
+  "repeatedCases": 19,
+  "cumulativeDistinctAcrossShas": 363,
+  "allAtCurrentHead": false,
+  "R06Accepted": false,
+  "localSigning": "SYNTHETIC_DEVELOPMENT_HMAC",
+  "schemaChanged": false,
+  "artifactRendererReady": false,
+  "productionApprovalInferred": false,
+  "provisioningUnitPassed": 33
+}

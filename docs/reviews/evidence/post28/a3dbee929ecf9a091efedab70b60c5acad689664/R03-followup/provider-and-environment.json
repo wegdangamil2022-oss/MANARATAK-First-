@@ -1,0 +1,160 @@
+{
+  "kind": "POST28_R03_PROVIDER_METADATA_AND_BLOCKERS",
+  "observedAt": "2026-10-16 12:59:36 UTC",
+  "sourceSha": "a3dbee929ecf9a091efedab70b60c5acad689664",
+  "projectId": "lively-feather-03681988",
+  "transport": "AUTHORIZED_NEON_MCP_METADATA_ONLY",
+  "targets": [
+    {
+      "branch": {
+        "id": "br-raspy-shadow-ba33tmh3",
+        "name": "post28-r03-db-g-20261016",
+        "projectId": "lively-feather-03681988",
+        "parentId": "br-patient-recipe-bahs1ix7",
+        "default": false,
+        "primary": false,
+        "state": "ready"
+      },
+      "endpoints": [
+        {
+          "id": "ep-red-king-baoyw96q",
+          "host": "ep-red-king-baoyw96q.c-8.eu-central-1.aws.neon.tech",
+          "branchId": "br-raspy-shadow-ba33tmh3",
+          "projectId": "lively-feather-03681988",
+          "type": "read_write"
+        }
+      ],
+      "databases": [
+        {
+          "name": "manaratak_test",
+          "owner": "manaratak_test_owner",
+          "branchId": "br-raspy-shadow-ba33tmh3"
+        },
+        {
+          "name": "manaratak_post28_greenfield_test",
+          "owner": "manaratak_test_owner",
+          "branchId": "br-raspy-shadow-ba33tmh3"
+        }
+      ],
+      "roles": [
+        {
+          "name": "post28_g_migrate_limited",
+          "branchId": "br-raspy-shadow-ba33tmh3",
+          "authenticationMethod": "no_login",
+          "protected": false
+        },
+        {
+          "name": "post28_migrator",
+          "branchId": "br-raspy-shadow-ba33tmh3",
+          "authenticationMethod": "password",
+          "protected": false
+        },
+        {
+          "name": "post28_app",
+          "branchId": "br-raspy-shadow-ba33tmh3",
+          "authenticationMethod": "password",
+          "protected": false
+        },
+        {
+          "name": "post28_g_app_limited",
+          "branchId": "br-raspy-shadow-ba33tmh3",
+          "authenticationMethod": "no_login",
+          "protected": false
+        },
+        {
+          "name": "manaratak_test_owner",
+          "branchId": "br-raspy-shadow-ba33tmh3",
+          "authenticationMethod": "password",
+          "protected": false
+        }
+      ]
+    },
+    {
+      "branch": {
+        "id": "br-round-dew-bahzpr4x",
+        "name": "post28-r03-db-s-20261016",
+        "projectId": "lively-feather-03681988",
+        "parentId": "br-patient-recipe-bahs1ix7",
+        "default": false,
+        "primary": false,
+        "state": "ready"
+      },
+      "endpoints": [
+        {
+          "id": "ep-tiny-recipe-ba15g3br",
+          "host": "ep-tiny-recipe-ba15g3br.c-8.eu-central-1.aws.neon.tech",
+          "branchId": "br-round-dew-bahzpr4x",
+          "projectId": "lively-feather-03681988",
+          "type": "read_write"
+        }
+      ],
+      "databases": [
+        {
+          "name": "manaratak_test",
+          "owner": "manaratak_test_owner",
+          "branchId": "br-round-dew-bahzpr4x"
+        },
+        {
+          "name": "manaratak_post28_shadow_test",
+          "owner": "manaratak_test_owner",
+          "branchId": "br-round-dew-bahzpr4x"
+        }
+      ],
+      "roles": [
+        {
+          "name": "manaratak_test_owner",
+          "branchId": "br-round-dew-bahzpr4x",
+          "authenticationMethod": "password",
+          "protected": false
+        },
+        {
+          "name": "post28_shadow",
+          "branchId": "br-round-dew-bahzpr4x",
+          "authenticationMethod": "password",
+          "protected": false
+        },
+        {
+          "name": "post28_s_shadow_limited",
+          "branchId": "br-round-dew-bahzpr4x",
+          "authenticationMethod": "no_login",
+          "protected": false
+        }
+      ]
+    }
+  ],
+  "workspace": {
+    "managedEnvironmentSpecRevision": "67",
+    "observationsCurrent": true,
+    "secretBindings": [],
+    "runtimeVariables": [],
+    "outboundIdentities": [],
+    "secretPresence": {
+      "DATABASE_URL": false,
+      "DIRECT_URL": false,
+      "GREENFIELD_DATABASE_URL": false,
+      "GREENFIELD_SHADOW_DATABASE_URL": false,
+      "NEON_API_KEY": false,
+      "POST28_TARGET_CONTRACT_FILE": false
+    },
+    "tcpPolicy": {
+      "domains": [],
+      "ip_ranges": []
+    }
+  },
+  "actions": {
+    "sqlStatementsExecuted": 0,
+    "ownerSessionsUsedForTests": 0,
+    "passwordsFetchedOrReset": 0,
+    "rolesDeletedOrAltered": 0,
+    "migrationsExecuted": 0,
+    "limitedRolePrismaConnectionsAttempted": 0
+  },
+  "status": {
+    "R03": "BLOCKED_RUNTIME_CONFIGURATION",
+    "R04": "NOT_READY_NOT_EXECUTED",
+    "limitedRoleAuthentication": "PROVIDER_REPORTS_NO_LOGIN_NOT_AUTHENTICATED",
+    "directPrismaTlsVerified": false,
+    "privilegeFlagsFreshlyMeasured": false,
+    "tableCountsFreshlyMeasured": false
+  }
+}

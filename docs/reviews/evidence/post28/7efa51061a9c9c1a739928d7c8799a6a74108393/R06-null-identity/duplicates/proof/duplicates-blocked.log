@@ -1,0 +1,7 @@
+BEGIN
+SET
+SET
+LOCK TABLE
+psql:C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/docs/remediation/proposals/20261019000100_admission_null_identity/migration.sql:42: ERROR:  23505: ADMISSION_NULL_IDENTITY_DUPLICATES_REQUIRE_REVIEW
+CONTEXT:  PL/pgSQL function inline_code_block line 32 at RAISE
+LOCATION:  exec_stmt_raise, pl_exec.c:3911

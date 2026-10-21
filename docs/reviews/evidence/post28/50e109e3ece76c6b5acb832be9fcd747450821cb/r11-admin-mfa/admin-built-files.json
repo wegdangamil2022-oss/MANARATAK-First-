@@ -1,0 +1,170 @@
+{
+  "sourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+  "files": [
+    {
+      "path": "assets/cairo-0-CJWMIGCx.woff2",
+      "sha256": "748022f50c427456ad66031e855349be3448ee1f05a5f1eb59574ebe0c686749",
+      "bytes": 30896
+    },
+    {
+      "path": "assets/cairo-1-at8nfxId.woff2",
+      "sha256": "da6ada83c3a87c2f0211325dc0a123702e1d4a940958b3e943ac4f37b31d5371",
+      "bytes": 16648
+    },
+    {
+      "path": "assets/cairo-2-PfPtmrPZ.woff2",
+      "sha256": "82c13cbd1352d76e97c3d335caa912ae68fecdc3949a43cf8d149eb892384c1b",
+      "bytes": 33820
+    },
+    {
+      "path": "assets/index-lk5bf8Kb.js",
+      "sha256": "57dbdbe50dcdb33bbe9e3241a3c965014827cec55936cb8460a2a1a25167a80b",
+      "bytes": 2969192
+    },
+    {
+      "path": "assets/index-Y2KYC6eE.css",
+      "sha256": "8dfb3358c558d9f67bb32df708599c66c100ce66aba103d076e8c366ec615ecc",
+      "bytes": 134161
+    },
+    {
+      "path": "brand/manaratak-logo-official.png",
+      "sha256": "10bc5fd51307913795990c95e87c758bdd653a07583286fe1ade6b8239b7321c",
+      "bytes": 134285
+    },
+    {
+      "path": "brand/manaratak-logo.png",
+      "sha256": "a1ad2bedd8cacbdb05a3c6b883edd0f4460112f658f69d9595c8324af1b6aef2",
+      "bytes": 1239179
+    },
+    {
+      "path": "fonts/cairo-0.woff2",
+      "sha256": "748022f50c427456ad66031e855349be3448ee1f05a5f1eb59574ebe0c686749",
+      "bytes": 30896
+    },
+    {
+      "path": "fonts/cairo-1.woff2",
+      "sha256": "da6ada83c3a87c2f0211325dc0a123702e1d4a940958b3e943ac4f37b31d5371",
+      "bytes": 16648
+    },
+    {
+      "path": "fonts/cairo-10.woff2",
+      "sha256": "da6ada83c3a87c2f0211325dc0a123702e1d4a940958b3e943ac4f37b31d5371",
+      "bytes": 16648
+    },
+    {
+      "path": "fonts/cairo-11.woff2",
+      "sha256": "82c13cbd1352d76e97c3d335caa912ae68fecdc3949a43cf8d149eb892384c1b",
+      "bytes": 33820
+    },
+    {
+      "path": "fonts/cairo-12.woff2",
+      "sha256": "748022f50c427456ad66031e855349be3448ee1f05a5f1eb59574ebe0c686749",
+      "bytes": 30896
+    },
+    {
+      "path": "fonts/cairo-13.woff2",
+      "sha256": "da6ada83c3a87c2f0211325dc0a123702e1d4a940958b3e943ac4f37b31d5371",
+      "bytes": 16648
+    },
+    {
+      "path": "fonts/cairo-14.woff2",
+      "sha256": "82c13cbd1352d76e97c3d335caa912ae68fecdc3949a43cf8d149eb892384c1b",
+      "bytes": 33820
+    },
+    {
+      "path": "fonts/cairo-15.woff2",
+      "sha256": "748022f50c427456ad66031e855349be3448ee1f05a5f1eb59574ebe0c686749",
+      "bytes": 30896
+    },
+    {
+      "path": "fonts/cairo-16.woff2",
+      "sha256": "da6ada83c3a87c2f0211325dc0a123702e1d4a940958b3e943ac4f37b31d5371",
+      "bytes": 16648
+    },
+    {
+      "path": "fonts/cairo-17.woff2",
+      "sha256": "82c13cbd1352d76e97c3d335caa912ae68fecdc3949a43cf8d149eb892384c1b",
+      "bytes": 33820
+    },
+    {
+      "path": "fonts/cairo-2.woff2",
+      "sha256": "82c13cbd1352d76e97c3d335caa912ae68fecdc3949a43cf8d149eb892384c1b",
+      "bytes": 33820
+    },
+    {
+      "path": "fonts/cairo-3.woff2",
+      "sha256": "748022f50c427456ad66031e855349be3448ee1f05a5f1eb59574ebe0c686749",
+      "bytes": 30896
+    },
+    {
+      "path": "fonts/cairo-4.woff2",
+      "sha256": "da6ada83c3a87c2f0211325dc0a123702e1d4a940958b3e943ac4f37b31d5371",
+      "bytes": 16648
+    },
+    {
+      "path": "fonts/cairo-5.woff2",
+      "sha256": "82c13cbd1352d76e97c3d335caa912ae68fecdc3949a43cf8d149eb892384c1b",
+      "bytes": 33820
+    },
+    {
+      "path": "fonts/cairo-6.woff2",
+      "sha256": "748022f50c427456ad66031e855349be3448ee1f05a5f1eb59574ebe0c686749",
+      "bytes": 30896
+    },
+    {
+      "path": "fonts/cairo-7.woff2",
+      "sha256": "da6ada83c3a87c2f0211325dc0a123702e1d4a940958b3e943ac4f37b31d5371",
+      "bytes": 16648
+    },
+    {
+      "path": "fonts/cairo-8.woff2",
+      "sha256": "82c13cbd1352d76e97c3d335caa912ae68fecdc3949a43cf8d149eb892384c1b",
+      "bytes": 33820
+    },
+    {
+      "path": "fonts/cairo-9.woff2",
+      "sha256": "748022f50c427456ad66031e855349be3448ee1f05a5f1eb59574ebe0c686749",
+      "bytes": 30896
+    },
+    {
+      "path": "fonts/cairo.css",
+      "sha256": "f9fa20e3239f6ef6dde1b1c6fccceca602c7dd5700a8e471d7b46d91cb166112",
+      "bytes": 19113
+    },
+    {
+      "path": "fonts/certificate-arabic-bold.ttf",
+      "sha256": "ed2711b387750ae991b6a980b8dd16fdd65e6702b97e9f52adf3a8edf09ef4df",
+      "bytes": 248468
+    },
+    {
+      "path": "fonts/certificate-arabic.ttf",
+      "sha256": "ceea25b464a656dc3b26849bab9356740401af62aedf1bfa8b7f0d9b75925b1b",
+      "bytes": 240456
+    },
+    {
+      "path": "fonts/certificate-latin-bold.ttf",
+      "sha256": "aac3f559445d23f0f567a243f91f3f6ad6cb4b5cafa1521a3479fffe0637f0bd",
+      "bytes": 356668
+    },
+    {
+      "path": "fonts/certificate-latin.ttf",
+      "sha256": "8cb29f7db250ebb2551a6ce2c1e0bfd5a0eb520e9e233370db0493e82e1f36f7",
+      "bytes": 380660
+    },
+    {
+      "path": "index.html",
+      "sha256": "d3f71193d8f12ca4a8354289fe7aa51c877cac6901c33162c4e44246cf443510",
+      "bytes": 506
+    },
+    {
+      "path": "manaratak-build.json",
+      "sha256": "12dcb9b77c0b52ca90802ac1d88833945d29792e7b27f4a6000442c61204e2bf",
+      "bytes": 84
+    },
+    {
+      "path": "_headers",
+      "sha256": "34cbb946e9836b77858d8085c373dccffb03554354bd7750e665287bd1c60d1e",
+      "bytes": 706
+    }
+  ]
+}

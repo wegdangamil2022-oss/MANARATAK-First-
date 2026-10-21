@@ -1,0 +1,124 @@
+[
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "persists enrollment audit and authoritative outbox without issuing a certificate",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 63.61967300000015,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "rejects completion below full progress without partial completion audit or event",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 59.37821900000017,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "atomically commits completed enrollment completion audit and versioned credential signal only",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 59.00819700000011,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "does not duplicate a completion audit or signal on sequential retry",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 49.44550600000002,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "serializes completion from independent connections into exactly one completion and event",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 53.156465000000026,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "rolls completion enrollment and audit back on the actual PostgreSQL outbox failure boundary",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 78.85196899999983,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "refuses external linked course enrollment progress and completion without local writes",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 22.453206000000137,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "rejects a persisted external-course certificate claim despite eligible completion payload",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 17.03340900000012,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "acknowledges persisted noncredential completion as a no-op without any issuance",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 43.22014100000024,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "fails closed for native credential completion when no approved active template exists",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 41.92187899999999,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "rejects wrong event domain type version and delivery idempotency identity before issuing",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 37.04829199999995,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "real completion worker dispatches noncredential events and records missing authority as retryable failure",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "failed",
+    "durationMs": 85.11860099999967,
+    "failureFirstLines": [
+      "AssertionError: expected undefined to be 'PROCESSED' // Object.is equality"
+    ]
+  }
+]

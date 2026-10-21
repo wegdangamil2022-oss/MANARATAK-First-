@@ -7,7 +7,9 @@ if (!message) {
   process.exit(2);
 }
 
-const conventional = /^(feat|fix|security|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9._/-]+\))?!?: .{3,}$/;
+// Configuration and merge commits are explicit project categories, including
+// the already published remediation history. Keep scope/subject validation.
+const conventional = /^(feat|fix|security|docs|style|refactor|perf|test|build|ci|chore|revert|config|merge)(\([a-z0-9._/-]+\))?!?: .{3,}$/;
 const generated = /^(Merge|Revert)\b.+/;
 
 if (!conventional.test(message) && !generated.test(message)) {

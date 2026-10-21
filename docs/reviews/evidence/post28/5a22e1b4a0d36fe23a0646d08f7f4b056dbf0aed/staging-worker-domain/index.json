@@ -1,0 +1,43 @@
+{
+  "sourceSha": "5a22e1b4a0d36fe23a0646d08f7f4b056dbf0aed",
+  "scope": "REAL_FINANCIAL_WORKER_SIGNED_LOOPBACK_NATURAL_DEADLINE_ACK_RETRY_NO_PROCESS_CRASH_OR_REAL_CHARGES",
+  "fullProfileAcceptance": false,
+  "productionAuthorized": false,
+  "files": [
+    {
+      "file": "result.json",
+      "bytes": 376,
+      "sha256": "54741532d30bae3d566d584fe44f3ca5b2a8f24fc86480d32387163239bcf7bb"
+    },
+    {
+      "file": "setup.json",
+      "bytes": 5175,
+      "sha256": "97cd5a771060872a290b31054d2035c1245a64e6ce263263ac549362d03af452"
+    },
+    {
+      "file": "discovery.json",
+      "bytes": 1721,
+      "sha256": "3911c8b4c53238305523466e474059f479565ee689ff0ab479cbb7822a2933a3"
+    },
+    {
+      "file": "selection.json",
+      "bytes": 291,
+      "sha256": "f63baf1953af8b4d37869ceb8379a2056fad8179bc27b0ef6c6077073b38f4ce"
+    },
+    {
+      "file": "summary.json",
+      "bytes": 1412,
+      "sha256": "a232a0ebd5f004f6017ee268e2b40864220675f521c72e027d8fefb8b7ee9a75"
+    },
+    {
+      "file": "vitest.json",
+      "bytes": 2871,
+      "sha256": "916cce186f2f5ba418dd40e088cf3fdfe1539b625a3d8b51ffade7d2c0156277"
+    },
+    {
+      "file": "pre-fix-read-only-inspection.json",
+      "bytes": 370,
+      "sha256": "30e02814ff5a8a6ada253d31c48e0ef6dd554b2e7bf85815e416b5ef1722192b"
+    }
+  ]
+}

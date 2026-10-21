@@ -1,0 +1,2757 @@
+
+> manaratak-2.0-monorepo@0.0.0 test:unit
+> vitest run --config vitest.config.ts && npm run test:node
+
+
+ RUN  v4.1.11 /workspace/MANARATAK-First-
+
+TAP version 13
+# Subtest: program-parity: mapped DRAFT excluded
+ok 1 - program-parity: mapped DRAFT excluded
+  ---
+  duration_ms: 1.419349
+  type: 'test'
+  ...
+# Subtest: program-parity: mapped ARCHIVED excluded
+ok 2 - program-parity: mapped ARCHIVED excluded
+  ---
+  duration_ms: 1.964671
+  type: 'test'
+  ...
+# Subtest: program-parity: mapped REVIEW_REQUIRED excluded
+ok 3 - program-parity: mapped REVIEW_REQUIRED excluded
+  ---
+  duration_ms: 0.118178
+  type: 'test'
+  ...
+# Subtest: program-parity: mapped PUBLISHED excluded
+ok 4 - program-parity: mapped PUBLISHED excluded
+  ---
+  duration_ms: 0.063726
+  type: 'test'
+  ...
+# Subtest: program-parity: matching active published profile passes
+ok 5 - program-parity: matching active published profile passes
+  ---
+  duration_ms: 0.102104
+  type: 'test'
+  ...
+# Subtest: program-parity: different degree profile fails
+ok 6 - program-parity: different degree profile fails
+  ---
+  duration_ms: 0.085809
+  type: 'test'
+  ...
+# Subtest: program-parity: public university projection omits unpublished children
+ok 7 - program-parity: public university projection omits unpublished children
+  ---
+  duration_ms: 0.435045
+  type: 'test'
+  ...
+# Subtest: program-parent: program-only derives canonical parent
+ok 8 - program-parent: program-only derives canonical parent
+  ---
+  duration_ms: 0.110887
+  type: 'test'
+  ...
+# Subtest: program-parent: mismatched manual/import parent fails
+ok 9 - program-parent: mismatched manual/import parent fails
+  ---
+  duration_ms: 0.409457
+  type: 'test'
+  ...
+# Subtest: program-parent: unknown owner never becomes resolved
+ok 10 - program-parent: unknown owner never becomes resolved
+  ---
+  duration_ms: 0.355927
+  type: 'test'
+  ...
+# Subtest: program-parent: public scholarship retains program-only canonical parent
+ok 11 - program-parent: public scholarship retains program-only canonical parent
+  ---
+  duration_ms: 0.382206
+  type: 'test'
+  ...
+# Subtest: test-proof: published owner/version and verified score passes
+ok 12 - test-proof: published owner/version and verified score passes
+  ---
+  duration_ms: 0.301564
+  type: 'test'
+  ...
+# Subtest: test-proof: {"internationalTest":{"status":"DRAFT"}} fails closed
+ok 13 - test-proof: {"internationalTest":{"status":"DRAFT"}} fails closed
+  ---
+  duration_ms: 0.074743
+  type: 'test'
+  ...
+# Subtest: test-proof: {"testVersionId":"x","testVersion":{"testId":"t","status":"DRAFT"}} fails closed
+ok 14 - test-proof: {"testVersionId":"x","testVersion":{"testId":"t","status":"DRAFT"}} fails closed
+  ---
+  duration_ms: 0.040961
+  type: 'test'
+  ...
+# Subtest: test-proof: {"minimumScore":10} fails closed
+ok 15 - test-proof: {"minimumScore":10} fails closed
+  ---
+  duration_ms: 0.040872
+  type: 'test'
+  ...
+# Subtest: test-proof: {"minimumScore":6,"internationalTest":{"status":"PUBLISHED","currentPublishedVersion":{"status":"PUBLISHED","scoreScales":[]}}} fails closed
+ok 16 - test-proof: {"minimumScore":6,"internationalTest":{"status":"PUBLISHED","currentPublishedVersion":{"status":"PUBLISHED","scoreScales":[]}}} fails closed
+  ---
+  duration_ms: 0.034633
+  type: 'test'
+  ...
+# Subtest: test-proof: {"testVariantId":"var","testVariant":{"testId":"other","isActive":true}} fails closed
+ok 17 - test-proof: {"testVariantId":"var","testVariant":{"testId":"other","isActive":true}} fails closed
+  ---
+  duration_ms: 0.033781
+  type: 'test'
+  ...
+# Subtest: test-proof: {"sectionScores":{"reading":6}} fails closed
+ok 18 - test-proof: {"sectionScores":{"reading":6}} fails closed
+  ---
+  duration_ms: 0.041001
+  type: 'test'
+  ...
+# Subtest: test-proof: missing scale is unverified
+ok 19 - test-proof: missing scale is unverified
+  ---
+  duration_ms: 0.089074
+  type: 'test'
+  ...
+# Subtest: test-proof: retired tests omitted from scholarship public projection
+ok 20 - test-proof: retired tests omitted from scholarship public projection
+  ---
+  duration_ms: 0.615167
+  type: 'test'
+  ...
+# Subtest: country: programs/majors independent of empty university page
+ok 21 - country: programs/majors independent of empty university page
+  ---
+  duration_ms: 1.630867
+  type: 'test'
+  ...
+# Subtest: country: optional failure is unavailable with unknown total, not successful zero
+ok 22 - country: optional failure is unavailable with unknown total, not successful zero
+  ---
+  duration_ms: 0.435596
+  type: 'test'
+  ...
+# Subtest: graph: optional CMS failure also isolated for university
+ok 23 - graph: optional CMS failure also isolated for university
+  ---
+  duration_ms: 0.599384
+  type: 'test'
+  ...
+# Subtest: graph: page two explicitly unsupported
+ok 24 - graph: page two explicitly unsupported
+  ---
+  duration_ms: 0.094312
+  type: 'test'
+  ...
+# Subtest: graph: reviewed locale only; draft translation ignored
+ok 25 - graph: reviewed locale only; draft translation ignored
+  ---
+  duration_ms: 0.140181
+  type: 'test'
+  ...
+# Subtest: graph: owner outage reports sanitized failure
+ok 26 - graph: owner outage reports sanitized failure
+  ---
+  duration_ms: 0.205489
+  type: 'test'
+  ...
+# Subtest: program repository: owner SQL requires exact degree/published profile before counts and cursor
+ok 27 - program repository: owner SQL requires exact degree/published profile before counts and cursor
+  ---
+  duration_ms: 0.54412
+  type: 'test'
+  ...
+# Subtest: student-owner: create replaces forged slug, deadline and canonical alias
+ok 28 - student-owner: create replaces forged slug, deadline and canonical alias
+  ---
+  duration_ms: 0.282356
+  type: 'test'
+  ...
+# Subtest: student-owner: basic published without verification is denied
+ok 29 - student-owner: basic published without verification is denied
+  ---
+  duration_ms: 0.140391
+  type: 'test'
+  ...
+# Subtest: student-owner: caller cannot edit official deadline
+ok 30 - student-owner: caller cannot edit official deadline
+  ---
+  duration_ms: 0.214583
+  type: 'test'
+  ...
+# Subtest: student-owner: orphan history retained without actionable URL/eligibility claim
+ok 31 - student-owner: orphan history retained without actionable URL/eligibility claim
+  ---
+  duration_ms: 0.281585
+  type: 'test'
+  ...
+# Subtest: student-owner: bounded pull updates current facts, owner outage stays retryable
+ok 32 - student-owner: bounded pull updates current facts, owner outage stays retryable
+  ---
+  duration_ms: 0.266401
+  type: 'test'
+  ...
+# Subtest: student-owner: reconcile CAS/outbox failure rolls back tracker update
+ok 33 - student-owner: reconcile CAS/outbox failure rolls back tracker update
+  ---
+  duration_ms: 0.704061
+  type: 'test'
+  ...
+# Subtest: reminder: changed official deadline suppresses stale intent
+ok 34 - reminder: changed official deadline suppresses stale intent
+  ---
+  duration_ms: 0.276847
+  type: 'test'
+  ...
+# Subtest: reminder: unpublished owner suppresses intent
+ok 35 - reminder: unpublished owner suppresses intent
+  ---
+  duration_ms: 0.658613
+  type: 'test'
+  ...
+# Subtest: role: final student role revoked suspends projection
+ok 36 - role: final student role revoked suspends projection
+  ---
+  duration_ms: 0.555317
+  type: 'test'
+  ...
+# Subtest: role: reordered revoke with another valid grant retains active state
+ok 37 - role: reordered revoke with another valid grant retains active state
+  ---
+  duration_ms: 0.118989
+  type: 'test'
+  ...
+# Subtest: role: suspended identity plus remaining grant cannot reactivate
+ok 38 - role: suspended identity plus remaining grant cannot reactivate
+  ---
+  duration_ms: 0.092029
+  type: 'test'
+  ...
+# Subtest: role: forged aggregate refused
+ok 39 - role: forged aggregate refused
+  ---
+  duration_ms: 0.1331
+  type: 'test'
+  ...
+# Subtest: saved: canonical owner replaces caller labels and alias
+ok 40 - saved: canonical owner replaces caller labels and alias
+  ---
+  duration_ms: 0.394164
+  type: 'test'
+  ...
+# Subtest: saved: unsupported private owner fails closed
+ok 41 - saved: unsupported private owner fails closed
+  ---
+  duration_ms: 0.17874
+  type: 'test'
+  ...
+# Subtest: saved: CMS spoofed slug cannot bind draft ID to other published content
+ok 42 - saved: CMS spoofed slug cannot bind draft ID to other published content
+  ---
+  duration_ms: 0.200012
+  type: 'test'
+  ...
+# Subtest: saved: historical hydration hides current private owner draft fields
+ok 43 - saved: historical hydration hides current private owner draft fields
+  ---
+  duration_ms: 0.320903
+  type: 'test'
+  ...
+# Subtest: navigation: no internal ID/publicId fallback
+ok 44 - navigation: no internal ID/publicId fallback
+  ---
+  duration_ms: 0.279992
+  type: 'test'
+  ...
+# Subtest: navigation: refocus freshness bounded at 30s, no polling
+ok 45 - navigation: refocus freshness bounded at 30s, no polling
+  ---
+  duration_ms: 0.098498
+  type: 'test'
+  ...
+# Subtest: registry: all26 owners and reviewed owner opt-in discovery explicit
+ok 46 - registry: all26 owners and reviewed owner opt-in discovery explicit
+  ---
+  duration_ms: 0.155845
+  type: 'test'
+  ...
+# Subtest: integrity: partial sample never asserts missing FK/production readiness
+ok 47 - integrity: partial sample never asserts missing FK/production readiness
+  ---
+  duration_ms: 0.236436
+  type: 'test'
+  ...
+# Subtest: integrity: declared complete broken reference detected without private values
+ok 48 - integrity: declared complete broken reference detected without private values
+  ---
+  duration_ms: 0.113311
+  type: 'test'
+  ...
+# Subtest: integrity: students and finance cannot be added through untyped allowed scope
+ok 49 - integrity: students and finance cannot be added through untyped allowed scope
+  ---
+  duration_ms: 0.150637
+  type: 'test'
+  ...
+# Subtest: API fixture: unsupported graph page rejected before owner invocation
+ok 50 - API fixture: unsupported graph page rejected before owner invocation
+  ---
+  duration_ms: 4.418169
+  type: 'test'
+  ...
+# Subtest: cycle: only canonical published owner-version cycles are offered
+ok 51 - cycle: only canonical published owner-version cycles are offered
+  ---
+  duration_ms: 0.566584
+  type: 'test'
+  ...
+# Subtest: cycle: ambiguous owners require explicit selection instead of reusing an old tracker
+ok 52 - cycle: ambiguous owners require explicit selection instead of reusing an old tracker
+  ---
+  duration_ms: 0.342676
+  type: 'test'
+  ...
+# Subtest: cycle: create overrides forged owner snapshot and cycle references
+ok 53 - cycle: create overrides forged owner snapshot and cycle references
+  ---
+  duration_ms: 0.153832
+  type: 'test'
+  ...
+# Subtest: cycle: archived tracker replay retains history and does not reactivate it
+ok 54 - cycle: archived tracker replay retains history and does not reactivate it
+  ---
+  duration_ms: 0.292501
+  type: 'test'
+  ...
+# Subtest: cycle: concurrent unique collision replays only the exact owned cycle
+ok 55 - cycle: concurrent unique collision replays only the exact owned cycle
+  ---
+  duration_ms: 0.197437
+  type: 'test'
+  ...
+# Subtest: documents: consent and exact current cycle requirement precede persistence
+ok 56 - documents: consent and exact current cycle requirement precede persistence
+  ---
+  duration_ms: 0.525772
+  type: 'test'
+  ...
+# Subtest: documents: foreign tracker, legacy cycle and foreign owner identity are denied
+ok 57 - documents: foreign tracker, legacy cycle and foreign owner identity are denied
+  ---
+  duration_ms: 0.261825
+  type: 'test'
+  ...
+# Subtest: documents: unavailable asset is denied on write and rechecked on read
+ok 58 - documents: unavailable asset is denied on write and rechecked on read
+  ---
+  duration_ms: 0.478111
+  type: 'test'
+  ...
+# Subtest: documents: revision changes, expiry and malformed consent cannot claim readiness
+ok 59 - documents: revision changes, expiry and malformed consent cannot claim readiness
+  ---
+  duration_ms: 0.529788
+  type: 'test'
+  ...
+# Subtest: documents: unavailable owner preserves private requirement history without readiness claim
+ok 60 - documents: unavailable owner preserves private requirement history without readiness claim
+  ---
+  duration_ms: 0.15898
+  type: 'test'
+  ...
+# Subtest: documents: archived tracker can withdraw consent with versioned transaction
+ok 61 - documents: archived tracker can withdraw consent with versioned transaction
+  ---
+  duration_ms: 0.359302
+  type: 'test'
+  ...
+# Subtest: documents: retention purge remains bounded and rechecks expiry before deletion
+ok 62 - documents: retention purge remains bounded and rechecks expiry before deletion
+  ---
+  duration_ms: 0.214593
+  type: 'test'
+  ...
+# Subtest: integrity live owner sample: unauthorized targets are neither read nor returned
+ok 63 - integrity live owner sample: unauthorized targets are neither read nor returned
+  ---
+  duration_ms: 0.828418
+  type: 'test'
+  ...
+# Subtest: integrity live owner sample: explicit missing target is reported without pretending full catalog coverage
+ok 64 - integrity live owner sample: explicit missing target is reported without pretending full catalog coverage
+  ---
+  duration_ms: 0.569679
+  type: 'test'
+  ...
+# Subtest: integrity API: absent identity and denied owner stop before owner reads
+ok 65 - integrity API: absent identity and denied owner stop before owner reads
+  ---
+  duration_ms: 1.030663
+  type: 'test'
+  ...
+# Subtest: integrity live owner sample: canonical program parent mismatch is detected
+ok 66 - integrity live owner sample: canonical program parent mismatch is detected
+  ---
+  duration_ms: 0.356918
+  type: 'test'
+  ...
+# Subtest: cycle: separate canonical cycle creates a clean checklist and cycle-specific reminder aggregate
+ok 67 - cycle: separate canonical cycle creates a clean checklist and cycle-specific reminder aggregate
+  ---
+  duration_ms: 0.470089
+  type: 'test'
+  ...
+# Subtest: documents: removed requirement stays visible for consent withdrawal without claiming current readiness
+ok 68 - documents: removed requirement stays visible for consent withdrawal without claiming current readiness
+  ---
+  duration_ms: 0.124768
+  type: 'test'
+  ...
+# Subtest: documents: concurrent tracker CAS failure prevents binding write and outbox
+ok 69 - documents: concurrent tracker CAS failure prevents binding write and outbox
+  ---
+  duration_ms: 0.30536
+  type: 'test'
+  ...
+ ❯ tests/integration/section27/section27.test.ts (0 test)
+1..69
+# tests 69
+# suites 0
+# pass 69
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 58.72346
+TAP version 13
+# Subtest: graph continuation: 80 canonical references remain reachable after an unrelated insert; cursor scope cannot cross owners
+ok 1 - graph continuation: 80 canonical references remain reachable after an unrelated insert; cursor scope cannot cross owners
+  ---
+  duration_ms: 2.231067
+  type: 'test'
+  ...
+# Subtest: test owner scoring: changed published version boundaries and ambiguous scales never use mutable root defaults
+ok 2 - test owner scoring: changed published version boundaries and ambiguous scales never use mutable root defaults
+  ---
+  duration_ms: 3.668521
+  type: 'test'
+  ...
+# Subtest: test owner scoring: explicit reviewed variant and section scopes are required independently
+ok 3 - test owner scoring: explicit reviewed variant and section scopes are required independently
+  ---
+  duration_ms: 0.355384
+  type: 'test'
+  ...
+# Subtest: test owner publication: freeze reviewed interpretation into version-local scales, reject foreign variant/section IDs
+ok 4 - test owner publication: freeze reviewed interpretation into version-local scales, reject foreign variant/section IDs
+  ---
+  duration_ms: 1.352345
+  type: 'test'
+  ...
+# Subtest: private academic attestation: replacement, changed cycle/version/digest, expiry and consent withdrawal invalidate readiness
+ok 5 - private academic attestation: replacement, changed cycle/version/digest, expiry and consent withdrawal invalidate readiness
+  ---
+  duration_ms: 0.397729
+  type: 'test'
+  ...
+# Subtest: student document upload: server fixes owner/privacy/retention; malware failure cannot activate or sanitize
+ok 6 - student document upload: server fixes owner/privacy/retention; malware failure cannot activate or sanitize
+  ---
+  duration_ms: 1.597554
+  type: 'test'
+  ...
+# Subtest: private document review: self-review and withdrawn consent stop before delivery grant or audit writes
+ok 7 - private document review: self-review and withdrawn consent stop before delivery grant or audit writes
+  ---
+  duration_ms: 0.51151
+  type: 'test'
+  ...
+# Subtest: scholarship reference decisions: transaction and independent reviewer are mandatory
+ok 8 - scholarship reference decisions: transaction and independent reviewer are mandatory
+  ---
+  duration_ms: 0.461976
+  type: 'test'
+  ...
+# Subtest: integrity CMS: orphan polymorphic reference is reported, unauthorized types are not read, owner failures are not missing rows
+ok 9 - integrity CMS: orphan polymorphic reference is reported, unauthorized types are not read, owner failures are not missing rows
+  ---
+  duration_ms: 1.440808
+  type: 'test'
+  ...
+ ❯ tests/integration/section27/completion-contracts.test.ts (0 test)
+# Subtest: graph API: native cursor reaches its collection; unsupported edge or shared page cannot be silently ignored
+ok 10 - graph API: native cursor reaches its collection; unsupported edge or shared page cannot be silently ignored
+  ---
+  duration_ms: 23.345744
+  type: 'test'
+  ...
+# Subtest: academic review API: support access alone cannot inspect or attest consented documents
+ok 11 - academic review API: support access alone cannot inspect or attest consented documents
+  ---
+  duration_ms: 0.729758
+  type: 'test'
+  ...
+# Subtest: review access: auditing a read does not advance tracker version or invalidate its scheduled reminder
+ok 12 - review access: auditing a read does not advance tracker version or invalidate its scheduled reminder
+  ---
+  duration_ms: 0.427984
+  type: 'test'
+  ...
+# Subtest: student document upload: successful processing delegates every security phase to EAP and only returns ACTIVE
+ok 13 - student document upload: successful processing delegates every security phase to EAP and only returns ACTIVE
+  ---
+  duration_ms: 0.917261
+  type: 'test'
+  ...
+# Subtest: integrity symmetry: probe exact scholarship/program identity, not absence on an unrelated first page
+ok 14 - integrity symmetry: probe exact scholarship/program identity, not absence on an unrelated first page
+  ---
+  duration_ms: 0.368835
+  type: 'test'
+  ...
+# Subtest: scholarship merge review: changed target revision cannot adopt a replacement after proposal
+ok 15 - scholarship merge review: changed target revision cannot adopt a replacement after proposal
+  ---
+  duration_ms: 1.485706
+  type: 'test'
+  ...
+# Subtest: admission variant: a mutable active root variant is not proof it belonged to the published version
+ok 16 - admission variant: a mutable active root variant is not proof it belonged to the published version
+  ---
+  duration_ms: 0.193571
+  type: 'test'
+  ...
+# Subtest: private review delivery: grant is capped by both consent and original asset retention, and access leaves reminder version intact
+ok 17 - private review delivery: grant is capped by both consent and original asset retention, and access leaves reminder version intact
+  ---
+  duration_ms: 0.53818
+  type: 'test'
+  ...
+# Subtest: saved owner lifecycle: reuse of an old slug cannot silently move private history to another canonical owner
+ok 18 - saved owner lifecycle: reuse of an old slug cannot silently move private history to another canonical owner
+  ---
+  duration_ms: 0.242615
+  type: 'test'
+  ...
+# Subtest: private review: withdrawal during grant issuance prevents the URL from being returned
+ok 19 - private review: withdrawal during grant issuance prevents the URL from being returned
+  ---
+  duration_ms: 0.274222
+  type: 'test'
+  ...
+(node:6611) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# Subtest: dashboard counter schema: zero distinct from missing, fractional, negative, coerced or nonfinite
+ok 1 - dashboard counter schema: zero distinct from missing, fractional, negative, coerced or nonfinite
+  ---
+  duration_ms: 1.926699
+  type: 'test'
+  ...
+# Subtest: strict aggregation and qualified partial arithmetic never drop a missing operand silently
+ok 2 - strict aggregation and qualified partial arithmetic never drop a missing operand silently
+  ---
+  duration_ms: 2.91082
+  type: 'test'
+  ...
+# Subtest: permission matrix: platform-only omits owner reads and domain grants never imply audit access
+ok 3 - permission matrix: platform-only omits owner reads and domain grants never imply audit access
+  ---
+  duration_ms: 0.617289
+  type: 'test'
+  ...
+# Subtest: scholarship review 3 is independent of imported 15 and ready 7
+ok 4 - scholarship review 3 is independent of imported 15 and ready 7
+  ---
+  duration_ms: 0.289225
+  type: 'test'
+  ...
+# Subtest: course canonical review, imported review and link/verification workload stay separate
+ok 5 - course canonical review, imported review and link/verification workload stay separate
+  ---
+  duration_ms: 0.17273
+  type: 'test'
+  ...
+# Subtest: CMS 5 in review and 8 ready remain distinct lifecycle counts
+ok 6 - CMS 5 in review and 8 ready remain distinct lifecycle counts
+  ---
+  duration_ms: 0.115694
+  type: 'test'
+  ...
+# Subtest: owner failure in one metric preserves valid independent counts
+ok 7 - owner failure in one metric preserves valid independent counts
+  ---
+  duration_ms: 0.788526
+  type: 'test'
+  ...
+# Subtest: identity envelope reads only human total and routes to identity owner
+ok 8 - identity envelope reads only human total and routes to identity owner
+  ---
+  duration_ms: 0.173682
+  type: 'test'
+  ...
+# Subtest: import owner counters distinguish observed zero, absent statuses and NaN
+ok 9 - import owner counters distinguish observed zero, absent statuses and NaN
+  ---
+  duration_ms: 0.317298
+  type: 'test'
+  ...
+# Subtest: finance projection validates statuses and strips raw attention/financial details
+ok 10 - finance projection validates statuses and strips raw attention/financial details
+  ---
+  duration_ms: 0.473863
+  type: 'test'
+  ...
+# Subtest: 403 revocation erases previous finance evidence; 500/503 keep marked stale evidence
+ok 11 - 403 revocation erases previous finance evidence; 500/503 keep marked stale evidence
+  ---
+  duration_ms: 0.67785
+  type: 'test'
+  ...
+# Subtest: browser read failure never proves health DOWN
+ok 12 - browser read failure never proves health DOWN
+  ---
+  duration_ms: 1.337623
+  type: 'test'
+  ...
+# Subtest: dashboard consumes protected v2 health status/gate unchanged, including DEGRADED
+ok 13 - dashboard consumes protected v2 health status/gate unchanged, including DEGRADED
+  ---
+  duration_ms: 0.984061
+  type: 'test'
+  ...
+# Subtest: freshness ceilings expire health sooner than catalogs and reject future evidence
+ok 14 - freshness ceilings expire health sooner than catalogs and reject future evidence
+  ---
+  duration_ms: 0.273552
+  type: 'test'
+  ...
+# Subtest: source timestamps preserve owner capture separately from receipt and are non-atomic
+ok 15 - source timestamps preserve owner capture separately from receipt and are non-atomic
+  ---
+  duration_ms: 0.12585
+  type: 'test'
+  ...
+# Subtest: timeout is bounded and distinct from runtime failure
+ok 16 - timeout is bounded and distinct from runtime failure
+  ---
+  duration_ms: 0.786333
+  type: 'test'
+  ...
+ ❯ tests/dashboard/section26.test.ts (0 test)
+# Subtest: three concurrent sources progress independently despite one failure
+ok 17 - three concurrent sources progress independently despite one failure
+  ---
+  duration_ms: 9.885187
+  type: 'test'
+  ...
+# Subtest: replacement/unmount abort suppresses late updates
+ok 18 - replacement/unmount abort suppresses late updates
+  ---
+  duration_ms: 0.28554
+  type: 'test'
+  ...
+# Subtest: contextual attention links use registered queue enums; identities and generic handoffs are explicit
+ok 19 - contextual attention links use registered queue enums; identities and generic handoffs are explicit
+  ---
+  duration_ms: 0.848687
+  type: 'test'
+  ...
+# Subtest: coverage gaps and analytics stay unmeasured; no private application source exists
+ok 20 - coverage gaps and analytics stay unmeasured; no private application source exists
+  ---
+  duration_ms: 0.305129
+  type: 'test'
+  ...
+# Subtest: activity requires platform, audit and owner grants before querying; denied is not empty history
+ok 21 - activity requires platform, audit and owner grants before querying; denied is not empty history
+  ---
+  duration_ms: 0.576338
+  type: 'test'
+  ...
+# Subtest: authorization-only activity excludes finance; finance grant permits only its own event and PII is stripped
+ok 22 - authorization-only activity excludes finance; finance grant permits only its own event and PII is stripped
+  ---
+  duration_ms: 7.341759
+  type: 'test'
+  ...
+# Subtest: activity bounded latest ten sort, record policy denial and unknown-target isolation
+ok 23 - activity bounded latest ten sort, record policy denial and unknown-target isolation
+  ---
+  duration_ms: 0.779944
+  type: 'test'
+  ...
+# Subtest: failed activity sources have partial/unavailable scope, not a no-activity verdict
+ok 24 - failed activity sources have partial/unavailable scope, not a no-activity verdict
+  ---
+  duration_ms: 2.594014
+  type: 'test'
+  ...
+# Subtest: activity parser returns only allowlisted event fields and rejects over-limit/malformed feed
+ok 25 - activity parser returns only allowlisted event fields and rejects over-limit/malformed feed
+  ---
+  duration_ms: 0.334764
+  type: 'test'
+  ...
+# Subtest: AR/EN static rendering: accessible exact/partial/forbidden states and zero distinct from unknown
+ok 26 - AR/EN static rendering: accessible exact/partial/forbidden states and zero distinct from unknown
+  ---
+  duration_ms: 22.63291
+  type: 'test'
+  ...
+# Subtest: stale health render never advertises a current green/UP gate
+ok 27 - stale health render never advertises a current green/UP gate
+  ---
+  duration_ms: 4.164007
+  type: 'test'
+  ...
+# Subtest: integration source boundaries: owner guards retained, activity GET query-only, lifecycle cleanup fenced
+ok 28 - integration source boundaries: owner guards retained, activity GET query-only, lifecycle cleanup fenced
+  ---
+  duration_ms: 4.062388
+  type: 'test'
+  ...
+# Subtest: malformed owner and receipt clocks cannot turn a response into fresh evidence
+ok 29 - malformed owner and receipt clocks cannot turn a response into fresh evidence
+  ---
+  duration_ms: 0.22588
+  type: 'test'
+  ...
+# Subtest: invalid and future receipt clocks are stale even when capture time is valid
+ok 30 - invalid and future receipt clocks are stale even when capture time is valid
+  ---
+  duration_ms: 0.167051
+  type: 'test'
+  ...
+# Subtest: partial activity semantics must match the owner availability
+ok 31 - partial activity semantics must match the owner availability
+  ---
+  duration_ms: 0.243186
+  type: 'test'
+  ...
+# Subtest: activity cannot carry blank event identities or action fields
+ok 32 - activity cannot carry blank event identities or action fields
+  ---
+  duration_ms: 0.375625
+  type: 'test'
+  ...
+ ❯ packages/application/tests/read-models/CrossDomainGraphReadService.spec.ts (8 tests | 2 failed) 22ms
+     × aggregates Country detail from owning domains using the canonical P7 country ID 5ms
+     × passes independent country edge cursors without repeated first-page queries 3ms
+ ❯ packages/application/tests/universities/UniversityPublicProjection.spec.ts (3 tests | 1 failed) 10ms
+     × only exposes published-mapped programs and published tests 5ms
+ ❯ packages/application/tests/certificates/CertificatePlanSecurity.spec.ts (41 tests | 5 failed) 43ms
+     × accepts independent official-issuer approval with private evidence 7ms
+     × stores PDF using its intended security classification 2ms
+     × stores PREVIEW using its intended security classification 1ms
+     × stores QR using its intended security classification 1ms
+     × expires a due row once, audits it, and prunes only the bounded retention batch 1ms
+TAP version 13
+# Subtest: 301 rows: one bounded page, accurate partial scope and critical row on seventh continuation
+ok 1 - 301 rows: one bounded page, accurate partial scope and critical row on seventh continuation
+  ---
+  duration_ms: 7.077762
+  type: 'test'
+  ...
+# Subtest: 0, 1 and 1000 owner fixtures: valid empty versus bounded retention
+ok 2 - 0, 1 and 1000 owner fixtures: valid empty versus bounded retention
+  ---
+  duration_ms: 3.916251
+  type: 'test'
+  ...
+# Subtest: role matrix: platform, owner, audit and import grants are independent; private coverage unsupported
+ok 3 - role matrix: platform, owner, audit and import grants are independent; private coverage unsupported
+  ---
+  duration_ms: 0.511295
+  type: 'test'
+  ...
+# Subtest: denied source never issues a request; 403 erases previous data and is not zero
+ok 4 - denied source never issues a request; 403 erases previous data and is not zero
+  ---
+  duration_ms: 0.423534
+  type: 'test'
+  ...
+# Subtest: 404/500 failures retain stale evidence and never expose raw errors
+ok 5 - 404/500 failures retain stale evidence and never expose raw errors
+  ---
+  duration_ms: 0.505607
+  type: 'test'
+  ...
+# Subtest: malformed/empty intermediate page cannot silently reach completion
+ok 6 - malformed/empty intermediate page cannot silently reach completion
+  ---
+  duration_ms: 0.268522
+  type: 'test'
+  ...
+# Subtest: live total transition is stale and cross-page duplicates are retained once
+ok 7 - live total transition is stale and cross-page duplicates are retained once
+  ---
+  duration_ms: 0.363424
+  type: 'test'
+  ...
+ ❯ tests/review-queue/section24.test.ts (0 test)
+ ❯ apps/api/tests/presentation/api/router/AssetPlatformRouter.spec.ts (44 tests | 1 failed) 284ms
+     × projects recovery state without provider coordinates or proof payloads 28ms
+ ❯ packages/infrastructure/tests/international-tests/PrismaInternationalTestRepository.spec.ts (16 tests | 1 failed) 35ms
+     × should enforce published and visible predicates inside findPublishedBySlug 16ms
+ ❯ apps/api/tests/presentation/api/router/MajorAdminRouter.spec.ts (15 tests | 1 failed) 183ms
+     × POST /admin/majors/new-candidates/:key/link links only after an explicit admin choice 14ms
+TAP version 13
+# Subtest: test-discovery: published, independently reviewed current owner link is advertised
+ok 1 - test-discovery: published, independently reviewed current owner link is advertised
+  ---
+  duration_ms: 4.151165
+  type: 'test'
+  ...
+# Subtest: test-discovery: unlinked and revision-changed owners do not advertise stale links
+ok 2 - test-discovery: unlinked and revision-changed owners do not advertise stale links
+  ---
+  duration_ms: 0.298354
+  type: 'test'
+  ...
+# Subtest: test-discovery: unknown or unpublished test stops owner reads
+ok 3 - test-discovery: unknown or unpublished test stops owner reads
+  ---
+  duration_ms: 0.453536
+  type: 'test'
+  ...
+# Subtest: test-discovery: empty filtered candidate page with continuation does not assert globally empty
+ok 4 - test-discovery: empty filtered candidate page with continuation does not assert globally empty
+  ---
+  duration_ms: 0.199667
+  type: 'test'
+  ...
+# Subtest: test-discovery: proposal binds current owner and test revisions rather than caller values
+ok 5 - test-discovery: proposal binds current owner and test revisions rather than caller values
+  ---
+  duration_ms: 0.309922
+  type: 'test'
+  ...
+# Subtest: test-discovery: approval requires a different reviewer and unchanged owner revision
+ok 6 - test-discovery: approval requires a different reviewer and unchanged owner revision
+  ---
+  duration_ms: 0.432063
+  type: 'test'
+  ...
+# Subtest: test-discovery: revoke does not need a still-published owner
+ok 7 - test-discovery: revoke does not need a still-published owner
+  ---
+  duration_ms: 0.257273
+  type: 'test'
+  ...
+# Subtest: test-discovery tool owner: locale, lifecycle and access flags are enforced
+ok 8 - test-discovery tool owner: locale, lifecycle and access flags are enforced
+  ---
+  duration_ms: 0.431072
+  type: 'test'
+  ...
+# Subtest: test-discovery service owner: paid price and current provider qualification are checked
+ok 9 - test-discovery service owner: paid price and current provider qualification are checked
+  ---
+  duration_ms: 0.54358
+  type: 'test'
+  ...
+# Subtest: test-discovery persistence: failed CAS cannot write approval or its audit event
+ok 10 - test-discovery persistence: failed CAS cannot write approval or its audit event
+  ---
+  duration_ms: 0.819701
+  type: 'test'
+  ...
+# Subtest: test-discovery API: uppercase or trailing-slash approval cannot bypass reviewer permission
+ok 11 - test-discovery API: uppercase or trailing-slash approval cannot bypass reviewer permission
+  ---
+  duration_ms: 2.489258
+  type: 'test'
+  ...
+# Subtest: test-discovery web contract: rejects unrelated owner, false emptiness and unsafe URLs
+ok 12 - test-discovery web contract: rejects unrelated owner, false emptiness and unsafe URLs
+  ---
+  duration_ms: 0.432444
+  type: 'test'
+  ...
+ ❯ tests/integration/section27/test-discovery.test.ts (0 test)
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 35.735088
+TAP version 13
+# Subtest: academic explorer: selected filters reach the program owner and scholarships are queried by exact program
+ok 1 - academic explorer: selected filters reach the program owner and scholarships are queried by exact program
+  ---
+  duration_ms: 3.510793
+  type: 'test'
+  ...
+# Subtest: academic explorer: failed optional scholarship owner never becomes a zero count
+ok 2 - academic explorer: failed optional scholarship owner never becomes a zero count
+  ---
+  duration_ms: 0.282482
+  type: 'test'
+  ...
+# Subtest: academic explorer: scholarship pagination checks the program against the exact current scope
+ok 3 - academic explorer: scholarship pagination checks the program against the exact current scope
+  ---
+  duration_ms: 0.41567
+  type: 'test'
+  ...
+# Subtest: academic explorer SQL: all canonical filters apply to one program; total excludes cursor and page limit
+ok 4 - academic explorer SQL: all canonical filters apply to one program; total excludes cursor and page limit
+  ---
+  duration_ms: 1.006192
+  type: 'test'
+  ...
+# Subtest: academic explorer API: public caller cannot request administrative visibility
+ok 5 - academic explorer API: public caller cannot request administrative visibility
+  ---
+  duration_ms: 7.449986
+  type: 'test'
+  ...
+# Subtest: academic explorer API: university permission alone cannot read private major and test states
+ok 6 - academic explorer API: university permission alone cannot read private major and test states
+  ---
+  duration_ms: 0.893985
+  type: 'test'
+  ...
+# Subtest: academic explorer: one owner batch supplies exact per-program scholarship pages
+ok 7 - academic explorer: one owner batch supplies exact per-program scholarship pages
+  ---
+  duration_ms: 0.508179
+  type: 'test'
+  ...
+# Subtest: scholarship owner batch: count and continuation stay independent per canonical program
+ok 8 - scholarship owner batch: count and continuation stay independent per canonical program
+  ---
+  duration_ms: 0.804652
+  type: 'test'
+  ...
+# Subtest: academic explorer: a hidden test is excluded even when its published version and score are valid
+ok 9 - academic explorer: a hidden test is excluded even when its published version and score are valid
+  ---
+  duration_ms: 0.533867
+  type: 'test'
+  ...
+ ❯ tests/integration/section27/academic-program-explorer.test.ts (0 test)
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 24.8465
+TAP version 13
+# Subtest: certificate affiliation: renamed university label is current while historical issuer name remains immutable
+ok 1 - certificate affiliation: renamed university label is current while historical issuer name remains immutable
+  ---
+  duration_ms: 3.439632
+  type: 'test'
+  ...
+# Subtest: certificate affiliation: archived university retires affiliation without invalidating certificate signature
+ok 2 - certificate affiliation: archived university retires affiliation without invalidating certificate signature
+  ---
+  duration_ms: 0.227079
+  type: 'test'
+  ...
+# Subtest: certificate affiliation: reviewed successor binding is explicit and preserves historical owner status
+ok 3 - certificate affiliation: reviewed successor binding is explicit and preserves historical owner status
+  ---
+  duration_ms: 0.177385
+  type: 'test'
+  ...
+# Subtest: certificate affiliation: changed binding without current delegation proof is unverified
+ok 4 - certificate affiliation: changed binding without current delegation proof is unverified
+  ---
+  duration_ms: 0.124986
+  type: 'test'
+  ...
+# Subtest: certificate affiliation: absent owner and legacy snapshots never invent an affiliation
+ok 5 - certificate affiliation: absent owner and legacy snapshots never invent an affiliation
+  ---
+  duration_ms: 0.175212
+  type: 'test'
+  ...
+# Subtest: certificate affiliation: invalid signature never triggers current affiliation lookup
+ok 6 - certificate affiliation: invalid signature never triggers current affiliation lookup
+  ---
+  duration_ms: 0.141411
+  type: 'test'
+  ...
+# Subtest: certificate affiliation: new signed envelope captures owner identity independently of later issuer edits
+ok 7 - certificate affiliation: new signed envelope captures owner identity independently of later issuer edits
+  ---
+  duration_ms: 0.923407
+  type: 'test'
+  ...
+ ❯ tests/integration/section27/certificate-affiliation.test.ts (0 test)
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 17.510607
+ ❯ apps/admin/tests/translations/TranslationWorkspaceInteractions.spec.tsx (4 tests | 3 failed) 141ms
+     × keeps authoring disabled by the actual workspace policy 27ms
+     × preserves the unsaved English draft when Arabic save/readback succeeds 23ms
+     × prevents duplicate writes after a successful save followed by failed readback 26ms
+TAP version 13
+# Subtest: private saved certificate: exact student ownership is passed to owner repository
+ok 1 - private saved certificate: exact student ownership is passed to owner repository
+  ---
+  duration_ms: 1.947686
+  type: 'test'
+  ...
+# Subtest: private saved certificate: foreign certificate and missing owner return no private identity
+ok 2 - private saved certificate: foreign certificate and missing owner return no private identity
+  ---
+  duration_ms: 2.006334
+  type: 'test'
+  ...
+# Subtest: private saved tool: retained owner-scoped copy is required even for caller-forged metadata
+ok 3 - private saved tool: retained owner-scoped copy is required even for caller-forged metadata
+  ---
+  duration_ms: 0.286988
+  type: 'test'
+  ...
+# Subtest: private hydration: foreign rows are discarded before any owner lookup
+ok 4 - private hydration: foreign rows are discarded before any owner lookup
+  ---
+  duration_ms: 0.236914
+  type: 'test'
+  ...
+# Subtest: private retained artifact inspection: valid purpose, expiry and owner yield minimal reference only
+ok 5 - private retained artifact inspection: valid purpose, expiry and owner yield minimal reference only
+  ---
+  duration_ms: 0.843468
+  type: 'test'
+  ...
+# Subtest: private retained artifact inspection: foreign envelope and expired retention fail closed
+ok 6 - private retained artifact inspection: foreign envelope and expired retention fail closed
+  ---
+  duration_ms: 0.18084
+  type: 'test'
+  ...
+ ❯ tests/integration/section27/private-saved-items.test.ts (0 test)
+ ❯ packages/infrastructure/tests/universities/UniversityProgramPilotIntegrity.spec.ts (8 tests | 1 failed) 16ms
+     × rejects a foreign campus before changing the existing program 7ms
+stderr | apps/admin/tests/pages/StudentToolsInteractions.spec.tsx > Section 19 operator request boundaries > removes execution/audit records when the requested trace cannot load
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+
+ ❯ apps/admin/tests/pages/StudentToolsInteractions.spec.tsx (4 tests | 1 failed) 87ms
+     × removes execution/audit records when the requested trace cannot load 21ms
+{"level":30,"time":"2026-10-16T02:38:43.568Z","timestamp":"2026-10-16T02:38:43.568Z","correlationId":"4627d5d2-8571-4fb7-abf4-e69c734ee42d","context":{"method":"GET","url":"/api/v1/monitoring/health/liveness","statusCode":200,"durationMs":7,"correlationId":"4627d5d2-8571-4fb7-abf4-e69c734ee42d"},"msg":"HTTP GET /api/v1/monitoring/health/liveness 200 - 7ms"}
+{"level":50,"time":"2026-10-16T02:38:43.602Z","timestamp":"2026-10-16T02:38:43.602Z","correlationId":"144677ec-1a72-4293-a093-bb121947e155","context":{"path":"/api/v1/monitoring/health/liveness","method":"POST","traceId":"144677ec-1a72-4293-a093-bb121947e155"},"error":{"name":"SyntaxError","message":"Expected property name or '}' in JSON at position 2 (line 1 column 3)","stack":"SyntaxError: Expected property name or '}' in JSON at position 2 (line 1 column 3)\n    at JSON.parse (<anonymous>)\n    at parse (/workspace/MANARATAK-First-/node_modules/body-parser/lib/types/json.js:96:19)\n    at /workspace/MANARATAK-First-/node_modules/body-parser/lib/read.js:128:18\n    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)\n    at invokeCallback (/workspace/MANARATAK-First-/node_modules/raw-body/index.js:238:16)\n    at done (/workspace/MANARATAK-First-/node_modules/raw-body/index.js:227:7)\n    at IncomingMessage.onEnd (/workspace/MANARATAK-First-/node_modules/raw-body/index.js:287:7)\n    at IncomingMessage.emit (node:events:518:28)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at processTicksAndRejections (node:internal/process/task_queues:90:21)"},"msg":"Unhandled Exception: Expected property name or '}' in JSON at position 2 (line 1 column 3)"}
+{"level":50,"time":"2026-10-16T02:38:43.603Z","timestamp":"2026-10-16T02:38:43.603Z","correlationId":"144677ec-1a72-4293-a093-bb121947e155","context":{"method":"POST","url":"/api/v1/monitoring/health/liveness","statusCode":500,"durationMs":7,"correlationId":"144677ec-1a72-4293-a093-bb121947e155"},"msg":"HTTP POST /api/v1/monitoring/health/liveness 500 - 7ms"}
+ ❯ apps/web/src/features/public-template/publicDesignImport.spec.ts (7 tests | 2 failed) 40ms
+     × does not replace an empty live course response with fixtures 24ms
+     × renders a small supplied course response without swapping its identity 6ms
+{"level":40,"time":"2026-10-16T02:39:20.994Z","timestamp":"2026-10-16T02:39:20.994Z","correlationId":"b0639065-e0a0-4d63-b199-1416d4458f19","context":{"method":"GET","url":"/api/v1/auth/csrf-token","statusCode":401,"durationMs":5,"correlationId":"b0639065-e0a0-4d63-b199-1416d4458f19"},"msg":"HTTP GET /api/v1/auth/csrf-token 401 - 5ms"}
+{"level":30,"time":"2026-10-16T02:39:21.003Z","timestamp":"2026-10-16T02:39:21.003Z","correlationId":"b49e6650-48d9-40da-a3aa-97122e199924","context":{"method":"GET","url":"/api/v1/monitoring/health/liveness","statusCode":200,"durationMs":3,"correlationId":"b49e6650-48d9-40da-a3aa-97122e199924"},"msg":"HTTP GET /api/v1/monitoring/health/liveness 200 - 3ms"}
+{"level":40,"time":"2026-10-16T02:39:21.010Z","timestamp":"2026-10-16T02:39:21.010Z","correlationId":"09d3b2ab-d156-49aa-943f-b2b6ecd95bcf","context":{"method":"GET","url":"/api/v1/files","statusCode":401,"durationMs":2,"correlationId":"09d3b2ab-d156-49aa-943f-b2b6ecd95bcf"},"msg":"HTTP GET /api/v1/files 401 - 2ms"}
+{"level":40,"time":"2026-10-16T02:39:21.013Z","timestamp":"2026-10-16T02:39:21.013Z","correlationId":"78dde1dc-09cc-4306-96d6-0b3300da63aa","context":{"method":"GET","url":"/api/v1/files","statusCode":401,"durationMs":1,"correlationId":"78dde1dc-09cc-4306-96d6-0b3300da63aa"},"msg":"HTTP GET /api/v1/files 401 - 1ms"}
+{"level":40,"time":"2026-10-16T02:39:21.018Z","timestamp":"2026-10-16T02:39:21.018Z","correlationId":"5bff13a2-b873-4f00-b6db-943dab6ab554","context":{"method":"GET","url":"/api/v1/reference-data","statusCode":404,"durationMs":3,"correlationId":"5bff13a2-b873-4f00-b6db-943dab6ab554"},"msg":"HTTP GET /api/v1/reference-data 404 - 3ms"}
+{"level":40,"time":"2026-10-16T02:39:21.021Z","timestamp":"2026-10-16T02:39:21.021Z","correlationId":"569e721c-2b67-4e14-a5a2-f5e13c685c3c","context":{"method":"GET","url":"/api/v1/academic-taxonomy/degree-levels","statusCode":404,"durationMs":1,"correlationId":"569e721c-2b67-4e14-a5a2-f5e13c685c3c"},"msg":"HTTP GET /api/v1/academic-taxonomy/degree-levels 404 - 1ms"}
+ ❯ packages/application/tests/localization/LocalizedPublicQueries.spec.ts (3 tests | 1 failed) 10ms
+     × projects University list results while preserving INS identity 7ms
+ ❯ apps/web/src/features/public-template/tests/StudyDestinationPublicMapping.spec.ts (2 tests | 1 failed) 19ms
+     × loads a single 20-item discovery page and forwards search filters to the owner 4ms
+TAP version 13
+# Subtest: graph labels: published major translation beats draft candidates
+ok 1 - graph labels: published major translation beats draft candidates
+  ---
+  duration_ms: 1.038341
+  type: 'test'
+  ...
+# Subtest: graph labels: service public snapshot owns translations instead of a newer draft
+ok 2 - graph labels: service public snapshot owns translations instead of a newer draft
+  ---
+  duration_ms: 2.538707
+  type: 'test'
+  ...
+# Subtest: graph labels: program translations require exact target, field and publication review
+ok 3 - graph labels: program translations require exact target, field and publication review
+  ---
+  duration_ms: 0.704389
+  type: 'test'
+  ...
+# Subtest: graph labels: unpublished test names cannot become reviewed localized labels
+ok 4 - graph labels: unpublished test names cannot become reviewed localized labels
+  ---
+  duration_ms: 0.16652
+  type: 'test'
+  ...
+ ❯ tests/integration/section27/graph-owner-labels.test.ts (0 test)
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 19.673706
+ ❯ packages/application/tests/read-models/P4CrossDomainSourceInvariants.spec.ts (6 tests | 1 failed) 10ms
+     × projects Major reverse reads from P11/P12/P13 owner queries keyed by canonical majorId 6ms
+ ❯ apps/api/tests/presentation/api/router/Section13Governance.spec.ts (5 tests | 3 failed) 58ms
+     × requires the displayed version/state precondition for approval 28ms
+     × returns conflict for a stale approval screen 5ms
+     × sanitizes unexpected persistence errors 5ms
+ ❯ apps/admin/src/pages/audit/AuditViewModel.spec.ts (12 tests | 1 failed) 32ms
+     × offers owner links only with the matching permission and escapes IDs 4ms
+ ❯ apps/admin/src/pages/AssetAdminPage.spec.tsx (3 tests | 1 failed) 43ms
+     × keeps governance, security actions and reusable picker readable in English 20ms
+ ❯ packages/infrastructure/tests/scholarships/ScholarshipListSourceBoundary.spec.ts (5 tests | 1 failed) 28ms
+     × university and program constraints use the same link 14ms
+ ❯ tests/risk-audit/Risk06To09SourceRepairs.spec.ts (4 tests | 1 failed) 27ms
+     × does not hide Major catalog DB enrichment failures in runtime environments 23ms
+ ❯ apps/web/src/features/public-template/MajorDiscovery.spec.ts (3 tests | 1 failed) 32ms
+     × passes query, degree and cursor to the published owner API without draining the catalog 5ms
+TAP version 13
+# Subtest: strict schemas reject unknown fields and wrong transport types
+ok 1 - strict schemas reject unknown fields and wrong transport types
+  ---
+  duration_ms: 9.138769
+  type: 'test'
+  ...
+# Subtest: bounded nested payloads fail closed
+ok 2 - bounded nested payloads fail closed
+  ---
+  duration_ms: 6.314271
+  type: 'test'
+  ...
+ ❯ tests/security/strict-edge-validation-runtime.test.ts (0 test)
+ ❯ apps/web/src/features/public-template/academicReports.spec.ts (3 tests | 3 failed) 20ms
+     × does not present sample audit statistics in mode undefined 15ms
+     × does not present sample audit statistics in mode api 3ms
+     × labels prototype examples and renders CSP compatible progress values 1ms
+ ❯ apps/api/tests/presentation/api/locale/LocaleQueryContract.spec.ts (5 tests | 1 failed) 12ms
+     × normalizes repeated query values to the last value 5ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 10 ⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/dashboard/section26.test.ts [ tests/dashboard/section26.test.ts ]
+Error: No test suite found in file /workspace/MANARATAK-First-/tests/dashboard/section26.test.ts
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/43]⎯
+
+ FAIL  tests/review-queue/section24.test.ts [ tests/review-queue/section24.test.ts ]
+Error: No test suite found in file /workspace/MANARATAK-First-/tests/review-queue/section24.test.ts
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/43]⎯
+
+ FAIL  tests/security/strict-edge-validation-runtime.test.ts [ tests/security/strict-edge-validation-runtime.test.ts ]
+Error: No test suite found in file /workspace/MANARATAK-First-/tests/security/strict-edge-validation-runtime.test.ts
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/43]⎯
+
+ FAIL  tests/integration/section27/academic-program-explorer.test.ts [ tests/integration/section27/academic-program-explorer.test.ts ]
+Error: No test suite found in file /workspace/MANARATAK-First-/tests/integration/section27/academic-program-explorer.test.ts
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/43]⎯
+
+ FAIL  tests/integration/section27/certificate-affiliation.test.ts [ tests/integration/section27/certificate-affiliation.test.ts ]
+Error: No test suite found in file /workspace/MANARATAK-First-/tests/integration/section27/certificate-affiliation.test.ts
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/43]⎯
+
+ FAIL  tests/integration/section27/completion-contracts.test.ts [ tests/integration/section27/completion-contracts.test.ts ]
+Error: No test suite found in file /workspace/MANARATAK-First-/tests/integration/section27/completion-contracts.test.ts
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/43]⎯
+
+ FAIL  tests/integration/section27/graph-owner-labels.test.ts [ tests/integration/section27/graph-owner-labels.test.ts ]
+Error: No test suite found in file /workspace/MANARATAK-First-/tests/integration/section27/graph-owner-labels.test.ts
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/43]⎯
+
+ FAIL  tests/integration/section27/private-saved-items.test.ts [ tests/integration/section27/private-saved-items.test.ts ]
+Error: No test suite found in file /workspace/MANARATAK-First-/tests/integration/section27/private-saved-items.test.ts
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/43]⎯
+
+ FAIL  tests/integration/section27/section27.test.ts [ tests/integration/section27/section27.test.ts ]
+Error: No test suite found in file /workspace/MANARATAK-First-/tests/integration/section27/section27.test.ts
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/43]⎯
+
+ FAIL  tests/integration/section27/test-discovery.test.ts [ tests/integration/section27/test-discovery.test.ts ]
+Error: No test suite found in file /workspace/MANARATAK-First-/tests/integration/section27/test-discovery.test.ts
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/43]⎯
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 33 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/risk-audit/Risk06To09SourceRepairs.spec.ts > RISK-06 through RISK-09 source closure > does not hide Major catalog DB enrichment failures in runtime environments
+AssertionError: expected 'import fs from \'fs\';\nimport path f…' to contain 'this.options.productionLike === true'
+
+- Expected
++ Received
+
+- this.options.productionLike === true
++ import fs from 'fs';
++ import path from 'path';
++ import { Prisma, PrismaClient } from '@prisma/client';
++ import { MajorFilters, PaginatedMajorResult } from '@manaratak/domain';
++
++ export interface CatalogItemDto {
++   id: string;
++   profileId?: string;
++   displayName: string;
++   nameAr?: string;
++   nameEn?: string;
++   code: string;
++   degreeLevel: string;
++   catalogKind: string;
++   targetDomain: string;
++   collegeOrField?: string;
++   academicFieldOrDiscipline?: string;
++   collegeOrFaculty?: string;
++   classificationCode?: string;
++   sourceFileName?: string;
++   status: string;
++   completenessStatus?: string;
++   sectionCount?: number;
++   sourceType?: string;
++   updatedAt?: string;
++   hasDbDetails?: boolean;
++ }
++
++ export interface Phase10CatalogRepositoryOptions {
++   catalogPath?: string;
++   productionLike?: boolean;
++ }
++
++ export class Phase10CatalogRepository {
++   private static cachedCatalog: { items: CatalogItemDto[]; mtimeMs: number } | null = null;
++   private static cachedDetails: Map<
++     string,
++     { sections: any[]; sourceFileName: string; collegeOrFaculty?: string }
++   > | null = null;
++
++   constructor(
++     private readonly prisma: PrismaClient,
++     private readonly options: Phase10CatalogRepositoryOptions = {},
++   ) {}
++
++   public loadCatalog(): CatalogItemDto[] {
++     const possiblePaths = [
++       ...(this.options.catalogPath ? [path.resolve(this.options.catalogPath)] : []),
++       '/app/applet/workspace/catalog-index/phase10CatalogIndex.json',
++     ];
++
++     let currentDir = process.cwd();
++     for (let i = 0; i < 6; i++) {
++       possiblePaths.push(path.join(currentDir, 'workspace/catalog-index/phase10CatalogIndex.json'));
++       const parent = path.dirname(currentDir);
++       if (parent === currentDir) break;
++       currentDir = parent;
++     }
++
++     if (typeof __dirname !== 'undefined') {
++       let dir = __dirname;
++       for (let i = 0; i < 6; i++) {
++         possiblePaths.push(path.join(dir, 'workspace/catalog-index/phase10CatalogIndex.json'));
++         const parent = path.dirname(dir);
++         if (parent === dir) break;
++         dir = parent;
++       }
++     }
++
++     let items: CatalogItemDto[] = [];
++
++     let currentMtimeMs = 0;
++
++     for (const p of possiblePaths) {
++       if (fs.existsSync(p)) {
++         try {
++           const stats = fs.statSync(p);
++           currentMtimeMs = stats.mtimeMs;
++
++           if (
++             Phase10CatalogRepository.cachedCatalog &&
++             Phase10CatalogRepository.cachedCatalog.mtimeMs === currentMtimeMs
++           ) {
++             return Phase10CatalogRepository.cachedCatalog.items;
++           }
++
++           const content = fs.readFileSync(p, 'utf-8');
++           const parsed = JSON.parse(content);
++           if (Array.isArray(parsed) && parsed.length > 0) {
++             items = parsed;
++             break;
++           }
++         } catch (err) {
++           console.error(`Failed reading catalog index at ${p}:`, err);
++         }
++       }
++     }
++
++     if (items.length > 0) {
++       console.log('[Phase10CatalogRepository.loadCatalog] LOADED items count:', items.length);
++       Phase10CatalogRepository.cachedCatalog = { items, mtimeMs: currentMtimeMs };
++       return items;
++     }
++
++     throw new Error(
++       'Phase10CatalogRepository: Failed to load complete catalog index from any known path. Will not fallback to DB-only state.',
++     );
++   }
++
++   public async listCatalog(filters: MajorFilters & { catalog?: string }): Promise<PaginatedMajorResult<CatalogItemDto>> {
++     const page=filters.page??1,pageSize=filters.pageSize??50;
++     if(!Number.isSafeInteger(page)||page<1||page>1000||!Number.isSafeInteger(pageSize)||pageSize<1||pageSize>100)throw new Error('MAJOR_CATALOG_PAGE_INVALID');
++     const rawCatalog=this.loadCatalog();if(rawCatalog.length>5000)throw new Error('MAJOR_SOURCE_CATALOG_SCOPE_TOO_LARGE');
++     const details=this.loadDetails();
++     const source=rawCatalog.map(item=>{const detail=details.get(item.code);return detail?{...item,collegeOrField:detail.collegeOrFaculty||item.collegeOrField,collegeOrFaculty:detail.collegeOrFaculty||item.collegeOrFaculty,sectionCount:detail.sections.length,sourceType:'DETAIL_DOSSIER',sourceFileName:detail.sourceFileName}:item;});
++     // Enrichment, filters, counts and paging happen in SQL. Only one bounded page leaves PostgreSQL.
++     const cte=Prisma.sql`WITH source AS (SELECT item,ordinality AS position FROM jsonb_array_elements(${JSON.stringify(source)}::jsonb) WITH ORDINALITY AS src(item,ordinality)),
++       collisions AS (SELECT p.code FROM source JOIN "MajorLevelProfile" p ON p.code=source.item->>'code' GROUP BY p.code HAVING COUNT(*)>1),
++       enriched AS (SELECT source.position,source.item || CASE WHEN p.id IS NULL THEN jsonb_build_object('hasDbDetails',false)
++         ELSE jsonb_strip_nulls(jsonb_build_object('id',p."majorId",'profileId',p.id,'hasDbDetails',true,
++           'displayName',COALESCE(p."localizedNameAr",p."displayName",source.item->>'displayName'),
++           'nameAr',p."localizedNameAr",'nameEn',p."localizedNameEn",'status',p.status,'completenessStatus',p."completenessStatus",'updatedAt',p."updatedAt"::text)) END AS item
++         FROM source LEFT JOIN "MajorLevelProfile" p ON p.code=source.item->>'code'),
++       supplemental AS (SELECT 5001::bigint AS position,jsonb_strip_nulls(jsonb_build_object('id',m.id,'profileId',p.id,'hasDbDetails',true,'code',p.code,'classificationCode',p.code,'displayName',COALESCE(p."localizedNameAr",p."displayName",m."displayName"),'nameAr',p."localizedNameAr",'nameEn',p."localizedNameEn",'degreeLevel',p.level,'catalogKind',p.level,'targetDomain','MAJORS','status',p.status,'completenessStatus',p."completenessStatus",'collegeOrField',COALESCE(p."collegeContext",f."canonicalName",d."canonicalName"),'academicFieldOrDiscipline',COALESCE(f."canonicalName",d."canonicalName"),'collegeOrFaculty',p."collegeContext",'sourceType','DISCOVERY_QUEUE','updatedAt',p."updatedAt"::text)) AS item
++         FROM "MajorLevelProfile" p JOIN "Major" m ON m.id=p."majorId" LEFT JOIN "AcademicTaxonomyNode" f ON f.id=COALESCE(p."academicFieldId",m."academicFieldId") LEFT JOIN "AcademicTaxonomyNode" d ON d.id=COALESCE(p."disciplineId",m."disciplineId") WHERE p.code IS NOT NULL AND NOT EXISTS(SELECT 1 FROM source WHERE source.item->>'code'=p.code)
++         UNION ALL SELECT 5002::bigint,jsonb_strip_nulls(jsonb_build_object('id',m.id,'hasDbDetails',true,'code',m."publicId",'displayName',COALESCE(m."localizedNameAr",m."displayName"),'nameAr',m."localizedNameAr",'nameEn',m."localizedNameEn",'degreeLevel',m."optionalFields"->>'degreeLevel','catalogKind',m."optionalFields"->>'degreeLevel','targetDomain','MAJORS','status',m.status,'completenessStatus',m."completenessStatus",'updatedAt',m."updatedAt"::text))
++         FROM "Major" m WHERE NOT EXISTS(SELECT 1 FROM "MajorLevelProfile" p WHERE p."majorId"=m.id) AND NOT EXISTS(SELECT 1 FROM source WHERE source.item->>'code'=m."publicId")),
++       matching AS (SELECT * FROM (SELECT * FROM enriched UNION ALL SELECT * FROM supplemental) catalog WHERE
++         (${filters.degreeLevel??null}::text IS NULL OR UPPER(COALESCE(item->>'catalogKind',item->>'degreeLevel'))=UPPER(${filters.degreeLevel??null}))
++         AND (${filters.status??null}::text IS NULL OR item->>'status'=${filters.status??null})
++         AND (${filters.completenessStatus??null}::text IS NULL OR item->>'completenessStatus'=${filters.completenessStatus??null})
++         AND (${filters.academicFieldOrDiscipline??null}::text IS NULL OR COALESCE(item->>'collegeOrField','') ILIKE ${'%'+(filters.academicFieldOrDiscipline??'')+'%'} OR COALESCE(item->>'academicFieldOrDiscipline','') ILIKE ${'%'+(filters.academicFieldOrDiscipline??'')+'%'})
++         AND (${filters.search??null}::text IS NULL OR concat_ws(' ',item->>'code',item->>'displayName',item->>'nameAr',item->>'nameEn',item->>'collegeOrField') ILIKE ${'%'+(filters.search??'')+'%'})),
++       paged AS (SELECT position,item FROM matching ORDER BY position,item->>'code',item->>'id' LIMIT ${pageSize} OFFSET ${(page-1)*pageSize})
++       SELECT COALESCE((SELECT jsonb_agg(item ORDER BY position,item->>'code',item->>'id') FROM paged),'[]'::jsonb) AS data,(SELECT COUNT(*)::text FROM matching) AS total,(SELECT COUNT(*)::int FROM collisions) AS "ambiguousCodes"`;
++     const rows=await this.prisma.$queryRaw<Array<{data:CatalogItemDto[];total:string;ambiguousCodes:number}>>(cte);
++     if(!rows[0])throw new Error('MAJOR_CATALOG_READ_UNAVAILABLE');
++     if(rows[0].ambiguousCodes>0)throw new Error('MAJOR_SOURCE_CODE_CONFLICT');
++     const total=Number(rows[0].total);return {data:rows[0].data,total,page,pageSize,totalPages:Math.ceil(total/pageSize)};
++   }
++
++   public maxCodeNumber(prefix: 'MJR' | 'MAS' | 'DOC' | 'FEL'): number {
++     let max = 0;
++     for (const item of this.loadCatalog()) {
++       const match = item.code?.match(new RegExp(`^${prefix}-([0-9]+)$`));
++       if (match) max = Math.max(max, Number(match[1]));
++     }
++     return max;
++   }
++
++
++   public getCatalogItem(id: string): CatalogItemDto | null {
++     const code = id.replace(/^cat-/, '');
++     const item = this.loadCatalog().find(
++       (candidate) => candidate.id === id || candidate.code === code,
++     );
++     if (!item) return null;
++     const detail = this.loadDetails().get(item.code);
++     return {
++       ...item,
++       collegeOrField: detail?.collegeOrFaculty || item.collegeOrField,
++       collegeOrFaculty: detail?.collegeOrFaculty || item.collegeOrFaculty,
++       sectionCount: detail?.sections.length ?? item.sectionCount ?? 0,
++       sourceType: detail ? 'DETAIL_DOSSIER' : item.sourceType,
++       sourceFileName: detail?.sourceFileName || item.sourceFileName,
++       hasDbDetails: false,
++     };
++   }
++
++   public getCatalogContentSections(id: string): any[] {
++     const code = id.replace(/^cat-/, '');
++     return this.loadDetails().get(code)?.sections ?? [];
++   }
++
++   public getCatalogSource(id: string): any[] {
++     const item = this.getCatalogItem(id);
++     if (!item) return [];
++     return [
++       {
++         sourceType: item.sourceType,
++         sourceName: item.sourceFileName,
++         sourceUri: `workspace/phase-10-major-detail-dossiers/${item.sourceFileName}`,
++       },
++     ];
++   }
++
++   public listCollegeFacets(degreeLevel?: string) {
++     const target = degreeLevel?.toUpperCase();
++     const groups = new Map<string, { name: string; degrees: Set<string>; majorCount: number }>();
++     for (const base of this.loadCatalog()) {
++       const detail = this.loadDetails().get(base.code);
++       const item = detail
++         ? {
++             ...base,
++             collegeOrField: detail.collegeOrFaculty || base.collegeOrField,
++             collegeOrFaculty: detail.collegeOrFaculty || base.collegeOrFaculty,
++           }
++         : base;
++       const degree = item.degreeLevel || item.catalogKind;
++       if (target && degree.toUpperCase() !== target) continue;
++       const name = item.collegeOrFaculty || item.collegeOrField || item.academicFieldOrDiscipline;
++       if (!name?.trim()) continue;
++       const current = groups.get(name) ?? { name, degrees: new Set<string>(), majorCount: 0 };
++       current.degrees.add(degree);
++       current.majorCount += 1;
++       groups.set(name, current);
++     }
++     return [...groups.values()]
++       .map((group) => ({
++         name: group.name,
++         supportedDegrees: [...group.degrees].sort(),
++         majorCount: group.majorCount,
++       }))
++       .sort((a, b) => a.name.localeCompare(b.name, 'ar'));
++   }
++
++   private loadDetails() {
++     if (Phase10CatalogRepository.cachedDetails) return Phase10CatalogRepository.cachedDetails;
++     const result = new Map<
++       string,
++       { sections: any[]; sourceFileName: string; collegeOrFaculty?: string }
++     >();
++     const roots = this.findWorkspaceRoots()
++       .map((root) => path.join(root, 'phase-10-major-detail-dossiers'))
++       .filter((root) => fs.existsSync(root));
++     for (const root of roots.slice(0, 1)) {
++       for (const filePath of this.walkMarkdown(root)) {
++         const content = fs.readFileSync(filePath, 'utf8');
++         const recordPattern = /^#\s+\d+\.\s+.+?(?=^#\s+\d+\.|(?![\s\S]))/gms;
++         for (const match of content.matchAll(recordPattern)) {
++           const record = match[0];
++           const code = record.match(/\b(?:MJR|MAS|DOC|FEL)-\d{4}\b/)?.[0];
++           if (!code) continue;
++           const collegeOrFaculty = record
++             .match(/^\|\s*(?:الكلية|المجال الأكاديمي|المجال المهني)\s*\|\s*([^|]+)\|/m)?.[1]
++             ?.trim();
++           const headings = [...record.matchAll(/^##\s+(.+)$/gm)];
++           const sections = headings
++             .map((heading, index) => {
++               const start = (heading.index ?? 0) + heading[0].length;
++               const end = headings[index + 1]?.index ?? record.length;
++               return {
++                 id: `${code}-${index + 1}`,
++                 sectionKey: `${String(index + 1).padStart(2, '0')}-${heading[1].trim()}`,
++                 title: heading[1].replace(/^\d+(?:\.\d+)*[).:-]?\s*/, '').trim(),
++                 content: record.slice(start, end).trim(),
++                 reviewStatus: 'NEEDS_REVIEW',
++               };
++             })
++             .filter((section) => section.content);
++           result.set(code, { sections, sourceFileName: path.basename(filePath), collegeOrFaculty });
++         }
++       }
++     }
++     Phase10CatalogRepository.cachedDetails = result;
++     return result;
++   }
++
++   private findWorkspaceRoots() {
++     const roots: string[] = [];
++     let current = process.cwd();
++     for (let i = 0; i < 7; i++) {
++       roots.push(path.join(current, 'workspace'));
++       const parent = path.dirname(current);
++       if (parent === current) break;
++       current = parent;
++     }
++     return roots;
++   }
++   private walkMarkdown(root: string): string[] {
++     return fs
++       .readdirSync(root, { withFileTypes: true })
++       .flatMap((entry) =>
++         entry.isDirectory()
++           ? this.walkMarkdown(path.join(root, entry.name))
++           : entry.name.toLowerCase().endsWith('.md')
++             ? [path.join(root, entry.name)]
++             : [],
++       );
++   }
++ }
++
+
+ ❯ tests/risk-audit/Risk06To09SourceRepairs.spec.ts:17:21
+     15|     const catalog = source('packages/infrastructure/src/majors/Phase10…
+     16|     expect(catalog).toContain('this.options.catalogPath');
+     17|     expect(catalog).toContain('this.options.productionLike === true');
+       |                     ^
+     18|     expect(catalog).not.toContain('process.env');
+     19|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/43]⎯
+
+ FAIL  apps/admin/src/pages/AssetAdminPage.spec.tsx > asset workspace bilingual contract > keeps governance, security actions and reusable picker readable in English
+AssertionError: expected '<div><div class="mt-4 space-y-4 borde…' to contain 'No asset'
+
+Expected: "No asset"
+Received: "<div><div class="mt-4 space-y-4 border-t pt-4"><div class="flex flex-wrap gap-2"><button type="button" class="rounded-lg border px-3 py-2">Copy asset ID </button><button type="button" class="rounded-lg border px-3 py-2">Copy asset reference </button><span class="p-2 text-slate-500">Owner route is unavailable for this type </span></div><p role="status"></p><dl class="grid gap-3 md:grid-cols-3"><div><dt>Dimensions </dt><dd>Not recorded</dd></div><div><dt>Duration in seconds </dt><dd>Not recorded</dd></div><div><dt>Legal hold until </dt><dd>Unable to determine hold status</dd></div></dl><section aria-label="Recorded processing evidence"><h3 class="font-bold">Recorded processing evidence </h3><p class="my-2 text-slate-500">These are the latest saved evidence entries, not a complete audit history of all attempts. </p><p>No evidence dates recorded. </p></section><section aria-label="Asset version history"><h3 class="font-bold">Asset version history </h3><ul class="mt-2 space-y-2"><li class="rounded-lg bg-slate-50 p-2">Version 1 — 1/1/2026, 12:00:00 AM<span> — No checksum recorded for this version </span></li></ul></section></div><div class="mt-4 rounded-lg border p-3"><h3 class="font-bold">Lifecycle actions </h3><p class="my-2 text-slate-500">The server verifies state, permissions and evidence for each action. Deletion here is logical; this view offers no physical deletion. </p><div class="flex flex-wrap gap-2"><button type="button" class="rounded-lg border px-3 py-2 disabled:opacity-50">Archive file</button><button type="button" class="rounded-lg border px-3 py-2 disabled:opacity-50">Soft delete</button></div></div><p role="status">Asset selection requires reuse permission.</p></div>"
+
+ ❯ apps/admin/src/pages/AssetAdminPage.spec.tsx:35:18
+     33|     expect(html).toContain('Asset version history');
+     34|     expect(html).toContain('Archive file');
+     35|     expect(html).toContain('No asset');
+       |                  ^
+     36|   });
+     37| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/43]⎯
+
+ FAIL  apps/admin/tests/pages/StudentToolsInteractions.spec.tsx > Section 19 operator request boundaries > removes execution/audit records when the requested trace cannot load
+AssertionError: expected '{"type":"main","props":{"dir":"ltr","…' not to contain 'old-trace'
+
+Expected: "old-trace"
+Received: "{"type":"main","props":{"dir":"ltr","className":"mx-auto max-w-6xl space-y-5 p-5 text-[#142B5F]"},"children":[{"type":"h1","props":{"className":"text-2xl font-bold"},"children":["tools19_title"]},{"type":"a","props":{"href":"/student-tools","data-discover":"true"},"children":["tools19_back"]},{"type":"h2","props":{},"children":["GPA"]},{"type":"section","props":{"className":"border rounded-xl p-4 space-y-3"},"children":[{"type":"h3","props":{},"children":["Reviewed test discovery links"]},{"type":"p","props":{},"children":["Opt in from this owner. Another reviewer must approve. Owner or test revision changes require a new proposal."]},{"type":"p","props":{"role":"alert"},"children":["Could not load or save links. Check permissions, current revisions and independent review."]},{"type":"div","props":{"className":"block space-y-1 text-xs font-medium text-slate-700"},"children":[{"type":"span","props":{},"children":["Published test"]},{"type":"input","props":{"type":"search","maxLength":200,"aria-label":"Search Published test","value":"new-trace","disabled":false,"placeholder":"Search owner records (up to 50 results)","className":"w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"},"children":null},{"type":"select","props":{"aria-label":"Published test","value":"","disabled":true,"className":"w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm disabled:bg-slate-50"},"children":[{"type":"option","props":{"value":""},"children":["Loading…"]}]},{"type":"span","props":{"className":"flex gap-3"},"children":[{"type":"button","props":{"type":"button","disabled":true},"children":["السابق"]},{"type":"span","props":{},"children":["1"]},{"type":"button","props":{"type":"button","disabled":true},"children":["التالي"]}]}]},{"type":"label","props":{},"children":["Review reason",{"type":"input","props":{"value":"","maxLength":2000},"children":null}]},{"type":"button","props":{"type":"button","disabled":true},"children":["Propose link / opt in"]},{"type":"button","props":{"type":"button","disabled":false},"children":["Refresh"]},{"type":"ul","props":{},"children":null},{"type":"button","props":{"type":"button","disabled":true},"children":["First page"]},{"type":"button","props":{"type":"button","disabled":true},"children":["Next links"]}]},{"type":"button","props":{"type":"button","disabled":false},"children":["tools19_refresh"]},{"type":"p","props":{},"children":["tools19_version",": ","1.1.0"," · ","tools19_revision",":"," ","1"," · "," · ","tools19_value_HEALTHY"]},{"type":"form","props":{},"children":[{"type":"fieldset","props":{"disabled":false,"className":"space-y-3 border p-4"},"children":[{"type":"legend","props":{},"children":["tools19_metadata"]},{"type":"label","props":{"className":"block"},"children":["tools19_field_nameAr",{"type":"input","props":{"className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]"},"children":null}]},{"type":"label","props":{"className":"block"},"children":["tools19_field_nameEn",{"type":"input","props":{"className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]","value":"GPA"},"children":null}]},{"type":"label","props":{"className":"block"},"children":["tools19_field_descriptionAr",{"type":"input","props":{"className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]"},"children":null}]},{"type":"label","props":{"className":"block"},"children":["tools19_field_descriptionEn",{"type":"input","props":{"className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]"},"children":null}]},{"type":"label","props":{"className":"block"},"children":["tools19_field_category",{"type":"input","props":{"className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]"},"children":null}]},{"type":"label","props":{"className":"block"},"children":["tools19_field_implementationPriority",{"type":"input","props":{"className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]"},"children":null}]},{"type":"label","props":{"className":"block"},"children":["tools19_field_desiredLaunchVisibility",{"type":"input","props":{"className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]"},"children":null}]},{"type":"label","props":{"className":"block"},"children":["tools19_field_tags",{"type":"input","props":{"className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]","value":""},"children":null}]},{"type":"label","props":{"className":"block"},"children":["tools19_field_estimatedMinutes",{"type":"input","props":{"type":"number","min":0,"max":100000,"className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]","value":0},"children":null}]},{"type":"label","props":{"className":"block"},"children":["tools19_field_iconAssetId",{"type":"input","props":{"className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]","value":""},"children":null}]},{"type":"button","props":{"type":"submit","disabled":true},"children":["tools19_save"]}]}]},{"type":"label","props":{"className":"block"},"children":["tools19_reason",{"type":"textarea","props":{"className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]","value":"","maxLength":2000},"children":null}]},{"type":"form","props":{},"children":[{"type":"fieldset","props":{"disabled":false,"className":"space-y-3 border p-4"},"children":[{"type":"legend","props":{},"children":["tools19_availability"]},{"type":"label","props":{"className":"block"},"children":[{"type":"input","props":{"type":"checkbox"},"children":null}," ","tools19_field_publicEnabled"]},{"type":"label","props":{"className":"block"},"children":[{"type":"input","props":{"type":"checkbox"},"children":null}," ","tools19_field_anonymousEnabled"]},{"type":"label","props":{"className":"block"},"children":[{"type":"input","props":{"type":"checkbox"},"children":null}," ","tools19_field_authenticatedEnabled"]},{"type":"label","props":{"className":"block"},"children":[{"type":"input","props":{"type":"checkbox"},"children":null}," ","tools19_field_adminOnly"]},{"type":"label","props":{"className":"block"},"children":[{"type":"input","props":{"type":"checkbox"},"children":null}," ","tools19_field_maintenanceMode"]},{"type":"label","props":{},"children":["tools19_locales",{"type":"input","props":{"className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]","value":"en"},"children":null}]},{"type":"p","props":{},"children":["tools19_region_notice"]},{"type":"button","props":{"type":"submit","disabled":true},"children":["tools19_save_version"]}]}]},{"type":"form","props":{},"children":[{"type":"fieldset","props":{"disabled":false,"className":"border p-4"},"children":[{"type":"legend","props":{},"children":["tools19_flags"]},{"type":"label","props":{"className":"block"},"children":[{"type":"input","props":{"type":"checkbox"},"children":null},"tools19_field_globallyEnabled"]},{"type":"label","props":{"className":"block"},"children":[{"type":"input","props":{"type":"checkbox"},"children":null},"tools19_field_anonymousEnabled"]},{"type":"label","props":{"className":"block"},"children":[{"type":"input","props":{"type":"checkbox"},"children":null},"tools19_field_authenticatedEnabled"]},{"type":"label","props":{"className":"block"},"children":[{"type":"input","props":{"type":"checkbox"},"children":null},"tools19_field_maintenanceMode"]},{"type":"button","props":{"type":"submit","disabled":true},"children":["tools19_save_version"]}]}]},{"type":"section","props":{"className":"border p-4 space-y-3"},"children":[{"type":"h3","props":{},"children":["tools19_release"]},{"type":"p","props":{},"children":["tools19_no_approval"]},{"type":"div","props":{"className":"flex gap-3"},"children":[{"type":"button","props":{"type":"button","disabled":true},"children":["tools19_PROPOSE"]},{"type":"button","props":{"type":"button","disabled":true},"children":["tools19_APPROVE"]},{"type":"button","props":{"type":"button","disabled":true},"children":["tools19_REJECT"]},{"type":"button","props":{"type":"button","disabled":true},"children":["tools19_ACTIVATE"]}]},{"type":"div","props":{"className":"flex gap-3"},"children":[{"type":"button","props":{"type":"button","disabled":true},"children":["tools19_testing"]},{"type":"button","props":{"type":"button","disabled":true},"children":["tools19_deprecate"]},{"type":"button","props":{"type":"button","disabled":true},"children":["tools19_retire"]}]}]},{"type":"section","props":{"className":"border p-4"},"children":[{"type":"h3","props":{},"children":["tools19_eligibility"]},{"type":"label","props":{},"children":["tools19_consumer",{"type":"select","props":{"value":"ANONYMOUS"},"children":[{"type":"option","props":{"value":"ANONYMOUS"},"children":["tools19_value_ANONYMOUS"]},{"type":"option","props":{"value":"AUTHENTICATED_STUDENT"},"children":["tools19_value_AUTHENTICATED_STUDENT"]}]}]},{"type":"button","props":{"type":"button","disabled":false},"children":["tools19_evaluate"]},{"type":"pre","props":{},"children":["null"]}]},{"type":"form","props":{},"children":[{"type":"fieldset","props":{"disabled":false,"className":"border p-4"},"children":[{"type":"legend","props":{},"children":["tools19_test"]},{"type":"p","props":{},"children":["tools19_test_notice"]},{"type":"label","props":{},"children":[{"type":"input","props":{"type":"checkbox","checked":false},"children":null},"tools19_test_approval"]},{"type":"label","props":{},"children":["tools19_test_input",{"type":"textarea","props":{"dir":"ltr","className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]","value":"{}"},"children":null}]},{"type":"button","props":{"type":"submit"},"children":["tools19_run"]},{"type":"pre","props":{"dir":"ltr"},"children":["null"]}]}]},{"type":"details","props":{},"children":[{"type":"summary","props":{},"children":["tools19_contracts"]},{"type":"pre","props":{"dir":"ltr"},"children":["{\n  \"input\": {},\n  \"output\": {},\n  \"dependencies\": []\n}"]}]},{"type":"details","props":{},"children":[{"type":"summary","props":{},"children":["tools19_telemetry"]},{"type":"p","props":{},"children":["tools19_denominator"]},{"type":"pre","props":{},"children":["{}"]}]},{"type":"div","props":{"className":"grid gap-3 sm:grid-cols-3"},"children":[{"type":"label","props":{},"children":["tools19_trace_filter",{"type":"input","props":{"maxLength":200,"className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]","value":""},"children":null}]},{"type":"label","props":{},"children":["tools19_status",{"type":"select","props":{"className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]","value":""},"children":[{"type":"option","props":{"value":""},"children":["tools19_all"]},{"type":"option","props":{"value":"RUNNING"},"children":["tools19_value_RUNNING"]},{"type":"option","props":{"value":"COMPLETED"},"children":["tools19_value_COMPLETED"]},{"type":"option","props":{"value":"FAILED"},"children":["tools19_value_FAILED"]},{"type":"option","props":{"value":"BLOCKED"},"children":["tools19_value_BLOCKED"]},{"type":"option","props":{"value":"UNKNOWN_OUTCOME"},"children":["tools19_value_UNKNOWN_OUTCOME"]}]}]},{"type":"label","props":{},"children":["tools19_traffic",{"type":"select","props":{"className":"rounded border border-[#0E7C86]/30 p-2 bg-transparent w-full focus:border-[#0E7C86]","value":""},"children":[{"type":"option","props":{"value":""},"children":["tools19_all"]},{"type":"option","props":{"value":"true"},"children":["tools19_test"]},{"type":"option","props":{"value":"false"},"children":["tools19_student"]}]}]}]},{"type":"section","props":{},"children":[{"type":"h3","props":{},"children":["tools19_executions"]},{"type":"pre","props":{"dir":"ltr","className":"overflow-auto"},"children":["[\n  {\n    \"traceId\": \"old-trace\"\n  }\n]"]},{"type":"button","props":{"type":"button","disabled":true},"children":["tools19_previous"]},{"type":"span","props":{},"children":["1"," · ","1"]},{"type":"button","props":{"type":"button","disabled":true},"children":["tools19_next"]}]},{"type":"section","props":{},"children":[{"type":"h3","props":{},"children":["tools19_audit"]},{"type":"pre","props":{"dir":"ltr","className":"overflow-auto"},"children":["[\n  {\n    \"event\": \"old-audit\"\n  }\n]"]},{"type":"button","props":{"type":"button","disabled":true},"children":["tools19_previous"]},{"type":"span","props":{},"children":["1"," · ","1"]},{"type":"button","props":{"type":"button","disabled":true},"children":["tools19_next"]}]}]}"
+
+ ❯ apps/admin/tests/pages/StudentToolsInteractions.spec.tsx:81:27
+     79|     const trace = tree.root.findAllByType('input').find((n) => n.props…
+     80|     await act(async () => trace.props.onChange({ target: { value: 'new…
+     81|     expect(content()).not.toContain('old-trace');
+       |                           ^
+     82|     expect(content()).not.toContain('old-audit');
+     83|     expect(content()).toContain('tools19_load_failed');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/43]⎯
+
+ FAIL  apps/admin/tests/translations/TranslationWorkspaceInteractions.spec.tsx > Translation workspace lightweight component interactions > keeps authoring disabled by the actual workspace policy
+ FAIL  apps/admin/tests/translations/TranslationWorkspaceInteractions.spec.tsx > Translation workspace lightweight component interactions > preserves the unsaved English draft when Arabic save/readback succeeds
+ FAIL  apps/admin/tests/translations/TranslationWorkspaceInteractions.spec.tsx > Translation workspace lightweight component interactions > prevents duplicate writes after a successful save followed by failed readback
+TypeError: Cannot read properties of undefined (reading 'map')
+ ❯ TranslationOwnerCapabilitiesPanel apps/admin/src/components/TranslationOwnerCapabilitiesPanel.tsx:47:15
+     45|       {error && <p role="alert">{error}</p>}
+     46|       <ul>
+     47|         {data.map((capability) => (
+       |               ^
+     48|           <li key={capability.key}>
+     49|             <Link to={capability.ownerPath}>{names[capability.key] ?? …
+ ❯ Object.react_stack_bottom_frame node_modules/react-test-renderer/cjs/react-test-renderer.development.js:15670:20
+ ❯ renderWithHooks node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4863:22
+ ❯ updateFunctionComponent node_modules/react-test-renderer/cjs/react-test-renderer.development.js:7018:19
+ ❯ beginWork node_modules/react-test-renderer/cjs/react-test-renderer.development.js:8499:18
+ ❯ runWithFiberInDEV node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13
+ ❯ performUnitOfWork node_modules/react-test-renderer/cjs/react-test-renderer.development.js:13224:22
+ ❯ workLoopSync node_modules/react-test-renderer/cjs/react-test-renderer.development.js:13068:41
+ ❯ renderRootSync node_modules/react-test-renderer/cjs/react-test-renderer.development.js:13049:11
+ ❯ performWorkOnRoot node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12253:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/43]⎯
+
+ FAIL  packages/application/tests/certificates/CertificatePlanSecurity.spec.ts > section 14 authority and privacy regressions > accepts independent official-issuer approval with private evidence
+AssertionError: expected "vi.fn()" to be called with arguments: [ Array(3) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+    "issuer",
+    {
+      "status": "ACTIVE",
+    },
+-   ObjectContaining {
++   {
++     "actorId": "checker",
++     "expectedIssuerUpdatedAt": "2026-10-10T00:00:00.000Z",
+      "issuerApproval": {
+        "authorityReference": "authority",
+        "evidenceAssetId": "evidence",
++       "evidenceChecksum": null,
+      },
++     "reason": "Authority evidence reviewed",
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ packages/application/tests/certificates/CertificatePlanSecurity.spec.ts:100:39
+     98|     const h = issuerHarness();
+     99|     await h.useCases.approveIssuer('issuer', 'evidence', 'authority', …
+    100|     expect(h.repository.updateIssuer).toHaveBeenCalledWith(
+       |                                       ^
+    101|       'issuer',
+    102|       { status: 'ACTIVE' },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/43]⎯
+
+ FAIL  packages/application/tests/certificates/CertificatePlanSecurity.spec.ts > section 14 authority and privacy regressions > stores PDF using its intended security classification
+ FAIL  packages/application/tests/certificates/CertificatePlanSecurity.spec.ts > section 14 authority and privacy regressions > stores PREVIEW using its intended security classification
+ FAIL  packages/application/tests/certificates/CertificatePlanSecurity.spec.ts > section 14 authority and privacy regressions > stores QR using its intended security classification
+AssertionError: expected [Function] to throw error including 'stop before network' but got 'this.ingest.requestGeneratedCertifica…'
+
+Expected: "stop before network"
+Received: "this.ingest.requestGeneratedCertificateUpload is not a function"
+
+ ❯ packages/application/tests/certificates/CertificatePlanSecurity.spec.ts:188:7
+    186|           },
+    187|         }),
+    188|       ).rejects.toThrow('stop before network');
+       |       ^
+    189|       expect(ingest.requestGeneratedCertificateUpload.mock.calls[0][0]…
+    190|         kind === 'QR' ? 'PUBLIC' : 'INTERNAL',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/43]⎯
+
+ FAIL  packages/application/tests/certificates/CertificatePlanSecurity.spec.ts > scheduled bounded expiry maintenance > expires a due row once, audits it, and prunes only the bounded retention batch
+AssertionError: expected "vi.fn()" to be called with arguments: [ ObjectContaining {"take": 100} ]
+
+Number of calls: 0
+
+ ❯ packages/application/tests/certificates/CertificatePlanSecurity.spec.ts:615:52
+    613|     expect(await repo.expireDue(new Date('2026-10-10'), 'maintenance')…
+    614|     expect(tx.$queryRaw.mock.calls[0][0].join('')).toContain('LIMIT 10…
+    615|     expect(tx.certificateVerificationLog.findMany).toHaveBeenCalledWit…
+       |                                                    ^
+    616|       expect.objectContaining({ take: 100 }),
+    617|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/43]⎯
+
+ FAIL  packages/application/tests/localization/LocalizedPublicQueries.spec.ts > localized public query adapters > projects University list results while preserving INS identity
+AssertionError: expected 'University of Florence' to be 'جامعة فلورنسا' // Object.is equality
+
+Expected: "جامعة فلورنسا"
+Received: "University of Florence"
+
+ ❯ packages/application/tests/localization/LocalizedPublicQueries.spec.ts:44:40
+     42|     const result = await new LocalizedPublicUniversityUseCases(reposit…
+     43|     expect(result.data[0].publicId).toBe('INS-ITA-0010');
+     44|     expect(result.data[0].displayName).toBe('جامعة فلورنسا');
+       |                                        ^
+     45|   });
+     46|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/43]⎯
+
+ FAIL  packages/application/tests/read-models/CrossDomainGraphReadService.spec.ts > CrossDomainGraphReadService P4 canonical projections > aggregates Country detail from owning domains using the canonical P7 country ID
+AssertionError: expected "vi.fn()" to be called with arguments: [ [ 'major-1' ] ]
+
+Number of calls: 0
+
+ ❯ packages/application/tests/read-models/CrossDomainGraphReadService.spec.ts:121:52
+    119|     expect(ctx.universityRepository.listPublished).toHaveBeenCalledWit…
+    120|     expect(ctx.scholarshipRepository.listPublished).toHaveBeenCalledWi…
+    121|     expect(ctx.internationalTestRepository.listPublished).toHaveBeenCa…
+       |                                                    ^
+    122|     expect(ctx.majorRepository.findPublishedByIds).toHaveBeenCalledWit…
+    123|     expect(ctx.courseRelationshipRepository.listPublishedRelatedCourse…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/43]⎯
+
+ FAIL  packages/application/tests/read-models/CrossDomainGraphReadService.spec.ts > CrossDomainGraphReadService P4 canonical projections > passes independent country edge cursors without repeated first-page queries
+AssertionError: expected "vi.fn()" to be called with arguments: [ ObjectContaining {"page": 3} ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   ObjectContaining {
+-     "page": 3,
++   {
++     "countryIso2Code": "YE",
++     "cursor": undefined,
++     "cursorMode": true,
++     "page": 1,
++     "pageSize": 12,
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ packages/application/tests/read-models/CrossDomainGraphReadService.spec.ts:149:59
+    148|     expect(ctx.courseRelationshipRepository.listPublishedRelatedCourse…
+    149|       expect.objectContaining({ cursor: 'course-next' }),
+    150|     );
+       | ^
+    151|     expect(ctx.universityRepository.listPublishedMajorGraph).toHaveBee…
+    152|       expect.objectContaining({countryReferenceId:'country-ye',cursor:…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/43]⎯
+
+ FAIL  packages/application/tests/read-models/P4CrossDomainSourceInvariants.spec.ts > P4 cross-domain read-model source invariants > projects Major reverse reads from P11/P12/P13 owner queries keyed by canonical majorId
+AssertionError: expected 'import {finalizeGraph,type GraphEdgeC…' to contain 'Boolean(program.degreeLevelId)'
+
+- Expected
++ Received
+
+- Boolean(program.degreeLevelId)
++ import {finalizeGraph,type GraphEdgeCursors} from './GraphPagination';
++ import {graphProgramLabel,graphPublishedLabel,graphMajorLabel,graphUniversityLabel,graphScholarshipLabel,graphTestLabel,graphServiceLabel,graphCareerLabel,graphCountryLabel} from './GraphOwnerLabels';
++ import type {TestDiscoveryPage} from '@manaratak/domain';
++ import type {TestDiscoveryOwnerUseCases} from '../integration/TestDiscoveryOwnerUseCases';
++ import {
++   createGraphReadScope,
++   graphOwnerRead,
++   requireGraphFirstPage,
++   type GraphReadScope,
++ } from './GraphReadPolicy';
++ import {
++   ICourseRelationshipRepository,
++   ICmsRepository,
++   CmsDomainTargetType,
++   PublicCmsContentDto,
++   IMajorRepository,
++   IReferenceDataRepository,
++   IInternationalTestRepository,
++   InternationalTestDto,
++   IScholarshipRepository,
++   IServiceCatalogRepository,
++   ICareerRepository,
++   IUniversityRepository,
++   MajorDto,
++   MajorStatus,
++   isPublicUniversityProgram,
++   isPublicScholarshipUniversityLink,
++   isPublicAdmissionRequirement,
++   PublicCourseFilters,
++   ScholarshipDto,
++   UniversityAcademicProgramReadDto,
++   UniversityDto,
++   UniversityStatus,
++ } from '@manaratak/domain';
++
++ type MajorGraphReadRepository = IMajorRepository & Required<Pick<IMajorRepository, 'findPublishedByIds'>>;
++ type UniversityGraphReadRepository = IUniversityRepository & Required<
++   Pick<IUniversityRepository, 'findPublishedByIds' | 'findPublishedAcademicProgramsByIds'>
++ >;
++
++ export interface StableEntityReadIdentity {
++   ownerId: string;
++   publicId?: string;
++   slug?: string;
++   canonicalCode?: string;
++   displayName: string;
++   labelLocale?: string;
++   localeFallback?: boolean;
++ }
++
++ export interface AcademicProgramGraphIdentity {
++   ownerId: string;
++   universityOwnerId: string;
++   universityPublicId: string;
++   universitySlug: string;
++   universityDisplayName: string;
++   sourceProgramName: string;
++   degreeLevelId?: string | null;
++   majorOwnerId?: string | null;
++   majorMappingState: string;
++   status: string;
++ }
++
++ export interface PaginatedGraphCollection<T> {
++   nextCursor?: string | null;
++   hasMore?: boolean;
++   data: T[];
++   total: number;
++   page: number;
++   pageSize: number;
++   totalPages: number;
++ }
++
++ export interface MajorUniversityGraphItem extends StableEntityReadIdentity {
++   matchingPrograms: Array<{
++     ownerId: string;
++     sourceProgramName: string;
++     degreeLevelId?: string | null;
++     majorOwnerId: string;
++   }>;
++ }
++
++
++ export interface EditorialGraphIdentity {
++   contentId: string;
++   publicId: string;
++   slug: string;
++   contentType: string;
++   title: string;
++   summary?: string | null;
++   locale: string;
++   publishedAt: Date;
++ }
++
++ export interface MajorGraphReadModel {
++   readScope?: GraphReadScope;
++   subject: StableEntityReadIdentity;
++   relationships: {
++     universities: PaginatedGraphCollection<MajorUniversityGraphItem>;
++     scholarships: PaginatedGraphCollection<StableEntityReadIdentity>;
++     courses: PaginatedGraphCollection<StableEntityReadIdentity & {
++       directCourseUrl: string;
++       providerName?: string | null;
++       category?: string | null;
++     }>;
++     editorialContent: EditorialGraphIdentity[];
++   };
++ }
++
++ export interface UniversityGraphReadModel {
++   readScope?: GraphReadScope;
++   subject: StableEntityReadIdentity;
++   countryOwnerId?: string | null;
++   relationships: {
++     majors: StableEntityReadIdentity[];
++     academicPrograms: Array<{
++       ownerId: string;
++       sourceProgramName: string;
++       degreeLevelId?: string | null;
++       majorOwnerId: string;
++     }>;
++     scholarships: PaginatedGraphCollection<StableEntityReadIdentity>;
++     editorialContent: EditorialGraphIdentity[];
++   };
++ }
++
++ export interface ScholarshipGraphReadModel {
++   readScope?: GraphReadScope;
++   subject: StableEntityReadIdentity;
++   countryOwnerId?: string | null;
++   relationships: {
++     universities: StableEntityReadIdentity[];
++     academicPrograms: AcademicProgramGraphIdentity[];
++     majors: StableEntityReadIdentity[];
++     editorialContent: EditorialGraphIdentity[];
++   };
++ }
++
++ export interface InternationalTestGraphReadModel {
++   readScope?: GraphReadScope;
++   subject: StableEntityReadIdentity & { providerName: string; status: string };
++   relationships: {
++     universities: PaginatedGraphCollection<StableEntityReadIdentity & {
++       matchingPrograms: Array<{
++         ownerId: string;
++         sourceProgramName: string;
++         minimumScore?: number | null;
++         status: string;
++       }>;
++     }>;
++     scholarships: PaginatedGraphCollection<StableEntityReadIdentity>;
++     editorialContent: EditorialGraphIdentity[];
++     preparationCourses: PaginatedGraphCollection<StableEntityReadIdentity & {
++       directCourseUrl: string;
++       providerName?: string | null;
++       category?: string | null;
++     }>;
++     studentTools: TestDiscoveryPage;
++     services: TestDiscoveryPage;
++   };
++ }
++
++ export interface CountryGraphReadModel {
++   readScope?: GraphReadScope;
++   subject: StableEntityReadIdentity & { canonicalCode: string };
++   relationships: {
++     universities: PaginatedGraphCollection<StableEntityReadIdentity>;
++     academicPrograms: AcademicProgramGraphIdentity[];
++     majors: StableEntityReadIdentity[];
++     scholarships: PaginatedGraphCollection<StableEntityReadIdentity>;
++     internationalTests: PaginatedGraphCollection<StableEntityReadIdentity & { providerName: string; status: string }>;
++     services: PaginatedGraphCollection<StableEntityReadIdentity & { serviceCategory: string; deliveryMode: string }>;
++     careerJobs: PaginatedGraphCollection<StableEntityReadIdentity & { opportunityType: string; employmentType: string }>;
++     providerHeadquartersCourses: PaginatedGraphCollection<StableEntityReadIdentity & {
++       directCourseUrl: string;
++       providerName?: string | null;
++       category?: string | null;
++     }>;
++     editorialContent: EditorialGraphIdentity[];
++   };
++ }
++
++ export interface CrossDomainGraphReadOptions extends GraphEdgeCursors {
++   page?: number;
++   pageSize?: number;
++   courseFilters?: PublicCourseFilters;
++   locale?: 'ar' | 'en';
++   programCursor?: string;
++   toolCursor?:string;
++   universityCursor?: string;
++   scholarshipCursor?: string;
++   serviceCursor?: string;
++   courseCursor?: string;
++   testCursor?:string;
++   careerCursor?:string;
++   majorCursor?:string;
++   editorialCursor?:string;
++   testPage?: number;
++   careerPage?: number;
++ }
++
++ /**
++  * P4 composition-only read service.
++  *
++  * It does not persist cross-domain collections and it never resolves relationships by display name.
++  * Every collection is queried from its owning domain repository using canonical owner IDs.
++  */
++ export class CrossDomainGraphReadService {
++   public constructor(
++     private readonly majorRepository: MajorGraphReadRepository,
++     private readonly universityRepository: UniversityGraphReadRepository,
++     private readonly scholarshipRepository: IScholarshipRepository,
++     private readonly internationalTestRepository: IInternationalTestRepository,
++     private readonly courseRelationshipRepository: ICourseRelationshipRepository,
++     private readonly referenceDataRepository: IReferenceDataRepository,
++     private readonly cmsRepository?: ICmsRepository,
++     private readonly serviceCatalogRepository?: IServiceCatalogRepository,
++     private readonly careerRepository?: ICareerRepository,
++     private readonly studentToolTestDiscovery?:Pick<TestDiscoveryOwnerUseCases,'publicPage'>,
++     private readonly serviceTestDiscovery?:Pick<TestDiscoveryOwnerUseCases,'publicPage'>,
++   ) {}
++
++   public async getMajorGraphBySlug(slug: string, options: CrossDomainGraphReadOptions = {}): Promise<MajorGraphReadModel> {
++     const subjectSlug=this.required(slug,'MAJOR_SLUG_REQUIRED');
++     const major=this.majorRepository.findPublishedSnapshot?await this.majorRepository.findPublishedSnapshot(subjectSlug):await this.majorRepository.findBySlug(subjectSlug);
++     if (!major || major.status !== MajorStatus.PUBLISHED) throw new Error('Major not found');
++
++     const readScope = createGraphReadScope();
++
++     const { pageSize } = this.pagination(options);
++     const [universities, scholarships, courses, editorialContent] = await Promise.all([
++       graphOwnerRead(readScope,'universities',()=>this.universityRepository.listPublished({ majorId: major.id, cursor: options.universityCursor, limit: pageSize }),this.emptyPage(pageSize)),
++       graphOwnerRead(readScope,'scholarships',()=>this.scholarshipRepository.listPublished({ majorId: major.id, cursor:options.scholarshipCursor, limit: pageSize }),this.emptyPage(pageSize)),
++       graphOwnerRead(readScope,'courses',()=>this.courseRelationshipRepository.listPublishedCoursesForMajor(major.id, {
++         ...options.courseFilters,
++         cursor: options.courseCursor,
++         limit: pageSize,
++       }),this.emptyPage(pageSize)),
++       graphOwnerRead(
++         readScope,
++         'editorialContent',
++         this.cmsRepository?.listPublishedByDomainTarget
++           ? () => this.relatedEditorial(CmsDomainTargetType.MAJOR, major.id, options.locale ?? 'ar', options, readScope)
++           : undefined,
++         [],
++       ),
++     ]);
++
++     return finalizeGraph({
++       readScope,
++       subject: this.majorIdentity(major, options.locale),
++       relationships: {
++         universities: {
++           ...universities,
++           data: universities.data.map((university) => this.majorUniversityIdentity(university, major.id, options.locale)),
++         },
++         scholarships: {
++           ...scholarships,
++           data: scholarships.data.map((scholarship) => this.scholarshipIdentity(scholarship, options.locale)),
++         },
++         courses: {
++           ...courses,
++           data: courses.data.map((course) => ({
++             ownerId: course.ownerId,
++             publicId: course.publicId,
++             slug: course.slug,
++             ...graphPublishedLabel(course.displayName,course.localizedNames,options.locale),
++             directCourseUrl: course.directCourseUrl,
++             providerName: course.providerName,
++             category: course.category,
++           })),
++         },
++         editorialContent,
++       },
++     }, `getMajorGraphBySlug:${major.id}`, options, pageSize);
++   }
++
++   public async getUniversityGraphBySlug(slug: string, options: CrossDomainGraphReadOptions = {}): Promise<UniversityGraphReadModel> {
++     const university = await this.universityRepository.findBySlug(this.required(slug, 'UNIVERSITY_SLUG_REQUIRED'));
++     if (!university || university.status !== UniversityStatus.PUBLISHED) throw new Error('University not found');
++
++     const readScope = createGraphReadScope();
++     const canonicalPrograms = (university.academicPrograms ?? []).filter(
++       (program): program is UniversityAcademicProgramReadDto & { majorId: string; degreeLevelId: string } =>
++         isPublicUniversityProgram(program),
++     );
++     const majorIds = [...new Set(canonicalPrograms.map((program) => program.majorId))];
++     const { pageSize } = this.pagination(options);
++     const [majors, scholarships, editorialContent] = await Promise.all([
++       graphOwnerRead(readScope,'majors',()=>this.majorRepository.findPublishedByIds(majorIds),[]),
++       graphOwnerRead(readScope,'scholarships',()=>this.scholarshipRepository.listPublished({ universityId: university.id, cursor:options.scholarshipCursor, limit: pageSize }),this.emptyPage(pageSize)),
++       graphOwnerRead(
++         readScope,
++         'editorialContent',
++         this.cmsRepository?.listPublishedByDomainTarget
++           ? () =>
++               this.relatedEditorial(CmsDomainTargetType.UNIVERSITY, university.id, options.locale ?? 'ar', options, readScope)
++           : undefined,
++         [],
++       ),
++     ]);
++     const publishedMajorIds = new Set(majors.map((major) => major.id));
++     const publishedCanonicalPrograms = canonicalPrograms.filter((program) => publishedMajorIds.has(program.majorId));
++
++     return finalizeGraph({
++       readScope,
++       subject: this.universityIdentity(university, options.locale),
++       countryOwnerId: university.countryReferenceId,
++       relationships: {
++         majors: majors.map((major) => this.majorIdentity(major, options.locale)),
++         academicPrograms: publishedCanonicalPrograms.map((program) => ({
++           ownerId: program.id,
++           sourceProgramName: program.sourceProgramName,
++           ...graphProgramLabel(university,program,options.locale),
++           degreeLevelId: program.degreeLevelId,
++           majorOwnerId: program.majorId,
++         })),
++         scholarships: {
++           ...scholarships,
++           data: scholarships.data.map((scholarship) => this.scholarshipIdentity(scholarship, options.locale)),
++         },
++         editorialContent,
++       },
++     }, `getUniversityGraphBySlug:${university.id}`, options, pageSize);
++   }
++
++   public async getScholarshipGraphBySlug(slug: string, options: CrossDomainGraphReadOptions = {}): Promise<ScholarshipGraphReadModel> {
++     const scholarship = await this.scholarshipRepository.findPublishedBySlug(this.required(slug, 'SCHOLARSHIP_SLUG_REQUIRED'));
++     if (!scholarship) throw new Error('Scholarship not found');
++
++     const readScope = createGraphReadScope();
++
++     const universityIds = [...new Set(
++       (scholarship.universityLinks ?? []).filter(link => isPublicScholarshipUniversityLink(link as Parameters<typeof isPublicScholarshipUniversityLink>[0]))
++         .map((link) => link.universityId)
++         .filter((id): id is string => Boolean(id)),
++     )];
++     const academicProgramIds = [...new Set(
++       (scholarship.universityLinks ?? []).filter(link => isPublicScholarshipUniversityLink(link as Parameters<typeof isPublicScholarshipUniversityLink>[0]))
++         .map((link) => link.academicProgramId)
++         .filter((id): id is string => Boolean(id)),
++     )];
++     const directMajorIds = [...new Set([
++       ...(scholarship.majorTargets ?? []).map((target) => target.majorId),
++       ...(scholarship.eligibilityItems ?? []).map((item) => item.majorId),
++     ].filter((id): id is string => Boolean(id)))];
++
++     const [universities, programs] = await Promise.all([
++       graphOwnerRead(readScope,'universities',()=>this.universityRepository.findPublishedByIds(universityIds),[]),
++       graphOwnerRead(readScope,'academicPrograms',()=>this.universityRepository.findPublishedAcademicProgramsByIds(academicProgramIds),[]),
++     ]);
++     const programMajorIds = programs.map((program) => program.majorId).filter((id): id is string => Boolean(id));
++     const [majors, editorialContent] = await Promise.all([
++       graphOwnerRead(readScope,'majors',()=>this.majorRepository.findPublishedByIds([...new Set([...directMajorIds, ...programMajorIds])]),[]),
++       graphOwnerRead(
++         readScope,
++         'editorialContent',
++         this.cmsRepository?.listPublishedByDomainTarget
++           ? () =>
++               this.relatedEditorial(CmsDomainTargetType.SCHOLARSHIP, scholarship.id, options.locale ?? 'ar', options, readScope)
++           : undefined,
++         [],
++       ),
++     ]);
++
++     const programUniversityIdentities: StableEntityReadIdentity[] = programs.map((program) => ({
++       ownerId: program.universityOwnerId,
++       publicId: program.universityPublicId,
++       slug: program.universitySlug,
++       ...graphPublishedLabel(program.universityDisplayName, program.universityLocalizedNames, options.locale),
++     }));
++
++     return finalizeGraph({
++       readScope,
++       subject: this.scholarshipIdentity(scholarship, options.locale),
++       countryOwnerId: scholarship.countryReferenceId,
++       relationships: {
++         universities: this.uniqueIdentities([
++           ...universities.map((university) => this.universityIdentity(university, options.locale)),
++           ...programUniversityIdentities,
++         ]),
++         academicPrograms: programs.map((program) => ({
++           ownerId: program.ownerId,
++           universityOwnerId: program.universityOwnerId,
++           universityPublicId: program.universityPublicId,
++           universitySlug: program.universitySlug,
++           universityDisplayName: graphPublishedLabel(program.universityDisplayName,program.universityLocalizedNames,options.locale).displayName,
++           universityLocaleFallback:graphPublishedLabel(program.universityDisplayName,program.universityLocalizedNames,options.locale).localeFallback,
++           ...graphPublishedLabel(program.sourceProgramName,program.localizedNames,options.locale),
++           sourceProgramName: program.sourceProgramName,
++           degreeLevelId: program.degreeLevelId,
++           majorOwnerId: program.majorId,
++           majorMappingState: program.majorMappingState,
++           status: program.status,
++         })),
++         majors: majors.map((major) => this.majorIdentity(major, options.locale)),
++         editorialContent,
++       },
++     }, `getScholarshipGraphBySlug:${scholarship.id}`, options, this.pagination(options).pageSize);
++   }
++
++   public async getInternationalTestGraphById(id: string, options: CrossDomainGraphReadOptions = {}): Promise<InternationalTestGraphReadModel> {
++     const candidate=await this.internationalTestRepository.findById(this.required(id,'INTERNATIONAL_TEST_ID_REQUIRED'));
++     const test=candidate&&typeof candidate.slug==='string'&&this.internationalTestRepository.findPublishedBySlug?await this.internationalTestRepository.findPublishedBySlug(candidate.slug):candidate;
++     if (!test || test.status !== 'PUBLISHED') throw new Error('International test not found');
++     const readScope = createGraphReadScope();
++     const { pageSize } = this.pagination(options);
++     const [universities, scholarships, preparationCourses, editorialContent, studentTools, services] = await Promise.all([
++       graphOwnerRead(readScope,'universities',()=>this.universityRepository.listPublished({ internationalTestId: test.id, cursor:options.universityCursor, limit: pageSize }),this.emptyPage(pageSize)),
++       graphOwnerRead(readScope,'scholarships',()=>this.scholarshipRepository.listPublished({ internationalTestId: test.id, cursor:options.scholarshipCursor, limit: pageSize }),this.emptyPage(pageSize)),
++       graphOwnerRead(readScope,'preparationCourses',()=>this.courseRelationshipRepository.listPublishedCoursesForInternationalTest(test.id, {
++         ...options.courseFilters,
++         cursor: options.courseCursor,
++         limit: pageSize,
++       }),this.emptyPage(pageSize)),
++       graphOwnerRead(
++         readScope,
++         'editorialContent',
++         this.cmsRepository?.listPublishedByDomainTarget
++           ? () =>
++               this.relatedEditorial(CmsDomainTargetType.INTERNATIONAL_TEST, test.id, options.locale ?? 'ar', options, readScope)
++           : undefined,
++         [],
++       ),
++       graphOwnerRead(readScope,'studentTools',this.studentToolTestDiscovery?()=>this.studentToolTestDiscovery!.publicPage(test.id,options.locale??'ar',options.toolCursor,pageSize):undefined,{ownerDomain:'STUDENT_TOOLS',state:'UNAVAILABLE',data:[],hasMore:false,nextCursor:null,scanned:0} as TestDiscoveryPage),
++       graphOwnerRead(readScope,'services',this.serviceTestDiscovery?()=>this.serviceTestDiscovery!.publicPage(test.id,options.locale??'ar',options.serviceCursor,pageSize):undefined,{ownerDomain:'SERVICES',state:'UNAVAILABLE',data:[],hasMore:false,nextCursor:null,scanned:0} as TestDiscoveryPage),
++     ]);
++
++     return finalizeGraph({
++       readScope,
++       subject: this.internationalTestIdentity(test, options.locale),
++       relationships: {
++         universities: {
++           ...universities,
++           data: universities.data.map((university) => ({
++             ...this.universityIdentity(university, options.locale),
++             matchingPrograms: (university.academicPrograms ?? []).flatMap((program) =>
++               isPublicUniversityProgram(program)
++                 ? (program.admissionRequirements ?? [])
++                 .filter((requirement) => requirement.internationalTestId === test.id &&
++                         isPublicAdmissionRequirement(requirement),
++                     )
++                 .map((requirement) => ({
++                   ownerId: program.id,
++                   sourceProgramName: program.sourceProgramName,
++                   ...graphProgramLabel(university,program,options.locale),
++                   minimumScore: requirement.minimumScore,
++                   status: requirement.status,
++                 }))
++                 : [],
++             ),
++           })),
++         },
++         scholarships: {
++           ...scholarships,
++           data: scholarships.data.map((scholarship) => this.scholarshipIdentity(scholarship, options.locale)),
++         },
++         editorialContent,
++         preparationCourses: {
++           ...preparationCourses,
++           data: preparationCourses.data.map((course) => ({
++             ownerId: course.ownerId,
++             publicId: course.publicId,
++             slug: course.slug,
++             ...graphPublishedLabel(course.displayName,course.localizedNames,options.locale),
++             directCourseUrl: course.directCourseUrl,
++             providerName: course.providerName,
++             category: course.category,
++           })),
++         },
++         studentTools,
++         services,
++       },
++     }, `getInternationalTestGraphById:${test.id}`, options, pageSize);
++   }
++
++   public async getCountryGraphByIso2Code(iso2Code: string, options: CrossDomainGraphReadOptions = {}): Promise<CountryGraphReadModel> {
++     const normalizedCode = this.required(iso2Code, 'COUNTRY_CODE_REQUIRED').toUpperCase();
++     const country = await this.referenceDataRepository.getCountry(normalizedCode);
++     if (!country || !country.isActive) throw new Error('Country not found');
++     if (!country.id) throw new Error('COUNTRY_CANONICAL_ID_REQUIRED');
++
++     const { page, pageSize } = this.pagination(options);
++     const readScope = createGraphReadScope();
++     const empty = { data: [], total: 0, page, pageSize, totalPages: 0 };
++     const [universities, scholarships, internationalTests, services, careerJobs, courses, editorialContent,
++       programPage,
++     ] = await Promise.all([
++       graphOwnerRead(
++         readScope,
++         'universities',
++         () =>
++           this.universityRepository.listPublished({ countryReferenceId: country.id,
++             cursor: options.universityCursor,
++             limit: pageSize }),
++         empty,
++       ),
++       graphOwnerRead(
++         readScope,
++         'scholarships',
++         () =>
++           this.scholarshipRepository.listPublished({ countryReferenceId: country.id,
++             cursor: options.scholarshipCursor,
++             limit: pageSize }),
++         empty,
++       ),
++       graphOwnerRead(
++         readScope,
++         'internationalTests',
++         () =>
++           this.internationalTestRepository.listPublished({ countryIso2Code: normalizedCode, cursorMode:true, cursor:options.testCursor, page: 1, pageSize }),
++         { data: [], total: 0, page, limit: pageSize },
++       ),
++       graphOwnerRead(
++         readScope,
++         'services',
++         this.serviceCatalogRepository
++         ? () =>
++               this.serviceCatalogRepository!.listPublished({ supportedCountryReferenceId: country.id,
++                 cursor: options.serviceCursor,
++                 limit: pageSize })
++         : undefined,
++         empty,
++       ),
++       graphOwnerRead(
++         readScope,
++         'careerJobs',
++       this.careerRepository
++         ? () =>
++               this.careerRepository!.listPublishedJobs({ countryReferenceId: country.id, cursor:options.careerCursor, limit:pageSize, page:1, pageSize })
++         : undefined,
++         empty,
++       ),
++       graphOwnerRead(
++         readScope,
++         'providerHeadquartersCourses',
++         () =>
++           this.courseRelationshipRepository.listPublishedRelatedCourses({
++         ...options.courseFilters,
++         providerHeadquartersCountryReferenceId: country.id,
++             cursor: options.courseCursor,
++         limit: pageSize,
++       }),
++         empty,
++       ),
++       graphOwnerRead(
++         readScope,
++         'editorialContent',
++         this.cmsRepository
++           ? () =>
++               this.relatedEditorial(CmsDomainTargetType.REFERENCE_COUNTRY, country.id, options.locale ?? 'ar', options, readScope)
++           : undefined,
++         [],
++       ),
++       graphOwnerRead(
++         readScope,
++         'academicPrograms',
++         this.universityRepository.listPublishedProgramGraph
++           ? () =>
++               this.universityRepository.listPublishedProgramGraph!({
++                 countryReferenceId: country.id,
++                 cursor: options.programCursor,
++                 limit: pageSize,
++               })
++           : undefined,
++         { data: [], total: 0, majorTotal: 0, hasMore: false, nextCursor: null },
++       ),
++     ]);
++
++     const academicPrograms = programPage.data.
++         map((program) => ({
++       ownerId: program.ownerId, universityOwnerId: program.universityOwnerId, universityPublicId:program.universityPublicId,universitySlug:program.universitySlug,
++       universityDisplayName:graphPublishedLabel(program.universityDisplayName,program.universityLocalizedNames,options.locale).displayName,
++       universityLocaleFallback:graphPublishedLabel(program.universityDisplayName,program.universityLocalizedNames,options.locale).localeFallback,
++       sourceProgramName:program.sourceProgramName,degreeLevelId:program.degreeLevelId,majorMappingState:program.majorMappingState,status:program.status,
++       ...graphPublishedLabel(program.sourceProgramName,program.localizedNames,options.locale),
++           majorOwnerId: program.majorId,
++     }),
++     );
++     const majorPage = await graphOwnerRead(readScope,'majors',this.universityRepository.listPublishedMajorGraph?()=>this.universityRepository.listPublishedMajorGraph!({countryReferenceId:country.id!,cursor:options.majorCursor,limit:pageSize}):undefined,{data:[],total:0,hasMore:false,nextCursor:null});
++     const majors = majorPage.data.length?await graphOwnerRead(readScope,'majors',()=>this.majorRepository.findPublishedByIds(majorPage.data.map(row=>row.ownerId)),[]):[];
++     if (readScope.collections.academicPrograms.state === 'AVAILABLE') Object.assign(readScope.collections.academicPrograms,{scope:'OWNER_QUERY',total:programPage.total,hasMore:programPage.hasMore,nextCursor:programPage.nextCursor});
++     if(readScope.collections.majors.state==='AVAILABLE')Object.assign(readScope.collections.majors,{scope:'OWNER_QUERY',total:majorPage.total,hasMore:majorPage.hasMore,nextCursor:majorPage.nextCursor});
++
++     return finalizeGraph({
++       readScope,
++       subject: {
++         ownerId: country.id,
++         canonicalCode: country.iso2Code,
++         ...graphCountryLabel(country,options.locale),
++       },
++       relationships: {
++         universities: {
++           ...universities,
++           data: universities.data.map((university) => this.universityIdentity(university, options.locale)),
++         },
++         academicPrograms,
++         majors: majors.map((major) => this.majorIdentity(major, options.locale)),
++         scholarships: {
++           ...scholarships,
++           data: scholarships.data.map((scholarship) => this.scholarshipIdentity(scholarship, options.locale)),
++         },
++         internationalTests: {
++           ...internationalTests,
++           pageSize: internationalTests.limit,
++           totalPages: Math.ceil(internationalTests.total / Math.max(1, internationalTests.limit)),
++           data: internationalTests.data.map((test) => this.internationalTestIdentity(test, options.locale)),
++         },
++         services: {
++           ...services,
++           data: services.data.map((service) => ({
++             ownerId: service.id,
++             publicId: service.publicId,
++             slug: service.slug,
++             ...graphServiceLabel(service,options.locale),
++             serviceCategory: service.serviceCategory,
++             deliveryMode: service.deliveryMode,
++           })),
++         },
++         careerJobs: {
++           ...careerJobs,
++           data: careerJobs.data.map((job) => ({
++             ownerId: job.id,
++             publicId: job.publicId,
++             slug: job.slug,
++             ...graphCareerLabel(job,options.locale),
++             opportunityType: job.opportunityType,
++             employmentType: job.employmentType,
++           })),
++         },
++         providerHeadquartersCourses: {
++           ...courses,
++           data: courses.data.map((course) => ({
++             ownerId: course.ownerId,
++             publicId: course.publicId,
++             slug: course.slug,
++             ...graphPublishedLabel(course.displayName,course.localizedNames,options.locale),
++             directCourseUrl: course.directCourseUrl,
++             providerName: course.providerName,
++             category: course.category,
++           })),
++         },
++         editorialContent,
++       },
++     }, `getCountryGraphByIso2Code:${country.id}`, options, pageSize);
++   }
++
++
++   private emptyPage(pageSize:number){return {data:[],total:0,page:1,pageSize,totalPages:0,hasMore:false,nextCursor:null};}
++
++   private async relatedEditorial(targetType: CmsDomainTargetType, targetId: string, locale: string,options:CrossDomainGraphReadOptions={},scope?:GraphReadScope): Promise<EditorialGraphIdentity[]> {
++     if (!this.cmsRepository?.listPublishedByDomainTarget) return [];
++     const ownerPage=this.cmsRepository.listPublishedDomainTargetPage?await this.cmsRepository.listPublishedDomainTargetPage(targetType,targetId,locale,options.editorialCursor,options.pageSize??12):null;
++     const rows=ownerPage?.data??await this.cmsRepository.listPublishedByDomainTarget(targetType,targetId,locale,'manaratak',6);
++     if(ownerPage&&scope)scope.collections.editorialContent={state:'AVAILABLE',scope:'OWNER_QUERY',total:ownerPage.total,hasMore:ownerPage.hasMore,nextCursor:ownerPage.nextCursor};
++     return rows.map((item: PublicCmsContentDto) => ({
++       contentId: item.contentId,
++       publicId: item.publicId,
++       slug: item.slug,
++       contentType: item.contentType,
++       title: item.title,
++       summary: item.summary,
++       locale: item.locale,
++       publishedAt: item.publishedAt,
++     }));
++   }
++
++   private majorUniversityIdentity(university: UniversityDto, majorId: string,
++     locale = 'ar',
++   ): MajorUniversityGraphItem {
++     const programs = (university.academicPrograms ?? []).filter(
++       (program): program is UniversityAcademicProgramReadDto & { majorId: string } =>
++         program.majorId === majorId && isPublicUniversityProgram(program),
++     );
++     return {
++       ...this.universityIdentity(university, locale),
++       matchingPrograms: programs.map((program) => ({
++         ownerId: program.id,
++         sourceProgramName: program.sourceProgramName,
++         ...graphProgramLabel(university,program,locale),
++         degreeLevelId: program.degreeLevelId,
++         majorOwnerId: program.majorId,
++       })),
++     };
++   }
++
++   private internationalTestIdentity(test: InternationalTestDto,
++     locale = 'ar',
++   ): StableEntityReadIdentity & { providerName: string; status: string } {
++     const extended = test as InternationalTestDto & { publicId?: string; slug?: string; displayName?: string };
++     return {
++       ownerId: test.id,
++       publicId: extended.publicId,
++       slug: extended.slug,
++       ...graphTestLabel(test,locale),
++       providerName: test.providerName,
++       status: test.status,
++     };
++   }
++
++   private majorIdentity(major: MajorDto, locale = 'ar'): StableEntityReadIdentity {
++     return { ownerId: major.id, publicId: major.publicId, slug: major.slug,
++       ...graphMajorLabel(major,locale),
++     };
++   }
++
++   private universityIdentity(university: UniversityDto, locale = 'ar'): StableEntityReadIdentity {
++     return { ownerId: university.id, publicId: university.publicId, slug: university.slug,
++       ...graphUniversityLabel(university,locale),
++     };
++   }
++
++   private scholarshipIdentity(scholarship: ScholarshipDto,
++     locale = 'ar',
++   ): StableEntityReadIdentity {
++     return { ownerId: scholarship.id, publicId: scholarship.publicId, slug: scholarship.slug,
++       ...graphScholarshipLabel(scholarship,locale),
++     };
++   }
++
++   private uniqueIdentities(items: StableEntityReadIdentity[]): StableEntityReadIdentity[] {
++     const seen = new Set<string>();
++     return items.filter((item) => {
++       if (seen.has(item.ownerId)) return false;
++       seen.add(item.ownerId);
++       return true;
++     });
++   }
++
++   private pagination(options: CrossDomainGraphReadOptions): { page: number; pageSize: number } {
++     requireGraphFirstPage(options.page);
++     return {
++       page: 1,
++       pageSize: Math.min(50, Math.max(1, options.pageSize ?? 12)),
++     };
++   }
++
++   private required(value: string, code: string): string {
++     const normalized = value.trim();
++     if (!normalized) throw new Error(code);
++     return normalized;
++   }
++
++ }
++
+
+ ❯ packages/application/tests/read-models/P4CrossDomainSourceInvariants.spec.ts:13:21
+     11|     expect(service).not.toContain('listPublished({ major: major.displa…
+     12|     expect(service).not.toContain('listPublishedCoursesForMajor(major.…
+     13|     expect(service).toContain('isPublicUniversityProgram(program)');
+       |                     ^
+     14|     const policy=read('packages/domain/src/public-boundaries/PublicOwn…
+     15|     expect(policy).toContain('degreeLevelId');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/43]⎯
+
+ FAIL  packages/application/tests/universities/UniversityPublicProjection.spec.ts > University public projection — allowlist and canonical relationships > only exposes published-mapped programs and published tests
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ packages/application/tests/universities/UniversityPublicProjection.spec.ts:82:64
+     80|     expect(output.academicPrograms).toHaveLength(1);
+     81|     expect(output.academicPrograms?.[0].sourceProgramName).toBe('Physi…
+     82|     expect(output.academicPrograms?.[0].admissionRequirements).toHaveL…
+       |                                                                ^
+     83|     expect(output.academicPrograms?.[0].admissionRequirements[0].inter…
+     84|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/43]⎯
+
+ FAIL  packages/infrastructure/tests/international-tests/PrismaInternationalTestRepository.spec.ts > PrismaInternationalTestRepository > should enforce published and visible predicates inside findPublishedBySlug
+AssertionError: expected "vi.fn()" to be called with arguments: [ ObjectContaining{…} ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   ObjectContaining {
++   {
++     "select": {
++       "currentPublishedVersionId": true,
++       "id": true,
++     },
+      "where": {
+        "isPubliclyVisible": true,
+        "slug": "private-test",
++       "status": {
++         "notIn": [
++           "ARCHIVED",
++           "REJECTED",
++         ],
++       },
+      },
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ packages/infrastructure/tests/international-tests/PrismaInternationalTestRepository.spec.ts:131:52
+    129|
+    130|     expect(result).toBeNull();
+    131|     expect(mockPrisma.internationalTest.findFirst).toHaveBeenCalledWit…
+       |                                                    ^
+    132|       expect.objectContaining({
+    133|         where: {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/43]⎯
+
+ FAIL  packages/infrastructure/tests/scholarships/ScholarshipListSourceBoundary.spec.ts > scholarship relational filtering and ordering > university and program constraints use the same link
+TypeError: Cannot read properties of undefined (reading 'findMany')
+ ❯ PrismaUniversityProgramReadPort.findByIds packages/infrastructure/src/universities/PrismaUniversityProgramReadPort.ts:66:62
+     64|     unique.forEach((id) => this.validateId(id));
+     65|     if (!unique.length) return [];
+     66|     const rows = await this.prisma.universityAcademicProgram.findMany({
+       |                                                              ^
+     67|       where: { id: { in: unique } },
+     68|       select: proofSelect,
+ ❯ PrismaScholarshipRepository.list packages/infrastructure/src/scholarships/PrismaScholarshipRepository.ts:407:44
+ ❯ packages/infrastructure/tests/scholarships/ScholarshipListSourceBoundary.spec.ts:6:99
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/43]⎯
+
+ FAIL  packages/infrastructure/tests/universities/UniversityProgramPilotIntegrity.spec.ts > M10-16 University program persistence integrity > rejects a foreign campus before changing the existing program
+AssertionError: expected "vi.fn()" to be called with arguments: [ { where: { …(2) }, …(1) } ]
+
+Received:
+
+  1st vi.fn() call:
+
+@@ -7,9 +7,10 @@
+        "id": {
+          "in": [
+            "campus",
+          ],
+        },
++       "status": "ACTIVE",
+        "universityId": "university",
+      },
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ packages/infrastructure/tests/universities/UniversityProgramPilotIntegrity.spec.ts:51:48
+     49|     const f = fixture(); f.client.universityCampus.findMany.mockResolv…
+     50|     await expect(f.repository.upsertAcademicProgram('university', 'pro…
+     51|     expect(f.client.universityCampus.findMany).toHaveBeenCalledWith({ …
+       |                                                ^
+     52|     expect(f.client.universityAcademicProgram.update).not.toHaveBeenCa…
+     53|     expect(f.client.universityProgramCampus.deleteMany).not.toHaveBeen…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/43]⎯
+
+ FAIL  apps/admin/src/pages/audit/AuditViewModel.spec.ts > audit investigation view model > offers owner links only with the matching permission and escapes IDs
+AssertionError: expected null to be '/universities/uni%2F1' // Object.is equality
+
+- Expected:
+"/universities/uni%2F1"
+
++ Received:
+null
+
+ ❯ apps/admin/src/pages/audit/AuditViewModel.spec.ts:33:110
+     31|   it('offers owner links only with the matching permission and escapes…
+     32|     expect(auditTargetLink('UNIVERSITY', 'uni/1', () => false)).toBeNu…
+     33|     expect(auditTargetLink('UNIVERSITY', 'uni/1', permission => permis…
+       |                                                                                                              ^
+     34|     expect(auditTargetLink('IDENTITY', 'user&admin', () => true)).toBe…
+     35|     expect(auditTargetLink('UNKNOWN', '1', () => true)).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/43]⎯
+
+ FAIL  apps/web/src/features/public-template/MajorDiscovery.spec.ts > Bounded public major discovery > passes query, degree and cursor to the published owner API without draining the catalog
+AssertionError: expected "getMajors" to be called with arguments: [ { search: 'علوم الحاسوب', …(4) } ]
+
+Received:
+
+  1st getMajors call:
+
+@@ -4,6 +4,7 @@
+      "degreeLevel": "BACHELOR",
+      "limit": 20,
+      "locale": "ar",
+      "search": "علوم الحاسوب",
+    },
++   undefined,
+  ]
+
+
+Number of calls: 1
+
+ ❯ apps/web/src/features/public-template/MajorDiscovery.spec.ts:8:379
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/43]⎯
+
+ FAIL  apps/web/src/features/public-template/academicReports.spec.ts > academic report data boundaries > does not present sample audit statistics in mode undefined
+ FAIL  apps/web/src/features/public-template/academicReports.spec.ts > academic report data boundaries > does not present sample audit statistics in mode api
+ FAIL  apps/web/src/features/public-template/academicReports.spec.ts > academic report data boundaries > labels prototype examples and renders CSP compatible progress values
+Error: useTranslation must be used within an I18nProvider
+ ❯ useTranslation apps/web/src/i18n/I18nProvider.tsx:73:11
+     71|   const context = useContext(I18nContext);
+     72|   if (context === undefined) {
+     73|     throw new Error('useTranslation must be used within an I18nProvide…
+       |           ^
+     74|   }
+     75|   return context;
+ ❯ AcademicReportsPage apps/web/src/features/public-template/components/AcademicReportsPage.tsx:32:26
+ ❯ Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:9808:18
+ ❯ renderWithHooks node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:5062:19
+ ❯ renderElement node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:5497:23
+ ❯ retryNode node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:6428:21
+ ❯ performWork node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:7435:17
+ ❯ startWork node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:8270:7
+ ❯ renderToStringImpl node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:8380:7
+ ❯ process.env.NODE_ENV.exports.renderToStaticMarkup node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:9861:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/43]⎯
+
+ FAIL  apps/web/src/features/public-template/publicDesignImport.spec.ts > public design import boundaries > does not replace an empty live course response with fixtures
+AssertionError: expected '<section id="featured-courses-section…' to contain 'لا توجد دورات حالياً في هذا القسم.'
+
+Expected: "لا توجد دورات حالياً في هذا القسم."
+Received: "<section id="featured-courses-section" class="px-0 py-3 w-full font-[&#x27;Cairo&#x27;,sans-serif]"><div class="relative rounded-3xl p-3 sm:p-4 bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)]/80 border border-[var(--mn-border)] shadow-xs overflow-hidden mn-panel"><div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent"></div><div class="relative z-10"><div class="text-center mb-3 sm:mb-4"><div class="relative pb-1 mb-1 inline-block"><h3 class="text-[14.5px] sm:text-base font-bold text-[#142B5F] dark:text-[#D6A43B] inline-flex items-center justify-center gap-1.5 font-[&#x27;Cairo&#x27;,sans-serif]"><span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#142B5F] border border-[#D6A43B]/60 flex items-center justify-center shrink-0 shadow-2xs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D6A43B]" aria-hidden="true"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg></span><span>الدورات التدريبية والتأهيلية</span></h3><div class="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent"></div></div><p class="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-[&#x27;Cairo&#x27;,sans-serif]">طور مهاراتك من خلال برامج تدريبية متخصصة ومقدمة من أفضل الأكاديميات والجامعات.</p></div><div class="flex items-center justify-center p-1 mb-3.5 max-w-xs mx-auto rounded-2xl bg-[var(--mn-surface-muted)] border border-[var(--mn-border)] shadow-2xs"><button type="button" aria-pressed="true" aria-controls="home-course-cards" class="flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer font-[&#x27;Cairo&#x27;,sans-serif] bg-[#142B5F] text-[#D6A43B] shadow-xs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-earth w-3.5 h-3.5" aria-hidden="true"><path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"></path><path d="M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17"></path><path d="M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"></path><circle cx="12" cy="12" r="10"></circle></svg><span>منصات عالمية</span></button><button type="button" aria-pressed="false" aria-controls="home-course-cards" class="flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer font-[&#x27;Cairo&#x27;,sans-serif] text-[var(--mn-text-muted)] hover:text-[var(--mn-heading)]"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-award w-3.5 h-3.5" aria-hidden="true"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"></path><circle cx="12" cy="8" r="6"></circle></svg><span>دورات منارتك</span></button></div><div id="home-course-cards" class="space-y-2 w-full"><div data-catalog-state="empty"><p role="status" aria-live="polite" class="sr-only">لم تُنشر دورات في هذا القسم بعد</p><div class="space-y-2 w-full" aria-busy="false"><div data-catalog-slot="courses" aria-hidden="true" class="flex min-h-[76px] min-w-0 items-center gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2 sm:p-2.5 mn-panel"><div class="relative h-12 w-14 sm:h-14 sm:w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--mn-primary)] "><img src="/preview-art/courses.svg" alt="" loading="lazy" decoding="async" aria-hidden="true" class="h-full w-full object-cover"/></div><div class="min-w-0 flex-1 text-start"><p class="text-xs font-bold leading-relaxed text-[var(--mn-heading)]">لم تُنشر دورات في هذا القسم بعد</p><p class="mt-0.5 text-[10px] leading-relaxed text-[var(--mn-text-muted)]">ستظهر هنا البطاقات عند توفر محتوى منشور.</p></div></div><div data-catalog-slot="courses" aria-hidden="true" class="flex min-h-[76px] min-w-0 items-center gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2 sm:p-2.5 mn-panel"><div class="relative h-12 w-14 sm:h-14 sm:w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--mn-primary)] "><img src="/preview-art/courses.svg" alt="" loading="lazy" decoding="async" aria-hidden="true" class="h-full w-full object-cover"/></div><div class="min-w-0 flex-1 text-start"><p class="text-xs font-bold leading-relaxed text-[var(--mn-heading)]">لم تُنشر دورات في هذا القسم بعد</p><p class="mt-0.5 text-[10px] leading-relaxed text-[var(--mn-text-muted)]">ستظهر هنا البطاقات عند توفر محتوى منشور.</p></div></div><div data-catalog-slot="courses" aria-hidden="true" class="flex min-h-[76px] min-w-0 items-center gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2 sm:p-2.5 mn-panel"><div class="relative h-12 w-14 sm:h-14 sm:w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--mn-primary)] "><img src="/preview-art/courses.svg" alt="" loading="lazy" decoding="async" aria-hidden="true" class="h-full w-full object-cover"/></div><div class="min-w-0 flex-1 text-start"><p class="text-xs font-bold leading-relaxed text-[var(--mn-heading)]">لم تُنشر دورات في هذا القسم بعد</p><p class="mt-0.5 text-[10px] leading-relaxed text-[var(--mn-text-muted)]">ستظهر هنا البطاقات عند توفر محتوى منشور.</p></div></div></div></div></div><div class="mt-4 flex justify-center"><button id="btn-view-all-courses" type="button" class="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-[&#x27;Cairo&#x27;,sans-serif] shadow-xs "><span class="text-[12px] sm:text-sm font-bold">تصفح جميع الدورات</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button></div></div></div></section>"
+
+ ❯ apps/web/src/features/public-template/publicDesignImport.spec.ts:30:18
+     28|   it('does not replace an empty live course response with fixtures', (…
+     29|     const html = renderToStaticMarkup(createElement(FeaturedCourses, {…
+     30|     expect(html).toContain('data-catalog-state="empty"');
+       |                  ^
+     31|     expect(html).toContain('لم تُنشر دورات في هذا القسم بعد');
+     32|     expect(html).not.toContain('IELTS خطوة بخطوة');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/43]⎯
+
+ FAIL  apps/web/src/features/public-template/publicDesignImport.spec.ts > public design import boundaries > renders a small supplied course response without swapping its identity
+AssertionError: expected '<section id="featured-courses-section…' to contain 'Live supplied course'
+
+Expected: "Live supplied course"
+Received: "<section id="featured-courses-section" class="px-0 py-3 w-full font-[&#x27;Cairo&#x27;,sans-serif]"><div class="relative rounded-3xl p-3 sm:p-4 bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)]/80 border border-[var(--mn-border)] shadow-xs overflow-hidden mn-panel"><div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent"></div><div class="relative z-10"><div class="text-center mb-3 sm:mb-4"><div class="relative pb-1 mb-1 inline-block"><h3 class="text-[14.5px] sm:text-base font-bold text-[#142B5F] dark:text-[#D6A43B] inline-flex items-center justify-center gap-1.5 font-[&#x27;Cairo&#x27;,sans-serif]"><span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#142B5F] border border-[#D6A43B]/60 flex items-center justify-center shrink-0 shadow-2xs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D6A43B]" aria-hidden="true"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg></span><span>الدورات التدريبية والتأهيلية</span></h3><div class="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent"></div></div><p class="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-[&#x27;Cairo&#x27;,sans-serif]">طور مهاراتك من خلال برامج تدريبية متخصصة ومقدمة من أفضل الأكاديميات والجامعات.</p></div><div class="flex items-center justify-center p-1 mb-3.5 max-w-xs mx-auto rounded-2xl bg-[var(--mn-surface-muted)] border border-[var(--mn-border)] shadow-2xs"><button type="button" aria-pressed="true" aria-controls="home-course-cards" class="flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer font-[&#x27;Cairo&#x27;,sans-serif] bg-[#142B5F] text-[#D6A43B] shadow-xs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-earth w-3.5 h-3.5" aria-hidden="true"><path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"></path><path d="M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17"></path><path d="M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"></path><circle cx="12" cy="12" r="10"></circle></svg><span>منصات عالمية</span></button><button type="button" aria-pressed="false" aria-controls="home-course-cards" class="flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer font-[&#x27;Cairo&#x27;,sans-serif] text-[var(--mn-text-muted)] hover:text-[var(--mn-heading)]"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-award w-3.5 h-3.5" aria-hidden="true"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"></path><circle cx="12" cy="8" r="6"></circle></svg><span>دورات منارتك</span></button></div><div id="home-course-cards" class="space-y-2 w-full"><div data-catalog-state="empty"><p role="status" aria-live="polite" class="sr-only">لم تُنشر دورات في هذا القسم بعد</p><div class="space-y-2 w-full" aria-busy="false"><div data-catalog-slot="courses" aria-hidden="true" class="flex min-h-[76px] min-w-0 items-center gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2 sm:p-2.5 mn-panel"><div class="relative h-12 w-14 sm:h-14 sm:w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--mn-primary)] "><img src="/preview-art/courses.svg" alt="" loading="lazy" decoding="async" aria-hidden="true" class="h-full w-full object-cover"/></div><div class="min-w-0 flex-1 text-start"><p class="text-xs font-bold leading-relaxed text-[var(--mn-heading)]">لم تُنشر دورات في هذا القسم بعد</p><p class="mt-0.5 text-[10px] leading-relaxed text-[var(--mn-text-muted)]">ستظهر هنا البطاقات عند توفر محتوى منشور.</p></div></div><div data-catalog-slot="courses" aria-hidden="true" class="flex min-h-[76px] min-w-0 items-center gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2 sm:p-2.5 mn-panel"><div class="relative h-12 w-14 sm:h-14 sm:w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--mn-primary)] "><img src="/preview-art/courses.svg" alt="" loading="lazy" decoding="async" aria-hidden="true" class="h-full w-full object-cover"/></div><div class="min-w-0 flex-1 text-start"><p class="text-xs font-bold leading-relaxed text-[var(--mn-heading)]">لم تُنشر دورات في هذا القسم بعد</p><p class="mt-0.5 text-[10px] leading-relaxed text-[var(--mn-text-muted)]">ستظهر هنا البطاقات عند توفر محتوى منشور.</p></div></div><div data-catalog-slot="courses" aria-hidden="true" class="flex min-h-[76px] min-w-0 items-center gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2 sm:p-2.5 mn-panel"><div class="relative h-12 w-14 sm:h-14 sm:w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--mn-primary)] "><img src="/preview-art/courses.svg" alt="" loading="lazy" decoding="async" aria-hidden="true" class="h-full w-full object-cover"/></div><div class="min-w-0 flex-1 text-start"><p class="text-xs font-bold leading-relaxed text-[var(--mn-heading)]">لم تُنشر دورات في هذا القسم بعد</p><p class="mt-0.5 text-[10px] leading-relaxed text-[var(--mn-text-muted)]">ستظهر هنا البطاقات عند توفر محتوى منشور.</p></div></div></div></div></div><div class="mt-4 flex justify-center"><button id="btn-view-all-courses" type="button" class="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-[&#x27;Cairo&#x27;,sans-serif] shadow-xs "><span class="text-[12px] sm:text-sm font-bold">تصفح جميع الدورات</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button></div></div></div></section>"
+
+ ❯ apps/web/src/features/public-template/publicDesignImport.spec.ts:43:18
+     41|   it('renders a small supplied course response without swapping its id…
+     42|     const course = { ...loadPublicPrototypeSnapshot().data.courses[0],…
+     43|     const html = renderToStaticMarkup(createElement(FeaturedCourses, {…
+       |                  ^
+     44|     expect(html).toContain('Live supplied course');
+     45|     expect(html).not.toContain('IELTS خطوة بخطوة');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/43]⎯
+
+ FAIL  apps/api/tests/presentation/api/locale/LocaleQueryContract.spec.ts > LocaleQueryContract > normalizes repeated query values to the last value
+ZodError: [
+  {
+    "code": "custom",
+    "path": [
+      "locale"
+    ],
+    "message": "Unsupported locale. Supported locales: ar, en"
+  }
+]
+ ❯ parseRequestLocale apps/api/src/presentation/api/locale/LocaleQueryContract.ts:35:28
+     33|
+     34| export function parseRequestLocale(query: unknown): ApplicationSupport…
+     35|   return localeQuerySchema.parse(query).locale;
+       |                            ^
+     36| }
+     37|
+ ❯ apps/api/tests/presentation/api/locale/LocaleQueryContract.spec.ts:15:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/43]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/AssetPlatformRouter.spec.ts > AssetPlatformRouter > projects recovery state without provider coordinates or proof payloads
+AssertionError: expected 500 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 500
+
+ ❯ apps/api/tests/presentation/api/router/AssetPlatformRouter.spec.ts:18:29
+     16|       assetRecordRepository: { findAdminDetails: vi.fn(async () => ({ …
+     17|     const response = await request(app).get('/assets/pending');
+     18|     expect(response.status).toBe(200); expect(response.body.securityEv…
+       |                             ^
+     19|     expect(response.body.securityEvidence.archivePhase).toBe('RECOVERY…
+     20|     expect(response.body.restoreOperation).toEqual({ operationId: oper…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/43]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/MajorAdminRouter.spec.ts > MajorAdminRouter > POST /admin/majors/new-candidates/:key/link links only after an explicit admin choice
+AssertionError: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ apps/api/tests/presentation/api/router/MajorAdminRouter.spec.ts:132:24
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/43]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/Section13Governance.spec.ts > P14 administration request governance > requires the displayed version/state precondition for approval
+AssertionError: expected 400 to be 428 // Object.is equality
+
+- Expected
++ Received
+
+- 428
++ 400
+
+ ❯ apps/api/tests/presentation/api/router/Section13Governance.spec.ts:7:229
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/43]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/Section13Governance.spec.ts > P14 administration request governance > returns conflict for a stale approval screen
+AssertionError: expected 400 to be 409 // Object.is equality
+
+- Expected
++ Received
+
+- 409
++ 400
+
+ ❯ apps/api/tests/presentation/api/router/Section13Governance.spec.ts:9:279
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[35/43]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/Section13Governance.spec.ts > P14 administration request governance > sanitizes unexpected persistence errors
+AssertionError: expected 400 to be 500 // Object.is equality
+
+- Expected
++ Received
+
+- 500
++ 400
+
+ ❯ apps/api/tests/presentation/api/router/Section13Governance.spec.ts:11:272
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[36/43]⎯
+
+ FAIL  apps/web/src/features/public-template/tests/StudyDestinationPublicMapping.spec.ts > Live country mapping and bounded discovery > loads a single 20-item discovery page and forwards search filters to the owner
+AssertionError: expected "getStudyDestinations" to be called 1 times, but got 2 times
+ ❯ apps/web/src/features/public-template/tests/StudyDestinationPublicMapping.spec.ts:78:17
+     76|       });
+     77|     await loadPublishedCountries('en');
+     78|     expect(spy).toHaveBeenCalledTimes(1);
+       |                 ^
+     79|     expect(spy).toHaveBeenLastCalledWith({ page: 1, pageSize: 20 });
+     80|     await searchPublishedCountries({ page: 3, q: 'Yemen', region: 'Asi…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[37/43]⎯
+
+
+ Test Files  31 failed | 660 passed | 3 skipped (694)
+      Tests  33 failed | 5043 passed | 7 skipped (5083)
+   Start at  02:34:57
+   Duration  437.32s (transform 23.65s, setup 0ms, import 310.57s, tests 43.99s, environment 62ms)
+

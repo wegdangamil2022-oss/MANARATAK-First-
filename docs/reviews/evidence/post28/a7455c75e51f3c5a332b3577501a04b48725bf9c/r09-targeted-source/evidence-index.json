@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "kind": "POST28_R09_TARGETED_SOURCE_EVIDENCE",
+  "sourceSha": "a7455c75e51f3c5a332b3577501a04b48725bf9c",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "r09-b03-return-green.json",
+      "bytes": 3207,
+      "sha256": "b07fd5816de2f5f7354ebd0e4b6a4787c59432574221d2cec4b912ce7176bdab"
+    },
+    {
+      "path": "r09-enrollment-green.json",
+      "bytes": 1439,
+      "sha256": "207de752fc0a2b0caccb6173720e05b88eba4813b2f416d532e0367bdcba2ebd"
+    },
+    {
+      "path": "r09-enrollment-red.json",
+      "bytes": 1603,
+      "sha256": "18f326621d9acf2afee8b79793ff667b69eed8ca9ad6e1a3b41ed6c151a49ef5"
+    },
+    {
+      "path": "r09-localized-green.json",
+      "bytes": 2910,
+      "sha256": "c2fa3070f1bce9463bc55b92559e78d07d824135a1a9e1912a1228f263993790"
+    },
+    {
+      "path": "r09-localized-red.json",
+      "bytes": 4291,
+      "sha256": "68e03ca2ded975ad41febb788823d81c330c5b75b7f28e4751a15b4bad0d630b"
+    },
+    {
+      "path": "scope.json",
+      "bytes": 1543,
+      "sha256": "8b7d1c75afd4efb8a976e63aacead515f928c2d46f91f2fbc9f02d7d051e6321"
+    }
+  ]
+}

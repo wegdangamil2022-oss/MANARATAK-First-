@@ -1,0 +1,13 @@
+{
+  "name": "preflight",
+  "command": "npm run ci:preflight",
+  "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T03:18:27.835730+00:00",
+  "endedAt": "2026-10-16T03:18:41.569506+00:00",
+  "exitCode": 0,
+  "logSha256": "61f35e9367a070575281672aadcd789ef9b109995205989ad2a3599c3e85f81f",
+  "nodeVersion": "22.16.0",
+  "databaseConnected": false
+}

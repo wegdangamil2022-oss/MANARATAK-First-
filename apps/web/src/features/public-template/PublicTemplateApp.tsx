@@ -96,7 +96,7 @@ import { PushNotificationCenter } from './components/PushNotificationCenter';
 import { UniversitiesList } from './components/UniversitiesList';
 import { CoursesList } from './components/CoursesList';
 import { NavigationDrawer } from './components/NavigationDrawer';
-import { consumePostLoginAction, consumePostLoginReturn, preservePostLoginAction, preservePostLoginReturn, rememberAuthenticatedIdentity } from '../students/postLoginIntent';
+import { consumePostLoginAction, consumePostLoginReturn, isStudentPostLoginDestination, preservePostLoginAction, preservePostLoginReturn, rememberAuthenticatedIdentity } from '../students/postLoginIntent';
 import {
   Filter,
   SlidersHorizontal,
@@ -2302,7 +2302,7 @@ export default function App() {
                   window.location.replace('/student');
                   return;
                 }
-                if (postLoginReturn && /^(?:\/student(?:[/?#]|$)|\/(?:ar\/|en\/)?tools\/[A-Za-z0-9._-]+(?:[?#]|$))/.test(postLoginReturn)) {
+                if (postLoginReturn && isStudentPostLoginDestination(postLoginReturn)) {
                   window.location.assign(postLoginReturn);
                   return;
                 }

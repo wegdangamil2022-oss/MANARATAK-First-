@@ -1,0 +1,21 @@
+{
+  "kind": "POST28_NATIVE_LOCAL_LAB",
+  "runtime": "NATIVE_WINDOWS",
+  "scope": "DISPOSABLE",
+  "profile": "transactions",
+  "sourceSha": "bb86c6539dd28a7c7d24fc87076686e3259db8a3",
+  "runId": "71469a1e-b64a-45f6-8164-82cdb114cabd",
+  "postgresMajor": 16,
+  "postgresVersion": "postgres (PostgreSQL) 16.15",
+  "pgBin": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\pg16-binaries\\pgsql\\bin",
+  "dataDirectory": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-JTNxRe\\data",
+  "directory": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-JTNxRe",
+  "port": 49806,
+  "status": "EMPTY_TARGETS_VERIFIED",
+  "createdAt": "2026-10-20T14:32:37.602Z",
+  "postgresBinarySha256": "19e73deb1152b3b505f2e1fd579191427f9eb3b3f800754968e7214b24edf31d",
+  "postmasterPid": 14020,
+  "serverIdentity": "7698757869367514992",
+  "contractFile": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-JTNxRe\\targets.json",
+  "envFile": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-JTNxRe\\lab.env"
+}

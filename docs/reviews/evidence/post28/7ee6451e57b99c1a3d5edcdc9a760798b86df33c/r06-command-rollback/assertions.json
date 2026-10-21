@@ -1,0 +1,82 @@
+[
+  {
+    "file": "tests/database/post28-relation-commands.database.spec.mjs",
+    "title": "commits program campus nullable test requirement audit and outbox through the actual owner command",
+    "ancestors": [
+      "Post28 real atomic relation owner commands"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-relation-commands.database.spec.mjs",
+    "title": "rejects duplicate nullable requirements atomically without advancing owner revision",
+    "ancestors": [
+      "Post28 real atomic relation owner commands"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-relation-commands.database.spec.mjs",
+    "title": "serializes two nullable requirement updates and rejects the stale owner revision without duplicate records",
+    "ancestors": [
+      "Post28 real atomic relation owner commands"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-relation-commands.database.spec.mjs",
+    "title": "rolls all program relations audit and owner revision back on a PostgreSQL outbox error",
+    "ancestors": [
+      "Post28 real atomic relation owner commands"
+    ],
+    "status": "passed",
+    "durationMs": 84.21493499999997,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-relation-commands.database.spec.mjs",
+    "title": "rejects missing actor reason or revision before any owner command writes",
+    "ancestors": [
+      "Post28 real atomic relation owner commands"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-relation-commands.database.spec.mjs",
+    "title": "derives the scholarship university from its published program owner and keeps initial version and cycle draft",
+    "ancestors": [
+      "Post28 real atomic relation owner commands"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-relation-commands.database.spec.mjs",
+    "title": "rejects a scholarship link to another university program before creating any scholarship",
+    "ancestors": [
+      "Post28 real atomic relation owner commands"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-relation-commands.database.spec.mjs",
+    "title": "rejects scholarship authoring when the owner program or actual major version loses publication eligibility",
+    "ancestors": [
+      "Post28 real atomic relation owner commands"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  }
+]

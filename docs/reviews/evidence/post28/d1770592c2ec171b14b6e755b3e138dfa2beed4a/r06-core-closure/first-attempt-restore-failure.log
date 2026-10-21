@@ -1,0 +1,6 @@
+pg_restore: error: could not execute query: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+Command was: CREATE INDEX "MajorLevelProfile_completenessStatus_idx" ON public."MajorLevelProfile" USING btree ("completenessStatus");
+
+

@@ -58,9 +58,9 @@ export class UniversityStudentSavedItemHydrationGateway implements IStudentSaved
   }
   async hydrate(item: StudentSavedItemDto,context?:'CANONICALIZE_NEW_SAVE') {
     const university =
-      (await this.universities.findById(item.entityId)) ??
+      (await this.universities.findPublishedByIds?.([item.entityId]))?.[0] ??
       (await this.universities.findPublishedByPublicIds?.([item.entityId]))?.[0] ??
-      (await this.universities.findBySlug(item.entitySlug ?? item.entityId));
+      (await this.universities.findPublishedBySlug(item.entitySlug ?? item.entityId));
     if (!university||!matchesSavedIdentity(item,university,context))
       return { ownerType: item.entityType, ownerId: item.entityId, available: false };
     return {

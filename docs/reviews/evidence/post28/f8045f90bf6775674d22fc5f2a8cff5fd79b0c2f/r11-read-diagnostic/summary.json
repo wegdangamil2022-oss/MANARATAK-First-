@@ -1,0 +1,73 @@
+{
+  "kind": "R11_PARTIAL_LOCAL_DIAGNOSTIC",
+  "status": "TWO_READ_CATEGORIES_DIAGNOSTICALLY_MEASURED",
+  "cases": [
+    {
+      "category": "public-search",
+      "workloadSourceSha": "129544a2015c1008e110e0f08a1e72f44cc1de30",
+      "apiSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+      "status": "COMPLETED_DIAGNOSTIC",
+      "sampleCount": 60,
+      "elapsedSeconds": 60.4202806,
+      "p50Ms": 4.077400000001944,
+      "p95Ms": 7.260900000008405,
+      "p99Ms": 77.1707000000024,
+      "throughput": 0.9930440475312854,
+      "transferBytes": 69540,
+      "errorCount": 0,
+      "timeoutCount": 0,
+      "maximumObservedCpuPercent": 0.88818781264211,
+      "maximumObservedResidentMemoryBytes": 184590336,
+      "maximumObservedConnections": 4
+    },
+    {
+      "category": "scholarship-filters",
+      "workloadSourceSha": "f8045f90bf6775674d22fc5f2a8cff5fd79b0c2f",
+      "apiSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+      "status": "COMPLETED_DIAGNOSTIC",
+      "sampleCount": 30,
+      "elapsedSeconds": 60.431858,
+      "p50Ms": 15.187799999999697,
+      "p95Ms": 49.609199999998964,
+      "p99Ms": 58.5625,
+      "throughput": 0.4964269011884427,
+      "transferBytes": 31530,
+      "errorCount": 0,
+      "timeoutCount": 0,
+      "maximumObservedCpuPercent": 1.163728897715988,
+      "maximumObservedResidentMemoryBytes": 190779392,
+      "maximumObservedConnections": 4
+    }
+  ],
+  "apiSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "rawAttemptsPreserved": true,
+  "allOwnedClustersStopped": true,
+  "finalApiStopped": true,
+  "initialCleanupBooleanBug": "initial apiStopped=false reflected exitCode=null for signal termination; operator awaited child exit; later accounting includes signalCode",
+  "dataset": {
+    "courses": 4,
+    "scholarships": 4,
+    "universities": 3,
+    "majors": 2,
+    "cmsPublishedSnapshots": 4,
+    "representativeLaunchDataset": false
+  },
+  "notMeasured": [
+    "pool wait",
+    "query cost",
+    "cold cache",
+    "launch-volume dataset",
+    "Linux load",
+    "student-writes",
+    "admin-scans",
+    "imports",
+    "finance-stub",
+    "worker-queues"
+  ],
+  "sloAcceptance": false,
+  "productionAcceptance": false,
+  "externalProvidersUsed": false,
+  "previousCiSourceSha": "f75f4b3913461b4aaf185de1e479ac032ceb1009",
+  "previousCiPassed": 23,
+  "newSourceCi": "NOT_YET_VERIFIED"
+}

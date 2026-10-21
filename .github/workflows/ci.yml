@@ -2,38 +2,76 @@ name: Enterprise CI Pipeline
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "feat/post28-r07-artifact-preparation" ]
   pull_request:
     branches: [ "main", "develop" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   NODE_ENV: development
   JWT_SECRET: dev-secret-at-least-32-characters-long-manaratak-key-phrase
   SESSION_SECRET: dev-session-secret-at-least-32-chars-long
   CSRF_SECRET: dev-csrf-secret-at-least-32-chars-long
-  REDIS_URL: redis://localhost:6379
   CORS_ORIGIN: http://localhost:3000
   ADMIN_AUTH_MODE: strict
 
 jobs:
-  ai-studio-compatibility:
-    name: Isolated Google AI Studio Web preview
+  r08-runtime-diagnostics:
+    name: R08 isolated Redis and Linux worker shutdown
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 immutable snapshot
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 22.16.0
           cache: npm
       - run: npm ci
-      - run: npm run verify:aistudio
-      - run: npx --no-install vitest run tests/aistudio/compatibility.spec.ts
-      - run: npm run build:aistudio
-      - run: node scripts/aistudio/environment.mjs --check
+      - name: Exercise actual Linux process signals and absolute deadline
+        run: node --test tests/runtime/post28-r08-process-drain.test.mjs
+      - name: Provision new restricted Redis and exercise counter and health isolation
+        shell: bash
+        run: |
+          unset DATABASE_URL DIRECT_URL REDIS_URL
+          node scripts/release/post28-r08-redis-lab.mjs
+      - name: Retain scoped Redis diagnostic receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r08-redis-diagnostic-${{ github.sha }}
+          path: /tmp/post28-r08-redis-result.json
+          if-no-files-found: warn
+      - name: Exercise refund recovery timeout and real finance worker replay in a new PG16 lab
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        run: node scripts/release/post28-r08-provider-faults.mjs "$RUNNER_TEMP/r08-provider"
+      - name: Retain new provider fault proof without lab credentials
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r08-provider-faults-${{ github.sha }}
+          path: ${{ runner.temp }}/r08-provider/proof
+          if-no-files-found: warn
+      - name: Exercise real certificate issuance worker replay in a separate new PG16 lab
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        run: node scripts/release/post28-r08-provider-faults.mjs "$RUNNER_TEMP/staging-certificate-worker" --certificate-worker
+      - name: Retain real certificate worker proof without lab credentials
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: staging-certificate-worker-${{ github.sha }}
+          path: ${{ runner.temp }}/staging-certificate-worker/proof
+          if-no-files-found: warn
 
   source-quality:
     name: Full source closure gates
     runs-on: ubuntu-latest
+    outputs:
+      manifest-sha256: ${{ steps.artifacts.outputs.manifest-sha256 }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -67,7 +105,7 @@ jobs:
         run: npm run ci:preflight
       - name: CI and migration source regression contracts
         id: source-regressions
-        run: node --test tests/architecture/ci-runtime-regressions.test.mjs tests/remediation/w2-migration-recovery-source.test.mjs tests/remediation/m10-recovery-gate-exit.test.mjs
+        run: node --test tests/architecture/ci-runtime-regressions.test.mjs tests/remediation/w2-migration-recovery-source.test.mjs tests/remediation/m10-recovery-gate-exit.test.mjs tests/release/post28-r07-static-runtime.test.mjs
       - name: Install local Nginx contract fixture
         run: sudo apt-get update && sudo apt-get install -y nginx
       - name: Authoritative registered source-closure manifest
@@ -93,15 +131,22 @@ jobs:
         run: npm run build
       - name: Unit and source integration tests
         id: unit
-        run: npm run test:unit
+        run: node scripts/ci/run-source-unit-with-diagnostics.mjs npm run test:unit
       - name: Build deterministic immutable release artifacts
         id: artifacts
-        run: npm run release:artifacts && npm run release:verify
+        shell: bash
+        env:
+          RELEASE_ARTIFACT_OUTPUT_DIR: ${{ runner.temp }}/r07-built-release
+        run: |
+          set -euo pipefail
+          npm run release:artifacts
+          npm run release:verify -- "$RELEASE_ARTIFACT_OUTPUT_DIR"
+          echo "manifest-sha256=$(sha256sum "$RELEASE_ARTIFACT_OUTPUT_DIR/release-manifest.json" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
       - name: Upload immutable release artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
         with:
           name: manaratak-release-artifacts-${{ github.sha }}
-          path: release-artifacts
+          path: ${{ runner.temp }}/r07-built-release
           if-no-files-found: error
       - name: Write P12 source CI evidence
         if: always()
@@ -117,6 +162,152 @@ jobs:
         with:
           name: p12-full-source-ci-closure
           path: p12-ci-evidence/SOURCE_CI_CLOSURE.json
+          if-no-files-found: error
+
+  artifact-retrieval:
+    name: Retrieve and verify immutable artifacts from Actions storage
+    needs: source-quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.16.0
+      - name: Download this run's exact-SHA artifact to a fresh directory
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" -n "manaratak-release-artifacts-$GITHUB_SHA" -D "$RUNNER_TEMP/recovered-release"
+      - name: Verify independently retained manifest digest and every unit
+        shell: bash
+        env:
+          EXPECTED_MANIFEST_SHA256: ${{ needs.source-quality.outputs.manifest-sha256 }}
+        run: |
+          set -euo pipefail
+          test "${#EXPECTED_MANIFEST_SHA256}" -eq 64
+          printf '%s  %s\n' "$EXPECTED_MANIFEST_SHA256" "$RUNNER_TEMP/recovered-release/release-manifest.json" | sha256sum --check
+          node scripts/release/verify-release-artifacts.mjs "$RUNNER_TEMP/recovered-release" | tee artifact-retrieval.txt
+          sha256sum "$RUNNER_TEMP/recovered-release/"* >> artifact-retrieval.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: artifact-retrieval-${{ github.sha }}
+          path: artifact-retrieval.txt
+          if-no-files-found: error
+
+  linux-runtime-review:
+    name: Linux x64 review image and native runtime
+    needs: [source-quality, artifact-retrieval]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - name: Retrieve exact reviewed units outside the checkout
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_MANIFEST_SHA256: ${{ needs.source-quality.outputs.manifest-sha256 }}
+        run: |
+          mkdir "$RUNNER_TEMP/r07-linux"
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" -n "manaratak-release-artifacts-$GITHUB_SHA" -D "$RUNNER_TEMP/r07-linux/artifacts"
+          printf '%s  %s\n' "$EXPECTED_MANIFEST_SHA256" "$RUNNER_TEMP/r07-linux/artifacts/release-manifest.json" | sha256sum --check
+          node scripts/release/verify-release-artifacts.mjs "$RUNNER_TEMP/r07-linux/artifacts"
+          mkdir "$RUNNER_TEMP/r07-linux/unpacked-api"
+          tar -xf "$RUNNER_TEMP/r07-linux/artifacts/manaratak-api-$GITHUB_SHA.tar" -C "$RUNNER_TEMP/r07-linux/unpacked-api"
+      - name: Install and verify a fresh locked Linux runtime layer
+        run: node scripts/release/post28-prepare-runtime-layer.mjs "$RUNNER_TEMP/r07-linux"
+      - name: Build digest-pinned non-root image and load native modules without network
+        run: node scripts/release/post28-linux-image-probe.mjs "$RUNNER_TEMP/r07-linux"
+      - name: Install browser for the isolated Linux review
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        run: npx --no-install playwright install --with-deps chromium
+      - name: Exercise R09 public owner pagination and unpublished course denial
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        env:
+          POST28_LINUX_RUNTIME_REVIEW: 'YES'
+        run: node scripts/release/post28-linux-artifact-runtime.mjs "$RUNNER_TEMP/r07-linux" --r09-public --r11-contention
+      - name: Verify rich text sanitization in Chromium without external requests
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        run: node scripts/security/verify-cms-rich-text-browser.mjs "$RUNNER_TEMP/r07-linux/cms-rich-text-proof.json"
+      - name: Record whether the pinned rollback pair remains eligible before creating its lab
+        id: rollback-eligibility
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        run: node scripts/release/assess-r14-rollback-eligibility.mjs "$RUNNER_TEMP/r14-rollback-eligibility/receipt.json" "$GITHUB_OUTPUT" "$GITHUB_STEP_SUMMARY"
+      - name: Retain rollback eligibility including an explicit blocked result
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r14-rollback-eligibility-${{ github.sha }}
+          path: ${{ runner.temp }}/r14-rollback-eligibility/receipt.json
+          if-no-files-found: error
+      - name: Retrieve the independently reviewed previous rollback artifacts
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation' && steps.rollback-eligibility.outputs.eligible == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir "$RUNNER_TEMP/r14-rollback"
+          cp -a "$RUNNER_TEMP/r07-linux/artifacts" "$RUNNER_TEMP/r07-linux/linux-image-probe.json" "$RUNNER_TEMP/r14-rollback/"
+          gh run download 39661105241 --repo "$GITHUB_REPOSITORY" -n "manaratak-release-artifacts-8e001c92a97e0e2f865adce90fc4b3bc6d3b5514" -D "$RUNNER_TEMP/r14-rollback/previous-artifacts"
+      - name: Exercise scoped Linux API rollback and forward recovery with real signals
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation' && steps.rollback-eligibility.outputs.eligible == 'true'
+        env:
+          POST28_LINUX_RUNTIME_REVIEW: 'YES'
+        run: node scripts/release/post28-linux-artifact-runtime.mjs "$RUNNER_TEMP/r14-rollback" --r14-rollback
+      - name: Retain Linux rollback observations and cleanup without private lab files
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation' && steps.rollback-eligibility.outputs.eligible == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r14-rollback-${{ github.sha }}
+          path: ${{ runner.temp }}/r14-rollback/linux-runtime-proof
+          if-no-files-found: warn
+      - name: Exercise R14 three-actor CMS MFA lifecycle in Arabic and English at one artifact SHA
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        env:
+          POST28_LINUX_RUNTIME_REVIEW: 'YES'
+        run: |
+          mkdir "$RUNNER_TEMP/r14-linux"
+          cp -a "$RUNNER_TEMP/r07-linux/artifacts" "$RUNNER_TEMP/r07-linux/linux-image-probe.json" "$RUNNER_TEMP/r14-linux/"
+          node --import tsx scripts/release/post28-linux-artifact-runtime.mjs "$RUNNER_TEMP/r14-linux" --r14-admin-cms
+      - name: Retain isolated R14 CMS browser proof and cleanup
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r14-admin-cms-${{ github.sha }}
+          path: ${{ runner.temp }}/r14-linux/linux-runtime-proof
+          if-no-files-found: warn
+      - name: Build configuration needed by the new source-router workflow profile
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        run: node node_modules/typescript/bin/tsc -b packages/config
+      - name: Exercise R09 shared workflows in a new restricted PostgreSQL 16 dataset
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        run: node scripts/release/post28-r09-workflow-lab.mjs "$RUNNER_TEMP/r09-workflows"
+      - name: Retain R09 workflow observations and cleanup without credentials
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r09-workflow-proof-${{ github.sha }}
+          path: ${{ runner.temp }}/r09-workflows/proof
+          if-no-files-found: warn
+      - name: Retain review proof without publishing the image
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: linux-runtime-review-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/r07-linux/linux-image-probe.json
+            ${{ runner.temp }}/r07-linux/runtime-layer.json
+            ${{ runner.temp }}/r07-linux/runtime-install.log
+            ${{ runner.temp }}/r07-linux/cms-rich-text-proof.json
+            ${{ runner.temp }}/r07-linux/linux-runtime-proof
           if-no-files-found: error
 
   translation-quality:

@@ -1,0 +1,97 @@
+{
+  "kind": "POST28_BRANCH_CONSOLIDATION_SOURCE_VALIDATION",
+  "sourceSha": "2940c2ac20cebb4c45941ed0d48093976b059198",
+  "cleanSourceAtStart": true,
+  "tests": [
+    "tests/database/post28-r05-trust-policy.test.mjs",
+    "tests/database/post28-r05-known-source.test.mjs",
+    "tests/remediation/post28-native-lab-policy.test.mjs",
+    "tests/database/post28-isolation.test.mjs",
+    "tests/database/post28-backup-contract.test.mjs",
+    "tests/database/post28-lab-profile.test.mjs",
+    "tests/database/post28-upgrade-candidate.test.mjs"
+  ],
+  "results": [
+    {
+      "name": "targeted-node",
+      "args": [
+        "--test",
+        "tests/database/post28-r05-trust-policy.test.mjs",
+        "tests/database/post28-r05-known-source.test.mjs",
+        "tests/remediation/post28-native-lab-policy.test.mjs",
+        "tests/database/post28-isolation.test.mjs",
+        "tests/database/post28-backup-contract.test.mjs",
+        "tests/database/post28-lab-profile.test.mjs",
+        "tests/database/post28-upgrade-candidate.test.mjs"
+      ],
+      "startedAt": "2026-10-19T12:50:20.210Z",
+      "durationMs": 12683,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null,
+      "counts": {
+        "tests": 92,
+        "pass": 92,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      }
+    },
+    {
+      "name": "source-quality",
+      "args": [
+        "scripts/quality/verify-source-quality.mjs"
+      ],
+      "startedAt": "2026-10-19T12:50:32.905Z",
+      "durationMs": 3936,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null
+    },
+    {
+      "name": "environment-inventory",
+      "args": [
+        "scripts/aistudio/environment.mjs",
+        "--check"
+      ],
+      "startedAt": "2026-10-19T12:50:36.842Z",
+      "durationMs": 5445,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null
+    },
+    {
+      "name": "secret-scan",
+      "args": [
+        "scripts/security/scan-secrets.mjs"
+      ],
+      "startedAt": "2026-10-19T12:50:42.288Z",
+      "durationMs": 37980,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null
+    },
+    {
+      "name": "targeted-eslint",
+      "args": [
+        "node_modules/eslint/bin/eslint.js",
+        "scripts/database/initialize-post28-upgrade.mjs",
+        "scripts/database/post28-r05-known-source.mjs",
+        "scripts/database/post28-r05-trust-policy.mjs",
+        "scripts/database/verify-post28-upgrade-backup.mjs",
+        "tests/database/post28-r05-known-source.test.mjs",
+        "tests/database/post28-r05-trust-policy.test.mjs",
+        "tests/database/post28-isolation.test.mjs"
+      ],
+      "startedAt": "2026-10-19T12:51:20.269Z",
+      "durationMs": 29862,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null
+    }
+  ],
+  "databaseCreated": false,
+  "databaseConnected": false,
+  "newRuntimeAcceptance": false
+}

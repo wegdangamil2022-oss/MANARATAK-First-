@@ -1199,7 +1199,7 @@ export function ScholarshipDetailPage() {
 
                   {(!scholarship.universityLinks || scholarship.universityLinks.length === 0) && (
                     <div className="rounded-2xl bg-slate-50 p-6 text-center text-xs text-slate-500 font-bold">
-                      المنحة مفتوحة ومتاحة في جميع الجامعات الحكومية المعتمدة في الدولة المستضيفة.
+                      لا توجد جامعات أو برامج موثقة مرتبطة بهذه المنحة.
                     </div>
                   )}
                 </div>

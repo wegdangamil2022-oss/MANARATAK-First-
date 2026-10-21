@@ -1,0 +1,79 @@
+{
+  "kind": "POST28_R04_CURRENT_CHAIN_REPLAY",
+  "sourceSha": "433e420ec230c4dee9bd6e974329f0f48119e613",
+  "startedAt": "2026-10-20T21:42:25.539Z",
+  "existingDatabasesTouched": false,
+  "requiredSeedRerun": false,
+  "providerCallsMade": false,
+  "runId": "1abeb0d1-7754-4d9e-a5f8-645fff53ab45",
+  "postgresVersion": "postgres (PostgreSQL) 16.15",
+  "replayExit": 0,
+  "parity": {
+    "version": 1,
+    "kind": "greenfield-migration-parity",
+    "pass": true,
+    "sourceSha": "433e420ec230c4dee9bd6e974329f0f48119e613",
+    "migrationChainSha256": "6d87e56c13d2a63322baa0e7768f8cf6f506ce4e578153ecbb9799fe030fdbcb",
+    "ledgerSha256": "0be77cbcd52cf3843a2fddacebc92a94e1c6016ca1e5bffa6a951c2738a29301",
+    "expectedMigrations": 111,
+    "appliedMigrations": 111,
+    "invalidIndexes": 0,
+    "unvalidatedConstraints": 0,
+    "unexpectedUserSchemas": 0,
+    "idempotentRedeployVerified": true,
+    "requiredSeedStatus": "NOT_EXECUTED_BY_THIS_VERIFIER",
+    "adr": "ADR-028"
+  },
+  "targets": [
+    {
+      "label": "DB-G",
+      "ledgerProof": {
+        "expected": 111,
+        "applied": 111,
+        "checksumsMatched": 111,
+        "partial": 0,
+        "rolledBack": 0
+      },
+      "tables": 282,
+      "foreignKeys": 313,
+      "checks": 102,
+      "indexes": 1191,
+      "userTriggers": 40,
+      "catalogSha256": "42b8e70d24ca3b0686903612ed0c10415f271e2a42f3d20bc1b3b371dd34afaa",
+      "allConstraintsValidated": true,
+      "allIndexesValidReadyLive": true,
+      "allUserTriggersEnabled": true
+    },
+    {
+      "label": "DB-S",
+      "ledgerProof": {
+        "expected": 111,
+        "applied": 111,
+        "checksumsMatched": 111,
+        "partial": 0,
+        "rolledBack": 0
+      },
+      "tables": 282,
+      "foreignKeys": 313,
+      "checks": 102,
+      "indexes": 1191,
+      "userTriggers": 40,
+      "catalogSha256": "42b8e70d24ca3b0686903612ed0c10415f271e2a42f3d20bc1b3b371dd34afaa",
+      "allConstraintsValidated": true,
+      "allIndexesValidReadyLive": true,
+      "allUserTriggersEnabled": true
+    }
+  ],
+  "greenfieldShadowCatalogsIdentical": true,
+  "appPrivileges": {
+    "schemaCreate": false,
+    "tableDmlGrants": 0,
+    "ledgerRead": false
+  },
+  "pass": true,
+  "cleanup": {
+    "ownedClusterStopped": true,
+    "postmasterPidRemoved": true
+  },
+  "finishedAt": "2026-10-20T21:43:08.317Z"
+}

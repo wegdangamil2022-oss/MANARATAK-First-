@@ -1,0 +1,14 @@
+{
+  "sourceSha": "95c0888161badd9efe47cecb4a732d35f39fc1ca",
+  "codeFilesOnlyNoCredentials": true,
+  "files": {
+    "/workspace/scratch/post28/tools/run-local.py": {
+      "sha256": "1a711522273be54cc64180acecd8609d7bf340cb1eabd52202c32a34b365d0f9",
+      "bytes": 1839
+    },
+    "/workspace/scratch/post28/tools/local-r03-app-defaults.mjs": {
+      "sha256": "b939b23fa2b31d6eceb2ae90c63bcb92d7cb06ccfb65185a2c8ee3513f67316f",
+      "bytes": 2707
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "kind": "POST28_R07_DIAGNOSTIC_BUILD",
+  "sourceSha": "4c7b01cbac1d49688a0f32273316fc370109bcb0",
+  "nodeVersion": "v22.16.0",
+  "lockSha256": "2b468457bb4c706293a6b9f8eaed1b0abde34cef38225a70364a10ff4ac0e151",
+  "schemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59",
+  "generatedClientSchemaSha256": "cd9fdff87ed21b2680f6dda774376a0dd5e2acb52e472519877c4fc88b0f5969",
+  "manifestSha256": "6cfa87ada3d63a95b117964dd96493b77484b6c61af1999bc8f2322991231503",
+  "sbomSha256": "9ffb78d59296e1e0652eceb0ffede4fd56856783f8472fdeece288a13fd7671b",
+  "units": [
+    {
+      "unit": "api",
+      "artifactSha256": "caf128c671a306d92ad33a7a9e1cda3d1acd6007c4049c3a249bc5b610f2afa3",
+      "bytes": 31068160,
+      "freshUnpackInspected": true,
+      "processBooted": false
+    },
+    {
+      "unit": "web",
+      "artifactSha256": "a4233c59beb0eaf8390c0d03201bc3de0d0bd615fd0c0ae7c7b796f543649769",
+      "bytes": 8202240,
+      "freshUnpackInspected": true,
+      "processBooted": false
+    },
+    {
+      "unit": "admin",
+      "artifactSha256": "6e11124f802457a45ca4a9424e6bf1452d96f3efd556f7c72bc1bf0e1c06d62b",
+      "bytes": 6318080,
+      "freshUnpackInspected": true,
+      "processBooted": false
+    }
+  ],
+  "runtimeBootVerified": false,
+  "databaseConnected": false,
+  "stageAccepted": false,
+  "promotionAuthorized": false
+}

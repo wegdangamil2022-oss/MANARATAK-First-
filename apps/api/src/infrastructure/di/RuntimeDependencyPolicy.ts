@@ -136,9 +136,10 @@ export function createRateLimiterForRuntime(
   createRedisClient: RedisClientFactoryFn = RedisClientFactory.createClient,
   sharedRedisClient?: ReturnType<RedisClientFactoryFn> | null,
 ): IRateLimiter {
-  if (!productionLike(env)) return new DefaultRateLimiter();
-
   const redisUrl = env.REDIS_URL?.trim();
+  // An explicitly configured shared store must not silently become per-process
+  // counters in development or an isolated integration deployment.
+  if (!productionLike(env) && !redisUrl) return new DefaultRateLimiter();
   if (!redisUrl) {
     throw new Error('REDIS_URL is required for production/staging distributed rate limiting');
   }

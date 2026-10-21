@@ -1,0 +1,82 @@
+[
+  {
+    "file": "tests/database/post28-course-major-visibility.database.spec.mjs",
+    "title": "allows an approved major relationship without profile and does not infer degree from training text",
+    "ancestors": [
+      "Post28 course major public visibility and degree facet contract"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-course-major-visibility.database.spec.mjs",
+    "title": "hides PROPOSED projections before public page and count",
+    "ancestors": [
+      "Post28 course major public visibility and degree facet contract"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-course-major-visibility.database.spec.mjs",
+    "title": "hides REVIEW_REQUIRED projections before public page and count",
+    "ancestors": [
+      "Post28 course major public visibility and degree facet contract"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-course-major-visibility.database.spec.mjs",
+    "title": "withdraws courses when their target major becomes DRAFT",
+    "ancestors": [
+      "Post28 course major public visibility and degree facet contract"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "AssertionError: expected 1 to be +0 // Object.is equality"
+    ]
+  },
+  {
+    "file": "tests/database/post28-course-major-visibility.database.spec.mjs",
+    "title": "withdraws courses when their target major becomes ARCHIVED",
+    "ancestors": [
+      "Post28 course major public visibility and degree facet contract"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "AssertionError: expected 1 to be +0 // Object.is equality"
+    ]
+  },
+  {
+    "file": "tests/database/post28-course-major-visibility.database.spec.mjs",
+    "title": "rejects an unsupported degree filter rather than returning an unfiltered successful response",
+    "ancestors": [
+      "Post28 course major public visibility and degree facet contract"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "AssertionError: expected 200 to be 400 // Object.is equality"
+    ]
+  },
+  {
+    "file": "tests/database/post28-course-major-visibility.database.spec.mjs",
+    "title": "rejects an unsupported profile filter rather than inferring an academic degree",
+    "ancestors": [
+      "Post28 course major public visibility and degree facet contract"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "AssertionError: expected 200 to be 400 // Object.is equality"
+    ]
+  },
+  {
+    "file": "tests/database/post28-course-major-visibility.database.spec.mjs",
+    "title": "refreshes the next no-store HTTP graph after source reconciliation and preserves independent valid links",
+    "ancestors": [
+      "Post28 course major public visibility and degree facet contract"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  }
+]

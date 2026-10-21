@@ -1,0 +1,31 @@
+{
+  "kind": "POST28_R07_REAL_RENDERER_VALIDATOR_COMPATIBILITY",
+  "sourceSha": "1349371f29902857be7444cf89457e90a1d4b25d",
+  "syntheticOnly": true,
+  "databaseConnections": 0,
+  "externalProviderCalls": 0,
+  "artifacts": [
+    {
+      "kind": "PDF",
+      "mimeType": "application/pdf",
+      "bytes": 12137,
+      "sha256": "d36ac1e879d5359db7ecafd80418d931281217d40d2c54d881336bc81dcefd7e",
+      "validatorPassed": true
+    },
+    {
+      "kind": "PREVIEW",
+      "mimeType": "image/svg+xml",
+      "bytes": 389236,
+      "sha256": "de521a6e70cddfeab2dfd9a923fc810460acf6fba9286eedf5048bf53e3a3713",
+      "validatorPassed": true
+    },
+    {
+      "kind": "QR",
+      "mimeType": "image/svg+xml",
+      "bytes": 24260,
+      "sha256": "b7fa692ed3cb4a6f87656213dd7525b75ab538bf12c1f9c146a86035656d09af",
+      "validatorPassed": true
+    }
+  ],
+  "passed": true
+}

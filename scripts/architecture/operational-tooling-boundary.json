@@ -10,6 +10,7 @@
     "directPrisma": "deny-unless-explicitly-classified"
   },
   "classifiedDirectPrismaScripts": [
+    "scripts/release/post28-linux-artifact-runtime.mjs",
     "scripts/check_outbox.ts",
     "scripts/find-failures.ts",
     "scripts/inspect_audit_logs.ts",
@@ -113,6 +114,14 @@
     "scripts/generate-localized-public-sitemap.ts"
   ],
   "reviewedPrismaScriptContracts": {
+    "scripts/database/remediate-post28-known-source.mjs": {
+      "purpose": "Repair one new synthetic known-source R05 incident through real providers and canonical Asset plus append-only Audit persistence",
+      "access": "isolated-read-write",
+      "environment": ["Node22; clean SHA/run-bound new native PostgreSQL16 U/V lab; ordinary post28_app with INSERT only on Asset and Audit"],
+      "gate": "Local U/V preflight, native lab marker, verified backup and preserved negative audit; fixed expiry, historical owner and consent preservation; no migration or production authorization",
+      "requiredSourceMarkers": ["preflightTargets", "requirePost28LocalExecution", "requireDatabaseMutationGate", "LIMITED_APPLICATION_IDENTITY_REQUIRED", "APPLICATION_PRIVILEGES_EXCESSIVE", "requireKnownSourceTrust", "INJECTED_COMPLETION_FAILURE", "upgradeExecuted:false", "R05Accepted:false"],
+      "review": "Delegated technical decision 2026-10-19; independent implementation review remains required before upgrade"
+    },
     "scripts/certificates/verify-isolated-runtime.mjs": {
       "purpose": "Manual certificate migration/rehearsal on an empty disposable local database only",
       "access": "isolated-read-write",
@@ -128,6 +137,14 @@
       ],
       "review": "B04 2026-10-15; no execution authorized by classification"
     },
+    "scripts/release/post28-linux-artifact-runtime.mjs": {
+      "purpose": "Exercise reviewed non-root Linux image and HTTPS browser against a newly created synthetic PostgreSQL16 lab",
+      "access": "isolated-read-write",
+      "environment": ["Linux x64 / Node22", "POST28_LINUX_RUNTIME_REVIEW=YES", "New labelled internal-network tmpfs PG16 only", "Exact clean artifact/source SHA"],
+      "gate": "Existing target preflight and reviewed migration initializer before synthetic fixtures; application role has no elevated flags, DDL or ledger writes; external egress disabled; cleanup verifies exact resource labels",
+      "requiredSourceMarkers": ["POST28_LINUX_RUNTIME_REVIEW_NOT_AUTHORIZED", "POST28_CLEAN_SOURCE_REQUIRED", "preflightTargets", "requireValidatedCatalog:true", "initialize-post28-transactions.mjs", "assert.equal(roles[0].role,'post28_app')", "assert.equal(identity.Config.Labels['codex.post28.run'],state.runId)"],
+      "review": "R07 isolated Linux review authorized by project owner; diagnostic execution only, no production or promotion"
+    },
     "scripts/release/build-immutable-artifacts.mjs": {
       "purpose": "Record external runtime module names in release artifact metadata",
       "access": "reference-only",
@@ -136,10 +153,18 @@
       ],
       "gate": "Must not import/instantiate Prisma or query a database",
       "requiredSourceMarkers": [
-        "externalModules:",
-        "'@prisma/client'"
+        "runtimeExternalModules(JSON.parse",
+        "externalModules,"
       ],
-      "review": "B04 2026-10-15"
+      "review": "R07 2026-10-17; metadata now follows actual esbuild external imports; reference-only restrictions retained"
+    },
+    "scripts/release/lib/RuntimeModules.mjs": {
+      "purpose": "Read esbuild metadata to enumerate required external modules, without loading Prisma or accessing a database",
+      "access": "reference-only",
+      "environment": ["Filesystem build metadata only; no database credentials"],
+      "gate": "Must not import/instantiate Prisma or query a database",
+      "requiredSourceMarkers": ["modules.includes('@prisma/client')", "!isBuiltin(row.path)"],
+      "review": "R07 2026-10-17; static import metadata enumeration only"
     },
     "scripts/release/lib/ReleaseContracts.mjs": {
       "purpose": "Validate release metadata declaring required runtime modules",
@@ -152,6 +177,140 @@
         "runtime.externalModules.includes('@prisma/client')"
       ],
       "review": "B04 2026-10-15"
+    },
+    "scripts/database/post28-preflight.mjs": {
+      "purpose": "Read-only identity check for declared local POST28 targets or registry/provider-bound Neon rehearsal targets; no Neon mutation authority",
+      "access": "isolated-read-write",
+      "environment": [
+        "NODE_ENV=test or development",
+        "POST28_ISOLATED_EXECUTION=YES",
+        "DATABASE_TARGET_CLASS=DISPOSABLE",
+        "POST28_TARGET_CONTRACT_FILE bound to current source SHA/run and local bootstrap comment OR exact Neon project/branch/endpoint/database/role",
+        "Neon requires fresh authenticated provider GETs, exact TCP grant and strict Prisma TLS; no CI bypass"
+      ],
+      "gate": "preflightTargets validates declarations and pair uniqueness before constructing any client; local server/database/marker or live Neon provider mapping plus SQL TLS/identity/grants are mandatory; SET TRANSACTION READ ONLY; all existing mutation runners still refuse Neon",
+      "requiredSourceMarkers": [
+        "preflightTargets",
+        "readDatabaseIdentity",
+        "POST28_IDENTITY_READ_FAILED",
+        "--require-empty",
+        "SET TRANSACTION READ ONLY"
+      ],
+      "review": "POST28 R02-core 2026-10-16; local and remote read-only source preparation, no Neon runtime, production or restore authority"
+    },
+    "scripts/database/post28-required-seed.ts": {
+      "purpose": "Required-only local R04 seed using existing P7 reviewed owner commands, durable receipts and real asset lifecycle; no legacy SeedApply enablement",
+      "access": "isolated-read-write",
+      "environment": [
+        "Node22",
+        "POST28 local contract matching clean SHA and DB-G/DB-S",
+        "Private source/run/manifest bound user local seed approval",
+        "Successful structural parity evidence"
+      ],
+      "gate": "Local-only identity and limited roles; private explicit approval checked before constructing a client; partial runs fail closed; no reset/delete/prod/Neon",
+      "requiredSourceMarkers": [
+        "POST28_CLEAN_SOURCE_REQUIRED",
+        "requirePost28LocalExecution",
+        "POST28_LOCAL_REQUIRED_SEED_APPROVAL",
+        "requireValidatedCatalog:true",
+        "ReferenceOwnerReviewUseCases",
+        "POST28_SEED_REAPPLY_CHANGED_DATABASE"
+      ],
+      "review": "R04 local execution authorized by user request to complete and close R4, 2026-10-16; no production source approval or DEC change"
+    },
+    "scripts/database/initialize-post28-upgrade.mjs": {
+      "purpose": "Deploy exact historical prefix on fresh local DB-U with matching previous generated client",
+      "access": "isolated-read-write",
+      "environment": [
+        "Node22; local disposable U/V contract bound to clean SHA/run; no cloud or DB-R"
+      ],
+      "gate": "Limited roles; exact identity and separate targets; no existing target overwrite; private artifacts outside Git",
+      "requiredSourceMarkers": [
+        "preflightTargets",
+        "requireDatabaseMutationGate",
+        "requireEmpty:true",
+        "POST28_R04_ACCEPTANCE_STALE",
+        "POST28_HISTORICAL_PREFIX_REQUIRED",
+        "seedHistoricalFixtures"
+      ],
+      "review": "POST28 local R05 preparation 2026-10-16; no R05 acceptance implied"
+    },
+    "scripts/database/verify-post28-upgrade-backup.mjs": {
+      "purpose": "Custom backup of DB-U and structural verification on new isolated DB-V only",
+      "access": "isolated-read-write",
+      "environment": [
+        "Node22; local disposable U/V contract bound to clean SHA/run; no cloud or DB-R"
+      ],
+      "gate": "Limited roles; exact identity and separate targets; no existing target overwrite; private artifacts outside Git",
+      "requiredSourceMarkers": [
+        "preflightTargets",
+        "requireDatabaseMutationGate",
+        "--single-transaction",
+        "requireEmpty:true",
+        "POST28_BACKUP_CONTAINER_IDENTITY_MISMATCH"
+      ],
+      "review": "POST28 local R05 preparation 2026-10-16; no R05 acceptance implied"
+    },
+    "scripts/database/prepare-post28-upgrade.mjs": {
+      "purpose": "Read Git schema and package lock metadata for exact historical migration prefix and previous Prisma version",
+      "access": "reference-only",
+      "environment": [
+        "Source-only Git inventory; no database credentials or client construction"
+      ],
+      "gate": "Read-only Git blobs; exact immutable prefix; no runtime acceptance",
+      "requiredSourceMarkers": [
+        "POST28_UPGRADE_IMMUTABLE_MIGRATION_PREFIX_REQUIRED",
+        "runtimeAcceptance:false"
+      ],
+      "review": "POST28 local R05 2026-10-16"
+    },
+    "scripts/database/audit-post28-upgrade.mjs": {
+      "purpose": "Read-only preupgrade audits of representative local DB-U fixtures using the matching old client; no migration execution",
+      "access": "isolated-read-write",
+      "environment": [
+        "Node22; clean SHA/run-bound local U/V; verified representative backup and fixture digest"
+      ],
+      "gate": "Local preflight before client construction; read-only transactions; report BLOCKED when any upgrade audit has violations",
+      "requiredSourceMarkers": [
+        "preflightTargets",
+        "SET TRANSACTION READ ONLY",
+        "POST28_REPRESENTATIVE_BACKUP_PROOF_REQUIRED",
+        "mutationCommandsExecuted:0"
+      ],
+      "review": "POST28 local R05 historical fixture validation 2026-10-16; no owner remediation or DEC approval"
+    },
+    "scripts/database/initialize-post28-transactions.mjs": {
+      "purpose": "Initialize newly empty local DB-T with a separately declared limited migrator; grant runtime DML only on explicit application tables",
+      "access": "isolated-read-write",
+      "environment": [
+        "Node22 clean SHA/run-bound local DB-T, user-scoped R06 disposition, unchanged accepted R04 schema"
+      ],
+      "gate": "preflightTransactionProvisioning verifies application and setup roles against the same declared DB-T identity; requireEmpty before deploy; no database owner tests; no ledger runtime grants",
+      "requiredSourceMarkers": [
+        "preflightTransactionProvisioning",
+        "requireEmpty:true",
+        "requireScopedR06Authorization",
+        "TRANSACTION_APPLICATION_TABLES",
+        "requireValidatedCatalog:true"
+      ],
+      "review": "POST28 R06 local runtime 2026-10-16; user authorized continuing with recorded R05 blockers, no R05 PASS or deployment authority"
+    },
+    "scripts/recovery/run-whole-platform-restore-drill.mjs": {
+      "purpose": "Restore only into an independently authorized disposable target, then verify full scoped row and asset parity with read-only Prisma",
+      "access": "isolated-read-write",
+      "environment": [
+        "Node22 PostgreSQL16; signed target/source SHA and snapshot; local synthetic or authorized disposable only"
+      ],
+      "gate": "Input hashes and pinned TLS before SQL; independently owned role sentinel before/after restore; read-only snapshot verifier; no destructive fixture suite",
+      "requiredSourceMarkers": [
+        "recoveryInputs",
+        "RECOVERY_DRILL_NOT_AUTHORIZED",
+        "databaseSentinel",
+        "verifyDatabaseSnapshot",
+        "recoveryPrismaUrl",
+        "requireTlsRoot: true"
+      ],
+      "review": "POST28 R10 independent source and local execution review 2026-10-20"
     }
   }
 }

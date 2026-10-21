@@ -1,0 +1,7 @@
+# R06 authenticated LearningPath certificate policy authoring
+
+Source aa90799417996f04d12af807c65ac1a3694e159d; run 86c03ce9-44b2-4f52-b247-cb0d4746c09d; PostgreSQL postgres (PostgreSQL) 16.15, system 7698102646421169148.
+
+The user approved optional eligibility for newly approved path versions. The admin authoring checkbox defaults false and becomes disabled for published paths. Five real JWT/HTTP PostgreSQL cases exercise the actual CourseAdminRouter and command coordinators: explicit opt-in survives create/review/publish; omitted policy stays false; persisted role withdrawal rejects an existing JWT; stale If-Match rejects the write; published policy edits reject without changing historical snapshots, audit or outbox facts. Actual authorization, CSRF and durable idempotency middleware are present. Admin TypeScript and source quality pass. No built-browser visual verification is claimed. Existing path issuance, owner policy gates, R04/R05 restrictions and historical events remain unchanged. No schema or historical migration changes occurred. This is scoped R06 evidence, not acceptance of all 26 scenarios.
+
+Evidence: docs/reviews/evidence/post28/aa90799417996f04d12af807c65ac1a3694e159d/R06-learning-path-http/evidence-index.json. Actual database cases: 5 passed, zero failed/skipped in final runs. New distinct 5; repeats 0; cumulative 447 across SHAs, not one current-head acceptance run. R06 remains 0/26 accepted.

@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "scope": "FIVE_BOUNDED_SYNTHETIC_SCENARIO_DIAGNOSTICS",
+  "authority": "Owner delegated project management and instructed continuation of R11; limits selected before execution",
+  "expectedApiSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "maximumOperations": 30,
+  "durationSeconds": 60,
+  "operationsPerSecond": 0.5,
+  "operationTimeoutMs": 2000,
+  "maximumCpuPercent": 80,
+  "maximumResidentMemoryBytes": 1073741824,
+  "maximumConnections": 10,
+  "postgresStatementTimeoutMs": 2000,
+  "postgresLockTimeoutMs": 1000,
+  "categories": {
+    "student-writes": "Built API cookie login and CSRF; own synthetic workspace theme updates; replay one command",
+    "admin-scans": "Canonical support application read model with bounded cursor; not Admin HTTP/MFA certification",
+    "imports": "Canonical source identity and initial URL receipt persistence for an inert file provider; not full import publication pipeline",
+    "finance-stub": "Canonical local draft/issue/credit and durable replay with no payment/FX provider registered; not provider latency",
+    "worker-queues": "Actual outbox claim/renew/complete with inert append-only audit delivery sink and unique lab domain; not every real consumer"
+  },
+  "cacheMode": "UNCONTROLLED_LOCAL_BASELINE",
+  "warmupOperations": 0,
+  "dataset": "Fresh clone of previously hashed synthetic dump; new fixture namespace; launch volume unapproved",
+  "platform": "Native Windows PostgreSQL16 and Node22; Linux load remains separate",
+  "productionAcceptance": false,
+  "sloAcceptance": false,
+  "externalProvidersAllowed": false
+}

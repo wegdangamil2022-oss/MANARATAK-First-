@@ -1,0 +1,19 @@
+{
+  "name": "native-final-tests",
+  "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+  "command": [
+    "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node.exe",
+    "--test",
+    "tests/release/post28-runtime-layer.test.mjs",
+    "tests/release/post28-runtime-modules.test.mjs",
+    "tests/release/post28-static-host.test.mjs",
+    "tests/release/post28-diagnostic-process.test.mjs"
+  ],
+  "startedAt": "2026-10-16T22:22:28.687Z",
+  "finishedAt": "2026-10-16T22:22:30.028Z",
+  "exitCode": 0,
+  "node": "v22.16.0",
+  "platform": "win32",
+  "architecture": "x64",
+  "logSha256": "7a142cdc90d3ad829baa19b791589521a89b7ec281874f112cdf4bbc2d569aca"
+}

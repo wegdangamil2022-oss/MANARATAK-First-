@@ -1,0 +1,105 @@
+{
+  "sourceSha": "c42f8dd3a881ee559c6a4e0665204ea4b814c875",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "r06-certificate-retry-red.json",
+      "bytes": 15583,
+      "sha256": "3233680ba81dab0ff627cebd4bdacd136e654ec0763490b0ce0b2552ec18b403"
+    },
+    {
+      "path": "r06-certificate-retry-final.json",
+      "bytes": 20389,
+      "sha256": "a1ddeb22a9117f22f70f994820b3945ae3a3c21bf7e519b9357cc05dfbe6af5e"
+    },
+    {
+      "path": "r06-certificate-retry-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r06-certificate-retry-quality.log",
+      "bytes": 384,
+      "sha256": "eec55ba731573ad76875e3cff714bdc27a87514146f57511d67392efccd7ee81"
+    },
+    {
+      "path": "r06-certificate-retry-eslint.log",
+      "bytes": 1324,
+      "sha256": "025b2d6a50daa5d2fcb57d00a39656257f403d6167a2f87a155249ba17f986fa"
+    },
+    {
+      "path": "r07-certificate-eap-lab.mjs",
+      "bytes": 12602,
+      "sha256": "cedcfb13d2f92fee78712728ef007be3a6552d07f13a3404409735a27e6ba364"
+    },
+    {
+      "path": "lab/targets.json",
+      "bytes": 667,
+      "sha256": "2805bcffcd2298cc3dd28fcf8277aa6fa57de38f676ceebafb2f475d4c79a14d"
+    },
+    {
+      "path": "lab/target-preflight.log",
+      "bytes": 426,
+      "sha256": "c00182f808e4b37fc7a1131c55d2115610785a66503b8e8e7be96e284897bc73"
+    },
+    {
+      "path": "lab/R07-setup/checks.json",
+      "bytes": 688,
+      "sha256": "bd1db4e50eb50193c3708c692ef3fc8b32c5b7d5c6264391be7757cc0588cc1c"
+    },
+    {
+      "path": "lab/R07-setup/result.json",
+      "bytes": 973,
+      "sha256": "d8f274aead65dc8a22ee5aa7eb73cb84c0fdde7ad7167870f0f16031018e956f"
+    },
+    {
+      "path": "lab/certificate-eap-stop.log",
+      "bytes": 118,
+      "sha256": "6f74a3e247b91774abe24cd936203fc1647df55633b786b7b72ce4501f6b025d"
+    },
+    {
+      "path": "lab/certificate-eap-edge-tool.json",
+      "bytes": 237,
+      "sha256": "25d950a338c53778594b464057660e575b4c1b3a98aceec981772be574dda8ff"
+    },
+    {
+      "path": "certificate-eap-proof/result.json",
+      "bytes": 1018,
+      "sha256": "cb61554517efef8af7a2b55046781df9356d2e17280a59523e261832f7400c5d"
+    },
+    {
+      "path": "certificate-eap-proof-renderer-path-fixed/result.json",
+      "bytes": 878,
+      "sha256": "f42027a48ce30c30e6ec3afec76842da21733662e1cb66c1cce72a2db0665933"
+    },
+    {
+      "path": "certificate-eap-proof-renderer-path-fixed/operations.jsonl",
+      "bytes": 240,
+      "sha256": "8cdce84d4040801432f348dc8ba9c1ec12f3a60b7cbb219e2b9beb22a78e6ca0"
+    },
+    {
+      "path": "certificate-eap-proof-pdf-detection-fixed/result.json",
+      "bytes": 1352,
+      "sha256": "1b873a577f7c846b2a0f7d654ec65def6095c9aef4a5adef9b12b6ca30dc5468"
+    },
+    {
+      "path": "certificate-eap-proof-pdf-detection-fixed/operations.jsonl",
+      "bytes": 755,
+      "sha256": "aa4ff2ae15b7a6cf438a0932a52e2e677def7c6e9b28e85913f9fb9ba6e2d6af"
+    },
+    {
+      "path": "certificate-eap-proof-edge-svg/result.json",
+      "bytes": 2240,
+      "sha256": "b0b3d118d36a00fcd712b034024a2f87d0687776059cdfd666f411b24db63593"
+    },
+    {
+      "path": "certificate-eap-proof-edge-svg/operations.jsonl",
+      "bytes": 1929,
+      "sha256": "7c75a80ae9833cdaeb28854a8060103b22884f40a89ff50ebf180ad862638b7c"
+    }
+  ]
+}

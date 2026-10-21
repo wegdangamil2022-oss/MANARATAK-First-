@@ -1,0 +1,17 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/home/runner/work/MANARATAK-First-/MANARATAK-First-[39m
+
+ [32m✓[39m tests/database/post28-r09-integrated-workflows.database.spec.mjs [2m([22m[2m5 tests[22m[2m)[22m[33m 14230[2mms[22m[39m
+     [33m[2m✓[22m[39m authors reviews publishes and withdraws current CMS snapshots using three actual capabilities [33m 729[2mms[22m[39m
+     [33m[2m✓[22m[39m completes an actual lesson and issues one signed certificate across two consumers then verifies and revokes it [33m 1330[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps original student document bindings consent and private invoices unchanged on foreign access and mutation [33m 2232[2mms[22m[39m
+     [33m[2m✓[22m[39m traverses canonical owner relations beyond page one and distinguishes withdrawal zero and unavailable reads [33m 8565[2mms[22m[39m
+     [33m[2m✓[22m[39m pays a real synthetic invoice once across concurrent HTTP replays with one balanced ledger effect [33m 1000[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 13:35:38
+[2m   Duration [22m 21.44s[2m (transform 5.06s, setup 0ms, import 7.06s, tests 14.23s, environment 0ms)[22m
+
+JSON report written to /home/runner/work/_temp/r09-workflows/private-labs/lab-ttSbJg/R06-suites/r09-integrated-workflows-An3oUM/vitest.json
+{"kind":"POST28_DATABASE_SUITE_EXECUTION","sourceSha":"b94ecd49d03463ea89ba26e510ba2ca7f87597a5","suite":"r09-integrated-workflows","caseExact":null,"fullDiscoveryCases":5,"fullProfileAcceptance":true,"authorization":{"migrationTransition":{"schemaUnchanged":true,"historicalPrefixMatched":110,"reviewedAppendOnlyMigration":{"name":"20261019000100_admission_null_identity","checksum":"013eb65a4295987696e3202c06a32cf5874adb389a83467f39ca37cf67bb4efa"},"scope":"LOCAL_SYNTHETIC_ONLY","productionAuthorized":false},"scope":"LOCAL_DB_T_SCOPED_TESTS_ONLY","R04":"PASS_LOCAL_MATCHING_SCHEMA","R05":"BLOCKED_USER_AUTHORIZED_SCOPED_R06","fullR06Acceptance":false,"deploymentAuthorized":false},"targets":[{"label":"DB-T","database":"manaratak_post28_transactions_test","role":"post28_app","serverIdentity":"7698743107307868205","databaseOid":"16386","postgresMajor":16,"timezone":"UTC","publicTables":282,"probeReadOnly":true}],"expected":5,"executed":5,"passed":5,"failed":0,"skipped":0}

@@ -34,9 +34,22 @@ describe('PrismaScholarshipCanonicalLookupGateway', () => {
 
   it('looks up AcademicProgram by exact canonical id only', async () => {
     const prisma = createPrismaMock();
-    prisma.universityAcademicProgram.findMany.mockResolvedValue([{ id: 'program-1', universityId:'university-1', degreeLevelId:'phd', majorId:'major-1', status:'ACTIVE', majorMappingState:'CANONICALLY_MAPPED', university:{status:'PUBLISHED'}, major:{status:'PUBLISHED',levelProfiles:[{degreeLevelId:'phd',status:'PUBLISHED',currentPublishedVersionId:'version-1'}]}, sourceProgramName: 'Computer Science PhD', normalizedName: 'computer science phd' }]);
+    prisma.universityAcademicProgram.findMany.mockResolvedValue([{ id: 'program-1', universityId:'university-1', degreeLevelId:'phd', majorId:'major-1', status:'ACTIVE', majorMappingState:'CANONICALLY_MAPPED', university:{status:'PUBLISHED',countryReference:{isActive:true,lifecycleState:'ACTIVE'},regionReferenceId:null,cityReferenceId:null}, major:{status:'PUBLISHED',levelProfiles:[{id:'profile-1',degreeLevelId:'phd',status:'PUBLISHED',currentPublishedVersionId:'version-1',currentPublishedVersion:{id:'version-1',majorId:'major-1',profileId:'profile-1',status:'PUBLISHED'}}]}, sourceProgramName: 'Computer Science PhD', normalizedName: 'computer science phd' }]);
     const results = await new PrismaScholarshipCanonicalLookupGateway(prisma as any).findCandidates('ACADEMIC_PROGRAM', { target: 'ACADEMIC_PROGRAM', canonicalId: 'program-1' });
-    expect(prisma.universityAcademicProgram.findMany).toHaveBeenCalledWith(expect.objectContaining({where:expect.objectContaining({id:'program-1',university:{is:{status:'PUBLISHED'}}}),take:501}));
+    expect(prisma.universityAcademicProgram.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        id: 'program-1',
+        university: { is: {
+          status: 'PUBLISHED',
+          countryReference: { is: { isActive: true, lifecycleState: 'ACTIVE' } },
+          AND: [
+            { OR: [{ regionReferenceId: null }, { regionReference: { is: { isActive: true, lifecycleState: 'ACTIVE' } } }] },
+            { OR: [{ cityReferenceId: null }, { cityReference: { is: { isActive: true, lifecycleState: 'ACTIVE' } } }] },
+          ],
+        } },
+      }),
+      take: 501,
+    }));
     expect(results[0]).toMatchObject({ id: 'program-1', method: 'EXACT_CANONICAL_ID' });
   });
 

@@ -1,0 +1,94 @@
+{
+  "kind": "POST28_R09_RAW_WORKFLOW_EVIDENCE",
+  "sourceSha": "130fbe0a5c6e42030922cd1669bcc816d03b93ba",
+  "syntheticOnly": true,
+  "productionAcceptance": false,
+  "fullR09Acceptance": false,
+  "cleanup": {
+    "sourceSha": "130fbe0a5c6e42030922cd1669bcc816d03b93ba",
+    "runId": "d7127b2a-b310-4d6c-96ca-7d33ecbc8b0a",
+    "exit": 0,
+    "stopped": true,
+    "existingDatabasesTouched": false
+  },
+  "cases": [
+    {
+      "title": "traverses canonical owner relations beyond page one and distinguishes withdrawal zero and unavailable reads",
+      "status": "passed",
+      "sourceSha": "130fbe0a5c6e42030922cd1669bcc816d03b93ba",
+      "evidence": "docs/reviews/evidence/post28/130fbe0a5c6e42030922cd1669bcc816d03b93ba/r09-shared-workflows/native-pg16-FcU9PS/R06-suites/r09-integrated-workflows-Ik32R6/vitest.json"
+    }
+  ],
+  "files": [
+    {
+      "path": "cleanup.json",
+      "bytes": 160,
+      "sha256": "bc7b4fe25a50e029452734e5f44182edbe78191b5da4c23be8bed7012cecafae"
+    },
+    {
+      "path": "initialize.log",
+      "bytes": 4435,
+      "sha256": "9d3372c77e83fac8e7b2e2539bebe7c855d71b21ddfb4dcb0ddc87b4c724a876"
+    },
+    {
+      "path": "R06-setup/0-validate.log",
+      "bytes": 144,
+      "sha256": "9bac6f2900d82077fd9ba3d76d872874f55c2b9bf30c910010cf33354fcf9dd6"
+    },
+    {
+      "path": "R06-setup/1-migrate.log",
+      "bytes": 16275,
+      "sha256": "1a02680bc82ad138fe38023ab463b2848a2d5fe7f8a79a90c9eadb878a6bfa50"
+    },
+    {
+      "path": "R06-setup/2-migrate.log",
+      "bytes": 258,
+      "sha256": "c9f63f6c9be05f51caf76a0ccbafea1e7e0ba9297f3a57e20ba491c9ec1a8a1a"
+    },
+    {
+      "path": "R06-setup/3-migrate.log",
+      "bytes": 25,
+      "sha256": "198913094e3f41610eb893459ab65a3c79991b65d4ef5fcb8c325ebe52ebf1ed"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "8373932dfd7a44ee4b5a24c023ac5a66e48436050ece2485ae5f35ab07cc3fe2"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 5486,
+      "sha256": "070fdbda22ccd891bbb376a5f34582549a81c3e13720a90cf6f05123b498ebe8"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-Ik32R6\\discovery.json",
+      "bytes": 1840,
+      "sha256": "ad8ffea88185ed1227f17af6be2578adcb53f004e143180405fbda7b07835dc5"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-Ik32R6\\selection.json",
+      "bytes": 287,
+      "sha256": "1e6833c69523db559c1ce8f1195e0b9e593bc920d462e19026bcde0f6dc3d3a1"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-Ik32R6\\summary.json",
+      "bytes": 1411,
+      "sha256": "c3541f8a4854fa7d73e0d5bd43f8d11acde9a5619fb3cb52fff7bbfa4c6fbde3"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-Ik32R6\\vitest.json",
+      "bytes": 3081,
+      "sha256": "18d198eb74cad818946e90f73e069ac462947df325da0bf2f2d3a6a58803c03d"
+    },
+    {
+      "path": "r09-workflow-observations-bbbc6299-b7e5-476f-9baf-dfa9bb47fa19.json",
+      "bytes": 1712,
+      "sha256": "546b44579f655bcb034fd263764739bced53f3487495ae64ef30587c416c6dee"
+    },
+    {
+      "path": "suite-0.log",
+      "bytes": 1840,
+      "sha256": "94e8a02fd18c31dbb08f0a9c9759350156ed04284d79af2d676cf849be0e70b8"
+    }
+  ]
+}

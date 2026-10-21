@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Post28 DEC05 owner command atomic lifecycle > commits rejection derived invalidation owner version audit and outbox together",
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC05 owner command atomic lifecycle > rolls all owner and relation writes back on actual PostgreSQL failure in auditRecord",
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC05 owner command atomic lifecycle > rolls all owner and relation writes back on actual PostgreSQL failure in transactionalOutboxRecord",
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC05 owner command atomic lifecycle > serializes concurrent owner commands and rejects the stale version without duplicate effects",
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC05 owner command atomic lifecycle > refuses stale command replay before any relation audit or outbox mutation",
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC05 owner command atomic lifecycle > reconciles removed source terms through the owner transaction and preserves independent links",
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC05 owner command atomic lifecycle > requires unpublication before reviewing a published structure then performs actual unpublish and rejection",
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC05 owner command atomic lifecycle > withdraws an approved taxonomy projection when its source provenance changes",
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs"
+  }
+]

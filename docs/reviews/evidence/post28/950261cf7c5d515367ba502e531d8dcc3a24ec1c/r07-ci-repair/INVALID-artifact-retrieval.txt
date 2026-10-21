@@ -1,0 +1,6 @@
+abf0dc304736a5db0709ee3a4156ad554e9df9befb2651b1c7f272251c687e87  /home/runner/work/_temp/recovered-release/SHA256SUMS
+94f6bfc6da0f97c6651e438424916818c0e97d16175459ffe6f64685d90dda07  /home/runner/work/_temp/recovered-release/manaratak-admin-SOURCE_SHA_UNAVAILABLE.tar
+b233cadbc9730adee56c62bec83e5783fa834cba837771991d057ec9672ad577  /home/runner/work/_temp/recovered-release/manaratak-api-SOURCE_SHA_UNAVAILABLE.tar
+e48c3aa668d9d42bd1c7ede99f58e23f16590598fe6d1dbe639deb91fbb4ae0f  /home/runner/work/_temp/recovered-release/manaratak-web-SOURCE_SHA_UNAVAILABLE.tar
+a65cc0896c8fde44f7f3e376c48b90eaf7b60ea0ba5a9e55687788595698da82  /home/runner/work/_temp/recovered-release/release-manifest.json
+36023bc1ff8fde30785851f77c4097868603f395b0f523ddbcb6b1c8f4fb979e  /home/runner/work/_temp/recovered-release/release-sbom.cdx.json

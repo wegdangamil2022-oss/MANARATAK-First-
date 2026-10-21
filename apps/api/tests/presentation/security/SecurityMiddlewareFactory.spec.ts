@@ -239,6 +239,19 @@ describe('SecurityMiddlewareFactory resolveAdminAuthMode', () => {
 });
 
 describe('SecurityMiddlewareFactory rate limiter middleware', () => {
+  it('forwards a shared limiter outage to the error handler without admitting the request', async () => {
+    const outage = new Error('synthetic shared limiter unavailable');
+    const limiter = new DefaultRateLimiter();
+    vi.spyOn(limiter, 'consume').mockRejectedValue(outage);
+    const middleware = SecurityMiddlewareFactory.createRateLimiter(new SecurityService(limiter), { limit: 5, windowMs: 60000 });
+    const response = createResponse();
+    const next = vi.fn();
+    await expect(middleware({ ip: '1.2.3.4' } as any, response as any, next)).resolves.toBeUndefined();
+    expect(next).toHaveBeenCalledExactlyOnceWith(outage);
+    expect(response.setHeader).not.toHaveBeenCalled();
+    expect(response.json).not.toHaveBeenCalled();
+  });
+
   it('allows requests within rate limit and sets rate limit headers', async () => {
     const rateLimiter = new DefaultRateLimiter();
     const securityService = new SecurityService(rateLimiter);

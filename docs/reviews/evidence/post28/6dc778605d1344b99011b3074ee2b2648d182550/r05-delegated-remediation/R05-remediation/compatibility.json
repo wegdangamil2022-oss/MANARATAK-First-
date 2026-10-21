@@ -1,0 +1,20 @@
+{
+  "sourceSha": "6dc778605d1344b99011b3074ee2b2648d182550",
+  "runId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+  "previousClientVersion": "5.22.0",
+  "fixtureReadProbes": 46,
+  "allDeclaredHistoricalFieldsMatched": true,
+  "role": "post28_app",
+  "phase": "AFTER_REMEDIATION_BEFORE_UPGRADE",
+  "canonicalAuthenticatedDelivery": {
+    "bytes": 10234,
+    "mimeType": "application/pdf",
+    "sha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5"
+  },
+  "crossStudentDenied": true,
+  "confidentialPublicReferenceDenied": true,
+  "legacyStudentReviewDenied": true,
+  "consentAndBindingUnchanged": true,
+  "upgradeExecuted": false,
+  "R05Accepted": false
+}

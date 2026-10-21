@@ -340,7 +340,9 @@ export class PrismaServicePlatformRepository
         Prisma.sql`SELECT COUNT(*) AS total FROM "ServiceCatalogRecord" s WHERE ${where}`,
       ),
       this.prisma.$queryRaw<Array<{ category: string; total: bigint }>>(
-        Prisma.sql`SELECT ${column('serviceCategory')} AS category,COUNT(*) AS total FROM "ServiceCatalogRecord" s WHERE ${where} GROUP BY ${column('serviceCategory')}`,
+        // Repeating a parameterized CASE allocates different bind positions;
+        // PostgreSQL cannot infer that those expressions group the same value.
+        Prisma.sql`SELECT ${column('serviceCategory')} AS category,COUNT(*) AS total FROM "ServiceCatalogRecord" s WHERE ${where} GROUP BY 1`,
       ),
     ]);
     const total = Number(counts[0]?.total ?? 0n);

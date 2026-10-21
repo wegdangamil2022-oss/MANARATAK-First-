@@ -1,0 +1,88 @@
+{
+  "kind": "POST28_R09_LEARNER_HANDOFF",
+  "sourceSha": "ce0690c36759fc73ac202a679f905054b7a4607b",
+  "runId": "39344907974",
+  "status": "IN_PROGRESS_LEARNER_AND_CMS_BROWSER_VERIFIED",
+  "runtimeEvidence": "../r09-learner-runtime/evidence-index.json",
+  "previousFailedRun": {
+    "sourceSha": "a7455c75e51f3c5a332b3577501a04b48725bf9c",
+    "runId": "39343384826",
+    "fixedCause": "Missing isolated lab INSERT/UPDATE privilege for CourseLessonProgress"
+  },
+  "completeCaseIds": [],
+  "partialCases": [
+    {
+      "caseIds": [
+        "CD-028",
+        "CD-029"
+      ],
+      "rows": [
+        "R-027"
+      ],
+      "verified": [
+        "real enrollment",
+        "lesson progress 50 retained after reload",
+        "independent second student progress 0",
+        "unenrolled content denied",
+        "two atomic Audit/Outbox records"
+      ],
+      "remaining": [
+        "worker projection into StudentWorkspace",
+        "learning-path/course completion and certificate inbox",
+        "other private student resources and hostile write combinations"
+      ]
+    },
+    {
+      "caseIds": [
+        "CD-026"
+      ],
+      "rows": [
+        "R-048"
+      ],
+      "verified": [
+        "student admin API denied 403",
+        "student admin UI redirects"
+      ],
+      "remaining": [
+        "authorized administrative lifecycle and other role combinations"
+      ]
+    },
+    {
+      "caseIds": [
+        "CD-042"
+      ],
+      "rows": [
+        "R-068"
+      ],
+      "verified": [
+        "Arabic deep link survives real login including query and fragment",
+        "CMS component sanitization in actual Chromium"
+      ],
+      "remaining": [
+        "English UI activation",
+        "full locale/SEO/accessibility/responsive matrix"
+      ]
+    },
+    {
+      "caseIds": [
+        "CD-038"
+      ],
+      "verified": [
+        "three SHA-matched built units recovered and booted"
+      ],
+      "remaining": [
+        "author-review-publish-unpublish canary"
+      ]
+    }
+  ],
+  "checks": {
+    "passed": 23,
+    "failed": 0,
+    "pending": 0
+  },
+  "formalR09Acceptance": false,
+  "productionAcceptance": false,
+  "promotionAuthorized": false,
+  "historicalMatricesRewritten": false,
+  "existingDatabasesTouched": false
+}

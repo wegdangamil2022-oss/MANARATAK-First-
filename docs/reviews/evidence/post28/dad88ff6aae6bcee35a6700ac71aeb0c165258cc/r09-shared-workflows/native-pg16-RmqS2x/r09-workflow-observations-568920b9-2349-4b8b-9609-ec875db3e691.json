@@ -1,0 +1,32 @@
+{
+  "kind": "POST28_R09_SHARED_WORKFLOW_INTEGRATION",
+  "sourceSha": "dad88ff6aae6bcee35a6700ac71aeb0c165258cc",
+  "syntheticOnly": true,
+  "productionAcceptance": false,
+  "externalProvidersEnabled": false,
+  "fullR09Acceptance": false,
+  "observations": [
+    {
+      "case": "ACTUAL_LESSON_TO_ONE_SIGNED_CERTIFICATE",
+      "courseId": "8d5e16d2-280a-4167-b6e2-0f43d850874e",
+      "eventId": "course-completed:8d5e16d2-280a-4167-b6e2-0f43d850874e:60c1287e-9bd3-4ba0-81a5-a081c0f806f8:v2",
+      "certificateId": "11e2140b-c074-40f8-8711-ed50e56630dd",
+      "consumers": 2,
+      "replays": 1,
+      "validThenRevoked": true,
+      "foreignArtifactsDenied": true,
+      "artifactRendererExercised": false
+    }
+  ],
+  "role": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledger": false
+  },
+  "browserVersion": "155.0.4283.62",
+  "boundary": "ACTUAL_SOURCE_ROUTERS_REAL_JWT_DB_CAPABILITIES_NOT_BUILT_ADMIN_UI_OR_MFA"
+}

@@ -1,0 +1,22 @@
+{
+  "sourceSha": "ea2286d37a7c7b32b9bbde03d69c43aa736252b0",
+  "suite": "relation-commands",
+  "discovered": 8,
+  "selected": 8,
+  "executed": 8,
+  "passed": 8,
+  "failed": 0,
+  "selectedSkipped": 0,
+  "rawSkippedAssertions": 0,
+  "fullProfilePassed": true,
+  "originalRunnerGate": "PASS",
+  "distinctNewPassingCases": 8,
+  "regressionNotAdditional": false,
+  "actualSqlStateAsserted": null,
+  "R04": "PASS_LOCAL_UNCHANGED",
+  "R05": "BLOCKED",
+  "R06": "PARTIAL",
+  "fullRequiredCasesAccepted": 0,
+  "externalProviderCalled": false,
+  "productionAcceptance": false
+}

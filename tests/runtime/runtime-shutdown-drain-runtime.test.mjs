@@ -17,7 +17,7 @@ function fixture(pollingDrain, httpDrain = true) {
   const calls = [];
   let expire;
   const context = {
-    process: { exitCode: 0 }, console: { log() {}, error() {} }, SHUTDOWN_TIMEOUT_MS: 100,
+    process: { exitCode: 0, exits: [], exit(code) { this.exits.push(code); } }, console: { log() {}, error() {} }, SHUTDOWN_TIMEOUT_MS: 100,
     stopPollingWorkers: () => { calls.push('polling-stop'); return pollingDrain; },
     backgroundWorker: { beginDrain: () => calls.push('background-stop'), drain: async () => calls.push('background-drain') },
     runtimeResources: { beginShutdown: () => calls.push('readiness-down'), closeAll: async () => calls.push('resources-close') },
@@ -54,4 +54,15 @@ test('successful shutdown waits for polling drain and is idempotent across signa
   assert.equal(f.context.process.exitCode, 0);
   assert.equal(f.calls.filter(call => call === 'resources-close').length, 1);
   assert.equal(f.calls.includes('http-force-close'), false);
+});
+
+test('the shutdown deadline still terminates when monitoring flush never settles', async () => {
+  const f = fixture(Promise.resolve());
+  f.context.monitoringProviderRuntime = { forceFlush: () => new Promise(() => {}) };
+  void f.context.shutdown('SIGTERM');
+  for (let turn = 0; turn < 12; turn++) await Promise.resolve();
+  f.expire();
+  assert.deepEqual(f.context.process.exits, [1]);
+  assert.ok(f.calls.includes('http-force-close'));
+  assert.ok(f.calls.includes('resources-close'));
 });

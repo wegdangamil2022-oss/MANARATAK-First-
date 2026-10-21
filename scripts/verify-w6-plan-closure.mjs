@@ -84,7 +84,7 @@ check('MNT-AUD-0078', 'production telemetry provider and HTTP/background instrum
     requireAll(monitoringService, ['this.provider?.startSpan?.', 'this.provider?.forceFlush?.', 'this.provider?.shutdown?.']) &&
     requireAll(app, ['OtlpHttpMonitoringProvider', 'telemetry-exporter']) &&
     requireAll(server, ['startPollingWorkers', 'monitoringProvider']) &&
-    requireAll(read('apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts'), ['observeWorkerIteration', 'worker.iterations.completed', 'worker.iterations.failed', 'worker.iteration.duration_ms', "pollingWorkerRuntimeRegistry.success('certificate-completion')"]) &&
+    requireAll(read('apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts'), ['observeWorkerIteration', 'worker.iterations.completed', 'worker.iterations.failed', 'worker.iteration.duration_ms', "register('certificate-completion', intervalMs, () => worker.runOnce(workerId))", "pollingWorkerRuntimeRegistry.success(name)", "pollingWorkerRuntimeRegistry.failure(name, error)"]) &&
     cfg.includes('OTEL_EXPORTER_OTLP_ENDPOINT');
 });
 
@@ -98,7 +98,9 @@ check('MNT-AUD-0066', 'provider-neutral DR contract, readiness and restore drill
     exists('scripts/recovery/verify-runtime-backup-readiness.mjs') &&
     exists('docs/operations/PLATFORM_DISASTER_RECOVERY_RUNBOOK.md') &&
     requireAll(verifier, ['RECOVERY_SOURCE_CONTRACT=PASS', 'REQUIRED_BEFORE_PRODUCTION']) &&
-    requireAll(drill, ['pg_restore', 'test:database', 'RESTORE_DRILL.json']) &&
+    requireAll(drill, ['pg_restore', 'verifyDatabaseSnapshot', 'databaseSentinel', 'RESTORE_DRILL.json']) &&
+    !drill.includes('test:database') &&
+    read('scripts/recovery/DatabaseSnapshot.mjs').includes('SET TRANSACTION READ ONLY') &&
     requireAll(workflow, ['schedule:', 'recovery:runtime:readiness', 'recovery:restore:drill']);
 });
 

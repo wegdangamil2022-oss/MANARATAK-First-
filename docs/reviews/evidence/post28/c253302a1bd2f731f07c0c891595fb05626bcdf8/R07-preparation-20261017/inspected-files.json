@@ -1,0 +1,166 @@
+{
+  "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+  "scope": "Focused build/runtime inspection; full branch tree fetched, not every source file semantically reviewed",
+  "files": [
+    {
+      "file": "docs/remediation/POST28_ISOLATED_VALIDATION_EXECUTION_PLAN_v1.3_2026-10-16.md",
+      "sha256": "956e4c59215cf9496e7ed967e48697e9d4c1914b5e862cc4156eabbbb26c8c1c"
+    },
+    {
+      "file": "docs/operations/POST28_R06_R09_PREPARATION.md",
+      "sha256": "967f4d417cc70df549b075fb39da48c7f115ec27691b3279d4fc07dfb423e61f"
+    },
+    {
+      "file": "docs/remediation/POST28_CONTINUATION_HANDOFF_2026-10-16.md",
+      "sha256": "189ba3df80d222faf1bba9c9fea01cc021080b65b7cf8ed996296ddac0688f21"
+    },
+    {
+      "file": "docs/remediation/POST28_R06_CLOSURE_REVIEW_2026-10-16.md",
+      "sha256": "72698d8ac0781f4019202d395577d8990dd6fe5a33b01c25964b8c7e03408007"
+    },
+    {
+      "file": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md",
+      "sha256": "81e5b65c459a159e44ccb5dfbb48fff5fd70959168d295c240534a8257cafb2f"
+    },
+    {
+      "file": "docs/remediation/POST28_R06_DEC01_PROGRAM_PAIR_EXECUTION_2026-10-16.md",
+      "sha256": "474212a43e451a8d35762247e4a0f7604309b4abf3d9c47385cb4450cf448f58"
+    },
+    {
+      "file": "docs/remediation/POST28_R04_LOCAL_CLOSURE_2026-10-16.md",
+      "sha256": "ece743c37d834064f74f8bf3d46a29dadcc393657fa981ffe6774a0489b10821"
+    },
+    {
+      "file": "docs/remediation/POST28_R05_KNOWN_SOURCE_TECHNICAL_REVIEW_2026-10-16.md",
+      "sha256": "e535caa7f9ab6c2650b09e460dc4fa77074f128afe89d0258a65156840844144"
+    },
+    {
+      "file": "docs/remediation/POST28_R07_DIAGNOSTIC_2026-10-16.md",
+      "sha256": "2ffc80faf86b1671350a51c536b4a35e144a5e8ceb5e8f213364334d4a89afce"
+    },
+    {
+      "file": "config/testing/post28-stage-disposition.json",
+      "sha256": "1ac6be55fff11b795da509d1306ad361ed39ae9ba35714fdc8d5fa437e35d17f"
+    },
+    {
+      "file": "config/release/runtime-acceptance-contract.json",
+      "sha256": "620ece8284c2edae8bc6c0dda95176406541fc3a9666582c85e4b1ed973e0199"
+    },
+    {
+      "file": "scripts/release/lib/AcceptanceContracts.mjs",
+      "sha256": "b90cc82e4b0272f70ee5f13e7ee6e425f5713a9eb1ba8b2bb33c981366054a4b"
+    },
+    {
+      "file": "scripts/release/lib/SmokeContracts.mjs",
+      "sha256": "944ad70a95ee703d390ded7839434fbe6d697c8df6fa30ff231c241330f81692"
+    },
+    {
+      "file": "scripts/release/lib/ReleaseContracts.mjs",
+      "sha256": "2697564ad38f89bc8b31cc5384fcf62b85f3de05dd8122ed02dd3163dea83cd9"
+    },
+    {
+      "file": "scripts/release/lib/StaticBuildPolicy.mjs",
+      "sha256": "f778b49733fca6e6954e7ffe5a4a98d63fbe2176ff5f0c4b1add69e5a8b510bb"
+    },
+    {
+      "file": "scripts/release/post-deploy-smoke.mjs",
+      "sha256": "464b92f8e35690f8e5a47dfce1a0613f863e11067673517fd7cb4c8d063c8d72"
+    },
+    {
+      "file": "scripts/release/build-immutable-artifacts.mjs",
+      "sha256": "e8fadbc601acc668f5728557f59115310d9bf7de5000e7bde1dc555983332975"
+    },
+    {
+      "file": "scripts/release/post28-diagnostic-build.mjs",
+      "sha256": "6760a3e6d510b01696101e93063b0a7e76519089bf71d53d5c1ad8bc15ec2a5a"
+    },
+    {
+      "file": "apps/api/src/server.ts",
+      "sha256": "34703114e1a76e4218f4a3498f367e2a74b35ce0172c28bcb2558b51280c4f08"
+    },
+    {
+      "file": "apps/api/src/app.ts",
+      "sha256": "33c1d7b984099741bec2f42b0babf6768fa6c894431ad0ee6dcbf1f7ea72b1bd"
+    },
+    {
+      "file": "apps/api/src/infrastructure/di/RuntimeDependencyPolicy.ts",
+      "sha256": "d570eae2e669c5fbe171a223ee8ca93b8dcbfa7cf7ca9ea09b3d16dd10750904"
+    },
+    {
+      "file": "apps/web/vite.config.ts",
+      "sha256": "b6433a190371eaea034d28c27b52214bc61675d80a41a076bcac998da7db55b7"
+    },
+    {
+      "file": "apps/admin/vite.config.ts",
+      "sha256": "ec74a6225a1e9b384c2175544f9ff3246866442654907d4b9a82a33a61cedc1e"
+    },
+    {
+      "file": "packages/config/src/AppConfig.ts",
+      "sha256": "f213352dee51fc17933a6e7c4aa5fe6ea505fea2ddb962760baae6a346eee83d"
+    },
+    {
+      "file": "packages/config/src/EnvironmentValidator.ts",
+      "sha256": "5726a603ba210461682e4af104f6d5b223997e048be6f9f6e24995fc52645825"
+    },
+    {
+      "file": "packages/config/src/providers/EnvironmentConfigurationProvider.ts",
+      "sha256": "7196ad900d292062501d11ce023be55f6365e5ad4e27922f862161d39a323faf"
+    },
+    {
+      "file": "packages/infrastructure/prisma/schema.prisma",
+      "sha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59"
+    },
+    {
+      "file": "package.json",
+      "sha256": "bdc041212f4df8b60ef8e8a93532f9fbd98fcb31af690d8b9622ef46eef4e1e4"
+    },
+    {
+      "file": "package-lock.json",
+      "sha256": "2b468457bb4c706293a6b9f8eaed1b0abde34cef38225a70364a10ff4ac0e151"
+    },
+    {
+      "file": "tsconfig.json",
+      "sha256": "44c2281a4178614cc1fa6110ac8186f4bb3757aa94679a7f54fd1c9e9ce68e70"
+    },
+    {
+      "file": "tsconfig.base.json",
+      "sha256": "74be1c02c4785837ca596c6eb32d24b44f706879572d580fe4ee8a860b697949"
+    },
+    {
+      "file": "apps/api/tsconfig.json",
+      "sha256": "3cc37030db9ffd5a2946c58cf4c1b7fe24ca2e96ce03a99413a74043b061d2cb"
+    },
+    {
+      "file": ".npmrc",
+      "sha256": "31693e8434cc54b45011e6c06a6f53682fbbaa3acfc829f9cc07c17a93ea056d"
+    },
+    {
+      "file": ".gitattributes",
+      "sha256": "5351a6a39cf34faf02c91afc3d6b6a3bb43b14d7a9a203f3e923ba8bc5802b5a"
+    },
+    {
+      "file": "server.js",
+      "sha256": "26fd0153a345adf80aae72ec3a0dd74ff0dea2dc506f4c08d712fd5f9f969957"
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "sha256": "593e08e5e0c93dfcb39774336eeebe22f8288a03d2b0af35d5b5f127f74c7150"
+    },
+    {
+      "file": ".github/workflows/source-architecture-guards.yml",
+      "sha256": "47be434acb86de5c74fc224c7805fe79550ffbd165ee3bcfdb7e43a9019cb903"
+    },
+    {
+      "file": "scripts/architecture/operational-tooling-boundary.json",
+      "sha256": "980ee5ba9d2efca260c2cdf6dcd0a2242b6faa5ca877edf6b19f91e87e69f803"
+    },
+    {
+      "file": "scripts/architecture/source-architecture-guard-core.mjs",
+      "sha256": "8d1090ebae639029190b8cb308ac65913f1bd439e42e2832e38e80c1d2dc2493"
+    },
+    {
+      "file": "scripts/aistudio/environment.mjs",
+      "sha256": "fbf0bdc3cf1c99bcaca14806ccfcaab2be77edc1327248f597754494e7bafa55"
+    }
+  ]
+}

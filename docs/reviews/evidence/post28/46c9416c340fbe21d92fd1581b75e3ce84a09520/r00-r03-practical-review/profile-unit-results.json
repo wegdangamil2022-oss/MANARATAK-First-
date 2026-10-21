@@ -1,0 +1,14 @@
+{
+  "sourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+  "command": "node --test tests/database/post28-lab-profile.test.mjs tests/remediation/post28-native-lab-policy.test.mjs",
+  "executed": 13,
+  "passed": 13,
+  "failed": 0,
+  "skipped": 0,
+  "newCases": 2,
+  "changedProfileCases": 10,
+  "unchangedNativeIdentityRegressionCases": 3,
+  "reason": "Add G/S bindings without redirecting U/V or DB-T; reject unsupported profile; preserve recorded native binary/cluster and nonprivileged target checks",
+  "redObservedBeforeImplementation": "MISSING_NATIVE_LAB_BINDINGS_EXPORT",
+  "fullSuiteRepeated": false
+}

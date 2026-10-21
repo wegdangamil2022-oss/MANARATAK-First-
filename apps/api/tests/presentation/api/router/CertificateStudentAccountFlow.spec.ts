@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
@@ -163,6 +163,7 @@ function harness() {
         complete: async () => {},
       },
       processAssetLifecycleUseCase: {
+        readAuthenticatedDelivery: async (id: string) => {const artifact=artifacts.get(id)!;return {bytes:artifact.bytes,mimeType:artifact.mimeType,checksumSha256:createHash('sha256').update(artifact.bytes).digest('hex')};},
         requestDeliveryGrant: async ({ assetId }: any) => ({
           url: `https://storage.example.org/private/${assetId}`,
           headers: {},
@@ -232,8 +233,14 @@ describe('completion → certificate → student account → private delivery', 
         .set('Authorization', 'Bearer student-owner')
         .set('Idempotency-Key', randomUUID())
         .send({});
-      expect(grant.status).toBe(200);
-      expect(grant.body.url).toContain('/private/');
+      expect(grant.status).toBe(410);
+      expect(grant.body.url).toBeUndefined();
+      const read = await request(h.app).get('/student/certificates/'+h.certificate.id+'/artifacts/'+kind+'/content').set('Authorization','Bearer student-owner');
+      expect(read.status).toBe(200);
+      expect(read.headers['cache-control']).toBe('no-store');
+      const expected = h.artifacts.get(kind === 'pdf' ? h.certificate.certificatePdfAssetId : h.certificate.previewImageAssetId)!;
+      const actual = Buffer.isBuffer(read.body) ? read.body : Buffer.from(read.text);
+      expect(createHash('sha256').update(actual).digest('hex')).toBe(createHash('sha256').update(expected.bytes).digest('hex'));
     }
     await h.consumer.consume(h.event);
     expect(h.artifacts.size).toBe(3);
@@ -251,7 +258,12 @@ describe('completion → certificate → student account → private delivery', 
       .set('Idempotency-Key', randomUUID())
       .send({});
     expect(grant.status).toBe(404);
+    const deniedRead = await request(h.app).get('/student/certificates/'+h.certificate.id+'/artifacts/pdf/content').set('Authorization','Bearer other-student');
+    expect(deniedRead.status).toBe(404);
     h.certificate.status = CertificateStatus.REVOKED;
+    const revokedRead = await request(h.app).get('/student/certificates/'+h.certificate.id+'/artifacts/pdf/content').set('Authorization','Bearer student-owner');
+    expect(revokedRead.status).not.toBe(200);
+    expect(revokedRead.headers['content-type']).not.toContain('application/pdf');
     await expect(
       h.cases.deliveryArtifact(h.certificate.id, 'pdf', 'student-owner'),
     ).rejects.toThrow('STATE_INVALID');

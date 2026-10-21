@@ -1,0 +1,26 @@
+{
+  "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+  "codeFilesOnlyNoCredentials": true,
+  "files": {
+    "/workspace/scratch/post28/tools/run-local.py": {
+      "sha256": "1a711522273be54cc64180acecd8609d7bf340cb1eabd52202c32a34b365d0f9",
+      "bytes": 1839
+    },
+    "/workspace/scratch/post28/tools/local-r03-app.mjs": {
+      "sha256": "8e8ea8f7d382cb1f06b2e47ec58c47c2a89631699d62c4820b1c4702cab3a557",
+      "bytes": 2201
+    },
+    "/workspace/scratch/post28/tools/local-r04-audit.mjs": {
+      "sha256": "1a6aabb934c0129bcf09de59160b61761907b4987d82c7d649fb610ddee30741",
+      "bytes": 6234
+    },
+    "/workspace/scratch/post28/tools/local-model-coverage.mjs": {
+      "sha256": "d9951af076ce01124b61fa5a33f7ed65055bff8d00735b6fcd07b9c60d1405a4",
+      "bytes": 1351
+    },
+    "/workspace/scratch/post28/labs/lab-EwrEBJ/bin/psql": {
+      "sha256": "e9f3546d33f58a2b6fa880ed9884d5b5dcaaa3eb40259931f88bc339baa451f7",
+      "bytes": 1516
+    }
+  }
+}

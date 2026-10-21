@@ -1,0 +1,103 @@
+{
+  "sourceSha": "c9264f40eef75ca5ab5142707f30f4203d381d60",
+  "identity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698151154215130672",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "observations": [
+    {
+      "route": "/health/build",
+      "status": 200,
+      "contentType": "application/json",
+      "revision": "c9264f40eef75ca5ab5142707f30f4203d381d60"
+    },
+    {
+      "route": "/admin/health/build",
+      "status": 200,
+      "contentType": "application/json",
+      "revision": "c9264f40eef75ca5ab5142707f30f4203d381d60"
+    },
+    {
+      "route": "/",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "revision": "c9264f40eef75ca5ab5142707f30f4203d381d60"
+    },
+    {
+      "route": "/admin/",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "revision": "c9264f40eef75ca5ab5142707f30f4203d381d60"
+    },
+    {
+      "route": "/api/v1/monitoring/health/readiness",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "revision": "c9264f40eef75ca5ab5142707f30f4203d381d60"
+    },
+    {
+      "route": "/api/v1/auth/me",
+      "status": 401,
+      "contentType": "application/problem+json; charset=utf-8",
+      "revision": null
+    },
+    {
+      "route": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "contentType": "application/problem+json; charset=utf-8",
+      "revision": null
+    },
+    {
+      "route": "/api/v1/public/courses",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "revision": null
+    },
+    {
+      "route": "/assets/definitely-missing.js",
+      "status": 404,
+      "contentType": "application/json",
+      "revision": "c9264f40eef75ca5ab5142707f30f4203d381d60"
+    },
+    {
+      "kind": "CORS_ALLOW",
+      "status": 204
+    },
+    {
+      "kind": "CORS_FOREIGN_ORIGIN_NOT_ALLOWED",
+      "status": 204
+    }
+  ],
+  "failure": null,
+  "verified": true,
+  "httpsTrustVerified": true,
+  "apiAndGatewayFromFreshUnpack": true,
+  "authenticatedSessionFlowVerified": false,
+  "processes": [
+    {
+      "name": "gateway",
+      "exit": {
+        "code": null,
+        "signal": "SIGTERM"
+      }
+    },
+    {
+      "name": "api",
+      "exit": {
+        "code": null,
+        "signal": "SIGTERM"
+      }
+    }
+  ],
+  "R07Accepted": false,
+  "promotionAuthorized": false
+}

@@ -1,0 +1,12 @@
+{
+  "name": "eslint",
+  "command": "node node_modules/eslint/bin/eslint.js scripts/wp-ic-10-browser-e2e.mjs scripts/release/lib/PlaywrightCasePolicy.mjs tests/release/post28-playwright-policy.test.mjs",
+  "sourceSha": "328535ffa80e6a2a9e819100f546424d525b5833",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T03:23:04.953142+00:00",
+  "endedAt": "2026-10-16T03:23:05.617819+00:00",
+  "exitCode": 0,
+  "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "nodeVersion": "22.16.0"
+}

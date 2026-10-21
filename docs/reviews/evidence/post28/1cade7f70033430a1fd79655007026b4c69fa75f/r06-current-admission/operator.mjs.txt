@@ -1,0 +1,32 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {execFileSync,spawnSync} from 'node:child_process';
+import {assertNativeLabState} from './r07-filtered/scripts/database/post28-native-lab-policy.mjs';
+const work=import.meta.dirname,repo=path.join(work,'r07-filtered'),bin=path.join(work,'pg16-binaries/pgsql/bin');
+const sha=execFileSync('git',['rev-parse','HEAD'],{cwd:repo,encoding:'utf8'}).trim();
+const result={kind:'R06_CURRENT_POST111_ADMISSION_PROOF',sourceSha:sha,startedAt:new Date().toISOString(),existingDatabasesTouched:false,providerCallsMade:false};
+let state,contract;
+try{
+ const create=spawnSync(process.execPath,['scripts/database/create-post28-native-lab.mjs'],{cwd:repo,env:{...process.env,NODE_ENV:'test',POST28_LOCAL_LAB_CREATE:'YES',POST28_LOCAL_LAB_PROFILE:'transactions',POST28_NATIVE_PG_BIN:bin,POST28_LAB_ROOT:work},encoding:'utf8',windowsHide:true,timeout:120000});
+ assert.equal(create.status,0,'NEW_LAB_REQUIRED');state=JSON.parse(create.stdout.trim());contract=JSON.parse(fs.readFileSync(state.contractFile,'utf8'));
+ assertNativeLabState(state,contract,sha,state.directory);result.runId=state.runId;
+ const privateEnv=Object.fromEntries(fs.readFileSync(state.envFile,'utf8').trim().split(/\r?\n/).map(line=>{const i=line.indexOf('=');return [line.slice(0,i),line.slice(i+1)];}));
+ const secrets=[privateEnv.DATABASE_URL,privateEnv.POST28_TRANSACTION_SETUP_URL,privateEnv.POST28_APP_PASSWORD,...[privateEnv.DATABASE_URL,privateEnv.POST28_TRANSACTION_SETUP_URL].map(url=>new URL(url).password)];
+ const redact=text=>secrets.reduce((value,secret)=>value.replaceAll(secret,'[REDACTED]'),String(text??'')).replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]');
+ const run=(script,args,environment,name)=>{
+  const child=spawnSync(process.execPath,[script,...args],{cwd:repo,env:{...process.env,...environment},encoding:'utf8',windowsHide:true,timeout:180000,maxBuffer:8*1024*1024});
+  const log=redact(child.stdout)+redact(child.stderr);fs.writeFileSync(path.join(state.directory,name+'.log'),log);
+  if(child.status!==0){result.failureTail=log.slice(-4000);throw Error(name+'_FAILED');}
+  return child.stdout;
+ };
+ run('scripts/database/initialize-post28-transactions.mjs',[],privateEnv,'setup');
+ const output=run('scripts/database/run-post28-suite.mjs',['admission-null-identity'],{...privateEnv,DATABASE_MUTATION_PURPOSE:'maintenance'},'suite');
+ result.suite=JSON.parse(output.trim().split(/\r?\n/).findLast(line=>line.startsWith('{"kind":"POST28_DATABASE_SUITE_EXECUTION"')));
+ assert.equal(result.suite.executed,5);assert.equal(result.suite.passed,5);assert.equal(result.suite.skipped,0);
+ result.pass=true;
+}catch(error){result.pass=false;result.error=error.message?.match(/^[A-Za-z_]+_FAILED$/)?.[0]??'R06_POST111_PROOF_FAILED';process.exitCode=1;}
+finally{
+ if(state){assertNativeLabState(state,contract,sha,state.directory);const stop=spawnSync(path.join(bin,'pg_ctl.exe'),['-D',state.dataDirectory,'-m','fast','-w','stop'],{windowsHide:true,encoding:'utf8',timeout:30000});result.cleanup={ownedClusterStopped:stop.status===0,postmasterPidRemoved:!fs.existsSync(path.join(state.dataDirectory,'postmaster.pid'))};if(stop.status!==0)process.exitCode=1;}
+ result.finishedAt=new Date().toISOString();fs.writeFileSync(path.join(work,'r06-post111-admission-result.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));
+}

@@ -1,0 +1,25 @@
+{
+  "sourceSha": "26fe899a033ab93eb3a44b39df1c10d9600bcd87",
+  "runId": "39287364100",
+  "jobId": 118178128350,
+  "observedAt": "2026-10-19T16:45:50.956Z",
+  "status": "in_progress",
+  "passed": [
+    "source-quality",
+    "source-preflight",
+    "source-regressions",
+    "source-closure",
+    "prisma-source",
+    "typecheck",
+    "vercel-typecheck"
+  ],
+  "inProgress": "lint",
+  "pending": [
+    "build",
+    "unit",
+    "artifacts",
+    "artifact retrieval",
+    "Linux native image review"
+  ],
+  "formalR07Acceptance": false
+}

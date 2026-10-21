@@ -8,6 +8,16 @@ export interface PollingWorkerHandle {
 
 let activeWorkerHandle: PollingWorkerHandle | null = null;
 
+async function requireSuccessfulDelivery<T>(result: Promise<T>): Promise<T> {
+  const value = await result;
+  if (value && typeof value === 'object') {
+    if ('exhausted' in value && typeof value.exhausted === 'number' && value.exhausted > 0) throw new Error('OUTBOX_DELIVERY_EXHAUSTED');
+    if ('failed' in value && typeof value.failed === 'number' && value.failed > 0) throw new Error('OUTBOX_DELIVERY_FAILED');
+    if ('leaseLost' in value && typeof value.leaseLost === 'number' && value.leaseLost > 0) throw new Error('OUTBOX_LEASE_LOST');
+  }
+  return value;
+}
+
 export async function startPollingWorkers(container: AwilixContainer, config: IConfigurationService): Promise<PollingWorkerHandle> {
   if (activeWorkerHandle) {
     return activeWorkerHandle;
@@ -22,7 +32,7 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
     const span = operationalMonitoring.startSpan?.('worker.iteration', { worker });
     operationalMetrics.incrementCounter('worker.iterations', 1, { worker });
     try {
-      const result = await action();
+      const result = await requireSuccessfulDelivery(action());
       operationalMetrics.incrementCounter('worker.iterations.completed', 1, { worker });
       span?.end('OK');
       return result;
@@ -60,14 +70,21 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
     const worker = container.resolve<any>('studentWorkspaceOutboxWorker');
     const workerId = `student-workspace-${runtimeId}`;
     register('student-workspace-outbox', intervalMs, async () => {
-      await worker.runIdentityOnce(`${workerId}-identity`);
-      await worker.runRoleOnce(`${workerId}-role`);
-      await worker.runCatchupOnce(`${workerId}-catchup`);
-      await worker.runLearningOnce(`${workerId}-learning`);
-      await worker.runCertificatesOnce(`${workerId}-certificates`);
-      await worker.runReplayOnce(`${workerId}-replay`);
-      await worker.runRemindersOnce(`${workerId}-reminders`);
-      await worker.runTrackerOwnersOnce(`${workerId}-tracker-owners`);
+      await requireSuccessfulDelivery(worker.runIdentityOnce(`${workerId}-identity`));
+      if (stopping) return;
+      await requireSuccessfulDelivery(worker.runRoleOnce(`${workerId}-role`));
+      if (stopping) return;
+      await requireSuccessfulDelivery(worker.runCatchupOnce(`${workerId}-catchup`));
+      if (stopping) return;
+      await requireSuccessfulDelivery(worker.runLearningOnce(`${workerId}-learning`));
+      if (stopping) return;
+      await requireSuccessfulDelivery(worker.runCertificatesOnce(`${workerId}-certificates`));
+      if (stopping) return;
+      await requireSuccessfulDelivery(worker.runReplayOnce(`${workerId}-replay`));
+      if (stopping) return;
+      await requireSuccessfulDelivery(worker.runRemindersOnce(`${workerId}-reminders`));
+      if (stopping) return;
+      await requireSuccessfulDelivery(worker.runTrackerOwnersOnce(`${workerId}-tracker-owners`));
     });
   }
   if (config.getOptional<boolean>('OWNER_DOMAIN_OUTBOX_WORKER_ENABLED') === true) {
@@ -75,9 +92,11 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
     const worker = container.resolve<any>('ownerDomainOutboxWorker');
     const workerId = `owner-domain-${runtimeId}`;
     register('owner-domain-outbox', intervalMs, async () => {
-      await worker.runSettingsOnce(`${workerId}-settings`);
-      await worker.runCareerOnce(`${workerId}-career`);
-      await worker.runServicesOnce(`${workerId}-services`);
+      await requireSuccessfulDelivery(worker.runSettingsOnce(`${workerId}-settings`));
+      if (stopping) return;
+      await requireSuccessfulDelivery(worker.runCareerOnce(`${workerId}-career`));
+      if (stopping) return;
+      await requireSuccessfulDelivery(worker.runServicesOnce(`${workerId}-services`));
     });
   }
   if (config.getOptional<boolean>('BACKGROUND_WORKER_ENABLED') === true) {
@@ -111,6 +130,7 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
       if (stopping || task) return;
       // Defer execution until task ownership is recorded, including synchronous failures.
       task = Promise.resolve().then(async () => {
+        if (stopping) return;
         try {
           pollingWorkerRuntimeRegistry.started(name);
           await observeWorkerIteration(name, action);

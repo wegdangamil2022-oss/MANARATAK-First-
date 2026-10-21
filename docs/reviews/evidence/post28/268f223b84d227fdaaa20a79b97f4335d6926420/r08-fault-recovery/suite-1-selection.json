@@ -1,0 +1,6 @@
+{
+  "caseExact": "R08 actual outbox processes to student inbox > a delayed role-created event projects current suspension instead of reviving the student",
+  "fullDiscoveryCases": 6,
+  "selectedCases": 1,
+  "fullProfileAcceptance": false
+}

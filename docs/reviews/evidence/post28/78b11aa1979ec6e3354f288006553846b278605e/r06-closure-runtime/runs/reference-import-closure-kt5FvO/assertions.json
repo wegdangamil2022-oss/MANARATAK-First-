@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "withdraws a hidden canonical test from scholarship public requirements even when status remains published",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 72.84184000000005,
+    "failureFirstLines": []
+  }
+]

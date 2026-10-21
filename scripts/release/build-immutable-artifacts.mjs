@@ -3,9 +3,12 @@ import childProcess from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import {assertRegularArtifactInputs} from './lib/ArtifactInputPolicy.mjs';
+import {tarLocalPath} from './lib/DiagnosticProcess.mjs';
+import {runtimeExternalModules} from './lib/RuntimeModules.mjs';
 import { requireSha, REPOSITORY } from './lib/ReleaseContracts.mjs';
 const root = process.cwd(),
-  out = path.join(root, 'release-artifacts');
+  out = path.resolve(process.env.RELEASE_ARTIFACT_OUTPUT_DIR ?? path.join(root, 'release-artifacts'));
 const sourceSha = requireSha(
   process.env.SOURCE_SHA ||
     process.env.GITHUB_SHA ||
@@ -20,21 +23,13 @@ if (
 )
   throw new Error('RELEASE_BUILDER_SOURCE_MISMATCH');
 childProcess.execFileSync('git', ['diff', '--quiet', 'HEAD', '--'], { stdio: 'pipe' });
-for (const unit of ['web', 'admin']) {
-  const directory = path.join(root, `apps/${unit}/dist`),
-    index = path.join(directory, 'index.html');
-  let html = fs
-    .readFileSync(index, 'utf8')
-    .replace(/<meta name="manaratak-build-sha" content="[^"]*">/g, '');
-  if (!html.includes('</head>')) throw new Error('RELEASE_HTML_HEAD_MISSING');
-  html = html.replace('</head>', `<meta name="manaratak-build-sha" content="${sourceSha}"></head>`);
-  fs.writeFileSync(index, html);
-  fs.writeFileSync(
-    path.join(directory, 'manaratak-build.json'),
-    JSON.stringify({ version: 1, unit, sourceSha }) + '\n',
-  );
-}
-fs.mkdirSync(out, { recursive: true });
+if(childProcess.execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim())
+  throw new Error('RELEASE_CLEAN_SOURCE_REQUIRED');
+if(fs.existsSync(out))throw new Error('RELEASE_FRESH_OUTPUT_REQUIRED');
+const realRoot=fs.realpathSync(root),realParent=fs.realpathSync(path.dirname(out));
+if(realParent.startsWith(realRoot+path.sep)||(realParent===realRoot&&path.basename(out)!=='release-artifacts'))
+  throw new Error('RELEASE_OUTPUT_PATH_INVALID');
+fs.mkdirSync(out,{mode:0o700});
 
 const units = [
   [
@@ -50,25 +45,50 @@ const units = [
       'package-lock.json',
     ],
   ],
-  ['web', ['apps/web/dist']],
-  ['admin', ['apps/admin/dist']],
+  ...['web','admin'].map(unit=>[unit,[`apps/${unit}/dist`,
+    'scripts/release/serve-static-artifact.mjs',
+    'scripts/release/serve-artifact-gateway.mjs',
+    'scripts/release/lib/StaticBuildPolicy.mjs',
+    'scripts/release/lib/StaticScriptPolicy.mjs',
+    'scripts/release/lib/ReleaseContracts.mjs']]),
 ];
+for(const [,items] of units)assertRegularArtifactInputs(root,items);
+for (const unit of ['web', 'admin']) {
+  const directory = path.join(root, `apps/${unit}/dist`),
+    index = path.join(directory, 'index.html');
+  let html = fs
+    .readFileSync(index, 'utf8')
+    .replace(/<meta name="manaratak-build-sha" content="[^"]*">/g, '');
+  if (!html.includes('</head>')) throw new Error('RELEASE_HTML_HEAD_MISSING');
+  html = html.replace('</head>', `<meta name="manaratak-build-sha" content="${sourceSha}"></head>`);
+  fs.writeFileSync(index, html);
+  fs.writeFileSync(
+    path.join(directory, 'manaratak-build.json'),
+    JSON.stringify({ version: 1, unit, sourceSha }) + '\n',
+  );
+}
+
+
+
 const sha = (f) => crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex');
 const artifacts = [];
+const externalModules=runtimeExternalModules(JSON.parse(fs.readFileSync('apps/api/dist/server.meta.json','utf8')));
 for (const [name, items] of units) {
   for (const i of items)
     if (!fs.existsSync(path.join(root, i))) throw new Error(`RELEASE_INPUT_MISSING:${i}`);
+  assertRegularArtifactInputs(root,items);
   const target = path.join(out, `manaratak-${name}-${sourceSha}.tar`);
   childProcess.execFileSync(
     'tar',
     [
+      '--force-local',
       '--sort=name',
       '--mtime=UTC 1970-01-01',
       '--owner=0',
       '--group=0',
       '--numeric-owner',
       '-cf',
-      target,
+      tarLocalPath(target),
       ...items,
     ],
     { cwd: root, stdio: 'inherit' },
@@ -119,18 +139,7 @@ const manifest = {
     lockSha256: sha('package-lock.json'),
     prismaSchemaSha256: sha('packages/infrastructure/prisma/schema.prisma'),
     generatedPrismaClientRequired: true,
-    externalModules: [
-      '@prisma/client',
-      'uuid',
-      'bcrypt',
-      'jsonwebtoken',
-      'cors',
-      'express',
-      'helmet',
-      'pdfkit',
-      'svg-to-pdfkit',
-      'fontkit',
-    ],
+    externalModules,
     bootEvidence: 'UNVERIFIED',
     deploymentUnits: ['api', 'web', 'admin'],
   },

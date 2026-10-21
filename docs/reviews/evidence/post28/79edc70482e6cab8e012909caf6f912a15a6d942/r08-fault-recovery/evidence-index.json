@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "kind": "POST28_R08_FAULT_RECOVERY_EVIDENCE",
+  "sourceSha": "79edc70482e6cab8e012909caf6f912a15a6d942",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 160,
+      "sha256": "683cd136732b1519aa7ad165c52c14d54cdfbcf07e33c75964410c0b48cbe012"
+    },
+    {
+      "path": "identity.json",
+      "bytes": 258,
+      "sha256": "a692aab1d5ef72d57d5a8d1acb50f5caacd5ee87fb79b81e00507204b70673b7"
+    },
+    {
+      "path": "setup.json",
+      "bytes": 4942,
+      "sha256": "069f03b8d78c7e2e674f0be8bf0a87af6a8f6971447954ad1661aaa4403ea996"
+    },
+    {
+      "path": "status.json",
+      "bytes": 884,
+      "sha256": "b83d8b1365a91500d77c9fa77278da2cd60a02c411e8635997f2b637993bd69f"
+    },
+    {
+      "path": "suite-0-discovery.json",
+      "bytes": 1831,
+      "sha256": "27e83ec0c75e8c3b1eb07998030cab4eaa125ec6ac5ef6f4ab4f437a05cd1a4d"
+    },
+    {
+      "path": "suite-0-selection.json",
+      "bytes": 235,
+      "sha256": "201c71df5757b9c1af27e0e5dd16cd4dd017db0de0c8411ac1d303b975fdd75b"
+    },
+    {
+      "path": "suite-0-summary.json",
+      "bytes": 1351,
+      "sha256": "fbdd7644014d44b85d2d59e4c1d56640fedbb3597f320d8b33b4a29a6a047331"
+    },
+    {
+      "path": "suite-0-vitest.json",
+      "bytes": 2868,
+      "sha256": "3c6aee7062ca55426b36d564902e7ed7cf08282763d0d52396b3a63b413d28f0"
+    }
+  ]
+}

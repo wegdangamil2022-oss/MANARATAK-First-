@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Post28 real atomic relation owner commands > commits program campus nullable test requirement audit and outbox through the actual owner command",
+    "file": "tests/database/post28-relation-commands.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real atomic relation owner commands > rejects duplicate nullable requirements atomically without advancing owner revision",
+    "file": "tests/database/post28-relation-commands.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real atomic relation owner commands > serializes two nullable requirement updates and rejects the stale owner revision without duplicate records",
+    "file": "tests/database/post28-relation-commands.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real atomic relation owner commands > rolls all program relations audit and owner revision back on a PostgreSQL outbox error",
+    "file": "tests/database/post28-relation-commands.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real atomic relation owner commands > rejects missing actor reason or revision before any owner command writes",
+    "file": "tests/database/post28-relation-commands.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real atomic relation owner commands > derives the scholarship university from its published program owner and keeps initial version and cycle draft",
+    "file": "tests/database/post28-relation-commands.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real atomic relation owner commands > rejects a scholarship link to another university program before creating any scholarship",
+    "file": "tests/database/post28-relation-commands.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real atomic relation owner commands > rejects scholarship authoring when the owner program or actual major version loses publication eligibility",
+    "file": "tests/database/post28-relation-commands.database.spec.mjs"
+  }
+]

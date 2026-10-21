@@ -1,0 +1,116 @@
+{
+  "observedRepositoryHead": "005595313b0ae1ff940fec44454f441f516c8d8e",
+  "currentCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "previousCandidateSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "files": [
+    {
+      "path": "r12-result.json",
+      "bytes": 3425,
+      "sha256": "21d6d6b3664450980f4f556bf722b159fb307978d28075c00d3b7f6221d14721"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 81,
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f"
+    },
+    {
+      "path": "r12-protected-before.json",
+      "bytes": 37827,
+      "sha256": "bb4a6313dbf8104c87d75c0cb29a5ce62d105803b67bdcb4f67511d6ac740991"
+    },
+    {
+      "path": "r12-protected-after-current.json",
+      "bytes": 38567,
+      "sha256": "7bc979e233a3938741def273c9bf311d1bb8988e3369c4f9f25ec6cf8c076f3d"
+    },
+    {
+      "path": "r12-protected-after.json",
+      "bytes": 38863,
+      "sha256": "5991bfe8a50ba9117b825b577b7842b1ccce8a0cc9103d0e041d26a1f7b9f279"
+    },
+    {
+      "path": "dataset.json",
+      "bytes": 332580,
+      "sha256": "26802886ab09c8b7a78eb067e6d26d85142cbe11da4d4b9f21ac253881eac633"
+    },
+    {
+      "path": "initial-functional-r12-result.json",
+      "bytes": 3061,
+      "sha256": "db6c13cfa6e17bcfed38d92567bc67a7f319e97ba5dccc3967ab874f29d112af"
+    },
+    {
+      "path": "initial-functional-cleanup.json",
+      "bytes": 81,
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f"
+    },
+    {
+      "path": "esm-preload-launch-failure-r12-result.json",
+      "bytes": 1237,
+      "sha256": "4328f8b8070cda538de92b8461a36fda6c6c5ddb6d0d94e848c4c66d69cc1a1c"
+    },
+    {
+      "path": "esm-preload-launch-failure-cleanup.json",
+      "bytes": 81,
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f"
+    },
+    {
+      "path": "listener-tool-path-failure-r12-result.json",
+      "bytes": 1259,
+      "sha256": "7c0d89271ef28b52c720ddfebc02e60e80c2c8284d50723b59335061f3996192"
+    },
+    {
+      "path": "listener-tool-path-failure-cleanup.json",
+      "bytes": 81,
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f"
+    },
+    {
+      "path": "run-r12-api-rollback.mjs.txt",
+      "bytes": 11237,
+      "sha256": "c8c017681647f20283507319ca7a429ae3a14fdbc4046eb406447d22e97cd4e3"
+    },
+    {
+      "path": "r12-api-rollback-worker.mjs.txt",
+      "bytes": 13497,
+      "sha256": "0b7003e4338654369c2ac0ce0ac9c92ab941db5e7f689da43afa435e60c274e9"
+    },
+    {
+      "path": "r12-loopback-only.mjs.txt",
+      "bytes": 417,
+      "sha256": "f3118853245f8b0f64d0f4713e9d13d42f665982fd30ba08ff407588dea37c75"
+    },
+    {
+      "path": "prepare-r12-unpack.mjs.txt",
+      "bytes": 2784,
+      "sha256": "070970e6275aef604f6ba98eec72ec0144dc8fe90d65c0033b1e0871efb20248"
+    },
+    {
+      "path": "artifact-pair-review.json",
+      "bytes": 1648,
+      "sha256": "d321a05649fdc612882507e50f0cb91183c2348fe6b5b855dc63aa4ef688c062"
+    },
+    {
+      "path": "executed-policy.json",
+      "bytes": 2274,
+      "sha256": "c961c655de0c7ddba9990271d8fc556d08289cbd93cd39b240c3a1725382cdc0"
+    },
+    {
+      "path": "runtime-audit.json",
+      "sha256": "3d97aac58a8fabc8562df3436a9e2ede67df5eacde671c2e00b7afc9942e5852",
+      "bytes": 2274
+    }
+  ],
+  "previousApiScopedRuntimeCompatible": true,
+  "previousWorkerRuntimeCompatible": false,
+  "formalR12Acceptance": false,
+  "productionAcceptance": false,
+  "privateFilesExcluded": [
+    "scenario-private.json",
+    "lab.env",
+    "database dumps",
+    "JWT private key and cookie jar",
+    "TLS private key",
+    "generated secrets"
+  ],
+  "operatorSources": "Preserved as text for provenance; original relative paths refer to operator workspace",
+  "rawDatasetNote": "dataset.apiSourceSha names the previous/shared runtime dependency source; r12-result.json identifies both executed artifacts"
+}

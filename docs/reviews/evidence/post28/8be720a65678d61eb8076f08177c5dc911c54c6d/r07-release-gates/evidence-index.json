@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "kind": "POST28_R07_RELEASE_GATE_PROGRESS_EVIDENCE",
+  "sourceSha": "8be720a65678d61eb8076f08177c5dc911c54c6d",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "SOURCE_CI_CLOSURE-5b9.json",
+      "bytes": 2569,
+      "sha256": "5a34db5b960783c6ec33e52559bac92af8e46932c97e95268e639384764db28b"
+    },
+    {
+      "path": "ci-attempts.json",
+      "bytes": 5245,
+      "sha256": "053fe5348dad93abdfe61727885bb112fb2132b119224c6ef5f9a36a6b305b5d"
+    },
+    {
+      "path": "github-run-snapshot.json",
+      "bytes": 982,
+      "sha256": "25acba61fa9b044f5e52ed0b106e92eb20bed3e829ac8a2ba45f5ee927215c5a"
+    },
+    {
+      "path": "local-checks.json",
+      "bytes": 1963,
+      "sha256": "36b3eb0c568e329730588e00f51993690c28d12d33b6eb6b819117d77339eef2"
+    },
+    {
+      "path": "retrieved-ci-report.json",
+      "bytes": 361,
+      "sha256": "6b4f819e5ace2eec32488452e7e0c8ef06c6151ac7076146d23be110fa64ffc6"
+    },
+    {
+      "path": "status.json",
+      "bytes": 1679,
+      "sha256": "d4cde1e4c9e4758fab4134dff9871ca87f6f3461c86e9f39296afd411f75fed3"
+    },
+    {
+      "path": "symlink-linux-proof.log",
+      "bytes": 652,
+      "sha256": "0049c627a9f3910569d6394ee25e2c7d7b5b55f252d353da526085e4d9ba8e99"
+    },
+    {
+      "path": "target-review.json",
+      "bytes": 811,
+      "sha256": "cd51545d7b089c937c8bc9755684611e3b507ddef2a4254432a8bff899db1af7"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "caseExact": "R08 signed loopback provider with persisted financial outcomes > recovers a lost refund response with one consumed approval and one balanced refund posting",
+  "fullDiscoveryCases": 4,
+  "selectedCases": 1,
+  "fullProfileAcceptance": false
+}

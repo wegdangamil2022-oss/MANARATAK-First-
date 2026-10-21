@@ -1,0 +1,8 @@
+file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r14-cms-profile-probe.mjs:21
+ assert.equal(await gateway.isEnrolled(actor.id),true);
+                            ^
+
+TypeError: gateway.isEnrolled is not a function
+    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r14-cms-profile-probe.mjs:21:29
+
+Node.js v22.16.0

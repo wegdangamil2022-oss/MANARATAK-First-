@@ -1,0 +1,68 @@
+{
+  "sourceSha": "4c7b01cbac1d49688a0f32273316fc370109bcb0",
+  "runId": "7ace2285-df63-4ed8-b293-6f8a4988dd92",
+  "ledger": {
+    "expected": 111,
+    "applied": 111,
+    "checksumsMatched": 111,
+    "partial": 0,
+    "rolledBack": 0
+  },
+  "index": {
+    "unique": true,
+    "valid": true,
+    "ready": true,
+    "nullsNotDistinct": true,
+    "unrestricted": true,
+    "plainColumns": true,
+    "keyCount": 4,
+    "columnCount": 4,
+    "columns": [
+      "academicProgramId",
+      "internationalTestId",
+      "testVariantId",
+      "testVersionId"
+    ]
+  },
+  "audits": [
+    {
+      "constraint": "FinancePayment_positive_units",
+      "violations": "0"
+    },
+    {
+      "constraint": "FinanceRefund_positive_units",
+      "violations": "0"
+    },
+    {
+      "constraint": "FinanceTransfer_positive_units",
+      "violations": "0"
+    },
+    {
+      "constraint": "FinanceWalletHold_positive_units",
+      "violations": "0"
+    },
+    {
+      "constraint": "FinanceLedger_positive_units",
+      "violations": "0"
+    },
+    {
+      "constraint": "ServiceCatalogRecord_fulfillment_policy",
+      "violations": "0"
+    },
+    {
+      "constraint": "ServicePricingRecord_bounded_money",
+      "violations": "0"
+    },
+    {
+      "constraint": "SettingAssignmentRecord_id_currentVersionId_fkey",
+      "violations": "0"
+    },
+    {
+      "constraint": "StudentApplicationDocumentBinding_assetId_fkey",
+      "violations": "0"
+    }
+  ],
+  "applicationRole": "post28_app",
+  "workersEnabled": false,
+  "syntheticOnly": true
+}

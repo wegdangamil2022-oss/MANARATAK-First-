@@ -1,0 +1,56 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
+import {verifyEvidenceIndex} from './r07-filtered/scripts/lib/verify-evidence-index.mjs';
+const work=import.meta.dirname,repo=path.join(work,'r07-filtered'),sha='0ee961a7aa5a79d5bdf22406cfb88a18970ec03e';
+const dest=path.join(repo,'docs/reviews/evidence/post28',sha,'r09-current-review');
+const hash=b=>createHash('sha256').update(b).digest('hex');
+const ci=JSON.parse(fs.readFileSync(path.join(work,'r07-review-ci-observed.json'),'utf8').replace(/^\uFEFF/,''));
+assert.equal(ci.sourceSha,sha);assert.equal(ci.runId,39506916987);assert.equal(ci.result,'success');assert.equal(ci.jobs.length,6);assert(ci.jobs.every(j=>j.conclusion==='success'));
+const id=12304986939,meta=ci.artifacts.find(a=>a.id===id),file=path.join(work,`r09-current-artifact-${id}.zip`),zip=fs.readFileSync(file);
+assert(meta);assert.equal(meta.expired,false);assert.equal(meta.workflow_run.head_sha,sha);assert.equal(meta.workflow_run.id,ci.runId);
+assert.equal('sha256:'+hash(zip),meta.digest);assert.equal(zip.length,meta.size_in_bytes);
+const names=execFileSync('C:/Windows/System32/tar.exe',['-tf',file],{encoding:'utf8'}).trim().split(/\r?\n/);
+assert.equal(names.length,new Set(names).size);assert(names.every(n=>/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(n)));
+const read=name=>{assert(names.includes(name));return JSON.parse(execFileSync('C:/Windows/System32/tar.exe',['-xOf',file,name],{maxBuffer:8*1024*1024}).toString());};
+const result=read('result.json'),summary=read('suite-0-summary.json'),vitest=read('suite-0-vitest.json');
+const observations=read(names.find(n=>/^r09-workflow-observations-[a-f0-9-]+\.json$/.test(n)));
+for(const item of [result,summary,observations])assert.equal(item.sourceSha,sha);
+assert.equal(result.passed,true);assert.equal(result.syntheticOnly,true);assert.equal(result.cleanup.existingDatabasesTouched,false);
+for(const key of ['databaseRemoved','networkRemoved'])assert.equal(result.cleanup[key],true);assert(!result.cleanup.errors);
+assert.equal(summary.suite,'r09-integrated-workflows');assert.equal(summary.caseExact,null);assert.equal(summary.fullProfileAcceptance,true);
+for(const [key,value] of Object.entries({fullDiscoveryCases:5,expected:5,executed:5,passed:5,failed:0,skipped:0}))assert.equal(summary[key],value);
+assert.equal(summary.targets.length,1);assert.equal(summary.targets[0].postgresMajor,16);assert.equal(summary.targets[0].role,'post28_app');
+assert.equal(vitest.success,true);assert.equal(vitest.numPassedTests,5);assert.equal(vitest.numPendingTests,0);assert.equal(vitest.numFailedTests,0);
+assert.equal(observations.externalProvidersEnabled,false);assert.equal(observations.observations.length,5);assert.equal(observations.fullR09Acceptance,false);
+const cases=Object.fromEntries(observations.observations.map(o=>[o.case,o]));
+assert.equal(Object.keys(cases).length,5);
+for(const key of ['originalConsentAndBindingPreserved','foreignReadWriteAndAssetDenied','financialFactsUnchanged'])assert.equal(cases.PRIVATE_DOCUMENT_AND_FINANCE_OWNERSHIP[key],true);
+for(const key of ['distinctActors','draftNeverReplacesPublished','withdrawnOnHistoryAndReload'])assert.equal(cases.CMS_AUTHOR_REVIEW_PUBLISH_WITHDRAW[key],true);
+const cert=cases.ACTUAL_LESSON_TO_ONE_SIGNED_CERTIFICATE;
+for(const key of ['validThenRevoked','foreignArtifactsDenied','artifactRendererExercised','renderReplayWithoutAdditionalWrites'])assert.equal(cert[key],true);
+assert.equal(cert.consumers,2);assert.equal(cert.artifactFiles.length,3);assert.equal(cert.providerDeliveryGrantExercised,false);assert.equal(cert.freshEapProcessing,false);
+assert.deepEqual(cert.artifactFiles.map(a=>a.kind).sort(),['PDF','PREVIEW','QR']);
+for(const artifact of cert.artifactFiles){assert.match(artifact.sha256,/^[a-f0-9]{64}$/);assert(artifact.bytes>0);}
+const payment=cases.SYNTHETIC_WALLET_PAYMENT_EXACTLY_ONE_EFFECT;
+assert.equal(payment.concurrentRequests,2);assert.equal(payment.capturedHolds,1);assert.equal(payment.replayVerified,true);assert.equal(payment.balancedDebit,'100');assert.equal(payment.balancedCredit,'100');assert.equal(payment.externalProvider,false);
+const graph=cases.CANONICAL_GRAPH_RELATIONSHIPS;
+for(const key of ['allThreeOwnersPaged','allThreeOwnersWithdrawn','uniqueOwnerIds','inverseOwnerIds','recovered','browserTransport'])assert.equal(graph[key],true);
+assert.equal(graph.realOwnerReadOutage,'UNAVAILABLE_TOTAL_NULL');assert.equal(graph.pages,3);assert.equal(graph.builtGraphUi,false);
+assert.equal(observations.role.role,'post28_app');for(const key of ['rolsuper','rolcreatedb','rolcreaterole','rolbypassrls','ddl','ledger'])assert.equal(observations.role[key],false);
+const retained=[];
+for(const index of [
+ 'docs/reviews/evidence/post28/b94ecd49d03463ea89ba26e510ba2ca7f87597a5/r09-shared-workflows/linux-ci/evidence-index.json',
+ 'docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r07-current-closure/evidence-index.json'
+])retained.push({index,...verifyEvidenceIndex(path.join(repo,index),{root:repo,gitRef:'HEAD'})});
+const unchangedPaths=['tests/database/post28-r09-integrated-workflows.database.spec.mjs','scripts/release/post28-r09-workflow-lab.mjs','packages/application/src/certificates','packages/application/src/cms','packages/infrastructure/src/cms'];
+assert.equal(execFileSync('git',['diff','--name-only','d4ffe62a4b00a9154de541f120be16e1317dd000',sha,'--',...unchangedPaths],{cwd:repo,encoding:'utf8'}).trim(),'');
+fs.mkdirSync(dest,{recursive:true});const write=(name,data)=>fs.writeFileSync(path.join(dest,name),JSON.stringify(data,null,2)+'\n');
+write('archive-receipt.json',{artifactId:id,name:meta.name,sourceSha:sha,runId:ci.runId,bytes:zip.length,digest:meta.digest,verified:true});
+for(const [name,data] of Object.entries({'result.json':result,'suite-summary.json':summary,'vitest.json':vitest,'workflow-observations.json':observations}))write(name,data);
+write('verification.json',{kind:'R09_CURRENT_EVIDENCE_REVIEW',sourceSha:sha,ciRun:ci.runId,ciPassedJobs:6,verifiedAt:new Date().toISOString(),fiveCasesOneSyntheticDatabase:true,artifactZipDigestMatched:true,retainedEvidence:retained,unchangedPaths,manualTestOrBuildOrCiRerun:false,fullR09Acceptance:false,productionAcceptance:false,artifactBytesIndependentlyRehashedFromThisArchive:false,artifactDigestBoundary:'Archive contains renderer output digest observations, not rendered artifact bytes; no fresh hash of PDF/SVG bytes is claimed.',legacyAuthorizationLabelNote:'BLOCKED_USER_AUTHORIZED_SCOPED_R06 is a retained suite authorization label, not a current reassessment of R05.'});
+fs.copyFileSync(path.join(work,'collect-r09-current-proof.mjs'),path.join(dest,'operator.mjs.txt'));
+write('evidence-index.json',{kind:'R09_CURRENT_REVIEW_EVIDENCE',sourceSha:sha,files:fs.readdirSync(dest).filter(n=>n!=='evidence-index.json').sort().map(name=>{const b=fs.readFileSync(path.join(dest,name));return {path:name,bytes:b.length,sha256:hash(b)};})});
+console.log(JSON.stringify({destination:dest,passed:5,skipped:0,retainedEvidenceFiles:retained.reduce((n,r)=>n+r.files,0),digestVerified:true}));

@@ -1,0 +1,34 @@
+{
+  "kind": "R12_FROZEN_SOURCE_REAL_POSTGRES_FENCING_AND_ASSET_CONTRACTS",
+  "operatorSourceSha": "70230e082e03f73761eee6437858c074839fb8d2",
+  "previousCandidateSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "currentCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "actualBuiltApiAssetHttpTest": false,
+  "providerKind": "LOCAL_IN_PROCESS_SYNTHETIC_BYTES_ONLY",
+  "formalAcceptance": false,
+  "productionAllowed": false,
+  "passed": false,
+  "applicationRole": {
+    "role": "post28_r12_actor",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "rolreplication": false
+  },
+  "leaseFencing": {
+    "realPostgresOwnershipCas": true,
+    "logicalClockUsedForExpiry": true,
+    "staleRenewRejected": true,
+    "staleSuccessRejected": true,
+    "staleFailureRejected": true,
+    "currentOwnerCompleted": true
+  },
+  "failure": {
+    "message": "R12_SOURCE_DRIFT:packages/application/src/asset-platform/use-cases/ProcessAssetLifecycleUseCase.ts\n+ actual - expected\n\n+ 'a991865cd07bd5d790c88ec73a14544ce8e1c31f7ad800473526e619719a4263'\n- '8f53651c8eeaf3c74c2e7f5779700a770633f75201941ce3fa76289b679f5a1b'\n"
+  },
+  "cleanup": {
+    "apisStopped": true,
+    "externalProvidersContacted": false
+  }
+}

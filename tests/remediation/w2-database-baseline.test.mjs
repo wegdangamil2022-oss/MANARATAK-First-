@@ -52,6 +52,7 @@ test('MNT-AUD-0083 baseline manifest covers every persistence-owned Prisma model
   const ownership = JSON.parse(read('docs/architecture/persistence/persistence-ownership.manifest.json'));
   assert.deepEqual(Object.keys(baseline.models).sort(), Object.keys(ownership.models).sort());
   assert.ok(Object.keys(baseline.models).length >= 206);
+  for (const [name, owner] of Object.entries(ownership.models)) assert.equal(baseline.models[name].owner, owner);
   assert.ok(Object.values(baseline.models).every((item) => item.required === true && item.owner));
 });
 

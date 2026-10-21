@@ -1,0 +1,32 @@
+{
+  "kind": "sessions",
+  "sourceSha": "5c5152ff2c575414b0e04f7b450330b61cef2070",
+  "runId": "e8843488-1264-4cb2-94ff-d0f1a2d59d4c",
+  "readOnlyInspection": true,
+  "syntheticOnly": true,
+  "effects": {
+    "concurrentCaseIdentity": "post28-r08-session-b81e3add-c8b0-42ac-8ef1-191e4a32a61a",
+    "sessions": [
+      {
+        "id": "2ff51c1d-6f61-4a42-9505-37008560f73d",
+        "identityId": "post28-r08-session-b81e3add-c8b0-42ac-8ef1-191e4a32a61a",
+        "familyId": "2ff51c1d-6f61-4a42-9505-37008560f73d",
+        "parentSessionId": null,
+        "revokedAt": "2026-10-19T20:34:31.848Z",
+        "rotatedAt": "2026-10-19T20:34:31.848Z",
+        "expiresAt": "2026-10-26T20:34:31.765Z"
+      },
+      {
+        "id": "33cd7e72-7185-450c-9dbc-c8fdf86aee97",
+        "identityId": "post28-r08-session-b81e3add-c8b0-42ac-8ef1-191e4a32a61a",
+        "familyId": "2ff51c1d-6f61-4a42-9505-37008560f73d",
+        "parentSessionId": "2ff51c1d-6f61-4a42-9505-37008560f73d",
+        "revokedAt": "2026-10-19T20:34:31.847Z",
+        "rotatedAt": null,
+        "expiresAt": "2026-10-26T20:34:31.765Z"
+      }
+    ],
+    "activeDescendants": 0,
+    "refreshHashesAndTokensExcluded": true
+  }
+}

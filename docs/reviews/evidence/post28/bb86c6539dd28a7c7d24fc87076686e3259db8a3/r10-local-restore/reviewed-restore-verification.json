@@ -1,0 +1,94 @@
+{
+  "kind": "POST28_R10_LOCAL_RESTORE_VERIFICATION",
+  "sourceSha": "bb86c6539dd28a7c7d24fc87076686e3259db8a3",
+  "restoreExecuted": true,
+  "restoredDumpParityVerified": true,
+  "sourceUnchanged": true,
+  "parity": {
+    "databaseSnapshotMatched": true,
+    "assetReferencesMatched": true,
+    "databaseSnapshotSha256": "f45e87b1361b3291f07074fcd57b31c07e2e1bd85f8b4fbe3ca14c137daa2c39",
+    "tableCount": 282,
+    "assetCount": 6,
+    "readOnly": true
+  },
+  "sourceFacts": {
+    "certificates": 1,
+    "certificateLedgers": 3,
+    "paidInvoices": 1,
+    "financialTransactions": 5,
+    "ledgerEntries": 10,
+    "withdrawnCmsSnapshots": 2,
+    "documentBindings": 1,
+    "outbox": 49,
+    "activeAssets": 6
+  },
+  "restoredFacts": {
+    "certificates": 1,
+    "certificateLedgers": 3,
+    "paidInvoices": 1,
+    "financialTransactions": 5,
+    "ledgerEntries": 10,
+    "withdrawnCmsSnapshots": 2,
+    "documentBindings": 1,
+    "outbox": 49,
+    "activeAssets": 6
+  },
+  "copiedAssetFiles": [
+    {
+      "path": "144df404-3a83-4ada-afd9-dc2fe413ee79.png",
+      "bytes": 68,
+      "sha256": "4b485b5b36e1d66996e0f5e3966acf6ff56bc326dd3a46d1cfd8329ce9068a6d"
+    },
+    {
+      "path": "8d936e13-7935-4db6-b085-3be3004f8884.svg",
+      "bytes": 24760,
+      "sha256": "2b1c930511f9b84145f6ac012ae2c62f9cd948004d296d1026121020b5c85eef"
+    },
+    {
+      "path": "a82c839d-f4ed-47fa-af6a-4cc986ff8d20.png",
+      "bytes": 68,
+      "sha256": "4b485b5b36e1d66996e0f5e3966acf6ff56bc326dd3a46d1cfd8329ce9068a6d"
+    },
+    {
+      "path": "e1cdc338-902f-4a55-af07-467eea7b2401.svg",
+      "bytes": 390930,
+      "sha256": "c80c709d9f70cdc98544901d6fa061fe8af5fe1ce4c9552613a8a82ba37dc8ba"
+    },
+    {
+      "path": "ee8ad622-5c19-4212-9daa-cabf3c5c1bed.pdf",
+      "bytes": 11353,
+      "sha256": "197e6ce402615efac1783a55a2abb06a866c5d908adc9eed868579b290c0adc4"
+    },
+    {
+      "path": "fb84cd6e-7d8f-4e83-93be-a34d3193cfa3.png",
+      "bytes": 68,
+      "sha256": "4b485b5b36e1d66996e0f5e3966acf6ff56bc326dd3a46d1cfd8329ce9068a6d"
+    }
+  ],
+  "independentApprovalSha256": "3a43b36bc24aa886f1ff35efeb0b6f0613f7d9b4053ab146c1f7f4e90f7ad494",
+  "ownerDelegationEvidenceSha256": "8e884ea0e10c1f36b77ad3050e13ee39f2064387066d69aaa293dec407a41008",
+  "sentinel": {
+    "serverIdentity": "7698757869367514992",
+    "database": "manaratak_restore_25b1069f5c519af8ec4bb1e054c8df56",
+    "role": "manaratak_restore_runner",
+    "superuser": false,
+    "createRole": false,
+    "createDatabase": false,
+    "replication": false,
+    "bypassRls": false,
+    "unsafeRoleMembership": false,
+    "canConnectOtherDatabase": false,
+    "targetFingerprint": "8193f68f7333dd6bb92177f5af2899b9bf2a4359c750e8cc50bc3512b2d64600",
+    "disposableInstanceId": "71469a1e-b64a-45f6-8164-82cdb114cabd",
+    "sentinelOwnedByRestoreRole": false,
+    "sentinelWritableByRestoreRole": false
+  },
+  "negativePreflightCases": 6,
+  "elapsedDatabaseRestoreMinutes": 0.11886666666666666,
+  "backupAgeProxyMinutes": 0.02775,
+  "measuredOperationalRpo": false,
+  "integratedServiceRtoMeasured": false,
+  "productionAcceptance": false,
+  "formalR10Acceptance": false
+}

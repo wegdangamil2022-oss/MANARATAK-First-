@@ -1,0 +1,238 @@
+{
+  "status": "LOCAL_R01_SOURCE_CHECKS_PASSED",
+  "sourceSha": "15cf903313fe6f4702e183702c03a00dc09bae2e",
+  "checkedAt": "2026-10-16T01:37:03.241898+00:00",
+  "clean": true,
+  "sourceManifest": {
+    "executed": 33,
+    "passed": 33,
+    "failed": 0,
+    "runtimeNotExecuted": [
+      "database-integration",
+      "browser-e2e"
+    ]
+  },
+  "checks": [
+    {
+      "name": "section20",
+      "command": [
+        "/home/agent/.npm/_npx/2ad0c2d1aba2dd61/node_modules/node/bin/node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        ".section20-finance-vitest.config.ts",
+        "packages/infrastructure/tests/finance-platform/Section20Safety.spec.ts",
+        "packages/infrastructure/tests/finance-platform/Section20ApprovalBoundaries.spec.ts",
+        "apps/api/tests/presentation/api/router/FinanceSection20.spec.ts"
+      ],
+      "sourceSha": "15cf903313fe6f4702e183702c03a00dc09bae2e",
+      "dirty": false,
+      "startedUtc": "2026-10-16T01:34:30.088356+00:00",
+      "finishedUtc": "2026-10-16T01:34:34.333981+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/15cf903313fe6f4702e183702c03a00dc09bae2e/R01-final/section20-20261016T013434311758Z.log",
+      "sha256": "ad9296c12e10e9a1434ccd6af8e1f6b7d4a076d5222ece221fefd1792d37086c"
+    },
+    {
+      "name": "b13",
+      "command": [
+        "/home/agent/.npm/_npx/2ad0c2d1aba2dd61/node_modules/node/bin/node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        ".b13-vitest.config.ts"
+      ],
+      "sourceSha": "15cf903313fe6f4702e183702c03a00dc09bae2e",
+      "dirty": false,
+      "startedUtc": "2026-10-16T01:34:34.371744+00:00",
+      "finishedUtc": "2026-10-16T01:34:40.453805+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/15cf903313fe6f4702e183702c03a00dc09bae2e/R01-final/b13-20261016T013440437589Z.log",
+      "sha256": "02a690781639978e3c9bf344833690559f19a2057cd6d1a76359dcd8bacbbccd"
+    },
+    {
+      "name": "b12",
+      "command": [
+        "/home/agent/.npm/_npx/2ad0c2d1aba2dd61/node_modules/node/bin/node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        ".b12-vitest.config.ts"
+      ],
+      "sourceSha": "15cf903313fe6f4702e183702c03a00dc09bae2e",
+      "dirty": false,
+      "startedUtc": "2026-10-16T01:34:40.488205+00:00",
+      "finishedUtc": "2026-10-16T01:34:47.794704+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/15cf903313fe6f4702e183702c03a00dc09bae2e/R01-final/b12-20261016T013447763839Z.log",
+      "sha256": "0106a689fa5b95d3d89fd1aacac79d6a566b68c51fc4ac4be28b175192a0e4ff"
+    },
+    {
+      "name": "postclosure",
+      "command": [
+        "/home/agent/.npm/_npx/2ad0c2d1aba2dd61/node_modules/node/bin/node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        ".postclosure-review-vitest.config.ts"
+      ],
+      "sourceSha": "15cf903313fe6f4702e183702c03a00dc09bae2e",
+      "dirty": false,
+      "startedUtc": "2026-10-16T01:34:47.827943+00:00",
+      "finishedUtc": "2026-10-16T01:34:54.283587+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/15cf903313fe6f4702e183702c03a00dc09bae2e/R01-final/postclosure-20261016T013454251695Z.log",
+      "sha256": "75224cdcd908e49aee8b2e154cb968733bf032449b37c9ec5fb04dff61ec1a8d"
+    },
+    {
+      "name": "changed-node-regressions",
+      "command": [
+        "/home/agent/.npm/_npx/2ad0c2d1aba2dd61/node_modules/node/bin/node",
+        "--test",
+        "tests/architecture/repository-organization.test.mjs",
+        "tests/security/auth-lifecycle-remediation-source.test.mjs",
+        "tests/security/strict-edge-validation-remediation-source.test.mjs",
+        "tests/runtime/runtime-resource-lifecycle-source.test.mjs",
+        "tests/runtime/runtime-shutdown-drain-runtime.test.mjs",
+        "tests/remediation/w2-database-baseline.test.mjs",
+        "tests/remediation/w2-retention-lifecycle.test.mjs"
+      ],
+      "sourceSha": "15cf903313fe6f4702e183702c03a00dc09bae2e",
+      "dirty": false,
+      "startedUtc": "2026-10-16T01:34:54.316922+00:00",
+      "finishedUtc": "2026-10-16T01:35:00.657738+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/15cf903313fe6f4702e183702c03a00dc09bae2e/R01-final/changed-node-regressions-20261016T013500641726Z.log",
+      "sha256": "1fcd4fa2e4e4927f7c64f9ff1138264b7ffb77358b08d858a97222362fc4a32c"
+    },
+    {
+      "name": "preflight",
+      "command": [
+        "/home/agent/.npm/_npx/2ad0c2d1aba2dd61/node_modules/node/bin/node",
+        "scripts/ci/source-preflight.mjs"
+      ],
+      "sourceSha": "15cf903313fe6f4702e183702c03a00dc09bae2e",
+      "dirty": false,
+      "startedUtc": "2026-10-16T01:35:00.705930+00:00",
+      "finishedUtc": "2026-10-16T01:35:09.158112+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/15cf903313fe6f4702e183702c03a00dc09bae2e/R01-final/preflight-20261016T013509141411Z.log",
+      "sha256": "a260c4b262082c80ea43f383708b35f43e2d7c6e1eb6dd00963c2b7277ae305a"
+    },
+    {
+      "name": "changed-eslint",
+      "command": [
+        "/home/agent/.npm/_npx/2ad0c2d1aba2dd61/node_modules/node/bin/node",
+        "node_modules/eslint/bin/eslint.js",
+        "packages/infrastructure/tests/finance-platform/Section20Safety.spec.ts",
+        "scripts/ci/write-source-ci-evidence.mjs",
+        "scripts/security/router-body-source-policy.mjs",
+        "scripts/verify-certificates-source-closure.mjs",
+        "scripts/verify-courses-source-closure.mjs",
+        "scripts/verify-import-foundation-source.mjs",
+        "scripts/verify-p10-plan-closure.mjs",
+        "scripts/verify-phase17-source.mjs",
+        "scripts/verify-public-ui-comprehensive-closure.mjs",
+        "scripts/verify-study-destinations-source-closure.mjs",
+        "scripts/verify-w0-source.mjs",
+        "scripts/verify-w1-source.mjs",
+        "scripts/verify-w2-source.mjs",
+        "scripts/verify-w3-source.mjs",
+        "scripts/verify-w4-source.mjs",
+        "scripts/verify-w6-plan-closure.mjs",
+        "scripts/verify/verify-final-repository-organization.mjs",
+        "tests/architecture/repository-organization.test.mjs",
+        "tests/release/section28.test.mjs",
+        "tests/remediation/w2-database-baseline.test.mjs",
+        "tests/remediation/w2-retention-lifecycle.test.mjs",
+        "tests/runtime/runtime-resource-lifecycle-source.test.mjs",
+        "tests/security/auth-lifecycle-remediation-source.test.mjs",
+        "tests/security/strict-edge-validation-remediation-source.test.mjs"
+      ],
+      "sourceSha": "15cf903313fe6f4702e183702c03a00dc09bae2e",
+      "dirty": false,
+      "startedUtc": "2026-10-16T01:35:09.190095+00:00",
+      "finishedUtc": "2026-10-16T01:35:10.623309+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/15cf903313fe6f4702e183702c03a00dc09bae2e/R01-final/changed-eslint-20261016T013510607102Z.log",
+      "sha256": "c61d191e48a16f8d350bd3f9995517cdd6318909fc6fbb8a445fcd9e9e97bd8f"
+    },
+    {
+      "name": "git-diff-check",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "sourceSha": "15cf903313fe6f4702e183702c03a00dc09bae2e",
+      "dirty": false,
+      "startedUtc": "2026-10-16T01:35:10.656079+00:00",
+      "finishedUtc": "2026-10-16T01:35:10.686479+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/15cf903313fe6f4702e183702c03a00dc09bae2e/R01-final/git-diff-check-20261016T013510661962Z.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-manifest",
+      "command": [
+        "/home/agent/.npm/_npx/2ad0c2d1aba2dd61/node_modules/node/bin/node",
+        "scripts/ci/run-source-closure-manifest.mjs",
+        "--source-only"
+      ],
+      "sourceSha": "15cf903313fe6f4702e183702c03a00dc09bae2e",
+      "dirty": false,
+      "startedUtc": "2026-10-16T01:33:57.405445+00:00",
+      "finishedUtc": "2026-10-16T01:35:49.370099+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/15cf903313fe6f4702e183702c03a00dc09bae2e/R01-final/source-manifest-20261016T013549354363Z.log",
+      "sha256": "f919895d368577e1b676204cd136cb2300912473e174502325f1524c05288381"
+    }
+  ],
+  "testGroups": {
+    "section20": 64,
+    "b13": 63,
+    "b12": 16,
+    "postclosure": 10,
+    "changedNodeRegressions": 26,
+    "preflight": 36,
+    "section28WithinManifest": 63
+  },
+  "digests": {
+    "docs/remediation/POST28_R01_SOURCE_GATE_REPAIR_2026-10-16.md": "916bc8a369e3c8bc2390a262f028fed22725a6a0138e0a267f51d6f85cc26740",
+    "docs/reviews/section-26-implementation.md": "5b2671f360f1e7c1e2499db7051aa9d99f9369fa4e595f6d17649336a17111e5",
+    "docs/reviews/section-26-validation.json": "6a0dc5675cee49552589bb8b5f60292112e11249d65b079b129e325efd48bf04",
+    "packages/infrastructure/tests/finance-platform/Section20Safety.spec.ts": "de1cbc5289dabeee82a061394297994fa0b4c749c48e6c9a1f54374e4ba6ee12",
+    "scripts/ci/write-source-ci-evidence.mjs": "4edc46bbaf7b048792869a88ab8f2a20c561e03ca4f30d35f15895394ca1b99a",
+    "scripts/database/database-baseline.manifest.json": "c28c85f707eaea5e448a31387db0e9dea13008087c60d59e9ad23d8743723b85",
+    "scripts/security/router-body-source-policy.mjs": "6379eaa20517ea8a516287fd3e226cd7822d7e4962afc36687389175e64c15cc",
+    "scripts/verify-certificates-source-closure.mjs": "7b6664089162b41bd69c0d51cf1a1da9be0b198314746c7138781423d7b8e50e",
+    "scripts/verify-courses-source-closure.mjs": "86a307055b568910da837df2e05e8a08789462fec7fb8b6427002cd4b479af6d",
+    "scripts/verify-import-foundation-source.mjs": "ed39dce1777996d1d753b9851d420754f8b79c23e9a0c029a7df098bf91adbc5",
+    "scripts/verify-p10-plan-closure.mjs": "7276adea3e109a061df90dc03e46f7f0e08151831b9d8a13a25ab2a7ce274e3a",
+    "scripts/verify-phase17-source.mjs": "b7f69c39aa450b6524dcfc22534096b8daa04a5fbf10f2a138358c5fe23f63cb",
+    "scripts/verify-public-ui-comprehensive-closure.mjs": "483efe9379e057db9435ff3accb09f837d30c671720141d09f60b5fecf0be6e0",
+    "scripts/verify-study-destinations-source-closure.mjs": "81f38c82a3796d48651302d8d65c2d5230ae5ac3ae9aba06c61bb1e95d221bae",
+    "scripts/verify-w0-source.mjs": "17069f4d2b3c50cbfd60c85c2870dc4030eed4698110fddc7fc0f6c2468ee1e3",
+    "scripts/verify-w1-source.mjs": "e749c4d372435088407be752a672c548eb6d83bb065d68602103262107ccc201",
+    "scripts/verify-w2-source.mjs": "b1a4f9510f111d9db8188b5aca526154a8bd4e3727d059eeac1497f617e52ed8",
+    "scripts/verify-w3-source.mjs": "6bd8aa3c5a66ccffd5b3d245951104139f2344d48c2424bf031f653d975d045a",
+    "scripts/verify-w4-source.mjs": "2ab2aff1929845e9e338286ee308ba717cc8e825be9eaff52071d97373b7c20f",
+    "scripts/verify-w6-plan-closure.mjs": "416dc66ec1a8ccdc6566b50c7aa2794708da67a3d08dfed14afe9334a6240572",
+    "scripts/verify/verify-final-repository-organization.mjs": "a996c73992a9c5dcbd6f7b80565e4ba2927f4a30df93a41264c6649f0d77d8ce",
+    "tests/architecture/repository-organization.test.mjs": "03e8aeae9bd4349964d77be2b413a3d08c49f7dcd50e1fee3128de2b29d9ba00",
+    "tests/release/section28.test.mjs": "c73bf4c5a57ac0720b7f2455003780501a6ad6e777fc0a9e9d24b9c51045a654",
+    "tests/remediation/w2-database-baseline.test.mjs": "4ade450bffd0bad6371946dd2bf72ab1b9d62217c34b39e7bf4ba0c865a9103e",
+    "tests/remediation/w2-retention-lifecycle.test.mjs": "04034055e6381d7241b0b4f6820d06d523e4dbadfb9c3f06a5a98b9bdcd5d4ef",
+    "tests/runtime/runtime-resource-lifecycle-source.test.mjs": "6ce32fc68fa433daaec2fe26bd14667dbb6984e84e65bf5e3b43304d5cda1899",
+    "tests/security/auth-lifecycle-remediation-source.test.mjs": "2cfb6a523ec6b3c2288a10056548a5cc8fc655f5a0ef5be2d98bb66b110ea21a",
+    "tests/security/strict-edge-validation-remediation-source.test.mjs": "2acffe052d4fe9a7e577cf01664e52b5266cc1db988cc5fd7c3b281bdc7fefaf",
+    "package-lock.json": "75269332ee9c7c5b5b66b753a5ac5e94427668cd27b1db20b26291499306b4ee",
+    "packages/infrastructure/prisma/schema.prisma": "56966e566cbcd7ea60966d3954a4368630753f35a265e24b8ece354387450d45"
+  },
+  "fullRemoteCI": "PENDING",
+  "CodeQL": "REMOTE_PENDING",
+  "databaseConnected": false,
+  "providersCalled": false,
+  "deploymentPerformed": false,
+  "next": "R02-core guard/discovery, then R03 DB-G/DB-S before migrations. R02 coverage and independent release/recovery authorities remain open."
+}

@@ -1,0 +1,51 @@
+{
+  "sourceSha": "26fe899a033ab93eb3a44b39df1c10d9600bcd87",
+  "state": "SCOPED_LINUX_SIGTERM_AND_REDIS_RUNTIME_VERIFIED",
+  "fullR08Acceptance": false,
+  "productionAcceptance": false,
+  "runId": "39287364100",
+  "jobId": 118178128146,
+  "linuxProcessProof": {
+    "owner": {
+      "signal": "SIGTERM",
+      "durationMs": 81.66982799999997,
+      "newClaimsAfterStop": 0,
+      "state": "STOPPED",
+      "fresh": false
+    },
+    "student": {
+      "signal": "SIGTERM",
+      "durationMs": 81.263162,
+      "newClaimsAfterStop": 0,
+      "state": "STOPPED",
+      "fresh": false
+    },
+    "hungMonitoring": {
+      "signal": "SIGTERM",
+      "configuredBudgetMs": 15000,
+      "elapsedMs": 15008.258022,
+      "exitCode": 1,
+      "scope": "Actual shutdown body with isolated HTTP and monitoring adapter, not full built API"
+    }
+  },
+  "redis": {
+    "receipt": "redis-execution-receipt.json",
+    "twoIndependentCounterProcesses": true,
+    "requests": 24,
+    "allowed": 10,
+    "namespaceIsolation": true,
+    "revisionIsolation": true,
+    "staleRejected": true,
+    "restrictedAcl": true,
+    "outageRejected": true,
+    "ownedContainerRemoved": true
+  },
+  "notClaimed": [
+    "Full built API persisted sessions or two API servers",
+    "Redis plus PostgreSQL full resource-drain overrun",
+    "Provider signed webhook/unknown outcome/reconciliation chains",
+    "Full financial business invariants",
+    "Full R07 release gates"
+  ],
+  "earlierPreparationRetained": "preparation-status.json"
+}

@@ -1,0 +1,21 @@
+{
+  "sourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+  "runId": 39599847197,
+  "smallRetrievalProof": {
+    "id": 12346550267,
+    "bytes": 652,
+    "digest": "sha256:4cc162e651f42985ba19b70639f3254c56f21cc7ed1089b9bd935ff8ec018c81",
+    "serverDigestVerified": true
+  },
+  "releasePackages": {
+    "id": 12345263891,
+    "bytes": 12994984,
+    "digest": "sha256:041ea2ddd916547df250b511f1826ad1303e2e518a4b2e2471adfad6b374663f",
+    "localDownload": "PARTIAL_NOT_VERIFIED_NOT_EXTRACTED",
+    "localPartialBytes": 703416,
+    "reason": "Transport timeout; no repeated large transfer",
+    "ciRetrievalAndDigestVerification": true
+  },
+  "rollbackExecuted": false,
+  "credentialsRetained": false
+}

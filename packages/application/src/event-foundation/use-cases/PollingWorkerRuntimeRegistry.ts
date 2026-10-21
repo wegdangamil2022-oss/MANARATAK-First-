@@ -4,6 +4,7 @@ export interface PollingWorkerRuntimeSnapshot {
   lastSuccessAt?: string;
   lastFailureAt?: string;
   lastFailureCode?: string;
+  lastStoppedAt?: string;
 }
 
 /** Runtime-only operational evidence for interval-based outbox workers. */
@@ -21,8 +22,12 @@ export class PollingWorkerRuntimeRegistry {
   public failure(name: string, error: unknown): void {
     const code = error instanceof Error ? error.message.split(':', 1)[0].slice(0, 120) : 'WORKER_ITERATION_FAILED';
     this.states.set(name, { ...this.snapshot(name), state: 'DEGRADED', lastFailureAt: new Date().toISOString(), lastFailureCode: code });
+    void this.observe?.(name, { ...this.snapshot(name) }).catch(() => undefined);
   }
-  public stopped(name: string): void { this.states.set(name, { ...this.snapshot(name), state: 'STOPPED' }); }
+  public stopped(name: string): void {
+    this.states.set(name, { ...this.snapshot(name), state: 'STOPPED', lastStoppedAt: new Date().toISOString() });
+    void this.observe?.(name, { ...this.snapshot(name) }).catch(() => undefined);
+  }
   public snapshot(name: string): PollingWorkerRuntimeSnapshot { return this.states.get(name) ?? { state: 'STOPPED' }; }
   public all(): Record<string, PollingWorkerRuntimeSnapshot> { return Object.fromEntries(this.states.entries()); }
 }

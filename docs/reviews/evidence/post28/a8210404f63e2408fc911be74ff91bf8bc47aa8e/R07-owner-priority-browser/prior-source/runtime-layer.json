@@ -1,0 +1,64 @@
+{
+  "kind": "POST28_DIAGNOSTIC_RUNTIME_LAYER",
+  "sourceSha": "fcb0dc940b05a6209dd2587f2cfa149893656b92",
+  "node": "v22.16.0",
+  "nodeMajor": 22,
+  "os": "win32",
+  "architecture": "x64",
+  "engineFile": "query_engine-windows.dll.node",
+  "engineSha256": "7d58cada77c5833e57d2ab4ad61ea2948247b2caa8575066b2fe3bc7e4ea4e5a",
+  "generatedSchemaSha256": "cd9fdff87ed21b2680f6dda774376a0dd5e2acb52e472519877c4fc88b0f5969",
+  "lockSha256": "2b468457bb4c706293a6b9f8eaed1b0abde34cef38225a70364a10ff4ac0e151",
+  "sourceSchemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59",
+  "formattedSourceSchemaSha256": "cd9fdff87ed21b2680f6dda774376a0dd5e2acb52e472519877c4fc88b0f5969",
+  "formattedSchemaMatches": true,
+  "installExitCode": 0,
+  "installLogSha256": "595e33d4ad9bfcb686e39c71b5716c4bcfe8cdb024ecaf28a7de126bd950ee8f",
+  "installCommand": [
+    "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node.exe",
+    "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node_modules\\npm\\bin\\npm-cli.js",
+    "ci",
+    "--omit=dev",
+    "--ignore-scripts",
+    "--no-audit",
+    "--no-fund"
+  ],
+  "verification": {
+    "sourceSha": "fcb0dc940b05a6209dd2587f2cfa149893656b92",
+    "nativeLoaded": true,
+    "modules": [
+      "@node-rs/xxhash",
+      "@prisma/client",
+      "cors",
+      "express",
+      "fontkit",
+      "helmet",
+      "pdfkit",
+      "svg-to-pdfkit",
+      "uuid"
+    ],
+    "stageAccepted": false
+  },
+  "runtimeArchiveSha256": "947495ed141e7c26bfd59a8a1d3527f419fcfa8a38b232398f6d08a9539e5325",
+  "runtimeArchiveBytes": 429762560,
+  "freshUnpackVerified": {
+    "sourceSha": "fcb0dc940b05a6209dd2587f2cfa149893656b92",
+    "nativeLoaded": true,
+    "modules": [
+      "@node-rs/xxhash",
+      "@prisma/client",
+      "cors",
+      "express",
+      "fontkit",
+      "helmet",
+      "pdfkit",
+      "svg-to-pdfkit",
+      "uuid"
+    ],
+    "stageAccepted": false
+  },
+  "generatedClientCopiedFromCleanBuild": true,
+  "checkoutPresent": false,
+  "stageAccepted": false,
+  "promotionAuthorized": false
+}

@@ -1,0 +1,17 @@
+{
+  "sourceSha": "bd112aaebb7c72e80bda390c4370aef990ef55e1",
+  "checks": [
+    {
+      "name": "prisma-generate",
+      "command": [
+        "npm",
+        "run",
+        "db:generate"
+      ],
+      "startedAt": "2026-10-16T22:04:33.283Z",
+      "finishedAt": "2026-10-16T22:04:33.285Z",
+      "exitCode": null,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

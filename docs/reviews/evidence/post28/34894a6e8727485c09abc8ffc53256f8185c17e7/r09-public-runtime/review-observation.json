@@ -1,0 +1,9 @@
+{
+  "sourceSha": "34894a6e8727485c09abc8ffc53256f8185c17e7",
+  "runtimePassedItsDeclaredAssertions": true,
+  "apiOwnerAndPagingEvidenceValid": true,
+  "catalogScreenshotStillLoading": true,
+  "loadedCatalogNotVerified": true,
+  "fullPublicUiAcceptance": false,
+  "followup": "157debd adds loaded catalog checks; 4244b94 and 819216e repair unsupported FREE filter values. Earlier proof is not relabeled with those fixes."
+}

@@ -1,0 +1,13 @@
+{
+  "name": "b12",
+  "command": "node node_modules/vitest/vitest.mjs run --config .b12-vitest.config.ts",
+  "sourceSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "endSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T02:47:42.383916+00:00",
+  "endedAt": "2026-10-16T02:47:50.975531+00:00",
+  "exitCode": 0,
+  "logSha256": "fdd87cb0c74116f6c9ab88a3dd35a82f01c45fb6f51f6477bfd1e4691855b8d6",
+  "nodeVersion": "22.16.0"
+}

@@ -1,0 +1,101 @@
+{
+  "observedSourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "verifiedAt": "2026-10-20T18:43:48.364Z",
+  "verifiedIndexes": [
+    {
+      "path": "docs/reviews/evidence/post28/f8045f90bf6775674d22fc5f2a8cff5fd79b0c2f/r11-read-diagnostic/evidence-index.json",
+      "sha256": "f7ef05be08dc123a731b4ffdd8e7ef3ba743ffb6f8a17298f5f31af7f33322b6",
+      "files": 24
+    },
+    {
+      "path": "docs/reviews/evidence/post28/399f816506677c3cdf14e79103f4c854d6416b2d/r11-scenario-diagnostic/evidence-index.json",
+      "sha256": "a59f5436ed3030b93e6e5add3be1fd09ba3dfd90cb228f4740c33daf831ccff5",
+      "files": 20
+    },
+    {
+      "path": "docs/reviews/evidence/post28/50e109e3ece76c6b5acb832be9fcd747450821cb/r11-admin-mfa/evidence-index.json",
+      "sha256": "5d14f8383ce73ad9cda58d2f530f1faf9665579467052c24deb2b71d3a400011",
+      "files": 21
+    },
+    {
+      "path": "docs/reviews/evidence/post28/6d440363adb1477101402f00371e2319c3aae84f/r11-mfa-enrollment/evidence-index.json",
+      "sha256": "bca42e2fc11e97b6bc4811df76958baf361e70896c8417dde15da434ed91cf93",
+      "files": 10
+    },
+    {
+      "path": "docs/reviews/evidence/post28/0402c97f6b5e93e7810a1053c6a43f0d410961f5/r11-wire-contract/evidence-index.json",
+      "sha256": "2577079c5b6c3dc53a0b06e52cdbc9144c1acfc5a235f86952e86dd67e8f99d6",
+      "files": 7
+    }
+  ],
+  "checkedFiles": 82,
+  "completedCategories": [
+    {
+      "id": "public-search",
+      "sourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+      "sampleCount": 60,
+      "elapsedSeconds": 60.4202806,
+      "durationMeetsFormalMinimum": true,
+      "p95Ms": 7.260900000008405,
+      "p99Ms": 77.1707000000024
+    },
+    {
+      "id": "scholarship-filters",
+      "sourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+      "sampleCount": 30,
+      "elapsedSeconds": 60.431858,
+      "durationMeetsFormalMinimum": true,
+      "p95Ms": 49.609199999998964,
+      "p99Ms": 58.5625
+    },
+    {
+      "id": "student-writes",
+      "sourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d",
+      "sampleCount": 30,
+      "elapsedSeconds": 60.012534200000005,
+      "durationMeetsFormalMinimum": true,
+      "p95Ms": 55.34599999999773,
+      "p99Ms": 60.205699999998615
+    },
+    {
+      "id": "admin-scans",
+      "sourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d",
+      "sampleCount": 30,
+      "elapsedSeconds": 60.0148712,
+      "durationMeetsFormalMinimum": true,
+      "p95Ms": 13.486100000009174,
+      "p99Ms": 24.26169999999547
+    },
+    {
+      "id": "imports",
+      "sourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d",
+      "sampleCount": 30,
+      "elapsedSeconds": 60.001185799999995,
+      "durationMeetsFormalMinimum": true,
+      "p95Ms": 17.698499999998603,
+      "p99Ms": 21.128300000011222
+    },
+    {
+      "id": "finance-stub",
+      "sourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d",
+      "sampleCount": 30,
+      "elapsedSeconds": 59.9998578,
+      "durationMeetsFormalMinimum": false,
+      "p95Ms": 71.19159999999101,
+      "p99Ms": 99.50229999999283
+    },
+    {
+      "id": "worker-queues",
+      "sourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d",
+      "sampleCount": 30,
+      "elapsedSeconds": 60.00966829999999,
+      "durationMeetsFormalMinimum": true,
+      "p95Ms": 36.52650000000722,
+      "p99Ms": 36.858299999992596
+    }
+  ],
+  "mfaEnrollmentUiVerified": true,
+  "priorApplicationScenariosRepeated": false,
+  "linuxAfterWireFixVerified": false,
+  "formalSloAcceptance": false
+}

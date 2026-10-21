@@ -1,0 +1,520 @@
+TAP version 13
+# Subtest: API-format certificate bundle renders real PDFs with packaged fonts and logo
+ok 1 - API-format certificate bundle renders real PDFs with packaged fonts and logo
+  ---
+  duration_ms: 1087.159121
+  type: 'test'
+  ...
+# Subtest: static build refuses missing
+ok 2 - static build refuses missing
+  ---
+  duration_ms: 6.654898
+  type: 'test'
+  ...
+# Subtest: static build refuses empty
+ok 3 - static build refuses empty
+  ---
+  duration_ms: 0.837308
+  type: 'test'
+  ...
+# Subtest: static build refuses symlink-file
+ok 4 - static build refuses symlink-file
+  ---
+  duration_ms: 5.541442
+  type: 'test'
+  ...
+# Subtest: static build refuses symlink-parent
+ok 5 - static build refuses symlink-parent
+  ---
+  duration_ms: 0.625547
+  type: 'test'
+  ...
+# Subtest: static build refuses traversal
+ok 6 - static build refuses traversal
+  ---
+  duration_ms: 0.585517
+  type: 'test'
+  ...
+# Subtest: static build refuses external
+ok 7 - static build refuses external
+  ---
+  duration_ms: 0.497193
+  type: 'test'
+  ...
+# Subtest: static build refuses metadata-symlink
+ok 8 - static build refuses metadata-symlink
+  ---
+  duration_ms: 9.005708
+  type: 'test'
+  ...
+# Subtest: valid same-unit JS entry is BUILT
+ok 9 - valid same-unit JS entry is BUILT
+  ---
+  duration_ms: 0.94425
+  type: 'test'
+  ...
+# Subtest: smoke refuses SPA fallback
+ok 10 - smoke refuses SPA fallback
+  ---
+  duration_ms: 128.494779
+  type: 'test'
+  ...
+# Subtest: smoke refuses HTML mislabeled as JS
+ok 11 - smoke refuses HTML mislabeled as JS
+  ---
+  duration_ms: 2.045278
+  type: 'test'
+  ...
+# Subtest: smoke refuses empty JS
+ok 12 - smoke refuses empty JS
+  ---
+  duration_ms: 1.976133
+  type: 'test'
+  ...
+# Subtest: smoke refuses missing JS
+ok 13 - smoke refuses missing JS
+  ---
+  duration_ms: 0.803627
+  type: 'test'
+  ...
+# Subtest: smoke refuses redirect
+ok 14 - smoke refuses redirect
+  ---
+  duration_ms: 0.724267
+  type: 'test'
+  ...
+# Subtest: smoke requests actual scripts for both built units
+ok 15 - smoke requests actual scripts for both built units
+  ---
+  duration_ms: 2.838728
+  type: 'test'
+  ...
+# Subtest: artifact input inspection rejects symlinks before tar packaging
+ok 16 - artifact input inspection rejects symlinks before tar packaging
+  ---
+  duration_ms: 23.364512
+  type: 'test'
+  ...
+# Subtest: packager rejects dirty source or existing output before altering static inputs
+ok 17 - packager rejects dirty source or existing output before altering static inputs
+  ---
+  duration_ms: 263.533884
+  type: 'test'
+  ...
+# Subtest: R06-R09 inventory identifies 26 mandatory R06 cases without claiming runtime coverage
+ok 18 - R06-R09 inventory identifies 26 mandatory R06 cases without claiming runtime coverage
+  ---
+  duration_ms: 248.587876
+  type: 'test'
+  ...
+# Subtest: FSA003 readiness path matches actual public monitoring mount/route
+ok 19 - FSA003 readiness path matches actual public monitoring mount/route
+  ---
+  duration_ms: 1.556567
+  type: 'test'
+  ...
+# Subtest: FSA003 API base composition does not duplicate api/v1
+ok 20 - FSA003 API base composition does not duplicate api/v1
+  ---
+  duration_ms: 0.601441
+  type: 'test'
+  ...
+# Subtest: FSA007 smoke accepts exact ready revision and built three-unit contracts
+ok 21 - FSA007 smoke accepts exact ready revision and built three-unit contracts
+  ---
+  duration_ms: 19.303632
+  type: 'test'
+  ...
+# Subtest: FSA007 smoke rejects HTTP 301
+ok 22 - FSA007 smoke rejects HTTP 301
+  ---
+  duration_ms: 0.547119
+  type: 'test'
+  ...
+# Subtest: FSA007 smoke rejects HTTP 302
+ok 23 - FSA007 smoke rejects HTTP 302
+  ---
+  duration_ms: 0.810838
+  type: 'test'
+  ...
+# Subtest: FSA007 smoke rejects HTTP 307
+ok 24 - FSA007 smoke rejects HTTP 307
+  ---
+  duration_ms: 0.329979
+  type: 'test'
+  ...
+# Subtest: FSA007 smoke rejects HTTP 308
+ok 25 - FSA007 smoke rejects HTTP 308
+  ---
+  duration_ms: 0.243829
+  type: 'test'
+  ...
+# Subtest: FSA007 smoke rejects HTTP 404
+ok 26 - FSA007 smoke rejects HTTP 404
+  ---
+  duration_ms: 0.207865
+  type: 'test'
+  ...
+# Subtest: FSA007 smoke rejects HTTP 503
+ok 27 - FSA007 smoke rejects HTTP 503
+  ---
+  duration_ms: 0.412365
+  type: 'test'
+  ...
+# Subtest: FSA007 rejects health {"body":{"status":"DOWN"}}
+ok 28 - FSA007 rejects health {"body":{"status":"DOWN"}}
+  ---
+  duration_ms: 0.623684
+  type: 'test'
+  ...
+# Subtest: FSA007 rejects health {"body":{"protocolVersion":1}}
+ok 29 - FSA007 rejects health {"body":{"protocolVersion":1}}
+  ---
+  duration_ms: 0.492516
+  type: 'test'
+  ...
+# Subtest: FSA007 rejects health {"body":{"code":"UNKNOWN"}}
+ok 30 - FSA007 rejects health {"body":{"code":"UNKNOWN"}}
+  ---
+  duration_ms: 1.603779
+  type: 'test'
+  ...
+# Subtest: FSA007 rejects health {"body":{"timestamp":"invalid"}}
+ok 31 - FSA007 rejects health {"body":{"timestamp":"invalid"}}
+  ---
+  duration_ms: 0.266363
+  type: 'test'
+  ...
+# Subtest: FSA007 rejects health {"contentType":"text/html"}
+ok 32 - FSA007 rejects health {"contentType":"text/html"}
+  ---
+  duration_ms: 0.193143
+  type: 'test'
+  ...
+# Subtest: FSA007 rejects health {"revision":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
+ok 33 - FSA007 rejects health {"revision":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
+  ---
+  duration_ms: 0.244761
+  type: 'test'
+  ...
+# Subtest: FSA008 smoke rejects placeholder/unbuilt html
+ok 34 - FSA008 smoke rejects placeholder/unbuilt html
+  ---
+  duration_ms: 0.742494
+  type: 'test'
+  ...
+# Subtest: FSA008 smoke rejects another static build
+ok 35 - FSA008 smoke rejects another static build
+  ---
+  duration_ms: 0.370521
+  type: 'test'
+  ...
+# Subtest: FSA008 missing static artifact is UNBUILT and server serves503
+ok 36 - FSA008 missing static artifact is UNBUILT and server serves503
+  ---
+  duration_ms: 0.774103
+  type: 'test'
+  ...
+# Subtest: FSA008 stamp matches exact static unit and source
+ok 37 - FSA008 stamp matches exact static unit and source
+  ---
+  duration_ms: 0.73984
+  type: 'test'
+  ...
+# Subtest: FSA009 rejects nonTLS/user-info origins
+ok 38 - FSA009 rejects nonTLS/user-info origins
+  ---
+  duration_ms: 0.19797
+  type: 'test'
+  ...
+# Subtest: FSA010/011 source manifest exact three units/digests runtime requirement descriptor
+ok 39 - FSA010/011 source manifest exact three units/digests runtime requirement descriptor
+  ---
+  duration_ms: 1.823952
+  type: 'test'
+  ...
+# Subtest: FSA011 missing or wrong expected source fails
+ok 40 - FSA011 missing or wrong expected source fails
+  ---
+  duration_ms: 0.866853
+  type: 'test'
+  ...
+# Subtest: FSA011 empty unit inventory never verifies
+ok 41 - FSA011 empty unit inventory never verifies
+  ---
+  duration_ms: 0.451965
+  type: 'test'
+  ...
+# Subtest: FSA011 digest tampering rejected
+ok 42 - FSA011 digest tampering rejected
+  ---
+  duration_ms: 0.63418
+  type: 'test'
+  ...
+# Subtest: FSA011 artifact traversal cannot read out of boundary
+ok 43 - FSA011 artifact traversal cannot read out of boundary
+  ---
+  duration_ms: 0.551506
+  type: 'test'
+  ...
+# Subtest: FSA011 symlink artifact rejected
+ok 44 - FSA011 symlink artifact rejected
+  ---
+  duration_ms: 0.791038
+  type: 'test'
+  ...
+# Subtest: FSA011 signed proof checked against independently supplied key
+ok 45 - FSA011 signed proof checked against independently supplied key
+  ---
+  duration_ms: 3.78315
+  type: 'test'
+  ...
+# Subtest: FSA011 signed stale/another-sha proof rejected
+ok 46 - FSA011 signed stale/another-sha proof rejected
+  ---
+  duration_ms: 1.019474
+  type: 'test'
+  ...
+# Subtest: FSA022 source/runtime require different trust keys before verdict
+ok 47 - FSA022 source/runtime require different trust keys before verdict
+  ---
+  duration_ms: 1.270865
+  type: 'test'
+  ...
+# Subtest: FSA012 accepted response is PENDING, not completed deployment
+ok 48 - FSA012 accepted response is PENDING, not completed deployment
+  ---
+  duration_ms: 0.45556
+  type: 'test'
+  ...
+# Subtest: FSA012 exact terminal unit/digest facts accepted
+ok 49 - FSA012 exact terminal unit/digest facts accepted
+  ---
+  duration_ms: 0.837088
+  type: 'test'
+  ...
+# Subtest: FSA012 partial/failed/wrong digest rejected
+ok 50 - FSA012 partial/failed/wrong digest rejected
+  ---
+  duration_ms: 0.344863
+  type: 'test'
+  ...
+# Subtest: FSA012 bounded reconcile polls accepted until terminal
+ok 51 - FSA012 bounded reconcile polls accepted until terminal
+  ---
+  duration_ms: 0.885281
+  type: 'test'
+  ...
+# Subtest: FSA012 accepted forever times out, never emits healthy evidence
+ok 52 - FSA012 accepted forever times out, never emits healthy evidence
+  ---
+  duration_ms: 0.866898
+  type: 'test'
+  ...
+# Subtest: FSA004/005/006/016/019/020/021 mandatory runtime skip stays BLOCKED
+ok 53 - FSA004/005/006/016/019/020/021 mandatory runtime skip stays BLOCKED
+  ---
+  duration_ms: 1.12276
+  type: 'test'
+  ...
+# Subtest: FSA022 independent logical source/runtime states accept complete fixture only
+ok 54 - FSA022 independent logical source/runtime states accept complete fixture only
+  ---
+  duration_ms: 0.307847
+  type: 'test'
+  ...
+# Subtest: FSA023 missing one source task reviewer cannot close section
+ok 55 - FSA023 missing one source task reviewer cannot close section
+  ---
+  duration_ms: 0.244951
+  type: 'test'
+  ...
+# Subtest: FSA023 actual owner-curation-pending inventory blocks even all claimed pass
+ok 56 - FSA023 actual owner-curation-pending inventory blocks even all claimed pass
+  ---
+  duration_ms: 1.471038
+  type: 'test'
+  ...
+# Subtest: FSA023 stale evidence and duplicate gate not PASS
+ok 57 - FSA023 stale evidence and duplicate gate not PASS
+  ---
+  duration_ms: 0.265913
+  type: 'test'
+  ...
+# Subtest: FSA004…021 mere PASS booleans lack required execution details
+ok 58 - FSA004…021 mere PASS booleans lack required execution details
+  ---
+  duration_ms: 0.71944
+  type: 'test'
+  ...
+# Subtest: FSA006 26-domain fixture matrix cannot use page-load-only evidence
+ok 59 - FSA006 26-domain fixture matrix cannot use page-load-only evidence
+  ---
+  duration_ms: 0.261225
+  type: 'test'
+  ...
+# Subtest: FSA006 full attributable matrix assertions accepted without any live execution
+ok 60 - FSA006 full attributable matrix assertions accepted without any live execution
+  ---
+  duration_ms: 0.326083
+  type: 'test'
+  ...
+# Subtest: FSA014 independently signed literal isolated target accepted
+ok 61 - FSA014 independently signed literal isolated target accepted
+  ---
+  duration_ms: 1.40014
+  type: 'test'
+  ...
+# Subtest: FSA014 reject /production before mutating
+ok 62 - FSA014 reject /production before mutating
+  ---
+  duration_ms: 0.956278
+  type: 'test'
+  ...
+# Subtest: FSA014 reject /test-production before mutating
+ok 63 - FSA014 reject /test-production before mutating
+  ---
+  duration_ms: 0.768324
+  type: 'test'
+  ...
+# Subtest: FSA014 reject /manaratak_restore_11111111111111111111111111111111 before mutating
+ok 64 - FSA014 reject /manaratak_restore_11111111111111111111111111111111 before mutating
+  ---
+  duration_ms: 0.9051
+  type: 'test'
+  ...
+# Subtest: FSA014 same source/target, missing second party denied
+ok 65 - FSA014 same source/target, missing second party denied
+  ---
+  duration_ms: 1.550518
+  type: 'test'
+  ...
+# Subtest: FSA014 production fingerprint target denied
+ok 66 - FSA014 production fingerprint target denied
+  ---
+  duration_ms: 0.729424
+  type: 'test'
+  ...
+# Subtest: FSA014 DB sentinel privileges/instance independently rechecked
+ok 67 - FSA014 DB sentinel privileges/instance independently rechecked
+  ---
+  duration_ms: 0.993053
+  type: 'test'
+  ...
+# Subtest: FSA018 corrupted backup aborts before even sentinel SQL
+ok 68 - FSA018 corrupted backup aborts before even sentinel SQL
+  ---
+  duration_ms: 56.727014
+  type: 'test'
+  ...
+# Subtest: FSA018 corrupt asset aborts before all SQL
+ok 69 - FSA018 corrupt asset aborts before all SQL
+  ---
+  duration_ms: 19.964273
+  type: 'test'
+  ...
+# Subtest: FSA018 traversal asset aborts before all SQL
+ok 70 - FSA018 traversal asset aborts before all SQL
+  ---
+  duration_ms: 8.514033
+  type: 'test'
+  ...
+# Subtest: FSA018 symlink asset rejected
+ok 71 - FSA018 symlink asset rejected
+  ---
+  duration_ms: 3.550887
+  type: 'test'
+  ...
+# Subtest: FSA017 measured >60min restore fails even structural success
+ok 72 - FSA017 measured >60min restore fails even structural success
+  ---
+  duration_ms: 0.341848
+  type: 'test'
+  ...
+# Subtest: FSA017 >5min backup currency fails
+ok 73 - FSA017 >5min backup currency fails
+  ---
+  duration_ms: 0.135546
+  type: 'test'
+  ...
+# Subtest: FSA014/017/018 full fake restore ordering and objective result without commands
+ok 74 - FSA014/017/018 full fake restore ordering and objective result without commands
+  ---
+  duration_ms: 7.242077
+  type: 'test'
+  ...
+# Subtest: FSA015 unsigned/stale backup readiness cannot pass
+ok 75 - FSA015 unsigned/stale backup readiness cannot pass
+  ---
+  duration_ms: 0.987595
+  type: 'test'
+  ...
+# Subtest: FSA015 missing numeric PITR proof cannot be mistaken for pass
+ok 76 - FSA015 missing numeric PITR proof cannot be mistaken for pass
+  ---
+  duration_ms: 0.654341
+  type: 'test'
+  ...
+# Subtest: FSA-FG024 typed mandatory market owner chain is available
+ok 77 - FSA-FG024 typed mandatory market owner chain is available
+  ---
+  duration_ms: 0.185831
+  type: 'test'
+  ...
+# Subtest: FSA-FG024 draft-only chain incomplete; zero distinct; partial unavailable
+ok 78 - FSA-FG024 draft-only chain incomplete; zero distinct; partial unavailable
+  ---
+  duration_ms: 0.101554
+  type: 'test'
+  ...
+# Subtest: FSA-FG024 optional zero market does not block mandatory scope, no production claim
+ok 79 - FSA-FG024 optional zero market does not block mandatory scope, no production claim
+  ---
+  duration_ms: 0.073031
+  type: 'test'
+  ...
+# Subtest: FSA001 source evidence writer preserves skipped gate and never declares runtime pass
+ok 80 - FSA001 source evidence writer preserves skipped gate and never declares runtime pass
+  ---
+  duration_ms: 61.999232
+  type: 'test'
+  ...
+# Subtest: FSA002/013 corrected repository while deployment/recovery remain explicit opt-in
+ok 81 - FSA002/013 corrected repository while deployment/recovery remain explicit opt-in
+  ---
+  duration_ms: 1.724641
+  type: 'test'
+  ...
+# Subtest: database integration config registers a disposable P07-P21 persistence contract
+ok 82 - database integration config registers a disposable P07-P21 persistence contract
+  ---
+  duration_ms: 1.064172
+  type: 'test'
+  ...
+# Subtest: production monitoring is provider-backed and covers HTTP plus workers
+ok 83 - production monitoring is provider-backed and covers HTTP plus workers
+  ---
+  duration_ms: 1.460312
+  type: 'test'
+  ...
+# Subtest: DR contract includes PITR, immutable backups, provider readiness and weekly restore drill
+ok 84 - DR contract includes PITR, immutable backups, provider readiness and weekly restore drill
+  ---
+  duration_ms: 0.262958
+  type: 'test'
+  ...
+# Subtest: release promotion consumes one immutable artifact set across validation staging and production
+ok 85 - release promotion consumes one immutable artifact set across validation staging and production
+  ---
+  duration_ms: 0.218682
+  type: 'test'
+  ...
+1..85
+# tests 85
+# suites 0
+# pass 85
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2359.898841

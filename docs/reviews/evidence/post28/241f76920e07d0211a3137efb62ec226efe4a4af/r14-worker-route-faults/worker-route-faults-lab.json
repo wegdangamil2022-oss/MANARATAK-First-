@@ -1,0 +1,20 @@
+{
+  "sourceSha": "241f76920e07d0211a3137efb62ec226efe4a4af",
+  "newCluster": true,
+  "postgresBinarySha256": "19e73deb1152b3b505f2e1fd579191427f9eb3b3f800754968e7214b24edf31d",
+  "serverIdentity": "7699095411190558760",
+  "donorDumpSha256": "6461cdd9f3318d82b50757b4edd37be9fb62d0248364337eda23429dfb9e6122",
+  "restoreListSha256": "1f9d8ebe31460737b51c632ca09e2997cdd86597747cf81df6ce0d93ac8d6e26",
+  "excludedDonorData": [
+    "TransactionalOutboxRecord"
+  ],
+  "ordinaryRole": "post28_r14_worker",
+  "runtimeDmlTables": [
+    "BackgroundJobRecord",
+    "BackgroundJobExecutionRecord",
+    "BackgroundJobDeadLetterRecord",
+    "TransactionalOutboxRecord"
+  ],
+  "protectedDomainWritePermissions": false,
+  "previousDatabasesTouched": false
+}

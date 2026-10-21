@@ -67,7 +67,9 @@ const checks = {
   browser_execution_idempotency: /intent!\.key/.test(webClient) && /student-tool-intent:/.test(webClient) && /Idempotency-Key/.test(webClient),
   save_does_not_submit_result: /saveStudentToolExecution\(executionId: string\)/.test(webClient) && !/saveStudentToolExecution\(executionId: string, result/.test(webClient),
   server_save_recovers_protected_result: /const result = await this\.recoverResult\(record\)/.test(toolExecution),
-  live_tool_execution_route: /path: 'tools\/:toolKey'[\s\S]*element: <StudentToolPage/.test(webRouter),
+  live_tool_execution_route: /path: 'tools\/:toolKey'\s*,\s*element: <StudentToolPreviewRoute/.test(webRouter) &&
+    webRouter.includes("if (import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype')") &&
+    webRouter.includes('return <Navigate replace to={target} />;') && webRouter.includes('return <StudentToolPage />;'),
   shadow_gemini_modal_removed: !exists('apps/web/src/features/public-template/components/AIToolsModal.tsx'),
   shadow_gemini_endpoints_removed: !/\/api\/gemini\//.test(publicApp + toolsPage + banner + executionPage),
   dead_student_tools_list_removed: !exists('apps/web/src/features/student-tools/StudentToolsList.tsx'),
@@ -98,6 +100,7 @@ function childPass(script) {
 }
 checks.phase17_regression = childPass('scripts/verify-phase17-source.mjs');
 checks.phase18_regression = childPass('scripts/verify-phase18-source.mjs');
+checks.tool_route_isolation = childPass('tests/security/student-tool-route-isolation.test.mjs');
 checks.architecture_regression = childPass('scripts/architecture/verify-source-architecture-guards.mjs');
 checks.source_quality_regression = childPass('scripts/quality/verify-source-quality.mjs');
 

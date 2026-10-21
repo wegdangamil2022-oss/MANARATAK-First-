@@ -1,0 +1,10 @@
+{
+  "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+  "unexpectedSchemas": 0,
+  "appLedgerInsert": true,
+  "appLedgerUpdate": true,
+  "appLedgerDelete": true,
+  "migrationRole": "post28_migrator",
+  "oldLabStopped": true,
+  "fixedInSourceSha": "95c0888161badd9efe47cecb4a732d35f39fc1ca"
+}

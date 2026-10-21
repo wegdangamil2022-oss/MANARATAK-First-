@@ -38,13 +38,13 @@ const university = (): UniversityDto => ({
       id: 'program-1', universityId: 'private-owner-1', sourceProgramName: 'Physics',
       normalizedName: 'physics', degreeLevelId: 'degree-1',
       majorId: 'major-1', major: { status: 'PUBLISHED', levelProfiles: [
-        { degreeLevelId: 'degree-1', status: 'PUBLISHED', currentPublishedVersionId: 'version-1' },
+        { id:'profile-1', degreeLevelId: 'degree-1', status: 'PUBLISHED', currentPublishedVersionId: 'version-1', currentPublishedVersion:{id:'version-1',majorId:'major-1',profileId:'profile-1',status:'PUBLISHED'} },
       ] },
       majorMappingState: 'CANONICALLY_MAPPED', status: 'ACTIVE',
       campusIds: ['campus-1'],
       admissionRequirements: [
         { id: 'internal-req-1', academicProgramId: 'program-1', internationalTestId: 'test-1',
-          internationalTest: { displayName: 'Test', canonicalName: 'Test', slug: 'test', status: 'PUBLISHED' },
+          internationalTest: { displayName: 'Test', canonicalName: 'Test', slug: 'test', status: 'PUBLISHED', currentPublishedVersion: {testId:'test-1',status:'PUBLISHED',scoreScales:[{overallMinimum:0,overallMaximum:9}]} },
           status: 'ACTIVE', minimumScore: 6.5 },
         { id: 'internal-req-2', academicProgramId: 'program-1', internationalTestId: 'test-2',
           internationalTest: { displayName: 'Unpublished', canonicalName: 'Unpublished', slug: 'draft', status: 'READY_TO_REVIEW' },

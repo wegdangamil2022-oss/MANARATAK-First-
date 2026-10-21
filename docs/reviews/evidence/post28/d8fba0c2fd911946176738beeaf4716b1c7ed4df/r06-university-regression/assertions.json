@@ -1,0 +1,72 @@
+[
+  {
+    "file": "tests/database/post28-university-relations.database.spec.mjs",
+    "title": "resolves a published program only through its matching degree profile and actual owner relations",
+    "ancestors": [
+      "Post28 real university program owner reference relations"
+    ],
+    "status": "passed",
+    "durationMs": 23.725262000000384,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-relations.database.spec.mjs",
+    "title": "enforces exact university program and degree scope without returning a foreign owner",
+    "ancestors": [
+      "Post28 real university program owner reference relations"
+    ],
+    "status": "passed",
+    "durationMs": 22.307658000000174,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-relations.database.spec.mjs",
+    "title": "stops public eligibility immediately when either university or major is unpublished",
+    "ancestors": [
+      "Post28 real university program owner reference relations"
+    ],
+    "status": "passed",
+    "durationMs": 16.095096000000012,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-relations.database.spec.mjs",
+    "title": "refuses a different degree profile and a missing published version pointer",
+    "ancestors": [
+      "Post28 real university program owner reference relations"
+    ],
+    "status": "passed",
+    "durationMs": 21.7136830000004,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-relations.database.spec.mjs",
+    "title": "excludes archived and unmapped programs even with valid foreign keys",
+    "ancestors": [
+      "Post28 real university program owner reference relations"
+    ],
+    "status": "passed",
+    "durationMs": 12.133989999999812,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-relations.database.spec.mjs",
+    "title": "enforces university major and degree foreign keys on real PostgreSQL without leaving an invalid update",
+    "ancestors": [
+      "Post28 real university program owner reference relations"
+    ],
+    "status": "passed",
+    "durationMs": 57.15082799999982,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-relations.database.spec.mjs",
+    "title": "reads owner publication inside the actual transaction and rolls an unpublished state back",
+    "ancestors": [
+      "Post28 real university program owner reference relations"
+    ],
+    "status": "passed",
+    "durationMs": 16.80527499999971,
+    "failureFirstLines": []
+  }
+]

@@ -1068,12 +1068,13 @@ export class FinancePlatformUseCases {
       payloadHash(this.refundApprovalPayload(refund)),
       refund.amount,
     );
+    // Configuration failure is known before execution and must not consume approval.
+    const gateway = this.requirePaymentGateway(payment.gatewayProvider);
     const processing = await this.repository.beginRefundProcessing(
       refund.id,
       approval,
       context(identity),
     );
-    const gateway = this.requirePaymentGateway(payment.gatewayProvider);
     // The approval is already atomically consumed and the refund reserved as PROCESSING.
     // Ambiguous provider/network outcomes therefore fail closed for reconciliation instead of re-opening execution.
     let evidence;

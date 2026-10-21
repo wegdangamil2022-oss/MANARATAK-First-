@@ -13,14 +13,21 @@ const program = (change: Record<string, unknown> = {}) => ({
   normalizedName: 'owner program',
   status: 'ACTIVE',
   majorMappingState: 'CANONICALLY_MAPPED',
-  university: { status: 'PUBLISHED' },
+  university: {
+    status: 'PUBLISHED',
+    countryReference: { isActive: true, lifecycleState: 'ACTIVE' },
+    regionReferenceId: null,
+    cityReferenceId: null,
+  },
   major: {
     status: 'PUBLISHED',
     levelProfiles: [
       {
         degreeLevelId: 'degree',
         status: 'PUBLISHED',
+        id: 'profile',
         currentPublishedVersionId: 'published-version',
+        currentPublishedVersion: { id: 'published-version', majorId: 'major', profileId: 'profile', status: 'PUBLISHED' },
       },
     ],
   },
@@ -59,6 +66,9 @@ describe('B05 versioned owner program read contract', () => {
         majorId: 'major',
         canonicalName: 'owner program',
         displayName: 'Owner program',
+        degreeLabel: undefined,
+        majorLabel: undefined,
+        studyLanguages: [],
         status: 'ACTIVE',
         publiclyEligible: true,
       },
@@ -75,6 +85,9 @@ describe('B05 versioned owner program read contract', () => {
     { status: 'ARCHIVED' },
     { majorMappingState: 'UNRESOLVED' },
     { university: { status: 'DRAFT' } },
+    { university: { status: 'PUBLISHED', countryReference: null } },
+    { university: { status: 'PUBLISHED', countryReference: { isActive: false, lifecycleState: 'ACTIVE' } } },
+    { university: { status: 'PUBLISHED', countryReference: { isActive: true, lifecycleState: 'ARCHIVED' } } },
     { major: { status: 'DRAFT', levelProfiles: [] } },
     {
       major: {

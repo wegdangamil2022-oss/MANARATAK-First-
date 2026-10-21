@@ -1,0 +1,52 @@
+TAP version 13
+# Subtest: derives a non-secret target identity from PostgreSQL URLs
+ok 1 - derives a non-secret target identity from PostgreSQL URLs
+  ---
+  duration_ms: 0.681739
+  type: 'test'
+  ...
+# Subtest: fails closed without provisioning approval
+ok 2 - fails closed without provisioning approval
+  ---
+  duration_ms: 0.381266
+  type: 'test'
+  ...
+# Subtest: fails closed when the declared target does not match DATABASE_URL
+ok 3 - fails closed when the declared target does not match DATABASE_URL
+  ---
+  duration_ms: 0.27095
+  type: 'test'
+  ...
+# Subtest: separates provisioning/migration from seed operations
+ok 4 - separates provisioning/migration from seed operations
+  ---
+  duration_ms: 0.134343
+  type: 'test'
+  ...
+# Subtest: permits an explicitly confirmed development mutation
+ok 5 - permits an explicitly confirmed development mutation
+  ---
+  duration_ms: 0.200463
+  type: 'test'
+  ...
+# Subtest: production mutations require a separate production authorization and change id
+ok 6 - production mutations require a separate production authorization and change id
+  ---
+  duration_ms: 0.260022
+  type: 'test'
+  ...
+# Subtest: production/staging cannot point mutation approval at loopback
+ok 7 - production/staging cannot point mutation approval at loopback
+  ---
+  duration_ms: 0.172861
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 59.013284

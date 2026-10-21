@@ -1,0 +1,13 @@
+{
+  "name": "tooling-eslint",
+  "command": "node node_modules/eslint/bin/eslint.js scripts/release/lib/StaticScriptPolicy.mjs scripts/release/lib/StaticBuildPolicy.mjs scripts/release/lib/SmokeContracts.mjs scripts/release/lib/ArtifactInputPolicy.mjs scripts/release/build-immutable-artifacts.mjs scripts/release/post28-diagnostic-build.mjs scripts/database/prepare-post28-r06-r09.mjs tests/release/post28-r07-static-runtime.test.mjs",
+  "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T03:18:41.569931+00:00",
+  "endedAt": "2026-10-16T03:18:43.049278+00:00",
+  "exitCode": 0,
+  "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "nodeVersion": "22.16.0",
+  "databaseConnected": false
+}

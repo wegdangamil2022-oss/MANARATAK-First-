@@ -1,0 +1,79 @@
+{
+  "runtimeSourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+  "sourceTests": {
+    "executedBeforeSourceFreeze": true,
+    "representedSourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+    "files": 7,
+    "discovered": 62,
+    "executed": 62,
+    "passed": 62,
+    "failed": 0,
+    "skipped": 0,
+    "note": "Only latest affected source round counted; earlier 56-case round is not added."
+  },
+  "provisioningSourceTests": {
+    "sourceSha": "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3",
+    "executed": 31,
+    "passed": 31,
+    "failed": 0,
+    "skipped": 0
+  },
+  "apiTypeScriptBuildExitCode": 0,
+  "privateLogHashes": [
+    {
+      "name": "closure-reference-unit-final.log",
+      "bytes": 207,
+      "sha256": "1e54d51dfa86418d6bf226515cd3a61743f4b70a6f8de76e306c3fece6f2278b"
+    },
+    {
+      "name": "closure-build-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "closure-final-fix-lint.log",
+      "bytes": 3390,
+      "sha256": "6d190573deeb43120984ee80bc6d60cc1158e5fab2e8c379e426cb12f861747a"
+    },
+    {
+      "name": "closure-audit.log",
+      "bytes": 131,
+      "sha256": "f8e8ae0e832cf9249bb6835079bc4369a6411e7b514f7d621b16f68bc6e411ae"
+    },
+    {
+      "name": "closure-replay-source.log",
+      "bytes": 357,
+      "sha256": "ba08d42d9e8226e5c35ab93a731d48505067aed5830b2dddaa5314c7736a36b4"
+    },
+    {
+      "name": "finance-local-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "closure-final-provisioning.log",
+      "bytes": 6689,
+      "sha256": "e3019ca1b4a78b0e6530603bebda8040d7ab36c53796d77c83f9e62bf6676d2c"
+    },
+    {
+      "name": "closure-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "closure-fix-lint.log",
+      "bytes": 7232,
+      "sha256": "573b3c29f95c23230415e27dea3de1c20812685e39b4f044992bcbf3607017d4"
+    },
+    {
+      "name": "closure-final-fix-architecture.log",
+      "bytes": 245,
+      "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659"
+    },
+    {
+      "name": "closure-final-fix-quality.log",
+      "bytes": 185,
+      "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073"
+    }
+  ]
+}

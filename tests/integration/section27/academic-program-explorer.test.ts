@@ -259,7 +259,7 @@ test('scholarship owner batch: count and continuation stay independent per canon
 
 import {isPublicAdmissionRequirement} from '../../../packages/domain/src/public-boundaries/PublicOwnerPolicy';
 test('academic explorer: a hidden test is excluded even when its published version and score are valid',()=>{
- const requirement={status:'ACTIVE',internationalTestId:'test',minimumScore:5,internationalTest:{status:'PUBLISHED',isPubliclyVisible:false,currentPublishedVersion:{status:'PUBLISHED',scoreScales:[{overallMinimum:0,overallMaximum:9}]}}};
+ const requirement={status:'ACTIVE',internationalTestId:'test',minimumScore:5,internationalTest:{status:'PUBLISHED',isPubliclyVisible:false,currentPublishedVersion:{testId:'test',status:'PUBLISHED',scoreScales:[{overallMinimum:0,overallMaximum:9}]}}};
  assert.equal(isPublicAdmissionRequirement(requirement),false);
  assert.equal(isPublicAdmissionRequirement({...requirement,internationalTest:{...requirement.internationalTest,isPubliclyVisible:true}}),true);
 });

@@ -1,0 +1,994 @@
+{
+  "kind": "POST28_UNIFIED_WORK_INDEX",
+  "version": 1,
+  "date": "2026-10-19",
+  "timezone": "Asia/Aden",
+  "branch": "feat/post28-r07-artifact-preparation",
+  "sourceValidationSha": "2940c2ac20cebb4c45941ed0d48093976b059198",
+  "preConsolidationSha": "c7f6585dddc6d350291d81726b936eb2daa0e2c9",
+  "scope": "SOURCE_BRANCH_CONSOLIDATION_AND_TARGETED_SOURCE_VALIDATION",
+  "historicalEvidenceRebound": false,
+  "productionAcceptance": false,
+  "deploymentAuthorized": false,
+  "mainMergeAuthorized": false,
+  "sources": [
+    {
+      "branch": "main",
+      "sha": "b1702289f43d0363d7bbf91f8eba465e4355c53c",
+      "disposition": "ALREADY_ANCESTOR"
+    },
+    {
+      "branch": "fix/post28-ci-environment-inventory-20261016",
+      "sha": "55d423959f622cee8cbfe644695d7ba46f56b8a2",
+      "disposition": "ALREADY_ANCESTOR"
+    },
+    {
+      "branch": "fix/post28-r05-known-source-runtime-20261017",
+      "sha": "61878b5b37b2109e37f55e554e163b38cc0f8311",
+      "disposition": "MERGED_WITH_REVIEWED_CONFLICT_RESOLUTIONS"
+    },
+    {
+      "branch": "review/r05-independent-source-audit-20261017",
+      "sha": "0970edd3181ac5b1184ae0165f2eb240fb8bac09",
+      "disposition": "ORIGINAL_REVIEW_IMPORTED"
+    },
+    {
+      "branch": "review/r05-independent-technical-audit-20261017",
+      "sha": "e81f9d797e7222d86b40309b6be4aa2c98208c64",
+      "disposition": "ALREADY_ANCESTOR"
+    }
+  ],
+  "stages": [
+    {
+      "id": "R00",
+      "state": "PRACTICAL_SCOPE_CLOSED_WITH_DOCUMENTED_EXCEPTIONS",
+      "practicalClosure": "docs/remediation/POST28_R00_R03_PRACTICAL_CLOSEOUT_2026-10-21.md",
+      "evidenceSourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+      "formalComprehensiveAcceptance": false,
+      "reference": "docs/remediation/POST28_R00_BASELINE_2026-10-16.md",
+      "laterDecisions": "docs/remediation/POST28_R06_DEC_POLICY_CONTINUATION_2026-10-16.md"
+    },
+    {
+      "id": "R01",
+      "state": "PRACTICAL_SCOPE_CLOSED_WITH_DOCUMENTED_EXCEPTIONS",
+      "practicalClosure": "docs/remediation/POST28_R00_R03_PRACTICAL_CLOSEOUT_2026-10-21.md",
+      "evidenceSourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+      "targetedB13Passed": 63,
+      "verifiedCurrentToolingCi": {
+        "sourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+        "runId": 39501061767,
+        "result": "success",
+        "passedJobs": 6
+      },
+      "verifiedPreviousDeliveryCi": {
+        "sourceSha": "d1c379df7b3013aff17c60109ebf15f56e6aa8b7",
+        "runId": 39496759696,
+        "result": "success",
+        "passedJobs": 6
+      },
+      "formalComprehensiveAcceptance": false,
+      "reference": "docs/remediation/POST28_R01_REVALIDATION_2026-10-16.md"
+    },
+    {
+      "id": "R02",
+      "state": "PRACTICAL_SCOPE_CLOSED_WITH_DOCUMENTED_EXCEPTIONS",
+      "practicalClosure": "docs/remediation/POST28_R00_R03_PRACTICAL_CLOSEOUT_2026-10-21.md",
+      "evidenceSourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+      "historicalCatalogChangedToPass": false,
+      "formalComprehensiveAcceptance": false,
+      "reference": "docs/remediation/POST28_R02_REVALIDATION_2026-10-16.md",
+      "laterDecisions": "docs/remediation/POST28_R06_DEC_POLICY_CONTINUATION_2026-10-16.md"
+    },
+    {
+      "id": "R03",
+      "state": "PRACTICAL_FRESH_EMPTY_GREENFIELD_SCOPE_CLOSED_WITH_EXCEPTIONS",
+      "practicalClosure": "docs/remediation/POST28_R00_R03_PRACTICAL_CLOSEOUT_2026-10-21.md",
+      "evidenceSourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+      "latestEvidence": "docs/reviews/evidence/post28/46c9416c340fbe21d92fd1581b75e3ce84a09520/r00-r03-practical-review/fresh-greenfield-lab.json",
+      "nativeGreenfieldSupported": true,
+      "formalComprehensiveAcceptance": false,
+      "reference": "docs/remediation/POST28_LOCAL_R03_R04_EXECUTION_2026-10-16.md",
+      "laterEvidence": "docs/reviews/evidence/post28/467d1369e8da0a93ea3444bc1ef6a56c5e53d57d/r04-closure/R03-app.json"
+    },
+    {
+      "id": "R04",
+      "state": "CURRENT_111_REPLAY_AND_HISTORICAL_REQUIRED_SEED_SCOPE_CLOSED_LOCAL",
+      "latestPracticalReview": "docs/remediation/POST28_R04_R05_PRACTICAL_REVIEW_2026-10-21.md",
+      "latestReplaySourceSha": "433e420ec230c4dee9bd6e974329f0f48119e613",
+      "latestReplayEvidence": "docs/reviews/evidence/post28/433e420ec230c4dee9bd6e974329f0f48119e613/r04-r05-practical-review/current-111-replay.json",
+      "formalComprehensiveAcceptance": false,
+      "reference": "docs/remediation/POST28_R04_LOCAL_CLOSURE_2026-10-16.md",
+      "evidenceSourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d"
+    },
+    {
+      "id": "R05",
+      "state": "CLOSED_LOCAL_SYNTHETIC_SCOPE",
+      "latestPracticalReview": "docs/remediation/POST28_R04_R05_PRACTICAL_REVIEW_2026-10-21.md",
+      "latestEvidenceReviewSourceSha": "433e420ec230c4dee9bd6e974329f0f48119e613",
+      "latestEvidenceReview": "docs/reviews/evidence/post28/433e420ec230c4dee9bd6e974329f0f48119e613/r04-r05-practical-review/retained-proof-review.json",
+      "reference": "docs/remediation/POST28_R05_LOCAL_CLOSURE_2026-10-19.md",
+      "technicalDecision": "RESOLVED_UNDER_EXPLICIT_USER_DELEGATION",
+      "independentReview": "docs/reviews/POST28_R05_INDEPENDENT_IMPLEMENTATION_REVIEW_2026-10-19.md",
+      "trustGuardIntegratedIntoHistoricalExecutor": true,
+      "runtimeEvidenceSourceSha": "dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c",
+      "upgradeAuthorized": "ISOLATED_SYNTHETIC_LOCAL_ONLY_EXECUTED",
+      "formalAcceptance": "PASS_LOCAL_ONLY",
+      "latestEvidence": "docs/reviews/evidence/post28/dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c/r05-local-closure/closure.json",
+      "productionAcceptance": false
+    },
+    {
+      "id": "R06",
+      "state": "CORE_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+      "latestPracticalReview": "docs/remediation/POST28_R06_CURRENT_REVIEW_2026-10-21.md",
+      "latestCurrentSchemaSuite": "admission-null-identity",
+      "latestDatabaseEvidenceSourceSha": "1cade7f70033430a1fd79655007026b4c69fa75f",
+      "latestDatabaseCasesPassed": 5,
+      "finalDeliveryCi": {
+        "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+        "runId": 39506916987,
+        "result": "success",
+        "passedJobs": 6
+      },
+      "formalAcceptance": "OPEN_COMPREHENSIVE_SCOPE",
+      "reference": "docs/remediation/POST28_R06_CORE_CLOSURE_2026-10-19.md",
+      "nullRepair": "docs/remediation/POST28_R06_NULL_IDENTITY_REPAIR_2026-10-19.md",
+      "coreScopeDeclaredComplete": true,
+      "runtimeEvidenceSourceSha": "d1770592c2ec171b14b6e755b3e138dfa2beed4a",
+      "latestEvidence": "docs/reviews/evidence/post28/d1770592c2ec171b14b6e755b3e138dfa2beed4a/r06-core-closure/closure.json",
+      "migration111": "APPLIED_ONLY_IN_FRESH_SYNTHETIC_LOCAL_LAB"
+    },
+    {
+      "id": "R07",
+      "state": "PRACTICAL_DIAGNOSTIC_SCOPE_CLOSED_WITH_RELEASE_EXCEPTIONS",
+      "latestPracticalClosure": "docs/remediation/POST28_R07_CURRENT_CLOSURE_2026-10-21.md",
+      "formalAcceptance": "OPEN_RELEASE_GATES",
+      "releaseGateProgressReport": "docs/remediation/POST28_R07_CURRENT_CLOSURE_2026-10-21.md",
+      "releaseGateEvidenceSourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+      "releaseGateRunId": "39506916987",
+      "releaseGateRunObservedState": "PASS_ALL_SIX_JOBS_ACTUAL_LINUX_PG16_HTTPS_BROWSER_VERIFIED",
+      "latestCandidateCiSourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+      "latestCandidateCiRun": "39506916987",
+      "latestCandidateCiObservedState": "PASS_SIX_PUSH_JOBS_LINUX_RUNTIME_AND_FRESH_LOCAL_ARTIFACT_VERIFICATION",
+      "historicalPrCiScopeNote": "PR workflows and CodeQL values below retain their original source; not new checks on0ee961a",
+      "previousCorrectedCandidateSha": "5879c610bc0527db89a4d29ccb46934aa251864d",
+      "previousCorrectedCandidateState": "PASS_SIX_PUSH_JOBS_AND_EIGHT_PR_WORKFLOWS",
+      "prCiRun": "39315381906",
+      "importedCourseCiRun": "39315381892",
+      "externalVercelStatus": "NO_FAILURE_STATUS_AFTER_OWNER_CONFIRMED_RETIRED_PREVIEW_BRANCH_DEPLOYMENT_DISABLED",
+      "retiredVercelProject": "manaratak-2-preview-2026",
+      "codeQlReview": "docs/remediation/POST28_R07_CODEQL_REVIEW_2026-10-19.md",
+      "codeQlOriginalNewAlerts": 8,
+      "codeQlSpecificDispositions": "157_158_159_FALSE_POSITIVE_155_156_USED_IN_TESTS_CONFIRMED_BY_API",
+      "codeQlCodeRepair": "135_136_80_REDOS_REPAIRED_ACTUAL_RESULT_118281934697_PASS_NO_NEW_ALERTS",
+      "codeQlPriorRepositoryFindings": "NOT_COLLECTIVELY_REVIEWED_OR_DISMISSED",
+      "googleAiStudioRuntime": "CANCELLED_BY_OWNER_2026_10_19",
+      "linuxReviewTarget": "linux-x64/node22/postgresql16",
+      "fourSymlinkCases": "PASS_ON_LINUX_AT_5b9c4e4502d2ea9168e223a4f2a465ef799b6662",
+      "reference": "docs/remediation/POST28_R07_POST111_DIAGNOSTIC_2026-10-19.md",
+      "evidenceSourceSha": "4c7b01cbac1d49688a0f32273316fc370109bcb0",
+      "newArtifactOrRuntimeProofAtConsolidationSha": false,
+      "newArtifactOrRuntimeProofOnLatestUnifiedSource": true,
+      "latestRuntimeProofScope": "EXACT_VERIFIED_CANDIDATE_SHA_NOT_LATER_DOCUMENTATION_COMMITS",
+      "lastVerifiedRuntimeSourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+      "latestCandidateArtifactRuntimeProof": true,
+      "latestEvidence": "docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r07-current-closure/linux-runtime-result.json",
+      "productionAcceptance": false
+    },
+    {
+      "id": "R08",
+      "state": "PRACTICAL_SCOPE_CLOSED_FOR_R09_LOCAL_ONLY",
+      "formalAcceptance": "OPEN_FULL_PROVIDER_MATRIX_HOSTING_AND_FORMAL_RELEASE",
+      "outboxChainReport": "docs/remediation/POST28_R08_OUTBOX_PROCESS_CHAIN_2026-10-19.md",
+      "shutdownReport": "docs/remediation/POST28_R08_SHUTDOWN_2026-10-19.md",
+      "linuxRedisReport": "docs/remediation/POST28_R08_LINUX_REDIS_2026-10-19.md",
+      "latestPracticalReview": "docs/remediation/POST28_R08_CURRENT_REVIEW_2026-10-21.md",
+      "latestReviewSourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+      "latestReviewEvidence": "docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r08-current-review/evidence-index.json",
+      "latestReviewCi": {
+        "runId": 39506916987,
+        "result": "success",
+        "passedJobs": 6,
+        "currentSelectedFinancialCasesPassed": 2,
+        "fullProviderProfileAccepted": false
+      },
+      "latestRuntimeReport": "docs/remediation/POST28_R08_PRACTICAL_CLOSE_2026-10-20.md",
+      "latestEvidenceSourceSha": "cbb99ac63bb4497df9c07cf3e16611d27bcd3396",
+      "latestEvidence": "docs/reviews/evidence/post28/cbb99ac63bb4497df9c07cf3e16611d27bcd3396/r08-practical-handoff/evidence-index.json",
+      "standardRuntimeSourceSha": "be5407e6c9a63f9633019c22a79b6990ca0d3a1d",
+      "latestCandidateCiRun": "39334529021",
+      "latestScopedRedisAndLinuxDrainState": "PASS_ON_cbb99ac_NOT_FORMAL_ACCEPTANCE",
+      "reference": "docs/remediation/POST28_R08_R09_PREPARATION_2026-10-16.md",
+      "laterEvidence": "docs/remediation/POST28_R06_WORKER_CRASH_2026-10-18.md",
+      "canonicalAutomaticWorkerEnabledByThisBatch": false,
+      "sessionConflictFixSourceSha": "5c5152ff2c575414b0e04f7b450330b61cef2070",
+      "canonicalOwnerRecoverySourceSha": "672c631c49e8fe337a1c8c02a8c9db80d9d06896",
+      "signedWebhookRedisSourceSha": "a3c0dde6d9f323ccc703bbae9610b828d0ed1f41",
+      "latestCandidateSourceSha": "cbb99ac63bb4497df9c07cf3e16611d27bcd3396",
+      "latestCandidateCiState": "PASS_ALL_23_CHECKS_COMBINED_RUNTIME_PRACTICAL_SCOPE_CLOSED",
+      "pendingConcurrentFixtureChangesCommitted": true,
+      "combinedBuiltApiTlsRedisSessionsVerified": true,
+      "financialRecoverySourceSha": "9c4d4b16b8efa5c4d38c18db4b36f56c04f252a7",
+      "refundAndAuthorizationTimeoutVerified": true,
+      "workerFailureAndStoppedHealthVerified": true
+    },
+    {
+      "id": "R09",
+      "state": "PRACTICAL_SCOPE_CLOSED_OWNER_ACCEPTED_DOCUMENTED_EXCEPTIONS",
+      "reference": "docs/remediation/POST28_R08_R09_PREPARATION_2026-10-16.md",
+      "laterEvidence": "docs/remediation/POST28_R06_R07_PRACTICAL_HANDOFF_2026-10-19.md",
+      "latestReport": "docs/remediation/POST28_R09_CURRENT_REVIEW_2026-10-21.md",
+      "latestEvidence": "docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r09-current-review/evidence-index.json",
+      "latestEvidenceSourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+      "formalAcceptance": "OPEN_COMPREHENSIVE_SCOPE_PRODUCTION_NOT_AUTHORIZED",
+      "latestCandidateCiSourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+      "latestCandidateCiState": "PASS_SIX_PUSH_JOBS_AND_FIVE_SHARED_WORKFLOW_CASES",
+      "latestCandidateCiRun": 39506916987,
+      "fullBuiltAdminCmsMfaJourneyAccepted": false,
+      "certificateProviderDeliveryGrantAccepted": false,
+      "ownerPriorityDecision": "OWNER_ACCEPTS_PRACTICAL_CLOSURE_WITHOUT_FULL_MATRIX_ACCEPTANCE",
+      "latestAdminCmsLocalDiagnostic": {
+        "completed": true,
+        "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+        "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+        "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+        "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+        "formalAcceptance": false,
+        "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
+      },
+      "latestPrivateAssetDeliveryDiagnostic": {
+        "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+        "scope": "STUDENT_OWNED_PRIVATE_PDF_GRANT_DIAGNOSTIC_WINDOWS_ONLY",
+        "passed": true,
+        "report": "docs/remediation/POST28_PRIVATE_ASSET_RETENTION_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/evidence-index.json",
+        "certificateDeliveryExercised": false,
+        "reviewerConsentDeliveryExercised": false,
+        "instantPreIssuedUrlRevocationProved": false,
+        "formalAcceptance": false,
+        "ci": {
+          "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+          "runId": 39522846173,
+          "lastObservedStatus": "in_progress",
+          "result": null,
+          "observedAt": "2026-10-21T00:44:31.964Z",
+          "jobs": [
+            {
+              "name": "Translation quality gates",
+              "status": "completed",
+              "result": "success"
+            },
+            {
+              "name": "Full source closure gates",
+              "status": "in_progress",
+              "result": null
+            },
+            {
+              "name": "Deployment configuration",
+              "status": "completed",
+              "result": "success"
+            },
+            {
+              "name": "R08 isolated Redis and Linux worker shutdown",
+              "status": "completed",
+              "result": "success"
+            }
+          ],
+          "passedJobs": 3
+        }
+      },
+      "latestReviewerDeliveryDiagnostic": {
+        "passed": true,
+        "scope": "BUILT_API_WINDOWS_SYNTHETIC_CONSENT_GATED_STREAM_WITH_MFA",
+        "report": "docs/remediation/POST28_REVIEWER_DELIVERY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/evidence-index.json",
+        "formalAcceptance": false
+      },
+      "latestCertificateDeliveryDiagnostic": {
+        "scope": "WINDOWS_BUILT_API_SIGNED_CERTIFICATE_PDF_PREVIEW_TRANSPORT_DIAGNOSTIC",
+        "scopedDeliveryPassed": true,
+        "report": "docs/remediation/POST28_CERTIFICATE_DELIVERY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/682a7ff9bcab350bf32f025b232f438874d67b97/r14-certificate-delivery/evidence-index.json",
+        "instantRevocationOfPreviouslyIssuedGrant": false,
+        "openFinding": {
+          "id": "R14-DELIVERY-01",
+          "state": "OPEN_RELEASE_REVIEW",
+          "observed": "Provider bearer URL issued before revocation returned200 afterward, within its original max300s TTL",
+          "impact": "Revocation does not invalidate capabilities already disclosed to a caller",
+          "requiredBeforeClaimingInstantRevocation": "Authenticated server content delivery with current certificate checks before and after IO, or proven provider capability fencing tied to certificate revocation",
+          "currentContract": "Temporary provider-signed URLs with bounded TTL; no existing instant invalidation protocol proved",
+          "productionScopeAccepted": false
+        },
+        "formalAcceptance": false
+      }
+    },
+    {
+      "id": "R10",
+      "state": "LOCAL_INTEGRATED_DIAGNOSTIC_RECOVERY_COMPLETE_PROVIDER_CONTROLS_NOT_PROVISIONED",
+      "latestPracticalReview": "docs/remediation/POST28_R10_CURRENT_REVIEW_2026-10-21.md",
+      "latestReviewSourceSha": "d83ee3e9513af2fd61dc2e7681cb99e3c6dff466",
+      "latestReviewEvidence": "docs/reviews/evidence/post28/d83ee3e9513af2fd61dc2e7681cb99e3c6dff466/r10-current-offline-review/evidence-index.json",
+      "numericRecoveryObjectiveGateHardened": true,
+      "latestFixCi": {
+        "runId": 39513312392,
+        "lastObservedStatus": "completed",
+        "result": "success",
+        "passedJobs": 6
+      },
+      "latestReport": "docs/remediation/POST28_R10_OPERATIONAL_RECOVERY_2026-10-20.md",
+      "latestEvidence": "docs/reviews/evidence/post28/978a0db95d89c5e65aceb012dd082b9111fa3327/r10-operational/evidence-index.json",
+      "latestEvidenceSourceSha": "978a0db95d89c5e65aceb012dd082b9111fa3327",
+      "formalAcceptance": "OPEN_PROVIDER_AND_PRODUCTION_SCOPE",
+      "productionAcceptance": false,
+      "restoreExecuted": true,
+      "independentReview": "docs/reviews/POST28_R10_OPERATIONAL_INDEPENDENT_REVIEW_2026-10-20.md",
+      "integratedServiceRtoSeconds": 17,
+      "observedProbeRpoSeconds": 3.443,
+      "eventMeasurementScope": "TWO_SYNTHETIC_COMMITTED_OUTBOX_PROBES",
+      "providerControlsVerified": false,
+      "latestCi": {
+        "sourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+        "passed": 23,
+        "failed": 0,
+        "pending": 0,
+        "pushRun": "39451932873",
+        "pullRequestRun": "39451943225"
+      },
+      "browserFollowupEvidence": "docs/reviews/evidence/post28/c8afe5f253d132f671ecd035a0330de7794b6ee8/r10-operational/evidence-index.json",
+      "majorsWarningResolved": true
+    },
+    {
+      "id": "R11",
+      "state": "PRACTICAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+      "latestPracticalReview": "docs/remediation/POST28_R11_CURRENT_REVIEW_2026-10-21.md",
+      "latestReviewSourceSha": "2934821ae7de16fd65531c5df41684eb104a8e5c",
+      "latestReviewEvidence": "docs/reviews/evidence/post28/2934821ae7de16fd65531c5df41684eb104a8e5c/r11-current-review/evidence-index.json",
+      "diagnosticDeadlineAndLatencyHardened": true,
+      "latestFixCi": {
+        "runId": 39514942840,
+        "lastObservedStatus": "completed",
+        "result": "success",
+        "passedJobs": 6
+      },
+      "latestReport": "docs/remediation/POST28_R11_PRACTICAL_CLOSEOUT_2026-10-20.md",
+      "configuration": "config/testing/r11-load-preparation.json",
+      "baselineSourceSha": "79055e7634ad33fe221872d58770d48c2ed09e58",
+      "acceptanceEvidenceValidationHardened": true,
+      "formalAcceptance": false,
+      "productionAcceptance": false,
+      "loadExecuted": true,
+      "latestEvidence": "docs/reviews/evidence/post28/4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b/r11-linux/evidence-index.json",
+      "loadScope": "TWO_READ_AND_FIVE_PARTIAL_SCENARIO_DIAGNOSTICS_SMALL_SYNTHETIC_DATASET",
+      "representativeLaunchDataset": false,
+      "scenarioSourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d",
+      "adminMfaBuiltLoginDiagnostic": true,
+      "adminLoginBootstrapRaceFixedAt": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+      "adminMfaEnrollmentUiTested": true,
+      "fullCmsBuiltLifecycleTested": true,
+      "linuxContention": {
+        "implementedAt": "4aed744292ce9bd1a1698f006aa18c894bcac160",
+        "sourceGuardFixedAt": "33b6daa41ed162e35461961aa39d92119c6d640c",
+        "execution": "COMPLETED_DIAGNOSTIC",
+        "wireContractFixedAt": "0402c97f6b5e93e7810a1053c6a43f0d410961f5",
+        "wireContractEvidence": "docs/reviews/evidence/post28/0402c97f6b5e93e7810a1053c6a43f0d410961f5/r11-wire-contract/evidence-index.json",
+        "verifiedSourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+        "evidence": "docs/reviews/evidence/post28/4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b/r11-linux/evidence-index.json",
+        "pairs": 10,
+        "expectedConflicts": 10,
+        "unexpectedErrors": 0,
+        "poolWaitMeasured": false
+      },
+      "mfaEnrollmentEvidence": "docs/reviews/evidence/post28/6d440363adb1477101402f00371e2319c3aae84f/r11-mfa-enrollment/evidence-index.json",
+      "ciPush": {
+        "sourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+        "runId": 39475394144,
+        "result": "success"
+      },
+      "practicalScopeComplete": true,
+      "practicalCloseout": "docs/remediation/POST28_R11_PRACTICAL_CLOSEOUT_2026-10-20.json",
+      "openFormalAcceptanceItems": [
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "E5"
+      ],
+      "latestAdminCmsLocalDiagnostic": {
+        "completed": true,
+        "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+        "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+        "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+        "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+        "formalAcceptance": false,
+        "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
+      },
+      "fullCmsBuiltLifecycleScope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART"
+    },
+    {
+      "id": "R12",
+      "state": "LOCAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_RELEASE_BLOCKERS",
+      "latestPracticalReview": "docs/remediation/POST28_R12_CURRENT_REVIEW_2026-10-21.md",
+      "latestReviewSourceSha": "0b13ba91ea8fc3d008d0ced45187d880cf88eb12",
+      "latestReviewEvidence": "docs/reviews/evidence/post28/0b13ba91ea8fc3d008d0ced45187d880cf88eb12/r12-current-review/evidence-index.json",
+      "latestReviewHistoricalFilesMatched": 48,
+      "latestReviewHistoricalArtifactUnitsVerified": 6,
+      "latestReport": "docs/remediation/POST28_R12_PRACTICAL_CLOSEOUT_2026-10-20.md",
+      "configuration": "config/testing/r12-local-rollback-preparation.json",
+      "evidenceIndex": "docs/reviews/evidence/post28/70230e082e03f73761eee6437858c074839fb8d2/r12-worker-assets/evidence-index.json",
+      "rollbackEvidenceGateHardened": true,
+      "currentCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+      "previousCandidateSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+      "previousApiSourceCompatible": true,
+      "previousApiRuntimeCompatible": true,
+      "previousWorkerRuntimeCompatible": false,
+      "adminRollbackAllowed": false,
+      "rehearsalExecuted": true,
+      "formalAcceptance": false,
+      "productionAcceptance": false,
+      "rehearsalScope": "LOCAL_API_AND_SCOPED_BUILT_STUDENT_WORKER_PLUS_FROZEN_SOURCE_ASSET_CONTRACTS",
+      "reference": "docs/remediation/POST28_R12_PRACTICAL_CLOSEOUT_2026-10-20.md",
+      "practicalLocalScopeComplete": true,
+      "previousBuiltStudentWorkspaceWorkerScopedCompatible": true,
+      "formalR12Acceptance": false,
+      "releaseBlockers": [
+        "R12-E01",
+        "R12-E02",
+        "R12-E03",
+        "R12-E04"
+      ],
+      "evidence": "docs/reviews/evidence/post28/70230e082e03f73761eee6437858c074839fb8d2/r12-worker-assets/evidence-index.json",
+      "previousApiEvidenceIndex": "docs/reviews/evidence/post28/005595313b0ae1ff940fec44454f441f516c8d8e/r12-api-runtime/evidence-index.json",
+      "latestPrivateAssetDeliveryDiagnostic": {
+        "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+        "scope": "STUDENT_OWNED_PRIVATE_PDF_GRANT_DIAGNOSTIC_WINDOWS_ONLY",
+        "passed": true,
+        "report": "docs/remediation/POST28_PRIVATE_ASSET_RETENTION_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/evidence-index.json",
+        "certificateDeliveryExercised": false,
+        "reviewerConsentDeliveryExercised": false,
+        "instantPreIssuedUrlRevocationProved": false,
+        "formalAcceptance": false,
+        "ci": {
+          "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+          "runId": 39522846173,
+          "lastObservedStatus": "in_progress",
+          "result": null,
+          "observedAt": "2026-10-21T00:44:31.964Z",
+          "jobs": [
+            {
+              "name": "Translation quality gates",
+              "status": "completed",
+              "result": "success"
+            },
+            {
+              "name": "Full source closure gates",
+              "status": "in_progress",
+              "result": null
+            },
+            {
+              "name": "Deployment configuration",
+              "status": "completed",
+              "result": "success"
+            },
+            {
+              "name": "R08 isolated Redis and Linux worker shutdown",
+              "status": "completed",
+              "result": "success"
+            }
+          ],
+          "passedJobs": 3
+        }
+      },
+      "latestReviewerDeliveryDiagnostic": {
+        "passed": true,
+        "scope": "BUILT_API_WINDOWS_SYNTHETIC_CONSENT_GATED_STREAM_WITH_MFA",
+        "report": "docs/remediation/POST28_REVIEWER_DELIVERY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/evidence-index.json",
+        "formalAcceptance": false
+      },
+      "latestCertificateDeliveryDiagnostic": {
+        "scope": "WINDOWS_BUILT_API_SIGNED_CERTIFICATE_PDF_PREVIEW_TRANSPORT_DIAGNOSTIC",
+        "scopedDeliveryPassed": true,
+        "report": "docs/remediation/POST28_CERTIFICATE_DELIVERY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/682a7ff9bcab350bf32f025b232f438874d67b97/r14-certificate-delivery/evidence-index.json",
+        "instantRevocationOfPreviouslyIssuedGrant": false,
+        "openFinding": {
+          "id": "R14-DELIVERY-01",
+          "state": "OPEN_RELEASE_REVIEW",
+          "observed": "Provider bearer URL issued before revocation returned200 afterward, within its original max300s TTL",
+          "impact": "Revocation does not invalidate capabilities already disclosed to a caller",
+          "requiredBeforeClaimingInstantRevocation": "Authenticated server content delivery with current certificate checks before and after IO, or proven provider capability fencing tied to certificate revocation",
+          "currentContract": "Temporary provider-signed URLs with bounded TTL; no existing instant invalidation protocol proved",
+          "productionScopeAccepted": false
+        },
+        "formalAcceptance": false
+      }
+    },
+    {
+      "id": "R13",
+      "state": "PRACTICAL_ISOLATED_REVIEW_SCOPE_COMPLETE_WITH_RELEASE_BLOCKERS",
+      "sourceReviewSha": "56e14b1ef0aad35d48a67299feb3481233ae230f",
+      "latestReport": "docs/remediation/POST28_R13_PRACTICAL_CLOSEOUT_2026-10-20.md",
+      "evidenceIndex": "docs/reviews/evidence/post28/92eb66e5ab572ab51f19c5db14ed3fa2329a3072/r13-practical-closeout/evidence-index.json",
+      "verifierWindowsEntryFixed": true,
+      "linkedHistoricalEvidenceFiles": 60,
+      "sectionCount": 27,
+      "relationships": 77,
+      "cases": 42,
+      "historicalContinuationRowsLinked": 26,
+      "fsaRequirements": 24,
+      "findings": 54,
+      "formalAcceptance": false,
+      "validationExecuted": false,
+      "stagingExecuted": false,
+      "productionAcceptance": false,
+      "blockers": [
+        "R13-B01",
+        "R13-B02",
+        "R13-B03",
+        "R13-B04",
+        "R13-B05",
+        "R13-B06"
+      ],
+      "section27SourceCuration": {
+        "sourceSha": "68bb1809698435416656cb7b51ed0c1f5f1a545a",
+        "taskReferences": 38,
+        "implementationFiles": 60,
+        "focusedManualReviewTasks": 3,
+        "otherTasksReferenceOnly": 35,
+        "sectionClosed": false,
+        "evidenceIndex": "docs/reviews/evidence/post28/68bb1809698435416656cb7b51ed0c1f5f1a545a/r13-section27-source/evidence-index.json"
+      },
+      "latestObservedCi": {
+        "runId": 39493746596,
+        "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39493746596",
+        "status": "completed",
+        "result": "success",
+        "passedJobs": 6,
+        "failedJobs": 0,
+        "skippedJobs": 0,
+        "observedAt": "2026-10-20T20:53:07.277Z",
+        "finalDocumentationCommitCiNotAssumed": true
+      },
+      "pendingWindowsPromotionEntryFix": false,
+      "windowsPromotionEntryFix": {
+        "sourceSha": "7877604b509c61f89ad7853d45b2beda30e2c2a6",
+        "newEntryAndImportTestsPassed": 2,
+        "existingSyntheticReconcileTestsPassed": 2,
+        "commandInvoked": false,
+        "authorizationAndEvidenceGuardsUnchanged": true
+      },
+      "reviewedCandidateSha": "92eb66e5ab572ab51f19c5db14ed3fa2329a3072",
+      "practicalScopeComplete": true,
+      "sourceTaskRiskReviewComplete": true,
+      "sourceTaskReviewCount": 38,
+      "referenceOnlyTasksRemaining": 0,
+      "eligibleForProductionReview": false,
+      "releaseDecision": "BLOCKED",
+      "releaseBlockers": [
+        "R13-E01",
+        "R13-E02",
+        "R13-E03",
+        "R13-E04",
+        "R13-E05"
+      ],
+      "latestPracticalReview": "docs/remediation/POST28_R13_CURRENT_REVIEW_2026-10-21.md",
+      "latestReviewSourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
+      "latestReviewEvidence": "docs/reviews/evidence/post28/cbe2ff2d0e3ba881361fcbe42133af500cd4c331/r13-current-review/evidence-index.json",
+      "runtimeRecoveryNumericGuardHardened": true,
+      "latestFixCi": {
+        "sourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
+        "runId": 39516645007,
+        "lastObservedStatus": "completed",
+        "result": "success",
+        "passedJobs": 6,
+        "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/r13-ci-completed.json"
+      },
+      "latestAdminCmsLocalDiagnostic": {
+        "completed": true,
+        "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+        "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+        "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+        "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+        "formalAcceptance": false,
+        "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
+      },
+      "latestPrivateAssetDeliveryDiagnostic": {
+        "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+        "scope": "STUDENT_OWNED_PRIVATE_PDF_GRANT_DIAGNOSTIC_WINDOWS_ONLY",
+        "passed": true,
+        "report": "docs/remediation/POST28_PRIVATE_ASSET_RETENTION_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/evidence-index.json",
+        "certificateDeliveryExercised": false,
+        "reviewerConsentDeliveryExercised": false,
+        "instantPreIssuedUrlRevocationProved": false,
+        "formalAcceptance": false,
+        "ci": {
+          "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+          "runId": 39522846173,
+          "lastObservedStatus": "in_progress",
+          "result": null,
+          "observedAt": "2026-10-21T00:44:31.964Z",
+          "jobs": [
+            {
+              "name": "Translation quality gates",
+              "status": "completed",
+              "result": "success"
+            },
+            {
+              "name": "Full source closure gates",
+              "status": "in_progress",
+              "result": null
+            },
+            {
+              "name": "Deployment configuration",
+              "status": "completed",
+              "result": "success"
+            },
+            {
+              "name": "R08 isolated Redis and Linux worker shutdown",
+              "status": "completed",
+              "result": "success"
+            }
+          ],
+          "passedJobs": 3
+        }
+      },
+      "latestReviewerDeliveryDiagnostic": {
+        "passed": true,
+        "scope": "BUILT_API_WINDOWS_SYNTHETIC_CONSENT_GATED_STREAM_WITH_MFA",
+        "report": "docs/remediation/POST28_REVIEWER_DELIVERY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/evidence-index.json",
+        "formalAcceptance": false
+      },
+      "latestCertificateDeliveryDiagnostic": {
+        "scope": "WINDOWS_BUILT_API_SIGNED_CERTIFICATE_PDF_PREVIEW_TRANSPORT_DIAGNOSTIC",
+        "scopedDeliveryPassed": true,
+        "report": "docs/remediation/POST28_CERTIFICATE_DELIVERY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/682a7ff9bcab350bf32f025b232f438874d67b97/r14-certificate-delivery/evidence-index.json",
+        "instantRevocationOfPreviouslyIssuedGrant": false,
+        "openFinding": {
+          "id": "R14-DELIVERY-01",
+          "state": "OPEN_RELEASE_REVIEW",
+          "observed": "Provider bearer URL issued before revocation returned200 afterward, within its original max300s TTL",
+          "impact": "Revocation does not invalidate capabilities already disclosed to a caller",
+          "requiredBeforeClaimingInstantRevocation": "Authenticated server content delivery with current certificate checks before and after IO, or proven provider capability fencing tied to certificate revocation",
+          "currentContract": "Temporary provider-signed URLs with bounded TTL; no existing instant invalidation protocol proved",
+          "productionScopeAccepted": false
+        },
+        "formalAcceptance": false
+      }
+    },
+    {
+      "id": "R14",
+      "state": "NO_GO_PREPARATION_MEMO_ONLY",
+      "latestReport": "docs/remediation/POST28_R14_NO_GO_PREPARATION_2026-10-21.md",
+      "reviewSha": "83e210e0eb9505c875129948bd52171986f458b3",
+      "candidateSourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+      "formalR14Accepted": false,
+      "productionAuthorized": false,
+      "promotionInvoked": false,
+      "releaseDecision": "NO_GO",
+      "nextFunctionalStep": "BUILT_REVIEWER_AUTHENTICATED_CONTENT_WITH_CURRENT_CONSENT_THEN_SIGNED_CERTIFICATE_DELIVERY",
+      "latestAdminCmsLocalDiagnostic": {
+        "completed": true,
+        "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+        "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+        "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+        "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+        "formalAcceptance": false,
+        "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
+      },
+      "latestPrivateAssetDeliveryDiagnostic": {
+        "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+        "scope": "STUDENT_OWNED_PRIVATE_PDF_GRANT_DIAGNOSTIC_WINDOWS_ONLY",
+        "passed": true,
+        "report": "docs/remediation/POST28_PRIVATE_ASSET_RETENTION_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/evidence-index.json",
+        "certificateDeliveryExercised": false,
+        "reviewerConsentDeliveryExercised": false,
+        "instantPreIssuedUrlRevocationProved": false,
+        "formalAcceptance": false,
+        "ci": {
+          "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+          "runId": 39522846173,
+          "lastObservedStatus": "in_progress",
+          "result": null,
+          "observedAt": "2026-10-21T00:44:31.964Z",
+          "jobs": [
+            {
+              "name": "Translation quality gates",
+              "status": "completed",
+              "result": "success"
+            },
+            {
+              "name": "Full source closure gates",
+              "status": "in_progress",
+              "result": null
+            },
+            {
+              "name": "Deployment configuration",
+              "status": "completed",
+              "result": "success"
+            },
+            {
+              "name": "R08 isolated Redis and Linux worker shutdown",
+              "status": "completed",
+              "result": "success"
+            }
+          ],
+          "passedJobs": 3
+        }
+      },
+      "previousCandidateSourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
+      "candidateCi": {
+        "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+        "runId": 39522846173,
+        "lastObservedStatus": "in_progress",
+        "result": null,
+        "observedAt": "2026-10-21T00:44:31.964Z",
+        "jobs": [
+          {
+            "name": "Translation quality gates",
+            "status": "completed",
+            "result": "success"
+          },
+          {
+            "name": "Full source closure gates",
+            "status": "in_progress",
+            "result": null
+          },
+          {
+            "name": "Deployment configuration",
+            "status": "completed",
+            "result": "success"
+          },
+          {
+            "name": "R08 isolated Redis and Linux worker shutdown",
+            "status": "completed",
+            "result": "success"
+          }
+        ],
+        "passedJobs": 3
+      },
+      "latestReviewerDeliveryDiagnostic": {
+        "passed": true,
+        "scope": "BUILT_API_WINDOWS_SYNTHETIC_CONSENT_GATED_STREAM_WITH_MFA",
+        "report": "docs/remediation/POST28_REVIEWER_DELIVERY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/evidence-index.json",
+        "formalAcceptance": false
+      },
+      "latestCertificateDeliveryDiagnostic": {
+        "scope": "WINDOWS_BUILT_API_SIGNED_CERTIFICATE_PDF_PREVIEW_TRANSPORT_DIAGNOSTIC",
+        "scopedDeliveryPassed": true,
+        "report": "docs/remediation/POST28_CERTIFICATE_DELIVERY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/682a7ff9bcab350bf32f025b232f438874d67b97/r14-certificate-delivery/evidence-index.json",
+        "instantRevocationOfPreviouslyIssuedGrant": false,
+        "openFinding": {
+          "id": "R14-DELIVERY-01",
+          "state": "OPEN_RELEASE_REVIEW",
+          "observed": "Provider bearer URL issued before revocation returned200 afterward, within its original max300s TTL",
+          "impact": "Revocation does not invalidate capabilities already disclosed to a caller",
+          "requiredBeforeClaimingInstantRevocation": "Authenticated server content delivery with current certificate checks before and after IO, or proven provider capability fencing tied to certificate revocation",
+          "currentContract": "Temporary provider-signed URLs with bounded TTL; no existing instant invalidation protocol proved",
+          "productionScopeAccepted": false
+        },
+        "formalAcceptance": false
+      }
+    }
+  ],
+  "validation": {
+    "evidenceIndex": "docs/reviews/evidence/post28/2940c2ac20cebb4c45941ed0d48093976b059198/branch-consolidation/evidence-index.json",
+    "targetedNode": {
+      "files": 7,
+      "tests": 92,
+      "passed": 92,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "todo": 0
+    },
+    "sourceQuality": "PASS",
+    "environmentInventory": {
+      "status": "PASS",
+      "variableNames": 320,
+      "secretValuesRead": false
+    },
+    "secretScan": "PASS",
+    "targetedEslint": "PASS",
+    "databaseCreated": false,
+    "databaseConnected": false,
+    "activeMigrationsChanged": false,
+    "schemaChanged": false,
+    "fullBuildRepeated": false,
+    "browserRepeated": false
+  },
+  "resumeOrder": [
+    "R13_RELEASE_BLOCKERS_BEFORE_FORMAL_VALIDATION_STAGING_OR_R14",
+    "R11_PREPARATION_ONLY_WITH_APPROVED_BUDGET_AND_SCOPE",
+    "R10_PROVIDER_CONTROLS_REQUIRE_REAL_HOSTING_ACCOUNT",
+    "R09_MANDATORY_CHAINS_AND_DOMAIN_MATRIX",
+    "DEFERRED_R08_FULL_PROVIDER_MATRIX_AND_HOSTING",
+    "R07_FORMAL_RELEASE_CONFIGURATION_AND_REVIEW_GATES"
+  ],
+  "mainPlan": "Prepare one reviewed pull request after consolidation stability and release configuration review; do not merge or deploy automatically.",
+  "r08BatchVerification": {
+    "reportDate": "2026-10-20",
+    "sourceSha": "4f9573332afe83ed2aa804f36494b520c574fe6d",
+    "ciRun": "39326541345",
+    "checkRuns": {
+      "passed": 23,
+      "failed": 0,
+      "pending": 0
+    },
+    "scopedDatabasePassingExecutions": 10,
+    "newAndCompletedRuntimeCases": 6,
+    "targetedUnitPassed": 19,
+    "syntheticNewPg16Clusters": 7,
+    "allOwnedClustersStopped": true,
+    "activeMigrationsChanged": false,
+    "schemaChanged": false,
+    "fullLocalBuildRepeated": false,
+    "combinedBuiltApiTlsRedisSessionsVerified": false,
+    "fullR08Acceptance": false,
+    "productionAcceptance": false
+  },
+  "r08PracticalClosure": {
+    "reportDate": "2026-10-20",
+    "sourceSha": "cbb99ac63bb4497df9c07cf3e16611d27bcd3396",
+    "ciRun": "39334529021",
+    "status": "PRACTICAL_SCOPE_CLOSED_FOR_R09_LOCAL_ONLY",
+    "combinedBuiltApiTlsRedisSessionsVerified": true,
+    "refundAndAuthorizationTimeoutVerified": true,
+    "workerHealthFailureAndStopVerified": true,
+    "fullR08Acceptance": false,
+    "productionAcceptance": false,
+    "existingDatabasesTouched": false,
+    "checkRuns": {
+      "passed": 23,
+      "failed": 0,
+      "pending": 0
+    }
+  },
+  "r09LearnerSlice": {
+    "sourceSha": "ce0690c36759fc73ac202a679f905054b7a4607b",
+    "ciRun": "39344907974",
+    "status": "IN_PROGRESS_LEARNER_AND_CMS_BROWSER_VERIFIED",
+    "checks": {
+      "passed": 23,
+      "failed": 0,
+      "pending": 0
+    },
+    "firstStudentProgress": 50,
+    "secondStudentProgress": 0,
+    "cmsSecurityBrowserCases": 4,
+    "fullR09Acceptance": false,
+    "productionAcceptance": false
+  },
+  "r09PublicSlice": {
+    "sourceSha": "819216eba0d09afb3048235e310e2854ef54779d",
+    "ciRun": "39348319130",
+    "status": "IN_PROGRESS_PUBLIC_OWNER_CANARY_VERIFIED",
+    "checks": {
+      "passed": 23,
+      "failed": 0,
+      "pending": 0
+    },
+    "publishedCourses": 3,
+    "hiddenCourses": 4,
+    "cursorPages": 3,
+    "fullR09Acceptance": false,
+    "productionAcceptance": false
+  },
+  "r09PracticalHandoff": {
+    "sourceSha": "819216eba0d09afb3048235e310e2854ef54779d",
+    "ciRun": "39348319130",
+    "status": "PRACTICAL_RECORDED_JOURNEYS_COMPLETE_FORMAL_R09_OPEN",
+    "checks": {
+      "passed": 23,
+      "failed": 0,
+      "pending": 0
+    },
+    "exceptions": [
+      "R09-E01",
+      "R09-E02",
+      "R09-E03",
+      "R09-E04",
+      "R09-E05",
+      "R09-E06"
+    ],
+    "formalR09Acceptance": false,
+    "productionAcceptance": false
+  },
+  "r09SharedWorkflows": {
+    "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+    "ciRun": "39430049248",
+    "checks": {
+      "passed": 23,
+      "failed": 0,
+      "pending": 0
+    },
+    "tests": {
+      "executed": 5,
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    },
+    "sameSyntheticDatabase": true,
+    "fullBuiltAdminMfaAccepted": false,
+    "allMandatoryRowsClosed": false,
+    "formalR09Acceptance": false,
+    "productionAcceptance": false
+  },
+  "r09RenderWithdrawal": {
+    "sourceSha": "d4ffe62a4b00a9154de541f120be16e1317dd000",
+    "report": "docs/remediation/POST28_R09_RENDER_WITHDRAWAL_2026-10-20.md",
+    "rendererSourceSha": "33c52e077a2ad3af81bed371a1d0ff2b0fb4bb2f",
+    "selectedDatabaseCasesPassed": 2,
+    "uiTestsPassed": 8,
+    "selectionRejectedAttempts": 1,
+    "fullR09Acceptance": false,
+    "latestCi": {
+      "sourceSha": "d4ffe62a4b00a9154de541f120be16e1317dd000",
+      "status": "IN_PROGRESS",
+      "run": "39434553130",
+      "previous23CheckPassSourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5"
+    },
+    "providerDeliveryGrantExercised": false,
+    "freshEapProcessing": false
+  },
+  "latestAdminCmsLocalDiagnostic": {
+    "completed": true,
+    "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+    "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+    "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+    "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+    "formalAcceptance": false,
+    "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
+  },
+  "latestPrivateAssetDeliveryDiagnostic": {
+    "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+    "scope": "STUDENT_OWNED_PRIVATE_PDF_GRANT_DIAGNOSTIC_WINDOWS_ONLY",
+    "passed": true,
+    "report": "docs/remediation/POST28_PRIVATE_ASSET_RETENTION_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/evidence-index.json",
+    "certificateDeliveryExercised": false,
+    "reviewerConsentDeliveryExercised": false,
+    "instantPreIssuedUrlRevocationProved": false,
+    "formalAcceptance": false,
+    "ci": {
+      "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+      "runId": 39522846173,
+      "result": "success",
+      "passedJobs": 6
+    }
+  },
+  "latestReviewerDeliveryDiagnostic": {
+    "passed": true,
+    "scope": "BUILT_API_WINDOWS_SYNTHETIC_CONSENT_GATED_STREAM_WITH_MFA",
+    "report": "docs/remediation/POST28_REVIEWER_DELIVERY_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/evidence-index.json",
+    "formalAcceptance": false
+  },
+  "latestCertificateDeliveryDiagnostic": {
+    "scope": "WINDOWS_BUILT_API_SIGNED_CERTIFICATE_PDF_PREVIEW_TRANSPORT_DIAGNOSTIC",
+    "scopedDeliveryPassed": true,
+    "report": "docs/remediation/POST28_CERTIFICATE_DELIVERY_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/682a7ff9bcab350bf32f025b232f438874d67b97/r14-certificate-delivery/evidence-index.json",
+    "instantRevocationOfPreviouslyIssuedGrant": false,
+    "openFinding": {
+      "id": "R14-DELIVERY-01",
+      "state": "OPEN_RELEASE_REVIEW",
+      "observed": "Provider bearer URL issued before revocation returned200 afterward, within its original max300s TTL",
+      "impact": "Revocation does not invalidate capabilities already disclosed to a caller",
+      "requiredBeforeClaimingInstantRevocation": "Authenticated server content delivery with current certificate checks before and after IO, or proven provider capability fencing tied to certificate revocation",
+      "currentContract": "Temporary provider-signed URLs with bounded TTL; no existing instant invalidation protocol proved",
+      "productionScopeAccepted": false
+    },
+    "formalAcceptance": false
+  }
+}

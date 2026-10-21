@@ -1,0 +1,17 @@
+[
+  {
+    "name": "R06-suites/owner-http-closure-0Xb8u9/vitest.json",
+    "sha256": "07331e98c613b3a98e40cac22811914e1cf76c56681475da30010a0a46dee46f",
+    "bytes": 5150
+  },
+  {
+    "name": "R06-suites/owner-http-closure-0Xb8u9/discovery.json",
+    "sha256": "c036d9024f258e20dbe07c76a0c6337a9a83013492fc80903413c033994370bb",
+    "bytes": 3028
+  },
+  {
+    "name": "R06-suites/owner-http-closure-0Xb8u9/selection.json",
+    "sha256": "dab4dccb04412d227a463ec7af062cf4e9c7f5efaaac0cabb8e1d40a6c5a6f8d",
+    "bytes": 251
+  }
+]

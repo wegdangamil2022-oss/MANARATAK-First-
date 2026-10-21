@@ -1,0 +1,11 @@
+{
+  "sourceSha": "868b4d2bf2a7d3d5bfce6c48fc5305f32c23a982",
+  "runId": "8b4d0fa3-0a8e-4b68-ae26-6870649096bb",
+  "status": "STOPPED_EVIDENCE_PRESERVED",
+  "creationExitCode": 1,
+  "preflightError": "POST28_IDENTITY_READ_FAILED",
+  "rootCause": "Internal Docker network did not publish requested loopback port; NetworkSettings.Ports was empty",
+  "migrationsExecuted": 0,
+  "volumeDeleted": false,
+  "privatePreflightLogSha256": "81b13195eeac437ce3e24d6ccbfdeac54223a294adad4f94488d639bb7451930"
+}

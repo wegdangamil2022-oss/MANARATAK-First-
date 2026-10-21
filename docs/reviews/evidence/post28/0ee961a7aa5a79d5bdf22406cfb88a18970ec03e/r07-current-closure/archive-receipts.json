@@ -1,0 +1,36 @@
+[
+  {
+    "artifactId": 12304586741,
+    "name": "artifact-retrieval-0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+    "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+    "runId": 39506916987,
+    "bytes": 652,
+    "expectedDigest": "sha256:821a7ceaef20433c65993a624d968b9e5076181648f54501a93f095411658d2d",
+    "actualDigest": "sha256:821a7ceaef20433c65993a624d968b9e5076181648f54501a93f095411658d2d",
+    "verified": true,
+    "downloadedAt": "2026-10-20T22:30:42.5660400Z"
+  },
+  {
+    "artifactId": 12304546722,
+    "name": "manaratak-release-artifacts-0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+    "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+    "runId": 39506916987,
+    "bytes": 12991136,
+    "expectedDigest": "sha256:e4b8beb6f176757958226fe82b7475285b04a5b700d586bd29c24520faa31c9c",
+    "actualDigest": "sha256:e4b8beb6f176757958226fe82b7475285b04a5b700d586bd29c24520faa31c9c",
+    "verified": true,
+    "downloadedAt": "2026-10-20T22:34:13.426Z",
+    "transport": "GitHub connector file reference after direct-transfer interruption"
+  },
+  {
+    "artifactId": 12304278801,
+    "name": "linux-runtime-review-0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+    "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+    "runId": 39506916987,
+    "bytes": 134582,
+    "expectedDigest": "sha256:e3bb35621c02efa958a4f8459c5307ba33489ed798b8025ae67c61660c69951c",
+    "actualDigest": "sha256:e3bb35621c02efa958a4f8459c5307ba33489ed798b8025ae67c61660c69951c",
+    "verified": true,
+    "downloadedAt": "2026-10-20T22:31:32.3721754Z"
+  }
+]

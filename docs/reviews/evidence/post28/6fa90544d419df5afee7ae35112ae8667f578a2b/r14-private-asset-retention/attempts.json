@@ -1,0 +1,24 @@
+{
+  "first": {
+    "lab": "native-pg16-v6R6Q1",
+    "outcome": "FAILED_FIXTURE_ROLE_DESCRIPTION_MISSING_BEFORE_WORKER_OR_API",
+    "postgresStopped": true,
+    "cleanupFalseApiFieldMeansWorkerReceiptMissing": true
+  },
+  "second": {
+    "lab": "native-pg16-eXLPg0",
+    "outcome": "FAILED_PROVIDER_CANONICAL_SIGNATURE_NEWLINE_MISMATCH_AFTER_OWNERSHIP_AND_EXPIRED_DENIAL",
+    "cleanupVerified": true
+  },
+  "final": {
+    "lab": "native-pg16-ZoDhLB",
+    "outcome": "PASS_SCOPED_RUNTIME",
+    "cleanupVerified": true
+  },
+  "intermediateUnit": {
+    "outcome": "65_PASS_8_FAIL_STALE_DOMAIN_DIST_AND_PARTIAL_PATCH",
+    "cause": "Patch utility stopped on CRLF; a repeated patch duplicated expiry local variable and tsc caught it. Corrected source once and rebuilt Domain/Application; final 73 pass. No assertion was weakened."
+  },
+  "oldFailedEvidenceRewritten": false,
+  "uniqueSuccessTestsNotSummedAcrossAttempts": true
+}

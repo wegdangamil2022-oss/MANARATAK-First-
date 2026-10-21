@@ -1,0 +1,50 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {spawnSync,execFileSync} from 'node:child_process';
+import {assertNativeLabState,nativePgEnvironment} from './r07-filtered/scripts/database/post28-native-lab-policy.mjs';
+import {readDatabaseIdentity} from './r07-filtered/scripts/database/post28-preflight.mjs';
+const work=import.meta.dirname,repo=path.join(work,'r07-filtered');
+const bin=path.join(work,'pg16-binaries/pgsql/bin');
+const sourceSha=execFileSync('git',['rev-parse','HEAD'],{cwd:repo,encoding:'utf8'}).trim();
+const result={kind:'POST28_R03_FRESH_GREENFIELD_REVIEW',sourceSha,startedAt:new Date().toISOString(),existingDatabasesTouched:false,businessMigrationsApplied:false,providerCallsMade:false,applicationStarted:false};
+let state,contract;
+try{
+ const create=spawnSync(process.execPath,['scripts/database/create-post28-native-lab.mjs'],{cwd:repo,encoding:'utf8',windowsHide:true,timeout:120000,env:{...process.env,NODE_ENV:'test',POST28_LOCAL_LAB_CREATE:'YES',POST28_LOCAL_LAB_PROFILE:'greenfield',POST28_NATIVE_PG_BIN:bin,POST28_LAB_ROOT:work}});
+ if(create.status!==0)throw Error('FRESH_LAB_CREATE_FAILED '+create.stderr);
+ state=JSON.parse(create.stdout.trim());contract=JSON.parse(fs.readFileSync(state.contractFile,'utf8'));
+ assertNativeLabState(state,contract,sourceSha,state.directory);
+ const env=Object.fromEntries(fs.readFileSync(state.envFile,'utf8').trim().split(/\r?\n/).map(line=>{const i=line.indexOf('=');return [line.slice(0,i),line.slice(i+1)];}));
+ result.runId=state.runId;result.postgresVersion=state.postgresVersion;
+ result.emptyPairPreflight=JSON.parse(fs.readFileSync(path.join(state.directory,'target-preflight.log'),'utf8'));
+ assert.equal(result.emptyPairPreflight.pass,true);
+ const g=await readDatabaseIdentity(env.GREENFIELD_DATABASE_URL),s=await readDatabaseIdentity(env.GREENFIELD_SHADOW_DATABASE_URL);
+ assert.notEqual(g.databaseOid,s.databaseOid);assert.notEqual(g.role,s.role);assert.equal(g.serverIdentity,s.serverIdentity);
+ const app=new URL(env.GREENFIELD_DATABASE_URL);app.username='post28_app';app.password=env.POST28_APP_PASSWORD;
+ const a=await readDatabaseIdentity(app.href);
+ for(const row of [g,s,a]){
+  assert.equal(row.postgresMajor,16);assert.equal(row.publicTables,0);assert.equal(row.probeReadOnly,true);
+  for(const key of ['superuser','createRole','createDatabase','replication','bypassRls','privilegedMembership','globalWrite','databaseOwner','databaseCreate'])assert.equal(row[key],false,key);
+ }
+ assert.equal(a.schemaCreate,false);assert.equal(g.schemaCreate,true);assert.equal(s.schemaCreate,true);
+ result.identities=[g,s,a];
+ result.crossDatabaseDenials=[];
+ for(const [name,url,target] of [['migrator_to_shadow',env.GREENFIELD_DATABASE_URL,s.database],['shadow_to_greenfield',env.GREENFIELD_SHADOW_DATABASE_URL,g.database],['app_to_shadow',app.href,s.database]]){
+  const wrong=new URL(url);wrong.pathname='/'+target;
+  const check=spawnSync(path.join(bin,'psql.exe'),['-X','-At','-c','SELECT 1'],{encoding:'utf8',windowsHide:true,timeout:10000,env:nativePgEnvironment(state,wrong.href,{readOnly:true})});
+  assert.notEqual(check.status,0);assert.match(check.stderr,/permission denied for database/);
+  result.crossDatabaseDenials.push({case:name,connectionDenied:true});
+ }
+ result.pass=true;
+}catch(error){result.pass=false;result.error=error.message?.startsWith('FRESH_LAB_CREATE_FAILED')?'FRESH_LAB_CREATE_FAILED':error.code??'R03_ASSERTION_FAILED';process.exitCode=1;}
+finally{
+ if(state){
+  assertNativeLabState(state,contract,sourceSha,state.directory);
+  const stop=spawnSync(path.join(bin,'pg_ctl.exe'),['-D',state.dataDirectory,'-m','fast','-w','stop'],{encoding:'utf8',windowsHide:true,timeout:30000});
+  result.cleanup={ownedClusterStopped:stop.status===0,postmasterPidRemoved:!fs.existsSync(path.join(state.dataDirectory,'postmaster.pid')),privateLabRetainedOutsideGit:true};
+  if(stop.status!==0)process.exitCode=1;
+ }
+ result.finishedAt=new Date().toISOString();
+ fs.writeFileSync(path.join(work,'r00-r03-fresh-lab-result.json'),JSON.stringify(result,null,2)+'\n');
+ console.log(JSON.stringify({pass:result.pass,sourceSha,runId:result.runId,cleanup:result.cleanup,error:result.error}));
+}

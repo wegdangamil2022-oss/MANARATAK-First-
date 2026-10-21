@@ -1,0 +1,38 @@
+{
+  "kind": "R09_CURRENT_EVIDENCE_REVIEW",
+  "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+  "ciRun": 39506916987,
+  "ciPassedJobs": 6,
+  "verifiedAt": "2026-10-20T22:57:52.590Z",
+  "fiveCasesOneSyntheticDatabase": true,
+  "artifactZipDigestMatched": true,
+  "retainedEvidence": [
+    {
+      "index": "docs/reviews/evidence/post28/b94ecd49d03463ea89ba26e510ba2ca7f87597a5/r09-shared-workflows/linux-ci/evidence-index.json",
+      "files": 17,
+      "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r07-current-closure/evidence-index.json",
+      "files": 8,
+      "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+      "gitRef": "HEAD",
+      "readOnly": true
+    }
+  ],
+  "unchangedPaths": [
+    "tests/database/post28-r09-integrated-workflows.database.spec.mjs",
+    "scripts/release/post28-r09-workflow-lab.mjs",
+    "packages/application/src/certificates",
+    "packages/application/src/cms",
+    "packages/infrastructure/src/cms"
+  ],
+  "manualTestOrBuildOrCiRerun": false,
+  "fullR09Acceptance": false,
+  "productionAcceptance": false,
+  "artifactBytesIndependentlyRehashedFromThisArchive": false,
+  "artifactDigestBoundary": "Archive contains renderer output digest observations, not rendered artifact bytes; no fresh hash of PDF/SVG bytes is claimed.",
+  "legacyAuthorizationLabelNote": "BLOCKED_USER_AUTHORIZED_SCOPED_R06 is a retained suite authorization label, not a current reassessment of R05."
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Post28 actual canonical course import receipts > requires explicit staged review and writes one unpublished canonical owner with provenance and receipt",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-course-import-receipt.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual canonical course import receipts > replays a persisted canonical receipt without changing rows audit or outbox",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-course-import-receipt.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual canonical course import receipts > serializes concurrent transfers from independent connections to one canonical mutation and one event",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-course-import-receipt.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual canonical course import receipts > records a first unchanged-analysis handoff and suppresses only subsequent receipt replays",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-course-import-receipt.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual canonical course import receipts > rolls back canonical owner identity analysis provenance receipt audit and event on actual PostgreSQL outbox failure",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-course-import-receipt.database.spec.mjs"
+  }
+]

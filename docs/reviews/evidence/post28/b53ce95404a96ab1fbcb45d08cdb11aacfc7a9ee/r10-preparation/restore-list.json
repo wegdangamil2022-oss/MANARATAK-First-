@@ -1,0 +1,10 @@
+{
+  "objects": 2125,
+  "excluded": [
+    "6; 2615 2200 SCHEMA - public post28_tx_migrator\r",
+    "2; 3079 16387 EXTENSION - pg_trgm \r",
+    "8851; 0 0 COMMENT - EXTENSION pg_trgm \r"
+  ],
+  "originalSha256": "641b41eaa42c17d08ffa8720f3667d8e35be879f51f0f778aa3d79f127b1ae37",
+  "filteredSha256": "c7c54b8ff293b1d5b6c1abdecffacb55f0c31470786cf093f7f60a87411b3492"
+}

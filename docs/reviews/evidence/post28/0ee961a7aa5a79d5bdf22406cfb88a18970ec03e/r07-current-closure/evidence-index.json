@@ -1,0 +1,46 @@
+{
+  "kind": "R07_CURRENT_PRACTICAL_CLOSURE_EVIDENCE",
+  "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+  "files": [
+    {
+      "path": "archive-receipts.json",
+      "bytes": 1560,
+      "sha256": "33f022b73e479df5e3ca84a17bdc32fcd0415b1294412914687cd01e3cfb27c8"
+    },
+    {
+      "path": "artifact-retrieval.txt",
+      "bytes": 1041,
+      "sha256": "4720de6086aae6779454e8f47fca2ffbe7be62b5bd21aaa8683c5055b7f23311"
+    },
+    {
+      "path": "ci-completed.json",
+      "bytes": 34953,
+      "sha256": "1a4875dcbf404f0a1c771dddb74f8dd15caa67b88efe982c0c7a0330ba70ddf5"
+    },
+    {
+      "path": "linux-image-probe.json",
+      "bytes": 1284,
+      "sha256": "9766652fa7520feb4ce326587f0507d90c08b46476af11fe214af5181f1e9265"
+    },
+    {
+      "path": "linux-runtime-result.json",
+      "bytes": 34622,
+      "sha256": "a6973e04eea8371d2c1c0c7e0cdba588b749fee4cf8389c1f19d56641ddcc59c"
+    },
+    {
+      "path": "operator.mjs.txt",
+      "bytes": 7830,
+      "sha256": "b618b3c413d03adc1df474863d3b9a476d58365bc0ec6102b35fd022edc798a5"
+    },
+    {
+      "path": "release-manifest.json",
+      "bytes": 2044,
+      "sha256": "0920dee386c3a58ba4ff2713d67217aab95e39a4aa4a002b65cb68fe3e255f67"
+    },
+    {
+      "path": "verification.json",
+      "bytes": 1542,
+      "sha256": "ab247f6f51104f4d0b4c975070c740bb180c674369e8236df8f006333a5bcf18"
+    }
+  ]
+}

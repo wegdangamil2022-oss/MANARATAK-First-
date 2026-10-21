@@ -1,0 +1,13 @@
+{
+  "name": "build",
+  "command": "npm run build",
+  "sourceSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "endSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T02:49:00.916239+00:00",
+  "endedAt": "2026-10-16T02:49:30.557889+00:00",
+  "exitCode": 0,
+  "logSha256": "6aff42c2ad3d8e567a980c0ed6192b6b0abf396234d5fd8db6d4e002dbb86213",
+  "nodeVersion": "22.16.0"
+}

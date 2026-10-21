@@ -208,6 +208,11 @@ export class PrismaCmsRepository implements ICmsRepository {
     const row = await this.db.cmsContentNode.findUnique({
       where: { id },
       include: {
+        publishedPayloads: {
+          where: { status: CmsContentStatus.PUBLISHED },
+          select: { locale: true },
+          orderBy: { locale: 'asc' },
+        },
         domainLinks: { orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] },
         localizedPayloads: {
           include: {
@@ -237,6 +242,7 @@ export class PrismaCmsRepository implements ICmsRepository {
     }
     return {
       ...this.content(row),
+      publishedLocales: row.publishedPayloads.map((entry: { locale: string }) => entry.locale),
       localizedPayloads: row.localizedPayloads.map((entry: any) => this.localized(entry)),
       tags: [...tags.values()],
       attachments,
@@ -743,7 +749,17 @@ export class PrismaCmsRepository implements ICmsRepository {
   public async archive(command: CmsWorkflowCommandDto): Promise<CmsLocalizedContentDto> {
     return this.serializable(async (tx: any) => {
       const { content, localized } = await this.loadWorkflow(tx, command);
-      CmsPublishingPolicy.assertTransition(localized.state, CmsContentStatus.ARCHIVED);
+      // A new working draft does not replace the immutable public snapshot.
+      // Publishers must still be able to withdraw that live snapshot without
+      // approving or publishing the draft first. Never-published drafts retain
+      // their original lifecycle guard; loadWorkflow enforces the current CAS.
+      const publication = await tx.cmsPublishedContent.findUnique({
+        where: { contentId_locale: { contentId: content.id, locale: command.locale } },
+        select: { status: true },
+      });
+      if (publication?.status !== CmsContentStatus.PUBLISHED) {
+        CmsPublishingPolicy.assertTransition(localized.state, CmsContentStatus.ARCHIVED);
+      }
       const now = new Date();
       await tx.cmsPublishedContent.updateMany({
         where: { contentId: content.id, locale: command.locale },

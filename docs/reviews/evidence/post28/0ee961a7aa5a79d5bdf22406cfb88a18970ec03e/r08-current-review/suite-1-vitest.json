@@ -1,0 +1,85 @@
+{
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 2,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 4,
+  "numPassedTests": 1,
+  "numFailedTests": 0,
+  "numPendingTests": 3,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1792534745816,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "R08 signed loopback provider with persisted financial outcomes"
+          ],
+          "fullName": "R08 signed loopback provider with persisted financial outcomes reconciles a lost capture response after the natural deadline without a second charge or receipt",
+          "status": "skipped",
+          "title": "reconciles a lost capture response after the natural deadline without a second charge or receipt",
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "R08 signed loopback provider with persisted financial outcomes"
+          ],
+          "fullName": "R08 signed loopback provider with persisted financial outcomes refuses signed evidence for another merchant without marking the invoice paid",
+          "status": "skipped",
+          "title": "refuses signed evidence for another merchant without marking the invoice paid",
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "R08 signed loopback provider with persisted financial outcomes"
+          ],
+          "fullName": "R08 signed loopback provider with persisted financial outcomes recovers a lost refund response with one consumed approval and one balanced refund posting",
+          "status": "skipped",
+          "title": "recovers a lost refund response with one consumed approval and one balanced refund posting",
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "R08 signed loopback provider with persisted financial outcomes"
+          ],
+          "fullName": "R08 signed loopback provider with persisted financial outcomes keeps a real authorization timeout pending without redispatch or a paid invoice",
+          "status": "passed",
+          "title": "keeps a real authorization timeout pending without redispatch or a paid invoice",
+          "duration": 1093.7592369999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1792534747917,
+      "endTime": 1792534749010.7593,
+      "status": "passed",
+      "message": "",
+      "name": "/home/runner/work/MANARATAK-First-/MANARATAK-First-/tests/database/post28-r08-provider-outcomes.database.spec.mjs"
+    }
+  ]
+}

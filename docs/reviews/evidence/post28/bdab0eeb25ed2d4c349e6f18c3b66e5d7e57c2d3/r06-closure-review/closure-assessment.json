@@ -1,0 +1,179 @@
+{
+  "kind": "POST28_R06_CLOSURE_ASSESSMENT",
+  "requestedOutcome": "CLOSE_R06",
+  "closureDecision": "BLOCKED_NOT_CLOSED",
+  "R04": "PASS_CLOSED_LOCAL_UNCHANGED",
+  "R05": "BLOCKED",
+  "R06": "PARTIAL_RUNTIME_CLOSURE_BLOCKED",
+  "acceptance": false,
+  "fullRequiredCasesAccepted": 0,
+  "productionAcceptance": false,
+  "ruleSources": [
+    {
+      "file": "docs/remediation/POST28_ISOLATED_VALIDATION_EXECUTION_PLAN_v1.3_2026-10-16.md",
+      "line": 219,
+      "rule": "Do not close before mandatory DB/owner cases including compound scholarship pairing, nullable duplicate admission requirement concurrency and atomic CourseMajorProjection invalidation."
+    },
+    {
+      "file": "config/testing/post28-stage-disposition.json",
+      "rule": "Authorization remains LOCAL_DB_T_SCOPED_TESTS_ONLY; R05 runtime acceptance false."
+    }
+  ],
+  "ownerDecisions": [
+    {
+      "id": "DEC-01",
+      "status": "AWAITING_OWNER_DECISION",
+      "ownerApproval": null,
+      "question": "هل مصدر الحقيقة المقبول هو academicProgramId أو group/versioned target أو eligibility rule يثبت نفس زوج degree-major؟ الجداول المستقلة وحدها لا تثبت الزوج. يُمنع مطابقة source labels أو تعميم المنحة على حاصل ضرب مجموعتين.",
+      "accountableRole": "مالك P12 بالتنسيق مع P10/P11 ومعمارية P1؛ اعتماد عقد/تمثيل مستقر، اختبارات موجبة وسالبة، ثم أي migration ببوابة B05/R04.",
+      "affectedCases": [
+        "CD-007",
+        "CD-008"
+      ]
+    },
+    {
+      "id": "DEC-02",
+      "status": "AWAITING_OWNER_DECISION",
+      "ownerApproval": null,
+      "question": "عرف رسميًا studyDestinationCountry وeligibleNationalityCountry وsponsorCountry وmulti-country target/cycle، وقرر كيف ينعكس IScholarshipCountryMapping على owner model الحالي. لا تُفرض cardinality متعددة على بيانات لا تمثلها.",
+      "accountableRole": "P12 + P7 + product owner؛ وثيقة مصدر/قرار وسيناريوهات البلدان.",
+      "affectedCases": [
+        "CD-009"
+      ]
+    },
+    {
+      "id": "DEC-03",
+      "status": "AWAITING_OWNER_DECISION",
+      "ownerApproval": null,
+      "question": "Phase13 guide يحتوي معيار OR، Mapper يشترط دراسة مجانية، Public/Publisher يشترطان مجانية الدراسة والشهادة معًا. أي سياسة مستقبلية ينبغي تعريفها بوضوح؛ **مرشح منطقي**: دراسة مجانية شرط الكتالوج المجاني، شهادة مجانية خاصية مستقلة، لا ضمان شهادة دون دليل.",
+      "accountableRole": "مالك P13/منتج + سلطة الوثائق: approve one normative policy ثم كل مسارات import/publish/public/UI تتطابق وتتبع الأصل.",
+      "affectedCases": [
+        "CD-012"
+      ]
+    },
+    {
+      "id": "DEC-04",
+      "status": "AWAITING_OWNER_DECISION",
+      "ownerApproval": null,
+      "question": "CourseMajorProjection.profileId اختياري وقراءته العامة تستخدم majorId؛ هل واجهة المنتج تعرض «دورات هذا التخصص» أم «دورات ماجستير/بكالوريوس هذا التخصص»؟ لا تحوّل مستوى دورة studyLevelRaw إلى درجة جامعية.",
+      "accountableRole": "P10/P13/P24؛ إن لم يكن facet بمستوى profile مطلوبًا، وثّق أنه غير مدعوم ولا تعرضه؛ إن طلب، اعتمد owner query وAPI وواجهة واختبارات.",
+      "affectedCases": [
+        "CD-017"
+      ]
+    },
+    {
+      "id": "DEC-05",
+      "status": "AWAITING_OWNER_DECISION",
+      "ownerApproval": null,
+      "question": "عند رفض رابط تصنيف، تغير Mapping، أو إزالة source term، ما الحالات النهائية القانونية وكيف تحفظ decisions وaudit؟ reviewTaxonomyLink() وreconcile... لا يسلكان المسار نفسه حاليًا.",
+      "accountableRole": "P13/P10 + security/DB؛ تحديد transaction boundary، واجهة idempotent وإبطال فور public/query وربط بوابة outbox/cache.",
+      "affectedCases": [
+        "CD-013",
+        "CD-014",
+        "CD-015",
+        "CD-016"
+      ]
+    },
+    {
+      "id": "DEC-06",
+      "status": "AWAITING_OWNER_DECISION",
+      "ownerApproval": null,
+      "question": "Prisma @@unique([academicProgramId, internationalTestId, testVariantId, testVersionId]) يحتوي حقولًا nullable؛ هل المانع الفعلي تطبيق أو expression index/constraint خاص مع الاستيراد المتوازي؟",
+      "accountableRole": "P11/P9/DB؛ اختبار اتصالين Postgres وحسم علاج لا يغيّر SQL المطبق سابقًا.",
+      "affectedCases": [
+        "CD-005"
+      ]
+    },
+    {
+      "id": "DEC-07",
+      "status": "AWAITING_OWNER_DECISION",
+      "ownerApproval": null,
+      "question": "FG-024 ما زال يتطلب canonical teaching-language owner query وscope؛ لا يعوضه studyLanguageSourceLabel أو JSON count أو snapshot ناقص.",
+      "accountableRole": "مالك P11/P12/P24/المنتج مع مالك بيانات الأسواق، حسب R02-coverage.",
+      "affectedCases": [
+        "CD-020",
+        "CD-021",
+        "CD-025",
+        "CD-033",
+        "CD-040"
+      ]
+    }
+  ],
+  "R05Prerequisites": [
+    "Traceable synthetic orphan remediation",
+    "Upgrade109_to110_preservation",
+    "Previous_client_after_upgrade",
+    "Upgrade_interruption_resume_and_lock_budgets"
+  ],
+  "independentAcceptanceNotYetProven": [
+    {
+      "caseIds": [
+        "CD-001",
+        "CD-002",
+        "CD-003",
+        "CD-004",
+        "CD-006",
+        "CD-010",
+        "CD-011"
+      ],
+      "remaining": "Full owner publish/review/invalidation and public surfaces after mutation; current evidence is selected real writes and reads, not all end-to-end publication histories.",
+      "reasonKind": "REMAINING_VALIDATION_NOT_CLAIMED_SERVICE_BLOCKER"
+    },
+    {
+      "caseIds": [
+        "CD-019",
+        "CD-035"
+      ],
+      "remaining": "Full controlled import-to-owner promotion, worker crash before/after durable ack, provenance across refresh and retry. Existing concurrency identities and completion worker proof are foundations.",
+      "reasonKind": "REMAINING_VALIDATION_NOT_CLAIMED_SERVICE_BLOCKER"
+    },
+    {
+      "caseIds": [
+        "CD-028"
+      ],
+      "remaining": "Learning-path completion and successful P14 credential issuance/render/verification under approved authority, template, signing configuration and real storage. Synthetic complete-course progress is not pedagogical or external credential authority.",
+      "reasonKind": "AUTHORITY_AND_RUNTIME_EVIDENCE_REQUIRED"
+    },
+    {
+      "caseIds": [
+        "CD-036"
+      ],
+      "remaining": "Secure real object delivery and revocation of an already delivered link; attestations use actual services over synthetic preverified asset records. Missing secure delivery capability fails closed.",
+      "reasonKind": "UNPROVEN_REAL_STORAGE_CAPABILITY"
+    },
+    {
+      "caseIds": [
+        "CD-030"
+      ],
+      "remaining": "External payment capture/refund/bank settlement success and ambiguous provider outcome recovery. No external provider authorized or invoked. Local wallet settlement and absence guards are separate.",
+      "reasonKind": "EXTERNAL_PROVIDER_NOT_AUTHORIZED"
+    },
+    {
+      "caseIds": [
+        "CD-040"
+      ],
+      "remaining": "Complete owner/parent/reference lifecycle changes across multiple pages with snapshot/count consistency, not just next-read withdrawal.",
+      "reasonKind": "REMAINING_VALIDATION_NOT_CLAIMED_SERVICE_BLOCKER"
+    },
+    {
+      "caseIds": [
+        "CD-026",
+        "CD-029"
+      ],
+      "remaining": "Full production principal/MFA/duty and private-graph surface matrix beyond current actual mounted JWT/RBAC/session tests.",
+      "reasonKind": "REMAINING_VALIDATION_NOT_CLAIMED_SERVICE_BLOCKER"
+    }
+  ],
+  "notAClosureWaiver": true,
+  "noOwnerDecisionsAdopted": true,
+  "latestEvidenceSha": "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3",
+  "cumulativeDistinctSuccessfulDatabaseCases": 243,
+  "newDistinctSuccessfulDatabaseCases": 76,
+  "caseAccounting": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+  "ownerDecisionRequest": {
+    "question": "Traceable approved DEC-01 through DEC-07 references required for R06 closure",
+    "ownerReply": "لا ماعندي",
+    "disposition": "NO_APPROVED_DEC_REFERENCES_AVAILABLE",
+    "decisionsAdopted": false
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "mutation-gates",
+  "command": [
+    "npx",
+    "--yes",
+    "--package=node@22.16.0",
+    "node",
+    "--test",
+    "tests/operations/database-mutation-gate.test.mjs"
+  ],
+  "sourceSha": "15cf903313fe6f4702e183702c03a00dc09bae2e",
+  "dirty": true,
+  "startedUtc": "2026-10-16T02:06:45.826868+00:00",
+  "finishedUtc": "2026-10-16T02:06:46.736714+00:00",
+  "exitCode": 0,
+  "log": "/workspace/scratch/post28/15cf903313fe6f4702e183702c03a00dc09bae2e/R02-core/mutation-gates-20261016T020646718936Z.log",
+  "sha256": "f457a5613bea342bec00e8cf1fd9e999afbb6735a5440794dbd96e05ed64d924"
+}

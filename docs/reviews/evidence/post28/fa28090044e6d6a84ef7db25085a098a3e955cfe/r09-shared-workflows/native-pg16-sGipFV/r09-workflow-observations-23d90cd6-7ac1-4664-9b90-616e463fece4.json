@@ -1,0 +1,38 @@
+{
+  "kind": "POST28_R09_SHARED_WORKFLOW_INTEGRATION",
+  "sourceSha": "fa28090044e6d6a84ef7db25085a098a3e955cfe",
+  "syntheticOnly": true,
+  "productionAcceptance": false,
+  "externalProvidersEnabled": false,
+  "fullR09Acceptance": false,
+  "observations": [
+    {
+      "case": "CMS_AUTHOR_REVIEW_PUBLISH_WITHDRAW",
+      "actorIds": [
+        "d82c9086-e577-430d-8707-168d3030c83f",
+        "d5d67f0d-40f4-4c80-9ad6-4c1b2e974b03",
+        "d4a3796a-ac0d-416d-8fc8-336ce448dd0e"
+      ],
+      "distinctActors": true,
+      "publicLocales": [
+        "ar",
+        "en"
+      ],
+      "browserLocale": "ar",
+      "draftNeverReplacesPublished": true,
+      "withdrawnOnHistoryAndReload": true,
+      "fullAdminUiOrMfaAcceptance": false
+    }
+  ],
+  "role": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledger": false
+  },
+  "browserVersion": "155.0.4283.62",
+  "boundary": "ACTUAL_SOURCE_ROUTERS_REAL_JWT_DB_CAPABILITIES_NOT_BUILT_ADMIN_UI_OR_MFA"
+}

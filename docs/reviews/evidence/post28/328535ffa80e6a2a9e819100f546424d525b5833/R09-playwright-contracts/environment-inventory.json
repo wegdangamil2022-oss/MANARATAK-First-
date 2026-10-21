@@ -1,0 +1,12 @@
+{
+  "name": "environment-inventory",
+  "command": "node scripts/aistudio/environment.mjs --check",
+  "sourceSha": "328535ffa80e6a2a9e819100f546424d525b5833",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T03:23:05.910091+00:00",
+  "endedAt": "2026-10-16T03:23:08.905911+00:00",
+  "exitCode": 0,
+  "logSha256": "40fe0d4ad2f425c6b8bc545d3aa0359304863920f517c2d973848ee097b4ba95",
+  "nodeVersion": "22.16.0"
+}

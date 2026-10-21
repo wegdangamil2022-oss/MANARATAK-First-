@@ -1,0 +1,13 @@
+# R06 current Course source proof on public reads
+
+Source 225e62c678ac2ced60efce8120c0912e1f80755c; run 052b3bf2-cf0b-44a6-b45f-03a0f0366544; PostgreSQL postgres (PostgreSQL) 16.15, system 7698143419419069184.
+
+Public Course reads now require an active source identity belonging to the Course provider, a matching canonical URL, exactly one current URL history for that identity, a persisted check timestamp and VERIFIED/REDIRECTED state, and a current provider domain covering the URL host. Malformed URLs and credential-bearing URLs fail closed. Native Course eligibility is preserved. The shared proof is applied before cursor pagination/count in the existing RepeatableRead transaction, and by the transaction-bound CMS owner gateway. No schema migration, publication-state mutation, audit fabrication or historical Consent/Binding changes.
+
+Ten new actual PostgreSQL/HTTP scenarios cover domain removal, broken link, archived identity, changed identity URL, changed Course URL, changed history URL, foreign provider identity, missing checkedAt, ambiguous current history and malformed URL. Each proves detail denial, list exclusion, zero relationship total, CMS denial, retained published status/version and unchanged audit/outbox counts. Sixteen publication regressions, four independent-connection read snapshot cases and eight native Course/major visibility regressions also pass: 38 database cases, zero failures/skips. 312 units, four selection safety tests, type checking and source quality pass.
+
+Earlier unit failures were an outdated CMS delegate mock and an assertion for the previous query shape. A subsequent test edit introduced a parse failure; the final source fixes it and all 312 units pass. These earlier outputs are preserved, not counted as success. Database fixtures remain synthetic persisted proof and do not claim fresh external network verification.
+
+Implementation tradeoff: proof candidates use batched hydration (500 Courses per query), scoped by public filters or a detail ID/slug. This avoids N+1 and post-pagination filtering, but catalog-wide requests still inspect all matching external candidates and build an ID allowlist. Large-catalog latency and parameter limits are not load-tested; a database-side equivalent predicate remains an optimization before scale deployment. Current evidence does not close full refresh, worker recovery, full certificate asset ingestion, browser gates or R06 acceptance.
+
+Evidence: docs/reviews/evidence/post28/225e62c678ac2ced60efce8120c0912e1f80755c/R06-course-source-withdrawal/evidence-index.json. Actual database cases: 38 passed, zero failed/skipped in final runs. New distinct 10; repeats 28; cumulative 467 across SHAs, not one current-head acceptance run. R06 remains 0/26 accepted.

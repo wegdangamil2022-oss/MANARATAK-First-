@@ -1,0 +1,162 @@
+{
+  "kind": "R12_SCOPED_WORKER_FENCING_ASSET_EVIDENCE",
+  "observedRepositoryHead": "70230e082e03f73761eee6437858c074839fb8d2",
+  "currentCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "previousCandidateSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "files": [
+    {
+      "path": "worker-result.json",
+      "bytes": 2307,
+      "sha256": "e3211eef245263551c223f5a99de809072680fc52a36be28d73097c1089bcb5d"
+    },
+    {
+      "path": "worker-cleanup.json",
+      "bytes": 81,
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f"
+    },
+    {
+      "path": "worker-dataset-summary.json",
+      "bytes": 20486,
+      "sha256": "b1cb821db910fc117082152b6db9ec3d2fa809098b04fb2e169949bc270656bc"
+    },
+    {
+      "path": "assets-result.json",
+      "bytes": 6651,
+      "sha256": "9a2ad16b5a2651d73daab21d24537c8aa44d79c9e3977c33f23b8d6a9d6869b9"
+    },
+    {
+      "path": "assets-cleanup.json",
+      "bytes": 81,
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f"
+    },
+    {
+      "path": "assets-dataset-summary.json",
+      "bytes": 20486,
+      "sha256": "1ee7d81931161ff34cd6f7ac0dd593406e39359ef448bb9f1a6950f12068920e"
+    },
+    {
+      "path": "worker-r12-protected-before.json",
+      "bytes": 484,
+      "sha256": "85e8c0279cf17c21b59b778fdbdd2192b35a9719a66791b45a6f104e4f84b67e"
+    },
+    {
+      "path": "worker-r12-protected-after.json",
+      "bytes": 930,
+      "sha256": "a74735e3cc4d65aa90b0cd7e8b1de73a489bc62cca35c469648d41b6e69ffe55"
+    },
+    {
+      "path": "worker-r12-api-current.log.txt",
+      "bytes": 541,
+      "sha256": "dfe388797737d384d396a7f24f5835ee4437749ad5b43b07a30dbb9dc3be2fd9"
+    },
+    {
+      "path": "worker-r12-api-previous.log.txt",
+      "bytes": 541,
+      "sha256": "421d18f1267239dbc3642ed1ac0ec4c81b390eaae3e4013aef64d703fa2e9a5c"
+    },
+    {
+      "path": "fence-completed-asset-source-check-failed.json",
+      "bytes": 1273,
+      "sha256": "34c7bd004209c8f3e0a59fcf6b72d776ab7a2fc7bb9289e11620e69cc9a9ce7f"
+    },
+    {
+      "path": "fence-run-cleanup.json",
+      "bytes": 81,
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f"
+    },
+    {
+      "path": "attempt-9E6eml-result.json",
+      "bytes": 1381,
+      "sha256": "753315d740c0dc533b9c5366a9e0b0db9f7a46241ef2505f5722a705f0916848"
+    },
+    {
+      "path": "attempt-9E6eml-cleanup.json",
+      "bytes": 82,
+      "sha256": "b6281905daeb75646d9ec1d6de95ec8eb04a8195f0336b311723b4c586619c63"
+    },
+    {
+      "path": "attempt-RX4UVG-result.json",
+      "bytes": 794,
+      "sha256": "d7cbb3be153b39c06a9b4d825bcd24f68f5a25c503878aa6a845489b5702c14b"
+    },
+    {
+      "path": "attempt-RX4UVG-cleanup.json",
+      "bytes": 81,
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f"
+    },
+    {
+      "path": "attempt-9V0pyS-result.json",
+      "bytes": 844,
+      "sha256": "a0306ac642977e7cd2d61c3f1392d697517fb5fb197abb90a6a0b6698327eae1"
+    },
+    {
+      "path": "attempt-9V0pyS-cleanup.json",
+      "bytes": 81,
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f"
+    },
+    {
+      "path": "attempt-9E6eml-manual-cleanup-followup.json",
+      "bytes": 302,
+      "sha256": "59807d5a6571a1cb953644799b412cbd1be47cf0ae535bfd1b1594e9209a6a30"
+    },
+    {
+      "path": "run-r12-built-worker.mjs.txt",
+      "bytes": 11251,
+      "sha256": "8e366324bfbcc08f12444f2a4d28b328909f4edea919a44772550569b2c07472"
+    },
+    {
+      "path": "r12-built-worker-drill.mjs.txt",
+      "bytes": 15348,
+      "sha256": "04e235e2ed20aa1f1fa7f6b6f165b98ab5237135dcc65946bbe1accb3cdd82da"
+    },
+    {
+      "path": "r12-worker-control.mjs.txt",
+      "bytes": 535,
+      "sha256": "3dcd1f307eba0cab1036071d27f4c13d97f1c5e7c5a5153d8c0716f181f9bac5"
+    },
+    {
+      "path": "run-r12-fence-assets.mjs.txt",
+      "bytes": 11256,
+      "sha256": "0239da95269af3844a7b980ccdf0d98ff74600c91b766be6e8f3b5c9e581fe77"
+    },
+    {
+      "path": "r12-fence-asset-contracts.mjs.txt",
+      "bytes": 9313,
+      "sha256": "7cb1253565cae8b24231273bc8ef8829fcd2297b0ffcdd8242f172765edc7334"
+    },
+    {
+      "path": "run-r12-assets-only.mjs.txt",
+      "bytes": 11243,
+      "sha256": "c599d0ba408578e049fedca75d61425f5e26cf73d105090f2bc618d3316283ea"
+    },
+    {
+      "path": "r12-assets-only.mjs.txt",
+      "bytes": 7788,
+      "sha256": "454774f358a3b302a04cdc10ded1142316eddd696c11857805aefb46109b1811"
+    },
+    {
+      "path": "prepare-r12-assets-only.mjs.txt",
+      "bytes": 1309,
+      "sha256": "91c5f664bbc69cef3f9912e6e287d832023df4243f4b7a9b5ae2db08fd3bcbc8"
+    },
+    {
+      "path": "ci-observation.json",
+      "bytes": 1747,
+      "sha256": "dfac0ea3bfb5954e77f437894ac7dfbb7921b4f93acd49ce81721ee3357531b2"
+    },
+    {
+      "path": "ci-completed-workflow.json",
+      "bytes": 14845,
+      "sha256": "fd0bc2abaaf4eacea125951fc9a9c6c89f0a416a98ff348678c8e306e9ac21e2"
+    }
+  ],
+  "workerBuiltRuntimePassed": true,
+  "leaseFencingComponentPassed": true,
+  "leaseRunOverallPassed": false,
+  "leaseRunLaterAssetSourceGuardFailure": "LF/CRLF-only difference in working tree; execution uses frozen Git blobs; normalized comparison plus exact previous/current blob equality passed in subsequent asset-only run",
+  "assetSourceContractPassed": true,
+  "assetBuiltHttpProviderDeliveryPassed": false,
+  "formalAcceptance": false,
+  "productionAcceptance": false,
+  "operatorArchiveNote": "Corrected reproducible operator archive; lease operator contains the later LF/CRLF guard correction. The failed lease run report is retained unchanged. Successful fencing and built-worker checks were not repeated."
+}

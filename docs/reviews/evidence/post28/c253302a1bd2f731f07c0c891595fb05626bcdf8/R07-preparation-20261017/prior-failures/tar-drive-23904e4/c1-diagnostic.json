@@ -1,0 +1,16 @@
+{
+  "name": "c1-diagnostic",
+  "sourceSha": "23904e4496a127993ae0da4b33cbcfa9d699452e",
+  "command": [
+    "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node.exe",
+    "scripts/release/post28-diagnostic-build.mjs",
+    "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\c1-23904e4"
+  ],
+  "startedAt": "2026-10-16T22:05:11.098Z",
+  "finishedAt": "2026-10-16T22:07:27.661Z",
+  "exitCode": 1,
+  "node": "v22.16.0",
+  "platform": "win32",
+  "architecture": "x64",
+  "logSha256": "d00105f4c843b47a1b3e31e028c447c8b0130e9d55cd0f91ef9bd73059ae3413"
+}

@@ -1,0 +1,27 @@
+[
+  {
+    "name": "R06-suites/relation-commands-MX3hMb/vitest.json",
+    "sha256": "66ff6e27728d87d62951d91deb0028e0e2098dc25acec31656fd6deab697b4e7",
+    "bytes": 3951
+  },
+  {
+    "name": "R06-suites/relation-commands-MX3hMb/discovery.json",
+    "sha256": "8d7c94494f4f5af7c3a1d13ae030bb0f8cf77e3aa90a39713a6b35171897f87c",
+    "bytes": 2055
+  },
+  {
+    "name": "R06-suites/relation-commands-MX3hMb/summary.json",
+    "sha256": "550e07e7b2695c1d21cf1daadc36802db1c576d380f4c35646ee8957c87aea16",
+    "bytes": 850
+  },
+  {
+    "name": "R06-setup/result.json",
+    "sha256": "425968c75298e70b7096d21608c9c69ee2680bb5674053b1bbaa10c46f2ce738",
+    "bytes": 3220
+  },
+  {
+    "name": "R06-setup/checks.json",
+    "sha256": "7ec12054725d5187f3ea68ad8053b7ea497d1f751a5beb7067a5523814e64054",
+    "bytes": 1393
+  }
+]

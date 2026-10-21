@@ -1,0 +1,26 @@
+{
+  "sourceSha": "293b2eee2514b29c91a2d6f8ad3a35353cab9454",
+  "suite": "http-finance",
+  "counts": {
+    "discovered": 14,
+    "reportedTotal": 14,
+    "passed": 13,
+    "failed": 1,
+    "pendingTotal": 0,
+    "skippedAssertions": 0,
+    "todo": 0
+  },
+  "selectedResult": null,
+  "fullProfilePassed": false,
+  "originalRunnerGate": "FAILED_TESTS",
+  "savedReportVerifierPassed": false,
+  "distinctNewPassingCases": 13,
+  "diagnosticOnly": false,
+  "regressionNotAdditional": false,
+  "R04": "PASS_LOCAL_UNCHANGED",
+  "R05": "BLOCKED",
+  "R06": "PARTIAL",
+  "fullRequiredCasesAccepted": 0,
+  "externalProviderCalled": false,
+  "productionAcceptance": false
+}

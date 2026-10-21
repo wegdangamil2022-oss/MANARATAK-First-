@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "kind": "POST28_R09_PUBLIC_EVIDENCE",
+  "sourceSha": "34894a6e8727485c09abc8ffc53256f8185c17e7",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "archive-receipt.json",
+      "bytes": 891,
+      "sha256": "f13ae3edabe4993413560b4c665781b8c8ef37907bb24039766969dd37973b22"
+    },
+    {
+      "path": "cms-rich-text-proof.json",
+      "bytes": 629,
+      "sha256": "09e5a4488749c1acd84f908cdfccd4cb34b062eb354c77fe655f967277c970a8"
+    },
+    {
+      "path": "linux-image-probe.json",
+      "bytes": 1284,
+      "sha256": "e6523ea57a01946dc9cae143502b15c303b7c26a04bcc7c890064c9d2d148972"
+    },
+    {
+      "path": "linux-runtime-proof--api.log",
+      "bytes": 31679,
+      "sha256": "0b6fe2daebbc8cef349d730b327968ca656f847b3f0c44a947ed393a6b3a33f2"
+    },
+    {
+      "path": "linux-runtime-proof--create.log",
+      "bytes": 872,
+      "sha256": "05c9130dd41371669df5a0e00cf1aecbc9cbf33895e973bfad608046fa0d87a6"
+    },
+    {
+      "path": "linux-runtime-proof--gateway.log",
+      "bytes": 136,
+      "sha256": "24578036bbc7b7c8b935ced9fb2da98df4b6054ebae0a3c9322ed03b5f73fa96"
+    },
+    {
+      "path": "linux-runtime-proof--initialize.log",
+      "bytes": 4029,
+      "sha256": "2652a5065f6cf44d4b67f1c9032c39531578c73d9f56fb5dd2d0c4e25b10b449"
+    },
+    {
+      "path": "linux-runtime-proof--r09-public-course.png",
+      "bytes": 79108,
+      "sha256": "7180efa0951778d3337533d3f156274d9f18b38b5ae0f0678ee18a30aed19c43"
+    },
+    {
+      "path": "linux-runtime-proof--r09-public-hidden.png",
+      "bytes": 37885,
+      "sha256": "a62fa33ef7d37b4b27e3558a5338dcb670c64c621597e5fca77f600cdfa1c7aa"
+    },
+    {
+      "path": "linux-runtime-proof--result.json",
+      "bytes": 19116,
+      "sha256": "bd26824f0b6eb7a2af2ad0d51b7319f78db02661ed8967c397fbae1025cf8175"
+    },
+    {
+      "path": "review-observation.json",
+      "bytes": 423,
+      "sha256": "42c6f057ac4db9ff8ad71badccbf996cc3ce105c7494961b3537e3ac7be17a4d"
+    },
+    {
+      "path": "runtime-layer.json",
+      "bytes": 1910,
+      "sha256": "98105295a149c0ca73152afd14015ee122da027f9f2602072bf1797ac96c1f3e"
+    }
+  ]
+}

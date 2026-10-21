@@ -1,0 +1,31 @@
+{
+  "kind": "R14_SAME_SHA_LINUX_CMS_RUNTIME_EVIDENCE",
+  "sourceSha": "282a7aa791cb1363f8a0cc29ee661fb3acf5cb9e",
+  "runId": 39625777899,
+  "passed": false,
+  "ciAllSixSucceeded": false,
+  "items": [
+    {
+      "file": "ci-observation.json",
+      "bytes": 1399,
+      "sha256": "bbf0e4e9718eb20f906d50e498151756975ba6cce238239f6a957b5ba0cb47ea"
+    },
+    {
+      "file": "http-observations.json",
+      "bytes": 54334,
+      "sha256": "6f0d820702e7436616a27bcde2b3d7a459ecd255227d3eb84bbcded58e1e6476"
+    },
+    {
+      "file": "result.json",
+      "bytes": 1990,
+      "sha256": "26729ddd50df1aa368bae584e810c6cec6d6db29ee23fe1d7a392721563d3dda"
+    },
+    {
+      "file": "retrieval.json",
+      "bytes": 399,
+      "sha256": "0521bcb927cfecbcb3b46118e5d2667af3809b568b520d24be7b1833b1294bc6"
+    }
+  ],
+  "formalAcceptance": false,
+  "productionAcceptance": false
+}

@@ -1,0 +1,28 @@
+{
+  "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+  "reason": "Redis bundled digest retains dynamic @node-rs/xxhash import; production install previously missed this native module",
+  "addedDirectDependency": "@node-rs/xxhash@1.7.6",
+  "changedExistingPackages": [],
+  "addedLockedPackages": [
+    "node_modules/@emnapi/core",
+    "node_modules/@emnapi/runtime",
+    "node_modules/@emnapi/wasi-threads",
+    "node_modules/@napi-rs/wasm-runtime",
+    "node_modules/@node-rs/xxhash",
+    "node_modules/@node-rs/xxhash-android-arm-eabi",
+    "node_modules/@node-rs/xxhash-android-arm64",
+    "node_modules/@node-rs/xxhash-darwin-arm64",
+    "node_modules/@node-rs/xxhash-darwin-x64",
+    "node_modules/@node-rs/xxhash-freebsd-x64",
+    "node_modules/@node-rs/xxhash-linux-arm-gnueabihf",
+    "node_modules/@node-rs/xxhash-linux-arm64-gnu",
+    "node_modules/@node-rs/xxhash-linux-arm64-musl",
+    "node_modules/@node-rs/xxhash-linux-x64-gnu",
+    "node_modules/@node-rs/xxhash-linux-x64-musl",
+    "node_modules/@node-rs/xxhash-wasm32-wasi",
+    "node_modules/@node-rs/xxhash-win32-arm64-msvc",
+    "node_modules/@node-rs/xxhash-win32-ia32-msvc",
+    "node_modules/@node-rs/xxhash-win32-x64-msvc",
+    "node_modules/@tybys/wasm-util"
+  ]
+}

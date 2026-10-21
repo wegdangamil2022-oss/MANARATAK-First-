@@ -1,0 +1,192 @@
+[
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "projects a resolved scholarship test document backed by its own published version",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 60.271702999999434,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "withdraws archived test requirements from scholarship public projection",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 20.939244999999573,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "withdraws a hidden canonical test from scholarship public requirements even when status remains published",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "failed",
+    "durationMs": 30.774279000000206,
+    "failureFirstLines": [
+      "AssertionError: expected [ { documentKey: 'test-proof', …(6) } ] to deeply equal []"
+    ]
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "withdraws test requirements when the currently referenced version is no longer published",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "failed",
+    "durationMs": 21.12686399999984,
+    "failureFirstLines": [
+      "AssertionError: expected [ { documentKey: 'test-proof', …(6) } ] to deeply equal []"
+    ]
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "does not treat an unresolved named test as an approved canonical requirement",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 16.310088000000178,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "keeps provider headquarters separate from course study geography",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 31.78946300000007,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "resolves an active canonical course language through its actual repository",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 19.456569999999374,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "rejects inactive and deprecated canonical languages despite a valid language FK",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "failed",
+    "durationMs": 55.161087999999836,
+    "failureFirstLines": [
+      "Error: promise resolved \"undefined\" instead of rejecting"
+    ]
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "does not publish source language labels without a reviewed canonical reference",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 47.88083900000038,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "public course card and list withdraw a previously resolved language after canonical deprecation",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "failed",
+    "durationMs": 50.99145700000008,
+    "failureFirstLines": [
+      "AssertionError: expected 200 to be 404 // Object.is equality"
+    ]
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "public course list excludes raw language only records without canonical proof",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "failed",
+    "durationMs": 21.90744900000027,
+    "failureFirstLines": [
+      "AssertionError: expected true to be false // Object.is equality"
+    ]
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "deduplicates one provider native language key across two actual connections",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 34.65315699999974,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "preserves separate source identities for each language version and provider",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 37.75182700000005,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "approved provider domains reject lookalike external hosts and accept the exact owned host",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 14.88004600000022,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "records supplied synthetic redirect evidence once and retains original first seen provenance",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 32.90410900000006,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "rejects a stale link-check result after a controlled URL replacement without changing history",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 24.56335299999955,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "forbids uncontrolled imported provider origin and URL identity edits before any owner mutation",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 35.37450700000045,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "blocks publishing a raw external source without persisted direct-link verification",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 28.1347880000003,
+    "failureFirstLines": []
+  }
+]

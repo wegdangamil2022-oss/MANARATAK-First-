@@ -1,0 +1,67 @@
+{
+  "kind": "TRANSCRIPT_OBSERVED_COMMAND_RESULTS_NOT_RAW_LOGS",
+  "sourceSha": "825a0b597bca7e14d95a6cc8fbf8d7bf352abdc8",
+  "executedBeforeCommitWithSameWorkingFiles": true,
+  "platform": "win32",
+  "node": "22.16.0",
+  "reproductions": [
+    {
+      "case": "owner continuation after stop",
+      "result": "FAILED_AS_EXPECTED",
+      "unexpectedCareerCalls": 1
+    },
+    {
+      "case": "queued initial iteration after stop",
+      "result": "FAILED_AS_EXPECTED",
+      "unexpectedStartedCalls": 1
+    },
+    {
+      "case": "hung forceFlush deadline",
+      "result": "FAILED_AS_EXPECTED",
+      "actualProcessExitCalls": 0
+    }
+  ],
+  "finalChecks": [
+    {
+      "command": "node node_modules/vitest/vitest.mjs run apps/api/tests/infrastructure/workers/PollingWorkerRuntime.spec.ts",
+      "passed": 10,
+      "failed": 0,
+      "reason": "Affected owner and student polling routes and queued startup race"
+    },
+    {
+      "command": "node --test tests/runtime/runtime-shutdown-drain-runtime.test.mjs tests/runtime/runtime-resource-lifecycle-source.test.mjs",
+      "passed": 6,
+      "failed": 0,
+      "reason": "Changed shutdown deadline and direct resource lifecycle contracts"
+    },
+    {
+      "command": "node --test tests/runtime/post28-r08-process-drain.test.mjs",
+      "passed": 2,
+      "failed": 0,
+      "note": "Executed before addition of the third deadline case; these two cases were not repeated"
+    },
+    {
+      "command": "node --test --test-name-pattern='real fifteen-second deadline' tests/runtime/post28-r08-process-drain.test.mjs",
+      "passed": 1,
+      "failed": 0,
+      "reason": "Only newly added real process deadline case"
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc -p apps/api/tsconfig.json --noEmit --pretty false",
+      "exitCode": 0
+    },
+    {
+      "command": "targeted ESLint changed source/tests",
+      "errors": 0,
+      "warnings": 7,
+      "note": "Existing any annotations in server and polling runtime"
+    },
+    {
+      "command": "node scripts/security/scan-secrets.mjs",
+      "status": "PASS"
+    }
+  ],
+  "fullBuildRepeated": false,
+  "databaseSuiteRepeated": false,
+  "browserRepeated": false
+}

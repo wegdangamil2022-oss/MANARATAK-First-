@@ -1,0 +1,11 @@
+{
+  "sourceSha": "7c15845d5a7af8572b6cef15e3222a3c8fc98e76",
+  "runId": "eedd717a-bd42-4494-b888-779870d4424a",
+  "discovered": 10,
+  "executed": 10,
+  "passed": 10,
+  "failed": 0,
+  "skipped": 0,
+  "fullProfilePassed": true,
+  "R06Accepted": false
+}

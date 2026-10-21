@@ -1,0 +1,57 @@
+{
+  "kind": "POST28_R08_OUTBOX_CHAIN_SCOPED_RUNTIME",
+  "sourceSha": "770d787c172d1ce826c7bb15ddeecb90ecc957d5",
+  "state": "SCOPED_OUTBOX_PROCESS_CHAIN_VERIFIED",
+  "fullR08Acceptance": false,
+  "productionAcceptance": false,
+  "externalProviderCalled": false,
+  "schemaChanged": false,
+  "defaultApplicationGrantsBroadened": false,
+  "fixtureOnlyAdditionalTable": "StudentWorkspaceEventInbox",
+  "fourCaseSourceSha": "865dfac48534fbb8b8e643344e1261b183d35e31",
+  "fourCaseResult": {
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0
+  },
+  "auditAssertionCorrection": {
+    "reason": "Audit target is workspace.id, not studentReferenceId; strengthened to require nonempty actual rows",
+    "selectedCases": 1,
+    "passed": 1,
+    "unselectedCases": 3,
+    "fullProfileAcceptance": false
+  },
+  "initialFailure": {
+    "sourceSha": "f374d55",
+    "passed": 0,
+    "failed": 4,
+    "rootCause": "42501 StudentWorkspaceEventInbox fixture grant absent; later cases encountered earlier pending work",
+    "productRuntimeBugClaimed": false
+  },
+  "leaseExpiry": "REAL_WALL_CLOCK_NO_ROW_EXPIRY_REWRITE",
+  "providerScope": "No financial, email or other external provider invoked",
+  "fixtures": "Synthetic role/identity/outbox setup; not an owner command publication proof",
+  "pipeline": "Real child processes -> TransactionalOutboxDispatcher -> PrismaTransactionalOutboxStore -> StudentWorkspaceOutboxDeliveryGateway -> StudentWorkspaceUseCases -> PrismaStudentWorkspaceRepository -> inbox/workspace/audit",
+  "exhaustion": "Existing FAILED plus availableAt year9999 parking; not a separate DLQ or alert proof",
+  "localChecks": {
+    "provisioning": {
+      "passed": 36,
+      "reason": "Changed optional fixture provisioning"
+    },
+    "selection": {
+      "passed": 4,
+      "reason": "Uses exact selected-case execution"
+    },
+    "targetedEslint": "PASS"
+  },
+  "remaining": [
+    "SIGTERM budget and bounded overrun on actual Linux host",
+    "Distributed API sessions/rate limits and Redis isolation/outages/freshness",
+    "Reordered owner events and active worker health observations",
+    "Signed webhook replay, unknown outcomes and reconciliation using provider stubs",
+    "Canonical import-to-owner mapping and full financial/receipt invariants"
+  ],
+  "R05": "UNCHANGED_PASS_LOCAL_ONLY",
+  "R06": "UNCHANGED_CORE_COMPLETE_WITH_EXCEPTIONS_FORMAL_OPEN",
+  "R07": "UNCHANGED_OPEN_RELEASE_GATES"
+}

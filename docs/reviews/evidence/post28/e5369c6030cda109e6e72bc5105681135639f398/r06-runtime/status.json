@@ -1,0 +1,16 @@
+{
+  "phase": "R06",
+  "status": "PARTIAL_SCOPED_RUNTIME_PASSED",
+  "sourceSha": "e5369c6030cda109e6e72bc5105681135639f398",
+  "runId": "c1fe555a-b68c-48d5-bedb-9b00b6972335",
+  "profiles": [
+    "assets"
+  ],
+  "databaseTestsPassed": 39,
+  "databaseTestsFailed": 0,
+  "databaseTestsSkipped": 0,
+  "R05": "REVIEW_COMPLETE_WITH_BLOCKERS_NOT_PASSED",
+  "fullR06Acceptance": false,
+  "cloudAcceptance": false,
+  "deploymentAuthorized": false
+}

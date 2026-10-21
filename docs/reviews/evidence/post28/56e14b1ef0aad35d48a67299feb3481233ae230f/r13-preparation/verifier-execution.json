@@ -1,0 +1,23 @@
+{
+  "kind": "R13_REAL_READ_ONLY_VERIFIER_EXECUTION",
+  "sourceSha": "56e14b1ef0aad35d48a67299feb3481233ae230f",
+  "operator": "prepare-r13-review-packet.mjs",
+  "artifactCheck": {
+    "exitCode": 0,
+    "stdout": "RELEASE_ARTIFACTS=SOURCE_DIGESTS_VERIFIED sourceSha=4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b RUNTIME_BOOT=UNVERIFIED PROMOTION=BLOCKED_WITHOUT_SIGNED_EVIDENCE",
+    "failureCode": null
+  },
+  "shaMismatch": {
+    "exitCode": 1,
+    "stdout": "",
+    "failureCode": "RELEASE_SOURCE_IDENTITY_MISMATCH"
+  },
+  "absentEnvelope": {
+    "exitCode": 1,
+    "stdout": "",
+    "failureCode": "RELEASE_EVIDENCE_BUNDLE_JSON_REQUIRED"
+  },
+  "keysOrApprovalsSynthesized": false,
+  "databaseOrNetworkAccess": false,
+  "productionAllowed": false
+}

@@ -1,0 +1,45 @@
+{
+  "sourceSha": "8e001c92a97e0e2f865adce90fc4b3bc6d3b5514",
+  "files": [
+    {
+      "file": "ci-observation.json",
+      "bytes": 1315,
+      "sha256": "73fa15be205c34f05a273f31b8db4e4b1c2958508b1db2f9488efc4ecb36e65e"
+    },
+    {
+      "file": "artifact-retrieval.txt",
+      "bytes": 1041,
+      "sha256": "49b113276068cbaaa3100c2371b52aa745b8a918fb22a5837d84b52db32a7531"
+    },
+    {
+      "file": "receipt-retrieval.json",
+      "bytes": 402,
+      "sha256": "74008ab24a6aaaa1fe6307e587a069194e811441a4212e0cfd112c314c7ea965"
+    },
+    {
+      "file": "old-pair-blocked.json",
+      "bytes": 439,
+      "sha256": "15d765fd03a07c32a7197f3a4ffa179087d1ddf7544d27573402d03ef8f024c6"
+    },
+    {
+      "file": "old-pair-retrieval.json",
+      "bytes": 408,
+      "sha256": "9ea593b936119a522a3f731e39c026321a0f1313bfb986d0016527c5dab6091f"
+    },
+    {
+      "file": "reference.json",
+      "bytes": 554,
+      "sha256": "2fc65985b059afae6aecc4df08806974877b15e8dcf3e3103a6ecd3d88fd346a"
+    },
+    {
+      "file": "cms-result.json",
+      "bytes": 78206,
+      "sha256": "ff8c7f355e7204494b6082a7db38ee0d77021874449d109f0d7d8fa1f410620e"
+    },
+    {
+      "file": "cms-retrieval.json",
+      "bytes": 400,
+      "sha256": "668c74797e476a42737c5b5fb9895f1b89cc04dad8e7a9cf709449b044f7e91f"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "final-release-tests",
+  "sourceSha": "c2c5c7de70d81b5c8110eae6dd589dab0ec60e11",
+  "command": [
+    "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node.exe",
+    "--test",
+    "tests/release/post28-diagnostic-process.test.mjs",
+    "tests/release/post28-runtime-modules.test.mjs",
+    "tests/release/post28-runtime-layer.test.mjs",
+    "tests/release/post28-static-host.test.mjs",
+    "tests/release/post28-r07-static-runtime.test.mjs",
+    "tests/release/section28.test.mjs"
+  ],
+  "startedAt": "2026-10-16T22:15:49.451Z",
+  "finishedAt": "2026-10-16T22:15:50.998Z",
+  "exitCode": 1,
+  "node": "v22.16.0",
+  "platform": "win32",
+  "architecture": "x64",
+  "logSha256": "926d9dd8c094908944de909872f903018e174e423942698f4a983be230b93a57"
+}

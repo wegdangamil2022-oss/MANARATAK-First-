@@ -161,6 +161,8 @@ export interface CmsPublishingReadinessDto {
 }
 
 export interface CmsContentDetailDto extends CmsContentDto {
+  /** Current public snapshots, independent of the edited locale's workflow state. */
+  publishedLocales?: string[];
   localizedPayloads: CmsLocalizedContentDto[];
   tags: CmsTagDto[];
   attachments: CmsAttachmentDto[];

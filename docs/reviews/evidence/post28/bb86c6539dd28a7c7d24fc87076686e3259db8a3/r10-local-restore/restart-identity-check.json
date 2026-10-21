@@ -1,0 +1,13 @@
+{
+  "sourceSha": "bb86c6539dd28a7c7d24fc87076686e3259db8a3",
+  "originalLabCreatedAt": "2026-10-20T14:32:37.602Z",
+  "checkedAt": "2026-10-20T14:50:43.504Z",
+  "serverIdentity": "7698757869367514992",
+  "binarySha256": "19e73deb1152b3b505f2e1fd579191427f9eb3b3f800754968e7214b24edf31d",
+  "dataDirectoryIdentitySha256": "94e0254cf93639c250d6941fd9f8d8aa75ed994a6a24a7b0e5f83bbb540f8fd4",
+  "labStateSha256": "e8423e524a9f35c52e295c0bbbb9b3650ece6ea8aa14fbe60df17ef201d20f43",
+  "tlsRootCertificateSha256": "3f2b80d674cf10dbfdc993f775434d80b2b3e0722bba06fe2ed1b4c015f9ab91",
+  "observedPostmasterPid": 8144,
+  "creationAttestationStillValid": true,
+  "creationTimestampRelabeled": false
+}

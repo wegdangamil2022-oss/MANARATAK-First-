@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "title": "MANARATAK Post28 isolated Neon target registry (NON_SECRET)",
+  "repository": "wegdangamil2022-oss/MANARATAK-First-",
+  "git": {
+    "workingBranch": "fix/post28-ci-environment-inventory-20261016",
+    "baselineBranch": "main"
+  },
+  "neon": {
+    "projectName": "manaratak-testing",
+    "projectId": "lively-feather-03681988",
+    "validationBranchName": "post28-validation",
+    "validationBranchId": "br-patient-recipe-bahs1ix7",
+    "validationDatabase": "manaratak_test",
+    "pgMajorVersion": 16,
+    "regionId": "aws-eu-central-1",
+    "purpose": "long-lived disposable-test BASELINE / reference, never production",
+    "validationEndpointId": "ep-restless-wind-badta11i",
+    "validationDirectHost": "ep-restless-wind-badta11i.c-8.eu-central-1.aws.neon.tech"
+  },
+  "validation": {
+    "checkedAt": "2026-10-16",
+    "neonBranchReady": true,
+    "neonReadOnlyConnectionVerified": true,
+    "databaseTableCountAtVerification": 0,
+    "codexEnvironmentAccess": "NOT_CONFIGURED",
+    "repoRemoteDatabaseGuardCompatibility": "READ_ONLY_PREFLIGHT_IMPLEMENTED_REMOTE_MUTATIONS_BLOCKED",
+    "applicationMigrationsApplied": false,
+    "schemaParityVerified": false,
+    "runtimeAcceptance": "NOT_STARTED",
+    "productionAcceptance": "NOT_AUTHORIZED",
+    "latestReadOnlyInspection": {
+      "transport": "Neon MCP, explicit project/branch/endpoint/database/owner role",
+      "publicTables": 0,
+      "ownerRolePrivileged": true,
+      "sqlSessionTls": false,
+      "directCodexPrismaConnection": "BLOCKED_NO_SECRETS_OR_TCP_GRANT",
+      "R02Core": "PARTIAL",
+      "R03": "BLOCKED"
+    }
+  },
+  "requiredSecretNames": [
+    "DATABASE_URL",
+    "DIRECT_URL"
+  ],
+  "prohibited": [
+    "secrets_in_git",
+    "autonomous_migrate_reset",
+    "db_push",
+    "bypass_remote_disposable_guard",
+    "using_default_neon_branch_for_tests",
+    "using_this_branch_for_production",
+    "marking_evidence_PASS_without_real_tests"
+  ],
+  "handoff": "docs/operations/POST28_NEON_TEST_DATABASE_HANDOFF.md",
+  "readOnlyPreflightGuide": "docs/operations/POST28_NEON_READ_ONLY_PREFLIGHT.md",
+  "r03": {
+    "status": "PARTIALLY_PROVISIONED_BLOCKED",
+    "asOf": "2026-10-16",
+    "greenfield": {
+      "branchName": "post28-r03-db-g-20261016",
+      "branchId": "br-raspy-shadow-ba33tmh3",
+      "endpointId": "ep-red-king-baoyw96q",
+      "directHost": "ep-red-king-baoyw96q.c-8.eu-central-1.aws.neon.tech",
+      "database": "manaratak_post28_greenfield_test",
+      "roles": {
+        "migration": "post28_g_migrate_limited",
+        "application": "post28_g_app_limited"
+      },
+      "publicTablesAtCheck": 0
+    },
+    "shadow": {
+      "branchName": "post28-r03-db-s-20261016",
+      "branchId": "br-round-dew-bahzpr4x",
+      "endpointId": "ep-tiny-recipe-ba15g3br",
+      "directHost": "ep-tiny-recipe-ba15g3br.c-8.eu-central-1.aws.neon.tech",
+      "database": "manaratak_post28_shadow_test",
+      "roles": {
+        "shadow": "post28_s_shadow_limited"
+      },
+      "publicTablesAtCheck": 0
+    },
+    "unapprovedPrivilegedRoles": [],
+    "secretsConfigured": false,
+    "directPrismaTlsVerified": false,
+    "remoteMutationsAuthorized": false,
+    "detail": "docs/operations/POST28_R03_NEON_PROVISIONING_2026-10-16.md",
+    "followUp": {
+      "asOf": "2026-10-16",
+      "status": "BLOCKED_RUNTIME_CONFIGURATION_AFTER_UNSAFE_ROLE_REMOVAL",
+      "limitedRoleAuthentication": "LOGIN_TRUE_PASSWORD_MISSING_3_ROLES",
+      "unsafeRoleRemediation": "VERIFIED_REMOVED_2026-10-16",
+      "tcpConfigured": false,
+      "directPrismaTlsVerified": false,
+      "r04Readiness": "BLOCKED",
+      "report": "docs/operations/POST28_R03_NEON_FOLLOWUP_2026-10-16.md",
+      "latestVerifiedGitHubReport": "docs/operations/POST28_R03_NEON_FOLLOWUP_2026-10-16.md"
+    },
+    "unsafeRolesRemoved": [
+      "post28_migrator",
+      "post28_app",
+      "post28_shadow"
+    ],
+    "rolesRemediation": "VERIFIED_REMOVED_2026-10-16"
+  }
+}

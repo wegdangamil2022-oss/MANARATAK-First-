@@ -1,0 +1,1 @@
+Historical diagnostics only. The initial full Vitest run: 5043 passed, 33 failed, 7 skipped; ten node:test TypeScript files were misrouted. Some diagnostics overlapped repairs and have a working-tree diff hash. They are not clean-SHA acceptance. Original Vitest identity regression: 39 passed, 1 failed. All logs are preserved without relabeling them as the frozen run.

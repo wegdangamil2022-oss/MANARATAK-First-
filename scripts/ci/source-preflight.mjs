@@ -5,7 +5,7 @@ const checks = [
   ['scripts/architecture/verify-source-architecture-guards.mjs'],
   ['scripts/architecture/verify-di-reachability.mjs'],
   ['scripts/architecture/verify-admin-audit-coverage.mjs'],
-  ['scripts/aistudio/environment.mjs', '--check'],
+  ['scripts/config/environment-inventory.mjs', '--check'],
   ['--test', 'tests/architecture/ci-runtime-regressions.test.mjs', 'tests/remediation/w2-migration-recovery-source.test.mjs', 'tests/remediation/m10-recovery-gate-exit.test.mjs', 'tests/security/admin-audit-coverage.test.mjs', 'tests/translation/dictionary-source.test.mjs'],
 ];
 for (const args of checks) {

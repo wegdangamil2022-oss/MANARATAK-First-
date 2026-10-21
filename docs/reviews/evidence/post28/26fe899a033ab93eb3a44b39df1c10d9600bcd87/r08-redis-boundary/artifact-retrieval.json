@@ -1,0 +1,12 @@
+{
+  "sourceSha": "26fe899a033ab93eb3a44b39df1c10d9600bcd87",
+  "runId": "39287364100",
+  "jobId": 118178128146,
+  "artifactId": 12203358536,
+  "artifactName": "r08-redis-diagnostic-26fe899a033ab93eb3a44b39df1c10d9600bcd87",
+  "zipSha256": "37b35915ff56d6990d890192a4407215f791d8837bbe7d977b96db72869b3bff",
+  "archiveEntriesValidated": 1,
+  "entry": "post28-r08-redis-result.json",
+  "temporarySignedUrlStored": false,
+  "releaseUnitsRetrievalGateSatisfied": false
+}

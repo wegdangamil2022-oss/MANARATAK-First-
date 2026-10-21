@@ -59,11 +59,10 @@ export class CoursePublicationService {
     if (!this.importedOperations) throw new Error('IMPORTED_COURSE_PUBLICATION_EVIDENCE_NOT_CONFIGURED');
 
     if (
-      course.accessType !== CourseAccessType.FREE_STUDY_AND_CERTIFICATE ||
-      course.isStudyFree !== true ||
-      course.isFreeCertificate !== true
+      ![CourseAccessType.FREE_STUDY, CourseAccessType.FREE_STUDY_AND_CERTIFICATE].includes(course.accessType) ||
+      course.isStudyFree !== true
     ) {
-      throw new Error('IMPORTED_COURSE_FREE_STUDY_AND_CERTIFICATE_REQUIRED');
+      throw new Error('IMPORTED_COURSE_FREE_STUDY_REQUIRED');
     }
 
     const detail = await this.importedOperations.getImportedCourseById(course.id);
@@ -118,6 +117,18 @@ export class CoursePublicationService {
       if (!current || current.status !== CourseStatus.READY_TO_PUBLISH || current.version !== course.version) {
         throw new Error('COURSE_PUBLICATION_STATE_CHANGED');
       }
+      if (!tx.lockPublicationReferences) throw new Error('COURSE_PUBLICATION_REFERENCE_LOCK_REQUIRED');
+      await tx.lockPublicationReferences(course.id);
+      if (this.relationshipRepository && !this.relationshipRepository.withTransaction)
+        throw new Error('COURSE_RELATIONSHIP_TRANSACTION_REQUIRED');
+      if (this.importedOperations && !this.importedOperations.withTransaction)
+        throw new Error('COURSE_SOURCE_TRANSACTION_REQUIRED');
+      await new CoursePublicationService(
+        tx,
+        this.importedOperations?.withTransaction?.(persistence),
+        undefined,
+        this.relationshipRepository?.withTransaction?.(persistence),
+      ).assertPublicationReady(current);
       await tx.updateStatus(course.id, CourseStatus.PUBLISHED);
     });
   }

@@ -1,0 +1,44 @@
+{
+  "kind": "R14_READ_ONLY_SOURCE_REFERENCES",
+  "reviewSha": "83e210e0eb9505c875129948bd52171986f458b3",
+  "verifiedAt": "2026-10-20T23:50:00.909Z",
+  "references": [
+    {
+      "path": "config/release/source-release-policy.json",
+      "gitRef": "83e210e0eb9505c875129948bd52171986f458b3",
+      "bytes": 673,
+      "sha256": "0c411f4436c678f37e4d49baa1f98e22529fd93a494e49a1b344235208299240"
+    },
+    {
+      "path": "config/release/runtime-acceptance-contract.json",
+      "gitRef": "83e210e0eb9505c875129948bd52171986f458b3",
+      "bytes": 2054,
+      "sha256": "620ece8284c2edae8bc6c0dda95176406541fc3a9666582c85e4b1ed973e0199"
+    },
+    {
+      "path": "config/recovery/aws-review-target.json",
+      "gitRef": "83e210e0eb9505c875129948bd52171986f458b3",
+      "bytes": 1198,
+      "sha256": "aeb3a24058c235348d934cdda8a301b1b07f4884064ce2ae9b243b8125737dd2"
+    },
+    {
+      "path": "docs/remediation/POST28_R13_CURRENT_REVIEW_2026-10-21.json",
+      "gitRef": "83e210e0eb9505c875129948bd52171986f458b3",
+      "bytes": 1368,
+      "sha256": "345775be6181c2125277956349e752cb90f0fe87aa30857e378b3d63871e8e11"
+    },
+    {
+      "path": "docs/remediation/POST28_R11_CURRENT_REVIEW_2026-10-21.json",
+      "gitRef": "83e210e0eb9505c875129948bd52171986f458b3",
+      "bytes": 1520,
+      "sha256": "bdc07153ce2f1844d53e51f75f913afde9d6f65ea43346cc1c7407401c594878"
+    },
+    {
+      "path": "docs/remediation/POST28_R12_CURRENT_REVIEW_2026-10-21.json",
+      "gitRef": "83e210e0eb9505c875129948bd52171986f458b3",
+      "bytes": 1302,
+      "sha256": "e8ce52f18bd9e1993e7f107c80d224562269ee0fc66171d3af14173c37c3065a"
+    }
+  ],
+  "noHistoricalEvidenceRebound": true
+}

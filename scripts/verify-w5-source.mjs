@@ -50,7 +50,7 @@ const checks = [
     files.repository.includes('canonicalReferenceId: country.id') &&
     files.repository.includes('canonicalReferenceId: language.id') &&
     files.reconciliation.includes('canonicalReferenceId: null') &&
-    files.reconciliation.includes('PENDING_GOOGLE_STUDIO')],
+    files.reconciliation.includes('PENDING_APPROVED_RUNTIME')],
   ['P9-REL-003',
     files.useCases.includes('this.canonicalRelationshipService.canonicalize(data)') &&
     createsRelationship('countryRelationships') &&
@@ -100,5 +100,5 @@ for (const [finding, ok] of checks) {
   if (ok) passed += 1;
 }
 console.log(`W5_SOURCE_VERIFIER=${passed === checks.length ? 'PASS' : 'FAIL'} ${passed}/${checks.length}`);
-console.log('W5_RUNTIME_DB_PROOF=PENDING_GOOGLE_STUDIO');
+console.log('W5_RUNTIME_DB_PROOF=PENDING_APPROVED_RUNTIME');
 process.exitCode = passed === checks.length ? 0 : 1;

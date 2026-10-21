@@ -1,0 +1,11 @@
+﻿{
+    "serverIdentity":  "7698170700523802352",
+    "port":  63940,
+    "recordedPid":  16024,
+    "processPresent":  false,
+    "listenerPresent":  false,
+    "stalePidFilePresent":  true,
+    "pgCtlStopSucceeded":  false,
+    "gracefulShutdownProven":  false,
+    "observation":  "Owned lab process had already exited before pg_ctl stop; retained failure and stale PID file. No existing database touched."
+}

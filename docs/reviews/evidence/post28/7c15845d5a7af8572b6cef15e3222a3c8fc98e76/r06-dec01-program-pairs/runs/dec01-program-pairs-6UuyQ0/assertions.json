@@ -1,0 +1,92 @@
+[
+  {
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs",
+    "title": "matches an explicit funded program without requiring duplicated independent targets",
+    "ancestors": [
+      "Post28 DEC01 exact funded degree major program pairs"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs",
+    "title": "rejects Cartesian pairs even when both independent target lists contain the requested values",
+    "ancestors": [
+      "Post28 DEC01 exact funded degree major program pairs"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs",
+    "title": "keeps each explicitly funded pair with exact API counts",
+    "ancestors": [
+      "Post28 DEC01 exact funded degree major program pairs"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs",
+    "title": "rejects a major inconsistent with the explicitly requested program",
+    "ancestors": [
+      "Post28 DEC01 exact funded degree major program pairs"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs",
+    "title": "does not use a university-only link as evidence of a funded degree major pair",
+    "ancestors": [
+      "Post28 DEC01 exact funded degree major program pairs"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs",
+    "title": "withdraws paired filter eligibility when the published profile version is withdrawn",
+    "ancestors": [
+      "Post28 DEC01 exact funded degree major program pairs"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs",
+    "title": "rejects a foreign university link despite valid individual foreign keys and target lists",
+    "ancestors": [
+      "Post28 DEC01 exact funded degree major program pairs"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs",
+    "title": "does not infer pairs from independent targets when the program relationship is unresolved",
+    "ancestors": [
+      "Post28 DEC01 exact funded degree major program pairs"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs",
+    "title": "filters exact pairs before cursor pagination and preserves totals across two pages",
+    "ancestors": [
+      "Post28 DEC01 exact funded degree major program pairs"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs",
+    "title": "rejects a current profile version belonging to a different major and profile despite valid foreign keys",
+    "ancestors": [
+      "Post28 DEC01 exact funded degree major program pairs"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  }
+]

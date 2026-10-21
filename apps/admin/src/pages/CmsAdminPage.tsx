@@ -66,6 +66,7 @@ interface DomainLink {
   sortOrder: number;
 }
 interface Detail extends Content {
+  publishedLocales?: string[];
   localizedPayloads: Localized[];
   tags: Tag[];
   revisions: Array<{ id: string; versionNumber: number; reason: string; capturedAt: string }>;
@@ -1277,7 +1278,15 @@ export function CmsAdminPage() {
                       </Action>
                       <Action
                         onClick={() => void runWorkflow('archive')}
-                        disabled={!canPublish || busy || dirty || localizedState !== 'PUBLISHED'}
+                        disabled={
+                          !canPublish ||
+                          busy ||
+                          dirty ||
+                          !(
+                            selected.publishedLocales?.includes(locale) ??
+                            localizedState === 'PUBLISHED'
+                          )
+                        }
                       >
                         <Archive className="h-4 w-4" />
                         {tr('أرشفة')}{' '}

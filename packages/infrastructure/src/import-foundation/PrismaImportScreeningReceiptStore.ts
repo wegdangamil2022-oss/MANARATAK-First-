@@ -33,7 +33,7 @@ export class PrismaImportScreeningReceiptStore implements IImportScreeningReceip
   async accept(handoff: UniversalImportHandoff, screen: () => Promise<unknown>) {
     const identity = screeningReceiptIdentity(handoff);
     return this.prisma.$transaction(async tx => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`screening:${identity.ownerDomain}:${identity.handoffKey}`}, 0))`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`screening:${identity.ownerDomain}:${identity.handoffKey}`}, 0))::text`;
       const prior = await tx.importScreeningReceipt.findUnique({ where: {
         ownerDomain_handoffKey: { ownerDomain: identity.ownerDomain, handoffKey: identity.handoffKey } } });
       if (prior) {

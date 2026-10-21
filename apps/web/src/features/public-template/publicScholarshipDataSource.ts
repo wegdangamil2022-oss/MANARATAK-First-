@@ -47,8 +47,11 @@ export function mapPublicScholarshipDto(dto: PublicScholarshipDto, now = new Dat
   const legacyFields = toTextList(dto.eligibleMajorsOrFields);
   const canonicalUniversityLinks = (dto.universityLinks ?? []).filter((link) => Boolean(link.universityId));
   const canonicalMajorTargets = (dto.majorTargets ?? []).filter((target) => Boolean(target.majorId));
-  const canonicalDegrees = (dto.degreeTargets ?? []).flatMap((target) => normalizeDegreeLevels(target.degreeLevel?.canonicalCode ?? target.sourceLabel ?? ''));
-  const legacyDegrees = normalizeDegreeLevels(dto.degreeLevel ?? '');
+  const hasProgramProjection = dto.fundedProgramPairs !== undefined;
+  const canonicalDegrees = hasProgramProjection
+    ? (dto.fundedProgramPairs ?? []).flatMap(pair => normalizeDegreeLevels(pair.degreeLabel ?? ''))
+    : (dto.degreeTargets ?? []).flatMap((target) => normalizeDegreeLevels(target.degreeLevel?.canonicalCode ?? target.sourceLabel ?? ''));
+  const legacyDegrees = hasProgramProjection ? [] : normalizeDegreeLevels(dto.degreeLevel ?? '');
   const deadline = dto.applicationDeadline ?? '';
   const deadlineDate = deadline ? new Date(deadline) : null;
   const isClosed = deadlineDate !== null && !Number.isNaN(deadlineDate.getTime()) && deadlineDate < now;
@@ -80,7 +83,9 @@ export function mapPublicScholarshipDto(dto: PublicScholarshipDto, now = new Dat
     nameEn: link.sourceLabel ?? 'Linked university',
   }));
   const universityLabel = participatingUniversities[0]?.name ?? legacyUniversities[0] ?? dto.providerName ?? dto.sponsorName ?? '';
-  const fields = canonicalMajorTargets.map((target) => target.sourceLabel ?? target.majorId ?? '').filter(Boolean);
+  const fields = hasProgramProjection
+    ? (dto.fundedProgramPairs ?? []).map(pair => pair.majorLabel || pair.majorId)
+    : canonicalMajorTargets.map((target) => target.sourceLabel ?? target.majorId ?? '').filter(Boolean);
 
   return {
     id: dto.slug,
@@ -90,8 +95,8 @@ export function mapPublicScholarshipDto(dto: PublicScholarshipDto, now = new Dat
     title: dto.localizedNames?.ar || dto.displayName,
     publishedData: dto,
     titleEn: dto.localizedNames?.en || dto.canonicalName,
-    country: dto.studyCountry ?? dto.countrySourceLabel ?? '',
-    countryEn: dto.studyCountry ?? dto.countrySourceLabel ?? '',
+    country: dto.studyCountryLabel ?? dto.studyCountry ?? dto.countrySourceLabel ?? '',
+    countryEn: dto.studyCountryLabel ?? dto.studyCountry ?? dto.countrySourceLabel ?? '',
     countryFlag: '',
     university: universityLabel,
     universityEn: universityLabel,
@@ -103,7 +108,7 @@ export function mapPublicScholarshipDto(dto: PublicScholarshipDto, now = new Dat
     featured: false,
     tag: 'منحة منشورة',
     imageUrl: '',
-    field: (fields.length ? fields : legacyFields).join('، '),
+    field: (hasProgramProjection || fields.length ? [...new Set(fields)] : legacyFields).join('، '),
     requirements: requirements.length ? [...requirements, ...eligibility] : eligibility.length ? eligibility : toTextList(dto.eligibilityCriteria),
     description: dto.description || dto.coverageDetails || dto.eligibilityCriteria || '',
     applicationUrl: dto.applicationLink ?? dto.applicationUrl ?? dto.officialSourceUrl ?? '',

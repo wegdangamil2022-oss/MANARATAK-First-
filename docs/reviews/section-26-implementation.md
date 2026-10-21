@@ -50,7 +50,7 @@ Activity coverage is the allowlist of ROLE, ROLE_ASSIGNMENT, POLICY, IDENTITY, S
 
 ## Validation and limits
 
-One source invocation: `node scripts/verify-dashboard-source-closure.mjs`: **26 passed, 2 failed / 28**, 2.25 seconds. Both failures were the new static-render fixtures: root tsconfig used classic JSX and `React` was undefined in automatic-JSX Admin components. Runner now sets `TSX_TSCONFIG_PATH=apps/admin/tsconfig.json`. No test rerun, renamed section-25 test, or full-repository suite. Evidence: `evidence/section-26/source-tests.txt`.
+One source invocation: `node scripts/verify-dashboard-source-closure.mjs`: **26 passed, 2 failed / 28**, 2.25 seconds. Both failures were the new static-render fixtures: root tsconfig used classic JSX and `React` was undefined in automatic-JSX Admin components. Runner now sets `TSX_TSCONFIG_PATH=apps/admin/tsconfig.json`. No test rerun, renamed section-25 test, or full-repository suite. Evidence: `docs/reviews/evidence/section-26-initial-20261014/source-tests.txt`.
 
 One API/Admin TypeScript invocation returned **exit 2**, reporting only `CmsAdminPage.tsx:1510 TS6133` for a redundant reviewParams hook introduced by section 24. Removed that extra hook from Status while preserving the actual CMS list handoff. Pushed the correction independently to main as `4af2c2cf` and fast-forwarded section 26 after stashing/restoring its local work. Compiler not rerun. Later generic actor-alias, finance staleness and DI consumer metadata changes are also un-rechecked; do not assert final compiler success.
 

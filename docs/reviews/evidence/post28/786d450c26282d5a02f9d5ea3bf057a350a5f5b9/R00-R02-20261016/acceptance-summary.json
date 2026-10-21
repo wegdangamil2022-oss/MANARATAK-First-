@@ -1,0 +1,117 @@
+{
+  "sourceSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "stageStatuses": {
+    "R00": "OPEN_OWNER_SCOPE_AND_AUTHORITY_INPUT",
+    "R01": "OPEN_REMOTE_CI_AND_RUNTIME_OBLIGATIONS",
+    "R02-core": "PARTIAL_SOURCE_VERIFIED_DATABASE_DEFERRED",
+    "R02-coverage": "BLOCKED_OWNER_DECISIONS_AND_PRODUCERS"
+  },
+  "checks": {
+    "unit": {
+      "exitCode": 0,
+      "logSha256": "e73410c032acc29ee4111a37d4c72e0d0ae3a34bbd253f2fc298d8d0e283a06c"
+    },
+    "manifest": {
+      "exitCode": 0,
+      "logSha256": "5e5b739d8723127a26b2db3c664ce86633b7a1eacf10cf7bde8d9cf7b99f8c34"
+    },
+    "post28-regressions": {
+      "exitCode": 0,
+      "logSha256": "ee4e6ceb729e2ec0ac271fe7a3c91dfa9da4d99569657a56338f4f699e1d29e5"
+    },
+    "section20": {
+      "exitCode": 0,
+      "logSha256": "21222dbba26c0a7214e4ae5e0b4beb340c88ad0fa793af365d8a688ded49174e"
+    },
+    "b13": {
+      "exitCode": 0,
+      "logSha256": "b0a080f38f8193c7c0e060f31fa1433a4c44f34acdf319d2d596efa6a33f69a6"
+    },
+    "b12": {
+      "exitCode": 0,
+      "logSha256": "fdd87cb0c74116f6c9ab88a3dd35a82f01c45fb6f51f6477bfd1e4691855b8d6"
+    },
+    "postclosure": {
+      "exitCode": 0,
+      "logSha256": "508ca98e1f8533c22f39d0eed6cf46de6d6dd964ff32744588b73fbf41e6bef5"
+    },
+    "preflight": {
+      "exitCode": 0,
+      "logSha256": "1054dcc932a18fd2c3b1bd96b9d846106ca74539fbe81f17b085e4a6e250f871"
+    },
+    "typecheck": {
+      "exitCode": 0,
+      "logSha256": "4ec075231d9f52f5dd547ac8e7270c71a0b769e01d64ea0048dbf6cbb20c028b"
+    },
+    "lint": {
+      "exitCode": 0,
+      "logSha256": "7109064fb8a29694aa0f92d038988e8ab2ea271da282b7f82c2c8fe1e2b4d597"
+    },
+    "build": {
+      "exitCode": 0,
+      "logSha256": "6aff42c2ad3d8e567a980c0ed6192b6b0abf396234d5fd8db6d4e002dbb86213"
+    },
+    "catalog": {
+      "exitCode": 0,
+      "logSha256": "1223c3cd45df3195c3df75403e3893a99e67f071e3a63654e115bc640e568089"
+    },
+    "security-secrets": {
+      "exitCode": 0,
+      "logSha256": "8b4e6b42a636d9540459c5644df3f73667d74321793f6cb35a1551095a4659a7"
+    },
+    "action-pins": {
+      "exitCode": 0,
+      "logSha256": "45a0d55a00b4594e48e695c6c3f74a9cbeb54bc5c207c127fe1c9b892c4136d1"
+    },
+    "audit": {
+      "exitCode": 0,
+      "logSha256": "6d8c5c8f3d7684adb070417bd608d01ae90aa3dc26a65af03ffda4955f38d9a3"
+    },
+    "discovery-assets": {
+      "exitCode": 0,
+      "logSha256": "2dc7c50db279d187e3428032e5ad4664c667147a274bd462f99991a76449385e"
+    },
+    "discovery-leases": {
+      "exitCode": 0,
+      "logSha256": "21905487e4ce92da82bae7b8d85321469bfa861e02c8e8cf50f1ed8e550c5aa0"
+    },
+    "discovery-persistence": {
+      "exitCode": 0,
+      "logSha256": "009e30485570a15ba86a2bc6f0666734de4b195df2027183c370182de94fc227"
+    },
+    "discovery-sections123": {
+      "exitCode": 0,
+      "logSha256": "bb04323d5b011388ad267de882067ecfa9b128c560c1ef4c0650c1eb8b400d06"
+    }
+  },
+  "sourceManifest": {
+    "executed": 33,
+    "passed": 33,
+    "runtimeNotExecuted": [
+      "database-integration",
+      "browser-e2e"
+    ]
+  },
+  "unitCounts": {
+    "vitest": {
+      "passed": 5076,
+      "skipped": 7,
+      "total": 5083,
+      "failed": 0
+    },
+    "node": {
+      "total": 648,
+      "passed": 648,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    }
+  },
+  "databaseRuntimeExecuted": 0,
+  "databaseCreationDeferredByUser": true,
+  "ownerDecisionsApproved": false,
+  "R03Started": false,
+  "deploymentPerformed": false,
+  "productionDecision": "NO_GO"
+}

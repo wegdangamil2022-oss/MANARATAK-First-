@@ -1,0 +1,584 @@
+{
+  "sourceArchiveSha256": "1fdd6c7fd8d7675cb1c93b0044dd63f9dbb501c786157c7710283bc44c3f2f5d",
+  "sourceExtractionSha256": "f8cdb176823d1e0c02faf73413ce3a50bde5bdca89099861b34a4da59e5c467b",
+  "records": [
+    {
+      "id": "b75e9c5d-4144-4ac9-9ae2-bc0031736628",
+      "reference": "POST28-R05:186b4fc2-d77a-45ab-8e97-0c3aabef0a20:1",
+      "action": "R05_PROCESSING_STAGE",
+      "category": "ASSET_REMEDIATION",
+      "severity": "INFO",
+      "actorId": "DELEGATED_SYNTHETIC_LAB_EXECUTOR",
+      "actorType": "SYSTEM",
+      "targetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+      "targetType": "ASSET",
+      "source": "POST28_R05_REMEDIATION",
+      "timestamp": "2026-10-19 13:38:00.042",
+      "contextMetadata": {
+        "action": "R05_PROCESSING_STAGE",
+        "assetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+        "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "decision": {
+          "expiresAt": "2027-04-17T13:35:11.970Z",
+          "classification": "CONFIDENTIAL",
+          "legalHoldUntil": null,
+          "sourceCreatedAt": "2026-10-19T13:35:11.970Z",
+          "retentionCategory": "TEMPORARY"
+        },
+        "sequence": 1,
+        "snapshot": {
+          "id": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+          "state": "INITIATED",
+          "locator": "quarantine://synthetic-pdf-lab/uploads/1d111402-4eca-4745-8c03-b6f2f9274e54",
+          "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+          "metadata": {
+            "byteSize": 636,
+            "mimeType": "application/pdf",
+            "fileExtension": "pdf",
+            "originalFilename": "new-synthetic-historical-document.pdf"
+          },
+          "expiresAt": "2027-04-17T13:35:11.970Z",
+          "ownerType": "STUDENT",
+          "reference": "STUDENT-DOCUMENT-R05-186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+          "classification": "CONFIDENTIAL",
+          "retentionCategory": "TEMPORARY"
+        },
+        "operationId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+        "manifestSha256": "212a86a22662783c29c939ff55228c46f4b455ab260e0f1889e47f253a106864",
+        "retentionClass": "STANDARD_ADMIN",
+        "snapshotSha256": "833a5586230c09486650a4d4dc84e7ca79b53d4e0aad36e64af54e0786d5db0a",
+        "retentionPolicyStatus": "UNCONFIGURED_RETAIN",
+        "previousSnapshotSha256": null
+      },
+      "complianceMetadata": "null",
+      "correlationReference": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+      "traceReference": null,
+      "chainReference": null,
+      "retentionPeriodInDays": null,
+      "retentionExpiresAt": null,
+      "lifecycleState": "RECORDED",
+      "createdAt": "2026-10-19 13:38:00.055",
+      "updatedAt": "2026-10-19 13:38:00.055",
+      "legalHoldUntil": null,
+      "retentionProcessedAt": null,
+      "retentionClaimUntil": null,
+      "retentionClaimToken": null
+    },
+    {
+      "id": "ef0ecf0c-3efe-4277-8e4a-8516c03ae8a4",
+      "reference": "POST28-R05:186b4fc2-d77a-45ab-8e97-0c3aabef0a20:2",
+      "action": "R05_PROCESSING_STAGE",
+      "category": "ASSET_REMEDIATION",
+      "severity": "INFO",
+      "actorId": "DELEGATED_SYNTHETIC_LAB_EXECUTOR",
+      "actorType": "SYSTEM",
+      "targetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+      "targetType": "ASSET",
+      "source": "POST28_R05_REMEDIATION",
+      "timestamp": "2026-10-19 13:38:00.059",
+      "contextMetadata": {
+        "action": "R05_PROCESSING_STAGE",
+        "assetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+        "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "decision": {
+          "expiresAt": "2027-04-17T13:35:11.970Z",
+          "classification": "CONFIDENTIAL",
+          "legalHoldUntil": null,
+          "sourceCreatedAt": "2026-10-19T13:35:11.970Z",
+          "retentionCategory": "TEMPORARY"
+        },
+        "sequence": 2,
+        "snapshot": {
+          "id": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+          "state": "QUARANTINED",
+          "locator": "quarantine://synthetic-pdf-lab/uploads/1d111402-4eca-4745-8c03-b6f2f9274e54",
+          "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+          "checksum": {
+            "hash": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+            "algorithm": "sha256"
+          },
+          "metadata": {
+            "byteSize": 636,
+            "mimeType": "application/pdf",
+            "fileExtension": "pdf",
+            "originalFilename": "new-synthetic-historical-document.pdf"
+          },
+          "expiresAt": "2027-04-17T13:35:11.970Z",
+          "ownerType": "STUDENT",
+          "reference": "STUDENT-DOCUMENT-R05-186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+          "classification": "CONFIDENTIAL",
+          "retentionCategory": "TEMPORARY",
+          "uploadVerification": {
+            "locator": "quarantine://synthetic-pdf-lab/uploads/1d111402-4eca-4745-8c03-b6f2f9274e54",
+            "byteSize": 636,
+            "verifiedAt": "2026-10-19T13:38:00.056Z",
+            "checksumSha256": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+            "verifiedMimeType": "application/pdf",
+            "signatureVerified": true
+          }
+        },
+        "operationId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+        "manifestSha256": "212a86a22662783c29c939ff55228c46f4b455ab260e0f1889e47f253a106864",
+        "retentionClass": "STANDARD_ADMIN",
+        "snapshotSha256": "3790ba2c8df822841c78494ca5f8a05cceb789bc2d1a78a0793b8227f822bf97",
+        "retentionPolicyStatus": "UNCONFIGURED_RETAIN",
+        "previousSnapshotSha256": "833a5586230c09486650a4d4dc84e7ca79b53d4e0aad36e64af54e0786d5db0a"
+      },
+      "complianceMetadata": "null",
+      "correlationReference": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+      "traceReference": null,
+      "chainReference": null,
+      "retentionPeriodInDays": null,
+      "retentionExpiresAt": null,
+      "lifecycleState": "RECORDED",
+      "createdAt": "2026-10-19 13:38:00.072",
+      "updatedAt": "2026-10-19 13:38:00.072",
+      "legalHoldUntil": null,
+      "retentionProcessedAt": null,
+      "retentionClaimUntil": null,
+      "retentionClaimToken": null
+    },
+    {
+      "id": "ea3ee129-6eab-4843-b2b3-1a87f34caf0a",
+      "reference": "POST28-R05:186b4fc2-d77a-45ab-8e97-0c3aabef0a20:3",
+      "action": "R05_PROCESSING_STAGE",
+      "category": "ASSET_REMEDIATION",
+      "severity": "INFO",
+      "actorId": "DELEGATED_SYNTHETIC_LAB_EXECUTOR",
+      "actorType": "SYSTEM",
+      "targetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+      "targetType": "ASSET",
+      "source": "POST28_R05_REMEDIATION",
+      "timestamp": "2026-10-19 13:38:00.136",
+      "contextMetadata": {
+        "action": "R05_PROCESSING_STAGE",
+        "assetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+        "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "decision": {
+          "expiresAt": "2027-04-17T13:35:11.970Z",
+          "classification": "CONFIDENTIAL",
+          "legalHoldUntil": null,
+          "sourceCreatedAt": "2026-10-19T13:35:11.970Z",
+          "retentionCategory": "TEMPORARY"
+        },
+        "sequence": 3,
+        "snapshot": {
+          "id": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+          "state": "VALIDATING",
+          "locator": "quarantine://synthetic-pdf-lab/uploads/1d111402-4eca-4745-8c03-b6f2f9274e54",
+          "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+          "checksum": {
+            "hash": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+            "algorithm": "sha256"
+          },
+          "metadata": {
+            "byteSize": 636,
+            "mimeType": "application/pdf",
+            "fileExtension": "pdf",
+            "originalFilename": "new-synthetic-historical-document.pdf"
+          },
+          "expiresAt": "2027-04-17T13:35:11.970Z",
+          "ownerType": "STUDENT",
+          "reference": "STUDENT-DOCUMENT-R05-186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+          "malwareScan": {
+            "status": "PASSED",
+            "locator": "quarantine://synthetic-pdf-lab/uploads/1d111402-4eca-4745-8c03-b6f2f9274e54",
+            "scannedAt": "2026-10-19T13:38:00.133Z"
+          },
+          "classification": "CONFIDENTIAL",
+          "retentionCategory": "TEMPORARY",
+          "uploadVerification": {
+            "locator": "quarantine://synthetic-pdf-lab/uploads/1d111402-4eca-4745-8c03-b6f2f9274e54",
+            "byteSize": 636,
+            "verifiedAt": "2026-10-19T13:38:00.056Z",
+            "checksumSha256": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+            "verifiedMimeType": "application/pdf",
+            "signatureVerified": true
+          }
+        },
+        "operationId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+        "manifestSha256": "212a86a22662783c29c939ff55228c46f4b455ab260e0f1889e47f253a106864",
+        "retentionClass": "STANDARD_ADMIN",
+        "snapshotSha256": "1ccf65c34cfbf089000b3cfb386464dbba2f7f054de0440adf64c49f426c5f13",
+        "retentionPolicyStatus": "UNCONFIGURED_RETAIN",
+        "previousSnapshotSha256": "3790ba2c8df822841c78494ca5f8a05cceb789bc2d1a78a0793b8227f822bf97"
+      },
+      "complianceMetadata": "null",
+      "correlationReference": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+      "traceReference": null,
+      "chainReference": null,
+      "retentionPeriodInDays": null,
+      "retentionExpiresAt": null,
+      "lifecycleState": "RECORDED",
+      "createdAt": "2026-10-19 13:38:00.148",
+      "updatedAt": "2026-10-19 13:38:00.148",
+      "legalHoldUntil": null,
+      "retentionProcessedAt": null,
+      "retentionClaimUntil": null,
+      "retentionClaimToken": null
+    },
+    {
+      "id": "3f19d4f6-788c-4cc7-9ff5-707a0496bd7b",
+      "reference": "POST28-R05:186b4fc2-d77a-45ab-8e97-0c3aabef0a20:4",
+      "action": "R05_PROCESSING_STAGE",
+      "category": "ASSET_REMEDIATION",
+      "severity": "INFO",
+      "actorId": "DELEGATED_SYNTHETIC_LAB_EXECUTOR",
+      "actorType": "SYSTEM",
+      "targetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+      "targetType": "ASSET",
+      "source": "POST28_R05_REMEDIATION",
+      "timestamp": "2026-10-19 13:38:00.297",
+      "contextMetadata": {
+        "action": "R05_PROCESSING_STAGE",
+        "assetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+        "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "decision": {
+          "expiresAt": "2027-04-17T13:35:11.970Z",
+          "classification": "CONFIDENTIAL",
+          "legalHoldUntil": null,
+          "sourceCreatedAt": "2026-10-19T13:35:11.970Z",
+          "retentionCategory": "TEMPORARY"
+        },
+        "sequence": 4,
+        "snapshot": {
+          "id": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+          "state": "SANITIZING",
+          "locator": "quarantine://synthetic-pdf-lab/uploads/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+          "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+          "checksum": {
+            "hash": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+            "algorithm": "sha256"
+          },
+          "metadata": {
+            "byteSize": 10234,
+            "mimeType": "application/pdf",
+            "fileExtension": "pdf",
+            "originalFilename": "new-synthetic-historical-document.pdf"
+          },
+          "expiresAt": "2027-04-17T13:35:11.970Z",
+          "ownerType": "STUDENT",
+          "reference": "STUDENT-DOCUMENT-R05-186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+          "malwareScan": {
+            "status": "PASSED",
+            "locator": "quarantine://synthetic-pdf-lab/uploads/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+            "scannedAt": "2026-10-19T13:38:00.294Z"
+          },
+          "sanitization": {
+            "sanitizedAt": "2026-10-19T13:38:00.239Z",
+            "exifStripped": true,
+            "sanitizerNotes": "Synthetic-only MuPDF 1.28.1 raster reconstruction; image-only, text/forms/signatures discarded"
+          },
+          "classification": "CONFIDENTIAL",
+          "retentionCategory": "TEMPORARY",
+          "uploadVerification": {
+            "locator": "quarantine://synthetic-pdf-lab/uploads/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+            "byteSize": 10234,
+            "verifiedAt": "2026-10-19T13:38:00.241Z",
+            "checksumSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+            "verifiedMimeType": "application/pdf",
+            "signatureVerified": true
+          }
+        },
+        "operationId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+        "manifestSha256": "212a86a22662783c29c939ff55228c46f4b455ab260e0f1889e47f253a106864",
+        "retentionClass": "STANDARD_ADMIN",
+        "snapshotSha256": "145291b95f97ca8a550c3fa75b0cfa21cc4b81d514492e03f7722559869d3059",
+        "retentionPolicyStatus": "UNCONFIGURED_RETAIN",
+        "previousSnapshotSha256": "1ccf65c34cfbf089000b3cfb386464dbba2f7f054de0440adf64c49f426c5f13"
+      },
+      "complianceMetadata": "null",
+      "correlationReference": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+      "traceReference": null,
+      "chainReference": null,
+      "retentionPeriodInDays": null,
+      "retentionExpiresAt": null,
+      "lifecycleState": "RECORDED",
+      "createdAt": "2026-10-19 13:38:00.31",
+      "updatedAt": "2026-10-19 13:38:00.31",
+      "legalHoldUntil": null,
+      "retentionProcessedAt": null,
+      "retentionClaimUntil": null,
+      "retentionClaimToken": null
+    },
+    {
+      "id": "df1a6d8a-a892-422d-b059-d1e241ad3a6f",
+      "reference": "POST28-R05:186b4fc2-d77a-45ab-8e97-0c3aabef0a20:5",
+      "action": "R05_PROCESSING_STAGE",
+      "category": "ASSET_REMEDIATION",
+      "severity": "INFO",
+      "actorId": "DELEGATED_SYNTHETIC_LAB_EXECUTOR",
+      "actorType": "SYSTEM",
+      "targetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+      "targetType": "ASSET",
+      "source": "POST28_R05_REMEDIATION",
+      "timestamp": "2026-10-19 13:38:00.306",
+      "contextMetadata": {
+        "action": "R05_PROCESSING_STAGE",
+        "assetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+        "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "decision": {
+          "expiresAt": "2027-04-17T13:35:11.970Z",
+          "classification": "CONFIDENTIAL",
+          "legalHoldUntil": null,
+          "sourceCreatedAt": "2026-10-19T13:35:11.970Z",
+          "retentionCategory": "TEMPORARY"
+        },
+        "sequence": 5,
+        "snapshot": {
+          "id": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+          "state": "SANITIZING",
+          "locator": "quarantine://synthetic-pdf-lab/uploads/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+          "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+          "checksum": {
+            "hash": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+            "algorithm": "sha256"
+          },
+          "metadata": {
+            "byteSize": 10234,
+            "mimeType": "application/pdf",
+            "fileExtension": "pdf",
+            "originalFilename": "new-synthetic-historical-document.pdf"
+          },
+          "expiresAt": "2027-04-17T13:35:11.970Z",
+          "ownerType": "STUDENT",
+          "reference": "STUDENT-DOCUMENT-R05-186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+          "malwareScan": {
+            "status": "PASSED",
+            "locator": "quarantine://synthetic-pdf-lab/uploads/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+            "scannedAt": "2026-10-19T13:38:00.294Z"
+          },
+          "sanitization": {
+            "sanitizedAt": "2026-10-19T13:38:00.239Z",
+            "exifStripped": true,
+            "sanitizerNotes": "Synthetic-only MuPDF 1.28.1 raster reconstruction; image-only, text/forms/signatures discarded"
+          },
+          "classification": "CONFIDENTIAL",
+          "retentionCategory": "TEMPORARY",
+          "uploadVerification": {
+            "locator": "quarantine://synthetic-pdf-lab/uploads/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+            "byteSize": 10234,
+            "verifiedAt": "2026-10-19T13:38:00.241Z",
+            "checksumSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+            "verifiedMimeType": "application/pdf",
+            "signatureVerified": true
+          },
+          "activationOperation": {
+            "phase": "PREPARED",
+            "version": 1,
+            "preparedAt": "2026-10-19T13:38:00.304Z",
+            "operationId": "484d5d35-e176-4965-9994-030ae32da5ab",
+            "sourceLocator": "quarantine://synthetic-pdf-lab/uploads/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+            "expectedSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5"
+          }
+        },
+        "operationId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+        "manifestSha256": "212a86a22662783c29c939ff55228c46f4b455ab260e0f1889e47f253a106864",
+        "retentionClass": "STANDARD_ADMIN",
+        "snapshotSha256": "6e7d2f4bd9770c497e2f5664282c1a2cfe4080c82f32569fa5d3bd3a7d63d109",
+        "retentionPolicyStatus": "UNCONFIGURED_RETAIN",
+        "previousSnapshotSha256": "145291b95f97ca8a550c3fa75b0cfa21cc4b81d514492e03f7722559869d3059"
+      },
+      "complianceMetadata": "null",
+      "correlationReference": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+      "traceReference": null,
+      "chainReference": null,
+      "retentionPeriodInDays": null,
+      "retentionExpiresAt": null,
+      "lifecycleState": "RECORDED",
+      "createdAt": "2026-10-19 13:38:00.319",
+      "updatedAt": "2026-10-19 13:38:00.319",
+      "legalHoldUntil": null,
+      "retentionProcessedAt": null,
+      "retentionClaimUntil": null,
+      "retentionClaimToken": null
+    },
+    {
+      "id": "a016c19f-3b2b-438a-8b54-6efdae70d6d5",
+      "reference": "POST28-R05:186b4fc2-d77a-45ab-8e97-0c3aabef0a20:6",
+      "action": "R05_PROCESSING_STAGE",
+      "category": "ASSET_REMEDIATION",
+      "severity": "INFO",
+      "actorId": "DELEGATED_SYNTHETIC_LAB_EXECUTOR",
+      "actorType": "SYSTEM",
+      "targetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+      "targetType": "ASSET",
+      "source": "POST28_R05_REMEDIATION",
+      "timestamp": "2026-10-19 13:38:00.317",
+      "contextMetadata": {
+        "action": "R05_PROCESSING_STAGE",
+        "assetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+        "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "decision": {
+          "expiresAt": "2027-04-17T13:35:11.970Z",
+          "classification": "CONFIDENTIAL",
+          "legalHoldUntil": null,
+          "sourceCreatedAt": "2026-10-19T13:35:11.970Z",
+          "retentionCategory": "TEMPORARY"
+        },
+        "sequence": 6,
+        "snapshot": {
+          "id": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+          "state": "ACTIVE",
+          "locator": "clean://synthetic-pdf-lab/clean/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+          "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+          "checksum": {
+            "hash": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+            "algorithm": "sha256"
+          },
+          "metadata": {
+            "byteSize": 10234,
+            "mimeType": "application/pdf",
+            "fileExtension": "pdf",
+            "originalFilename": "new-synthetic-historical-document.pdf"
+          },
+          "expiresAt": "2027-04-17T13:35:11.970Z",
+          "ownerType": "STUDENT",
+          "reference": "STUDENT-DOCUMENT-R05-186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+          "malwareScan": {
+            "status": "PASSED",
+            "locator": "quarantine://synthetic-pdf-lab/uploads/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+            "scannedAt": "2026-10-19T13:38:00.294Z"
+          },
+          "sanitization": {
+            "sanitizedAt": "2026-10-19T13:38:00.239Z",
+            "exifStripped": true,
+            "sanitizerNotes": "Synthetic-only MuPDF 1.28.1 raster reconstruction; image-only, text/forms/signatures discarded"
+          },
+          "classification": "CONFIDENTIAL",
+          "retentionCategory": "TEMPORARY",
+          "uploadVerification": {
+            "locator": "quarantine://synthetic-pdf-lab/uploads/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+            "byteSize": 10234,
+            "verifiedAt": "2026-10-19T13:38:00.241Z",
+            "checksumSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+            "verifiedMimeType": "application/pdf",
+            "signatureVerified": true
+          },
+          "activationOperation": {
+            "phase": "COMPLETED",
+            "version": 1,
+            "preparedAt": "2026-10-19T13:38:00.304Z",
+            "completedAt": "2026-10-19T13:38:00.313Z",
+            "operationId": "484d5d35-e176-4965-9994-030ae32da5ab",
+            "sourceLocator": "quarantine://synthetic-pdf-lab/uploads/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+            "expectedSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5"
+          }
+        },
+        "operationId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+        "manifestSha256": "212a86a22662783c29c939ff55228c46f4b455ab260e0f1889e47f253a106864",
+        "retentionClass": "STANDARD_ADMIN",
+        "snapshotSha256": "8203c0d85178057c22c2f660a5a84372112a8bd22534cf427b8ee2ec7fded96f",
+        "retentionPolicyStatus": "UNCONFIGURED_RETAIN",
+        "previousSnapshotSha256": "6e7d2f4bd9770c497e2f5664282c1a2cfe4080c82f32569fa5d3bd3a7d63d109"
+      },
+      "complianceMetadata": "null",
+      "correlationReference": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+      "traceReference": null,
+      "chainReference": null,
+      "retentionPeriodInDays": null,
+      "retentionExpiresAt": null,
+      "lifecycleState": "RECORDED",
+      "createdAt": "2026-10-19 13:38:00.329",
+      "updatedAt": "2026-10-19 13:38:00.329",
+      "legalHoldUntil": null,
+      "retentionProcessedAt": null,
+      "retentionClaimUntil": null,
+      "retentionClaimToken": null
+    },
+    {
+      "id": "f1ae1fd9-94c2-4061-9725-8f1928e493d6",
+      "reference": "POST28-R05:186b4fc2-d77a-45ab-8e97-0c3aabef0a20:7",
+      "action": "R05_REMEDIATION_COMPLETED",
+      "category": "ASSET_REMEDIATION",
+      "severity": "INFO",
+      "actorId": "DELEGATED_SYNTHETIC_LAB_EXECUTOR",
+      "actorType": "SYSTEM",
+      "targetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+      "targetType": "ASSET",
+      "source": "POST28_R05_REMEDIATION",
+      "timestamp": "2026-10-19 13:38:00.353",
+      "contextMetadata": {
+        "action": "R05_REMEDIATION_COMPLETED",
+        "assetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+        "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "decision": {
+          "expiresAt": "2027-04-17T13:35:11.970Z",
+          "classification": "CONFIDENTIAL",
+          "legalHoldUntil": null,
+          "sourceCreatedAt": "2026-10-19T13:35:11.970Z",
+          "retentionCategory": "TEMPORARY"
+        },
+        "sequence": 7,
+        "snapshot": {
+          "id": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+          "state": "ACTIVE",
+          "locator": "clean://synthetic-pdf-lab/clean/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+          "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+          "checksum": {
+            "hash": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+            "algorithm": "sha256"
+          },
+          "metadata": {
+            "byteSize": 10234,
+            "mimeType": "application/pdf",
+            "fileExtension": "pdf",
+            "originalFilename": "new-synthetic-historical-document.pdf"
+          },
+          "expiresAt": "2027-04-17T13:35:11.970Z",
+          "ownerType": "STUDENT",
+          "reference": "STUDENT-DOCUMENT-R05-186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+          "malwareScan": {
+            "status": "PASSED",
+            "locator": "quarantine://synthetic-pdf-lab/uploads/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+            "scannedAt": "2026-10-19T13:38:00.294Z"
+          },
+          "sanitization": {
+            "sanitizedAt": "2026-10-19T13:38:00.239Z",
+            "exifStripped": true,
+            "sanitizerNotes": "Synthetic-only MuPDF 1.28.1 raster reconstruction; image-only, text/forms/signatures discarded"
+          },
+          "classification": "CONFIDENTIAL",
+          "retentionCategory": "TEMPORARY",
+          "uploadVerification": {
+            "locator": "quarantine://synthetic-pdf-lab/uploads/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+            "byteSize": 10234,
+            "verifiedAt": "2026-10-19T13:38:00.241Z",
+            "checksumSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+            "verifiedMimeType": "application/pdf",
+            "signatureVerified": true
+          },
+          "activationOperation": {
+            "phase": "COMPLETED",
+            "version": 1,
+            "preparedAt": "2026-10-19T13:38:00.304Z",
+            "completedAt": "2026-10-19T13:38:00.313Z",
+            "operationId": "484d5d35-e176-4965-9994-030ae32da5ab",
+            "sourceLocator": "quarantine://synthetic-pdf-lab/uploads/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+            "expectedSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5"
+          }
+        },
+        "operationId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+        "manifestSha256": "212a86a22662783c29c939ff55228c46f4b455ab260e0f1889e47f253a106864",
+        "retentionClass": "STANDARD_ADMIN",
+        "snapshotSha256": "8203c0d85178057c22c2f660a5a84372112a8bd22534cf427b8ee2ec7fded96f",
+        "retentionPolicyStatus": "UNCONFIGURED_RETAIN",
+        "previousSnapshotSha256": "8203c0d85178057c22c2f660a5a84372112a8bd22534cf427b8ee2ec7fded96f"
+      },
+      "complianceMetadata": "null",
+      "correlationReference": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+      "traceReference": null,
+      "chainReference": null,
+      "retentionPeriodInDays": null,
+      "retentionExpiresAt": null,
+      "lifecycleState": "RECORDED",
+      "createdAt": "2026-10-19 13:38:00.366",
+      "updatedAt": "2026-10-19 13:38:00.366",
+      "legalHoldUntil": null,
+      "retentionProcessedAt": null,
+      "retentionClaimUntil": null,
+      "retentionClaimToken": null
+    }
+  ],
+  "sequenceAndSnapshotChainVerified": true
+}

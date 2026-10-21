@@ -1,0 +1,54 @@
+{
+  "kind": "TRANSCRIPT_OBSERVED_RESULTS_NOT_RAW_LOGS",
+  "sourceSha": "6e42d922c79053b67107cd8722390bff1f273986",
+  "studioRetirement": {
+    "ciJobRemoved": true,
+    "launchersRemoved": true,
+    "iframeSecurityOverridesRemoved": true,
+    "partitionedCookiesRemoved": true,
+    "genericInventoryPreserved": true,
+    "environmentNames": 318,
+    "inventoryCheck": "PASS",
+    "engines": {
+      "node": ">=22.16.0 <23",
+      "npm": ">=10.9.0 <11",
+      "engineStrict": true
+    }
+  },
+  "targetedVitest": {
+    "files": [
+      "tests/runtime/standard-workspace-config.spec.ts",
+      "apps/api/tests/presentation/security/HttpOnlyAuthCookies.spec.ts",
+      "apps/api/tests/presentation/security/AuthSessionBoundary.spec.ts",
+      "apps/api/tests/runtime-dependency-bootstrap.spec.ts",
+      "apps/api/tests/infrastructure/di/StandaloneContainer.spec.ts"
+    ],
+    "passed": 44,
+    "failed": 0
+  },
+  "sourceRegressionNode": {
+    "passed": 8,
+    "failed": 0
+  },
+  "W0": {
+    "passed": 77,
+    "failed": 0
+  },
+  "transactionProvisioning": {
+    "passed": 36,
+    "failed": 0
+  },
+  "apiTypecheck": "PASS",
+  "vercelContexts": "PASS_DIAGNOSTICS_0",
+  "repositoryOrganization": "PASS_NO_BROKEN_IMPORTS_OR_IMPORTANT_LINKS",
+  "targetedEslint": "PASS_NO_ERRORS",
+  "secretScan": "PASS",
+  "fullLocalBuildRepeated": false,
+  "priorDatabaseSuitesRepeated": false,
+  "smokeRepeat": {
+    "reason": "Initial HTML probe closed Vite before dependency scanning finished, producing cancellation errors. Corrected harness waits for scanProcessing and requests idle; repeated only HTTP smoke.",
+    "finalExit": 0,
+    "finalErrorMatches": 0,
+    "browserExecuted": false
+  }
+}

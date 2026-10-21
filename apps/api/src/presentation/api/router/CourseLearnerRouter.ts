@@ -8,12 +8,22 @@ import { createStudentRoleGuard } from '../../security/StudentRoleGuard.js';
 import type { IRoleAssignmentRepository } from '@manaratak/domain';
 import { createCanonicalIdempotencyMiddleware } from '../../middleware/CanonicalIdempotencyMiddleware.js';
 import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
+import { problemDetails } from '../../http/ProblemDetails.js';
 
 export class CourseLearnerRouter {
   public static create(cradle: { processAssetLifecycleUseCase: ProcessAssetLifecycleUseCase; roleAssignmentRepository: IRoleAssignmentRepository; courseProgressUseCases: CourseProgressUseCases; learningPathUseCases: LearningPathUseCases; tokenProvider: ITokenProvider; sessionManager: ISessionManager; principalAccessValidator: IPrincipalAccessValidator; apiIdempotencyStore: PrismaApiIdempotencyStore }): Router {
     const router = Router();
     const { courseProgressUseCases, learningPathUseCases, tokenProvider, sessionManager, principalAccessValidator, apiIdempotencyStore } = cradle;
-    const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => Promise.resolve(fn(req, res, next)).catch(next);
+    const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => Promise.resolve(fn(req, res, next)).catch(error => {
+      if (error instanceof Error && error.message === 'COURSE_ENROLLMENT_REQUIRED') {
+        res.status(403).type('application/problem+json').json(problemDetails({
+          status: 403, code: 'COURSE_ENROLLMENT_REQUIRED', detail: 'COURSE_ENROLLMENT_REQUIRED',
+          instance: req.originalUrl, traceId: String(req.headers['x-request-id'] || 'unknown'),
+        }));
+        return;
+      }
+      next(error);
+    });
     router.use(new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator).generate());
     router.use(createStudentRoleGuard(cradle.roleAssignmentRepository));
     router.use(createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }));

@@ -1,0 +1,18 @@
+{
+  "sourceSha": "d927710984de2fb7ffbf56e71cd742eaeb44536a",
+  "runId": 39628696516,
+  "jobId": 119326814171,
+  "conclusion": "failure",
+  "failure": [
+    "2026-10-21T16:01:11.7937393Z Error: Cannot find package '/home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/@manaratak/shared/dist/index.js' imported from /home/runner/work/MANARATAK-First-/MANARATAK-First-/scripts/release/lib/R14AdminCmsRuntime.mjs",
+    "2026-10-21T16:01:11.7947859Z   code: 'ERR_MODULE_NOT_FOUND'"
+  ],
+  "cmsProfileLabCreated": false,
+  "cmsProofArtifactCreated": false,
+  "fix": "Read source-controlled locale policy directly with existing tsx instead of unbuilt workspace dist",
+  "localDirectImportPassed": true,
+  "policyNotChanged": true,
+  "publicTemplateLocales": [
+    "ar"
+  ]
+}

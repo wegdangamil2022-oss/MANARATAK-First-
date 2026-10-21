@@ -1,0 +1,62 @@
+{
+    "files":  [
+                  {
+                      "path":  ".gitattributes",
+                      "sha256":  "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+                      "bytes":  8
+                  },
+                  {
+                      "path":  "archive-receipt.json",
+                      "sha256":  "779b2f30171bd72da338e1d537f7316ad1474c9686ee6982aa631aee4f3ad832",
+                      "bytes":  818
+                  },
+                  {
+                      "path":  "cms-rich-text-proof.json",
+                      "sha256":  "25ed4d184ff0cbfd900a6a820ba4e90edac951f8cea597fac1a9ddcdb18b40e3",
+                      "bytes":  629
+                  },
+                  {
+                      "path":  "linux-image-probe.json",
+                      "sha256":  "86e1383fde26c5cc95848a04fdd0bf1549e060e6a02e1dc25e85db2a524b17ef",
+                      "bytes":  1284
+                  },
+                  {
+                      "path":  "linux-runtime-proof--api.log",
+                      "sha256":  "b2ef5d3cd8faa4bfc6a3f1901b3aaba9780301795a553b3f56081f307a294f43",
+                      "bytes":  37215
+                  },
+                  {
+                      "path":  "linux-runtime-proof--create.log",
+                      "sha256":  "f480b37f9750a4cf6ca6e232244c01cec7a849beb65c4a09f21e86071644580c",
+                      "bytes":  872
+                  },
+                  {
+                      "path":  "linux-runtime-proof--gateway.log",
+                      "sha256":  "9a857b411997080e5cfd4118aa78db4b4c4059b1ba8a8cc8eab7e8fd141ed50a",
+                      "bytes":  136
+                  },
+                  {
+                      "path":  "linux-runtime-proof--initialize.log",
+                      "sha256":  "0cb0c9e995417d3dc454e4f8a72695f695e14edaee8c614a18252f81fc7d722b",
+                      "bytes":  4051
+                  },
+                  {
+                      "path":  "linux-runtime-proof--r09-learner.png",
+                      "sha256":  "6d64084a04247f4a3efc39625a071093a62012f319bb890779635b467f0cac3b",
+                      "bytes":  32118
+                  },
+                  {
+                      "path":  "linux-runtime-proof--result.json",
+                      "sha256":  "94ec4037aae1d1bfd5f2e3ceaab5427513b3e0da550454e7b5cc8b8b77daae76",
+                      "bytes":  18722
+                  },
+                  {
+                      "path":  "runtime-layer.json",
+                      "sha256":  "46f5a904344189d05a91c4732c7b65acb3f30ef97acd1cbfdcb3b12c5986bc49",
+                      "bytes":  1910
+                  }
+              ],
+    "sourceSha":  "ce0690c36759fc73ac202a679f905054b7a4607b",
+    "version":  1,
+    "kind":  "POST28_R09_LEARNER_EVIDENCE"
+}

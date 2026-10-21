@@ -1,0 +1,175 @@
+{
+  "kind": "POST28_R07_STATIC_ARTIFACT_HTTPS_DIAGNOSTIC",
+  "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+  "measuredAt": "2026-10-18T23:04:04.023Z",
+  "node": "v22.16.0",
+  "os": "win32",
+  "architecture": "x64",
+  "certificateSha256": "76f8c4765c06f5ecc3c7814777cd30002b43062e6f489789ec43cedad18273c3",
+  "observations": [
+    {
+      "url": "https://127.0.0.1:62132/health/build",
+      "status": 200,
+      "contentType": "application/json",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "a3a46ff9331b99d853577f146d824090985a5a0a7cae1e357554509a5ab32f8c"
+    },
+    {
+      "url": "https://127.0.0.1:62132/",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "7c3bf826989fb15d5a5e05161d007f3851e20bb0fcb281b18d9bdb48918267cf"
+    },
+    {
+      "url": "https://127.0.0.1:62132/assets/index-ChOjP5kU.js",
+      "status": 200,
+      "contentType": "application/javascript",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "30fad3c09a463280d36b6f02a28f248639ac2099270520d4fb845f4fe36992f6"
+    },
+    {
+      "url": "https://127.0.0.1:62132/fonts/cairo.css",
+      "status": 200,
+      "contentType": "text/css",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "6547dbd101c39865bf42fc24e0a57a1e74d9f47db6798c16ff42c4c41ed1fa01"
+    },
+    {
+      "url": "https://127.0.0.1:62132/assets/index-Chp4nGOr.css",
+      "status": 200,
+      "contentType": "text/css",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "94d54404c8a3d41a110ae0cf8fc117f4807b67262a22b015bb4bac50fd68c6fa"
+    },
+    {
+      "url": "https://127.0.0.1:62132/fonts/cairo-0.woff2",
+      "status": 200,
+      "contentType": "font/woff2",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "748022f50c427456ad66031e855349be3448ee1f05a5f1eb59574ebe0c686749"
+    },
+    {
+      "url": "https://127.0.0.1:62132/fonts/cairo-1.woff2",
+      "status": 200,
+      "contentType": "font/woff2",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "da6ada83c3a87c2f0211325dc0a123702e1d4a940958b3e943ac4f37b31d5371"
+    },
+    {
+      "url": "https://127.0.0.1:62132/fonts/cairo-2.woff2",
+      "status": 200,
+      "contentType": "font/woff2",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "82c13cbd1352d76e97c3d335caa912ae68fecdc3949a43cf8d149eb892384c1b"
+    },
+    {
+      "url": "https://127.0.0.1:62132/assets/definitely-missing.js",
+      "status": 404,
+      "contentType": "application/json",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "url": "https://127.0.0.1:62132/api/v1/monitoring/health/readiness",
+      "status": 503,
+      "contentType": "application/json",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "d93364fc24d7f4de9f925f1244b3e9f64e8a3e67dfcedbb0d5f1fd5d5bf6670e"
+    },
+    {
+      "url": "https://127.0.0.1:62135/admin/health/build",
+      "status": 200,
+      "contentType": "application/json",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "ac3954a813af51c229e3e19dd1d6fc98943809a548fd7a2c613152d7d4d24e95"
+    },
+    {
+      "url": "https://127.0.0.1:62135/admin/",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "ea401849d0294066c2da19842a266eab048280efb65d2bf22b307abf91ee2cc5"
+    },
+    {
+      "url": "https://127.0.0.1:62135/admin/assets/index-Dh8Vxlpe.js",
+      "status": 200,
+      "contentType": "application/javascript",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "f56efaa81cdc5920073c42932e2339e747c68faa8e17ef6fc8015ba17b1d36c1"
+    },
+    {
+      "url": "https://127.0.0.1:62135/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "contentType": "text/css",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "8dfb3358c558d9f67bb32df708599c66c100ce66aba103d076e8c366ec615ecc"
+    },
+    {
+      "url": "https://127.0.0.1:62135/admin/fonts/cairo-0.woff2",
+      "status": 200,
+      "contentType": "font/woff2",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "748022f50c427456ad66031e855349be3448ee1f05a5f1eb59574ebe0c686749"
+    },
+    {
+      "url": "https://127.0.0.1:62135/admin/fonts/cairo-1.woff2",
+      "status": 200,
+      "contentType": "font/woff2",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "da6ada83c3a87c2f0211325dc0a123702e1d4a940958b3e943ac4f37b31d5371"
+    },
+    {
+      "url": "https://127.0.0.1:62135/admin/fonts/cairo-2.woff2",
+      "status": 200,
+      "contentType": "font/woff2",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "82c13cbd1352d76e97c3d335caa912ae68fecdc3949a43cf8d149eb892384c1b"
+    },
+    {
+      "url": "https://127.0.0.1:62135/admin/assets/definitely-missing.js",
+      "status": 404,
+      "contentType": "application/json",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "url": "https://127.0.0.1:62135/api/v1/monitoring/health/readiness",
+      "status": 503,
+      "contentType": "application/json",
+      "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "bodySha256": "d93364fc24d7f4de9f925f1244b3e9f64e8a3e67dfcedbb0d5f1fd5d5bf6670e"
+    }
+  ],
+  "processes": [
+    {
+      "unit": "web",
+      "pid": 8476,
+      "terminated": {
+        "code": null,
+        "signal": "SIGTERM"
+      },
+      "portClosed": true,
+      "logSha256": "d2375ee8153663f16287d923cf43cc7a408270c1032495fe4465d36bf7571a45",
+      "checkoutPresent": false,
+      "inheritedNodeModules": false
+    },
+    {
+      "unit": "admin",
+      "pid": 14828,
+      "terminated": {
+        "code": null,
+        "signal": "SIGTERM"
+      },
+      "portClosed": true,
+      "logSha256": "d4f2d1f60b29fe78a8a41638f2c4a818708f2b16719ea687702c43c522886273",
+      "checkoutPresent": false,
+      "inheritedNodeModules": false
+    }
+  ],
+  "outcome": "STATIC_HTTP_VALIDATED",
+  "failure": null,
+  "apiReadinessVerified": false,
+  "stageAccepted": false,
+  "promotionAuthorized": false
+}

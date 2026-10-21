@@ -1,0 +1,254 @@
+[
+  {
+    "name": "bash-syntax",
+    "command": [
+      "bash",
+      "-n",
+      "scripts/database/verify-greenfield-migration-parity.sh"
+    ],
+    "sourceSha": "c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:39:19.159055+00:00",
+    "finishedUtc": "2026-10-16T12:39:19.270015+00:00",
+    "exitCode": 0,
+    "log": "bash-syntax.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "originalLogPath": "/workspace/scratch/post28/c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0/R02-neon-final/bash-syntax-20261016T123919160791Z.log"
+  },
+  {
+    "name": "discovery-assets",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/database/post28-suite-discovery.mjs",
+      "assets"
+    ],
+    "sourceSha": "c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:39:19.338595+00:00",
+    "finishedUtc": "2026-10-16T12:39:27.583843+00:00",
+    "exitCode": 0,
+    "log": "discovery-assets.log",
+    "sha256": "2dc7c50db279d187e3428032e5ad4664c667147a274bd462f99991a76449385e",
+    "originalLogPath": "/workspace/scratch/post28/c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0/R02-neon-final/discovery-assets-20261016T123927535212Z.log"
+  },
+  {
+    "name": "discovery-leases",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/database/post28-suite-discovery.mjs",
+      "leases"
+    ],
+    "sourceSha": "c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:39:19.241023+00:00",
+    "finishedUtc": "2026-10-16T12:39:26.864283+00:00",
+    "exitCode": 0,
+    "log": "discovery-leases.log",
+    "sha256": "21905487e4ce92da82bae7b8d85321469bfa861e02c8e8cf50f1ed8e550c5aa0",
+    "originalLogPath": "/workspace/scratch/post28/c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0/R02-neon-final/discovery-leases-20261016T123926749869Z.log"
+  },
+  {
+    "name": "discovery-persistence",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/database/post28-suite-discovery.mjs",
+      "persistence"
+    ],
+    "sourceSha": "c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:39:19.255795+00:00",
+    "finishedUtc": "2026-10-16T12:39:28.569203+00:00",
+    "exitCode": 0,
+    "log": "discovery-persistence.log",
+    "sha256": "009e30485570a15ba86a2bc6f0666734de4b195df2027183c370182de94fc227",
+    "originalLogPath": "/workspace/scratch/post28/c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0/R02-neon-final/discovery-persistence-20261016T123928472314Z.log"
+  },
+  {
+    "name": "discovery-sections123",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/database/post28-suite-discovery.mjs",
+      "sections123"
+    ],
+    "sourceSha": "c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:39:19.279067+00:00",
+    "finishedUtc": "2026-10-16T12:39:28.658933+00:00",
+    "exitCode": 0,
+    "log": "discovery-sections123.log",
+    "sha256": "bb04323d5b011388ad267de882067ecfa9b128c560c1ef4c0650c1eb8b400d06",
+    "originalLogPath": "/workspace/scratch/post28/c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0/R02-neon-final/discovery-sections123-20261016T123928566977Z.log"
+  },
+  {
+    "name": "eslint",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/eslint/bin/eslint.js",
+      "scripts/database/post28-neon-policy.mjs",
+      "scripts/database/post28-neon-provider.mjs",
+      "scripts/database/post28-isolation.mjs",
+      "scripts/database/post28-preflight.mjs",
+      "scripts/database/prepare-post28-acceptance.mjs",
+      "scripts/database/prisma-env-diff.mjs",
+      "scripts/database/run-post28-suite.mjs",
+      "scripts/lib/disposable-database-target-guard.mjs",
+      "tests/database/post28-database-safety.setup.mjs",
+      "tests/database/post28-neon-preflight.test.mjs"
+    ],
+    "sourceSha": "c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:39:18.979988+00:00",
+    "finishedUtc": "2026-10-16T12:39:29.958873+00:00",
+    "exitCode": 0,
+    "log": "eslint.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "originalLogPath": "/workspace/scratch/post28/c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0/R02-neon-final/eslint-20261016T123929890932Z.log"
+  },
+  {
+    "name": "organization",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/verify/verify-final-repository-organization.mjs"
+    ],
+    "sourceSha": "c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:39:18.901401+00:00",
+    "finishedUtc": "2026-10-16T12:39:36.376108+00:00",
+    "exitCode": 0,
+    "log": "organization.log",
+    "sha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+    "originalLogPath": "/workspace/scratch/post28/c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0/R02-neon-final/organization-20261016T123936346915Z.log"
+  },
+  {
+    "name": "quality",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/quality/verify-source-quality.mjs"
+    ],
+    "sourceSha": "c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:39:19.077609+00:00",
+    "finishedUtc": "2026-10-16T12:39:35.548237+00:00",
+    "exitCode": 0,
+    "log": "quality.log",
+    "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073",
+    "originalLogPath": "/workspace/scratch/post28/c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0/R02-neon-final/quality-20261016T123935470989Z.log"
+  },
+  {
+    "name": "secrets",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/security/scan-secrets.mjs"
+    ],
+    "sourceSha": "c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:39:18.786443+00:00",
+    "finishedUtc": "2026-10-16T12:39:30.854938+00:00",
+    "exitCode": 0,
+    "log": "secrets.log",
+    "sha256": "97139ac247578278bf1e51f84eecfec570aeb41e6192a7b54b48236a69716679",
+    "originalLogPath": "/workspace/scratch/post28/c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0/R02-neon-final/secrets-20261016T123930735209Z.log"
+  },
+  {
+    "name": "source-architecture",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/architecture/verify-source-architecture-guards.mjs"
+    ],
+    "sourceSha": "c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:39:18.961230+00:00",
+    "finishedUtc": "2026-10-16T12:39:26.652989+00:00",
+    "exitCode": 0,
+    "log": "source-architecture.log",
+    "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659",
+    "originalLogPath": "/workspace/scratch/post28/c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0/R02-neon-final/source-architecture-20261016T123926571687Z.log"
+  },
+  {
+    "name": "source-preflight",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/ci/source-preflight.mjs"
+    ],
+    "sourceSha": "c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:39:18.864435+00:00",
+    "finishedUtc": "2026-10-16T12:39:39.753296+00:00",
+    "exitCode": 0,
+    "log": "source-preflight.log",
+    "sha256": "98a745e99724b77a61103f0ba57c172e19205d12e82f058205a8bd45de0aaff9",
+    "originalLogPath": "/workspace/scratch/post28/c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0/R02-neon-final/source-preflight-20261016T123939737760Z.log"
+  },
+  {
+    "name": "targeted-tests",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "--test",
+      "tests/database/post28-neon-preflight.test.mjs",
+      "tests/database/post28-isolation.test.mjs",
+      "tests/database/post28-r04-r05-preparation.test.mjs",
+      "tests/database/greenfield-migration-parity-source.test.mjs",
+      "tests/remediation/w2-disposable-db-mutation-guard.test.mjs",
+      "tests/operations/database-mutation-gate.test.mjs"
+    ],
+    "sourceSha": "c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:39:18.801607+00:00",
+    "finishedUtc": "2026-10-16T12:39:36.985166+00:00",
+    "exitCode": 0,
+    "log": "targeted-tests.log",
+    "sha256": "f3e31b2bf9ad018f9d8f9c6b983e3648b340b10fe0c73bfc670b210ca3350981",
+    "originalLogPath": "/workspace/scratch/post28/c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0/R02-neon-final/targeted-tests-20261016T123936962096Z.log"
+  },
+  {
+    "name": "w2",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/verify-w2-source.mjs"
+    ],
+    "sourceSha": "c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:39:19.086121+00:00",
+    "finishedUtc": "2026-10-16T12:39:24.847467+00:00",
+    "exitCode": 0,
+    "log": "w2.log",
+    "sha256": "4923d2f01a10d760573235caf147b21fdbacebfd5c89bf7f08939754d110e068",
+    "originalLogPath": "/workspace/scratch/post28/c9e8e98d4e650d0157ee8ec95ee4d9db9a695de0/R02-neon-final/w2-20261016T123924674694Z.log"
+  }
+]

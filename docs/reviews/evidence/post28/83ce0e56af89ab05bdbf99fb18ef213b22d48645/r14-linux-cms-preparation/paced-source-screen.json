@@ -1,0 +1,19 @@
+{
+  "previousSourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+  "currentSourceSha": "282a7aa791cb1363f8a0cc29ee661fb3acf5cb9e",
+  "paths": [
+    "apps/api",
+    "apps/web",
+    "apps/admin",
+    "packages",
+    "vendor",
+    "package.json",
+    "package-lock.json"
+  ],
+  "changedRuntimePaths": [],
+  "sourceEqual": true,
+  "knownWorkerAndCertificateFixesRetained": true,
+  "sourceEqualityIsNotRuntimeProof": true,
+  "rollbackExecuted": false,
+  "formalAcceptance": false
+}

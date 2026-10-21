@@ -1,0 +1,55 @@
+{
+  "status": 200,
+  "bodySha256": "79a497607f0147f073269d9cbfa15dc8b29b8facaa535de233bebbbe5177c053",
+  "bodyBytes": 1051,
+  "body": {
+    "data": [
+      {
+        "publicId": "3732c3c9-7d43-488c-ae40-86dc6a039d63",
+        "slug": "r09-2382f5bd-48e9-4a94-a1a7-9a84e8a74c58",
+        "canonicalName": "bfb7fc6f-84a3-437b-ab2e-9dfb14f40b88",
+        "displayName": "R09 synthetic document owner",
+        "providerName": null,
+        "fundedProgramPairs": [],
+        "academicYear": null,
+        "cycleName": null,
+        "countryReferenceId": null,
+        "countrySourceLabel": null,
+        "countryScope": null,
+        "studyLanguageReferenceId": null,
+        "studyLanguageSourceLabel": null,
+        "applicationDeadline": null,
+        "deadlineType": null,
+        "applicationMethod": null,
+        "applicationUrl": null,
+        "officialSourceUrl": null,
+        "fundingTypeCode": null,
+        "isFullyFunded": false,
+        "amountMinorUnits": null,
+        "amountCurrencyCode": null,
+        "benefits": [],
+        "degreeTargets": [],
+        "majorTargets": [],
+        "eligibilityItems": [],
+        "requiredDocumentItems": [
+          {
+            "documentKey": "884abbe1-afee-4517-982a-31b248b48a49",
+            "documentTypeCode": null,
+            "displayName": "R09 private required document",
+            "description": null,
+            "internationalTestId": null,
+            "isRequired": true,
+            "displayOrder": 0
+          }
+        ],
+        "universityLinks": []
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "pageSize": 20,
+    "totalPages": 1,
+    "hasMore": false,
+    "nextCursor": null
+  }
+}

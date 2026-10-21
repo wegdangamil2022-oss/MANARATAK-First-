@@ -1,0 +1,7 @@
+{
+  "stopped": true,
+  "apiStopped": true,
+  "workerStopped": true,
+  "existingDatabasesTouched": false,
+  "restartedOwnedSyntheticLab": true
+}

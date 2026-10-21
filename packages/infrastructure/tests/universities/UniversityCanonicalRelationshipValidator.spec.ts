@@ -2,12 +2,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { UniversityCanonicalRelationshipValidator, type UniversityRelationshipValidationClient } from '../../src/universities/UniversityCanonicalRelationshipValidator';
 
 const client = () => ({
-  referenceCountry: { findUnique: vi.fn().mockResolvedValue({ iso2Code: 'YE' }) },
+  referenceCountry: { findUnique: vi.fn().mockResolvedValue({ iso2Code: 'YE', isActive: true, lifecycleState: 'ACTIVE' }) },
   administrativeRegion: { findUnique: vi.fn().mockResolvedValue({ countryIso2Code: 'YE', lifecycleState: 'ACTIVE' }) },
   referenceCity: {
     findUnique: vi
       .fn()
-      .mockResolvedValue({ countryIso2Code: 'YE', administrativeRegionId: 'region-1' }),
+      .mockResolvedValue({ isActive: true, lifecycleState: 'ACTIVE', countryIso2Code: 'YE', administrativeRegionId: 'region-1' }),
   },
   degreeLevel: { findUnique: vi.fn().mockResolvedValue({ id: 'degree-1', status: 'ACTIVE' }) },
   major: { findUnique: vi.fn().mockResolvedValue({ id: 'major-1' }) },
@@ -32,21 +32,23 @@ describe('UniversityCanonicalRelationshipValidator', () => {
   it.each([
     ['UNIVERSITY_CAMPUS_COUNTRY_NOT_FOUND', 'referenceCountry', null],
     ['UNIVERSITY_CAMPUS_COUNTRY_NOT_ACTIVE', 'referenceCountry', { iso2Code: 'YE', isActive: false }],
+    ['UNIVERSITY_CAMPUS_COUNTRY_NOT_ACTIVE', 'referenceCountry', { iso2Code: 'YE', isActive: true, lifecycleState: 'DEPRECATED' }],
+    ['UNIVERSITY_CAMPUS_CITY_NOT_ACTIVE', 'referenceCity', { countryIso2Code: 'YE', isActive: true, lifecycleState: 'DEPRECATED' }],
     ['UNIVERSITY_CAMPUS_REGION_NOT_FOUND', 'administrativeRegion', null],
     ['UNIVERSITY_CAMPUS_REGION_NOT_ACTIVE', 'administrativeRegion', { countryIso2Code: 'YE', lifecycleState: 'DEPRECATED' }],
     ['UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH', 'administrativeRegion', { countryIso2Code: 'SA', lifecycleState: 'ACTIVE' }],
     ['UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH', 'administrativeRegion', { countryIso2Code: 'YE', countryReferenceId: 'foreign-country', lifecycleState: 'ACTIVE' }],
     ['UNIVERSITY_CAMPUS_CITY_NOT_FOUND', 'referenceCity', null],
     ['UNIVERSITY_CAMPUS_CITY_NOT_ACTIVE', 'referenceCity', { countryIso2Code: 'YE', isActive: false }],
-    ['UNIVERSITY_CAMPUS_CITY_COUNTRY_MISMATCH', 'referenceCity', { countryIso2Code: 'YE', countryReferenceId: 'foreign-country' }],
-    ['UNIVERSITY_CAMPUS_CITY_REGION_MISMATCH', 'referenceCity', { countryIso2Code: 'YE', administrativeRegionId: 'foreign-region' }],
+    ['UNIVERSITY_CAMPUS_CITY_COUNTRY_MISMATCH', 'referenceCity', { countryIso2Code: 'YE', countryReferenceId: 'foreign-country', isActive: true, lifecycleState: 'ACTIVE' }],
+    ['UNIVERSITY_CAMPUS_CITY_REGION_MISMATCH', 'referenceCity', { isActive: true, lifecycleState: 'ACTIVE', countryIso2Code: 'YE', administrativeRegionId: 'foreign-region' }],
   ] as const)('rejects missing/inactive/foreign geography without a write: %s', async (code, delegate, record) => {
     const c = client(); c[delegate].findUnique.mockResolvedValue(record as any);
     await expect(validator(c).validateCampus({ countryReferenceId: 'country-1', regionReferenceId: 'region-1', cityReferenceId: 'city-1' })).rejects.toThrow(code);
   });
 
   it('rejects inconsistent region/city countries even when no country was selected', async () => {
-    const c = client(); c.referenceCity.findUnique.mockResolvedValue({ countryIso2Code: 'SA', administrativeRegionId: 'region-1' });
+    const c = client(); c.referenceCity.findUnique.mockResolvedValue({ isActive: true, lifecycleState: 'ACTIVE', countryIso2Code: 'SA', administrativeRegionId: 'region-1' });
     await expect(validator(c).validateCampus({ regionReferenceId: 'region-1', cityReferenceId: 'city-1' })).rejects.toThrow('UNIVERSITY_CAMPUS_CITY_REGION_MISMATCH');
   });
 
@@ -89,7 +91,7 @@ describe('UniversityCanonicalRelationshipValidator', () => {
       'UNIVERSITY_CAMPUS_CITY_COUNTRY_MISMATCH',
       (c: any) =>
         c.referenceCity.findUnique.mockResolvedValue({
-          countryIso2Code: 'SA',
+          isActive: true, lifecycleState: 'ACTIVE', countryIso2Code: 'SA',
           administrativeRegionId: 'region-1',
         }),
     ],

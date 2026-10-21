@@ -1,0 +1,30 @@
+{
+  "FinancialLedgerEntryRecord": [],
+  "FinancialTransactionRecord": [],
+  "FinancialAccountRecord": [],
+  "FinanceInvoiceRecord": [],
+  "FinancePaymentRecord": [],
+  "FinanceWalletRecord": [],
+  "FinanceWalletHoldRecord": [],
+  "FinanceCommandRecord": [],
+  "StudentPrivacyConsentDecision": [],
+  "StudentApplicationDocumentBinding": [],
+  "CmsPublishedContent": [],
+  "AuditRecord": [],
+  "TransactionalOutboxRecord": [
+    {
+      "id": "599d3812-5219-499f-8a5c-49b971a436c1",
+      "sha256": "9e35425915fe6ce0930f2e09ec6a9522414e9241217bd2cd93473c3ebae589ed"
+    },
+    {
+      "id": "da1aa278-552a-4a95-8591-e62eefd832c1",
+      "sha256": "dd5b9dfad283dfbcb7c48d3628fda281334070bc024c6272959390f887e51a02"
+    },
+    {
+      "id": "dcaab098-38b0-4eb5-bb56-918a8cc95178",
+      "sha256": "917c801c72bd8fbf3ea914706d5cd04702acde08870c67dc9b1caa5ae0da4719"
+    }
+  ],
+  "ApiIdempotencyRecord": [],
+  "_prisma_migrations": []
+}

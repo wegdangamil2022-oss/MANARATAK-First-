@@ -1,0 +1,47 @@
+{
+  "kind": "TRANSCRIPT_OBSERVED_COMMAND_RESULTS_NOT_RAW_LOGS",
+  "sourceSha": "be5407e6c9a63f9633019c22a79b6990ca0d3a1d",
+  "frontendSecuritySourceTests": {
+    "passed": 3,
+    "failed": 0
+  },
+  "newDevelopmentNonceCase": {
+    "passed": 1,
+    "unselected": 3,
+    "reason": "Reran only the new case after correcting optional production html access in test"
+  },
+  "targetedFrontendTypeScript": {
+    "status": "PASS",
+    "files": [
+      "apps/frontend-security/ViteFrontendSecurityHeaders.ts",
+      "apps/web/vite.config.ts",
+      "apps/admin/vite.config.ts",
+      "tests/runtime/standard-workspace-config.spec.ts"
+    ],
+    "initialErrors": [
+      "TS2589 recursive Vite PluginOption flatten inference",
+      "TS18048 optional html property"
+    ],
+    "resolution": "Type plugin inspection as unknown[] before flatten; inspect optional html with optional chaining. No runtime assertion removed."
+  },
+  "targetedEslint": "PASS",
+  "browser": {
+    "webRendered": true,
+    "adminRendered": true,
+    "uncaughtErrors": 0,
+    "styleViolationsAfter": 0,
+    "adminDeniedEval": {
+      "source": "zod.js",
+      "count": 1,
+      "behavior": "Still blocked by CSP, no uncaught error; policy was not relaxed for code generation"
+    },
+    "apiIntercepted": true,
+    "externalRequestsBlocked": true,
+    "fullUserJourneyAcceptance": false
+  },
+  "initialProbeCorrection": "An exploratory assertion expected script blocking on Web, but observation showed styles blocked while root rendered. The diagnostic expectation was corrected before implementing the style nonce remedy.",
+  "productionHeaders": "Canonical strict policy and static _headers unchanged",
+  "serverNonceLifetime": "One local development-server process; absent from production/staging/build/preview",
+  "ciRunId": "39295249621",
+  "fullCiResultKnown": false
+}

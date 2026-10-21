@@ -33,7 +33,7 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
   ): Promise<T> {
     if (this.bound) {
       // One shared graph/alias/mapping lock spans owner writes, audit and outbox.
-      await this.prisma.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'academic-taxonomy:governance'}, 0))`;
+      await this.prisma.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${'academic-taxonomy:governance'}, 0))`;
       return operation(this);
     }
     // The API's explicit in-memory development adapter is intentionally not a

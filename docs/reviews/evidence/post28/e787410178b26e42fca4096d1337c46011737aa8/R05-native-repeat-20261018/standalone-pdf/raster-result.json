@@ -1,0 +1,19 @@
+{
+  "kind": "POST28_SYNTHETIC_ONLY_RASTER_CDR_EXPERIMENT",
+  "sourceSha256": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+  "sanitizedSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+  "sourceBytes": 636,
+  "sanitizedBytes": 10234,
+  "rasterDpi": 144,
+  "pages": 1,
+  "imageOnlyReconstruction": true,
+  "originalPdfObjectsCopied": 0,
+  "outputObjects": 5,
+  "visualPixelsMatched": true,
+  "searchableTextAndInteractiveFeaturesDiscarded": true,
+  "productionProviderApproved": false,
+  "assetCreated": false,
+  "databaseMutations": 0,
+  "lifecycleActivated": false,
+  "R05Accepted": false
+}

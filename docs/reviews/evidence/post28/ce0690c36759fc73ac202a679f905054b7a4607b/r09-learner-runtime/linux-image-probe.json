@@ -1,0 +1,39 @@
+{
+  "kind": "POST28_LINUX_REVIEW_IMAGE",
+  "sourceSha": "ce0690c36759fc73ac202a679f905054b7a4607b",
+  "checkedAt": "2026-10-20T00:10:00.403Z",
+  "baseTag": "node:22.16.0-bookworm",
+  "baseDigest": "node@sha256:71bcbb3b215b3fa84b5b167585675072f4c270855e37a599803f1a58141a0716",
+  "imageId": "sha256:a6af36c85f1315eda0f97a8a4a56beb1ba2164194482b87e9a540de2358ddb56",
+  "dockerfileSha256": "90e242ea42d244e59b697d2a082ba507b01f33ffb462d4f731348d38ce336900",
+  "nativeProbe": {
+    "node": "v22.16.0",
+    "uid": 1000,
+    "sourceSha": "ce0690c36759fc73ac202a679f905054b7a4607b",
+    "nativeLoaded": true,
+    "modules": [
+      "@node-rs/xxhash",
+      "@prisma/client",
+      "cors",
+      "express",
+      "fontkit",
+      "helmet",
+      "pdfkit",
+      "svg-to-pdfkit",
+      "uuid"
+    ],
+    "stageAccepted": false
+  },
+  "network": "none",
+  "readOnly": true,
+  "capabilities": "ALL_DROPPED",
+  "apiBooted": false,
+  "databaseConnected": false,
+  "targetDatabaseMajor": 16,
+  "postgresDigest": "postgres@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+  "postgresVersion": "postgres (PostgreSQL) 16.15 (Debian 16.15-1.pgdg13+2)",
+  "postgresServerStarted": false,
+  "imagePushed": false,
+  "productionAcceptance": false,
+  "promotionAuthorized": false
+}

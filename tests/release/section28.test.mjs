@@ -145,7 +145,12 @@ test('FSA003 readiness path matches actual public monitoring mount/route', () =>
     fs.readFileSync('apps/api/src/presentation/api/router/MonitoringRouter.ts', 'utf8'),
     /publicProbe\('\/health\/readiness'/,
   );
-  assert.match(fs.readFileSync('apps/api/src/app.ts', 'utf8'), /\/api\/v1\/monitoring/);
+  const appSource = fs.readFileSync('apps/api/src/app.ts', 'utf8');
+  const apiRouterSource = fs.readFileSync('apps/api/src/presentation/api/router/ApiRouter.ts', 'utf8');
+  assert.match(appSource, /app\.use\(\s*'\/api'\s*,\s*apiRouter\.getRouter\(\)\s*\)/);
+  assert.match(appSource, /apiRouter\.registerVersion\(\s*'v1'\s*,\s*v1Router\s*\)/);
+  assert.match(apiRouterSource, /this\.router\.use\(\s*`\/\$\{version\}`\s*,\s*versionRouter\s*\)/);
+  assert.match(appSource, /v1Router\.use\(\s*'\/monitoring'\s*,\s*MonitoringRouter\.create\(/);
 });
 test('FSA003 API base composition does not duplicate api/v1', () => {
   assert.equal(
@@ -173,6 +178,7 @@ function healthyFetch(overrides = {}) {
           },
         },
       );
+    if(new URL(url).pathname.endsWith('.js'))return new Response('export {};',{headers:{'content-type':'application/javascript'}});
     const unit = url.includes('admin') ? 'admin' : 'web';
     if (url.endsWith('/health/build'))
       return new Response(
@@ -229,12 +235,14 @@ test('FSA008 stamp matches exact static unit and source', () => {
   const root = temp();
   fs.writeFileSync(
     path.join(root, 'index.html'),
-    `<meta name="manaratak-build-sha" content="${sha}">`,
+    `<meta name="manaratak-build-sha" content="${sha}"><div id="root"></div><script src="/assets/app.js"></script>`,
   );
   fs.writeFileSync(
     path.join(root, 'manaratak-build.json'),
     JSON.stringify({ version: 1, unit: 'web', sourceSha: sha }),
   );
+  fs.mkdirSync(path.join(root,'assets'));
+  fs.writeFileSync(path.join(root,'assets/app.js'),'export {};');
   assert.equal(inspectStaticBuild(root, 'web', sha).status, 'BUILT');
   assert.equal(inspectStaticBuild(root, 'admin', sha).status, 'UNBUILT');
   assert.equal(inspectStaticBuild(root, 'web', 'b'.repeat(40)).status, 'UNBUILT');
@@ -446,6 +454,32 @@ test('FSA023 stale evidence and duplicate gate not PASS', () => {
 });
 test('FSA004…021 mere PASS booleans lack required execution details', () =>
   assert.ok(acceptanceDetails(proof(), sha).length > 0));
+
+test('R11 rejects absent or nonnumeric measurement duration and empty dataset identity', () => {
+  const row = {
+    id: 'public-search', p95Ms: 10, p99Ms: 20, maximumP99Ms: 100,
+    durationSeconds: 60, fixture: 'synthetic-catalog-v1', errorBudgetPassed: true,
+    poolSaturationSafe: true, rateLimitSafe: true, queueLagSafe: true,
+  };
+  const failures = (categories) => acceptanceDetails({ gates: [{ id: 'load-slo', categories }] }, sha);
+  assert.equal(failures([row]).includes('public-search:SLO_UNVERIFIED'), false);
+  for (const durationSeconds of [undefined, null, NaN, Infinity, '60', 59]) {
+    assert.equal(failures([{ ...row, durationSeconds }]).includes('public-search:SLO_UNVERIFIED'), true);
+  }
+  for (const fixture of [' ', true, {}]) {
+    assert.equal(failures([{ ...row, fixture }]).includes('public-search:SLO_UNVERIFIED'), true);
+  }
+});
+
+test('R11 conflicting duplicate category cannot hide a failing load observation', () => {
+  const row = {
+    id: 'public-search', p95Ms: 10, p99Ms: 20, maximumP99Ms: 100,
+    durationSeconds: 60, fixture: 'synthetic-catalog-v1', errorBudgetPassed: true,
+    poolSaturationSafe: true, rateLimitSafe: true, queueLagSafe: true,
+  };
+  const failures = acceptanceDetails({ gates: [{ id: 'load-slo', categories: [row, { ...row, p99Ms: 1000 }] }] }, sha);
+  assert.ok(failures.includes('public-search:SLO_UNVERIFIED'));
+});
 test('FSA006 26-domain fixture matrix cannot use page-load-only evidence', () => {
   const rows = DOMAINS.map((owner) => ({
     owner,
@@ -536,6 +570,10 @@ const sentinel = (target, proof) => ({
   superuser: false,
   createRole: false,
   createDatabase: false,
+  replication: false,
+  bypassRls: false,
+  unsafeRoleMembership: false,
+  canConnectOtherDatabase: false,
   targetFingerprint: target.fingerprint,
   disposableInstanceId: proof.disposableInstanceId,
   sentinelOwnedByRestoreRole: false,
@@ -613,6 +651,13 @@ test('FSA018 corrupted backup aborts before even sentinel SQL', async () => {
       }),
     /BACKUP_HASH/,
   );
+  assert.equal(calls, 0);
+});
+test('FSA018 runtime requires a data-derived database snapshot before sentinel SQL', async () => {
+  const input = {...recoveryFixture(), requireDatabaseSnapshot: true};
+  let calls = 0;
+  const forbidden = async () => { calls++; throw Error('UNEXPECTED_SQL'); };
+  await assert.rejects(() => executeRestore(input, {readSentinel:forbidden,restoreDatabase:forbidden,verifyDatabase:forbidden,now:()=>now}), /RECOVERY_DATABASE_SNAPSHOT_INVALID/);
   assert.equal(calls, 0);
 });
 test('FSA018 corrupt asset aborts before all SQL', async () => {
@@ -832,6 +877,12 @@ test('FSA001 source evidence writer preserves skipped gate and never declares ru
   assert.equal(report.pass, false);
   assert.equal(report.runtimeStatus, 'UNVERIFIED');
   assert.equal(report.productionDecision, 'BLOCKED');
+  const manifestBytes = fs.readFileSync('scripts/ci/source-closure-manifest.json');
+  const manifest = JSON.parse(manifestBytes);
+  assert.equal(report.sourceClosureManifest.sha256, hash(manifestBytes));
+  assert.deepEqual(report.sourceClosureManifest.sourceGateIds, manifest.gates.filter(gate => gate.classification === 'SOURCE').map(gate => gate.id));
+  assert.equal(report.runtimePendingManifest, manifest.runtimePendingManifest);
+  assert.equal(report.unitCommand, JSON.parse(fs.readFileSync('package.json')).scripts['test:unit']);
 });
 test('FSA002/013 corrected repository while deployment/recovery remain explicit opt-in', () => {
   const release = fs.readFileSync('.github/workflows/release-promotion.yml', 'utf8'),

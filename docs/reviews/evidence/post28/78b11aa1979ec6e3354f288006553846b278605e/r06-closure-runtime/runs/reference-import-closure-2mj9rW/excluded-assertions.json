@@ -1,0 +1,19 @@
+[
+  "projects a resolved scholarship test document backed by its own published version",
+  "withdraws archived test requirements from scholarship public projection",
+  "withdraws a hidden canonical test from scholarship public requirements even when status remains published",
+  "withdraws test requirements when the currently referenced version is no longer published",
+  "does not treat an unresolved named test as an approved canonical requirement",
+  "keeps provider headquarters separate from course study geography",
+  "resolves an active canonical course language through its actual repository",
+  "rejects inactive and deprecated canonical languages despite a valid language FK",
+  "public course card and list withdraw a previously resolved language after canonical deprecation",
+  "public course list excludes raw language only records without canonical proof",
+  "deduplicates one provider native language key across two actual connections",
+  "preserves separate source identities for each language version and provider",
+  "approved provider domains reject lookalike external hosts and accept the exact owned host",
+  "records supplied synthetic redirect evidence once and retains original first seen provenance",
+  "rejects a stale link-check result after a controlled URL replacement without changing history",
+  "forbids uncontrolled imported provider origin and URL identity edits before any owner mutation",
+  "blocks publishing a raw external source without persisted direct-link verification"
+]

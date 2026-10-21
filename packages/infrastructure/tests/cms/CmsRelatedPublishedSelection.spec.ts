@@ -46,12 +46,16 @@ describe('CMS related published selection', () => {
 
   it('skips published lookups when the scoped selection has no matching owners', async () => {
     const prisma = {
-      course: { findFirst: vi.fn().mockResolvedValue(null) },
+      course: { findMany: vi.fn().mockResolvedValue([]), findFirst: vi.fn().mockResolvedValue(null) },
       $queryRaw: vi.fn().mockResolvedValue([]),
       cmsPublishedContent: { findMany: vi.fn() },
     };
     const owner = new PrismaCmsRepository(prisma as unknown as PrismaClient);
     expect(await owner.listPublishedByDomainTarget('COURSE', 'missing', 'ar', 'manaratak', 6)).toEqual([]);
+    expect(prisma.course.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ originType: 'EXTERNAL_LINKED_COURSE', AND: expect.arrayContaining([{ id: 'missing' }]) }),
+      take: 500,
+    }));
     expect(prisma.cmsPublishedContent.findMany).not.toHaveBeenCalled();
     expect(prisma.$queryRaw).not.toHaveBeenCalled();
   });

@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "replays installments without a second plan and rejects a different schedule for the same key",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "passed",
+    "durationMs": 119.59130400000004,
+    "failureFirstLines": []
+  }
+]

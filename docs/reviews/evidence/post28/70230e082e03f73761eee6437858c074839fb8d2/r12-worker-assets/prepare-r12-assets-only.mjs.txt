@@ -1,0 +1,10 @@
+import fs from 'node:fs';import path from 'node:path';
+const root=import.meta.dirname;let source=fs.readFileSync(path.join(root,'r12-fence-asset-contracts.mjs'),'utf8');
+const first=source.indexOf(' const {PrismaTransactionalOutboxStore}'),last=source.indexOf(" for(const relative of ['aggregates/AssetRecord'");if(first<0||last<0)throw Error('TEMPLATE_CHANGED');
+const segment=source.slice(last,source.indexOf(' const bytes=',last));
+const preflight=source.slice(0,source.indexOf('const result='))+segment+"\nconsole.log(JSON.stringify({frozenSourcePreflight:true,files:sources.length}));await db.$disconnect();\n";
+fs.writeFileSync(path.join(root,'r12-asset-source-preflight.mjs'),preflight);
+source=source.slice(0,first)+" result.leaseFencingEvidence='native-pg16-1T4SlV/r12-result.json:leaseFencing; not repeated';\n"+source.slice(last);
+source=source.replace('R12_FROZEN_SOURCE_REAL_POSTGRES_FENCING_AND_ASSET_CONTRACTS','R12_FROZEN_SOURCE_REAL_POSTGRES_ASSET_CONTRACTS');
+fs.writeFileSync(path.join(root,'r12-assets-only.mjs'),source);
+let parent=fs.readFileSync(path.join(root,'run-r12-fence-assets.mjs'),'utf8').replaceAll('r12-fence-asset-contracts.mjs','r12-assets-only.mjs').replaceAll('r12-contract-lab.txt','r12-asset-lab.txt');fs.writeFileSync(path.join(root,'run-r12-assets-only.mjs'),parent);

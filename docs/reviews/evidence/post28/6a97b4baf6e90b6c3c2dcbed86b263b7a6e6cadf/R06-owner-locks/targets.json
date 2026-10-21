@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "kind": "POST28_LOCAL_DATABASE_TARGETS",
+  "sourceSha": "6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf",
+  "runId": "bfa5b45f-eebe-499d-bd5c-018e892c8035",
+  "postgresMajor": 16,
+  "targets": {
+    "DB-T": {
+      "host": "127.0.0.1",
+      "port": 55449,
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "roleKind": "APPLICATION",
+      "nonce": "10939e6c77ba29127d658f94c32ce68aa1373aa3f679aca633914d5f248770e3",
+      "serverIdentity": "7698059553268370824",
+      "databaseOid": "16386"
+    }
+  },
+  "provisioning": {
+    "label": "DB-T",
+    "role": "post28_tx_migrator",
+    "roleKind": "MIGRATION"
+  }
+}

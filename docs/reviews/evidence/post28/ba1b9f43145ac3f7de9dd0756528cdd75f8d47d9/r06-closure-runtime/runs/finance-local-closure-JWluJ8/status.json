@@ -1,0 +1,18 @@
+{
+  "discovered": 14,
+  "executed": 1,
+  "passed": 1,
+  "failed": 0,
+  "selectedSkipped": 0,
+  "rawExcludedAssertions": 13,
+  "fullProfilePassed": false,
+  "sourceSha": "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+  "suite": "finance-local-closure",
+  "runId": "a96d8bdd-da83-4820-a773-d2cc54c0cb09",
+  "caseExact": "Post28 independent local credit installments and wallet obligation invariants > replays installments without a second plan and rejects a different schedule for the same key",
+  "originalRunnerGate": "PASS",
+  "R04": "PASS_LOCAL_UNCHANGED",
+  "R05": "BLOCKED",
+  "R06": "PARTIAL",
+  "productionAcceptance": false
+}

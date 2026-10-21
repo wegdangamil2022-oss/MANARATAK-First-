@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "kind": "MANARATAK_AWS_RECOVERY_REVIEW_TARGET",
+  "state": "DESIGN_SELECTED_NOT_PROVISIONED",
+  "provider": "AWS",
+  "application": {"os": "Linux", "architecture": "x64", "nodeMajor": 22, "runtime": "reviewed immutable container"},
+  "postgresql": {"service": "RDS PostgreSQL", "major": 16, "publiclyAccessible": false, "multiAz": true, "backupRetentionDays": 35, "crossRegionAutomatedBackupCopy": true, "storageEncrypted": true},
+  "assets": {"service": "S3", "versioning": true, "blockPublicAccess": true, "backupObjectLockMode": "COMPLIANCE", "dailyBackupRetentionDays": 35, "weeklyBackupCopies": 12, "crossRegionReplication": true},
+  "security": {"separateBackupAccount": true, "distinctBackupKmsKey": true, "rdsImmutableCopy": "AWS Backup locked vault", "accessAudit": "CloudTrail with S3 object data events", "applicationMayDeleteBackup": false},
+  "primaryRegion": null,
+  "backupRegion": null,
+  "regionDecision": "Select after account availability and data residency review; source and backup must differ",
+  "budgetApproved": false,
+  "resourcesCreated": false,
+  "runtimeControlsVerified": false,
+  "regionalRpoRtoVerified": false,
+  "productionAcceptance": false
+}

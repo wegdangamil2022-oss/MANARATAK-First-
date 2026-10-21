@@ -1,0 +1,98 @@
+[
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > commits verified attestation bound to canonical scholarship cycle version and real asset checksum",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > persists an explicit rejected attestation without granting verified status",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > rejects a stale attestation revision atomically",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > refuses self review and malformed validity or evidence without an audit",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > rejects attestation after consent withdrawal",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > serializes two independent reviewers to one decision timeline two scoped audits and outbox",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > rejects repeat decisions and removes the decided binding from the real review queue",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > fails closed when the actual scholarship cycle or owner publication is withdrawn",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > real asset policy refuses another owner and untrusted bytes before any attestation",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > rolls attestation tracker timeline and audit back at real PostgreSQL outbox failure",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP records real JWT reviewer and current persisted review permission",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP refuses a caller lacking review permission before a decision",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP refuses cached attestation after review permission withdrawal",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > real delivery service refuses opening bytes when secure storage capability is absent",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP serves the preserved sanitized bytes and revokes the already issued path without renewing consent",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP denies a leaked issued path to unauthenticated and other unprivileged identities",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP denies self review even when the student identity holds a review permission",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP denies the issued path after persisted review permission withdrawal",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP rejects consent withdrawn on another connection while storage IO is in flight",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP refuses substituted CLEAN file bytes rather than returning unchecked content",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP rejects changed asset ownership on another connection during storage IO",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP refuses an old issued review version and refuses content after attestation without new consent",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP rechecks permission after storage IO and refuses a newly revoked reviewer",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP rejects expired and oversized read deadlines on an issued path",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-attestation-closure.database.spec.mjs"
+  }
+]

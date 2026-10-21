@@ -1,6 +1,8 @@
 import { findUsedAssetIds } from './AssetUsageBatchQuery';
 import { randomUUID } from 'node:crypto';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
+import type { AtomicPersistenceContext } from '@manaratak/domain';
+import type { PrismaAtomicPersistenceContext } from '../event-foundation/PrismaTransactionalOutboxStore';
 import {
   IAssetRecordRepository,
   AssetRecord,
@@ -49,6 +51,17 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async save(asset: AssetRecord): Promise<void> {
+    return this.saveWithClient(asset, this.prisma);
+  }
+
+  /** Joins an existing owner transaction so an Asset and its Audit commit together. */
+  async saveInTransaction(asset: AssetRecord, context: AtomicPersistenceContext): Promise<void> {
+    const client = (context as Partial<PrismaAtomicPersistenceContext>).transactionClient;
+    if (!context.boundaryId || !client?.assetRecord) throw new Error('ASSET_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    return this.saveWithClient(asset, client);
+  }
+
+  private async saveWithClient(asset: AssetRecord, client: PrismaClient | Prisma.TransactionClient): Promise<void> {
     const data = {
       id: asset.id.value,
       reference: asset.reference.value,
@@ -79,7 +92,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
           bucketName: version.storageLocator.bucketName, pathKey: version.storageLocator.pathKey },
         ...(version.checksum ? { checksum: { algorithm: version.checksum.algorithm, hash: version.checksum.hash } } : {}),
         ...(version.changelog ? { changelog: version.changelog } : {}),
-      })) } : null,
+      })) } : Prisma.DbNull,
       sanitizationMetadata: asset.sanitization ? {
         exifStripped: asset.sanitization.exifStripped,
         sanitizedAt: asset.sanitization.sanitizedAt?.toISOString(),
@@ -90,7 +103,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         : null as any,
     };
 
-    const delegate = (this.prisma as any).assetRecord;
+    const delegate = client.assetRecord;
     const captured = this.loadedSnapshots.get(asset);
     if (!captured) {
       // New entities must never overwrite an existing record via upsert.

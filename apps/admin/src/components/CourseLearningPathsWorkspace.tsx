@@ -25,6 +25,7 @@ export function CourseLearningPathsWorkspace() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [strict, setStrict] = useState(false);
+  const [certificateEligible, setCertificateEligible] = useState(false);
   const [logic, setLogic] = useState<'ALL' | 'ALL_REQUIRED'>('ALL_REQUIRED');
   const [courses, setCourses] = useState<LearningPathCourseDto[]>([]);
   const [labels, setLabels] = useState<Record<string, string>>({});
@@ -54,6 +55,7 @@ export function CourseLearningPathsWorkspace() {
     setTitle(path?.title ?? '');
     setDescription(path?.description ?? '');
     setStrict(path?.isStrictlyOrdered ?? false);
+    setCertificateEligible(path?.certificateEligible === true);
     setLogic(path?.completionLogic ?? 'ALL_REQUIRED');
     setCourses(path?.courses ?? []);
     setError('');
@@ -91,7 +93,7 @@ export function CourseLearningPathsWorkspace() {
         body: JSON.stringify(
           action
             ? {}
-            : { title, description, isStrictlyOrdered: strict, completionLogic: logic, courses },
+            : { title, description, isStrictlyOrdered: strict, completionLogic: logic, courses, certificateEligible },
         ),
       });
       select(result);
@@ -134,6 +136,10 @@ export function CourseLearningPathsWorkspace() {
         />
       </label>
       <fieldset disabled={busy || !editable} className="grid gap-3">
+        <label>
+          <input type="checkbox" checked={certificateEligible} onChange={(event) => setCertificateEligible(event.target.checked)} />
+          إتاحة شهادة عند إتمام هذا الإصدار بعد اعتماده ونشره
+        </label>
         <label>
           عنوان المسار
           <input value={title} onChange={(event) => setTitle(event.target.value)} />

@@ -67,12 +67,12 @@ export class UniversityCanonicalRelationshipValidator {
     const country = input.countryReferenceId
       ? await this.client.referenceCountry.findUnique({
           where: { id: input.countryReferenceId },
-          select: { iso2Code: true, isActive: true },
+          select: { iso2Code: true, isActive: true, lifecycleState: true },
         })
       : null;
     if (input.countryReferenceId && !country)
       throw new Error('UNIVERSITY_CAMPUS_COUNTRY_NOT_FOUND');
-    if (country?.isActive === false) throw new Error('UNIVERSITY_CAMPUS_COUNTRY_NOT_ACTIVE');
+    if (country && (!country.isActive || country.lifecycleState !== 'ACTIVE')) throw new Error('UNIVERSITY_CAMPUS_COUNTRY_NOT_ACTIVE');
     const region = input.regionReferenceId
       ? await this.client.administrativeRegion.findUnique({
           where: { id: input.regionReferenceId },
@@ -84,11 +84,11 @@ export class UniversityCanonicalRelationshipValidator {
     const city = input.cityReferenceId
       ? await this.client.referenceCity.findUnique({
           where: { id: input.cityReferenceId },
-          select: { countryIso2Code: true, countryReferenceId: true, administrativeRegionId: true, isActive: true },
+          select: { countryIso2Code: true, countryReferenceId: true, administrativeRegionId: true, isActive: true, lifecycleState: true },
         })
       : null;
     if (input.cityReferenceId && !city) throw new Error('UNIVERSITY_CAMPUS_CITY_NOT_FOUND');
-    if (city?.isActive === false) throw new Error('UNIVERSITY_CAMPUS_CITY_NOT_ACTIVE');
+    if (city && (!city.isActive || city.lifecycleState !== 'ACTIVE')) throw new Error('UNIVERSITY_CAMPUS_CITY_NOT_ACTIVE');
     if (country && region && (country.iso2Code !== region.countryIso2Code ||
       (region.countryReferenceId && region.countryReferenceId !== input.countryReferenceId)))
       throw new Error('UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH');
@@ -143,7 +143,7 @@ export class UniversityCanonicalRelationshipValidator {
     await this.validateAdmissionRequirements(input.admissionRequirements ?? []);
   }
 
-  private async validateAdmissionRequirements(
+  async validateAdmissionRequirements(
     requirements: NonNullable<UniversityAcademicProgramAuthoringInput['admissionRequirements']>,
   ): Promise<void> {
     const requirementKeys = new Set<string>();

@@ -1,0 +1,77 @@
+# تجهيز R06–R09 قبل اتصال Neon
+
+> أحدث نقطة استئناف وتسليم R06: [التسليم الرسمي 2026-10-16](../remediation/POST28_R06_HANDOFF_2026-10-16.md)، ويتضمن المصفوفة26 والعد283 والأوامر وحدود الأدلة.
+
+
+> أحدث مراجعة إغلاق:243 حالة PostgreSQL مختلفة؛ R06 PARTIAL وإغلاقها BLOCKED، وR05 BLOCKED. أُصلحت فجوات replay للصلاحيات والمراجع المعيارية وrefund، ونُفذت بوابات attestation والتعلم والمالية المحلية. لا اعتماد DEC أو قبول إنتاجي. [تقرير الإغلاق والأدلة والشروط المتبقية](../remediation/POST28_R06_CLOSURE_REVIEW_2026-10-16.md).
+
+> آخر استكمال:167 حالة PostgreSQL مختلفة؛ R06 PARTIAL وR05 BLOCKED. أُصلح قبول الدولة/المدينة المتقاعدة عبر أوامر الجامعة الحقيقية، وحُفظت الجولة الفاشلة والتصحيحات والاختيارات دون تكرار العد. [التقرير والمصفوفة الأحدث](../remediation/POST28_R06_UNIVERSITY_GEOGRAPHY_2026-10-16.md).
+
+> آخر استكمال:149 حالة PostgreSQL مختلفة؛ R06 PARTIAL وR05 BLOCKED. أُصلح تجاوز صلاحية المنح عند replay، وأضيف دليل Admin/DB والقراءة العامة. [التقرير والأدلة](../remediation/POST28_R06_SCHOLARSHIP_ADMIN_REPLAY_2026-10-16.md).
+
+> أحدث استكمال:127 حالة PostgreSQL مختلفة ناجحة؛ R06 PARTIAL وR05 BLOCKED. تفاصيل العلاقات وHTTP واستهلاك الاعتماد وحدود التشغيل في [تقرير الاستكمال](../remediation/POST28_R06_OWNER_RELATIONS_HTTP_FINANCE_2026-10-16.md). لا تجمع إعادة الحالات7 أو الاستبعادات13 مع العدد.
+
+> تحديث أحدث: نجحت17 حالة جديدة للوثائق وعلاقات البرامج الجامعية؛ التراكمي85 حالة مختلفة. R06 جزئية وR05 بعائقها. راجع [تقرير الموافقة والعلاقات](../remediation/POST28_R06_DOCUMENT_CONSENT_RELATIONS_2026-10-16.md).
+
+> تحديث أحدث: نجحت19 حالة أوامر طالب ومالية واعتماد على PostgreSQL الحقيقي، فأصبح التراكمي68 حالة مختلفة. R06 ما زالت جزئية وR05 بعائقها؛ راجع [تقرير أوامر المالكين](../remediation/POST28_R06_OWNER_WORKFLOWS_2026-10-16.md). المتن التالي يحتفظ بنتائج الجولة السابقة.
+
+
+> تحديث أحدث بتوجيه المستخدم: سُجلت مراجعة R05 منتهية مع عوائق دون PASS، ثم نُفذت49 حالة PostgreSQL على DB-T مستقلة ضمن R06 المحدودة. التفاصيل والأدلة والاستثناء المحلي في [تقرير R05/R06](../remediation/POST28_R05_DISPOSITION_R06_RUNTIME_2026-10-16.md). المتن التالي يسجل الحالة السابقة ولا يلغي نتائج التشغيل أو يمنح قبولًا شاملًا.
+
+
+هذا تجهيز مصدر وتشخيص بناء؛لا يبدأ قبول تشغيل R06 قبل R04/R05،ولا يقبل R07 دون قاعدة وخدمات مختبر موثقة وruntime layer. لا تتغير حدود R00–R05 أو DEC-01…07،ولا يُنفذ نشر أو migration أو seed أو اتصال مزود حقيقي.
+
+## R06 — المعاملات والعلاقات
+
+يمكن توليد قائمة المتطلبات دون استيراد اختبارات قاعدة البيانات أو تشغيل hooks:
+
+```bash
+node scripts/database/prepare-post28-r06-r09.mjs /absolute/private/new-preparation.json
+```
+
+يجب أن يوجد parent directory خارج Git،ولا يعاد استخدام ملف قائم. تسجل الحزمة26 حالة R06 الإلزامية من الملحق (CD-001…019 و026/028/029/030/035/036/040)،والمالكين والنتيجة المطلوبة والقرارات المعلقة. تسجل أيضًا ملفات profiles الموجودة وحدودها؛وجود assets/leases/persistence/sections123 لا يثبت تغطية التمويل أو consent أو جميع علاقات الجامعة والمنحة والدورة. أوامر runtime غير المربوطة تبقى null ولا تصنع PASSES.
+
+غدًا بعد إثبات R03 وقبول R04/R05،يلزم على DB-T منفصلة:
+
+- application role محدود فعليًا،وsynthetic owner fixtures بنسخة/run مستقلين عن DB-E.
+- اتصالان حقيقيان بهويتَي backend مختلفتين،barriers محدودة وملاحظة lock/lease/CAS؛لا sleep تخمينيًا أو mock للـtransaction.
+- owner+audit+outbox/receipt كلها commit أو كلها rollback؛failure injection قبلcommit مع assertion للأرصدة والـholds والـbindings والقراءة العامة.
+- retry/idempotency وstale/missing version وprivilege/owner negatives،من دون حذف ledger أو receipt تاريخي للتنظيف.
+- القرار المؤسسي المعلق،مثل degree-major pairing أوnullable uniqueness أوإبطالprojection،يبقى BLOCKED حتى اعتماده؛لا ينشأ schema علاج افتراضي.
+
+الحزمة تكشف نقص owner runtime suites؛لا تنفذ هذه المعاملات أو تضيف دليلًا مزيفًا لها. الحارس الحالي محلي؛تكييف هوية Neon الحية وTLS/grants ما زال مطلوبًا كما في [دليل Neon](POST28_NEON_R04_R05_PREPARATION.md).
+
+## R07 — بناء وتشخيص artifact دون boot أو نشر
+
+أضيف أمر تشخيص يفرض Node22 ومصدرًا نظيفًا،وينشئ مجلدًا جديدًا خاصًا خارج Git:
+
+```bash
+node scripts/release/post28-diagnostic-build.mjs /absolute/private/new-r07-run
+```
+
+ينفذ Prisma generate من الحزم المحلية،ثم build للوحدات مرة واحدة،ثم packaging وdigest/SBOM verification وunpack جديد لكل وحدة. لا يبدأ API أو worker أو متصفحًا،ولا يتصل بقاعدة. يتحقق من وجود API entrypoint وJavaScript الواجهات داخل النسخة المفكوكة،ومن عدم وجود checkout أوnode_modules موروثة في جذرها. runtime layer الخارجي والـnative modules وPrisma engines والـboot نفسه تظل متطلبات غير مثبتة.
+
+المخرجات:
+
+- checks.json: الأوامر والتوقيت والنتائج وhashes للسجلات.
+- artifacts/: ثلاث حزم tar وmanifest وSBOM وdigests؛محلية خاصة،ولا ترفع tar إلى Git تلقائيًا.
+- unpacked-api/web/admin/: نسخ جديدة للفحص،دون process boot.
+- summary.json: source/lock/schema/generated-client/SBOM/artifact digests؛runtimeBootVerified=false وstageAccepted=false وpromotionAuthorized=false.
+
+فُرض output جديد على builder لمنع استبدال artifact قائم،وفُرضت نظافة المصدر بما فيه untracked files. ترفض مدخلات packaging symlinks والملفات الخاصة ومسارات الخروج قبل كتابة بصمات الواجهات.
+
+أُصلح فحص BUILT: بصمة HTML وحدها لا تكفي؛يجب أن يشير HTML إلى JS محلي موجود وغير فارغ،دون symlink أو traversal أو مصدر خارجي. أُصلح smoke ليطلب JS للوحدتين ويرفض redirect و404 وHTML fallback ولو سمي JavaScript. هذه فحوص presence/protocol؛لا تثبت أن التطبيق تفاعل بنجاح في متصفح أوأن API اتصل بقاعدة.
+
+للقبول الفعلي لاحقًا: CI موثق لنفسSHA،runtime image/native dependencies وclient متوافق،ثلاث وحدات منartifact وحده،TLS/CORS/cookies/base paths،readiness exact200/protocol2/fresh SHA،وقاعدة/Redis/storage مختبر موثقة. static build health لا يعوض backend readiness.
+
+## R08 وR09
+
+تدرج الحزمة متطلبات العمال والجلسات والمزودين،و77 علاقة و42 حالة ومصفوفة26 مجالًا بأبعادها الخمسة. اختبارات shutdown/lifecycle بمصادر معزولة لا تثبت تشغيل عاملين حقيقيين أوPostgreSQL/Redis أوprovider effects. اختبارات HTTP المعترضة لا تثبت built-browser+DB.
+
+لا تشغيل SMTP أودفع أومزودAI حقيقي،ولا FLUSHALL علىRedis مشترك،ولاload أوrestore دون هدف وميزانية وسلطات مرحلتها. تبقى كل نتائج التشغيل NOT_EXECUTED حتى قياسها؛لا R03–R09 CLOSED بسبب تقرير تجهيز أوbuild تشخيصي.
+
+## تصحيح مشغّل WP-IC-10 القديم
+
+`wp-ic-10-browser-e2e.mjs` يختبر ثلاث حالات HTTP مع dev server،ولا يستعمل page/browser. لم يعد يكتب browser E2E PASS:يحفظ `IMPORTED_COURSE_HTTP_BOUNDARY_DIAGNOSTIC` مع pass=false وbuiltBrowserVerified=false وruntimeAcceptance=false حتى لو نجحت الحالات. finalizer الذي يطلب browser acceptance يبقى BLOCKED. يتطلب مجلدًا جديدًا مطلقًا خارج Git؛لا تستخدم نتائج قديمة أوتخلطها بقبولR09.
+
+أضيف جمع Playwright JSON قبل التشغيل ومقارنة file/case/project نفسها بعده،ورفض zero/skip/flaky/retry/missing/extra cases. اختبار subprocess فعلي يستعمل Playwright test runner بحالة inert بلا browser أوwebServer أوDB ليثبت صيغة التقرير؛ليس دليل متصفح تشغيلي. مشغّل built API/Web/Admin الحقيقي وTLS وfixtures لا يزال مطلوبًا.

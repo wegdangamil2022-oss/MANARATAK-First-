@@ -1,0 +1,6 @@
+{
+  "caseExact": "Post28 real atomic relation owner commands > rolls all program relations audit and owner revision back on a PostgreSQL outbox error",
+  "fullDiscoveryCases": 8,
+  "selectedCases": 1,
+  "fullProfileAcceptance": false
+}

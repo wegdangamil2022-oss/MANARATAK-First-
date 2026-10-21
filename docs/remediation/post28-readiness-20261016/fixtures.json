@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "baselineSourceSha": "d82ff2e3b23152025a001f529a0d4abd5d160bfa",
+  "plan": "docs/remediation/POST28_ISOLATED_VALIDATION_EXECUTION_PLAN_v1.3_2026-10-16.md",
+  "planSha256": "956e4c59215cf9496e7ed967e48697e9d4c1914b5e862cc4156eabbbb26c8c1c",
+  "matrix": "docs/remediation/CROSS_PHASE_RELATIONSHIP_CLOSURE_MATRIX.md",
+  "matrixSha256": "dccb5861521537ea4fcc0e0974b4cc3a60b601faf86b8a369e35e9009cd40d65",
+  "runtimeExecuted": false,
+  "fixtures": [
+    {
+      "fixtureId": "FX-REF-01",
+      "inputs": "دولتان مختلفتان ISO2/ISO3؛ لكل منهما مناطق ومدن وأكواد معيارية؛ مدينة متشابهة اسمًا بدولة أخرى؛ عناصر ACTIVE وDEPRECATED/ARCHIVED",
+      "purpose": "صحة country→region→city، ومنع اسم متشابه من إنشاء FK غير صحيح",
+      "status": "SPECIFIED_NOT_PROVISIONED",
+      "ownerCommand": null,
+      "executed": false
+    },
+    {
+      "fixtureId": "FX-ACA-01",
+      "inputs": "DegreeLevel بكالوريوس/ماجستير/دكتوراه، مجال/تخصص CS وMED وAI، مع MajorLevelProfile صالح وغير صالح/غير منشور",
+      "purpose": "ضبط تقاطع degree/major/taxonomy وعدم استخدام ملف تخصص من مستوى آخر",
+      "status": "SPECIFIED_NOT_PROVISIONED",
+      "ownerCommand": null,
+      "executed": false
+    },
+    {
+      "fixtureId": "FX-UNI-01",
+      "inputs": "جامعتان بحالتين مختلفتين، campus/unit وبرنامجان BSc-CS وPhD-MED، ومثال campus من جامعة أخرى",
+      "purpose": "صحة parent/child والحدود وحالة النشر؛ نفس الاسم في جامعتين بمعرفين مختلفين",
+      "status": "SPECIFIED_NOT_PROVISIONED",
+      "ownerCommand": null,
+      "executed": false
+    },
+    {
+      "fixtureId": "FX-TEST-01",
+      "inputs": "اختبار دولي منشور وآخر غير منشور، variants/versions وحد أدنى للدرجة وتفرعات اختيارية/null",
+      "purpose": "فحص متطلبات القبول، score/variant/version ownership، والتكرار/التزامن",
+      "status": "SPECIFIED_NOT_PROVISIONED",
+      "ownerCommand": null,
+      "executed": false
+    },
+    {
+      "fixtureId": "FX-SCH-01",
+      "inputs": "منحة S1 صحيحة مرتبطة بـBSc-CS، ومنحة S2 تغطي BSc-CS وPhD-MED فقط، ومنحة S3 مجهولة/غير مكتملة",
+      "purpose": "منع phantom BSc-MED؛ توافق المنحة مع البرنامج والجامعة والدرجة والتخصص",
+      "status": "SPECIFIED_NOT_PROVISIONED",
+      "ownerCommand": null,
+      "executed": false
+    },
+    {
+      "fixtureId": "FX-SCH-GEO-01",
+      "inputs": "منحة ممولة من دولة A، والدراسة في دولة B، ومسموحة للمتقدمين من C؛ حالة افتراضية متعددة وجهات للدراسة A/B",
+      "purpose": "تحديد ما يدعمه العقد الفعلي وما يحتاج قرارًا؛ لا تحويل أهلية الجنسية إلى دولة الدراسة",
+      "status": "SPECIFIED_NOT_PROVISIONED",
+      "ownerCommand": null,
+      "executed": false
+    },
+    {
+      "fixtureId": "FX-COURSE-01",
+      "inputs": "دورة داخلية و3 خارجية: دراسة وشهادة مجانيتان؛ دراسة مجانية/شهادة مدفوعة؛ دراسة مجانية/بلا شهادة؛ وأخرى مدفوعة الدراسة",
+      "purpose": "كشف اتساق الاستيراد/النشر/القراءة بناءً على السياسة المعتمدة، وليس النتيجة التي تمناها fixture",
+      "status": "SPECIFIED_NOT_PROVISIONED",
+      "ownerCommand": null,
+      "executed": false
+    },
+    {
+      "fixtureId": "FX-COURSE-LINK-01",
+      "inputs": "دورة بتصنيف معتمد وتخصص CS عبر taxonomy؛ إسقاط آخر DIRECT_REVIEWED مستقل؛ حالة رفض/إلغاء مصدر لاحقة",
+      "purpose": "سحب الإسقاط التابع فقط وبصورة ذرية؛ منع resurfacing تلقائي",
+      "status": "SPECIFIED_NOT_PROVISIONED",
+      "ownerCommand": null,
+      "executed": false
+    },
+    {
+      "fixtureId": "FX-COURSE-PROFILE-01",
+      "inputs": "دورة عامة للتخصص؛ دورة إن وُجد عقد مستوى BSc ودورة لمسار MSc، مع روابط profileId متنوعة",
+      "purpose": "التمييز بين تخصص عام وملف مرحلة دراسية؛ النتيجة BLOCKED إذا لم يعتمد سلوك الفصل",
+      "status": "SPECIFIED_NOT_PROVISIONED",
+      "ownerCommand": null,
+      "executed": false
+    },
+    {
+      "fixtureId": "FX-COURSE-PROV-01",
+      "inputs": "مزود خارجي مقرّه A ودورة إلكترونية عالمية غير مقيدة ببلد دراسة، مصدر تغيّر عنوانه وسجل URL history",
+      "purpose": "منع الاستدلال الجغرافي الخاطئ، التكرار، وكشف تغير URL/مخاطر المصدر",
+      "status": "SPECIFIED_NOT_PROVISIONED",
+      "ownerCommand": null,
+      "executed": false
+    },
+    {
+      "fixtureId": "FX-STD-01",
+      "inputs": "طالبان A/B وصاحب امتياز إداري وناشر ومراجع ومستخدم مرفوض؛ saved items وenrollment/certificates خاصة",
+      "purpose": "RBAC وowner isolation/hydration وعدم انتقال private data إلى public cache",
+      "status": "SPECIFIED_NOT_PROVISIONED",
+      "ownerCommand": null,
+      "executed": false
+    },
+    {
+      "fixtureId": "FX-CMS-01",
+      "inputs": "كتلة رئيسية عامة، محتوى عربي/إنجليزي، draft/published/archived، ورابط صحيح/مكسور",
+      "purpose": "تثبيت حقيقة البطاقات والصفحة الرئيسية مع غياب البيانات أو غياب API ورفض mock fallback",
+      "status": "SPECIFIED_NOT_PROVISIONED",
+      "ownerCommand": null,
+      "executed": false
+    },
+    {
+      "fixtureId": "FX-EDGE-01",
+      "inputs": "IDs مفقودة، مكررة، archived، null، ومن مصدر آخر؛ عمليات متزامنة وتحديث منشور خلال قراءة cursor page",
+      "purpose": "negative/atomic/consistency tests والحالات المنتهية مع عدم تعديل التاريخ",
+      "status": "SPECIFIED_NOT_PROVISIONED",
+      "ownerCommand": null,
+      "executed": false
+    }
+  ]
+}

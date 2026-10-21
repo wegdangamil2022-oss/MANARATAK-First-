@@ -1,0 +1,2 @@
+[Bootstrap] Server successfully started on port 62099
+{"level":30,"time":"2026-10-18T23:03:18.693Z","timestamp":"2026-10-18T23:03:18.692Z","correlationId":"c89f58d9-b06e-4e1f-ad9c-aa3cfc254937","context":{"method":"GET","url":"/api/v1/monitoring/health/readiness","statusCode":200,"durationMs":164,"correlationId":"c89f58d9-b06e-4e1f-ad9c-aa3cfc254937"},"msg":"HTTP GET /api/v1/monitoring/health/readiness 200 - 164ms"}

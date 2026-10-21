@@ -22,9 +22,11 @@ export function isPublicUniversityProgram(value: {
   major?: {
     status?: unknown;
     levelProfiles?: Array<{
+      id?: unknown;
       degreeLevelId?: unknown;
       status?: unknown;
       currentPublishedVersionId?: unknown;
+      currentPublishedVersion?: { id?: unknown; majorId?: unknown; profileId?: unknown; status?: unknown } | null;
     }>;
   } | null;
 }): boolean {
@@ -39,7 +41,12 @@ export function isPublicUniversityProgram(value: {
         (profile) =>
           profile.degreeLevelId === value.degreeLevelId &&
           profile.status === 'PUBLISHED' &&
-          profile.currentPublishedVersionId,
+          Boolean(profile.id) &&
+          Boolean(profile.currentPublishedVersionId) &&
+          profile.currentPublishedVersion?.id === profile.currentPublishedVersionId &&
+          profile.currentPublishedVersion?.majorId === value.majorId &&
+          profile.currentPublishedVersion?.profileId === profile.id &&
+          profile.currentPublishedVersion?.status === 'PUBLISHED',
       ),
     )
   );
@@ -97,6 +104,7 @@ export function isPublicAdmissionRequirement(value: {
     status?: string;
     currentPublishedVersion?: {
       id?: string;
+      testId?: string;
       status?: string;
       metadata?:unknown;
       scoreScales?: AdmissionVersionScale[];
@@ -115,6 +123,7 @@ export function isPublicAdmissionRequirement(value: {
     ? value.testVersion
     : value.internationalTest.currentPublishedVersion;
   if (!version || version.status !== 'PUBLISHED') return false;
+  if (!value.testVersionId && value.internationalTest.currentPublishedVersion?.testId !== value.internationalTestId) return false;
   if (value.testVersionId && value.testVersion?.testId !== value.internationalTestId) return false;
   if (
     value.testVariantId &&

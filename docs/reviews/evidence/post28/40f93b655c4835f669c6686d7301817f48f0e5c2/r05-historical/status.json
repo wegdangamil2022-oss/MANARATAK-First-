@@ -1,0 +1,43 @@
+{
+  "phase": "R05",
+  "status": "BLOCKED",
+  "progress": "REPRESENTATIVE_HISTORICAL_BASELINE_AND_BACKUP_VERIFIED",
+  "sourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+  "predecessorSha": "23897bdaa66d966eef15c85f44288589ecbcdf2b",
+  "historicalStageSha": "f80e3b0ab9aa29f0ea5312af3d6aa7ab461be7b7",
+  "runId": "57cf058e-7d41-41c3-a410-ee6523853057",
+  "tests": {
+    "sourcePassed": 140,
+    "sourceFailed": 0,
+    "sourceSkipped": 0
+  },
+  "historicalFixtures": {
+    "rows": 46,
+    "models": 36,
+    "sourceOnlySynthetic": true,
+    "ownerApproval": false
+  },
+  "migrationCount": 109,
+  "applicationRows": 109,
+  "countedModels": 281,
+  "invariantGroupsMeasured": 8,
+  "financialGroups": 2,
+  "backupRestoredAndVerified": true,
+  "runtimeUpgradeAudit": {
+    "expectedRejection": true,
+    "cleanChecks": 8,
+    "checksWithViolations": 1,
+    "syntheticOrphanRecords": 1,
+    "mutationCommandsExecuted": 0
+  },
+  "upgrade110Executed": false,
+  "previousClientAfterUpgradeExecuted": false,
+  "interruptionResumeExecuted": false,
+  "R06Started": false,
+  "cloudAcceptance": false,
+  "remaining": [
+    "Owner-reviewed traceable synthetic orphan remediation and approved fixture semantics",
+    "Actual 109-to-110 upgrade with full preservation, schema and validated constraint evidence",
+    "Bounded locks/timeouts, safe interruption/resume/redeploy and previous-client compatibility after upgrade"
+  ]
+}

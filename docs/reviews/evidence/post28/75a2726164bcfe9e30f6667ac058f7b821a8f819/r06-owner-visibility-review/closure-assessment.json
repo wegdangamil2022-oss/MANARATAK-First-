@@ -1,0 +1,26 @@
+{
+  "kind": "POST28_CURRENT_DEC_POLICY_REVIEW",
+  "latestEvidenceSha": "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+  "R04": "PASS_CLOSED_LOCAL_110_UNCHANGED",
+  "R05": "BLOCKED_TECHNICAL_OWNER_REVIEWS_AND_UPGRADE_PROOF",
+  "R06": "PARTIAL_NOT_CLOSED",
+  "productionAcceptance": false,
+  "functionalDecisionsApproved": 7,
+  "requiredCases": 26,
+  "fullyAccepted": 0,
+  "partialEvidenceCases": 25,
+  "remainingImplementationOrRuntimeCases": 1,
+  "allCasesDependentOnR05ForClosure": true,
+  "cumulativeDistinctSuccessfulDatabaseCases": 283,
+  "ownerFunctionalApprovalIsRuntimeAcceptance": false,
+  "remaining": [
+    "DEC01 full dashboard/public detail/UI paired relationship agreement and owner lifecycle proof",
+    "DEC02 separated destination/nationality/funding sources and filters",
+    "DEC04 built UI and full reverse Major router/profile facet agreement",
+    "DEC05 remaining full import/URL-refresh, complete owner HTTP permissions and reverse graph/browser-cache matrix",
+    "DEC06 PostgreSQL NULL-safe concurrent uniqueness design and migration gates",
+    "DEC07 programme-level canonical multi-language and filter agreement",
+    "Complete 26 acceptance scenarios including real service-dependent evidence",
+    "R05 owner review, real asset lifecycle, upgrade, previous-client compatibility and interruption recovery"
+  ]
+}

@@ -27,6 +27,14 @@ beforeEach(() => {
 afterEach(async () => { if (tree) await act(async () => tree.unmount()); vi.useRealTimers(); });
 async function mount(element: React.ReactElement) { await act(async () => { tree = create(element); }); await flush(); }
 describe('B08 owner discovery', () => {
+  it('keeps destination nationality and funding organization filters distinct across paging and reset',async()=>{
+    state.language='en';await mount(<PublishedCatalogDiscovery kind="scholarships"/>);
+    for(const [label,value] of [['Study destination','destination-id'],['Nationality explicitly included in eligibility','nationality-id'],['Funding organization','Donor']]){await act(async()=>tree.root.findByProps({'aria-label':label}).props.onChange({target:{value}}));await flush();}
+    await act(async()=>button('Load more').props.onClick());
+    expect(state.scholarships).toHaveBeenLastCalledWith(expect.objectContaining({countryReferenceId:'destination-id',nationalityCountryReferenceId:'nationality-id',sponsorName:'Donor',cursor:'2'}),'en',expect.any(AbortSignal));
+    await act(async()=>button('Reset filters').props.onClick());await flush();
+    expect(state.scholarships).toHaveBeenLastCalledWith(expect.objectContaining({countryReferenceId:undefined,nationalityCountryReferenceId:undefined,sponsorName:undefined,cursor:undefined}),'en',expect.any(AbortSignal));
+  });
   it('reaches result 101 by explicit pagination and opens its actual owner identity', async () => {
     const open = vi.fn();
     await mount(<PublishedCatalogDiscovery kind="scholarships" onScholarship={open} />);
@@ -38,7 +46,7 @@ describe('B08 owner discovery', () => {
   });
   it('passes country and degree IDs to the owner and preserves them and locale on continuation', async () => {
     state.language = 'en'; await mount(<PublishedCatalogDiscovery kind="scholarships" />);
-    await act(async () => tree.root.findByProps({ 'aria-label': 'country' }).props.onChange({ target: { value: 'country-uuid' } }));
+    await act(async () => tree.root.findByProps({ 'aria-label': 'Study destination' }).props.onChange({ target: { value: 'country-uuid' } }));
     await flush();
     await act(async () => tree.root.findByProps({ 'aria-label': 'degree' }).props.onChange({ target: { value: 'degree-uuid' } })); await flush();
     for (const field of ['major', 'language']) { await act(async () => tree.root.findByProps({ 'aria-label': field }).props.onChange({ target: { value: field + '-uuid' } })); await flush(); }

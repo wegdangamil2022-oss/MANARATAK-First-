@@ -75,6 +75,8 @@ export interface ScholarshipMajorTargetDto {
 }
 
 export interface ScholarshipEligibilityItemDto {
+  /** Read-only canonical country label; never an input resolver. */
+  countryLabel?:string;
   id?: string;
   scholarshipId?: string;
   itemKey: string;
@@ -248,7 +250,22 @@ export interface ScholarshipApplicationCycleDto {
   metadata?: Record<string, unknown> | null;
 }
 
+export interface ScholarshipFundedProgramPairDto {
+  studyLanguages?: Array<{id:string;name:string}>;
+  linkKey: string;
+  universityId: string;
+  academicProgramId: string;
+  degreeLevelId: string;
+  majorId: string;
+  programName: string;
+  degreeLabel?: string;
+  majorLabel?: string;
+}
+
 export interface ScholarshipDto extends CreateScholarshipDto {
+  studyCountryLabel?:string;
+  /** Read-only owner projection, never a Cartesian product of target lists. */
+  fundedProgramPairs?: ScholarshipFundedProgramPairDto[];
   id: string;
   /** Monotonic owner revision for conditional writes. */
   revision?: number;
@@ -312,6 +329,8 @@ export interface ScholarshipAdminSummary {
 }
 
 export interface PublicScholarshipFilters {
+  /** Explicit resolved IN nationality conditions; unknown conditions fail closed. */
+  nationalityCountryReferenceId?: string;
   /** Internal exact-owner parity probe; public HTTP filters do not accept this field. */
   ownerId?:string;
   search?:string;

@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "kind": "POST28_BRANCH_CONSOLIDATION_EVIDENCE",
+  "sourceSha": "2940c2ac20cebb4c45941ed0d48093976b059198",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "collect-post28-consolidation.mjs",
+      "bytes": 5809,
+      "sha256": "67176bfe8f113e51edfdf0c3220db8b4327c4e11a8e241406463cf3de36aef09"
+    },
+    {
+      "path": "environment-inventory.log",
+      "bytes": 51,
+      "sha256": "1296e27d2cb8dac56464652ef745d7a3772ae15ea4f3fa3e0091c4d31f0a5e4d"
+    },
+    {
+      "path": "preservation-audit.json",
+      "bytes": 2272,
+      "sha256": "bb0e1b94add4c171b967ca5e0b3cb2dfa0d0cfbe437543d301e21d1fbc1dae36"
+    },
+    {
+      "path": "secret-scan.log",
+      "bytes": 40,
+      "sha256": "d22e5214a3fc3f064f4d64a877319bce618e0699dd9e62fbb71e2d55d8819712"
+    },
+    {
+      "path": "source-quality.log",
+      "bytes": 185,
+      "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073"
+    },
+    {
+      "path": "targeted-eslint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "targeted-node.log",
+      "bytes": 16057,
+      "sha256": "66e7ac78f9cd57a3ee45ad9339389cb562b04c8e52021fec4231725ee3be5518"
+    },
+    {
+      "path": "validate-post28-consolidation.mjs",
+      "bytes": 2820,
+      "sha256": "b52a157b7126ef192fc8a0cfe76d8e6019729ce51cf8bd353e1c8eeebfa39f96"
+    },
+    {
+      "path": "validation.json",
+      "bytes": 2888,
+      "sha256": "c35070718607035491d9088a00eaab481bc098432b7e061d5d7a961a92eb3da8"
+    }
+  ]
+}

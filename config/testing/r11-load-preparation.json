@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "kind": "POST28_R11_LOAD_PREPARATION",
+  "status": "LOCAL_DIAGNOSTICS_RECORDED_FORMAL_LOAD_PREPARATION_OPEN",
+  "sourceBaseline": "79055e7634ad33fe221872d58770d48c2ed09e58",
+  "environment": "NEW_ISOLATED_SYNTHETIC_DB_L_REQUIRED",
+  "runtimeTarget": {
+    "os": "linux",
+    "arch": "x64",
+    "nodeMajor": 22,
+    "postgresMajor": 16
+  },
+  "externalProviderEffectsAllowed": false,
+  "productionAllowed": false,
+  "formalAcceptance": false,
+  "approval": {
+    "approvedBy": null,
+    "approvedAt": null,
+    "decisionRef": null
+  },
+  "dataset": {
+    "fixture": null,
+    "manifestSha256": null,
+    "launchVolumeReference": null,
+    "representativenessReview": null,
+    "rowCounts": null,
+    "indexManifest": null,
+    "collation": null
+  },
+  "resourceBudget": {
+    "maximumCpuPercent": null,
+    "maximumResidentMemoryBytes": null,
+    "maximumDatabaseConnections": null,
+    "maximumPoolWaitMs": null,
+    "abortErrorRatio": null,
+    "abortTimeoutRatio": null
+  },
+  "categoryContract": {
+    "requiredBeforeExecution": [
+      "scenarioRef",
+      "payloadSha256",
+      "cacheMode",
+      "warmupSeconds",
+      "durationSeconds",
+      "minimumSamples",
+      "requestsPerSecond",
+      "maximumConcurrency",
+      "maximumP99Ms",
+      "maximumErrorRatio",
+      "maximumTimeoutRatio",
+      "maximumQueueLagMs"
+    ],
+    "requiredObservations": [
+      "p50Ms",
+      "p95Ms",
+      "p99Ms",
+      "sampleCount",
+      "throughput",
+      "errorCount",
+      "timeoutCount",
+      "poolWaitMs",
+      "activeConnections",
+      "cpuPercent",
+      "residentMemoryBytes",
+      "queryCosts",
+      "transferBytes",
+      "rateLimitBehavior",
+      "queueLagMs",
+      "oldestDueMs",
+      "drain",
+      "leaseLosses"
+    ],
+    "limitsMustPrecedeMeasurement": true,
+    "missingMeasurementsAreNotZero": true,
+    "minimumDurationSecondsFromExistingAcceptanceContract": 60
+  },
+  "categories": [
+    {
+      "id": "public-search",
+      "approvedBudget": null,
+      "measuredRecord": null
+    },
+    {
+      "id": "scholarship-filters",
+      "approvedBudget": null,
+      "measuredRecord": null
+    },
+    {
+      "id": "student-writes",
+      "approvedBudget": null,
+      "measuredRecord": null
+    },
+    {
+      "id": "admin-scans",
+      "approvedBudget": null,
+      "measuredRecord": null
+    },
+    {
+      "id": "imports",
+      "approvedBudget": null,
+      "measuredRecord": null
+    },
+    {
+      "id": "finance-stub",
+      "approvedBudget": null,
+      "measuredRecord": null
+    },
+    {
+      "id": "worker-queues",
+      "approvedBudget": null,
+      "measuredRecord": null
+    }
+  ],
+  "executionBlockers": [
+    "Representative launch dataset and volume not established",
+    "Per-category SLO and workload budgets not established",
+    "Full SLO resource ceilings not established; bounded local diagnostic ceilings exist separately",
+    "DB-L and candidate-bound runtime not provisioned for load"
+  ],
+  "localDiagnosticEvidence": {
+    "readCategories": "docs/reviews/evidence/post28/f8045f90bf6775674d22fc5f2a8cff5fd79b0c2f/r11-read-diagnostic/evidence-index.json",
+    "scenarioCategories": "docs/reviews/evidence/post28/399f816506677c3cdf14e79103f4c854d6416b2d/r11-scenario-diagnostic/evidence-index.json",
+    "adminMfa": "docs/reviews/evidence/post28/50e109e3ece76c6b5acb832be9fcd747450821cb/r11-admin-mfa/evidence-index.json",
+    "representativeLaunchDataset": false,
+    "sloAcceptance": false,
+    "adminMfaEnrollment": "docs/reviews/evidence/post28/6d440363adb1477101402f00371e2319c3aae84f/r11-mfa-enrollment/evidence-index.json",
+    "linuxContention": "docs/reviews/evidence/post28/4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b/r11-linux/evidence-index.json"
+  },
+  "practicalDiagnosticScope": {
+    "status": "PRACTICAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+    "validatedCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+    "closeout": "docs/remediation/POST28_R11_PRACTICAL_CLOSEOUT_2026-10-20.json",
+    "formalLoadSloAcceptance": false
+  }
+}

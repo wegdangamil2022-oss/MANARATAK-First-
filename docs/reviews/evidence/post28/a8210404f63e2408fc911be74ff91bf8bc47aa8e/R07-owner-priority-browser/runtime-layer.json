@@ -1,0 +1,28 @@
+{
+  "sourceSha": "a8210404f63e2408fc911be74ff91bf8bc47aa8e",
+  "reusedDependencyLayerFrom": "fcb0dc940b05a6209dd2587f2cfa149893656b92",
+  "reason": "Only service SQL changed; all package manifests, lock and schema unchanged. No second install.",
+  "dependencyInputsUnchanged": true,
+  "apiFilesMatchFreshUnpack": true,
+  "apiArtifactSha256": "08dece77a54e7a80846156efad09e88cc0893878236651d31762787c9fc2605e",
+  "generatedClientSchemaSha256": "cd9fdff87ed21b2680f6dda774376a0dd5e2acb52e472519877c4fc88b0f5969",
+  "engineSha256": "7d58cada77c5833e57d2ab4ad61ea2948247b2caa8575066b2fe3bc7e4ea4e5a",
+  "verification": {
+    "sourceSha": "a8210404f63e2408fc911be74ff91bf8bc47aa8e",
+    "nativeLoaded": true,
+    "modules": [
+      "@node-rs/xxhash",
+      "@prisma/client",
+      "cors",
+      "express",
+      "fontkit",
+      "helmet",
+      "pdfkit",
+      "svg-to-pdfkit",
+      "uuid"
+    ],
+    "stageAccepted": false
+  },
+  "newRuntimeArchiveCreated": false,
+  "productionAccepted": false
+}

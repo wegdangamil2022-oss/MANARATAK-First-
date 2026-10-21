@@ -6,14 +6,22 @@ const ACCOUNT_KEY = 'manaratak_active_identity';
 function safeInternalPath(value: string | null | undefined): string | null {
   const path = value?.trim();
   if (!path || !path.startsWith('/') || path.startsWith('//')) return null;
-  if (/^[\\/]{2}/.test(path) || path.includes('://')) return null;
-  return path;
+  if (path.includes('\\') || path.includes('://')) return null;
+  // Browsers strip embedded tabs/newlines before interpreting a URL. Checking
+  // only the original leading slashes can therefore admit an external origin.
+  const base = 'https://manaratak.invalid';
+  try { return new URL(path, base).origin === base ? path : null; }
+  catch { return null; }
 }
 
 export function preservePostLoginReturn(path: string): void {
   const safe = safeInternalPath(path);
   if (!safe) return;
   try { sessionStorage.setItem(KEY, JSON.stringify({ path: safe, accountId: sessionStorage.getItem(ACCOUNT_KEY) })); } catch { /* storage can be unavailable */ }
+}
+
+export function isStudentPostLoginDestination(path: string): boolean {
+  return safeInternalPath(path) !== null && /^\/(?:ar\/|en\/)?(?:student(?:[/?#]|$)|tools\/[A-Za-z0-9._-]+(?:[?#]|$))/.test(path);
 }
 
 export function consumePostLoginReturn(identityId: string): string | null {

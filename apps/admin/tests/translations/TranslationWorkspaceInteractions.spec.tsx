@@ -104,7 +104,7 @@ describe('Translation workspace lightweight component interactions', () => {
   });
   it('keeps authoring disabled by the actual workspace policy', async () => {
     controls.request.mockImplementation((url: string) =>
-      Promise.resolve(url.includes('/workspace?') ? page([row]) : row),
+      Promise.resolve(url.endsWith('/capabilities') ? {data:[]} : url.includes('/workspace?') ? page([row]) : row),
     );
     await mount();
     await selectFirst();
@@ -115,6 +115,7 @@ describe('Translation workspace lightweight component interactions', () => {
     controls.canWrite = true;
     let written = false;
     controls.request.mockImplementation((url: string, options?: any) => {
+      if (url.endsWith('/capabilities')) return Promise.resolve({data:[]});
       if (url.includes('/workspace?')) return Promise.resolve(page([row]));
       if (options?.method === 'PATCH') {
         written = true;
@@ -146,6 +147,7 @@ describe('Translation workspace lightweight component interactions', () => {
     controls.canWrite = true;
     let written = false;
     controls.request.mockImplementation((url: string, options?: any) => {
+      if (url.endsWith('/capabilities')) return Promise.resolve({data:[]});
       if (url.includes('/workspace?')) return Promise.resolve(page([row]));
       if (options?.method === 'PATCH') {
         written = true;

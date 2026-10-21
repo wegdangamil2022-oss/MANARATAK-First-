@@ -11,7 +11,7 @@ export class PrismaImportSourceObservationGateway implements IImportSourceObserv
   async remember(source: ImportSourceDefinition, snapshot: StoredImportRawSnapshot) {
     if (!source.updatedAt) throw new Error('IMPORT_SOURCE_REVISION_REQUIRED');
     await this.prisma.$transaction(async tx => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`import-governance:observation:${source.sourceId}`}, 0))`;
+      await tx.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${`import-governance:observation:${source.sourceId}`}, 0))`;
       const current = await tx.importSourceRegistryEntry.findUnique({ where: { sourceId: source.sourceId } });
       if (!current || current.updatedAt.toISOString() !== source.updatedAt!.toISOString() || current.status !== 'ACTIVE') throw new Error('IMPORT_SOURCE_STATUS_CONFLICT');
       const prior = await tx.importSourceObservation.findUnique({ where: { sourceId: source.sourceId } });
@@ -26,7 +26,7 @@ export class PrismaImportSourceObservationGateway implements IImportSourceObserv
   async observeShape(source: ImportSourceDefinition, shape: Record<string, string[]>) {
     const hash = createHash('sha256').update(JSON.stringify(shape)).digest('hex');
     const allowed = await this.prisma.$transaction(async tx => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`import-governance:observation:${source.sourceId}`}, 0))`;
+      await tx.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${`import-governance:observation:${source.sourceId}`}, 0))`;
       const row = await tx.importSourceObservation.findUnique({ where: { sourceId: source.sourceId } });
       if (!row || row.sourceRevision.toISOString() !== source.updatedAt?.toISOString()) throw new Error('IMPORT_SOURCE_STATUS_CONFLICT');
       if (row.shapeHash === hash) return true;

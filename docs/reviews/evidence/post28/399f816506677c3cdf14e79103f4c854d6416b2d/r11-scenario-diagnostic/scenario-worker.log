@@ -1,0 +1,5 @@
+{"category":"student-writes","status":"COMPLETED_DIAGNOSTIC","samples":30,"p95Ms":55.34599999999773,"abortReason":null}
+{"category":"admin-scans","status":"COMPLETED_DIAGNOSTIC","samples":30,"p95Ms":13.486100000009174,"abortReason":null}
+{"category":"imports","status":"COMPLETED_DIAGNOSTIC","samples":30,"p95Ms":17.698499999998603,"abortReason":null}
+{"category":"finance-stub","status":"COMPLETED_DIAGNOSTIC","samples":30,"p95Ms":71.19159999999101,"abortReason":null}
+{"category":"worker-queues","status":"COMPLETED_DIAGNOSTIC","samples":30,"p95Ms":36.52650000000722,"allFiveComplete":true}

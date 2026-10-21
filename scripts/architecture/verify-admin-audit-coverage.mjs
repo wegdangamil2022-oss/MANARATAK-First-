@@ -67,6 +67,18 @@ function staticRoutePaths(argument, call, ast) {
 export function buildAuditInventory({ appSource, containerSource, routerSources, policySource }) {
   const app = parse('app.ts', appSource);
   const container = parse('container.ts', containerSource);
+  const factories = new Map();
+  for (const declaration of app.statements) {
+    if (!ts.isImportDeclaration(declaration) || !ts.isStringLiteral(declaration.moduleSpecifier)
+      || declaration.importClause?.isTypeOnly) continue;
+    const owner = declaration.moduleSpecifier.text.match(/^\.\/presentation\/api\/router\/([A-Z][A-Za-z0-9]*Router)\.js$/)?.[1];
+    const imports = declaration.importClause?.namedBindings;
+    if (!owner || !imports || !ts.isNamedImports(imports)) continue;
+    for (const binding of imports.elements) {
+      if (!binding.isTypeOnly && (binding.propertyName ?? binding.name).text === `create${owner}`)
+        factories.set(binding.name.text, owner);
+    }
+  }
   const bindings = new Map();
   visit(container, node => {
     if (!ts.isPropertyAssignment(node)) return;
@@ -99,6 +111,12 @@ export function buildAuditInventory({ appSource, containerSource, routerSources,
     const prefix = literal(node.arguments[0]);
     if (!prefix?.startsWith('/admin/')) return;
     let owner;
+    // Recognize only directly mounted factories imported from their canonical
+    // router module. A factory name or a nested dependency alone is not proof.
+    for (const argument of node.arguments.slice(1)) {
+      if (ts.isCallExpression(argument) && ts.isIdentifier(argument.expression)
+        && factories.has(argument.expression.text)) owner = factories.get(argument.expression.text);
+    }
     const permissions = [];
     visit(node, child => {
       if (!ts.isCallExpression(child)) return;
@@ -134,7 +152,10 @@ export function buildAuditInventory({ appSource, containerSource, routerSources,
       if (!ts.isVariableDeclaration(node) || !ts.isIdentifier(node.name) || !node.initializer
         || !(ts.isArrowFunction(node.initializer) || ts.isFunctionExpression(node.initializer))) return;
       const permissions = [...node.initializer.getText(ast).matchAll(/['"](admin:[a-z0-9:*_-]+)['"]/g)].map(match => match[1]);
-      if (permissions.length) resolvers.set(node.name.text, { source: node.initializer.getText(ast), permissions: [...new Set(permissions)].sort() });
+      if (permissions.length) resolvers.set(node.name.text, {
+        source: node.initializer.getText(ast), permissions: [...new Set(permissions)].sort(),
+        initializer: node.initializer, position: node.pos, block: node.parent.parent.parent,
+      });
     });
     const conditionalGuards = [];
     visit(ast, node => {
@@ -175,6 +196,30 @@ export function buildAuditInventory({ appSource, containerSource, routerSources,
         const inlinePermissions = [...text.matchAll(/['"](admin:[a-z0-9:*_-]+)['"]/g)].map(match => match[1]);
         const inheritedPolicies = conditionalGuards.filter(guard => guard.position < node.pos && guard.router === node.expression.expression.getText(ast))
           .map(({ position: _position, router: _router, ...policy }) => policy);
+        // Record named route middleware too: moving a permission into a local
+        // helper must not erase it or hide later changes to that helper.
+        for (const argument of node.arguments.slice(1)) {
+          const name = ts.isIdentifier(argument) ? argument.text
+            : ts.isCallExpression(argument) && ts.isIdentifier(argument.expression) ? argument.expression.text : null;
+          const policy = resolvers.get(name);
+          if (!policy || policy.position >= node.pos || policy.block !== node.parent.parent) continue;
+          let permissions = policy.permissions;
+          if (ts.isCallExpression(argument)) {
+            const fn = policy.initializer;
+            const body = fn.body;
+            // Finite literal action passed to a direct permission-prefix guard.
+            if (fn.parameters.length !== 1 || !ts.isIdentifier(fn.parameters[0].name)
+              || !ts.isCallExpression(body) || body.expression.getText(ast) !== 'SecurityMiddlewareFactory.createAdminPermissionGuard') continue;
+            const expression = body.arguments[0];
+            const action = literal(argument.arguments[0]);
+            if (!expression || !ts.isBinaryExpression(expression) || expression.operatorToken.kind !== ts.SyntaxKind.PlusToken
+              || !ts.isIdentifier(expression.right) || expression.right.text !== fn.parameters[0].name.text
+              || !/^admin:[a-z0-9:-]+:$/.test(literal(expression.left) ?? '') || !/^[a-z][a-z0-9-]*$/.test(action ?? '')) continue;
+            permissions = [literal(expression.left) + action];
+          }
+          inheritedPolicies.push({ resolver: name, permissions,
+            sourceFingerprint: createHash('sha256').update(`${policy.source}\n${argument.getText(ast)}`).digest('hex') });
+        }
         const permissionEvidence = [...new Set([...mount.permissions, ...inlinePermissions, ...inheritedPolicies.flatMap(policy => policy.permissions)])];
         // A conditional per-route guard is recorded explicitly, rather than claiming
         // that a class-wide evaluator import proves the authorization of every route.

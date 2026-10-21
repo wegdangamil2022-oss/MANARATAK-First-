@@ -13,9 +13,11 @@ const university = {
         status: 'PUBLISHED',
         levelProfiles: [
           {
+            id: 'profile-1',
             degreeLevelId: 'degree-bachelor',
             status: 'PUBLISHED',
             currentPublishedVersionId: 'version-1',
+            currentPublishedVersion: {id:'version-1',majorId:'major-1',profileId:'profile-1',status:'PUBLISHED'},
           },
         ],
       },
@@ -41,9 +43,10 @@ function build() {
     findPublishedByIds: vi.fn().mockResolvedValue([major]),
   };
   const universityRepository = {
-    findBySlug: vi.fn().mockResolvedValue(university),
+    findPublishedBySlug: vi.fn().mockResolvedValue(university),
     listPublished: vi.fn().mockResolvedValue(page([university])),
     findPublishedByIds: vi.fn().mockResolvedValue([university]),
+    listPublishedMajorGraph: vi.fn().mockResolvedValue({data:[{ownerId:'major-1'}],total:1,hasMore:false,nextCursor:null}),
     listPublishedProgramGraph: vi
       .fn()
       .mockResolvedValue({
@@ -131,8 +134,9 @@ describe('CrossDomainGraphReadService P4 canonical projections', () => {
       universityCursor: 'uni-next',
       scholarshipCursor: 'sch-next',
       programCursor: 'program-next',
+      majorCursor: 'major-next',
       courseCursor: 'course-next',
-      testPage: 3,
+      testCursor: 'test-next',
     });
     expect(ctx.universityRepository.listPublished).toHaveBeenCalledWith(
       expect.objectContaining({ cursor: 'uni-next' }),
@@ -146,8 +150,11 @@ describe('CrossDomainGraphReadService P4 canonical projections', () => {
     expect(ctx.courseRelationshipRepository.listPublishedRelatedCourses).toHaveBeenCalledWith(
       expect.objectContaining({ cursor: 'course-next' }),
     );
+    expect(ctx.universityRepository.listPublishedMajorGraph).toHaveBeenCalledWith(
+      expect.objectContaining({countryReferenceId:'country-ye',cursor:'major-next'}),
+    );
     expect(ctx.internationalTestRepository.listPublished).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 3 }),
+      expect.objectContaining({cursorMode:true,cursor:'test-next',page:1}),
     );
   });
 
@@ -197,6 +204,7 @@ describe('CrossDomainGraphReadService P4 canonical projections', () => {
                     status: 'PUBLISHED',
                     currentPublishedVersion: {
                       id: 'test-version',
+                      testId: 'test-1',
                       status: 'PUBLISHED',
                       scoreScales: [{ overallMinimum: 0, overallMaximum: 9 }],
                     },

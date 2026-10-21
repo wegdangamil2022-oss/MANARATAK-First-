@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP binds university geography audit to the authenticated JWT actor",
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP rejects a foreign region and leaves root revision audit and outbox unchanged",
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP rejects deprecated country and city canonical references",
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP rejects missing revision stale revision and missing CSRF",
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP refuses university writes and cached replay after permission withdrawal",
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP replays authorized university commands without duplicate mutation",
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP denies an admin without university permission before root writes",
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP executes invoice issuance under both finance and action permission with JWT audit actor",
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP denies invoice action permission despite generic finance access",
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP refuses cached invoice response when action permission alone is withdrawn",
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP replays an authorized invoice issue using one owner receipt and one audit event",
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP session revocation prevents university cached replay",
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs"
+  }
+]

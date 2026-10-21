@@ -1,0 +1,73 @@
+{
+  "kind": "POST28_R14_WORKER_ROUTE_FAULT_EVIDENCE",
+  "sourceSha": "241f76920e07d0211a3137efb62ec226efe4a4af",
+  "inventoryFixSourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+  "scope": "WINDOWS_REAL_POSTGRES_SCHEDULER_HANDLERS_QUEUE_FAULT_BOUNDARIES",
+  "files": [
+    {
+      "file": "attempt-01-cleanup.json",
+      "bytes": 84,
+      "sha256": "1e6ed48a0b5e85738ea612e1b4efd9e68ea8a9f2efd56262aaab02b56c1f9ee8"
+    },
+    {
+      "file": "attempt-01-precondition-failed.log",
+      "bytes": 460,
+      "sha256": "6d38bdc0fbf5fe52c66959d9d5fedfb6fe262f9477e7a8648a6055801c7c3f87"
+    },
+    {
+      "file": "attempt-02-cleanup.json",
+      "bytes": 83,
+      "sha256": "3d4bb6c9311066ac222c58d4231d4f9bdd506324c4c1fc7da592cd0e39d90621"
+    },
+    {
+      "file": "attempt-02-passed-before-stop-fix.json",
+      "bytes": 2457,
+      "sha256": "f954fd9753d3289b79cd33b28e5f24d6727454a00c269d2f2106f2e0eee629a3"
+    },
+    {
+      "file": "ci-inventory-fix-observation.json",
+      "bytes": 658,
+      "sha256": "7c4fc30ea0fcf6f60b58fbf7a2f273e150fde8e6fd141171efc4b79003fd6ae7"
+    },
+    {
+      "file": "ci-observation.json",
+      "bytes": 8360,
+      "sha256": "647986126bbabeecab48ee46f7a19e2baefe378e29b6651157f9caef22f3f82f"
+    },
+    {
+      "file": "isolated-lab-recipe.mjs.txt",
+      "bytes": 7363,
+      "sha256": "04e1bb23286c401bb6defe6686f8096684624fb7fc1a5d25fb3094daf1ae0993"
+    },
+    {
+      "file": "linux-next-input-review.json",
+      "bytes": 1556,
+      "sha256": "c5fd12c16f7b1c3ed884affdd7eeb474751b5a241f4608389b625a19957324e8"
+    },
+    {
+      "file": "scoped-validation.json",
+      "bytes": 2083,
+      "sha256": "9df1566f09939f6490404c2d4a87603491b6b0681e33f1f784f7fe9110cbe1dc"
+    },
+    {
+      "file": "worker-route-faults-cleanup.json",
+      "bytes": 83,
+      "sha256": "3d4bb6c9311066ac222c58d4231d4f9bdd506324c4c1fc7da592cd0e39d90621"
+    },
+    {
+      "file": "worker-route-faults-lab.json",
+      "bytes": 744,
+      "sha256": "133d1478a64a0c66ab2c0c38ac95f74ce6920a450c11255a495b743c74db61ce"
+    },
+    {
+      "file": "worker-route-faults-result.json",
+      "bytes": 2599,
+      "sha256": "8793bfb99d827474addb958a542e997a98588cae2f84a8fc817d5d0f20c4b20a"
+    },
+    {
+      "file": "worker-route-faults.log",
+      "bytes": 2142,
+      "sha256": "7055655aa09265e6ef530e6a90c20fa5995a90f88f67dd5510fe6e62a590aaa8"
+    }
+  ]
+}

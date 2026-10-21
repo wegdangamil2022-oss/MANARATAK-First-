@@ -1,0 +1,53 @@
+{
+  "kind": "POST28_R00_CURRENT_BASELINE",
+  "observedAt": "2026-10-20T21:29:58.022Z",
+  "localDate": "2026-10-21",
+  "timezone": "Asia/Aden",
+  "sourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+  "initialSourceSha": "d1c379df7b3013aff17c60109ebf15f56e6aa8b7",
+  "branch": "feat/post28-r07-artifact-preparation",
+  "cleanAtLabExecution": true,
+  "originWorkAtFetch": "d1c379df7b3013aff17c60109ebf15f56e6aa8b7",
+  "originMainAtFetch": "bd5feb6657135011857975070fe5c53532d0e123",
+  "mergeBaseWithMain": "b1702289f43d0363d7bbf91f8eba465e4355c53c",
+  "workAndMainDistinctCommits": [
+    382,
+    59
+  ],
+  "baseline": "525be0e",
+  "baselineChangedPaths": 3870,
+  "baselinePathCounts": {
+    "A": 3577,
+    "M": 277,
+    "D": 16
+  },
+  "baselineReviewIsFullFileAudit": false,
+  "sourceDeltaFromInitial": [
+    "scripts/database/create-post28-native-lab.mjs",
+    "scripts/database/post28-lab-profile.mjs",
+    "tests/database/post28-lab-profile.test.mjs"
+  ],
+  "applicationAndMigrationPathsChangedSinceLatestVerifiedCi": [],
+  "capabilities": {
+    "node": "v22.16.0",
+    "platform": "win32",
+    "architecture": "x64",
+    "freeDiskBytes": 21108436992,
+    "totalMemoryBytes": 17006092288,
+    "postgres": "postgres (PostgreSQL) 16.15",
+    "openssl": "OpenSSL 3.5.6 7 Apr 2026 (Library: OpenSSL 3.5.6 7 Apr 2026)"
+  },
+  "trust": {
+    "privateKeyValuesRead": false,
+    "signaturesCreated": false,
+    "independentSignersAssigned": false,
+    "localPublicInputPresent": {
+      "RELEASE_SOURCE_EVIDENCE_PUBLIC_KEY": false,
+      "RELEASE_RUNTIME_EVIDENCE_PUBLIC_KEY": false,
+      "RELEASE_EVIDENCE_PUBLIC_KEY": false,
+      "RELEASE_EVIDENCE_BUNDLE_JSON": false
+    }
+  },
+  "mainMerged": false,
+  "productionAcceptance": false
+}

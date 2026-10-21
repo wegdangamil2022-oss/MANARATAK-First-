@@ -1016,7 +1016,7 @@ export const ar = {
   "admin_needs_review": "قيد المراجعة",
   "admin_published": "المنح الدراسية المنشورة",
   "admin_archive": "الأرشيف",
-  "admin_health_status": "النظام يعمل بشكل طبيعي في معاينة Google Studio.",
+  "admin_health_status": "تحقق من صحة الخدمات لمعرفة حالة النظام الحالية.",
   "back_to_admin": "العودة إلى لوحة التحكم",
   "admin_status_active": "نشط",
   "admin_status_preview": "معاينة",

@@ -12,7 +12,10 @@ const check = (name, ok, detail='') => checks.push({ name, ok: Boolean(ok), deta
 
 const roadmap = read('docs/governance/roadmap/MANARATAK-2.0-Roadmap-v6.0.md');
 check('roadmap_version_6', roadmap.includes('**Version:** 6.0'));
-check('roadmap_source_through_phase19', roadmap.includes('Source implementation is present through **Phase 19'));
+check('roadmap_scoped_source_checkpoint',
+  roadmap.includes('Source evidence is recorded for **P01–P24**')
+  && roadmap.includes('does not mean all phase requirements are globally complete')
+  && roadmap.includes('ARCHITECTURAL_SECURITY_PHASE_STATUS_2026-10-15.md'));
 check('roadmap_runtime_boundary', roadmap.includes('runtime-pending') && roadmap.includes('Greenfield database mutation gate'));
 check('roadmap_no_obsolete_recovery_authority', !roadmap.includes('Original Development Database'));
 
@@ -37,16 +40,11 @@ check('quality_gate_script_exists', fs.existsSync(path.join(root, 'scripts/quali
 check('quality_baseline_exists', fs.existsSync(path.join(root, 'scripts/quality/source-quality-baseline.json')));
 
 const pkg = JSON.parse(read('package.json'));
-const aiStudioPortableInstall = pkg.scripts?.['verify:aistudio'] === 'node scripts/aistudio/verify.mjs'
-  && fs.existsSync(path.join(root, 'docs/operations/GOOGLE_AI_STUDIO.md'))
-  && fs.existsSync(path.join(root, '.env.aistudio.example'));
 check('package_node_engine_strict_range', pkg.engines?.node === '>=22.16.0 <23');
-check('package_npm_engine_range', pkg.engines?.npm === '>=10.9.0 <11'
-  || (aiStudioPortableInstall && pkg.engines?.npm === '>=10'));
+check('package_npm_engine_range', pkg.engines?.npm === '>=10.9.0 <11');
 check('package_quality_script', pkg.scripts?.['quality:source'] === 'node scripts/quality/verify-source-quality.mjs');
 check('package_w0_verify_script', pkg.scripts?.['w0:verify'] === 'node scripts/verify-w0-source.mjs');
-check('npm_engine_strict', /engine-strict\s*=\s*true/.test(read('.npmrc'))
-  || (aiStudioPortableInstall && /engine-strict\s*=\s*false/.test(read('.npmrc'))));
+check('npm_engine_strict', /engine-strict\s*=\s*true/.test(read('.npmrc')));
 check('nvmrc_pinned', read('.nvmrc').trim() === '22.16.0');
 const turbo = JSON.parse(read('turbo.json'));
 check('turbo_v2_tasks_config', Boolean(turbo.tasks) && !('pipeline' in turbo));

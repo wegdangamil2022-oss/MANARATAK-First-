@@ -1,0 +1,9 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import{execFileSync}from'node:child_process';
+import {legacyErrorToProblem} from './r07-filtered/apps/api/src/presentation/http/ProblemDetails.ts';
+import {assertContentionOutcome} from './r07-filtered/scripts/performance/LinuxStudentContention.mjs';
+const canonical=legacyErrorToProblem({body:{error:'STUDENT_WORKSPACE_VERSION_CONFLICT'},status:409,instance:'/api/v1/student/workspace',traceId:'R11_SYNTHETIC_CONTRACT'});
+assert.equal(canonical.code,'STUDENT_WORKSPACE_VERSION_CONFLICT');assert.equal(canonical.status,409);assert.equal(canonical.error,undefined);
+const success={status:200,body:{version:2,theme:'LIGHT'}};assert.equal(assertContentionOutcome([success,{status:409,body:canonical}],{version:2,theme:'LIGHT'},1),success);
+const unrelated=legacyErrorToProblem({body:{error:'UNRELATED_CONFLICT'},status:409,instance:'/api/v1/student/workspace',traceId:'R11_SYNTHETIC_CONTRACT'});assert.throws(()=>assertContentionOutcome([success,{status:409,body:unrelated}],{version:2,theme:'LIGHT'},1));
+const sourceSha=execFileSync('git',['rev-parse','HEAD'],{cwd:path.join(import.meta.dirname,'r07-filtered'),encoding:'utf8'}).trim();
+fs.writeFileSync(path.join(import.meta.dirname,'r11-wire-problem-result.json'),JSON.stringify({sourceSha,canonicalMapperVerified:true,exactVersionConflictAccepted:true,unrelatedConflictRejected:true,rawLegacyErrorFieldAbsent:true,databaseConnected:false,httpExecuted:false,linuxRuntimeAccepted:false},null,2)+'\n');console.log('ACTUAL_PROBLEM_DETAILS_MAPPER_AND_CONTENTION_CONTRACT_PASS');

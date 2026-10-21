@@ -21,6 +21,7 @@ const relationshipService = read('packages/application/src/courses/services/Cour
 const relationshipContract = read('packages/domain/src/courses/relationships.ts');
 const relationshipRepo = read('packages/infrastructure/src/courses/PrismaCourseRelationshipRepository.ts');
 const courseRepo = read('packages/infrastructure/src/courses/PrismaCourseRepository.ts');
+const publicEligibility = read('packages/infrastructure/src/courses/CoursePublicEligibility.ts');
 const schema = read('packages/infrastructure/prisma/schema.prisma');
 const graph = read('packages/application/src/read-models/CrossDomainGraphReadService.ts');
 const publicDataSource = read('apps/web/src/features/public-template/publicLiveDataSource.ts');
@@ -41,14 +42,15 @@ check('Course/test model and source-only migration exist', schema.includes('mode
 check('Cross-domain graph reads Course-owned test relations', graph.includes('listPublishedCoursesForInternationalTest(test.id'));
 check('Public API accepts international-test filter', publicRouter.includes('internationalTestId'));
 check('Publication requires canonical relationship closure', publication.includes('COURSE_PUBLICATION_CANONICAL_LANGUAGE_REQUIRED') && publication.includes('COURSE_PUBLICATION_RELATIONSHIP_REVIEW_REQUIRED'));
-check('Imported publication requires free study and certificate', publication.includes('IMPORTED_COURSE_FREE_STUDY_AND_CERTIFICATE_REQUIRED') && publication.includes('course.isStudyFree !== true') && publication.includes('course.isFreeCertificate !== true'));
-check('Public imported eligibility matches publication policy', publicUseCases.includes('CourseAccessType.FREE_STUDY_AND_CERTIFICATE') && publicUseCases.includes('course.isStudyFree === true') && publicUseCases.includes('course.isFreeCertificate === true'));
-check('Repositories apply matching public eligibility', courseRepo.includes('isStudyFree: true') && courseRepo.includes('isFreeCertificate: true') && relationshipRepo.includes('isFreeCertificate: true'));
+// DEC-03 keeps free study mandatory and certificate cost independently unknown/paid/free.
+check('Imported publication requires free study independently of certificate cost', publication.includes('IMPORTED_COURSE_FREE_STUDY_REQUIRED') && publication.includes('course.isStudyFree !== true') && publication.includes('CourseAccessType.FREE_STUDY, CourseAccessType.FREE_STUDY_AND_CERTIFICATE') && !publication.includes('course.isFreeCertificate !== true'));
+check('Public imported eligibility matches publication policy', publicUseCases.includes('CourseAccessType.FREE_STUDY, CourseAccessType.FREE_STUDY_AND_CERTIFICATE') && publicUseCases.includes('course.isStudyFree === true') && !publicUseCases.includes('course.isFreeCertificate === true'));
+check('Repositories apply matching current owner eligibility', courseRepo.includes('return currentPublicCourseEligibility(this.prisma, scope)') && relationshipRepo.includes('await currentPublicCourseEligibility(this.prisma, where)') && publicEligibility.includes('isStudyFree: true') && publicEligibility.includes("accessType: { in: ['FREE_STUDY', 'FREE_STUDY_AND_CERTIFICATE'] }") && !publicEligibility.includes('isFreeCertificate: true'));
 check('Native readiness covers language and relationships', nativeUseCases.includes("'canonical-language'") && nativeUseCases.includes("'relationship-review'"));
 check('Learner workspace is authenticated', learnerRouter.includes("router.get('/:courseId/workspace'") && learnerRouter.includes('AuthMiddleware'));
 check('Learner access requires enrollment', progressUseCases.includes('requireLearningAccessEnrollment') && progressUseCases.includes('COURSE_ENROLLMENT_REQUIRED'));
 check('Relationship semantics stay Course-owned', relationshipService.includes('proposeInternationalTestRelationship') && relationshipService.includes('approveLanguageReference'));
-check('Public template reads published courses from canonical API', publicDataSource.includes('collectCursorPages((cursor) => ApiClient.getCourses({ cursor, limit: 100 }))') && publicDataSource.includes('const mapped = rows.map(mapCourse)'));
+check('Public template reads published courses from canonical API', publicDataSource.includes('ApiClient.getCourses({ originType, limit: 3 }, locale)') && publicDataSource.includes('page.data.filter(dto => dto.originType === originType).map(mapCourse)'));
 
 const failed = checks.filter((item) => !item.passed);
 for (const item of checks) console.log(`${item.passed ? 'PASS' : 'FAIL'} ${item.name}`);

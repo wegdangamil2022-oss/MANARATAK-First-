@@ -1,0 +1,15 @@
+{
+  "sourceSha": "be5407e6c9a63f9633019c22a79b6990ca0d3a1d",
+  "runId": "39295249621",
+  "sourceJobId": 118205939484,
+  "sourceOutcome": "FAILED_ENVIRONMENT_INVENTORY_MAPPING",
+  "r08LinuxRedisJobId": 118205939383,
+  "r08LinuxRedisOutcome": "success",
+  "studioJobPresent": false,
+  "fixSourceSha": "810b3a9440fa64ad13258a17bcf86ffe0b7bb2e2",
+  "fix": "Generic inventory includes new NODE_ENV source in frontend CSP plugin; no runtime change",
+  "inventoryCheck": "PASS_318_NAMES",
+  "currentRunId": "39296347297",
+  "currentRunObservedState": "in_progress",
+  "formalAcceptance": false
+}

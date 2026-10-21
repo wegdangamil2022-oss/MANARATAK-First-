@@ -1,0 +1,17 @@
+{
+  "phase": "R06",
+  "status": "PARTIAL_SCOPED_RUNTIME_PASSED",
+  "sourceSha": "853fe76646c018e1fd9955034cd155311760856f",
+  "runId": "1e11952d-1ccc-4f54-9d31-1a3a87d0258e",
+  "profiles": [
+    "leases",
+    "core-transactions"
+  ],
+  "databaseTestsPassed": 10,
+  "databaseTestsFailed": 0,
+  "databaseTestsSkipped": 0,
+  "R05": "REVIEW_COMPLETE_WITH_BLOCKERS_NOT_PASSED",
+  "fullR06Acceptance": false,
+  "cloudAcceptance": false,
+  "deploymentAuthorized": false
+}

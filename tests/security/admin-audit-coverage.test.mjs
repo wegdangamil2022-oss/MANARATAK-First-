@@ -66,6 +66,81 @@ test('inline router construction retains its owner when cradle repositories are 
   assert.deepEqual(routes[0].permissionEvidence, ['admin:settings:manage']);
 });
 
+test('canonical imported router factories retain every mounted mutation and dependency ownership', () => {
+  const routes = buildAuditInventory({ ...fixture,
+    appSource: "import { createTestRouter as createOwnerRouter } from './presentation/api/router/TestRouter.js';\n"
+      + "v1Router.use('/admin/test', requireAdminPermission('admin:settings:manage'), createOwnerRouter(container.resolve('repository')));",
+  });
+  assert.equal(routes.length, 1);
+  assert.equal(routes[0].owner, 'TestRouter');
+  assert.equal(routes[0].path, '/admin/test/edit');
+  assert.deepEqual(routes[0].permissionEvidence, ['admin:settings:manage']);
+  assert.match(checkAuditInventory(routes, [])[0], /UNREVIEWED_MUTATION/);
+});
+
+test('unimported, mismatched and type-only router factories fail closed', () => {
+  for (const declaration of [
+    '',
+    "import { createTestRouter } from './other/TestRouter.js';",
+    "import { createTestRouter } from './presentation/api/router/OtherRouter.js';",
+    "import type { createTestRouter } from './presentation/api/router/TestRouter.js';",
+    "import { type createTestRouter } from './presentation/api/router/TestRouter.js';",
+  ]) {
+    assert.throws(() => buildAuditInventory({ ...fixture,
+      appSource: declaration + "\nv1Router.use('/admin/test', createTestRouter());",
+    }), /ADMIN_ROUTER_BINDING_UNRESOLVED/);
+  }
+});
+
+test('a nested factory dependency does not prove the mounted router owner', () => {
+  assert.throws(() => buildAuditInventory({ ...fixture,
+    appSource: "import { createTestRouter } from './presentation/api/router/TestRouter.js';\n"
+      + "v1Router.use('/admin/test', wrapUnknownRouter(createTestRouter()));",
+  }), /ADMIN_ROUTER_BINDING_UNRESOLVED/);
+});
+
+test('named permission middleware retains permission candidates and detects weakened helper bodies', () => {
+  const source = "const router=Router(); const delegationReader=(req,res,next)=>permit(req.body.approve?'admin:certificates:issuers:approve':'admin:certificates:issuers:manage')(req,res,next); router.post('/grant',delegationReader,handler);";
+  const input = { ...fixture, routerSources: { 'TestRouter.ts': source } };
+  const original = buildAuditInventory(input);
+  assert.equal(original[0].conditionalPermissionReview, true);
+  assert.deepEqual(original[0].conditionalPermissionPolicies[0].permissions,
+    ['admin:certificates:issuers:approve', 'admin:certificates:issuers:manage']);
+  const weakened = buildAuditInventory({ ...input, routerSources: {
+    'TestRouter.ts': source.replace('=>permit(', '=>unused('),
+  } });
+  assert.match(checkAuditInventory(weakened, original)[0], /AUDIT_CONTRACT_CHANGED/);
+});
+
+test('literal action guards retain exact permissions and reject runtime action inference', () => {
+  const source = "const router=Router(); const guard=(action)=>SecurityMiddlewareFactory.createAdminPermissionGuard('admin:study-destinations:'+action); router.post('/publish',guard('publish'),handler);";
+  const input = { ...fixture, routerSources: { 'TestRouter.ts': source } };
+  const rows = buildAuditInventory(input);
+  assert.deepEqual(rows[0].conditionalPermissionPolicies[0].permissions, ['admin:study-destinations:publish']);
+  const changed = buildAuditInventory({ ...input, routerSources: {
+    'TestRouter.ts': source.replace("guard('publish')", "guard('edit')"),
+  } });
+  assert.match(checkAuditInventory(changed, rows)[0], /AUDIT_CONTRACT_CHANGED/);
+  const dynamic = buildAuditInventory({ ...input, routerSources: {
+    'TestRouter.ts': source.replace("guard('publish')", 'guard(runtimeAction)'),
+  } });
+  assert.equal(dynamic[0].conditionalPermissionPolicies, undefined);
+  assert.ok(!dynamic[0].permissionEvidence.includes('admin:study-destinations:publish'));
+});
+
+test('unused, late and differently scoped named helpers are not route permission evidence', () => {
+  const helper = "const permissionGuard=(req,res,next)=>permit('admin:certificates:issuers:manage')(req,res,next);";
+  for (const source of [
+    `const router=Router(); ${helper} router.post('/grant',handler);`,
+    `const router=Router(); router.post('/grant',permissionGuard,handler); ${helper}`,
+    `const router=Router(); { ${helper} } router.post('/grant',permissionGuard,handler);`,
+  ]) {
+    const rows = buildAuditInventory({ ...fixture, routerSources: { 'TestRouter.ts': source } });
+    assert.deepEqual(rows[0].permissionEvidence, ['admin:settings:manage']);
+    assert.equal(rows[0].conditionalPermissionPolicies, undefined);
+  }
+});
+
 const conditionalPolicy = `
 const requiredPermission = (method, path) => path.endsWith('/publish') ? 'admin:cms:publish' : 'admin:cms:author';
 router.use(async (req, res, next) => {

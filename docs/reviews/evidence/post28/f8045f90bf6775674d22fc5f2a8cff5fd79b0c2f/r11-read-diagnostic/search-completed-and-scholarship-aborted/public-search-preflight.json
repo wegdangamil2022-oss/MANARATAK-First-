@@ -1,0 +1,52 @@
+{
+  "status": 200,
+  "bodySha256": "71f623a4094765f3feb0c553f76417aab4f4c95e11b3c1447b89e54c339d07de",
+  "bodyBytes": 1159,
+  "body": {
+    "items": [
+      {
+        "target": {
+          "entityNamespace": "articles",
+          "resourceKey": "07cd7899-1808-4ab0-964a-1b543a78b7b6"
+        },
+        "score": 5,
+        "kind": "articles",
+        "id": "07cd7899-1808-4ab0-964a-1b543a78b7b6",
+        "slug": "r09-a54c1e18-ab57-49c5-893b-babed7210bad-en",
+        "title": "R09 en published owner",
+        "subtitle": "Synthetic current owner summary",
+        "contentType": "ARTICLE",
+        "url": "/en/content/r09-a54c1e18-ab57-49c5-893b-babed7210bad-en"
+      },
+      {
+        "target": {
+          "entityNamespace": "courses",
+          "resourceKey": "5e2d87a1-83ed-401c-af5d-e6d778d557bf"
+        },
+        "score": 1,
+        "kind": "courses",
+        "id": "5e2d87a1-83ed-401c-af5d-e6d778d557bf",
+        "slug": "r09-b2851c4b-5c58-4877-90ef-e5119c3e9c79",
+        "title": "05ddbd35-4e40-4565-a2df-99db121b1cbf",
+        "subtitle": "",
+        "originType": "NATIVE_MANARATAK_COURSE",
+        "url": "/en/courses/r09-b2851c4b-5c58-4877-90ef-e5119c3e9c79"
+      },
+      {
+        "target": {
+          "entityNamespace": "scholarships",
+          "resourceKey": "d3fe4638-737f-403b-a4f4-c2453a233083"
+        },
+        "score": 1,
+        "kind": "scholarships",
+        "id": "d3fe4638-737f-403b-a4f4-c2453a233083",
+        "slug": "r09-2382f5bd-48e9-4a94-a1a7-9a84e8a74c58",
+        "title": "bfb7fc6f-84a3-437b-ab2e-9dfb14f40b88",
+        "subtitle": "",
+        "url": "/en/scholarships/r09-2382f5bd-48e9-4a94-a1a7-9a84e8a74c58"
+      }
+    ],
+    "hasMore": false,
+    "nextCursor": null
+  }
+}

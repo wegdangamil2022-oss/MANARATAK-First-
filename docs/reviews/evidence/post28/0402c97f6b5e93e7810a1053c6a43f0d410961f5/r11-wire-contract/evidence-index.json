@@ -1,0 +1,50 @@
+{
+  "sourceSha": "0402c97f6b5e93e7810a1053c6a43f0d410961f5",
+  "files": [
+    {
+      "path": "wire-problem-result.json",
+      "sha256": "d0c66373880199665eac4d6290c3fa8ba38460725009363a82106532cd854a79",
+      "bytes": 299
+    },
+    {
+      "path": "verify-r11-wire-problem.mjs.txt",
+      "sha256": "5487545a8f6dd844fa0d31caf8ab111aa41e05e36c27319090bce0bd33e16dbe",
+      "bytes": 1620
+    },
+    {
+      "path": "ci-before-wire-fix.json",
+      "sha256": "a0cd980f3d72d4173ddbe3cd98623ef325d0cf0a9687bae72b04fa8384ad2195",
+      "bytes": 14593
+    },
+    {
+      "path": "local-fixture-403-responses.json",
+      "sha256": "fcbc04abdb1f7170f48cd660653cada4e9ed2798f36fbcef0f08065a94eadbfb",
+      "bytes": 520
+    },
+    {
+      "path": "local-fixture-403-contract.json",
+      "sha256": "98e0b189569c44bfa229e6312e24180c381696c3131785f6cc67c006b4010df9",
+      "bytes": 146
+    },
+    {
+      "path": "local-fixture-403-cleanup.json",
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f",
+      "bytes": 81
+    },
+    {
+      "path": "unready-lab-cleanup-observation.json",
+      "sha256": "5d31217a7a197122d58b6712ce716f560d65eed7ba50b4cd7c6aafa34c4feee6",
+      "bytes": 361
+    }
+  ],
+  "targetedNodeTest": {
+    "tests": 1,
+    "passed": 1,
+    "command": "node --test --test-name-pattern=\"R11 contention proof\" tests/release/r11-linux-contention.test.mjs"
+  },
+  "actualProblemMapperVerified": true,
+  "httpRuntimeAfterFixVerified": false,
+  "linuxRuntimeAfterFixVerified": false,
+  "sloAcceptance": false,
+  "productionAcceptance": false
+}

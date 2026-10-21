@@ -1,0 +1,123 @@
+{
+  "sourceSha": "3deef4557f181d6d7a3fd05e959990ac1bbfd36a",
+  "runtimeExecuted": false,
+  "checks": [
+    {
+      "name": "affected-tests",
+      "command": "node --test tests/database/post28-r04-r05-preparation.test.mjs tests/database/post28-isolation.test.mjs tests/database/greenfield-migration-parity-source.test.mjs",
+      "sourceSha": "3deef4557f181d6d7a3fd05e959990ac1bbfd36a",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:06:55.312544+00:00",
+      "finishedAt": "2026-10-16T03:06:57.977951+00:00",
+      "exitCode": 0,
+      "logSha256": "73d6ffc13d073ff1423a30c6b82c89ed1ba6674d0e012a9f2f8678f0960ff340",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    },
+    {
+      "name": "bash-syntax",
+      "command": "bash -n scripts/database/verify-greenfield-migration-parity.sh",
+      "sourceSha": "3deef4557f181d6d7a3fd05e959990ac1bbfd36a",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:06:57.978322+00:00",
+      "finishedAt": "2026-10-16T03:06:57.997236+00:00",
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    },
+    {
+      "name": "tooling-eslint",
+      "command": "node node_modules/eslint/bin/eslint.js scripts/database/post28-migration-inventory.mjs scripts/database/verify-post28-migration-ledger.mjs scripts/database/post28-upgrade-preservation.mjs scripts/database/compare-post28-upgrade.mjs scripts/database/prepare-post28-acceptance.mjs scripts/database/post28-neon-policy.mjs tests/database/post28-r04-r05-preparation.test.mjs",
+      "sourceSha": "3deef4557f181d6d7a3fd05e959990ac1bbfd36a",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:06:57.997486+00:00",
+      "finishedAt": "2026-10-16T03:06:58.761204+00:00",
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    },
+    {
+      "name": "w2",
+      "command": "npm run w2:verify",
+      "sourceSha": "3deef4557f181d6d7a3fd05e959990ac1bbfd36a",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:06:58.761827+00:00",
+      "finishedAt": "2026-10-16T03:06:58.914360+00:00",
+      "exitCode": 0,
+      "logSha256": "a4c38e2c14ac7d6a6c19cb0ef2fa854c8dcb455f50b775dcef7ea0953c87d316",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    },
+    {
+      "name": "preflight",
+      "command": "npm run ci:preflight",
+      "sourceSha": "3deef4557f181d6d7a3fd05e959990ac1bbfd36a",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:06:58.914772+00:00",
+      "finishedAt": "2026-10-16T03:07:05.799307+00:00",
+      "exitCode": 0,
+      "logSha256": "2a9ddca52c134a1bcc83b74e80e91679acbe4f4a498ed18f40d694b9470a95c7",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    },
+    {
+      "name": "quality",
+      "command": "npm run quality:source",
+      "sourceSha": "3deef4557f181d6d7a3fd05e959990ac1bbfd36a",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:07:05.799753+00:00",
+      "finishedAt": "2026-10-16T03:07:08.763034+00:00",
+      "exitCode": 0,
+      "logSha256": "8da3e12185549330fd7da4e28e9bde9bde31bb13fe1c2321e77859983ec6e0bd",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    },
+    {
+      "name": "organization",
+      "command": "node scripts/verify/verify-final-repository-organization.mjs",
+      "sourceSha": "3deef4557f181d6d7a3fd05e959990ac1bbfd36a",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:07:08.763437+00:00",
+      "finishedAt": "2026-10-16T03:07:11.897324+00:00",
+      "exitCode": 0,
+      "logSha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    },
+    {
+      "name": "secrets",
+      "command": "npm run security:secrets",
+      "sourceSha": "3deef4557f181d6d7a3fd05e959990ac1bbfd36a",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:07:11.898307+00:00",
+      "finishedAt": "2026-10-16T03:07:13.173395+00:00",
+      "exitCode": 0,
+      "logSha256": "4b29bf6c0b9e9f1479af538f20a75c30620098273712d41f404a259f2cac9ace",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    },
+    {
+      "name": "prepare-bundle",
+      "command": "node scripts/database/prepare-post28-acceptance.mjs /workspace/post28-private/r04-r05-3deef4557f181d6d7a3fd05e959990ac1bbfd36a/acceptance-preparation.json",
+      "sourceSha": "3deef4557f181d6d7a3fd05e959990ac1bbfd36a",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:07:13.173832+00:00",
+      "finishedAt": "2026-10-16T03:07:13.262865+00:00",
+      "exitCode": 0,
+      "logSha256": "240615014138ba4ea6d470b524374c4b78193fad2afd885437601d3616012936",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    }
+  ]
+}

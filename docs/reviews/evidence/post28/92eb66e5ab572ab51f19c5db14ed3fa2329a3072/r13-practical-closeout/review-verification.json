@@ -1,0 +1,12 @@
+{
+  "taskIdsExactlyMatched": true,
+  "distinctTaskIds": 38,
+  "reviewGroups": 7,
+  "linkedImplementationHashesUnchanged": true,
+  "implementationFiles": 60,
+  "newApplicationCodeChanges": false,
+  "newDatabaseChanges": false,
+  "sourceOrRuntimeTestsRepeated": false,
+  "whyNoRepeat": "No application code, schema, lock or test changes. Running CI already includes current source/unit gates; prior runtime evidence remains attached to its actual source SHA.",
+  "formalR13Acceptance": false
+}

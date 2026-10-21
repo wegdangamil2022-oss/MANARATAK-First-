@@ -1,0 +1,13 @@
+{
+  "name": "diagnostic-build",
+  "command": "node scripts/release/post28-diagnostic-build.mjs /workspace/post28-private/r06-r09-70e22445f95f2c86bb8155f80ad1aea3fce41982/diagnostic-build",
+  "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T03:18:25.408655+00:00",
+  "endedAt": "2026-10-16T03:19:05.338976+00:00",
+  "exitCode": 0,
+  "logSha256": "b6c0109b84230cfbaad8bb43c9a1e67112881efc439822e578bf663aa576b74e",
+  "nodeVersion": "22.16.0",
+  "databaseConnected": false
+}

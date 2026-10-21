@@ -1,0 +1,16 @@
+{
+  "sourceSha": "8a7391f3348e2d5c60a28a6e121186c5f4d7d846",
+  "runId": "ca94177f-3abc-4894-832d-2229c6e7be98",
+  "passedDatabaseCases": 28,
+  "newDistinctCases": 7,
+  "repeatedCases": 21,
+  "cumulativeDistinctAcrossShas": 385,
+  "allAtCurrentHead": false,
+  "R06Accepted": false,
+  "unitPassed": 361,
+  "automaticHtmlParser": false,
+  "realHeadChecks": true,
+  "schemaChanged": false,
+  "actualSourceGets": 2,
+  "rawSnapshotPersistence": "DEVELOPMENT_ONLY"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "39464433178",
+  "sourceSha": "a295ca3a882c67d3b6559cba32730e420ce4ba86",
+  "statusBefore": "in_progress",
+  "reason": "Superseded diagnostic-only commit; current 4aed744 run retained instead of repeating earlier pipeline",
+  "currentRun": "39465627242",
+  "requestedAt": "2026-10-20T17:25:52.528Z"
+}

@@ -1,4 +1,5 @@
 import type { PaginatedCourseResult } from './contracts/ICourseRepository';
+import type { AtomicPersistenceContext } from '../event-foundation/outbox/TransactionalOutbox';
 import type { PublicCourseFilters } from './contracts/PublicCourseFilters';
 
 export type CourseTaxonomyResolutionStatus =
@@ -281,6 +282,7 @@ export interface CourseRelationshipAnalysisResult {
 }
 
 export interface ICourseRelationshipRepository {
+  withTransaction?(context: AtomicPersistenceContext): ICourseRelationshipRepository;
   getRelationshipSource(courseId: string): Promise<CourseRelationshipSourceDto | null>;
 
   resolveTaxonomyCandidates(normalizedTerm: string): Promise<CourseTaxonomyCandidateDto[]>;

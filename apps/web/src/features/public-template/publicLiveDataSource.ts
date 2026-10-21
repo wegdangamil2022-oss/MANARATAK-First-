@@ -164,8 +164,8 @@ export function mapPublicUniversityDto(dto: PublicUniversityDto): University {
   };
 }
 
-function degreeLevels(value: string): DegreeLevel[] {
-  const normalized = value.toLowerCase();
+function degreeLevels(value: string | null | undefined): DegreeLevel[] {
+  const normalized = (value ?? '').toLowerCase();
   const result: DegreeLevel[] = [];
   if (/bachelor|undergraduate|بكالوريوس/.test(normalized)) result.push('بكالوريوس');
   if (/master|postgraduate|ماجستير/.test(normalized)) result.push('ماجستير');
@@ -281,7 +281,7 @@ export function mapCourse(dto: PublicCourseDto): {
           level,
           duration: dto.studyDuration ?? dto.studyDurationRaw ?? '',
           studyFree: dto.isStudyFree === true,
-          freeCertificate: dto.isFreeCertificate === true,
+          freeCertificate: dto.isFreeCertificate ?? null,
           certificateType:
             dto.certificateType ?? (dto.isFreeCertificate === true ? 'نوع الشهادة غير محدد' : ''),
           topics: splitText(dto.shortCourseTopicsRaw ?? dto.courseContent),

@@ -1,0 +1,36 @@
+[
+  {
+    "artifactId": 12222467169,
+    "sha256": "sha256:394a26e2c12c2d066ca97414b0c9da95fb7748396999ba4e7c1774c8bc649414",
+    "verifiedAgainstGitHubDigest": true,
+    "retainedEntries": [
+      "post28-r08-redis-result.json"
+    ]
+  },
+  {
+    "artifactId": 12222693219,
+    "sha256": "sha256:ad76c922331277c9391344017755e2f35e61de20bdfd9ad06bbb0ba3b17a152b",
+    "verifiedAgainstGitHubDigest": true,
+    "retainedEntries": [
+      "runtime-layer.json",
+      "linux-image-probe.json",
+      "linux-runtime-proof/result.json"
+    ]
+  },
+  {
+    "artifactId": 12222642968,
+    "sha256": "sha256:879dd48d1fbd3605e3df8bf192c4f1f8f0ba91a43f386b124fda0bfc3e3e9a33",
+    "verifiedAgainstGitHubDigest": true,
+    "retainedEntries": [
+      "artifact-retrieval.txt"
+    ]
+  },
+  {
+    "artifactId": 12223280762,
+    "sha256": "sha256:b5b72fa22a978d4e8bf677bd3a33ef48fadc1701eab2db3d3a1221b1b388b7bf",
+    "verifiedAgainstGitHubDigest": true,
+    "retainedEntries": [
+      "SOURCE_CI_CLOSURE.json"
+    ]
+  }
+]

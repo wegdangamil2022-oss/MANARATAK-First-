@@ -1,0 +1,1 @@
+{"kind":"LOCAL_ARTIFACT_INTEGRATION_GATEWAY","sourceSha":"6dfae89cf3278678a0c50a49fd9c9f4bf37e2e8a","port":36769,"stageAccepted":false}

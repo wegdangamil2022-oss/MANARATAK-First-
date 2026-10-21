@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "kind": "POST28_LOCAL_DATABASE_TARGETS",
+  "sourceSha": "dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c",
+  "runId": "6788aa7c-ecd9-4735-b262-05b4d7995891",
+  "postgresMajor": 16,
+  "targets": {
+    "DB-U": {
+      "host": "127.0.0.1",
+      "port": 50812,
+      "database": "manaratak_post28_upgrade_test",
+      "role": "post28_upgrader",
+      "roleKind": "MIGRATION",
+      "nonce": "d2a195de849585a18481dd5c8cd531c62b1b080d5d06bd558058038393f61fb0",
+      "serverIdentity": "7698377962333947932",
+      "databaseOid": "16387"
+    },
+    "DB-V": {
+      "host": "127.0.0.1",
+      "port": 50812,
+      "database": "manaratak_post28_upgrade_verify_test",
+      "role": "post28_verifier",
+      "roleKind": "MIGRATION",
+      "nonce": "1c89c0ee28ba33ab130ff6a26e95e00fcbd6c0e62c94dc66519fbd3411f34f6b",
+      "serverIdentity": "7698377962333947932",
+      "databaseOid": "16469"
+    }
+  }
+}

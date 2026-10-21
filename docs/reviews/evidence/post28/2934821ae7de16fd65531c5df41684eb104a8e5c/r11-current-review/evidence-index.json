@@ -1,0 +1,26 @@
+{
+  "kind": "R11_CURRENT_REVIEW_EVIDENCE",
+  "sourceSha": "2934821ae7de16fd65531c5df41684eb104a8e5c",
+  "files": [
+    {
+      "path": "operator.mjs.txt",
+      "bytes": 3925,
+      "sha256": "47cb5b7610ba11d3a782e1487f94d298f1b2ab57060a02de4fcccf6689db1166"
+    },
+    {
+      "path": "r10-fix-ci-completed.json",
+      "bytes": 957,
+      "sha256": "1cfe4e79ababbf73762de945a997f19920b82a32e1084a9d846c2288d4078994"
+    },
+    {
+      "path": "r11-fix-ci-observed.json",
+      "bytes": 447,
+      "sha256": "15f7e1a6a02c3dd7992862fdb358231e1b67cbef234b2bdb6ebd75cc89bf4bcf"
+    },
+    {
+      "path": "review-summary.json",
+      "bytes": 2068,
+      "sha256": "04bd614d88dd358f62be1f0a8e72c7426c3274c9faf84da8e047f17a0a36633f"
+    }
+  ]
+}

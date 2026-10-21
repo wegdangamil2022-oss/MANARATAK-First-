@@ -1,0 +1,22 @@
+[
+  {
+    "name": "R06-suites/university-relations-kKMROY/vitest.json",
+    "sha256": "7412bbc7a7dbb6e7a6bc6d29647fd3cc56f70bacee86af989c2ed674fa4f0ff2",
+    "bytes": 3626
+  },
+  {
+    "name": "R06-suites/university-relations-kKMROY/discovery.json",
+    "sha256": "e77b763fecfe48d78672132821812d220025a15bff995a04e90d9eab5803bc34",
+    "bytes": 1859
+  },
+  {
+    "name": "R06-setup/result.json",
+    "sha256": "fe15507c68af527142ef931bacb5eb6e34d0bc15d664b255f7e46c049ede3669",
+    "bytes": 2965
+  },
+  {
+    "name": "R06-setup/checks.json",
+    "sha256": "82bcd24bfa22b5e620253076d2d385391d93169a24f3d9499b5dfe566b5a7c85",
+    "bytes": 1393
+  }
+]

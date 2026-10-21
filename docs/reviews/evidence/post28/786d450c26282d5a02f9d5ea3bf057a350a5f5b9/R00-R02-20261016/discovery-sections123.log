@@ -1,0 +1,1 @@
+{"kind":"POST28_STATIC_DATABASE_DISCOVERY","suite":"sections123","definitions":12,"files":["tests/e2e/sections123/section01.database.spec.ts","tests/e2e/sections123/section02.database.spec.ts","tests/e2e/sections123/section03.database.spec.ts"],"parameterizedCasesExpanded":false,"runtimeExecuted":false}

@@ -1,0 +1,28 @@
+tar: Option --force-local is not supported
+Usage:
+  List:    tar -tf <archive-filename>
+  Extract: tar -xf <archive-filename>
+  Create:  tar -cf <archive-filename> [filenames...]
+  Help:    tar --help
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: tar --force-local --sort=name --mtime=UTC 1970-01-01 --owner=0 --group=0 --numeric-owner -cf ../r10-operational-build/artifacts/manaratak-api-978a0db95d89c5e65aceb012dd082b9111fa3327.tar apps/api/dist packages/infrastructure/assets/certificates packages/infrastructure/package.json packages/infrastructure/prisma/schema.prisma packages/infrastructure/prisma/migrations vendor/awilix-core package.json package-lock.json
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at checkExecSyncError (node:child_process:882:11)
+    at Object.execFileSync (node:child_process:918:15)
+    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/scripts/release/build-immutable-artifacts.mjs:81:16
+    at ModuleJob.run (node:internal/modules/esm/module_job:274:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 13488,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v22.16.0

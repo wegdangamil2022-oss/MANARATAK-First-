@@ -1,11 +1,9 @@
-import { PreviewStudentApiClient } from '../students/studentWorkspacePreviewApi';
-const ApiClient = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? PreviewStudentApiClient : LiveApiClient;
 import { useTranslation } from '../../i18n/I18nProvider';
 import { certificateCopy } from '@manaratak/shared';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createQrMatrix } from '@manaratak/shared';
-import { ApiClient as LiveApiClient, type StudentCertificateProjectionDto } from '../../api/client';
+import { ApiClient, type StudentCertificateProjectionDto } from '../../api/client';
 
 export function StudentCertificateActions({
   certificate,
@@ -13,6 +11,7 @@ export function StudentCertificateActions({
   certificate: StudentCertificateProjectionDto;
 }) {
   const { language } = useTranslation();
+  const isPrototype = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype';
   const copy = useCallback((value: string) => certificateCopy(language, value), [language]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -38,7 +37,7 @@ export function StudentCertificateActions({
     const controller = new AbortController();
     requestRef.current = controller;
     try {
-      if (import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype') {
+      if (isPrototype) {
         const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="540" viewBox="0 0 900 540">
           <rect width="900" height="540" fill="#f7f8fb"/><rect x="25" y="25" width="850" height="490" fill="none" stroke="#142B5F" stroke-width="4"/>
           <text x="450" y="155" text-anchor="middle" font-size="38" fill="#142B5F" font-family="sans-serif">MANARATAK</text>
@@ -52,17 +51,7 @@ export function StudentCertificateActions({
         setPreview(previewRef.current);
         return;
       }
-      const grant = await ApiClient.getMyCertificateArtifactDeliveryGrant(
-        certificate.id,
-        'preview',
-      );
-      if (!/^https?:\/\//i.test(grant.url)) throw new Error(copy('رابط ملف الشهادة غير صالح.'));
-      const response = await fetch(grant.url, {
-        headers: grant.headers,
-        signal: controller.signal,
-      });
-      if (!response.ok) throw new Error(copy('تعذر تحميل الشهادة'));
-      const blob = await response.blob();
+      const blob = await ApiClient.getMyCertificateArtifactBlob(certificate.id, 'preview', controller.signal);
       if (!['image/svg+xml', 'image/png', 'image/jpeg'].includes(blob.type))
         throw new Error(copy('رابط ملف الشهادة غير صالح.'));
       if (controller.signal.aborted) return;
@@ -93,15 +82,11 @@ export function StudentCertificateActions({
     setBusy(true);
     setError('');
     try {
-      if (import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype') {
+      if (isPrototype) {
         setError(copy('معاينة فقط: لا توجد شهادة رسمية أو ملف PDF قابل للتنزيل. استخدم زر عرض الشهادة لتجربة التصميم.'));
         return;
       }
-      const grant = await ApiClient.getMyCertificateArtifactDeliveryGrant(certificate.id, 'pdf');
-      if (!/^https?:\/\//i.test(grant.url)) throw new Error(copy('رابط ملف الشهادة غير صالح.'));
-      const response = await fetch(grant.url, { headers: grant.headers });
-      if (!response.ok) throw new Error(copy('تعذر تنزيل الشهادة.'));
-      const blob = await response.blob();
+      const blob = await ApiClient.getMyCertificateArtifactBlob(certificate.id, 'pdf');
       if (blob.type !== 'application/pdf') throw new Error(copy('تعذر تنزيل الشهادة.'));
       const objectUrl = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
@@ -146,7 +131,7 @@ export function StudentCertificateActions({
             {previewBusy ? copy('جارٍ التحميل…') : copy('عرض الشهادة')}
           </button>
         )}
-        {verifyPath && (import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? (
+        {verifyPath && (isPrototype ? (
           <button type="button" onClick={() => setError(copy('هذه شهادة توضيحية فقط؛ لا توجد شهادة رسمية للتحقق منها.'))}
             className="text-[var(--mn-secondary)] underline">{copy('التحقق من الشهادة')}</button>
         ) : (

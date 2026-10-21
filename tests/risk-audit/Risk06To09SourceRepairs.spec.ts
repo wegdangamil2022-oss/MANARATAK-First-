@@ -14,7 +14,8 @@ describe('RISK-06 through RISK-09 source closure', () => {
   it('does not hide Major catalog DB enrichment failures in runtime environments', () => {
     const catalog = source('packages/infrastructure/src/majors/Phase10CatalogRepository.ts');
     expect(catalog).toContain('this.options.catalogPath');
-    expect(catalog).toContain('this.options.productionLike === true');
+    expect(catalog).toContain('await this.prisma.$queryRaw');
+    expect(catalog.slice(catalog.indexOf('public async listCatalog'))).not.toMatch(/catch\s*\(/);
     expect(catalog).not.toContain('process.env');
   });
 

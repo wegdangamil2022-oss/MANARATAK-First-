@@ -1,0 +1,122 @@
+{
+  "lab-dVxMN4": [
+    {
+      "name": "R03-app",
+      "command": [
+        "node",
+        "/workspace/scratch/post28/tools/local-r03-app-defaults.mjs"
+      ],
+      "sourceSha": "b645f755b1be74437e80152b4f78350bf03da14c",
+      "startedUtc": "2026-10-16T14:29:48.461825+00:00",
+      "finishedUtc": "2026-10-16T14:29:48.668639+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-dVxMN4/R03-app-20261016T142948666320Z.log",
+      "sha256": "c1be48a97815e3055eecb56a103973475abbc0334412604f111d45c666d4f20c"
+    },
+    {
+      "name": "R04-parity",
+      "command": [
+        "bash",
+        "scripts/database/verify-greenfield-migration-parity.sh"
+      ],
+      "sourceSha": "b645f755b1be74437e80152b4f78350bf03da14c",
+      "startedUtc": "2026-10-16T14:29:49.508217+00:00",
+      "finishedUtc": "2026-10-16T14:30:22.518663+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-dVxMN4/R04-parity-20261016T143022516832Z.log",
+      "sha256": "02b636c0ef5e6bcb2104b2d0f80d7591955714977c31141bf54cf6ed1499c4a2"
+    },
+    {
+      "name": "R04-seed-apply",
+      "command": [
+        "env",
+        "DATABASE_MUTATION_PURPOSE=seed",
+        "node",
+        "node_modules/tsx/dist/cli.mjs",
+        "scripts/database/post28-required-seed.ts",
+        "apply"
+      ],
+      "sourceSha": "b645f755b1be74437e80152b4f78350bf03da14c",
+      "startedUtc": "2026-10-16T14:30:27.189483+00:00",
+      "finishedUtc": "2026-10-16T14:31:08.468959+00:00",
+      "exitCode": 1,
+      "log": "/workspace/scratch/post28/labs/lab-dVxMN4/R04-seed-apply-20261016T143108466176Z.log",
+      "sha256": "8b3d4f046569565ca624a7a845d71868dca9148bb6c24a0c372d353c8873f81a"
+    }
+  ],
+  "lab-g6bbzL": [
+    {
+      "name": "R03-app",
+      "command": [
+        "node",
+        "/workspace/scratch/post28/tools/local-r03-app-defaults.mjs"
+      ],
+      "sourceSha": "0de110193d529024d407258ac9fb50c812b48a2c",
+      "startedUtc": "2026-10-16T14:33:08.150248+00:00",
+      "finishedUtc": "2026-10-16T14:33:08.370851+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-g6bbzL/R03-app-20261016T143308368823Z.log",
+      "sha256": "5f615385195ce07973ac7b4d65a829da78859ba27374653213d7c9cc65bde0e4"
+    },
+    {
+      "name": "R04-parity",
+      "command": [
+        "bash",
+        "scripts/database/verify-greenfield-migration-parity.sh"
+      ],
+      "sourceSha": "0de110193d529024d407258ac9fb50c812b48a2c",
+      "startedUtc": "2026-10-16T14:33:09.147337+00:00",
+      "finishedUtc": "2026-10-16T14:33:41.031473+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-g6bbzL/R04-parity-20261016T143341029205Z.log",
+      "sha256": "3d1c5a662acd0f5b3a2c7d3329163e267cd9f7f61d953ab8954f04a571363c13"
+    },
+    {
+      "name": "seed-progress",
+      "command": [
+        "node",
+        "scripts/database/post28-psql.mjs",
+        "-Atqc",
+        "SELECT count(*) FROM \"ReferenceOwnerImportReview\";"
+      ],
+      "sourceSha": "0de110193d529024d407258ac9fb50c812b48a2c",
+      "startedUtc": "2026-10-16T14:35:04.632820+00:00",
+      "finishedUtc": "2026-10-16T14:35:04.843354+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-g6bbzL/seed-progress-20261016T143504841038Z.log",
+      "sha256": "c02efad74c4db35b2450beec922eb590d202b34c5b436bff0b6acc15059f5d21"
+    },
+    {
+      "name": "R04-seed-apply",
+      "command": [
+        "env",
+        "DATABASE_MUTATION_PURPOSE=seed",
+        "node",
+        "node_modules/tsx/dist/cli.mjs",
+        "scripts/database/post28-required-seed.ts",
+        "apply"
+      ],
+      "sourceSha": "0de110193d529024d407258ac9fb50c812b48a2c",
+      "startedUtc": "2026-10-16T14:34:06.084896+00:00",
+      "finishedUtc": "2026-10-16T14:35:48.018318+00:00",
+      "exitCode": 1,
+      "log": "/workspace/scratch/post28/labs/lab-g6bbzL/R04-seed-apply-20261016T143548016206Z.log",
+      "sha256": "22c39947bda1d2b4a52d75e48af507079e622f6b8b842d0fc8fdeebe4557d6a8"
+    },
+    {
+      "name": "seed-rejection-review",
+      "command": [
+        "node",
+        "scripts/database/post28-psql.mjs",
+        "-Atqc",
+        "SELECT json_build_object('handoff',result->>'handoffId','type',result->>'entityType','issues',result->'issues') FROM \"ImportScreeningReceipt\" WHERE result->>'state'='INVALID';"
+      ],
+      "sourceSha": "0de110193d529024d407258ac9fb50c812b48a2c",
+      "startedUtc": "2026-10-16T14:36:09.661447+00:00",
+      "finishedUtc": "2026-10-16T14:36:09.853983+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-g6bbzL/seed-rejection-review-20261016T143609851991Z.log",
+      "sha256": "e9c65ef003c47b5dabd2494823c9463c20cad58b760485203ff4e692552473dc"
+    }
+  ]
+}

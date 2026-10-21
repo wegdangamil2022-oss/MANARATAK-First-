@@ -1,0 +1,11 @@
+{
+  "sourceSha": "41fb7c90ccb732177a160677669634982fc61173",
+  "suite": "university-relations",
+  "runId": "69cbb0b3-c0e2-4b46-839f-9296d32583f8",
+  "result": "PASS_SCOPED_LOCAL_ONLY",
+  "fullR06Accepted": false,
+  "R05": "BLOCKED",
+  "R04": "PASS_LOCAL",
+  "secretsCommitted": false,
+  "cumulativeDistinctDatabaseCases": 85
+}

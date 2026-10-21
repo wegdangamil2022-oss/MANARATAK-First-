@@ -7,3 +7,41 @@ packages/infrastructure/src/courses/ExternalCourseProviderSeed.ts -text
 packages/domain/src/academic-taxonomy/isced-f-baseline.ts -text
 # Preserve verified upstream dependency snapshots byte-for-byte.
 vendor/awilix-core/** -text whitespace=cr-at-eol
+# Retained R09 workflow receipts are hashed before Git staging.
+docs/reviews/evidence/post28/*/r09-shared-workflows/** -text
+docs/reviews/evidence/post28/*/r10-preparation/** -text
+docs/reviews/evidence/post28/*/r10-local-restore/** -text
+docs/reviews/evidence/post28/*/r10-operational/** -text
+docs/reviews/evidence/post28/*/r11-read-diagnostic/** -text
+
+docs/reviews/evidence/post28/*/r11-scenario-diagnostic/** -text
+docs/reviews/evidence/post28/*/r11-scenario-diagnostic/*.mjs.txt whitespace=cr-at-eol,-blank-at-eof
+docs/reviews/evidence/post28/*/r11-scenario-diagnostic/*.log whitespace=cr-at-eol
+
+docs/reviews/evidence/post28/*/r11-admin-mfa/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/r11-mfa-enrollment/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/r11-wire-contract/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/r11-linux/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/r12-source-review/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/r12-api-runtime/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/r14-worker-route-faults/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/r14-linux-cms-preparation/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/r14-linux-cms-runtime/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/r14-linux-rollback/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/staging-review/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/staging-worker-domain/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/staging-worker-linux/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/repaired-rollback-reference/** -text whitespace=cr-at-eol,-blank-at-eof

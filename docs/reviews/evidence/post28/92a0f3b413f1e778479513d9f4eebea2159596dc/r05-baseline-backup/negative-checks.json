@@ -1,0 +1,20 @@
+{
+  "checks": [
+    {
+      "name": "r05-negative-missing-v-binding",
+      "exitCode": 1,
+      "expectedRejection": "POST28_BACKUP_VERIFICATION_FAILED",
+      "passed": true
+    },
+    {
+      "name": "r05-negative-backup-tamper",
+      "exitCode": 1,
+      "expectedRejection": "POST28_BACKUP_DIGEST_MISMATCH",
+      "passed": true
+    }
+  ],
+  "passed": 2,
+  "failed": 0,
+  "archiveRestored": true,
+  "finishedUtc": "2026-10-16T15:56:46.930832+00:00"
+}

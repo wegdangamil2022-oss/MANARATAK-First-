@@ -1,0 +1,303 @@
+{
+  "kind": "POST28_R01_TARGETED_B13",
+  "sourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+  "command": "node node_modules/vitest/vitest.mjs run --config .b13-vitest.config.ts --reporter=json --outputFile <outside-checkout>",
+  "startTime": 1792531462156,
+  "success": true,
+  "total": 63,
+  "passed": 63,
+  "failed": 0,
+  "skipped": 0,
+  "rawReportSha256": "e1e93d1e123fc7e47b2aa21385cbff7c6fe6d3322a6e1a3fcaaa4444802d7216",
+  "files": [
+    {
+      "file": "apps/admin/tests/finance/B13AccountRead.spec.tsx",
+      "status": "passed",
+      "cases": [
+        {
+          "name": "B13 financial account operator read loads only bounded account reads and resets pagination for a changed filter",
+          "status": "passed"
+        },
+        {
+          "name": "B13 financial account operator read uses the header refresh and clears stale accounts on failure",
+          "status": "passed"
+        },
+        {
+          "name": "B13 financial account operator read ignores a late response after navigating to a different account filter",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "apps/admin/tests/finance/B13FinancialCommands.spec.tsx",
+      "status": "passed",
+      "cases": [
+        {
+          "name": "B13 financial UI command intent keeps installments body, version and key frozen on an uncertain command",
+          "status": "passed"
+        },
+        {
+          "name": "B13 financial UI command intent keeps credit body, version and key frozen on an uncertain command",
+          "status": "passed"
+        },
+        {
+          "name": "B13 financial UI command intent locks a generic wallet/reversal intent synchronously and ignores a late response after scope changes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "packages/infrastructure/tests/finance-platform/B13AccountRead.spec.ts",
+      "status": "passed",
+      "cases": [
+        {
+          "name": "B13 financial account owner read uses the same filtered snapshot for the page and count, without ledger data",
+          "status": "passed"
+        },
+        {
+          "name": "B13 financial account owner read rejects unbounded or invalid direct reads {\"page\":10001}",
+          "status": "passed"
+        },
+        {
+          "name": "B13 financial account owner read rejects unbounded or invalid direct reads {\"pageSize\":51}",
+          "status": "passed"
+        },
+        {
+          "name": "B13 financial account owner read rejects unbounded or invalid direct reads {\"page\":1.5}",
+          "status": "passed"
+        },
+        {
+          "name": "B13 financial account owner read rejects unbounded or invalid direct reads {\"ownerReferenceId\":\" \"}",
+          "status": "passed"
+        },
+        {
+          "name": "B13 financial account owner read rejects unbounded or invalid direct reads {\"currencyCode\":\"usd\"}",
+          "status": "passed"
+        },
+        {
+          "name": "B13 financial account owner read rejects unbounded or invalid direct reads {\"active\":\"false\"}",
+          "status": "passed"
+        },
+        {
+          "name": "B13 financial account owner read rejects unbounded or invalid direct reads {\"type\":\"UNKNOWN\"}",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "packages/infrastructure/tests/finance-platform/B13CreditNote.spec.ts",
+      "status": "passed",
+      "cases": [
+        {
+          "name": "B13 native credit note acceptance replays the full HTTP command after CREDITED without another document, ledger, receipt, audit or outbox",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects changed intent under the same HTTP key: {\"reason\":\"Different reason\"}",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects changed intent under the same HTTP key: {\"amount\":{\"amountMinorUnits\":\"500\",\"currencyCode\":\"USD\",\"scale\":2}}",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects changed intent under the same HTTP key: {\"expectedVersion\":2}",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects over balance through the actual use case before any write",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects currency mismatch through the actual use case before any write",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects scale mismatch through the actual use case before any write",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects zero amount through the actual use case before any write",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects negative amount through the actual use case before any write",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance owner rejects incompatible invoice money {\"amountMinorUnits\":\"1000\",\"currencyCode\":\"SAR\",\"scale\":2}",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance owner rejects incompatible invoice money {\"amountMinorUnits\":\"1000\",\"currencyCode\":\"USD\",\"scale\":3}",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects missing/zero/stale owner version undefined",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects missing/zero/stale owner version 0",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects missing/zero/stale owner version 2",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects invalid reason through use case and owner (length 0)",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects invalid reason through use case and owner (length 2)",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects invalid reason through use case and owner (length 501)",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects outstanding payment reservations before posting",
+          "status": "passed"
+        },
+        {
+          "name": "B13 native credit note acceptance rejects outstanding hold reservations before posting",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "apps/api/tests/presentation/api/router/B13AccountRead.spec.ts",
+      "status": "passed",
+      "cases": [
+        {
+          "name": "B13 account catalog permission and query contract reads with the existing finance permission and preserves inactive filtering",
+          "status": "passed"
+        },
+        {
+          "name": "B13 account catalog permission and query contract denies permission before reading",
+          "status": "passed"
+        },
+        {
+          "name": "B13 account catalog permission and query contract rejects invalid queries pageSize=51 before reading",
+          "status": "passed"
+        },
+        {
+          "name": "B13 account catalog permission and query contract rejects invalid queries page=10001 before reading",
+          "status": "passed"
+        },
+        {
+          "name": "B13 account catalog permission and query contract rejects invalid queries active=0 before reading",
+          "status": "passed"
+        },
+        {
+          "name": "B13 account catalog permission and query contract rejects invalid queries currencyCode=usd before reading",
+          "status": "passed"
+        },
+        {
+          "name": "B13 account catalog permission and query contract rejects invalid queries type=UNKNOWN before reading",
+          "status": "passed"
+        },
+        {
+          "name": "B13 account catalog permission and query contract rejects invalid queries unexpected=value before reading",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "apps/api/tests/presentation/api/router/B13CommandBoundary.spec.ts",
+      "status": "passed",
+      "cases": [
+        {
+          "name": "B13 command HTTP boundaries dispatches /invoices/invoice/installment-plans with the authenticated actor and stable request key",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries dispatches /invoices/invoice/credit-notes with the authenticated actor and stable request key",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries dispatches /wallets/wallet/holds with the authenticated actor and stable request key",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries dispatches /wallet-holds/hold/release with the authenticated actor and stable request key",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries dispatches /wallet-holds/hold/capture with the authenticated actor and stable request key",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries dispatches /ledger/transactions/transaction/reverse with the authenticated actor and stable request key",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries dispatches /approvals/approval/decisions with the authenticated actor and stable request key",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries denies /invoices/invoice/installment-plans without operation permission",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries denies /invoices/invoice/credit-notes without operation permission",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries denies /wallets/wallet/holds without operation permission",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries denies /wallet-holds/hold/release without operation permission",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries denies /wallet-holds/hold/capture without operation permission",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries denies /ledger/transactions/transaction/reverse without operation permission",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries denies /approvals/approval/decisions without operation permission",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries requires a version for /invoices/invoice/installment-plans",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries requires a version for /invoices/invoice/credit-notes",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries requires a version for /wallets/wallet/holds",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries requires a version for /wallet-holds/hold/release",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries requires a version for /wallet-holds/hold/capture",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries requires a version for /approvals/approval/decisions",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries rejects a missing or oversized request key (undefined)",
+          "status": "passed"
+        },
+        {
+          "name": "B13 command HTTP boundaries rejects a missing or oversized request key (xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "scope": "SOURCE_NATIVE_ADAPTER_ROUTER_UI_TESTS_NOT_POSTGRES_OR_PROVIDER_ACCEPTANCE"
+}

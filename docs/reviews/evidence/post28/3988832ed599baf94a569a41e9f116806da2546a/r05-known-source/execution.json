@@ -1,0 +1,54 @@
+[
+  {
+    "name": "baseline",
+    "args": [
+      "scripts/database/initialize-post28-upgrade.mjs",
+      "23897bdaa66d966eef15c85f44288589ecbcdf2b",
+      "--historical-known-source"
+    ],
+    "startedAt": "2026-10-16T21:02:17.939624+00:00",
+    "finishedAt": "2026-10-16T21:02:47.590016+00:00",
+    "exitCode": 0,
+    "expectedExitCode": 0,
+    "logSha256": "12eedb4bbc0340002681f0e370ad8c881240b2a865a7fd61c3d4f4a9d571c5b2",
+    "bytes": 1648
+  },
+  {
+    "name": "backup",
+    "args": [
+      "scripts/database/verify-post28-upgrade-backup.mjs",
+      "backup"
+    ],
+    "startedAt": "2026-10-16T21:02:47.590466+00:00",
+    "finishedAt": "2026-10-16T21:02:55.591123+00:00",
+    "exitCode": 0,
+    "expectedExitCode": 0,
+    "logSha256": "fac3b8bb7bdcc6d8740e57b605c01e19c4758becd7fa7ae180ac60cfcb149672",
+    "bytes": 689
+  },
+  {
+    "name": "restore-verification",
+    "args": [
+      "scripts/database/verify-post28-upgrade-backup.mjs",
+      "verify"
+    ],
+    "startedAt": "2026-10-16T21:02:55.591552+00:00",
+    "finishedAt": "2026-10-16T21:03:27.282567+00:00",
+    "exitCode": 0,
+    "expectedExitCode": 0,
+    "logSha256": "ac10a994112076829d36159399a30d60c667815dc3b5cd1ffcf74ebd17b2a501",
+    "bytes": 1290
+  },
+  {
+    "name": "audit",
+    "args": [
+      "scripts/database/audit-post28-upgrade.mjs"
+    ],
+    "startedAt": "2026-10-16T21:03:27.283206+00:00",
+    "finishedAt": "2026-10-16T21:04:02.339512+00:00",
+    "exitCode": 2,
+    "expectedExitCode": 2,
+    "logSha256": "6083a439fecfd5fcb8098307d28a90990c0c56684b7b0371b07e05f46052f276",
+    "bytes": 2096
+  }
+]

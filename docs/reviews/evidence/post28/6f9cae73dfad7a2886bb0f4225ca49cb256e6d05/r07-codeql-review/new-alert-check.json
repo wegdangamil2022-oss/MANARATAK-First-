@@ -1,0 +1,94 @@
+{
+  "sourceSha": "6f9cae73dfad7a2886bb0f4225ca49cb256e6d05",
+  "pullRequest": 34,
+  "checks": [
+    {
+      "id": 118269541680,
+      "name": "CodeQL",
+      "head_sha": "6f9cae73dfad7a2886bb0f4225ca49cb256e6d05",
+      "status": "completed",
+      "conclusion": "failure",
+      "details_url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/runs/118269541680",
+      "output": {
+        "title": "8 new alerts including 8 high severity security vulnerabilities",
+        "summary": "### New alerts in code changed by this pull request\n\nSecurity Alerts:\n * 8 high\n\n\n_Alerts not introduced by this pull request might have been detected because the code changes were too large._\n\nSee annotations below for details.\n\n[View all branch alerts](/wegdangamil2022-oss/MANARATAK-First-/security/code-scanning?query=pr%3A34+tool%3ACodeQL+is%3Aopen).",
+        "text": null,
+        "annotations_count": 8
+      }
+    }
+  ],
+  "annotations": [
+    {
+      "path": "packages/application/src/asset-platform/utils/AssetValidator.ts",
+      "start_line": 65,
+      "end_line": 67,
+      "annotation_level": "failure",
+      "message": "This [regular expression](1) that depends on [library input](2) may run slow on strings starting with '<' and with many repetitions of '\\t'.\nThis [regular expression](1) that depends on [library input](3) may run slow on strings starting with '<' and with many repetitions of '\\t'.\nThis [regular expression](1) that depends on [library input](4) may run slow on strings starting with '<' and with many repetitions of '\\t'.\nThis [regular expression](1) that depends on [library input](5) may run slow on strings starting with '<' and with many repetitions of '\\t'.",
+      "title": "Polynomial regular expression used on uncontrolled data",
+      "raw_details": null
+    },
+    {
+      "path": "packages/application/src/asset-platform/utils/AssetValidator.ts",
+      "start_line": 79,
+      "end_line": 79,
+      "annotation_level": "failure",
+      "message": "This [regular expression](1) that depends on [library input](2) may run slow on strings starting with 'url(' and with many repetitions of 'url(!'.\nThis [regular expression](1) that depends on [library input](3) may run slow on strings starting with 'url(' and with many repetitions of 'url(!'.\nThis [regular expression](1) that depends on [library input](4) may run slow on strings starting with 'url(' and with many repetitions of 'url(!'.\nThis [regular expression](1) that depends on [library input](5) may run slow on strings starting with 'url(' and with many repetitions of 'url(!'.",
+      "title": "Polynomial regular expression used on uncontrolled data",
+      "raw_details": null
+    },
+    {
+      "path": "packages/application/src/auth/InMemorySessionManager.ts",
+      "start_line": 19,
+      "end_line": 19,
+      "annotation_level": "failure",
+      "message": "Password from [a call to login](1) is hashed insecurely.\nPassword from [a call to login](2) is hashed insecurely.",
+      "title": "Use of password hash with insufficient computational effort",
+      "raw_details": null
+    },
+    {
+      "path": "packages/application/src/courses/services/CourseSourceRelationshipReadiness.ts",
+      "start_line": 5,
+      "end_line": 5,
+      "annotation_level": "failure",
+      "message": "This [regular expression](1) that depends on [library input](2) may run slow on strings with many repetitions of '\\t'.\nThis [regular expression](1) that depends on [library input](3) may run slow on strings with many repetitions of '\\t'.",
+      "title": "Polynomial regular expression used on uncontrolled data",
+      "raw_details": null
+    },
+    {
+      "path": "packages/infrastructure/src/auth/PrismaSessionManager.ts",
+      "start_line": 12,
+      "end_line": 12,
+      "annotation_level": "failure",
+      "message": "Password from [a call to login](1) is hashed insecurely.",
+      "title": "Use of password hash with insufficient computational effort",
+      "raw_details": null
+    },
+    {
+      "path": "scripts/release/post28-r08-redis-lab.mjs",
+      "start_line": 13,
+      "end_line": 13,
+      "annotation_level": "failure",
+      "message": "Password from [an access to password](1) is hashed insecurely.",
+      "title": "Use of password hash with insufficient computational effort",
+      "raw_details": null
+    },
+    {
+      "path": "tests/database/fixtures/post28-r08-session-server.mjs",
+      "start_line": 28,
+      "end_line": 28,
+      "annotation_level": "failure",
+      "message": "This route handler performs [authorization](1), but is not rate-limited.\nThis route handler performs [authorization](2), but is not rate-limited.\nThis route handler performs [authorization](3), but is not rate-limited.",
+      "title": "Missing rate limiting",
+      "raw_details": null
+    },
+    {
+      "path": "tests/database/post28-learning-path-http.database.spec.mjs",
+      "start_line": 56,
+      "end_line": 56,
+      "annotation_level": "failure",
+      "message": "This route handler performs [authorization](1), but is not rate-limited.\nThis route handler performs [authorization](2), but is not rate-limited.\nThis route handler performs [authorization](3), but is not rate-limited.\nThis route handler performs [authorization](4), but is not rate-limited.\nThis route handler performs [authorization](5), but is not rate-limited.",
+      "title": "Missing rate limiting",
+      "raw_details": null
+    }
+  ]
+}

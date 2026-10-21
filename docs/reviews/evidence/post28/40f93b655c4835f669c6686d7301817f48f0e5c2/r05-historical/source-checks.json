@@ -1,0 +1,113 @@
+[
+  {
+    "name": "affected-source",
+    "command": [
+      "node",
+      "--test",
+      "tests/database/post28-historical-fixtures.test.mjs",
+      "tests/database/post28-backup-contract.test.mjs",
+      "tests/database/post28-lab-profile.test.mjs",
+      "tests/database/post28-upgrade-candidate.test.mjs",
+      "tests/database/post28-isolation.test.mjs",
+      "tests/database/post28-r04-r05-preparation.test.mjs"
+    ],
+    "sourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+    "dirty": false,
+    "startedUtc": "2026-10-16T16:10:35.104569+00:00",
+    "finishedUtc": "2026-10-16T16:10:39.387524+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/40f93b655c4835f669c6686d7301817f48f0e5c2/R05-historical-final/affected-source-20261016T161039368475Z.log",
+    "sha256": "cc22efc0c3769602ba151ee4ddf32b0d3b2a20ef044e8843ffbc22881bf1aa5e"
+  },
+  {
+    "name": "architecture",
+    "command": [
+      "node",
+      "scripts/architecture/verify-source-architecture-guards.mjs"
+    ],
+    "sourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+    "dirty": false,
+    "startedUtc": "2026-10-16T16:11:18.052064+00:00",
+    "finishedUtc": "2026-10-16T16:11:18.369211+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/40f93b655c4835f669c6686d7301817f48f0e5c2/R05-historical-final/architecture-20261016T161118348186Z.log",
+    "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659"
+  },
+  {
+    "name": "source-quality",
+    "command": [
+      "node",
+      "scripts/quality/verify-source-quality.mjs"
+    ],
+    "sourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+    "dirty": false,
+    "startedUtc": "2026-10-16T16:11:18.403003+00:00",
+    "finishedUtc": "2026-10-16T16:11:21.295629+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/40f93b655c4835f669c6686d7301817f48f0e5c2/R05-historical-final/source-quality-20261016T161121276216Z.log",
+    "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073"
+  },
+  {
+    "name": "eslint",
+    "command": [
+      "npx",
+      "eslint",
+      "scripts/database/audit-post28-upgrade.mjs",
+      "scripts/database/post28-historical-fixtures.mjs",
+      "scripts/database/post28-upgrade-measurement.mjs",
+      "scripts/database/initialize-post28-upgrade.mjs",
+      "scripts/database/verify-post28-upgrade-backup.mjs",
+      "tests/database/post28-historical-fixtures.test.mjs"
+    ],
+    "sourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+    "dirty": false,
+    "startedUtc": "2026-10-16T16:11:21.333264+00:00",
+    "finishedUtc": "2026-10-16T16:11:22.517941+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/40f93b655c4835f669c6686d7301817f48f0e5c2/R05-historical-final/eslint-20261016T161122497911Z.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "inventory",
+    "command": [
+      "node",
+      "scripts/aistudio/environment.mjs",
+      "--check"
+    ],
+    "sourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+    "dirty": false,
+    "startedUtc": "2026-10-16T16:11:22.549129+00:00",
+    "finishedUtc": "2026-10-16T16:11:25.324078+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/40f93b655c4835f669c6686d7301817f48f0e5c2/R05-historical-final/inventory-20261016T161125308432Z.log",
+    "sha256": "29c1251bbf64bfb976eab81494a68c3a3e561b6f0398f97b6a4e0f1ce527f444"
+  },
+  {
+    "name": "secrets",
+    "command": [
+      "node",
+      "scripts/security/scan-secrets.mjs"
+    ],
+    "sourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+    "dirty": false,
+    "startedUtc": "2026-10-16T16:11:25.362749+00:00",
+    "finishedUtc": "2026-10-16T16:11:26.622142+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/40f93b655c4835f669c6686d7301817f48f0e5c2/R05-historical-final/secrets-20261016T161126600596Z.log",
+    "sha256": "fb57132dedfc814530ccda39a7fd39cfc7ba19f0472e684c664ce9045ec9e44a"
+  },
+  {
+    "name": "repository-organization",
+    "command": [
+      "node",
+      "scripts/verify/verify-final-repository-organization.mjs"
+    ],
+    "sourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+    "dirty": false,
+    "startedUtc": "2026-10-16T16:11:26.669180+00:00",
+    "finishedUtc": "2026-10-16T16:11:30.141129+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/40f93b655c4835f669c6686d7301817f48f0e5c2/R05-historical-final/repository-organization-20261016T161130119308Z.log",
+    "sha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129"
+  }
+]

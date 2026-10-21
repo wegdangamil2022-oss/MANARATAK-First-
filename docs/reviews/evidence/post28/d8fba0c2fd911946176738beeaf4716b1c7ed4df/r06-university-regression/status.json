@@ -1,0 +1,26 @@
+{
+  "sourceSha": "d8fba0c2fd911946176738beeaf4716b1c7ed4df",
+  "suite": "university-relations",
+  "counts": {
+    "discovered": 7,
+    "reportedTotal": 7,
+    "passed": 7,
+    "failed": 0,
+    "pendingTotal": 0,
+    "skippedAssertions": 0,
+    "todo": 0
+  },
+  "selectedResult": null,
+  "fullProfilePassed": true,
+  "originalRunnerGate": "PASS",
+  "savedReportVerifierPassed": false,
+  "distinctNewPassingCases": 0,
+  "diagnosticOnly": false,
+  "regressionNotAdditional": true,
+  "R04": "PASS_LOCAL_UNCHANGED",
+  "R05": "BLOCKED",
+  "R06": "PARTIAL",
+  "fullRequiredCasesAccepted": 0,
+  "externalProviderCalled": false,
+  "productionAcceptance": false
+}

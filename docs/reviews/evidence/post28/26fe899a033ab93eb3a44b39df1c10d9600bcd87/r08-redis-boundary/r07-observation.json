@@ -1,0 +1,30 @@
+{
+  "kind": "WORKFLOW_LOG_OBSERVATION",
+  "runId": "39285187356",
+  "sourceSha": "825a0b597bca7e14d95a6cc8fbf8d7bf352abdc8",
+  "jobId": 118169003196,
+  "restReportedState": "queued",
+  "actualJobLog": {
+    "observedErrorAt": "2026-10-19T16:25:10.5158100Z",
+    "message": "Environment inventory stale: run node scripts/aistudio/environment.mjs --write",
+    "steps": {
+      "source-quality": "success",
+      "source-preflight": "failure",
+      "source-regressions": "skipped",
+      "source-closure": "skipped",
+      "prisma-source": "skipped",
+      "typecheck": "skipped",
+      "vercel-typecheck": "skipped",
+      "lint": "skipped",
+      "build": "skipped",
+      "unit": "skipped",
+      "artifacts": "skipped"
+    }
+  },
+  "resolution": "Regenerated inventory using official generator; check passes on new source",
+  "currentRunId": "39287364100",
+  "currentSourceSha": "26fe899a033ab93eb3a44b39df1c10d9600bcd87",
+  "currentRestState": "queued",
+  "actualNewResultKnown": false,
+  "formalR07Acceptance": false
+}

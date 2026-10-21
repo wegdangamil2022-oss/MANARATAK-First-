@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "kind": "whole-platform-restore-drill",
+  "status": "PASS",
+  "structuralRestorability": true,
+  "sloPassed": true,
+  "rtoMinutes": 0.11886666666666666,
+  "rpoMinutes": 0.02775,
+  "objectives": {
+    "regionalLossRpoMinutes": 5,
+    "regionalLossRtoMinutes": 60,
+    "pitrWindowDays": 30,
+    "restoreAuditCadence": "WEEKLY"
+  },
+  "assetCount": 6,
+  "snapshotId": "snapshot_62eafa4aee861154e6233c1c3c8e31e7",
+  "sha": "bb86c6539dd28a7c7d24fc87076686e3259db8a3",
+  "environment": "DISPOSABLE",
+  "rpoMeasurementBasis": "BACKUP_CAPTURE_TIMESTAMP_PROXY_NOT_RECOVERED_EVENT_WATERMARK",
+  "integratedServiceRtoMeasured": false,
+  "formalR10Acceptance": false,
+  "productionAcceptance": false,
+  "scope": "LOCAL_SYNTHETIC_LOOPBACK",
+  "startedAt": "2026-10-20T14:50:46.525Z",
+  "completedAt": "2026-10-20T14:50:53.657Z"
+}

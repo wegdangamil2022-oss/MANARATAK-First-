@@ -3,6 +3,9 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { REPOSITORY, requireSha, hash } from '../release/lib/ReleaseContracts.mjs';
+const manifestBytes = fs.readFileSync(new URL('./source-closure-manifest.json', import.meta.url));
+const manifest = JSON.parse(manifestBytes);
+const sourcePackage = JSON.parse(fs.readFileSync(new URL('../../package.json', import.meta.url)));
 const requiredSteps = [
   'source-quality',
   'source-preflight',
@@ -36,6 +39,13 @@ const report = {
   })),
   pass,
   databaseConnectionRequired: false,
+  sourceClosureManifest: {
+    path: 'scripts/ci/source-closure-manifest.json',
+    sha256: hash(manifestBytes),
+    sourceGateIds: manifest.gates.filter(gate => gate.classification === 'SOURCE').map(gate => gate.id),
+  },
+  unitCommand: sourcePackage.scripts['test:unit'],
+  runtimePendingManifest: manifest.runtimePendingManifest,
 };
 const out = 'p12-ci-evidence';
 fs.mkdirSync(out, { recursive: true });

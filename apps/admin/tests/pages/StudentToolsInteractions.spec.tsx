@@ -76,7 +76,7 @@ describe('Section 19 operator request boundaries', () => {
     await mount('/student-tools/gpa-calculator');
     expect(content()).toContain('old-trace');
     state.request.mockRejectedValue(new Error('offline'));
-    const trace = tree.root.findAllByType('input').find((n) => n.props.maxLength === 200)!;
+    const trace = tree.root.findAllByType('input').find((n) => n.props.maxLength === 200 && n.parent?.children.includes('tools19_trace_filter'))!;
     await act(async () => trace.props.onChange({ target: { value: 'new-trace' } }));
     expect(content()).not.toContain('old-trace');
     expect(content()).not.toContain('old-audit');

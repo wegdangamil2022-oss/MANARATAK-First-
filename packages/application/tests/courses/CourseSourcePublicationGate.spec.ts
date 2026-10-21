@@ -43,11 +43,28 @@ describe('M10-14 course source publication gate', () => {
   it('fails closed for an imported course without configured relationship evidence', async () => {
     await expect(new CoursePublicationService({} as ICourseRepository).assertPublicationReady(course)).rejects.toThrow('IMPORTED_COURSE_RELATIONSHIP_EVIDENCE_NOT_CONFIGURED');
   });
+  it('fails closed when the transaction adapter cannot hold publication references',async()=>{
+    const f=fixture(),row={...course,version:1};
+    const tx={assertCurrentVersion:vi.fn(),findById:async()=>row,updateStatus:vi.fn()};
+    const repo={withTransaction:()=>tx},atomic={execute:async(_definition:unknown,work:any)=>work({boundaryId:'test'})};
+    await expect(new CoursePublicationService(repo as any,f.operations as any,atomic as any,f.relationships as any).publish(row)).rejects.toThrow('COURSE_PUBLICATION_REFERENCE_LOCK_REQUIRED');
+    expect(tx.updateStatus).not.toHaveBeenCalled();
+  });
+  it('rereads source evidence from the bound transaction after its reference locks',async()=>{
+    const f=fixture(),row={...course,version:1},order:string[]=[];
+    const tx={assertCurrentVersion:vi.fn(),findById:async()=>row,lockPublicationReferences:async()=>{order.push('locked');},updateStatus:vi.fn()};
+    const relationships={...f.relationships,withTransaction:()=>{order.push('relationships-bound');return f.relationships;}};
+    const operations={...f.operations,withTransaction:()=>({getImportedCourseById:async()=>{order.push('source-reread');return {sourceVerified:false,linkHealth:'VERIFIED_DIRECT'};}})};
+    const atomic={execute:async(_definition:unknown,work:any)=>work({boundaryId:'test'})};
+    await expect(new CoursePublicationService({withTransaction:()=>tx} as any,operations as any,atomic as any,relationships as any).publish(row)).rejects.toThrow('IMPORTED_COURSE_SOURCE_VERIFICATION_REQUIRED');
+    expect(order).toEqual(['locked','relationships-bound','source-reread']);expect(tx.updateStatus).not.toHaveBeenCalled();
+  });
   it('keeps Native and Paid courses separate from the imported free certificate rule', async () => {
     for (const originType of [CourseOriginType.NATIVE_MANARATAK_COURSE, CourseOriginType.PAID_COURSE]) {
       await expect(new CoursePublicationService({} as ICourseRepository).assertPublicationReady({ ...course, originType, accessType: CourseAccessType.PAID, isStudyFree: false, isFreeCertificate: false })).resolves.toBeUndefined();
     }
     const f = fixture();
-    await expect(f.service.assertPublicationReady({ ...course, isFreeCertificate: false })).rejects.toThrow('IMPORTED_COURSE_FREE_STUDY_AND_CERTIFICATE_REQUIRED');
+    await expect(f.service.assertPublicationReady({ ...course, accessType: CourseAccessType.FREE_STUDY, isFreeCertificate: false })).resolves.toBeUndefined();
+    await expect(f.service.assertPublicationReady({ ...course, isStudyFree: false })).rejects.toThrow('IMPORTED_COURSE_FREE_STUDY_REQUIRED');
   });
 });

@@ -25,9 +25,9 @@ test('MNT-AUD-0035 source inspection preserves declared blockers without executi
     manifest.steps.find(step => step.id === id).state = states[index];
   }
   assert.deepEqual(inspectSeedManifest(manifest, root).blockers, [
-    'reference-countries:BLOCKED_SOURCE_REVIEW',
     'reference-currencies:BLOCKED_SOURCE_DATASET_MISSING',
     'reference-languages:BLOCKED_SOURCE_DATASET_MISSING',
+    'reference-countries:BLOCKED_SOURCE_REVIEW',
   ]);
 });
 
@@ -77,4 +77,17 @@ test('MNT-AUD-0035 root commands distinguish deploy, seed, provision and develop
   }
   assert.equal(pkg.scripts['db:push'], undefined);
   assert.equal(pkg.scripts['db:migrate'], undefined);
+});
+
+test('Post28 local profile does not reopen legacy apply or production approval',()=>{
+ const manifest=JSON.parse(read('scripts/database/greenfield-seed.manifest.json'));
+ assert.equal(manifest.localValidationProfile.legacyReferenceApplyEnabled,false);
+ assert.equal(manifest.localValidationProfile.productionApproval,false);
+ assert.deepEqual(manifest.steps.slice(0,3).map(s=>s.id),['reference-currencies','reference-languages','reference-countries']);
+ const runner=read('scripts/database/post28-required-seed.ts');
+ assert.ok(runner.indexOf('POST28_LOCAL_REQUIRED_SEED_APPROVAL')<runner.indexOf('new PrismaClient'));
+ assert.match(runner,/requireValidatedCatalog:true/);
+ assert.match(runner,/POST28_SEED_REAPPLY_CHANGED_DATABASE/);
+ assert.match(runner,/POST28_SEED_PARTIAL_RUN_REQUIRES_REVIEW/);
+ assert.match(read('scripts/database/seed-orchestrator.mjs'),/SEED_OWNER_ROUTE_REQUIRED/);
 });

@@ -54,7 +54,7 @@ for (const sourcePath of sourcePaths) {
 const summary = await new UniversityLaterStagesDryRunUseCase().execute(stage, handoffs);
 const readiness = summary.results.reduce<Record<string, number>>((counts, result) => ({ ...counts, [result.readiness]: (counts[result.readiness] ?? 0) + 1 }), {});
 const validationIssueCounts = summary.results.flatMap(result => result.validationIssues).reduce<Record<string, number>>((counts, issue) => ({ ...counts, [issue.code]: (counts[issue.code] ?? 0) + 1 }), {});
-console.log(JSON.stringify({ mode: 'DRY_RUN', stage, artifacts, total: summary.total, readiness, validationIssueCounts, databaseWrites: 0, databaseIdentityCheck: 'PENDING_GOOGLE_STUDIO' }, null, 2));
+console.log(JSON.stringify({ mode: 'DRY_RUN', stage, artifacts, total: summary.total, readiness, validationIssueCounts, databaseWrites: 0, databaseIdentityCheck: 'PENDING_APPROVED_RUNTIME' }, null, 2));
 
 function rankings(row: Record<string, unknown>) {
   const entries = [['QS','QS'],['THE','THE'],['ARWU','ARWU']].flatMap(([provider, prefix]) => {

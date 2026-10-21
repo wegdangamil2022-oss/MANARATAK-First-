@@ -9,6 +9,8 @@ export class PrismaSessionManager implements ISessionManager {
   ) {}
 
   private hashToken(token: string): string {
+    // Stable lookup digest of a 256-bit random opaque refresh token, not a
+    // password KDF. Changing this format would invalidate existing sessions.
     return crypto.createHash('sha256').update(token).digest('hex');
   }
 
@@ -59,7 +61,7 @@ export class PrismaSessionManager implements ISessionManager {
     const parentHash = this.hashToken(refreshToken);
     const nextHash = this.hashToken(nextRefreshToken);
 
-    return this.prisma.$transaction(async (tx) => {
+    const rotateOnce = () => this.prisma.$transaction(async (tx) => {
       const now = new Date();
       const parent = await tx.sessionRecord.findUnique({
         where: { refreshTokenHash: parentHash },
@@ -120,6 +122,18 @@ export class PrismaSessionManager implements ISessionManager {
 
       return { userId: parent.identityId, sessionId: nextSessionId, familyId: parent.familyId };
     }, { isolationLevel: 'Serializable' });
+
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        return await rotateOnce();
+      } catch (error) {
+        // P2034 guarantees rollback. Re-read in a new transaction so a losing
+        // refresh sees the committed rotation and revokes its descendants.
+        // Never retry an unknown commit outcome or silently accept a failure.
+        if (attempt >= 2 || !error || typeof error !== 'object' ||
+            !('code' in error) || error.code !== 'P2034') throw error;
+      }
+    }
   }
 
   /** @deprecated Prefer findRefreshSession; retained for compatibility tests during migration. */

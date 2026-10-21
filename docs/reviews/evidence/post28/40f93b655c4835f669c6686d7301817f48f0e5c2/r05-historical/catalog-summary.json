@@ -1,0 +1,1490 @@
+{
+  "tables": [
+    {
+      "name": "AIAsyncJobRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AICapabilityPromptBindingRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIEmbeddingRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIEvaluationRunRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIExecutionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIExecutionSpanRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIIncidentEventRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIIndexingRunRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIKnowledgeSourceRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIPromptDeploymentRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIPromptVersionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIProviderCircuitRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIQuotaReservationRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIRegistryRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIUsageRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIWorkflowRunRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIWorkflowStepRunRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AIWorkflowVersionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AcademicStandardMapping",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AcademicTaxonomyAlias",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AcademicTaxonomyEdge",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AcademicTaxonomyImportReview",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AcademicTaxonomyNode",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AccountRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AdminEmergencyAccessRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AdministrativeRegion",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ApiIdempotencyRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ApiSearchRequestRecord",
+      "count": "2",
+      "hash": "0c51b6308784c825e9b38dcee2a4a687f3b3666d5374cb5cc153ebd26eca1b21"
+    },
+    {
+      "name": "ApiServiceControlRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ApiServiceExposureProjection",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AssetRecord",
+      "count": "2",
+      "hash": "089ec7f4b5cff36458202b6a323a38f13ed51f65c5ed74f2dfb481824f834ab5"
+    },
+    {
+      "name": "AssetRenditionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AuditAlertOccurrenceRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AuditRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "AuditWorkspaceRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "BackgroundJobDeadLetterRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "BackgroundJobExecutionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "BackgroundJobRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CareerAlumniProfileRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CareerApplicationRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CareerEmployerRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CareerJobPostingRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CareerProfileRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "Certificate",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CertificateAuthorityDelegation",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CertificateIssuanceInbox",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CertificateIssuer",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CertificateLedgerEntry",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CertificateTemplate",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CertificateTemplateVersion",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CertificateVerificationLog",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CmsAnnouncement",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CmsBlockSchema",
+      "count": "1",
+      "hash": "83d10ca2b4367d90c32d076c86d3ea9eed8ae236499567df46021075aac5d19e"
+    },
+    {
+      "name": "CmsCategory",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CmsContentAttachment",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CmsContentBlock",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CmsContentDomainLink",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CmsContentNode",
+      "count": "1",
+      "hash": "a1e1ee4a84d6f71af7078ffcc92c56fb8613b13ab0f424dad9110c2239dd5f39"
+    },
+    {
+      "name": "CmsContentRevision",
+      "count": "1",
+      "hash": "e6a9bbb000c5b6cd661cf3cc3e817dc753901c0cc42978f2b4e4cd0d4e7ce24f"
+    },
+    {
+      "name": "CmsContentTag",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CmsEditorialLedger",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CmsLocalizedContent",
+      "count": "1",
+      "hash": "532df2800d35851fabd1e0c58b8ca6ecb0623ba723c5212c26dc3d59c67fa5fb"
+    },
+    {
+      "name": "CmsNavigationMenu",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CmsNavigationNode",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CmsPublishedContent",
+      "count": "1",
+      "hash": "005244deba7454509cf1257297ea59ceb368362537e4110693113693915e5149"
+    },
+    {
+      "name": "CmsRedirect",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CmsScheduledJob",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CmsSitePublishedSnapshot",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CmsTag",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CmsWorkflowReview",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "Course",
+      "count": "1",
+      "hash": "183d2f416edaafd11c2809490666ea1f8682ba6201392e9768f6d55a792dd2b9"
+    },
+    {
+      "name": "CourseAcademicTaxonomyLink",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseCompletion",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseEnrollment",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseEnrollmentPolicy",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseFieldProvenance",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseImportAnalysis",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseInternationalTestRelationship",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseLesson",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseLessonAsset",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseLessonProgress",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseMajorProjection",
+      "count": "1",
+      "hash": "e9a3a646eecf1a85aad276dd7e85502b8407edeeb55e67d0e36343ff0e9698ed"
+    },
+    {
+      "name": "CourseModule",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseQuestion",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseQuestionBank",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseQuestionVersion",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseQuiz",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseQuizAttempt",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseSourceIdentity",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseSourceUrlHistory",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseTaxonomyResolution",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CourseVersion",
+      "count": "1",
+      "hash": "389891ef535a40eb2e6fcacda1ef7eb3966fd4bf350c3837270a3405c8fb9d3e"
+    },
+    {
+      "name": "CredentialRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "DegreeLevel",
+      "count": "1",
+      "hash": "f243e5f0090c109e95fb5295f22003790d6c0b3599edfa0cc3597261c64d4069"
+    },
+    {
+      "name": "EmailVerificationTokenRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "EnterpriseEventRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ExternalCourseProvider",
+      "count": "18",
+      "hash": "d3a884a4c944666f74732264ee2cad3ad2e924703eeda2c96d7b477a88719cbc"
+    },
+    {
+      "name": "ExternalCourseProviderAlias",
+      "count": "6",
+      "hash": "f6b83322f77ed546742f6c7ede997ad8ffe3aa068f3b7d84a1fe960c5f0fae26"
+    },
+    {
+      "name": "ExternalCourseProviderDomain",
+      "count": "39",
+      "hash": "11ee4564202089b5544c035d7f2c23961f630417ae969960932a2771b20b7de5"
+    },
+    {
+      "name": "FellowshipDefinition",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "FinanceAdjustmentCaseRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "FinanceApprovalDecisionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "FinanceApprovalRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "FinanceCommandRecord",
+      "count": "1",
+      "hash": "89f58577241796c14989fcd085826c73e8d562581f016f96e50d3e4fd606554a"
+    },
+    {
+      "name": "FinanceCommissionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "FinanceDocumentRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "FinanceEstimateRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "FinanceExchangeRateRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "FinanceInstallmentPlanRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "FinanceInvoiceRecord",
+      "count": "1",
+      "hash": "7f107bdea7fae8f45b01f3966e60765605c602072b3c439c16ee9939a0ef632b"
+    },
+    {
+      "name": "FinancePaymentAttemptRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "FinancePaymentRecord",
+      "count": "1",
+      "hash": "c09cfba84ed2e7fd0107ec521600681490711664ad314c6783e7405f220f2b8a"
+    },
+    {
+      "name": "FinanceReconciliationIssueRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "FinanceReconciliationSnapshot",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "FinanceRefundRecord",
+      "count": "1",
+      "hash": "4a6cc3b1c4f5ddaebd7121fd2b3f5446f28c9a449fde515fc34910d03aa68dab"
+    },
+    {
+      "name": "FinanceTransferRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "FinanceWalletHoldRecord",
+      "count": "1",
+      "hash": "2dea654b739c6cc5dea9d6404c05faa5c4f52131f5d37e81bdaf10f6adb036f6"
+    },
+    {
+      "name": "FinanceWalletRecord",
+      "count": "1",
+      "hash": "016bb7e06c77d49a24134bee14e6d2c6b2878395c8166b57f9c91dac24d6cb26"
+    },
+    {
+      "name": "FinancialAccountRecord",
+      "count": "2",
+      "hash": "aad61a0d7446c92155ea09f764777ef525e1f9109cf89f93b3db503c32b5ff65"
+    },
+    {
+      "name": "FinancialLedgerEntryRecord",
+      "count": "2",
+      "hash": "0e7f1b73d64b10d899f6ddbee504c35c9b790710f5b007f360b0e101af1494f3"
+    },
+    {
+      "name": "FinancialTransactionRecord",
+      "count": "1",
+      "hash": "3ef02742776e020fa5ae061bca4211a054b966692cd124d7b56e10d085a261c2"
+    },
+    {
+      "name": "IdentityRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ImportBatch",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ImportMappingProfile",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ImportRateBudget",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ImportRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ImportReviewAssignment",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ImportScreeningReceipt",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ImportSourceObservation",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ImportSourceRegistryEntry",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTest",
+      "count": "1",
+      "hash": "3373f1807cbb6a366d4ebb321a552b3cf259fe390e5e4263cef37f689abdd7bd"
+    },
+    {
+      "name": "InternationalTestAcademicTaxonomyRelationship",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestAvailability",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestCenter",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestContentBlock",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestCountryRelationship",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestDegreeRelationship",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestDeliveryModeProfile",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestEquivalencyMapping",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestEvidence",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestEvidenceHistory",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestFamily",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestFeeMetadata",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestGovernance",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestLanguageRelationship",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestOfficialLink",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestPolicy",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestPreparationMaterial",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestProvider",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestPublicationSnapshot",
+      "count": "1",
+      "hash": "7b1c5eef883e4657394dedce0b6582862b4dfe46c709bd616c8544d2ca953759"
+    },
+    {
+      "name": "InternationalTestRequirement",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestScoreScale",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestSection",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestSession",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestVariant",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "InternationalTestVersion",
+      "count": "1",
+      "hash": "172e94ed57426eeded90445d7427c78f8682974cc41bc9242faa46f172b039be"
+    },
+    {
+      "name": "InternationalTestVersionScoreScale",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "LearningPath",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "LearningPathCourse",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "LearningPathEnrollment",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "LearningPathVersion",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "Major",
+      "count": "1",
+      "hash": "3883d2a9a3a4d3e48ee9a6fadb81f8651b3c3d72c9908d7394069d64d624563b"
+    },
+    {
+      "name": "MajorAlias",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "MajorClassificationMapping",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "MajorContentSection",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "MajorImportOwnerReview",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "MajorLevelProfile",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "MajorPublicationSnapshot",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "MajorRelationship",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "MajorSource",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "MajorVersion",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "NewMajorCandidateDecision",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "NotificationChannelDelivery",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "NotificationDeliveryReceipt",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "NotificationIntentRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "NotificationRateReservation",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "NotificationTemplateRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "OwnerTranslationTransferReceipt",
+      "count": "1",
+      "hash": "8ee962bffe5b88eb1f9058e4457542574f1019380dd7945a834481cdd84ec1b4"
+    },
+    {
+      "name": "PasswordResetTokenRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "PolicyRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ReferenceAliasRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ReferenceCity",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ReferenceCountry",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ReferenceCurrency",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ReferenceLanguage",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ReferenceOwnerImportReview",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ReferenceProviderMappingRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ReferenceRelationshipRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ReferenceStandardSnapshot",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ReferenceVersionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "RetentionDecisionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "RoleAssignmentRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "RoleRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "Scholarship",
+      "count": "1",
+      "hash": "6dd07e66163037a64948684d9941791052ad65738382e9a7acfca728e75afde2"
+    },
+    {
+      "name": "ScholarshipApplicationCycle",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ScholarshipAwardPackageVersion",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ScholarshipBenefit",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ScholarshipDegreeTarget",
+      "count": "2",
+      "hash": "f7319ab459d78a383e323e7a4c2d3724e77e33777911aebcc114672e93c51f8c"
+    },
+    {
+      "name": "ScholarshipEligibilityItem",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ScholarshipEligibilityRuleVersion",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ScholarshipImportCanonicalResolutionDecision",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ScholarshipImportVerificationDecision",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ScholarshipMajorTarget",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ScholarshipReferenceTransition",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ScholarshipRequiredDocument",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ScholarshipSourceEvidence",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ScholarshipSponsorContext",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ScholarshipUniversityLink",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ScholarshipVersion",
+      "count": "1",
+      "hash": "82c2ce313bccefa61c9fa77eaa7dfbd989c28554dac6c7cdbed96e614480896a"
+    },
+    {
+      "name": "ServiceAvailabilitySlotRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServiceBookingItemRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServiceBookingRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServiceCatalogCountryRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServiceCatalogLanguageRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServiceCatalogRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServiceDeliveryArtifactRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServiceDiscountRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServicePackageItemRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServicePackageRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServicePricingRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServicePromotionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServiceProviderRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServiceProviderServiceRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServiceRequestRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServiceTestDiscoveryLink",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServiceWorkflowDefinitionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ServiceWorkflowExecutionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "SessionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "SettingAssignmentRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "SettingDefinitionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "SettingVersionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "Settings",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "SettingsGovernanceRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "SharedComponentControlRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "SharedComponentRenderingProjection",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentApplicationChecklistItem",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentApplicationDocumentBinding",
+      "count": "6",
+      "hash": "e9a5855d8c2db6f4a741c8ba258ee4cd33786dab500a943c02bae489bfb41f6c"
+    },
+    {
+      "name": "StudentApplicationTracker",
+      "count": "1",
+      "hash": "f7acbc9b57190bcb99de0092abb0716b854a67ceef27fb5c9c8562fbf0474109"
+    },
+    {
+      "name": "StudentCertificateReadProjection",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentLearningProjection",
+      "count": "1",
+      "hash": "fe4ed5d9ce0d7a162e6252a5ec57d881bcf00431c8e213abb5437894277d9313"
+    },
+    {
+      "name": "StudentNotificationProjection",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentPersonalStatistics",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentPrivacyConsentDecision",
+      "count": "1",
+      "hash": "b74552149abc1f021221e7376f0ff0af8c0c5408e4d8452f8467f05c4d7c406b"
+    },
+    {
+      "name": "StudentRecentActivity",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentRecentlyViewed",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentSavedCollection",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentSavedItem",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentSearchHistory",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentSupportOwnerReadObservation",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentTimelineEntry",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentToolDefinitionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentToolDependencyRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentToolExecutionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentToolTestDiscoveryLink",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentToolVersionRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentWorkspace",
+      "count": "1",
+      "hash": "2abf1a2e4b3a15c88e47a52a5abb748d251761e992fc80356d25874e1aca5ffd"
+    },
+    {
+      "name": "StudentWorkspaceEventInbox",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudentWorkspaceSnapshot",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudyDestinationProfile",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "StudyDestinationStudyLanguage",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "TransactionalOutboxRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "University",
+      "count": "1",
+      "hash": "d2dc3cd1e60f94fffeffa6c60b7d5830586777e5747125f379bae3775d3b4c50"
+    },
+    {
+      "name": "UniversityAcademicProgram",
+      "count": "1",
+      "hash": "1026267261b04117164bc0c752d6093f41fe922eaad40fba673e4b6732ab68d0"
+    },
+    {
+      "name": "UniversityAccommodationProfile",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "UniversityCampus",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "UniversityImportChange",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "UniversityImportChangeSet",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "UniversityLocalizedText",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "UniversityOrganizationUnit",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "UniversityProgramAdmissionRequirement",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "UniversityProgramCampus",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "UniversityProgramIntake",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "UniversityProgramStudyLanguage",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "UniversityProgramStudyProfile",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "UniversityRanking",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "UniversitySourceRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "UniversityTranslation",
+      "count": "1",
+      "hash": "5a1b6f1cfba5ab6b54c5e12b7d27ac6481388128721411aa692333328004e9ce"
+    },
+    {
+      "name": "UniversityTuitionProfile",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "UserRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "WorkflowControlRecord",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "WorkflowExecutionProjection",
+      "count": "0",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "_prisma_migrations",
+      "count": "109",
+      "hash": "46fc7eccac37213b3be2ef4a3ae24393541281d312ddb4c3db113f1dc486bd8c"
+    }
+  ],
+  "tableContentSha256": "050b565a0e5be29712d61203f61037e72b05c8f9f7b7543dd985c978d27b80db",
+  "catalogSha256": "2aa2f4305b7f39d3353a0e052e856148e77aedb92569a060146f0d4fc2a13f1f",
+  "catalogCounts": {
+    "constraints": 732,
+    "indexes": 1191,
+    "triggers": 40,
+    "functions": 14,
+    "columns": 3477
+  },
+  "unvalidatedConstraints": [
+    {
+      "table": "FinancePaymentRecord",
+      "name": "FinancePayment_positive_units",
+      "type": "c",
+      "validated": false,
+      "definition": "CHECK (\"amountMinorUnits\" ~ '^[1-9][0-9]{0,29}$'::text) NOT VALID"
+    },
+    {
+      "table": "FinanceRefundRecord",
+      "name": "FinanceRefund_positive_units",
+      "type": "c",
+      "validated": false,
+      "definition": "CHECK (\"amountMinorUnits\" ~ '^[1-9][0-9]{0,29}$'::text) NOT VALID"
+    },
+    {
+      "table": "FinanceTransferRecord",
+      "name": "FinanceTransfer_positive_units",
+      "type": "c",
+      "validated": false,
+      "definition": "CHECK (\"sourceAmountMinorUnits\" ~ '^[1-9][0-9]{0,29}$'::text) NOT VALID"
+    },
+    {
+      "table": "FinanceWalletHoldRecord",
+      "name": "FinanceWalletHold_positive_units",
+      "type": "c",
+      "validated": false,
+      "definition": "CHECK (\"amountMinorUnits\" ~ '^[1-9][0-9]{0,29}$'::text) NOT VALID"
+    },
+    {
+      "table": "FinancialLedgerEntryRecord",
+      "name": "FinanceLedger_positive_units",
+      "type": "c",
+      "validated": false,
+      "definition": "CHECK (\"amountMinorUnits\" ~ '^[1-9][0-9]{0,29}$'::text AND (direction = ANY (ARRAY['DEBIT'::text, 'CREDIT'::text]))) NOT VALID"
+    },
+    {
+      "table": "ServiceCatalogRecord",
+      "name": "ServiceCatalogRecord_fulfillment_policy",
+      "type": "c",
+      "validated": false,
+      "definition": "CHECK (\"fulfillmentPolicy\" = ANY (ARRAY['FREE'::text, 'CHARGEABLE'::text, 'QUOTE_REQUIRED'::text])) NOT VALID"
+    },
+    {
+      "table": "ServicePricingRecord",
+      "name": "ServicePricingRecord_bounded_money",
+      "type": "c",
+      "validated": false,
+      "definition": "CHECK (\"amountMinorUnits\" ~ '^(0|[1-9][0-9]{0,29})$'::text AND scale >= 0 AND scale <= 6) NOT VALID"
+    },
+    {
+      "table": "SettingAssignmentRecord",
+      "name": "SettingAssignmentRecord_id_currentVersionId_fkey",
+      "type": "f",
+      "validated": false,
+      "definition": "FOREIGN KEY (id, \"currentVersionId\") REFERENCES \"SettingVersionRecord\"(\"assignmentId\", id) DEFERRABLE INITIALLY DEFERRED NOT VALID"
+    },
+    {
+      "table": "StudentApplicationDocumentBinding",
+      "name": "StudentApplicationDocumentBinding_assetId_fkey",
+      "type": "f",
+      "validated": false,
+      "definition": "FOREIGN KEY (\"assetId\") REFERENCES \"AssetRecord\"(id) ON UPDATE RESTRICT ON DELETE RESTRICT NOT VALID"
+    }
+  ],
+  "invalidIndexes": [],
+  "allTriggersEnabled": true
+}

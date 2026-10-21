@@ -32,7 +32,10 @@ async function harness() {
     getRateLimiter: () => ({ consume: async () => ({ allowed: !limited }) }),
   };
   const app = express(); app.use(express.json());
-  app.use('/auth', AuthRouter.create({ authService: {}, identityRepository: {}, securityService,
+  app.use('/auth', AuthRouter.create({
+    forgotPasswordUseCase:{execute:async()=>{throw new Error('UNEXPECTED_RECOVERY_CALL');}},
+    resetPasswordUseCase:{execute:async()=>{throw new Error('UNEXPECTED_RECOVERY_CALL');}},
+    authRateLimitKey:value=>`isolated-test:${value}`, authService: {}, identityRepository: {}, securityService,
     tokenProvider: { verifyAccessToken: async () => ({ userId: 'student', sessionId: 'session' }) },
     sessionManager: sessions, principalAccessValidator: access, changePasswordUseCase: change,
   }));

@@ -307,7 +307,7 @@ export class PrismaCertificateRepository implements ICertificateRepository {
   public async issue(data: IssueCertificateDto): Promise<CertificateDto> {
     return this.db.$transaction(async (tx: any) => {
       for (const identity of [`event:${data.sourceEventId}`, `completion:${data.sourceCompletionId}`].sort()) {
-        await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${identity}, 0))`;
+        await tx.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${identity}, 0))`;
       }
       const inbox = await tx.certificateIssuanceInbox.findUnique({ where: { eventId: data.sourceEventId }, include: { certificate: true } });
       if (inbox) {
@@ -550,7 +550,7 @@ export class PrismaCertificateRepository implements ICertificateRepository {
 
   public async recordVerification(certificateId: string, result: string, channel: string): Promise<void> {
     await this.db.$transaction(async (tx: any) => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`verify:${certificateId}`}, 0))`;
+      await tx.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${`verify:${certificateId}`}, 0))`;
       const recent = await tx.certificateVerificationLog.findFirst({where:{certificateId, result, occurredAt:{gte:new Date(Date.now()-60000)}}});
       if (recent) return;
       await tx.certificateVerificationLog.create({ data: { certificateId, result, channel } });

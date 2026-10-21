@@ -137,7 +137,7 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
             </div>
             <div className="flex items-center justify-between gap-3 py-2.5">
               <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">{publicT('public_free_certification')}</span>
-              <span className="text-[10.5px] font-bold text-[var(--mn-success-text)]">{course.freeCertificate ? publicT('public_yes_free') : publicT('public_unavailable_3')}</span>
+              <span className="text-[10.5px] font-bold text-[var(--mn-success-text)]">{course.freeCertificate === true ? publicT('public_yes_free') : course.freeCertificate === false ? publicT('public_paid') : publicT('public_unknown')}</span>
             </div>
             <div className="flex items-center justify-between gap-3 py-2.5">
               <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">{publicT('public_certificate_type')}</span>

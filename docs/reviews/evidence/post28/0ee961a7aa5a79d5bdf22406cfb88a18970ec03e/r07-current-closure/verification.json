@@ -1,0 +1,46 @@
+{
+  "kind": "R07_CURRENT_CI_ARTIFACT_AND_LINUX_VERIFICATION",
+  "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+  "runId": 39506916987,
+  "verifiedAt": "2026-10-20T22:34:14.517Z",
+  "ciPassedJobs": 6,
+  "zipArchivesDigestMatched": 3,
+  "freshLocalReleaseManifestVerified": true,
+  "manifestSha256": "0920dee386c3a58ba4ff2713d67217aab95e39a4aa4a002b65cb68fe3e255f67",
+  "verifiedUnits": [
+    {
+      "unit": "api",
+      "sha256": "86ea6fb08569187a94f2a9d4d774c544e989fa329f2f72552dcd3a2ffba09459",
+      "size": 31078400
+    },
+    {
+      "unit": "web",
+      "sha256": "3ae51876fea0c67480db28a9bad92191823ef6fcc833e2db007b310d0d7604ab",
+      "size": 11653120
+    },
+    {
+      "unit": "admin",
+      "sha256": "167ffb1747499d6fce7c9ff3f13452c7240bb327c19d8b862c880d7bf1c1bfa2",
+      "size": 8355840
+    }
+  ],
+  "sbomDigestVerified": true,
+  "verifiedUnitsRetainedOutsideGit": true,
+  "imageId": "sha256:c95fdf3e9b0c637f41d861a4f95df77ee48935a67504e4b3dff06171e993f332",
+  "readinessThreeSameRevision": true,
+  "loginAndLogoutObserved": true,
+  "activeSessionsAfterLogout": 0,
+  "pageErrors": 0,
+  "http5xx": 0,
+  "consoleErrorsRetained": 38,
+  "cleanupVerified": true,
+  "existingDatabasesTouched": false,
+  "priorR06EvidenceMatched": 11,
+  "applicationAndReleaseCodeChangedSincePriorProof": false,
+  "symlinkCasesManuallyRerun": false,
+  "manualBuildOrCiRerun": false,
+  "nativeOnlyProbeMisrepresentedAsApiBoot": false,
+  "runtimeEvidenceRebound": false,
+  "productionAcceptance": false,
+  "formalReleaseAcceptance": false
+}

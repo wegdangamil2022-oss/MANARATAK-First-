@@ -1,0 +1,69 @@
+{
+  "kind": "POST28_BUILT_ADMIN_CMS_MFA_SCOPED_PROOF",
+  "localDate": "2026-10-21",
+  "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+  "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+  "platform": "WINDOWS_X64_NODE22_POSTGRES16",
+  "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+  "cleanUnifiedReleaseCandidate": false,
+  "fullEnglishJourney": false,
+  "result": "PASS_LOCAL_SCOPED_JOURNEY_ACROSS_OWNED_RESTART",
+  "newSyntheticLabRunId": "6dec7701-181f-49cc-b7f7-848611ee1fec",
+  "restrictedRuntimeRole": {
+    "role": "post28_r11_actor",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "rolreplication": false
+  },
+  "sourceReusePathsUnchanged": true,
+  "contentCommandsReplayedOnResume": false,
+  "threeDistinctActors": true,
+  "enrollmentAndConfirmationViaUi": true,
+  "syntheticTotpSecretDecryptedOnlyInMemoryToResume": true,
+  "setupOnlyRuntimeDatabaseRolePasswordRotated": true,
+  "canonicalCmsOrigin": "https://r14.example.invalid",
+  "separateLoopbackBrowserTransport": true,
+  "guardRelaxed": false,
+  "publicStatusSequence": [
+    200,
+    200,
+    404,
+    404
+  ],
+  "authorApprovalDenied": 403,
+  "protectedBaselineRows": {
+    "StudentPrivacyConsentDecision": 0,
+    "StudentApplicationDocumentBinding": 1,
+    "FinancialLedgerEntryRecord": 10,
+    "FinanceInvoiceRecord": 3
+  },
+  "consentLimitation": "Consent table was empty: unchanged empty set only; no positive existing-consent preservation proof in this journey",
+  "bindingAndFinancialRowsPreserved": true,
+  "currentLogoutRevokedOwnSession": true,
+  "priorSyntheticSessionsSeparatelyRevoked": 9,
+  "allThreeSyntheticIdentitiesHaveNoActiveSessions": true,
+  "finalResumeHttp5xx": 0,
+  "finalResumePageErrors": 0,
+  "earlierFailedAttemptsRetained": true,
+  "allOwnedProcessesStopped": true,
+  "applicationSourceChanged": false,
+  "newMigration": false,
+  "productionAcceptance": false,
+  "formalR13Acceptance": false,
+  "releaseDecision": "NO_GO",
+  "ci": {
+    "sourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
+    "runId": 39516645007,
+    "passedJobs": 6
+  },
+  "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json",
+  "remaining": [
+    "Secure private asset/certificate HTTP provider delivery and expiry/revocation",
+    "Unified exact-SHA Linux runtime journey and English coverage",
+    "Representative load/pool wait, remaining worker fault and rollback proofs",
+    "Actual hosting controls, trust signatures, validation/staging, formal release gates"
+  ]
+}

@@ -189,17 +189,17 @@ export function buildFinalReport(gateResults, { phase = 'source', runtimeGitSha 
     const value = gateResults[name];
     gates.push(value
       ? { name, pass: value.pass === true, state: value.pass === true ? 'PASS' : 'FAIL', detail: value.detail ?? value.result ?? '', source: value.source ?? null }
-      : { name, pass: null, state: 'DEFERRED_TO_GOOGLE_STUDIO', detail: 'prepared in repository; execute only after Google Studio provides the runtime/database environment' });
+      : { name, pass: null, state: 'DEFERRED_TO_APPROVED_RUNTIME', detail: 'prepared in repository; execute only in an approved isolated runtime/database environment' });
   }
 
   const requiredPass = gates.filter((item) => requiredNames.includes(item.name)).every((item) => item.pass === true);
   const runtimeClosureState = !requiredPass
     ? 'BLOCKED'
     : phase === 'runtime'
-      ? 'GOOGLE_STUDIO_RUNTIME_VERIFIED'
-      : 'CODE_COMPLETE_READY_FOR_GOOGLE_STUDIO_INTEGRATION';
+      ? 'RUNTIME_VERIFIED'
+      : 'CODE_COMPLETE_READY_FOR_RUNTIME_INTEGRATION';
   return {
-    version: 2,
+    version: 3,
     wp: 'WP-IC-10R1',
     phase,
     historicalPackageBaseSha: WPIC10_HISTORICAL_PACKAGE_BASE_SHA,
@@ -226,10 +226,10 @@ export function renderFinalMarkdown(report) {
   for (const item of report.gates) {
     lines.push(`| ${item.name} | ${item.state} | ${String(item.detail ?? '').replace(/\|/g, '\\|')} |`);
   }
-  lines.push('', report.runtimeClosureState === 'CODE_COMPLETE_READY_FOR_GOOGLE_STUDIO_INTEGRATION'
-    ? 'Source, contract, build, unit, security, and parser-memory gates passed. Database integration, backup/restore, browser E2E, and runtime smoke are prepared but intentionally deferred until Google Studio provides the runtime/database environment.'
-    : report.runtimeClosureState === 'GOOGLE_STUDIO_RUNTIME_VERIFIED'
-      ? 'Google Studio runtime smoke passed after database/service integration. Imported-course runtime integration is verified.'
+  lines.push('', report.runtimeClosureState === 'CODE_COMPLETE_READY_FOR_RUNTIME_INTEGRATION'
+    ? 'Source, contract, build, unit, security, and parser-memory gates passed. Database integration, backup/restore, browser E2E, and runtime smoke are prepared but intentionally deferred until an approved isolated runtime/database environment is available.'
+    : report.runtimeClosureState === 'RUNTIME_VERIFIED'
+      ? 'Approved-environment runtime smoke passed after database/service integration. Imported-course runtime integration is verified.'
       : 'Do not treat imported courses as runtime-closed until every required gate passes.');
   return `${lines.join('\n')}\n`;
 }

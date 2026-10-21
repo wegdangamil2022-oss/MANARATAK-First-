@@ -1,0 +1,6 @@
+{
+  "caseExact": "R08 two real HTTP auth processes with persistent shared sessions > revokes the committed descendant after a deterministically concurrent refresh serialization conflict",
+  "fullDiscoveryCases": 5,
+  "selectedCases": 1,
+  "fullProfileAcceptance": false
+}

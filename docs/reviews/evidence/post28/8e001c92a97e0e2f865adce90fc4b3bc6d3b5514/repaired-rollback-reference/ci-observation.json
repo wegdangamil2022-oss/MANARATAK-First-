@@ -1,0 +1,51 @@
+{
+  "sourceSha": "8e001c92a97e0e2f865adce90fc4b3bc6d3b5514",
+  "runId": 39661105241,
+  "observedAt": "2026-10-21T19:44:37.892Z",
+  "jobs": [
+    {
+      "id": 119434011242,
+      "name": "Deployment configuration",
+      "status": "completed",
+      "conclusion": "success",
+      "activeOrFailedSteps": []
+    },
+    {
+      "id": 119434011632,
+      "name": "Translation quality gates",
+      "status": "completed",
+      "conclusion": "success",
+      "activeOrFailedSteps": []
+    },
+    {
+      "id": 119434011704,
+      "name": "Full source closure gates",
+      "status": "completed",
+      "conclusion": "success",
+      "activeOrFailedSteps": []
+    },
+    {
+      "id": 119434011909,
+      "name": "R08 isolated Redis and Linux worker shutdown",
+      "status": "completed",
+      "conclusion": "success",
+      "activeOrFailedSteps": []
+    },
+    {
+      "id": 119439509419,
+      "name": "Retrieve and verify immutable artifacts from Actions storage",
+      "status": "completed",
+      "conclusion": "success",
+      "activeOrFailedSteps": []
+    },
+    {
+      "id": 119439645669,
+      "name": "Linux x64 review image and native runtime",
+      "status": "completed",
+      "conclusion": "success",
+      "activeOrFailedSteps": []
+    }
+  ],
+  "allSixSucceeded": true,
+  "formalAcceptance": false
+}

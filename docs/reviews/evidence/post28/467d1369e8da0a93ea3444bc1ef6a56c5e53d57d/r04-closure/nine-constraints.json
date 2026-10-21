@@ -1,0 +1,56 @@
+[
+  {
+    "name": "FinancePayment_positive_units",
+    "table": "FinancePaymentRecord",
+    "validated": true,
+    "violations": 0
+  },
+  {
+    "name": "FinanceRefund_positive_units",
+    "table": "FinanceRefundRecord",
+    "validated": true,
+    "violations": 0
+  },
+  {
+    "name": "FinanceTransfer_positive_units",
+    "table": "FinanceTransferRecord",
+    "validated": true,
+    "violations": 0
+  },
+  {
+    "name": "FinanceWalletHold_positive_units",
+    "table": "FinanceWalletHoldRecord",
+    "validated": true,
+    "violations": 0
+  },
+  {
+    "name": "FinanceLedger_positive_units",
+    "table": "FinancialLedgerEntryRecord",
+    "validated": true,
+    "violations": 0
+  },
+  {
+    "name": "ServiceCatalogRecord_fulfillment_policy",
+    "table": "ServiceCatalogRecord",
+    "validated": true,
+    "violations": 0
+  },
+  {
+    "name": "ServicePricingRecord_bounded_money",
+    "table": "ServicePricingRecord",
+    "validated": true,
+    "violations": 0
+  },
+  {
+    "name": "SettingAssignmentRecord_id_currentVersionId_fkey",
+    "table": "SettingAssignmentRecord",
+    "validated": true,
+    "violations": 0
+  },
+  {
+    "name": "StudentApplicationDocumentBinding_assetId_fkey",
+    "table": "StudentApplicationDocumentBinding",
+    "validated": true,
+    "violations": 0
+  }
+]

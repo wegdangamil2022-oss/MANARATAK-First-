@@ -10,7 +10,7 @@ describe('UniversityImportPromotionUseCase safety gate', () => {
 
     await expect(useCase.promote({})).resolves.toEqual({
       type: 'REJECTED',
-      reason: 'UNIVERSITY_BULK_IMPORT_BLOCKED_PENDING_GOOGLE_STUDIO',
+      reason: 'UNIVERSITY_BULK_IMPORT_BLOCKED_PENDING_RUNTIME_APPROVAL',
     });
   });
 });

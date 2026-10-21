@@ -361,6 +361,9 @@ test('M4.2 — Public Registration, Email Verification & Account Lifecycle', asy
     };
 
     const router = AuthRouter.create({
+    forgotPasswordUseCase:{execute:async()=>{throw new Error('UNEXPECTED_RECOVERY_CALL');}},
+    resetPasswordUseCase:{execute:async()=>{throw new Error('UNEXPECTED_RECOVERY_CALL');}},
+    authRateLimitKey:value=>`isolated-test:${value}`,
       authService: {},
       identityRepository: identityRepo,
       securityService: mockSecurityService,
@@ -394,9 +397,10 @@ test('M4.2 — Public Registration, Email Verification & Account Lifecycle', asy
         primaryEmail: 'student.legit@example.com',
         password: 'LegitPassword123!',
       });
-    assert.equal(validRes.status, 201);
-    assert.equal(validRes.body.data.status, 'PROVISIONED');
-    assert.equal(validRes.body.data.isEmailVerified, false);
+    assert.equal(validRes.status, 202);
+    assert.equal(validRes.body.data.registrationPending, true);
+    assert.equal(validRes.body.data.status, undefined);
+    assert.equal(validRes.body.data.isEmailVerified, undefined);
 
     // C. Duplicate registration
     const duplicateRes = await request(app)
@@ -406,8 +410,8 @@ test('M4.2 — Public Registration, Email Verification & Account Lifecycle', asy
         primaryEmail: 'student.legit@example.com',
         password: 'AnotherPassword123!',
       });
-    assert.equal(duplicateRes.status, 409);
-    assert.equal(duplicateRes.body.error.code, 'EMAIL_ALREADY_EXISTS');
+    assert.equal(duplicateRes.status, 202);
+    assert.deepEqual(duplicateRes.body.data, validRes.body.data);
 
     // D. Email verification via HTTP
     const dispatched = emailGateway.getLastDispatchedEmail();

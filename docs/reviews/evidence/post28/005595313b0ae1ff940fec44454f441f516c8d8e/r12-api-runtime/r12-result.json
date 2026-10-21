@@ -1,0 +1,130 @@
+{
+  "kind": "R12_LOCAL_API_STOP_START_ROLLBACK",
+  "operatorSourceSha": "005595313b0ae1ff940fec44454f441f516c8d8e",
+  "currentCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "previousCandidateSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "runtimeDependencySourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "sharedLockedWindowsDependencies": true,
+  "differentApiImplementationDemonstrated": false,
+  "workersEnabled": false,
+  "loopbackListenAdapter": true,
+  "loopbackAdapterSha256": "f3118853245f8b0f64d0f4713e9d13d42f665982fd30ba08ff407588dea37c75",
+  "previousWorkerRuntimeCompatible": false,
+  "formalR12Acceptance": false,
+  "productionAcceptance": false,
+  "observations": [
+    {
+      "phase": "current",
+      "apiPid": 15028,
+      "readinessSourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+      "listeners": [
+        {
+          "LocalAddress": "127.0.0.1",
+          "LocalPort": 56088
+        }
+      ]
+    },
+    {
+      "phase": "CURRENT",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "phase": "CURRENT",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "phase": "CURRENT",
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200
+    },
+    {
+      "stopped": "current",
+      "portClosed": true,
+      "stopMilliseconds": 23.939600000000155
+    },
+    {
+      "phase": "previous",
+      "apiPid": 13680,
+      "readinessSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+      "listeners": [
+        {
+          "LocalAddress": "127.0.0.1",
+          "LocalPort": 56088
+        }
+      ]
+    },
+    {
+      "phase": "PREVIOUS",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "phase": "PREVIOUS",
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200
+    },
+    {
+      "phase": "PREVIOUS",
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 403
+    },
+    {
+      "phase": "PREVIOUS",
+      "method": "GET",
+      "path": "/api/v1/admin/courses",
+      "status": 403
+    },
+    {
+      "phase": "PREVIOUS",
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "status": 200
+    },
+    {
+      "stopped": "previous",
+      "portClosed": true,
+      "stopMilliseconds": 23.263300000000527
+    }
+  ],
+  "passed": true,
+  "applicationRole": {
+    "role": "post28_r12_actor",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "rolreplication": false
+  },
+  "previousApiScopedRuntimeCompatible": true,
+  "newReceiptReplayedWithoutAnotherEffect": true,
+  "sessionAndCsrfPreserved": true,
+  "previousAuthorizationEnforced": true,
+  "historicalRowsPreserved": true,
+  "requestCount": 8,
+  "canaryElapsedSeconds": 2.6900309,
+  "canaryBudget": {
+    "approvedBy": "Delegated project manager under owner authorization, local diagnostic only",
+    "maximumRequests": 24,
+    "maximumConcurrency": 1,
+    "durationSeconds": 60,
+    "maximumUnexpectedErrors": 0
+  },
+  "tls": {
+    "exactLocalCa": true,
+    "hostnameVerified": true,
+    "ignoreTlsErrors": false
+  },
+  "apiStopMode": "Windows owned-process termination after settled requests; graceful Linux worker drain not certified",
+  "cleanup": {
+    "apisStopped": true,
+    "gatewayStopped": true
+  }
+}

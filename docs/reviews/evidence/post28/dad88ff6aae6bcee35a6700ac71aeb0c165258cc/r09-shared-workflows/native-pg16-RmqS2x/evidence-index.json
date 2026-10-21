@@ -1,0 +1,161 @@
+{
+  "kind": "POST28_R09_RAW_WORKFLOW_EVIDENCE",
+  "sourceSha": "dad88ff6aae6bcee35a6700ac71aeb0c165258cc",
+  "syntheticOnly": true,
+  "productionAcceptance": false,
+  "fullR09Acceptance": false,
+  "cleanup": {
+    "sourceSha": "dad88ff6aae6bcee35a6700ac71aeb0c165258cc",
+    "runId": "d2c5cbbe-a4f5-451d-a19b-3092716c87b2",
+    "exit": 0,
+    "stopped": true,
+    "existingDatabasesTouched": false
+  },
+  "cases": [
+    {
+      "title": "completes an actual lesson and issues one signed certificate across two consumers then verifies and revokes it",
+      "status": "passed",
+      "sourceSha": "dad88ff6aae6bcee35a6700ac71aeb0c165258cc",
+      "evidence": "docs/reviews/evidence/post28/dad88ff6aae6bcee35a6700ac71aeb0c165258cc/r09-shared-workflows/native-pg16-RmqS2x/R06-suites/r09-integrated-workflows-58jZq6/vitest.json"
+    },
+    {
+      "title": "pays a real synthetic invoice once across concurrent HTTP replays with one balanced ledger effect",
+      "status": "passed",
+      "sourceSha": "dad88ff6aae6bcee35a6700ac71aeb0c165258cc",
+      "evidence": "docs/reviews/evidence/post28/dad88ff6aae6bcee35a6700ac71aeb0c165258cc/r09-shared-workflows/native-pg16-RmqS2x/R06-suites/r09-integrated-workflows-gctqRR/vitest.json"
+    },
+    {
+      "title": "authors reviews publishes and withdraws current CMS snapshots using three actual capabilities",
+      "status": "failed",
+      "sourceSha": "dad88ff6aae6bcee35a6700ac71aeb0c165258cc",
+      "evidence": "docs/reviews/evidence/post28/dad88ff6aae6bcee35a6700ac71aeb0c165258cc/r09-shared-workflows/native-pg16-RmqS2x/R06-suites/r09-integrated-workflows-mUhwNb/vitest.json"
+    }
+  ],
+  "files": [
+    {
+      "path": "cleanup.json",
+      "bytes": 160,
+      "sha256": "5b267bd206edde3dce87c26db1afde7a226d1a7cb2a9891f6d009e754c11a596"
+    },
+    {
+      "path": "initialize.log",
+      "bytes": 4408,
+      "sha256": "c0cf9cdec9ecdbafdb6dd0e7b6602e05fe3c04bcc9d6bd2ac134fe0bf121a0a6"
+    },
+    {
+      "path": "R06-setup/0-validate.log",
+      "bytes": 144,
+      "sha256": "9bac6f2900d82077fd9ba3d76d872874f55c2b9bf30c910010cf33354fcf9dd6"
+    },
+    {
+      "path": "R06-setup/1-migrate.log",
+      "bytes": 16275,
+      "sha256": "210f32dd4f3cc7dbd7d7ddc85c1a6331ad1889473b7bb0e6d76905f37ea4df6f"
+    },
+    {
+      "path": "R06-setup/2-migrate.log",
+      "bytes": 258,
+      "sha256": "417630e99f1d65c8dad3071a05e4201944d4537eaf236769fba3f8e70ff8dc63"
+    },
+    {
+      "path": "R06-setup/3-migrate.log",
+      "bytes": 25,
+      "sha256": "198913094e3f41610eb893459ab65a3c79991b65d4ef5fcb8c325ebe52ebf1ed"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "ae7da290f6c3b420792d550f5f3c0caad509fd6fb7a2f3ba28ba05a464f73de5"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 5454,
+      "sha256": "ac74dd707146fbe87b202d14a652830b3e97b9c3b08e564720db6176a635c080"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-58jZq6\\discovery.json",
+      "bytes": 1469,
+      "sha256": "a9b5891fcb5847a763f379b460d8349eb6c5b281e67a83d3b31027b01815f720"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-58jZq6\\selection.json",
+      "bytes": 290,
+      "sha256": "dd2c6317c2ee250804655655d62354961897c3459bf5fe9aec9b20e18a0e3698"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-58jZq6\\summary.json",
+      "bytes": 1414,
+      "sha256": "8172d8c44f613e0ed830549a3562cbd0c597ffe40b2ee94c261d10f0945888ca"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-58jZq6\\vitest.json",
+      "bytes": 2613,
+      "sha256": "563a177935e968017acb468d593d17c7c3d26c2b15c0c95295981268ae8da0c8"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-gctqRR\\discovery.json",
+      "bytes": 1469,
+      "sha256": "a9b5891fcb5847a763f379b460d8349eb6c5b281e67a83d3b31027b01815f720"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-gctqRR\\selection.json",
+      "bytes": 277,
+      "sha256": "e1b39c3e273ca59d42eae7901885e859c5bdf984209b34552290ccf362aa2376"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-gctqRR\\summary.json",
+      "bytes": 1401,
+      "sha256": "0030d2de89a6a824415d3e8f7b02bf3f4a5a556a6dd1b1a8092dbf04130a8dba"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-gctqRR\\vitest.json",
+      "bytes": 2612,
+      "sha256": "fb29e08902775f9b8ffe02bee7b643ae7f022ea92fe943016b48debaf72db77e"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-mUhwNb\\discovery.json",
+      "bytes": 1469,
+      "sha256": "a9b5891fcb5847a763f379b460d8349eb6c5b281e67a83d3b31027b01815f720"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-mUhwNb\\selection.json",
+      "bytes": 273,
+      "sha256": "413feef6f042b39e88f5cbb0d5943ab18b282c7f8afcc1a3407bfa6916e847d3"
+    },
+    {
+      "path": "R06-suites\\r09-integrated-workflows-mUhwNb\\vitest.json",
+      "bytes": 3127,
+      "sha256": "31c2c21afacdee567d1505493a9b866ed6bc28092b25a2622555a04e68506c91"
+    },
+    {
+      "path": "r09-workflow-observations-33b26f55-490c-4272-bd26-9f5f87db10dd.json",
+      "bytes": 573,
+      "sha256": "d43ce0fc2b01ec47b4e364061fbe8e3c4dffc07f76140c06098ceacd4d13c7f6"
+    },
+    {
+      "path": "r09-workflow-observations-3b40644c-95a2-4772-bd53-573821666a07.json",
+      "bytes": 920,
+      "sha256": "b1d6421cd5de3bc1bbaecc65dd3ab4ab1978ee445088e2d2f4dee9cd94c3c1e9"
+    },
+    {
+      "path": "r09-workflow-observations-568920b9-2349-4b8b-9609-ec875db3e691.json",
+      "bytes": 1033,
+      "sha256": "bd3e162c2f62aac63651f9a76022798a66fdb51d4daf0f9ef48c7ab6f767aef0"
+    },
+    {
+      "path": "suite-0.log",
+      "bytes": 1817,
+      "sha256": "507de30a03f2ee7fd70faae68866fe11eba78bc529ce21cc5516414ec3b572d5"
+    },
+    {
+      "path": "suite-1.log",
+      "bytes": 1843,
+      "sha256": "65adca5687665db85bcd19906396c84e3a3405cce466550d837d35da633309ed"
+    },
+    {
+      "path": "suite-2.log",
+      "bytes": 2152,
+      "sha256": "36130b7a50d4c762cb8e5b61d26fcae791691a6d5e2f36e433f95504e11a2821"
+    }
+  ]
+}
