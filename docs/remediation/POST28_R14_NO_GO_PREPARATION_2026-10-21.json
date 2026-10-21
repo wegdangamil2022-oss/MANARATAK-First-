@@ -383,9 +383,15 @@
     "injectedFailure": "AFTER_REAL_DOMAIN_EFFECT_BEFORE_ACKNOWLEDGEMENT",
     "processCrashDemonstrated": false,
     "pdfRenderDemonstrated": false,
-    "linuxCiResult": "PENDING_NEW_PUSHED_SOURCE_OBSERVATION",
+    "linuxCiResult": "SCOPED_WORKER_JOB_PASSED_ARTIFACTS_RETRIEVED_WITH_VERIFIED_SERVER_DIGESTS",
     "fullWorkerAcceptance": false,
-    "report": "docs/remediation/POST28_STAGING_REAL_WORKER_DOMAINS_2026-10-21.md"
+    "report": "docs/remediation/POST28_STAGING_REAL_WORKER_DOMAINS_2026-10-21.md",
+    "linuxSourceSha": "8e001c92a97e0e2f865adce90fc4b3bc6d3b5514",
+    "linuxRunId": 39661105241,
+    "linuxJobId": 119434011909,
+    "linuxDatabaseAndNetworkCleanupVerified": true,
+    "allSixCurrentCiJobsObservedSuccessful": false,
+    "linuxEvidence": "docs/reviews/evidence/post28/8e001c92a97e0e2f865adce90fc4b3bc6d3b5514/staging-worker-linux"
   },
   "currentRuntimeRequiresNewCandidate": true,
   "pinnedRollbackPairCurrentStatus": "BLOCKED_RUNTIME_COMPATIBILITY_REVIEW_REQUIRED"

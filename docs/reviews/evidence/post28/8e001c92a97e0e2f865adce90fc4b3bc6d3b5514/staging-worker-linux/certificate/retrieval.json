@@ -1,0 +1,12 @@
+{
+  "runId": 39661105241,
+  "artifactId": 12375585304,
+  "name": "staging-certificate-worker-8e001c92a97e0e2f865adce90fc4b3bc6d3b5514",
+  "bytes": 9258,
+  "digest": "sha256:f8e8dd11399a4fc0949996819a22c4d5cfc716b689ea0aaf8b6c5d47ed210cb2",
+  "serverDigestVerified": true,
+  "transport": "CURL_NORMAL_TLS",
+  "safePathsChecked": true,
+  "credentialsRetained": false,
+  "observedAt": "2026-10-21T19:27:16.731Z"
+}

@@ -1,0 +1,6 @@
+{
+  "caseExact": "R08 signed loopback provider with persisted financial outcomes > keeps a real authorization timeout pending without redispatch or a paid invoice",
+  "fullDiscoveryCases": 5,
+  "selectedCases": 1,
+  "fullProfileAcceptance": false
+}

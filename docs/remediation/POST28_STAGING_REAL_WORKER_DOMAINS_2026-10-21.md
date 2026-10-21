@@ -22,7 +22,7 @@ Each local execution selected exactly one case. Discovery found five finance cas
 
 ## CI and release consequences
 
-The existing Linux provider lab now runs the new financial worker case alongside its two retained provider cases. A second fresh lab selects the certificate worker case. Both use restricted PG16 fixtures and retain only sanitized observations and cleanup. The job budget increases from ten to fifteen minutes for the additional provisioning and natural provider deadline. These Linux executions are pending until observed on the new pushed SHA.
+The existing Linux provider lab now runs the new financial worker case alongside its two retained provider cases. A second fresh lab selects the certificate worker case. Both use restricted PG16 fixtures and retain only sanitized observations and cleanup. The job budget increases from ten to fifteen minutes for the additional provisioning and natural provider deadline. Their observed Linux result is recorded below, separately from the still-pending general CI result.
 
 The financial repair changes actual application bytes. The old staging plan still identifies historical candidate `aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b`; `prepare-staging-review.mjs` correctly rejects its reuse with `STAGING_REVIEW_RUNTIME_CHANGED_REQUIRES_NEW_CANDIDATE`. Fresh immutable artifacts, CI and source-bound evidence are required before replacing that plan.
 
@@ -33,3 +33,9 @@ Validation for this orchestration change: the four existing rollback safety test
 ## Remaining worker scope
 
 These cases inject a failure after a committed effect in one process, then construct fresh clients/workers. They do not kill an operating-system process, prove all lease-expiry races, use Redis scheduling, render a certificate PDF or validate a real asset/payment provider. Historical synthetic certificate fixture setup remains explicit. Existing worker flags remain disabled in the staging review plan until the required enabled routes, renderer/assets, scheduler, recovery and readiness configuration have evidence. Actual hosting, TLS, provider backups, trust approvals and production promotion remain blocked as previously documented.
+
+## Observed Linux result
+
+Actions [39661105241](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39661105241) completed its isolated worker diagnostic job successfully on `8e001c92a97e0e2f865adce90fc4b3bc6d3b5514`. All three selected financial/provider cases and the selected certificate worker case passed. Both separate PostgreSQL16 databases and their networks were removed; neither lab touched an existing database. Redis isolation and Linux signal checks in that same job also succeeded. Artifact downloads were verified against GitHub's SHA256 digests before retaining selected JSON evidence. No private lab files or credentials were retained.
+
+Retained evidence: [financial Linux index](../reviews/evidence/post28/8e001c92a97e0e2f865adce90fc4b3bc6d3b5514/staging-worker-linux/finance/index.json), [certificate Linux index](../reviews/evidence/post28/8e001c92a97e0e2f865adce90fc4b3bc6d3b5514/staging-worker-linux/certificate/index.json). At this observation the general source job was still running, with Prisma validation/client generation and workspace typechecking already successful. This worker result does not claim all six CI jobs or the blocked rollback pair passed.

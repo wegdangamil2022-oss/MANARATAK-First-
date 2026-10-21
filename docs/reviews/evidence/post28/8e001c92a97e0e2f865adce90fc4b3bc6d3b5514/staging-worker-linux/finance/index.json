@@ -1,0 +1,84 @@
+{
+  "sourceSha": "8e001c92a97e0e2f865adce90fc4b3bc6d3b5514",
+  "runId": 39661105241,
+  "linuxWorkerJobPassed": true,
+  "formalAcceptance": false,
+  "productionAuthorized": false,
+  "files": [
+    {
+      "file": "result.json",
+      "bytes": 664,
+      "sha256": "0b4e94d78469fc017e08efb04f489132dd4ba1102e43ac95cebf21eb49d27701"
+    },
+    {
+      "file": "setup.json",
+      "bytes": 5175,
+      "sha256": "6a85d10bb83b35e0194e8bec47946a78ecd71e5fb8b7076dc7184cd30a790ec1"
+    },
+    {
+      "file": "suite-0-discovery.json",
+      "bytes": 1556,
+      "sha256": "bec214cfe44e362794569f8f083e11df18c5c93399cbd04e39aa6e5b94d16fed"
+    },
+    {
+      "file": "suite-0-selection.json",
+      "bytes": 260,
+      "sha256": "6eee5867f9717de8d67785378a83ca6e1b42ea2fa57e41e46e8f8370ae9ad459"
+    },
+    {
+      "file": "suite-0-summary.json",
+      "bytes": 1381,
+      "sha256": "a598d935665ab5f0443b6c18c9dc0a9c899147f04f75ddc9fc7ce1e6981f1ba9"
+    },
+    {
+      "file": "suite-0-vitest.json",
+      "bytes": 2832,
+      "sha256": "d1364a52998d9a56588412813f1ae53a742ba0f8b2dbfede87c4b0cb5bae55b6"
+    },
+    {
+      "file": "suite-1-discovery.json",
+      "bytes": 1556,
+      "sha256": "bec214cfe44e362794569f8f083e11df18c5c93399cbd04e39aa6e5b94d16fed"
+    },
+    {
+      "file": "suite-1-selection.json",
+      "bytes": 291,
+      "sha256": "f63baf1953af8b4d37869ceb8379a2056fad8179bc27b0ef6c6077073b38f4ce"
+    },
+    {
+      "file": "suite-1-summary.json",
+      "bytes": 1412,
+      "sha256": "235331a1d1630e4e1c1489c93a2ab98fd0ad5b83f0e422915efb22dcb899e456"
+    },
+    {
+      "file": "suite-1-vitest.json",
+      "bytes": 2833,
+      "sha256": "33b626716867bb36882e68e8a2e1e484d12982f11b2e2b0734f52b9189128214"
+    },
+    {
+      "file": "suite-2-discovery.json",
+      "bytes": 1556,
+      "sha256": "bec214cfe44e362794569f8f083e11df18c5c93399cbd04e39aa6e5b94d16fed"
+    },
+    {
+      "file": "suite-2-selection.json",
+      "bytes": 249,
+      "sha256": "252fa33232bd2fd6a38cde5c71fd5b1b0edbd4d3ddb1b8d28ed609f385ea0c63"
+    },
+    {
+      "file": "suite-2-summary.json",
+      "bytes": 1370,
+      "sha256": "e0203f2f8faf0b146529328cb79c1568309f538810cb5bb11243a5984e48d577"
+    },
+    {
+      "file": "suite-2-vitest.json",
+      "bytes": 2838,
+      "sha256": "893982d22f70ea7b3a52d405d0693c5ce167c3c04ca49b7c99d3be02e3fa8671"
+    },
+    {
+      "file": "retrieval.json",
+      "bytes": 405,
+      "sha256": "1994aa6af13af7265b9031c82f17dcbb220313804f7ce26dfc424e376bddaf99"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "runId": 39661105241,
+  "artifactId": 12375700006,
+  "name": "r08-provider-faults-8e001c92a97e0e2f865adce90fc4b3bc6d3b5514",
+  "bytes": 16245,
+  "digest": "sha256:20d6a3da9caec933e65c4bbd3dd0fe586583f51d677255918ab8cda18938b07f",
+  "serverDigestVerified": true,
+  "transport": "CURL_NORMAL_TLS",
+  "safePathsChecked": true,
+  "credentialsRetained": false,
+  "observedAt": "2026-10-21T19:27:15.568Z"
+}
