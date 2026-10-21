@@ -2399,7 +2399,9 @@ function ServiceRequestsView({
     );
   }, [selected, invoices]);
 
-  const hasAnyRequestsOrInvoices = requests.length > 0 || invoices.length > 0;
+  // A directly linked, authorized request must remain inspectable even if it is
+  // absent from the currently fetched/filtered request page.
+  const hasAnyRequestsOrInvoices = requests.length > 0 || invoices.length > 0 || Boolean(selected) || Boolean(requestedNotFoundId);
 
   return (
     <div className="space-y-5">
@@ -2552,7 +2554,7 @@ function ServiceRequestsView({
           </div>
         </div>
       ) : activeTab === 'REQUESTS' ? (
-        requests.length === 0 ? (
+        requests.length === 0 && !selected && !requestedNotFoundId ? (
           <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 text-center mn-panel">
             <ClipboardList className="w-8 h-8 mx-auto text-[var(--mn-text-muted)] mb-2" />
             <h3 className="text-[14px] font-bold text-[var(--mn-heading)]">{statusFilter ? 'لا توجد طلبات مطابقة للحالة المختارة' : 'لا توجد طلبات خدمات معروضة حاليًا'}</h3>
@@ -2572,6 +2574,11 @@ function ServiceRequestsView({
             <ServiceSectionCard title="سجل الطلبات المقدمة" icon={<ClipboardList className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />} count={`${requests.length} طلب`}>
 
               <div className="space-y-2.5">
+                {requests.length === 0 && (
+                  <p className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3 text-[11px] leading-[1.8] text-[var(--mn-text-muted)]">
+                    لا توجد طلبات في القائمة المعروضة حاليًا. يمكنك مراجعة تفاصيل الطلب المفتوح على الجانب.
+                  </p>
+                )}
                 {requests.map((request) => {
                   const statusInfo = getServiceRequestStatusBadge(request.status);
                   const isSelected = selected?.id === request.id || selected?.publicId === request.publicId;
