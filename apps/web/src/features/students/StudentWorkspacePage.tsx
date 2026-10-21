@@ -1344,14 +1344,14 @@ function OpportunitiesView({
         {/* Keep the original cultural-exchange-style decorative stripe on the RIGHT edge. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute top-2.5 bottom-2.5 right-0 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#B78622] via-[#D6A43B] to-[#E5B54F]"
+          className="pointer-events-none absolute inset-y-0 right-0 w-[3.5px] bg-gradient-to-b from-[#B78622] via-[#D6A43B] to-[#E5B54F]"
         />
 
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#142B5F] border border-[#D6A43B]/30">
             <Route className="h-4.5 w-4.5 text-[#E5B54F]" aria-hidden="true" />
           </div>
-          <h2 className="mn-student-opportunities-heading text-[14px] font-bold text-[var(--mn-heading)] leading-tight">
+          <h2 className="text-[14px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)] leading-tight">
             فرصي وملفات التقديم
           </h2>
         </div>
@@ -1378,11 +1378,11 @@ function OpportunitiesView({
           </div>
         )}
 
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div dir="rtl" className="mt-4 flex w-full flex-wrap items-center gap-3">
           <p className="text-[11px] font-medium text-[var(--mn-text-muted)]">ملفاتك ومواعيدك في مكان واحد</p>
           <Link
             to="/scholarships"
-            className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-xl bg-[#142B5F] px-3.5 py-2 text-[11px] font-bold text-white shadow-2xs transition-colors hover:bg-[#203D74] dark:bg-[#D6A43B] dark:text-[#142B5F] dark:hover:bg-[#E5B54F]"
+            className="ms-auto inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#142B5F] px-3.5 py-2 text-[11px] font-bold text-white shadow-2xs transition-colors hover:bg-[#203D74] dark:bg-[#D6A43B] dark:text-[#142B5F] dark:hover:bg-[#E5B54F]"
           >
             <Sparkles className="h-3.5 w-3.5 text-[#E5B54F] dark:text-[#142B5F]" aria-hidden="true" />
             <span>استكشف المنح</span>
