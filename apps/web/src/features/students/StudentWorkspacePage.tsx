@@ -2408,7 +2408,7 @@ function ServiceRequestsView({
   useEffect(() => { if (selected) setActiveTab('REQUESTS'); }, [selected?.id]);
 
   const pendingCount = useMemo(
-    () => requests.filter((r) => ['REQUESTED', 'ACCEPTED', 'IN_PROGRESS', 'AWAITING_PAYMENT'].includes(r.status)).length,
+    () => requests.filter((request) => !['COMPLETED', 'FULFILLED', 'RESOLVED', 'CANCELLED', 'REJECTED'].includes(request.status.toUpperCase())).length,
     [requests],
   );
 
@@ -2425,69 +2425,63 @@ function ServiceRequestsView({
 
   return (
     <div className="space-y-5">
-      {/* 1. Header Banner & Stats */}
-      <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <div className="inline-flex items-center gap-2">
-              <span className="text-[10px] font-bold text-[#142B5F] dark:text-[#E5B54F]">خدمات واستشارات</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#D6A43B]/10 text-[#D6A43B] font-semibold">مساحة الطالب</span>
-            </div>
-            <h2 className="text-base sm:text-lg font-bold text-[var(--mn-heading)] mt-0.5">طلباتي ومدفوعاتي</h2>
-            <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">
-              متابعة حالة طلبات الخدمات الأكاديمية والاستشارية، تفاصيل المعايير، والفواتير والمدفوعات المرتبطة بحسابك.
-            </p>
+      {/* Main service overview uses the same right-edge stripe as فرصي and تعليمي. */}
+      <section aria-label="طلباتي ومدفوعاتي" className="relative overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel dark:border-white/10 sm:p-5">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-[3.5px] bg-gradient-to-b from-[#B78622] via-[#D6A43B] to-[#E5B54F]" />
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+            <ClipboardList className="h-[18px] w-[18px] text-[#E5B54F]" aria-hidden="true" />
+          </span>
+          <h2 className="text-[14px] font-bold leading-[1.35] text-[var(--mn-heading)]">طلباتي ومدفوعاتي</h2>
+        </div>
+        <div className="mt-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2.5 dark:bg-[var(--mn-surface-elevated)]">
+          <p className="text-[12px] font-bold leading-5 text-[var(--mn-heading)]">تابع خدماتك ومعاملاتك في مكان واحد</p>
+          <p className="mt-0.5 text-[11px] font-medium leading-[1.85] text-[var(--mn-text-muted)] sm:text-[12px]">
+            اطّلع على حالة طلبات الخدمات الأكاديمية والاستشارية، وتفاصيلها، والفواتير والدفعات المرتبطة بها.
+          </p>
+        </div>
+        {hasAnyRequestsOrInvoices && (
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            {[
+              { label: 'طلبات معروضة', number: requests.length, tab: 'REQUESTS' as const },
+              { label: 'قيد المتابعة', number: pendingCount, tab: 'REQUESTS' as const },
+              { label: 'فواتير معروضة', number: invoices.length, tab: 'INVOICES' as const },
+            ].map((stat) => (
+              <button
+                key={stat.label}
+                type="button"
+                aria-label={`${stat.label}: ${stat.number}، عرض التفاصيل`}
+                onClick={() => setActiveTab(stat.tab)}
+                className="min-w-0 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 text-center transition-colors hover:border-[#D6A43B]/50 dark:bg-[var(--mn-surface-elevated)] sm:p-3"
+              >
+                <span className="block text-[17px] font-bold leading-6 text-[var(--mn-heading)] sm:text-[18px]">{stat.number}</span>
+                <span className="mt-0.5 block text-[10px] font-semibold leading-[1.6] text-[var(--mn-text-muted)] sm:text-[11px]">{stat.label}</span>
+              </button>
+            ))}
           </div>
+        )}
+        <div dir="rtl" className="mt-4 flex w-full flex-wrap items-center gap-3">
+          <p className="text-[11px] font-medium leading-[1.7] text-[var(--mn-text-muted)]">طلباتك وفواتيرك في مساحة واحدة</p>
           <Link
             to="/services"
-            className="self-start sm:self-center shrink-0 px-3.5 py-1.5 rounded-xl bg-[var(--mn-primary)] text-white text-xs font-bold hover:bg-[var(--mn-primary-hover)] transition-all shadow-2xs flex items-center gap-1.5"
+            className="ms-auto inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#142B5F] px-3.5 py-2 text-[12px] font-bold text-white shadow-2xs transition-colors hover:bg-[#203D74] dark:bg-[#D6A43B] dark:text-[#142B5F] dark:hover:bg-[#E5B54F]"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#E5B54F]" />
+            <Sparkles className="h-3.5 w-3.5 text-[#E5B54F] dark:text-[#142B5F]" aria-hidden="true" />
             <span>استكشف الخدمات</span>
           </Link>
         </div>
+      </section>
 
-        {/* 3 Metric Counters - Only shown when requests or invoices exist */}
-        {hasAnyRequestsOrInvoices && (
-          <div className="mt-4 grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => setActiveTab('REQUESTS')}
-              className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel cursor-pointer hover:border-[#D6A43B]/40 transition-colors"
-            >
-              <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{requests.length}</div>
-              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">الطلبات المعروضة</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('REQUESTS')}
-              className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel cursor-pointer hover:border-[#D6A43B]/40 transition-colors"
-            >
-              <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{pendingCount}</div>
-              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">قيد المراجعة والمعالجة</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('INVOICES')}
-              className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel cursor-pointer hover:border-[#D6A43B]/40 transition-colors"
-            >
-              <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{invoices.length}</div>
-              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">الفواتير المعروضة</div>
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* 2. Top Switcher (Requests vs Invoices) - Only shown when requests or invoices exist */}
       {hasAnyRequestsOrInvoices && (
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-white/10 w-fit text-xs font-medium">
+        <nav aria-label="عرض طلبات الخدمات والفواتير" className="grid grid-cols-2 gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2">
           <button
             type="button"
             onClick={() => setActiveTab('REQUESTS')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold ${
+            aria-pressed={activeTab === 'REQUESTS'}
+            className={`min-h-10 min-w-0 rounded-lg px-2 py-1.5 text-[11px] font-bold leading-[1.7] transition-colors ${
               activeTab === 'REQUESTS'
                 ? 'bg-[var(--mn-primary)] text-white shadow-2xs'
-                : 'text-[var(--mn-text-muted)] hover:bg-[var(--mn-page)]'
+                : 'bg-[var(--mn-page)] text-[var(--mn-text-muted)] hover:bg-[var(--mn-surface-muted)]'
             }`}
           >
             طلبات الخدمات ({requests.length})
@@ -2495,15 +2489,16 @@ function ServiceRequestsView({
           <button
             type="button"
             onClick={() => setActiveTab('INVOICES')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold ${
+            aria-pressed={activeTab === 'INVOICES'}
+            className={`min-h-10 min-w-0 rounded-lg px-2 py-1.5 text-[11px] font-bold leading-[1.7] transition-colors ${
               activeTab === 'INVOICES'
                 ? 'bg-[var(--mn-primary)] text-white shadow-2xs'
-                : 'text-[var(--mn-text-muted)] hover:bg-[var(--mn-page)]'
+                : 'bg-[var(--mn-page)] text-[var(--mn-text-muted)] hover:bg-[var(--mn-surface-muted)]'
             }`}
           >
             الفواتير والمدفوعات ({invoices.length})
           </button>
-        </div>
+        </nav>
       )}
 
       {/* 3. Main Content View */}
