@@ -34,7 +34,16 @@ const statement = [
 ];
 for (const [name, password] of roles) {
   statement.push(`DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = ${literal(name)}) THEN CREATE ROLE ${name} LOGIN; END IF; END $$;`);
-  statement.push(`ALTER ROLE ${name} WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS PASSWORD ${literal(password)};`);
+  // New roles default to unprivileged attributes. Managed CREATEROLE operators
+  // cannot ALTER SUPERUSER, even to false. Reject unsafe existing identities
+  // instead of requiring a superuser to silently strip their privileges.
+  statement.push(`DO $$ BEGIN IF EXISTS (
+    SELECT FROM pg_roles r WHERE r.rolname = ${literal(name)} AND (
+      r.rolsuper OR r.rolcreatedb OR r.rolcreaterole OR r.rolreplication OR r.rolbypassrls
+      OR EXISTS (SELECT FROM pg_auth_members m WHERE m.member = r.oid)
+    )
+  ) THEN RAISE EXCEPTION 'DB_ROLE_PRIVILEGE_REVIEW_REQUIRED'; END IF; END $$;`);
+  statement.push(`ALTER ROLE ${name} WITH LOGIN PASSWORD ${literal(password)};`);
   statement.push(`REVOKE ALL ON DATABASE "${database.replaceAll('"','""')}" FROM ${name};`);
   statement.push(`GRANT CONNECT ON DATABASE "${database.replaceAll('"','""')}" TO ${name};`);
   statement.push(`REVOKE ALL ON SCHEMA public FROM ${name};`);
