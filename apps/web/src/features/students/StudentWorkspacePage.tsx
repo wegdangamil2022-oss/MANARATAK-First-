@@ -2927,21 +2927,21 @@ function VaultView({
     }
   }, [collections, collectionFilter]);
 
-  const toolTitles: Record<string, string> = {
-    'gpa-calculator': 'حاسبة المعدل التراكمي',
-    'university-comparison': 'مقارنة الجامعات',
-    'motivation-letter-generator': 'خطاب الدافع',
-    'scholarship-recommendation': 'توصية المنح',
-  };
-  const getSavedTitle = (item: StudentSavedItemDto) => {
+  const getSavedTitle = React.useCallback((item: StudentSavedItemDto): string => {
     const owner = hydratedBySavedItemId.get(item.id);
+    const toolTitles: Record<string, string> = {
+      'gpa-calculator': 'حاسبة المعدل التراكمي',
+      'university-comparison': 'مقارنة الجامعات',
+      'motivation-letter-generator': 'خطاب الدافع',
+      'scholarship-recommendation': 'توصية المنح',
+    };
     return (item.entityType === 'STUDENT_TOOL' && owner?.visibility === 'STUDENT_PRIVATE'
       ? (language === 'en' ? 'Retained private tool result' : 'نتيجة أداة محفوظة خاصة')
       : owner?.displayName)
       || item.displayName
       || (item.entityType === 'STUDENT_TOOL' ? toolTitles[item.entitySlug ?? ''] : undefined)
       || item.entityId;
-  };
+  }, [hydratedBySavedItemId, language]);
 
   const typeCounts = useMemo(() => {
     const counts: Record<string, number> = { ALL: savedItems.length };
@@ -2977,7 +2977,7 @@ function VaultView({
           !arabicEntityType(item.entityType).toLocaleLowerCase().includes(query)) return false;
       return true;
     });
-  }, [savedItems, typeFilter, collectionFilter, searchQuery, hydratedBySavedItemId, language]);
+  }, [savedItems, typeFilter, collectionFilter, searchQuery, getSavedTitle]);
 
   const getEntityIcon = (type: string) => {
     const iconStyle = 'h-4 w-4 text-[#E5B54F]';
