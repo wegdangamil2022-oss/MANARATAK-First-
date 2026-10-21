@@ -2401,7 +2401,7 @@ function ServiceRequestsView({
 
   // A directly linked, authorized request must remain inspectable even if it is
   // absent from the currently fetched/filtered request page.
-  const hasAnyRequestsOrInvoices = requests.length > 0 || invoices.length > 0 || Boolean(selected) || Boolean(requestedNotFoundId);
+  const hasAnyRequestsOrInvoices = requests.length > 0 || invoices.length > 0 || Boolean(selected) || Boolean(requestedNotFoundId) || Boolean(invoiceError);
 
   return (
     <div className="space-y-5">
@@ -2608,8 +2608,8 @@ function ServiceRequestsView({
                           : 'border-[var(--mn-border)] bg-[var(--mn-page)] hover:border-[#D6A43B]/40 dark:border-white/10 dark:bg-[var(--mn-surface-elevated)]'
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="flex min-w-0 flex-1 items-center gap-2.5">
                           <div className="w-8 h-8 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shrink-0">
                             <ClipboardList className="w-4 h-4 text-[#E5B54F]" />
                           </div>
@@ -2623,7 +2623,7 @@ function ServiceRequestsView({
                           </div>
                         </div>
 
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${statusInfo.className}`}>
+                        <span className={`max-w-full rounded-full border px-2 py-0.5 text-[10px] font-bold leading-[1.7] ${statusInfo.className}`}>
                           {statusInfo.label}
                         </span>
                       </div>
@@ -2648,7 +2648,7 @@ function ServiceRequestsView({
                 <ServiceSectionCard title="تفاصيل الطلب المحدد" icon={<FileText className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}>
                   <div className="space-y-5">
                   {/* Top Details Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--mn-border)] dark:border-white/10">
+                  <div className="flex min-w-0 flex-wrap items-start justify-between gap-3 border-b border-[var(--mn-border)] pb-4 dark:border-white/10">
                     <div>
                       <h4 className="text-[14px] font-bold leading-[1.65] text-[var(--mn-heading)] break-words">
                         طلب خدمة رقم <span className="text-[#B78622] dark:text-[#E5B54F]">#{selected.publicId}</span>
@@ -2864,8 +2864,8 @@ function ServiceRequestsView({
                     className="min-w-0 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3.5 flex flex-col justify-between transition-colors hover:border-[#D6A43B]/40 dark:border-white/10 dark:bg-[var(--mn-surface-elevated)]"
                   >
                     <div>
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="flex min-w-0 flex-1 items-center gap-2">
                           <div className="w-8 h-8 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
                             <Receipt className="w-4 h-4 text-[#E5B54F]" />
                           </div>
@@ -2879,7 +2879,7 @@ function ServiceRequestsView({
                           </div>
                         </div>
 
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusInfo.className}`}>
+                        <span className={`max-w-full rounded-full border px-2 py-0.5 text-[10px] font-bold leading-[1.7] ${statusInfo.className}`}>
                           {statusInfo.label}
                         </span>
                       </div>
@@ -2909,7 +2909,7 @@ function ServiceRequestsView({
                         <div className="mt-2.5 space-y-1">
                           <div className="text-[10px] font-bold text-[var(--mn-heading)]">بنود الفاتورة:</div>
                           {invoice.lineItems.map((item, idx) => (
-                            <div key={idx} className="text-[10.5px] text-[var(--mn-text-muted)] flex justify-between">
+                            <div key={idx} className="flex flex-wrap items-start justify-between gap-1.5 text-[11px] leading-[1.7] text-[var(--mn-text-muted)]">
                               <span>{item.description}</span>
                               <span className="shrink-0 text-[11px] font-semibold text-[var(--mn-heading)]">{formatMoney(item.totalPrice)}</span>
                             </div>
