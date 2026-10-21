@@ -2516,7 +2516,14 @@ function ServiceRequestsView({
           </button>
         </div>
       )}
-      {invoiceError && <Alert tone="error" message={invoiceError} />}
+      {invoiceError && (
+        <div className="space-y-2">
+          <Alert tone="error" message={invoiceError} />
+          <button type="button" onClick={onRetry} className="inline-flex min-h-9 items-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-1.5 text-[12px] font-bold text-[var(--mn-heading)]">
+            إعادة تحميل الفواتير
+          </button>
+        </div>
+      )}
 
       {/* Loading doesn't unmount the main view, so the active tab stays selected. */}
       {serviceLoading && (
@@ -2557,9 +2564,11 @@ function ServiceRequestsView({
         requests.length === 0 && !selected && !requestedNotFoundId ? (
           <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 text-center mn-panel">
             <ClipboardList className="w-8 h-8 mx-auto text-[var(--mn-text-muted)] mb-2" />
-            <h3 className="text-[14px] font-bold text-[var(--mn-heading)]">{statusFilter ? 'لا توجد طلبات مطابقة للحالة المختارة' : 'لا توجد طلبات خدمات معروضة حاليًا'}</h3>
+            <h3 className="text-[14px] font-bold text-[var(--mn-heading)]">{serviceError ? 'تعذر تحميل طلباتك حاليًا' : statusFilter ? 'لا توجد طلبات مطابقة للحالة المختارة' : 'لا توجد طلبات خدمات معروضة حاليًا'}</h3>
             <p className="mt-1 text-[11px] leading-[1.85] text-[var(--mn-text-muted)]">
-              يمكنك اختيار حالة أخرى أو الاطلاع على الفواتير والمدفوعات أو تقديم طلب جديد عبر دليل الخدمات.
+              {serviceError
+                ? 'يمكنك إعادة تحميل الطلبات من الزر أعلاه. ستبقى الفواتير المحمّلة متاحة هنا.'
+                : 'يمكنك اختيار حالة أخرى أو الاطلاع على الفواتير والمدفوعات أو تقديم طلب جديد عبر دليل الخدمات.'}
             </p>
             <Link
               to="/services"
@@ -2838,9 +2847,9 @@ function ServiceRequestsView({
           {invoices.length === 0 ? (
             <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 text-center mn-panel">
               <CreditCard className="w-8 h-8 mx-auto text-[var(--mn-text-muted)] mb-2" />
-              <h4 className="text-[14px] font-bold text-[var(--mn-heading)]">لا توجد فواتير أو مدفوعات مسجلة بحسابك</h4>
-              <p className="text-xs text-[var(--mn-text-muted)] mt-1 max-w-sm mx-auto">
-                عند طلب خدمات مدفوعة أو استشارات خاصة ستظهر فواتيرك وإيصالات السداد هنا.
+              <h4 className="text-[14px] font-bold text-[var(--mn-heading)]">{invoiceError ? 'تعذر تحميل الفواتير حاليًا' : 'لا توجد فواتير أو مدفوعات مسجلة بحسابك'}</h4>
+              <p className="text-[11px] leading-[1.85] text-[var(--mn-text-muted)] mt-1 max-w-sm mx-auto">
+                {invoiceError ? 'أعد المحاولة من زر إعادة تحميل الفواتير أعلاه.' : 'عند طلب خدمات مدفوعة أو استشارات خاصة ستظهر فواتيرك وإيصالات السداد هنا.'}
               </p>
             </div>
           ) : (
