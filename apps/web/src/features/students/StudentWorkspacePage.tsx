@@ -2471,7 +2471,7 @@ function ServiceRequestsView({
               className="mt-1 block min-h-10 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-[12px] font-semibold text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
             >
               <option value="">جميع الحالات</option>
-              {['REQUESTED','ACCEPTED','IN_PROGRESS','AWAITING_PAYMENT','ACTION_REQUIRED','NEEDS_INPUT','COMPLETED','CANCELLED'].map((status) => (
+              {['REQUESTED','ACCEPTED','IN_PROGRESS','AWAITING_PAYMENT','COMPLETED','CANCELLED'].map((status) => (
                 <option key={status} value={status}>{getServiceRequestStatusBadge(status).label}</option>
               ))}
             </select>
@@ -2610,6 +2610,7 @@ function ServiceRequestsView({
             <div>
               {selected ? (
                 <ServiceSectionCard title="تفاصيل الطلب المحدد" icon={<FileText className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}>
+                  <div className="space-y-5">
                   {/* Top Details Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--mn-border)] dark:border-white/10">
                     <div>
@@ -2781,6 +2782,7 @@ function ServiceRequestsView({
                       )}
                     </div>
                   )}
+                  </div>
                 </ServiceSectionCard>
               ) : requestedNotFoundId ? (
                 <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-8 text-center mn-panel">
