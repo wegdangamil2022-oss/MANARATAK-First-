@@ -1355,7 +1355,7 @@ function OpportunitiesView({
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#142B5F] border border-[#D6A43B]/30">
             <Route className="h-4.5 w-4.5 text-[#E5B54F]" aria-hidden="true" />
           </div>
-          <h2 className="text-[14px] sm:text-base font-bold text-[var(--mn-heading)] leading-tight">
+          <h2 className="mn-student-opportunities-heading text-[14px] font-bold text-[var(--mn-heading)] leading-tight">
             فرصي وملفات التقديم
           </h2>
         </div>
@@ -1472,16 +1472,11 @@ function OpportunitiesView({
           <div className="space-y-5">
             {/* Upcoming Deadlines Panel */}
             {upcomingDeadlines.length > 0 && (
-              <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-7 h-7 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
-                    <CalendarClock className="w-3.5 h-3.5 text-[#E5B54F]" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-bold text-[var(--mn-heading)]">المواعيد النهائية القريبة</h3>
-                    <p className="text-[10px] text-[var(--mn-text-muted)]">مواعيد إغلاق تقديمات المنح المتابعة</p>
-                  </div>
-                </div>
+              <OpportunitiesSectionCard
+                title="المواعيد النهائية القريبة"
+                icon={<CalendarClock className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
+                description="مواعيد إغلاق تقديمات المنح المتابعة"
+              >
 
                 <div className="space-y-2">
                   {upcomingDeadlines.slice(0, 4).map((tracker) => {
@@ -1493,11 +1488,11 @@ function OpportunitiesView({
                         className="p-2.5 rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] flex items-center justify-between gap-3 text-xs"
                       >
                         <div className="min-w-0">
-                          <div className="font-bold truncate text-[var(--mn-heading)]">{title}</div>
-                          <div className="text-[10.5px] text-[var(--mn-text-muted)] mt-0.5">{tracker.stage}</div>
+                          <div className="text-[12px] sm:text-[13px] font-bold leading-5 text-[var(--mn-heading)] break-words">{title}</div>
+                          <div className="text-[11px] text-[var(--mn-text-muted)] mt-0.5">{tracker.stage}</div>
                         </div>
                         <div className="shrink-0 text-right">
-                          <div className="inline-flex items-center gap-1 font-mono font-bold text-[#D6A43B] text-[11px]">
+                          <div className="inline-flex items-center gap-1 font-semibold text-[var(--mn-text-muted)] text-[11px] font-['Cairo',sans-serif]">
                             <span>{formatDate(deadlineStr)}</span>
                           </div>
                         </div>
@@ -1505,11 +1500,11 @@ function OpportunitiesView({
                     );
                   })}
                 </div>
-              </div>
+              </OpportunitiesSectionCard>
             )}
 
             {/* Application Progress Summary */}
-            <Panel title="حصيلة التقديم">
+            <OpportunitiesSectionCard title="حصيلة التقديم" icon={<ClipboardList className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}>
               <div className="space-y-4">
                 <ProgressRow label="إنجاز مهام التقديم" value={journeyProgress} />
                 <ProgressRow
@@ -1517,16 +1512,19 @@ function OpportunitiesView({
                   value={trackers.length ? Math.round((archivedTrackers.length / trackers.length) * 100) : 0}
                 />
               </div>
-              <div className="mt-4 p-3 rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] dark:border-white/10 text-[11px] leading-relaxed text-[var(--mn-text-muted)]">
-                💡 <strong>تنبيه دقة البيانات:</strong> حفظ المنحة في «محفوظاتي» يتيح الرجوع إليها لاحقًا، بينما فتح «ملف تقديم» هنا يمكّنك من متابعة المهام ومراحل التقديم خطوة بخطوة.
+              <div className="mt-4 flex items-start gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-3 py-2.5 text-[11px] leading-[1.85] text-[var(--mn-text-muted)]">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#0E7C86] dark:text-[#6AD2D1]" aria-hidden="true" />
+                <p><strong className="font-bold text-[var(--mn-heading)]">تنبيه دقة البيانات:</strong> حفظ المنحة في «محفوظاتي» يتيح الرجوع إليها لاحقًا، بينما فتح «ملف تقديم» هنا يمكّنك من متابعة المهام ومراحل التقديم خطوة بخطوة.</p>
               </div>
-            </Panel>
+            </OpportunitiesSectionCard>
 
             {/* Timeline of activity */}
             {dashboard.timeline.length > 0 && (
-              <Panel title="سجل الأنشطة والمواعيد">
-                <ActivityList items={dashboard.timeline} />
-              </Panel>
+              <OpportunitiesSectionCard title="سجل الأنشطة والمواعيد" icon={<HistoryIcon className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}>
+                <div className="mn-student-opportunities-activity">
+                  <ActivityList items={dashboard.timeline} />
+                </div>
+              </OpportunitiesSectionCard>
             )}
           </div>
         </div>
@@ -1534,6 +1532,44 @@ function OpportunitiesView({
     </div>
   );
 }
+
+/** Matches the icon, Cairo 14px title, gold underline and spacing in ملخصي.
+ * Kept separate from the generic Panel to avoid changing other student tabs.
+ */
+function OpportunitiesSectionCard({
+  title,
+  icon,
+  description,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      aria-label={title}
+      className="mn-student-opportunities-section relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel font-['Cairo',sans-serif]"
+    >
+      <div className="mb-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+            {icon}
+          </span>
+          <h3 className="mn-student-opportunities-heading min-w-0 text-[14px] font-bold leading-[1.22] text-[var(--mn-heading)]">
+            {title}
+          </h3>
+        </div>
+        {description && (
+          <p className="mt-1.5 text-[11px] leading-[1.7] text-[var(--mn-text-muted)]">{description}</p>
+        )}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 
 const APPLICATION_STAGES = [
   'تجهيز المستندات',
