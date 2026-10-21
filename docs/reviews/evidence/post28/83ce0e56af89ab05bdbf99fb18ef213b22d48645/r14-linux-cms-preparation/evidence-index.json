@@ -46,8 +46,8 @@
     },
     {
       "file": "locale-candidate-ci.json",
-      "bytes": 944,
-      "sha256": "ffc54acc11ac41ee7407f2b7b96c1e99d7cf075d6bb56d0a0cb5ce69f504621f"
+      "bytes": 1399,
+      "sha256": "dbecbd8b92e1ebdcb90fc6ea6a54215610d279fa219399e1d0eccb4e6e223461"
     },
     {
       "file": "native-profile-cleanup.json",

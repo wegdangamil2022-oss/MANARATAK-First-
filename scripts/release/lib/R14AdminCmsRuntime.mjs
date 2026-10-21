@@ -3,7 +3,7 @@ import path from 'node:path';
 import { randomBytes, randomUUID, scryptSync, createHash } from 'node:crypto';
 import { totp } from '../../../packages/infrastructure/src/auth/mfa/Totp.ts';
 import { createDiagnosticRequestBudget } from './DiagnosticRequestBudget.mjs';
-import { PUBLIC_TEMPLATE_LOCALES } from '@manaratak/shared';
+import { PUBLIC_TEMPLATE_LOCALES } from '../../../packages/shared/src/localization/readiness.ts';
 import { assertCmsDiagnosticLocale } from './CmsDiagnosticLocaleContract.mjs';
 
 /** Only the setup principal in the already verified new DB-T calls this helper. */
