@@ -1,0 +1,12 @@
+{
+  "runId": 39661105241,
+  "artifactId": 12376705422,
+  "name": "r14-rollback-eligibility-8e001c92a97e0e2f865adce90fc4b3bc6d3b5514",
+  "bytes": 442,
+  "digest": "sha256:9680f2de51375c6d49ac104e52db209081d4fa9d567dc08c7cd07e9ff745f463",
+  "serverDigestVerified": true,
+  "transport": "CURL_NORMAL_TLS",
+  "safePathsChecked": true,
+  "credentialsRetained": false,
+  "observedAt": "2026-10-21T19:36:47.772Z"
+}

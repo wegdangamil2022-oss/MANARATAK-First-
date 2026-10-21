@@ -43,3 +43,5 @@ docs/reviews/evidence/post28/*/staging-review/** -text whitespace=cr-at-eol,-bla
 docs/reviews/evidence/post28/*/staging-worker-domain/** -text whitespace=cr-at-eol,-blank-at-eof
 
 docs/reviews/evidence/post28/*/staging-worker-linux/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/repaired-rollback-reference/** -text whitespace=cr-at-eol,-blank-at-eof

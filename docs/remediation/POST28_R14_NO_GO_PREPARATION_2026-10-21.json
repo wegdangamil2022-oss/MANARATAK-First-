@@ -86,7 +86,7 @@
     "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39648892069",
     "evidence": "docs/reviews/evidence/post28/aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b/r14-linux-rollback/ci-observation.json"
   },
-  "nextFunctionalStep": "BUILD_NEW_REPAIRED_RUNTIME_CANDIDATE_AND_OBSERVE_LINUX_WORKER_PROOFS_THEN_COMPLETE_ROUTE_RECOVERY_AND_TARGET_GATES",
+  "nextFunctionalStep": "OBSERVE_REPAIRED_REFERENCE_SCOPED_LINUX_ROLLBACK_THEN_REFRESH_STAGING_REVIEW_WITH_SAME_SHA_EVIDENCE",
   "evidence": "docs/reviews/evidence/post28/83e210e0eb9505c875129948bd52171986f458b3/r14-no-go-preparation/evidence-index.json",
   "latestAdminCmsLocalDiagnostic": {
     "completed": true,
@@ -279,23 +279,12 @@
     "runtimeSourceUnchangedAfterInventoryFix": true
   },
   "latestAdminCmsLinuxDiagnostic": {
-    "sourceSha": "6f7b68572f007a45d10263759800d8cbbfd49135",
+    "sourceSha": "8e001c92a97e0e2f865adce90fc4b3bc6d3b5514",
     "passed": true,
-    "scope": "LINUX_X64_NODE22_PG16_SAME_SHA_BUILT_API_WEB_ADMIN_THREE_ACTOR_MFA_AR_EN",
+    "scope": "LINUX_SAME_SHA_THREE_ACTOR_MFA_AR_EN_EDITORIAL_AR_PUBLIC",
     "cleanupPassed": true,
-    "drainMilliseconds": 142,
     "allActorSessionsRevoked": true,
-    "requestBudget": {
-      "maximumRequests": 60,
-      "windowMilliseconds": 61000,
-      "count": 450,
-      "delayed": 245,
-      "maximumDelayMilliseconds": 29377,
-      "serverLimitsChanged": false,
-      "rejectedRequestsRetried": false
-    },
-    "report": "docs/remediation/POST28_R14_LINUX_CMS_2026-10-21.md",
-    "evidence": "docs/reviews/evidence/post28/6f7b68572f007a45d10263759800d8cbbfd49135/r14-linux-cms-runtime/evidence-index.json",
+    "evidence": "docs/reviews/evidence/post28/8e001c92a97e0e2f865adce90fc4b3bc6d3b5514/repaired-rollback-reference/index.json",
     "formalAcceptance": false
   },
   "repetitionScope": "Affected local profile and boundary tests plus automatic full source CI after tooling commits; no manual repeat of unaffected local R05-R13 suites",
@@ -390,9 +379,16 @@
     "linuxRunId": 39661105241,
     "linuxJobId": 119434011909,
     "linuxDatabaseAndNetworkCleanupVerified": true,
-    "allSixCurrentCiJobsObservedSuccessful": false,
+    "allSixCurrentCiJobsObservedSuccessful": true,
     "linuxEvidence": "docs/reviews/evidence/post28/8e001c92a97e0e2f865adce90fc4b3bc6d3b5514/staging-worker-linux"
   },
   "currentRuntimeRequiresNewCandidate": true,
-  "pinnedRollbackPairCurrentStatus": "BLOCKED_RUNTIME_COMPATIBILITY_REVIEW_REQUIRED"
+  "pinnedRollbackPairCurrentStatus": "REPAIRED_REFERENCE_PINNED_NEXT_SCOPED_DRILL_PENDING",
+  "latestRepairedRuntimeCi": {
+    "sourceSha": "8e001c92a97e0e2f865adce90fc4b3bc6d3b5514",
+    "runId": 39661105241,
+    "allSixSucceeded": true,
+    "formalAcceptance": false
+  },
+  "currentRuntimeCandidateSourceSha": "8e001c92a97e0e2f865adce90fc4b3bc6d3b5514"
 }

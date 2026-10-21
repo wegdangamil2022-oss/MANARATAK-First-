@@ -1,0 +1,13 @@
+{
+  "sourceSha": "8e001c92a97e0e2f865adce90fc4b3bc6d3b5514",
+  "previousSourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+  "status": "BLOCKED_RUNTIME_COMPATIBILITY_REVIEW_REQUIRED",
+  "eligible": false,
+  "changedRuntimePaths": [
+    "packages/infrastructure/src/finance-platform/PrismaFinanceRepository.ts"
+  ],
+  "rollbackExecuted": false,
+  "rollbackPassed": false,
+  "formalAcceptance": false,
+  "productionAuthorized": false
+}

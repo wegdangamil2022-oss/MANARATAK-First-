@@ -256,7 +256,7 @@ jobs:
         run: |
           mkdir "$RUNNER_TEMP/r14-rollback"
           cp -a "$RUNNER_TEMP/r07-linux/artifacts" "$RUNNER_TEMP/r07-linux/linux-image-probe.json" "$RUNNER_TEMP/r14-rollback/"
-          gh run download 39599847197 --repo "$GITHUB_REPOSITORY" -n "manaratak-release-artifacts-fb1a375eba5d09d3f7a01d5515270ed2cf011280" -D "$RUNNER_TEMP/r14-rollback/previous-artifacts"
+          gh run download 39661105241 --repo "$GITHUB_REPOSITORY" -n "manaratak-release-artifacts-8e001c92a97e0e2f865adce90fc4b3bc6d3b5514" -D "$RUNNER_TEMP/r14-rollback/previous-artifacts"
       - name: Exercise scoped Linux API rollback and forward recovery with real signals
         if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation' && steps.rollback-eligibility.outputs.eligible == 'true'
         env:

@@ -2,11 +2,12 @@ import assert from 'node:assert/strict';
 import { requireSha, DIGEST } from './ReleaseContracts.mjs';
 
 // Independently retrieved successful run and manifest digest; includes the
-// authenticated-certificate and worker-health fixes absent from older candidates.
+// authenticated-certificate, worker-health and financial alias fixes. This is a
+// reference for the next scoped drill, not a claim that its rollback has passed.
 export const R14_PREVIOUS_RELEASE = Object.freeze({
-  runId: 39599847197,
-  sourceSha: 'fb1a375eba5d09d3f7a01d5515270ed2cf011280',
-  manifestSha256: 'f17c7d7a33efa90f51618fcb602e0f6a414cd62bef45e6bb43ffdfade0397c71',
+  runId: 39661105241,
+  sourceSha: '8e001c92a97e0e2f865adce90fc4b3bc6d3b5514',
+  manifestSha256: 'a95d1163305610383a89ab15285907251b4aacf2f79720afe91896ccfc55481b',
 });
 
 export function assertRollbackPair(current, previous, proof) {

@@ -1,0 +1,14 @@
+{
+  "sourceSha": "8e001c92a97e0e2f865adce90fc4b3bc6d3b5514",
+  "runId": 39661105241,
+  "manifestSha256": "a95d1163305610383a89ab15285907251b4aacf2f79720afe91896ccfc55481b",
+  "allSixCiJobsSucceeded": true,
+  "currentRuntimeInputsUnchanged": true,
+  "referenceContainsFinancialRepair": true,
+  "previousRollbackActionBlocked": true,
+  "newlyPinnedPairExecuted": false,
+  "formalAcceptance": false,
+  "productionAuthorized": false,
+  "manifestDigestSource": "DIGEST_VERIFIED_GITHUB_ARTIFACT_RETRIEVAL_RECEIPT",
+  "fullArchiveLocalDownloadClaimed": false
+}

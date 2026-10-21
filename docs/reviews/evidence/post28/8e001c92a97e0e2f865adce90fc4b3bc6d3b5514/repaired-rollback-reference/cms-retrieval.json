@@ -1,0 +1,12 @@
+{
+  "runId": 39661105241,
+  "artifactId": 12376506304,
+  "name": "r14-admin-cms-8e001c92a97e0e2f865adce90fc4b3bc6d3b5514",
+  "bytes": 528032,
+  "digest": "sha256:249d30259bf592a638375dc2148018931742e14d5fd1c5ce6398dbe8b0243f73",
+  "serverDigestVerified": true,
+  "transport": "CURL_NORMAL_TLS",
+  "safePathsChecked": true,
+  "credentialsRetained": false,
+  "observedAt": "2026-10-21T19:44:12.438Z"
+}
