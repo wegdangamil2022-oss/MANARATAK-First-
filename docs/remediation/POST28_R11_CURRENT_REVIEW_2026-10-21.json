@@ -46,7 +46,7 @@
   "databaseConnected": false,
   "externalProviderEnabled": false,
   "evidence": "docs/reviews/evidence/post28/2934821ae7de16fd65531c5df41684eb104a8e5c/r11-current-review/evidence-index.json",
-  "next": "CURRENT_FIX_CI_THEN_R12_REVIEW",
+  "next": "SCOPED_LINUX_ROLLBACK_THEN_REMAINING_RELEASE_BLOCKERS",
   "latestAdminCmsLocalDiagnostic": {
     "completed": true,
     "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
@@ -57,6 +57,30 @@
     "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
     "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
   },
-  "fullAdminCmsMfaJourneyScope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
-  "fullAdminCmsUnifiedLinuxJourneyCompleted": false
+  "fullAdminCmsMfaJourneyScope": "AR_PUBLIC_AND_AR_EN_EDITORIAL_UNIFIED_LINUX_SAME_SHA",
+  "fullAdminCmsUnifiedLinuxJourneyCompleted": true,
+  "latestAdminCmsLinuxDiagnostic": {
+    "sourceSha": "6f7b68572f007a45d10263759800d8cbbfd49135",
+    "passed": true,
+    "scope": "LINUX_X64_NODE22_PG16_SAME_SHA_BUILT_API_WEB_ADMIN_THREE_ACTOR_MFA_AR_EN",
+    "cleanupPassed": true,
+    "drainMilliseconds": 142,
+    "allActorSessionsRevoked": true,
+    "requestBudget": {
+      "maximumRequests": 60,
+      "windowMilliseconds": 61000,
+      "count": 450,
+      "delayed": 245,
+      "maximumDelayMilliseconds": 29377,
+      "serverLimitsChanged": false,
+      "rejectedRequestsRetried": false
+    },
+    "report": "docs/remediation/POST28_R14_LINUX_CMS_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/6f7b68572f007a45d10263759800d8cbbfd49135/r14-linux-cms-runtime/evidence-index.json",
+    "formalAcceptance": false,
+    "publicTemplateLocales": [
+      "ar"
+    ],
+    "publicEnglishReleaseAccepted": false
+  }
 }

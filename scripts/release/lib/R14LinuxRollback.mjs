@@ -42,11 +42,11 @@ export function linuxApiSwitcher({ docker, state, apiEnv, apiEnvFile, target, pr
   };
 }
 
-export async function exerciseLinuxRollback({ page, origin, db, email, password, fixtureId, current, previous, switcher }) {
+export async function exerciseLinuxRollback({ page, origin, db, migrationObserver, email, password, fixtureId, current, previous, switcher }) {
   const protectedTables = ['_prisma_migrations', 'FinancialLedgerEntryRecord', 'FinanceInvoiceRecord', 'Certificate', 'StudentPrivacyConsentDecision', 'StudentApplicationDocumentBinding', 'CmsPublishedContent', 'AuditRecord', 'TransactionalOutboxRecord', 'ApiIdempotencyRecord'];
   const fingerprint = async () => {
     const result = {};
-    for (const table of protectedTables) result[table] = await db.$queryRawUnsafe('SELECT id, encode(sha256(convert_to(to_jsonb(t)::text,\'UTF8\')),\'hex\') AS sha256 FROM public."' + table + '" t ORDER BY id');
+    for (const table of protectedTables) result[table] = table === '_prisma_migrations' ? await migrationObserver.fingerprint() : await db.$queryRawUnsafe('SELECT id, encode(sha256(convert_to(to_jsonb(t)::text,\'UTF8\')),\'hex\') AS sha256 FROM public."' + table + '" t ORDER BY id');
     return result;
   };
   const preserved = (before, after) => {

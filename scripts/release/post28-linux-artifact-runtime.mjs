@@ -41,9 +41,9 @@ if(image.sourceSha!==sha||!/^sha256:[a-f0-9]{64}$/.test(image.imageId))throw Err
 const proof=path.join(run,'linux-runtime-proof');fs.mkdirSync(proof,{mode:0o700});
 const hash=value=>createHash('sha256').update(value).digest('hex');
 const dockerEnv={...process.env};for(const key of ['DOCKER_HOST','DOCKER_CONTEXT','DOCKER_TLS','DOCKER_TLS_VERIFY','DOCKER_CERT_PATH'])delete dockerEnv[key];
-const docker=args=>execFileSync('docker',['--host=unix:///var/run/docker.sock',...args],{env:dockerEnv,encoding:'utf8',timeout:45000,maxBuffer:4*1024*1024}).trim();
+const docker=(args,input)=>execFileSync('docker',['--host=unix:///var/run/docker.sock',...args],{env:dockerEnv,input,encoding:'utf8',timeout:45000,maxBuffer:4*1024*1024}).trim();
 const baseEnv={PATH:process.env.PATH,HOME:process.env.HOME,NODE_ENV:'test',POST28_LOCAL_LAB_CREATE:'YES',POST28_LOCAL_LAB_PROFILE:'transactions',POST28_LOCAL_LAB_STORAGE:'tmpfs',POST28_LAB_ROOT:path.join(run,'private-labs')};
-let state,env={},db,apiId,browser,gateway,forwarder,combined,rollbackImage,apiTarget,failure=null;
+let state,env={},db,apiId,browser,gateway,forwarder,combined,rollbackImage,apiTarget,migrationObserver,failure=null;
 const secrets=[],observations=[],network=[],pageErrors=[],consoleErrors=[],children=[];
 const redact=value=>secrets.reduce((text,secret)=>text.replaceAll(secret,'[REDACTED]'),String(value)).replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]');
 const report={kind:'POST28_R07_LINUX_ARTIFACT_RUNTIME',sourceSha:sha,imageId:image.imageId,node:process.version,environment:'DISPOSABLE',providerMode:'NO_EXTERNAL_EGRESS',observations,network,pageErrors,consoleErrors,productionAcceptance:false,formalR07Acceptance:false,promotionAuthorized:false};
@@ -87,6 +87,13 @@ try{
   assert.equal(roles[0].role,'post28_app');for(const key of ['rolsuper','rolcreatedb','rolcreaterole','rolreplication','rolbypassrls'])assert.equal(roles[0][key],false);
   const privileges=await db.$queryRaw`SELECT has_schema_privilege(current_user,'public','CREATE') AS ddl, has_table_privilege(current_user,'public._prisma_migrations','UPDATE') AS ledger`;
   assert.equal(privileges[0].ddl,false);assert.equal(privileges[0].ledger,false);report.applicationRole={...roles[0],...privileges[0]};
+  if(r14Rollback){
+    const [rights]=await db.$queryRaw`SELECT has_table_privilege(current_user,'public._prisma_migrations','SELECT') AS ledger_read`;
+    assert.equal(rights.ledger_read,false);report.applicationRole.ledgerRead=false;
+    const {provisionMigrationObserver}=await import('./lib/R14MigrationObserver.mjs');
+    migrationObserver=await provisionMigrationObserver({docker,state,applicationUrl:env.DATABASE_URL,secrets,PrismaClient});
+    report.migrationObserverRole=migrationObserver.identity;
+  }
   if(r09Learner){
     const [rights]=await db.$queryRaw`SELECT has_table_privilege(current_user,'public."CourseLessonProgress"','INSERT') AS insert, has_table_privilege(current_user,'public."CourseLessonProgress"','UPDATE') AS update, has_table_privilege(current_user,'public."CourseLessonProgress"','DELETE') AS delete`;
     assert.equal(rights.insert,true);assert.equal(rights.update,true);assert.equal(rights.delete,false);report.learnerProgressPrivileges=rights;
@@ -149,7 +156,7 @@ try{
     observations.push({step:'R14_SAME_SHA_THREE_ACTOR_MFA_AR_EN_CMS_LIFECYCLE',passed:true});report.redisConfigured=false;
   }else if(r14Rollback){
     const switcher=rollbackTools.linuxApiSwitcher({docker,state,apiEnv,apiEnvFile,target:apiTarget,proof,redact,initialId:apiId,onStarted:id=>{apiId=id;}});
-    report.rollbackJourney=await rollbackTools.exerciseLinuxRollback({page,origin,db,email,password,fixtureId,current:{sourceSha:sha,imageId:image.imageId},previous:{sourceSha:rollbackImage.previousSourceSha,imageId:rollbackImage.imageId},switcher});
+    report.rollbackJourney=await rollbackTools.exerciseLinuxRollback({page,origin,db,migrationObserver,email,password,fixtureId,current:{sourceSha:sha,imageId:image.imageId},previous:{sourceSha:rollbackImage.previousSourceSha,imageId:rollbackImage.imageId},switcher});
     observations.push({step:'R14_REAL_SIGTERM_CURRENT_PREVIOUS_CURRENT_SESSION_CSRF_RECEIPT_CONTINUITY',passed:true});report.redisConfigured=false;
   }else if(combined){
     report.combinedAuth=await combined.exercise({page,origin,email,password,db,fixtureId});
@@ -183,6 +190,7 @@ try{
 }catch(error){failure=redact(error.message);process.exitCode=1;}
 finally{
   await browser?.close().catch(()=>{});await db?.$disconnect().catch(()=>{});
+  await migrationObserver?.disconnect().catch(()=>{});
   for(const item of children){if(item.child.exitCode===null&&item.child.signalCode===null){const exit=new Promise(resolve=>item.child.once('exit',resolve));item.child.kill('SIGTERM');await exit;}fs.writeFileSync(path.join(proof,'gateway.log'),redact(item.log()),{flag:'wx'});}
   forwarder?.close();
   const cleanup={ownedContainerStopped:false,ownedContainerRemoved:false,postgresStopped:false,postgresRemoved:false,networkRemoved:false,existingDatabasesTouched:false};

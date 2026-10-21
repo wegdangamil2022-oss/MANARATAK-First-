@@ -42,7 +42,7 @@
     "R13-E05"
   ],
   "evidence": "docs/reviews/evidence/post28/cbe2ff2d0e3ba881361fcbe42133af500cd4c331/r13-current-review/evidence-index.json",
-  "next": "SECURE_PRIVATE_DELIVERY_THEN_REMAINING_RELEASE_BLOCKERS_NO_AUTOMATIC_GO",
+  "next": "REMAINING_RELEASE_BLOCKERS_NO_AUTOMATIC_GO",
   "latestAdminCmsLocalDiagnostic": {
     "completed": true,
     "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
@@ -85,13 +85,101 @@
     "instantRevocationOfPreviouslyIssuedGrant": false,
     "openFinding": {
       "id": "R14-DELIVERY-01",
-      "state": "OPEN_RELEASE_REVIEW",
+      "state": "IMPLEMENTATION_FIXED_DEPLOYMENT_TRANSITION_PENDING",
       "observed": "Provider bearer URL issued before revocation returned200 afterward, within its original max300s TTL",
       "impact": "Revocation does not invalidate capabilities already disclosed to a caller",
       "requiredBeforeClaimingInstantRevocation": "Authenticated server content delivery with current certificate checks before and after IO, or proven provider capability fencing tied to certificate revocation",
       "currentContract": "Temporary provider-signed URLs with bounded TTL; no existing instant invalidation protocol proved",
-      "productionScopeAccepted": false
+      "productionScopeAccepted": false,
+      "implementationResolution": {
+        "state": "IMPLEMENTATION_FIXED_DEPLOYMENT_TRANSITION_PENDING",
+        "implementationSourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
+        "currentComparedSourceSha": "784c0764a978209f68f8954ecd9de223d8a93745",
+        "deliveryContract": "AUTHENTICATED_BOUNDED_STREAM_RECHECKED_BEFORE_AND_AFTER_IO",
+        "genericCertificateProviderGrantsDisabled": true,
+        "previousCapabilitiesInvalidated": false,
+        "deploymentTransitionRequiredIfPresent": true,
+        "report": "docs/remediation/POST28_AUTHENTICATED_CERTIFICATE_DELIVERY_2026-10-21.md",
+        "unchangedImplementationFiles": [
+          {
+            "file": "apps/api/src/presentation/api/router/AssetPlatformRouter.ts",
+            "sha256": "dc640abcfa26061d0ea01ae5683d6799dcb8fa54e9dcfcdf13bad780e03a550f"
+          },
+          {
+            "file": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts",
+            "sha256": "b1bc2c3a0cfb9c49f2b4d44e11f8eab8b989a64d2b10c15f7c74f72d69d66d66"
+          },
+          {
+            "file": "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts",
+            "sha256": "8e6ef21fe92205ecfefe4723dfbd01b34db3c4d900caf515ffd5f16fc698b21f"
+          },
+          {
+            "file": "packages/application/src/asset-platform/use-cases/ProcessAssetLifecycleUseCase.ts",
+            "sha256": "e64d4c2df6f1ec038f22d291ea2d2fcdc39241f7f8acf167639a2b4860757b6a"
+          },
+          {
+            "file": "packages/application/src/certificates/services/CertificateArtifactDelivery.ts",
+            "sha256": "7ec1c0e2b570232354d5345d187560e54f1b0ed955790003eb251f10c5853eca"
+          },
+          {
+            "file": "apps/web/src/api/client.ts",
+            "sha256": "5fee7cd6311c6d178911c6aa5db2330d9cc0cf05215f153dd21b7cc4e5b77cd2"
+          },
+          {
+            "file": "apps/web/src/features/certificates/StudentCertificateActions.tsx",
+            "sha256": "29970bb0258b2e018d8837fb67550466662470f05d4480f68339362ac564620d"
+          },
+          {
+            "file": "apps/admin/src/pages/CertificateDetailPage.tsx",
+            "sha256": "f758e78a580c6cfb3ba65d52ef070fb25199cd3752bd115cfa9b040996274883"
+          }
+        ],
+        "sourceEqualityIsNotNewRuntimeProof": true
+      }
     },
     "formalAcceptance": false
+  },
+  "latestAuthenticatedCertificateDeliveryDiagnostic": {
+    "sourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
+    "frontendSourceSha": "e2ff681738c99e143fbf2ea2219b85a307142d60",
+    "localBehaviorPassed": true,
+    "newAuthenticatedDelivery": "FIXED_AND_LOCAL_RUNTIME_VERIFIED",
+    "previousProviderCapabilities": "DEPLOYMENT_TRANSITION_STILL_REQUIRED_IF_PRESENT",
+    "report": "docs/remediation/POST28_AUTHENTICATED_CERTIFICATE_DELIVERY_2026-10-21.md",
+    "ci": {
+      "sourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
+      "runId": 39527255949,
+      "status": "completed",
+      "result": "success",
+      "passedJobs": 6,
+      "allSixJobsSucceeded": true,
+      "observedAtUtc": "2026-10-21T12:06:52.306Z",
+      "evidence": "docs/reviews/evidence/post28/7f26fb5753338090bc434ee3f3fe1eccb4020f83/r14-authenticated-ci/ci-six-jobs-completed.json"
+    },
+    "formalAcceptance": false
+  },
+  "latestAdminCmsLinuxDiagnostic": {
+    "sourceSha": "6f7b68572f007a45d10263759800d8cbbfd49135",
+    "passed": true,
+    "scope": "LINUX_X64_NODE22_PG16_SAME_SHA_BUILT_API_WEB_ADMIN_THREE_ACTOR_MFA_AR_EN",
+    "cleanupPassed": true,
+    "drainMilliseconds": 142,
+    "allActorSessionsRevoked": true,
+    "requestBudget": {
+      "maximumRequests": 60,
+      "windowMilliseconds": 61000,
+      "count": 450,
+      "delayed": 245,
+      "maximumDelayMilliseconds": 29377,
+      "serverLimitsChanged": false,
+      "rejectedRequestsRetried": false
+    },
+    "report": "docs/remediation/POST28_R14_LINUX_CMS_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/6f7b68572f007a45d10263759800d8cbbfd49135/r14-linux-cms-runtime/evidence-index.json",
+    "formalAcceptance": false,
+    "publicTemplateLocales": [
+      "ar"
+    ],
+    "publicEnglishReleaseAccepted": false
   }
 }

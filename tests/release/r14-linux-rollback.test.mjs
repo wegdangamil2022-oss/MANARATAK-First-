@@ -2,6 +2,16 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { assertRollbackPair, R14_PREVIOUS_RELEASE } from '../../scripts/release/lib/R14RollbackContracts.mjs';
 import { linuxApiSwitcher } from '../../scripts/release/lib/R14LinuxRollback.mjs';
+import { provisionMigrationObserver } from '../../scripts/release/lib/R14MigrationObserver.mjs';
+
+test('migration observer provisioning refuses any PostgreSQL container outside its disposable lab', async () => {
+  for (const labels of [{ 'codex.post28.run': 'other', 'codex.post28.scope': 'DISPOSABLE' }, { 'codex.post28.run': 'owned', 'codex.post28.scope': 'PRODUCTION' }]) {
+    const commands = [];
+    const docker = args => { commands.push(args); return JSON.stringify([{ Config: { Labels: labels } }]); };
+    await assert.rejects(() => provisionMigrationObserver({ docker, state: { containerId: 'pg', runId: 'owned' } }));
+    assert.deepEqual(commands, [['inspect', 'pg']]);
+  }
+});
 
 test('rollback rejects unverified provenance and runtime/schema changes before creating a lab', () => {
   const runtimeRequirements = { lockSha256: 'a'.repeat(64), prismaSchemaSha256: 'b'.repeat(64), externalModules: ['@prisma/client'] };

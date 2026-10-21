@@ -1,0 +1,53 @@
+{
+  "sourceSha": "784c0764a978209f68f8954ecd9de223d8a93745",
+  "runId": 39640721889,
+  "observedAt": "2026-10-21T17:30:04.302Z",
+  "jobs": [
+    {
+      "id": 119363675033,
+      "name": "Translation quality gates",
+      "status": "completed",
+      "conclusion": "success",
+      "activeOrFailedSteps": []
+    },
+    {
+      "id": 119363675475,
+      "name": "Full source closure gates",
+      "status": "completed",
+      "conclusion": "success",
+      "activeOrFailedSteps": []
+    },
+    {
+      "id": 119363675566,
+      "name": "Deployment configuration",
+      "status": "completed",
+      "conclusion": "success",
+      "activeOrFailedSteps": []
+    },
+    {
+      "id": 119363675901,
+      "name": "R08 isolated Redis and Linux worker shutdown",
+      "status": "completed",
+      "conclusion": "success",
+      "activeOrFailedSteps": []
+    },
+    {
+      "id": 119369274421,
+      "name": "Retrieve and verify immutable artifacts from Actions storage",
+      "status": "completed",
+      "conclusion": "success",
+      "activeOrFailedSteps": []
+    },
+    {
+      "id": 119369548810,
+      "name": "Linux x64 review image and native runtime",
+      "status": "completed",
+      "conclusion": "failure",
+      "activeOrFailedSteps": [
+        "Exercise scoped Linux API rollback and forward recovery with real signals"
+      ]
+    }
+  ],
+  "allSixSucceeded": false,
+  "formalAcceptance": false
+}

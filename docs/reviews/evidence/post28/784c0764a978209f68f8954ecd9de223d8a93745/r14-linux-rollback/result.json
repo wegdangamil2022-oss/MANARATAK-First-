@@ -1,0 +1,106 @@
+{
+  "kind": "POST28_R14_LINUX_API_ROLLBACK",
+  "sourceSha": "784c0764a978209f68f8954ecd9de223d8a93745",
+  "imageId": "sha256:8ad1fa1a7a4fc8f9576eb7fd52e2c7a02048c94cab74df12e489570fa39de297",
+  "node": "v22.16.0",
+  "environment": "DISPOSABLE",
+  "providerMode": "NO_EXTERNAL_EGRESS",
+  "observations": [
+    {
+      "step": "REVISION_READINESS",
+      "route": "/health/build",
+      "status": 200,
+      "sourceSha": "784c0764a978209f68f8954ecd9de223d8a93745"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/admin/health/build",
+      "status": 200,
+      "sourceSha": "784c0764a978209f68f8954ecd9de223d8a93745"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/api/v1/monitoring/health/readiness",
+      "status": 200,
+      "sourceSha": "784c0764a978209f68f8954ecd9de223d8a93745"
+    }
+  ],
+  "network": [
+    {
+      "method": "GET",
+      "path": "/health/build",
+      "status": 200,
+      "resource": "document"
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "productionAcceptance": false,
+  "formalR07Acceptance": false,
+  "promotionAuthorized": false,
+  "rollbackImage": {
+    "currentSourceSha": "784c0764a978209f68f8954ecd9de223d8a93745",
+    "previousSourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+    "sharedLockedDependencyLayer": true,
+    "differentApiImplementationDemonstrated": false,
+    "downMigrationsAllowed": false,
+    "formalAcceptance": false,
+    "imageId": "sha256:56aefb0345fe8a6304d72cbcf858dae346f457e53db9317d87abe9fbd4a684b2",
+    "previousManifestSha256": "f17c7d7a33efa90f51618fcb602e0f6a414cd62bef45e6bb43ffdfade0397c71",
+    "previousApiArtifactSha256": "af2b7f37632e20e1f178d068593466066dd73bd24279b433c8a160e63233d510",
+    "nativeProbe": {
+      "sourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+      "nativeLoaded": true,
+      "modules": [
+        "@node-rs/xxhash",
+        "@prisma/client",
+        "cors",
+        "express",
+        "fontkit",
+        "helmet",
+        "pdfkit",
+        "svg-to-pdfkit",
+        "uuid"
+      ],
+      "stageAccepted": false
+    },
+    "previousRuntimeBooted": false
+  },
+  "databaseIdentity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7699174728513994797",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "applicationRole": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolreplication": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledger": false
+  },
+  "browserVersion": "151.0.7922.34",
+  "cleanup": {
+    "ownedContainerStopped": true,
+    "ownedContainerRemoved": true,
+    "postgresStopped": true,
+    "postgresRemoved": true,
+    "networkRemoved": true,
+    "existingDatabasesTouched": false,
+    "apiExitCode": 0,
+    "drainMilliseconds": 273
+  },
+  "failure": "\nInvalid `prisma.$queryRawUnsafe()` invocation:\n\n\nRaw query failed. Code: `42501`. Message: `ERROR: permission denied for table _prisma_migrations`",
+  "passed": false,
+  "completedAt": "2026-10-21T17:30:25.774Z"
+}

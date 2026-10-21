@@ -1,0 +1,35 @@
+{
+  "kind": "R14_SCOPED_LINUX_ROLLBACK_EVIDENCE",
+  "sourceSha": "784c0764a978209f68f8954ecd9de223d8a93745",
+  "passed": false,
+  "allSixCiSucceeded": false,
+  "items": [
+    {
+      "file": "certificate-source-reconciliation.json",
+      "bytes": 1672,
+      "sha256": "c1f84924f016e4b610527068da653bfca07e045b0677df9f27f79cd76097b5e1"
+    },
+    {
+      "file": "ci-observation.json",
+      "bytes": 1407,
+      "sha256": "201e43b64c58f1265908ed25065da7a9dbbe4531a6f0125a77727ff06fe39b47"
+    },
+    {
+      "file": "result.json",
+      "bytes": 3205,
+      "sha256": "27a2496035661157892a5ebe95e185d22d56043d464bca34a7e0e3375e2af7d4"
+    },
+    {
+      "file": "retrieval.json",
+      "bytes": 397,
+      "sha256": "b45dec9b0ad28389d191c2ec88ee711646829da55e4a4fbefb01866ed13aaed5"
+    },
+    {
+      "file": "superseded-doc-ci.json",
+      "bytes": 335,
+      "sha256": "3eeffaaa41f42bfd656752be6f3a051b30e8098f320bcc34f016c1ec755fc2ad"
+    }
+  ],
+  "formalAcceptance": false,
+  "productionAcceptance": false
+}

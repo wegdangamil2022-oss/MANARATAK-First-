@@ -1,0 +1,12 @@
+{
+  "runId": 39640721889,
+  "artifactId": 12365743653,
+  "name": "r14-rollback-784c0764a978209f68f8954ecd9de223d8a93745",
+  "bytes": 4537,
+  "digest": "sha256:1494c73157e4b12567f61ebfc04cba478163e93c277b04ff98932569ed276dbf",
+  "serverDigestVerified": true,
+  "transport": "CURL_NORMAL_TLS",
+  "safePathsChecked": true,
+  "credentialsRetained": false,
+  "observedAt": "2026-10-21T17:30:13.857Z"
+}

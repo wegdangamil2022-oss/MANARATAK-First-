@@ -35,3 +35,5 @@ docs/reviews/evidence/post28/*/r14-worker-route-faults/** -text whitespace=cr-at
 docs/reviews/evidence/post28/*/r14-linux-cms-preparation/** -text whitespace=cr-at-eol,-blank-at-eof
 
 docs/reviews/evidence/post28/*/r14-linux-cms-runtime/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/r14-linux-rollback/** -text whitespace=cr-at-eol,-blank-at-eof
