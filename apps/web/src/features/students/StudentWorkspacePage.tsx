@@ -806,23 +806,12 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
         {tab === 'SERVICES' && (
           <div className="mn-student-services-page space-y-5 font-['Cairo',sans-serif]">
 
-            {serviceError && (
-              <div className="space-y-2">
-                <Alert tone="error" message={serviceError} />
-                <button type="button" onClick={() => setRetryKey(value => value + 1)} className="inline-flex min-h-9 items-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-1.5 text-[12px] font-bold text-[var(--mn-heading)]">
-                  إعادة تحميل الطلبات
-                </button>
-              </div>
-            )}
-            {invoiceError && <Alert tone="error" message={invoiceError} />}
-            {serviceError && !sectionFailures.includes('الفواتير') && (
-              <div className="mn-student-services-fallback-invoices">
-                <InvoicePanel invoices={invoices} paymentsByInvoice={paymentsByInvoice} onToggle={toggleInvoicePayments} compactSummary />
-              </div>
-            )}
-            {!serviceLoading && !serviceError && (
-              <ServiceRequestsView
-                requests={serviceRequests}
+            <ServiceRequestsView
+                requests={serviceError ? [] : serviceRequests}
+                serviceLoading={serviceLoading}
+                serviceError={serviceError}
+                invoiceError={invoiceError}
+                onRetry={() => setRetryKey(value => value + 1)}
                 statusFilter={serviceStatus}
                 onStatusFilterChange={setServiceStatus}
                 totalRequests={serviceTotal}
@@ -834,8 +823,6 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
                 paymentsByInvoice={paymentsByInvoice}
                 onTogglePayments={toggleInvoicePayments}
               />
-            )}
-            {selectedServiceRequest && <StudentServiceBookingPanel requestId={selectedServiceRequest.id} />}
             <div className="flex flex-wrap items-center justify-center gap-2">
               {serviceHasMore && (
                 <button type="button" disabled={serviceLoading} onClick={() => void loadMoreServices()} className="min-h-9 rounded-lg bg-[var(--mn-primary)] px-3.5 py-1.5 text-[12px] font-bold text-white disabled:opacity-50">
@@ -2364,6 +2351,10 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 
 function ServiceRequestsView({
   requests,
+  serviceLoading,
+  serviceError,
+  invoiceError,
+  onRetry,
   statusFilter,
   onStatusFilterChange,
   totalRequests,
@@ -2376,6 +2367,10 @@ function ServiceRequestsView({
   onTogglePayments,
 }: {
   requests: StudentServiceRequestDto[];
+  serviceLoading: boolean;
+  serviceError: string | null;
+  invoiceError: string | null;
+  onRetry: () => void;
   statusFilter: string;
   onStatusFilterChange: (nextStatus: string) => void;
   totalRequests: number;
@@ -2511,8 +2506,33 @@ function ServiceRequestsView({
         </nav>
       )}
 
+      {serviceError && (
+        <div className="space-y-2" role="alert">
+          <Alert tone="error" message={serviceError} />
+          <button type="button" onClick={onRetry} className="inline-flex min-h-9 items-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-1.5 text-[12px] font-bold text-[var(--mn-heading)]">
+            إعادة تحميل الطلبات
+          </button>
+        </div>
+      )}
+      {invoiceError && <Alert tone="error" message={invoiceError} />}
+
+      {/* Loading doesn't unmount the main view, so the active tab stays selected. */}
+      {serviceLoading && (
+        <p role="status" className="rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-[11px] font-semibold text-[var(--mn-text-muted)]">
+          جارٍ تحديث الطلبات…
+        </p>
+      )}
+
       {/* 3. Main Content View */}
-      {!hasAnyRequestsOrInvoices ? (
+      {serviceLoading && activeTab === 'REQUESTS' ? (
+        <div role="status" className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 text-center text-[12px] font-semibold text-[var(--mn-text-muted)]">
+          جارٍ تحميل بيانات الطلبات…
+        </div>
+      ) : !hasAnyRequestsOrInvoices && serviceError ? (
+        <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 text-center text-[12px] text-[var(--mn-text-muted)]">
+          تعذر جلب الطلبات حاليًا. يمكنك إعادة المحاولة دون فقدان اختيارك.
+        </div>
+      ) : !hasAnyRequestsOrInvoices ? (
         <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 sm:p-8 text-center mn-panel shadow-2xs">
           <div className="w-12 h-12 rounded-2xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/40 flex items-center justify-center text-[#E5B54F] mx-auto mb-3.5 shadow-xs">
             <ClipboardList className="w-6 h-6 text-[#E5B54F]" />
@@ -2922,6 +2942,9 @@ function ServiceRequestsView({
             </div>
           )}
         </ServiceSectionCard>
+      )}
+      {activeTab === 'REQUESTS' && selected && !serviceLoading && (
+        <StudentServiceBookingPanel requestId={selected.id} />
       )}
     </div>
   );
