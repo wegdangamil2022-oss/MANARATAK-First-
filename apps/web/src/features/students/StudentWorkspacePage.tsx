@@ -1301,13 +1301,6 @@ function OpportunitiesView({
     return trackers;
   }, [filter, activeTrackers, archivedTrackers, trackers]);
 
-  const totalTasks = trackers.reduce((total, item) => total + item.checklist.length, 0);
-  const completedTasks = trackers.reduce(
-    (total, item) => total + item.checklist.filter((task) => task.completed).length,
-    0,
-  );
-  const journeyProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-
   const upcomingDeadlines = useMemo(() => {
     return activeTrackers
       .filter((t) => t.deadlineAt || t.owner?.deadlineAt)
@@ -1327,6 +1320,9 @@ function OpportunitiesView({
     (total, item) => total + item.checklist.filter((task) => task.completed).length,
     0,
   );
+  const activeTaskProgress = activeTaskCount > 0
+    ? Math.round((activeCompletedCount / activeTaskCount) * 100)
+    : 0;
   const activeFileDescription = activeTrackers.length === 1
     ? 'لديك ملف تقديم نشط واحد'
     : activeTrackers.length === 2
@@ -1372,7 +1368,7 @@ function OpportunitiesView({
               <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">تقديم نشط</div>
             </div>
             <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel">
-              <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{activeTaskCount ? Math.round((activeCompletedCount / activeTaskCount) * 100) : 0}%</div>
+              <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{activeTaskProgress}%</div>
               <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">إنجاز المهام ({activeCompletedCount}/{activeTaskCount})</div>
             </div>
             <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel">
@@ -1506,7 +1502,7 @@ function OpportunitiesView({
             {/* Application Progress Summary */}
             <OpportunitiesSectionCard title="حصيلة التقديم" icon={<ClipboardList className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}>
               <div className="space-y-4">
-                <ProgressRow label="إنجاز مهام التقديم" value={journeyProgress} />
+                <ProgressRow label="إنجاز مهام التقديم النشطة" value={activeTaskProgress} />
                 <ProgressRow
                   label="نسبة الملفات المؤرشفة"
                   value={trackers.length ? Math.round((archivedTrackers.length / trackers.length) * 100) : 0}
