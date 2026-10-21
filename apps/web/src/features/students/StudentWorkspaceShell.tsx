@@ -185,8 +185,31 @@ export function StudentWorkspaceShell({
         </>
       )}
 
-      {/* Section detail view keeps its original content and styling. */}
-      {tab !== 'SUMMARY' && (
+      {/* Opportunities has a single, full-width indigo/petrol navigation bar.
+          Other student sections retain their existing compact heading. */}
+      {tab === 'OPPORTUNITIES' ? (
+        <nav
+          aria-label="تنقل فرصي"
+          className="mn-student-opportunities-topbar relative -mx-3 mt-2 flex min-h-[58px] w-[calc(100%+1.5rem)] items-center justify-between gap-3 overflow-hidden rounded-xl border border-[#186D7A]/50 bg-gradient-to-l from-[#163D76] via-[#0D5875] to-[#06606B] px-3.5 py-2.5 text-white shadow-2xs sm:-mx-6 sm:mt-3 sm:min-h-[62px] sm:w-[calc(100%+3rem)] sm:px-5"
+        >
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-[#E5B54F]/35 bg-[#142B5F]/65">
+              <Route className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />
+            </span>
+            <h1 className="text-[14px] font-bold leading-[1.5] text-white">فرصي</h1>
+          </div>
+          <button
+            type="button"
+            onClick={() => onTabChange('SUMMARY')}
+            title="العودة إلى ملخصي"
+            aria-label="الرجوع إلى ملخصي"
+            className="inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-white/35 bg-white/10 px-3 py-1.5 text-[12px] font-bold text-white transition-colors hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E5B54F]"
+          >
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            <span>ملخصي</span>
+          </button>
+        </nav>
+      ) : tab !== 'SUMMARY' && (
         <nav aria-label="تنقل حساب الطالب" className="mt-4 sm:mt-5 flex min-w-0 items-center justify-between gap-3 font-['Cairo',sans-serif]">
           <h1 className="min-w-0 text-[14px] font-bold text-[var(--mn-heading)]">{sectionTitle}</h1>
           <button
