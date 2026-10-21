@@ -1,10 +1,20 @@
 import {describe,it,expect,vi} from 'vitest';
 import {WorkerHealthObservation} from '../../../src/infrastructure/runtime/WorkerHealthObservation';
 import {freshWorkerEvidence} from '../../../src/presentation/monitoring/RuntimeHealthPolicy';
+import {BackgroundWorkerRuntimeState} from '../../../../../packages/application/src/background-jobs/workers/DurableBackgroundWorker';
 
 const scope={environment:'test',apiOrigin:'https://api.example.invalid',revision:'r08'};
 function redisFixture(){const values=new Map<string,string>();return {get:vi.fn(async(key:string)=>values.get(key)??null),set:vi.fn(async(key:string,value:string,_options?:unknown)=>{values.set(key,value);})};}
 describe('R08 worker health Redis boundary',()=>{
+  it('publishes a durable worker stop instead of retaining its previous healthy poll',async()=>{
+    const health=new WorkerHealthObservation(redisFixture(),scope),writes:Promise<void>[]=[];
+    const runtime=new BackgroundWorkerRuntimeState(snapshot=>{const write=health.publish('background-jobs',snapshot);writes.push(write);return write;});
+    runtime.markRunning(0);await Promise.all(writes);
+    expect(freshWorkerEvidence(await health.read('background-jobs'),15000)).toBe(true);
+    runtime.stop();await Promise.all(writes);
+    expect((await health.read('background-jobs')).state).toBe('STOPPED');
+    expect(freshWorkerEvidence(await health.read('background-jobs'),15000)).toBe(false);
+  });
   it.each([0, 1])('replaces prior healthy evidence when an IDLE background job fails %i ms after its poll',async offset=>{
     const redis=redisFixture(),health=new WorkerHealthObservation(redis,scope);
     const poll=new Date(Date.now()-100).toISOString(),error=new Date(Date.parse(poll)+offset).toISOString();

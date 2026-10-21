@@ -120,5 +120,9 @@ try {
   assert.equal(certificateCalls, 2);
   assert.deepEqual(await fingerprint(), baseline);
   await worker.drain();
-  console.log(JSON.stringify({ sourceSha: process.env.POST28_SOURCE_SHA, scope: 'WINDOWS_REAL_POSTGRES_SCHEDULER_HANDLERS_QUEUE_FAULT_BOUNDARIES', identity, finance: { retryThenCompleted: true, stableIdempotencyKey: true, failedAttemptSkippedReconcile: true }, imports: { retryThenDlq: true, attempts: 2, dlqRows: 1 }, certificates: { outboxFailureObserved: true, retryProcessed: true, stableIdempotencyKey: true }, health: { failureObservation, recoveryObservation, durableFailurePublished: true, transport: 'IN_MEMORY_REDIS_ADAPTER' }, protectedBeforeAndAfter: baseline, financialProviderCalled: false, domainUseCasesSubstituted: true, productionAcceptance: false, drain: state.snapshot().state }));
+  await flush();
+  const stopObservation = await health.read('background-jobs');
+  assert.equal(stopObservation.state, 'STOPPED');
+  assert.equal(freshWorkerEvidence(stopObservation, 15000), false);
+  console.log(JSON.stringify({ sourceSha: process.env.POST28_SOURCE_SHA, scope: 'WINDOWS_REAL_POSTGRES_SCHEDULER_HANDLERS_QUEUE_FAULT_BOUNDARIES', identity, finance: { retryThenCompleted: true, stableIdempotencyKey: true, failedAttemptSkippedReconcile: true }, imports: { retryThenDlq: true, attempts: 2, dlqRows: 1 }, certificates: { outboxFailureObserved: true, retryProcessed: true, stableIdempotencyKey: true }, health: { failureObservation, recoveryObservation, stopObservation, durableFailurePublished: true, transport: 'IN_MEMORY_REDIS_ADAPTER' }, protectedBeforeAndAfter: baseline, financialProviderCalled: false, domainUseCasesSubstituted: true, productionAcceptance: false, drain: state.snapshot().state }));
 } finally { await stopPollingWorkers(); await db.$disconnect(); }

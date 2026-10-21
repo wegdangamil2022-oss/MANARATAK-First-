@@ -8,6 +8,7 @@ export interface BackgroundWorkerRuntimeSnapshot {
   lastSuccessAt?: string;
   lastErrorAt?: string;
   lastErrorCode?: string;
+  lastStoppedAt?: string;
   inFlight: number;
   claimedTotal: number;
   completedTotal: number;
@@ -23,6 +24,7 @@ export class BackgroundWorkerRuntimeState {
   private lastSuccessAt?: Date;
   private lastErrorAt?: Date;
   private lastErrorCode?: string;
+  private lastStoppedAt?: Date;
   private inFlight = 0;
   private claimedTotal = 0;
   private completedTotal = 0;
@@ -34,7 +36,7 @@ export class BackgroundWorkerRuntimeState {
   markFailed(code: string): void { this.inFlight = Math.max(0, this.inFlight - 1); this.failedTotal++; this.lastErrorAt = new Date(); this.lastErrorCode = code; if (this.inFlight === 0 && this.state !== 'DRAINING') this.state = 'IDLE'; this.publish(); }
   markLeaseLost(): void { this.inFlight = Math.max(0, this.inFlight - 1); this.leaseLostTotal++; this.lastErrorAt = new Date(); this.lastErrorCode = 'BACKGROUND_JOB_LEASE_LOST'; if (this.inFlight === 0 && this.state !== 'DRAINING') this.state = 'IDLE'; this.publish(); }
   beginDrain(): void { this.state = 'DRAINING'; }
-  stop(): void { this.state = 'STOPPED'; this.inFlight = 0; }
+  stop(): void { this.state = 'STOPPED'; this.inFlight = 0; this.lastStoppedAt = new Date(); this.publish(); }
   snapshot(): BackgroundWorkerRuntimeSnapshot {
     return Object.freeze({
       state: this.state,
@@ -42,6 +44,7 @@ export class BackgroundWorkerRuntimeState {
       ...(this.lastSuccessAt ? { lastSuccessAt: this.lastSuccessAt.toISOString() } : {}),
       ...(this.lastErrorAt ? { lastErrorAt: this.lastErrorAt.toISOString() } : {}),
       ...(this.lastErrorCode ? { lastErrorCode: this.lastErrorCode } : {}),
+      ...(this.lastStoppedAt ? { lastStoppedAt: this.lastStoppedAt.toISOString() } : {}),
       inFlight: this.inFlight,
       claimedTotal: this.claimedTotal,
       completedTotal: this.completedTotal,
