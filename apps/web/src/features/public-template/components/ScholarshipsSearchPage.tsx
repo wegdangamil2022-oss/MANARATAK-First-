@@ -184,8 +184,10 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
     setSearchQuery('');
   }, [initialCountryReferenceId]);
 
+  // A design preview must show the full bundled scholarship card collection.
+  // The API mode continues to use only the published scholarship source.
   const scholarshipSource = dataStatus === 'prototype'
-    ? scholarships.filter((s) => s.id === 'csc-china')
+    ? scholarships
     : (countryScopedScholarships ?? scholarships);
   const resultsRef = useRef<HTMLDivElement>(null);
 

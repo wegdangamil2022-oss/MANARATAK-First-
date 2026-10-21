@@ -24,7 +24,7 @@ import { PublicCourseEntry } from './components/PublicCourseEntry';
 // Statically imported heavy route views & modals for instant tab switching and transitions
 import { GlobalSearchPage } from './components/GlobalSearchPage';
 import { ComparePage } from './components/ComparePage';
-import { FavoritesPage } from './components/FavoritesPage';
+
 import { SmartSearchPage } from './components/SmartSearchPage';
 import { ScholarshipsSearchPage } from './components/ScholarshipsSearchPage';
 import { CountriesSearchPage } from './components/CountriesSearchPage';
@@ -47,7 +47,7 @@ import { ExamDetailModal } from './components/ExamDetailModal';
 import { MajorsSearchPage } from './components/MajorsSearchPage';
 import { UniversitiesSearchPage } from './components/UniversitiesSearchPage';
 import { AuthPage as PrototypeAuthPage } from './components/AuthPage';
-import { StudentWorkspacePage as PrototypeStudentWorkspacePage } from './components/StudentWorkspacePage';
+
 import { StudentAuthPage as LiveStudentAuthPage } from '../students/StudentAuthPage';
 import { StudentWorkspacePage as LiveStudentWorkspacePage } from '../students/StudentWorkspacePage';
 
@@ -233,7 +233,14 @@ export default function App() {
     }
     else if (section === 'login' || section === 'signup' || section === 'register' || section === 'verify-email' || section === 'forgot-password' || section === 'reset-password') patch = { activeTab: 'auth' };
     else if (section === 'student') patch = { activeTab: 'account' };
+    else if (section === 'favorites') patch = { activeTab: 'favorites' };
+    else if (section === 'tracker') patch = { activeTab: 'tracker' };
     else if (section === 'search') patch = { activeTab: 'search', selectedCategory: 'all', globalSearchQuery: params.get('q') || '' };
+    else if (section === 'compare') patch = {
+      activeTab: 'search', selectedCategory: 'all', isComparePage: true,
+      compareType: params.get('type') || 'universities',
+      compareItems: params.get('items') || '',
+    };
     else if (section === 'scholarships') {
       const selected = key ? scholarships.find(matchesKey) || null : null;
       if (key && publicDataMode === 'api') {
@@ -643,6 +650,10 @@ export default function App() {
   const openSection = (target: string) => {
     setIsMenuOpen(false);
     setIsNotificationOpen(false);
+    if (publicDataMode === 'prototype' && target === 'notifications') {
+      setIsNotificationOpen(true);
+      return;
+    }
     if (publicDataMode === 'api' && target === 'notifications') {
       openStudentAccount('notifications');
       return;
@@ -1026,7 +1037,7 @@ export default function App() {
     return counts;
   }, {});
 
-  const isCompareRoute = /^\/(?:ar|en)\/compare(?:\/|$)/.test(window.location.pathname);
+  const isCompareRoute = navigation.state.isComparePage;
 
   return (
     <div className="manaratak-public flex flex-col min-h-screen w-full bg-[var(--mn-page)] text-[var(--mn-text)] selection:bg-[var(--mn-accent)]/30 selection:text-[var(--mn-heading)] font-['Cairo',sans-serif] pb-24 sm:pb-28 transition-colors mn-panel ">
@@ -1102,7 +1113,7 @@ export default function App() {
           </div>
         )}
         {isCompareRoute ? (
-          <ComparePage locale={language} onBack={goBack} />
+          <ComparePage locale={language} onBack={goBack} dataMode={publicDataMode} initialType={navigation.state.compareType} initialItems={navigation.state.compareItems} scholarships={scholarships} universities={universities} majors={majors} courses={courses} paidCourses={paidCourses} importedCourses={importedCourses} />
         ) : navigation.state.auxiliaryPage ? (
           <PublicInfoPage dataMode={publicDataMode} page={navigation.state.auxiliaryPage} onBack={goBack} onServices={() => openSection('services')} />
         ) : isSmartSearchOpen ? (
@@ -2255,7 +2266,7 @@ export default function App() {
 
             {/* TAB 4: SMART AI TOOLS VIEW */}
             {activeTab === 'ai-tools' && (
-              <AIToolsPage tools={tools} detailId={navigation.state.nestedDetailId} onDetailChange={(id) => navigation.field('nestedDetailId')[1](id)} searchAnchor={detailSearchAnchor} searchTerm={detailSearchTerm}
+              <AIToolsPage dataMode={publicDataMode} tools={tools} detailId={navigation.state.nestedDetailId} onDetailChange={(id) => navigation.field('nestedDetailId')[1](id)} searchAnchor={detailSearchAnchor} searchTerm={detailSearchTerm}
                 onBack={goBack}
                 onNavigateCategory={(category) => {
                   setFavoriteLaunch(null);
@@ -2279,9 +2290,11 @@ export default function App() {
             )}
 
             {/* TAB: STUDENT WORKSPACE / P15 LIVE API OR EXPLICIT PROTOTYPE */}
-            {activeTab === 'account' && <LiveStudentWorkspacePage />}
+            {activeTab === 'account' && <LiveStudentWorkspacePage initialTab="SUMMARY" />}
 
-            {activeTab === 'auth' && (
+            {activeTab === 'auth' && (publicDataMode === 'prototype' ? (
+              <PrototypeAuthPage onBackToWorkspace={() => openSection('account')} />
+            ) : (
               <LiveStudentAuthPage onAuthenticated={(_destination, identity) => {
                 const postLoginReturn = consumePostLoginReturn(identity.principalId);
                 const accountChanged = rememberAuthenticatedIdentity(identity.principalId);
@@ -2296,7 +2309,7 @@ export default function App() {
                 setActiveTab('account');
                 window.history.replaceState({...window.history.state}, '', '/student');
               }} />
-            )}
+            ))}
         {activeTab === 'tracker' && <LiveStudentWorkspacePage initialTab="JOURNEY" />}
           </>
         )}
@@ -2316,7 +2329,7 @@ export default function App() {
         }}
         favoritesCount={favoriteKeys.length}
         unreadNotificationsCount={unreadNotificationsCount}
-        isNotificationsOpen={false}
+        isNotificationsOpen={isNotificationOpen}
       />
 
       {/* Slide-out Navigation Drawer Menu */}

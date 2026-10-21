@@ -1,5 +1,7 @@
+import { PreviewStudentApiClient } from './studentWorkspacePreviewApi';
+const ApiClient = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? PreviewStudentApiClient : LiveApiClient;
 import { useEffect, useRef, useState } from 'react';
-import { ApiClient, type StudentOwnedAssetDto } from '../../api/client';
+import { ApiClient as LiveApiClient, type StudentOwnedAssetDto } from '../../api/client';
 import { useTranslation } from '../../i18n/I18nProvider';
 export function StudentDocumentUpload({
   onUploaded,
@@ -12,6 +14,7 @@ export function StudentDocumentUpload({
     [consent, setConsent] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
+    [previewNotice, setPreviewNotice] = useState(''),
     [pending, setPending] = useState<{ id: string; filename: string; mime: string } | null>(null),
     generation = useRef(0);
   useEffect(
@@ -54,6 +57,29 @@ export function StudentDocumentUpload({
             ? 'Choose a PDF, PNG or JPEG up to 10 MB.'
             : 'اختر PDF أو PNG أو JPEG بحجم لا يتجاوز 10 ميغابايت.',
         );
+      if (import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype') {
+        // Only the filename/type are kept in volatile demo memory. Never send
+        // or read the document bytes and never create an actual upload grant.
+        const simulated = await ApiClient.requestMyDocumentUpload({
+          originalFilename: file.name,
+          mimeType: file.type,
+          byteSize: file.size,
+          consent: true,
+        });
+        if (request !== generation.current) return;
+        onUploaded({
+          id: simulated.assetId,
+          reference: simulated.assetId,
+          lifecycleState: 'ACTIVE',
+          metadata: { originalFilename: file.name, mimeType: file.type },
+        });
+        setFile(null);
+        setConsent(false);
+        setPreviewNotice(en
+          ? 'Preview only: the document name was added to the mock form; no file was uploaded or saved.'
+          : 'معاينة فقط: أُضيف اسم المستند للنموذج التجريبي، ولم يُرفع أي ملف أو تُحفظ بياناته.');
+        return;
+      }
       const result = await ApiClient.requestMyDocumentUpload({
         originalFilename: file.name,
         mimeType: file.type,
@@ -153,6 +179,7 @@ export function StudentDocumentUpload({
       {busy && (
         <p role="status">{en ? 'Uploading or checking the file…' : 'جارٍ رفع الملف أو فحصه…'}</p>
       )}
+      {previewNotice && <p role="status" className="text-xs text-[var(--mn-text-muted)]">{previewNotice}</p>}
       {error && <p role="alert">{error}</p>}
     </section>
   );

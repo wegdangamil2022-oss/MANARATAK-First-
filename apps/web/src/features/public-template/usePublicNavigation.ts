@@ -4,6 +4,9 @@ import type { TabType } from './components/BottomNavBar';
 
 export const initialNavigation = {
   activeTab: 'home' as TabType,
+  isComparePage: false,
+  compareType: 'universities',
+  compareItems: '',
   selectedCategory: 'all' as CategoryType,
   selectedCourseTrack: null as 'imported' | 'native' | 'paid' | null,
   selectedServiceTrack: null as ServiceAudience | null,
@@ -49,12 +52,15 @@ function entityKey(item: any): string {
 export function publicUrlForState(state: NavigationState): string {
   const prefix = localePrefix();
   let path = '/';
-  if (state.activeTab === 'auth') {
+  if (state.isComparePage) path = '/compare';
+  else if (state.activeTab === 'auth') {
     const currentAuthPath = window.location.pathname.replace(/^\/(?:ar|en)(?=\/|$)/, '');
     path = ['/signup', '/register', '/verify-email', '/forgot-password', '/reset-password'].includes(currentAuthPath)
       ? currentAuthPath : '/login';
   }
   else if (state.activeTab === 'account') path = '/student';
+  else if (state.activeTab === 'favorites') path = '/favorites';
+  else if (state.activeTab === 'tracker') path = '/tracker';
   else if (state.activeTab === 'ai-tools') path = '/tools';
   else if (state.selectedScholarship) path = `/scholarships/${entityKey(state.selectedScholarship)}`;
   else if (state.selectedUniversity) path = `/universities/${entityKey(state.selectedUniversity)}`;
@@ -82,6 +88,14 @@ export function publicUrlForState(state: NavigationState): string {
     const token = new URLSearchParams(window.location.search).get('token');
     if (token) params.set('token', token);
   }
+  if (path === '/compare') {
+    // Restore deep-link inputs from state even if the public router replaced
+    // an earlier history entry before the comparison page was mounted.
+    const existing = new URLSearchParams(window.location.search);
+    params.set('type', existing.get('type') || state.compareType);
+    const items = existing.get('items') || state.compareItems;
+    if (items) params.set('items', items);
+  }
   if (path === '/search' && state.globalSearchQuery.trim()) params.set('q', state.globalSearchQuery.trim());
   if (path === '/tools' && state.activeTab === 'ai-tools' && state.nestedDetailId) params.set('detail', state.nestedDetailId);
   if (state.detailSearchTerm.trim()) params.set('match', state.detailSearchTerm.trim());
@@ -91,7 +105,7 @@ export function publicUrlForState(state: NavigationState): string {
 }
 
 export function routeKey(state: NavigationState) {
-  return JSON.stringify([state.activeTab, state.selectedCategory, state.selectedCourseTrack,
+  return JSON.stringify([state.isComparePage, state.compareType, state.compareItems, state.activeTab, state.selectedCategory, state.selectedCourseTrack,
     state.selectedServiceTrack, state.isSmartSearchOpen, state.auxiliaryPage,
     state.nestedDetailId, state.countryNavigationName, state.detailSearchAnchor, state.detailSearchTerm,
     ...detailKeys.map(key => state[key]?.id || null)]);

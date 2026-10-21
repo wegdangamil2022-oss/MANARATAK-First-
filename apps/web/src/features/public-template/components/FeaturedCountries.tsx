@@ -94,7 +94,14 @@ export const FeaturedCountries: React.FC<FeaturedCountriesProps> = ({
 
                     {/* Country Flag Badge Pin (Prominent & Elevated) */}
                     <div className="absolute -bottom-0.5 -right-0.5 bg-[var(--mn-surface)] rounded-full w-6 h-6 sm:w-6.5 sm:h-6.5 shadow-xs border border-[var(--mn-border)] flex items-center justify-center mn-panel ">
-                      <span className="text-xs sm:text-sm leading-none">{item.flag}</span>
+                      {item.flagEmoji || (item.flag && !/^https?:\/\//i.test(item.flag)) ? (
+                        <span className="text-xs sm:text-sm leading-none">{item.flagEmoji || item.flag}</span>
+                      ) : item.flag && /^https?:\/\//i.test(item.flag) ? (
+                        <img src={item.flag} alt={`علم ${item.name}`} className="h-full w-full rounded-full object-cover" loading="lazy"
+                          onError={(event) => { event.currentTarget.style.display = 'none'; }} />
+                      ) : (
+                        <Globe aria-hidden="true" className="h-3.5 w-3.5 text-[var(--mn-heading)]" />
+                      )}
                     </div>
                   </div>
 

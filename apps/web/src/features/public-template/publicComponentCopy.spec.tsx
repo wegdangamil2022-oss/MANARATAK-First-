@@ -10,7 +10,7 @@ import { BottomNavBar } from './components/BottomNavBar';
 import { CategoryNav } from './components/CategoryNav';
 import { FavoriteButton } from './components/FavoriteButton';
 import { SmartSearchBar } from './components/SmartSearchBar';
-import { StudentWorkspacePage } from './components/StudentWorkspacePage';
+import { StudentCertificatesPanel } from '../certificates/StudentCertificatesPanel';
 import { FeaturedUniversities } from './components/FeaturedUniversities';
 import { PublishedUniversityDetails } from './components/PublishedUniversityDetails';
 import type { University } from './types';
@@ -64,15 +64,15 @@ describe('public component copy with a synthetic enabled locale', () => {
       .toContain('aria-label="Save this university"');
   });
 
-  it('renders the guest student hub and all academic profile empty states in English', () => {
-    const html = markup(<StudentWorkspacePage profile={null} language="en" isDarkMode={false}
-      favoriteTypeCounts={{}} favoritesCount={0} milestones={[]} notifications={[]}
-      onOpenFavorites={noop} onOpenTracker={noop} onOpenNotifications={noop}
-      onOpenGlobalSearch={noop} onOpenSmartSearch={noop} onOpenTools={noop}
-      onOpenAuth={noop} onToggleLanguage={noop} onToggleDarkMode={noop} />);
+  it('renders the current student entry and certificate empty state in English', () => {
+    const html = markup(<><Header language="en" onToggleLanguage={noop} onOpenMenu={noop}
+      onOpenProfile={noop} onToggleDarkMode={noop} activeTab="home" />
+      <StudentCertificatesPanel initial={[]} /></>);
     assertEnglish(html);
-    expect(html).toContain('Target degree');
-    expect(html).toContain('No linked certificates yet');
+    expect(html).toContain('Student Account');
+    expect(html).toContain('aria-label="Certificates"');
+    expect(html).toContain('My achievements and certificates');
+    expect(html).toContain('MANARATAK');
   });
 
   it('localizes count and rank prose while preserving canonical university data', () => {

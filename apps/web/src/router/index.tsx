@@ -38,6 +38,20 @@ const PageLoadingFallback = () => {
 
 const PasswordRecoveryPage = () => <StudentAuthPage onAuthenticated={() => { window.location.assign('/student'); }} />;
 
+// In the standalone design deployment, deep links to a student tool must show
+// its existing prototype details rather than calling the unavailable live API.
+// Production retains the complete executable student tool route unchanged.
+function StudentToolPreviewRoute() {
+  const { toolKey } = useParams<{ toolKey: string }>();
+  const { language } = useTranslation();
+  if (import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype') {
+    const detail = toolKey ? `tool-${toolKey}` : '';
+    const target = `/${language}/tools${detail ? `?detail=${encodeURIComponent(detail)}` : ''}`;
+    return <Navigate replace to={target} />;
+  }
+  return <StudentToolPage />;
+}
+
 
 export const RootLayout = () => {
   const { language, setLanguage } = useTranslation();
@@ -213,7 +227,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'tools/:toolKey',
-        element: <StudentToolPage />,
+        element: <StudentToolPreviewRoute />,
       },
       {
         path: 'certificates/verify',
@@ -229,6 +243,14 @@ const router = createBrowserRouter([
       },
       {
         path: 'student',
+        element: <PublicTemplateApp />,
+      },
+      {
+        path: 'favorites',
+        element: <PublicTemplateApp />,
+      },
+      {
+        path: 'tracker',
         element: <PublicTemplateApp />,
       },
       {

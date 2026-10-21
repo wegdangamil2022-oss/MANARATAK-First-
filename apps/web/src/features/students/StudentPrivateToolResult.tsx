@@ -1,5 +1,7 @@
+import { PreviewStudentApiClient } from './studentWorkspacePreviewApi';
+const ApiClient = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? PreviewStudentApiClient : LiveApiClient;
 import { useEffect, useRef, useState } from 'react';
-import { ApiClient } from '../../api/client';
+import { ApiClient as LiveApiClient } from '../../api/client';
 import { StudentToolResultView } from '../student-tools/StudentToolResultView';
 import { useTranslation } from '../../i18n/I18nProvider';
 export function StudentPrivateToolResult({

@@ -26,3 +26,299 @@
   --mn-heading: #ffffff;
   --mn-border: #cbd5e1;
 }
+
+/*
+ * The public preview and P15 student workspace share the same identity layout.
+ * These scoped rules follow the site's manual .dark toggle regardless of which
+ * Tailwind CSS entrypoint generates utility variants. Light mode is unchanged.
+ */
+.dark .mn-student-attention {
+  background-color: var(--mn-page, #09152f);
+  color: #f4f9fc;
+}
+.dark .mn-student-attention h2 {
+  color: #f4f9fc;
+}
+.dark .mn-student-attention .mn-student-attention-card {
+  background-color: var(--mn-surface, #10264a);
+  border-color: #55b5b4;
+  border-right-color: #55cbc5;
+}
+.dark .mn-student-attention .mn-student-attention-card h3 {
+  color: #f2f7fa;
+}
+.dark .mn-student-attention .mn-student-attention-card p {
+  color: #ccdfe4;
+}
+.dark .mn-student-attention .mn-student-attention-action {
+  background-color: var(--mn-surface-elevated, #153258);
+  color: #f2fafa;
+  border-color: #55b5b4;
+}
+.dark .mn-student-attention .mn-student-attention-action:hover {
+  background-color: #28617a;
+}
+
+/* Exact student navigation contract, shared by preview and real workspace:
+ * Light: selected = solid navy box + navy border, non-selected = white + navy border.
+ * Dark: selected = solid gold box + gold border, non-selected = navy + gold border.
+ * The selected tab follows aria-current when students switch sections.
+ */
+.mn-student-workspace .mn-student-nav .mn-student-nav-tile {
+  background-color: #ffffff;
+  border: 1px solid rgba(20, 43, 95, 0.60);
+  color: #29404B;
+}
+.mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] {
+  background-color: #142B5F;
+  border: 2px solid #142B5F;
+  color: #ffffff;
+}
+.mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] svg {
+  color: #ffffff;
+}
+.mn-student-workspace .mn-student-nav .mn-student-nav-tile:not([aria-current='page']):hover {
+  background-color: #F5F8F8;
+  border-color: #142B5F;
+}
+.dark .mn-student-workspace .mn-student-nav .mn-student-nav-tile {
+  background-color: #10264A;
+  border: 1px solid rgba(214, 164, 59, 0.75);
+  color: #EEF4F6;
+}
+.dark .mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] {
+  background-color: #D6A43B;
+  border: 2px solid #D6A43B;
+  color: #142B5F;
+}
+.dark .mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] svg {
+  color: #142B5F;
+}
+.dark .mn-student-workspace .mn-student-nav .mn-student-nav-tile:not([aria-current='page']):hover {
+  background-color: #183456;
+  border-color: #D6A43B;
+}
+
+/* Compact summary actions: one physical size and one typeface across buttons/links.
+ * The site's mobile button reset gives <button> a 44px minimum height,
+ * while course actions are <a>; normalise their visual dimensions here.
+ * Scope overrides to summary actions only, preserving global controls.
+ */
+.mn-student-workspace .mn-student-summary-header-link,
+.mn-student-workspace .mn-student-summary-header-link span {
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 18px !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+.mn-student-workspace .mn-student-summary-header-link {
+  min-height: 34px;
+  white-space: nowrap;
+  padding: 0 2px;
+}
+.mn-student-workspace .mn-student-summary-primary-action,
+.mn-student-workspace .mn-student-summary-primary-action span {
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 11px !important;
+  line-height: 18px !important;
+  font-weight: 600;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+.mn-student-workspace .mn-student-summary-primary-action {
+  min-height: 32px;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+/* Only the recent-activity records toggle: reduce the visible button box.
+ * Leave the other summary actions and section titles unchanged.
+ */
+.mn-student-workspace button[aria-controls='student-summary-activity-timeline'] {
+  box-sizing: border-box;
+  min-height: 28px !important;
+  height: 28px;
+  padding: 2px 6px !important;
+  gap: 4px;
+  border-radius: 6px;
+  font-family: 'Cairo', sans-serif !important;
+}
+
+/* Force the records button label itself (including the expanded state)
+ * to use Cairo, not a global span or button typography override. */
+.mn-student-workspace button[aria-controls='student-summary-activity-timeline'] span {
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 18px !important;
+}
+
+/* Opportunities and application files: use Cairo for every text element,
+ * including form controls and nested document panels, without affecting other tabs. */
+.mn-student-workspace .mn-student-opportunities-page,
+.mn-student-workspace .mn-student-opportunities-page :where(*) {
+  font-family: 'Cairo', sans-serif !important;
+}
+
+/* The Opportunities section cards mirror the section-heading style in ملخصي:
+ * 14px Cairo Bold and a gold line directly below the text, not across the card.
+ */
+.mn-student-workspace .mn-student-opportunities-heading {
+  display: inline-block;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border-bottom: 2px solid #D6A43B;
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1.22;
+  overflow-wrap: anywhere;
+}
+
+/* Compact, readable activity records without changing the global timeline. */
+.mn-student-workspace .mn-student-opportunities-activity h3 {
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700;
+  line-height: 1.55;
+}
+.mn-student-workspace .mn-student-opportunities-activity p,
+.mn-student-workspace .mn-student-opportunities-activity time {
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 11px !important;
+  line-height: 1.7;
+}
+.mn-student-workspace .mn-student-opportunities-section progress {
+  display: block;
+  max-width: 100%;
+}
+
+/* The entire Learning tab, including embedded certificate actions, uses Cairo.
+ * Never apply this scope to Summary, Opportunities, or other student tabs. */
+.mn-student-workspace .mn-student-learning-page,
+.mn-student-workspace .mn-student-learning-page :where(*) {
+  font-family: 'Cairo', sans-serif !important;
+}
+
+/* Summary-style section headings: 14px Bold, gold rule directly under the
+ * intrinsic text (no underline across the entire card). */
+.mn-student-workspace .mn-student-learning-heading {
+  display: inline-block;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border-bottom: 2px solid #D6A43B;
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1.22;
+  overflow-wrap: anywhere;
+}
+.mn-student-workspace .mn-student-learning-page :where(.mn-student-learning-course, .mn-student-learning-certificate) {
+  min-width: 0;
+}
+.mn-student-workspace .mn-student-learning-course progress {
+  display: block;
+  max-width: 100%;
+}
+.mn-student-workspace .mn-student-learning-certificates :where(button, a) {
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 12px;
+  font-weight: 700;
+}
+.mn-student-workspace .mn-student-learning-certificates :where(p, time) {
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+/* Legacy enrollment cards only appear under the Learning tab here;
+ * keep their title hierarchy consistent with the redesigned course cards. */
+.mn-student-workspace .mn-student-learning-section a.group h3 {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.65;
+}
+.mn-student-workspace .mn-student-learning-section a.group :where(span, time) {
+  font-family: 'Cairo', sans-serif !important;
+  line-height: 1.65;
+}
+
+/* Scholarship application document details stay compact and legible with
+ * Cairo typography. Only tools within the Opportunities tab are affected. */
+.mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(p, label) {
+  font-size: 11px;
+  line-height: 1.85;
+}
+.mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(form > label, div > label) {
+  display: block;
+  font-weight: 600;
+  color: var(--mn-heading);
+}
+.mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(select, input[type='date'], textarea) {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 36px;
+  margin-top: 4px;
+  padding: 6px 9px;
+  border: 1px solid var(--mn-border);
+  border-radius: 9px;
+  background: var(--mn-surface);
+  color: var(--mn-text);
+  font-size: 11px;
+}
+.mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(form > button, p > button, div > button) {
+  min-height: 34px;
+  margin-top: 5px;
+  margin-inline-end: 5px;
+  padding: 5px 9px;
+  border: 1px solid var(--mn-border);
+  border-radius: 8px;
+  background: var(--mn-surface);
+  color: var(--mn-heading);
+  font-size: 11px;
+  font-weight: 700;
+}
+.mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(button:disabled) {
+  opacity: .6;
+  cursor: not-allowed;
+}
+.mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(p[role='alert']) {
+  color: var(--mn-danger-text);
+}
+
+/* Summary section titles: gold line immediately touching the title box,
+   following the intrinsic text width rather than spanning the card. */
+.mn-student-workspace .mn-student-summary-heading,
+.mn-student-workspace .mn-student-summary-invoices .mn-card h2 {
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700;
+  display: inline-block;
+  width: max-content;
+  max-width: 100%;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  line-height: 1.22;
+  border-bottom: 2px solid #D6A43B;
+}
+
+/* Invoice summary title uses the same line and 14px Cairo as other headings. */
+.mn-student-workspace .mn-student-summary-invoices .mn-card h2 {
+  font-family: 'Cairo', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}

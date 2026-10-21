@@ -55,9 +55,31 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
 
   const degreeLevels=['الكل',...Object.keys(DEGREE_CODES)];
 
-  const catalog = useBoundedCatalog<Major>(JSON.stringify([searchQuery, selectedFaculty, selectedDegree, locale]), async (cursor, signal) => {
-    return searchPublishedMajors({ search: searchQuery.trim() || undefined, degreeLevel: DEGREE_CODES[selectedDegree], academicFieldOrDiscipline: selectedFaculty === 'الكل' ? undefined : selectedFaculty, cursor }, locale, signal);
-  });
+  // The published catalog remains API-owned. Only the explicitly selected
+  // non-production design preview searches its bundled example records.
+  const prototypePreview = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype';
+  const catalog = useBoundedCatalog<Major>(
+    JSON.stringify([searchQuery, selectedFaculty, selectedDegree, locale, prototypePreview ? majors.map((item) => item.id) : null]),
+    async (cursor, signal) => {
+      if (prototypePreview) {
+        const query = searchQuery.trim().toLowerCase();
+        const faculty = selectedFaculty.trim().toLowerCase();
+        const filtered = majors.filter((major) => {
+          const academicField = getMajorFaculty(major);
+          const searchable = [major.name, major.nameEn, academicField, major.description];
+          return (!query || searchable.some((value) => value.toLowerCase().includes(query))) &&
+            (selectedFaculty === 'الكل' || academicField.toLowerCase().includes(faculty)) &&
+            (selectedDegree === 'الكل' || major.degreeLevels?.some((degree) => degree === selectedDegree));
+        });
+        const offset = cursor === undefined ? 0 : Number(cursor);
+        if (!Number.isSafeInteger(offset) || offset < 0) throw new Error('INVALID_PREVIEW_CURSOR');
+        const page = filtered.slice(offset, offset + 20);
+        const nextOffset = offset + page.length;
+        return { data: page, total: filtered.length, nextCursor: nextOffset < filtered.length ? String(nextOffset) : null };
+      }
+      return searchPublishedMajors({ search: searchQuery.trim() || undefined, degreeLevel: DEGREE_CODES[selectedDegree], academicFieldOrDiscipline: selectedFaculty === 'الكل' ? undefined : selectedFaculty, cursor }, locale, signal);
+    },
+  );
   const { rows: filteredMajors, total, cursor: nextCursor, busy: loading, error } = catalog;
 
   const handleResetFilters = () => {
@@ -76,7 +98,6 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
       className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel "
       dir={publicDir}
     >
-      <label>{locale === 'ar' ? 'المجال الأكاديمي' : 'Academic field'}<input aria-label="Academic field" value={selectedFaculty === 'الكل' ? '' : selectedFaculty} onChange={event => setSelectedFaculty(event.target.value || 'الكل')} /></label>
       {/* ========================================================================= */}
       {/* HERO EMERALD CURVED BANNER */}
       {/* ========================================================================= */}
@@ -206,8 +227,31 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
                 </span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-1" />
-              <input aria-label={publicT('public_faculty_or_academic_domain')} list="major-field-suggestions" value={selectedFaculty==='الكل'?'':selectedFaculty} onChange={event=>setSelectedFaculty(event.target.value||'الكل')} className="mt-2 w-full rounded border p-1 text-xs" placeholder={publicT('public_enter_a_faculty_or_domain')} />
-              <datalist id="major-field-suggestions">{faculties.filter(value=>value!=='الكل').map(value=><option key={value} value={value}/>)}</datalist>
+              {prototypePreview ? (
+                <select
+                  aria-label={publicT('public_faculty_or_academic_domain')}
+                  title={publicT('public_choose_faculty')}
+                  value={selectedFaculty}
+                  onChange={(event) => setSelectedFaculty(event.target.value)}
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                >
+                  {faculties.map((faculty) => (
+                    <option key={faculty} value={faculty}>
+                      {faculty === 'الكل' ? publicT('public_choose_faculty') : faculty}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  aria-label={publicT('public_faculty_or_academic_domain')}
+                  list="major-field-suggestions"
+                  value={selectedFaculty === 'الكل' ? '' : selectedFaculty}
+                  onChange={(event) => setSelectedFaculty(event.target.value || 'الكل')}
+                  className="mt-2 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] p-1 text-xs"
+                  placeholder={publicT('public_enter_a_faculty_or_domain')}
+                />
+              )}
+              {!prototypePreview && <datalist id="major-field-suggestions">{faculties.filter(value => value !== 'الكل').map(value => <option key={value} value={value} />)}</datalist>}
             </div>
 
             {/* Tile 2: الدرجة العلمية */}

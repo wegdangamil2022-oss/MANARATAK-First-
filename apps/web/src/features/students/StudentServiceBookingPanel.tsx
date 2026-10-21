@@ -1,5 +1,7 @@
+import { PreviewStudentApiClient } from './studentWorkspacePreviewApi';
+const ApiClient = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? PreviewStudentApiClient : LiveApiClient;
 import { useEffect, useRef, useState } from 'react';
-import { ApiClient, type StudentServicePackageDto } from '../../api/client';
+import { ApiClient as LiveApiClient, type StudentServicePackageDto } from '../../api/client';
 import { useTranslation } from '../../i18n/I18nProvider';
 type Slot = { id: string; startsAt: string; timezone: string };
 export function StudentServiceBookingPanel({ requestId }: { requestId: string }) {
@@ -109,12 +111,15 @@ export function StudentServiceBookingPanel({ requestId }: { requestId: string })
         options,
       );
       if (active.current === reference)
-        setNotice(
-          label(
-            `حُجز الموعد مؤقتًا: ${result.publicId}. التأكيد يتطلب تسوية المالية قبل انتهاء الحجز.`,
-            `Temporary booking: ${result.publicId}. Finance settlement is required before hold expiry.`,
-          ),
-        );
+        setNotice(import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype'
+          ? label(
+              `معاينة فقط: تمت محاكاة حجز الموعد برمز ${result.publicId}. لم يتم إنشاء حجز أو دفع حقيقي.`,
+              `Design preview only: booking ${result.publicId} was simulated. No booking or payment was created.`,
+            )
+          : label(
+              `حُجز الموعد مؤقتًا: ${result.publicId}. التأكيد يتطلب تسوية المالية قبل انتهاء الحجز.`,
+              `Temporary booking: ${result.publicId}. Finance settlement is required before hold expiry.`,
+            ));
     } catch {
       if (active.current === reference)
         setNotice(

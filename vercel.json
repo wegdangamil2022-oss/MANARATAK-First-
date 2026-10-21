@@ -4,5 +4,11 @@
     "deploymentEnabled": {
       "feat/post28-r07-artifact-preparation": false
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }

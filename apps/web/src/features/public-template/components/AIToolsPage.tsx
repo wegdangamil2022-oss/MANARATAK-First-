@@ -27,6 +27,7 @@ import { FavoriteButton } from './FavoriteButton';
 import { DetailBackButton, DetailSectionHeader, useDetailSearchTarget } from './DetailUi';
 
 interface AIToolsPageProps {
+  dataMode?: 'prototype' | 'api';
   detailId?: string;
   tools: StudentToolPreview[];
   onDetailChange?: (id: string) => void;
@@ -224,6 +225,7 @@ const StudentToolCard: React.FC<{
 };
 
 const ToolDetailView: React.FC<{
+  dataMode?: 'prototype' | 'api';
   tool: StudentToolPreview;
   onBack: () => void;
   onNavigateCategory?: (category: CategoryType) => void;
@@ -232,7 +234,7 @@ const ToolDetailView: React.FC<{
   onToggleFavorite?: (id: string) => void;
   searchAnchor?: string;
   searchTerm?: string;
-}> = ({ tool, onBack, onNavigateCategory, onOpenService, isFavorite = false, onToggleFavorite, searchAnchor, searchTerm }) => {
+}> = ({ tool, dataMode = 'api', onBack, onNavigateCategory, onOpenService, isFavorite = false, onToggleFavorite, searchAnchor, searchTerm }) => {
   const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
 
   useDetailSearchTarget(searchAnchor, searchTerm);
@@ -398,7 +400,13 @@ const ToolDetailView: React.FC<{
         {tool.availability === 'متاحة الآن' ? (
           <>
             <p className="mt-1 text-[9px] sm:text-[10px] leading-5 text-[var(--mn-text-muted)] font-medium">{publicT('public_enter_your_information_and_run_the_tool_results')}</p>
-            <Link to={`/tools/${encodeURIComponent(tool.toolKey)}`} className="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl bg-[var(--mn-primary)] px-5 py-2 text-xs font-bold text-white hover:opacity-90 mn-inverse">{publicT('public_open_tool')}</Link>
+            {dataMode === 'prototype' ? (
+              <span role="status" className="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl bg-[var(--mn-primary)]/65 px-5 py-2 text-xs font-bold text-white mn-inverse">
+                {publicDir === 'rtl' ? 'معاينة الأداة — التشغيل بعد ربط النظام' : 'Tool preview — execution after integration'}
+              </span>
+            ) : (
+              <Link to={`/tools/${encodeURIComponent(tool.toolKey)}`} className="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl bg-[var(--mn-primary)] px-5 py-2 text-xs font-bold text-white hover:opacity-90 mn-inverse">{publicT('public_open_tool')}</Link>
+            )}
           </>
         ) : (
           <p className="mt-1 text-[9px] sm:text-[10px] leading-5 text-[var(--mn-text-muted)] font-medium">{publicT('public_this_tool_is_not_available_to_the_public')}</p>
@@ -410,6 +418,7 @@ const ToolDetailView: React.FC<{
 };
 
 export const AIToolsPage: React.FC<AIToolsPageProps> = ({
+  dataMode = 'api',
   detailId, onDetailChange, searchAnchor, searchTerm,
   tools,
   onBack,
@@ -475,6 +484,7 @@ export const AIToolsPage: React.FC<AIToolsPageProps> = ({
   if (selectedTool) {
     return (
       <ToolDetailView
+        dataMode={dataMode}
         tool={selectedTool}
         onBack={() => {
           if (onDetailChange && onBack) {onBack(); return;}
@@ -610,7 +620,7 @@ export const AIToolsPage: React.FC<AIToolsPageProps> = ({
         <div className="flex items-center justify-between px-1">
           <div>
             <span className="text-xs sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_available_tools')}{filteredTools.length})</span>
-            <p className="mt-0.5 text-[9px] sm:text-[10px] text-[var(--mn-text-muted)] font-medium">{publicT('public_the_information_shown_comes_from_the_published_manaratak')}</p>
+            <p className="mt-0.5 text-[9px] sm:text-[10px] text-[var(--mn-text-muted)] font-medium">{dataMode === 'prototype' ? (publicDir === 'rtl' ? 'بيانات توضيحية للمعاينة والتصميم' : 'Example data for design preview') : publicT('public_the_information_shown_comes_from_the_published_manaratak')}</p>
           </div>
           <span className="text-[9px] sm:text-[10px] text-[var(--mn-accent-text)] font-bold font-['Cairo',sans-serif]">{publicT('public_student_tools')}</span>
         </div>
