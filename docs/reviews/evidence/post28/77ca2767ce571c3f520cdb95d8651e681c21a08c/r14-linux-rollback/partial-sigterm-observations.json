@@ -1,0 +1,12 @@
+{
+  "fullJourneyPassed": false,
+  "signals": [
+    {
+      "file": "rollback-stop-0.log",
+      "lines": [
+        "[Bootstrap] SIGTERM received; readiness is DOWN and graceful drain has started.",
+        "[Bootstrap] Graceful shutdown completed."
+      ]
+    }
+  ]
+}

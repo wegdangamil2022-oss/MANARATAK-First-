@@ -94,7 +94,7 @@
       "implementationResolution": {
         "state": "IMPLEMENTATION_FIXED_DEPLOYMENT_TRANSITION_PENDING",
         "implementationSourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
-        "currentComparedSourceSha": "784c0764a978209f68f8954ecd9de223d8a93745",
+        "currentComparedSourceSha": "77ca2767ce571c3f520cdb95d8651e681c21a08c",
         "deliveryContract": "AUTHENTICATED_BOUNDED_STREAM_RECHECKED_BEFORE_AND_AFTER_IO",
         "genericCertificateProviderGrantsDisabled": true,
         "previousCapabilitiesInvalidated": false,

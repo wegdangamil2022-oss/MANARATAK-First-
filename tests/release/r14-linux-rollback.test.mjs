@@ -1,8 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { assertRollbackPair, R14_PREVIOUS_RELEASE } from '../../scripts/release/lib/R14RollbackContracts.mjs';
-import { linuxApiSwitcher } from '../../scripts/release/lib/R14LinuxRollback.mjs';
+import { linuxApiSwitcher, verifyRollbackRevision } from '../../scripts/release/lib/R14LinuxRollback.mjs';
 import { provisionMigrationObserver } from '../../scripts/release/lib/R14MigrationObserver.mjs';
+
+test('rollback checks the documented readiness identity and rejects missing, wrong or unhealthy revisions', async () => {
+  const sha = 'a'.repeat(40), response = { status: 200, sourceSha: sha, body: { protocolVersion: 2, code: 'AVAILABLE', status: 'UP' } };
+  const request = async (method, route) => { assert.equal(method, 'GET'); assert.equal(route, '/api/v1/monitoring/health/readiness'); return response; };
+  await verifyRollbackRevision(request, sha);
+  for (const altered of [{ ...response, sourceSha: null }, { ...response, sourceSha: 'b'.repeat(40) }, { ...response, status: 503 }, { ...response, body: { ...response.body, status: 'DOWN' } }]) await assert.rejects(() => verifyRollbackRevision(async () => altered, sha));
+});
 
 test('migration observer provisioning refuses any PostgreSQL container outside its disposable lab', async () => {
   for (const labels of [{ 'codex.post28.run': 'other', 'codex.post28.scope': 'DISPOSABLE' }, { 'codex.post28.run': 'owned', 'codex.post28.scope': 'PRODUCTION' }]) {

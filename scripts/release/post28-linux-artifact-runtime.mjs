@@ -156,7 +156,9 @@ try{
     observations.push({step:'R14_SAME_SHA_THREE_ACTOR_MFA_AR_EN_CMS_LIFECYCLE',passed:true});report.redisConfigured=false;
   }else if(r14Rollback){
     const switcher=rollbackTools.linuxApiSwitcher({docker,state,apiEnv,apiEnvFile,target:apiTarget,proof,redact,initialId:apiId,onStarted:id=>{apiId=id;}});
+    report.rollbackSwitches=switcher.observations;
     report.rollbackJourney=await rollbackTools.exerciseLinuxRollback({page,origin,db,migrationObserver,email,password,fixtureId,current:{sourceSha:sha,imageId:image.imageId},previous:{sourceSha:rollbackImage.previousSourceSha,imageId:rollbackImage.imageId},switcher});
+    report.rollbackImage.previousRuntimeBooted=true;
     observations.push({step:'R14_REAL_SIGTERM_CURRENT_PREVIOUS_CURRENT_SESSION_CSRF_RECEIPT_CONTINUITY',passed:true});report.redisConfigured=false;
   }else if(combined){
     report.combinedAuth=await combined.exercise({page,origin,email,password,db,fixtureId});

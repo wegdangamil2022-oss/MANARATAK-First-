@@ -1,0 +1,40 @@
+{
+  "kind": "R14_SCOPED_LINUX_ROLLBACK_EVIDENCE",
+  "sourceSha": "77ca2767ce571c3f520cdb95d8651e681c21a08c",
+  "passed": false,
+  "allSixCiSucceeded": false,
+  "items": [
+    {
+      "file": "certificate-source-reconciliation.json",
+      "bytes": 1672,
+      "sha256": "d228c74380dbb06e3a4efcaa46f7c05ff3699aeabf89d3e0396837aa870cb8f0"
+    },
+    {
+      "file": "ci-observation.json",
+      "bytes": 1407,
+      "sha256": "ba438140aea8d508be2ccc52e03e2c2dc2132fcca97f315486972a4f953ec1cd"
+    },
+    {
+      "file": "partial-sigterm-observations.json",
+      "bytes": 269,
+      "sha256": "37e44714cbe36a57aa32fdffe56008115a916bdfa7a1ae3fab90a6f80146cf82"
+    },
+    {
+      "file": "result.json",
+      "bytes": 4167,
+      "sha256": "1988bdd102c1d61794ec51eb4a2c79cf436b2026af74878423bcf90842aa72d8"
+    },
+    {
+      "file": "retrieval.json",
+      "bytes": 397,
+      "sha256": "ce2ab085db75520ab90bf68b61e0cb918f438fce92c037a31ed6ab2b104db0fc"
+    },
+    {
+      "file": "superseded-doc-ci.json",
+      "bytes": 335,
+      "sha256": "3eeffaaa41f42bfd656752be6f3a051b30e8098f320bcc34f016c1ec755fc2ad"
+    }
+  ],
+  "formalAcceptance": false,
+  "productionAcceptance": false
+}

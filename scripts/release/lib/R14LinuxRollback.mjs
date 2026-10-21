@@ -4,6 +4,12 @@ import net from 'node:net';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 
+export async function verifyRollbackRevision(request, sourceSha) {
+  const response = await request('GET', '/api/v1/monitoring/health/readiness');
+  assert.equal(response.status, 200); assert.equal(response.sourceSha, sourceSha);
+  assert.equal(response.body.protocolVersion, 2); assert.equal(response.body.code, 'AVAILABLE'); assert.equal(response.body.status, 'UP');
+}
+
 export function linuxApiSwitcher({ docker, state, apiEnv, apiEnvFile, target, proof, redact, initialId, onStarted }) {
   let activeId = initialId, sequence = 0;
   const observations = [];
@@ -79,14 +85,18 @@ export async function exerciseLinuxRollback({ page, origin, db, migrationObserve
     const afterWrite = await fingerprint(), receipts = await db.apiIdempotencyRecord.count(); preserved(before, afterWrite);
     await switcher.switchTo(previous);
     assert.equal((await request('GET', '/api/v1/auth/me')).status, 200, 'R14_PREVIOUS_SESSION_LOST');
+    await verifyRollbackRevision(request, previous.sourceSha);
     const replay = await request('PUT', '/api/v1/student/workspace', body, token.csrf, key);
-    assert.equal(replay.status, 200); assert.equal(replay.replayed, 'true'); assert.deepEqual(replay.body, winner.body); assert.equal(replay.sourceSha, previous.sourceSha);
+    assert.equal(replay.status, 200); assert.equal(replay.replayed, 'true'); assert.deepEqual(replay.body, winner.body);
+    await verifyRollbackRevision(request, previous.sourceSha);
     assert.equal((await request('PUT', '/api/v1/student/workspace', { theme: 'DARK', expectedVersion: workspace.version + 1 }, undefined, randomUUID())).status, 403);
     assert.equal((await request('GET', '/api/v1/admin/courses')).status, 403);
     await switcher.switchTo(current);
     assert.equal((await request('GET', '/api/v1/auth/me')).status, 200, 'R14_FORWARD_SESSION_LOST');
+    await verifyRollbackRevision(request, current.sourceSha);
     const forwardReplay = await request('PUT', '/api/v1/student/workspace', body, token.csrf, key);
-    assert.equal(forwardReplay.status, 200); assert.equal(forwardReplay.replayed, 'true'); assert.deepEqual(forwardReplay.body, winner.body); assert.equal(forwardReplay.sourceSha, current.sourceSha);
+    assert.equal(forwardReplay.status, 200); assert.equal(forwardReplay.replayed, 'true'); assert.deepEqual(forwardReplay.body, winner.body);
+    await verifyRollbackRevision(request, current.sourceSha);
     const after = await fingerprint(); preserved(afterWrite, after);
     assert.equal(await db.apiIdempotencyRecord.count(), receipts);
     assert.equal((await db.studentWorkspace.findUniqueOrThrow({ where: { studentReferenceId: fixtureId } })).version, workspace.version + 1);
