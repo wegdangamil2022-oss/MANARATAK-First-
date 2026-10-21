@@ -1644,9 +1644,9 @@ function ApplicationTrackerCard({
   }
 
   return (
-    <article className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel transition-all hover:border-[#D6A43B]/40">
+    <article className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel font-['Cairo',sans-serif] transition-all hover:border-[#D6A43B]/40">
       <OwnerReferenceNotice reference={tracker.owner?.referenceState}/>
-      <StudentApplicationDocuments tracker={tracker} onChanged={onDocumentsChanged} />
+      {/* Scholarship identity always precedes document tools. */}
       {/* Top Header Row */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 min-w-0">
@@ -1654,50 +1654,35 @@ function ApplicationTrackerCard({
             <GraduationCap className="w-5 h-5 text-[#E5B54F]" />
           </div>
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-1.5">
+            <h3 className="text-[14px] leading-[1.5] font-bold text-[var(--mn-heading)] break-words">
+              {displayName}
+            </h3>
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
               {isArchived ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-500/10 text-slate-500 border border-slate-500/20">
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-500/10 text-slate-500 border border-slate-500/20">
                   مؤرشف تنظيمياً
                 </span>
               ) : (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border border-[var(--mn-success-border)]">
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border border-[var(--mn-success-border)]">
                   تقديم نشط
                 </span>
               )}
               {tracker.owner?.country && (
-                <span className="text-[10px] font-medium text-[var(--mn-text-muted)] bg-[var(--mn-page)] px-2 py-0.5 rounded-md border border-[var(--mn-border)]">
+                <span className="text-[11px] font-medium text-[var(--mn-text-muted)] bg-[var(--mn-page)] px-2 py-0.5 rounded-md border border-[var(--mn-border)]">
                   {tracker.owner.country}
                 </span>
               )}
-              <span className="text-[10px] font-semibold text-[#142B5F] dark:text-[#E5B54F] bg-[#142B5F]/10 dark:bg-[#E5B54F]/15 px-2 py-0.5 rounded-md border border-[#D6A43B]/20">
+              <span className="text-[11px] font-semibold text-[#142B5F] dark:text-[#E5B54F] bg-[#142B5F]/10 dark:bg-[#E5B54F]/15 px-2 py-0.5 rounded-md border border-[#D6A43B]/20">
                 المرحلة (حسب تحديثك): {tracker.stage}
               </span>
             </div>
 
-            <h3 className="text-sm sm:text-base font-bold text-[var(--mn-heading)] mt-1.5 line-clamp-1">
-              {displayName}
-            </h3>
-
-            {/* Meta tags: Deadline & Checklist */}
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-[var(--mn-text-muted)]">
-              <span className="inline-flex items-center gap-1">
-                <CalendarClock className="w-3.5 h-3.5 text-[#D6A43B]" />
-                <span>الموعد: <strong>{formatDate(deadlineStr)}</strong></span>
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <ListChecks className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#E5B54F]" />
-                <span>المهام: <strong>{completed} من {total}</strong> ({progress}%)</span>
-              </span>
-              <span className="text-[10.5px] text-[var(--mn-text-muted)]">
-                آخر تحديث: {formatDate(tracker.updatedAt)}
-              </span>
-            </div>
           </div>
         </div>
 
         {/* Progress % Badge */}
         <div className="text-right shrink-0">
-          <div className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] text-xs font-bold text-[var(--mn-heading)]">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] text-[18px] font-bold text-[var(--mn-heading)]">
             {progress}%
           </div>
         </div>
@@ -1721,45 +1706,61 @@ function ApplicationTrackerCard({
         </div>
       )}
 
-      {/* Expand / Collapse Action Button */}
-      <div className="mt-3.5 pt-3 border-t border-[var(--mn-border)] dark:border-white/10 flex items-center justify-between gap-2">
+      {/* Keep document/cycle tools collapsed inside the scholarship card. */}
+      <StudentApplicationDocuments tracker={tracker} onChanged={onDocumentsChanged} />
+
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 text-[11px] text-[var(--mn-text-muted)]">
+        <span className="inline-flex items-center gap-1">
+          <ListChecks className="h-3.5 w-3.5 text-[#142B5F] dark:text-[#E5B54F]" aria-hidden="true" />
+          المهام: <strong>{completed} من {total}</strong>
+        </span>
+        <span>آخر تحديث: {formatDate(tracker.updatedAt)}</span>
+      </div>
+
+      {/* Deadline and file action are prominent; management actions remain available. */}
+      <div className="mt-3 border-t border-[var(--mn-border)] dark:border-white/10 pt-3 flex flex-wrap items-center justify-between gap-3">
+        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--mn-text-muted)]">
+          <CalendarClock className="h-3.5 w-3.5 text-[#D6A43B]" aria-hidden="true" />
+          موعد التقديم: <strong>{formatDate(deadlineStr)}</strong>
+        </span>
         <button
           type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--mn-primary)] hover:text-[var(--mn-secondary)] transition-colors cursor-pointer"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((value) => !value)}
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 text-[12px] font-bold text-[var(--mn-primary)] hover:text-[var(--mn-secondary)] transition-colors cursor-pointer"
         >
-          <span>{expanded ? 'إخفاء تفاصيل ومهام الملف' : 'فتح تفاصيل الملف والمهام'}</span>
-          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          <span>{expanded ? 'إخفاء تفاصيل الملف' : 'متابعة الملف'}</span>
+          {expanded ? <ChevronUp className="h-4 w-4" aria-hidden="true" /> : <ChevronDown className="h-4 w-4" aria-hidden="true" />}
         </button>
+      </div>
 
-        <div className="flex items-center gap-2">
-          {slug && (
-            <Link
-              to={`/scholarships/${encodeURIComponent(slug)}`}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--mn-text-muted)] hover:text-[#D6A43B] transition-colors"
-              title="صفحة المنحة"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">صفحة المنحة</span>
-            </Link>
-          )}
-          <button
-            type="button"
-            disabled={saving}
-            onClick={() => onArchive(tracker)}
-            className="rounded-lg border border-[var(--mn-border)] px-2.5 py-1 text-xs font-semibold text-[var(--mn-text-muted)] hover:border-[#D6A43B] transition-colors cursor-pointer"
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+        {slug && (
+          <Link
+            to={`/scholarships/${encodeURIComponent(slug)}`}
+            className="inline-flex min-h-8 items-center gap-1 text-[11px] font-semibold text-[var(--mn-text-muted)] hover:text-[#D6A43B] transition-colors"
+            title="صفحة المنحة"
           >
-            {isArchived ? 'إلغاء الأرشفة' : 'أرشفة'}
-          </button>
-          <button
-            type="button"
-            disabled={saving}
-            onClick={() => onRemove(tracker)}
-            className="rounded-lg border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--mn-danger-text)] hover:brightness-95 transition-colors cursor-pointer"
-          >
-            إزالة
-          </button>
-        </div>
+            <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>صفحة المنحة</span>
+          </Link>
+        )}
+        <button
+          type="button"
+          disabled={saving}
+          onClick={() => onArchive(tracker)}
+          className="rounded-lg border border-[var(--mn-border)] px-2.5 py-1 text-[11px] font-semibold text-[var(--mn-text-muted)] hover:border-[#D6A43B] transition-colors cursor-pointer"
+        >
+          {isArchived ? 'إلغاء الأرشفة' : 'أرشفة'}
+        </button>
+        <button
+          type="button"
+          disabled={saving}
+          onClick={() => onRemove(tracker)}
+          className="rounded-lg border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] px-2.5 py-1 text-[11px] font-semibold text-[var(--mn-danger-text)] hover:brightness-95 transition-colors cursor-pointer"
+        >
+          إزالة
+        </button>
       </div>
 
       {/* Expanded Details: Stage selector, Checklist, Notes */}
