@@ -1916,294 +1916,277 @@ function ApplicationTrackerCard({
 
 function LearningView({ dashboard }: { dashboard: StudentDashboardSummaryDto }) {
   const [filter, setFilter] = useState<'ALL' | 'IN_PROGRESS' | 'COMPLETED' | 'CERTIFICATES'>('ALL');
-  const otherCourses = dashboard.courseEnrollments.filter(course => !['ACTIVE', 'ENROLLED', 'IN_PROGRESS', 'COMPLETED'].includes(course.status));
 
   const inProgressCourses = useMemo(
-    () => dashboard.courseEnrollments.filter((c) => ['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(c.status)),
+    () => dashboard.courseEnrollments.filter((course) => ['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(course.status)),
     [dashboard.courseEnrollments],
   );
-
   const completedCourses = useMemo(
-    () => dashboard.courseEnrollments.filter((c) => c.status === 'COMPLETED'),
+    () => dashboard.courseEnrollments.filter((course) => course.status === 'COMPLETED'),
     [dashboard.courseEnrollments],
   );
-
+  const otherCourses = useMemo(
+    () => dashboard.courseEnrollments.filter((course) => !['ACTIVE', 'ENROLLED', 'IN_PROGRESS', 'COMPLETED'].includes(course.status)),
+    [dashboard.courseEnrollments],
+  );
   const certificates = useMemo(() => dashboard.certificates || [], [dashboard.certificates]);
-
   const hasAnyLearningData = dashboard.courseEnrollments.length > 0 || certificates.length > 0;
+  const learningIntroduction = hasAnyLearningData
+    ? `لديك ${inProgressCourses.length} دورة قيد التعلم، و${completedCourses.length} دورة مكتملة، و${certificates.length} شهادة مسجلة في حسابك.`
+    : 'لم تبدأ دوراتك بعد. اختر دورة مناسبة لتبدأ تعلمك وتتابع تقدمك وشهاداتك من هنا.';
+
+  const learningFilters: Array<{ id: 'ALL' | 'IN_PROGRESS' | 'COMPLETED' | 'CERTIFICATES'; label: string }> = [
+    { id: 'ALL', label: `الكل (${dashboard.courseEnrollments.length + certificates.length})` },
+    { id: 'IN_PROGRESS', label: `قيد التعلم (${inProgressCourses.length})` },
+    { id: 'COMPLETED', label: `المكتملة (${completedCourses.length})` },
+    { id: 'CERTIFICATES', label: `الشهادات (${certificates.length})` },
+  ];
 
   return (
-    <div className="space-y-5">
+    <div className="mn-student-learning-page space-y-6 font-['Cairo',sans-serif]">
       {dashboard.capabilityStatus?.learning === 'DEGRADED' && <Alert tone="warning" message="تعذر تحميل الدورات حالياً؛ القائمة الحالية لا تعني عدم وجود تسجيلات." />}
       {dashboard.capabilityStatus?.certificates === 'DEGRADED' && <Alert tone="warning" message="تعذر تحميل الشهادات حالياً. أعد تحديث الحساب." />}
-      {/* 1. Header Banner & Quick Learning Stats */}
-      <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <div className="inline-flex items-center gap-2">
-              <span className="text-[10px] font-bold text-[#142B5F] dark:text-[#E5B54F]">المسار الأكاديمي</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#D6A43B]/10 text-[#D6A43B] font-semibold">مساحة الطالب</span>
-            </div>
-            <h2 className="text-base sm:text-lg font-bold text-[var(--mn-heading)] mt-0.5">تعلمي وإنجازاتي</h2>
-            <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">
-              متابعة الدورات التدريبية المسجل بها، سجل التقدم الفعلي، والشهادات الصادرة والمعتمدة بحسابك.
-            </p>
+
+      {/* The same full-height right-hand gold accent as the Opportunities hero. */}
+      <section
+        aria-label="تعليمي وإنجازاتي"
+        className="mn-student-learning-hero relative overflow-hidden rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel"
+      >
+        <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-[3.5px] bg-gradient-to-b from-[#B78622] via-[#D6A43B] to-[#E5B54F]" />
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+            <BookOpen className="h-[18px] w-[18px] text-[#E5B54F]" aria-hidden="true" />
+          </span>
+          <h2 className="text-[14px] font-bold leading-[1.35] text-[var(--mn-heading)]">تعليمي وإنجازاتي</h2>
+        </div>
+
+        <div className="mt-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-3 py-2.5">
+          <p className="text-[12px] font-bold leading-5 text-[var(--mn-heading)]">تابع تعلمك وحقق أهدافك</p>
+          <p className="mt-0.5 text-[11px] sm:text-[12px] font-medium leading-[1.85] text-[var(--mn-text-muted)]">
+            {learningIntroduction}
+          </p>
+        </div>
+
+        {hasAnyLearningData && (
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            {([
+              { key: 'IN_PROGRESS' as const, number: inProgressCourses.length, label: 'قيد التعلم' },
+              { key: 'COMPLETED' as const, number: completedCourses.length, label: 'دورات مكتملة' },
+              { key: 'CERTIFICATES' as const, number: certificates.length, label: 'شهادات صادرة' },
+            ]).map((stat) => (
+              <button
+                key={stat.key}
+                type="button"
+                onClick={() => setFilter(stat.key)}
+                aria-label={`${stat.label}: ${stat.number}، عرض التفاصيل`}
+                className="min-w-0 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center transition-colors hover:border-[#D6A43B]/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86]"
+              >
+                <span className="block text-[17px] sm:text-[18px] font-bold leading-6 text-[var(--mn-heading)]">{stat.number}</span>
+                <span className="mt-0.5 block text-[10px] sm:text-[11px] font-semibold leading-[1.6] text-[var(--mn-text-muted)]">{stat.label}</span>
+              </button>
+            ))}
           </div>
+        )}
+
+        <div dir="rtl" className="mt-4 flex w-full flex-wrap items-center gap-3">
+          <p className="text-[11px] font-medium leading-[1.7] text-[var(--mn-text-muted)]">
+            دوراتك وتقدمك وشهاداتك في مكان واحد
+          </p>
           <Link
             to="/courses"
-            className="self-start sm:self-center shrink-0 px-3.5 py-1.5 rounded-xl bg-[var(--mn-primary)] text-white text-xs font-bold hover:bg-[var(--mn-primary-hover)] transition-all shadow-2xs flex items-center gap-1.5"
+            className="ms-auto inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#142B5F] px-3.5 py-2 text-[12px] font-bold text-white shadow-2xs transition-colors hover:bg-[#203D74] dark:bg-[#D6A43B] dark:text-[#142B5F] dark:hover:bg-[#E5B54F]"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#E5B54F]" />
+            <Sparkles className="h-3.5 w-3.5 text-[#E5B54F] dark:text-[#142B5F]" aria-hidden="true" />
             <span>استكشف الدورات</span>
           </Link>
         </div>
+      </section>
 
-        {/* Metric Counters - Only shown when learning data exists */}
-        {hasAnyLearningData && (
-          <div className="mt-4 grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => setFilter('IN_PROGRESS')}
-              className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel cursor-pointer hover:border-[#D6A43B]/40 transition-colors"
-            >
-              <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{inProgressCourses.length}</div>
-              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">قيد التعلم</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilter('COMPLETED')}
-              className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel cursor-pointer hover:border-[#D6A43B]/40 transition-colors"
-            >
-              <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{completedCourses.length}</div>
-              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">دورات مكتملة</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilter('CERTIFICATES')}
-              className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel cursor-pointer hover:border-[#D6A43B]/40 transition-colors"
-            >
-              <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{certificates.length}</div>
-              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">شهادات صادرة</div>
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* 2. Filter Navigation Pills - Only shown when learning data exists */}
       {hasAnyLearningData && (
-        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-white/10 w-fit text-xs font-medium">
-          <button
-            type="button"
-            onClick={() => setFilter('ALL')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold ${
-              filter === 'ALL'
-                ? 'bg-[var(--mn-primary)] text-white shadow-2xs'
-                : 'text-[var(--mn-text-muted)] hover:bg-[var(--mn-page)]'
-            }`}
-          >
-            الكل ({dashboard.courseEnrollments.length + certificates.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setFilter('IN_PROGRESS')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold ${
-              filter === 'IN_PROGRESS'
-                ? 'bg-[var(--mn-primary)] text-white shadow-2xs'
-                : 'text-[var(--mn-text-muted)] hover:bg-[var(--mn-page)]'
-            }`}
-          >
-            قيد التعلم ({inProgressCourses.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setFilter('COMPLETED')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold ${
-              filter === 'COMPLETED'
-                ? 'bg-[var(--mn-primary)] text-white shadow-2xs'
-                : 'text-[var(--mn-text-muted)] hover:bg-[var(--mn-page)]'
-            }`}
-          >
-            المكتملة ({completedCourses.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setFilter('CERTIFICATES')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold ${
-              filter === 'CERTIFICATES'
-                ? 'bg-[var(--mn-primary)] text-white shadow-2xs'
-                : 'text-[var(--mn-text-muted)] hover:bg-[var(--mn-page)]'
-            }`}
-          >
-            الشهادات ({certificates.length})
-          </button>
-        </div>
+        <nav aria-label="تصفية الدورات والشهادات" className="grid grid-cols-2 gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2 sm:grid-cols-4">
+          {learningFilters.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setFilter(item.id)}
+              aria-pressed={filter === item.id}
+              className={`min-h-9 min-w-0 rounded-lg px-2 py-1.5 text-[11px] font-bold leading-[1.7] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] ${
+                filter === item.id
+                  ? 'bg-[var(--mn-primary)] text-white shadow-2xs'
+                  : 'bg-[var(--mn-page)] text-[var(--mn-text-muted)] hover:bg-[var(--mn-surface-muted)]'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
       )}
 
       {!hasAnyLearningData ? (
-        <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 sm:p-8 text-center mn-panel shadow-2xs">
-          <div className="w-12 h-12 rounded-2xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/40 flex items-center justify-center text-[#E5B54F] mx-auto mb-3.5 shadow-xs">
-            <BookOpen className="w-6 h-6 text-[#E5B54F]" />
+        <LearningSectionCard title="ابدأ رحلتك التعليمية" icon={<BookOpen className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}>
+          <div className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-4 text-center">
+            <p className="text-[12px] font-semibold leading-[1.9] text-[var(--mn-text-muted)]">
+              سجّل في دورة من دليل منارتك لتظهر هنا الدروس التي تتابعها، ونسب إنجازك، والشهادات التي تصدر لك.
+            </p>
           </div>
-          <h3 className="text-sm sm:text-base font-bold text-[var(--mn-heading)]">ابدأ مسارك التعليمي المخصص</h3>
-          <p className="text-xs text-[var(--mn-text-muted)] mt-2 leading-relaxed max-w-lg mx-auto">
-            تصفح دليل الدورات التدريبية المتاحة وسجّل في البرامج التي تدعم مسارك الأكاديمي والمهني لتتبع تقدم الدروس خطوة بخطوة والحصول على شهادات إتمام معتمدة تصدر مباشرة في حسابك.
-          </p>
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              to="/courses"
-              className="px-4 py-2 rounded-xl bg-[var(--mn-primary)] text-white text-xs font-bold hover:bg-[var(--mn-primary-hover)] transition-all shadow-2xs inline-flex items-center gap-2"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#E5B54F]" />
-              <span>استكشف دليل الدورات التدريبية</span>
-            </Link>
-          </div>
-        </div>
+        </LearningSectionCard>
       ) : (
-        <div className="space-y-6">
-          {/* Section 1: In-Progress Courses */}
+        <>
           {(filter === 'ALL' || filter === 'IN_PROGRESS') && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
-                    <Clock3 className="w-3.5 h-3.5 text-[#E5B54F]" />
-                  </div>
-                  <h3 className="text-sm font-bold text-[var(--mn-heading)]">دورات قيد التعلم</h3>
-                </div>
-                <span className="text-xs font-semibold text-[var(--mn-text-muted)]">
-                  {inProgressCourses.length} دورة
-                </span>
-              </div>
-
+            <LearningSectionCard
+              title="دورات قيد التعلم"
+              icon={<Clock3 className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
+              count={`${inProgressCourses.length} دورة`}
+            >
               {inProgressCourses.length === 0 ? (
-                <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-5 text-center text-xs text-[var(--mn-text-muted)] mn-panel">
+                <p className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-4 text-center text-[12px] text-[var(--mn-text-muted)]">
                   لا توجد دورات قيد التعلم حاليًا.
-                </div>
+                </p>
               ) : (
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3.5 sm:grid-cols-2">
                   {inProgressCourses.map((course) => (
-                    <div
+                    <article
                       key={course.enrollmentId || course.courseId}
-                      className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel flex flex-col justify-between hover:border-[#D6A43B]/40 transition-all"
+                      className="mn-student-learning-course flex min-w-0 flex-col justify-between rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3.5 transition-colors hover:border-[#D6A43B]/50"
                     >
                       <div>
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                            قيد التعلم
-                          </span>
-                          <span className="text-xs font-bold text-[var(--mn-heading)]">
-                            {course.progressPercentage}%
-                          </span>
+                          <span className="rounded-full border border-[var(--mn-info-border)] bg-[var(--mn-info-soft)] px-2 py-0.5 text-[11px] font-semibold text-[var(--mn-info-text)]">قيد التعلم</span>
+                          <span className="text-[16px] font-bold text-[var(--mn-heading)]">{course.progressPercentage}%</span>
                         </div>
-
-                        <h4 className="text-sm font-bold text-[var(--mn-heading)] mt-2 line-clamp-2">
-                          {course.courseName}
-                        </h4>
-
-                        <div className="mt-3">
-                          <progress
-                            className="mn-native-progress mn-native-progress-secondary h-2 w-full"
-                            value={Math.min(100, Math.max(0, course.progressPercentage))}
-                            max={100}
-                            aria-label="نسبة تقدم الدورة"
-                          />
-                        </div>
-
-                        <div className="mt-2 text-[10.5px] text-[var(--mn-text-muted)]">
-                          {course.lastAccessedAt ? (
-                            <span>آخر وصول: <strong>{formatDate(course.lastAccessedAt)}</strong></span>
-                          ) : (
-                            <span>تاريخ التسجيل: <strong>{formatDate(course.enrolledAt)}</strong></span>
-                          )}
-                        </div>
+                        <h4 className="mt-2 text-[14px] font-bold leading-[1.65] text-[var(--mn-heading)] break-words">{course.courseName}</h4>
+                        <progress
+                          className="mn-native-progress mn-native-progress-secondary mt-3 h-2 w-full"
+                          value={Math.min(100, Math.max(0, course.progressPercentage))}
+                          max={100}
+                          aria-label={`تقدم دورة ${course.courseName}`}
+                        />
+                        <p className="mt-2 text-[11px] font-medium leading-[1.7] text-[var(--mn-text-muted)]">
+                          {course.lastAccessedAt
+                            ? `آخر وصول: ${formatDate(course.lastAccessedAt)}`
+                            : `تاريخ التسجيل: ${formatDate(course.enrolledAt)}`}
+                        </p>
                       </div>
-
-                      <div className="mt-4 pt-3 border-t border-[var(--mn-border)] dark:border-white/10 flex items-center justify-between">
-                        <span className="text-[10px] text-[var(--mn-text-muted)]">منارة للتعليم</span>
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--mn-border)] pt-3">
+                        <span className="text-[11px] text-[var(--mn-text-muted)]">متابعة تقدم الدورة</span>
                         <Link
                           to={`../student/courses/${encodeURIComponent(course.courseId)}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--mn-primary)] text-white text-xs font-bold hover:bg-[var(--mn-primary-hover)] transition-all shadow-2xs"
+                          className="ms-auto inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-[var(--mn-primary)] px-3 py-1.5 text-[12px] font-bold text-white transition-colors hover:bg-[var(--mn-primary-hover)]"
                         >
                           <span>متابعة التعلم</span>
-                          <ArrowLeft className="w-3.5 h-3.5" />
+                          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
                         </Link>
                       </div>
-                    </div>
+                    </article>
                   ))}
                 </div>
               )}
-            </div>
+            </LearningSectionCard>
           )}
 
-          {/* Section 2: Completed Courses */}
           {(filter === 'ALL' || filter === 'COMPLETED') && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#E5B54F]" />
-                  </div>
-                  <h3 className="text-sm font-bold text-[var(--mn-heading)]">الدورات المكتملة</h3>
-                </div>
-                <span className="text-xs font-semibold text-[var(--mn-text-muted)]">
-                  {completedCourses.length} دورة
-                </span>
-              </div>
-
+            <LearningSectionCard
+              title="الدورات المكتملة"
+              icon={<CheckCircle2 className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
+              count={`${completedCourses.length} دورة`}
+            >
               {completedCourses.length === 0 ? (
-                <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-5 text-center text-xs text-[var(--mn-text-muted)] mn-panel">
+                <p className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-4 text-center text-[12px] text-[var(--mn-text-muted)]">
                   لا توجد دورات مكتملة حتى الآن.
-                </div>
+                </p>
               ) : (
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3.5 sm:grid-cols-2">
                   {completedCourses.map((course) => (
-                    <div
+                    <article
                       key={course.enrollmentId || course.courseId}
-                      className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel flex flex-col justify-between hover:border-[#D6A43B]/40 transition-all"
+                      className="mn-student-learning-course flex min-w-0 flex-col justify-between rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3.5 transition-colors hover:border-[#D6A43B]/50"
                     >
                       <div>
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border border-[var(--mn-success-border)]">
-                            مكتملة بنجاح
-                          </span>
-                          <span className="text-xs font-bold text-[var(--mn-success-text)]">
-                            100%
-                          </span>
+                          <span className="rounded-full border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] px-2 py-0.5 text-[11px] font-semibold text-[var(--mn-success-text)]">مكتملة بنجاح</span>
+                          <span className="text-[16px] font-bold text-[var(--mn-success-text)]">100%</span>
                         </div>
-
-                        <h4 className="text-sm font-bold text-[var(--mn-heading)] mt-2 line-clamp-2">
-                          {course.courseName}
-                        </h4>
-
-                        <div className="mt-3 text-[10.5px] text-[var(--mn-text-muted)] flex items-center gap-1.5">
-                          <Check className="w-3.5 h-3.5 text-[var(--mn-success-text)]" />
-                          <span>تاريخ الإتمام: {formatDate(course.completedAt || course.lastAccessedAt)}</span>
+                        <h4 className="mt-2 text-[14px] font-bold leading-[1.65] text-[var(--mn-heading)] break-words">{course.courseName}</h4>
+                        <div className="mt-2 flex items-center gap-1.5 text-[11px] leading-[1.7] text-[var(--mn-text-muted)]">
+                          <Check className="h-3.5 w-3.5 shrink-0 text-[var(--mn-success-text)]" aria-hidden="true" />
+                          <span>{course.completedAt ? `تاريخ الإتمام: ${formatDate(course.completedAt)}` : 'تاريخ الإتمام غير متاح'}</span>
                         </div>
                       </div>
-
-                      <div className="mt-4 pt-3 border-t border-[var(--mn-border)] dark:border-white/10 flex items-center justify-between">
-                        <span className="text-[10px] text-[var(--mn-text-muted)]">سجل التدريب</span>
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--mn-border)] pt-3">
+                        <span className="text-[11px] text-[var(--mn-text-muted)]">مراجعة محتوى الدورة</span>
                         <Link
                           to={`../student/courses/${encodeURIComponent(course.courseId)}`}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-[var(--mn-primary)] hover:underline"
+                          className="ms-auto inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-1.5 text-[12px] font-bold text-[var(--mn-primary)] transition-colors hover:border-[#D6A43B]/50"
                         >
                           <span>مراجعة المواد</span>
-                          <ArrowLeft className="w-3.5 h-3.5" />
+                          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
                         </Link>
                       </div>
-                    </div>
+                    </article>
                   ))}
                 </div>
               )}
-            </div>
+            </LearningSectionCard>
           )}
 
-          {filter === 'ALL' && otherCourses.length > 0 && <section className="space-y-3"><h3 className="text-sm font-bold text-[var(--mn-heading)]">تسجيلات معلقة أو سابقة</h3><div className="grid gap-3 sm:grid-cols-2">{otherCourses.map(course => <CourseCard key={course.enrollmentId} course={course} />)}</div></section>}
-
-        </div>
+          {filter === 'ALL' && otherCourses.length > 0 && (
+            <LearningSectionCard
+              title="تسجيلات معلقة أو سابقة"
+              icon={<ClipboardList className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
+              count={`${otherCourses.length} تسجيل`}
+            >
+              <div className="grid gap-3.5 sm:grid-cols-2">
+                {otherCourses.map((course) => (
+                  <CourseCard key={course.enrollmentId || course.courseId} course={course} />
+                ))}
+              </div>
+            </LearningSectionCard>
+          )}
+        </>
       )}
-      {(filter === 'ALL' || filter === 'CERTIFICATES') && <StudentCertificatesPanel initial={certificates}/> }
+
+      {(filter === 'ALL' || filter === 'CERTIFICATES') && (
+        <LearningSectionCard
+          title="إنجازاتي وشهاداتي"
+          icon={<Award className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
+        >
+          <StudentCertificatesPanel initial={certificates} compactLearning />
+        </LearningSectionCard>
+      )}
     </div>
+  );
+}
+
+/** Matches the typography and card identity of ملخصي without altering other tabs. */
+function LearningSectionCard({
+  title,
+  icon,
+  count,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  count?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      aria-label={title}
+      className="mn-student-learning-section relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel"
+    >
+      <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+            {icon}
+          </span>
+          <h3 className="mn-student-learning-heading min-w-0 text-[14px] font-bold leading-[1.22] text-[var(--mn-heading)]">
+            {title}
+          </h3>
+        </div>
+        {count && <span className="shrink-0 text-[11px] font-semibold text-[var(--mn-text-muted)]">{count}</span>}
+      </div>
+      {children}
+    </section>
   );
 }
 
