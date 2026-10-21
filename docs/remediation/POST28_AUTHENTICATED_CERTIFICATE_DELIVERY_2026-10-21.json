@@ -77,9 +77,19 @@
   "ci": {
     "sourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
     "runId": 39527255949,
-    "status": "pending",
-    "result": null
+    "status": "completed",
+    "result": "success",
+    "passedJobs": 6,
+    "allSixJobsSucceeded": true,
+    "observedAtUtc": "2026-10-21T12:06:52.306Z",
+    "evidence": "docs/reviews/evidence/post28/7f26fb5753338090bc434ee3f3fe1eccb4020f83/r14-authenticated-ci/ci-six-jobs-completed.json"
   },
   "evidence": "docs/reviews/evidence/post28/19b6a6d28c44d99507cc8df2dc38eb2070528296/r14-authenticated-certificates/evidence-index.json",
-  "resume": "Observe final source CI after it starts. Keep mandatory release evidence gates and verify legacy URL expiries/invalidation only on an authorized real target."
+  "resume": "CI completed successfully. Continue required financial/certificate/import worker route fault proofs in isolated synthetic lab; legacy provider URL transition and formal release gates remain required on an authorized target.",
+  "previousCiObservation": {
+    "sourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
+    "runId": 39527255949,
+    "status": "pending",
+    "result": null
+  }
 }

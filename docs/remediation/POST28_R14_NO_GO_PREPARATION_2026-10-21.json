@@ -2,7 +2,7 @@
   "kind": "POST28_R14_NO_GO_PREPARATION",
   "localDate": "2026-10-21",
   "reviewSha": "83e210e0eb9505c875129948bd52171986f458b3",
-  "candidateSourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+  "candidateSourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
   "branch": "feat/post28-r07-artifact-preparation",
   "releaseDecision": "NO_GO",
   "decisionScope": "PREPARATION_MEMO_NOT_PRODUCTION_AUTHORIZATION",
@@ -19,7 +19,7 @@
   "hostingBudgetApproved": false,
   "localRemainingWork": [
     "Unified exact-SHA Linux Admin CMS lifecycle and English coverage; Arabic mixed-source Windows journey completed locally",
-    "Reviewer stream and signed certificate PDF/preview demonstrated locally; pre-issued provider URL instant revocation remains OPEN R14-DELIVERY-01",
+    "Authenticated certificate delivery fixed and browser/IO-revocation proved locally; previously issued provider capabilities still require target-specific expiry or invalidation evidence",
     "Required financial/certificate/import worker route fault proofs",
     "Scoped Linux rollback with selected exact artifacts and actual signal transport",
     "Representative launch dataset and prior SLO/resource budget; pool checkout instrumentation"
@@ -32,15 +32,16 @@
     "R13-E05"
   ],
   "candidateCi": {
-    "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
-    "runId": 39522846173,
+    "sourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
+    "runId": 39527255949,
+    "status": "completed",
     "result": "success",
     "passedJobs": 6,
-    "lastObservedStatus": "completed",
     "allSixJobsSucceeded": true,
-    "evidence": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/ci-six-jobs-completed.json"
+    "observedAtUtc": "2026-10-21T12:06:52.306Z",
+    "evidence": "docs/reviews/evidence/post28/7f26fb5753338090bc434ee3f3fe1eccb4020f83/r14-authenticated-ci/ci-six-jobs-completed.json"
   },
-  "nextFunctionalStep": "R14_DELIVERY_01_AUTHENTICATED_CERTIFICATE_CONTENT_CONTRACT_AND_CONSUMERS",
+  "nextFunctionalStep": "SCOPED_FINANCIAL_CERTIFICATE_IMPORT_WORKER_ROUTE_FAULT_PROOFS_IN_SYNTHETIC_LAB",
   "evidence": "docs/reviews/evidence/post28/83e210e0eb9505c875129948bd52171986f458b3/r14-no-go-preparation/evidence-index.json",
   "latestAdminCmsLocalDiagnostic": {
     "completed": true,
@@ -69,47 +70,15 @@
       "passedJobs": 6
     }
   },
-  "previousCandidateSourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
+  "previousCandidateSourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
   "previousCandidateCi": {
-    "sourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
-    "runId": 39516645007,
-    "lastObservedStatus": "completed",
+    "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+    "runId": 39522846173,
     "result": "success",
     "passedJobs": 6,
-    "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/r13-ci-completed.json",
+    "lastObservedStatus": "completed",
     "allSixJobsSucceeded": true,
-    "latestJobs": [
-      {
-        "name": "R08 isolated Redis and Linux worker shutdown",
-        "status": "completed",
-        "result": "success"
-      },
-      {
-        "name": "Deployment configuration",
-        "status": "completed",
-        "result": "success"
-      },
-      {
-        "name": "Full source closure gates",
-        "status": "completed",
-        "result": "success"
-      },
-      {
-        "name": "Translation quality gates",
-        "status": "completed",
-        "result": "success"
-      },
-      {
-        "name": "Retrieve and verify immutable artifacts from Actions storage",
-        "status": "completed",
-        "result": "success"
-      },
-      {
-        "name": "Linux x64 review image and native runtime",
-        "status": "completed",
-        "result": "success"
-      }
-    ]
+    "evidence": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/ci-six-jobs-completed.json"
   },
   "latestReviewerDeliveryDiagnostic": {
     "passed": true,
@@ -132,6 +101,25 @@
       "requiredBeforeClaimingInstantRevocation": "Authenticated server content delivery with current certificate checks before and after IO, or proven provider capability fencing tied to certificate revocation",
       "currentContract": "Temporary provider-signed URLs with bounded TTL; no existing instant invalidation protocol proved",
       "productionScopeAccepted": false
+    },
+    "formalAcceptance": false
+  },
+  "latestAuthenticatedCertificateDeliveryDiagnostic": {
+    "sourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
+    "frontendSourceSha": "e2ff681738c99e143fbf2ea2219b85a307142d60",
+    "localBehaviorPassed": true,
+    "newAuthenticatedDelivery": "FIXED_AND_LOCAL_RUNTIME_VERIFIED",
+    "previousProviderCapabilities": "DEPLOYMENT_TRANSITION_STILL_REQUIRED_IF_PRESENT",
+    "report": "docs/remediation/POST28_AUTHENTICATED_CERTIFICATE_DELIVERY_2026-10-21.md",
+    "ci": {
+      "sourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
+      "runId": 39527255949,
+      "status": "completed",
+      "result": "success",
+      "passedJobs": 6,
+      "allSixJobsSucceeded": true,
+      "observedAtUtc": "2026-10-21T12:06:52.306Z",
+      "evidence": "docs/reviews/evidence/post28/7f26fb5753338090bc434ee3f3fe1eccb4020f83/r14-authenticated-ci/ci-six-jobs-completed.json"
     },
     "formalAcceptance": false
   }

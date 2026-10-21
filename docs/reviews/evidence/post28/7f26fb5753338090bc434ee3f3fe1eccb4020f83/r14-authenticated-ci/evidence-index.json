@@ -1,0 +1,12 @@
+{
+  "kind": "POST28_SCOPED_EVIDENCE_INDEX",
+  "reviewSha": "7f26fb5753338090bc434ee3f3fe1eccb4020f83",
+  "sourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
+  "files": [
+    {
+      "path": "docs/reviews/evidence/post28/7f26fb5753338090bc434ee3f3fe1eccb4020f83/r14-authenticated-ci/ci-six-jobs-completed.json",
+      "bytes": 13874,
+      "sha256": "354e8b33d7b5e6207ad9de8029ebee78cc79becfba7afa30d73c8cabfc093740"
+    }
+  ]
+}
