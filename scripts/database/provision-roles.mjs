@@ -27,6 +27,9 @@ if (new Set(roles.map(([name]) => name)).size !== 3 || roles.some(([name,pass]) 
 const [probe, migrator, app] = roles.map(([name]) => name);
 const database = decodeURIComponent(direct.pathname.slice(1));
 const statement = [
+  // The restricted migrator must not hold database CREATE. Install this
+  // reviewed prerequisite as the provisioning operator before migration replay.
+  'CREATE EXTENSION IF NOT EXISTS pg_trgm;',
   `REVOKE ALL ON DATABASE "${database.replaceAll('\"','\"\"')}" FROM PUBLIC;`,
   'REVOKE CREATE ON SCHEMA public FROM PUBLIC;',
   'REVOKE ALL ON ALL TABLES IN SCHEMA public FROM PUBLIC;',
