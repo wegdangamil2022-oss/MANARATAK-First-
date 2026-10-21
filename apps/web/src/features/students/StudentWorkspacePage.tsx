@@ -1320,10 +1320,30 @@ function OpportunitiesView({
 
   const hasTrackers = trackers.length > 0;
 
+  // Personalize the introduction using only active application files.
+  // Archived records must not inflate the active task totals.
+  const activeTaskCount = activeTrackers.reduce((total, item) => total + item.checklist.length, 0);
+  const activeCompletedCount = activeTrackers.reduce(
+    (total, item) => total + item.checklist.filter((task) => task.completed).length,
+    0,
+  );
+  const activeFileDescription = activeTrackers.length === 1
+    ? 'لديك ملف تقديم نشط واحد'
+    : activeTrackers.length === 2
+      ? 'لديك ملفا تقديم نشطان'
+      : `لديك ${activeTrackers.length} ملفات تقديم نشطة`;
+  const introduction = activeTrackers.length === 0
+    ? 'لا توجد ملفات تقديم نشطة حاليًا. ابدأ بمتابعة منحة لتتمكن من تنظيم متطلباتها ومواعيدها.'
+    : activeTaskCount > 0
+      ? `${activeFileDescription}، وأنجزت ${activeCompletedCount} من أصل ${activeTaskCount} من مهام التقديم.`
+      : `${activeFileDescription}. لم تُضف مهام متابعة إلى هذه الملفات بعد.`;
+
   return (
-    <div className="space-y-5">
+    <div className="mn-student-opportunities-page space-y-5 font-['Cairo',sans-serif]">
       {/* 1. Header Banner & Quick Stats */}
-      <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel">
+      <div className="relative overflow-hidden rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel font-['Cairo',sans-serif]">
+        {/* Same right-edge introduction stripe as the cultural-exchange lesson, now gold. */}
+        <div aria-hidden="true" className="pointer-events-none absolute top-2.5 bottom-2.5 right-0 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#B78622] via-[#D6A43B] to-[#E5B54F]" />
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="inline-flex items-center gap-2">
@@ -1342,6 +1362,12 @@ function OpportunitiesView({
             <Sparkles className="w-3.5 h-3.5 text-[#E5B54F]" />
             <span>استكشف المنح</span>
           </Link>
+        </div>
+
+        {/* Neutral guidance: only the decorative edge of the parent panel is gold. */}
+        <div className="mt-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-3 py-2.5 font-['Cairo',sans-serif]">
+          <p className="text-[12px] font-bold text-[var(--mn-heading)] leading-5">تابع رحلتك نحو القبول الجامعي</p>
+          <p className="mt-0.5 text-[11px] sm:text-xs font-medium leading-[1.85] text-[var(--mn-text-muted)]">{introduction}</p>
         </div>
 
         {/* 3 Metric Counters - Only shown when trackers exist */}
