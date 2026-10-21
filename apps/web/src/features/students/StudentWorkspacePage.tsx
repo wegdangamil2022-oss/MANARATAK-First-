@@ -2549,11 +2549,7 @@ function ServiceRequestsView({
         ) : (
           <div className="grid gap-6 lg:grid-cols-[1fr_1.35fr]">
             {/* Left Column: Requests List */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs sm:text-sm font-bold text-[var(--mn-heading)]">سجل الطلبات المقدمة</h3>
-                <span className="text-[11px] text-[var(--mn-text-muted)]">{requests.length} طلب</span>
-              </div>
+            <ServiceSectionCard title="سجل الطلبات المقدمة" icon={<ClipboardList className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />} count={`${requests.length} طلب`}>
 
               <div className="space-y-2.5">
                 {requests.map((request) => {
@@ -2582,10 +2578,10 @@ function ServiceRequestsView({
                             <ClipboardList className="w-4 h-4 text-[#E5B54F]" />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-bold text-xs sm:text-sm text-[var(--mn-heading)] truncate">
+                            <div className="text-[14px] font-bold leading-[1.65] text-[var(--mn-heading)] break-words">
                               طلب خدمة رقم #{request.publicId}
                             </div>
-                            <div className="text-[10px] text-[var(--mn-text-muted)] mt-0.5">
+                            <div className="text-[11px] text-[var(--mn-text-muted)] mt-0.5">
                               تاريخ التقديم: {formatDate(request.createdAt)}
                             </div>
                           </div>
@@ -2608,19 +2604,18 @@ function ServiceRequestsView({
                   );
                 })}
               </div>
-            </div>
+            </ServiceSectionCard>
 
             {/* Right Column: Selected Request Details */}
             <div>
               {selected ? (
-                <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel space-y-5">
+                <ServiceSectionCard title="تفاصيل الطلب المحدد" icon={<FileText className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}>
                   {/* Top Details Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--mn-border)] dark:border-white/10">
                     <div>
-                      <span className="text-[10px] font-bold text-[#142B5F] dark:text-[#E5B54F]">تفاصيل الطلب المحدد</span>
-                      <h3 className="text-base font-bold text-[var(--mn-heading)] mt-0.5">
-                        طلب خدمة رقم <span className="font-mono text-[#D6A43B]">#{selected.publicId}</span>
-                      </h3>
+                      <h4 className="text-[14px] font-bold leading-[1.65] text-[var(--mn-heading)] break-words">
+                        طلب خدمة رقم <span className="text-[#B78622] dark:text-[#E5B54F]">#{selected.publicId}</span>
+                      </h4>
                       <div className="text-[11px] text-[var(--mn-text-muted)] mt-1">
                         تاريخ الإنشاء: {formatDate(selected.createdAt)} · آخر تحديث: {formatDate(selected.updatedAt)}
                       </div>
@@ -2716,7 +2711,7 @@ function ServiceRequestsView({
                             <Receipt className="w-3.5 h-3.5 text-[#E5B54F]" />
                           </div>
                           <div>
-                            <div className="text-xs font-bold text-[var(--mn-heading)]">
+                            <div className="text-[13px] font-bold leading-[1.65] text-[var(--mn-heading)] break-words">
                               فاتورة مرتبطة #{matchedInvoice.invoiceNumber || matchedInvoice.publicId}
                             </div>
                             <div className="text-[10px] text-[var(--mn-text-muted)]">
@@ -2786,7 +2781,7 @@ function ServiceRequestsView({
                       )}
                     </div>
                   )}
-                </div>
+                </ServiceSectionCard>
               ) : requestedNotFoundId ? (
                 <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-8 text-center mn-panel">
                   <AlertTriangle className="w-8 h-8 mx-auto text-amber-600 dark:text-amber-400 mb-2" />
@@ -2809,11 +2804,7 @@ function ServiceRequestsView({
         )
       ) : (
         /* Invoices Full Section */
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs sm:text-sm font-bold text-[var(--mn-heading)]">سجل الفواتير والمدفوعات</h3>
-            <span className="text-[11px] text-[var(--mn-text-muted)]">{invoices.length} فاتورة</span>
-          </div>
+        <ServiceSectionCard title="سجل الفواتير والمدفوعات" icon={<Receipt className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />} count={`${invoices.length} فاتورة`}>
 
           {invoices.length === 0 ? (
             <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 text-center mn-panel">
@@ -2841,7 +2832,7 @@ function ServiceRequestsView({
                             <Receipt className="w-4 h-4 text-[#E5B54F]" />
                           </div>
                           <div>
-                            <div className="text-xs font-bold text-[var(--mn-heading)]">
+                            <div className="text-[14px] font-bold leading-[1.65] text-[var(--mn-heading)] break-words">
                               فاتورة #{invoice.invoiceNumber || invoice.publicId}
                             </div>
                             <div className="text-[10px] text-[var(--mn-text-muted)]">
@@ -2928,9 +2919,37 @@ function ServiceRequestsView({
               })}
             </div>
           )}
-        </div>
+        </ServiceSectionCard>
       )}
     </div>
+  );
+}
+
+/** Matches Summary and Opportunities: 14px Cairo and a gold underline only below the title. */
+function ServiceSectionCard({
+  title,
+  icon,
+  count,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  count?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section aria-label={title} className="mn-student-services-section relative -mx-[2px] w-[calc(100%+4px)] min-w-0 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-2xs mn-panel dark:border-white/10 sm:mx-0 sm:w-full sm:p-4">
+      <div className="mb-3 flex min-w-0 flex-wrap items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+            {icon}
+          </span>
+          <h3 className="mn-student-services-heading min-w-0 text-[14px] font-bold leading-[1.22] text-[var(--mn-heading)]">{title}</h3>
+        </div>
+        {count && <span className="text-[11px] font-semibold text-[var(--mn-text-muted)]">{count}</span>}
+      </div>
+      {children}
+    </section>
   );
 }
 
