@@ -7,6 +7,10 @@ import {FinancePlatformUseCases} from '../../packages/application/src/finance-pl
 import {PrismaFinanceRepository} from '../../packages/infrastructure/src/finance-platform/PrismaFinanceRepository.ts';
 import {PrismaFinanceCurrencyReferenceGateway,FinancePaymentGatewayRegistry,FinanceBankTransferGatewayRegistry} from '../../packages/infrastructure/src/finance-platform/FinanceSafetyGateways.ts';
 import {EnvironmentPaymentGatewayAdapter} from '../../packages/infrastructure/src/finance-platform/ProviderNeutralFinanceGateways.ts';
+import {FinanceReconciliationBackgroundJobHandler} from '../../packages/application/src/background-jobs/handlers/FinanceReconciliationBackgroundJobHandler.ts';
+import {DurableBackgroundWorker,BackgroundWorkerRuntimeState} from '../../packages/application/src/background-jobs/workers/DurableBackgroundWorker.ts';
+import {BackgroundJobHandlerRegistry} from '../../packages/application/src/background-jobs/workers/BackgroundJobHandlerRegistry.ts';
+import {PrismaBackgroundJobExecutionGateway} from '../../packages/infrastructure/src/background-jobs/PrismaBackgroundJobExecutionGateway.ts';
 
 const fresh=()=>randomUUID(),money=()=>({amountMinorUnits:'100',currencyCode:'USD',scale:2});
 const context=()=>({actorId:'post28-r08-provider',idempotencyKey:fresh(),correlationId:fresh(),reason:'Synthetic loopback provider outcome'});
@@ -67,6 +71,43 @@ describe('R08 signed loopback provider with persisted financial outcomes',()=>{
     finance=new FinancePlatformUseCases(new PrismaFinanceRepository(db),{currencyReference:new PrismaFinanceCurrencyReferenceGateway(db),paymentGateways:new FinancePaymentGatewayRegistry([adapter]),bankTransferGateways:new FinanceBankTransferGatewayRegistry([]),fxRateProvider:{providerKey:'POST28_DISABLED',isConfigured:()=>false,fetchRate:async()=>{throw Error('EXTERNAL_FX_FORBIDDEN');}},transferFeePolicy:{policyReference:'POST28_UNUSED',basisPoints:0}});
   });
   afterAll(async()=>{if(server){server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}await db?.$disconnect();});
+  it('recovers through the real financial background worker and replays its failed acknowledgement with one capture and posting',async()=>{
+    const i=await invoice(),c=context(),input={invoiceId:i.id,amount:money(),paymentMethodToken:'synthetic-lost-response',gatewayProvider:'POST28_STUB'};
+    await expect(finance.capturePayment(input,c)).rejects.toThrow('FINANCE_PROVIDER_UNAVAILABLE:payment.capture');
+    const pending=await facts(i.id),provider=records.get(pending.payment.publicId);
+    expect(provider.captures).toBe(1);expect(pending.transactions).toHaveLength(0);expect(pending.receipts).toHaveLength(0);
+    const wait=Math.max(0,pending.payment.nextCheckAt.getTime()-Date.now()+50);expect(wait).toBeLessThanOrEqual(120050);
+    await new Promise(resolve=>setTimeout(resolve,wait));
+    const reference=fresh(),handler=new FinanceReconciliationBackgroundJobHandler(finance),keys=[];let effectReached=false;
+    await db.backgroundJobRecord.create({data:{id:reference,reference,jobType:handler.jobType,parameters:{limit:10},maxAttempts:2,backoffType:'none',timeoutSeconds:15,availableAt:new Date(Date.now()-1000)}});
+    const first=new DurableBackgroundWorker(new PrismaBackgroundJobExecutionGateway(db),new BackgroundJobHandlerRegistry([{
+      jobType:handler.jobType,handle:async(payload,workerContext)=>{keys.push(workerContext.idempotencyKey);await handler.handle(payload,workerContext);effectReached=true;throw Error('SYNTHETIC_JOB_ACK_LOST_AFTER_REAL_FINANCE_EFFECT');},
+    }]),new BackgroundWorkerRuntimeState());
+    const options={batchSize:1,leaseDurationMs:5000,heartbeatIntervalMs:1000};
+    await first.runOnce({...options,workerId:'synthetic-finance-before-restart'});await first.drain();
+    expect(effectReached).toBe(true);
+    const settled=await facts(i.id);
+    expect(settled.payment.status).toBe('CAPTURED');expect(settled.invoice.status).toBe('PAID');expect(settled.invoice.dueMinorUnits).toBe('0');
+    expect(settled.transactions).toHaveLength(1);expect(settled.receipts).toHaveLength(1);
+    expect(settled.transactions[0].entries).toHaveLength(2);expect(new Set(settled.transactions[0].entries.map(entry=>entry.direction))).toEqual(new Set(['DEBIT','CREDIT']));
+    expect(settled.transactions[0].entries.every(entry=>entry.amountMinorUnits==='100'&&entry.currencyCode==='USD'&&entry.scale===2)).toBe(true);
+    expect((await db.backgroundJobRecord.findUniqueOrThrow({where:{reference}})).status).toBe('SCHEDULED');
+    const other=new PrismaClient({log:[],errorFormat:'minimal'});
+    try{
+      const adapter=new EnvironmentPaymentGatewayAdapter('POST28_STUB',{baseUrl:'http://127.0.0.1:'+port,apiKey,signingSecret:secret,allowInsecureHttp:true,timeoutMs:1000,maxAttempts:1,merchantReference:merchant,runtimeApproved:true});
+      const freshFinance=new FinancePlatformUseCases(new PrismaFinanceRepository(other),{currencyReference:new PrismaFinanceCurrencyReferenceGateway(other),paymentGateways:new FinancePaymentGatewayRegistry([adapter]),bankTransferGateways:new FinanceBankTransferGatewayRegistry([]),fxRateProvider:{providerKey:'POST28_DISABLED',isConfigured:()=>false,fetchRate:async()=>{throw Error('EXTERNAL_FX_FORBIDDEN');}},transferFeePolicy:{policyReference:'POST28_UNUSED',basisPoints:0}});
+      const retryHandler=new FinanceReconciliationBackgroundJobHandler(freshFinance);
+      const retry=new DurableBackgroundWorker(new PrismaBackgroundJobExecutionGateway(other),new BackgroundJobHandlerRegistry([{jobType:retryHandler.jobType,handle:async(payload,workerContext)=>{keys.push(workerContext.idempotencyKey);await retryHandler.handle(payload,workerContext);}}]),new BackgroundWorkerRuntimeState());
+      await retry.runOnce({...options,workerId:'synthetic-finance-after-restart'});await retry.drain();
+      const after=await facts(i.id);
+      for(const field of ['payment','invoice','transactions','receipts'])expect(after[field]).toEqual(settled[field]);
+      expect(provider.captures).toBe(1);expect(keys).toEqual([reference,reference]);
+      expect((await db.backgroundJobRecord.findUniqueOrThrow({where:{reference}})).status).toBe('COMPLETED');
+      expect((await db.backgroundJobExecutionRecord.findMany({where:{jobReference:reference},orderBy:{attempt:'asc'}})).map(row=>row.outcome)).toEqual(['FAILED','SUCCEEDED']);
+      expect(await db.backgroundJobDeadLetterRecord.count({where:{jobReference:reference}})).toBe(0);
+      expect(requests.filter(row=>row.reference===pending.payment.publicId).map(row=>row.operation)).toEqual(['authorize','capture','status']);
+    }finally{await other.$disconnect();}
+  },150000);
   it('reconciles a lost capture response after the natural deadline without a second charge or receipt',async()=>{
     const i=await invoice(),c=context(),input={invoiceId:i.id,amount:money(),paymentMethodToken:'synthetic-lost-response',gatewayProvider:'POST28_STUB'};
     await expect(finance.capturePayment(input,c)).rejects.toThrow('FINANCE_PROVIDER_UNAVAILABLE:payment.capture');

@@ -18,7 +18,8 @@ export const COURSE_FIXTURE_APPLICATION_TABLES=Object.freeze(['CourseImportAnaly
 export const LEARNING_PATH_FIXTURE_APPLICATION_TABLES=Object.freeze(['LearningPath','LearningPathVersion','LearningPathCourse','LearningPathEnrollment']);
 export const R08_OUTBOX_FIXTURE_APPLICATION_TABLES=Object.freeze(['StudentWorkspaceEventInbox']);
 export const R08_SESSION_FIXTURE_APPLICATION_TABLES=Object.freeze(['CredentialRecord']);
-export const R08_PROVIDER_FIXTURE_APPLICATION_TABLES=Object.freeze(['FinancePaymentAttemptRecord']);
+// Only the explicit synthetic provider fixture may persist reconciliation scans.
+export const R08_PROVIDER_FIXTURE_APPLICATION_TABLES=Object.freeze(['FinancePaymentAttemptRecord','FinanceReconciliationSnapshot','FinanceReconciliationIssueRecord']);
 export const R09_LEARNER_APPLICATION_TABLES=Object.freeze(['CourseLessonProgress']);
 // MFA credentials and editorial writes, only in an explicitly requested new DB-T.
 export const R14_ADMIN_CMS_APPLICATION_TABLES=Object.freeze([
