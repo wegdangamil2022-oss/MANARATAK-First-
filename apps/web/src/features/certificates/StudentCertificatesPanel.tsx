@@ -8,8 +8,10 @@ import { StudentCertificateActions } from './StudentCertificateActions';
 
 export function StudentCertificatesPanel({
   initial,
+  compactLearning = false,
 }: {
   initial: StudentCertificateProjectionDto[];
+  compactLearning?: boolean;
 }) {
   const { language } = useTranslation();
   const copy = useCallback((text: string) => certificateCopy(language, text), [language]);
@@ -81,16 +83,18 @@ export function StudentCertificatesPanel({
     }
   };
   return (
-    <section id="certificates" className="space-y-3 scroll-mt-6" aria-label={copy('الشهادات')}>
-      <div className="flex items-center justify-between">
-        <h3 className="font-bold">{copy('إنجازاتي وشهاداتي')}</h3>
+    <section id="certificates" className={compactLearning ? "mn-student-learning-certificates scroll-mt-6 space-y-3" : "space-y-3 scroll-mt-6"} aria-label={copy('الشهادات')}>
+      <div className={compactLearning ? "flex items-center justify-end" : "flex items-center justify-between"}>
+        {!compactLearning && <h3 className="font-bold">{copy('إنجازاتي وشهاداتي')}</h3>}
         <button
           type="button"
           onClick={() => {
             setBusy(false);
             setRefresh((value) => value + 1);
           }}
-          className="text-xs underline"
+          className={compactLearning
+            ? "inline-flex min-h-9 items-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-1.5 text-[12px] font-bold text-[var(--mn-primary)] transition-colors hover:border-[#D6A43B]"
+            : "text-xs underline"}
         >
           {copy('تحديث')}
         </button>
@@ -101,7 +105,9 @@ export function StudentCertificatesPanel({
         </p>
       )}
       {!rows.length && (
-        <p className="rounded-xl border p-5 text-sm">
+        <p className={compactLearning
+          ? "rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-4 text-center text-[12px] leading-[1.9] text-[var(--mn-text-muted)]"
+          : "rounded-xl border p-5 text-sm"}>
           {copy(
             'تظهر شهادة منارتك للدورات المؤهلة بعد إتمام المتطلبات وانتهاء عملية إصدار الشهادة.',
           )}
@@ -111,19 +117,23 @@ export function StudentCertificatesPanel({
         {rows.map((row) => (
           <article
             key={row.id}
-            className="rounded-2xl border border-[#D6A43B]/40 bg-[var(--mn-surface)] p-4"
+            className={compactLearning
+              ? "mn-student-learning-certificate min-w-0 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3.5"
+              : "rounded-2xl border border-[#D6A43B]/40 bg-[var(--mn-surface)] p-4"}
           >
-            <h4 className="font-bold">{row.courseDisplayName}</h4>
-            <p className="mt-1 text-xs">{certificateStatusCopy(language, row.status)}</p>
-            <p className="mt-2 text-xs" dir="ltr">
+            <h4 className={compactLearning ? "text-[14px] font-bold leading-[1.65] text-[var(--mn-heading)] break-words" : "font-bold"}>{row.courseDisplayName}</h4>
+            <p className={compactLearning ? "mt-1 text-[11px] font-semibold text-[var(--mn-text-muted)]" : "mt-1 text-xs"}>{certificateStatusCopy(language, row.status)}</p>
+            <p className={compactLearning ? "mt-2 text-[11px] text-[var(--mn-text-muted)] break-all" : "mt-2 text-xs"} dir="ltr">
               {row.serialNumber}
             </p>
-            <p className="text-xs">
+            <p className={compactLearning ? "text-[11px] text-[var(--mn-text-muted)]" : "text-xs"}>
               {copy('تاريخ الإصدار')}:{' '}
               {new Date(row.issuedAt).toLocaleDateString(language === 'ar' ? 'ar' : 'en')}
             </p>
             <StudentCertificateActions certificate={row} />
-            <button type="button" disabled={busy} onClick={()=>{setBusy(true);setError('');void ApiClient.createMyStudentSavedItem({entityType:'CERTIFICATE',entityId:row.id}).catch(()=>setError(language==='en'?'Could not save this owned certificate.':'تعذر حفظ الشهادة المملوكة لك.')).finally(()=>setBusy(false));}}>{language==='en'?'Save certificate reference':'حفظ مرجع الشهادة'}</button>
+            <button type="button" disabled={busy} className={compactLearning
+              ? "mt-2 inline-flex min-h-9 items-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-1.5 text-[12px] font-bold text-[var(--mn-primary)] disabled:opacity-50"
+              : undefined} onClick={()=>{setBusy(true);setError('');void ApiClient.createMyStudentSavedItem({entityType:'CERTIFICATE',entityId:row.id}).catch(()=>setError(language==='en'?'Could not save this owned certificate.':'تعذر حفظ الشهادة المملوكة لك.')).finally(()=>setBusy(false));}}>{language==='en'?'Save certificate reference':'حفظ مرجع الشهادة'}</button>
 
           </article>
         ))}
@@ -133,7 +143,9 @@ export function StudentCertificatesPanel({
           type="button"
           disabled={busy}
           onClick={() => void more()}
-          className="rounded-lg border px-4 py-2 text-sm disabled:opacity-50"
+          className={compactLearning
+            ? "min-h-9 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-4 py-2 text-[12px] font-bold text-[var(--mn-primary)] disabled:opacity-50"
+            : "rounded-lg border px-4 py-2 text-sm disabled:opacity-50"}
         >
           {busy ? copy('جارٍ التحميل…') : copy('عرض المزيد')}
         </button>
