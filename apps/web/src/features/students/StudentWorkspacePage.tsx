@@ -1340,99 +1340,91 @@ function OpportunitiesView({
       : `${activeFileDescription}. لم تُضف مهام متابعة إلى هذه الملفات بعد.`;
 
   return (
-    <div className="mn-student-opportunities-page space-y-6 font-['Cairo',sans-serif]">
-      {/* 1. Focused opportunities summary: heading, neutral guidance, metrics and discover action */}
-      <section
-        aria-label="فرصي وملفات التقديم"
-        className="relative overflow-hidden rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel font-['Cairo',sans-serif]"
-      >
-        {/* Keep the original cultural-exchange-style decorative stripe on the RIGHT edge. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 right-0 w-[3.5px] bg-gradient-to-b from-[#B78622] via-[#D6A43B] to-[#E5B54F]"
-        />
+    <div className="mn-student-opportunities-page mt-3 space-y-5 font-['Cairo',sans-serif] sm:mt-4">
+      {/* Reduced-height hero and the separate filters share a compact visual group. */}
+      <div className="space-y-1.5">
+        <section
+          aria-label="فرصي وملفات التقديم"
+          className="relative overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-2xs mn-panel dark:border-white/10 sm:p-4"
+        >
+          {/* The gold accent runs along the entire RIGHT edge of the card. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 right-0 w-[3.5px] bg-gradient-to-b from-[#B78622] via-[#D6A43B] to-[#E5B54F]"
+          />
 
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#142B5F] border border-[#D6A43B]/30">
-            <Route className="h-4.5 w-4.5 text-[#E5B54F]" aria-hidden="true" />
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-[#D6A43B]/30 bg-[#142B5F]">
+              <Route className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />
+            </span>
+            <h2 className="text-[14px] font-bold leading-[1.5] text-[var(--mn-heading)]">
+              فرصي وملفات التقديم
+            </h2>
           </div>
-          <h2 className="text-[14px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)] leading-tight">
-            فرصي وملفات التقديم
-          </h2>
-        </div>
 
-        <div className="mt-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-3 py-2.5">
-          <p className="text-[12px] font-bold text-[var(--mn-heading)] leading-5">تابع رحلتك نحو القبول الجامعي</p>
-          <p className="mt-0.5 text-[11px] sm:text-xs font-medium leading-[1.85] text-[var(--mn-text-muted)]">{introduction}</p>
-        </div>
+          <div className="mt-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 dark:bg-[var(--mn-surface-elevated)]">
+            <p className="text-[12px] font-bold leading-5 text-[var(--mn-heading)]">تابع رحلتك نحو القبول الجامعي</p>
+            <p className="mt-0.5 text-[11px] font-medium leading-[1.75] text-[var(--mn-text-muted)] sm:text-[12px]">{introduction}</p>
+          </div>
 
+          {hasTrackers && (
+            <div className="mt-2.5 grid grid-cols-3 gap-1.5 sm:gap-2">
+              <div className="min-w-0 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-1.5 py-2 text-center dark:bg-[var(--mn-surface-elevated)] sm:p-2.5">
+                <div className="text-[16px] font-bold leading-6 text-[var(--mn-heading)]">{activeTrackers.length}</div>
+                <div className="mt-0.5 text-[10px] font-semibold leading-[1.5] text-[var(--mn-text-muted)]">تقديم نشط</div>
+              </div>
+              <div className="min-w-0 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-1.5 py-2 text-center dark:bg-[var(--mn-surface-elevated)] sm:p-2.5">
+                <div className="text-[16px] font-bold leading-6 text-[var(--mn-heading)]">{activeTaskProgress}%</div>
+                <div className="mt-0.5 text-[10px] font-semibold leading-[1.5] text-[var(--mn-text-muted)]">إنجاز المهام ({activeCompletedCount}/{activeTaskCount})</div>
+              </div>
+              <div className="min-w-0 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-1.5 py-2 text-center dark:bg-[var(--mn-surface-elevated)] sm:p-2.5">
+                <div className="text-[16px] font-bold leading-6 text-[var(--mn-heading)]">{archivedTrackers.length}</div>
+                <div className="mt-0.5 text-[10px] font-semibold leading-[1.5] text-[var(--mn-text-muted)]">ملفات مؤرشفة</div>
+              </div>
+            </div>
+          )}
+
+          <div dir="rtl" className="mt-2.5 flex w-full flex-wrap items-center gap-2">
+            <p className="text-[11px] font-medium leading-[1.6] text-[var(--mn-text-muted)]">ملفاتك ومواعيدك في مكان واحد</p>
+            <Link
+              to="/scholarships"
+              className="ms-auto inline-flex min-h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-[#142B5F] px-3 py-1.5 text-[11px] font-bold text-white shadow-2xs transition-colors hover:bg-[#203D74] dark:bg-[#D6A43B] dark:text-[#142B5F] dark:hover:bg-[#E5B54F]"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-[#E5B54F] dark:text-[#142B5F]" aria-hidden="true" />
+              <span>استكشف المنح</span>
+            </Link>
+          </div>
+        </section>
+
+        {/* Three INDIVIDUAL filter cards, aligned right with left breathing room. */}
         {hasTrackers && (
-          <div className="mt-4 grid grid-cols-3 gap-2">
-            <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel">
-              <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{activeTrackers.length}</div>
-              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">تقديم نشط</div>
-            </div>
-            <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel">
-              <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{activeTaskProgress}%</div>
-              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">إنجاز المهام ({activeCompletedCount}/{activeTaskCount})</div>
-            </div>
-            <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel">
-              <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{archivedTrackers.length}</div>
-              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">ملفات مؤرشفة</div>
-            </div>
-          </div>
+          <nav
+            aria-label="تصفية ملفات التقديم"
+            className="ml-auto grid w-[94%] grid-cols-3 gap-1.5 sm:w-[86%] sm:gap-2"
+          >
+            {([
+              { value: 'ACTIVE' as const, label: 'النشطة حاليًا', count: activeTrackers.length, icon: CheckCircle2 },
+              { value: 'ARCHIVED' as const, label: 'المؤرشفة', count: archivedTrackers.length, icon: Archive },
+              { value: 'ALL' as const, label: 'الكل', count: trackers.length, icon: ListChecks },
+            ]).map(({ value, label, count, icon: Icon }) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={filter === value}
+                onClick={() => setFilter(value)}
+                className={`flex min-h-10 min-w-0 items-center justify-center gap-1 rounded-xl border px-1.5 py-1.5 text-center text-[10px] font-bold leading-[1.5] shadow-2xs transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] sm:text-[11px] ${
+                  filter === value
+                    ? 'border-[#0A6273] bg-gradient-to-l from-[#153B75] to-[#056579] text-white dark:border-[#D6A43B] dark:from-[#153B75] dark:to-[#0B6473]'
+                    : 'border-[var(--mn-border)] bg-[var(--mn-surface)] text-[var(--mn-heading)] hover:border-[#0E7C86] dark:border-white/20'
+                }`}
+              >
+                <Icon className={`h-3.5 w-3.5 shrink-0 ${filter === value ? 'text-[#E5B54F]' : 'text-[var(--mn-text-muted)]'}`} aria-hidden="true" />
+                <span>{label} ({count})</span>
+              </button>
+            ))}
+          </nav>
         )}
-
-        <div dir="rtl" className="mt-4 flex w-full flex-wrap items-center gap-3">
-          <p className="text-[11px] font-medium text-[var(--mn-text-muted)]">ملفاتك ومواعيدك في مكان واحد</p>
-          <Link
-            to="/scholarships"
-            className="ms-auto inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#142B5F] px-3.5 py-2 text-[11px] font-bold text-white shadow-2xs transition-colors hover:bg-[#203D74] dark:bg-[#D6A43B] dark:text-[#142B5F] dark:hover:bg-[#E5B54F]"
-          >
-            <Sparkles className="h-3.5 w-3.5 text-[#E5B54F] dark:text-[#142B5F]" aria-hidden="true" />
-            <span>استكشف المنح</span>
-          </Link>
-        </div>
-      </section>
-
-      {/* 2. Filter Tabs (Active / Archived / All) - Only shown when trackers exist */}
-      {hasTrackers && (
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-white/10 w-fit text-xs font-medium">
-          <button
-            type="button"
-            onClick={() => setFilter('ACTIVE')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold ${
-              filter === 'ACTIVE'
-                ? 'bg-[var(--mn-primary)] text-white shadow-2xs'
-                : 'text-[var(--mn-text-muted)] hover:bg-[var(--mn-page)]'
-            }`}
-          >
-            النشطة حاليًا ({activeTrackers.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setFilter('ARCHIVED')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold ${
-              filter === 'ARCHIVED'
-                ? 'bg-[var(--mn-primary)] text-white shadow-2xs'
-                : 'text-[var(--mn-text-muted)] hover:bg-[var(--mn-page)]'
-            }`}
-          >
-            المؤرشفة ({archivedTrackers.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setFilter('ALL')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold ${
-              filter === 'ALL'
-                ? 'bg-[var(--mn-primary)] text-white shadow-2xs'
-                : 'text-[var(--mn-text-muted)] hover:bg-[var(--mn-page)]'
-            }`}
-          >
-            الكل ({trackers.length})
-          </button>
-        </div>
-      )}
+      </div>
 
       {/* 3. Main Trackers or Single Clean Starter State */}
       {!hasTrackers ? (
