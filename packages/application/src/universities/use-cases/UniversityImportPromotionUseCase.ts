@@ -2,7 +2,7 @@ import { IUniversityRepository } from '@manaratak/domain';
 
 export type UniversityPromotionResult = {
   type: 'REJECTED';
-  reason: 'UNIVERSITY_BULK_IMPORT_BLOCKED_PENDING_GOOGLE_STUDIO';
+  reason: 'UNIVERSITY_BULK_IMPORT_BLOCKED_PENDING_RUNTIME_APPROVAL';
 };
 
 /**
@@ -15,7 +15,7 @@ export class UniversityImportPromotionUseCase {
   public async promote(_record: unknown): Promise<UniversityPromotionResult> {
     return {
       type: 'REJECTED',
-      reason: 'UNIVERSITY_BULK_IMPORT_BLOCKED_PENDING_GOOGLE_STUDIO',
+      reason: 'UNIVERSITY_BULK_IMPORT_BLOCKED_PENDING_RUNTIME_APPROVAL',
     };
   }
 }

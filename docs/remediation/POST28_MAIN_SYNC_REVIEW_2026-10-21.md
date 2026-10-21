@@ -40,6 +40,10 @@ Candidate `4adc505` passed the repaired inline-style contract, then [source clos
 
 ## Remaining boundaries
 
+Candidate `c621d33` reached the public UI gate, which rejected two further obsolete markup assumptions: the tool route now uses StudentToolPreviewRoute to isolate the prototype while returning StudentToolPage in live mode, and the inverse gradient header is owned by StudentWorkspaceShell with external CSS. Update the existing gate to require the actual wrapper, explicit prototype condition, live execution return, shell inverse class and external gradient. The updated canonical public UI verifier passed 156/156 locally. No tool handler or security policy was disabled.
+
+On the owner's renewed instruction, remove remaining active hosting-provider terminology from UI, imported-course report v3, dry-run/reconciliation outputs, future bootstrap attribution and the still-rejected legacy university promotion reason. Update the direct consumers and affected assertions to the provider-neutral contract; keep all proof and mutation requirements. Nine report cases passed, including a new negative case for every missing database/backup/browser/smoke proof; 17 affected university/source/runtime-configuration cases passed. The standard workspace tests confirm there is no hosted-preview startup script, iframe bypass plugin or obsolete CI job. The old provider is not an operational dependency. Historical SQL checksums and retained evidence remain intact; see the current local-development policy.
+
 GitHub's branch-protection endpoint returned HTTP 403 for the connected integration; branch-protection requirements have not been independently inspected. All four existing PR review threads were resolved when inspected. PR34 remains draft pending the new candidate's checks and remaining review.
 
 The new web inputs change the exact runtime source compared with the previously pinned rollback reference. Retain the existing rollback-compatibility rejection; do not treat prior rollback evidence as acceptance of this candidate. Any blocked action must be reported separately from successful CI jobs.

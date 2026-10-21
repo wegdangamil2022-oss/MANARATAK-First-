@@ -88,7 +88,7 @@ if (failures.length) fail();
 console.log('W12_SOURCE_REMEDIATION=PASS');
 console.log('W12_FINDINGS=14/14');
 console.log('W12_GUARDS=4/4');
-console.log('W12_RUNTIME_DB_PROOF=PENDING_GOOGLE_STUDIO');
+console.log('W12_RUNTIME_DB_PROOF=PENDING_APPROVED_RUNTIME');
 
 function fail() {
   console.error('W12_SOURCE_REMEDIATION=FAIL');

@@ -42,5 +42,5 @@ for (const [finding, ok] of checks) {
   if (ok) passed += 1;
 }
 console.log(`W7_SOURCE_VERIFIER=${passed === checks.length ? 'PASS' : 'FAIL'} ${passed}/${checks.length}`);
-console.log('W7_RUNTIME_DB_PROOF=PENDING_GOOGLE_STUDIO');
+console.log('W7_RUNTIME_DB_PROOF=PENDING_APPROVED_RUNTIME');
 process.exitCode = passed === checks.length ? 0 : 1;

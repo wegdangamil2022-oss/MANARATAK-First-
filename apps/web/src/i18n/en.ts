@@ -1017,7 +1017,7 @@ export const en = {
   "admin_needs_review": "Needs Review",
   "admin_published": "Published Scholarships",
   "admin_archive": "Archive",
-  "admin_health_status": "System is running normally in Google Studio preview.",
+  "admin_health_status": "Check service health for current system availability.",
   "back_to_admin": "Back to Admin",
   "admin_status_active": "Active",
   "admin_status_preview": "Preview",

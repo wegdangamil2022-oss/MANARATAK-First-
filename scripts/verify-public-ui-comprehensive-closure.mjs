@@ -33,6 +33,8 @@ const webSrcFiles=walk('apps/web/src');
 const allWebSrc=webSrcFiles.filter(p=>!/[.](?:spec|test|stories)[.]tsx?$/.test(p)).map(read).join('\n');
 const router='apps/web/src/router/index.tsx';
 const studentWorkspace='apps/web/src/features/students/StudentWorkspacePage.tsx';
+const studentShell='apps/web/src/features/students/StudentWorkspaceShell.tsx';
+const studentStyles='apps/web/src/features/students/student-workspace.css';
 
 function relativeLuminance(hex) {
   const raw = hex.replace('#','');
@@ -147,7 +149,7 @@ check('DIRECT_CAREER_INJECT',contains(app,'careersForView') && contains(app,'set
 
 // Router / single-admin architecture
 check('ROUTER_USES_OUTLET',contains(router,'<Outlet />'),'matched public child routes render');
-check('ROUTER_TOOL_EXECUTION',contains(router,"path: 'tools/:toolKey'") && contains(router,'element: <StudentToolPage />'),'tool execution route active');
+check('ROUTER_TOOL_EXECUTION',contains(router,"path: 'tools/:toolKey'") && contains(router,'element: <StudentToolPreviewRoute />') && contains(router,"if (import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype')") && contains(router,'return <Navigate replace to={target} />;') && contains(router,'return <StudentToolPage />;'),'explicit prototype redirect retains the executable live tool route');
 check('NO_SHADOW_ADMIN_DIR',!exists('apps/web/src/features/admin-preview'),'apps/admin remains the only admin UI');
 check('NO_LOCAL_ADMIN_SWITCH',notContains(router,'VITE_LOCAL_ADMIN_READ_ONLY'),'no local shadow-admin switch');
 check('CANONICAL_ADMIN_REDIRECT',contains(router,"path: 'admin/*'") && contains(router,'CanonicalAdminRedirect'),'legacy /admin routes redirect to canonical admin');
@@ -159,7 +161,7 @@ check('HEADER_MIN_WIDTH',contains(header,'min-w-0'),'header flex shrink safety')
 check('HEADER_LOGO_HOME',contains(header,'ManaratakLogo') && /onClick=\{[^}]*on/.test(read(header)),'logo interactive');
 check('HEADER_BRAND_VISIBLE_TINY',contains(css,'max-width: 359px') && !/max-width:\s*359px[^}]*span:first-child[^}]*display:\s*none/s.test(read(css)),'MANARATAK remains visible');
 check('STUDENT_WORKSPACE_SEMANTIC',contains('apps/web/src/features/students/StudentWorkspacePage.tsx','var(--mn-') && !/(#044A37|#087A55|font-black)/i.test(read('apps/web/src/features/students/StudentWorkspacePage.tsx')),'live student workspace theme');
-check('STUDENT_WORKSPACE_HERO_INVERSE',/className="[^"]*\bmn-inverse\b[^"]*\bbg-gradient-to-br\b/.test(read(studentWorkspace)),'semantic inverse hero context');
+check('STUDENT_WORKSPACE_HERO_INVERSE',contains(studentWorkspace,'<StudentWorkspaceShell') && /className="[^"]*\bmn-student-identity-header\b[^\"]*\bmn-inverse\b/.test(read(studentShell)) && /\.mn-student-workspace \.mn-student-identity-header\s*\{\s*background-image: linear-gradient\(/.test(read(studentStyles)),'shared shell retains semantic inverse context and external gradient styling');
 check('STUDENT_WORKSPACE_MOBILE_STATS',/className="[^"]*\bgrid-cols-2\b[^"]*\bgap-[\d.]+/.test(read(studentWorkspace)),'two compact stats per row on mobile');
 check('STUDENT_WORKSPACE_ICON_UI',contains(studentWorkspace,'<Folder') && contains(studentWorkspace,'<ArrowLeft') && contains(studentWorkspace,'<X'),'Lucide workspace affordances');
 check('TOOL_ROUTE_SEMANTIC',contains('apps/web/src/features/student-tools/StudentToolPage.tsx','mn-page-shell'),'student tool live route themed');

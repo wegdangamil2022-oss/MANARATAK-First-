@@ -104,7 +104,7 @@ describe('WP-IC-07 source invariants', () => {
     expect(repository).toContain('a."resolvedProviderId" = ${providerId}');
   });
 
-  it('keeps pre-Google-Studio CI source-only and tracks the full imported-course closure surface', () => {
+  it('keeps source-only CI source-only and tracks the full imported-course closure surface', () => {
     const ci = source('.github/workflows/ci.yml');
     const closure = source('.github/workflows/imported-courses-runtime-closure.yml');
     expect(ci).not.toContain('npm run test:database');

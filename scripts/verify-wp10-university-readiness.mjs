@@ -48,7 +48,7 @@ const report = {
   stableInsIdentity: /UniversitySourceReferenceId = `INS-\$\{string\}`/.test(contracts),
   dryRunWritesZero: /databaseWrites: 0/.test(contracts),
   explicitRootSelection: /explicitlySelectedFileName/.test(contracts),
-  legacyPromotionFailClosed: promotion.includes('UNIVERSITY_BULK_IMPORT_BLOCKED_PENDING_GOOGLE_STUDIO') && !/uuidv4|repository\.(?:create|update|upsert)/.test(promotion),
+  legacyPromotionFailClosed: promotion.includes('UNIVERSITY_BULK_IMPORT_BLOCKED_PENDING_RUNTIME_APPROVAL') && !/uuidv4|repository\.(?:create|update|upsert)/.test(promotion),
   phase6UniversityDependencies,
   directUniversityImportScripts,
   previewImportDisabled: !listPreview.includes('to="/admin/imports/universities"') && listPreview.includes('aria-disabled="true"'),

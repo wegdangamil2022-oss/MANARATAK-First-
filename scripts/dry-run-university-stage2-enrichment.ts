@@ -71,7 +71,7 @@ console.log(JSON.stringify({
   validationIssueCounts: countIssues(summary.results),
   unresolvedCountryReferences: countUnresolved(summary.results),
   databaseWrites: summary.databaseWrites,
-  databaseIdentityCheck: 'PENDING_GOOGLE_STUDIO',
+  databaseIdentityCheck: 'PENDING_APPROVED_RUNTIME',
 }, null, 2));
 if (summary.databaseWrites !== 0) throw new Error('Dry run attempted database writes.');
 

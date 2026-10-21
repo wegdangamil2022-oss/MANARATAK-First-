@@ -87,4 +87,4 @@ for (const [id, passed] of checks) {
 }
 if (failures) process.exit(1);
 console.log(`W11_SOURCE_VERIFIER=PASS ${checks.length}/${checks.length}`);
-console.log('W11_RUNTIME_DB_PROOF=PENDING_GOOGLE_STUDIO');
+console.log('W11_RUNTIME_DB_PROOF=PENDING_APPROVED_RUNTIME');

@@ -97,5 +97,5 @@ for (const item of checks) {
   console.log(`${item.ok ? 'PASS' : 'FAIL'} ${item.id} — ${item.detail}`);
 }
 console.log(`W10_SOURCE_VERIFIER=${passed === checks.length ? 'PASS' : 'FAIL'} ${passed}/${checks.length}`);
-console.log('W10_RUNTIME_DB_PROOF=PENDING_GOOGLE_STUDIO');
+console.log('W10_RUNTIME_DB_PROOF=PENDING_APPROVED_RUNTIME');
 process.exitCode = passed === checks.length ? 0 : 1;

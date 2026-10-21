@@ -981,7 +981,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     }
 
     // Compatibility bridge for pre-W3 rows. Existing rows intentionally remain
-    // NULL until Google Studio duplicate inspection/backfill is approved. A
+    // NULL until approved-runtime duplicate inspection/backfill is approved. A
     // legacy row is claimed only when its canonical identity is unambiguous.
     const legacyRegionScope = data.administrativeRegionId
       ? { administrativeRegionId: data.administrativeRegionId }

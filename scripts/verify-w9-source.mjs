@@ -57,5 +57,5 @@ for (const [id, ok] of checks) {
 const migrationGated = files.migration.includes('Source-only migration') && files.migration.includes('controlled CourseCompletion.courseVersion reconciliation') && files.migration.includes('No historical CourseVersion');
 console.log(`${migrationGated ? 'PASS' : 'FAIL'} W9-MIGRATION-SOURCE-ONLY`);
 console.log(`W9_SOURCE_VERIFIER=${passed === checks.length && migrationGated ? 'PASS' : 'FAIL'} ${passed}/${checks.length}`);
-console.log('W9_RUNTIME_DB_PROOF=PENDING_GOOGLE_STUDIO');
+console.log('W9_RUNTIME_DB_PROOF=PENDING_APPROVED_RUNTIME');
 if (passed !== checks.length || !migrationGated) process.exit(1);
