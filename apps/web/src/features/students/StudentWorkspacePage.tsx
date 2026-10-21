@@ -2517,9 +2517,9 @@ function ServiceRequestsView({
           <div className="w-12 h-12 rounded-2xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/40 flex items-center justify-center text-[#E5B54F] mx-auto mb-3.5 shadow-xs">
             <ClipboardList className="w-6 h-6 text-[#E5B54F]" />
           </div>
-          <h3 className="text-sm sm:text-base font-bold text-[var(--mn-heading)]">لا توجد طلبات خدمات أو استشارات سابقة</h3>
-          <p className="text-xs text-[var(--mn-text-muted)] mt-2 leading-relaxed max-w-lg mx-auto">
-            تصفح دليل الخدمات الأكاديمية والاستشارية المتاحة. عند تقديم أي طلب، ستتمكن من متابعة مراحل التنفيذ، مراجعة التحديثات، والاطلاع على الفواتير وإيصالات السداد المرتبطة بالطلب هنا مباشرة.
+          <h3 className="text-[14px] font-bold text-[var(--mn-heading)]">{statusFilter ? 'لا توجد طلبات مطابقة للحالة المختارة' : 'لا توجد طلبات خدمات أو فواتير مسجلة'}</h3>
+          <p className="mt-2 text-[11px] leading-[1.85] text-[var(--mn-text-muted)]">
+            {statusFilter ? 'اختر «جميع الحالات» لعرض الطلبات الأخرى، أو تصفح دليل الخدمات.' : 'يمكنك استكشاف الخدمات الأكاديمية والاستشارية، وستظهر طلباتك وفواتيرك هنا عند توفرها.'}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -2535,9 +2535,9 @@ function ServiceRequestsView({
         requests.length === 0 ? (
           <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 text-center mn-panel">
             <ClipboardList className="w-8 h-8 mx-auto text-[var(--mn-text-muted)] mb-2" />
-            <h3 className="font-bold text-sm text-[var(--mn-heading)]">لا توجد طلبات خدمات نشطة</h3>
-            <p className="text-xs text-[var(--mn-text-muted)] mt-1 max-w-sm mx-auto">
-              يمكنك الاطلاع على تبويب الفواتير والمدفوعات بالأعلى أو تقديم طلب جديد عبر دليل الخدمات.
+            <h3 className="text-[14px] font-bold text-[var(--mn-heading)]">{statusFilter ? 'لا توجد طلبات مطابقة للحالة المختارة' : 'لا توجد طلبات خدمات معروضة حاليًا'}</h3>
+            <p className="mt-1 text-[11px] leading-[1.85] text-[var(--mn-text-muted)]">
+              يمكنك اختيار حالة أخرى أو الاطلاع على الفواتير والمدفوعات أو تقديم طلب جديد عبر دليل الخدمات.
             </p>
             <Link
               to="/services"
