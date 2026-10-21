@@ -943,7 +943,7 @@ function SummaryView({
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/60 bg-[#142B5F]"><Bell className="h-4 w-4 text-[#EAC775]" /></span>
             <h2 className="mn-student-summary-heading text-[14px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F4F9FC]">يحتاج انتباهك</h2>
           </div>
-          <div className="mt-3 space-y-2">
+          <div className="mt-3 space-y-3.5">
             {urgentAlerts.criticalDeadlines.slice(0, 2).map((tracker) => (
               <div key={tracker.id} className="mn-student-attention-card flex min-w-0 items-center justify-between gap-2 rounded-lg border border-[#0E7C86]/50 dark:border-[#55B5B4]/65 border-r-[3px] border-r-[#0E7C86] dark:border-r-[#55CBC5] bg-white dark:bg-[#142B4E] px-2.5 py-2 shadow-2xs">
                 <div className="min-w-0 flex-1">
@@ -998,7 +998,7 @@ function SummaryView({
   ) : null;
 
   return (
-    <div className="mt-3.5 space-y-3.5 sm:space-y-4 font-['Cairo',sans-serif]">
+    <div className="mt-3.5 space-y-6 sm:space-y-7 font-['Cairo',sans-serif]">
       {/* Critical deadline or overdue invoice first; otherwise metrics first. */}
       {urgentAlerts.hasCritical && attentionPanel}
       {/* 2. Quick Stat Counters (Only meaningful numbers, clickable to respective tabs) */}
@@ -1170,7 +1170,7 @@ function SummaryView({
             </button>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3.5">
             {[...activeMilestones]
               .sort((first, second) => (Date.parse(second.updatedAt) || 0) - (Date.parse(first.updatedAt) || 0))
               .slice(0, 2)
