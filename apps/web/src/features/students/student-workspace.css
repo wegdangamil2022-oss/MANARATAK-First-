@@ -155,6 +155,13 @@
   line-height: 18px !important;
 }
 
+/* Opportunities and application files: use Cairo for every text element,
+ * including form controls and nested document panels, without affecting other tabs. */
+.mn-student-workspace .mn-student-opportunities-page,
+.mn-student-workspace .mn-student-opportunities-page :where(*) {
+  font-family: 'Cairo', sans-serif !important;
+}
+
 /* Summary section titles: gold line immediately touching the title box,
    following the intrinsic text width rather than spanning the card. */
 .mn-student-workspace .mn-student-summary-heading,
