@@ -2404,7 +2404,7 @@ function ServiceRequestsView({
   const hasAnyRequestsOrInvoices = requests.length > 0 || invoices.length > 0 || Boolean(selected) || Boolean(requestedNotFoundId) || Boolean(invoiceError);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5" aria-busy={serviceLoading}>
       {/* Main service overview uses the same right-edge stripe as فرصي and تعليمي. */}
       <section aria-label="طلباتي ومدفوعاتي" className="relative overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel dark:border-white/10 sm:p-5">
         <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-[3.5px] bg-gradient-to-b from-[#B78622] via-[#D6A43B] to-[#E5B54F]" />
@@ -2601,6 +2601,8 @@ function ServiceRequestsView({
                       key={request.id}
                       type="button"
                       disabled={saving}
+                      aria-pressed={isSelected}
+                      aria-label={`عرض تفاصيل طلب الخدمة رقم ${request.publicId || request.id}`}
                       onClick={() => onOpen(request.publicId || request.id)}
                       className={`w-full min-w-0 text-right rounded-xl border p-3.5 transition-colors cursor-pointer ${
                         isSelected
@@ -2787,6 +2789,7 @@ function ServiceRequestsView({
                       <button
                         type="button"
                         onClick={() => onTogglePayments(matchedInvoice.id)}
+                        aria-expanded={Boolean(paymentsByInvoice[matchedInvoice.id])}
                         className="w-full text-center py-1.5 rounded-lg border border-[var(--mn-border)] text-xs font-bold text-[var(--mn-primary)] hover:bg-[var(--mn-page)] transition-colors cursor-pointer"
                       >
                         {paymentsByInvoice[matchedInvoice.id] ? 'إخفاء سجل الدفعات' : 'عرض سجل الدفعات'}
@@ -2922,6 +2925,7 @@ function ServiceRequestsView({
                       <button
                         type="button"
                         onClick={() => onTogglePayments(invoice.id)}
+                        aria-expanded={Boolean(paymentsByInvoice[invoice.id])}
                         className="w-full text-center py-1.5 rounded-xl border border-[var(--mn-border)] text-xs font-bold text-[var(--mn-primary)] hover:bg-[var(--mn-page)] transition-colors cursor-pointer"
                       >
                         {hasPayments ? 'إخفاء سجل المعاملات' : 'عرض سجل عمليات الدفع'}
