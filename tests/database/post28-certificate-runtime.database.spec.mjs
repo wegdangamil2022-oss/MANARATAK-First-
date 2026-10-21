@@ -10,6 +10,9 @@ import {PrismaAssetRecordRepository} from '../../packages/infrastructure/src/ass
 import {CertificateUseCases} from '../../packages/application/src/certificates/use-cases/CertificateUseCases.ts';
 import {CertificateReadModelService} from '../../packages/application/src/certificates/use-cases/CertificateReadModelService.ts';
 import {CertificateCompletionEventConsumer} from '../../packages/application/src/certificates/use-cases/CertificateCompletionEventConsumer.ts';
+import {CertificateCompletionOutboxDeliveryGateway} from '../../packages/application/src/certificates/use-cases/CertificateCompletionOutboxDeliveryGateway.ts';
+import {CertificateCompletionOutboxWorker} from '../../packages/application/src/certificates/use-cases/CertificateCompletionOutboxWorker.ts';
+import {TransactionalOutboxDispatcher} from '../../packages/application/src/event-foundation/use-cases/TransactionalOutboxDispatcher.ts';
 import {CertificatePublicRouter} from '../../apps/api/src/presentation/api/router/CertificatePublicRouter.ts';
 import {PrismaCertificateRepository} from '../../packages/infrastructure/src/certificates/PrismaCertificateRepository.ts';
 import {PrismaCourseRepository} from '../../packages/infrastructure/src/courses/PrismaCourseRepository.ts';
@@ -88,6 +91,36 @@ describe('Post28 actual synthetic certificate owner issuance and verification wo
   app=express();app.use('/certificates',CertificatePublicRouter.create({certificateReadModelService:new CertificateReadModelService(repository,certificates)}));
  });
  afterAll(async()=>{await Promise.all([db?.$disconnect(),other?.$disconnect()]);});
+ it('replays a real certificate worker delivery after a lost acknowledgement without duplicating issuance',async()=>{
+  const event=await completion();
+  const delivery=new CertificateCompletionOutboxDeliveryGateway(new CertificateCompletionEventConsumer(certificates));
+  const keys=[];
+  const firstDispatcher=new TransactionalOutboxDispatcher(new PrismaTransactionalOutboxStore(db),{
+   deliver:async(entry,deliveryContext)=>{
+    expect(entry.id).toBe(event.id);keys.push(deliveryContext.idempotencyKey);
+    await delivery.deliver(entry,deliveryContext);
+    throw Error('SYNTHETIC_ACK_LOST_AFTER_REAL_ISSUANCE');
+   },
+  });
+  const options={batchSize:1,claimDurationMs:5000,maxAttempts:3,baseBackoffMs:1,maxBackoffMs:1};
+  const failed=await new CertificateCompletionOutboxWorker(firstDispatcher,options).runOnce('synthetic-certificate-before-restart');
+  expect(failed).toMatchObject({claimed:1,processed:0,failed:1});
+  const before=await effects(event);
+  expect(before.rows).toHaveLength(1);expect(before.inbox).toHaveLength(1);
+  expect(before.ledgers.length).toBeGreaterThan(0);expect(before.audit).toBeGreaterThan(0);
+  const pending=await db.transactionalOutboxRecord.findUniqueOrThrow({where:{id:event.id}});
+  expect(pending.state).toBe('PENDING');expect(pending.attempts).toBe(1);
+  await new Promise(resolve=>setTimeout(resolve,Math.max(0,pending.availableAt.getTime()-Date.now()+5)));
+  const recoveredDispatcher=new TransactionalOutboxDispatcher(new PrismaTransactionalOutboxStore(other),{
+   deliver:async(entry,deliveryContext)=>{keys.push(deliveryContext.idempotencyKey);await new CertificateCompletionOutboxDeliveryGateway(new CertificateCompletionEventConsumer(otherCertificates)).deliver(entry,deliveryContext);},
+  });
+  const recoveredWorker=new CertificateCompletionOutboxWorker(recoveredDispatcher,options);
+  expect(await recoveredWorker.runOnce('synthetic-certificate-after-restart')).toMatchObject({claimed:1,processed:1,failed:0});
+  expect(await effects(event)).toEqual(before);expect(keys).toEqual([event.id,event.id]);
+  const processed=await db.transactionalOutboxRecord.findUniqueOrThrow({where:{id:event.id}});
+  expect(processed.state).toBe('PROCESSED');expect(processed.claimToken).toBeNull();
+  expect(await recoveredWorker.runOnce('synthetic-certificate-empty-poll')).toMatchObject({claimed:0,processed:0});
+ });
  it('activates issuer and expiring template through real synthetic maker checker commands only',async()=>{
   expect(authorityChecks).toEqual({issuerMakerRejected:true,templateMakerRejected:true});expect(issuer.status).toBe('ACTIVE');expect(issuer.metadata.trust).toMatchObject({createdBy:maker,approvedBy:checker});expect(template.currentVersion).toMatchObject({status:'ACTIVE',createdBy:maker,approvedBy:checker,validityPolicy:'EXPIRING',validityDurationDays:180});
   expect(await db.auditRecord.count({where:{targetId:issuer.id}})).toBe(2);expect(await db.auditRecord.count({where:{targetId:template.id}})).toBe(4);
