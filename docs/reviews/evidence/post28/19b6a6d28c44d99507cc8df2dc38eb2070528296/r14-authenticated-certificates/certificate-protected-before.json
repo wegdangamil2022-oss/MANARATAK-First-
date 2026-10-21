@@ -1,0 +1,89 @@
+{
+  "StudentPrivacyConsentDecision": [],
+  "StudentApplicationDocumentBinding": [
+    {
+      "id": "924aa39b-3d70-4a5d-9baa-3af132625021",
+      "sha256": "1cfc8fb3714181c1918b99f33654f4c5baad7118d8285ad57a168678d2f44ac8"
+    }
+  ],
+  "FinancialLedgerEntryRecord": [
+    {
+      "id": "0ba47d73-c9e7-4fce-b2ea-e7cd4232acad",
+      "sha256": "aab1619fdd6ecdb365fd45d866a8d88b95281a51a4c1d0d9198b17e1a4f0deb3"
+    },
+    {
+      "id": "0cb9fbec-a43a-44b6-9a53-03c241881cbb",
+      "sha256": "14a3a894f5bfdb8a67810e311b7a16969422cf058bf4747b71435543a5c2680f"
+    },
+    {
+      "id": "0cdf32a0-bae3-4333-8dab-ad2a7774145e",
+      "sha256": "f9d722bac3d6e97cf42d0569235fbbeb76c6a71a380b3fd4c1dceaa3b67da07c"
+    },
+    {
+      "id": "2ced8fba-772f-498c-88a6-273d15d01290",
+      "sha256": "94cb3438492450dc837b2489f3625df19b319a4ad3fb968a9eead654e0be13e9"
+    },
+    {
+      "id": "3701d9b8-50ce-489d-9603-5d97d8664241",
+      "sha256": "0601933d3eb1266869cb725bd970e11cdc85519e346746887ed6bec258ee5220"
+    },
+    {
+      "id": "7483ff66-ea7d-419f-a691-3b14c84c4994",
+      "sha256": "f150873f34d6c68c327ebafe6a0e9d0fa679f4aa51cafd99f769e7098ac0aadf"
+    },
+    {
+      "id": "bd7aa055-fca9-4d97-8b8f-258765e92486",
+      "sha256": "c891c70b9e7009bdf7becbc96cf0be3aa2df2d90963bce9c608842105f164345"
+    },
+    {
+      "id": "c6fba1ae-f497-4dda-a709-c46cd44be02c",
+      "sha256": "f854420017de9704dff65d855c524abff47576e5f7b3d0927cce72edb8950fa9"
+    },
+    {
+      "id": "d71bd491-21ba-4480-8ac2-5f2a8a284442",
+      "sha256": "0f82f28aa0bba3de8c966fb5e454ab83ea7195e39f2c838529cf69ad0919e2b6"
+    },
+    {
+      "id": "f1bb2d72-58f0-4139-8703-0294f0ae255f",
+      "sha256": "d5af7a74eab1516e0cd2d7b02e3ed3446f3c9215eecfb120360c6ecf6212a636"
+    }
+  ],
+  "FinanceInvoiceRecord": [
+    {
+      "id": "5b92177f-4374-4157-93cc-16277caa7e35",
+      "sha256": "5d11bc15a2d42088c3a71cf968ca7d04ba98795e4d0f543ea89d546dd6cdae6e"
+    },
+    {
+      "id": "dc6718c5-0976-4d37-8ad4-d763bde3903b",
+      "sha256": "03c620d736e532acddc04ef3a3457c1c0e374d37c48f14a62b71ed19584a0e15"
+    },
+    {
+      "id": "f08c7093-e0e9-4cda-b2db-20168aff31b6",
+      "sha256": "689dbbc38dcd14c007d27295fa945a56d8b6b3993e21eaf3977717e972abea6c"
+    }
+  ],
+  "Certificate": [
+    {
+      "id": "7b68ba67-fab4-486a-95ad-bccfb0d18337",
+      "sha256": "4fc4d238560d0c5907c23d8439ec096efe96baec9eab2db5f83b261e0993223d"
+    }
+  ],
+  "CertificateIssuer": [
+    {
+      "id": "2428b74c-0c5a-40ce-9126-b00437946d6d",
+      "sha256": "d45be26bd0327b6a5e0cf9241b8d2f0755655433d224ef0ef2a6dc106562c37f"
+    }
+  ],
+  "CertificateTemplate": [
+    {
+      "id": "bd6a203f-d507-4d7d-82cc-3eaf1c5d0552",
+      "sha256": "bc29ee14e0dd9ac7ee036fe9ae6c7da080b01530d803f9ecbd4c0b96e792259c"
+    }
+  ],
+  "CertificateTemplateVersion": [
+    {
+      "id": "4fd6572e-740c-40fb-8453-5834374ae608",
+      "sha256": "69eaf21a07b1b2f45eecb7e204e9edf8894a094843c3d1c1e529bc6160a8caa6"
+    }
+  ]
+}

@@ -1,0 +1,328 @@
+{
+  "numTotalTestSuites": 10,
+  "numPassedTestSuites": 10,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 21,
+  "numPassedTests": 21,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1792545001647,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "private certificate provider capabilities"
+          ],
+          "fullName": "private certificate provider capabilities refuses provider URL for CERTIFICATE_PDF before contacting storage",
+          "status": "passed",
+          "title": "refuses provider URL for CERTIFICATE_PDF before contacting storage",
+          "duration": 6.921699999999873,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private certificate provider capabilities"
+          ],
+          "fullName": "private certificate provider capabilities refuses provider URL for CERTIFICATE_PREVIEW before contacting storage",
+          "status": "passed",
+          "title": "refuses provider URL for CERTIFICATE_PREVIEW before contacting storage",
+          "duration": 0.6770999999998821,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private certificate provider capabilities"
+          ],
+          "fullName": "private certificate provider capabilities refuses provider URL for STUDENT_CERTIFICATE_PDF before contacting storage",
+          "status": "passed",
+          "title": "refuses provider URL for STUDENT_CERTIFICATE_PDF before contacting storage",
+          "duration": 0.4976999999998952,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private certificate provider capabilities"
+          ],
+          "fullName": "private certificate provider capabilities refuses provider URL for STUDENT_CERTIFICATE_PREVIEW before contacting storage",
+          "status": "passed",
+          "title": "refuses provider URL for STUDENT_CERTIFICATE_PREVIEW before contacting storage",
+          "duration": 0.4513999999999214,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private certificate provider capabilities"
+          ],
+          "fullName": "private certificate provider capabilities preserves non-artifact certificate evidence grants",
+          "status": "passed",
+          "title": "preserves non-artifact certificate evidence grants",
+          "duration": 0.9466999999995096,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private certificate provider capabilities"
+          ],
+          "fullName": "private certificate provider capabilities fails closed if certificate usage lookup is unavailable",
+          "status": "passed",
+          "title": "fails closed if certificate usage lookup is unavailable",
+          "duration": 0.9313000000001921,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1792545007570,
+      "endTime": 1792545007579.9314,
+      "status": "passed",
+      "message": "",
+      "name": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/CertificateArtifactGrantPolicy.spec.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "authenticated certificate bytes"
+          ],
+          "fullName": "authenticated certificate bytes returns verified bytes after current authorization on both sides of storage IO",
+          "status": "passed",
+          "title": "returns verified bytes after current authorization on both sides of storage IO",
+          "duration": 4.086500000000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "authenticated certificate bytes"
+          ],
+          "fullName": "authenticated certificate bytes rejects a revoked certificate before storage access",
+          "status": "passed",
+          "title": "rejects a revoked certificate before storage access",
+          "duration": 2.3125,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "authenticated certificate bytes"
+          ],
+          "fullName": "authenticated certificate bytes rejects bytes if the certificate is revoked during storage IO",
+          "status": "passed",
+          "title": "rejects bytes if the certificate is revoked during storage IO",
+          "duration": 0.476600000000019,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "authenticated certificate bytes"
+          ],
+          "fullName": "authenticated certificate bytes rejects an artifact replacement during storage IO",
+          "status": "passed",
+          "title": "rejects an artifact replacement during storage IO",
+          "duration": 0.4260999999999626,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "authenticated certificate bytes"
+          ],
+          "fullName": "authenticated certificate bytes rejects a provider MIME that does not match the requested artifact kind",
+          "status": "passed",
+          "title": "rejects a provider MIME that does not match the requested artifact kind",
+          "duration": 0.38299999999998136,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "authenticated certificate bytes"
+          ],
+          "fullName": "authenticated certificate bytes fails closed when authenticated storage reads are unavailable",
+          "status": "passed",
+          "title": "fails closed when authenticated storage reads are unavailable",
+          "duration": 0.3643999999999892,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1792545002418,
+      "endTime": 1792545002426.383,
+      "status": "passed",
+      "message": "",
+      "name": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/certificates/AuthenticatedCertificateDelivery.spec.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "CertificateAdminRouter"
+          ],
+          "fullName": "CertificateAdminRouter lists the real certificate registry",
+          "status": "passed",
+          "title": "lists the real certificate registry",
+          "duration": 40.084500000000844,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "CertificateAdminRouter"
+          ],
+          "fullName": "CertificateAdminRouter requires a meaningful revocation reason",
+          "status": "passed",
+          "title": "requires a meaningful revocation reason",
+          "duration": 21.632299999999304,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "CertificateAdminRouter"
+          ],
+          "fullName": "CertificateAdminRouter creates templates as governed drafts",
+          "status": "passed",
+          "title": "creates templates as governed drafts",
+          "duration": 10.055899999999383,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1792545013319,
+      "endTime": 1792545013391.056,
+      "status": "passed",
+      "message": "",
+      "name": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/apps/api/tests/presentation/api/router/CertificateAdminRouter.spec.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "admin authenticated certificate content"
+          ],
+          "fullName": "admin authenticated certificate content returns private bytes with no cache or provider URL",
+          "status": "passed",
+          "title": "returns private bytes with no cache or provider URL",
+          "duration": 30.849299999999857,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "admin authenticated certificate content"
+          ],
+          "fullName": "admin authenticated certificate content denies missing permission before storage access",
+          "status": "passed",
+          "title": "denies missing permission before storage access",
+          "duration": 14.156499999999141,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "admin authenticated certificate content"
+          ],
+          "fullName": "admin authenticated certificate content denies bytes if permission is removed while storage is reading",
+          "status": "passed",
+          "title": "denies bytes if permission is removed while storage is reading",
+          "duration": 7.6436999999987165,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "admin authenticated certificate content"
+          ],
+          "fullName": "admin authenticated certificate content retires direct provider grants with a clear authorized response",
+          "status": "passed",
+          "title": "retires direct provider grants with a clear authorized response",
+          "duration": 20.33220000000074,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1792545013317,
+      "endTime": 1792545013389.3323,
+      "status": "passed",
+      "message": "",
+      "name": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/apps/api/tests/presentation/api/router/CertificateAuthenticatedDelivery.spec.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "completion → certificate → student account → private delivery"
+          ],
+          "fullName": "completion → certificate → student account → private delivery issues one signed certificate, renders the adopted PDF/SVG, and exposes it to its owner in account and API",
+          "status": "passed",
+          "title": "issues one signed certificate, renders the adopted PDF/SVG, and exposes it to its owner in account and API",
+          "duration": 595.3850999999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "completion → certificate → student account → private delivery"
+          ],
+          "fullName": "completion → certificate → student account → private delivery prevents another student from seeing or downloading the certificate and prevents revoked delivery",
+          "status": "passed",
+          "title": "prevents another student from seeing or downloading the certificate and prevents revoked delivery",
+          "duration": 417.63860000000204,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1792545018356,
+      "endTime": 1792545019368.6387,
+      "status": "passed",
+      "message": "",
+      "name": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/apps/api/tests/presentation/api/router/CertificateStudentAccountFlow.spec.ts"
+    }
+  ]
+}

@@ -1,0 +1,604 @@
+{
+  "numTotalTestSuites": 3,
+  "numPassedTestSuites": 3,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 45,
+  "numPassedTests": 45,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1792545761144,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter projects recovery state without provider coordinates or proof payloads",
+          "status": "passed",
+          "title": "projects recovery state without provider coordinates or proof payloads",
+          "duration": 29.423099999999977,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter returns an audited migration response for blocked certificate capabilities",
+          "status": "passed",
+          "title": "returns an audited migration response for blocked certificate capabilities",
+          "duration": 21.26009999999951,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter POST /assets/upload-locator requests upload locator",
+          "status": "passed",
+          "title": "POST /assets/upload-locator requests upload locator",
+          "duration": 13.80199999999968,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter POST /assets/upload-locator rejects raw URL for assetId or assetReference",
+          "status": "passed",
+          "title": "POST /assets/upload-locator rejects raw URL for assetId or assetReference",
+          "duration": 13.696099999999205,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter POST /assets/register-quarantined registers quarantined asset",
+          "status": "passed",
+          "title": "POST /assets/register-quarantined registers quarantined asset",
+          "duration": 7.710100000000239,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter POST /assets/register-quarantined rejects raw URL AssetReference",
+          "status": "passed",
+          "title": "POST /assets/register-quarantined rejects raw URL AssetReference",
+          "duration": 7.192699999999604,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter POST /assets/:assetId/validate validates asset",
+          "status": "passed",
+          "title": "POST /assets/:assetId/validate validates asset",
+          "duration": 7.150700000000143,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter POST /assets/:assetId/validate rejects raw URL parameter",
+          "status": "passed",
+          "title": "POST /assets/:assetId/validate rejects raw URL parameter",
+          "duration": 6.268200000000434,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter POST /assets/:assetId/malware-failed marks malware scan failed",
+          "status": "passed",
+          "title": "POST /assets/:assetId/malware-failed marks malware scan failed",
+          "duration": 13.13879999999881,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter POST /assets/:assetId/sanitize sanitizes asset",
+          "status": "passed",
+          "title": "POST /assets/:assetId/sanitize sanitizes asset",
+          "duration": 8.078300000001036,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter POST /assets/:assetId/activate activates asset",
+          "status": "passed",
+          "title": "POST /assets/:assetId/activate activates asset",
+          "duration": 6.08389999999963,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter rejects client-controlled sanitizer metadata and clean storage locators",
+          "status": "passed",
+          "title": "rejects client-controlled sanitizer metadata and clean storage locators",
+          "duration": 10.48779999999897,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter POST /assets/:assetId/delivery-grant requests temporary secure delivery",
+          "status": "passed",
+          "title": "POST /assets/:assetId/delivery-grant requests temporary secure delivery",
+          "duration": 6.06919999999991,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter POST /assets/:assetId/archive archives asset",
+          "status": "passed",
+          "title": "POST /assets/:assetId/archive archives asset",
+          "duration": 11.367699999998877,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter DELETE /assets/:assetId soft deletes asset",
+          "status": "passed",
+          "title": "DELETE /assets/:assetId soft deletes asset",
+          "duration": 5.663199999999051,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter POST /assets/:assetId/restore restores asset",
+          "status": "passed",
+          "title": "POST /assets/:assetId/restore restores asset",
+          "duration": 6.448899999999412,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter DELETE /assets/:assetId/purge purges asset",
+          "status": "passed",
+          "title": "DELETE /assets/:assetId/purge purges asset",
+          "duration": 5.691899999999805,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter returns safe 409 Problem Details for an in-use lifecycle conflict",
+          "status": "passed",
+          "title": "returns safe 409 Problem Details for an in-use lifecycle conflict",
+          "duration": 7.003900000001522,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/upload-locator rejects unauthenticated requests before reaching the router",
+          "status": "passed",
+          "title": "post /admin/assets/upload-locator rejects unauthenticated requests before reaching the router",
+          "duration": 11.171199999998862,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/register-quarantined rejects unauthenticated requests before reaching the router",
+          "status": "passed",
+          "title": "post /admin/assets/register-quarantined rejects unauthenticated requests before reaching the router",
+          "duration": 5.77139999999963,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/ast_01/validate rejects unauthenticated requests before reaching the router",
+          "status": "passed",
+          "title": "post /admin/assets/ast_01/validate rejects unauthenticated requests before reaching the router",
+          "duration": 5.771699999999328,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/ast_01/malware-failed rejects unauthenticated requests before reaching the router",
+          "status": "passed",
+          "title": "post /admin/assets/ast_01/malware-failed rejects unauthenticated requests before reaching the router",
+          "duration": 5.5091999999986,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/ast_01/sanitize rejects unauthenticated requests before reaching the router",
+          "status": "passed",
+          "title": "post /admin/assets/ast_01/sanitize rejects unauthenticated requests before reaching the router",
+          "duration": 5.300899999998364,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/ast_01/activate rejects unauthenticated requests before reaching the router",
+          "status": "passed",
+          "title": "post /admin/assets/ast_01/activate rejects unauthenticated requests before reaching the router",
+          "duration": 9.74619999999959,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/ast_01/delivery-grant rejects unauthenticated requests before reaching the router",
+          "status": "passed",
+          "title": "post /admin/assets/ast_01/delivery-grant rejects unauthenticated requests before reaching the router",
+          "duration": 4.801499999999578,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/ast_01/archive rejects unauthenticated requests before reaching the router",
+          "status": "passed",
+          "title": "post /admin/assets/ast_01/archive rejects unauthenticated requests before reaching the router",
+          "duration": 5.442500000001019,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards delete /admin/assets/ast_01 rejects unauthenticated requests before reaching the router",
+          "status": "passed",
+          "title": "delete /admin/assets/ast_01 rejects unauthenticated requests before reaching the router",
+          "duration": 5.596899999998641,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/ast_01/restore rejects unauthenticated requests before reaching the router",
+          "status": "passed",
+          "title": "post /admin/assets/ast_01/restore rejects unauthenticated requests before reaching the router",
+          "duration": 5.795799999999872,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards delete /admin/assets/ast_01/purge rejects unauthenticated requests before reaching the router",
+          "status": "passed",
+          "title": "delete /admin/assets/ast_01/purge rejects unauthenticated requests before reaching the router",
+          "duration": 12.121100000000297,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/upload-locator requires admin:assets:manage",
+          "status": "passed",
+          "title": "post /admin/assets/upload-locator requires admin:assets:manage",
+          "duration": 6.18579999999929,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/register-quarantined requires admin:assets:manage",
+          "status": "passed",
+          "title": "post /admin/assets/register-quarantined requires admin:assets:manage",
+          "duration": 5.828699999998207,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/ast_01/validate requires admin:assets:manage",
+          "status": "passed",
+          "title": "post /admin/assets/ast_01/validate requires admin:assets:manage",
+          "duration": 4.907500000001164,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/ast_01/malware-failed requires admin:assets:manage",
+          "status": "passed",
+          "title": "post /admin/assets/ast_01/malware-failed requires admin:assets:manage",
+          "duration": 5.03689999999915,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/ast_01/sanitize requires admin:assets:manage",
+          "status": "passed",
+          "title": "post /admin/assets/ast_01/sanitize requires admin:assets:manage",
+          "duration": 10.014999999999418,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/ast_01/activate requires admin:assets:manage",
+          "status": "passed",
+          "title": "post /admin/assets/ast_01/activate requires admin:assets:manage",
+          "duration": 5.009600000001228,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/ast_01/delivery-grant requires admin:assets:manage",
+          "status": "passed",
+          "title": "post /admin/assets/ast_01/delivery-grant requires admin:assets:manage",
+          "duration": 5.722600000000966,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/ast_01/archive requires admin:assets:manage",
+          "status": "passed",
+          "title": "post /admin/assets/ast_01/archive requires admin:assets:manage",
+          "duration": 5.165399999998044,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards delete /admin/assets/ast_01 requires admin:assets:manage",
+          "status": "passed",
+          "title": "delete /admin/assets/ast_01 requires admin:assets:manage",
+          "duration": 8.824600000003556,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards post /admin/assets/ast_01/restore requires admin:assets:manage",
+          "status": "passed",
+          "title": "post /admin/assets/ast_01/restore requires admin:assets:manage",
+          "duration": 5.165799999998853,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards delete /admin/assets/ast_01/purge requires admin:assets:manage",
+          "status": "passed",
+          "title": "delete /admin/assets/ast_01/purge requires admin:assets:manage",
+          "duration": 4.625499999998283,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards rejects requests when unauthenticated with 401",
+          "status": "passed",
+          "title": "rejects requests when unauthenticated with 401",
+          "duration": 4.672999999998865,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter",
+            "Route Security Guards"
+          ],
+          "fullName": "AssetPlatformRouter Route Security Guards allows authenticated requests through admin guard and permission guard",
+          "status": "passed",
+          "title": "allows authenticated requests through admin guard and permission guard",
+          "duration": 5.825100000001839,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter GET /assets validates canonical facets before calling the read model",
+          "status": "passed",
+          "title": "GET /assets validates canonical facets before calling the read model",
+          "duration": 25.983100000001286,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter GET detail projects governance, persisted versions and operation identity without storage coordinates",
+          "status": "passed",
+          "title": "GET detail projects governance, persisted versions and operation identity without storage coordinates",
+          "duration": 6.164600000000064,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "AssetPlatformRouter"
+          ],
+          "fullName": "AssetPlatformRouter rejects unrecognized workspace facets before repository execution",
+          "status": "passed",
+          "title": "rejects unrecognized workspace facets before repository execution",
+          "duration": 10.997799999997369,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1792545777503,
+      "endTime": 1792545777887.9978,
+      "status": "passed",
+      "message": "",
+      "name": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/apps/api/tests/presentation/api/router/AssetPlatformRouter.spec.ts"
+    }
+  ]
+}

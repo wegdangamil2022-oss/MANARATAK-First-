@@ -1,0 +1,521 @@
+{
+  "status": "PASS_LOCAL_BUILT_WEB_ADMIN_CERTIFICATE_ACTIONS",
+  "apiSourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
+  "webSourceSha": "e2ff681738c99e143fbf2ea2219b85a307142d60",
+  "adminSourceSha": "e2ff681738c99e143fbf2ea2219b85a307142d60",
+  "unchangedFrontendSourceComparedToApi": true,
+  "mixedCommitLocalDiagnostic": true,
+  "httpsSpkiPinned": true,
+  "ignoreHTTPSErrors": false,
+  "externalBrowserRequestsBlocked": true,
+  "studentLoginViaUi": true,
+  "adminFreshMfaLoginViaUi": true,
+  "studentPreviewVisible": true,
+  "studentAndAdminPdfDownloadsMatched": true,
+  "providerCapabilityEndpointUsed": false,
+  "network": [
+    {
+      "path": "/ar/login",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/fonts/cairo.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/assets/index-Chp4nGOr.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/assets/index-B1BmxYH7.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/majors",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/international-tests",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/fonts/cairo-2.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/scholarships",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/fonts/cairo-0.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/universities",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/preview-art/scholarships.svg",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/student-tools",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/services",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/careers/jobs",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/ar/student",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/fonts/cairo.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/assets/index-Chp4nGOr.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/assets/index-B1BmxYH7.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/majors",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/fonts/cairo-2.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/fonts/cairo-0.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/scholarships",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/international-tests",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/universities",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/services",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/student-tools",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/public/careers/jobs",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/application-trackers",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/ac7380f2-a7da-4f95-972a-4a5963b96b9b/finance/invoices",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/snapshots",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/services/requests",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/dashboard",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/dashboard",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/certificates",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/certificates/17409162-ebe3-4a73-9a99-562e3e52f399/artifacts/preview/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/certificates/17409162-ebe3-4a73-9a99-562e3e52f399/artifacts/pdf/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/certificates",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/certificates",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/certificates",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/student/certificates",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/login",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-CXl9Szhc.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/certificates",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-CXl9Szhc.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/certificates/17409162-ebe3-4a73-9a99-562e3e52f399",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-CXl9Szhc.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/certificates/17409162-ebe3-4a73-9a99-562e3e52f399/verification",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/certificates/17409162-ebe3-4a73-9a99-562e3e52f399/ledger",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/certificates/17409162-ebe3-4a73-9a99-562e3e52f399",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/certificates/template-versions/4fd6572e-740c-40fb-8453-5834374ae608",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/certificates/17409162-ebe3-4a73-9a99-562e3e52f399/artifacts/pdf/content",
+      "status": 200,
+      "method": "GET"
+    }
+  ],
+  "pageErrors": [],
+  "downloads": [
+    {
+      "actor": "student",
+      "sha256": "ca9dee97c6caa64aedd7d31245a35aa1d76e1875e3e207a916b165ae7188cb92",
+      "bytes": 11390
+    },
+    {
+      "actor": "admin",
+      "sha256": "ca9dee97c6caa64aedd7d31245a35aa1d76e1875e3e207a916b165ae7188cb92",
+      "bytes": 11390
+    }
+  ]
+}
