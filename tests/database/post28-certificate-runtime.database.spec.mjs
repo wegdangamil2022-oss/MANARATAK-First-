@@ -109,7 +109,7 @@ describe('Post28 actual synthetic certificate owner issuance and verification wo
   expect(before.rows).toHaveLength(1);expect(before.inbox).toHaveLength(1);
   expect(before.ledgers.length).toBeGreaterThan(0);expect(before.audit).toBeGreaterThan(0);
   const pending=await db.transactionalOutboxRecord.findUniqueOrThrow({where:{id:event.id}});
-  expect(pending.state).toBe('PENDING');expect(pending.attempts).toBe(1);
+  expect(pending.state).toBe('FAILED');expect(pending.attempts).toBe(1);expect(pending.claimToken).toBeNull();
   await new Promise(resolve=>setTimeout(resolve,Math.max(0,pending.availableAt.getTime()-Date.now()+5)));
   const recoveredDispatcher=new TransactionalOutboxDispatcher(new PrismaTransactionalOutboxStore(other),{
    deliver:async(entry,deliveryContext)=>{keys.push(deliveryContext.idempotencyKey);await new CertificateCompletionOutboxDeliveryGateway(new CertificateCompletionEventConsumer(otherCertificates)).deliver(entry,deliveryContext);},
