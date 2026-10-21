@@ -105,6 +105,15 @@ describe('degree scholarship guide format', () => {
   const record = (metadata: string, fields = '') => `### منحة رقم 0001 — Example\n${metadata}\n${fields}`;
   const identity = '**المعرّف الأصلي:** `SCH-OC-0001`';
 
+  it('retains document-only test evidence and separates general majors from program ownership', () => {
+    const fields = '#### 7. التخصصات المتاحة\nComputing\n#### 8. الشروط ومعايير التقديم\nAdmission rules\n#### 10. المستندات المطلوبة\nTOEFL ITP 500 أو IELTS 6.0، أو إعفاء معتمد عند اشتراطه';
+    const result = reconcileScholarshipGuide(record(`${identity}\n**حالة الاستيراد النهائية:** IMPORTED`, fields), sourceHash, null);
+    const queue = result.decisions[0].canonicalQueue;
+    expect(queue.find(item => item.target === 'INTERNATIONAL_TEST')?.rawValue).toContain('TOEFL ITP 500');
+    expect(queue.find(item => item.target === 'MAJOR')?.rawValue).toBe('Computing');
+    expect(queue.find(item => item.target === 'ACADEMIC_PROGRAM')?.policy).toContain('NO_GENERAL_MAJOR_TO_PROGRAM_INFERENCE');
+  });
+
   it.each([false, true])('resolves named sections when participating universities are present: %s', participating => {
     const offset = participating ? 1 : 0;
     const fields = [
@@ -122,7 +131,8 @@ describe('degree scholarship guide format', () => {
     expect(result.summaryDifference).toBeNull();
     expect(result.decisions[0].applicationUrls).toEqual(['https://apply.example/']);
     expect(result.decisions[0].canonicalQueue.find(item => item.target === 'UNIVERSITY')?.rawValue).toBe(participating ? 'Partner University' : '');
-    expect(result.decisions[0].canonicalQueue.find(item => item.target === 'INTERNATIONAL_TEST')?.rawValue).toBe('TOEFL or approved alternative');
+    expect(result.decisions[0].canonicalQueue.find(item => item.target === 'INTERNATIONAL_TEST')?.rawValue).toContain('TOEFL or approved alternative');
+    expect(result.decisions[0].canonicalQueue.find(item => item.target === 'INTERNATIONAL_TEST')?.rawValue).toContain('Conditional documents');
     expect(result.decisions[0].canonicalQueue.every(item => item.canonicalId === null && item.state === 'REVIEW_REQUIRED')).toBe(true);
     expect(result.databaseWrites).toBe(0);
   });

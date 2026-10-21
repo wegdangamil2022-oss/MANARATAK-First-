@@ -29,6 +29,8 @@ describe('M10 offline source quality preparation', () => {
     const scholarshipRows = output['scholarships-sections.jsonl'].trim().split('\n').map(row => JSON.parse(row));
     expect(scholarshipRows.filter(row => row.decision === 'HOLD_CANONICAL_AND_OFFICIAL_SOURCE_REVIEW')).toHaveLength(703);
     expect(scholarshipRows.filter(row => row.decision === 'DO_NOT_PROMOTE')).toHaveLength(244);
+    expect(scholarshipRows.every(row => row.relationshipReview.canonicalAssignments === 0 && row.relationshipReview.importReady === false)).toBe(true);
+    expect(scholarshipRows.every(row => Boolean(row.relationshipReview.academicLevelsRaw))).toBe(true);
     expect(scholarshipRows.some(row => row.canonicalQueue.some((item: { canonicalId: string | null }) => item.canonicalId !== null))).toBe(false);
   }, 90_000);
   it('detects edited output and never rewrites it in check mode', () => {
