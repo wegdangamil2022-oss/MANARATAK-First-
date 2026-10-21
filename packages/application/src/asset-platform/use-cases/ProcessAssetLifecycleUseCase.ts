@@ -7,6 +7,7 @@ import {
   IAssetMalwareScannerGateway,
   IAssetSanitizationGateway,
   AssetId,
+  AssetRecord,
   AssetLifecycleState,
 } from '@manaratak/domain';
 
@@ -265,18 +266,37 @@ export class ProcessAssetLifecycleUseCase {
     if (!this.storageGateway.generateDeliveryGrant) {
       throw new Error('ASSET_SECURE_DELIVERY_NOT_CONFIGURED');
     }
-    const rights=record.metadata.extraMetadata?.rights as {publicationPolicy?:string;expiresAt?:string}|undefined;
-    const deadline=record.classification==='PUBLIC'&&rights?.publicationPolicy==='MANDATORY'&&rights.expiresAt?Date.parse(rights.expiresAt):null;
-    const ttl=deadline===null?(dto.expiresInSeconds??300):Math.min(dto.expiresInSeconds??300,Math.floor((deadline-Date.now())/1000));
-    if(ttl<1)throw new Error('ASSET_PUBLIC_RIGHTS_REQUIRED');
+    const deadline = this.deliveryDeadline(record);
+    const ttl = Math.min(dto.expiresInSeconds ?? 300, Math.floor((deadline - Date.now()) / 1000));
+    if (ttl < 1) throw new Error('ASSET_DELIVERY_GRANT_EXCEEDS_DEADLINE');
+    const snapshot = {locator: record.locator.value, checksum: record.checksum?.hash,
+      classification: record.classification, ownerId: record.owner.ownerId, ownerType: record.owner.ownerType};
     const grant = await this.storageGateway.generateDeliveryGrant(record.locator, ttl);
-    if(deadline!==null&&grant.expiresAt.getTime()>deadline)throw new Error('ASSET_PUBLIC_RIGHTS_REQUIRED');
+    const current = await this.assetRepository.findById(id);
+    if (!current) throw new Error('ASSET_DELIVERY_UNAVAILABLE');
+    current.assertCanDeliver();
+    if (current.classification === 'PUBLIC') assertAssetPublicRights(current.metadata.extraMetadata?.rights);
+    if (current.locator.value !== snapshot.locator || current.checksum?.hash !== snapshot.checksum ||
+        current.classification !== snapshot.classification || current.owner.ownerId !== snapshot.ownerId ||
+        current.owner.ownerType !== snapshot.ownerType)
+      throw new Error('ASSET_DELIVERY_CHANGED');
+    const expiresAt = grant.expiresAt.getTime();
+    if (!Number.isFinite(expiresAt) || expiresAt <= Date.now() ||
+        expiresAt > Math.min(deadline, this.deliveryDeadline(current)))
+      throw new Error('ASSET_DELIVERY_GRANT_EXCEEDS_DEADLINE');
     return {
       assetId: dto.assetId,
       url: grant.url,
       headers: grant.headers,
       expiresAt: grant.expiresAt.toISOString(),
     };
+  }
+
+  private deliveryDeadline(record: AssetRecord): number {
+    const rights = record.metadata.extraMetadata?.rights as {publicationPolicy?: string; expiresAt?: string} | undefined;
+    const rightsDeadline = record.classification === 'PUBLIC' && rights?.publicationPolicy === 'MANDATORY' && rights.expiresAt
+      ? Date.parse(rights.expiresAt) : Infinity;
+    return Math.min(record.retention.expiresAt?.getTime() ?? Infinity, rightsDeadline);
   }
 
   private async assertNotInUse(id: AssetId, operation: 'archive' | 'soft delete' | 'purge'): Promise<void> {
