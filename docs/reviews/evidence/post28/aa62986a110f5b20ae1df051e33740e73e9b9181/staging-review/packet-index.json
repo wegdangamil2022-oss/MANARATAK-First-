@@ -1,0 +1,17 @@
+{
+  "sourceSha": "aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b",
+  "preparerSourceSha": "aa62986a110f5b20ae1df051e33740e73e9b9181",
+  "items": [
+    {
+      "file": "review.json",
+      "bytes": 7657,
+      "sha256": "3607ec166907b29b1d88113ccbf5626ef0ce5bb3b328702b3ae8cf6c6ede80c0"
+    },
+    {
+      "file": "api.env.reference",
+      "bytes": 2141,
+      "sha256": "dce0e087f28d4f2d3771d07e395ed82dd138a3df0156b37080e42daa1d0f3838"
+    }
+  ],
+  "deploymentAuthorized": false
+}

@@ -1,0 +1,276 @@
+{
+  "kind": "MANARATAK_STAGING_REVIEW_PACKET",
+  "version": 1,
+  "state": "REVIEW_PREPARED_TARGET_AND_RUNTIME_BLOCKED",
+  "sourceSha": "aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b",
+  "artifactRetrieval": {
+    "repository": "wegdangamil2022-oss/MANARATAK-First-",
+    "runId": 39648892069,
+    "artifactName": "manaratak-release-artifacts-aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b",
+    "freshManifestAndUnitDigestVerificationRequired": true,
+    "artifactBytesIncluded": false
+  },
+  "target": {
+    "os": "Linux",
+    "architecture": "x64",
+    "nodeMajor": 22,
+    "postgresMajor": 16
+  },
+  "hostingDesign": "config/recovery/aws-review-target.json",
+  "topology": "HTTPS single origin; /api/v1 to API; /admin to Admin; / to Web",
+  "publicLocales": [
+    "ar"
+  ],
+  "runtimeFlags": {
+    "CERTIFICATE_COMPLETION_WORKER_ENABLED": false,
+    "BACKGROUND_WORKER_ENABLED": false,
+    "STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED": false,
+    "OWNER_DOMAIN_OUTBOX_WORKER_ENABLED": false
+  },
+  "requiredRuntimeKeys": [
+    "DATABASE_URL",
+    "DIRECT_URL",
+    "REDIS_URL",
+    "API_BASE_URL",
+    "CORS_ORIGIN",
+    "PUBLIC_WEB_URL",
+    "ADMIN_WEB_URL",
+    "JWT_ACTIVE_KEY_ID",
+    "JWT_PRIVATE_KEY_PEM",
+    "JWT_PUBLIC_KEY_PEM",
+    "JWT_ISSUER",
+    "JWT_AUDIENCE",
+    "CSRF_SECRET",
+    "SECURE_COOKIE",
+    "TRUST_PROXY_HOPS",
+    "SECURITY_CSP_ENABLED",
+    "SECURITY_RATE_LIMIT_MAX",
+    "SECURITY_RATE_LIMIT_WINDOW_MS",
+    "ADMIN_AUTH_MODE",
+    "CERTIFICATE_COMPLETION_WORKER_ENABLED",
+    "CERTIFICATE_COMPLETION_WORKER_INTERVAL_MS",
+    "STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED",
+    "STUDENT_WORKSPACE_OUTBOX_WORKER_INTERVAL_MS",
+    "OWNER_DOMAIN_OUTBOX_WORKER_ENABLED",
+    "OWNER_DOMAIN_OUTBOX_WORKER_INTERVAL_MS",
+    "BACKGROUND_WORKER_ENABLED",
+    "BACKGROUND_WORKER_INTERVAL_MS",
+    "BACKGROUND_WORKER_BATCH_SIZE",
+    "BACKGROUND_WORKER_LEASE_MS",
+    "BACKGROUND_WORKER_HEARTBEAT_MS",
+    "BACKGROUND_RETENTION_CRON",
+    "BACKGROUND_FINANCE_RECONCILIATION_CRON",
+    "BACKGROUND_AI_CRON",
+    "BACKGROUND_IMPORT_CRON",
+    "BACKGROUND_CMS_CRON",
+    "BACKGROUND_NOTIFICATION_CRON",
+    "MANARATAK_ASSET_PROVIDER_BASE_URL",
+    "MANARATAK_ASSET_PROVIDER_API_KEY",
+    "MANARATAK_ASSET_PROVIDER_SIGNING_SECRET",
+    "MANARATAK_IMPORT_RAW_RETENTION_DAYS",
+    "FINANCE_MERCHANT_REFERENCE",
+    "FINANCE_RUNTIME_APPROVED",
+    "SERVICES_MAINTENANCE_ENABLED",
+    "CAREERS_MAINTENANCE_ENABLED",
+    "FINANCE_PROVIDER_BASE_URL",
+    "FINANCE_PROVIDER_API_KEY",
+    "FINANCE_PROVIDER_SIGNING_SECRET",
+    "HEALTH_DEPLOYMENT_REVISION",
+    "FINANCE_PAYMENT_PROVIDER_KEY",
+    "FINANCE_FX_PROVIDER_KEY",
+    "FINANCE_BANK_PROVIDER_KEY",
+    "NOTIFICATION_PAYLOAD_RETENTION_DAYS",
+    "NOTIFICATION_PAYLOAD_KEY",
+    "NOTIFICATION_PAYLOAD_KEY_PREVIOUS",
+    "NOTIFICATION_PROVIDER_BASE_URL",
+    "NOTIFICATION_PROVIDER_API_KEY",
+    "NOTIFICATION_PROVIDER_SIGNING_SECRET",
+    "NOTIFICATION_RECIPIENT_MAX_DELIVERIES_PER_HOUR",
+    "OTEL_EXPORTER_OTLP_ENDPOINT"
+  ],
+  "runtimeProfileReady": false,
+  "runtimeBlockers": [
+    {
+      "id": "admin.strict_mode_required",
+      "area": "Admin Security"
+    },
+    {
+      "id": "auth.jwt_key_id_required",
+      "area": "Authentication"
+    },
+    {
+      "id": "auth.jwt_private_key_required",
+      "area": "Authentication"
+    },
+    {
+      "id": "auth.jwt_public_key_required",
+      "area": "Authentication"
+    },
+    {
+      "id": "auth.access_token_ttl_invalid",
+      "area": "Authentication"
+    },
+    {
+      "id": "auth.csrf_secret_weak",
+      "area": "Authentication"
+    },
+    {
+      "id": "auth.insecure_cookie",
+      "area": "Authentication"
+    },
+    {
+      "id": "auth.jwt_claims_unconfigured",
+      "area": "Authentication"
+    },
+    {
+      "id": "database.production_url",
+      "area": "Database"
+    },
+    {
+      "id": "redis.production_url_required",
+      "area": "Redis"
+    },
+    {
+      "id": "api.https_base_url_required",
+      "area": "API"
+    },
+    {
+      "id": "web.https_public_url_required",
+      "area": "Web"
+    },
+    {
+      "id": "admin.https_public_url_required",
+      "area": "Admin"
+    },
+    {
+      "id": "cors.production_origin_required",
+      "area": "CORS"
+    },
+    {
+      "id": "security.csp_disabled",
+      "area": "HTTP Security"
+    },
+    {
+      "id": "security.trust_proxy_unconfigured",
+      "area": "HTTP Security"
+    },
+    {
+      "id": "worker.certificate_completion_disabled",
+      "area": "Workers"
+    },
+    {
+      "id": "worker.certificate_completion_interval_invalid",
+      "area": "Workers"
+    },
+    {
+      "id": "worker.background_disabled",
+      "area": "Workers"
+    },
+    {
+      "id": "worker.background_interval_invalid",
+      "area": "Workers"
+    },
+    {
+      "id": "worker.background_batch_invalid",
+      "area": "Workers"
+    },
+    {
+      "id": "worker.background_lease_invalid",
+      "area": "Workers"
+    },
+    {
+      "id": "worker.retention_schedule_missing",
+      "area": "Workers"
+    },
+    {
+      "id": "provider.asset_https_required",
+      "area": "Providers"
+    },
+    {
+      "id": "provider.asset_api_key_required",
+      "area": "Providers"
+    },
+    {
+      "id": "provider.asset_signing_secret_required",
+      "area": "Providers"
+    },
+    {
+      "id": "provider.import_raw_retention_invalid",
+      "area": "Providers"
+    },
+    {
+      "id": "observability.service_name_missing",
+      "area": "Observability"
+    },
+    {
+      "id": "observability.otlp_exporter_required",
+      "area": "Observability"
+    },
+    {
+      "id": "launch.worker_revision_missing",
+      "area": "Workers"
+    },
+    {
+      "id": "launch.payment-gateway.FINANCE_PROVIDER_BASE_URL",
+      "area": "Launch Dependencies"
+    },
+    {
+      "id": "launch.payment-gateway.FINANCE_PROVIDER_API_KEY",
+      "area": "Launch Dependencies"
+    },
+    {
+      "id": "launch.payment-gateway.FINANCE_PROVIDER_SIGNING_SECRET",
+      "area": "Launch Dependencies"
+    },
+    {
+      "id": "launch.payment-gateway.FINANCE_PAYMENT_PROVIDER_KEY",
+      "area": "Launch Dependencies"
+    },
+    {
+      "id": "launch.notifications.NOTIFICATION_PROVIDER_BASE_URL",
+      "area": "Launch Dependencies"
+    },
+    {
+      "id": "launch.notifications.NOTIFICATION_PROVIDER_API_KEY",
+      "area": "Launch Dependencies"
+    },
+    {
+      "id": "launch.notifications.NOTIFICATION_PROVIDER_SIGNING_SECRET",
+      "area": "Launch Dependencies"
+    },
+    {
+      "id": "launch.notifications.NOTIFICATION_PAYLOAD_KEY",
+      "area": "Launch Dependencies"
+    },
+    {
+      "id": "launch.notifications.BACKGROUND_NOTIFICATION_CRON",
+      "area": "Launch Dependencies"
+    }
+  ],
+  "targetPrerequisites": {
+    "accountAndBudget": false,
+    "regionsAndDataResidency": false,
+    "isolatedDatabaseAndAssets": false,
+    "tlsIngressAndSecrets": false,
+    "workerAndProviderEvidence": false,
+    "backupRestoreControls": false,
+    "deploymentControlPlane": false,
+    "protectedTrustAndApprovals": false
+  },
+  "readinessPath": "/api/v1/monitoring/health/readiness",
+  "demonstratedScope": {
+    "evidenceIndex": "docs/reviews/evidence/post28/aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b/r14-linux-rollback/evidence-index.json",
+    "linuxApiRollbackPassed": true,
+    "requestCount": 14,
+    "elapsedMilliseconds": 2494,
+    "workersEnabled": false,
+    "financialEffectOnceClaimed": false,
+    "differentApiImplementationDemonstrated": false
+  },
+  "stagingExecuted": false,
+  "validationExecuted": false,
+  "deploymentAuthorized": false,
+  "productionAuthorized": false,
+  "evidenceIsDiagnosticNotSignedPromotionApproval": true,
+  "preparerSourceSha": "aa62986a110f5b20ae1df051e33740e73e9b9181"
+}
