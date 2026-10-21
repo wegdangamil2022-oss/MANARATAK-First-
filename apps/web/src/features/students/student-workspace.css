@@ -146,6 +146,15 @@
   font-family: 'Cairo', sans-serif !important;
 }
 
+/* Force the records button label itself (including the expanded state)
+ * to use Cairo, not a global span or button typography override. */
+.mn-student-workspace button[aria-controls='student-summary-activity-timeline'] span {
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 18px !important;
+}
+
 /* Summary section titles: gold line immediately touching the title box,
    following the intrinsic text width rather than spanning the card. */
 .mn-student-workspace .mn-student-summary-heading,
