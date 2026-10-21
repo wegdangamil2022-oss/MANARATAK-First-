@@ -1339,7 +1339,7 @@ function OpportunitiesView({
       : `${activeFileDescription}. لم تُضف مهام متابعة إلى هذه الملفات بعد.`;
 
   return (
-    <div className="mn-student-opportunities-page space-y-5 font-['Cairo',sans-serif]">
+    <div className="mn-student-opportunities-page space-y-6 font-['Cairo',sans-serif]">
       {/* 1. Focused opportunities summary: heading, neutral guidance, metrics and discover action */}
       <section
         aria-label="فرصي وملفات التقديم"
@@ -1469,7 +1469,7 @@ function OpportunitiesView({
             />
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-6">
             {/* Upcoming Deadlines Panel */}
             {upcomingDeadlines.length > 0 && (
               <OpportunitiesSectionCard
@@ -1478,7 +1478,7 @@ function OpportunitiesView({
                 description="مواعيد إغلاق تقديمات المنح المتابعة"
               >
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {upcomingDeadlines.slice(0, 4).map((tracker) => {
                     const deadlineStr = tracker.deadlineAt || tracker.owner?.deadlineAt;
                     const title = trackerDisplayName(tracker);
