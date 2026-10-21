@@ -1,0 +1,59 @@
+{
+  "sourceSha": "241f76920e07d0211a3137efb62ec226efe4a4af",
+  "observations": [
+    {
+      "kind": "RED",
+      "tests": 2,
+      "scope": "new equal/newer error-time health regression cases",
+      "observed": "Expected DEGRADED but prior IDLE remained"
+    },
+    {
+      "kind": "GREEN",
+      "tests": 11,
+      "scope": "WorkerHealthObservation 8 and B09RecurringJobs 3",
+      "reason": "changed shared observation publisher and direct recurring health consumers"
+    },
+    {
+      "kind": "RED",
+      "tests": 1,
+      "scope": "real BackgroundWorkerRuntimeState stop publication",
+      "observed": "Expected STOPPED but prior IDLE remained"
+    },
+    {
+      "kind": "GREEN",
+      "tests": 14,
+      "scope": "WorkerHealthObservation 9 and B09LeaseLifecycle 5",
+      "reason": "stop publication changed durable lifecycle; previous recurring test not repeated"
+    },
+    {
+      "kind": "TYPECHECK",
+      "scope": "apps/api before stop fix; packages/application and apps/api after stop fix",
+      "exitCode": 0
+    },
+    {
+      "kind": "LINT",
+      "scope": "changed source/tests/runtime fixture",
+      "errors": 0,
+      "warnings": 1,
+      "warning": "pre-existing redis:any annotation"
+    }
+  ],
+  "newRegressionCases": 3,
+  "unrelatedSuitesRepeated": false,
+  "runtimeRerunReason": "Stop publication changed BackgroundWorkerRuntimeState used by all three routes; added a STOPPED observation assertion",
+  "notClaimed": [
+    "Live Redis transport in this diagnostic",
+    "Real finance provider invocation",
+    "End-to-end FinancePlatformUseCases or ImportAdminUseCases execution",
+    "Crash-kill, lease-steal or effect-once proof for every owner route",
+    "Linux exact-artifact formal acceptance",
+    "Production acceptance"
+  ],
+  "inventoryFix": {
+    "sourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+    "check": "Environment inventory current: 327 variable names",
+    "cause": "New fixture reads three tooling variables; regenerate names and sources only",
+    "runtimeSourceUnchanged": true,
+    "successfulTestsRepeated": false
+  }
+}

@@ -2,7 +2,7 @@
   "kind": "POST28_R14_NO_GO_PREPARATION",
   "localDate": "2026-10-21",
   "reviewSha": "83e210e0eb9505c875129948bd52171986f458b3",
-  "candidateSourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
+  "candidateSourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
   "branch": "feat/post28-r07-artifact-preparation",
   "releaseDecision": "NO_GO",
   "decisionScope": "PREPARATION_MEMO_NOT_PRODUCTION_AUTHORIZATION",
@@ -20,7 +20,7 @@
   "localRemainingWork": [
     "Unified exact-SHA Linux Admin CMS lifecycle and English coverage; Arabic mixed-source Windows journey completed locally",
     "Authenticated certificate delivery fixed and browser/IO-revocation proved locally; previously issued provider capabilities still require target-specific expiry or invalidation evidence",
-    "Required financial/certificate/import worker route fault proofs",
+    "Worker route queue fault diagnostic completed on Windows; real use-case/provider crash and lease/effect-once evidence still requires route-specific scope; Redis transport substituted here",
     "Scoped Linux rollback with selected exact artifacts and actual signal transport",
     "Representative launch dataset and prior SLO/resource budget; pool checkout instrumentation"
   ],
@@ -32,16 +32,22 @@
     "R13-E05"
   ],
   "candidateCi": {
-    "sourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
-    "runId": 39527255949,
-    "status": "completed",
-    "result": "success",
-    "passedJobs": 6,
-    "allSixJobsSucceeded": true,
-    "observedAtUtc": "2026-10-21T12:06:52.306Z",
-    "evidence": "docs/reviews/evidence/post28/7f26fb5753338090bc434ee3f3fe1eccb4020f83/r14-authenticated-ci/ci-six-jobs-completed.json"
+    "sourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+    "runId": 39599847197,
+    "status": "in_progress",
+    "result": null,
+    "observedAtUtc": "2026-10-21T12:27:31.015Z",
+    "allSixJobsSucceeded": false,
+    "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39599847197",
+    "runtimeDiagnosticSourceSha": "241f76920e07d0211a3137efb62ec226efe4a4af",
+    "runtimeSourceUnchanged": true,
+    "changedPaths": [
+      ".env.runtime.example",
+      "docs/operations/ENVIRONMENT_INVENTORY.md"
+    ],
+    "evidence": "docs/reviews/evidence/post28/241f76920e07d0211a3137efb62ec226efe4a4af/r14-worker-route-faults/ci-inventory-fix-observation.json"
   },
-  "nextFunctionalStep": "SCOPED_FINANCIAL_CERTIFICATE_IMPORT_WORKER_ROUTE_FAULT_PROOFS_IN_SYNTHETIC_LAB",
+  "nextFunctionalStep": "UNIFIED_EXACT_SHA_LINUX_ADMIN_CMS_AND_SCOPED_ROLLBACK_WITH_RETAINED_ARTIFACTS",
   "evidence": "docs/reviews/evidence/post28/83e210e0eb9505c875129948bd52171986f458b3/r14-no-go-preparation/evidence-index.json",
   "latestAdminCmsLocalDiagnostic": {
     "completed": true,
@@ -70,15 +76,16 @@
       "passedJobs": 6
     }
   },
-  "previousCandidateSourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+  "previousCandidateSourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
   "previousCandidateCi": {
-    "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
-    "runId": 39522846173,
+    "sourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
+    "runId": 39527255949,
+    "status": "completed",
     "result": "success",
     "passedJobs": 6,
-    "lastObservedStatus": "completed",
     "allSixJobsSucceeded": true,
-    "evidence": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/ci-six-jobs-completed.json"
+    "observedAtUtc": "2026-10-21T12:06:52.306Z",
+    "evidence": "docs/reviews/evidence/post28/7f26fb5753338090bc434ee3f3fe1eccb4020f83/r14-authenticated-ci/ci-six-jobs-completed.json"
   },
   "latestReviewerDeliveryDiagnostic": {
     "passed": true,
@@ -122,5 +129,18 @@
       "evidence": "docs/reviews/evidence/post28/7f26fb5753338090bc434ee3f3fe1eccb4020f83/r14-authenticated-ci/ci-six-jobs-completed.json"
     },
     "formalAcceptance": false
+  },
+  "latestWorkerRouteFaultDiagnostic": {
+    "sourceSha": "241f76920e07d0211a3137efb62ec226efe4a4af",
+    "passed": true,
+    "scope": "WINDOWS_REAL_POSTGRES_SCHEDULER_HANDLERS_QUEUE_FAULT_BOUNDARIES",
+    "report": "docs/remediation/POST28_WORKER_ROUTE_FAULTS_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/241f76920e07d0211a3137efb62ec226efe4a4af/r14-worker-route-faults/evidence-index.json",
+    "protectedDomainRowsUnchanged": true,
+    "redisTransportSubstituted": true,
+    "domainUseCasesSubstituted": true,
+    "formalAcceptance": false,
+    "inventoryFixSourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+    "runtimeSourceUnchangedAfterInventoryFix": true
   }
 }

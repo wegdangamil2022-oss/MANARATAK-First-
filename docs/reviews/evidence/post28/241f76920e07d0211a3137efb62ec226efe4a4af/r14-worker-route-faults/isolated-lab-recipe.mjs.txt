@@ -1,0 +1,43 @@
+import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import assert from 'node:assert/strict';import {spawnSync,execFileSync} from 'node:child_process';
+import {verificationRestoreList} from './r07-filtered/scripts/database/post28-backup-contract.mjs';
+const work=import.meta.dirname,repo=path.join(work,'r07-filtered'),bin=path.join(work,'pg16-binaries/pgsql/bin'),hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+const sourceSha=execFileSync('git',['rev-parse','HEAD'],{cwd:repo,encoding:'utf8'}).trim();
+assert.equal(execFileSync('git',['status','--porcelain'],{cwd:repo,encoding:'utf8'}).trim(),'');
+const created=spawnSync(process.execPath,['scripts/database/create-post28-native-lab.mjs'],{cwd:repo,env:{...process.env,NODE_ENV:'test',POST28_LOCAL_LAB_CREATE:'YES',POST28_LOCAL_LAB_PROFILE:'transactions',POST28_NATIVE_PG_BIN:bin,POST28_LAB_ROOT:work},encoding:'utf8',windowsHide:true,timeout:90000});
+assert.equal(created.status,0,'NEW_LAB_FAILED:'+created.stderr);
+const state=JSON.parse(created.stdout.trim()),lab=state.directory;
+fs.writeFileSync(path.join(work,'r14-worker-faults-current-lab.txt'),lab);
+const env=Object.fromEntries(fs.readFileSync(state.envFile,'utf8').trim().split(/\r?\n/).map(l=>{const i=l.indexOf('=');return[l.slice(0,i),l.slice(i+1)];}));
+const bootstrap=fs.readFileSync(path.join(lab,'bootstrap-password'),'utf8').trim(),setup=new URL(env.POST28_TRANSACTION_SETUP_URL),password=crypto.randomBytes(24).toString('hex'),database='manaratak_r14_workers_'+crypto.randomBytes(8).toString('hex');
+const pgEnv=(role,secret,db)=>({...process.env,PGHOST:'127.0.0.1',PGPORT:String(state.port),PGDATABASE:db,PGUSER:role,PGPASSWORD:secret,PGSSLMODE:'disable'});
+const sql=(query,db=database)=>{const r=spawnSync(path.join(bin,'psql.exe'),['-X','-At','-v','ON_ERROR_STOP=1'],{input:query,env:pgEnv('post28_bootstrap',bootstrap,db),encoding:'utf8',windowsHide:true,timeout:10000});assert.equal(r.status,0,'SETUP_SQL_FAILED:'+r.stderr.replaceAll(bootstrap,'[REDACTED]'));return r.stdout.trim();};
+const json=(file,value)=>fs.writeFileSync(path.join(lab,file),JSON.stringify(value,null,2)+'\n');
+let workerPassed=false;
+try{
+ assert.equal(Number(fs.readFileSync(path.join(state.dataDirectory,'postmaster.pid'),'utf8').split('\n')[0]),state.postmasterPid);
+ assert.equal(hash(fs.readFileSync(path.join(bin,'postgres.exe'))),state.postgresBinarySha256);
+ sql(`CREATE DATABASE "${database}" OWNER post28_bootstrap TEMPLATE template0 ENCODING 'UTF8' LC_COLLATE 'C' LC_CTYPE 'C'; REVOKE ALL ON DATABASE "${database}" FROM PUBLIC; GRANT CONNECT ON DATABASE "${database}" TO post28_tx_migrator;`,'postgres');
+ sql('CREATE EXTENSION pg_trgm; ALTER SCHEMA public OWNER TO post28_tx_migrator; REVOKE ALL ON SCHEMA public FROM PUBLIC; GRANT USAGE,CREATE ON SCHEMA public TO post28_tx_migrator;');
+ const donor=path.join(work,'native-pg16-JTNxRe'),dump=path.join(donor,'reviewed-source.dump'),auth=JSON.parse(JSON.parse(fs.readFileSync(path.join(donor,'restore-authorization.json'))).payload);
+ assert.equal(hash(fs.readFileSync(dump)),auth.databaseBackupSha256);
+ const listed=execFileSync(path.join(bin,'pg_restore.exe'),['--list',dump],{encoding:'utf8',windowsHide:true}),list=path.join(lab,'synthetic-clone.list');
+ // This route fixture needs an empty outbox, with the reviewed domain rows retained.
+ // Omit donor queue DATA at restore time; do not consume or delete its pending event.
+ const restoreText=verificationRestoreList(listed).text.split('\n').map(line=>/^\d+;.* TABLE DATA public TransactionalOutboxRecord /.test(line)?'; excluded unrelated donor outbox fixture '+line:line).join('\n');
+ fs.writeFileSync(list,restoreText);
+ const cloned=spawnSync(path.join(bin,'pg_restore.exe'),['--no-owner','--no-acl','--exit-on-error','--use-list',list,'--dbname',database,dump],{env:pgEnv(setup.username,decodeURIComponent(setup.password),database),encoding:'utf8',windowsHide:true,timeout:120000});
+ fs.writeFileSync(path.join(lab,'synthetic-clone.log'),(cloned.stdout??'')+(cloned.stderr??''));assert.equal(cloned.status,0,'SYNTHETIC_CLONE_FAILED');
+ // Setup owns schema; runtime can only read protected domain rows and mutate its queues.
+ sql(`CREATE ROLE post28_r14_worker LOGIN PASSWORD '${password}' NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS; GRANT CONNECT ON DATABASE "${database}" TO post28_r14_worker; GRANT USAGE ON SCHEMA public TO post28_r14_worker; GRANT SELECT ON ALL TABLES IN SCHEMA public TO post28_r14_worker; REVOKE ALL ON public."_prisma_migrations" FROM post28_r14_worker; GRANT INSERT,UPDATE,DELETE ON public."BackgroundJobRecord",public."BackgroundJobExecutionRecord",public."BackgroundJobDeadLetterRecord",public."TransactionalOutboxRecord" TO post28_r14_worker; GRANT EXECUTE ON FUNCTION pg_control_system() TO post28_r14_worker; ALTER ROLE post28_r14_worker SET statement_timeout='2000ms'; ALTER ROLE post28_r14_worker SET lock_timeout='1000ms';`);
+ const runtimeUrl=new URL('postgresql://post28_r14_worker@127.0.0.1:'+state.port+'/'+database);runtimeUrl.password=password;runtimeUrl.searchParams.set('connection_limit','3');
+ const result=spawnSync(process.execPath,['--import','tsx','tests/runtime/fixtures/post28-r14-worker-route-faults.mjs'],{cwd:repo,env:{SystemRoot:process.env.SystemRoot,PATH:path.dirname(process.execPath)+';C:/Program Files/Git/cmd',NODE_ENV:'test',DATABASE_URL:runtimeUrl.href,TSX_TSCONFIG_PATH:path.join(repo,'tsconfig.base.json'),POST28_R14_WORKER_FAULTS:'SYNTHETIC_NEW_CLUSTER_ONLY',POST28_EXPECTED_SERVER_ID:state.serverIdentity,POST28_SOURCE_SHA:sourceSha},encoding:'utf8',windowsHide:true,timeout:90000});
+ const log=(result.stdout??'')+(result.stderr??'');fs.writeFileSync(path.join(lab,'worker-route-faults.log'),log.replaceAll(password,'[REDACTED]').replaceAll(runtimeUrl.href,'[REDACTED]'));
+ assert.equal(result.status,0,'WORKER_ROUTE_PROOF_FAILED:'+log.slice(-2200).replaceAll(password,'[REDACTED]'));
+ const proof=JSON.parse(result.stdout.trim().split('\n').at(-1));assert.equal(proof.sourceSha,sourceSha);json('worker-route-faults-result.json',proof);workerPassed=true;
+ json('worker-route-faults-lab.json',{sourceSha,newCluster:true,postgresBinarySha256:state.postgresBinarySha256,serverIdentity:state.serverIdentity,donorDumpSha256:auth.databaseBackupSha256,restoreListSha256:hash(restoreText),excludedDonorData:['TransactionalOutboxRecord'],ordinaryRole:'post28_r14_worker',runtimeDmlTables:['BackgroundJobRecord','BackgroundJobExecutionRecord','BackgroundJobDeadLetterRecord','TransactionalOutboxRecord'],protectedDomainWritePermissions:false,previousDatabasesTouched:false});
+}finally{
+ assert.equal(Number(fs.readFileSync(path.join(state.dataDirectory,'postmaster.pid'),'utf8').split('\n')[0]),state.postmasterPid);
+ const actual=execFileSync('powershell.exe',['-NoProfile','-Command','(Get-Process -Id '+state.postmasterPid+').Path'],{encoding:'utf8',windowsHide:true}).trim();assert.equal(fs.realpathSync(actual),fs.realpathSync(path.join(bin,'postgres.exe')));
+ const stopped=spawnSync(path.join(bin,'pg_ctl.exe'),['-D',state.dataDirectory,'-m','fast','-w','stop'],{stdio:'ignore',windowsHide:true,timeout:30000}).status===0;
+ json('worker-route-faults-cleanup.json',{stopped,workerPassed,existingDatabasesTouched:false});assert.equal(stopped,true);console.log(JSON.stringify({lab,stopped,workerPassed}));
+}

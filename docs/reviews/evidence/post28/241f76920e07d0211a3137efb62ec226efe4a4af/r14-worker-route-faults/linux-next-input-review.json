@@ -1,0 +1,34 @@
+{
+  "kind": "POST28_R14_LINUX_INPUT_SOURCE_REVIEW",
+  "candidateSourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+  "ciRunId": 39599847197,
+  "expectedArtifactName": "manaratak-release-artifacts-fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+  "expectedEnvironment": {
+    "os": "linux",
+    "arch": "x64",
+    "nodeMajor": 22,
+    "postgresMajor": 16
+  },
+  "previousSourceCompared": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
+  "ancestorVerified": true,
+  "changedRuntimePaths": [
+    "apps/api/src/infrastructure/runtime/WorkerHealthObservation.ts",
+    "apps/api/tests/infrastructure/workers/WorkerHealthObservation.spec.ts",
+    "packages/application/src/background-jobs/workers/DurableBackgroundWorker.ts"
+  ],
+  "schemaUnchanged": true,
+  "lockUnchanged": true,
+  "oldR12SourceEqualityProofReusable": false,
+  "rollbackCandidateAccepted": false,
+  "reason": "Previous candidate lacks failure and stop health fixes. No source equality or runtime compatibility may be inferred from the older R12 drill.",
+  "requiredNext": [
+    "Retrieve candidate immutable artifact manifest and verify SHA/hashes",
+    "Use same candidate API Web Admin packages for Linux CMS browser flow",
+    "Choose a reviewed previous API/worker pair without silently restoring known health defects",
+    "Run bounded actual Linux signal and routing drill with protected-row/receipt fingerprints"
+  ],
+  "artifactsRetrieved": false,
+  "linuxDrillExecuted": false,
+  "productionAuthorized": false,
+  "runtimeDiagnosticSourceSha": "241f76920e07d0211a3137efb62ec226efe4a4af"
+}
