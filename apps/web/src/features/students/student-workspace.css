@@ -239,6 +239,23 @@
   line-height: 1.7;
 }
 
+/* Legacy enrollment cards only appear under the Learning tab here;
+ * keep their title hierarchy consistent with the redesigned course cards. */
+.mn-student-workspace .mn-student-learning-section a.group h3 {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.65;
+}
+.mn-student-workspace .mn-student-learning-section a.group :where(span, time) {
+  font-family: 'Cairo', sans-serif !important;
+  line-height: 1.65;
+}
+
 /* Scholarship application document details stay compact and legible with
  * Cairo typography. Only tools within the Opportunities tab are affected. */
 .mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(p, label) {
