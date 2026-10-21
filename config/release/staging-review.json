@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "kind": "MANARATAK_STAGING_REVIEW_PLAN",
+  "environment": "staging",
+  "reviewOnly": true,
+  "candidateSourceSha": "aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b",
+  "candidateRunId": 39648892069,
+  "target": { "os": "Linux", "architecture": "x64", "nodeMajor": 22, "postgresMajor": 16 },
+  "hostingDesign": "config/recovery/aws-review-target.json",
+  "topology": "HTTPS single origin; /api/v1 to API; /admin to Admin; / to Web",
+  "publicLocales": ["ar"],
+  "dataScope": "NEW_ISOLATED_SYNTHETIC_DATABASE_AND_PRIVATE_ASSET_NAMESPACE",
+  "providers": "STUB_OR_SANDBOX_ONLY_NO_REAL_CHARGES_OR_STUDENT_MESSAGES",
+  "runtimeFlags": {
+    "CERTIFICATE_COMPLETION_WORKER_ENABLED": false,
+    "BACKGROUND_WORKER_ENABLED": false,
+    "STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED": false,
+    "OWNER_DOMAIN_OUTBOX_WORKER_ENABLED": false
+  },
+  "targetReadiness": {
+    "accountAndBudget": false,
+    "regionsAndDataResidency": false,
+    "isolatedDatabaseAndAssets": false,
+    "tlsIngressAndSecrets": false,
+    "workerAndProviderEvidence": false,
+    "backupRestoreControls": false,
+    "deploymentControlPlane": false,
+    "protectedTrustAndApprovals": false
+  }
+}
