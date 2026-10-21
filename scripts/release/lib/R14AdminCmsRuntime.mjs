@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { randomBytes, randomUUID, scryptSync, createHash } from 'node:crypto';
 import { totp } from '../../../packages/infrastructure/src/auth/mfa/Totp.ts';
+import { createDiagnosticRequestBudget } from './DiagnosticRequestBudget.mjs';
 
 /** Only the setup principal in the already verified new DB-T calls this helper. */
 export async function seedR14AdminCmsFixture(setup, secrets) {
@@ -20,6 +21,7 @@ export async function seedR14AdminCmsFixture(setup, secrets) {
 
 export async function exerciseR14AdminCms({ browser, origin, db, fixture, proof, secrets, sourceSha }) {
   const pages = {}, contexts = [], observations = [], errors = [], network = [], blocked = new Set();
+  const requestBudget = createDiagnosticRequestBudget();
   const protectedTables = ['StudentPrivacyConsentDecision', 'StudentApplicationDocumentBinding', 'FinancialLedgerEntryRecord', 'FinanceInvoiceRecord', 'Certificate'];
   const fingerprint = async () => {
     const rows = {};
@@ -34,8 +36,8 @@ export async function exerciseR14AdminCms({ browser, origin, db, fixture, proof,
   const unwrap = async response => { const body = await response.json(); return response.headers()['x-import-envelope-version'] === '2' ? body.data : body; };
   const newPage = async () => {
     const context = await browser.newContext({ ignoreHTTPSErrors: false }); contexts.push(context);
-    await context.route('**/*', route => { const target = new URL(route.request().url()); if (target.origin === origin || ['data:', 'blob:'].includes(target.protocol)) return route.continue(); blocked.add(target.origin); return route.abort(); });
-    const page = await context.newPage(); page.on('dialog', dialog => dialog.accept()); page.on('pageerror', error => errors.push(error.message));
+    await context.route('**/*', async route => { const target = new URL(route.request().url()); if (target.origin === origin) { if (target.pathname.startsWith('/api/')) await requestBudget.acquire(); return route.continue(); } if (['data:', 'blob:'].includes(target.protocol)) return route.continue(); blocked.add(target.origin); return route.abort(); });
+    const page = await context.newPage(); page.setDefaultTimeout(90000); page.setDefaultNavigationTimeout(90000); page.on('dialog', dialog => dialog.accept()); page.on('pageerror', error => errors.push(error.message));
     page.on('response', response => { const url = new URL(response.url()); if (url.origin === origin) network.push({ path: url.pathname, status: response.status(), method: response.request().method() }); });
     return page;
   };
@@ -109,8 +111,8 @@ export async function exerciseR14AdminCms({ browser, origin, db, fixture, proof,
       const status = await pages[actor.kind].evaluate(async () => { const token = await fetch('/api/v1/auth/csrf-token', { credentials: 'include' }); return (await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include', headers: { 'x-csrf-token': token.headers.get('x-csrf-token') } })).status; });
       assert.equal(status, 200); assert.equal(await db.sessionRecord.count({ where: { identityId: actor.id, revokedAt: null } }), 0);
     }
-    assert.deepEqual(await fingerprint(), baseline); assert.equal(errors.length, 0); assert.equal(network.filter(row => row.status >= 500).length, 0);
-    return { sourceSha, builtThreeUnitsAtOneSha: true, locales, observations, protectedBeforeAndAfter: baseline, noExternalEffects: true, blockedExternalOrigins: [...blocked], pageErrors: errors, network, allActorSessionsRevoked: true, formalAcceptance: false };
+    assert.deepEqual(await fingerprint(), baseline); assert.equal(errors.length, 0); assert.equal(network.filter(row => row.status >= 500 || row.status === 429).length, 0);
+    return { sourceSha, builtThreeUnitsAtOneSha: true, locales, observations, requestBudget: requestBudget.snapshot(), protectedBeforeAndAfter: baseline, noExternalEffects: true, blockedExternalOrigins: [...blocked], pageErrors: errors, network, allActorSessionsRevoked: true, formalAcceptance: false };
   } finally {
     // Synthetic sessions only; cleanup must also revoke sessions after a failed journey.
     await db.sessionRecord.updateMany({ where: { identityId: { in: fixture.actors.map(actor => actor.id) }, revokedAt: null }, data: { revokedAt: new Date() } });
