@@ -46,7 +46,7 @@ jobs:
           name: r08-redis-diagnostic-${{ github.sha }}
           path: /tmp/post28-r08-redis-result.json
           if-no-files-found: warn
-      - name: Exercise only new refund recovery and timeout cases in a new PG16 lab
+      - name: Exercise refund recovery timeout and real finance worker replay in a new PG16 lab
         if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
         run: node scripts/release/post28-r08-provider-faults.mjs "$RUNNER_TEMP/r08-provider"
       - name: Retain new provider fault proof without lab credentials
@@ -55,6 +55,16 @@ jobs:
         with:
           name: r08-provider-faults-${{ github.sha }}
           path: ${{ runner.temp }}/r08-provider/proof
+          if-no-files-found: warn
+      - name: Exercise real certificate issuance worker replay in a separate new PG16 lab
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        run: node scripts/release/post28-r08-provider-faults.mjs "$RUNNER_TEMP/staging-certificate-worker" --certificate-worker
+      - name: Retain real certificate worker proof without lab credentials
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: staging-certificate-worker-${{ github.sha }}
+          path: ${{ runner.temp }}/staging-certificate-worker/proof
           if-no-files-found: warn
 
   source-quality:
