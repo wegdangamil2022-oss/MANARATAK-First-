@@ -1,0 +1,27 @@
+{
+  "sourceSha": "83ce0e56af89ab05bdbf99fb18ef213b22d48645",
+  "runId": 39601999968,
+  "jobId": 119229089399,
+  "conclusion": "failure",
+  "annotations": [
+    {
+      "title": "",
+      "message": "Process completed with exit code 1."
+    },
+    {
+      "title": "Source unit failure",
+      "message": "not ok 870 - source CI permits only the explicitly authorized dependency-gated Linux browser lab\n  ---\n  duration_ms: 6.258427\n  type: 'test'\n  location: '/home/runner/work/MANARATAK-First-/MANARATAK-First-/tests/remediation/w7-documentation-closure.test.mjs:21:1'\n  failureType: 'testCodeFailure'\n  error: |-\n    Expected values to be strictly equal:\n    \n    true !== false\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: false"
+    },
+    {
+      "title": "Source unit failure",
+      "message": "Error: DATABASE_UNAVAILABLE\n    at /home/runner/work/MANARATAK-First-/MANARATAK-First-/apps/api/tests/presentation/api/router/ReferenceDataAdminRouter.spec.ts:238:41\n    at file:///home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)\n    at file:///home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64\n\n ✓ apps/api/tests/presentation/api/router/ReferenceDataAdminRouter.spec.ts (26 tests) 541ms\n ✓ packages/application/tests/reference-data/ReferenceDataUseCases.spec.ts (18 tests) 32ms"
+    },
+    {
+      "title": "Source unit failure",
+      "message": "Error: Cannot set headers after they are sent to the client\n    at ServerResponse.setHeader (node:_http_outgoing:699:11)\n    at ServerResponse.header (/home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/express/lib/response.js:794:10)\n    at ServerResponse.send (/home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/express/lib/response.js:174:12)\n    at ServerResponse.json (/home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/express/lib/response.js:278:15)\n    at /home/runner/work/MANARATAK-First-/MANARATAK-First-/apps/api/src/presentation/api/router/CourseAdminRouter.ts:697:23\n    at Layer.handle_error (/home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/express/lib/router/layer.js:71:5)\n    at trim_prefix (/home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/express/lib/router/index.js:326:13)\n    at /home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/express/lib/router/index.js:286:9\n    at Function.process_params (/home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/express/lib/router/index.js:346:12)\n    at next (/home/runner/work/MANARATAK-First-/MANARATAK-First-/node_modules/express/lib/router/index.js:280:10)\n\n ✓ apps/api/tests/presentation/api/router/CourseAdminRouter.spec.ts (13 tests) 424ms\n ✓ packages/infrastructure/tests/translation-import/TranslationGovernance.spec.ts (12 tests) 45ms"
+    }
+  ],
+  "rootCause": "Per-job existential environment guard accepts a second journey authorization after the first is removed; negative boundary test failed",
+  "fixedBy": "6d64b30814903c0b387b47457ee347f41f5634b4",
+  "linuxCmsExecuted": false
+}

@@ -2,7 +2,7 @@
   "kind": "POST28_R14_NO_GO_PREPARATION",
   "localDate": "2026-10-21",
   "reviewSha": "83e210e0eb9505c875129948bd52171986f458b3",
-  "candidateSourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+  "candidateSourceSha": "d927710984de2fb7ffbf56e71cd742eaeb44536a",
   "branch": "feat/post28-r07-artifact-preparation",
   "releaseDecision": "NO_GO",
   "decisionScope": "PREPARATION_MEMO_NOT_PRODUCTION_AUTHORIZATION",
@@ -14,11 +14,11 @@
   "promotionInvoked": false,
   "sourceSignaturesCreated": false,
   "applicationSourceChanged": false,
-  "testsOrBuildOrDatabaseDrillRepeated": false,
+  "testsOrBuildOrDatabaseDrillRepeated": true,
   "hostingState": "DESIGN_SELECTED_NOT_PROVISIONED",
   "hostingBudgetApproved": false,
   "localRemainingWork": [
-    "Unified exact-SHA Linux Admin CMS lifecycle and English coverage; Arabic mixed-source Windows journey completed locally",
+    "Finish unified exact-SHA Linux Admin CMS Arabic/English lifecycle after diagnostic pacing fix; partial Linux real-MFA publishing already observed",
     "Authenticated certificate delivery fixed and browser/IO-revocation proved locally; previously issued provider capabilities still require target-specific expiry or invalidation evidence",
     "Worker route queue fault diagnostic completed on Windows; real use-case/provider crash and lease/effect-once evidence still requires route-specific scope; Redis transport substituted here",
     "Scoped Linux rollback with selected exact artifacts and actual signal transport",
@@ -32,20 +32,46 @@
     "R13-E05"
   ],
   "candidateCi": {
-    "sourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
-    "runId": 39599847197,
+    "sourceSha": "d927710984de2fb7ffbf56e71cd742eaeb44536a",
+    "runId": 39628696516,
     "status": "in_progress",
     "result": null,
-    "observedAtUtc": "2026-10-21T12:27:31.015Z",
     "allSixJobsSucceeded": false,
-    "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39599847197",
-    "runtimeDiagnosticSourceSha": "241f76920e07d0211a3137efb62ec226efe4a4af",
-    "runtimeSourceUnchanged": true,
-    "changedPaths": [
-      ".env.runtime.example",
-      "docs/operations/ENVIRONMENT_INVENTORY.md"
+    "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39628696516",
+    "observedAt": "2026-10-21T15:55:28.185Z",
+    "jobs": [
+      {
+        "id": 119320728225,
+        "name": "Full source closure gates",
+        "status": "in_progress",
+        "conclusion": null,
+        "currentOrFailedSteps": [
+          "Unit and source integration tests"
+        ]
+      },
+      {
+        "id": 119320728625,
+        "name": "Deployment configuration",
+        "status": "completed",
+        "conclusion": "success",
+        "currentOrFailedSteps": []
+      },
+      {
+        "id": 119320728649,
+        "name": "Translation quality gates",
+        "status": "completed",
+        "conclusion": "success",
+        "currentOrFailedSteps": []
+      },
+      {
+        "id": 119320728739,
+        "name": "R08 isolated Redis and Linux worker shutdown",
+        "status": "completed",
+        "conclusion": "success",
+        "currentOrFailedSteps": []
+      }
     ],
-    "evidence": "docs/reviews/evidence/post28/241f76920e07d0211a3137efb62ec226efe4a4af/r14-worker-route-faults/ci-inventory-fix-observation.json"
+    "evidence": "docs/reviews/evidence/post28/83ce0e56af89ab05bdbf99fb18ef213b22d48645/r14-linux-cms-preparation/locale-candidate-ci.json"
   },
   "nextFunctionalStep": "UNIFIED_EXACT_SHA_LINUX_ADMIN_CMS_AND_SCOPED_ROLLBACK_WITH_RETAINED_ARTIFACTS",
   "evidence": "docs/reviews/evidence/post28/83e210e0eb9505c875129948bd52171986f458b3/r14-no-go-preparation/evidence-index.json",
@@ -76,16 +102,67 @@
       "passedJobs": 6
     }
   },
-  "previousCandidateSourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
+  "previousCandidateSourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
   "previousCandidateCi": {
-    "sourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
-    "runId": 39527255949,
-    "status": "completed",
-    "result": "success",
-    "passedJobs": 6,
+    "sourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+    "runId": 39599847197,
+    "observedAt": "2026-10-21T12:54:45.624Z",
+    "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39599847197",
+    "jobs": [
+      {
+        "id": 119221274340,
+        "name": "Full source closure gates",
+        "status": "completed",
+        "conclusion": "success",
+        "completedAt": "2026-10-21T12:35:34Z",
+        "currentOrFailedSteps": []
+      },
+      {
+        "id": 119221274520,
+        "name": "Deployment configuration",
+        "status": "completed",
+        "conclusion": "success",
+        "completedAt": "2026-10-21T12:28:30Z",
+        "currentOrFailedSteps": []
+      },
+      {
+        "id": 119221274685,
+        "name": "R08 isolated Redis and Linux worker shutdown",
+        "status": "completed",
+        "conclusion": "success",
+        "completedAt": "2026-10-21T12:30:47Z",
+        "currentOrFailedSteps": []
+      },
+      {
+        "id": 119221274764,
+        "name": "Translation quality gates",
+        "status": "completed",
+        "conclusion": "success",
+        "completedAt": "2026-10-21T12:29:02Z",
+        "currentOrFailedSteps": []
+      },
+      {
+        "id": 119224592323,
+        "name": "Retrieve and verify immutable artifacts from Actions storage",
+        "status": "completed",
+        "conclusion": "success",
+        "completedAt": "2026-10-21T12:35:59Z",
+        "currentOrFailedSteps": []
+      },
+      {
+        "id": 119224770701,
+        "name": "Linux x64 review image and native runtime",
+        "status": "completed",
+        "conclusion": "success",
+        "completedAt": "2026-10-21T12:40:18Z",
+        "currentOrFailedSteps": []
+      }
+    ],
     "allSixJobsSucceeded": true,
-    "observedAtUtc": "2026-10-21T12:06:52.306Z",
-    "evidence": "docs/reviews/evidence/post28/7f26fb5753338090bc434ee3f3fe1eccb4020f83/r14-authenticated-ci/ci-six-jobs-completed.json"
+    "result": "success",
+    "status": "completed",
+    "passedJobs": 6,
+    "evidence": "docs/reviews/evidence/post28/83ce0e56af89ab05bdbf99fb18ef213b22d48645/r14-linux-cms-preparation/previous-ci.json"
   },
   "latestReviewerDeliveryDiagnostic": {
     "passed": true,
@@ -142,5 +219,31 @@
     "formalAcceptance": false,
     "inventoryFixSourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
     "runtimeSourceUnchangedAfterInventoryFix": true
+  },
+  "latestAdminCmsLinuxDiagnostic": {
+    "sourceSha": "282a7aa791cb1363f8a0cc29ee661fb3acf5cb9e",
+    "passed": false,
+    "scope": "LINUX_X64_NODE22_PG16_SAME_SHA_BUILT_API_WEB_ADMIN_THREE_ACTOR_MFA_AR_EN",
+    "cleanupPassed": true,
+    "drainMilliseconds": 153,
+    "allActorSessionsRevoked": false,
+    "requestBudget": null,
+    "report": "docs/remediation/POST28_R14_LINUX_CMS_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/282a7aa791cb1363f8a0cc29ee661fb3acf5cb9e/r14-linux-cms-runtime/evidence-index.json",
+    "formalAcceptance": false
+  },
+  "repetitionScope": "Affected local profile and boundary tests plus automatic full source CI after tooling commits; no manual repeat of unaffected local R05-R13 suites",
+  "formalValidationTargetExecuted": false,
+  "latestPublicEnglishPolicyReview": {
+    "policySource": "packages/shared/src/localization/readiness.ts",
+    "publicEnglishCopyReady": false,
+    "publicTemplateLocales": [
+      "ar"
+    ],
+    "englishHtmlObservedStatus": 404,
+    "englishReleaseAccepted": false,
+    "internalEnglishEditorialLifecyclePermitted": true,
+    "sourcePolicyChanged": false,
+    "diagnosticFixSourceSha": "d927710984de2fb7ffbf56e71cd742eaeb44536a"
   }
 }

@@ -1,0 +1,71 @@
+{
+  "kind": "POST28_R14_ADMIN_CMS_ARTIFACT_RUNTIME",
+  "sourceSha": "6d64b30814903c0b387b47457ee347f41f5634b4",
+  "imageId": "sha256:8c96eff2dfbf71bb8bd91b4a66f22578b62263fd4d6e95925d1c67545a872296",
+  "node": "v22.16.0",
+  "environment": "DISPOSABLE",
+  "providerMode": "NO_EXTERNAL_EGRESS",
+  "observations": [
+    {
+      "step": "REVISION_READINESS",
+      "route": "/health/build",
+      "status": 200,
+      "sourceSha": "6d64b30814903c0b387b47457ee347f41f5634b4"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/admin/health/build",
+      "status": 200,
+      "sourceSha": "6d64b30814903c0b387b47457ee347f41f5634b4"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/api/v1/monitoring/health/readiness",
+      "status": 200,
+      "sourceSha": "6d64b30814903c0b387b47457ee347f41f5634b4"
+    }
+  ],
+  "network": [],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "productionAcceptance": false,
+  "formalR07Acceptance": false,
+  "promotionAuthorized": false,
+  "databaseIdentity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7699110044318474285",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "applicationRole": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolreplication": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledger": false
+  },
+  "browserVersion": "151.0.7922.34",
+  "cleanup": {
+    "ownedContainerStopped": true,
+    "ownedContainerRemoved": true,
+    "postgresStopped": true,
+    "postgresRemoved": true,
+    "networkRemoved": true,
+    "existingDatabasesTouched": false,
+    "apiExitCode": 0,
+    "drainMilliseconds": 133
+  },
+  "failure": "locator.fill: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByLabel('بحث المحتوى', { exact: true })\n",
+  "passed": false,
+  "completedAt": "2026-10-21T13:21:06.740Z"
+}

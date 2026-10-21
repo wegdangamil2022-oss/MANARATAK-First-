@@ -1,0 +1,23 @@
+{
+  "currentSourceSha": "83ce0e56af89ab05bdbf99fb18ef213b22d48645",
+  "previousSourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+  "ancestorVerified": true,
+  "runtimePaths": [
+    "apps/api",
+    "apps/admin",
+    "apps/web",
+    "packages",
+    "vendor",
+    "package.json",
+    "package-lock.json"
+  ],
+  "changedRuntimePaths": [],
+  "sourceEqual": true,
+  "retainsWorkerHealthAndAuthenticatedCertificateFixes": true,
+  "previousCiAndLinuxProofRetained": true,
+  "previousPackagesLocallyVerified": false,
+  "runtimeRehearsalExecuted": false,
+  "rollbackOfDifferentImplementationDemonstrated": false,
+  "formalAcceptance": false,
+  "decision": "SOURCE_SCREEN_ONLY_PREVIOUS_PACKAGES_AND_SCOPED_RUNTIME_REHEARSAL_REQUIRED"
+}
