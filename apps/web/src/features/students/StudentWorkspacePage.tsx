@@ -1253,51 +1253,8 @@ function SummaryView({
         </section>
       )}
 
-      {/* 7. Explore Platform Directory (Scholarships, Courses, Majors, Universities) - only for active students to avoid duplicate CTA for new students */}
-      {!isNewStudent && (
-        <div className="relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full rounded-2xl border border-[#D6A43B]/30 bg-gradient-to-r from-[#D6A43B]/10 via-[#F3CE74]/5 to-transparent p-4">
-          <div className="text-center max-w-xl mx-auto">
-            <div className="inline-flex items-center justify-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
-                <Sparkles className="w-3.5 h-3.5 text-[#E5B54F]" />
-              </div>
-              <h2 className="mn-student-summary-heading text-[14px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">استكشف الفرص في منارتك</h2>
-            </div>
-            <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
-            <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">
-              ابحث في دليل المنح الدراسية، الدورات التخصصية، والجامعات المعتمدة عبر الفلاتر الذكية.
-            </p>
-            <div className="mt-3.5 flex flex-wrap items-center justify-center gap-2">
-              <Link
-                to="/scholarships"
-                className="px-3 py-1.5 rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] hover:border-[#D6A43B]/60 text-xs font-semibold text-[var(--mn-heading)] dark:text-[#E5B54F] transition-all shadow-2xs"
-              >
-                المنح الدراسية
-              </Link>
-              <Link
-                to="/courses"
-                className="px-3 py-1.5 rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] hover:border-[#D6A43B]/60 text-xs font-semibold text-[var(--mn-heading)] dark:text-[#E5B54F] transition-all shadow-2xs"
-              >
-                الدورات التدريبية
-              </Link>
-              <Link
-                to="/universities"
-                className="px-3 py-1.5 rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] hover:border-[#D6A43B]/60 text-xs font-semibold text-[var(--mn-heading)] dark:text-[#E5B54F] transition-all shadow-2xs"
-              >
-                دليل الجامعات
-              </Link>
-              <Link
-                to="/majors"
-                className="px-3 py-1.5 rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] hover:border-[#D6A43B]/60 text-xs font-semibold text-[var(--mn-heading)] dark:text-[#E5B54F] transition-all shadow-2xs"
-              >
-                التخصصات
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 7. Invoices (If any exist) */}
 
-      {/* 8. Invoices (If any exist) */}
       {invoices.length > 0 && (
         <div className="mn-student-summary-invoices">
           <InvoicePanel
