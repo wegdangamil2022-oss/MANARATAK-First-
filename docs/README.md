@@ -29,6 +29,7 @@ This file is the navigation entrypoint for the current `docs/` tree. It does not
 | `reviews/` | Section reviews, executable source-check evidence and explicitly deferred runtime closure gates. |
 | `implementation-status/` | Current implementation-status evidence. |
 | `imports/` | Import-domain documentation and source/data evidence. |
+| `plans/` | Bounded execution plans, import source registers and progress tracking; [current import plan](./plans/imports/plan.md). |
 | `standards/` | Shared repository/documentation standards. |
 | `templates/` | Editable design references and preview artifacts; not issued credentials. |
 | `legacy/` | Superseded historical artifacts only. |
