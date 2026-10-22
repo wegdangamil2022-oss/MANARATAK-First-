@@ -1736,7 +1736,7 @@ export class ApiClient {
     if (input.cursor) params.set('facetCursor', input.cursor);
     const response = await apiFetch(`${API_BASE_URL}/public/academic-program-explorer?${params}`, { signal: input.signal, cache: 'no-store' });
     if (!response.ok) throw new Error('PUBLIC_DEGREE_CHOICES_UNAVAILABLE');
-    return response.json();
+    return (await response.json()).data;
   }
 
   static async searchPublicCatalog(input: {
