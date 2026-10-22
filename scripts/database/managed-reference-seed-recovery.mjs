@@ -1,6 +1,18 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 export const recoveryHash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+// This budget belongs only to the managed development operator. Server-side
+// statement, lock and abandoned-transaction limits remain independently bounded.
+export const managedReferenceTransactionOptions=Object.freeze({maxWait:10000,timeout:60000});
+/** Reuse only an exact content-bound receipt loaded for this run's handoff keys. */
+export function cachedSeedReceipt(receipts,identity){
+  const row=receipts.get(identity.handoffKey);
+  if(!row)return null;
+  assert.equal(row.ownerDomain,identity.ownerDomain,'IMPORT_RECEIPT_OWNER_CONFLICT');
+  assert.equal(row.handoffKey,identity.handoffKey,'IMPORT_RECEIPT_IDENTITY_CONFLICT');
+  assert.equal(row.requestHash,identity.requestHash,'IMPORT_RECEIPT_CONTENT_CONFLICT');
+  return row;
+}
 export function validateSeedRecovery(approval,state,snapshot,stateHash,runId){
   assert.equal(state.runId,runId,'MANAGED_SEED_RECOVERY_RUN_MISMATCH');
   assert.equal(state.completed,false,'MANAGED_SEED_RECOVERY_ALREADY_COMPLETED');

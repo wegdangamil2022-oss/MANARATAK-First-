@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { PrismaClient, type Prisma } from '@prisma/client';
 import { AssetId, AssetStorageLocator, AssetStorageZone, AssetSecurityClassification, AssetRetentionCategory, UniversalImportHandoff } from '@manaratak/domain';
-import { referenceImportPayloadDigest } from '@manaratak/application';
+import { referenceImportPayloadDigest, type ReferenceOwnerReview } from '@manaratak/application';
 import { AtomicAuditedOutboxMutationExecutor, AtomicDomainMutationCoordinator, ReferenceOwnerReviewUseCases, ReferenceDataUseCases,
   ReferenceDataScreeningHandoffConsumer, ImportHandoffDispatcher, IngestAssetUseCase, ProcessAssetLifecycleUseCase } from '@manaratak/application';
 import { PrismaAtomicPersistenceUnitOfWork, PrismaAuditRecordRepository, PrismaTransactionalOutboxStore, PrismaReferenceOwnerReviewGateway,
@@ -23,8 +23,9 @@ import { requireDatabaseMutationGate } from '../lib/database-mutation-gate.mjs';
 // @ts-expect-error PostgreSQL TLS probe has no TS declaration.
 import { verifyManagedPostgresTls } from './verify-managed-postgres-tls.mjs';
 // @ts-expect-error Operator ESM recovery guard has no TS declaration.
-import { recoveryHash, validateSeedRecovery, seedReviewAction } from './managed-reference-seed-recovery.mjs';
+import { recoveryHash, validateSeedRecovery, seedReviewAction, cachedSeedReceipt, managedReferenceTransactionOptions } from './managed-reference-seed-recovery.mjs';
 let diagnosticPath:string|undefined;
+const recentQueryTimings:Array<{at:string;durationMs:number}>=[];
 
 async function main(){
  const mode=process.argv[2];
@@ -55,7 +56,9 @@ async function main(){
  const live=await readDatabaseIdentity(process.env.DATABASE_URL,{provider:'NEON'});
  // A managed endpoint includes network round trips inside the existing owner
  // transaction. Bound this operator client only; retain all atomicity/lock guards.
- const db=new PrismaClient({datasources:{db:{url:process.env.DATABASE_URL}},log:[],errorFormat:'minimal',transactionOptions:{maxWait:10000,timeout:30000}});
+ const db=new PrismaClient({datasources:{db:{url:process.env.DATABASE_URL}},log:[{emit:'event',level:'query'}],errorFormat:'minimal',transactionOptions:managedReferenceTransactionOptions});
+ // Keep only bounded timings, never SQL or parameters, for intermittent remote stalls.
+ db.$on('query',event=>{recentQueryTimings.push({at:new Date().toISOString(),durationMs:event.duration});if(recentQueryTimings.length>64)recentQueryTimings.shift();});
  try{
   await db.$connect();
   const transport=await verifyManagedPostgresTls(process.env.DATABASE_URL);
@@ -119,12 +122,34 @@ async function applyReferences(db:PrismaClient,options:ApplyOptions){
  const reviewGateway=new PrismaReferenceOwnerReviewGateway(db);
  const reviews=new ReferenceOwnerReviewUseCases(reviewGateway,new AtomicDomainMutationCoordinator(executor));
  const repository=new PrismaReferenceDataRepository(db),author=new ReferenceDataUseCases(repository,undefined,undefined,executor);
- const dispatcher=new ImportHandoffDispatcher({REFERENCE_DATA:new ReferenceDataScreeningHandoffConsumer()},new PrismaImportScreeningReceiptStore(db,{maxWait:10000,timeout:30000}));
+ const dispatcher=new ImportHandoffDispatcher({REFERENCE_DATA:new ReferenceDataScreeningHandoffConsumer()},new PrismaImportScreeningReceiptStore(db,managedReferenceTransactionOptions));
  const storage=new LocalAssetStorageGateway(bucket,storageRoot),assets=new PrismaAssetRecordRepository(db);
  const ingest=new IngestAssetUseCase(assets,storage),lifecycle=new ProcessAssetLifecycleUseCase(assets,storage,new PrismaAssetUsageRegistryGateway(db),security,security);
  const context={actorId,actorType:'DELEGATED_PROJECT_OPERATOR',source:'managed-development-reference-seed',correlationId:runId};
+ const packets=new Map(inputs.map(input=>{
+  const bytes=Buffer.from(JSON.stringify(input.records));
+  return [input.id,{bytes,artifactHash:hash(bytes),assetId:'managed-seed-'+hash(runId+input.id)}] as const;
+ }));
+ const handoffFor=(input:SeedInput,index:number):UniversalImportHandoff=>{
+  const {artifactHash,assetId}=packets.get(input.id)!;
+  return {handoffId:input.id+':'+index,ownerDomain:'REFERENCE_DATA',artifact:{sourceId:input.id,artifactId:assetId},normalizedPayload:referenceSeedPayload(input,input.records[index]),
+   provenance:{sourceSystem:'managed-development-reviewed-manifest',contentHash:artifactHash,sourceRowNumber:index+1},validation:{state:'VALID',issues:[]},
+   execution:{executionId:runId,dryRun:false,attempt:1,idempotencyKey:input.id+':'+index},referenceMetadata:{referenceEntityType:input.type,sourceVersion:input.sourceVersion}};
+ };
+ // Recovery already proved an exact live snapshot under the exclusive operator
+ // lock. Load its bounded receipts and owner plans once instead of paying three
+ // remote lookups for every completed row. Missing/pending rows still use the
+ // original transactional owner commands, version guards and durable receipt store.
+ const keys=inputs.flatMap(input=>input.records.map((_,index)=>screeningReceiptIdentity(handoffFor(input,index)).handoffKey));
+ assert.equal(keys.length,622);assert.equal(new Set(keys).size,keys.length,'MANAGED_SEED_HANDOFF_IDENTITY_COLLISION');
+ const previousReceiptRows=options.resume?await db.importScreeningReceipt.findMany({where:{ownerDomain:'REFERENCE_DATA',handoffKey:{in:keys}},take:keys.length+1}):[];
+ assert.ok(previousReceiptRows.length<=keys.length,'MANAGED_SEED_RECOVERY_RECEIPT_COUNT_INVALID');
+ const previousReceipts=new Map(previousReceiptRows.map(row=>[row.handoffKey,row]));
+ const previousPlanRows=options.resume&&previousReceiptRows.length?await db.referenceOwnerImportReview.findMany({where:{receiptId:{in:previousReceiptRows.map(row=>row.id)}},take:keys.length+1}):[];
+ assert.ok(previousPlanRows.length<=previousReceiptRows.length,'MANAGED_SEED_RECOVERY_REVIEW_COUNT_INVALID');
+ const previousPlans=new Map(previousPlanRows.map(row=>[row.id,row as unknown as ReferenceOwnerReview]));
  for(const input of inputs){
-  const bytes=Buffer.from(JSON.stringify(input.records)),artifactHash=hash(bytes),assetId='managed-seed-'+hash(runId+input.id);
+  const {bytes,artifactHash,assetId}=packets.get(input.id)!;
   const existing=await assets.findById(new AssetId(assetId));
   if(existing){
    assert.ok(options.resume,'MANAGED_SEED_EXISTING_ASSET_REQUIRES_RECOVERY');existing.assertCanDeliver();
@@ -140,17 +165,15 @@ async function applyReferences(db:PrismaClient,options:ApplyOptions){
   }
   for(const [index,record] of input.records.entries()){
    const payload=referenceSeedPayload(input,record);
-   const handoff:UniversalImportHandoff={handoffId:input.id+':'+index,ownerDomain:'REFERENCE_DATA',artifact:{sourceId:input.id,artifactId:assetId},normalizedPayload:payload,
-    provenance:{sourceSystem:'managed-development-reviewed-manifest',contentHash:artifactHash,sourceRowNumber:index+1},validation:{state:'VALID',issues:[]},
-    execution:{executionId:runId,dryRun:false,attempt:1,idempotencyKey:input.id+':'+index},referenceMetadata:{referenceEntityType:input.type,sourceVersion:input.sourceVersion}};
+   const handoff=handoffFor(input,index),identity=screeningReceiptIdentity(handoff);
    // A reviewed recovery reuses durable receipts through their content-hash check.
    // Starting another write transaction for a receipt already accepted adds no proof.
-   const priorReceipt=options.resume?await dispatcher.findReceipt(handoff):null;
+   const priorReceipt=options.resume?cachedSeedReceipt(previousReceipts,identity):null;
    const screened=priorReceipt?priorReceipt.result:await dispatcher.dispatch(handoff);assert.ok(screened&&typeof screened==='object'&&'state' in screened&&'issues' in screened);
    assert.equal(screened.state,'NEEDS_OWNER_REVIEW');assert.ok(Array.isArray(screened.issues));assert.equal(screened.issues.length,0);
-   const identity=screeningReceiptIdentity(handoff),receipt=await db.importScreeningReceipt.findUniqueOrThrow({where:{ownerDomain_handoffKey:{ownerDomain:identity.ownerDomain,handoffKey:identity.handoffKey}}});
+   const receipt=priorReceipt??await db.importScreeningReceipt.findUniqueOrThrow({where:{ownerDomain_handoffKey:{ownerDomain:identity.ownerDomain,handoffKey:identity.handoffKey}}});
    const reviewId='p7-review-'+referenceImportPayloadDigest({value:receipt.id});
-   const priorPlan=options.resume?await reviewGateway.get(reviewId):null;
+   const priorPlan=options.resume?previousPlans.get(reviewId):null;
    let plan=priorPlan??await reviews.preview(receipt.id,context);assert.deepEqual(plan.preview.issues,[]);
    assert.equal(plan.receiptId,receipt.id);assert.equal(plan.sourceHash,receipt.requestHash);assert.equal(plan.entityType,input.type);
    const action=seedReviewAction(plan,actorId,referenceImportPayloadDigest(plan.payload),referenceImportPayloadDigest(payload));
@@ -184,7 +207,7 @@ main().catch(error=>{
   let detail=error instanceof Error?error.stack??error.message:String(error);
   detail=detail.replace(/postgres(?:ql)?:\/\/[^\s"']+/g,'[REDACTED_URI]');
   if(process.env.DATABASE_URL){const password=decodeURIComponent(new URL(process.env.DATABASE_URL).password);if(password)detail=detail.split(password).join('[REDACTED]');}
-  writeSeedEvidence(diagnosticPath,{at:new Date().toISOString(),code:error?.code??null,detail:detail.slice(0,6000)});
+  writeSeedEvidence(diagnosticPath,{at:new Date().toISOString(),code:error?.code??null,detail:detail.slice(0,6000),recentQueryTimings});
  }
  const message=error instanceof Error?error.message:'';
  console.error(/^(MANAGED_SEED_|DEFENDER_|POST28_|ASSET_|REFERENCE_)[A-Z0-9_]+$/.test(message)?message:'MANAGED_SEED_OPERATION_FAILED_REVIEW_PRIVATE_STATE');
