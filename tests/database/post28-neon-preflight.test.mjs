@@ -194,23 +194,24 @@ test('remote read-only proof cannot authorize existing parity, diff or destructi
 });
 test('identity reader uses READ ONLY before the exact Neon SELECT and always disconnects (inert client)',async()=>{
   const calls=[];
-  const client={$transaction:async(fn,settings)=>{assert.equal(settings.timeout,15000);
+  const client={$connect:async()=>{calls.push('connect');},$transaction:async(fn,settings)=>{assert.equal(settings.timeout,15000);
     return fn({$executeRawUnsafe:async sql=>{calls.push(sql);},$queryRawUnsafe:async sql=>{
       assert.equal(sql,NEON_IDENTITY_SQL);calls.push('SELECT');return [liveFor(expected)];}});},
   $disconnect:async()=>{calls.push('disconnect');}};
   const result=await readDatabaseIdentity(urlFor(g),expected,async raw=>{assert.equal(raw,urlFor(g));return client;});
   assert.equal(result.database,g.database);
-  assert.deepEqual(calls,['SET TRANSACTION READ ONLY',"SET LOCAL statement_timeout = '10000ms'",'SELECT','disconnect']);
+  assert.deepEqual(calls,['connect','SET TRANSACTION READ ONLY',"SET LOCAL statement_timeout = '10000ms'",'SELECT','disconnect']);
 });
-for(const step of ['construct','transaction','empty row','disconnect'])
+for(const step of ['construct','connect','transaction','empty row','disconnect'])
   test(`identity reader redacts ${step} failure without leaking driver credentials`,async()=>{
     let disconnected=0;
-    const client={$transaction:async()=>{
+    const client={$connect:async()=>{if(step==='connect')throw Object.assign(new Error(urlFor(g)),{code:'P1001'});},$transaction:async()=>{
       if(step==='transaction')throw new Error(urlFor(g));return step==='empty row'?[]:[liveFor(expected)];
     },$disconnect:async()=>{disconnected++;if(step==='disconnect')throw new Error(urlFor(g));}};
     await assert.rejects(readDatabaseIdentity(urlFor(g),expected,async()=>{
       if(step==='construct')throw new Error(urlFor(g));return client;
-    }),e=>e.message==='POST28_IDENTITY_READ_FAILED');
+    }),e=>e.message==='POST28_IDENTITY_READ_FAILED'&&!JSON.stringify(e).includes(urlFor(g))&&
+      (step!=='connect'||(e.phase==='connect'&&e.code==='P1001')));
     assert.equal(disconnected,step==='construct'?0:1);
   });
 test('provider connection or authorization failure aborts before creating a SQL client',async()=>{

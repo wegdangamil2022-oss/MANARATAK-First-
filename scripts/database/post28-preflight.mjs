@@ -71,8 +71,16 @@ async function createIdentityClient(url) {
 
 export async function readDatabaseIdentity(url, expected, createClient=createIdentityClient) {
   let client;
+  let phase='construct';
+  const failure=error=>Object.assign(new Error('POST28_IDENTITY_READ_FAILED'),{
+    phase,code:/^P\d{4}$/.test(error?.code??'')?error.code:undefined,
+  });
   try {
     client=await createClient(url);
+    // Establish TLS/authentication before starting the bounded read-only transaction.
+    phase='connect';
+    await client.$connect();
+    phase='transaction';
     const rows = await client.$transaction(async tx => {
       await tx.$executeRawUnsafe('SET TRANSACTION READ ONLY');
       await tx.$executeRawUnsafe("SET LOCAL statement_timeout = '10000ms'");
@@ -80,11 +88,11 @@ export async function readDatabaseIdentity(url, expected, createClient=createIde
     },{maxWait:10000,timeout:15000});
     if (rows.length !== 1) throw new Error('POST28_IDENTITY_ROW_REQUIRED');
     return rows[0];
-  } catch {
+  } catch (error) {
     // Driver diagnostics can contain credentials; preserve a stable redacted failure.
-    throw new Error('POST28_IDENTITY_READ_FAILED');
+    throw failure(error);
   } finally {
-    if(client)try{await client.$disconnect();}catch{throw new Error('POST28_IDENTITY_READ_FAILED');}
+    if(client)try{await client.$disconnect();}catch(error){phase='disconnect';throw failure(error);}
   }
 }
 

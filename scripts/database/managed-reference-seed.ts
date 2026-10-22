@@ -207,7 +207,7 @@ main().catch(error=>{
   let detail=error instanceof Error?error.stack??error.message:String(error);
   detail=detail.replace(/postgres(?:ql)?:\/\/[^\s"']+/g,'[REDACTED_URI]');
   if(process.env.DATABASE_URL){const password=decodeURIComponent(new URL(process.env.DATABASE_URL).password);if(password)detail=detail.split(password).join('[REDACTED]');}
-  writeSeedEvidence(diagnosticPath,{at:new Date().toISOString(),code:error?.code??null,detail:detail.slice(0,6000),recentQueryTimings});
+  writeSeedEvidence(diagnosticPath,{at:new Date().toISOString(),code:error?.code??null,phase:error?.phase??null,detail:detail.slice(0,6000),recentQueryTimings});
  }
  const message=error instanceof Error?error.message:'';
  console.error(/^(MANAGED_SEED_|DEFENDER_|POST28_|ASSET_|REFERENCE_)[A-Z0-9_]+$/.test(message)?message:'MANAGED_SEED_OPERATION_FAILED_REVIEW_PRIVATE_STATE');
