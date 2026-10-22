@@ -27,20 +27,7 @@ export class StudentToolRegistryUseCases {
     private readonly assetReferences?: AssetReferencePolicy,
   ) {}
   async installOfficialRegistry(actorReferenceId: string) {
-    if (!actorReferenceId) throw new Error('ACTOR_REQUIRED');
-    const values = [];
-    for (const tool of OFFICIAL_STUDENT_TOOLS)
-      values.push(
-        await this.repository.upsertDefinition(
-          {
-            ...tool,
-            lifecycle: StudentToolLifecycleStatus.TESTING,
-            visibility: StudentToolVisibilityStatus.HIDDEN_ADMIN_ONLY,
-          },
-          actorReferenceId,
-        ),
-      );
-    return values;
+    return installOfficialStudentToolRegistry(this.repository, actorReferenceId);
   }
   async listAdminPage(filters: StudentToolFilters & { page?: number; pageSize?: number }) {
     if (!this.repository.listPage) throw new Error('TOOL_PAGING_NOT_CONFIGURED');
@@ -270,6 +257,23 @@ export class StudentToolRegistryUseCases {
       reason,
     );
   }
+}
+
+/** The API and approved-environment CLI share the same owner installation policy. */
+export async function installOfficialStudentToolRegistry(
+  repository: IStudentToolRegistryRepository,
+  actorReferenceId: string,
+): Promise<StudentToolDefinition[]> {
+  if (!actorReferenceId) throw new Error('ACTOR_REQUIRED');
+  const values: StudentToolDefinition[] = [];
+  for (const tool of OFFICIAL_STUDENT_TOOLS) {
+    values.push(await repository.upsertDefinition({
+      ...tool,
+      lifecycle: StudentToolLifecycleStatus.TESTING,
+      visibility: StudentToolVisibilityStatus.HIDDEN_ADMIN_ONLY,
+    }, actorReferenceId));
+  }
+  return values;
 }
 
 function compareSemver(a: string, b: string): number {

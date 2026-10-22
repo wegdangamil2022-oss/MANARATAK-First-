@@ -1,0 +1,76 @@
+{
+  "kind": "P06_SUPPLEMENTARY_OFFICIAL_INSTITUTION_ADDRESS_EVIDENCE",
+  "sourceSha": "4bc6256354bde23b28023cc25c0368a3ca2959b2",
+  "observedAt": "2026-10-22T22:06:47.511Z",
+  "databaseConnections": 0,
+  "databaseWrites": 0,
+  "sourcePilot": [
+    {
+      "universitySourceReferenceId": "INS-CHN-0001",
+      "officialName": "Peking University",
+      "citySourceId": "city_cn_beijing",
+      "countryIso2": "CN",
+      "citySourceRowHash": "33bb84d576d0f2240b5e5e21db2b08c8944c81775d9284c30da5f6fd12737ef0"
+    },
+    {
+      "universitySourceReferenceId": "INS-CHN-0003",
+      "officialName": "Tsinghua University",
+      "citySourceId": "city_cn_beijing",
+      "countryIso2": "CN",
+      "citySourceRowHash": "33bb84d576d0f2240b5e5e21db2b08c8944c81775d9284c30da5f6fd12737ef0"
+    },
+    {
+      "universitySourceReferenceId": "INS-HUN-0006",
+      "officialName": "Eötvös Loránd University",
+      "citySourceId": "city_hu_budapest",
+      "countryIso2": "HU",
+      "citySourceRowHash": "d07c206764e870a6d0905d623a8b8110ba75e1a02e89a1ba2beb4414556ac89f"
+    },
+    {
+      "universitySourceReferenceId": "INS-TUR-0145",
+      "officialName": "Middle East Technical University",
+      "citySourceId": "city_tr_ankara",
+      "countryIso2": "TR",
+      "citySourceRowHash": "044adb7e58a070dbca59e732ddb606eb82c50e7b36b2a4c144d93a22043369a2"
+    }
+  ],
+  "additionalEvidence": [
+    {
+      "universityName": "Peking University",
+      "citySourceId": "city_cn_beijing",
+      "url": "https://english.pku.edu.cn/detail/11807.html",
+      "evidence": "The university president office lists an address in Haidian District, Beijing, China."
+    },
+    {
+      "universityName": "E?tv?s Lor?nd University",
+      "citySourceId": "city_hu_budapest",
+      "url": "https://www.elte.hu/karok-kapcsolat",
+      "evidence": "The university headquarters contact page identifies Budapest as its address."
+    }
+  ],
+  "previousAddressEvidence": [
+    {
+      "universityName": "Middle East Technical University",
+      "citySourceId": "city_tr_ankara",
+      "url": "https://www.metu.edu.tr/contact-info",
+      "observedOn": "2026-10-22",
+      "evidence": "Official university contact page identifies Ankara, Türkiye.",
+      "limits": "Confirms institutional city/country only; does not approve all city metadata, region source identity or import."
+    },
+    {
+      "universityName": "Tsinghua University",
+      "citySourceId": "city_cn_beijing",
+      "url": "https://www.tsinghua.edu.cn/en/Contact.htm",
+      "observedOn": "2026-10-22",
+      "evidence": "Official undergraduate admissions contact page identifies Haidian District, Beijing, China.",
+      "limits": "Confirms institutional city/country only; does not approve all city metadata, region source identity or import."
+    }
+  ],
+  "limits": [
+    "Institution city evidence only; not a review of every city field or all campus locations.",
+    "ISO subdivision identity, canonical target region, timezone, coordinates, population and owner import review are not approved by this supplement.",
+    "No source fields changed; all historical quarantine remains held."
+  ],
+  "ownerImportApprovalCreated": false,
+  "independentHumanApprovalClaimed": false
+}

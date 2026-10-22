@@ -1,0 +1,355 @@
+{
+  "kind": "MANAGED_REQUIRED_BASELINE_COMPLETION",
+  "localDate": "2026-10-23",
+  "runtimeSourceSha": "4bc6256354bde23b28023cc25c0368a3ca2959b2",
+  "runId": "e68e0b93-813e-4178-ad03-4da45dc22c12",
+  "pointAComplete": true,
+  "target": {
+    "projectId": "hidden-smoke-02928871",
+    "branchId": "br-sweet-king-b9pem1dg",
+    "postgresMajor": 16
+  },
+  "counts": {
+    "ReferenceCurrency": 168,
+    "ReferenceLanguage": 260,
+    "ReferenceCountry": 194,
+    "DegreeLevel": 7,
+    "AcademicTaxonomyNode": 163,
+    "AcademicTaxonomyEdge": 152,
+    "AcademicTaxonomyAlias": 39,
+    "StudentToolDefinitionRecord": 83,
+    "StudentToolVersionRecord": 83,
+    "StudentToolDependencyRecord": 4,
+    "ExternalCourseProvider": 18,
+    "ExternalCourseProviderAlias": 6,
+    "ExternalCourseProviderDomain": 39
+  },
+  "backup": {
+    "sourceSha": "4bc6256354bde23b28023cc25c0368a3ca2959b2",
+    "runId": "e68e0b93-813e-4178-ad03-4da45dc22c12",
+    "observedAt": "2026-10-22T21:41:02.778Z",
+    "projectId": "hidden-smoke-02928871",
+    "branchId": "br-sweet-king-b9pem1dg",
+    "backupFile": "before-required-baseline-4bc62563-parallel",
+    "format": "directory",
+    "parallelJobs": 4,
+    "sha256Scope": "SORTED_ENTRY_MANIFEST_INCLUDING_PER_FILE_SHA256",
+    "sha256": "f28719b33dd821d95718aa5ff52551f96e23f8b66b80cf6088ec01fcce04611a",
+    "bytes": 1890459,
+    "databaseWrites": 0,
+    "archiveListVerified": true,
+    "fullArchiveDecodeVerified": true,
+    "consistentSnapshot": true,
+    "snapshotMechanism": "POSTGRES16_PG_DUMP_NATIVE_PARALLEL_SYNCHRONIZED_SNAPSHOTS",
+    "externalSnapshotKeeper": false,
+    "allTableSchemasIncluded": true,
+    "allTableDataIncluded": true,
+    "nonemptyDataTableCoverageVerified": true,
+    "sourceCountsObservation": "BEFORE_NATIVE_DUMP_SNAPSHOT_REQUIRES_RESTORE_COMPARISON_WITH_UNMODIFIED_SOURCE",
+    "tableCount": 282,
+    "emptyTables": 268,
+    "nonemptyTables": 14,
+    "restoreRehearsal": false,
+    "elapsedMs": 111645,
+    "referenceDocumentation": "https://www.postgresql.org/docs/16/app-pgdump.html",
+    "sessionOnlyIdleTransactionTimeoutMs": 660000,
+    "overallDumpTimeoutMs": 600000
+  },
+  "restore": {
+    "kind": "P02_NEW_LOCAL_RECOVERY_REHEARSAL",
+    "sourceSha": "4bc6256354bde23b28023cc25c0368a3ca2959b2",
+    "runId": "e68e0b93-813e-4178-ad03-4da45dc22c12",
+    "labRunId": "2c53fe6a-e0f4-4596-9157-ae60e873c2ef",
+    "observedAt": "2026-10-22T21:42:20.877Z",
+    "pass": true,
+    "sourceDatabaseWrites": 0,
+    "restoreTarget": "NEW_DISPOSABLE_LOCAL_POSTGRES16_ONLY",
+    "archiveSha256": "f28719b33dd821d95718aa5ff52551f96e23f8b66b80cf6088ec01fcce04611a",
+    "tableCount": 282,
+    "allTableCountsMatchPreBackupObservation": true,
+    "allTableDataFingerprintsMatchUnmodifiedManagedSource": true,
+    "fingerprintSha256": "6b23971a0eda77b0bcb0963c272220f4acd97291d5c41ecde9d54df4ab2e14f8",
+    "restrictedVerification": {
+      "role": "manaratak_restore_probe",
+      "superuser": false,
+      "createRole": false,
+      "createDatabase": false,
+      "bypassRls": false,
+      "readOnly": true,
+      "ownsRelations": false,
+      "invalidIndexes": 0,
+      "unvalidatedConstraints": 0,
+      "dataMutationPrivilege": false
+    },
+    "priorDatabasesTouched": false,
+    "extensionCommentPreservedAsAlreadyIdentical": true,
+    "excludedTocEntries": [
+      "7344; 0 0 COMMENT - EXTENSION pg_trgm "
+    ]
+  },
+  "result": {
+    "sourceSha": "4bc6256354bde23b28023cc25c0368a3ca2959b2",
+    "runId": "e68e0b93-813e-4178-ad03-4da45dc22c12",
+    "complete": true,
+    "steps": [
+      {
+        "id": "degree-levels",
+        "mode": "APPLIED",
+        "counts": {
+          "DegreeLevel": 7
+        },
+        "completedAt": "2026-10-22T21:43:18.847Z"
+      },
+      {
+        "id": "academic-taxonomy-isced-f",
+        "mode": "APPLIED",
+        "counts": {
+          "AcademicTaxonomyNode": 163,
+          "AcademicTaxonomyEdge": 152,
+          "AcademicTaxonomyAlias": 39
+        },
+        "completedAt": "2026-10-22T21:45:08.050Z"
+      },
+      {
+        "id": "external-course-providers",
+        "mode": "PRESERVED_HISTORICAL_MIGRATION_ROWS",
+        "counts": {
+          "ExternalCourseProvider": 18
+        },
+        "completedAt": "2026-10-22T21:45:14.913Z"
+      },
+      {
+        "id": "student-tools-registry",
+        "mode": "OWNER_INSTALL_RECOVERY_CONTINUATION",
+        "counts": {
+          "StudentToolDefinitionRecord": 83,
+          "StudentToolVersionRecord": 83,
+          "StudentToolDependencyRecord": 4
+        },
+        "completedAt": "2026-10-22T22:08:09.791Z"
+      }
+    ],
+    "pass": true,
+    "recoveredAfterInterruptedToolSeed": true,
+    "counts": {
+      "DegreeLevel": 7,
+      "AcademicTaxonomyNode": 163,
+      "AcademicTaxonomyEdge": 152,
+      "AcademicTaxonomyAlias": 39,
+      "StudentToolDefinitionRecord": 83,
+      "StudentToolVersionRecord": 83,
+      "StudentToolDependencyRecord": 4,
+      "ExternalCourseProvider": 18,
+      "ExternalCourseProviderAlias": 6,
+      "ExternalCourseProviderDomain": 39
+    },
+    "relationships": {
+      "databaseWrites": 0,
+      "taxonomyNodesMatchSource": true,
+      "taxonomyEdgesMatchSource": true,
+      "taxonomyAliasesMatchSource": true,
+      "providerDomainsMatchSource": true,
+      "degreeCodesAndRanksMatchSource": true
+    },
+    "preservedProviderDecision": {
+      "decision": "PRESERVE_VERIFIED_HISTORICAL_MIGRATION_REGISTRY_WITH_EXPLICIT_METADATA_EXCEPTIONS_DO_NOT_RESEED",
+      "exactSourceMatch": false,
+      "metadataExceptions": 23
+    },
+    "protectedRowsUnchanged": true,
+    "protectedTables": 275,
+    "studentTools": {
+      "sourceSha": "4bc6256354bde23b28023cc25c0368a3ca2959b2",
+      "runId": "e68e0b93-813e-4178-ad03-4da45dc22c12",
+      "pass": true,
+      "installed": 69,
+      "reconciled": 14,
+      "definitions": 83,
+      "versions": 83,
+      "dependencies": 4,
+      "audit": 83,
+      "outbox": 83,
+      "ownerCommand": "StudentToolRegistryUseCases.installOfficialRegistry",
+      "ownerProjection": {
+        "lifecycle": "TESTING",
+        "visibility": "HIDDEN_ADMIN_ONLY"
+      },
+      "discoverableDefinitions": 0,
+      "releaseApprovalsCreated": 0,
+      "correctionAudit": 5,
+      "correctionOutbox": 5
+    },
+    "correction": {
+      "kind": "BASELINE_OWNER_INSTALL_POLICY_CORRECTION",
+      "sourceSha": "4bc6256354bde23b28023cc25c0368a3ca2959b2",
+      "runId": "e68e0b93-813e-4178-ad03-4da45dc22c12",
+      "pass": true,
+      "keys": [
+        "motivation-letter-generator",
+        "motivation-letter-reviewer",
+        "personal-statement-generator",
+        "personal-statement-reviewer",
+        "recommendation-letter-generator"
+      ],
+      "correctedDefinitions": 5,
+      "command": "StudentToolRegistryUseCases.transition(TESTING)",
+      "allCorrectedDefinitionsNonDiscoverable": true,
+      "releaseApprovalsCreated": 0,
+      "originalVersionRowsUnchanged": true,
+      "originalDependenciesUnchanged": true,
+      "protectedTablesUnchanged": 275,
+      "executions": 0,
+      "audit": 5,
+      "outbox": 5,
+      "observedAt": "2026-10-22T21:52:39.080Z"
+    },
+    "productionReady": false,
+    "adminBootstrapped": false,
+    "catalogsImported": false
+  },
+  "readOnlyFinalSourceComparison": {
+    "kind": "P03_P05_READ_ONLY_FINAL_SOURCE_COMPARISON",
+    "sourceSha": "4bc6256354bde23b28023cc25c0368a3ca2959b2",
+    "runId": "e68e0b93-813e-4178-ad03-4da45dc22c12",
+    "observedAt": "2026-10-22T22:09:22.841Z",
+    "pass": true,
+    "databaseWrites": 0,
+    "degreeRowsAllSourceFieldsMatch": 7,
+    "studentToolDefinitionsAllOwnerProjectedSourceFieldsMatch": 83,
+    "studentToolOwnerProjection": {
+      "lifecycle": "TESTING",
+      "visibility": "HIDDEN_ADMIN_ONLY"
+    },
+    "studentToolDiscoverableDefinitions": 0,
+    "studentToolReleaseApprovalsStillNull": true,
+    "studentToolExecutionPerformed": false,
+    "existingProvidersByteProjectionUnchanged": true,
+    "existingProviderMetadataExceptions": 23,
+    "taxonomySourceRelationshipProof": {
+      "databaseWrites": 0,
+      "taxonomyNodesMatchSource": true,
+      "taxonomyEdgesMatchSource": true,
+      "taxonomyAliasesMatchSource": true,
+      "providerDomainsMatchSource": true,
+      "degreeCodesAndRanksMatchSource": true
+    },
+    "protectedRowsUnchanged": true
+  },
+  "ownerProjectionIsNotRawSourceEquality": true,
+  "studentToolEffects": {
+    "definitionUpserts": 83,
+    "ownerPolicyCorrections": 5,
+    "totalAudit": 88,
+    "totalOutbox": 88,
+    "releaseApprovalsCreated": 0,
+    "executions": 0
+  },
+  "sourceScripts": {
+    "degree": "scripts/seed-degree-levels.ts",
+    "taxonomy": "scripts/seed-taxonomy.ts",
+    "tools": "Actual StudentToolRegistryUseCases.installOfficialRegistry via a source-bound recovery adapter; no repeated upsert of already reconciled definitions"
+  },
+  "receipts": [
+    {
+      "name": "BASELINE_BACKUP.json",
+      "sha256": "0834f1ae5c1597c6407befba8e2ba8159cee09deabd6cb5ff8a590eb71e449bc"
+    },
+    {
+      "name": "BASELINE_RESTORE_VERIFIED.json",
+      "sha256": "f5fe634d08f66382ee51210a371e53df2a17f9b1486f5cd76f62dfd0f3564fcd"
+    },
+    {
+      "name": "BASELINE_PREFLIGHT.json",
+      "sha256": "058a06f3ce5b972674cb5e39d874b2c96ee81beaef20b68551c737cd842399b8"
+    },
+    {
+      "name": "BASELINE_RESULT.json",
+      "sha256": "da64adc2ed27fc9536bfd0d1bc07d459b5cfeb077314e0fd3e81ab30d1a5920c"
+    },
+    {
+      "name": "BASELINE_SOURCE_COMPARISON.json",
+      "sha256": "8be01a9d0a02a569111f2cab508a9d82d9d6d1de777ae0dfd7fd7e82dce4c227"
+    },
+    {
+      "name": "TOOL_OWNER_CORRECTION_RESULT.json",
+      "sha256": "e2164d3ae78fbb96e3e3619d19e1ed148a6ca7e61b668e2b5dfefd1b46b79a64"
+    },
+    {
+      "name": "STUDENT_TOOLS_RESULT.json",
+      "sha256": "c7e2f7c3d8a4cc9dd2315310cc2e45ee262db3bf5c0fe5241e8fb57296fe6569"
+    }
+  ],
+  "privateOperatorSource": [
+    {
+      "name": "native-parallel-backup.mjs",
+      "sha256": "e95784dc3ed088a0bb726fed3c2287a0bf90e882430aa681491bbb70263c3a62"
+    },
+    {
+      "name": "backup-digest.mjs",
+      "sha256": "3916dac0e2003564bd96b634885b7dac4d30883bc23c032d02bd3d2d9bbdadb1"
+    },
+    {
+      "name": "restore-backup.mjs",
+      "sha256": "11ab338941f1c510f9b059cc7cb02ab358c33c8a877ee9d587fd85c3880dd710"
+    },
+    {
+      "name": "run-required-baseline.mjs",
+      "sha256": "64f2176111953ebf11dceae665402f968fea1097d20192c4896961d1fb20e81b"
+    },
+    {
+      "name": "correct-owner-tool-state.ts",
+      "sha256": "16a5b1837b541389dea094f3177e813037bdffd2a39c7e482a419e8c8516debc"
+    },
+    {
+      "name": "install-student-tool-baseline.ts",
+      "sha256": "d0c5f6dc6c1cf19cede26e465e20e0b4dc44ef4ca9a0506376989bbdefad08eb"
+    },
+    {
+      "name": "verify-installed-baseline.ts",
+      "sha256": "6408147e2c8b7c5d0ce69937f3291d2a582dc4c46acedfe31dc94dec0342073b"
+    }
+  ],
+  "recovery": {
+    "priorFailureEvidencePreserved": true,
+    "rawToolDefinitionsInitiallyCreated": 5,
+    "rawDefinitionsCorrectedThroughOwnerCommand": 5,
+    "finalContinuationNewDefinitions": 69,
+    "earlierDegreeAndTaxonomySeedsRepeated": false,
+    "managedSourceRole": "manaratak_app",
+    "sourceRolePrivileged": false,
+    "originalProviderProvenancePreserved": true,
+    "definitionsReconciledDuringFinalContinuation": 14
+  },
+  "sourceValidation": {
+    "newCliRegressionTests": 2,
+    "directOwnerRegressionTestsRerun": 4,
+    "focusedTestsPassed": 6,
+    "redReproduction": "Before the fix the real CLI exposed four discoverable raw ACTIVE candidates; the blocked mutation-gate test already passed.",
+    "targetedLint": "PASS",
+    "repositoryOrganizationGate": "PASS_LOCAL",
+    "rootAllowlistChanged": false,
+    "sourceInventoryRelocatedWithoutContentChanges": true,
+    "unaffectedParserAndBroadSuitesRepeated": false
+  },
+  "ci": {
+    "previousCommit": "4bc6256354bde23b28023cc25c0368a3ca2959b2",
+    "previousRunId": 39858420749,
+    "previousFailure": "Full source closure: unexpected root directory tasks",
+    "fix": "Move plan, todo and source register/inventory under docs/plans/imports; preserve guard and source inventory bytes.",
+    "newDeliveryCiResult": "NOT_YET_VERIFIED"
+  },
+  "limits": {
+    "databaseRecoveryOnlyNotWholePlatformFileStoreRecovery": true,
+    "apiStarted": false,
+    "adminBootstrapped": false,
+    "studentToolsReleased": false,
+    "regionsImported": false,
+    "citiesImported": false,
+    "bulkCatalogsImported": false,
+    "productionReady": false,
+    "productionDeployed": false,
+    "migrationsModified": false,
+    "oldNeonProjectAccessed": false
+  },
+  "next": "P06 review of selected region/city identity fields and canonical target mapping; then atomic region owner commands before city review/apply. Rebind the next operation to a clean reviewed source and valid authorization."
+}
