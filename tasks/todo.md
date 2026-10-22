@@ -1,25 +1,48 @@
-# MANARATAK execution checklist
+# MANARATAK — متابعة خطة الاستيراد والتشغيل
 
-Scope and acceptance criteria: [plan.md](plan.md).
+المرجع: [الخطة ومعايير القبول](plan.md)، [سجل المصادر](import-source-register.md)، [بصمات الحصر](import-source-inventory.json). تحديث 2026-10-22.
 
-- [x] Reference currencies/languages/countries: 622 rows independently verified.
-- [ ] 1. Review existing geography sources and quarantine reports; record eligible
-  rows, hashes, conflicts and unresolved rows without changing the database.
-- [ ] 2. Rebind required-baseline preparation, verify fresh backup/identity,
-  install degree/taxonomy/provider/student-tool definitions and reconcile.
-- [ ] Checkpoint A: baseline source relationships and protected fingerprints pass;
-  geographic eligibility is explicit; no provider or student tool was executed.
-- [ ] 3. Install the reviewed region/city candidate set through owner workflows;
-  verify country/region links and keep unresolved rows deferred.
-- [ ] 4. Fix least-privilege schema readiness; complete gated development admin
-  access and prove installed choices can be read through the authenticated API.
-- [ ] Checkpoint B: application/admin run against the intended independent target;
-  readiness limitations and relevant permission checks have actual evidence.
-- [ ] 5. Preview the new scholarship master, resolve required relations, and
-  import eligible records with source-count reconciliation.
-- [ ] 6. Prove one browser author/review/publish/public-view/withdraw flow using
-  actual bundles and synthetic test fixtures where needed.
-- [ ] Checkpoint C: end-to-end development flow succeeds; unresolved critical
-  risks are explicit; completion claims match observed evidence.
-- [ ] 7. Push reviewed increments, inspect relevant CI, and prepare hosting/release
-  requirements without external deployment or paid service creation.
+هذه توسعة للمهام المفتوحة السابقة، لا إعادة R0–R13. علامة الإنجاز تخص النطاق المذكور فقط؛ لا نجمع الإثراء كهويات جديدة.
+
+- [x] المراجع الأساسية: 622 عملة/لغة/دولة بمراجعة مستقلة سابقة.
+- [x] P00: حصر المصادر، وفحص الجداول والمحللات، ومطابقة 29 ملف دليل source-quality، وإعداد الخطة دون اتصال بالقاعدة.
+- [ ] P01: إصلاح قراءة كتالوجات التخصصات الثلاثة وإثبات الرموز والأعداد ومنع الجداول المستبعدة.
+- [ ] P02: ربط preparation بـSHA وmanifest والهدف المستقل والدور المقيد وbackup حديث وبصمات محمية.
+- [ ] P03: تثبيت 7 مستويات دراسية ومطابقتها.
+- [ ] P04: تثبيت 163 عقدة تصنيف و152 وصلة و39 اسمًا بديلًا ومطابقة العلاقات.
+- [ ] P05a: تثبيت 18 تعريف مزود دورات دون طلب خارجي.
+- [ ] P05b: تثبيت 83 تعريف أداة و83 إصدارًا و4 اعتماديات دون تنفيذ.
+- [ ] نقطة تحقق A: baseline مطابق، بلا أثر خارج النطاق، والمراجع الـ622 محفوظة.
+- [ ] P06: مراجعة فروق تقارير الجغرافيا والحجر واختيار مناطق/مدن أولى وخريطة مفاتيحها.
+- [ ] P07a: إثبات مشغّل المناطق الذري، ثم تطبيق المراجعة فقط.
+- [ ] P07b: preview/review/apply للمدن الأولى، مع بلد/منطقة صحيحين.
+- [ ] P08a: تخصصات أولى بدرجة/تصنيف معتمد، ثم إثراء نفس الهويات.
+- [ ] P08b: إثبات مسار مالك الزمالات قبل أي ترقية FEL؛ لا الاكتفاء بـstaging/enum.
+- [ ] P09a: تعريف مزودي/عائلات الاختبارات المطلوبة ومراجعة هوية الهدف؛ CSCA معلّق حتى حسمه.
+- [ ] P09b: اختبارات أولى بدفعات 1–5 وأدلة تغيير/recovery وإيصالات.
+- [ ] نقطة تحقق B: روابط أولى ومسارات مالك مثبتة، وغير المراجع معزول.
+- [ ] P10a: جامعات Stage 1 الأولى بجغرافيا مراجعة، دون مضاعفة أوراق Geography Review.
+- [ ] P10b: Stage 2 كتحديث لنفس الجامعة وربط البرامج المعتمدة.
+- [ ] P11a: معاينة منح v6.6 وشروطها وبدائلها/إعفاءاتها وروابطها؛ 244 معلّقة.
+- [ ] P11b: مسودات منح مؤهلة بإسقاط وعقد مالك صحيح، دون FK مخمن أو نشر تلقائي.
+- [ ] P12: readiness بأقل صلاحية، وحساب تطوير عبر بوابته، وتشغيل API/Admin وقراءة الخيارات الفعلية.
+- [ ] P13: متصفح الإدارة/التأليف/المراجعة/النشر/العرض والفلاتر وزر الاختبار/السحب والاختفاء؛ صلاحيات بصناعي فقط.
+- [ ] نقطة تحقق C: مسار فعلي من حزم مصدر واحد، واستثناءات واضحة دون ادعاء قبول شامل.
+- [ ] P14a: دورات أولى من إسقاط 21559، بمزود/لغة وروابط مراجعة.
+- [ ] P14b: إثراء الجامعة Stage 3/4 المؤهل بعد وجود المراجع، وحجز الأجزاء المخطئة.
+- [ ] P15: توسعة المؤهل بدفعات وإيصالات وأعداد applied/held/rejected منفصلة.
+- [ ] P16: تسليم increments، وفحص CI، ومتطلبات استضافة لاحقة دون نشر/DNS/خدمة مدفوعة.
+
+## استثناءات لا تختفي بنجاح المجموعة الأولى
+
+- مراجعة بقية المدن والمناطق؛ تطابق الرمز ليس مراجعة رسمية.
+- 91 بكالوريوس و329 زمالة بلا تفاصيل مماثلة ضمن النطاق الحالي.
+- Stage 2 لأوقيانوسيا وأمريكا الجنوبية غير متاح.
+- 1391 هوية جامعة بها خطأ في Stage 3 أو4؛ 244 منحة وCSCA معلّقة.
+- course master تاريخي بنحو 5000 صف غير متاح؛ لا ادعاء اكتمال التاريخ.
+- Antarctica غير صالح والأرشيف JSON غير مكتمل: خارج الاستيراد، دون حذف أو معالجة تخمينية.
+- الضغط/كل التركيبات وتكملة المصدر لاحقة للمسار الأول؛ خطر بيانات/خصوصية/شهادات حرج لا يؤجل.
+
+## ربط المهام بالخطة السابقة
+
+الجغرافيا = P06/P07؛ baseline = P02–P05؛ API/Admin = P12؛ المنح = P11؛ المتصفح = P13؛ التسليم والاستضافة = P16. أضيفت التخصصات/الزمالات والاختبارات والجامعات والدورات صراحة بعد الحصر، ولم تغلق أي مهمة تشغيل سابقة.

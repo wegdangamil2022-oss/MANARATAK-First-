@@ -1,96 +1,160 @@
-# MANARATAK: independent development database to a working platform
+# MANARATAK — خطة مصادر الاستيراد والانتقال إلى منصة تعمل
 
-Updated: 2026-10-22. This continues the completed remediation work; it does not
-restart R0–R13. Task status is tracked in [todo.md](todo.md).
+تحديث: 2026-10-22. هذه توسعة للخطة القائمة بطلب المالك بعد حصر التخصصات والاختبارات وبقية الملفات؛ لا تعيد مراحل R0–R13، ولا تلغي أي عمل غير مكتمل سابقًا. المتابعة في [todo.md](todo.md)، والأسماء الفردية في [سجل الملفات](import-source-register.md)، والبصمات والعدادات في [الحصر الآلي](import-source-inventory.json).
 
-## Established starting point
+**قرار التنفيذ:** لا نستورد جميع الملفات دفعة واحدة. نثبت التعريفات الأساسية، ونعالج عوائق القراءة ومسارات المالك، ثم نستورد مجموعة مترابطة صغيرة، ونثبت عملها في الإدارة والموقع قبل توسيع الدفعات. مراجعة المدن لا تمنع التعريفات المستقلة، ومشكلات إثراء جامعة لا تمنع جامعة أخرى سليمة.
 
-Reference bootstrap is verified complete: 168 currencies, 260 languages and
-194 countries. Evidence is in
-`docs/reviews/MANAGED_REFERENCE_COMPLETION_2026-10-22.md`, delivered in
-`d5bb352961ae14eb42bd9c1ed34644fb9a18fd14`.
-The four remaining required baseline seeds are not applied. Geography CSVs
-exist for five continents; their presence does not establish import approval.
-Large city/region imports are explicitly excluded from the required seed manifest.
+## 1. الحالة المثبتة وحدود هذه المراجعة
 
-## Fixed sequence and deliverables
+- مرجع الكود: `a61213749718fa355189d6fe9bf818effa8fbcad`، على الفرع `fix/managed-reference-seed-20261022`.
+- اكتمل سابقًا تثبيت **168 عملة + 260 لغة + 194 دولة = 622 سجلًا** في قاعدة التطوير المستقلة. الدليل: [إغلاق المراجع](../docs/reviews/MANAGED_REFERENCE_COMPLETION_2026-10-22.md)، ضمن التسليم `d5bb352961ae14eb42bd9c1ed34644fb9a18fd14`. لا نعيد استيرادها.
+- المستويات الدراسية والتصنيف الأكاديمي ومزودو الدورات وتعريفات أدوات الطالب **لم تطبّق بعد** وفق دليل الإغلاق. الكتالوجات الأخرى أدناه ليست مستوردة بموجب هذا الحصر.
+- فُهرست **548 ملفًا**: جميع ملفات `workspace` المتتبعة، ومصادر التعريفات المعلنة، وملفات الجداول المتتبعة خارجها. استُخدم فهرس المستودع ذي **9046 ملفًا** لاكتشاف النطاق؛ لا ندّعي مراجعة كل سطر في جميع ملفات التطبيق.
+- صُنّف 402 ملف كمرشحي مصادر، و116 كتقارير/فهارس مشتقة، و29 كتحكم/README، وملف واحد كأرشيف. كلمة «مرشح» لا تعني صالحًا للاستيراد؛ من ضمنها ملف Antarctica المعلّق.
+- استُخدمت محللات التطبيق للتخصصات وتفاصيلها والاختبارات والمنح وإثراء الجامعات، مع فحص CSV وأوراق XLSX. تطابقت بصمات **29 ملفًا** مع manifest مراجعة المصدر `m10-12-14`، لذلك تُستخدم نتائجه المصدرية دون تكرار المجموعات القديمة.
+- هذه الدفعة مراجعة وتخطيط فقط: **صفر اتصالات بقاعدة البيانات وصفر كتابات إليها**. الأعداد التالية أعداد مصادر، وليست نتائج تشغيل أو قبول نشر.
 
-1. **Geography source review.** Inspect the existing five region CSVs and five
-   city CSVs, related reconciliation/quarantine reports, owner contracts and
-   country identifiers. Produce source hashes, eligible region/city candidates,
-   duplicate/conflict counts and an explicit unresolved list. Prefer the cities
-   required by the intended university/scholarship content for the initial run.
-   Acceptance: every eligible city resolves to one of the installed countries;
-   any region link resolves to the same country; ambiguous entries are held out.
-   Verification: source-only checks and the affected existing validators.
-   No database mutation or legacy import script execution in this step.
+## 2. أقسام البيانات ومصادرها
 
-2. **Required operational baseline.** Rebind the prepared private operator to
-   the reviewed current code, create/verify a fresh backup, and check target,
-   restricted roles, source hashes and protected fingerprints. Apply seven degree
-   levels; 163 taxonomy nodes, 152 edges and 39 aliases; 18 course providers;
-   83 student-tool definitions and versions with four dependencies.
-   Acceptance: manifest reconciliation, exact source relationships and unchanged
-   protected rows outside the declared mutation set. No tool/provider execution.
-   Dependencies: completed references. This work is independent of unresolved
-   geography entries, so a geography data issue does not freeze this step.
+| القسم | المصدر | العدد | ما ينقص قبل التطبيق |
+| --- | --- | ---: | --- |
+| العملات واللغات والدول | CSV/CSV/XLSX تحت `workspace/reference-data` | 622 | مكتملة بالدليل السابق؛ نحافظ عليها ونقرأ هوياتها لربط الأقسام الأخرى |
+| المستويات الدراسية | `DegreeLevelSeedService.ts` | 7 | تشغيل التعريفات بعد إعادة ربط المشغل بالكود والهدف |
+| التصنيف الأكاديمي ISCED-F | `isced-f-baseline.ts` | 163 عقدة، 152 وصلة، 39 اسمًا بديلًا | تثبيت التعريفات؛ هذا ليس كتالوج التخصصات |
+| مزودو الدورات | `ExternalCourseProviderSeed.ts` | 18 تعريفًا | تثبيت السجل دون مزامنة مع مزود |
+| أدوات الطالب | `OfficialStudentToolRegistry.ts` | 83 تعريفًا | تثبيت التعريفات والإصدارات والاعتماديات دون تنفيذ الأدوات |
+| المناطق الإدارية | 5 ملفات CSV | 5003 | مراجعة الأهلية وتجهيز دفعات عبر أمر مالك المناطق |
+| المدن | 5 ملفات CSV | 10676 | كلها `NEEDS_MANUAL_REVIEW`؛ نبدأ بالمدن اللازمة للمجموعة الأولى بعد مراجعتها |
+| كتالوج التخصصات والزمالات | 4 ملفات Markdown | 3402 هوية مصدر | إصلاح قراءة 3 ملفات، وحسم مسار الزمالات وربط الدرجة والتصنيف |
+| تفاصيل التخصصات | 310 ملفات Markdown | 2982 رمزًا فريدًا | إثراء الهويات نفسها بعد المطابقة؛ ليست تخصصات إضافية |
+| الاختبارات الدولية | 56 ملف Markdown في 7 مجموعات | 56 اختبارًا مرشحًا | تعريف المزود/العائلة والتحقق من الهوية وإعداد التغيير المراجع |
+| الجامعات Stage 1 | 6 ملفات XLSX | 10723 هوية فريدة | مطابقة الجغرافيا والهوية وترك غير المحسوم مسودة/معلّقًا |
+| الجامعات Stage 2 | 4 ملفات XLSX | 9775 تحديثًا | تحديث Stage 1 بالمعرّف نفسه؛ لا ملف مماثل لأوقيانوسيا وأمريكا الجنوبية |
+| جامعات أوروبا Stage 3/4 | ملف Markdown واحد | 1530 هوية قائمة | معالجة أخطاء المصدر وروابطه؛ 139 فقط سليمة في المرحلتين وفق فحص المصدر |
+| المنح | ملف v6.6 الجديد فقط | 947 منحة مصدر | 703 مرشحات تحتاج مراجعة، و244 معلّقة؛ لا قبول تلقائي للربط أو النشر |
+| الدورات | ملفا MASTER 1 وMASTER 2 | 21562 صفًا خامًا ← 21559 بعد الإسقاط المراجع | مراجعة المزود والهوية واللغة والروابط، وحفظ أسباب استبعاد التكرار |
 
-3. **Reviewed geography installation.** Use the geography owner's governed
-   workflow for eligible regions first and cities second, with a separate
-   source-bound import scope and backup. Preserve country discrimination,
-   existing decisions, Audit/Outbox and same-run recovery.
-   Acceptance: imported rows exactly match the reviewed candidate set; country
-   and region links resolve; homonymous cities remain distinct; deferred entries
-   are listed. The city/region import is not implicitly added to the core seed.
-   If a contract or additive migration is required, meet its gates first and
-   continue independent baseline/runtime work meanwhile.
+مصادر التعريفات المضمنة:
 
-4. **API and administration run.** Resolve the known schema-readiness probe's
-   attempt to read the migration ledger with the restricted application role,
-   without granting that role ledger access or weakening readiness checks.
-   Establish development administrator access through its separate credentialed
-   bootstrap gate. Acceptance: API starts against the independent database,
-   readiness dependencies are stated truthfully, and an authenticated admin
-   can read installed reference/taxonomy/location choices through the API.
-   Verification: focused changed-path checks and an actual bounded runtime run.
+- `packages/application/src/degree-level/DegreeLevelSeedService.ts`
+- `packages/domain/src/academic-taxonomy/isced-f-baseline.ts`
+- `packages/infrastructure/src/courses/ExternalCourseProviderSeed.ts`
+- `packages/application/src/student-tools/OfficialStudentToolRegistry.ts`
 
-5. **New scholarship file preview and import.** Use the new scholarship master
-   already selected in this chat. Map source fields to degrees, disciplines,
-   countries, locations and existing requirement entities. Produce a preview
-   with unresolved/duplicate rows before applying eligible records through owner
-   workflows. Acceptance: source counts reconcile; no unresolved key is replaced
-   by an invented relation; old scholarship sources are not reintroduced.
-   Depends on operational baseline and location eligibility for affected rows.
+التخصصات: بكالوريوس 843، ماجستير 1116، دكتوراه 1114، زمالات 329. التفاصيل المتاحة: بكالوريوس 752، ماجستير 1116، دكتوراه 1114. إذن **91 مدخل بكالوريوس و329 زمالة بلا ملفات تفاصيل مماثلة ضمن هذا النطاق**؛ لا نصف الكتالوج كله بمكتمل المحتوى.
 
-6. **One complete browser content flow.** Run API/Web/Admin from one known
-   source against the independent development database. Verify admin login,
-   author/review/publish of an eligible scholarship, public visibility and
-   filters, then withdrawal hiding it. Verify relevant permission boundaries
-   with synthetic fixtures only. Acceptance: observed browser/API/database
-   evidence for this specific flow; no assertion of untested flows.
+مجموعات الاختبارات: إنجليزية 12، لغات أخرى 13، قبول بكالوريوس عام 4، دراسات عليا 2، مؤهلات وطنية/دولية 11، قبول تخصصي 10، ومهني/ترخيص 4. الأسماء الفردية لكل ملف، بما فيها الـ310 ملفات تفاصيل، مثبتة في سجل المصادر.
 
-7. **Delivery and hosting preparation.** Save and push each completed increment
-   to the existing branch; review directly affected checks and CI. Record any
-   material data/privacy/certificate risks separately from deferred coverage.
-   Prepare deployment configuration and realistic costs after the local flow
-   works. This plan does not authorize production, paid services, DNS changes
-   or external deployment. Merge/release gates remain explicit.
+سجل أدوات الطالب يتضمن تعريفات ضمن خارطة المنتج؛ تثبيت 83 تعريفًا لا يعني أن 83 أداة منفذة أو متاحة للتشغيل. ولا نحسب ورقة Summary في XLSX كدورات؛ صيغتاها في MASTER 2 ليستا خلايا Courses المستوردة، ولا تُنفذ صيغ جداول عند المراجعة.
 
-## Rules for execution
+## 3. ما يجب إنجازه قبل الاستيراد
 
-- Preserve the completed references; do not reimport them or restart old phases.
-- Do not run broad successful suites again without an affected dependency.
-- Never weaken guards/assertions, invent approval, bypass owner commands or
-  replay a failed write without reviewing the actual state.
-- Keep city-source review separate from core seeds; advance independent tasks
-  if a subset of geographic data cannot yet be accepted.
-- No old Neon project, production, schema reset, historical migration edits,
-  external payments or provider effects.
-- Acceptance is a working development content flow, with the database and
-  permissions proved. Hosting readiness is a later, separate conclusion.
+| المسألة المثبتة | الأثر | الإجراء وحدّ المنع |
+| --- | --- | --- |
+| `MajorCatalogMarkdownParser` يشترط عنوان بدء غير موجود في الملفات الثلاثة الحالية | توجد 3073 هوية بكالوريوس/ماجستير/دكتوراه في النص، لكن المحلل يقبل منها صفرًا؛ يقبل 329 زمالة فقط | إصلاح الصيغة المحددة واختبار منع جداول الاستثناء/التكرار. تُمنع هويات التخصصات المتأثرة حتى تطابق الأعداد والرموز |
+| staging يقبل FELLOWSHIP لكن dispatcher لا يسجّل مستهلك `FELLOWSHIPS` | تحليل الملف أو وجود `FellowshipImportPromotionUseCase` لا يثبت مسار ترقية مشغّل | إثبات/توصيل مسار المالك وضمان التدقيق والمعاملة قبل دفعة FEL. لا تغيير اسم المجال للتحايل |
+| رفع الملف المرجعي P6 يدعم COUNTRY/CURRENCY/LANGUAGE/CITY، ولا يدعم REGION | لا تمرير للمناطق كمدن ولا تشغيل مستورد Prisma قديم | مشغّل مصدر محدود عبر `ReferenceDataUseCases.upsertRegion` الذري الموجود؛ أي توسيع للعقد يُراجع أولًا |
+| المدن كلها تحمل حالة مراجعة؛ تقرير قديم يذكر 9992 نشطة و119 محجوزة | العدادات القديمة لا تمثل الملفات الحالية | مراجعة فروق المصدر وبصمات القرار وحفظ الحجر؛ اعتماد مدن المجموعة الأولى دون انتظار مراجعة كل المدن |
+| مطابقة الاختبارات تعتمد لقطة old_49 التاريخية | تصنيف 46 «استبدال» قد يستهدف هويات غير موجودة في القاعدة المستقلة | مقارنة الهدف للقراءة فقط لاحقًا ثم change set مطابق له. مزودو الاختبارات غير مزودي الدورات |
+| `CSCA_China_2026_Unified_AR.md` مصنّف REVIEW_REQUIRED | هوية/تفسير غير محسوم | قرار مصدر وهوية قبل تطبيق هذا السجل وحده |
+| جامعات Stage 1: 10553 تطابقًا مصدريًا، 162 تحتاج مراجعة، و8 اختلاف نطاق دولة/إقليم | ليست كلها جاهزة لربط UUID أو النشر | استخدام طوابير المصدر المطابقة والتحقق من هويات الهدف؛ لا اختيار مدينة بالاسم فقط أو إنشاء دولة لتجاوز الخطأ |
+| Stage 3/4: أخطاء في 1391 هوية من 1530 | روابط/حدود أعداد/URL/سكن غير صالح | حجز الجزء المتأثر وفق عقد المرحلة، مع إبقاء هوية Stage 1 السليمة. Stage 3 = 1320، Stage 4 = 558، والتداخل = 487؛ بعض README أقدم من هذه النتائج |
+| المنح تحمل IMPORTED وشروطًا بديلة وإعفاءات ونصوصًا معلّقة | العلامة ليست إيصالًا في القاعدة الجديدة والنص ليس FK | مراجعة المرشحات وحجز 244؛ لا تحويل ذكر TOEFL إلى إلزام ولا البدائل إلى شروط تراكمية |
+| course master أقدم بنحو 5000 صف غير متاح | لا دليل اكتمال تاريخ الدورات | إدخال المرشحات الحالية فقط؛ توثيق النقص دون اختراع صفوف أو ادعاء استبدال التاريخ |
+| Antarctica الإضافي غير صالح كـXLSX وأرشيف JSON غير مكتمل | لا يصلحان مصدرًا نشطًا | خارج كل دفعة، دون حذف/إصلاح تخميني أو إضافة دولة رقم 195؛ لا يحجبان المراجع المعتمدة |
+| README قديم للجامعة يشير إلى Google Studio | تعليمات بيئة متقاعدة | تصحيحها إلى القاعدة المستقلة مع الحفاظ على بوابة recovery الفعلية؛ لا استعادة Studio ولا إلغاء شرط سلامة عام |
+| probe جاهزية المخطط يحاول قراءة migration ledger بدور التطبيق، وفق الخطة السابقة | إثبات تشغيل API/Admin لم ينجز بهذه الدفعة | إصلاح المسار دون منح الدور صلاحية ledger أو إضعاف readiness، ثم تشغيل فعلي محدود |
 
-## Next action
+فحص الجغرافيا الحالي سليم بنيويًا: لا تكرار لمعرّفات المصدر، ولا دولة خارج مجموعة الدول الـ194 في المصدر المعتمد، ولا مدينة بلا regionCode أو بلا تطابق دقيق `country + regionCode`. هذا ليس اعتمادًا رسميًا لأسماء المدن ومواقعها، ولا مقارنة حيّة مع القاعدة. IDs مثل `city_*` و`reg_*` مفاتيح مصدر وليست UUIDs هدف تُنسخ تلقائيًا.
 
-Start task 1: assess the existing geography sources and reports. Then execute
-task 2's already prepared baseline after rebinding its source and safety gates.
-Task 3 imports only geography whose review and execution gates are satisfied.
+## 4. العلاقات وترتيب إنشائها
+
+القاعدة تحفظ الهوية والعلاقات؛ لوحة الإدارة تختار الروابط وتراجعها؛ الموقع يعرض الروابط المعتمدة. كلمة «TOEFL» أو اسم تخصص داخل نص لا ينشئ علاقة.
+
+| العلاقة | العقد/الجدول الفعلي | قرار الربط |
+| --- | --- | --- |
+| منطقة/مدينة ← دولة ومنطقة | `AdministrativeRegion`, `ReferenceCity` | هوية هدف فعلية وتطابق البلد في الطرفين |
+| تخصص/ملف مستوى ← درجة وتصنيف | `MajorLevelProfile`, `MajorClassificationMapping` | رمز ومستوى وهوية وقرار تصنيف؛ لا التخمين من الاسم |
+| اختبار ← مزود/عائلة ومراجع | `InternationalTest` وعلاقات P9 | مزود فعلي والنسخ المطلوبة؛ قبول الجامعة قرارها هي |
+| جامعة/حرم ← جغرافيا | `University`, `UniversityCampus` | لا FK لمدينة غير معتمدة ولا جامعة جديدة لكل مكتب |
+| برنامج ← جامعة/تخصص/درجة | `UniversityAcademicProgram` | حفظ الحزمة الفعلية وأصل البرنامج الصحيح |
+| شروط برنامج ← اختبار/نسخة/نوع | `UniversityProgramAdmissionRequirement` | هوية الاختبار ومقياس النتيجة والسياق؛ لا نسخة مفترضة |
+| منحة ← جامعة/برنامج/تخصص/درجة | `ScholarshipUniversityLink`, `ScholarshipMajorTarget`, `ScholarshipDegreeTarget` | أزواج حقيقية لا جميع التركيبات الممكنة لقائمتين |
+| منحة ← لغة/دولة/عملة منافع | `Scholarship` ومراجع `ScholarshipBenefit` | بلد المزود ليس تلقائيًا بلد الدراسة؛ حفظ مراجع كل حقل |
+| شرط/مستند منحة ← اختبار | `ScholarshipEligibilityItem`, `ScholarshipRequiredDocument` | canonical test ID وقرار required/optional/alternative/waived موثق |
+| دورة ← مزود/لغة/تصنيف/تخصص/اختبار | `Course`, `CourseAcademicTaxonomyLink`, `CourseMajorProjection`, `CourseInternationalTestRelationship` | الربط يملكه P13 ويراجع الطرفين؛ دورة التحضير ليست شهادة اختبار |
+
+**مثال زر التوفل:** نثبت الاختبار الصحيح، ونربطه بشرط المنحة المراجع. تقرأ الواجهة `internationalTestId` من الإسقاط العام وتفتح الاختبار المنشور. نختبر ذلك في المتصفح؛ إذا سُحب الاختبار لا يُكشف محتوى خاص ولا يُستخدم محتوى تجريبي بديل. لا جدول علاقة مكرر؛ [عقد التنقل موجود](../docs/architecture/PUBLIC_CANONICAL_RELATIONSHIP_NAVIGATION.md).
+
+**فك الاعتماد الدائري:** جامعات Stage 1 ← إثراء Stage 2 المؤهل ← هويات منح مراجعة كمسودات بعد مراجعها اللازمة ← مراجعة روابط المنح/البرامج وإثراء الجامعة Stage 3/4. لا ننتظر كل المنح لإنشاء جامعة، ولا نختلق منحة لإرضاء رابط إثراء.
+
+## 5. مهام التنفيذ ونتيجة كل دفعة
+
+الحالات في `todo.md`. كل مهمة دفعة محدودة؛ تعديل يتسع لأكثر من نحو خمسة ملفات تنفيذ يُقسم. لا تغيير تطبيق ضمن دفعة التخطيط الحالية.
+
+| المهمة | التبعيات | النتيجة ومعيار القبول | التحقق والمواضع المرجحة |
+| --- | --- | --- | --- |
+| P00 — الحصر والخطة | لا شيء | تم: سجل وبصمات وعدّادات وعوائق، بلا كتابة قاعدة | ملفات tasks الأربعة؛ مطابقة الأعداد والبصمات والروابط |
+| P01 — قارئ التخصصات | P00 | قراءة 843/1116/1114 و329 من الملفات المعينة مع الرموز نفسها ومنع الجداول المستبعدة | محلل الكتالوج واختباره؛ الملفات الأربعة offline ثم المسار المتأثر |
+| P02 — تجهيز baseline | P00 | مشغّل مربوط بـSHA مراجع وmanifest والهدف والدور المقيد؛ backup حديث وبصمات محمية | preparation الخاص وmanifest؛ dry-run وفحص الهوية قبل أول كتابة؛ دون إعادة الـ622 |
+| P03 — الدرجات | P02 | 7 مستويات مطابقة بلا تكرار | `seed-degree-levels.ts` وخدمته؛ إيصالات وحقول المصدر |
+| P04 — التصنيف | P03 | 163 عقدة و152 وصلة و39 اسمًا بديلًا صحيحة | `seed-taxonomy.ts` وbaseline؛ reconciliation للعقد والحواف |
+| P05a — مزودو الدورات | P02 | 18 تعريفًا دون اتصال مزود | `seed-external-course-providers.ts`؛ الهوية والحقول وآثار المهمة |
+| P05b — تعريفات الأدوات | P02 | 83 تعريفًا و83 إصدارًا و4 اعتماديات وفق الإعداد المصدرّي؛ لا تنفيذ | `bootstrap-phase18-student-tools.ts` وregistry؛ مقارنة المصدر الفعلي، لا الحد الأدنى وحده |
+| P06 — أهلية الجغرافيا | P00 | مناطق ومدن أولى مراجعة وخريطة مفاتيح وحجر واضح وفروق تقارير محسومة | CSV وتقارير الجغرافيا؛ بلد/منطقة/تكرار للسجلات المختارة |
+| P07a — المناطق | P06, P02 | مشغّل مصدر عبر أمر المالك الذري، ثم دفعة مناطق مراجعة | `ReferenceDataUseCases.upsertRegion` والمشغّل؛ تكرار آمن وAudit/Outbox واستعادة |
+| P07b — المدن الأولى | P07a | المدن المختارة فقط ببلد ومنطقة صحيحين | مسار P6/P7؛ preview/review/apply ومطابقة الصفوف |
+| P08a — تخصصات أولى | P01, P03, P04 | هويات وملفات مستوى وتصنيف مراجع؛ التفاصيل تلتحق بالهوية نفسها | Major staging/owner؛ دفعة صغيرة ومطابقة الرموز دون ازدواج |
+| P08b — مسار الزمالات | P00, P03, P04 | مسار مالك مثبت قبل أي FEL وحسم هوية/مستوى الزمالة | `container.ts` وstaging/owner واختبار المسار؛ وجود enum/صنف ليس دليل تشغيل |
+| P09a — تجهيز الاختبارات | P03, P04 ومراجع المواقع المستخدمة | مزودون/عائلات مراجعة وخطة هوية create/update حالية؛ CSCA معلّق | `reviewed-test-import-source.ts` و`InternationalTestImportChangeSet.ts`؛ prepare/inspect ثم قراءة الهدف |
+| P09b — اختبارات أولى | P09a, P02 | دفعات 1–5 بpreviewHash واعتماد التغيير ودليل recovery؛ TOEFL/IELTS عند استيفائهما | `import_unified_tests_v2.ts`؛ مطابقة الإيصالات والنسخ والمراجع للدفعة فقط |
+| P10a — جامعات الهوية | P07b للمواقع المستخدمة | هويات Stage 1 مختارة وجغرافيا صحيحة دون تكرار أوراق Geography Review | قارئ Stage 1 وUniversity owner؛ Reference ID والجغرافيا |
+| P10b — إثراء الجامعة | P10a | Stage 2 تحديث لنفس الجامعة؛ البرامج تربط التخصص/الدرجة عند اعتمادها | قارئ enrichment وخطة الجامعة؛ لا 9775 جامعة جديدة ولا مصدر مفقود مختلق |
+| P11a — معاينة المنح | P00؛ الربط النهائي يحتاج P08a/P09b/P10a | معاينة v6.6 وطابور علاقات/شروط؛ 244 معلّقة | القارئ ومراجعة المصدر القائمة؛ 947 هوية وصفر FK مخمن وفصل البدائل والإعفاءات |
+| P11b — مسودات منح | P11a وهويات الروابط اللازمة | مرشحات مراجعة عبر المالك، هويات فعلية ونسخة مصدر، بلا نشر تلقائي | إسقاط لعقد مدعوم ثم staging/owner؛ لا تمرير Markdown لواجهة JSON/NDJSON/CSV |
+| P12 — API/Admin | P03/P04 ثم الأقسام المراد عرضها | readiness بأقل صلاحية وحساب تطوير عبر بوابته وخيارات من القاعدة | موضع probe وbootstrap-admin؛ اختبار مباشر ثم تشغيل فعلي بلا صلاحية ledger للتطبيق |
+| P13 — مسار المتصفح | P11b, P12, P09b عند شرط اختبار | دخول/تأليف/مراجعة/نشر/عرض وفلاتر وزر اختبار/سحب واختفاء؛ صلاحيات بصناعي | حزم API/Web/Admin من SHA واحد؛ أدلة متصفح/API/قاعدة لهذا المسار فقط |
+| P14a — دورات أولى | P05a, P04 ومراجع الربط المستخدمة | دورات مراجعة من إسقاط 21559 بمفاتيح مزود وروابط صحيحة | قارئ XLSX وcourse owner المخصص؛ قرارات URL ونسخ اللغة محفوظة |
+| P14b — إثراء جامعة متقدم | P10b, P11b, P08a/P09b للروابط المستخدمة | أجزاء Stage 3/4 السليمة فقط مع أسباب الحجز | source-quality وخطة الجامعة؛ الروابط وURL والسكن وحدود القوائم |
+| P15 — توسعة المحتوى | P13 ومهمة القسم المعني | مرشحون مؤهلون بدفعات؛ applied/held/rejected منفصلة لكل مصدر | إيصالات كل دفعة ومقارنة المصدر/العلاقات؛ المتأثر فقط عند التغيير |
+| P16 — تسليم واستضافة | P13 وغياب خطر حرج بالنطاق | حفظ وcommit/push والتحقق من CI للتسليم؛ متطلبات تشغيل/تكلفة لاحقة | لا نشر/DNS/خدمة مدفوعة؛ الاستضافة بعد إثبات مسار التطوير |
+
+نقاط التحقق: بعد P03–P05 تطابق baseline وسلامة الصفوف المحمية؛ بعد P07/P08/P09 روابط أولى ومسارات مالك مثبتة؛ بعد P10–P13 دليل منصة تعمل بمحتوى مترابط، ثم التوسع. لا نعلّق المسار الأول على معالجة كل ملف تاريخي.
+
+P01 وP06 ومعاينة P11a يمكن تنفيذها بلا كتابة قاعدة. يمكن تشخيص P12 أثناء التجهيز. تعثر سجل جغرافي أو زمالة أو مرحلة إثراء يحجب الإجراء المتأثر فقط.
+
+## 6. بوابة كل دفعة كتابة
+
+1. تثبيت SHA ونسخة المصدر وبصمته، وهوية الهدف المستقل والدور المقيد. قراءة IDs الفعلية لا نسخ IDs لقطة قديمة.
+2. backup حديث ودليل استعادة صالح للنطاق، وبصمات الصفوف المحمية قبل التشغيل. الحفاظ على بيانات الطالب والشهادات وConsent وBinding والتاريخ المالي خارج التغيير.
+3. preview/dry-run يحدد create/update/hold/reject وأسباب الربط وبصمة التغيير والمراجع المطلوبة؛ حجز غير المحسوم.
+4. مراجعة المالك المطلوبة بعقد العملية، ثم أوامره ومعاملاته وتدقيقه وOutbox حيث يفرضهما العقد. لا اعتماد مختلق ولا كتابة مباشرة لتجاوز بوابة.
+5. reconciliation للصفوف والعلاقات والإيصالات والآثار والبصمات المحمية. بعد انقطاع اتصال إثر كتابة: نقرأ حالة المهمة قبل إعادة المحاولة.
+6. حفظ ورفع الدفعة الناجحة مع مصدرها وSHA والأعداد والاستثناءات ونقطة الاستئناف. IMPORTED/PASS داخل المصدر ليس نجاح تنفيذ.
+
+أي migration إضافية تُثبت حاجتها وتستوفي بواباتها قبل التطبيق؛ لا `db push` أو `migrate reset` أو تعديل migrations تاريخية أو قاعدة قديمة أو إنتاج. لا دور مرتفع للاختبار ولا توسيع صلاحيات لحل فحص واحد، ولا دفع أو مزود/أداة خارجية مؤثرة.
+
+## 7. الاستثناءات والمصادر المستبعدة
+
+| النطاق | أثره الآن | شرط استئنافه |
+| --- | --- | --- |
+| مراجعة جميع المدن | لا تمنع تشغيل المجموعة الأولى المراجعة؛ الروابط غير المعتمدة لا تنشر | قرار مرتبط بالمصدر والبلد والمنطقة |
+| 91 بكالوريوس و329 زمالة دون تفاصيل مماثلة | هويات مصدر كمسودات إذا سمح العقد، دون وصفها كاملة | ملفات أصلية أو تأليف مراجع وتصنيف/درجة |
+| أخطاء Stage 3/4 والـ244 منحة وCSCA | لا تمنع محتوى آخر سليم؛ المتأثر محجوز | تصحيح/قرار موثق وpreview للمتأثر |
+| Stage 2 لقارتين والـcourse master القديم المفقود | نقص إثراء/تاريخ، دون ادعاء تغطية كاملة | المصدر الأصلي أو تأليف موثق، لا صفوف مختلقة |
+| الضغط/كل التركيبات وإدخال عشرات الآلاف قبل رؤية الموقع | مؤجلة لصالح مسار صغير فعلي؛ لا يؤجل خطر حرج معلوم | توسيع بعد إثبات المسار وقياس الحاجة |
+| CMS/المقالات/الخدمات/الوظائف ووجهة الدراسة | مجالات موجودة؛ لم يُعثر على مصدر bulk مستقل معتمد لها ضمن الحزمة المحصورة | تحديد المصدر والمالك؛ لا نقل prototype/mock إلى القاعدة |
+| الطلاب والشهادات والمال وملفاتهم | بيانات تشغيل حساسة وليست كتالوج seed؛ fixtures ليست مصادر | إجراءات المالك وصلاحياته، دون استيراد مواد المختبر |
+| التقارير والفهارس وREADME والأرشيف والمستوردات القديمة | أدلة ومخرجات/تاريخ، لا كيانات إضافية؛ وجود script/enum لا يثبت مسارًا آمنًا | المصدر النشط وعقده؛ لا تشغيل legacy مباشر |
+
+لا استيراد من ملف المنح القديم v3.21؛ يبقى في Git، وv6.6 هو المصدر النشط الوحيد. لا استخدام لملف Antarctica غير الصالح أو الأرشيف JSON المبتور، ولا حذفهما في هذه الدفعة. لا إعادة تفعيل Google Studio؛ تبقى أدلة recovery العامة للهدف المستقل مطلوبة.
+
+## 8. الوقت والاختبارات والتسليم
+
+- لا إعادة R0–R13 أو ناجح غير متأثر؛ نستخدم دليل المصدر المطابق لبصمته.
+- parser: اختبار الخلل والملفات المتأثرة فقط؛ توثيق: أعداد/روابط/بصمات دون بناء كامل.
+- كل دفعة تعلن ما يعمل وما حُجز ولماذا وما لم يختبر؛ لا نسب تخمينية ولا عدّاد واحد يخفي تقدم السيناريو.
+- تكرر عائق البيئة يستدعي تحليل السبب ومتابعة المستقل، لا محاولات كتابة متشابهة.
+- API/Admin والمتصفح وCI والاستضافة من الخطة السابقة تبقى مفتوحة حتى دليل تشغيل، ولا تغلقها مراجعة الملفات الحالية.
+
+**نقطة البدء التالية:** P01 لقارئ التخصصات وP06 لجغرافيا المجموعة الأولى، مع P02 لتجهيز baseline. ثم P03–P05، والمناطق قبل المدن، وهويات التخصصات/الاختبارات/الجامعات قبل روابط المنح والإثراء المتقدم. لا يلزم قرار بيانات من المالك الآن؛ أي غموض مصدر يُعزل ويستمر العمل الممكن.
