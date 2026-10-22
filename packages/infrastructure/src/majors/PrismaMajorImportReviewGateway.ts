@@ -1,16 +1,24 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import { AssetId, ImportRecordStatus, MajorDeduplicationService, type AtomicPersistenceContext, type MajorImportPayload } from '@manaratak/domain';
-import { MajorImportPromotionUseCase, type CanonicalMajorReferenceService, type IMajorImportReviewGateway, type MajorImportReview } from '@manaratak/application';
+import { MajorImportPromotionUseCase, CanonicalMajorReferenceService, type IMajorImportReviewGateway, type MajorImportReview } from '@manaratak/application';
 import { PrismaAssetRecordRepository } from '../asset-platform/PrismaAssetRecordRepository';
 import { PrismaMajorRepository } from './PrismaMajorRepository';
+import { PrismaAcademicTaxonomyRepository } from '../academic-taxonomy/PrismaAcademicTaxonomyRepository';
+import { DegreeLevelRepository } from '../degree-level/DegreeLevelRepository';
 export class PrismaMajorImportReviewGateway implements IMajorImportReviewGateway {
  constructor(private readonly prisma:PrismaClient,private readonly references:CanonicalMajorReferenceService,private readonly bound=false){}
- withTransaction(context:AtomicPersistenceContext){const tx=(context as AtomicPersistenceContext&{transactionClient?:Prisma.TransactionClient}).transactionClient;if(!context.boundaryId||!tx)throw new Error('MAJOR_IMPORT_TRANSACTION_REQUIRED');return new PrismaMajorImportReviewGateway(tx as unknown as PrismaClient,this.references,true);}
+ withTransaction(context:AtomicPersistenceContext){const tx=(context as AtomicPersistenceContext&{transactionClient?:Prisma.TransactionClient}).transactionClient;if(!context.boundaryId||!tx)throw new Error('MAJOR_IMPORT_TRANSACTION_REQUIRED');
+  // Reference reads share the owner transaction instead of borrowing another
+  // connection while the mutation holds its only pooled connection.
+  const client=tx as unknown as PrismaClient;
+  const references=new CanonicalMajorReferenceService(new PrismaAcademicTaxonomyRepository(client,true),new DegreeLevelRepository(client));
+  return new PrismaMajorImportReviewGateway(client,references,true);}
  async lock(){if(!this.bound)throw new Error('MAJOR_IMPORT_TRANSACTION_REQUIRED');await this.prisma.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${'major-import:owner-review'},0))`;}
  async screening(id:string){const receipt=await this.prisma.importScreeningReceipt.findUnique({where:{id}});return receipt&&['MAJOR','MAJORS'].includes(receipt.ownerDomain)?{requestHash:receipt.requestHash,result:receipt.result}:null;}
  async verifyArtifact(id:string,sha256:string){if(!this.bound)throw new Error('MAJOR_IMPORT_TRANSACTION_REQUIRED');await this.prisma.$queryRaw`SELECT id FROM "AssetRecord" WHERE id=${id} FOR SHARE`;const asset=await new PrismaAssetRecordRepository(this.prisma).findById(new AssetId(id));if(!asset)throw new Error('MAJOR_IMPORT_SOURCE_UNAVAILABLE');asset.assertCanDeliver();if(asset.checksum?.algorithm.toUpperCase()!=='SHA256'||asset.checksum.hash.toLowerCase()!==sha256.toLowerCase())throw new Error('MAJOR_IMPORT_SOURCE_HASH_CONFLICT');}
  async inspect(payload:MajorImportPayload){
   if(!this.bound)throw new Error('MAJOR_IMPORT_TRANSACTION_REQUIRED');
+  await this.references.assertDegreeMatches(payload.degreeLevelId??'',payload.degreeLevel??'');
   await this.references.assertPayloadReferencesActive(payload);
   const key=MajorDeduplicationService.generateKey(payload);
   await this.prisma.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${`major-import:identity:${key}`},0))`;

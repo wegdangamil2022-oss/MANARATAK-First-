@@ -1,0 +1,160 @@
+{
+  "kind": "P08A_BOUNDED_MAJOR_IDENTITY_REVIEW",
+  "observedAt": "2026-10-22T22:49:08.516Z",
+  "authorization": "PROJECT_OWNER_DELEGATED_DATABASE_PREPARATION",
+  "reviewer": "delegated-owner-codex-major-pilot",
+  "independentHumanReview": false,
+  "databaseWrites": 0,
+  "sourceArtifacts": [
+    {
+      "path": "workspace/phase-10-major-catalogs/MANARATAK_Bachelor_Majors_By_Colleges_v1.0.md",
+      "sha256": "cd8f339df63d3514fa7d4b21d700363c1300cc7a9b12b0c9dc7c90debb25b22e",
+      "rows": 843
+    }
+  ],
+  "scope": {
+    "majors": 3,
+    "degree": "BACHELOR",
+    "publish": false,
+    "detailDossiers": false
+  },
+  "target": {
+    "projectId": "hidden-smoke-02928871",
+    "branchId": "br-sweet-king-b9pem1dg",
+    "database": "neondb"
+  },
+  "references": {
+    "degreeLevelId": "0d1d8be9-ec7e-4a9b-a6d5-efaf6c2a244b",
+    "academicFieldId": "dd2b8ef3-0899-4b1c-aa0a-66d383050756",
+    "disciplineId": "3415a42e-01fa-4f0b-a247-e669e31a9bd9",
+    "observedVia": "restricted manaratak_probe read-only transaction",
+    "degreeCode": "BACHELOR",
+    "academicFieldCode": "06",
+    "disciplineCode": "061",
+    "allActive": true
+  },
+  "mappingRationale": "Operator-reviewed broad ICT mapping only. Preserve MANARATAK catalog codes; do not claim detailed ISCED 0613 or a verified university curriculum.",
+  "primaryEvidence": [
+    {
+      "url": "https://uis.unesco.org/sites/default/files/documents/isced-fields-of-education-and-training-2013-en.pdf",
+      "scope": "ISCED-F broad field 06 and narrow field 061 ICT hierarchy"
+    },
+    {
+      "url": "https://uis.unesco.org/sites/default/files/documents/international-standard-classification-of-education-fields-of-education-and-training-2013-detailed-field-descriptions-2015-en.pdf",
+      "scope": "ICT descriptions corroborate computing scope; detailed program mapping remains held"
+    }
+  ],
+  "held": {
+    "softwareEngineering": {
+      "codes": [
+        "MJR-0189",
+        "MJR-0242"
+      ],
+      "reason": "Same canonical name at two catalog codes; review cross-listing/context before promoting either."
+    },
+    "content": [
+      "dossier claims",
+      "duration",
+      "career outcomes",
+      "courses",
+      "detailed program-area mapping",
+      "publication"
+    ]
+  },
+  "rows": [
+    {
+      "code": "MJR-0237",
+      "sourceLine": 238,
+      "sourceRowSha256": "45a3e4c795e3ad4566649e14e9750aafa2db51ecfd02765f0e1516b8ed13e839",
+      "decision": "APPROVED_AS_UNPUBLISHED_IDENTITY_UNDER_DELEGATED_OWNER_AUTHORITY",
+      "payload": {
+        "canonicalMajorName": "Computer Science",
+        "degreeLevel": "BACHELOR",
+        "degreeLevelId": "0d1d8be9-ec7e-4a9b-a6d5-efaf6c2a244b",
+        "sourceClassificationSystem": "MANARATAK_PHASE_10_CATALOG",
+        "classificationCode": "MJR-0237",
+        "localizedNames": {
+          "ar": "علوم الحاسوب",
+          "en": "Computer Science"
+        },
+        "academicFieldId": "dd2b8ef3-0899-4b1c-aa0a-66d383050756",
+        "disciplineId": "3415a42e-01fa-4f0b-a247-e669e31a9bd9",
+        "sourceImportMode": "CATALOG_IDENTITY_ONLY",
+        "metadata": {
+          "sourceFileName": "workspace/phase-10-major-catalogs/MANARATAK_Bachelor_Majors_By_Colleges_v1.0.md",
+          "sourceSha256": "cd8f339df63d3514fa7d4b21d700363c1300cc7a9b12b0c9dc7c90debb25b22e",
+          "sourceLine": 238,
+          "sourceReviewStatus": "NEEDS_REVIEW",
+          "reviewScope": "IDENTITY_AND_BROAD_ICT_MAPPING_ONLY",
+          "contentReview": "PENDING"
+        }
+      }
+    },
+    {
+      "code": "MJR-0238",
+      "sourceLine": 239,
+      "sourceRowSha256": "38097f5b302e9b57bc77f040eaf7b8af73e11b47d5e7afb6b8334dd4ae7d44bf",
+      "decision": "APPROVED_AS_UNPUBLISHED_IDENTITY_UNDER_DELEGATED_OWNER_AUTHORITY",
+      "payload": {
+        "canonicalMajorName": "Information Technology",
+        "degreeLevel": "BACHELOR",
+        "degreeLevelId": "0d1d8be9-ec7e-4a9b-a6d5-efaf6c2a244b",
+        "sourceClassificationSystem": "MANARATAK_PHASE_10_CATALOG",
+        "classificationCode": "MJR-0238",
+        "localizedNames": {
+          "ar": "تقنية المعلومات",
+          "en": "Information Technology"
+        },
+        "academicFieldId": "dd2b8ef3-0899-4b1c-aa0a-66d383050756",
+        "disciplineId": "3415a42e-01fa-4f0b-a247-e669e31a9bd9",
+        "sourceImportMode": "CATALOG_IDENTITY_ONLY",
+        "metadata": {
+          "sourceFileName": "workspace/phase-10-major-catalogs/MANARATAK_Bachelor_Majors_By_Colleges_v1.0.md",
+          "sourceSha256": "cd8f339df63d3514fa7d4b21d700363c1300cc7a9b12b0c9dc7c90debb25b22e",
+          "sourceLine": 239,
+          "sourceReviewStatus": "NEEDS_REVIEW",
+          "reviewScope": "IDENTITY_AND_BROAD_ICT_MAPPING_ONLY",
+          "contentReview": "PENDING"
+        }
+      }
+    },
+    {
+      "code": "MJR-0239",
+      "sourceLine": 240,
+      "sourceRowSha256": "a8762db5b356a92f9e0f7ff58dca502353fcf740fd91f06436fc99aa1045e0a8",
+      "decision": "APPROVED_AS_UNPUBLISHED_IDENTITY_UNDER_DELEGATED_OWNER_AUTHORITY",
+      "payload": {
+        "canonicalMajorName": "Information Systems",
+        "degreeLevel": "BACHELOR",
+        "degreeLevelId": "0d1d8be9-ec7e-4a9b-a6d5-efaf6c2a244b",
+        "sourceClassificationSystem": "MANARATAK_PHASE_10_CATALOG",
+        "classificationCode": "MJR-0239",
+        "localizedNames": {
+          "ar": "نظم المعلومات",
+          "en": "Information Systems"
+        },
+        "academicFieldId": "dd2b8ef3-0899-4b1c-aa0a-66d383050756",
+        "disciplineId": "3415a42e-01fa-4f0b-a247-e669e31a9bd9",
+        "sourceImportMode": "CATALOG_IDENTITY_ONLY",
+        "metadata": {
+          "sourceFileName": "workspace/phase-10-major-catalogs/MANARATAK_Bachelor_Majors_By_Colleges_v1.0.md",
+          "sourceSha256": "cd8f339df63d3514fa7d4b21d700363c1300cc7a9b12b0c9dc7c90debb25b22e",
+          "sourceLine": 240,
+          "sourceReviewStatus": "NEEDS_REVIEW",
+          "reviewScope": "IDENTITY_AND_BROAD_ICT_MAPPING_ONLY",
+          "contentReview": "PENDING"
+        }
+      }
+    }
+  ],
+  "requiredBeforeApply": [
+    "clean source SHA",
+    "new full backup and isolated restore comparison",
+    "restricted application role and TLS",
+    "scanned deliverable source artifact",
+    "real P6 persisted batch and records",
+    "durable screening",
+    "owner preview/review/apply with degree matching",
+    "original rows and Audit/Outbox preserved"
+  ]
+}
