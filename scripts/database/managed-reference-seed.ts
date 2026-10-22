@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, type Prisma } from '@prisma/client';
 import { AssetId, AssetStorageLocator, AssetStorageZone, UniversalImportHandoff } from '@manaratak/domain';
 import { referenceImportPayloadDigest } from '@manaratak/application';
 import { AtomicAuditedOutboxMutationExecutor, AtomicDomainMutationCoordinator, ReferenceOwnerReviewUseCases, ReferenceDataUseCases,
@@ -107,7 +107,14 @@ async function applyReferences(db:PrismaClient,options:ApplyOptions){
   execFileSync('git',['merge-base','--is-ancestor',prior.sourceSha,sourceSha],{stdio:'pipe'});
   writeSeedEvidence(path.join(output,'recovery-start-'+Date.now()+'.json'),{sourceSha,priorState:prior,authorizationSha256:hash(fs.readFileSync(configFile))},{exclusive:true});
  }else writeSeedEvidence(statePath,state,{exclusive:true});
- const executor=new AtomicAuditedOutboxMutationExecutor(new PrismaAtomicPersistenceUnitOfWork(db),new PrismaAuditRecordRepository(db),new PrismaTransactionalOutboxStore(db));
+ const baseUnitOfWork=new PrismaAtomicPersistenceUnitOfWork(db);
+ const boundedUnitOfWork:typeof baseUnitOfWork={execute:work=>baseUnitOfWork.execute(async context=>{
+  const tx=(context as typeof context & {transactionClient:Prisma.TransactionClient}).transactionClient;
+  // Bound server waits too: a lost client must not leave advisory locks open.
+  await tx.$queryRaw`SELECT set_config('statement_timeout','10000',true) AS statement_timeout, set_config('lock_timeout','3000',true) AS lock_timeout, set_config('idle_in_transaction_session_timeout','30000',true) AS idle_timeout`;
+  return work(context);
+ })};
+ const executor=new AtomicAuditedOutboxMutationExecutor(boundedUnitOfWork,new PrismaAuditRecordRepository(db),new PrismaTransactionalOutboxStore(db));
  const reviews=new ReferenceOwnerReviewUseCases(new PrismaReferenceOwnerReviewGateway(db),new AtomicDomainMutationCoordinator(executor));
  const repository=new PrismaReferenceDataRepository(db),author=new ReferenceDataUseCases(repository,undefined,undefined,executor);
  const dispatcher=new ImportHandoffDispatcher({REFERENCE_DATA:new ReferenceDataScreeningHandoffConsumer()},new PrismaImportScreeningReceiptStore(db));
@@ -146,7 +153,7 @@ async function applyReferences(db:PrismaClient,options:ApplyOptions){
     if(aliases.length){assert.ok(options.resume);const normalize=(x:{alias:string;locale?:string|null;aliasType?:string})=>JSON.stringify([x.alias,x.locale??null,x.aliasType]);assert.deepEqual(aliases.map(normalize).sort(),record.aliases.map(normalize).sort());}
     else await author.upsertLanguage({...payload,id:current.id,expectedVersion:current.versionNumber,aliases:record.aliases} as Parameters<ReferenceDataUseCases['upsertLanguage']>[0],context);state.aliasCommands++;
    }
-   state.applied++;if(state.applied%25===0){save();console.log(JSON.stringify({phase:input.id,applied:state.applied,expected:622}));}
+   state.applied++;save();if(state.applied%5===0)console.log(JSON.stringify({phase:input.id,applied:state.applied,expected:622}));
   }
   save();console.log(JSON.stringify({phase:input.id,completed:true,applied:state.applied}));
  }

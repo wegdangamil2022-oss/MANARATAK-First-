@@ -80,7 +80,7 @@ fabricated receipt/approval row bypasses these services.
 Successful completion requires exact reference counts, 622 APPLIED reviews,
 matching expected Audit/Outbox counts, actual scanner receipts, and unchanged
 student/certificate/financial/payment/wallet/ledger table fingerprints. Checkpoints
-are fsynced every 25 rows and after each source. An interrupted or previously
+are fsynced after every row and each source. An interrupted or previously
 started run fails closed on the next `apply`: inspect the private state and real
 database receipts before preparing an explicit recovery change. Never clear the
 state file, change the run ID, truncate reference tables, or rerun blindly.
@@ -106,6 +106,13 @@ The managed operator client allows 10 seconds to acquire a transaction and a
 This setting is scoped to this bootstrap client; it does not change application
 defaults, remove locks, weaken assertions, retry failed transactions automatically,
 or move canonical/Audit/Outbox writes outside their atomic boundary.
+The existing unit of work also sets transaction-local server bounds before owner
+commands: 10-second statements, 3-second lock waits and 30-second idle transactions.
+These settings protect advisory locks if the client connection stalls; they are
+not a claim that an intermittent network pause has been resolved. A separate
+read-only 12-query probe measured 167–581 ms per warmed round trip, while a failed
+owner transaction reported a 90-second elapsed gap. Preserve such failures and
+inspect committed receipts before any reviewed recovery attempt.
 
 Other required seeds (degree levels, academic taxonomy, provider registry and
 student tools), administrator bootstrap, restore rehearsal, private student asset
