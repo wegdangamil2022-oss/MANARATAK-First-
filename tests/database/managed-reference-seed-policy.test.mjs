@@ -10,6 +10,8 @@ const approval={kind:'MANAGED_DEVELOPMENT_REFERENCE_SEED',environment:'developme
 const uri='postgresql://manaratak_app:synthetic@'+target.host+'/neondb?sslmode=require&sslaccept=strict';
 test('managed reference scope binds exact source and independent target without changing local R04',()=>{
   assert.deepEqual(validateManagedReferenceSeed(approval,source,uri,{NODE_ENV:'development'}).target,target);
+  assert.deepEqual(validateManagedReferenceSeed(approval,source,uri+'&pool_timeout=30',{NODE_ENV:'development'}).target,target);
+  for(const timeout of ['0','-1','300','forever','30&pool_timeout=30'])assert.throws(()=>validateManagedReferenceSeed(approval,source,uri+'&pool_timeout='+timeout,{NODE_ENV:'development'}),/MANAGED_SEED/);
   for(const change of [{environment:'production'},{sourceSha:'0'.repeat(40)},{schemaSha256:'0'.repeat(64)},
     {manifestSha256:'0'.repeat(64)},{independent:false},{authorization:'CI'},{sourceHashes:{}},
     {expiresAt:new Date(now+4*3600000).toISOString()},

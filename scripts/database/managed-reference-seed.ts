@@ -52,12 +52,13 @@ async function main(){
   const filename=path.join(storageRoot,bucket,locator.pathKey);fs.mkdirSync(path.dirname(filename),{recursive:true,mode:0o700});
   fs.writeFileSync(filename,JSON.stringify(input.records),{mode:0o600});await security.sanitize(locator);await security.scan(locator);
  }
- const transport=await verifyManagedPostgresTls(process.env.DATABASE_URL);
  const live=await readDatabaseIdentity(process.env.DATABASE_URL,{provider:'NEON'});
  // A managed endpoint includes network round trips inside the existing owner
  // transaction. Bound this operator client only; retain all atomicity/lock guards.
  const db=new PrismaClient({datasources:{db:{url:process.env.DATABASE_URL}},log:[],errorFormat:'minimal',transactionOptions:{maxWait:10000,timeout:30000}});
  try{
+  await db.$connect();
+  const transport=await verifyManagedPostgresTls(process.env.DATABASE_URL);
   const [{access}]=await db.$queryRaw<Array<{access:boolean}>>`SELECT has_table_privilege(current_user,'public._prisma_migrations','SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') AS access`;
   validateManagedSeedIdentity(target,live,access,transport);
   const preflight={mode:'PREFLIGHT',pass:true,sourceSha,runId,target,records:inputs.reduce((n,x)=>n+x.records.length,0),databaseWrites:0,

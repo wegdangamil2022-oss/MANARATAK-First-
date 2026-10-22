@@ -52,6 +52,11 @@ Use Node 22 and the restricted application `DATABASE_URL`, with
 `sslmode=require&sslaccept=strict` and a trusted CA file through `sslcert` where
 needed. The command rejects other environments, TLS overrides and duplicate or
 unknown connection options. Keep all credentials outside Git and terminal output.
+An optional `pool_timeout=30` allows a bounded 30 seconds for pool acquisition;
+zero, unbounded or other values are rejected. The operator eagerly connects before
+its first privilege query and obtains fresh transport evidence afterward. This
+separates initial connection setup from Prisma's lazy first-query pool acquisition,
+which was observed failing at its default 10 seconds before any write.
 
 1. `npm run db:seed:managed-references -- preflight` performs only file scans and
    database reads, and retains identity/scan evidence in the private directory.

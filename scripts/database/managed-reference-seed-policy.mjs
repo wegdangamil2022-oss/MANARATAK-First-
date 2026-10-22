@@ -25,7 +25,8 @@ export function validateManagedReferenceSeed(approval,source,rawUrl,env) {
   if(!['postgresql:','postgres:'].includes(url.protocol)||url.hostname!==target.host||url.hash||!url.password||
     url.port&&url.port!=='5432'||decodeURIComponent(url.pathname.slice(1))!==target.database||decodeURIComponent(url.username)!==target.role||
     new Set(entries.map(([key])=>key)).size!==entries.length||
-    entries.some(([key])=>!['sslmode','sslaccept','sslcert','connect_timeout','connection_limit','schema'].includes(key))||
+    entries.some(([key])=>!['sslmode','sslaccept','sslcert','connect_timeout','connection_limit','pool_timeout','schema'].includes(key))||
+    url.searchParams.has('pool_timeout')&&url.searchParams.get('pool_timeout')!=='30'||
     url.searchParams.get('sslmode')!=='require'||url.searchParams.get('sslaccept')!=='strict'||
     url.searchParams.has('schema')&&url.searchParams.get('schema')!=='public')fail();
   return {target,actorId:approval.actorId,runId:approval.runId};
