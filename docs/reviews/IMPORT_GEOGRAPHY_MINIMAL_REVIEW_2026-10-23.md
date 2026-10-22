@@ -1,6 +1,6 @@
 # P06 — مراجعة حقول أول ثلاث مناطق ومدن
 
-الحالة: **MINIMAL_FIELDS_REVIEWED / TARGET_APPLY_PENDING**. هذه مراجعة تشغيلية ضمن تفويض مالك المشروع، وليست توقيع مراجع بشري مستقل. [الإسقاط والبصمات](evidence/IMPORT_GEOGRAPHY_FIELD_REVIEW_2026-10-23.json)، [عناوين الجامعات الرسمية المراجعة سابقًا](evidence/IMPORT_GEOGRAPHY_ADDRESS_REVIEW_2026-10-23.json).
+الحالة عند إصدار المراجعة: **MINIMAL_FIELDS_REVIEWED / TARGET_APPLY_PENDING**؛ أُنجز التطبيق بعدها في [دليل المجموعة الأولى](IMPORT_GEOGRAPHY_COMPLETION_2026-10-23.md). هذه مراجعة تشغيلية ضمن تفويض مالك المشروع، وليست توقيع مراجع بشري مستقل. [الإسقاط والبصمات](evidence/IMPORT_GEOGRAPHY_FIELD_REVIEW_2026-10-23.json)، [عناوين الجامعات الرسمية المراجعة سابقًا](evidence/IMPORT_GEOGRAPHY_ADDRESS_REVIEW_2026-10-23.json).
 
 | الدولة | رمز المنطقة | اسم المنطقة المعتمد لهذه الدفعة | المدينة |
 | --- | --- | --- | --- |
@@ -8,7 +8,7 @@
 | HU | HU-BU | Budapest | Budapest |
 | TR | TR-06 | Ankara | Ankara |
 
-طابقت الصفوف الأربعة المصدرية وبصمات الصفوف الستة دليل المجموعة السابق. ربط الرموز بالأسماء مؤيد بملف [Unicode CLDR المثبت عند commit محدد](https://github.com/unicode-org/cldr/blob/7e3bf78ce1f9357bdda7280fe83b626bbdba9b67/common/subdivisions/en.xml). هذا تأييد من ناشر CLDR نفسه؛ لا ندعي اعتماد ISO رسميًا. استُخدم اسم Beijing بدل Beijing Shi في الإسقاط فقط، دون تغيير المصدر الخام. توضح [حكومة بكين](https://www.beijing.gov.cn/renwen/bjgk/) هويتها ومساحتها الإدارية، ويحدد [مكتب الإحصاء المجري](https://www.ksh.hu/regionalatlas_administrative_units) بودابست كوحدة إقليمية واحدة وعاصمة. عناوين الجامعات الرسمية تؤيد وجود المدن الثلاث ودولها فقط.
+طابقت الملفات المصدرية الأربعة وبصمات الصفوف الستة دليل المجموعة السابق. ربط الرموز بالأسماء مؤيد بملف [Unicode CLDR المثبت عند commit محدد](https://github.com/unicode-org/cldr/blob/7e3bf78ce1f9357bdda7280fe83b626bbdba9b67/common/subdivisions/en.xml). هذا تأييد من ناشر CLDR نفسه؛ لا ندعي اعتماد ISO رسميًا. استُخدم اسم Beijing بدل Beijing Shi في الإسقاط فقط، دون تغيير المصدر الخام. توضح [حكومة بكين](https://www.beijing.gov.cn/renwen/bjgk/) هويتها ومساحتها الإدارية، ويحدد [مكتب الإحصاء المجري](https://www.ksh.hu/regionalatlas_administrative_units) بودابست كوحدة إقليمية واحدة وعاصمة. عناوين الجامعات الرسمية تؤيد وجود المدن الثلاث ودولها فقط.
 
 الحقول المعتمدة: الاسم الإنجليزي، رمز الدولة، رمز المنطقة، وربط المدينة بمنطقتها الفعلية بعد إنشاء المنطقة. لا نعتمد السكان أو الإحداثيات أو timezone أو الأسماء المترجمة أو localName أو نوع المنطقة أو adminLevel أو أهلية الدراسة ومراكز الاختبار. تُترك هذه الحقول بلا إثراء حتى مراجعتها. لا يكفي تطابق الرمز أو عنوان الجامعة لاعتمادها.
 

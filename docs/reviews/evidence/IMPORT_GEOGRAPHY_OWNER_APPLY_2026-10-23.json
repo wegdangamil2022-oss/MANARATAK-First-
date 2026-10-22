@@ -1,0 +1,210 @@
+{
+  "kind": "P06_P07_BOUNDED_GEOGRAPHY_OWNER_APPLY",
+  "pass": true,
+  "sourceSha": "73c05bca9ad14967a6643c69e7810e63609443eb",
+  "runId": "6a52891c-92aa-476f-b8bf-6fd96fe983a6",
+  "observedAt": "2026-10-22T22:37:59.835Z",
+  "scope": {
+    "regions": 3,
+    "cities": 3,
+    "universities": 0
+  },
+  "all282PreexistingTableFingerprintsPreserved": true,
+  "protectedBaselinePreserved": true,
+  "priorQuarantineReleased": 0,
+  "audit": 12,
+  "outbox": 12,
+  "referenceVersions": 6,
+  "cityOwnerReviewsApplied": 3,
+  "firstCityReplayNoNewEffects": true,
+  "reviewSha256": "ba43d581ae41a17d540eb0ab6122dc423e8429df1af9ab4fb989e56fa1f6d0e9",
+  "operatorSha256": "004134b35a328a62d9aa597f07d7ebb3cac87254b0c3f22daa399e67960f0772",
+  "backupSha256": "84d1bcee4caa77bda8b1a2aac019c6da5ebead99f5f57f15d9fd29c72c4ac644",
+  "restoreVerified": true,
+  "restrictedReadOnlyVerification": {
+    "role": "manaratak_probe",
+    "oid": "16395",
+    "version": 160015,
+    "readOnly": "on",
+    "superuser": false,
+    "createRole": false,
+    "createDatabase": false,
+    "bypassRls": false
+  },
+  "regions": [
+    {
+      "sourceId": "reg_cn_bj",
+      "id": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+      "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+      "countryIso2Code": "CN",
+      "regionCode": "CN-BJ",
+      "name": "Beijing"
+    },
+    {
+      "sourceId": "reg_hu_bu",
+      "id": "7ccf3f41-ce49-4693-b545-974edd9d3ef9",
+      "countryReferenceId": "aa450b59-9731-4869-b3e8-7713aed3ae72",
+      "countryIso2Code": "HU",
+      "regionCode": "HU-BU",
+      "name": "Budapest"
+    },
+    {
+      "sourceId": "reg_tr_06",
+      "id": "d9db85b6-b3d0-42a7-b45e-5eb6b0b5a66b",
+      "countryReferenceId": "2c14f864-d235-4276-8c87-d1bb19ceca0d",
+      "countryIso2Code": "TR",
+      "regionCode": "TR-06",
+      "name": "Ankara"
+    }
+  ],
+  "cities": [
+    {
+      "sourceId": "city_cn_beijing",
+      "id": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37",
+      "receiptId": "73d634c1-4e5c-40c2-b15b-ed3025a6e31a",
+      "reviewId": "p7-review-a21277dd1a656203c5b33438f65ce381dabf31a0d4715d93d004f837743e8024",
+      "previewHash": "835944d47a2b0181e907df7db15deaf9d46fe869aaa312a8ae83db753ec17547",
+      "reviewVersion": 2,
+      "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+      "countryIso2Code": "CN",
+      "name": "Beijing",
+      "region": "Beijing",
+      "administrativeRegionId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90"
+    },
+    {
+      "sourceId": "city_hu_budapest",
+      "id": "b986d010-bceb-481f-b9d9-572b33acab5e",
+      "receiptId": "3b30fc5b-b1f2-40f2-9e0c-8c91c38e5648",
+      "reviewId": "p7-review-72c72e7b20c7464e286d5e5fbde5ba6afe15d4d0ded73b7c2144108c0151fb5a",
+      "previewHash": "20d931eab3e75b68583bbb695761b04dc58ac6139eef61ba20050945dfc1f0b7",
+      "reviewVersion": 2,
+      "countryReferenceId": "aa450b59-9731-4869-b3e8-7713aed3ae72",
+      "countryIso2Code": "HU",
+      "name": "Budapest",
+      "region": "Budapest",
+      "administrativeRegionId": "7ccf3f41-ce49-4693-b545-974edd9d3ef9"
+    },
+    {
+      "sourceId": "city_tr_ankara",
+      "id": "25d9c584-2cd4-47ac-98a4-f7c3e68588ef",
+      "receiptId": "8cf2597b-5ca8-4f93-94eb-83170ef6fff6",
+      "reviewId": "p7-review-e1da404a27fcb46d8bcf92958d1f6a474596a2fc6e6f3bb8a2d6e165f93fb1ac",
+      "previewHash": "c2ceb7f2ff1a5161c74a499717c8879545fc3f3be96e582bf71c3fe5244e6c67",
+      "reviewVersion": 2,
+      "countryReferenceId": "2c14f864-d235-4276-8c87-d1bb19ceca0d",
+      "countryIso2Code": "TR",
+      "name": "Ankara",
+      "region": "Ankara",
+      "administrativeRegionId": "d9db85b6-b3d0-42a7-b45e-5eb6b0b5a66b"
+    }
+  ],
+  "productionReady": false,
+  "ancillaryFieldsApproved": false,
+  "backup": {
+    "sourceSha": "73c05bca9ad14967a6643c69e7810e63609443eb",
+    "runId": "6a52891c-92aa-476f-b8bf-6fd96fe983a6",
+    "observedAt": "2026-10-22T22:34:10.680Z",
+    "format": "directory",
+    "parallelJobs": 2,
+    "sha256": "84d1bcee4caa77bda8b1a2aac019c6da5ebead99f5f57f15d9fd29c72c4ac644",
+    "sha256Scope": "SORTED_ENTRY_MANIFEST_INCLUDING_PER_FILE_SHA256",
+    "bytes": 1945686,
+    "tableCount": 282,
+    "emptyTables": 261,
+    "nonemptyTables": 21,
+    "fullArchiveDecodeVerified": true,
+    "allTableSchemasIncluded": true,
+    "allTableDataIncluded": true,
+    "snapshotMechanism": "POSTGRES16_PG_DUMP_NATIVE_PARALLEL_SYNCHRONIZED_SNAPSHOTS",
+    "elapsedMs": 173385
+  },
+  "restore": {
+    "kind": "P02_NEW_LOCAL_RECOVERY_REHEARSAL",
+    "sourceSha": "73c05bca9ad14967a6643c69e7810e63609443eb",
+    "runId": "6a52891c-92aa-476f-b8bf-6fd96fe983a6",
+    "labRunId": "d2b87ae2-1e07-430b-9258-bd7b5fcbb050",
+    "observedAt": "2026-10-22T22:34:39.250Z",
+    "pass": true,
+    "sourceDatabaseWrites": 0,
+    "restoreTarget": "NEW_DISPOSABLE_LOCAL_POSTGRES16_ONLY",
+    "archiveSha256": "84d1bcee4caa77bda8b1a2aac019c6da5ebead99f5f57f15d9fd29c72c4ac644",
+    "tableCount": 282,
+    "allTableCountsMatchPreBackupObservation": true,
+    "allTableDataFingerprintsMatchUnmodifiedManagedSource": true,
+    "fingerprintSha256": "df2f7e2b35542f2d857d3bf5a16a3cc71f3a6755e411e7a81f4b68a8b4dc5cd1",
+    "restrictedVerification": {
+      "role": "manaratak_restore_probe",
+      "superuser": false,
+      "createRole": false,
+      "createDatabase": false,
+      "bypassRls": false,
+      "readOnly": true,
+      "ownsRelations": false,
+      "invalidIndexes": 0,
+      "unvalidatedConstraints": 0,
+      "dataMutationPrivilege": false
+    },
+    "priorDatabasesTouched": false,
+    "extensionCommentPreservedAsAlreadyIdentical": true,
+    "excludedTocEntries": [
+      "7344; 0 0 COMMENT - EXTENSION pg_trgm "
+    ]
+  },
+  "sourceAsset": {
+    "id": "geography-pilot-6a52891c-92aa-476f-b8bf-6fd96fe983a6",
+    "sha256": "a6074a0cda91582f82fa7127eb3b21ecd45563191c511fb0eb8a43804369f234",
+    "classification": "INTERNAL",
+    "retention": "PERMANENT_INTERNAL_REFERENCE_PROVENANCE",
+    "storage": "PRIVATE_LOCAL_DEVELOPMENT_ONLY",
+    "scannerReceipts": [
+      {
+        "provider": "WINDOWS_DEFENDER",
+        "sha256": "d83f91c72d1a4c08d3b0d504ee9c8d627233c8823cbe06075bd0aa72f81a2516",
+        "exitCode": 0,
+        "digestUnchanged": true,
+        "clean": true,
+        "signatureVersion": "1.461.145.0",
+        "signatureUpdatedAt": "2026-10-21T23:33:44.0000000Z"
+      },
+      {
+        "provider": "WINDOWS_DEFENDER",
+        "sha256": "a6074a0cda91582f82fa7127eb3b21ecd45563191c511fb0eb8a43804369f234",
+        "exitCode": 0,
+        "digestUnchanged": true,
+        "clean": true,
+        "signatureVersion": "1.461.145.0",
+        "signatureUpdatedAt": "2026-10-21T23:33:44.0000000Z"
+      },
+      {
+        "provider": "WINDOWS_DEFENDER",
+        "sha256": "a6074a0cda91582f82fa7127eb3b21ecd45563191c511fb0eb8a43804369f234",
+        "exitCode": 0,
+        "digestUnchanged": true,
+        "clean": true,
+        "signatureVersion": "1.461.145.0",
+        "signatureUpdatedAt": "2026-10-21T23:33:44.0000000Z"
+      },
+      {
+        "provider": "WINDOWS_DEFENDER",
+        "sha256": "a6074a0cda91582f82fa7127eb3b21ecd45563191c511fb0eb8a43804369f234",
+        "exitCode": 0,
+        "digestUnchanged": true,
+        "clean": true,
+        "signatureVersion": "1.461.145.0",
+        "signatureUpdatedAt": "2026-10-21T23:33:44.0000000Z"
+      }
+    ],
+    "privateStorageLocatorOmitted": true
+  },
+  "originalSnapshotSha256": "428f338885a72545744085ddeb204efaed61efbf9e1832ce50d56867ece7203f",
+  "permittedRowDeltas": {
+    "AdministrativeRegion": 3,
+    "ReferenceCity": 3,
+    "ReferenceVersionRecord": 6,
+    "AssetRecord": 1,
+    "ImportScreeningReceipt": 3,
+    "ReferenceOwnerImportReview": 3,
+    "AuditRecord": 12,
+    "TransactionalOutboxRecord": 12
+  }
+}
