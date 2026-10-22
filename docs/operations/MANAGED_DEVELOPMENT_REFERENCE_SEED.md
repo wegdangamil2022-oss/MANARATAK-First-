@@ -85,6 +85,21 @@ started run fails closed on the next `apply`: inspect the private state and real
 database receipts before preparing an explicit recovery change. Never clear the
 state file, change the run ID, truncate reference tables, or rerun blindly.
 
+For an interrupted run, refresh the delegated authorization against the new clean
+SHA with the **same run ID**, retaining the old authorization. `inspect-recovery`
+only reads the database and writes a private recovery candidate containing the
+checkpoint hash and live reference/asset/receipt/review/Audit/Outbox fingerprints.
+Review the actual partial state, then copy that candidate to `config.recovery`
+with kind `DELEGATED_REVIEWED_SAME_RUN_RECOVERY`. `resume` requires the normal
+mutation gate, unchanged live fingerprints and protected rows, and source ancestry.
+It retains the previous checkpoint in an exclusive recovery-start receipt and
+takes an exclusive operator lock. Existing ACTIVE assets must still match their
+owner, reference and actual bytes and pass a fresh scan. Existing owner approvals
+and APPLIED reviews retain their original reviewer/reason; the owner services
+replay applied work without new Audit/Outbox effects. Pending non-ACTIVE assets
+remain blocked for a separate lifecycle recovery. Private failure receipts retain
+redacted error details; console output never prints database errors or credentials.
+
 Other required seeds (degree levels, academic taxonomy, provider registry and
 student tools), administrator bootstrap, restore rehearsal, private student asset
 storage and API/Web/Admin verification remain separate work. A passing reference
