@@ -3,7 +3,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { PrismaClient, type Prisma } from '@prisma/client';
-import { AssetId, AssetStorageLocator, AssetStorageZone, UniversalImportHandoff } from '@manaratak/domain';
+import { AssetId, AssetStorageLocator, AssetStorageZone, AssetSecurityClassification, AssetRetentionCategory, UniversalImportHandoff } from '@manaratak/domain';
 import { referenceImportPayloadDigest } from '@manaratak/application';
 import { AtomicAuditedOutboxMutationExecutor, AtomicDomainMutationCoordinator, ReferenceOwnerReviewUseCases, ReferenceDataUseCases,
   ReferenceDataScreeningHandoffConsumer, ImportHandoffDispatcher, IngestAssetUseCase, ProcessAssetLifecycleUseCase } from '@manaratak/application';
@@ -130,7 +130,7 @@ async function applyReferences(db:PrismaClient,options:ApplyOptions){
    assert.equal(existing.checksum?.hash,artifactHash);assert.equal(existing.classification,'INTERNAL');assert.equal(existing.retention.category,'PERMANENT');
    assert.equal(hash(await storage.read(existing.locator,10*1024*1024)),artifactHash);await security.sanitize(existing.locator);await security.scan(existing.locator);
   }else{
-  const upload=await ingest.requestUploadLocator({assetId,assetReference:runId+':'+input.id,ownerId:runId,ownerType:'REFERENCE_DATA',originalFilename:input.id+'.json',mimeType:'application/json',fileExtension:'json',byteSize:bytes.length,classification:'INTERNAL',retentionCategory:'PERMANENT'});
+  const upload=await ingest.requestUploadLocator({assetId,assetReference:runId+':'+input.id,ownerId:runId,ownerType:'REFERENCE_DATA',originalFilename:input.id+'.json',mimeType:'application/json',fileExtension:'json',byteSize:bytes.length,classification:AssetSecurityClassification.INTERNAL,retentionCategory:AssetRetentionCategory.PERMANENT});
   const filename=path.join(storageRoot,upload.bucketName,upload.pathKey);fs.mkdirSync(path.dirname(filename),{recursive:true,mode:0o700});fs.writeFileSync(filename,bytes,{mode:0o600,flag:'wx'});
   await lifecycle.finalizeUploadedAsset({assetId});await lifecycle.validateAsset({assetId});await lifecycle.sanitizeAsset({assetId});await lifecycle.activateAsset({assetId});
   const asset=await assets.findById(new AssetId(assetId));assert.ok(asset);asset.assertCanDeliver();assert.equal(asset.checksum?.hash,artifactHash);
@@ -141,7 +141,8 @@ async function applyReferences(db:PrismaClient,options:ApplyOptions){
    const handoff:UniversalImportHandoff={handoffId:input.id+':'+index,ownerDomain:'REFERENCE_DATA',artifact:{sourceId:input.id,artifactId:assetId},normalizedPayload:payload,
     provenance:{sourceSystem:'managed-development-reviewed-manifest',contentHash:artifactHash,sourceRowNumber:index+1},validation:{state:'VALID',issues:[]},
     execution:{executionId:runId,dryRun:false,attempt:1,idempotencyKey:input.id+':'+index},referenceMetadata:{referenceEntityType:input.type,sourceVersion:input.sourceVersion}};
-   const screened=await dispatcher.dispatch(handoff);assert.equal(screened.state,'NEEDS_OWNER_REVIEW');assert.equal(screened.issues.length,0);
+   const screened=await dispatcher.dispatch(handoff);assert.ok(screened&&typeof screened==='object'&&'state' in screened&&'issues' in screened);
+   assert.equal(screened.state,'NEEDS_OWNER_REVIEW');assert.ok(Array.isArray(screened.issues));assert.equal(screened.issues.length,0);
    const identity=screeningReceiptIdentity(handoff),receipt=await db.importScreeningReceipt.findUniqueOrThrow({where:{ownerDomain_handoffKey:{ownerDomain:identity.ownerDomain,handoffKey:identity.handoffKey}}});
    let plan=await reviews.preview(receipt.id,context);assert.deepEqual(plan.preview.issues,[]);
    const action=seedReviewAction(plan,actorId,referenceImportPayloadDigest(plan.payload),referenceImportPayloadDigest(payload));
