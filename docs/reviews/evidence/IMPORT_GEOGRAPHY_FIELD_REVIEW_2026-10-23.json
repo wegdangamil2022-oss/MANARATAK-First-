@@ -1,0 +1,226 @@
+{
+  "kind": "P06_BOUNDED_GEOGRAPHY_FIELD_REVIEW",
+  "observedAt": "2026-10-22T22:27:08.066Z",
+  "authorization": "PROJECT_OWNER_DELEGATED_DATABASE_PREPARATION",
+  "reviewer": "delegated-owner-codex-geography-pilot",
+  "independentHumanReview": false,
+  "databaseWrites": 0,
+  "scope": {
+    "regions": 3,
+    "cities": 3,
+    "universities": 0
+  },
+  "cldr": {
+    "url": "https://raw.githubusercontent.com/unicode-org/cldr/7e3bf78ce1f9357bdda7280fe83b626bbdba9b67/common/subdivisions/en.xml",
+    "commitSha": "7e3bf78ce1f9357bdda7280fe83b626bbdba9b67",
+    "sha256": "637705773cb923d63bf71abaf05e6246fd853ef98f143bd9796b11d2c5ac10c0",
+    "interpretation": "Primary Unicode maintained code/name corroboration; not a claim of ISO certification or reproduction of the ISO standard."
+  },
+  "officialAddressEvidence": "IMPORT_GEOGRAPHY_ADDRESS_REVIEW_2026-10-23.json",
+  "administrativeIdentityEvidence": [
+    {
+      "url": "https://www.beijing.gov.cn/renwen/bjgk/",
+      "scope": "Beijing in China; administrative area exists."
+    },
+    {
+      "url": "https://www.ksh.hu/regionalatlas_administrative_units",
+      "scope": "Budapest is one territorial unit and Hungary capital."
+    }
+  ],
+  "rawSourcesUnmodified": true,
+  "sourceArtifacts": [
+    {
+      "path": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+      "sha256": "b73b64e99a0892b26fb2295c612594a2589ccc8067cd9f7e810a6c20554060a0",
+      "rows": 3474
+    },
+    {
+      "path": "workspace/reference-data/regions/asia/02_admin_regions_asia.csv",
+      "sha256": "b1721ca908bcd01cf03b6908de298daa6f000e42a98797673a7b89336c0b61c1",
+      "rows": 1165
+    },
+    {
+      "path": "workspace/reference-data/cities/europe/MANARATAK_Europe_Cities_All_Combined.csv",
+      "sha256": "8e724b7e7c0260e2d84510850b79f09102b3f654bcc03da965009071a9a21fec",
+      "rows": 2672
+    },
+    {
+      "path": "workspace/reference-data/regions/europe/MANARATAK_Europe_Admin_Regions.csv",
+      "sha256": "72d179a2714bf7e0f95cc3fca97f05ba7cad371dbefb3460fb0e3975e6a87808",
+      "rows": 1914
+    }
+  ],
+  "rows": [
+    {
+      "sourceCityId": "city_cn_beijing",
+      "sourceRegionId": "reg_cn_bj",
+      "citySource": {
+        "path": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+        "row": 195,
+        "sha256": "33bb84d576d0f2240b5e5e21db2b08c8944c81775d9284c30da5f6fd12737ef0"
+      },
+      "regionSource": {
+        "path": "workspace/reference-data/regions/asia/02_admin_regions_asia.csv",
+        "row": 233,
+        "sha256": "665c083d0c54d515208faee754666f0f48e45f3521a096e9d291c2ce2705a97f"
+      },
+      "region": {
+        "countryIso2Code": "CN",
+        "regionCode": "CN-BJ",
+        "name": "Beijing"
+      },
+      "city": {
+        "countryIso2Code": "CN",
+        "name": "Beijing",
+        "region": "Beijing"
+      },
+      "canonicalAdministrativeRegionId": "RESOLVE_FROM_COMMITTED_OWNER_RESULT_ONLY",
+      "historicalSourceLabels": {
+        "region": "REFERENCE_DATA_IMPORTED",
+        "city": "NEEDS_MANUAL_REVIEW",
+        "importedLabelIsNotTargetDatabaseReceipt": true
+      },
+      "normalization": "Beijing Shi source label projected as Beijing, corroborated by Unicode CLDR. Raw source remains unchanged.",
+      "reviewedFields": [
+        "countryIso2Code",
+        "regionCode",
+        "region.name",
+        "city.name",
+        "city.region",
+        "city.administrativeRegionId via actual owner result"
+      ],
+      "heldFields": [
+        "nameAr",
+        "localName",
+        "regionType",
+        "adminLevel",
+        "timezone",
+        "latitude",
+        "longitude",
+        "population",
+        "capitalRole",
+        "study/university/test-center eligibility",
+        "providerMappings",
+        "aliases"
+      ],
+      "decision": "APPROVED_MINIMAL_IDENTITY_ONLY_UNDER_DELEGATED_PROJECT_AUTHORITY"
+    },
+    {
+      "sourceCityId": "city_hu_budapest",
+      "sourceRegionId": "reg_hu_bu",
+      "citySource": {
+        "path": "workspace/reference-data/cities/europe/MANARATAK_Europe_Cities_All_Combined.csv",
+        "row": 863,
+        "sha256": "d07c206764e870a6d0905d623a8b8110ba75e1a02e89a1ba2beb4414556ac89f"
+      },
+      "regionSource": {
+        "path": "workspace/reference-data/regions/europe/MANARATAK_Europe_Admin_Regions.csv",
+        "row": 784,
+        "sha256": "63253081d41a79a933ad060821d890633cbfbf5bfcc86127910a8e82e9ce6dd9"
+      },
+      "region": {
+        "countryIso2Code": "HU",
+        "regionCode": "HU-BU",
+        "name": "Budapest"
+      },
+      "city": {
+        "countryIso2Code": "HU",
+        "name": "Budapest",
+        "region": "Budapest"
+      },
+      "canonicalAdministrativeRegionId": "RESOLVE_FROM_COMMITTED_OWNER_RESULT_ONLY",
+      "historicalSourceLabels": {
+        "region": "REFERENCE_DATA_IMPORTED",
+        "city": "NEEDS_MANUAL_REVIEW",
+        "importedLabelIsNotTargetDatabaseReceipt": true
+      },
+      "normalization": "UNCHANGED",
+      "reviewedFields": [
+        "countryIso2Code",
+        "regionCode",
+        "region.name",
+        "city.name",
+        "city.region",
+        "city.administrativeRegionId via actual owner result"
+      ],
+      "heldFields": [
+        "nameAr",
+        "localName",
+        "regionType",
+        "adminLevel",
+        "timezone",
+        "latitude",
+        "longitude",
+        "population",
+        "capitalRole",
+        "study/university/test-center eligibility",
+        "providerMappings",
+        "aliases"
+      ],
+      "decision": "APPROVED_MINIMAL_IDENTITY_ONLY_UNDER_DELEGATED_PROJECT_AUTHORITY"
+    },
+    {
+      "sourceCityId": "city_tr_ankara",
+      "sourceRegionId": "reg_tr_06",
+      "citySource": {
+        "path": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+        "row": 2481,
+        "sha256": "044adb7e58a070dbca59e732ddb606eb82c50e7b36b2a4c144d93a22043369a2"
+      },
+      "regionSource": {
+        "path": "workspace/reference-data/regions/asia/02_admin_regions_asia.csv",
+        "row": 991,
+        "sha256": "5cc39e30876a6f0a2c9feb7780721e6c9a88ec5924ef05aef2a6bd244989e5e9"
+      },
+      "region": {
+        "countryIso2Code": "TR",
+        "regionCode": "TR-06",
+        "name": "Ankara"
+      },
+      "city": {
+        "countryIso2Code": "TR",
+        "name": "Ankara",
+        "region": "Ankara"
+      },
+      "canonicalAdministrativeRegionId": "RESOLVE_FROM_COMMITTED_OWNER_RESULT_ONLY",
+      "historicalSourceLabels": {
+        "region": "REFERENCE_DATA_IMPORTED",
+        "city": "NEEDS_MANUAL_REVIEW",
+        "importedLabelIsNotTargetDatabaseReceipt": true
+      },
+      "normalization": "UNCHANGED",
+      "reviewedFields": [
+        "countryIso2Code",
+        "regionCode",
+        "region.name",
+        "city.name",
+        "city.region",
+        "city.administrativeRegionId via actual owner result"
+      ],
+      "heldFields": [
+        "nameAr",
+        "localName",
+        "regionType",
+        "adminLevel",
+        "timezone",
+        "latitude",
+        "longitude",
+        "population",
+        "capitalRole",
+        "study/university/test-center eligibility",
+        "providerMappings",
+        "aliases"
+      ],
+      "decision": "APPROVED_MINIMAL_IDENTITY_ONLY_UNDER_DELEGATED_PROJECT_AUTHORITY"
+    }
+  ],
+  "priorQuarantine": {
+    "total": 119,
+    "released": 0,
+    "reappearingHeld": [
+      "city_sg_singapore",
+      "city_mc_monaco"
+    ]
+  },
+  "requirement": "Before writes: clean source SHA, restricted target identity/TLS, new full backup and isolated restored comparison; region owner atomic commands then city source asset/screening/preview/review/apply. No inferred canonical IDs or raw bulk geography importer."
+}
