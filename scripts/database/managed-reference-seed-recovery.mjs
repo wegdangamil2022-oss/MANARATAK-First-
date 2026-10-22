@@ -17,5 +17,5 @@ export function seedReviewAction(plan,actorId,payloadDigest,expectedDigest){
     assert.equal(plan.reviewer,actorId,'MANAGED_SEED_RECOVERY_REVIEWER_CHANGED');
     assert.ok(plan.reason?.startsWith('Delegated project-owner development bootstrap; source='),'MANAGED_SEED_RECOVERY_APPROVAL_INVALID');
   }
-  return plan.status==='PREVIEWED'?'REVIEW':'APPLY';
+  return plan.status==='PREVIEWED'?'REVIEW':plan.status==='APPLIED'?'REUSE':'APPLY';
 }

@@ -116,7 +116,8 @@ async function applyReferences(db:PrismaClient,options:ApplyOptions){
   return work(context);
  })};
  const executor=new AtomicAuditedOutboxMutationExecutor(boundedUnitOfWork,new PrismaAuditRecordRepository(db),new PrismaTransactionalOutboxStore(db));
- const reviews=new ReferenceOwnerReviewUseCases(new PrismaReferenceOwnerReviewGateway(db),new AtomicDomainMutationCoordinator(executor));
+ const reviewGateway=new PrismaReferenceOwnerReviewGateway(db);
+ const reviews=new ReferenceOwnerReviewUseCases(reviewGateway,new AtomicDomainMutationCoordinator(executor));
  const repository=new PrismaReferenceDataRepository(db),author=new ReferenceDataUseCases(repository,undefined,undefined,executor);
  const dispatcher=new ImportHandoffDispatcher({REFERENCE_DATA:new ReferenceDataScreeningHandoffConsumer()},new PrismaImportScreeningReceiptStore(db,{maxWait:10000,timeout:30000}));
  const storage=new LocalAssetStorageGateway(bucket,storageRoot),assets=new PrismaAssetRecordRepository(db);
@@ -142,13 +143,21 @@ async function applyReferences(db:PrismaClient,options:ApplyOptions){
    const handoff:UniversalImportHandoff={handoffId:input.id+':'+index,ownerDomain:'REFERENCE_DATA',artifact:{sourceId:input.id,artifactId:assetId},normalizedPayload:payload,
     provenance:{sourceSystem:'managed-development-reviewed-manifest',contentHash:artifactHash,sourceRowNumber:index+1},validation:{state:'VALID',issues:[]},
     execution:{executionId:runId,dryRun:false,attempt:1,idempotencyKey:input.id+':'+index},referenceMetadata:{referenceEntityType:input.type,sourceVersion:input.sourceVersion}};
-   const screened=await dispatcher.dispatch(handoff);assert.ok(screened&&typeof screened==='object'&&'state' in screened&&'issues' in screened);
+   // A reviewed recovery reuses durable receipts through their content-hash check.
+   // Starting another write transaction for a receipt already accepted adds no proof.
+   const priorReceipt=options.resume?await dispatcher.findReceipt(handoff):null;
+   const screened=priorReceipt?priorReceipt.result:await dispatcher.dispatch(handoff);assert.ok(screened&&typeof screened==='object'&&'state' in screened&&'issues' in screened);
    assert.equal(screened.state,'NEEDS_OWNER_REVIEW');assert.ok(Array.isArray(screened.issues));assert.equal(screened.issues.length,0);
    const identity=screeningReceiptIdentity(handoff),receipt=await db.importScreeningReceipt.findUniqueOrThrow({where:{ownerDomain_handoffKey:{ownerDomain:identity.ownerDomain,handoffKey:identity.handoffKey}}});
-   let plan=await reviews.preview(receipt.id,context);assert.deepEqual(plan.preview.issues,[]);
+   const reviewId='p7-review-'+referenceImportPayloadDigest({value:receipt.id});
+   const priorPlan=options.resume?await reviewGateway.get(reviewId):null;
+   let plan=priorPlan??await reviews.preview(receipt.id,context);assert.deepEqual(plan.preview.issues,[]);
+   assert.equal(plan.receiptId,receipt.id);assert.equal(plan.sourceHash,receipt.requestHash);assert.equal(plan.entityType,input.type);
    const action=seedReviewAction(plan,actorId,referenceImportPayloadDigest(plan.payload),referenceImportPayloadDigest(payload));
    if(action==='REVIEW')plan=await reviews.review(plan.id,{expectedVersion:plan.version,previewHash:plan.previewHash,decision:'APPROVE',reason:`Delegated project-owner development bootstrap; source=${input.sourceHash}; authorization=${hash(fs.readFileSync(configFile))}`},context);
-   await reviews.apply(plan.id,{expectedVersion:plan.version,previewHash:plan.previewHash},context);
+   // An APPLIED plan already completed the owner transaction. Keep its decision,
+   // Audit and Outbox intact; only pending plans invoke the owner mutation again.
+   if(action!=='REUSE')await reviews.apply(plan.id,{expectedVersion:plan.version,previewHash:plan.previewHash},context);
    if(input.type==='LANGUAGE'&&record.aliases?.length){
     const current=await repository.getLanguage(record.isoCode);assert.ok(current);
     const aliases=await db.referenceAliasRecord.findMany({where:{referenceId:current.id,entityType:'LANGUAGE'},select:{alias:true,locale:true,aliasType:true}});

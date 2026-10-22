@@ -13,8 +13,10 @@ test('same-run recovery rejects changed checkpoint, live rows, source and comple
 test('existing approved and applied owner reviews are reused without fabricating approval',()=>{
  const plan={status:'APPROVED',reviewer:'owner',reason:'Delegated project-owner development bootstrap; source=hash; authorization=old'};
  assert.equal(seedReviewAction(plan,'owner','same','same'),'APPLY');
- assert.equal(seedReviewAction({...plan,status:'APPLIED'},'owner','same','same'),'APPLY');
+ assert.equal(seedReviewAction({...plan,status:'APPLIED'},'owner','same','same'),'REUSE');
  assert.equal(seedReviewAction({status:'PREVIEWED'},'owner','same','same'),'REVIEW');
  for(const change of [{reviewer:'other'},{reason:null},{status:'REJECTED'}])assert.throws(()=>seedReviewAction({...plan,...change},'owner','same','same'));
  assert.throws(()=>seedReviewAction(plan,'owner','changed','same'));
+ for(const change of [{reviewer:'other'},{reason:null}])assert.throws(()=>seedReviewAction({...plan,status:'APPLIED',...change},'owner','same','same'));
+ assert.throws(()=>seedReviewAction({...plan,status:'APPLIED'},'owner','changed','same'));
 });
