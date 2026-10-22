@@ -25,7 +25,7 @@ export function privateSeedDirectory(configFile,root) {
   }else if(fs.statSync(directory).mode&0o077||fs.statSync(file).mode&0o077)throw new Error('MANAGED_SEED_PRIVATE_MODE_REQUIRED');
   return directory;
 }
-export function writeSeedEvidence(filename,value) {
-  const fd=fs.openSync(filename,'w',0o600);
+export function writeSeedEvidence(filename,value,{exclusive=false}={}) {
+  const fd=fs.openSync(filename,exclusive?'wx':'w',0o600);
   try{fs.writeSync(fd,JSON.stringify(value,null,2)+'\n');fs.fsyncSync(fd);}finally{fs.closeSync(fd);}
 }

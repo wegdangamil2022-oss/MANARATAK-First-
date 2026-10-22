@@ -79,7 +79,9 @@ async function applyReferences(db:PrismaClient,options:ApplyOptions){
  assert.deepEqual(counts,[0,0,0],'MANAGED_SEED_NONEMPTY_REFERENCE_TARGET');
  const protectedBefore=await protectedRows(db);
  const state={sourceSha,runId,completed:false,applied:0,aliasCommands:0,protectedBefore,scannerReceipts:security.receipts};
- const save=()=>writeSeedEvidence(statePath,state);save();
+ const save=()=>writeSeedEvidence(statePath,state);
+ // Atomic creation prevents two operators from both starting an empty run.
+ writeSeedEvidence(statePath,state,{exclusive:true});
  const executor=new AtomicAuditedOutboxMutationExecutor(new PrismaAtomicPersistenceUnitOfWork(db),new PrismaAuditRecordRepository(db),new PrismaTransactionalOutboxStore(db));
  const reviews=new ReferenceOwnerReviewUseCases(new PrismaReferenceOwnerReviewGateway(db),new AtomicDomainMutationCoordinator(executor));
  const repository=new PrismaReferenceDataRepository(db),author=new ReferenceDataUseCases(repository,undefined,undefined,executor);
