@@ -1,0 +1,270 @@
+{
+  "kind": "P05A_EXISTING_PROVIDER_SOURCE_RECONCILIATION",
+  "sourceSha": "4d62f332f2d5e72fe98fc5253df327d167d1d4c9",
+  "observedAt": "2026-10-22T21:16:58.160Z",
+  "databaseWrites": 0,
+  "projectId": "hidden-smoke-02928871",
+  "branchId": "br-sweet-king-b9pem1dg",
+  "sourcePath": "packages/infrastructure/src/courses/ExternalCourseProviderSeed.ts",
+  "sourceSha256": "279ab69f7cb5a589d946c7cdbd3d1de389bd21405b364a1ae74255526e7d73f3",
+  "providers": 18,
+  "aliases": 6,
+  "domains": 39,
+  "exactSourceMatch": false,
+  "differences": [
+    {
+      "publicId": "ecp-openlearn",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-openlearn",
+      "field": "aliases",
+      "expected": [
+        {
+          "alias": "OpenLearn",
+          "normalizedAlias": "openlearn",
+          "locale": null,
+          "source": "WP-IC-02 seed"
+        },
+        {
+          "alias": "Open University OpenLearn",
+          "normalizedAlias": "open university openlearn",
+          "locale": null,
+          "source": "WP-IC-02 seed"
+        }
+      ],
+      "actual": [
+        {
+          "alias": "OpenLearn",
+          "normalizedAlias": "openlearn",
+          "locale": null,
+          "source": "WP-IC-02 seed migration"
+        },
+        {
+          "alias": "Open University OpenLearn",
+          "normalizedAlias": "open university openlearn",
+          "locale": null,
+          "source": "WP-IC-02 seed migration"
+        }
+      ]
+    },
+    {
+      "publicId": "ecp-freecodecamp",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-fao-elearning-academy",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-ibm-skillsbuild",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-hubspot-academy",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-saylor-university",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-nextgenu",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-openhpi",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-openhpi",
+      "field": "aliases",
+      "expected": [
+        {
+          "alias": "openHPI",
+          "normalizedAlias": "openhpi",
+          "locale": null,
+          "source": "WP-IC-02 seed"
+        }
+      ],
+      "actual": [
+        {
+          "alias": "openHPI",
+          "normalizedAlias": "openhpi",
+          "locale": null,
+          "source": "WP-IC-02 seed migration"
+        }
+      ]
+    },
+    {
+      "publicId": "ecp-global-health-learning-center",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-semrush-academy",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-cisco-networking-academy",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-jmooc",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-wipo-academy",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-undp-learning-for-nature",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-undp-learning-for-nature",
+      "field": "aliases",
+      "expected": [
+        {
+          "alias": "Learning for Nature",
+          "normalizedAlias": "learning for nature",
+          "locale": null,
+          "source": "WP-IC-02 seed"
+        }
+      ],
+      "actual": [
+        {
+          "alias": "Learning for Nature",
+          "normalizedAlias": "learning for nature",
+          "locale": null,
+          "source": "WP-IC-02 seed migration"
+        }
+      ]
+    },
+    {
+      "publicId": "ecp-hp-life",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-google-skillshop",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-university-helsinki-mooc",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-university-helsinki-mooc",
+      "field": "aliases",
+      "expected": [
+        {
+          "alias": "MOOC.fi",
+          "normalizedAlias": "mooc fi",
+          "locale": null,
+          "source": "WP-IC-02 seed"
+        }
+      ],
+      "actual": [
+        {
+          "alias": "MOOC.fi",
+          "normalizedAlias": "mooc fi",
+          "locale": null,
+          "source": "WP-IC-02 seed migration"
+        }
+      ]
+    },
+    {
+      "publicId": "ecp-harvard-cs50",
+      "field": "directCoursePathPatterns",
+      "expected": [],
+      "actual": null
+    },
+    {
+      "publicId": "ecp-harvard-cs50",
+      "field": "aliases",
+      "expected": [
+        {
+          "alias": "CS50",
+          "normalizedAlias": "cs50",
+          "locale": null,
+          "source": "WP-IC-02 seed"
+        }
+      ],
+      "actual": [
+        {
+          "alias": "CS50",
+          "normalizedAlias": "cs50",
+          "locale": null,
+          "source": "WP-IC-02 seed migration"
+        }
+      ]
+    }
+  ],
+  "existingRowsSnapshotSha256": "dfc4a3987ecfd8c4b5c6728e813cfb868c801da5b8a0eed21c7e373406587fc4",
+  "providerExecution": false,
+  "decision": "PRESERVE_VERIFIED_HISTORICAL_MIGRATION_REGISTRY_WITH_EXPLICIT_METADATA_EXCEPTIONS_DO_NOT_RESEED",
+  "compatibility": {
+    "reviewed": true,
+    "runtimePatternListsMatchSource": true,
+    "providerIdsBoundToHistoricalMigration": true,
+    "aliasesBoundToHistoricalMigration": 6,
+    "unreviewedDifferences": 0,
+    "rawExactSourceMatch": false,
+    "independentHumanApprovalClaimed": false,
+    "justification": "All identities and functional source fields match. Preserve original migration alias provenance. Nullable patterns were added by a later migration and the actual repository maps null to the empty source list.",
+    "sources": [
+      {
+        "path": "packages/infrastructure/prisma/migrations/20260822011000_seed_external_course_providers/migration.sql",
+        "sha256": "f5f98fea42402eaa643a873c888ee3d75ff37208b82de3532ac9bb1704324018"
+      },
+      {
+        "path": "packages/infrastructure/prisma/migrations/20260826013000_w9_course_lifecycle/migration.sql",
+        "sha256": "a64ff79af37d2dd2d1d0bad4e289e591fd212037565e00a412389446274e5469"
+      },
+      {
+        "path": "packages/infrastructure/src/courses/PrismaExternalCourseProviderRepository.ts",
+        "sha256": "8aeb1b96155bd38ea880c908e29b12c147f124b6c9798071f12135ea39622ee8"
+      }
+    ]
+  },
+  "checks": {
+    "fields": false,
+    "normalizedNames": true,
+    "aliases": false,
+    "domains": true,
+    "identity": true
+  }
+}

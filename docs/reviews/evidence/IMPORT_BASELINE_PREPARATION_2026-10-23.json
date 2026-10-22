@@ -1,0 +1,311 @@
+{
+  "kind": "IMPORT_BASELINE_PREPARATION_INCREMENT",
+  "sourceSha": "4d62f332f2d5e72fe98fc5253df327d167d1d4c9",
+  "sourceRunId": "f799749d-f9b4-4151-ad42-6928eb5cc832",
+  "recordedAt": "2026-10-22T21:32:35.848Z",
+  "localDate": "2026-10-23",
+  "phaseStatus": {
+    "P01": "SOURCE_PARSER_FIXED_AND_PUSHED",
+    "P02": "PARTIAL_BACKUP_TRANSFER_BLOCKED_NO_APPLY",
+    "P03": "NOT_APPLIED",
+    "P04": "NOT_APPLIED",
+    "P05a": "EXISTING_MIGRATION_REGISTRY_VERIFIED_WITH_METADATA_EXCEPTIONS_NO_RESEED",
+    "P05b": "NOT_APPLIED",
+    "P06": "SOURCE_PILOT_PREPARED_OWNER_IMPORT_REVIEW_PENDING"
+  },
+  "managedDatabaseWritesThisIncrement": 0,
+  "sourceRole": "manaratak_probe",
+  "priorReferenceCompletion": {
+    "sourceSha": "75728732252ea37f320fca3f8a47a56826db7cf3",
+    "runId": "b37d7965-db25-4483-afc3-4c992a90ccb2",
+    "pass": true,
+    "responseSha256": "1661e2ec649278db374bff29abc69038ef34dd480692f7b788766c82ad22a901",
+    "currentCountCheckedDuringPreparation": [
+      168,
+      260,
+      194
+    ],
+    "originalReviewCount": 622,
+    "fullSemanticComparisonRepeated": false
+  },
+  "baselineSourceInspection": {
+    "sourceSha": "4d62f332f2d5e72fe98fc5253df327d167d1d4c9",
+    "mode": "SOURCE_PLAN_ONLY",
+    "databaseWrites": 0,
+    "referencesMustCompleteBeforeApply": true,
+    "steps": [
+      {
+        "id": "degree-levels",
+        "order": 40,
+        "required": true,
+        "owner": "reference",
+        "state": "READY",
+        "script": "scripts/seed-degree-levels.ts",
+        "sourcePath": "packages/application/src/degree-level/DegreeLevelSeedService.ts",
+        "sourceVersion": "degree-level-baseline-v1",
+        "expected": {
+          "DegreeLevel": {
+            "exact": 7
+          }
+        },
+        "provenance": "MANARATAK governed education reference baseline",
+        "sourceSha256": "1a5e1fade135f73d08d89a16931a7e3c554ee00d1fb49ef85040f65807df62b5",
+        "scriptSha256": "d2992d427757d090786f83f6466a8df95964c4b6fcf6804fd3fbc8366f26f5a0"
+      },
+      {
+        "id": "academic-taxonomy-isced-f",
+        "order": 50,
+        "required": true,
+        "owner": "academic_taxonomy",
+        "state": "READY",
+        "script": "scripts/seed-taxonomy.ts",
+        "sourcePath": "packages/domain/src/academic-taxonomy/isced-f-baseline.ts",
+        "sourceVersion": "UNESCO-UIS-ISCED-F-2013",
+        "expected": {
+          "AcademicTaxonomyNode": {
+            "exact": 163
+          },
+          "AcademicTaxonomyEdge": {
+            "exact": 152
+          },
+          "AcademicTaxonomyAlias": {
+            "exact": 39
+          }
+        },
+        "provenance": "UNESCO UIS ISCED-F 2013",
+        "sourceSha256": "db396914f498c7dca5eadd93dc693ba26b799d6d0642271f2612c556463a1893",
+        "scriptSha256": "3711b2a8c8fb7955305b5182f890544d98ecc6def501c07bb571948a69bf751e"
+      },
+      {
+        "id": "external-course-providers",
+        "order": 60,
+        "required": true,
+        "owner": "learning",
+        "state": "READY",
+        "script": "scripts/seed-external-course-providers.ts",
+        "sourcePath": "packages/infrastructure/src/courses/ExternalCourseProviderSeed.ts",
+        "sourceVersion": "course-provider-registry-v1",
+        "expected": {
+          "ExternalCourseProvider": {
+            "minimum": 18
+          }
+        },
+        "provenance": "Reviewed MANARATAK external course provider registry",
+        "sourceSha256": "279ab69f7cb5a589d946c7cdbd3d1de389bd21405b364a1ae74255526e7d73f3",
+        "scriptSha256": "fe7631274bccea32e32e298433c3b13f67f8d6828cef61a68ea0930ade39808d"
+      },
+      {
+        "id": "student-tools-registry",
+        "order": 70,
+        "required": true,
+        "owner": "student_tools",
+        "state": "READY",
+        "script": "scripts/bootstrap-phase18-student-tools.ts",
+        "sourcePath": "packages/application/src/student-tools/OfficialStudentToolRegistry.ts",
+        "sourceVersion": "phase18-official-registry-v2-section19",
+        "expected": {
+          "StudentToolDefinitionRecord": {
+            "exact": 83
+          }
+        },
+        "provenance": "Phase 18 official student-tools registry",
+        "sourceSha256": "d5af8c7452d5ac9cd67495ba1fe92093634fd52abbeac1bb082d6187c7c11cf9",
+        "scriptSha256": "aa5fe0e33861bc3565f65b37030d416c5aa9d9635f5f1d64a3d13985ab080f0c"
+      }
+    ],
+    "checks": {
+      "taxonomyNodeKeysUnique": true,
+      "taxonomyEdgesResolve": true,
+      "taxonomyAcyclic": true,
+      "taxonomyAliasesResolve": true,
+      "studentToolKeysUnique": true,
+      "providerIdsAndSlugsUnique": true
+    },
+    "expected": {
+      "degreeLevels": 7,
+      "taxonomyNodes": 163,
+      "taxonomyEdges": 152,
+      "taxonomyAliases": 39,
+      "providers": 18,
+      "studentToolDefinitions": 83,
+      "studentToolVersions": 83,
+      "studentToolDependencies": 4
+    },
+    "intentionallyMutableProtectedTables": [
+      "StudentToolDefinitionRecord",
+      "StudentToolVersionRecord",
+      "StudentToolDependencyRecord"
+    ],
+    "boundaries": [
+      "Existing seed commands and owner repositories only",
+      "Restricted application role with strict TLS to independent target",
+      "No student execution, student records, certificates, payment, admin credential or external provider calls",
+      "Separate source-bound delegated authorization and verified pre-baseline backup before any execution",
+      "Existing student-tool rows must exactly match source and attributed audit/outbox before recovery skips; no repeated upsert",
+      "All other protected rows and existing reference fingerprints must stay unchanged"
+    ]
+  },
+  "liveBaselineReadOnlyObservation": {
+    "observedAt": "2026-10-22T20:54:22.243Z",
+    "databaseWrites": 0,
+    "ownRoleSessions": [
+      {
+        "application": "",
+        "state": "idle in transaction",
+        "waitType": "Client",
+        "waitEvent": "ClientRead",
+        "queryAgeSeconds": 177,
+        "transactionAgeSeconds": 185,
+        "catalogPatternExpansion": false,
+        "copyStatement": false
+      },
+      {
+        "application": "pg_dump",
+        "state": "idle in transaction",
+        "waitType": "Client",
+        "waitEvent": "ClientRead",
+        "queryAgeSeconds": 25,
+        "transactionAgeSeconds": 173,
+        "catalogPatternExpansion": false,
+        "copyStatement": true
+      }
+    ],
+    "baselineCounts": {
+      "DegreeLevel": 0,
+      "AcademicTaxonomyNode": 0,
+      "ExternalCourseProvider": 18,
+      "StudentToolDefinitionRecord": 0
+    }
+  },
+  "backup": {
+    "accepted": false,
+    "restoreRehearsalPerformed": false,
+    "parallelDumpStarted": false,
+    "readOnlyPreparationFailures": [
+      {
+        "at": "2026-10-22T20:50:35.034Z",
+        "category": "TIMEOUT",
+        "databaseWrites": 0
+      },
+      {
+        "at": "2026-10-22T20:55:26.067Z",
+        "category": "TIMEOUT",
+        "databaseWrites": 0
+      },
+      {
+        "at": "2026-10-22T21:26:32.138Z",
+        "category": "TIMEOUT",
+        "databaseWrites": 0
+      },
+      {
+        "at": "2026-10-22T21:27:34.493Z",
+        "category": "SERVER_CLOSED_CONNECTION",
+        "databaseWrites": 0
+      }
+    ],
+    "partialArchives": [
+      {
+        "name": "before-required-baseline-4d62f332.dump",
+        "bytes": 1773568,
+        "safeForRestore": false
+      },
+      {
+        "name": "before-required-baseline-4d62f332-snapshot.dump",
+        "bytes": 0,
+        "safeForRestore": false
+      },
+      {
+        "name": "before-required-baseline-4d62f332-snapshot-union.dump",
+        "bytes": 1695744,
+        "safeForRestore": false
+      },
+      {
+        "name": "before-required-baseline-4d62f332-uncompressed.dump",
+        "bytes": 4935680,
+        "safeForRestore": false
+      }
+    ],
+    "volume": {
+      "observedAt": "2026-10-22T21:21:56.206Z",
+      "databaseWrites": 0,
+      "volume": {
+        "auditRows": 1886,
+        "auditJsonBytes": 2142394,
+        "outboxRows": 1886,
+        "outboxJsonBytes": 1646095
+      }
+    },
+    "reason": "Serial transfer exceeded bounded deadlines. Parallel preparation then failed when the server closed the connection before export/dump startup. No valid backup receipt or apply preflight exists. Partial archives remain private and rejected."
+  },
+  "localLab": {
+    "runId": "0d4b417d-d782-4e31-bb22-0c795be8d4b8",
+    "postgresMajor": 16,
+    "status": "EMPTY_TARGETS_VERIFIED",
+    "runtimeStatus": "STOPPED",
+    "restoreRehearsalPerformed": false,
+    "existingDatabasesTouched": false,
+    "provisioningOnly": true
+  },
+  "operatorSource": {
+    "kind": "PRIVATE_EPHEMERAL_OPERATOR_SOURCE_MANIFEST",
+    "sourceSha": "4d62f332f2d5e72fe98fc5253df327d167d1d4c9",
+    "files": [
+      {
+        "name": "run-required-baseline.mjs",
+        "sha256": "a122b7ccfae6714f3112bfacd59811ea24a8a7043b73f1f472ce2990b7a9e3ae"
+      },
+      {
+        "name": "snapshot-backup-parallel.ts",
+        "sha256": "ffe01da76bc7d8d6769f0b27e6cc9ff14576f5d5bfbbab7f6e2c978a871a8e41"
+      },
+      {
+        "name": "backup-digest.mjs",
+        "sha256": "3916dac0e2003564bd96b634885b7dac4d30883bc23c032d02bd3d2d9bbdadb1"
+      },
+      {
+        "name": "restore-backup.mjs",
+        "sha256": "c374d7f544ef63fd41b51f5576ae9935e266d200df854bb8a8e4bd542e7fc9d2"
+      },
+      {
+        "name": "install-student-tool-baseline.ts",
+        "sha256": "6137ee3cec8831aa4c7bc07f014d0df031609c5946b1d547f00151aa4731e491"
+      },
+      {
+        "name": "verify-installed-baseline.ts",
+        "sha256": "166c4390c7b4df2b0a42e129ecdf59ae32d367fb23638f065d5ad980b0bf4fc9"
+      },
+      {
+        "name": "reconcile-existing-providers.ts",
+        "sha256": "e238555dad9759f4dd3104afb7d335e3692f7c8c3f14a4a6d202e35204ace817"
+      }
+    ],
+    "credentialsIncluded": false
+  },
+  "verification": {
+    "parserTestsPreviouslyPassed": 10,
+    "parserTestsRerunThisContinuation": false,
+    "parserLintPreviouslyPassed": true,
+    "unrelatedSuitesRerun": false,
+    "operatorJavascriptSyntaxChecked": 3,
+    "operatorTypeScriptSyntaxTranspileChecked": 4,
+    "operatorFullTypeCheckClaimed": false,
+    "ciResultVerified": false
+  },
+  "next": [
+    "Rebind preparation to the next clean reviewed source and current authorization; do not reuse stale preflight or expired configuration.",
+    "Obtain a complete PostgreSQL 16 backup over a stable connection, decode fully, then restore into the newly isolated local lab and compare all table contents with the unmodified source.",
+    "Only after the recovery gate, apply degree/taxonomy/student-tool baseline and verify protected data; preserve existing references and providers.",
+    "Continue bounded P06 source-field review independently; do not approve quarantined or unverified ancillary city fields."
+  ],
+  "exclusions": {
+    "adminBootstrapped": false,
+    "bulkCatalogsImported": false,
+    "regionsImported": false,
+    "citiesImported": false,
+    "studentToolsExecuted": false,
+    "externalProvidersExecuted": false,
+    "productionDeployed": false,
+    "existingMigrationsModified": false,
+    "oldNeonAccessed": false
+  }
+}

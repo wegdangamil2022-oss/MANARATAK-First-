@@ -1,0 +1,1130 @@
+{
+  "kind": "P06_GEOGRAPHY_SOURCE_PREPARATION",
+  "sourceSha": "4d62f332f2d5e72fe98fc5253df327d167d1d4c9",
+  "observedAt": "2026-10-22T20:42:49.947Z",
+  "databaseConnections": 0,
+  "databaseWrites": 0,
+  "sourceArtifacts": [
+    {
+      "path": "workspace/reference-data/cities/africa/MANARATAK_Africa_Cities_All_Combined.csv",
+      "sha256": "0e4238618a0d739ca97d0c4c4904a680d125106cd81af07f8219f1e1ea4a53ba",
+      "rows": 1888
+    },
+    {
+      "path": "workspace/reference-data/cities/americas/MANARATAK_Americas_Cities_All_Combined.csv",
+      "sha256": "d8d369c96ad9d325bfd074604795b71fa0e287e817b1c82cfc5a86ad8593ba12",
+      "rows": 2548
+    },
+    {
+      "path": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+      "sha256": "b73b64e99a0892b26fb2295c612594a2589ccc8067cd9f7e810a6c20554060a0",
+      "rows": 3474
+    },
+    {
+      "path": "workspace/reference-data/cities/europe/MANARATAK_Europe_Cities_All_Combined.csv",
+      "sha256": "8e724b7e7c0260e2d84510850b79f09102b3f654bcc03da965009071a9a21fec",
+      "rows": 2672
+    },
+    {
+      "path": "workspace/reference-data/cities/oceania/22_cities_oceania.csv",
+      "sha256": "44ccdae2880d81feaf2c9a9a6264f8b93763317732bcef64b902cb1360fc9211",
+      "rows": 94
+    },
+    {
+      "path": "workspace/reference-data/regions/africa/01_admin_regions_africa.csv",
+      "sha256": "f2b6b32deabdd120562c9e7b7dc7eefa6597d212e372486a24cdbc1373ac1d0b",
+      "rows": 1117
+    },
+    {
+      "path": "workspace/reference-data/regions/americas/MANARATAK_Americas_Admin_Regions.csv",
+      "sha256": "e4ccd1da7d28dc3fa5fa15724995724f98025b70ab2565bf51a050120a427627",
+      "rows": 638
+    },
+    {
+      "path": "workspace/reference-data/regions/asia/02_admin_regions_asia.csv",
+      "sha256": "b1721ca908bcd01cf03b6908de298daa6f000e42a98797673a7b89336c0b61c1",
+      "rows": 1165
+    },
+    {
+      "path": "workspace/reference-data/regions/europe/MANARATAK_Europe_Admin_Regions.csv",
+      "sha256": "72d179a2714bf7e0f95cc3fca97f05ba7cad371dbefb3460fb0e3975e6a87808",
+      "rows": 1914
+    },
+    {
+      "path": "workspace/reference-data/regions/oceania/05_admin_regions_oceania.csv",
+      "sha256": "6ea98cb5ce84cc2c85bbd4e664cd559568da5f82d803fe65079ea20a86fb0f47",
+      "rows": 169
+    }
+  ],
+  "sourceTotals": {
+    "regions": 5003,
+    "cities": 10676
+  },
+  "history": [
+    {
+      "path": "workspace/reports/geography-closeout/2026-10-13/summary.json",
+      "sha256": "c39349bddb726581d81b73c7afa0bdd1d9d761a9a8cf1222c303163fe376f30d",
+      "cityCount": 9992,
+      "regionCount": null,
+      "referenceOnly": true,
+      "bindings": []
+    },
+    {
+      "path": "workspace/reports/university-location-verification/2026-10-14/summary.json",
+      "sha256": "720374e0f978b6346085296949009d37e169139c4db3c2654e684b5b0ee4b650",
+      "cityCount": 10610,
+      "regionCount": 5003,
+      "referenceOnly": true,
+      "bindings": []
+    },
+    {
+      "path": "workspace/reports/university-location-workbook/2026-10-14-batch12/summary.json",
+      "sha256": "fb6ffd2cb8a0e5a25104a6d927e37235b92b9726afc1a021bb6a18e13cf82dde",
+      "cityCount": 10676,
+      "regionCount": 5003,
+      "referenceOnly": true,
+      "bindings": []
+    },
+    {
+      "path": "workspace/reports/geography-research-restoration/2026-10-13/summary.json",
+      "sha256": "821a369cf6b56f31b228a4082db49819377c40a6581a8f2958b52c2d7148032a",
+      "cityCount": null,
+      "regionCount": null,
+      "referenceOnly": true,
+      "bindings": [
+        {
+          "path": "workspace/reference-data/regions/africa/01_admin_regions_africa.csv",
+          "matchesCurrent": true
+        },
+        {
+          "path": "workspace/reference-data/regions/americas/MANARATAK_Americas_Admin_Regions.csv",
+          "matchesCurrent": true
+        },
+        {
+          "path": "workspace/reference-data/regions/asia/02_admin_regions_asia.csv",
+          "matchesCurrent": true
+        },
+        {
+          "path": "workspace/reference-data/regions/europe/MANARATAK_Europe_Admin_Regions.csv",
+          "matchesCurrent": true
+        },
+        {
+          "path": "workspace/reference-data/regions/oceania/05_admin_regions_oceania.csv",
+          "matchesCurrent": true
+        },
+        {
+          "path": "workspace/reference-data/cities/africa/MANARATAK_Africa_Cities_All_Combined.csv",
+          "matchesCurrent": true
+        },
+        {
+          "path": "workspace/reference-data/cities/americas/MANARATAK_Americas_Cities_All_Combined.csv",
+          "matchesCurrent": true
+        },
+        {
+          "path": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+          "matchesCurrent": true
+        },
+        {
+          "path": "workspace/reference-data/cities/europe/MANARATAK_Europe_Cities_All_Combined.csv",
+          "matchesCurrent": true
+        },
+        {
+          "path": "workspace/reference-data/cities/oceania/22_cities_oceania.csv",
+          "matchesCurrent": true
+        },
+        {
+          "path": "workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx",
+          "matchesCurrent": true
+        },
+        {
+          "path": "workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx",
+          "matchesCurrent": true
+        },
+        {
+          "path": "workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx",
+          "matchesCurrent": true
+        },
+        {
+          "path": "workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx",
+          "matchesCurrent": true
+        },
+        {
+          "path": "workspace/import-sources/universities/stage-1/Oceania_Universities_Import_English_14_Countries_COMPLETE.xlsx",
+          "matchesCurrent": true
+        },
+        {
+          "path": "workspace/import-sources/universities/stage-1/South_America_Universities_Import_English_12_Countries_COMPLETE.xlsx",
+          "matchesCurrent": true
+        }
+      ]
+    }
+  ],
+  "priorQuarantine": {
+    "artifact": "workspace/reports/geography-closeout/2026-10-13/city-quarantine.jsonl",
+    "sha256": "e2c111003ba1bd5cef30abd389588c521618ab1211aed778399124340dd9e182",
+    "total": 119,
+    "reappearingInCurrentSources": 2,
+    "decisions": [
+      {
+        "sourceCityId": "city_et_sodo",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_et_arba_minch",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_et_hosa_ina",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_et_dila",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_et_boditi",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_yt_mamoudzou",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_re_saint_denis",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_aw_oranjestad",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_ky_george_town",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_cw_willemstad",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_gf_cayenne",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_gf_saint_laurent_du_maroni",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_gf_kourou",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_gp_pointe_a_pitre",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_mq_fort_de_france",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_pr_san_juan",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_pr_aguadilla",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_pr_bayamon",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_pr_carolina",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_pr_arecibo",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_pr_ponce",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_pr_san_german",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_pr_mayaguez",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_pr_caguas",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_pr_guaynabo",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_pr_juana_diaz",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_pr_fajardo",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_vg_road_town",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_hk_central",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_hk_hong_kong",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_hk_kennedy_town",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_hk_kowloon",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_hk_kowloon_000061",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_hk_lam_tin",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_hk_san_tung_chung_hang",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_hk_sha_tin",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_hk_sham_shui_po",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_hk_tin_shui_wai",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_hk_tsing_yi_town",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_mo_macau",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_sg_singapore",
+        "presentInCurrentSources": true,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": "SG-NATIONAL",
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_bade",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_caotun",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_changhua",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_chaozhou",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_chiayi",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_dongshan",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_douliu",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_hemei",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_hsinchu",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_hualien",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_hukou",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_huwei",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_jian",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_jincheng",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_kaohsiung",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_keelung",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_lugang",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_luodong",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_magong",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_miaoli",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_minxiong",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_nantou",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_neibu",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_pingtung",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_pingzhen",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_puli",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_taibao",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_taichung",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_tainan",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_taipei",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_taitung",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_taoyuan_district",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_toufen",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_xihu",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_xinfeng",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_yangmei",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_yilan",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_yuanlin",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_zhongli",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_zhubei",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_zhudong",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_zhunan",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_tw_zhushan",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_fo_torshavn",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_gg_saint_peter_port",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_im_douglas",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_je_saint_helier",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_pristina",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_prizren",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_ferizaj",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_peje",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_gjakove",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_gjilan",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_podujeve",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_mitrovice",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_lipjan",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_vushtrri",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_suhareke",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_gllogovc",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_rahovec",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_skenderaj",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_viti",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_fushe_kosove",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_istog",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_kline",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_kamenice",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_dragash",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_kacanik",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_shtime",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_leposaviq",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_zvecan",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_zubin_potok",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_xk_shterpce",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_mc_monaco",
+        "presentInCurrentSources": true,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": "MC-NATIONAL",
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_mk_skopje",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_no_tromso",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_no_harstad",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      },
+      {
+        "sourceCityId": "city_no_alta",
+        "presentInCurrentSources": false,
+        "reason": "COUNTRY_SCOPE_OR_ADMINISTRATIVE_REGION_REVIEW_REQUIRED",
+        "currentRegionCode": null,
+        "status": "HELD_UNTIL_EXPLICIT_REVIEW_OF_PRIOR_QUARANTINE"
+      }
+    ]
+  },
+  "universitySourceEvidence": {
+    "path": "workspace/import-sources/reconciliation/m10-12-14/universities-geography.jsonl",
+    "sha256": "1298da80e7ecf29e1f2299f3db1c72a708c221f7f55fcd1acf05beb9ba5975dc",
+    "rows": 170
+  },
+  "pilot": [
+    {
+      "universitySourceReferenceId": "INS-CHN-0001",
+      "officialName": "Peking University",
+      "universitySourceKey": "workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx#1189",
+      "universitySourceRowHash": "4251bd387fdbb843cb920632f05b1d0ec646a7e31baca38808a63ba306f90891",
+      "sourceMatchState": "SOURCE_MATCHED",
+      "citySourceId": "city_cn_beijing",
+      "cityName": "Beijing",
+      "countryIso2": "CN",
+      "citySourceFile": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+      "citySourceRowNumber": 195,
+      "citySourceRowHash": "33bb84d576d0f2240b5e5e21db2b08c8944c81775d9284c30da5f6fd12737ef0",
+      "regionSourceId": "reg_cn_bj",
+      "regionCode": "CN-BJ",
+      "regionSourceFile": "workspace/reference-data/regions/asia/02_admin_regions_asia.csv",
+      "regionSourceRowNumber": 233,
+      "regionSourceRowHash": "665c083d0c54d515208faee754666f0f48e45f3521a096e9d291c2ce2705a97f",
+      "priorQuarantine": false,
+      "status": "SOURCE_CANDIDATE_NOT_IMPORT_APPROVED",
+      "requiredNext": "Validate official geography and owner source-bound review; resolve canonical target country/region identities; use region owner command before city P7 review/apply.",
+      "canonicalCityId": null,
+      "canonicalRegionId": null
+    },
+    {
+      "universitySourceReferenceId": "INS-CHN-0003",
+      "officialName": "Tsinghua University",
+      "universitySourceKey": "workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx#1191",
+      "universitySourceRowHash": "0ea1de796c6f107a8128d6f3a899387dd6a76ad156187b3cf3f9b1606921ad89",
+      "sourceMatchState": "SOURCE_MATCHED",
+      "citySourceId": "city_cn_beijing",
+      "cityName": "Beijing",
+      "countryIso2": "CN",
+      "citySourceFile": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+      "citySourceRowNumber": 195,
+      "citySourceRowHash": "33bb84d576d0f2240b5e5e21db2b08c8944c81775d9284c30da5f6fd12737ef0",
+      "regionSourceId": "reg_cn_bj",
+      "regionCode": "CN-BJ",
+      "regionSourceFile": "workspace/reference-data/regions/asia/02_admin_regions_asia.csv",
+      "regionSourceRowNumber": 233,
+      "regionSourceRowHash": "665c083d0c54d515208faee754666f0f48e45f3521a096e9d291c2ce2705a97f",
+      "priorQuarantine": false,
+      "status": "SOURCE_CANDIDATE_NOT_IMPORT_APPROVED",
+      "requiredNext": "Validate official geography and owner source-bound review; resolve canonical target country/region identities; use region owner command before city P7 review/apply.",
+      "canonicalCityId": null,
+      "canonicalRegionId": null
+    },
+    {
+      "universitySourceReferenceId": "INS-HUN-0006",
+      "officialName": "Eötvös Loránd University",
+      "universitySourceKey": "workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx#629",
+      "universitySourceRowHash": "f78fb160fb404539162765aaf7034841f837eebea9713cf064680f1894b692cd",
+      "sourceMatchState": "SOURCE_MATCHED",
+      "citySourceId": "city_hu_budapest",
+      "cityName": "Budapest",
+      "countryIso2": "HU",
+      "citySourceFile": "workspace/reference-data/cities/europe/MANARATAK_Europe_Cities_All_Combined.csv",
+      "citySourceRowNumber": 863,
+      "citySourceRowHash": "d07c206764e870a6d0905d623a8b8110ba75e1a02e89a1ba2beb4414556ac89f",
+      "regionSourceId": "reg_hu_bu",
+      "regionCode": "HU-BU",
+      "regionSourceFile": "workspace/reference-data/regions/europe/MANARATAK_Europe_Admin_Regions.csv",
+      "regionSourceRowNumber": 784,
+      "regionSourceRowHash": "63253081d41a79a933ad060821d890633cbfbf5bfcc86127910a8e82e9ce6dd9",
+      "priorQuarantine": false,
+      "status": "SOURCE_CANDIDATE_NOT_IMPORT_APPROVED",
+      "requiredNext": "Validate official geography and owner source-bound review; resolve canonical target country/region identities; use region owner command before city P7 review/apply.",
+      "canonicalCityId": null,
+      "canonicalRegionId": null
+    },
+    {
+      "universitySourceReferenceId": "INS-TUR-0145",
+      "officialName": "Middle East Technical University",
+      "universitySourceKey": "workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx#2236",
+      "universitySourceRowHash": "c50d1171fb0b842419edbf54ea6186241def4c4de3b52fce0916b6107cb6b05e",
+      "sourceMatchState": "SOURCE_MATCHED",
+      "citySourceId": "city_tr_ankara",
+      "cityName": "Ankara",
+      "countryIso2": "TR",
+      "citySourceFile": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+      "citySourceRowNumber": 2481,
+      "citySourceRowHash": "044adb7e58a070dbca59e732ddb606eb82c50e7b36b2a4c144d93a22043369a2",
+      "regionSourceId": "reg_tr_06",
+      "regionCode": "TR-06",
+      "regionSourceFile": "workspace/reference-data/regions/asia/02_admin_regions_asia.csv",
+      "regionSourceRowNumber": 991,
+      "regionSourceRowHash": "5cc39e30876a6f0a2c9feb7780721e6c9a88ec5924ef05aef2a6bd244989e5e9",
+      "priorQuarantine": false,
+      "status": "SOURCE_CANDIDATE_NOT_IMPORT_APPROVED",
+      "requiredNext": "Validate official geography and owner source-bound review; resolve canonical target country/region identities; use region owner command before city P7 review/apply.",
+      "canonicalCityId": null,
+      "canonicalRegionId": null
+    }
+  ],
+  "allCitySourcesStillRequireManualReview": true,
+  "sourceMatchingIsNotFactualApproval": true,
+  "rawSourcesUnmodified": true,
+  "remaining": [
+    "No city owner approval created",
+    "No official-geography verification claimed",
+    "No regions/cities imported",
+    "Prior quarantine is not released by a filled region code",
+    "Pilot is a bounded candidate list, not a source of invented UUIDs"
+  ],
+  "officialAddressEvidence": [
+    {
+      "universityName": "Middle East Technical University",
+      "citySourceId": "city_tr_ankara",
+      "url": "https://www.metu.edu.tr/contact-info",
+      "observedOn": "2026-10-22",
+      "evidence": "Official university contact page identifies Ankara, Türkiye.",
+      "limits": "Confirms institutional city/country only; does not approve all city metadata, region source identity or import."
+    },
+    {
+      "universityName": "Tsinghua University",
+      "citySourceId": "city_cn_beijing",
+      "url": "https://www.tsinghua.edu.cn/en/Contact.htm",
+      "observedOn": "2026-10-22",
+      "evidence": "Official undergraduate admissions contact page identifies Haidian District, Beijing, China.",
+      "limits": "Confirms institutional city/country only; does not approve all city metadata, region source identity or import."
+    }
+  ]
+}
