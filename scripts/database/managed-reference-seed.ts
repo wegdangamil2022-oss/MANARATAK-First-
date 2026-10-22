@@ -53,7 +53,7 @@ async function main(){
   const filename=path.join(storageRoot,bucket,locator.pathKey);fs.mkdirSync(path.dirname(filename),{recursive:true,mode:0o700});
   fs.writeFileSync(filename,JSON.stringify(input.records),{mode:0o600});await security.sanitize(locator);await security.scan(locator);
  }
- const live=await readDatabaseIdentity(process.env.DATABASE_URL,{provider:'NEON'});
+ const live=await readDatabaseIdentity(process.env.DATABASE_URL,{provider:'NEON'},undefined,managedReferenceTransactionOptions);
  // A managed endpoint includes network round trips inside the existing owner
  // transaction. Bound this operator client only; retain all atomicity/lock guards.
  const db=new PrismaClient({datasources:{db:{url:process.env.DATABASE_URL}},log:[{emit:'event',level:'query'}],errorFormat:'minimal',transactionOptions:managedReferenceTransactionOptions});

@@ -220,6 +220,21 @@ test('provider connection or authorization failure aborts before creating a SQL 
     {...opts,readProviderIdentity:createNeonProviderReader({NEON_API_KEY:'synthetic'},async()=>{throw new Error('403 synthetic');})}),
   /PROVIDER_READ_FAILED/);assert.equal(reads,0);
 });
+test('identity reader accepts a bounded managed budget without changing read-only commands',async()=>{
+  const calls=[];
+  const client={$connect:async()=>{},$disconnect:async()=>{},$transaction:async(fn,settings)=>{
+    assert.deepEqual(settings,{maxWait:30000,timeout:60000});
+    return fn({$executeRawUnsafe:async sql=>calls.push(sql),$queryRawUnsafe:async()=>[liveFor(expected)]});
+  }};
+  await readDatabaseIdentity(urlFor(g),expected,async()=>client,{maxWait:30000,timeout:60000});
+  assert.deepEqual(calls,['SET TRANSACTION READ ONLY',"SET LOCAL statement_timeout = '10000ms'"]);
+});
+test('identity reader refuses unbounded budgets before opening any connection',async()=>{
+  let constructed=0;
+  for(const budget of [{maxWait:30001,timeout:60000},{maxWait:10000,timeout:60001},{maxWait:10000,timeout:Infinity}])
+    await assert.rejects(readDatabaseIdentity(urlFor(g),expected,async()=>{constructed++;throw new Error('must not connect');},budget),/POST28_IDENTITY_BUDGET_INVALID/);
+  assert.equal(constructed,0);
+});
 test('migration/shadow require schema CREATE; missing role facts and catalog evidence are refused',()=>{
   assert.throws(()=>inspectNeonLiveIdentity(expected,{...liveFor(expected),schemaCreate:false}),/ROLE_GRANTS_REQUIRED/);
   for(const key of ['canConnect','schemaUsage','schemaCreate','ownsRelations']){

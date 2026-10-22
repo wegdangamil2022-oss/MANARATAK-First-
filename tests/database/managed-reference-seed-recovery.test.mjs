@@ -19,7 +19,7 @@ test('bounded replay reuses only matching owner, handoff and content identities'
   const rows=new Map([[identity.handoffKey,{...row,[field]:'changed'}]]);
   assert.throws(()=>cachedSeedReceipt(rows,identity));
  }
- assert.deepEqual(managedReferenceTransactionOptions,{maxWait:10000,timeout:60000});
+ assert.deepEqual(managedReferenceTransactionOptions,{maxWait:30000,timeout:60000});
  assert.equal(Object.isFrozen(managedReferenceTransactionOptions),true);
 });
 test('existing approved and applied owner reviews are reused without fabricating approval',()=>{

@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 export const recoveryHash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 // This budget belongs only to the managed development operator. Server-side
 // statement, lock and abandoned-transaction limits remain independently bounded.
-export const managedReferenceTransactionOptions=Object.freeze({maxWait:10000,timeout:60000});
+export const managedReferenceTransactionOptions=Object.freeze({maxWait:30000,timeout:60000});
 /** Reuse only an exact content-bound receipt loaded for this run's handoff keys. */
 export function cachedSeedReceipt(receipts,identity){
   const row=receipts.get(identity.handoffKey);

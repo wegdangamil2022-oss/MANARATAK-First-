@@ -69,7 +69,12 @@ async function createIdentityClient(url) {
   return new PrismaClient({datasources: {db: {url}}, log: [], errorFormat: 'minimal'});
 }
 
-export async function readDatabaseIdentity(url, expected, createClient=createIdentityClient) {
+export async function readDatabaseIdentity(url, expected, createClient=createIdentityClient,
+  transactionOptions={maxWait:10000,timeout:15000}) {
+  if(!Number.isInteger(transactionOptions?.maxWait)||transactionOptions.maxWait<10000||transactionOptions.maxWait>30000||
+    !Number.isInteger(transactionOptions?.timeout)||transactionOptions.timeout<15000||transactionOptions.timeout>60000)
+    throw new Error('POST28_IDENTITY_BUDGET_INVALID');
+  const settings={maxWait:transactionOptions.maxWait,timeout:transactionOptions.timeout};
   let client;
   let phase='construct';
   const failure=error=>Object.assign(new Error('POST28_IDENTITY_READ_FAILED'),{
@@ -85,7 +90,7 @@ export async function readDatabaseIdentity(url, expected, createClient=createIde
       await tx.$executeRawUnsafe('SET TRANSACTION READ ONLY');
       await tx.$executeRawUnsafe("SET LOCAL statement_timeout = '10000ms'");
       return tx.$queryRawUnsafe(expected?.provider==='NEON'?NEON_IDENTITY_SQL:IDENTITY_SQL);
-    },{maxWait:10000,timeout:15000});
+    },settings);
     if (rows.length !== 1) throw new Error('POST28_IDENTITY_ROW_REQUIRED');
     return rows[0];
   } catch (error) {
