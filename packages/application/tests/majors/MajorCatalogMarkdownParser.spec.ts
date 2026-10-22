@@ -1,8 +1,51 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { ImportTargetDomain } from '@manaratak/domain';
-import { MajorCatalogMarkdownParser } from '../../src/majors/services/MajorCatalogMarkdownParser';
+import { MajorCatalogKind, MajorCatalogMarkdownParser } from '../../src/majors/services/MajorCatalogMarkdownParser';
 
 describe('MajorCatalogMarkdownParser', () => {
+  it.each<{
+    file: string; kind: MajorCatalogKind; prefix: string; count: number;
+  }>([
+    { file: 'MANARATAK_Bachelor_Majors_By_Colleges_v1.0.md', kind: 'BACHELOR', prefix: 'MJR', count: 843 },
+    { file: 'MANARATAK_Master_Specializations_By_Academic_Fields_v1.0.md', kind: 'MASTER', prefix: 'MAS', count: 1116 },
+    { file: 'MANARATAK_Doctoral_Specializations_By_Academic_Fields_v1.0.md', kind: 'DOCTORATE', prefix: 'DOC', count: 1114 },
+    { file: 'MANARATAK_Fellowships_By_Professional_Domains_v1.0.md', kind: 'FELLOWSHIP', prefix: 'FEL', count: 329 },
+  ])('reads the actual $kind identity source without losing or duplicating codes', ({ file, kind, prefix, count }) => {
+    const source = readFileSync(new URL(`../../../../workspace/phase-10-major-catalogs/${file}`, import.meta.url), 'utf8');
+    const result = MajorCatalogMarkdownParser.parse(source, kind);
+
+    expect(result.rows).toHaveLength(count);
+    expect(result.rows.map(row => row.code)).toEqual(
+      Array.from({ length: count }, (_, index) => `${prefix}-${String(index + 1).padStart(4, '0')}`),
+    );
+    expect(result.rows.every(row => row.metadata.reviewStatus === 'NEEDS_REVIEW')).toBe(true);
+    if (kind !== 'FELLOWSHIP') {
+      expect(result.rows[0].academicFieldOrDiscipline).toBeUndefined();
+    }
+  });
+
+  it.each(['Excluded titles', 'Cross-listed majors'])('keeps the %s section and its subsections out of a flat catalog', stopHeading => {
+    const result = MajorCatalogMarkdownParser.parse(`
+# MANARATAK_Bachelor_Majors_By_Colleges_v1.0.md
+| MJR-0001 | علوم الحاسوب | Computer Science |
+## ${stopHeading}
+| MJR-9998 | مستبعد | Excluded |
+### Review notes
+| MJR-9999 | مكرر | Duplicate |
+`, 'BACHELOR');
+
+    expect(result.rows.map(row => row.code)).toEqual(['MJR-0001']);
+  });
+
+  it('does not treat a filename mentioned in an unrelated heading as a catalog', () => {
+    const result = MajorCatalogMarkdownParser.parse(`
+# Review of MANARATAK_Bachelor_Majors_By_Colleges_v1.0.md
+| MJR-9999 | مثال | Example |
+`, 'BACHELOR');
+    expect(result.rows).toEqual([]);
+  });
+
   it('parses bachelor catalog rows as major identity records', () => {
     const result = MajorCatalogMarkdownParser.parse(`
 ## 5. القائمة الكاملة حسب الكليات

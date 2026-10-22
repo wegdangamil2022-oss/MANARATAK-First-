@@ -54,8 +54,10 @@ export class MajorCatalogMarkdownParser {
     for (const line of lines) {
       const heading = this.extractHeading(line);
       if (heading) {
-        currentHeading = heading;
-        if (this.isCatalogStartHeading(heading)) {
+        const flatCatalogHeading = /^#\s/.test(line) && this.isFlatCatalogHeading(heading);
+        // A source filename opens its identity table, but is not an academic field.
+        currentHeading = flatCatalogHeading ? '' : heading;
+        if (flatCatalogHeading || this.isCatalogStartHeading(heading)) {
           catalogTableActive = true;
         } else if (this.isCatalogStopHeading(heading)) {
           catalogTableActive = false;
@@ -134,6 +136,14 @@ export class MajorCatalogMarkdownParser {
       || heading.includes('Complete Catalog')
       || heading.includes('Full Catalog')
       || heading.includes('Fellowship Catalog');
+  }
+
+  private static isFlatCatalogHeading(heading: string): boolean {
+    return [
+      'MANARATAK_Bachelor_Majors_By_Colleges_v1.0.md',
+      'MANARATAK_Master_Specializations_By_Academic_Fields_v1.0.md',
+      'MANARATAK_Doctoral_Specializations_By_Academic_Fields_v1.0.md',
+    ].includes(heading);
   }
 
   private static isCatalogStopHeading(heading: string): boolean {
