@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "db:seed:managed-references": "tsx scripts/database/managed-reference-seed.ts",
     "bootstrap": "npm install && npm run build",
     "dev": "npm run dev -w @manaratak/web",
     "dev:admin": "npm run dev -w @manaratak/admin",
