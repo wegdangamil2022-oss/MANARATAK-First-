@@ -1,0 +1,487 @@
+{
+  "kind": "TEST_BOOTSTRAP_DIAGNOSTIC_NOT_WRITE_PLAN",
+  "databaseWrites": 0,
+  "readyToWrite": false,
+  "sourceManifestSha256": "d2e38cfccdf540d7c5e8570718c9b689ffb0adb72a941062fa81a5e6ee015c3f",
+  "target": {
+    "environment": "independent-development",
+    "projectId": "hidden-smoke-02928871",
+    "branchId": "br-sweet-king-b9pem1dg",
+    "database": "neondb",
+    "observedAt": "2026-10-23",
+    "observationPrecision": "LOCAL_CALENDAR_DAY",
+    "providers": 0,
+    "families": 0,
+    "tests": 0,
+    "identities": 0,
+    "roles": 0,
+    "roleAssignments": 0,
+    "probeRoleRequested": "manaratak_probe",
+    "readOnlyTransaction": true,
+    "databaseWrites": 0,
+    "evidence": "Two successful read-only transactions in this turn. Later combined refresh returned a connector error; no newer successful observation is claimed."
+  },
+  "counts": {
+    "NEW_TEST": 9,
+    "REPLACE_EXISTING": 46,
+    "REVIEW_REQUIRED": 1
+  },
+  "entries": [
+    {
+      "sourceKey": "01_English_Language_Tests_12/Cambridge_English_Qualifications_2026_Complete_Data_AR.md",
+      "sourceClassification": "NEW_TEST",
+      "action": "CREATE_CANDIDATE_REQUIRES_REVIEW",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "01_English_Language_Tests_12/Duolingo_English_Test_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "01_English_Language_Tests_12/IELTS_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "01_English_Language_Tests_12/LanguageCert_Academic_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "01_English_Language_Tests_12/Linguaskill_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "01_English_Language_Tests_12/Michigan_English_Test_MET_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "01_English_Language_Tests_12/OET_2026_Complete_Data_AR.md",
+      "sourceClassification": "NEW_TEST",
+      "action": "CREATE_CANDIDATE_REQUIRES_REVIEW",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "01_English_Language_Tests_12/Oxford_Test_of_English_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "01_English_Language_Tests_12/PTE_Academic_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "01_English_Language_Tests_12/TOEFL_iBT_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "01_English_Language_Tests_12/TOEIC_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "01_English_Language_Tests_12/iTEP_Academic_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "02_Non_English_Language_Tests_13/CILS_Italian_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "02_Non_English_Language_Tests_13/Celpe_Bras_Brazilian_Portuguese_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "02_Non_English_Language_Tests_13/DELE_Spanish_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "02_Non_English_Language_Tests_13/DELF_DALF_French_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "02_Non_English_Language_Tests_13/HSK_Chinese_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "02_Non_English_Language_Tests_13/JLPT_Japanese_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "02_Non_English_Language_Tests_13/NT2_Netherlands_Dutch_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "02_Non_English_Language_Tests_13/Polish_State_Certificate_Poland_Polish_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "02_Non_English_Language_Tests_13/TOMER_Turkey_Turkish_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "02_Non_English_Language_Tests_13/TOPIK_Korean_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "02_Non_English_Language_Tests_13/TORFL_TRKI_Russian_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "02_Non_English_Language_Tests_13/TestDaF_German_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "02_Non_English_Language_Tests_13/UKBI_Indonesia_Indonesian_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "03_General_Undergraduate_Admission_Tests_4/ACT_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "03_General_Undergraduate_Admission_Tests_4/AP_Exams_2027_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "03_General_Undergraduate_Admission_Tests_4/CLT_Classic_Learning_Test_2026_2027_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "03_General_Undergraduate_Admission_Tests_4/SAT_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "04_Graduate_Admission_Tests_2/GMAT_Exam_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "04_Graduate_Admission_Tests_2/GRE_General_Test_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "05_National_International_Admission_Tests_Qualifications_11/A_Level_UK_International_2026_Unified_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "05_National_International_Admission_Tests_Qualifications_11/Abitur_Germany_2026_Unified_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "05_National_International_Admission_Tests_Qualifications_11/CSAT_South_Korea_2027_Unified_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "05_National_International_Admission_Tests_Qualifications_11/CSCA_China_2026_Unified_AR.md",
+      "sourceClassification": "REVIEW_REQUIRED",
+      "action": "HOLD_MANUAL_REVIEW",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "05_National_International_Admission_Tests_Qualifications_11/CUET_India_2026_Unified_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "05_National_International_Admission_Tests_Qualifications_11/EJU_Japan_2026_Unified_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "05_National_International_Admission_Tests_Qualifications_11/Gaokao_China_2026_Unified_AR.md",
+      "sourceClassification": "NEW_TEST",
+      "action": "CREATE_CANDIDATE_REQUIRES_REVIEW",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "05_National_International_Admission_Tests_Qualifications_11/IB_Diploma_Programme_2026_Unified_AR.md",
+      "sourceClassification": "NEW_TEST",
+      "action": "CREATE_CANDIDATE_REQUIRES_REVIEW",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "05_National_International_Admission_Tests_Qualifications_11/Matura_Multiple_European_Countries_2026_Unified_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "05_National_International_Admission_Tests_Qualifications_11/TR_YOS_Turkiye_2026_Unified_AR_REVISED.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "05_National_International_Admission_Tests_Qualifications_11/YKS_Turkey_2026_Unified_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "06_Specialized_Admission_Tests_10/DAT_United_States_Dental_Admission_2026.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "06_Specialized_Admission_Tests_10/GAMSAT_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "06_Specialized_Admission_Tests_10/IMAT_Italy_Medicine_Admission_2026.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "06_Specialized_Admission_Tests_10/JEE_Advanced_India_2026_Unified_AR.md",
+      "sourceClassification": "NEW_TEST",
+      "action": "CREATE_CANDIDATE_REQUIRES_REVIEW",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "06_Specialized_Admission_Tests_10/JEE_Main_India_2026_Unified_AR.md",
+      "sourceClassification": "NEW_TEST",
+      "action": "CREATE_CANDIDATE_REQUIRES_REVIEW",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "06_Specialized_Admission_Tests_10/LNAT_2026_2027_Unified_AR.md",
+      "sourceClassification": "NEW_TEST",
+      "action": "CREATE_CANDIDATE_REQUIRES_REVIEW",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "06_Specialized_Admission_Tests_10/LSAT_2026_2027_Unified_AR.md",
+      "sourceClassification": "NEW_TEST",
+      "action": "CREATE_CANDIDATE_REQUIRES_REVIEW",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "06_Specialized_Admission_Tests_10/MCAT_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "06_Specialized_Admission_Tests_10/NEET_UG_India_2026_Unified_AR.md",
+      "sourceClassification": "NEW_TEST",
+      "action": "CREATE_CANDIDATE_REQUIRES_REVIEW",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "06_Specialized_Admission_Tests_10/UCAT_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "07_Professional_Licensing_Certification_Tests_4/CPA_United_States_Accounting_Licensure_2026_Unified_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "07_Professional_Licensing_Certification_Tests_4/PLAB_United_Kingdom_Medical_Licensing_2026_Unified_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "07_Professional_Licensing_Certification_Tests_4/PMP_Project_Management_Professional_2026_Unified_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    },
+    {
+      "sourceKey": "07_Professional_Licensing_Certification_Tests_4/USMLE_United_States_Medical_Licensing_2026_Unified_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "action": "HOLD_HISTORICAL_REPLACE_WITHOUT_TARGET",
+      "targetId": null,
+      "providerId": null,
+      "familyId": null
+    }
+  ],
+  "requiredNext": [
+    "PROVISION_VERIFIED_DEVELOPMENT_ACTOR_THROUGH_IDENTITY_AUTHORIZATION_OWNER",
+    "CREATE_REVIEWED_PROVIDERS_THROUGH_ATOMIC_TEST_OWNER",
+    "RESOLVE_HISTORICAL_REPLACE_VS_EMPTY_TARGET_WITHOUT_EDITING_SOURCE",
+    "RESOLVE_ACTUAL_UUIDS_AND_PREVIEW_HASH",
+    "FRESH_RECOVERY_EVIDENCE_BEFORE_APPROVED_WRITE"
+  ],
+  "optionalFamilyPolicy": "familyId is optional in the write contract; do not invent a family UUID or bypass an owner to populate the table"
+}

@@ -1,0 +1,18 @@
+{
+  "environment": "independent-development",
+  "projectId": "hidden-smoke-02928871",
+  "branchId": "br-sweet-king-b9pem1dg",
+  "database": "neondb",
+  "observedAt": "2026-10-23",
+  "observationPrecision": "LOCAL_CALENDAR_DAY",
+  "providers": 0,
+  "families": 0,
+  "tests": 0,
+  "identities": 0,
+  "roles": 0,
+  "roleAssignments": 0,
+  "probeRoleRequested": "manaratak_probe",
+  "readOnlyTransaction": true,
+  "databaseWrites": 0,
+  "evidence": "Two successful read-only transactions in this turn. Later combined refresh returned a connector error; no newer successful observation is claimed."
+}
