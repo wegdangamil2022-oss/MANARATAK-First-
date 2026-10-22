@@ -108,7 +108,7 @@ async function applyReferences(db:PrismaClient,options:ApplyOptions){
   writeSeedEvidence(path.join(output,'recovery-start-'+Date.now()+'.json'),{sourceSha,priorState:prior,authorizationSha256:hash(fs.readFileSync(configFile))},{exclusive:true});
  }else writeSeedEvidence(statePath,state,{exclusive:true});
  const baseUnitOfWork=new PrismaAtomicPersistenceUnitOfWork(db);
- const boundedUnitOfWork:typeof baseUnitOfWork={execute:work=>baseUnitOfWork.execute(async context=>{
+ const boundedUnitOfWork:Pick<typeof baseUnitOfWork,'execute'>={execute:work=>baseUnitOfWork.execute(async context=>{
   const tx=(context as typeof context & {transactionClient:Prisma.TransactionClient}).transactionClient;
   // Bound server waits too: a lost client must not leave advisory locks open.
   await tx.$queryRaw`SELECT set_config('statement_timeout','10000',true) AS statement_timeout, set_config('lock_timeout','3000',true) AS lock_timeout, set_config('idle_in_transaction_session_timeout','30000',true) AS idle_timeout`;
