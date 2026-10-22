@@ -1,0 +1,64 @@
+{
+  "kind": "P09A_REFERENCE_BOOTSTRAP_REVIEW",
+  "authorization": "PROJECT_OWNER_DELEGATED_DATABASE_PREPARATION",
+  "independentHumanApproval": false,
+  "scope": {
+    "providers": 2,
+    "canonicalRoles": 2,
+    "identities": 0,
+    "roleAssignments": 0,
+    "tests": 0
+  },
+  "providers": [
+    {
+      "key": "ETS",
+      "displayName": "ETS",
+      "officialWebsite": "https://www.ets.org/",
+      "metadata": {
+        "reviewScope": "PROVIDER_IDENTITY_ONLY",
+        "officialEvidence": "https://www.ets.org/toefl.html"
+      }
+    },
+    {
+      "key": "IELTS_PARTNERSHIP",
+      "displayName": "IELTS (joint partnership)",
+      "officialWebsite": "https://ielts.org/",
+      "metadata": {
+        "reviewScope": "PROVIDER_IDENTITY_ONLY",
+        "officialEvidence": "https://ielts.org/about-ielts",
+        "jointOwners": [
+          "British Council",
+          "IDP IELTS",
+          "Cambridge University Press & Assessment"
+        ]
+      }
+    }
+  ],
+  "rbac": {
+    "owner": "ControlledRbacBaselineProvisioner",
+    "approvalPolicy": "SOLO_OWNER",
+    "authorizationBasis": "Existing project-owner delegation; operator attribution is explicit, not a second-person signature.",
+    "roleIds": [
+      "student",
+      "administrator"
+    ],
+    "roleAssignments": 0
+  },
+  "held": [
+    "real email verification",
+    "first administrator promotion and its distinct-approver gate",
+    "test creation",
+    "family creation",
+    "publication",
+    "fees and scores"
+  ],
+  "databaseWrites": 0,
+  "requiredBeforeApply": [
+    "clean source SHA",
+    "full fresh backup and new isolated restore comparison",
+    "restricted application role and TLS",
+    "empty provider and role target",
+    "actual atomic owner commands",
+    "preserve every previous row"
+  ]
+}
