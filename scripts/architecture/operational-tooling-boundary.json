@@ -198,6 +198,14 @@
       ],
       "review": "POST28 R02-core 2026-10-16; local and remote read-only source preparation, no Neon runtime, production or restore authority"
     },
+    "scripts/database/managed-reference-seed.ts": {
+      "purpose": "Restricted independent development currency/language/country bootstrap via existing Assets/P6/P7/Audit/Outbox; no production or legacy apply",
+      "access": "isolated-read-write",
+      "environment": ["Node22", "NODE_ENV=development", "Private source/schema/manifest/target-bound delegated-owner authorization", "Strict TLS and non-DDL application role", "Real signed native scanner and retained unchanged-schema proof"],
+      "gate": "Development target and private ACL verified before client creation; actual scanner and direct certificate-verified TLS plus read-only live identity; seed mutation gate; initially empty reference targets; existing/partial state fails closed for review",
+      "requiredSourceMarkers": ["validateManagedReferenceSeed", "validateManagedSeedIdentity", "privateSeedDirectory", "verifyManagedPostgresTls", "requireDatabaseMutationGate", "ReferenceOwnerReviewUseCases", "MANAGED_SEED_NONEMPTY_REFERENCE_TARGET", "MANAGED_SEED_PROTECTED_ROWS_CHANGED"],
+      "review": "Delegated project-owner development preparation 2026-10-22; source implementation self-review; no independent human review or production approval claimed"
+    },
     "scripts/database/post28-required-seed.ts": {
       "purpose": "Required-only local R04 seed using existing P7 reviewed owner commands, durable receipts and real asset lifecycle; no legacy SeedApply enablement",
       "access": "isolated-read-write",

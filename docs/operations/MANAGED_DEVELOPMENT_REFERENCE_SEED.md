@@ -25,6 +25,13 @@ and unchanged schema/migration files in source history. Project/branch identity
 comes from the prior provisioning evidence; this command does not claim a new
 provider API identity check.
 
+Neon's proxy can terminate TLS before the PostgreSQL backend. Preserve the actual
+`pg_stat_ssl` values in the identity receipt; do not relabel them. Independently
+negotiate PostgreSQL SSLRequest with the exact approved endpoint and require a
+trusted certificate/hostname and TLS 1.2 or 1.3. Retain that transport receipt,
+while the Prisma URI must still enforce strict TLS. The wire request follows
+[PostgreSQL 16 SSLRequest](https://www.postgresql.org/docs/16/protocol-message-formats.html#PROTOCOL-MESSAGE-FORMATS-SSLREQUEST).
+
 ## Private configuration and execution
 
 Set `MANAGED_REFERENCE_SEED_CONFIG` to an absolute private JSON file outside the

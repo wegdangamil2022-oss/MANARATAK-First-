@@ -26,10 +26,16 @@ test('live preflight requires least privilege and the same database OID and ledg
     schemaCreate:false,databaseCreate:false,databaseOwner:false,ownsRelations:false,superuser:false,createRole:false,createDatabase:false,
     replication:false,bypassRls:false,privilegedMembership:false,globalRead:false,globalWrite:false,otherSchemaCreate:false,
     probeReadOnly:true,canConnect:true,schemaUsage:true,unvalidatedConstraints:0,invalidIndexes:0};
-  validateManagedSeedIdentity(target,live,false);
+  const transport={host:target.host,authorized:true,protocol:'TLSv1.3',certificateFingerprint256:'AA:BB',verifiedAt:new Date().toISOString()};
+  validateManagedSeedIdentity(target,live,false,transport);
+  validateManagedSeedIdentity(target,{...live,tls:false},false,transport);
   for(const key of ['superuser','createRole','databaseCreate','schemaCreate','privilegedMembership','globalRead','ownsRelations']){
-    assert.throws(()=>validateManagedSeedIdentity(target,{...live,[key]:true},false),/MANAGED_SEED/);
+    assert.throws(()=>validateManagedSeedIdentity(target,{...live,[key]:true},false,transport),/MANAGED_SEED/);
   }
-  assert.throws(()=>validateManagedSeedIdentity(target,{...live,databaseOid:'2'},false),/MANAGED_SEED/);
-  assert.throws(()=>validateManagedSeedIdentity(target,live,true),/MANAGED_SEED/);
+  assert.throws(()=>validateManagedSeedIdentity(target,{...live,databaseOid:'2'},false,transport),/MANAGED_SEED/);
+  assert.throws(()=>validateManagedSeedIdentity(target,live,true,transport),/MANAGED_SEED/);
+  for(const changed of [undefined,{...transport,authorized:false},{...transport,host:'other'},
+    {...transport,protocol:'TLSv1.1'},{...transport,verifiedAt:new Date(Date.now()-120000).toISOString()}]){
+    assert.throws(()=>validateManagedSeedIdentity(target,live,false,changed),/MANAGED_SEED/);
+  }
 });

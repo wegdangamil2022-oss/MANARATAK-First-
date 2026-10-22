@@ -19,6 +19,8 @@ import { privateSeedDirectory, writeSeedEvidence } from './managed-reference-see
 import { readDatabaseIdentity } from './post28-preflight.mjs';
 // @ts-expect-error Shared mutation gate has no TS declaration.
 import { requireDatabaseMutationGate } from '../lib/database-mutation-gate.mjs';
+// @ts-expect-error PostgreSQL TLS probe has no TS declaration.
+import { verifyManagedPostgresTls } from './verify-managed-postgres-tls.mjs';
 
 async function main(){
  const mode=process.argv[2];
@@ -45,13 +47,14 @@ async function main(){
   const filename=path.join(storageRoot,bucket,locator.pathKey);fs.mkdirSync(path.dirname(filename),{recursive:true,mode:0o700});
   fs.writeFileSync(filename,JSON.stringify(input.records),{mode:0o600});await security.sanitize(locator);await security.scan(locator);
  }
+ const transport=await verifyManagedPostgresTls(process.env.DATABASE_URL);
  const live=await readDatabaseIdentity(process.env.DATABASE_URL,{provider:'NEON'});
  const db=new PrismaClient({datasources:{db:{url:process.env.DATABASE_URL}},log:[],errorFormat:'minimal'});
  try{
   const [{access}]=await db.$queryRaw<Array<{access:boolean}>>`SELECT has_table_privilege(current_user,'public._prisma_migrations','SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') AS access`;
-  validateManagedSeedIdentity(target,live,access);
+  validateManagedSeedIdentity(target,live,access,transport);
   const preflight={mode:'PREFLIGHT',pass:true,sourceSha,runId,target,records:inputs.reduce((n,x)=>n+x.records.length,0),databaseWrites:0,
-   schemaSha256:source.schemaSha256,schemaProofSha256:hash(fs.readFileSync(config.schemaProof)),scannerReceipts:security.receipts,live};
+   schemaSha256:source.schemaSha256,schemaProofSha256:hash(fs.readFileSync(config.schemaProof)),scannerReceipts:security.receipts,transport,live};
   writeSeedEvidence(path.join(output,'preflight.json'),preflight);
   if(mode==='preflight'){console.log(JSON.stringify(preflight));return;}
   await applyReferences(db,{inputs,security,storageRoot,bucket,output,sourceSha,runId,actorId,configFile});

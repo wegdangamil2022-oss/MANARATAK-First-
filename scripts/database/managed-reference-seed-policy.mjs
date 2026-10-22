@@ -30,9 +30,12 @@ export function validateManagedReferenceSeed(approval,source,rawUrl,env) {
     url.searchParams.has('schema')&&url.searchParams.get('schema')!=='public')fail();
   return {target,actorId:approval.actorId,runId:approval.runId};
 }
-export function validateManagedSeedIdentity(target,live,ledgerAccess) {
+export function validateManagedSeedIdentity(target,live,ledgerAccess,transport) {
+  const verified=Date.parse(transport?.verifiedAt);
+  if(transport?.host!==target.host||transport.authorized!==true||!['TLSv1.2','TLSv1.3'].includes(transport.protocol)||
+    !transport.certificateFingerprint256||!Number.isFinite(verified)||Math.abs(Date.now()-verified)>60000)fail();
   if(live?.database!==target.database||live.role!==target.role||live.sessionRole!==target.role||live.databaseOid!==target.databaseOid||
-    live.postgresMajor!==16||live.tls!==true||live.probeReadOnly!==true||live.canConnect!==true||live.schemaUsage!==true||
+    live.postgresMajor!==16||live.probeReadOnly!==true||live.canConnect!==true||live.schemaUsage!==true||
     live.unvalidatedConstraints!==0||live.invalidIndexes!==0||ledgerAccess!==false)fail();
   for(const key of ['superuser','createRole','createDatabase','replication','bypassRls','privilegedMembership','globalRead','globalWrite',
     'databaseOwner','databaseCreate','schemaCreate','otherSchemaCreate','ownsRelations'])if(live[key]!==false)fail();
