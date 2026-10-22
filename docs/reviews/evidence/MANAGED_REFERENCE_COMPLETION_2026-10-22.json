@@ -1,0 +1,42 @@
+{
+  "sourceSha": "75728732252ea37f320fca3f8a47a56826db7cf3",
+  "runId": "b37d7965-db25-4483-afc3-4c992a90ccb2",
+  "observedAt": "2026-10-22T19:16:25.602Z",
+  "pass": true,
+  "databaseWrites": 0,
+  "target": {
+    "projectId": "hidden-smoke-02928871",
+    "branchId": "br-sweet-king-b9pem1dg",
+    "database": "neondb",
+    "role": "manaratak_probe"
+  },
+  "counts": {
+    "currencies": 168,
+    "languages": 260,
+    "countries": 194,
+    "appliedReviews": 622,
+    "screeningReceipts": 622,
+    "aliasCommands": 20,
+    "aliases": 48,
+    "versions": 642,
+    "audit": 1886,
+    "outbox": 1886
+  },
+  "checks": {
+    "exactSourceFields": true,
+    "sourceHashesAndReceipts": true,
+    "allOwnerApprovalsApplied": true,
+    "countryDefaultsResolve": true,
+    "aliasesMatchSource": true,
+    "versionsComplete": true,
+    "auditOutboxEffectsMatchExactly": true,
+    "noDuplicateEffects": true,
+    "assetsActiveAndChecksumsMatch": true,
+    "protectedRowsUnchangedAtImportCompletion": true,
+    "invalidIndexes": 0,
+    "unvalidatedConstraints": 0
+  },
+  "responseSha256": "1661e2ec649278db374bff29abc69038ef34dd480692f7b788766c82ad22a901",
+  "elapsedMs": 68932,
+  "productionReady": false
+}
