@@ -1,0 +1,174 @@
+{
+  "kind": "P08A_FIRST_MAJOR_IDENTITIES_VERIFIED",
+  "pass": true,
+  "sourceSha": "3f6f343fae42afaa2652d190c25d180c607f6235",
+  "runId": "55b37c92-6006-4da5-91c9-82cdb33e58c9",
+  "observedAt": "2026-10-22T23:04:45.359Z",
+  "scope": {
+    "majors": 3,
+    "profiles": 3,
+    "versions": 3,
+    "published": 0
+  },
+  "all282PreexistingTableFingerprintsPreserved": true,
+  "protectedBaselineAndGeographyPreserved": true,
+  "audit": 9,
+  "outbox": 9,
+  "firstMajorReplayNoNewEffects": true,
+  "reviewSha256": "87dfd761d7ec824239217e56a29658f666e1e32f98b6fca5f1d0c385468fde66",
+  "operatorSha256": "9224eb9548b4b9f206034341062b2080f7b7ca1a627de9349c5e8f81330aaf0e",
+  "restrictedReadOnlyVerification": {
+    "role": "manaratak_probe",
+    "oid": "16395",
+    "version": 160015,
+    "readOnly": "on",
+    "superuser": false,
+    "createRole": false,
+    "createDatabase": false,
+    "bypassRls": false
+  },
+  "backup": {
+    "sha256": "98da618bfb9e05378db7a8b70108a709ec5010097302fcd47cf0fd4948284b72",
+    "format": "directory",
+    "parallelJobs": 2,
+    "bytes": 1953387,
+    "tableCount": 282,
+    "emptyTables": 259,
+    "nonemptyTables": 23,
+    "fullArchiveDecodeVerified": true,
+    "allTableDataIncluded": true,
+    "consistentSnapshot": true,
+    "elapsedMs": 154674
+  },
+  "restore": {
+    "kind": "P02_NEW_LOCAL_RECOVERY_REHEARSAL",
+    "sourceSha": "3f6f343fae42afaa2652d190c25d180c607f6235",
+    "runId": "55b37c92-6006-4da5-91c9-82cdb33e58c9",
+    "labRunId": "78593116-6e57-425e-ba10-591949d84400",
+    "observedAt": "2026-10-22T23:01:18.132Z",
+    "pass": true,
+    "sourceDatabaseWrites": 0,
+    "restoreTarget": "NEW_DISPOSABLE_LOCAL_POSTGRES16_ONLY",
+    "archiveSha256": "98da618bfb9e05378db7a8b70108a709ec5010097302fcd47cf0fd4948284b72",
+    "tableCount": 282,
+    "allTableCountsMatchPreBackupObservation": true,
+    "allTableDataFingerprintsMatchUnmodifiedManagedSource": true,
+    "fingerprintSha256": "68e05e897bc948bd630ede662fa757fc7ab8b758c340904a656c3ab9a99ea1b7",
+    "restrictedVerification": {
+      "role": "manaratak_restore_probe",
+      "superuser": false,
+      "createRole": false,
+      "createDatabase": false,
+      "bypassRls": false,
+      "readOnly": true,
+      "ownsRelations": false,
+      "invalidIndexes": 0,
+      "unvalidatedConstraints": 0,
+      "dataMutationPrivilege": false
+    },
+    "priorDatabasesTouched": false,
+    "extensionCommentPreservedAsAlreadyIdentical": true,
+    "excludedTocEntries": [
+      "7344; 0 0 COMMENT - EXTENSION pg_trgm "
+    ]
+  },
+  "sourceAsset": {
+    "id": "major-pilot-55b37c92-6006-4da5-91c9-82cdb33e58c9",
+    "sha256": "9ec3ff55f15d24748ac09d30bcd09263fa6debc7eb33efe2cbe83f0149ad3cbb",
+    "classification": "INTERNAL",
+    "retention": "PERMANENT_INTERNAL_IMPORT_PROVENANCE",
+    "storage": "PRIVATE_LOCAL_DEVELOPMENT_ONLY",
+    "scannerReceipts": [
+      {
+        "provider": "WINDOWS_DEFENDER",
+        "sha256": "9ec3ff55f15d24748ac09d30bcd09263fa6debc7eb33efe2cbe83f0149ad3cbb",
+        "exitCode": 0,
+        "digestUnchanged": true,
+        "clean": true,
+        "signatureVersion": "1.461.145.0",
+        "signatureUpdatedAt": "2026-10-21T23:33:44.0000000Z"
+      },
+      {
+        "provider": "WINDOWS_DEFENDER",
+        "sha256": "9ec3ff55f15d24748ac09d30bcd09263fa6debc7eb33efe2cbe83f0149ad3cbb",
+        "exitCode": 0,
+        "digestUnchanged": true,
+        "clean": true,
+        "signatureVersion": "1.461.145.0",
+        "signatureUpdatedAt": "2026-10-21T23:33:44.0000000Z"
+      },
+      {
+        "provider": "WINDOWS_DEFENDER",
+        "sha256": "9ec3ff55f15d24748ac09d30bcd09263fa6debc7eb33efe2cbe83f0149ad3cbb",
+        "exitCode": 0,
+        "digestUnchanged": true,
+        "clean": true,
+        "signatureVersion": "1.461.145.0",
+        "signatureUpdatedAt": "2026-10-21T23:33:44.0000000Z"
+      }
+    ]
+  },
+  "permittedRowDeltas": {
+    "Major": 3,
+    "MajorLevelProfile": 3,
+    "MajorVersion": 3,
+    "MajorAlias": 9,
+    "MajorClassificationMapping": 6,
+    "MajorSource": 3,
+    "ImportBatch": 1,
+    "ImportRecord": 3,
+    "AssetRecord": 1,
+    "ImportScreeningReceipt": 3,
+    "MajorImportOwnerReview": 3,
+    "AuditRecord": 9,
+    "TransactionalOutboxRecord": 9
+  },
+  "majors": [
+    {
+      "code": "MJR-0237",
+      "id": "76013de2-04de-4a72-8481-2f9b29bd9863",
+      "profileId": "70b3988b-6459-4f8f-b232-9a368596cbef",
+      "importRecordId": "rec-1d0ecc61-90ec-4da7-87e1-7847ba5bd8f7",
+      "receiptId": "2651bbea-57c5-49a0-b73d-d756fbe5c5c3",
+      "reviewId": "major-import-96ba16436c164fd925dcccc30f0ff9699fbc6631aa5a512edbff0d04b773fe93",
+      "previewHash": "aa8a14c8a3695ffccecbcfe0ea6189a01c84a5811ac3a759470304f9dce44a5a",
+      "reviewVersion": 2,
+      "canonicalName": "Computer Science",
+      "degreeLevelId": "0d1d8be9-ec7e-4a9b-a6d5-efaf6c2a244b",
+      "academicFieldId": "dd2b8ef3-0899-4b1c-aa0a-66d383050756",
+      "disciplineId": "3415a42e-01fa-4f0b-a247-e669e31a9bd9"
+    },
+    {
+      "code": "MJR-0238",
+      "id": "28c5ec7f-b3d7-4876-8dee-deb7d199b31b",
+      "profileId": "39dc1ba2-2718-489d-b809-e901d37d8bee",
+      "importRecordId": "rec-266e7a2e-8122-409e-adb8-5643e05bd5a7",
+      "receiptId": "26eee282-35d2-4467-a8c0-b61d5bde8c7e",
+      "reviewId": "major-import-43504d773f1857998761db527dc36b80d3facec18667405f4b1d95fd6cfc65b8",
+      "previewHash": "4f8fb1215ac82c1c03ee2a09035eb1ecb3992cdc23111c6370278b1ab4882230",
+      "reviewVersion": 2,
+      "canonicalName": "Information Technology",
+      "degreeLevelId": "0d1d8be9-ec7e-4a9b-a6d5-efaf6c2a244b",
+      "academicFieldId": "dd2b8ef3-0899-4b1c-aa0a-66d383050756",
+      "disciplineId": "3415a42e-01fa-4f0b-a247-e669e31a9bd9"
+    },
+    {
+      "code": "MJR-0239",
+      "id": "5c086c7c-9c71-4278-9b03-2c4aa9d9c975",
+      "profileId": "2a5974ab-8d5f-43a4-a10d-dcbb7bd9ef8d",
+      "importRecordId": "rec-615c86a6-7fb6-42a8-8b0a-246753b76667",
+      "receiptId": "a99fd7ac-4a41-4d54-b574-c1f348bb10fb",
+      "reviewId": "major-import-28ad84ad47c3950076a21b4cf73f1803f639f7dd12db6f6efbf7994ecfe3316b",
+      "previewHash": "52732bb189080df7b228408929e2c115cc5cacb9e3658eedee6a14d73d9daf99",
+      "reviewVersion": 2,
+      "canonicalName": "Information Systems",
+      "degreeLevelId": "0d1d8be9-ec7e-4a9b-a6d5-efaf6c2a244b",
+      "academicFieldId": "dd2b8ef3-0899-4b1c-aa0a-66d383050756",
+      "disciplineId": "3415a42e-01fa-4f0b-a247-e669e31a9bd9"
+    }
+  ],
+  "p6Status": "COMPLETE_SCREENING_DELIVERED_OWNER_REVIEWS_APPLIED",
+  "p6PromotedEntityBacklink": "PENDING_IMPORT_FOUNDATION_OWNER_INTEGRATION_NOT_FORGED",
+  "detailEnrichment": "PENDING",
+  "productionReady": false
+}

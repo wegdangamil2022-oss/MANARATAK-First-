@@ -14,7 +14,15 @@ describe('Bounded P10 read models and transaction boundaries',()=>{
  it('rejects import writes and source locks without the coordinator transaction',async()=>{const gateway=new PrismaMajorImportReviewGateway({} as any,{} as any);await expect(gateway.lock()).rejects.toThrow('TRANSACTION_REQUIRED');await expect(gateway.save({} as any)).rejects.toThrow('TRANSACTION_REQUIRED');await expect(gateway.apply({} as any,{boundaryId:'fake'})).rejects.toThrow('TRANSACTION_REQUIRED');});
  it('allocates after the numeric source maximum without changing source codes',()=>{const repo=new Phase10CatalogRepository({} as any);vi.spyOn(repo,'loadCatalog').mockReturnValue([{code:'MJR-0099'},{code:'MAS-0200'}] as any);expect(repo.maxCodeNumber('MJR')).toBe(99);expect(repo.maxCodeNumber('MAS')).toBe(200);});
 
- it('inspection keeps the major repository bound to the coordinator transaction and locks an existing target',async()=>{const query=vi.fn(async()=>[{revision:5n,status:'READY_TO_REVIEW'}]);const db:any={$queryRaw:query,major:{count:vi.fn(async()=>1)}};vi.spyOn(PrismaMajorRepository.prototype,'findByDedupKey').mockResolvedValue({id:'major',revision:5} as any);const references:any={assertPayloadReferencesActive:vi.fn()};const gateway=new PrismaMajorImportReviewGateway(db,references,true);expect(await gateway.inspect({canonicalMajorName:'Computing',degreeLevel:'BACHELOR'})).toEqual({targetId:'major',targetRevision:5});expect(query.mock.calls.some((call:any[])=>call[0].join('').includes('FOR UPDATE'))).toBe(true);});
+ it('inspection keeps the major repository bound to the coordinator transaction and locks an existing target',async()=>{
+  const query=vi.fn(async()=>[{revision:5n,status:'READY_TO_REVIEW'}]);const db:any={$queryRaw:query,major:{count:vi.fn(async()=>1)}};
+  vi.spyOn(PrismaMajorRepository.prototype,'findByDedupKey').mockResolvedValue({id:'major',revision:5} as any);
+  const references:any={assertPayloadReferencesActive:vi.fn(),assertDegreeMatches:vi.fn()};
+  const gateway=new PrismaMajorImportReviewGateway(db,references,true),degreeLevelId='11111111-1111-4111-8111-111111111111';
+  expect(await gateway.inspect({canonicalMajorName:'Computing',degreeLevel:'BACHELOR',degreeLevelId})).toEqual({targetId:'major',targetRevision:5});
+  expect(references.assertDegreeMatches).toHaveBeenCalledWith(degreeLevelId,'BACHELOR');
+  expect(query.mock.calls.some((call:any[])=>call[0].join('').includes('FOR UPDATE'))).toBe(true);
+ });
 
  it('uses the original P6 record ID for source history rather than the screening receipt ID',async()=>{const promote=vi.spyOn(MajorImportPromotionUseCase.prototype,'promote').mockResolvedValue({type:'CREATED',majorId:'major'});const db:any={$queryRaw:vi.fn(async()=>[{id:'original-record'}]),importScreeningReceipt:{findUnique:vi.fn(async()=>({ownerDomain:'MAJORS',result:{origin:{batchId:'batch',sourceDedupKey:'dedup'}}}))}};await new PrismaMajorImportReviewGateway(db,{} as any,true).apply({receiptId:'receipt',id:'review',payload:{canonicalMajorName:'Computing'}} as any,{boundaryId:'tx'});expect(promote).toHaveBeenCalledWith(expect.objectContaining({id:'original-record'}));expect(db.$queryRaw.mock.calls[0][0].join('')).toContain('FOR SHARE');});
 
