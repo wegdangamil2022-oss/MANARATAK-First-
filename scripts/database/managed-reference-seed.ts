@@ -54,7 +54,9 @@ async function main(){
  }
  const transport=await verifyManagedPostgresTls(process.env.DATABASE_URL);
  const live=await readDatabaseIdentity(process.env.DATABASE_URL,{provider:'NEON'});
- const db=new PrismaClient({datasources:{db:{url:process.env.DATABASE_URL}},log:[],errorFormat:'minimal'});
+ // A managed endpoint includes network round trips inside the existing owner
+ // transaction. Bound this operator client only; retain all atomicity/lock guards.
+ const db=new PrismaClient({datasources:{db:{url:process.env.DATABASE_URL}},log:[],errorFormat:'minimal',transactionOptions:{maxWait:10000,timeout:30000}});
  try{
   const [{access}]=await db.$queryRaw<Array<{access:boolean}>>`SELECT has_table_privilege(current_user,'public._prisma_migrations','SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') AS access`;
   validateManagedSeedIdentity(target,live,access,transport);

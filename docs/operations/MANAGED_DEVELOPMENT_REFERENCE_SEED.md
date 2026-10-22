@@ -100,6 +100,13 @@ replay applied work without new Audit/Outbox effects. Pending non-ACTIVE assets
 remain blocked for a separate lifecycle recovery. Private failure receipts retain
 redacted error details; console output never prints database errors or credentials.
 
+The managed operator client allows 10 seconds to acquire a transaction and a
+30-second interactive transaction budget. Actual Neon execution exposed Prisma
+`P2028` at its default 5-second budget (5321 ms during owner screening verification).
+This setting is scoped to this bootstrap client; it does not change application
+defaults, remove locks, weaken assertions, retry failed transactions automatically,
+or move canonical/Audit/Outbox writes outside their atomic boundary.
+
 Other required seeds (degree levels, academic taxonomy, provider registry and
 student tools), administrator bootstrap, restore rehearsal, private student asset
 storage and API/Web/Admin verification remain separate work. A passing reference
