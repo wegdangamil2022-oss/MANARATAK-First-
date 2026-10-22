@@ -22,7 +22,10 @@ export function screeningReceiptIdentity(handoff: UniversalImportHandoff) {
 }
 /** Receipts for pure screening only. No canonical write is admitted into this transaction. */
 export class PrismaImportScreeningReceiptStore implements IImportScreeningReceiptStore {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly transactionOptions: { maxWait?: number; timeout: number } = { timeout: 15_000 },
+  ) {}
   async find(handoff: UniversalImportHandoff) {
     const identity = screeningReceiptIdentity(handoff);
     const row = await this.prisma.importScreeningReceipt.findUnique({ where: {
@@ -47,6 +50,6 @@ export class PrismaImportScreeningReceiptStore implements IImportScreeningReceip
       await tx.importScreeningReceipt.create({ data: { id: randomUUID(), ...identity,
         result: stored === null ? Prisma.JsonNull : stored } });
       return result ?? null;
-    }, { timeout: 15_000 });
+    }, this.transactionOptions);
   }
 }

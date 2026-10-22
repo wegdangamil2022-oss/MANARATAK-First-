@@ -118,7 +118,7 @@ async function applyReferences(db:PrismaClient,options:ApplyOptions){
  const executor=new AtomicAuditedOutboxMutationExecutor(boundedUnitOfWork,new PrismaAuditRecordRepository(db),new PrismaTransactionalOutboxStore(db));
  const reviews=new ReferenceOwnerReviewUseCases(new PrismaReferenceOwnerReviewGateway(db),new AtomicDomainMutationCoordinator(executor));
  const repository=new PrismaReferenceDataRepository(db),author=new ReferenceDataUseCases(repository,undefined,undefined,executor);
- const dispatcher=new ImportHandoffDispatcher({REFERENCE_DATA:new ReferenceDataScreeningHandoffConsumer()},new PrismaImportScreeningReceiptStore(db));
+ const dispatcher=new ImportHandoffDispatcher({REFERENCE_DATA:new ReferenceDataScreeningHandoffConsumer()},new PrismaImportScreeningReceiptStore(db,{maxWait:10000,timeout:30000}));
  const storage=new LocalAssetStorageGateway(bucket,storageRoot),assets=new PrismaAssetRecordRepository(db);
  const ingest=new IngestAssetUseCase(assets,storage),lifecycle=new ProcessAssetLifecycleUseCase(assets,storage,new PrismaAssetUsageRegistryGateway(db),security,security);
  const context={actorId,actorType:'DELEGATED_PROJECT_OPERATOR',source:'managed-development-reference-seed',correlationId:runId};
