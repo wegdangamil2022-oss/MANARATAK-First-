@@ -1,0 +1,86 @@
+{
+  "kind": "GITHUB_SOURCE_COMMIT_CI_VERIFIED",
+  "sourceSha": "73c05bca9ad14967a6643c69e7810e63609443eb",
+  "observedAt": "2026-10-22T22:43:19.350Z",
+  "repository": "wegdangamil2022-oss/MANARATAK-First-",
+  "workflowRuns": [
+    {
+      "id": 39865260387,
+      "name": "Source Architecture Guards",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39865260387"
+    },
+    {
+      "id": 39865260412,
+      "name": "Cross-module source contracts",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39865260412"
+    },
+    {
+      "id": 39865260427,
+      "name": "Security Gates",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39865260427"
+    },
+    {
+      "id": 39865260381,
+      "name": "Imported Courses Source Closure",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39865260381"
+    },
+    {
+      "id": 39865260433,
+      "name": "Enterprise CI Pipeline",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39865260433"
+    }
+  ],
+  "enterpriseJobs": [
+    {
+      "id": 120126049680,
+      "name": "Deployment configuration",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 120126049978,
+      "name": "Full source closure gates",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 120126050042,
+      "name": "Translation quality gates",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 120126050077,
+      "name": "R08 isolated Redis and Linux worker shutdown",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 120130351850,
+      "name": "Retrieve and verify immutable artifacts from Actions storage",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 120130517064,
+      "name": "Linux x64 review image and native runtime",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "productionReady": false,
+  "limits": [
+    "Applies to this source SHA only; later documentation delivery needs its own CI observation.",
+    "Does not authorize hosting, external providers, production, DNS or migrations."
+  ]
+}
