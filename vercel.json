@@ -4,7 +4,8 @@
     "deploymentEnabled": {
       "main": false,
       "feat/post28-r07-artifact-preparation": false,
-      "fix/relationship-audit-20261022": false
+      "fix/relationship-audit-20261022": false,
+      "fix/database-resume-20261022": false
     }
   },
   "rewrites": [

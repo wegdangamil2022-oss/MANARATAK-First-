@@ -156,6 +156,7 @@ if (mode === 'deploy') {
     recoveryEvidence,
   }));
   runPrisma(['migrate', 'deploy', '--schema', schemaPath]);
+  finalizeApplicationGrants();
   runPrisma(['migrate', 'status', '--schema', schemaPath]);
   runPrisma(['migrate', 'diff', '--from-schema-datasource', schemaPath, '--to-schema-datamodel', schemaPath, '--exit-code']);
   process.exit(0);
@@ -212,6 +213,16 @@ function gitMetadata(): { commit: string | null; dirty: boolean | null } {
     dirty: status.status === 0 ? status.stdout.trim().length > 0 : null,
   };
 }
+function finalizeApplicationGrants(): void {
+  // Existing labs without a separately configured application role retain their
+  // own privilege bootstrap. Managed targets must supply DB_APPLICATION_ROLE.
+  if (!process.env.DB_APPLICATION_ROLE) return;
+  const result = spawnSync(process.execPath, [path.join(root, 'scripts/database/finalize-application-grants.mjs')], {
+    cwd: root, stdio: 'inherit', env: process.env,
+  });
+  if (result.status !== 0) process.exit(result.status ?? 1);
+}
+
 function runPrisma(args: string[]): void {
   const cli = path.join(root, 'node_modules/prisma/build/index.js');
   const result = spawnSync(process.execPath, [cli, ...args], { cwd: root, stdio: 'inherit', env: process.env });

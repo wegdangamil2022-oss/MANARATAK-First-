@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process';
 import { requireDatabaseMutationGate, databaseTargetIdentity } from '../lib/database-mutation-gate.mjs';
+import { applicationPrivilegesSql } from './runtime-role-privileges.mjs';
 
 const env = process.env;
 requireDatabaseMutationGate('db:roles:provision', { allowedPurposes: ['provision'] }, env);
@@ -67,12 +68,10 @@ statement.push(`GRANT USAGE ON SCHEMA public TO ${probe}, ${app};`);
 statement.push(`GRANT USAGE, CREATE ON SCHEMA public TO ${migrator};`);
 statement.push(`REVOKE ALL ON ALL TABLES IN SCHEMA public FROM ${probe}, ${app};`);
 statement.push(`GRANT SELECT ON ALL TABLES IN SCHEMA public TO ${probe};`);
-statement.push(`GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${app};`);
-statement.push(`GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO ${app};`);
 statement.push(`SET LOCAL ROLE ${migrator};`);
 statement.push(`ALTER DEFAULT PRIVILEGES FOR ROLE ${migrator} IN SCHEMA public GRANT SELECT ON TABLES TO ${probe};`);
-statement.push(`ALTER DEFAULT PRIVILEGES FOR ROLE ${migrator} IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO ${app};`);
 statement.push(`ALTER DEFAULT PRIVILEGES FOR ROLE ${migrator} IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO ${app};`);
+statement.push(applicationPrivilegesSql(app));
 statement.push('RESET ROLE;');
 const childEnv = { ...env, PGHOST: direct.hostname, PGPORT: direct.port || '5432', PGDATABASE: database,
   PGUSER: decodeURIComponent(direct.username), PGPASSWORD: decodeURIComponent(direct.password),

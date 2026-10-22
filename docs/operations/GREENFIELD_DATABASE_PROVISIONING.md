@@ -104,3 +104,21 @@ A source-only review may mark a card `SOURCE_VERIFIED` or `RUNTIME_PENDING`; it 
 Older remediation reports may retain their original recovery terminology as historical evidence. If they remain in the active documentation tree, they must carry a clear supersession notice pointing to this document. Historical wording is not operational authority.
 
 For M5 role creation and M6 read-only preflight, see [M5 source readiness and M6 probe](M5_SOURCE_READINESS_AND_M6_PROBE.md). Role creation is gated as a provision mutation; the M6 probe performs no writes.
+
+## Application grants after migrations
+
+Managed targets must set `DB_APPLICATION_ROLE` to the previously provisioned,
+non-administrative application identity when running `db:remediation:deploy`.
+The command finalizes its grants immediately after successful migration replay,
+before status/drift checks. For already-applied migrations, use `db:roles:finalize`
+with the same reviewed target, direct migrator credentials, and provision/migrate
+mutation gate; do not replay migrations just to update privileges.
+
+Provisioning and finalization share one policy: no application default table
+grants, explicit DML grants on public business tables, and no application or
+PUBLIC privileges on `_prisma_migrations`. Thus newly created tables require
+finalization before application startup, while migration history stays isolated.
+The probe keeps its separately granted read access. Run finalization after any
+standalone Prisma deployment or role reprovisioning, and verify effective grants
+before connecting the application. No student/reference rows or migration history
+are changed by this privilege operation.
