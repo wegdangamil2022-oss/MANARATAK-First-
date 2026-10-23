@@ -347,7 +347,7 @@ export function CourseListPage() {
         </div>
       </section>
 
-      <section dir="rtl" className="grid gap-3 rounded-2xl border bg-white p-4 md:grid-cols-3">
+      <section dir="rtl" className="grid items-end gap-3 rounded-2xl border border-[#DDEFF2] bg-white p-4 shadow-xs md:grid-cols-3 [&>input]:h-11 [&>select]:h-11 [&>button]:h-11" aria-label={tr('فلاتر الدورات', 'Course filters')}>
         <input
           value={search}
           onChange={(e) => {
