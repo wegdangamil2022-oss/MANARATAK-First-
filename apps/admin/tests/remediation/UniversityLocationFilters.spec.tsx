@@ -1,0 +1,32 @@
+import React from 'react';
+import {act,create} from 'react-test-renderer';
+import {afterEach,beforeEach,expect,it,vi} from 'vitest';
+const api=vi.hoisted(()=>({countries:vi.fn(),regions:vi.fn(),cities:vi.fn()}));
+vi.mock('../../src/api/canonicalPickers',()=>({canonicalPickerApi:api,canonicalOptionIsSelectable:()=>true}));
+vi.mock('../../src/i18n/I18nProvider',()=>({useTranslation:()=>({language:'ar'})}));
+import {UniversityLocationFilters} from '../../src/components/UniversityLocationFilters';
+let tree:ReturnType<typeof create>;
+beforeEach(()=>{(globalThis as {IS_REACT_ACT_ENVIRONMENT?:boolean}).IS_REACT_ACT_ENVIRONMENT=true;vi.useFakeTimers();api.countries.mockReset();api.regions.mockReset().mockResolvedValue([]);api.cities.mockReset().mockResolvedValue([]);});
+afterEach(async()=>{if(tree)await act(async()=>tree.unmount());vi.useRealTimers();});
+it('resolves an exact country beyond page one before loading its geography',async()=>{
+  api.countries.mockImplementation(async(_query='',page=1)=>page===1?Array.from({length:50},(_,i)=>({id:'other-'+i,label:'Country',code:'ZZ',lifecycle:'ACTIVE'})):[{id:'selected',label:'Country',code:'YE',lifecycle:'ACTIVE'}]);
+  const changed=vi.fn();
+  await act(async()=>{tree=create(<UniversityLocationFilters countryId="selected" regionId="region-kept" cityId="city-kept" ar onChange={changed}/>);});
+  await act(async()=>{await vi.advanceTimersByTimeAsync(205);});
+  expect(api.countries).toHaveBeenCalledWith('',2);
+  expect(api.regions).toHaveBeenCalledWith('YE','',1);
+  expect(api.cities).toHaveBeenCalledWith('YE','region-kept','',1);
+  expect(tree.root.findAllByType('select').map(node=>node.props.value)).toEqual(['selected','region-kept','city-kept']);
+  expect(changed).not.toHaveBeenCalled();
+});
+it('keeps dependent geography disabled until a country is selected and resolves its exact code',async()=>{
+  api.countries.mockResolvedValue([{id:'country-id',label:'Country',code:'YE',lifecycle:'ACTIVE'}]);
+  const changed=vi.fn();
+  await act(async()=>{tree=create(<UniversityLocationFilters countryId="" regionId="" cityId="" ar onChange={changed}/>);});
+  await act(async()=>{await vi.advanceTimersByTimeAsync(205);});
+  expect(tree.root.findAllByType('select').slice(1).every(node=>node.props.disabled)).toBe(true);
+  await act(async()=>tree.root.findAllByType('select')[0].props.onChange({target:{value:'country-id'}}));
+  expect(changed).toHaveBeenCalledWith('countryReferenceId','country-id');
+  await act(async()=>{tree.update(<UniversityLocationFilters countryId="country-id" regionId="" cityId="" ar onChange={changed}/>);await vi.advanceTimersByTimeAsync(205);});
+  expect(api.regions).toHaveBeenCalledWith('YE','',1);
+});

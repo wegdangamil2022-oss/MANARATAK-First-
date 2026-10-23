@@ -1,7 +1,7 @@
 import {AdmissionRequirementScoreEditor} from '../features/integration/AdmissionRequirementScoreEditor';
 import { FormEvent, useEffect, useState, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Globe2, Plus, Save, ShieldCheck, Trash2, Undo2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Globe2, Plus, Save, ShieldCheck, Trash2, Undo2, School, MapPin, Building2, Coins, House, Award, BookOpen } from 'lucide-react';
 import { adminApiClient } from '../api/client';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from '../components/CanonicalPicker';
@@ -237,17 +237,23 @@ export function UniversityRelationshipEditorPage() {
   const immutable = university.status === 'PUBLISHED';
   const hasUnsavedChanges = sectionsDirty || countryReferenceId !== (university.countryReferenceId ?? null) || regionReferenceId !== (university.regionReferenceId ?? null) || cityReferenceId !== (university.cityReferenceId ?? null) || programs.some(program => JSON.stringify(program) !== JSON.stringify(savedPrograms.find(saved => program.id ? saved.id === program.id : saved.sourceReferenceId === program.sourceReferenceId)));
 
-  return <div className="mx-auto max-w-6xl space-y-6 font-['Cairo',sans-serif]">
-    <div className="flex items-center justify-between gap-3">
-      <div><Link to="/universities" className="inline-flex items-center gap-1 text-sm font-bold text-[#0E7C86]"><ArrowLeft className="h-4 w-4" /> Universities</Link><h2 className="mt-2 text-2xl font-black text-[#142B5F]">{university.displayName}</h2><p className="text-sm text-slate-500">Canonical relationship authoring · owner APIs only</p></div>
-      <span className="rounded-full bg-[#DDEFF2] px-3 py-1 text-xs font-black text-[#142B5F]">{university.status}</span>
-    </div>
+  return <div dir="rtl" className="university-detail mx-auto max-w-6xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
+    <header className="rounded-3xl bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-lg sm:p-8">
+      <Link to="/universities" className="inline-flex items-center gap-2 text-xs font-bold text-[#F2CD78]"><ArrowLeft className="h-4 w-4" />العودة إلى دليل الجامعات</Link>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4"><h1 className="min-w-0 break-words text-2xl font-black sm:text-3xl">{university.displayName}</h1><span className="rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold">{university.status}</span></div>
+      <p className="mt-3 text-sm leading-7 text-[#DDEFF2]">تفاصيل الجامعة، القبول والوثائق، الكليات والبرامج الأكاديمية، الرسوم والسكن والتصنيفات.</p>
+    </header>
+    <nav aria-label="أقسام تفاصيل الجامعة" className="grid grid-cols-2 gap-2 rounded-3xl border border-[#DDEFF2] bg-white p-4 shadow-sm sm:grid-cols-3 lg:grid-cols-5">
+      {[
+        ['identity','الهوية والوثائق',School],['location','الموقع الجغرافي',MapPin],['admissions','القبول والتقديم',Globe2],['accreditations','الاعتمادات',ShieldCheck],['campuses','الحرم الجامعي',MapPin],['organizationUnits','الكليات والأقسام',Building2],['programs','البرامج والاختبارات',BookOpen],['tuitionProfiles','الرسوم الدراسية',Coins],['accommodationProfiles','السكن والمعيشة',House],['rankings','التصنيفات',Award],
+      ].map(([key,title,Icon],index)=>{const SectionIcon=Icon as typeof School;return <a key={String(key)} href={'#university-section-'+key} className="inline-flex items-center gap-2 rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/40 px-3 py-3 text-xs font-bold text-[#142B5F] hover:bg-teal-50"><SectionIcon aria-hidden="true" className={'h-4 w-4 shrink-0 '+(['text-[#D6A43B]','text-[#142B5F]','text-[#0E7C86]'][index%3])} />{String(title)}</a>;})}
+    </nav>
 
     <div className="rounded-2xl border border-[#DDEFF2] bg-white p-4 shadow-sm">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 font-black text-[#142B5F]"><ShieldCheck className="h-4 w-4 text-[#0E7C86]" /> Publication lifecycle</div>
-          <p className="mt-1 text-xs leading-6 text-[#203442]/65">Publishing is allowed only after completeness and canonical relationship checks pass. Import handoff never auto-publishes.</p>
+          <div className="flex items-center gap-2 font-black text-[#142B5F]"><ShieldCheck className="h-4 w-4 text-[#0E7C86]" />المراجعة والنشر</div>
+          <p className="mt-1 text-xs leading-6 text-[#203442]/65">النشر مشروط باكتمال البيانات وصحة العلاقات المعتمدة. استيراد الجامعة يحفظها للمراجعة.</p>
           {readiness ? <div className="mt-3 text-xs">
             <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-black ${readiness.ready ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800'}`}>{readiness.ready ? <CheckCircle2 className="h-3.5 w-3.5" /> : <ShieldCheck className="h-3.5 w-3.5" />}{readiness.ready ? 'Publication gate ready' : `${readiness.blockingIssues.length} blocking issue(s)`}</span>
             {readiness.blockingIssues.length ? <ul className="mt-2 space-y-1 text-amber-800">{readiness.blockingIssues.map((issue) => <li key={`${issue.code}:${issue.field ?? ''}`}>• {issue.code}{issue.field ? ` · ${issue.field}` : ''}</li>)}</ul> : null}
@@ -270,7 +276,8 @@ export function UniversityRelationshipEditorPage() {
     {error ? <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
     {message ? <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">{message}</div> : null}
 
-    <form onSubmit={saveLocation} className="grid gap-4 rounded-2xl border border-[#DDEFF2] bg-white p-5 md:grid-cols-3">
+    <form id="university-section-location" onSubmit={saveLocation} className="grid scroll-mt-28 gap-4 rounded-2xl border border-[#DDEFF2] bg-white p-5 md:grid-cols-3">
+      <h2 className="flex items-center gap-2 font-black text-[#142B5F] md:col-span-3"><MapPin className="h-5 w-5 text-[#D6A43B]" aria-hidden="true" />الموقع الجغرافي والعلاقات المعتمدة</h2>
       <CanonicalPicker label="Country" value={countryReferenceId} onChange={(next, option) => { setCountryReferenceId(next); setCountryIso2(option?.code ?? ''); setRegionReferenceId(null); setCityReferenceId(null); }} load={() => canonicalPickerApi.countries()} reloadKey="university-country" disabled={saving || immutable} />
       <CanonicalPicker label="Region" value={regionReferenceId} onChange={(next) => { setRegionReferenceId(next); setCityReferenceId(null); }} load={() => canonicalPickerApi.regions(countryIso2 || undefined)} reloadKey={`university-regions:${countryIso2}`} optional disabled={saving || immutable || !countryIso2} />
       <CanonicalCityPicker countryIso2Code={countryIso2} regionId={regionReferenceId} value={cityReferenceId} rawLabel={university.city ?? ''} onChange={setCityReferenceId} disabled={saving || immutable} />
@@ -280,7 +287,7 @@ export function UniversityRelationshipEditorPage() {
     <UniversitySectionsEditor key={id} id={id} initial={university} reviewReason={reviewReason} disabled={saving || immutable} onDirtyChange={setSectionsDirty} onSaved={refreshUniversity} />
     {hasUnsavedChanges && <p className="text-sm font-bold text-amber-700">توجد تعديلات غير محفوظة؛ احفظ كل قسم قبل النشر.</p>}
     {university.status==='PUBLISHED' && university.slug && <a href={`/universities/${university.slug}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-[#0E7C86]">عرض الجامعة في الصفحة العامة</a>}
-    <section className="space-y-4 rounded-2xl border border-[#DDEFF2] bg-white p-5">
+    <section id="university-section-programs" className="scroll-mt-28 space-y-4 rounded-2xl border border-[#DDEFF2] bg-white p-5">
       <div className="flex items-center justify-between"><div><h3 className="font-bold">Academic programs</h3><p className="text-xs text-slate-500">Program → Degree Level / Major / International Test. Each program is saved independently to preserve its canonical Program ID; remove archives the program instead of hard-deleting it.</p></div><button type="button" disabled={saving || immutable} onClick={() => setPrograms((current) => [...current, blankProgram()])} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm"><Plus className="h-4 w-4" /> Program</button></div>
       {programs.map((program, index) => <fieldset disabled={saving || immutable} key={program.id ?? program.sourceReferenceId ?? index} className="space-y-4 rounded-xl border border-[#DDEFF2] p-4">
         <div className="flex gap-3"><label className="flex-1 text-xs font-medium">Program name<input value={program.sourceProgramName} onChange={(event) => updateProgram(index, { sourceProgramName: event.target.value })} className="mt-1 w-full rounded-lg border px-3 py-2 text-sm" /></label><button type="button" title="Save program" disabled={saving || immutable} onClick={() => saveProgram(index)} className="self-end rounded-lg border border-[#21A7B4]/35 p-2 text-[#0E7C86] disabled:opacity-50"><Save className="h-4 w-4" /></button><button type="button" title={program.id ? 'Archive program' : 'Remove unsaved program'} disabled={saving || immutable} onClick={() => archiveProgram(index)} className="self-end rounded-lg border border-red-200 p-2 text-red-600 disabled:opacity-50"><Trash2 className="h-4 w-4" /></button></div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Save, Plus } from 'lucide-react';
+import { Save, Plus, School, Globe2, ShieldCheck, MapPin, Building2, Coins, House, Award } from 'lucide-react';
 import { adminApiClient } from '../api/client';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from './CanonicalPicker';
@@ -402,8 +402,8 @@ export function UniversitySectionsEditor({
           {message}
         </p>
       )}
-      <section className="rounded-2xl border bg-white p-5">
-        <h3 className="mb-4 font-black text-[#142B5F]">الهوية والبيانات الأساسية والوثائق</h3>
+      <section id="university-section-identity" className="scroll-mt-28 rounded-2xl border bg-white p-5">
+        <h3 className="mb-4 flex items-center gap-2 font-black text-[#142B5F]"><School className="h-5 w-5 text-[#D6A43B]" aria-hidden="true" />الهوية والبيانات الأساسية والوثائق</h3>
         {fieldsForm(
           identityFields,
           identity,
@@ -415,8 +415,8 @@ export function UniversitySectionsEditor({
         )}
         {button('identity')}
       </section>
-      <section className="rounded-2xl border bg-white p-5">
-        <h3 className="mb-4 font-black text-[#142B5F]">قبول الطلاب الدوليين والتقديم</h3>
+      <section id="university-section-admissions" className="scroll-mt-28 rounded-2xl border bg-white p-5">
+        <h3 className="mb-4 flex items-center gap-2 font-black text-[#142B5F]"><Globe2 className="h-5 w-5 text-[#0E7C86]" aria-hidden="true" />قبول الطلاب الدوليين والتقديم</h3>
         {fieldsForm(
           admissionsFields,
           admissions,
@@ -429,8 +429,8 @@ export function UniversitySectionsEditor({
         {button('admissions')}
       </section>
       {sectionDefinitions.map((section) => (
-        <section key={section.key} className="rounded-2xl border bg-white p-5">
-          <h3 className="mb-4 font-black text-[#142B5F]">{section.title}</h3>
+        <section key={section.key} id={'university-section-'+section.key} className="scroll-mt-28 rounded-2xl border bg-white p-5">
+          <h3 className="mb-4 flex items-center gap-2 font-black text-[#142B5F]">{section.key==='accreditations'?<ShieldCheck className="h-5 w-5 text-[#0E7C86]" aria-hidden="true" />:section.key==='campuses'?<MapPin className="h-5 w-5 text-[#D6A43B]" aria-hidden="true" />:section.key==='organizationUnits'?<Building2 className="h-5 w-5 text-[#142B5F]" aria-hidden="true" />:section.key==='tuitionProfiles'?<Coins className="h-5 w-5 text-[#D6A43B]" aria-hidden="true" />:section.key==='accommodationProfiles'?<House className="h-5 w-5 text-[#0E7C86]" aria-hidden="true" />:<Award className="h-5 w-5 text-[#142B5F]" aria-hidden="true" />}{section.title}</h3>
           {rows[section.key].map((row, index) => (
             <div key={String(row.id ?? index)} className="mb-3 rounded-xl border p-3">
               {fieldsForm(

@@ -23,7 +23,12 @@ import {
   Database,
   ArrowLeft,
   ArrowRight,
-  SlidersHorizontal,
+  Plus,
+  LayoutGrid,
+  Table as TableIcon,
+  Building2,
+  ShieldCheck,
+  ArrowDownWideNarrow,
   ExternalLink
 } from 'lucide-react';
 import { useTranslation } from '../i18n/I18nProvider';
@@ -80,6 +85,9 @@ export function UniversityAdminPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [completenessFilter, setCompletenessFilter] = useState('');
   const [page, setPage] = useState(1);
+  const [showCreate,setShowCreate]=useState(false);
+  const [showPrograms,setShowPrograms]=useState(false);
+  const [viewMode,setViewMode]=useState<'cards'|'table'>('cards');
   const listRequest = useRef(0);
   const [cooldown, setCooldown] = useState<number | null>(null);
 
@@ -185,13 +193,13 @@ export function UniversityAdminPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
       <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-xl sm:p-8">
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-2">
+        <div className="relative z-10 flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+          <div className="min-w-0 flex-1 space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-md">
               <School className="h-4 w-4" />
               <span>{tr('دليل المؤسسات والجامعات العالمية', 'Institution & University Directory')}</span>
             </div>
-            <h1 className="text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl text-white">
+            <h1 className="text-2xl font-black leading-relaxed sm:text-3xl text-white">
               {tr('إدارة دليل الجامعات', 'University Directory Management')}
             </h1>
             <p className="max-w-2xl text-xs font-medium leading-relaxed text-[#DDEFF2] sm:text-sm">
@@ -202,7 +210,9 @@ export function UniversityAdminPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex max-w-full flex-wrap items-center gap-3 xl:max-w-sm">
+            <button type="button" aria-expanded={showCreate} aria-controls="university-create" onClick={()=>setShowCreate(value=>!value)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-xs font-bold text-[#142B5F]"><Plus className="h-4 w-4" aria-hidden="true" />{tr('إنشاء جامعة جديدة','Create university')}</button>
+            <button type="button" aria-expanded={showPrograms} aria-controls="university-program-workspace" onClick={()=>setShowPrograms(value=>!value)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-xs font-bold"><School className="h-4 w-4" aria-hidden="true" />{tr('إدارة البرامج الأكاديمية','Academic programs')}</button>
             <button
               onClick={handleRefresh}
               disabled={loading || statsLoading}
@@ -355,121 +365,27 @@ export function UniversityAdminPage() {
           </div>
         </button>
       </section>
-<details className="admin-section-tools"><summary>{tr('إنشاء جامعة وإدارة البرامج', 'Create university and manage programs')}</summary><div className="space-y-4"><OwnerDraftCreateForm owner="universities"/>
-      <UniversityProgramWorkspace />
-</div></details>
-      <details className="admin-section-tools"><summary>{tr('فلاتر الموقع ونوع المؤسسة', 'Location and institution filters')}</summary><div className="space-y-4"><section className="grid gap-4 sm:grid-cols-2"><h2 className="font-black sm:col-span-2">{tr('فلاتر موقع الجامعة وترتيبها','University location and sort filters')}</h2>
-        <div className="sm:col-span-2"><UniversityLocationFilters countryId={countryReferenceId} regionId={searchParams.get('regionReferenceId')??''} cityId={searchParams.get('cityReferenceId')??''} ar={isArabic} onChange={(key,value)=>{const next=new URLSearchParams(searchParams);if(value)next.set(key,value);else next.delete(key);if(key==='countryReferenceId'){next.delete('regionReferenceId');next.delete('cityReferenceId');}if(key==='regionReferenceId')next.delete('cityReferenceId');setSearchParams(next);setPage(1);}}/></div>
-        <label>{tr('نوع المؤسسة','Institution type')}<select value={searchParams.get('institutionType')??''} onChange={event=>{const next=new URLSearchParams(searchParams);if(event.target.value)next.set('institutionType',event.target.value);else next.delete('institutionType');setSearchParams(next);setPage(1);}}><option value="">—</option>{['UNIVERSITY','COLLEGE','INSTITUTE','ACADEMY','OTHER'].map(value=><option key={value}>{value}</option>)}</select></label>
-        <label>{tr('الترتيب','Sort')}<select value={searchParams.get('sort')??'CREATED_DESC'} onChange={event=>{const next=new URLSearchParams(searchParams);next.set('sort',event.target.value);setSearchParams(next);setPage(1);}}><option value="CREATED_DESC">{tr('الأحدث إنشاء','Newest created')}</option><option value="UPDATED_DESC">{tr('الأحدث تحديث','Newest updated')}</option><option value="NAME_ASC">{tr('اسم الجامعة','University name')}</option></select></label>
-      </section></div></details>
+      {showCreate&&<section id="university-create"><OwnerDraftCreateForm owner="universities" defaultOpen /></section>}
+      {showPrograms&&<section id="university-program-workspace" className="admin-section-tools"><UniversityProgramWorkspace /></section>}
 
-
-      {/* Country Filter Badge if set via query */}
-      {countryReferenceId && (
-        <div className="flex items-center justify-between rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-xs font-bold text-amber-900 shadow-xs">
+      <section aria-labelledby="university-filters" className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
+        <h2 id="university-filters" className="mb-4 flex items-center gap-2 text-lg font-black text-[#142B5F]"><Filter className="h-5 w-5 text-[#0E7C86]" aria-hidden="true" />{tr('البحث والتصفية','Search and filters')}</h2>
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row">
+          <label className="relative min-w-0 flex-1"><span className="sr-only">{tr('البحث عن جامعة','Search universities')}</span><Search className="pointer-events-none absolute start-3 top-3.5 h-4 w-4 text-[#0E7C86]" aria-hidden="true" /><input type="search" maxLength={200} value={searchTerm} onChange={event=>{setSearchTerm(event.target.value);setPage(1);}} placeholder={tr('البحث باسم الجامعة، الدولة، أو المدينة…','University, country or city…')} className="min-h-11 w-full rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/30 py-3 pe-3 ps-10 text-xs" /></label>
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-amber-600" />
-            <span>
-              {tr('تصفية حسب وجهة الدراسة المحددة:', 'Filtered by Study Destination:')}{' '}
-              <span className="font-mono bg-white px-2 py-0.5 rounded-md border border-amber-300">{countryReferenceId}</span>
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              const next = new URLSearchParams(searchParams);
-              next.delete('countryReferenceId');
-              setSearchParams(next);
-              setPage(1);
-            }}
-            className="rounded-xl border border-amber-300 bg-white px-3 py-1 text-xs font-bold text-amber-800 hover:bg-amber-100"
-          >
-            {tr('إلغاء تصفية الوجهة', 'Clear Destination')}
-          </button>
-        </div>
-      )}
-
-      {/* Filter and Search Bar */}
-      <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          {/* Search Box */}
-          <div className="relative flex-1">
-            <Search className="absolute right-3.5 top-3 h-4 w-4 text-slate-400" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
-              placeholder={tr('البحث باسم الجامعة، الدولة، أو المدينة...', 'Search by university, country, or city...')}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 py-2.5 pr-10 pl-4 text-xs font-semibold text-slate-800 placeholder-slate-400 outline-none transition focus:border-[#0E7C86] focus:bg-white focus:ring-2 focus:ring-[#0E7C86]/20"
-            />
-            {searchTerm && (
-              <button
-                type="button"
-                onClick={() => setSearchTerm('')}
-                className="absolute left-3.5 top-2.5 rounded-full bg-slate-200 p-1 text-[10px] text-slate-600 hover:bg-slate-300"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-
-          {/* Select Filters */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative min-w-[150px]">
-              <select
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50/70 py-2.5 pr-4 pl-9 text-xs font-bold text-[#142B5F] outline-none transition focus:border-[#0E7C86] focus:bg-white"
-              >
-                <option value="">{tr('جميع الحالات', 'All Statuses')}</option>
-                <option value="IMPORTED">{tr('مستوردة (IMPORTED)', 'Imported')}</option>
-                <option value="READY_TO_REVIEW">{tr('بانتظار المراجعة (READY_TO_REVIEW)', 'Ready to Review')}</option>
-                <option value="READY_TO_PUBLISH">{tr('جاهزة للنشر (READY_TO_PUBLISH)', 'Ready to Publish')}</option>
-                <option value="PUBLISHED">{tr('منشورة (PUBLISHED)', 'Published')}</option>
-                <option value="REJECTED">{tr('مرفوضة (REJECTED)', 'Rejected')}</option>
-                <option value="ARCHIVED">{tr('مؤرشفة (ARCHIVED)', 'Archived')}</option>
-              </select>
-              <Filter className="pointer-events-none absolute left-3 top-3 h-3.5 w-3.5 text-slate-400" />
-            </div>
-
-            <div className="relative min-w-[150px]">
-              <select
-                value={completenessFilter}
-                onChange={(e) => {
-                  setCompletenessFilter(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50/70 py-2.5 pr-4 pl-9 text-xs font-bold text-[#142B5F] outline-none transition focus:border-[#0E7C86] focus:bg-white"
-              >
-                <option value="">{tr('جميع مستويات الاكتمال', 'All Completeness')}</option>
-                <option value="COMPLETE">{tr('مكتملة (COMPLETE)', 'Complete')}</option>
-                <option value="NEEDS_REVIEW">{tr('تحتاج مراجعة (NEEDS_REVIEW)', 'Needs Review')}</option>
-                <option value="INCOMPLETE">{tr('غير مكتملة (INCOMPLETE)', 'Incomplete')}</option>
-              </select>
-              <SlidersHorizontal className="pointer-events-none absolute left-3 top-3 h-3.5 w-3.5 text-slate-400" />
-            </div>
-
-            {(statusFilter || completenessFilter || searchTerm) && (
-              <button
-                type="button"
-                onClick={() => {
-                  setStatusFilter('');
-                  setCompletenessFilter('');
-                  setSearchTerm('');
-                  setPage(1);
-                }}
-                className="rounded-2xl border border-slate-200 bg-slate-100 px-3.5 py-2.5 text-xs font-bold text-slate-600 transition hover:bg-slate-200"
-              >
-                {tr('إعادة ضبط', 'Reset')}
-              </button>
-            )}
+            <button type="button" aria-pressed={viewMode==='cards'} onClick={()=>setViewMode('cards')} className={viewMode==='cards'?'inline-flex items-center gap-2 rounded-xl bg-[#142B5F] px-4 py-3 text-xs font-bold text-white':'inline-flex items-center gap-2 rounded-xl border border-[#DDEFF2] px-4 py-3 text-xs font-bold'}><LayoutGrid aria-hidden="true" className="h-4 w-4" />{tr('بطاقات','Cards')}</button>
+            <button type="button" aria-pressed={viewMode==='table'} onClick={()=>setViewMode('table')} className={viewMode==='table'?'inline-flex items-center gap-2 rounded-xl bg-[#142B5F] px-4 py-3 text-xs font-bold text-white':'inline-flex items-center gap-2 rounded-xl border border-[#DDEFF2] px-4 py-3 text-xs font-bold'}><TableIcon aria-hidden="true" className="h-4 w-4" />{tr('جدول','Table')}</button>
+            <button type="button" onClick={()=>{setStatusFilter('');setCompletenessFilter('');setSearchTerm('');setSearchParams(new URLSearchParams());setPage(1);}} className="rounded-xl border border-[#DDEFF2] px-3 py-3 text-xs font-bold">{tr('إعادة ضبط','Reset')}</button>
           </div>
         </div>
-      </div>
+        <div className="university-filter-fields grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <UniversityLocationFilters countryId={countryReferenceId} regionId={searchParams.get('regionReferenceId')??''} cityId={searchParams.get('cityReferenceId')??''} ar={isArabic} onChange={(key,value)=>{const next=new URLSearchParams(searchParams);if(value)next.set(key,value);else next.delete(key);if(key==='countryReferenceId'){next.delete('regionReferenceId');next.delete('cityReferenceId');}if(key==='regionReferenceId')next.delete('cityReferenceId');setSearchParams(next);setPage(1);}} />
+          <label><span><Building2 aria-hidden="true" />{tr('نوع المؤسسة','Institution type')}</span><select value={searchParams.get('institutionType')??''} onChange={event=>{const next=new URLSearchParams(searchParams);if(event.target.value)next.set('institutionType',event.target.value);else next.delete('institutionType');setSearchParams(next);setPage(1);}}><option value="">{tr('الكل','All')}</option>{[['UNIVERSITY','جامعة'],['COLLEGE','كلية'],['INSTITUTE','معهد'],['ACADEMY','أكاديمية'],['OTHER','أخرى']].map(([value,label])=><option key={value} value={value}>{isArabic?label:value}</option>)}</select></label>
+          <label><span><ShieldCheck aria-hidden="true" />{tr('حالة النشر والمراجعة','Status')}</span><select value={statusFilter} onChange={event=>{setStatusFilter(event.target.value);setPage(1);}}><option value="">{tr('جميع الحالات','All statuses')}</option>{['IMPORTED','READY_TO_REVIEW','READY_TO_PUBLISH','PUBLISHED','REJECTED','ARCHIVED'].map(value=><option key={value} value={value}>{formatStatusLabel(value,isArabic)}</option>)}</select></label>
+          <label><span><CheckCircle2 aria-hidden="true" />{tr('اكتمال البيانات','Completeness')}</span><select value={completenessFilter} onChange={event=>{setCompletenessFilter(event.target.value);setPage(1);}}><option value="">{tr('جميع مستويات الاكتمال','All completeness')}</option>{['COMPLETE','NEEDS_REVIEW','INCOMPLETE'].map(value=><option key={value} value={value}>{formatCompletenessLabel(value,isArabic)}</option>)}</select></label>
+          <label><span><ArrowDownWideNarrow aria-hidden="true" />{tr('الترتيب','Sort')}</span><select value={searchParams.get('sort')??'CREATED_DESC'} onChange={event=>{const next=new URLSearchParams(searchParams);next.set('sort',event.target.value);setSearchParams(next);setPage(1);}}><option value="CREATED_DESC">{tr('الأحدث إنشاء','Newest created')}</option><option value="UPDATED_DESC">{tr('الأحدث تحديث','Newest updated')}</option><option value="NAME_ASC">{tr('اسم الجامعة','University name')}</option></select></label>
+        </div>
+      </section>
 
       {error ? (
         <div className="rounded-2xl border border-rose-200 bg-rose-50 p-8 text-center shadow-sm max-w-2xl mx-auto">
@@ -508,7 +424,10 @@ export function UniversityAdminPage() {
             </div>
           ) : (
             <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs">
-              <div className="overflow-x-auto">
+              {viewMode==='cards'&&<div className="space-y-4 bg-slate-50/40 p-4 sm:p-5">
+                {filteredItems.length===0?<p className="py-8 text-center text-sm text-slate-500">{tr('لا توجد جامعات تطابق الفلاتر المحددة.','No matching universities.')}</p>:filteredItems.map(uni=><UniversityCard key={uni.id} university={uni} ar={isArabic} />)}
+              </div>}
+              <div hidden={viewMode!=='table'} className="overflow-x-auto">
                 <table className="w-full border-collapse text-start text-xs">
                   <thead>
                     <tr className="border-b border-slate-200/90 bg-[#FAF7F0] text-[11px] font-black uppercase tracking-wider text-[#142B5F]">
@@ -651,6 +570,22 @@ export function UniversityAdminPage() {
   );
 }
 
+function UniversityCard({university:uni,ar}:{university:University;ar:boolean}) {
+  const tr=(arabic:string,english:string)=>ar?arabic:english;
+  return <article className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm transition hover:border-[#0E7C86] hover:shadow-md">
+    <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex min-w-0 items-center gap-3"><span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#142B5F] to-[#0E7C86] text-[#F2CD78]"><School className="h-7 w-7" aria-hidden="true" /></span><div className="min-w-0"><AdminLink to={'/universities/'+uni.id} className="break-words text-lg font-black text-[#142B5F]">{uni.displayName}</AdminLink><p className="mt-1 text-xs text-slate-500">{[uni.city,uni.country].filter(Boolean).join('، ')||tr('الموقع غير محدد','Location unspecified')}</p></div></div>
+      <span className="rounded-xl bg-teal-50 px-3 py-2 text-xs font-bold text-[#0E7C86]">{formatStatusLabel(uni.status,ar)}</span>
+    </div>
+    <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <span className="flex items-center gap-2 rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/50 px-3 py-3 text-xs"><MapPin className="h-4 w-4 shrink-0 text-[#0E7C86]" aria-hidden="true" />{uni.country||tr('الدولة غير محددة','Country unspecified')}</span>
+      <span className="flex items-center gap-2 rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/50 px-3 py-3 text-xs"><Calendar className="h-4 w-4 shrink-0 text-[#D6A43B]" aria-hidden="true" />{uni.foundedYear?tr('تأسست عام ','Founded ')+uni.foundedYear:tr('سنة التأسيس غير محددة','Foundation year unspecified')}</span>
+      <span className="flex items-center gap-2 rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/50 px-3 py-3 text-xs"><CheckCircle2 className="h-4 w-4 shrink-0 text-[#142B5F]" aria-hidden="true" />{formatCompletenessLabel(uni.completenessStatus,ar)}</span>
+      <AdminLink to={'/universities/'+uni.id} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 py-3 text-xs font-black text-[#F2CD78]">{tr('عرض التفاصيل','View details')}<ArrowLeft className="h-4 w-4" aria-hidden="true" /></AdminLink>
+    </div>
+  </article>;
+}
+
 function formatStatusLabel(status: string, isArabic: boolean): string {
   if (!isArabic) return status.replace(/_/g, ' ');
   switch (status) {
@@ -675,7 +610,7 @@ function formatCompletenessLabel(status: string, isArabic: boolean): string {
   if (!isArabic) return status.replace(/_/g, ' ');
   switch (status) {
     case 'COMPLETE':
-      return 'بيانات مكتملة 100%';
+      return 'الحقول المطلوبة مكتملة';
     case 'NEEDS_REVIEW':
       return 'تحتاج مراجعة وتدقيق';
     case 'INCOMPLETE':

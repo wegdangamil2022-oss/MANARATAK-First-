@@ -1,90 +1,37 @@
-import { useState } from 'react';
-import { canonicalPickerApi, type CanonicalPickerOption } from '../api/canonicalPickers';
-export function UniversityLocationFilters({
-  countryId,
-  regionId,
-  cityId,
-  onChange,
-  ar,
-}: {
-  countryId: string;
-  regionId: string;
-  cityId: string;
-  onChange: (
-    key: 'countryReferenceId' | 'regionReferenceId' | 'cityReferenceId',
-    value: string,
-  ) => void;
-  ar: boolean;
+import { useEffect, useRef, useState } from 'react';
+import { Globe2, MapPin, Map } from 'lucide-react';
+import { canonicalPickerApi } from '../api/canonicalPickers';
+import { CanonicalPicker } from './CanonicalPicker';
+
+export function UniversityLocationFilters({countryId,regionId,cityId,onChange,ar}:{
+  countryId:string;regionId:string;cityId:string;ar:boolean;
+  onChange:(key:'countryReferenceId'|'regionReferenceId'|'cityReferenceId',value:string)=>void;
 }) {
-  const [options, setOptions] = useState<Record<string, CanonicalPickerOption[]>>({});
-  const [search, setSearch] = useState('');
-  const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
-  const load = async () => {
-    setBusy(true);
-    setError('');
-    try {
-      const countries = await canonicalPickerApi.countries(search);
-      const country =
-        countries.find((item) => item.id === countryId) ??
-        options.countryReferenceId?.find((item) => item.id === countryId);
-      const [regions, cities] = await Promise.all([
-        canonicalPickerApi.regions(country?.code, search),
-        canonicalPickerApi.cities(country?.code, regionId || undefined, search),
-      ]);
-      setOptions({
-        countryReferenceId: countries,
-        regionReferenceId: regions,
-        cityReferenceId: cities,
-      });
-    } catch {
-      setError(
-        ar
-          ? 'تعذر تحميل خيارات الجغرافيا من المالك؛ لا تخمّن المعرف.'
-          : 'Owner geography options unavailable; do not guess an ID.',
-      );
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <div className="grid items-end gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      <label>
-        {ar ? 'بحث الجغرافيا' : 'Geography search'}
-        <input maxLength={200} value={search} onChange={(event) => setSearch(event.target.value)} />
-      </label>
-      <button type="button" disabled={busy} onClick={() => void load()}>
-        {ar ? 'تحميل خيارات الموقع' : 'Load location choices'}
-      </button>
-      {(
-        [
-          ['countryReferenceId', countryId, ar ? 'البلد' : 'Country'],
-          ['regionReferenceId', regionId, ar ? 'المنطقة' : 'Region'],
-          ['cityReferenceId', cityId, ar ? 'المدينة' : 'City'],
-        ] as const
-      ).map(([key, value, label]) => (
-        <label key={key}>
-          {label}
-          <select
-            value={value}
-            disabled={busy}
-            onChange={(event) => onChange(key, event.target.value)}
-          >
-            <option value="">—</option>
-            {value && !options[key]?.some((item) => item.id === value) && (
-              <option value={value}>{ar ? 'خيار غير محمل' : 'Unloaded selection'}</option>
-            )}
-            {options[key]
-              ?.filter((item) => item.lifecycle === 'ACTIVE')
-              .map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.label}
-                </option>
-              ))}
-          </select>
-        </label>
-      ))}
-      {error && <p role="status">{error}</p>}
-    </div>
-  );
+  const [countryCode,setCountryCode]=useState('');
+  const selectedCountry=useRef('');
+  const [error,setError]=useState('');
+  useEffect(()=>{
+    let active=true;
+    if(selectedCountry.current===countryId)return;
+    setCountryCode('');setError('');
+    if(!countryId){selectedCountry.current='';return;}
+    // Deep links may point beyond the first bounded page. Resolve the exact ID.
+    void (async()=>{
+      for(let page=1;page<=1000&&active;page++){
+        const options=await canonicalPickerApi.countries('',page);
+        if(!active)return;
+        const selected=options.find(option=>option.id===countryId);
+        if(selected){selectedCountry.current=countryId;setCountryCode(selected.code??'');return;}
+        if(options.length<50)break;
+      }
+      if(active)setError(ar?'تعذر تحديد الدولة المحفوظة؛ اختر الدولة لإتاحة مناطقها ومدنها.':'Choose a country to resolve regions and cities.');
+    })().catch(()=>{if(active)setError(ar?'تعذر تحميل مرجع الدولة.':'Country reference unavailable.');});
+    return()=>{active=false;};
+  },[countryId,ar]);
+  return <>
+    <CanonicalPicker label={ar?'الدولة':'Country'} icon={<Globe2 aria-hidden="true" className="h-3.5 w-3.5" />} value={countryId} onChange={(id,option)=>{selectedCountry.current=id??'';setCountryCode(option?.code??'');setError('');onChange('countryReferenceId',id??'');}} load={canonicalPickerApi.countries} reloadKey="university-filter-countries" compact paged optional allowInactive />
+    <CanonicalPicker label={ar?'المنطقة':'Region'} icon={<Map aria-hidden="true" className="h-3.5 w-3.5" />} value={regionId} onChange={id=>onChange('regionReferenceId',id??'')} load={(query,page)=>canonicalPickerApi.regions(countryCode,query,page)} reloadKey={`university-filter-regions:${countryCode}`} disabled={!countryCode} compact paged optional allowInactive />
+    <CanonicalPicker label={ar?'المدينة':'City'} icon={<MapPin aria-hidden="true" className="h-3.5 w-3.5" />} value={cityId} onChange={id=>onChange('cityReferenceId',id??'')} load={(query,page)=>canonicalPickerApi.cities(countryCode,regionId||undefined,query,page)} reloadKey={`university-filter-cities:${countryCode}:${regionId}`} disabled={!countryCode} compact paged optional allowInactive />
+    {error&&<p role="status" className="col-span-full text-xs text-amber-800">{error}</p>}
+  </>;
 }
