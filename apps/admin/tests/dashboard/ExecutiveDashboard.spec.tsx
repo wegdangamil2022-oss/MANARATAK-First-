@@ -96,4 +96,28 @@ describe('Executive dashboard data and independent periods', () => {
     ).toThrow('SCHEMA_MISMATCH');
     expect(() => parseExecutiveData('users', users(7), 30)).toThrow('SCHEMA_MISMATCH');
   });
+  it('ignores late results from a previous period and marks retained totals stale after a refresh failure', async () => {
+    await act(async () => {
+      tree = create(view());
+    });
+    const pending = new Map<number, (value: unknown) => void>();
+    state.request.mockImplementation(
+      (url: string) =>
+        new Promise((resolve) => {
+          pending.set(Number(new URL(url, 'http://test.local').searchParams.get('days')), resolve);
+        }),
+    );
+    const select = (label: string) =>
+      tree.root.findAllByType('button').find((node) => node.children.join('') === label)!;
+    await act(async () => select('7 days').props.onClick());
+    await act(async () => select('90 days').props.onClick());
+    await act(async () => pending.get(90)!({ ...users(90), registeredUsers: 99 }));
+    await act(async () => pending.get(7)!({ ...users(7), registeredUsers: 777 }));
+    expect(JSON.stringify(tree.toJSON())).toContain('99');
+    expect(JSON.stringify(tree.toJSON())).not.toContain('777');
+    state.request.mockRejectedValue(new Error('source unavailable'));
+    await act(async () => select('Refresh data').props.onClick());
+    expect(JSON.stringify(tree.toJSON())).toContain('99');
+    expect(JSON.stringify(tree.toJSON())).toContain('Stale — refresh failed');
+  });
 });

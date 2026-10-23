@@ -69,6 +69,16 @@ describe('Executive dashboard on a new isolated PostgreSQL 16 target', () => {
     requestVersion = 0,
     proofId = '';
   const require = createRequire(path.join(process.cwd(), 'package.json'));
+  // PostgreSQL timestamp(3) rounds server defaults; wait past the committed
+  // timestamp before asserting a strict, exclusive JS millisecond upper bound.
+  async function periodAfter(stamp: Date) {
+    const deadline = Date.now() + 100;
+    while (Date.now() <= +stamp) {
+      if (Date.now() >= deadline) throw new Error('ISOLATED_DATABASE_CLOCK_SKEW');
+      await new Promise((resolve) => setTimeout(resolve, 1));
+    }
+    return dashboardPeriod(30);
+  }
   async function verifiedAsset(ownerId: string) {
     const id = randomUUID(),
       stamp = new Date(),
@@ -351,7 +361,7 @@ describe('Executive dashboard on a new isolated PostgreSQL 16 target', () => {
     expect(a.id).toBe(b.id);
     requestId = a.id;
     requestVersion = a.version;
-    const projection = await reads.applications(dashboardPeriod(30));
+    const projection = await reads.applications(await periodAfter(a.createdAt));
     expect(projection.managedServiceRequests).toBe(1);
     expect(projection.managedUniversitySubmissions).toBe(0);
     expect(
@@ -460,7 +470,10 @@ describe('Executive dashboard on a new isolated PostgreSQL 16 target', () => {
     ).rejects.toThrow('DECISION_ALREADY_RECORDED');
     await evidence.selfReport(student, 'dashboard-scholarship', 'report-one');
     await evidence.selfReport(student, 'dashboard-scholarship', 'report-two');
-    const result = await reads.applications(dashboardPeriod(30));
+    const report = await db.directApplicationReport.findFirstOrThrow({
+      where: { studentId: student },
+    });
+    const result = await reads.applications(await periodAfter(report.reportedAt));
     expect(result.officialAccepted).toBe(1);
     expect(result.officialRejected).toBe(0);
     expect(result.directSelfReportedApplications).toBe(1);
@@ -568,4 +581,124 @@ describe('Executive dashboard on a new isolated PostgreSQL 16 target', () => {
       'university.example.org',
     );
   });
+  it('boots the actual API with real sessions and permissions and displays its PostgreSQL aggregates in the browser', async () => {
+    const { createApiApp } = await import('../../../../apps/api/src/app');
+    const { container } = await import('../../../../apps/api/src/infrastructure/di/container');
+    const app = await createApiApp({
+      resetCache: true,
+      connectExternalServices: false,
+      databaseClient: db,
+      env: {
+        NODE_ENV: 'test',
+        LOG_LEVEL: 'error',
+        DATABASE_URL: process.env.DATABASE_URL,
+        DIRECT_URL: process.env.DIRECT_URL,
+      },
+    });
+    const server = app.listen(0, '127.0.0.1');
+    await new Promise<void>((resolve) => server.once('listening', resolve));
+    const address = server.address();
+    if (!address || typeof address === 'string') throw new Error('ISOLATED_API_BIND_FAILED');
+    const origin = 'http://127.0.0.1:' + address.port;
+    let browser: any;
+    try {
+      await db.credentialRecord.createMany({
+        data: [staff, student].map((identityId) => ({
+          identityId,
+          type: 'password',
+          passwordHash: 'synthetic-session-fixture-no-password-login',
+        })),
+      });
+      await db.roleRecord.create({
+        data: {
+          id: 'dashboard-lab-admin',
+          name: 'Isolated Dashboard Administrator',
+          description: 'Synthetic local authorization only',
+          permissions: ['admin:*'],
+          policyIds: [],
+        },
+      });
+      await db.roleAssignmentRecord.create({
+        data: { id: randomUUID(), identityId: staff, roleId: 'dashboard-lab-admin' },
+      });
+      const tokens = container.resolve<any>('tokenProvider'),
+        sessions = container.resolve<any>('sessionManager');
+      const credentials = async (actor: string) => {
+        const sessionId = randomUUID();
+        await sessions.createSession(actor, await tokens.generateRefreshToken(), sessionId);
+        return tokens.generateAccessToken({ userId: actor, sessionId });
+      };
+      const adminToken = await credentials(staff),
+        studentToken = await credentials(student);
+      expect((await fetch(origin + '/api/v1/admin/dashboard/users')).status).toBe(401);
+      expect(
+        (
+          await fetch(origin + '/api/v1/admin/dashboard/users', {
+            headers: { Authorization: 'Bearer ' + studentToken },
+          })
+        ).status,
+      ).toBe(403);
+      const headers = { Authorization: 'Bearer ' + adminToken };
+      const response = await fetch(origin + '/api/v1/admin/dashboard/users?days=30', { headers });
+      expect(response.status).toBe(200);
+      expect(response.headers.get('cache-control')).toContain('no-store');
+      const realUsers = await response.json();
+      expect(realUsers.registeredUsers).toBe(2004);
+      const applications = await fetch(origin + '/api/v1/admin/dashboard/applications?days=30', {
+        headers,
+      });
+      expect(applications.status).toBe(200);
+      expect((await applications.json()).officialAccepted).toBe(1);
+      if (process.env.EXECUTIVE_DASHBOARD_BROWSER_ORIGIN) {
+        const { chromium } = require('playwright');
+        browser = await chromium.launch({
+          executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
+          headless: true,
+        });
+        const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+        await context.route('**/api/v1/**', async (route: any) => {
+          const url = new URL(route.request().url());
+          const actual = await route.fetch({
+            url: origin + url.pathname + url.search,
+            headers: { ...route.request().headers(), ...headers },
+          });
+          await route.fulfill({ response: actual });
+        });
+        const page = await context.newPage();
+        await page.goto(process.env.EXECUTIVE_DASHBOARD_BROWSER_ORIGIN + '/admin/dashboard');
+        await page.waitForFunction(
+          () =>
+            document.querySelector('.executive-header button')?.getAttribute('disabled') === null &&
+            document.querySelectorAll('.executive-kpi-grid output').length === 8,
+        );
+        const text = await page.locator('.executive-kpi-grid output').first().innerText();
+        expect(text.replace(/[,٬\s]/g, '')).toMatch(/^(2004|٢٠٠٤)$/);
+        expect(await page.locator('.executive-dashboard').innerText()).not.toContain(
+          '@example.test',
+        );
+        await page.screenshot({
+          path: path.join(
+            path.dirname(process.env.EXECUTIVE_DATABASE_EVIDENCE_FILE!),
+            'REAL_DATABASE_DASHBOARD.png',
+          ),
+          fullPage: true,
+        });
+      }
+      (fixture as any).fullStory = {
+        actualAppMount: true,
+        actualJwtSession: true,
+        actualRolePermissions: true,
+        anonymous: 401,
+        student: 403,
+        admin: 200,
+        registeredUsers: realUsers.registeredUsers,
+        browser: Boolean(browser),
+        noExternalServices: true,
+      };
+    } finally {
+      await browser?.close();
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+      await app.locals.runtimeResourceRegistry?.closeAll();
+    }
+  }, 60000);
 });

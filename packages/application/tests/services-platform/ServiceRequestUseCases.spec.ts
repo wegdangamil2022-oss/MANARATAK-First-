@@ -56,8 +56,14 @@ describe('Phase 20 service request ownership and finance handoff', () => {
 
   beforeEach(() => {
     catalog = {
-      create: vi.fn(), update: vi.fn(), findById: vi.fn().mockResolvedValue(service),
-      findBySlug: vi.fn(), findByDedupKey: vi.fn(), updateStatus: vi.fn(), list: vi.fn(), listPublished: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      findById: vi.fn().mockResolvedValue(service),
+      findBySlug: vi.fn(),
+      findByDedupKey: vi.fn(),
+      updateStatus: vi.fn(),
+      list: vi.fn(),
+      listPublished: vi.fn(),
     };
     requests = {
       createRequest: vi.fn().mockImplementation(async (data) => ({ ...request, ...data })),
@@ -65,55 +71,129 @@ describe('Phase 20 service request ownership and finance handoff', () => {
       findRequestByPublicId: vi.fn(),
       listRequests: vi.fn(),
       updateRequestStatus: vi.fn(),
-      linkFinanceInvoice: vi.fn().mockImplementation(async (_id, financeInvoiceId, financeInvoicePublicId) => ({
-        ...request,
-        status: ServiceRequestStatus.AWAITING_PAYMENT,
-        financeInvoiceId,
-        financeInvoicePublicId,
-      })),
+      linkFinanceInvoice: vi
+        .fn()
+        .mockImplementation(async (_id, financeInvoiceId, financeInvoicePublicId) => ({
+          ...request,
+          status: ServiceRequestStatus.AWAITING_PAYMENT,
+          financeInvoiceId,
+          financeInvoicePublicId,
+        })),
       assignProvider: vi.fn(),
     };
     finance = {
       createDraftInvoice: vi.fn().mockResolvedValue({ id: 'fin-1', publicId: 'fin-public-1' }),
       getInvoiceClearance: vi.fn().mockResolvedValue({
-        invoiceId: 'fin-1', invoiceStatus: 'PAID', amountDueMinorUnits: '0', financiallyCleared: true,
+        invoiceId: 'fin-1',
+        invoiceStatus: 'PAID',
+        amountDueMinorUnits: '0',
+        financiallyCleared: true,
       }),
     };
   });
 
-  it('only delegates bounded P20 payment triage to its owner repository',async()=>{
-    const owner={items:[{studentReferenceId:'student-1'}],total:1,hasMore:false,nextPage:null};
-    requests.listSupportAwaitingPaymentStudents=vi.fn().mockResolvedValue(owner);
-    const useCases=new AdminServiceFulfillmentUseCases(catalog,requests,finance);
-    expect(await useCases.listSupportAwaitingPaymentStudents(1,20)).toEqual(owner);
-    expect(requests.listSupportAwaitingPaymentStudents).toHaveBeenCalledWith(1,20,{});
-    expect(()=>useCases.listSupportAwaitingPaymentStudents(1,51))
-      .toThrow('SERVICE_SUPPORT_TRIAGE_QUERY_INVALID');
+  it('only delegates bounded P20 payment triage to its owner repository', async () => {
+    const owner = {
+      items: [{ studentReferenceId: 'student-1' }],
+      total: 1,
+      hasMore: false,
+      nextPage: null,
+    };
+    requests.listSupportAwaitingPaymentStudents = vi.fn().mockResolvedValue(owner);
+    const useCases = new AdminServiceFulfillmentUseCases(catalog, requests, finance);
+    expect(await useCases.listSupportAwaitingPaymentStudents(1, 20)).toEqual(owner);
+    expect(requests.listSupportAwaitingPaymentStudents).toHaveBeenCalledWith(1, 20, {});
+    expect(() => useCases.listSupportAwaitingPaymentStudents(1, 51)).toThrow(
+      'SERVICE_SUPPORT_TRIAGE_QUERY_INVALID',
+    );
   });
 
   it('allows a student request only for a published owner service', async () => {
     const useCases = new StudentServiceRequestUseCases(catalog, requests);
-    await useCases.createRequest({ studentReferenceId: 'student-1', serviceId: 'svc-1', idempotencyKey:'intent-1234', consent:true });
-    expect(requests.createRequest).toHaveBeenCalledWith(expect.objectContaining({
-      studentReferenceId: 'student-1', serviceId: 'svc-1', status: ServiceRequestStatus.REQUESTED,
-    }));
+    await useCases.createRequest({
+      studentReferenceId: 'student-1',
+      serviceId: 'svc-1',
+      idempotencyKey: 'intent-1234',
+      consent: true,
+    });
+    expect(requests.createRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        studentReferenceId: 'student-1',
+        serviceId: 'svc-1',
+        status: ServiceRequestStatus.REQUESTED,
+      }),
+    );
 
-    vi.mocked(catalog.findById).mockResolvedValueOnce({ ...service, status: ServiceStatus.READY_TO_REVIEW });
-    await expect(useCases.createRequest({ studentReferenceId: 'student-1', serviceId: 'svc-1', idempotencyKey:'intent-1234', consent:true }))
-      .rejects.toThrow('SERVICE_NOT_AVAILABLE');
+    vi.mocked(catalog.findById).mockResolvedValueOnce({
+      ...service,
+      status: ServiceStatus.READY_TO_REVIEW,
+    });
+    await expect(
+      useCases.createRequest({
+        studentReferenceId: 'student-1',
+        serviceId: 'svc-1',
+        idempotencyKey: 'intent-1234',
+        consent: true,
+      }),
+    ).rejects.toThrow('SERVICE_NOT_AVAILABLE');
+  });
+  it('does not classify a published service as managed from an unapproved draft flag', async () => {
+    vi.mocked(catalog.findById).mockResolvedValueOnce({
+      ...service,
+      managedApplication: true,
+      publishedSnapshot: { ...service, managedApplication: undefined },
+    } as never);
+    const useCases = new StudentServiceRequestUseCases(catalog, requests);
+    await useCases.createRequest({
+      studentReferenceId: 'student-1',
+      serviceId: 'svc-1',
+      idempotencyKey: 'published-intent-1234',
+      consent: true,
+    });
+    expect(requests.createRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        serviceSnapshot: expect.objectContaining({ managedApplication: false }),
+      }),
+    );
   });
 
   it('keeps finance authority behind IServiceFinanceGateway and stores only returned invoice identity', async () => {
-    requests.prepareInvoiceIntent=vi.fn(async(_id,intent)=>({...request,invoiceIntent:intent,version:2}));
-    const operations:any={findActivePricing:vi.fn().mockResolvedValue({id:'price',amountMinorUnits:'12500',currencyCode:'USD',scale:2,immutableFingerprint:'hash'})};
-    const useCases = new AdminServiceFulfillmentUseCases(catalog, requests, finance,operations);
-    const result = await useCases.createFinanceInvoice({
-      requestId: 'req-1', amountMinorUnits: '12500', currencyCode: 'USD', scale: 2, actorId: 'admin-1', expectedVersion: 1,
-    });
-    expect(finance.createDraftInvoice).toHaveBeenCalledWith(expect.objectContaining({
-      requestId: 'req-1', requestPublicId: 'svc_req_public', studentReferenceId: 'student-1',
-      amountMinorUnits: '12500', currencyCode: 'USD', scale: 2, actorId: 'admin-1',
+    requests.prepareInvoiceIntent = vi.fn(async (_id, intent) => ({
+      ...request,
+      invoiceIntent: intent,
+      version: 2,
     }));
+    const operations: any = {
+      findActivePricing: vi
+        .fn()
+        .mockResolvedValue({
+          id: 'price',
+          amountMinorUnits: '12500',
+          currencyCode: 'USD',
+          scale: 2,
+          immutableFingerprint: 'hash',
+        }),
+    };
+    const useCases = new AdminServiceFulfillmentUseCases(catalog, requests, finance, operations);
+    const result = await useCases.createFinanceInvoice({
+      requestId: 'req-1',
+      amountMinorUnits: '12500',
+      currencyCode: 'USD',
+      scale: 2,
+      actorId: 'admin-1',
+      expectedVersion: 1,
+    });
+    expect(finance.createDraftInvoice).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestId: 'req-1',
+        requestPublicId: 'svc_req_public',
+        studentReferenceId: 'student-1',
+        amountMinorUnits: '12500',
+        currencyCode: 'USD',
+        scale: 2,
+        actorId: 'admin-1',
+      }),
+    );
     expect(requests.linkFinanceInvoice).toHaveBeenCalledWith('req-1', 'fin-1', 'fin-public-1', 2);
     expect(result.financeInvoiceId).toBe('fin-1');
   });
@@ -125,12 +205,16 @@ describe('Phase 20 service request ownership and finance handoff', () => {
       financeInvoicePublicId: 'fin-public-1',
     });
     vi.mocked(finance.getInvoiceClearance).mockResolvedValueOnce({
-      invoiceId: 'fin-1', invoiceStatus: 'ISSUED', amountDueMinorUnits: '12500', financiallyCleared: false,
+      invoiceId: 'fin-1',
+      invoiceStatus: 'ISSUED',
+      amountDueMinorUnits: '12500',
+      financiallyCleared: false,
     });
     const useCases = new AdminServiceFulfillmentUseCases(catalog, requests, finance);
 
-    await expect(useCases.transitionRequest('req-1', ServiceRequestStatus.IN_PROGRESS, 1))
-      .rejects.toThrow('SERVICE_FINANCIAL_CLEARANCE_REQUIRED');
+    await expect(
+      useCases.transitionRequest('req-1', ServiceRequestStatus.IN_PROGRESS, 1),
+    ).rejects.toThrow('SERVICE_FINANCIAL_CLEARANCE_REQUIRED');
     expect(requests.updateRequestStatus).not.toHaveBeenCalled();
   });
 
@@ -145,8 +229,15 @@ describe('Phase 20 service request ownership and finance handoff', () => {
 
     await useCases.transitionRequest('req-1', ServiceRequestStatus.IN_PROGRESS, 1);
 
-    expect(finance.getInvoiceClearance).toHaveBeenCalledWith('fin-1',{requestPublicId:'svc_req_public',studentReferenceId:'student-1'});
-    expect(requests.updateRequestStatus).toHaveBeenCalledWith('req-1', ServiceRequestStatus.IN_PROGRESS, 1, undefined);
+    expect(finance.getInvoiceClearance).toHaveBeenCalledWith('fin-1', {
+      requestPublicId: 'svc_req_public',
+      studentReferenceId: 'student-1',
+    });
+    expect(requests.updateRequestStatus).toHaveBeenCalledWith(
+      'req-1',
+      ServiceRequestStatus.IN_PROGRESS,
+      1,
+      undefined,
+    );
   });
-
 });
