@@ -1,0 +1,378 @@
+﻿{
+    "scope":  "Dashboard and review supporting disclosures",
+    "frontendSourceSha":  "879721d66e00e77615c191db0c03b1a79c8bd935",
+    "browser":  {
+                    "pass":  true,
+                    "apiResponses":  "EXPLICITLY_SYNTHETIC",
+                    "target":  "COMPILED_ADMIN_BUNDLE",
+                    "contentWrites":  0,
+                    "pageErrors":  [
+
+                                   ],
+                    "checks":  [
+                                   "three dashboard disclosures share Cairo 17px headings, 3px gold curved rails and left toggle; native Enter/Space works; inner paragraphs 15px; lazy source reads preserved",
+                                   "four review disclosures share title and body typography; every panel opens/closes by keyboard; gold chevron rotates; source table scrolls in a bounded region; content, links and ten-row results retained"
+                               ],
+                    "layouts":  [
+                                    {
+                                        "page":  "/admin/dashboard",
+                                        "width":  1360,
+                                        "overflow":  false,
+                                        "panels":  [
+                                                       {
+                                                           "title":  "تفاصيل مؤشرات الأقسام ومصادرها",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "النشاط الإداري المصرح",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "تغطية القياس",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       }
+                                                   ]
+                                    },
+                                    {
+                                        "page":  "/admin/dashboard",
+                                        "width":  1000,
+                                        "overflow":  false,
+                                        "panels":  [
+                                                       {
+                                                           "title":  "تفاصيل مؤشرات الأقسام ومصادرها",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "النشاط الإداري المصرح",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "تغطية القياس",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       }
+                                                   ]
+                                    },
+                                    {
+                                        "page":  "/admin/dashboard",
+                                        "width":  820,
+                                        "overflow":  false,
+                                        "panels":  [
+                                                       {
+                                                           "title":  "تفاصيل مؤشرات الأقسام ومصادرها",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "النشاط الإداري المصرح",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "تغطية القياس",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       }
+                                                   ]
+                                    },
+                                    {
+                                        "page":  "/admin/dashboard",
+                                        "width":  390,
+                                        "overflow":  false,
+                                        "panels":  [
+                                                       {
+                                                           "title":  "تفاصيل مؤشرات الأقسام ومصادرها",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  139,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "النشاط الإداري المصرح",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "تغطية القياس",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       }
+                                                   ]
+                                    },
+                                    {
+                                        "page":  "/admin/review-queue",
+                                        "width":  1360,
+                                        "overflow":  false,
+                                        "panels":  [
+                                                       {
+                                                           "title":  "دليل المراجعة وحدود البيانات",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "تغطية المصادر والأعداد والأخطاء",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "تحليل العينة ومساحات المراجعة",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "الاعتماد والنشر داخل القسم المختص",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       }
+                                                   ]
+                                    },
+                                    {
+                                        "page":  "/admin/review-queue",
+                                        "width":  1000,
+                                        "overflow":  false,
+                                        "panels":  [
+                                                       {
+                                                           "title":  "دليل المراجعة وحدود البيانات",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "تغطية المصادر والأعداد والأخطاء",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "تحليل العينة ومساحات المراجعة",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "الاعتماد والنشر داخل القسم المختص",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       }
+                                                   ]
+                                    },
+                                    {
+                                        "page":  "/admin/review-queue",
+                                        "width":  820,
+                                        "overflow":  false,
+                                        "panels":  [
+                                                       {
+                                                           "title":  "دليل المراجعة وحدود البيانات",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "تغطية المصادر والأعداد والأخطاء",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "تحليل العينة ومساحات المراجعة",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "الاعتماد والنشر داخل القسم المختص",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  94,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       }
+                                                   ]
+                                    },
+                                    {
+                                        "page":  "/admin/review-queue",
+                                        "width":  390,
+                                        "overflow":  false,
+                                        "panels":  [
+                                                       {
+                                                           "title":  "دليل المراجعة وحدود البيانات",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  110,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "تغطية المصادر والأعداد والأخطاء",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  116,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "تحليل العينة ومساحات المراجعة",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  116,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       },
+                                                       {
+                                                           "title":  "الاعتماد والنشر داخل القسم المختص",
+                                                           "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                           "size":  "17px",
+                                                           "height":  116,
+                                                           "goldRail":  "rgb(214, 164, 59)",
+                                                           "railWidth":  "3px",
+                                                           "toggleOnLeft":  true,
+                                                           "bodyHidden":  true
+                                                       }
+                                                   ]
+                                    }
+                                ],
+                    "expandedMobileOverflowChecks":  "PASS",
+                    "allSevenNativeKeyboardChecks":  "PASS"
+                },
+    "verification":  {
+                         "adminTypecheck":  "PASS",
+                         "DashboardPermission":  3,
+                         "ReviewQueueSession":  7,
+                         "eslintErrors":  0,
+                         "existingHookWarnings":  7,
+                         "build":  "PASS",
+                         "liveApiReadiness":  "NOT_RETESTED_PRESENTATION_SCOPE",
+                         "apiLatency":  "PREVIOUSLY_DOCUMENTED_UNRESOLVED"
+                     },
+    "localInstall":  {
+                         "pass":  true,
+                         "at":  "2026-10-23T21:47:26.658Z",
+                         "frontendSourceSha":  "879721d66e00e77615c191db0c03b1a79c8bd935",
+                         "runtimeApiSourceSha":  "554d08cfa74c88a1df23db0a3ccfcd36c4290cab",
+                         "runtimePid":  13340,
+                         "apiRestarted":  false,
+                         "activeSessionsPreserved":  true,
+                         "servedArtifactMatches":  true,
+                         "manifestSha256":  "a7ba47e3f0855afc34e2ae48663bda7cd1e5e8e97e074315705d1fd72929bc86"
+                     }
+}

@@ -23,3 +23,4 @@ The seven supporting panels used unrelated summary sizes and inconsistent inner 
 The built frontend is installed without restarting the API, retaining previous hashed assets for open tabs and matching the served HTML to the reviewed bundle. Build/install evidence records the frontend source SHA separately from the API runtime SHA.
 
 Previously documented live API/authentication latency remains outside this presentation change. This delivery does not claim to resolve that latency or to complete production acceptance.
+[Compiled browser and local install evidence](evidence/ADMIN_DISCLOSURES_2026-10-24.json) records the exact source and runtime separately. All seven expanded panels were checked on mobile without page overflow.
