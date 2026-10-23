@@ -3,6 +3,46 @@ import express from 'express';
 import request from 'supertest';
 vi.mock('../../../src/infrastructure/di/container.js',()=>({container:{resolve:vi.fn()}}));
 import {SecurityMiddlewareFactory} from '../../../src/presentation/security/SecurityMiddlewareFactory';
+import {AuthRouter} from '../../../src/presentation/api/router/AuthRouter';
+
+it('does not repeat current-user lifecycle reads and rejects a subsequent inactive request',async()=>{
+  let allowed=true;
+  const validator={isAuthenticationAllowed:vi.fn(async()=>allowed)};
+  const sessions={isSessionActive:vi.fn().mockResolvedValue(true)};
+  const app=express();
+  app.use('/auth',AuthRouter.create({
+    authService:{} as any,identityRepository:{findById:vi.fn().mockResolvedValue({})} as any,
+    securityService:{} as any,tokenProvider:{verifyAccessTokenSync:()=>({userId:'existing-admin',sessionId:'session-1'})} as any,
+    sessionManager:sessions as any,principalAccessValidator:validator,
+    forgotPasswordUseCase:{} as any,resetPasswordUseCase:{} as any,authRateLimitKey:value=>value,
+  }));
+  expect((await request(app).get('/auth/me').set('Cookie','manaratak_access=synthetic-token')).status).toBe(200);
+  expect(validator.isAuthenticationAllowed).toHaveBeenCalledTimes(1);
+  allowed=false;
+  expect((await request(app).get('/auth/me').set('Cookie','manaratak_access=synthetic-token')).status).toBe(401);
+  expect(validator.isAuthenticationAllowed).toHaveBeenCalledTimes(2);
+  expect(sessions.isSessionActive).toHaveBeenCalledTimes(2);
+});
+
+it('checks lifecycle once per authenticated request and rechecks it on the next request',async()=>{
+  let allowed=true;
+  const validator={isAuthenticationAllowed:vi.fn(async()=>allowed)};
+  const sessionManager={isSessionActive:vi.fn().mockResolvedValue(true)};
+  const guard=SecurityMiddlewareFactory.createAdminGuard({mode:'strict',tokenProvider:{verifyAccessTokenSync:()=>({userId:'existing-admin',sessionId:'session-1'})} as any,sessionManager:sessionManager as any,principalAccessValidator:validator});
+  const invoke=async()=>{
+    const response={statusCode:200,status(code:number){this.statusCode=code;return this;},json(){return this;},locals:{},setHeader:vi.fn()};
+    const next=vi.fn();
+    await guard({headers:{authorization:'Bearer synthetic-token'},method:'GET'} as any,response as any,next);
+    return {response,next};
+  };
+  const first=await invoke();
+  expect(first.next).toHaveBeenCalledOnce();expect(validator.isAuthenticationAllowed).toHaveBeenCalledTimes(1);
+  allowed=false;
+  const second=await invoke();
+  expect(second.next).not.toHaveBeenCalled();expect(second.response.statusCode).toBe(401);
+  expect(validator.isAuthenticationAllowed).toHaveBeenCalledTimes(2);
+  expect(sessionManager.isSessionActive).toHaveBeenCalledTimes(2);
+});
 
 it.each(['lookup','revocation'])('handles %s storage failure without rejecting or granting access',async failure=>{
   const storageError=new Error('SYNTHETIC_PRIVATE_STORAGE_FAILURE');

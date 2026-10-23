@@ -185,6 +185,7 @@ export class SecurityMiddlewareFactory {
   public static createAdminGuard(options: AdminGuardOptions) {
     return async (req: Request, res: Response, next: NextFunction) => {
       let principalId: string | null = req.authUserId || null;
+      let principalValidated = false;
 
       if (!principalId) {
         const receivedToken = readAccessCookie(req) || extractBearerToken(req.headers.authorization);
@@ -205,6 +206,7 @@ export class SecurityMiddlewareFactory {
               && await options.principalAccessValidator.isAuthenticationAllowed(payload.userId)
             ) {
               principalId = payload.userId;
+              principalValidated = true;
               req.authSessionId = payload.sessionId;
             }
           } catch (e) {
@@ -227,7 +229,9 @@ export class SecurityMiddlewareFactory {
       }
 
       try {
-        if (!options.principalAccessValidator || !await options.principalAccessValidator.isAuthenticationAllowed(principalId)) {
+        // A token authenticated above has already passed the current lifecycle
+        // check. This flag lives only for this request; never cache across requests.
+        if (!principalValidated && (!options.principalAccessValidator || !await options.principalAccessValidator.isAuthenticationAllowed(principalId))) {
           if (options.sessionManager) await options.sessionManager.revokeAllSessions(principalId);
           res.status(401).json({
             error: { code: 'ADMIN_SESSION_NOT_ACTIVE', message: 'Admin authentication is required.' },

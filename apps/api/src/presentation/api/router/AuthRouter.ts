@@ -211,6 +211,7 @@ export class AuthRouter {
     router.get('/me', async (req: Request, res: Response) => {
       try {
         let principalId: string | null = (req as any).authUserId || null;
+        let principalValidated = false;
 
         if (!principalId) {
           const authHeader = req.headers.authorization;
@@ -232,6 +233,7 @@ export class AuthRouter {
                 && (!cradle.mfaUseCases || await cradle.mfaUseCases.sessionAuthenticated(payload.userId,payload.sessionId))
               ) {
                 principalId = payload.userId;
+                principalValidated = true;
               }
             } catch (e) {
               // Invalid or expired tokens remain unauthenticated.
@@ -247,7 +249,7 @@ export class AuthRouter {
           return;
         }
 
-        if (!await principalAccessValidator.isAuthenticationAllowed(principalId)) {
+        if (!principalValidated && !await principalAccessValidator.isAuthenticationAllowed(principalId)) {
           if (sessionManager) await sessionManager.revokeAllSessions(principalId);
           res.status(401).json(responseFormatter.error({ code: 'SESSION_NOT_ACTIVE', message: 'Authentication required' }));
           return;

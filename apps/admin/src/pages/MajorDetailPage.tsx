@@ -423,6 +423,7 @@ export function MajorDetailPage() {
   const [activeTab, setActiveTab] = useState<DetailTab>('basic');
   const [loading, setLoading] = useState(true);
   const [loadingSections, setLoadingSections] = useState(false);
+  const [relatedState,setRelatedState]=useState<'loading'|'ready'|'error'>('loading');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -466,34 +467,44 @@ export function MajorDetailPage() {
   });
 
   const rootReads=useRef(0),profileReads=useRef(0),loadedProfile=useRef('');
+  const loadRelatedData = async (generation:number) => {
+    const results=await Promise.allSettled([
+      adminApiClient.request<{data:MajorAlias[]}>(`/admin/majors/${id}/aliases`),
+      adminApiClient.request<{data:MajorRelationship[]}>(`/admin/majors/${id}/relationships`),
+      adminApiClient.request<{data:MajorClassificationMapping[]}>(`/admin/majors/${id}/classification-mappings`),
+    ]);
+    if(generation!==rootReads.current)return;
+    const [aliasResult,relationshipResult,mappingResult]=results;
+    if(aliasResult.status==='fulfilled')setAliases(aliasResult.value.data);
+    if(relationshipResult.status==='fulfilled')setRelationships(relationshipResult.value.data);
+    if(mappingResult.status==='fulfilled')setMappings(mappingResult.value.data);
+    const failed=results.some(result=>result.status==='rejected');
+    setRelatedState(failed?'error':'ready');
+    if(failed)setError('تعذر تحميل بعض العلاقات أو الأسماء البديلة أو التصنيفات؛ البيانات غير المحملة غير معروفة. أعد تحميل التفاصيل للمحاولة مجددًا.');
+  };
   // 1. Initial Load of Major and Profiles
   const loadMajorAndProfiles = async () => {
     if (!id) return;
     const generation=++rootReads.current;++profileReads.current;
     setLoading(true);
+    setRelatedState('loading');
     setError(null);
     try {
       const results = await Promise.allSettled([
         adminApiClient.request<MajorDetail>(`/admin/majors/${id}`),
         adminApiClient.request<{ data: MajorProfile[] }>(`/admin/majors/${id}/profiles`),
-        adminApiClient.request<{ data: MajorAlias[] }>(`/admin/majors/${id}/aliases`),
-        adminApiClient.request<{ data: MajorRelationship[] }>(`/admin/majors/${id}/relationships`),
-        adminApiClient.request<{ data: MajorClassificationMapping[] }>(`/admin/majors/${id}/classification-mappings`),
       ]);
 
       if(generation!==rootReads.current)return;
       const [rootResult,...related]=results;
       if(rootResult.status==='rejected')throw rootResult.reason;
       const majorResult=rootResult.value as MajorDetail;
-      const [profileResult,aliasResult,relationshipResult,mappingResult]=related.map(result=>result.status==='fulfilled'?result.value:undefined) as Array<{data:unknown[]}|undefined>;
+      const [profileResult]=related.map(result=>result.status==='fulfilled'?result.value:undefined) as Array<{data:unknown[]}|undefined>;
       const failures=related.flatMap((result,index)=>result.status==='rejected'?[['ملفات المستويات','الأسماء البديلة','العلاقات','التصنيف'][index]]:[]);
       if(failures.length)setError(`تعذر تحميل ${failures.join('، ')}؛ هذه البيانات غير معروفة. استخدم إعادة تحميل التفاصيل للمحاولة مجددًا.`);
       setMajor(majorResult);
       const profList = (profileResult?.data ?? []) as MajorProfile[];
       setProfiles(profList);
-      if(aliasResult)setAliases(aliasResult.data as MajorAlias[]);
-      if(relationshipResult)setRelationships(relationshipResult.data as MajorRelationship[]);
-      if(mappingResult)setMappings(mappingResult.data as MajorClassificationMapping[]);
 
       // Determine initial active profile
       const queryProf = searchParams.get('profileId');
@@ -528,6 +539,8 @@ export function MajorDetailPage() {
       if (activeProfId) {
         await loadProfileData(majorResult.id, activeProfId);
       }
+      // Related panels cannot delay the identity header or the editable content.
+      if(generation===rootReads.current)void loadRelatedData(generation);
     } catch (err: unknown) {
       if(generation===rootReads.current)setError(err instanceof Error ? err.message : 'تعذر تحميل تفاصيل التخصص الأكاديمي.');
     } finally {
@@ -1325,7 +1338,7 @@ export function MajorDetailPage() {
             </h2>
             <ReviewedGraphEditor key={major.id} ownerId={major.id} ownerStatus={major.status ?? ''} domain="MAJOR" profiles={profiles} onSaved={loadMajorAndProfiles} />
             <div className="grid gap-3">
-              {mappings.length === 0 ? (
+              {relatedState!=='ready' ? <p role="status" className="text-xs text-slate-500">{relatedState==='loading'?'جارٍ تحميل التصنيفات…':'التصنيفات غير متاحة حاليًا؛ أعد تحميل التفاصيل.'}</p> : mappings.length === 0 ? (
                 <p className="text-xs text-slate-400 font-bold">لا توجد خرائط تصنيف مخصصة بعد.</p>
               ) : (
                 mappings.map((mapping) => (
@@ -1349,7 +1362,7 @@ export function MajorDetailPage() {
               <GitBranch className="h-5 w-5 text-[#0E7C86]" />
               <span>الأسماء البديلة والمرادفات</span>
             </h2>
-            {aliases.length === 0 ? (
+            {relatedState!=='ready' ? <p role="status" className="text-xs text-slate-500">{relatedState==='loading'?'جارٍ تحميل الأسماء البديلة…':'الأسماء البديلة غير متاحة حاليًا؛ أعد تحميل التفاصيل.'}</p> : aliases.length === 0 ? (
               <p className="text-xs text-slate-400 font-bold">لا توجد أسماء بديلة مسجلة.</p>
             ) : (
               <div className="flex flex-wrap gap-2">
@@ -1367,7 +1380,7 @@ export function MajorDetailPage() {
               <Link2 className="h-5 w-5 text-[#0E7C86]" />
               <span>علاقات التكافؤ والتكامل</span>
             </h2>
-            {relationships.length === 0 ? (
+            {relatedState!=='ready' ? <p role="status" className="text-xs text-slate-500">{relatedState==='loading'?'جارٍ تحميل العلاقات…':'العلاقات غير متاحة حاليًا؛ أعد تحميل التفاصيل.'}</p> : relationships.length === 0 ? (
               <p className="text-xs text-slate-400 font-bold">لا توجد علاقات تكافؤ مسجلة.</p>
             ) : (
               <div className="grid gap-2">
