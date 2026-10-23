@@ -1,0 +1,383 @@
+{
+  "kind": "UNIVERSITY_SOURCE_REVIEW_CANONICAL_POSTGRES16_PROOF",
+  "pass": true,
+  "sourceSha": "b3a3d9b86685db7d531e35da7b7b860be6ed846f",
+  "runId": "8f7e6d86-a326-46f7-a521-d1c8f5f5f3fb",
+  "observedAt": "2026-10-23T01:20:12.014Z",
+  "postgresMajor": 16,
+  "identity": {
+    "role": "post28_app",
+    "server": "7699665884647952288",
+    "rolsuper": false,
+    "rolcreaterole": false,
+    "rolcreatedb": false,
+    "rolbypassrls": false,
+    "ledger": false,
+    "ddl": false,
+    "owns": false
+  },
+  "managedDatabaseConnections": 0,
+  "realAccountsCreated": 0,
+  "priorDatabasesTouched": false,
+  "universitiesApplied": 4,
+  "publication": false,
+  "sourceAssetSha256": "8e05bb9937688ef08455a18a077575b248cc4900b2a26ff2b80493be8f6f13f6",
+  "sourceFieldReviewSha256": "ab7a339ffecd50aedeb2cc231566c8b9493be2618012fe2127bd1e16c531586d",
+  "institutionReviewSha256": "f7676c10c1be695c58e13c0d66cc1fc893557e28a06cb699fa14edd05b57d16e",
+  "scannerReceipts": [
+    {
+      "provider": "WINDOWS_DEFENDER",
+      "sha256": "8e05bb9937688ef08455a18a077575b248cc4900b2a26ff2b80493be8f6f13f6",
+      "exitCode": 0,
+      "digestUnchanged": true,
+      "clean": true,
+      "signatureVersion": "1.461.156.0",
+      "signatureUpdatedAt": "2026-10-22T18:40:20.0000000Z"
+    },
+    {
+      "provider": "WINDOWS_DEFENDER",
+      "sha256": "8e05bb9937688ef08455a18a077575b248cc4900b2a26ff2b80493be8f6f13f6",
+      "exitCode": 0,
+      "digestUnchanged": true,
+      "clean": true,
+      "signatureVersion": "1.461.156.0",
+      "signatureUpdatedAt": "2026-10-22T18:40:20.0000000Z"
+    }
+  ],
+  "plans": [
+    {
+      "stage": "STAGE_1",
+      "sourceArtifactId": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+      "changes": [
+        {
+          "sequence": 1,
+          "sourceReferenceId": "INS-CHN-0001",
+          "entityType": "UNIVERSITY",
+          "entityKey": "INS-CHN-0001",
+          "operation": "CREATE",
+          "afterState": {
+            "city": "Beijing",
+            "country": "China",
+            "metadata": {
+              "purpose": "REVIEWED_PRIVATE_UNIVERSITY_DRAFT_SOURCE",
+              "sourceFile": "workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx",
+              "rawRowSha256": "c68880dfd6510c992484b113542b6fb0ab36174b9f6789378ecc934a14c36844",
+              "reviewSha256": "ab7a339ffecd50aedeb2cc231566c8b9493be2618012fe2127bd1e16c531586d",
+              "sourceRowNumber": 1189,
+              "sourceWorkbookSha256": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+              "institutionReviewSha256": "f7676c10c1be695c58e13c0d66cc1fc893557e28a06cb699fa14edd05b57d16e"
+            },
+            "countryIso3": "CHN",
+            "universityName": "Peking University",
+            "institutionType": "UNIVERSITY",
+            "officialWebsite": "https://www.pku.edu.cn/",
+            "officialSourceUrl": "https://english.pku.edu.cn/detail/11807.html",
+            "sourceReferenceId": "INS-CHN-0001",
+            "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+            "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+            "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37"
+          }
+        },
+        {
+          "sequence": 2,
+          "sourceReferenceId": "INS-CHN-0001",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "252c9a8a-b6f0-4629-9e59-354be0f3c7f8",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_1",
+            "artifactId": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+            "sourceRowNumber": 1189,
+            "contentHash": "c68880dfd6510c992484b113542b6fb0ab36174b9f6789378ecc934a14c36844"
+          }
+        },
+        {
+          "sequence": 3,
+          "sourceReferenceId": "INS-CHN-0003",
+          "entityType": "UNIVERSITY",
+          "entityKey": "INS-CHN-0003",
+          "operation": "CREATE",
+          "afterState": {
+            "city": "Beijing",
+            "country": "China",
+            "metadata": {
+              "purpose": "REVIEWED_PRIVATE_UNIVERSITY_DRAFT_SOURCE",
+              "sourceFile": "workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx",
+              "rawRowSha256": "bbe6058fbd891a7c4c6dd44299e31bf9c89085f5b7d8831ea47692aa2728b9bb",
+              "reviewSha256": "ab7a339ffecd50aedeb2cc231566c8b9493be2618012fe2127bd1e16c531586d",
+              "sourceRowNumber": 1191,
+              "sourceWorkbookSha256": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+              "institutionReviewSha256": "f7676c10c1be695c58e13c0d66cc1fc893557e28a06cb699fa14edd05b57d16e"
+            },
+            "countryIso3": "CHN",
+            "universityName": "Tsinghua University",
+            "institutionType": "UNIVERSITY",
+            "officialWebsite": "https://www.tsinghua.edu.cn/",
+            "officialSourceUrl": "https://www.tsinghua.edu.cn/en/Contact.htm",
+            "sourceReferenceId": "INS-CHN-0003",
+            "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+            "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+            "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37"
+          }
+        },
+        {
+          "sequence": 4,
+          "sourceReferenceId": "INS-CHN-0003",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "be19a8d2-2d87-488c-b22d-8e5ad0d4d204",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_1",
+            "artifactId": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+            "sourceRowNumber": 1191,
+            "contentHash": "bbe6058fbd891a7c4c6dd44299e31bf9c89085f5b7d8831ea47692aa2728b9bb"
+          }
+        }
+      ],
+      "validationIssues": [],
+      "databaseWrites": 0,
+      "screeningBindings": [
+        {
+          "sourceReferenceId": "INS-CHN-0001",
+          "receiptId": "252c9a8a-b6f0-4629-9e59-354be0f3c7f8",
+          "requestHash": "615d8fa0b34467491474cbd56ad34ee30eed17a898bbfc2614910fb5965f98c5",
+          "assetId": "university-source-8f7e6d86-a326-46f7-a521-d1c8f5f5f3fb",
+          "artifactSha256": "8e05bb9937688ef08455a18a077575b248cc4900b2a26ff2b80493be8f6f13f6"
+        },
+        {
+          "sourceReferenceId": "INS-CHN-0003",
+          "receiptId": "be19a8d2-2d87-488c-b22d-8e5ad0d4d204",
+          "requestHash": "4f3bfa0b1461d28655f93c08019a83c871e0f41b2277aaa81dea95278e2470b6",
+          "assetId": "university-source-8f7e6d86-a326-46f7-a521-d1c8f5f5f3fb",
+          "artifactSha256": "8e05bb9937688ef08455a18a077575b248cc4900b2a26ff2b80493be8f6f13f6"
+        }
+      ],
+      "sourceReview": {
+        "previewPlanHash": "b875986aa4c32a48edca2c98b3b07d7b4db62a279aa86c654aec68a58a823d41",
+        "reviewedBy": "a044c958-1cfa-4d90-86b6-93584dc92e2e",
+        "reason": "Synthetic local operator exercising delegated official-field review and exact canonical geography; no real identity or managed approval.",
+        "geography": [
+          {
+            "sourceReferenceId": "INS-CHN-0001",
+            "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+            "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+            "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37"
+          },
+          {
+            "sourceReferenceId": "INS-CHN-0003",
+            "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+            "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+            "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37"
+          }
+        ]
+      },
+      "planHash": "a4d231f897be85ada51e10e170f8f8c2728ba6267b7ce50e50824879b7f6cff7",
+      "changeSetId": "STAGE_1:24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030:a4d231f897be85ada51e10e170f8f8c2728ba6267b7ce50e50824879b7f6cff7"
+    },
+    {
+      "stage": "STAGE_1",
+      "sourceArtifactId": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+      "changes": [
+        {
+          "sequence": 1,
+          "sourceReferenceId": "INS-HUN-0006",
+          "entityType": "UNIVERSITY",
+          "entityKey": "INS-HUN-0006",
+          "operation": "CREATE",
+          "afterState": {
+            "city": "Budapest",
+            "country": "Hungary",
+            "metadata": {
+              "purpose": "REVIEWED_PRIVATE_UNIVERSITY_DRAFT_SOURCE",
+              "sourceFile": "workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx",
+              "rawRowSha256": "b935225ca7c6997b1aac63f7f56c551b10935c8af27735bf9c1ed2f7d84f04b5",
+              "reviewSha256": "ab7a339ffecd50aedeb2cc231566c8b9493be2618012fe2127bd1e16c531586d",
+              "sourceRowNumber": 629,
+              "sourceWorkbookSha256": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+              "institutionReviewSha256": "f7676c10c1be695c58e13c0d66cc1fc893557e28a06cb699fa14edd05b57d16e"
+            },
+            "countryIso3": "HUN",
+            "universityName": "Eötvös Loránd University",
+            "institutionType": "UNIVERSITY",
+            "officialWebsite": "https://www.elte.hu/en",
+            "officialSourceUrl": "https://elte.hu/en/central-international-relations-office",
+            "sourceReferenceId": "INS-HUN-0006",
+            "countryReferenceId": "aa450b59-9731-4869-b3e8-7713aed3ae72",
+            "regionReferenceId": "7ccf3f41-ce49-4693-b545-974edd9d3ef9",
+            "cityReferenceId": "b986d010-bceb-481f-b9d9-572b33acab5e"
+          }
+        },
+        {
+          "sequence": 2,
+          "sourceReferenceId": "INS-HUN-0006",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "58c3da70-72a2-49cf-941c-d165aca8f92e",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_1",
+            "artifactId": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+            "sourceRowNumber": 629,
+            "contentHash": "b935225ca7c6997b1aac63f7f56c551b10935c8af27735bf9c1ed2f7d84f04b5"
+          }
+        },
+        {
+          "sequence": 3,
+          "sourceReferenceId": "INS-TUR-0145",
+          "entityType": "UNIVERSITY",
+          "entityKey": "INS-TUR-0145",
+          "operation": "CREATE",
+          "afterState": {
+            "city": "Ankara",
+            "country": "Turkey",
+            "metadata": {
+              "purpose": "REVIEWED_PRIVATE_UNIVERSITY_DRAFT_SOURCE",
+              "sourceFile": "workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx",
+              "rawRowSha256": "8e7f5fbf9d1912c296557e0b5304c3bc7477754a6de29eb3abdf88bfd9ad0ad9",
+              "reviewSha256": "ab7a339ffecd50aedeb2cc231566c8b9493be2618012fe2127bd1e16c531586d",
+              "sourceRowNumber": 2236,
+              "sourceWorkbookSha256": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+              "institutionReviewSha256": "f7676c10c1be695c58e13c0d66cc1fc893557e28a06cb699fa14edd05b57d16e"
+            },
+            "countryIso3": "TUR",
+            "universityName": "Middle East Technical University",
+            "institutionType": "UNIVERSITY",
+            "officialWebsite": "https://www.metu.edu.tr/",
+            "officialSourceUrl": "https://www.metu.edu.tr/",
+            "sourceReferenceId": "INS-TUR-0145",
+            "countryReferenceId": "2c14f864-d235-4276-8c87-d1bb19ceca0d",
+            "regionReferenceId": "d9db85b6-b3d0-42a7-b45e-5eb6b0b5a66b",
+            "cityReferenceId": "25d9c584-2cd4-47ac-98a4-f7c3e68588ef"
+          }
+        },
+        {
+          "sequence": 4,
+          "sourceReferenceId": "INS-TUR-0145",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "581f2474-bda3-4245-b97b-7dfaef5dec58",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_1",
+            "artifactId": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+            "sourceRowNumber": 2236,
+            "contentHash": "8e7f5fbf9d1912c296557e0b5304c3bc7477754a6de29eb3abdf88bfd9ad0ad9"
+          }
+        }
+      ],
+      "validationIssues": [],
+      "databaseWrites": 0,
+      "screeningBindings": [
+        {
+          "sourceReferenceId": "INS-HUN-0006",
+          "receiptId": "58c3da70-72a2-49cf-941c-d165aca8f92e",
+          "requestHash": "23abdf0d9afb274fa98935255b4eeb1e32730cf3403f11ab1fc0450bd5936c80",
+          "assetId": "university-source-8f7e6d86-a326-46f7-a521-d1c8f5f5f3fb",
+          "artifactSha256": "8e05bb9937688ef08455a18a077575b248cc4900b2a26ff2b80493be8f6f13f6"
+        },
+        {
+          "sourceReferenceId": "INS-TUR-0145",
+          "receiptId": "581f2474-bda3-4245-b97b-7dfaef5dec58",
+          "requestHash": "75d0e9232e2a9495917d9af65db2f29c739e7db08075fe8e173fdc31f02532d5",
+          "assetId": "university-source-8f7e6d86-a326-46f7-a521-d1c8f5f5f3fb",
+          "artifactSha256": "8e05bb9937688ef08455a18a077575b248cc4900b2a26ff2b80493be8f6f13f6"
+        }
+      ],
+      "sourceReview": {
+        "previewPlanHash": "7f207a7ab5e6f85759c27f8d4e1e1247b3649e83f3ffb34d687a340baa372950",
+        "reviewedBy": "a044c958-1cfa-4d90-86b6-93584dc92e2e",
+        "reason": "Synthetic local operator exercising delegated official-field review and exact canonical geography; no real identity or managed approval.",
+        "geography": [
+          {
+            "sourceReferenceId": "INS-HUN-0006",
+            "countryReferenceId": "aa450b59-9731-4869-b3e8-7713aed3ae72",
+            "regionReferenceId": "7ccf3f41-ce49-4693-b545-974edd9d3ef9",
+            "cityReferenceId": "b986d010-bceb-481f-b9d9-572b33acab5e"
+          },
+          {
+            "sourceReferenceId": "INS-TUR-0145",
+            "countryReferenceId": "2c14f864-d235-4276-8c87-d1bb19ceca0d",
+            "regionReferenceId": "d9db85b6-b3d0-42a7-b45e-5eb6b0b5a66b",
+            "cityReferenceId": "25d9c584-2cd4-47ac-98a4-f7c3e68588ef"
+          }
+        ]
+      },
+      "planHash": "a6ee68eb4f26e8ed2450a6aca6443f81c2b9528f08788e1944c0f04373763b11",
+      "changeSetId": "STAGE_1:0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2:a6ee68eb4f26e8ed2450a6aca6443f81c2b9528f08788e1944c0f04373763b11"
+    }
+  ],
+  "before": {
+    "receipts": 4,
+    "records": 4,
+    "assets": 1,
+    "universities": 0,
+    "sources": 0,
+    "sets": 0,
+    "changes": 0,
+    "audit": 0,
+    "outbox": 3
+  },
+  "applied": {
+    "receipts": 4,
+    "records": 4,
+    "assets": 1,
+    "universities": 4,
+    "sources": 4,
+    "sets": 2,
+    "changes": 8,
+    "audit": 2,
+    "outbox": 5
+  },
+  "rolled": {
+    "receipts": 4,
+    "records": 4,
+    "assets": 1,
+    "universities": 0,
+    "sources": 0,
+    "sets": 2,
+    "changes": 8,
+    "audit": 4,
+    "outbox": 7
+  },
+  "phases": [
+    {
+      "name": "SOURCE_LAB_RESTRICTED_IDENTITY_VERIFIED",
+      "at": "2026-10-23T01:19:49.210Z"
+    },
+    {
+      "name": "PRIVATE_SOURCE_ASSET_UPLOAD_SCAN_SANITIZE_ACTIVATE_AND_AUTHENTICATED_READ",
+      "at": "2026-10-23T01:19:50.566Z",
+      "sha256": "8e05bb9937688ef08455a18a077575b248cc4900b2a26ff2b80493be8f6f13f6",
+      "scannerPasses": 2
+    },
+    {
+      "name": "FOUR_NEW_REVIEWED_SOURCES_STAGED_WITHOUT_REWRITING_OLD_RECEIPTS",
+      "at": "2026-10-23T01:19:50.687Z"
+    },
+    {
+      "name": "ACTUAL_PREVIEW_AND_OFFLINE_REVIEW_CLIS_BOUND_TWO_PLANS_WITH_ZERO_CANONICAL_WRITES",
+      "at": "2026-10-23T01:19:58.694Z"
+    },
+    {
+      "name": "RESEALED_SOURCE_TAMPERING_MISSING_REVIEW_RETIRED_ASSET_AND_WRONG_COUNTRY_REJECTED",
+      "at": "2026-10-23T01:19:58.817Z"
+    },
+    {
+      "name": "SOURCE_REVIEW_AUDIT_AND_CANONICAL_WRITES_ROLL_BACK_WHEN_OUTBOX_FAILS",
+      "at": "2026-10-23T01:19:58.897Z"
+    },
+    {
+      "name": "ACTUAL_COMMIT_CLI_WRITES_FOUR_CANONICAL_DRAFTS_WITH_TWO_ATOMIC_REVIEW_AUDIT_OUTBOX_RECORDS",
+      "at": "2026-10-23T01:20:05.537Z"
+    },
+    {
+      "name": "ACTUAL_COMMIT_CLI_REPLAY_HAS_NO_ADDITIONAL_EFFECTS",
+      "at": "2026-10-23T01:20:11.881Z"
+    },
+    {
+      "name": "SAFE_UNDO_PRESERVES_SOURCE_ASSET_SCREENING_REVIEW_AND_CHANGE_JOURNAL",
+      "at": "2026-10-23T01:20:12.012Z"
+    }
+  ],
+  "productionReady": false,
+  "geographyEvidence": "Existing reviewed geography IDs replicated only as new local fixtures; no live managed geography revalidation claimed.",
+  "recoveryGate": "Disposable local rehearsal token; not managed backup authorization."
+}
