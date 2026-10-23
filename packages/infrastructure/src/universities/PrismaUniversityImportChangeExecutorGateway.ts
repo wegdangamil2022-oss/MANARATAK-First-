@@ -96,6 +96,7 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
       if (changeSet.state !== 'APPLIED')
         throw new Error(`UNIVERSITY_CHANGE_SET_NOT_ROLLBACKABLE:${changeSet.state}`);
 
+      await this.assertRollbackUnchanged(transaction, changeSet.changes);
       for (const change of changeSet.changes) await this.rollbackChange(transaction, change);
       const rolledBackAt = new Date();
       await transaction.universityImportChangeSet.update({
@@ -112,6 +113,45 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
       );
       return { changeSetId, revertedChanges: changeSet.changes.length };
     });
+  }
+
+  private async assertRollbackUnchanged(transaction: Transaction, changes: Array<{
+    entityType: string; entityId: string; universityId: string | null; operation: string; afterState: Prisma.JsonValue | null;
+  }>): Promise<void> {
+    // Validate every row before the first mutation; a source row must not be
+    // deleted before discovering that its parent has since changed.
+    const owners = [...new Set(changes.map(row => row.universityId).filter((id): id is string => Boolean(id)))].sort();
+    for (const id of owners) {
+      await transaction.$queryRaw`SELECT id FROM "University" WHERE id = ${id} FOR UPDATE`;
+      const owner = await transaction.university.findUnique({ where: { id }, include: { _count: true } });
+      if (!owner || ['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(owner.status)) throw new Error('UNIVERSITY_IMPORT_ROLLBACK_OWNER_IMMUTABLE');
+      if (changes.some(row => row.entityType === 'UNIVERSITY' && row.entityId === id && row.operation === 'CREATE')) {
+        const relationTypes: Record<string, string> = { campuses: 'CAMPUS', organizationUnits: 'ORGANIZATION_UNIT', academicPrograms: 'ACADEMIC_PROGRAM', tuitionProfiles: 'TUITION', accommodationProfiles: 'ACCOMMODATION', rankings: 'RANKING', sourceRecords: 'SOURCE_RECORD' };
+        for (const [relation, count] of Object.entries(owner._count)) {
+          const expected = relation === 'importChanges' ? changes.filter(row => row.universityId === id).length
+            : changes.filter(row => row.universityId === id && row.operation === 'CREATE' && row.entityType === relationTypes[relation]).length;
+          if (count !== expected) throw new Error('UNIVERSITY_IMPORT_ROLLBACK_DEPENDENCIES');
+        }
+      }
+    }
+    const delegates = {
+      UNIVERSITY: ['University', transaction.university], CAMPUS: ['UniversityCampus', transaction.universityCampus],
+      ORGANIZATION_UNIT: ['UniversityOrganizationUnit', transaction.universityOrganizationUnit], ACADEMIC_PROGRAM: ['UniversityAcademicProgram', transaction.universityAcademicProgram],
+      ADMISSION_REQUIREMENT: ['UniversityProgramAdmissionRequirement', transaction.universityProgramAdmissionRequirement], TUITION: ['UniversityTuitionProfile', transaction.universityTuitionProfile],
+      ACCOMMODATION: ['UniversityAccommodationProfile', transaction.universityAccommodationProfile], RANKING: ['UniversityRanking', transaction.universityRanking], SOURCE_RECORD: ['UniversitySourceRecord', transaction.universitySourceRecord],
+    } as const;
+    const canonical = (value: unknown): string => JSON.stringify(JSON.parse(JSON.stringify(value)), (_key, item) => item && typeof item === 'object' && !Array.isArray(item) ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b))) : item);
+    for (const change of [...changes].sort((a, b) => `${a.entityType}:${a.entityId}`.localeCompare(`${b.entityType}:${b.entityId}`))) {
+      const selected = delegates[change.entityType as keyof typeof delegates];
+      if (!selected || !change.afterState) throw new Error('UNIVERSITY_IMPORT_ROLLBACK_CONFLICT');
+      // Table identifiers come exclusively from the fixed mapping above.
+      await transaction.$queryRaw(Prisma.sql`SELECT id FROM ${Prisma.raw('"' + selected[0] + '"')} WHERE id = ${change.entityId} FOR UPDATE`);
+      const repository = selected[1] as unknown as { findUnique(input: { where: { id: string } }): Promise<Record<string, unknown> | null> };
+      const current = await repository.findUnique({ where: { id: change.entityId } });
+      if (!current) throw new Error('UNIVERSITY_IMPORT_ROLLBACK_CONFLICT');
+      const { _count: _relations, ...fields } = current;
+      if (canonical(fields) !== canonical(change.afterState)) throw new Error('UNIVERSITY_IMPORT_ROLLBACK_CONFLICT');
+    }
   }
 
   private async authorizeOperator(tx: Transaction, actorId: string): Promise<void> {

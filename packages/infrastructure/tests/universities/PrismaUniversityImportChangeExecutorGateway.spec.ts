@@ -14,6 +14,25 @@ function authorized<T extends object>(transaction: T) {
 }
 
 describe('PrismaUniversityImportChangeExecutorGateway', () => {
+  it.each(['edited', 'published', 'source-edited', 'new-translation'])('preserves the whole batch on rollback drift: %s', async kind => {
+    const original = { id: 'u1', status: 'READY_TO_REVIEW', displayName: 'Original' };
+    const source = { id: 's1', universityId: 'u1', sourceHash: 'original' };
+    const root = { ...original, ...(kind === 'edited' ? { displayName: 'Changed' } : {}), ...(kind === 'published' ? { status: 'PUBLISHED' } : {}) };
+    const tx = authorized({
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      universityImportChangeSet: { findUnique: vi.fn().mockResolvedValue({ state: 'APPLIED', changes: [
+        { sequence: 2, entityType: 'SOURCE_RECORD', entityId: 's1', universityId: 'u1', operation: 'CREATE', beforeState: null, afterState: source },
+        { sequence: 1, entityType: 'UNIVERSITY', entityId: 'u1', universityId: 'u1', operation: 'CREATE', beforeState: null, afterState: original },
+      ] }), update: vi.fn() },
+      university: { findUnique: vi.fn().mockResolvedValue({ ...root, _count: { sourceRecords: 1, importChanges: 2, translations: kind === 'new-translation' ? 1 : 0 } }), delete: vi.fn() },
+      universitySourceRecord: { findUnique: vi.fn().mockResolvedValue({ ...source, sourceHash: kind === 'source-edited' ? 'changed' : source.sourceHash }), delete: vi.fn() },
+      auditRecord: { create: vi.fn() }, transactionalOutboxRecord: { create: vi.fn() },
+    });
+    const gateway = new PrismaUniversityImportChangeExecutorGateway({ $transaction: async work => work(tx) } as never);
+    await expect(gateway.rollback('STAGE_1:fixture', 'admin-1')).rejects.toThrow(/ROLLBACK_(CONFLICT|DEPENDENCIES|OWNER_IMMUTABLE)/);
+    expect(tx.university.delete).not.toHaveBeenCalled(); expect(tx.universitySourceRecord.delete).not.toHaveBeenCalled();
+    expect(tx.universityImportChangeSet.update).not.toHaveBeenCalled(); expect(tx.auditRecord.create).not.toHaveBeenCalled();
+  });
   it('rejects a modified bounded plan before opening a transaction', async () => {
     const prisma = { $transaction: vi.fn() };
     const gateway = new PrismaUniversityImportChangeExecutorGateway(prisma as never);
@@ -276,22 +295,26 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
               sequence: 2,
               entityType: 'SOURCE_RECORD',
               entityId: 'source-1',
+              universityId: 'db-uni-1',
               operation: 'CREATE',
               beforeState: null,
+              afterState: { id: 'source-1', universityId: 'db-uni-1', sourceHash: 'original' },
             },
             {
               sequence: 1,
               entityType: 'UNIVERSITY',
               entityId: 'db-uni-1',
+              universityId: 'db-uni-1',
               operation: 'CREATE',
               beforeState: null,
+              afterState: { id: 'db-uni-1', status: 'READY_TO_REVIEW' },
             },
           ],
         }),
         update: vi.fn(),
       },
-      universitySourceRecord: { delete: vi.fn() },
-      university: { delete: vi.fn() },
+      universitySourceRecord: { findUnique: vi.fn().mockResolvedValue({ id: 'source-1', universityId: 'db-uni-1', sourceHash: 'original' }), delete: vi.fn() },
+      university: { findUnique: vi.fn().mockResolvedValue({ id: 'db-uni-1', status: 'READY_TO_REVIEW', _count: { sourceRecords: 1, importChanges: 2 } }), delete: vi.fn() },
       auditRecord: { create: vi.fn() },
       transactionalOutboxRecord: { create: vi.fn() },
     };
