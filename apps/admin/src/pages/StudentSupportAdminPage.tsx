@@ -713,7 +713,6 @@ export function StudentSupportAdminPage() {
 
   return (
     <div dir={dir} className="mx-auto max-w-7xl space-y-6">
-      {hasPermission('admin:students:documents:review')&&<Link to="/student-document-reviews">{dir==='ltr'?'Consented academic document reviews':'مراجعات المستندات الأكاديمية بموافقة أصحابها'}</Link>}
       <header className="rounded-3xl bg-gradient-to-l from-[#0E7C86] to-[#142B5F] p-6 text-white sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -723,14 +722,17 @@ export function StudentSupportAdminPage() {
               {t('stu_support_intro')}
             </p>
           </div>
-          <button
-            disabled={loading}
-            onClick={() => void load()}
-            className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-3 font-bold disabled:opacity-50"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            {t('stu_support_refresh_list')}
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            {hasPermission('admin:students:documents:review') && <Link className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-bold text-white" to="/student-document-reviews">{dir === 'ltr' ? 'Consented academic document reviews' : 'مراجعات المستندات الأكاديمية بموافقة أصحابها'}</Link>}
+            <button
+              disabled={loading}
+              onClick={() => void load()}
+              className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-3 font-bold disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              {t('stu_support_refresh_list')}
+            </button>
+          </div>
         </div>
       </header>
       {error && (
