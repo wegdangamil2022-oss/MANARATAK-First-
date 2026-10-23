@@ -1,0 +1,15 @@
+{
+  "pass": true,
+  "at": "2026-10-23T13:46:51.718Z",
+  "sourceSha": "ef1a4f638c97a70cb65a54896e9e59b3af7049cc",
+  "runId": "e7b0d421-0c4a-4a88-990d-61b6ccf636be",
+  "state": "REAL_DEVELOPMENT_OWNER_ACTIVE",
+  "emailVerified": true,
+  "passwordMatchedStoredHash": true,
+  "administratorGranted": true,
+  "oneTimeAuditRecorded": true,
+  "actualBrowserLoginProven": false,
+  "productionTouched": false,
+  "snapshotScope": "ACCOUNT_ACTIVATION_BEFORE_BROWSER_CHECK",
+  "followupBrowserEvidence": "IMPORT_REAL_OWNER_BROWSER_2026-10-23.json"
+}

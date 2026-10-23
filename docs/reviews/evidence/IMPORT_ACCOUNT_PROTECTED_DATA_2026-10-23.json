@@ -1,0 +1,20 @@
+{
+  "pass": true,
+  "at": "2026-10-23T13:45:53.492Z",
+  "comparedTables": 272,
+  "allComparedRowsUnchanged": true,
+  "baseline": "LAST_RESTORED_REFERENCE_BASELINE",
+  "excludedPreviouslyAuthorizedReferenceAndAccountTables": [
+    "IdentityRecord",
+    "UserRecord",
+    "AccountRecord",
+    "CredentialRecord",
+    "EmailVerificationTokenRecord",
+    "RoleAssignmentRecord",
+    "TransactionalOutboxRecord",
+    "AuditRecord",
+    "RoleRecord",
+    "InternationalTestProvider"
+  ],
+  "sourceWrites": 0
+}

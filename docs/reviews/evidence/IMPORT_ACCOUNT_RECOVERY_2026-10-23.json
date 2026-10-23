@@ -1,0 +1,39 @@
+{
+  "pass": true,
+  "kind": "ACCOUNT_OPERATION_SCOPED_RECOVERY_REHEARSAL",
+  "sourceSha": "ef1a4f638c97a70cb65a54896e9e59b3af7049cc",
+  "runId": "e7b0d421-0c4a-4a88-990d-61b6ccf636be",
+  "at": "2026-10-23T13:41:46.768Z",
+  "fullPlatformBackup": false,
+  "tableCount": 10,
+  "tables": [
+    "AccountRecord",
+    "AuditRecord",
+    "CredentialRecord",
+    "EmailVerificationTokenRecord",
+    "IdentityRecord",
+    "RoleAssignmentRecord",
+    "RoleRecord",
+    "TransactionalOutboxRecord",
+    "UserRecord",
+    "AuditWorkspaceRecord"
+  ],
+  "freshAccountArchiveSha256": "2f9e1c9809e9ea41ed2b1440a8425acbaefcd29f5fbdb1695f3cac6b2061ce76",
+  "schemaArchiveSha256": "7a65f6571241c511a00adfff79a973839a925dcfac66adb2715867558cc1efad",
+  "schemaMatchesLiveAccountColumns": true,
+  "auditFunctionMatchesLive": true,
+  "auditPolicyVerifiedEmpty": true,
+  "allScopedRowFingerprintsMatch": true,
+  "sourceDatabaseWrites": 0,
+  "priorDatabasesTouched": false,
+  "restoreTarget": "NEW_ISOLATED_LOCAL_POSTGRES16",
+  "restrictedVerification": {
+    "superuser": false,
+    "createRole": false,
+    "createDatabase": false,
+    "bypassRls": false,
+    "readOnly": "on",
+    "ownsRelations": false
+  },
+  "labRunId": "137e800e-5c36-4527-8e0b-7b538a6dc852"
+}

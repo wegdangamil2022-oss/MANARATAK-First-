@@ -1,0 +1,80 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
+import { readScholarshipMasterGuide } from '../../work/r07-filtered/scripts/import/ScholarshipMasterGuideReader';
+import { scholarshipGuideSection, reviewScholarshipRelationships } from '../../work/r07-filtered/scripts/import/ScholarshipRelationshipSourceReview';
+
+const source = 'workspace/import-sources/scholarships/MANARATAK_Degree_Scholarships_Master_v6_6_2027_Audit_001_010_947.md';
+const queue = 'workspace/import-sources/reconciliation/m10-12-14/scholarships-sections.jsonl';
+const digest = (value: string | Buffer) => createHash('sha256').update(value).digest('hex');
+const bytes = fs.readFileSync(source), artifactHash = digest(bytes);
+assert.equal(artifactHash, 'f09c81d8a58c79ff05ef69a6009d181e31fe34d37f2c010ee566cd77e22902fd');
+const records = readScholarshipMasterGuide(bytes.toString('utf8'));
+const queueBytes = fs.readFileSync(queue);
+const decisions = queueBytes.toString('utf8').trim().split(/\r?\n/).map(line => JSON.parse(line));
+const byId = new Map(decisions.map(item => [item.sourceRecordId, item]));
+assert.equal(records.length, 947); assert.equal(byId.size, 947); assert.equal(decisions.length, 947);
+for (const record of records) {
+  const decision = byId.get(record.sourceRecordId);
+  assert.ok(decision); assert.equal(decision.artifactHash, artifactHash);
+  assert.equal(decision.sourceHash, record.sourceHash); assert.equal(decision.sourceLineNumber, record.sourceLineNumber);
+  assert.deepEqual(decision.relationshipReview, reviewScholarshipRelationships(record));
+  assert.equal(decision.databaseWrites, 0); assert.equal(decision.relationshipReview.importReady, false);
+  assert.equal(decision.relationshipReview.canonicalAssignments, 0);
+  assert.ok(decision.canonicalQueue.every((item: any) => item.state === 'REVIEW_REQUIRED' && item.canonicalId === null));
+}
+// Explicit review shortlist, not name-based FK resolution or an import payload.
+const proposals = [
+  { id: 'SCH-OC-0051', reference: 'INS-CHN-0001', name: 'Peking University',
+    authority: 'https://yenchingacademy.pku.edu.cn/ADMISSIONS.htm', fetch: 'READABLE',
+    review: '2027 cohort opens 2026-09-01 and closes 2026-11-30 09:00 Beijing. English evidence has alternatives, waivers and excluded delivery variants. Source summary alone cannot encode these rules.',
+    next: 'REVIEW_CONDITIONAL_LANGUAGE_EVIDENCE_AND_PROGRAM_SCOPE' },
+  { id: 'SCH-OC-0155', reference: 'INS-CHN-0003', name: 'Tsinghua University',
+    authority: 'https://www.schwarzmanscholars.org/admissions/application-instructions/', fetch: 'READABLE',
+    review: '2027/2028 applications closed; next US/global window April–September 2027. English alternatives include two distinct TOEFL iBT scales (5/6 and 100/120), IELTS 7 and other tests, with waivers. Preserve scale and cycle separately.',
+    next: 'REVIEW_DISTINCT_TEST_SCALES_WAIVERS_AND_CLOSED_CYCLE' },
+  { id: 'SCH-OC-0117', reference: 'INS-HUN-0006', name: 'Eötvös Loránd University',
+    authority: 'https://www.elte.hu/en/stipendium-hungaricum', fetch: 'FAILED_404',
+    review: 'Current official host page could not be retrieved. Preserve source claim as unverified; do not infer a new cycle, a programme list or a universal language test.',
+    next: 'RECOVER_OFFICIAL_HOST_SOURCE_AND_REVIEW_PROGRAM_PARTNER_SCOPE' },
+];
+const universities = JSON.parse(fs.readFileSync('docs/reviews/evidence/IMPORT_UNIVERSITY_STAGE2_SELECTED_ROWS_2026-10-23.json', 'utf8')).rows;
+const selected = proposals.map(proposal => {
+  const record = records.find(item => item.sourceRecordId === proposal.id)!;
+  assert.ok(record?.explicitlyImported);
+  const university = universities.find((row: any) => row.rawRow['University Reference ID'] === proposal.reference);
+  assert.ok(university); assert.equal(university.rawRow['Original Imported Name'], proposal.name);
+  return {
+    sourceRecordId: record.sourceRecordId, title: record.title, sourceLineNumber: record.sourceLineNumber,
+    sourceHash: record.sourceHash, sourceMarker: record.importStatus,
+    state: 'REVIEW_SHORTLIST_NOT_IMPORT_READY', canonicalAssignments: 0, databaseWrites: 0,
+    proposedHostReview: { publicId: proposal.reference, name: proposal.name, assignedCanonicalId: null,
+      origin: 'EXPLICIT_REVIEW_SHORTLIST_CROSS_REFERENCE', adopted: false,
+      evidenceFile: 'docs/reviews/evidence/IMPORT_UNIVERSITY_STAGE2_SELECTED_ROWS_2026-10-23.json',
+      evidenceRow: university.sourceRowNumber, evidenceRowSha256: university.rawRowSha256,
+      managedExistenceVerified: false, providerEqualsHost: null },
+    sourceSections: Object.fromEntries(['اسم المنحة', 'الجهة المانحة', 'المعلومات الأساسية', 'حالة المنحة', 'التخصصات المتاحة', 'الشروط ومعايير التقديم', 'المستندات المطلوبة', 'رابط التقديم', 'الروابط الرسمية'].map(label => [label, scholarshipGuideSection(record, label)])),
+    languageEvidence: { namedTestMentionsInSource: byId.get(record.sourceRecordId).relationshipReview.testEvidence,
+      genericLanguageProofNotNotApplicable: true, isRequired: null, internationalTestId: null,
+      alternativesAndExemptionsNeedReview: true, automaticScoreConversion: false },
+    officialReview: { checkedOn: '2026-10-23', url: proposal.authority, fetchState: proposal.fetch,
+      summary: proposal.review, scope: 'PARTIAL_CURRENT_SOURCE_REVIEW_NOT_PUBLICATION_APPROVAL' },
+    next: proposal.next,
+    applyBlockers: ['LIVE_REVIEWED_HOST_IDENTITY_REQUIRED', 'CANONICAL_DECISIONS_AND_SOURCE_SCREENING_REQUIRED', 'FRESH_SCOPED_RECOVERY_AND_EXACT_OWNER_BATCH_REQUIRED'],
+  };
+});
+const result = {
+  kind: 'P11A_SOURCE_BOUND_RELATIONSHIP_PREVIEW', pass: true, sourceSha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+  source, artifactHash, existingQueue: queue, existingQueueSha256: digest(queueBytes),
+  checkedRecords: records.length, sourceCandidatesHeld: records.filter(item => item.explicitlyImported).length,
+  sourceTranscriptionsHeld: records.filter(item => !item.explicitlyImported).length,
+  firstReviewShortlistCount: selected.length, canonicalAssignments: 0, importReady: 0, databaseConnections: 0, databaseWrites: 0,
+  reviewContract: 'SOURCE_MARKER_IS_NOT_EXECUTION; NO_NAME_ONLY_FK; NO_REQUIRED_DEFAULT; NO_CARTESIAN_PROGRAMS; NO_SCORE_SCALE_CONVERSION',
+  selected,
+};
+assert.equal(result.sourceCandidatesHeld, 703); assert.equal(result.sourceTranscriptionsHeld, 244);
+const output = 'docs/reviews/evidence/IMPORT_SCHOLARSHIP_FIRST_PREVIEW_2026-10-23.json';
+fs.writeFileSync(output, JSON.stringify(result, null, 2) + '\n');
+console.log(JSON.stringify({ pass: true, output, checkedRecords: result.checkedRecords, shortlisted: selected.length, importReady: 0, databaseWrites: 0 }));

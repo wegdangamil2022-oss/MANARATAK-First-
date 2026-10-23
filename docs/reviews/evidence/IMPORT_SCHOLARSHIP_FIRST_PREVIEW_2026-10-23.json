@@ -1,0 +1,182 @@
+{
+  "kind": "P11A_SOURCE_BOUND_RELATIONSHIP_PREVIEW",
+  "pass": true,
+  "sourceSha": "ef1a4f638c97a70cb65a54896e9e59b3af7049cc",
+  "source": "workspace/import-sources/scholarships/MANARATAK_Degree_Scholarships_Master_v6_6_2027_Audit_001_010_947.md",
+  "artifactHash": "f09c81d8a58c79ff05ef69a6009d181e31fe34d37f2c010ee566cd77e22902fd",
+  "existingQueue": "workspace/import-sources/reconciliation/m10-12-14/scholarships-sections.jsonl",
+  "existingQueueSha256": "341cdf852d0b89c4f3ef09216e60664a4f6e2c680e7d15f8e0056f94dcea6416",
+  "checkedRecords": 947,
+  "sourceCandidatesHeld": 703,
+  "sourceTranscriptionsHeld": 244,
+  "firstReviewShortlistCount": 3,
+  "canonicalAssignments": 0,
+  "importReady": 0,
+  "databaseConnections": 0,
+  "databaseWrites": 0,
+  "reviewContract": "SOURCE_MARKER_IS_NOT_EXECUTION; NO_NAME_ONLY_FK; NO_REQUIRED_DEFAULT; NO_CARTESIAN_PROGRAMS; NO_SCORE_SCALE_CONVERSION",
+  "selected": [
+    {
+      "sourceRecordId": "SCH-OC-0051",
+      "title": "Yenching Academy of Peking University Scholarship",
+      "sourceLineNumber": 4923,
+      "sourceHash": "0cae12012b10e675dde0b1ab8d19f2678c4f5711f58caa5e607f732c984c48ce",
+      "sourceMarker": "IMPORTED — OPEN 2027 COHORT",
+      "state": "REVIEW_SHORTLIST_NOT_IMPORT_READY",
+      "canonicalAssignments": 0,
+      "databaseWrites": 0,
+      "proposedHostReview": {
+        "publicId": "INS-CHN-0001",
+        "name": "Peking University",
+        "assignedCanonicalId": null,
+        "origin": "EXPLICIT_REVIEW_SHORTLIST_CROSS_REFERENCE",
+        "adopted": false,
+        "evidenceFile": "docs/reviews/evidence/IMPORT_UNIVERSITY_STAGE2_SELECTED_ROWS_2026-10-23.json",
+        "evidenceRow": 1405,
+        "evidenceRowSha256": "9c5ad21892690ea2c1722aa6317672f4447d2e228595b2a2aefb33ff99e83945",
+        "managedExistenceVerified": false,
+        "providerEqualsHost": null
+      },
+      "sourceSections": {
+        "اسم المنحة": "Yenching Academy of Peking University Scholarship — 2027 Cohort",
+        "الجهة المانحة": "Yenching Academy of Peking University",
+        "المعلومات الأساسية": "دولة الدراسة: الصين | الدرجة: ماجستير في China Studies | فتح التقديم: 1 سبتمبر 2026 | الموعد النهائي: 30 نوفمبر 2026، الساعة 9:00 صباحًا بتوقيت بكين | التمويل: ممول بالكامل | لغة الدراسة: الإنجليزية",
+        "حالة المنحة": "OPEN.",
+        "التخصصات المتاحة": "Economics and Management؛ Politics and International Relations؛ Law and Society؛ Philosophy and Religion؛ History and Archaeology؛ Literature and Culture.",
+        "الشروط ومعايير التقديم": "بكالوريوس في أي تخصص أو التخرج قبل أغسطس 2027، سجل أكاديمي قوي، اهتمام واضح بدراسات الصين، أنشطة وقيادة ومسؤولية مجتمعية، وإثبات الإنجليزية وفق الحد الرسمي. المتقدم الدولي يجب أن يكون غير صيني ويحمل جوازًا صالحًا.",
+        "المستندات المطلوبة": "نموذج إلكتروني، Personal Statement حتى 750 كلمة، Statement of Research Interest حتى 1500 كلمة، CV، كشوف رسمية، شهادة بكالوريوس أو إثبات قيد، رسالتا توصية أكاديميتان، وإثبات الإنجليزية عند وجوبه.",
+        "رابط التقديم": "https://apply.yca.pku.edu.cn/",
+        "الروابط الرسمية": "- https://yenchingacademy.pku.edu.cn/ADMISSIONS.htm\n- https://apply.yca.pku.edu.cn/\n- https://yenchingacademy.pku.edu.cn/ADMISSIONS/Frequently_Asked_Questions.htm\n**مصدر الاكتشاف:** https://www.opportunitiescircle.com/yenching-academy-scholarship-in-china/"
+      },
+      "languageEvidence": {
+        "namedTestMentionsInSource": [],
+        "genericLanguageProofNotNotApplicable": true,
+        "isRequired": null,
+        "internationalTestId": null,
+        "alternativesAndExemptionsNeedReview": true,
+        "automaticScoreConversion": false
+      },
+      "officialReview": {
+        "checkedOn": "2026-10-23",
+        "url": "https://yenchingacademy.pku.edu.cn/ADMISSIONS.htm",
+        "fetchState": "READABLE",
+        "summary": "2027 cohort opens 2026-09-01 and closes 2026-11-30 09:00 Beijing. English evidence has alternatives, waivers and excluded delivery variants. Source summary alone cannot encode these rules.",
+        "scope": "PARTIAL_CURRENT_SOURCE_REVIEW_NOT_PUBLICATION_APPROVAL"
+      },
+      "next": "REVIEW_CONDITIONAL_LANGUAGE_EVIDENCE_AND_PROGRAM_SCOPE",
+      "applyBlockers": [
+        "LIVE_REVIEWED_HOST_IDENTITY_REQUIRED",
+        "CANONICAL_DECISIONS_AND_SOURCE_SCREENING_REQUIRED",
+        "FRESH_SCOPED_RECOVERY_AND_EXACT_OWNER_BATCH_REQUIRED"
+      ]
+    },
+    {
+      "sourceRecordId": "SCH-OC-0155",
+      "title": "Schwarzman Scholars — Tsinghua University",
+      "sourceLineNumber": 7597,
+      "sourceHash": "cda6c01be7b8b0c8b718803b1898fe0ac8da887cfaea4cd78c9dc4c1333d3163",
+      "sourceMarker": "IMPORTED — CLASS 2027/2028 CLOSED / NEXT CYCLE 2028/2029 UPCOMING",
+      "state": "REVIEW_SHORTLIST_NOT_IMPORT_READY",
+      "canonicalAssignments": 0,
+      "databaseWrites": 0,
+      "proposedHostReview": {
+        "publicId": "INS-CHN-0003",
+        "name": "Tsinghua University",
+        "assignedCanonicalId": null,
+        "origin": "EXPLICIT_REVIEW_SHORTLIST_CROSS_REFERENCE",
+        "adopted": false,
+        "evidenceFile": "docs/reviews/evidence/IMPORT_UNIVERSITY_STAGE2_SELECTED_ROWS_2026-10-23.json",
+        "evidenceRow": 1407,
+        "evidenceRowSha256": "20aec91ebb1241b7367cdc5ce345a97e1cbc94390bca64573b7baa304fb58c4f",
+        "managedExistenceVerified": false,
+        "providerEqualsHost": null
+      },
+      "sourceSections": {
+        "اسم المنحة": "Schwarzman Scholars — Master of Global Affairs — Tsinghua University.",
+        "الجهة المانحة": "Schwarzman Scholars / Tsinghua University.",
+        "المعلومات الأساسية": "دولة الدراسة: الصين | الدرجة: one-year Master of Global Affairs | Class 2027/2028: مغلقة | الدورة التالية 2028/2029: U.S./Global من أبريل–سبتمبر 2027؛ Chinese passport track من مارس–مايو 2027 | التمويل: شامل.",
+        "حالة المنحة": "CLOSED للدورة 2027/2028؛ UPCOMING للدورة 2028/2029.",
+        "التخصصات المتاحة": "Master of Global Affairs مع مسارات/مناهج في السياسة العامة والاقتصاد والأعمال والدراسات الدولية والقيادة.",
+        "الشروط ومعايير التقديم": "Bachelor’s أو ما يعادله قبل بدء البرنامج، عمر 18–28 وفق حدود الدورة، إجادة الإنجليزية، وقدرات قيادية وفكرية وشخصية قوية.",
+        "المستندات المطلوبة": "Online application، Essays، Resume/CV، Transcript، Recommendation Letters، Video، وإثبات الإنجليزية عند انطباقه.",
+        "رابط التقديم": "https://www.schwarzmanscholars.org/admissions/application-instructions/",
+        "الروابط الرسمية": "- https://www.schwarzmanscholars.org/admissions/\n- https://www.schwarzmanscholars.org/admissions/application-instructions/\n**مصدر الاكتشاف:** https://www.opportunitiescircle.com/schwarzman-scholarship/"
+      },
+      "languageEvidence": {
+        "namedTestMentionsInSource": [],
+        "genericLanguageProofNotNotApplicable": true,
+        "isRequired": null,
+        "internationalTestId": null,
+        "alternativesAndExemptionsNeedReview": true,
+        "automaticScoreConversion": false
+      },
+      "officialReview": {
+        "checkedOn": "2026-10-23",
+        "url": "https://www.schwarzmanscholars.org/admissions/application-instructions/",
+        "fetchState": "READABLE",
+        "summary": "2027/2028 applications closed; next US/global window April–September 2027. English alternatives include two distinct TOEFL iBT scales (5/6 and 100/120), IELTS 7 and other tests, with waivers. Preserve scale and cycle separately.",
+        "scope": "PARTIAL_CURRENT_SOURCE_REVIEW_NOT_PUBLICATION_APPROVAL"
+      },
+      "next": "REVIEW_DISTINCT_TEST_SCALES_WAIVERS_AND_CLOSED_CYCLE",
+      "applyBlockers": [
+        "LIVE_REVIEWED_HOST_IDENTITY_REQUIRED",
+        "CANONICAL_DECISIONS_AND_SOURCE_SCREENING_REQUIRED",
+        "FRESH_SCOPED_RECOVERY_AND_EXACT_OWNER_BATCH_REQUIRED"
+      ]
+    },
+    {
+      "sourceRecordId": "SCH-OC-0117",
+      "title": "Stipendium Hungaricum — Eötvös Loránd University Host Track 2026/2027",
+      "sourceLineNumber": 20876,
+      "sourceHash": "769b4ba3d0891045dad8feecf688fd68c89506e9a36614f54a31c56888e71fae",
+      "sourceMarker": "IMPORTED — 2026/2027 CLOSED / NEXT CYCLE TBA",
+      "state": "REVIEW_SHORTLIST_NOT_IMPORT_READY",
+      "canonicalAssignments": 0,
+      "databaseWrites": 0,
+      "proposedHostReview": {
+        "publicId": "INS-HUN-0006",
+        "name": "Eötvös Loránd University",
+        "assignedCanonicalId": null,
+        "origin": "EXPLICIT_REVIEW_SHORTLIST_CROSS_REFERENCE",
+        "adopted": false,
+        "evidenceFile": "docs/reviews/evidence/IMPORT_UNIVERSITY_STAGE2_SELECTED_ROWS_2026-10-23.json",
+        "evidenceRow": 654,
+        "evidenceRowSha256": "aa29d4a14b12ba1107e9db48ec24857ef7b53d809d6082720b45d4d8acfa0970",
+        "managedExistenceVerified": false,
+        "providerEqualsHost": null
+      },
+      "sourceSections": {
+        "اسم المنحة": "Stipendium Hungaricum — Eötvös Loránd University (ELTE) Host Track — Academic Year 2026/2027.",
+        "الجهة المانحة": "Government of Hungary / Tempus Public Foundation — hosted by Eötvös Loránd University.",
+        "المعلومات الأساسية": "دولة الدراسة: المجر | المستويات: Bachelor’s، Master’s، One-tier Master’s، Doctoral وبعض non-degree/partial studies حسب Sending Partner والبرنامج | الموعد لدورة 2026/27: 15 يناير 2026، 14:00 CET | التمويل: حكومي شامل جزئيًا لنفقات المعيشة | اللغة: حسب البرنامج.",
+        "حالة المنحة": "CLOSED لدورة 2026/2027. دورة 2027/2028 لم تكن منشورة رسميًا وقت التحقق.",
+        "التخصصات المتاحة": "برامج ELTE التي يتيحها Stipendium Hungaricum لكل Sending Partner؛ تختلف القائمة حسب الجنسية والمستوى والسنة.",
+        "الشروط ومعايير التقديم": "جنسية مؤهلة ضمن Sending Partner، اختيار برنامج ELTE متاح لذلك الشريك، استيفاء القبول الأكاديمي واللغوي، والتقديم عبر منصة Stipendium Hungaricum مع استكمال إجراءات جهة الترشيح الوطنية عند انطباقها.",
+        "المستندات المطلوبة": "الطلب الإلكتروني، المؤهلات والكشوف، خطاب الدافع، إثبات اللغة، الجواز/الهوية، الفحص الطبي عند المرحلة المطلوبة، والمستندات الإضافية للبرنامج/جهة الترشيح.",
+        "رابط التقديم": "https://apply.stipendiumhungaricum.hu/",
+        "الروابط الرسمية": "- https://www.elte.hu/en/stipendium-hungaricum\n- https://www.stipendiumhungaricum.hu/\n- https://apply.stipendiumhungaricum.hu/\n**مصدر الاكتشاف:** https://www.opportunitiescircle.com/eotvos-lorand-university-scholarship-in-hungary/"
+      },
+      "languageEvidence": {
+        "namedTestMentionsInSource": [],
+        "genericLanguageProofNotNotApplicable": true,
+        "isRequired": null,
+        "internationalTestId": null,
+        "alternativesAndExemptionsNeedReview": true,
+        "automaticScoreConversion": false
+      },
+      "officialReview": {
+        "checkedOn": "2026-10-23",
+        "url": "https://www.elte.hu/en/stipendium-hungaricum",
+        "fetchState": "FAILED_404",
+        "summary": "Current official host page could not be retrieved. Preserve source claim as unverified; do not infer a new cycle, a programme list or a universal language test.",
+        "scope": "PARTIAL_CURRENT_SOURCE_REVIEW_NOT_PUBLICATION_APPROVAL"
+      },
+      "next": "RECOVER_OFFICIAL_HOST_SOURCE_AND_REVIEW_PROGRAM_PARTNER_SCOPE",
+      "applyBlockers": [
+        "LIVE_REVIEWED_HOST_IDENTITY_REQUIRED",
+        "CANONICAL_DECISIONS_AND_SOURCE_SCREENING_REQUIRED",
+        "FRESH_SCOPED_RECOVERY_AND_EXACT_OWNER_BATCH_REQUIRED"
+      ]
+    }
+  ]
+}

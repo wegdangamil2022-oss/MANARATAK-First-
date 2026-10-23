@@ -1,0 +1,33 @@
+{
+  "pass": true,
+  "at": "2026-10-23T14:07:38.764Z",
+  "sourceSha": "ef1a4f638c97a70cb65a54896e9e59b3af7049cc",
+  "scope": "LOCAL_DEVELOPMENT_ONLY",
+  "productionReleaseAccepted": false,
+  "probes": [
+    {
+      "endpoint": "/api/v1/monitoring/health/liveness",
+      "httpStatus": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sourceSha": "ef1a4f638c97a70cb65a54896e9e59b3af7049cc",
+      "body": {
+        "protocolVersion": 2,
+        "status": "UP",
+        "timestamp": "2026-10-23T14:07:37.046Z",
+        "code": "AVAILABLE"
+      }
+    },
+    {
+      "endpoint": "/api/v1/monitoring/health/readiness",
+      "httpStatus": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sourceSha": "ef1a4f638c97a70cb65a54896e9e59b3af7049cc",
+      "body": {
+        "protocolVersion": 2,
+        "status": "UP",
+        "timestamp": "2026-10-23T14:07:38.772Z",
+        "code": "AVAILABLE"
+      }
+    }
+  ]
+}

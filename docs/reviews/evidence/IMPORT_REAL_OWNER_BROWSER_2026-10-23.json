@@ -1,0 +1,63 @@
+{
+  "pass": true,
+  "at": "2026-10-23T13:58:39.713Z",
+  "sourceSha": "ef1a4f638c97a70cb65a54896e9e59b3af7049cc",
+  "origin": "http://127.0.0.1:3000",
+  "actualBrowserLoginProven": true,
+  "realOwnerIdentityMatched": true,
+  "adminPermissionsFromDatabase": true,
+  "httpOnlyCookies": true,
+  "sameSiteStrict": true,
+  "sessionSurvivesReload": true,
+  "authorizedAdminReadStatus": 200,
+  "anonymousAdminReadStatus": 401,
+  "logoutRevokesAccess": true,
+  "pageErrors": [],
+  "observations": [
+    {
+      "path": "/api/v1/auth/me",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    }
+  ],
+  "externalRequestsBlocked": true,
+  "contentMutationsEnabled": false,
+  "backgroundWorkersEnabled": false,
+  "healthEvidence": "HEALTH_PROBES.json",
+  "healthCorrection": "INITIAL_WRONG_PATH_HTML_200_EXCLUDED; ACTUAL_JSON_CONTRACT_VERIFIED_SEPARATELY"
+}
