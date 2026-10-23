@@ -1,0 +1,17 @@
+{
+  "kind": "UNIVERSITY_STAGE2_FOUNDED_YEAR_REVIEW",
+  "reviewedOn": "2026-10-23",
+  "reviewerCapacity": "DELEGATED_PROJECT_OPERATOR_NOT_INDEPENDENT_HUMAN_SIGNOFF",
+  "approvedNewCanonicalFields": ["foundedYear"],
+  "rawWorkbooksModified": false,
+  "databaseConnections": 0,
+  "decisions": [
+    { "sourceReferenceId": "INS-CHN-0001", "foundedYear": 1898, "officialEvidenceUrl": "https://www.pku.edu.cn/", "evidence": "The official Chinese homepage gives 1898 as the founding year and describes the institution's origin. The English About page timed out in this follow-up; its availability is not claimed." },
+    { "sourceReferenceId": "INS-CHN-0003", "foundedYear": 1911, "officialEvidenceUrl": "https://www.tsinghua.edu.cn/en/About/General_Information.htm", "evidence": "The official General Information page dates the institution's establishment to 1911; the university-section and later naming dates remain distinct historical facts." },
+    { "sourceReferenceId": "INS-HUN-0006", "foundedYear": 1635, "officialEvidenceUrl": "https://www.elte.hu/en/history", "evidence": "The official institutional history dates its founding documents to 1635; later changes in location and name are not treated as new university identities." },
+    { "sourceReferenceId": "INS-TUR-0145", "foundedYear": 1956, "officialEvidenceUrl": "https://www.metu.edu.tr/general-information", "evidence": "The university's own General Information page identifies 1956 as its founding year." }
+  ],
+  "preserveCanonicalFields": ["id", "publicId", "displayName", "countryReferenceId", "regionReferenceId", "cityReferenceId", "institutionType", "officialWebsite", "officialSourceUrl", "optionalFields"],
+  "heldFields": ["ownership and specialized type", "local names and translation workflow", "abbreviations", "descriptions", "campus addresses", "contact details", "map/social/application URLs", "government and directory references", "workbook review/confidence/completion labels"],
+  "acceptance": "Partial field enrichment only. Retain all 44 source columns as source evidence, not approved canonical values. No publication, managed apply or full Stage2 acceptance."
+}

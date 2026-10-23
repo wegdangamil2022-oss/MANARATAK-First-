@@ -11,7 +11,7 @@ import type {
   UniversityImportPlannedChange,
 } from '@manaratak/application';
 import { randomUUID } from 'node:crypto';
-import { validateUniversityImportPlanSeal } from '@manaratak/application';
+import { validateUniversityImportPlanSeal, universityImportContentHash } from '@manaratak/application';
 import { planUniversityScreenedSources, reviewUniversityScreeningPlan, type UniversityScreeningSourceBinding,
   type UniversityReviewedScreeningPlan, type UniversityScreeningPlanGateway } from '@manaratak/application';
 
@@ -21,11 +21,11 @@ type JsonRecord = Record<string, unknown>;
 export class PrismaUniversityImportChangeExecutorGateway implements UniversityImportChangeExecutorGateway {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async previewScreenedSources(bindings: UniversityScreeningSourceBinding[], actorId: string) {
+  async previewScreenedSources(bindings: UniversityScreeningSourceBinding[], actorId: string, stage: 'STAGE_1' | 'STAGE_2' = 'STAGE_1') {
     return this.prisma.$transaction(async tx => {
       await tx.$executeRaw`SET TRANSACTION READ ONLY`;
       await this.verifyOperator(tx, actorId);
-      const plans = await planUniversityScreenedSources(this.screeningReader(tx), bindings);
+      const plans = await planUniversityScreenedSources(this.screeningReader(tx), bindings, stage);
       return { state: 'OWNER_REVIEW_REQUIRED' as const, readyToWrite: false as const, databaseWrites: 0 as const, plans };
     }, { isolationLevel: 'RepeatableRead', timeout: 15000 });
   }
@@ -94,11 +94,13 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
   }
 
   private screeningReader(tx: Transaction): UniversityScreeningPlanGateway {
-    return { read: async (sourceReferenceId, receiptId, assetId) => ({
+    return { read: async (sourceReferenceId, receiptId, assetId) => {
+      const existing = await tx.university.findUnique({ where: { publicId: sourceReferenceId } });
+      return {
       receipt: await tx.importScreeningReceipt.findUnique({ where: { id: receiptId } }),
       asset: await tx.assetRecord.findUnique({ where: { id: assetId } }),
-      existingUniversity: await tx.university.findUnique({ where: { publicId: sourceReferenceId }, select: { id: true, publicId: true } }),
-    }) };
+      existingUniversity: existing ? { id: existing.id, publicId: existing.publicId, updatedAt: existing.updatedAt.toISOString(), stateHash: universityImportContentHash(existing) } : null,
+    }; } };
   }
 
   private async verifySourceReview(tx: Transaction, plan: UniversityImportChangePlan, actorId: string): Promise<Prisma.InputJsonObject | undefined> {
@@ -114,7 +116,8 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     for (const id of [...new Set(reviewed.screeningBindings.map(row => row.assetId))].sort()) {
       await tx.$queryRaw`SELECT id FROM "AssetRecord" WHERE id = ${id} FOR SHARE`;
     }
-    const previews = await planUniversityScreenedSources(this.screeningReader(tx), reviewed.screeningBindings);
+    if (plan.stage !== 'STAGE_1' && plan.stage !== 'STAGE_2') throw new Error('UNIVERSITY_SOURCE_REVIEW_STAGE_UNSUPPORTED');
+    const previews = await planUniversityScreenedSources(this.screeningReader(tx), reviewed.screeningBindings, plan.stage);
     if (previews.length !== 1 || reviewUniversityScreeningPlan(previews[0], reviewed.sourceReview).planHash !== plan.planHash)
       throw new Error('UNIVERSITY_SOURCE_REVIEW_PLAN_MISMATCH');
     for (const location of [...reviewed.sourceReview.geography].sort((a, b) => a.sourceReferenceId.localeCompare(b.sourceReferenceId))) {
@@ -233,7 +236,7 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     change: UniversityImportPlannedChange,
     plan: UniversityImportChangePlan,
   ) {
-    if (change.entityType === 'UNIVERSITY') return this.applyUniversity(transaction, change);
+    if (change.entityType === 'UNIVERSITY') return this.applyUniversity(transaction, change, plan.stage);
     let university = await transaction.university.findUnique({
       where: { publicId: change.sourceReferenceId },
     });
@@ -527,11 +530,18 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     }
   }
 
-  private async applyUniversity(transaction: Transaction, change: UniversityImportPlannedChange) {
+  private async applyUniversity(transaction: Transaction, change: UniversityImportPlannedChange, stage: string) {
     const after = change.afterState as JsonRecord;
+    if (stage === 'STAGE_2') await transaction.$queryRaw`SELECT id FROM "University" WHERE "publicId" = ${change.sourceReferenceId} FOR UPDATE`;
     const before = await transaction.university.findUnique({
       where: { publicId: change.sourceReferenceId },
     });
+    if (stage === 'STAGE_2') {
+      const snapshot = change.beforeState;
+      if (change.operation !== 'UPDATE' || !snapshot?.id || !snapshot.updatedAt || !/^[a-f0-9]{64}$/.test(String(snapshot.stateHash))) throw new Error('UNIVERSITY_ENRICHMENT_VERSION_REQUIRED');
+      if (!before || before.id !== snapshot.id || before.id !== change.entityKey || before.updatedAt.toISOString() !== snapshot.updatedAt
+        || universityImportContentHash(before) !== snapshot.stateHash) throw new Error('UNIVERSITY_ENRICHMENT_CONFLICT');
+    }
     // Enrichment stages deliberately do not repeat the Stage-1 university name.
     // Preserve the reviewed identity instead of failing, renaming, or creating a placeholder.
     const displayName = this.string(
@@ -540,6 +550,15 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     if (!displayName) throw new Error('UNIVERSITY_NAME_REQUIRED');
     if (before && ['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(before.status))
       throw new Error('UNIVERSITY_IMPORT_OWNER_LIFECYCLE_IMMUTABLE');
+    if (stage === 'STAGE_2') {
+      if (!Number.isInteger(after.foundedYear) || Number(after.foundedYear) < 800 || Number(after.foundedYear) > new Date().getUTCFullYear()) throw new Error('UNIVERSITY_ENRICHMENT_FOUNDED_YEAR_INVALID');
+      // Initial enrichment slice: identity, geography, optional data and later
+      // manual edits are not copied from historical workbook fields.
+      const record = await transaction.university.update({ where: { id: before!.id }, data: {
+        foundedYear: Number(after.foundedYear), status: 'READY_TO_REVIEW', completenessStatus: 'NEEDS_REVIEW',
+      } });
+      return this.applied(record.id, record.id, before, record);
+    }
     const data = {
       displayName,
       canonicalName: displayName.trim(),

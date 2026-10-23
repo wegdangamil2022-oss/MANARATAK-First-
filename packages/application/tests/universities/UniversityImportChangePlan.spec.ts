@@ -11,6 +11,15 @@ const handoff = (dryRun = true, normalizedPayload: Record<string, unknown> = { s
 } as any);
 
 describe('UniversityImportChangePlan', () => {
+  it('binds Stage 2 to an existing owner version and blocks a missing snapshot', async () => {
+    const findBySourceReferenceId = vi.fn().mockResolvedValue({ id: 'db-1', publicId: 'INS-DZA-0001', updatedAt: '2026-10-23T01:00:00.000Z', stateHash: 'a'.repeat(64) });
+    const plan = await new UniversityImportChangePlanner({ findBySourceReferenceId }).plan('STAGE_2', [handoff(true, { sourceReferenceId: 'INS-DZA-0001', foundedYear: 1900 })]);
+    expect(plan.changes[0].beforeState).toEqual({ id: 'db-1', updatedAt: '2026-10-23T01:00:00.000Z', stateHash: 'a'.repeat(64) });
+    expect(plan.changes[0].operation).toBe('UPDATE');
+    findBySourceReferenceId.mockResolvedValue({ id: 'db-1', publicId: 'INS-DZA-0001' });
+    const missing = await new UniversityImportChangePlanner({ findBySourceReferenceId }).plan('STAGE_2', [handoff()]);
+    expect(missing.validationIssues.map(row => row.code)).toContain('UNIVERSITY_ENRICHMENT_VERSION_REQUIRED');
+  });
   it('binds a bounded selection and every projected field to its identity', async () => {
     const planner = new UniversityImportChangePlanner();
     const first = await planner.plan('STAGE_1', [handoff()]);

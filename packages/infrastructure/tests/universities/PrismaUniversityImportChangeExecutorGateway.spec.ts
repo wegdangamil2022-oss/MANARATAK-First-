@@ -1,4 +1,4 @@
-import { sealUniversityImportPlan, type UniversityImportChangePlan } from '../../../application/src/universities/use-cases/UniversityImportChangePlan';
+import { sealUniversityImportPlan, universityImportContentHash, type UniversityImportChangePlan } from '../../../application/src/universities/use-cases/UniversityImportChangePlan';
 import { describe, expect, it, vi } from 'vitest';
 import { PrismaUniversityImportChangeExecutorGateway } from '../../src/universities/PrismaUniversityImportChangeExecutorGateway';
 import { planUniversityScreenedSources, reviewUniversityScreeningPlan } from '@manaratak/application';
@@ -15,6 +15,35 @@ function authorized<T extends object>(transaction: T) {
 }
 
 describe('PrismaUniversityImportChangeExecutorGateway', () => {
+  it('preserves current identity and optional fields in the initial Stage 2 founding-year slice', async () => {
+    const original = { id: 'owner', publicId: 'INS-DZA-0001', displayName: 'Later owner name', status: 'READY_TO_REVIEW', optionalFields: { preserve: 'manual data' }, updatedAt: new Date('2026-10-23T01:00:00.000Z') };
+    const tx = authorized({ $queryRaw: vi.fn().mockResolvedValue([]),
+      universityImportChangeSet: { findUnique: vi.fn().mockResolvedValue(null), create: vi.fn(), update: vi.fn() }, universityImportChange: { create: vi.fn() },
+      university: { findUnique: vi.fn().mockResolvedValue(original), update: vi.fn().mockResolvedValue({ ...original, foundedYear: 1900 }) },
+      auditRecord: { create: vi.fn() }, transactionalOutboxRecord: { create: vi.fn() },
+    });
+    const plan = sealed({ changeSetId: '', stage: 'STAGE_2', sourceArtifactId: 'stage2', validationIssues: [], databaseWrites: 0,
+      changes: [{ sequence: 1, sourceReferenceId: original.publicId, entityType: 'UNIVERSITY', entityKey: original.id, operation: 'UPDATE',
+        beforeState: { id: original.id, updatedAt: original.updatedAt.toISOString(), stateHash: universityImportContentHash(original) },
+        afterState: { foundedYear: 1900, universityName: 'Historical source name', country: 'Historical country' } }] });
+    await new PrismaUniversityImportChangeExecutorGateway({ $transaction: async work => work(tx) } as never).apply(plan, 'admin-1');
+    expect(tx.university.update).toHaveBeenCalledWith({ where: { id: 'owner' }, data: { foundedYear: 1900, status: 'READY_TO_REVIEW', completenessStatus: 'NEEDS_REVIEW' } });
+    expect(tx.$queryRaw.mock.calls.some(([query]) => Array.isArray(query) && query.join('').includes('FOR UPDATE'))).toBe(true);
+  });
+  it.each(['missing', 'changed', 'replacement', 'same-time-edit'])('rejects an unsafe Stage 2 owner snapshot before mutation: %s', async kind => {
+    const original = { id: 'owner', publicId: 'INS-DZA-0001', displayName: 'Existing', status: 'READY_TO_REVIEW', updatedAt: new Date('2026-10-23T01:00:00.000Z') };
+    const tx = authorized({ $queryRaw: vi.fn().mockResolvedValue([]),
+      universityImportChangeSet: { findUnique: vi.fn().mockResolvedValue(null), create: vi.fn() },
+      university: { findUnique: vi.fn().mockResolvedValue({ ...original, ...(kind === 'replacement' ? { id: 'replacement' } : {}),
+        ...(kind === 'same-time-edit' ? { displayName: 'Manual edit without timestamp change' } : {}), ...(kind === 'changed' ? { updatedAt: new Date('2026-10-23T01:00:01.000Z') } : {}) }), update: vi.fn() },
+    });
+    const gateway = new PrismaUniversityImportChangeExecutorGateway({ $transaction: async work => work(tx) } as never);
+    const plan = sealed({ changeSetId: '', stage: 'STAGE_2', sourceArtifactId: 'stage2', validationIssues: [], databaseWrites: 0,
+      changes: [{ sequence: 1, sourceReferenceId: 'INS-DZA-0001', entityType: 'UNIVERSITY', entityKey: 'owner', operation: 'UPDATE',
+        ...(kind !== 'missing' ? { beforeState: { id: 'owner', updatedAt: original.updatedAt.toISOString(), stateHash: universityImportContentHash(original) } } : {}), afterState: { foundedYear: 1900 } }] });
+    await expect(gateway.apply(plan, 'admin-1')).rejects.toThrow(kind === 'missing' ? 'UNIVERSITY_ENRICHMENT_VERSION_REQUIRED' : 'UNIVERSITY_ENRICHMENT_CONFLICT');
+    expect(tx.university.update).not.toHaveBeenCalled();
+  });
   it.each(['payload-tamper', 'receipt-drift', 'asset-retired', 'different-reviewer'])('rechecks reviewed source evidence before any canonical write: %s', async kind => {
     const binding = { sourceReferenceId: 'INS-DZA-0001', receiptId: 'receipt', requestHash: 'a'.repeat(64), assetId: 'asset', artifactSha256: 'b'.repeat(64) };
     const receipt = { id: binding.receiptId, ownerDomain: 'UNIVERSITIES', requestHash: binding.requestHash, result: {

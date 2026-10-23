@@ -14,6 +14,24 @@ function snapshot(): UniversityScreeningSnapshot {
   };
 }
 describe('source-bound university screening preview', () => {
+  it('reviews Stage 2 only as an update of a versioned existing identity', async () => {
+    const data = snapshot(); data.existingUniversity = { id: 'existing', publicId: binding.sourceReferenceId, updatedAt: '2026-10-23T00:00:00.000Z', stateHash: 'e'.repeat(64) };
+    const payload = (data.receipt!.result as { normalizedPayload: Record<string, unknown> }).normalizedPayload;
+    payload.foundedYear = 1900;
+    const [preview] = await planUniversityScreenedSources({ read: async () => data }, [binding], 'STAGE_2');
+    expect(preview.stage).toBe('STAGE_2'); expect(preview.changes[0].beforeState?.stateHash).toBe('e'.repeat(64));
+    const reviewed = reviewUniversityScreeningPlan(preview, { previewPlanHash: preview.planHash!, reviewedBy: 'reviewer', reason: 'Review enrichment only',
+      geography: [{ sourceReferenceId: binding.sourceReferenceId, countryReferenceId: 'country', regionReferenceId: 'region', cityReferenceId: 'city' }] });
+    expect(reviewed.validationIssues).toEqual([]); expect(reviewed.changes[0].operation).toBe('UPDATE');
+    Object.assign(data.receipt!.result as object, { stageState: 'STAGED_DUPLICATE_REVIEW', dedupe: { duplicate: true, existingUniversityId: 'different-owner' } });
+    await expect(planUniversityScreenedSources({ read: async () => data }, [binding], 'STAGE_2')).rejects.toThrow('NOT_REVIEWABLE');
+    Object.assign(data.receipt!.result as object, { dedupe: { duplicate: true, existingUniversityId: 'existing' } });
+    expect((await planUniversityScreenedSources({ read: async () => data }, [binding], 'STAGE_2'))[0].stage).toBe('STAGE_2');
+    payload.officialLocalName = 'Requires translation owner';
+    await expect(planUniversityScreenedSources({ read: async () => data }, [binding], 'STAGE_2')).rejects.toThrow('UNSUPPORTED_FIELDS');
+    delete payload.officialLocalName; payload.foundedYear = 0;
+    await expect(planUniversityScreenedSources({ read: async () => data }, [binding], 'STAGE_2')).rejects.toThrow('FOUNDED_YEAR_INVALID');
+  });
   it('keeps an existing identity out of the initial-create review path', async () => {
     const data = snapshot(); data.existingUniversity = { id: 'existing', publicId: binding.sourceReferenceId };
     const [preview] = await planUniversityScreenedSources({ read: async () => data }, [binding]);

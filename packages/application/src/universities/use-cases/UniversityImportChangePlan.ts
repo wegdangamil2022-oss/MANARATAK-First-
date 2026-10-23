@@ -25,11 +25,15 @@ export interface UniversityImportChangePlan {
   databaseWrites: 0;
 }
 
-export function sealUniversityImportPlan(plan: UniversityImportChangePlan): UniversityImportChangePlan {
-  const { changeSetId: _id, planHash: _hash, ...body } = plan;
+export function universityImportContentHash(value: unknown): string {
   const canonical = (value: unknown): unknown => Array.isArray(value) ? value.map(canonical)
     : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([key, child]) => [key, canonical(child)])) : value;
-  const planHash = createHash('sha256').update(JSON.stringify(canonical(JSON.parse(JSON.stringify(body))))).digest('hex');
+  return createHash('sha256').update(JSON.stringify(canonical(JSON.parse(JSON.stringify(value))))).digest('hex');
+}
+
+export function sealUniversityImportPlan(plan: UniversityImportChangePlan): UniversityImportChangePlan {
+  const { changeSetId: _id, planHash: _hash, ...body } = plan;
+  const planHash = universityImportContentHash(body);
   return { ...body, planHash, changeSetId: `${body.stage}:${body.sourceArtifactId}:${planHash}` };
 }
 
@@ -40,7 +44,7 @@ export function validateUniversityImportPlanSeal(plan: UniversityImportChangePla
 }
 
 export interface UniversityImportPlanIdentityLookup {
-  findBySourceReferenceId(sourceReferenceId: string): Promise<{ id: string; publicId: string } | null>;
+  findBySourceReferenceId(sourceReferenceId: string): Promise<{ id: string; publicId: string; updatedAt?: string; stateHash?: string } | null>;
 }
 
 export class UniversityImportChangePlanner {
@@ -70,8 +74,11 @@ export class UniversityImportChangePlanner {
       const existing = this.identities && sourceReferenceId ? await this.identities.findBySourceReferenceId(sourceReferenceId) : null;
       if (stage !== 'STAGE_1' && !this.identities) validationIssues.push({ code: 'DATABASE_IDENTITY_CHECK_REQUIRED', path: sourceReferenceId, message: 'Later stages require database identity resolution before commit.' });
       if (stage !== 'STAGE_1' && this.identities && !existing) validationIssues.push({ code: 'UNIVERSITY_IDENTITY_NOT_FOUND', path: sourceReferenceId, message: 'Later-stage data cannot create a university.' });
+      if (stage === 'STAGE_2' && (!existing?.updatedAt || !Number.isFinite(Date.parse(existing.updatedAt)) || !/^[a-f0-9]{64}$/.test(existing.stateHash ?? '')))
+        validationIssues.push({ code: 'UNIVERSITY_ENRICHMENT_VERSION_REQUIRED', path: sourceReferenceId, message: 'Stage 2 requires the exact existing owner version and full row content hash.' });
       if (stage === 'STAGE_3') this.validateAdmissionRequirements(payload, handoff.handoffId, validationIssues);
-      changes.push({ sequence: changes.length + 1, sourceReferenceId, entityType: 'UNIVERSITY', entityKey: existing?.id ?? sourceReferenceId, operation: existing ? 'UPDATE' : 'CREATE', afterState: payload });
+      changes.push({ sequence: changes.length + 1, sourceReferenceId, entityType: 'UNIVERSITY', entityKey: existing?.id ?? sourceReferenceId, operation: existing ? 'UPDATE' : 'CREATE',
+        ...(stage === 'STAGE_2' && existing ? { beforeState: { id: existing.id, updatedAt: existing.updatedAt, stateHash: existing.stateHash } } : {}), afterState: payload });
       for (const child of this.deriveStageChanges(stage, sourceReferenceId, payload)) {
         changes.push({ ...child, sequence: changes.length + 1 });
       }
