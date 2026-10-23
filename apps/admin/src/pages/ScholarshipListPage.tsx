@@ -398,7 +398,6 @@ export function ScholarshipListPage() {
         </button>
       </section>
 <details className="admin-section-tools"><summary>{tr('إنشاء منحة جديدة', 'Create scholarship')}</summary><OwnerDraftCreateForm owner="scholarships"/></details>
-<details className="admin-section-tools"><summary>{tr('إنشاء منحة جديدة', 'Create scholarship')}</summary><OwnerDraftCreateForm owner="scholarships"/></details>
 <details className="admin-section-tools"><summary>{tr('فلاتر العلاقات والمصدر', 'Relationship and source filters')}</summary><div className="space-y-4">
       <ScholarshipCanonicalFilters
         value={canonical}

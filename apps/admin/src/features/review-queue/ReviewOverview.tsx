@@ -34,7 +34,7 @@ export function ReviewOverview({ items, states, filters, onFilter, language, now
     { key: 'incomplete', title: tr('بيانات ناقصة', 'Incomplete'), icon: AlertTriangle, color: '#D6A43B', value: count('incomplete') },
     { key: 'ready_to_publish', title: tr('جاهز لدى المالك', 'Owner ready'), icon: CheckCircle2, color: '#0E7C86', value: count('ready_to_publish') },
     { key: 'imported_unreviewed', title: tr('مستورد للمراجعة', 'Imported for review'), icon: FileSpreadsheet, color: '#21A7B4', value: count('imported_unreviewed') },
-    { key: 'overdue', title: tr('متجاوز الموعد بدليل', 'Evidenced overdue'), icon: TimerReset, color: '#D6A43B', value: sla.some(value => value !== 'unknown') ? sla.filter(value => value === 'overdue').length : null },
+    { key: 'overdue', title: tr('متجاوز الموعد بدليل', 'Evidenced overdue'), icon: TimerReset, color: '#D6A43B', value: sla.length > 0 && sla.every(value => value !== 'unknown') ? sla.filter(value => value === 'overdue').length : null },
   ];
   const quality = [
     { key: 'needs_translation', title: tr('بحاجة لترجمة', 'Translation needed'), icon: Languages },
