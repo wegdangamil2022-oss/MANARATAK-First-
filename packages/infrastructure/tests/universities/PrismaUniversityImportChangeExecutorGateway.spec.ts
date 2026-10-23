@@ -1,6 +1,7 @@
 import { sealUniversityImportPlan, type UniversityImportChangePlan } from '../../../application/src/universities/use-cases/UniversityImportChangePlan';
 import { describe, expect, it, vi } from 'vitest';
 import { PrismaUniversityImportChangeExecutorGateway } from '../../src/universities/PrismaUniversityImportChangeExecutorGateway';
+import { planUniversityScreenedSources, reviewUniversityScreeningPlan } from '@manaratak/application';
 
 function sealed(plan: UniversityImportChangePlan) { return Object.assign(plan, sealUniversityImportPlan(plan)); }
 
@@ -14,6 +15,38 @@ function authorized<T extends object>(transaction: T) {
 }
 
 describe('PrismaUniversityImportChangeExecutorGateway', () => {
+  it.each(['payload-tamper', 'receipt-drift', 'asset-retired', 'different-reviewer'])('rechecks reviewed source evidence before any canonical write: %s', async kind => {
+    const binding = { sourceReferenceId: 'INS-DZA-0001', receiptId: 'receipt', requestHash: 'a'.repeat(64), assetId: 'asset', artifactSha256: 'b'.repeat(64) };
+    const receipt = { id: binding.receiptId, ownerDomain: 'UNIVERSITIES', requestHash: binding.requestHash, result: {
+      stageState: 'STAGED_COMPLETE', promotion: { automatic: false, publication: false, state: 'MANUAL_REVIEW_REQUIRED' },
+      normalizedPayload: { sourceReferenceId: binding.sourceReferenceId, universityName: 'Source University', country: 'Algeria', countryIso3: 'DZA', institutionType: 'UNIVERSITY',
+        metadata: { sourceWorkbookSha256: 'c'.repeat(64), rawRowSha256: 'd'.repeat(64), sourceRowNumber: 1 } },
+      evidence: { artifact: { artifactId: 'asset' }, referenceMetadata: { artifactSha256: binding.artifactSha256 }, validation: { state: 'VALID' } },
+    } };
+    const asset = { id: 'asset', lifecycleState: 'ACTIVE', securityClassification: 'INTERNAL', checksumAlgorithm: 'SHA256', checksumHash: binding.artifactSha256, retentionExpiresAt: null, deletedAt: null, purgedAt: null };
+    const [preview] = await planUniversityScreenedSources({ read: async () => ({ receipt, asset, existingUniversity: null }) }, [binding]);
+    const plan = reviewUniversityScreeningPlan(preview, { previewPlanHash: preview.planHash!, reviewedBy: kind === 'different-reviewer' ? 'another-actor' : 'admin-1', reason: 'Explicit source review',
+      geography: [{ sourceReferenceId: binding.sourceReferenceId, countryReferenceId: 'country', regionReferenceId: 'region', cityReferenceId: 'city' }] });
+    if (kind === 'payload-tamper') { plan.changes[0].afterState = { ...plan.changes[0].afterState, universityName: 'Unreviewed replacement' }; sealed(plan); }
+    if (kind === 'receipt-drift') receipt.requestHash = 'f'.repeat(64);
+    if (kind === 'asset-retired') asset.lifecycleState = 'ARCHIVED';
+    const tx = authorized({ $queryRaw: vi.fn().mockResolvedValue([]),
+      importScreeningReceipt: { findUnique: vi.fn().mockResolvedValue(receipt) }, assetRecord: { findUnique: vi.fn().mockResolvedValue(asset) },
+      university: { findUnique: vi.fn().mockResolvedValue(null), create: vi.fn() },
+      universityImportChangeSet: { findUnique: vi.fn().mockResolvedValue(null), create: vi.fn() },
+    });
+    const gateway = new PrismaUniversityImportChangeExecutorGateway({ $transaction: async work => work(tx) } as never);
+    await expect(gateway.apply(plan, 'admin-1')).rejects.toThrow(/UNIVERSITY_(SOURCE_REVIEW|SCREENING_)/);
+    expect(tx.universityImportChangeSet.create).not.toHaveBeenCalled(); expect(tx.university.create).not.toHaveBeenCalled();
+  });
+  it('rejects a resealed screening plan whose owner decision was removed before writing a change set', async () => {
+    const tx = authorized({ $queryRaw: vi.fn().mockResolvedValue([]), universityImportChangeSet: { findUnique: vi.fn().mockResolvedValue(null), create: vi.fn() } });
+    const gateway = new PrismaUniversityImportChangeExecutorGateway({ $transaction: async work => work(tx) } as never);
+    const plan = sealed({ stage: 'STAGE_1', sourceArtifactId: 'fixture', changeSetId: '', validationIssues: [], databaseWrites: 0,
+      screeningBindings: [{ sourceReferenceId: 'INS-DZA-0001' }], changes: [{ sequence: 1, sourceReferenceId: 'INS-DZA-0001', entityKey: 'INS-DZA-0001', entityType: 'UNIVERSITY', operation: 'CREATE', afterState: { universityName: 'Source University' } }] } as never);
+    await expect(gateway.apply(plan, 'admin-1')).rejects.toThrow('SOURCE_REVIEW_REQUIRED');
+    expect(tx.universityImportChangeSet.create).not.toHaveBeenCalled();
+  });
   it('reads screening evidence only in a read-only snapshot after checking operator permissions', async () => {
     const tx = authorized({ $queryRaw: vi.fn(), $executeRaw: vi.fn(),
       importScreeningReceipt: { findUnique: vi.fn().mockResolvedValue(null) },

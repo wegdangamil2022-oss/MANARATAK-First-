@@ -12,7 +12,8 @@ import type {
 } from '@manaratak/application';
 import { randomUUID } from 'node:crypto';
 import { validateUniversityImportPlanSeal } from '@manaratak/application';
-import { planUniversityScreenedSources, type UniversityScreeningSourceBinding } from '@manaratak/application';
+import { planUniversityScreenedSources, reviewUniversityScreeningPlan, type UniversityScreeningSourceBinding,
+  type UniversityReviewedScreeningPlan, type UniversityScreeningPlanGateway } from '@manaratak/application';
 
 type Transaction = Prisma.TransactionClient;
 type JsonRecord = Record<string, unknown>;
@@ -24,11 +25,7 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     return this.prisma.$transaction(async tx => {
       await tx.$executeRaw`SET TRANSACTION READ ONLY`;
       await this.verifyOperator(tx, actorId);
-      const plans = await planUniversityScreenedSources({ read: async (sourceReferenceId, receiptId, assetId) => ({
-        receipt: await tx.importScreeningReceipt.findUnique({ where: { id: receiptId } }),
-        asset: await tx.assetRecord.findUnique({ where: { id: assetId } }),
-        existingUniversity: await tx.university.findUnique({ where: { publicId: sourceReferenceId }, select: { id: true, publicId: true } }),
-      }) }, bindings);
+      const plans = await planUniversityScreenedSources(this.screeningReader(tx), bindings);
       return { state: 'OWNER_REVIEW_REQUIRED' as const, readyToWrite: false as const, databaseWrites: 0 as const, plans };
     }, { isolationLevel: 'RepeatableRead', timeout: 15000 });
   }
@@ -49,6 +46,8 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
       if (existing?.state === 'APPLIED')
         return { changeSetId: existing.id, appliedChanges: existing.changes.length };
       if (existing) throw new Error(`UNIVERSITY_CHANGE_SET_NOT_APPLICABLE:${existing.state}`);
+
+      const sourceEvidence = await this.verifySourceReview(transaction, plan, actorId);
 
       await transaction.universityImportChangeSet.create({
         data: {
@@ -88,9 +87,46 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
         'UNIVERSITY_CHANGE_SET_APPLIED',
         plan.changes.length,
         appliedAt,
+        sourceEvidence,
       );
       return { changeSetId: plan.changeSetId, appliedChanges: plan.changes.length };
     });
+  }
+
+  private screeningReader(tx: Transaction): UniversityScreeningPlanGateway {
+    return { read: async (sourceReferenceId, receiptId, assetId) => ({
+      receipt: await tx.importScreeningReceipt.findUnique({ where: { id: receiptId } }),
+      asset: await tx.assetRecord.findUnique({ where: { id: assetId } }),
+      existingUniversity: await tx.university.findUnique({ where: { publicId: sourceReferenceId }, select: { id: true, publicId: true } }),
+    }) };
+  }
+
+  private async verifySourceReview(tx: Transaction, plan: UniversityImportChangePlan, actorId: string): Promise<Prisma.InputJsonObject | undefined> {
+    if (!('screeningBindings' in plan) && !('sourceReview' in plan)) return undefined; // Existing non-screening stage contracts remain supported.
+    const reviewed = plan as UniversityReviewedScreeningPlan;
+    if (!Array.isArray(reviewed.screeningBindings) || !reviewed.screeningBindings.length || !reviewed.sourceReview
+      || reviewed.sourceReview.reviewedBy !== actorId) throw new Error('UNIVERSITY_SOURCE_REVIEW_REQUIRED');
+    // A content seal alone is not approval: rebuild from locked persisted evidence,
+    // allowing only the explicitly reviewed canonical geography additions.
+    for (const binding of [...reviewed.screeningBindings].sort((a, b) => a.receiptId.localeCompare(b.receiptId))) {
+      await tx.$queryRaw`SELECT id FROM "ImportScreeningReceipt" WHERE id = ${binding.receiptId} FOR SHARE`;
+    }
+    for (const id of [...new Set(reviewed.screeningBindings.map(row => row.assetId))].sort()) {
+      await tx.$queryRaw`SELECT id FROM "AssetRecord" WHERE id = ${id} FOR SHARE`;
+    }
+    const previews = await planUniversityScreenedSources(this.screeningReader(tx), reviewed.screeningBindings);
+    if (previews.length !== 1 || reviewUniversityScreeningPlan(previews[0], reviewed.sourceReview).planHash !== plan.planHash)
+      throw new Error('UNIVERSITY_SOURCE_REVIEW_PLAN_MISMATCH');
+    for (const location of [...reviewed.sourceReview.geography].sort((a, b) => a.sourceReferenceId.localeCompare(b.sourceReferenceId))) {
+      await tx.$queryRaw`SELECT id FROM "ReferenceCountry" WHERE id = ${location.countryReferenceId} FOR SHARE`;
+      await tx.$queryRaw`SELECT id FROM "AdministrativeRegion" WHERE id = ${location.regionReferenceId} FOR SHARE`;
+      await tx.$queryRaw`SELECT id FROM "ReferenceCity" WHERE id = ${location.cityReferenceId} FOR SHARE`;
+      await new UniversityCanonicalRelationshipValidator(tx).validateCampus(location);
+      const country = await tx.referenceCountry.findUnique({ where: { id: location.countryReferenceId }, select: { iso3Code: true } });
+      const source = plan.changes.find(row => row.entityType === 'UNIVERSITY' && row.sourceReferenceId === location.sourceReferenceId)!;
+      if (!source.afterState.countryIso3 || source.afterState.countryIso3 !== country?.iso3Code) throw new Error('UNIVERSITY_SOURCE_REVIEW_COUNTRY_MISMATCH');
+    }
+    return JSON.parse(JSON.stringify({ planHash: plan.planHash, screeningBindings: reviewed.screeningBindings, sourceReview: reviewed.sourceReview })) as Prisma.InputJsonObject;
   }
 
   async rollback(
@@ -663,6 +699,7 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     action: string,
     count: number,
     timestamp: Date,
+    sourceEvidence?: Prisma.InputJsonObject,
   ) {
     const auditId = randomUUID();
     await transaction.auditRecord.create({
@@ -682,6 +719,7 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
           result: 'SUCCESS',
           changeCount: count,
           atomicity: 'BUSINESS_AUDIT_OUTBOX',
+          ...(sourceEvidence ? { sourceEvidence } : {}),
         },
       },
     });
@@ -693,7 +731,7 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
         aggregateType: 'UNIVERSITY_CHANGE_SET',
         aggregateId: changeSetId,
         payload: { changeSetId, changeCount: count, operation: action },
-        metadata: { actorId, atomicity: 'BUSINESS_AUDIT_OUTBOX' },
+        metadata: { actorId, atomicity: 'BUSINESS_AUDIT_OUTBOX', ...(sourceEvidence ? { sourceEvidence } : {}) },
         state: 'PENDING',
         attempts: 0,
         availableAt: timestamp,

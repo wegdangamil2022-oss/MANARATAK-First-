@@ -1,0 +1,40 @@
+{
+  "kind": "UNIVERSITY_MINIMAL_INSTITUTION_TYPE_REVIEW",
+  "reviewedOn": "2026-10-23",
+  "reviewerCapacity": "DELEGATED_PROJECT_OPERATOR_NOT_INDEPENDENT_HUMAN_SIGNOFF",
+  "scope": "Normalize the supported common institution class UNIVERSITY only; do not infer ownership, accreditation, programs or specialist classifications.",
+  "rawSourcesModified": false,
+  "databaseWrites": 0,
+  "decisions": [
+    {
+      "sourceReferenceId": "INS-CHN-0001",
+      "institutionType": "UNIVERSITY",
+      "officialEvidenceUrl": "https://english.pku.edu.cn/about.html",
+      "evidence": "The institution's own About page identifies Peking University and describes university teaching and research across disciplines. Only the common university class is normalized."
+    },
+    {
+      "sourceReferenceId": "INS-CHN-0003",
+      "institutionType": "UNIVERSITY",
+      "officialEvidenceUrl": "https://www.tsinghua.edu.cn/en/About/General_Information.htm",
+      "evidence": "The institution's General Information page identifies Tsinghua University and its university section, academic schools and research. Only the common university class is normalized."
+    },
+    {
+      "sourceReferenceId": "INS-HUN-0006",
+      "institutionType": "UNIVERSITY",
+      "officialEvidenceUrl": "https://www.elte.hu/en/history",
+      "evidence": "The institution's History page identifies Eotvos Lorand University and describes its university faculties. Only the common university class is normalized; historical figures and accreditation claims are not imported."
+    },
+    {
+      "sourceReferenceId": "INS-TUR-0145",
+      "institutionType": "UNIVERSITY",
+      "officialEvidenceUrl": "https://www.metu.edu.tr/general-information",
+      "evidence": "The institution's General Information page explicitly identifies Middle East Technical University as a university. Only the common class is normalized; ownership and numerical facts are outside this review."
+    }
+  ],
+  "limitations": [
+    "Previous INCOMPLETE screening receipts remain immutable and are not relabelled complete.",
+    "A new derived artifact and fresh screening execution must include this review hash and the original workbook/row hashes.",
+    "The prior Peking homepage availability hold remains; an accessible About page is not proof that the homepage was fetched.",
+    "This field review does not authorize publication, a real account, managed database writes or production."
+  ]
+}

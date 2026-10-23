@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { planUniversityScreenedSources, type UniversityScreeningSnapshot } from '../../src/universities/use-cases/UniversityScreeningPlan';
+import { planUniversityScreenedSources, reviewUniversityScreeningPlan, type UniversityScreeningSnapshot } from '../../src/universities/use-cases/UniversityScreeningPlan';
 import { validateUniversityImportPlanSeal } from '../../src/universities/use-cases/UniversityImportChangePlan';
 
 const binding = { sourceReferenceId: 'INS-DZA-0001', receiptId: 'receipt-1', requestHash: 'a'.repeat(64), assetId: 'asset-1', artifactSha256: 'b'.repeat(64) };
@@ -14,6 +14,22 @@ function snapshot(): UniversityScreeningSnapshot {
   };
 }
 describe('source-bound university screening preview', () => {
+  it('binds an explicit review to the exact preview and permits only canonical geography additions', async () => {
+    const [preview] = await planUniversityScreenedSources({ read: vi.fn().mockResolvedValue(snapshot()) }, [binding]);
+    const decision = { previewPlanHash: preview.planHash!, reviewedBy: 'reviewer', reason: 'Official fields checked; resolve actual geography IDs.',
+      geography: [{ sourceReferenceId: binding.sourceReferenceId, countryReferenceId: 'country', regionReferenceId: 'region', cityReferenceId: 'city' }] };
+    const reviewed = reviewUniversityScreeningPlan(preview, decision);
+    expect(validateUniversityImportPlanSeal(reviewed)).toEqual(reviewed);
+    expect(reviewed.validationIssues).toEqual([]);
+    expect(reviewed.changes[0].afterState).toEqual({ ...preview.changes[0].afterState, countryReferenceId: 'country', regionReferenceId: 'region', cityReferenceId: 'city' });
+    expect(reviewed.changes[1]).toEqual(preview.changes[1]);
+    expect(reviewed.sourceReview.previewPlanHash).toBe(preview.planHash);
+    expect(reviewed.planHash).not.toBe(preview.planHash);
+    expect(() => reviewUniversityScreeningPlan(preview, { ...decision, previewPlanHash: '0'.repeat(64) })).toThrow('REVIEW_INVALID');
+    expect(() => reviewUniversityScreeningPlan(preview, { ...decision, geography: [] })).toThrow('GEOGRAPHY_REQUIRED');
+    expect(() => reviewUniversityScreeningPlan(preview, { ...decision, geography: [{ ...decision.geography[0], sourceReferenceId: 'INS-OTHER-0001' }] })).toThrow('GEOGRAPHY_REQUIRED');
+    expect(() => reviewUniversityScreeningPlan({ ...preview, validationIssues: [] }, decision)).toThrow('PLAN_SEAL');
+  });
   it('seals persisted source identities and remains blocked for owner review', async () => {
     const read = vi.fn().mockResolvedValue(snapshot());
     const [plan] = await planUniversityScreenedSources({ read }, [binding]);

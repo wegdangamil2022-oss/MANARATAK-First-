@@ -1,5 +1,5 @@
 import type { UniversalImportHandoff } from '@manaratak/domain';
-import { UniversityImportChangePlanner, sealUniversityImportPlan, type UniversityImportChangePlan } from './UniversityImportChangePlan';
+import { UniversityImportChangePlanner, sealUniversityImportPlan, validateUniversityImportPlanSeal, type UniversityImportChangePlan } from './UniversityImportChangePlan';
 
 export interface UniversityScreeningSourceBinding {
   sourceReferenceId: string; receiptId: string; requestHash: string; assetId: string; artifactSha256: string;
@@ -14,6 +14,34 @@ export interface UniversityScreeningPlanGateway {
   read(sourceReferenceId: string, receiptId: string, assetId: string): Promise<UniversityScreeningSnapshot>;
 }
 export interface UniversityScreeningPlan extends UniversityImportChangePlan { screeningBindings: UniversityScreeningSourceBinding[]; }
+export interface UniversitySourceReviewDecision {
+  previewPlanHash: string;
+  reviewedBy: string;
+  reason: string;
+  geography: Array<{ sourceReferenceId: string; countryReferenceId: string; regionReferenceId: string; cityReferenceId: string }>;
+}
+export interface UniversityReviewedScreeningPlan extends UniversityScreeningPlan { sourceReview: UniversitySourceReviewDecision; }
+
+/** Explicit owner decision, not an authorization grant. The writer rechecks persisted evidence and geography. */
+export function reviewUniversityScreeningPlan(preview: UniversityScreeningPlan, decision: UniversitySourceReviewDecision): UniversityReviewedScreeningPlan {
+  validateUniversityImportPlanSeal(preview);
+  if (preview.stage !== 'STAGE_1' || decision.previewPlanHash !== preview.planHash || !decision.reviewedBy?.trim()
+    || !decision.reason?.trim() || decision.reason.length > 2000 || !Array.isArray(preview.screeningBindings)
+    || !preview.screeningBindings.length || preview.validationIssues.length !== 1
+    || preview.validationIssues[0].code !== 'UNIVERSITY_SOURCE_OWNER_REVIEW_REQUIRED') throw new Error('UNIVERSITY_SOURCE_REVIEW_INVALID');
+  const roots = preview.changes.filter(row => row.entityType === 'UNIVERSITY');
+  if (!Array.isArray(decision.geography) || roots.length !== preview.screeningBindings.length || decision.geography.length !== roots.length
+    || new Set(decision.geography.map(row => row.sourceReferenceId)).size !== roots.length
+    || decision.geography.some(row => !roots.some(root => root.sourceReferenceId === row.sourceReferenceId)
+      || [row.countryReferenceId, row.regionReferenceId, row.cityReferenceId].some(id => !id?.trim()))) throw new Error('UNIVERSITY_SOURCE_REVIEW_GEOGRAPHY_REQUIRED');
+  const changes = preview.changes.map(row => {
+    if (row.entityType !== 'UNIVERSITY') return row;
+    const location = decision.geography.find(item => item.sourceReferenceId === row.sourceReferenceId)!;
+    return { ...row, afterState: { ...row.afterState, countryReferenceId: location.countryReferenceId,
+      regionReferenceId: location.regionReferenceId, cityReferenceId: location.cityReferenceId } };
+  });
+  return sealUniversityImportPlan({ ...preview, changes, validationIssues: [], sourceReview: structuredClone(decision) } as UniversityReviewedScreeningPlan) as UniversityReviewedScreeningPlan;
+}
 
 /** Preview only: creates no review approval, canonical entity or source asset. */
 export async function planUniversityScreenedSources(gateway: UniversityScreeningPlanGateway,

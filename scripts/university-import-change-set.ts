@@ -68,6 +68,7 @@ if (mode === 'inspect') {
   if (mode === 'commit') {
     validateUniversityImportPlanSeal(plan as UniversityImportChangePlan);
     if (process.env.UNIVERSITY_IMPORT_APPROVAL_PLAN_HASH !== (plan as UniversityImportChangePlan).planHash) throw new Error('UNIVERSITY_IMPORT_EXACT_PLAN_APPROVAL_REQUIRED');
+    if (plan.stage === 'STAGE_1' && (!('screeningBindings' in plan) || !('sourceReview' in plan))) throw new Error('UNIVERSITY_SOURCE_REVIEW_REQUIRED');
   }
   requireDatabaseMutationGate('reviewed-university-import', { allowedPurposes: ['import'] });
   const prisma = new PrismaClient();
