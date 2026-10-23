@@ -18,6 +18,8 @@ Search,
 Sparkles,
 Plus,
 ShieldCheck,
+LayoutGrid,
+Table2,
 X
 } from 'lucide-react';
 import { useEffect,useMemo,useState } from 'react';
@@ -25,13 +27,14 @@ import { Link,useSearchParams } from 'react-router-dom';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { adminApiClient } from '../api/client';
+import {majorDisplayNames,majorAcademicContext,type MajorAcademicMetadata} from '../utils/majorDisplayNames';
 import { NewMajorCandidatesPanel } from '../components/NewMajorCandidatesPanel';
 import { useTranslation } from "../i18n/I18nProvider";
 
 type MajorStatus = 'IMPORTED' | 'READY_TO_REVIEW' | 'READY_TO_PUBLISH' | 'PUBLISHED' | 'REJECTED' | 'ARCHIVED' | string;
 type MajorCompletenessStatus = 'INCOMPLETE' | 'NEEDS_REVIEW' | 'COMPLETE' | string;
 
-interface Major {
+interface Major extends MajorAcademicMetadata {
   id: string;
   publicId?: string;
   profileId?: string;
@@ -146,6 +149,7 @@ export function MajorAdminPage() {
   const view = searchParams.get('view') === 'new' ? 'new' : searchParams.get('view') === 'catalog' ? 'catalog' : 'all';
   const [newCandidatesTotal, setNewCandidatesTotal] = useState<number|null>(null);
   const [showCreate,setShowCreate]=useState(false);
+  const [displayMode,setDisplayMode]=useState<'cards'|'table'>('cards');
   const [data, setData] = useState<PaginatedResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -293,7 +297,7 @@ export function MajorAdminPage() {
             <MetricCard label="إجمالي التخصصات ضمن النتائج" value={stats.total??'—'} icon={BookOpen} accent="#142B5F" />
             <MetricCard label={data?.stats?"منشورة ضمن النتائج":"منشورة في الصفحة"} value={stats.published??'—'} icon={CheckCircle2} accent="#2E7D5A" />
             <MetricCard label={data?.stats?"تحتاج مراجعة ضمن النتائج":"تحتاج مراجعة في الصفحة"} value={stats.needsReview??'—'} icon={AlertCircle} accent="#D6A43B" />
-            <MetricCard label={data?.stats?"مكتملة ضمن النتائج":"مكتملة في الصفحة"} value={stats.complete??'—'} icon={GraduationCap} accent="#21A7B4" />
+            <MetricCard label={data?.stats?"هويات مكتملة ضمن النتائج":"هويات مكتملة في الصفحة"} value={stats.complete??'—'} icon={GraduationCap} accent="#21A7B4" />
           </section>
 
           {/* Compact Refined Search & Filter Card */}
@@ -376,7 +380,7 @@ export function MajorAdminPage() {
 
                 {/* Completeness Filter */}
                 <div>
-                  <label htmlFor="major-completeness"><CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5" />اكتمال البيانات</label>
+                  <label htmlFor="major-completeness"><CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5" />اكتمال الهوية</label>
                   <select
                     id="major-completeness" value={completenessFilter}
                     onChange={(e) => { setCompletenessFilter(e.target.value); setPage(1); }}
@@ -420,6 +424,13 @@ export function MajorAdminPage() {
 
           {/* Cards Grid Section */}
           <section className="space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="text-xs font-semibold text-slate-500">{data ? `${data.total} تخصص · ${visibleMajors.length} في هذه الصفحة` : 'قائمة التخصصات'}</span>
+              <div role="group" aria-label="طريقة عرض التخصصات" className="inline-flex gap-1 rounded-xl border border-[#DDEFF2] bg-white p-1">
+                <button type="button" aria-pressed={displayMode==='cards'} onClick={()=>setDisplayMode('cards')} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold ${displayMode==='cards'?'bg-[#142B5F] text-white':'text-slate-600'}`}><LayoutGrid aria-hidden="true" className="h-4 w-4"/>بطاقات</button>
+                <button type="button" aria-pressed={displayMode==='table'} onClick={()=>setDisplayMode('table')} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold ${displayMode==='table'?'bg-[#142B5F] text-white':'text-slate-600'}`}><Table2 aria-hidden="true" className="h-4 w-4"/>جدول</button>
+              </div>
+            </div>
             {loading && !data ? (
               <div className="flex h-72 flex-col items-center justify-center gap-3 rounded-2xl border border-[#DDEFF2] bg-white p-8">
                 <Loader2 className="h-9 w-9 animate-spin text-[#0E7C86]" />
@@ -455,13 +466,30 @@ export function MajorAdminPage() {
                   </Link>
                 </div>
               </div>
+            ) : displayMode==='table' ? (
+              <div className="overflow-x-auto rounded-2xl border border-[#DDEFF2] bg-white">
+                <table className="major-catalog-table w-full min-w-[760px] text-right text-xs">
+                  <caption className="sr-only">التخصصات الأكاديمية في الصفحة الحالية</caption>
+                  <thead className="bg-slate-50 text-[#142B5F]"><tr>{['التخصص','الدرجة','الكلية','المجال الأكاديمي','المراجعة والنشر','اكتمال الهوية','التفاصيل'].map(label=><th key={label} scope="col" className="px-4 py-3 font-bold">{label}</th>)}</tr></thead>
+                  <tbody className="divide-y divide-slate-100">{visibleMajors.map(major=>{
+                    const names=majorDisplayNames(major);
+                    return <tr key={major.profileId||major.id} className="hover:bg-slate-50/70">
+                      <th scope="row" className="px-4 py-3 font-normal"><Link to={`/majors/${major.id}${major.profileId?`?profileId=${major.profileId}`:''}`} className="font-bold text-[#142B5F]">{names.primary}</Link>{names.secondary&&<span dir="ltr" className="mt-0.5 block text-[11px] text-slate-500">{names.secondary}</span>}<span className="mt-1 block text-[10px] text-slate-400">{major.classificationCode||major.publicId||'الرمز غير محدد'}</span></th>
+                      <td className="px-4 py-3">{getDegreeArabicLabel(major.degreeLevel)}</td><td className="px-4 py-3">{majorAcademicContext(major).college||'غير محددة'}</td><td className="px-4 py-3">{majorAcademicContext(major).field||'غير محدد'}</td>
+                      <td className="px-4 py-3"><span className={`inline-flex rounded-lg border px-2 py-1 text-[11px] ${statusBadgeClasses(major.status)}`}>{getStatusArabicLabel(major.status)}</span></td>
+                      <td className="px-4 py-3">{completenessOptions.find(option=>option.value===major.completenessStatus)?.labelAr||'غير محدد'}</td>
+                      <td className="px-4 py-3"><Link aria-label={`تفاصيل ${names.primary}`} to={`/majors/${major.id}${major.profileId?`?profileId=${major.profileId}`:''}`} className="inline-flex items-center gap-1.5 rounded-lg bg-[#142B5F] px-3 py-2 font-semibold text-white"><Eye aria-hidden="true" className="h-3.5 w-3.5"/>عرض</Link></td>
+                    </tr>;
+                  })}</tbody>
+                </table>
+              </div>
             ) : (
               /* Beautiful Responsive Cards Grid */
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                 {visibleMajors.map((major) => (
                   <article
                     key={major.profileId || major.id}
-                    className="group relative flex flex-col justify-between rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-xs transition-all duration-200 hover:border-[#21A7B4]/60 hover:shadow-md hover:-translate-y-0.5"
+                    className="major-catalog-card group relative flex flex-col justify-between rounded-2xl border border-[#DDEFF2] bg-white p-4 shadow-xs transition-all duration-200 hover:border-[#21A7B4]/60 hover:shadow-md"
                   >
                     {/* Card Top: Badges & Identifiers */}
                     <div>
@@ -489,25 +517,25 @@ export function MajorAdminPage() {
                       <div className="mt-3.5">
                         <Link
                           to={`/majors/${major.id}${major.profileId ? `?profileId=${major.profileId}` : ''}`}
-                          className="block text-base sm:text-lg font-black text-[#142B5F] group-hover:text-[#0E7C86] transition-colors leading-snug line-clamp-2"
+                          className="major-catalog-name block font-bold text-[#142B5F] group-hover:text-[#0E7C86] transition-colors leading-snug line-clamp-2"
                         >
-                          {major.nameAr || major.displayName}
+                          {majorDisplayNames(major).primary}
                         </Link>
                       </div>
 
-                      {major.nameEn && <p dir="ltr" className="mt-1 text-xs text-slate-500 text-right">{major.nameEn}</p>}
+                      {majorDisplayNames(major).secondary && <p dir="ltr" className="major-catalog-english mt-1 text-slate-500 text-right">{majorDisplayNames(major).secondary}</p>}
                       {/* Details: College & Discipline */}
                       <div className="mt-3 space-y-1.5 text-xs text-slate-600">
-                        {major.collegeOrFaculty && (
+                        {(
                           <div className="flex items-center gap-1.5 text-slate-600">
                             <Building2 className="h-3.5 w-3.5 shrink-0 text-[#0E7C86]" />
-                            <span className="font-semibold line-clamp-1">{major.collegeOrFaculty}</span>
+                            <span className="line-clamp-1">الكلية: {majorAcademicContext(major).college||'غير محددة'}</span>
                           </div>
                         )}
-                        {major.academicFieldOrDiscipline && (
+                        {(
                           <div className="flex items-center gap-1.5 text-slate-500">
                             <Layers3 className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                            <span className="font-medium line-clamp-1">{major.academicFieldOrDiscipline}</span>
+                            <span className="font-medium line-clamp-1">المجال: {majorAcademicContext(major).field||'غير محدد'}</span>
                           </div>
                         )}
                       </div>
@@ -517,6 +545,7 @@ export function MajorAdminPage() {
                         <span className={`inline-flex items-center rounded-lg border px-2.5 py-0.5 text-[11px] font-bold ${statusBadgeClasses(major.status)}`}>
                           {getStatusArabicLabel(major.status)}
                         </span>
+                        <span title="اكتمال حقول الهوية؛ للمحتوى التفصيلي حالة مستقلة." className="inline-flex items-center gap-1 rounded-lg bg-slate-50 px-2 py-0.5 text-[10px] text-slate-500"><CheckCircle2 aria-hidden="true" className="h-3 w-3 text-[#0E7C86]"/>{major.completenessStatus==='COMPLETE'?'الهوية مكتملة':completenessOptions.find(option=>option.value===major.completenessStatus)?.labelAr||'الاكتمال غير محدد'}</span>
                         {major.currentPublishedVersionId && (
                           <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
                             <CheckCircle2 className="h-3 w-3 text-emerald-600" />

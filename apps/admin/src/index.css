@@ -230,6 +230,45 @@ textarea {
 .major-detail #major-technical-info > div > section { border: 0; padding: 0; }
 .major-detail #major-technical-info section > div { border-color: #DDEFF2; border-radius: 12px; }
 
+/* Compact major identity and actions share horizontal rows at desktop widths. */
+.major-detail { container-type: inline-size; }
+.major-detail-hero { container-type: inline-size; padding: 18px 20px; border-radius: 20px; }
+.major-detail-hero > div { display: block; }
+.major-detail-identity { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 280px); column-gap: 20px; align-items: start; }
+.major-detail-identity > :not(label) { grid-column: 1; }
+.major-detail-identity > div:first-child { margin-bottom: 6px; }
+.major-detail-hero h1 { font-size: 20px; line-height: 1.6; }
+.major-detail-identity > label { grid-column: 2; grid-row: 1 / span 4; margin-top: 0; width: 100%; }
+.major-detail-identity > label span { margin-bottom: 6px; }
+.major-detail-english { font-size: 12px; text-align: right; }
+.major-detail-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgb(255 255 255 / 15%); }
+.major-detail-actions > * { margin-block: 0; }
+.major-detail-actions :where(button, a) { min-height: 34px; padding: 7px 10px; font-size: 12px; border-radius: 10px; }
+.major-detail-content-count { margin-inline-start: auto; font-size: 11px; }
+.major-detail-tabs { container-type: inline-size; }
+.major-content-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.major-content-grid > * { grid-column: 1 / -1; }
+.major-content-grid > .major-content-empty { grid-column: auto; }
+.major-content-empty .major-content-section-heading { flex-wrap: nowrap; gap: 8px; padding: 10px 12px; }
+.major-content-empty .major-content-section-heading > div:first-child { gap: 8px; }
+.major-content-empty h3 { font-size: 12px; }
+.major-content-empty .major-content-section-body { padding: 10px 12px; }
+.major-content-empty .major-content-section-heading > div:last-child span { white-space: nowrap; font-size: 10px; padding: 3px 6px; }
+.major-catalog-card .major-catalog-name { font-size: 15px; line-height: 1.8; }
+.major-catalog-card .major-catalog-english { font-size: 11px; line-height: 1.6; }
+.major-catalog-card > div:last-child { margin-top: 14px; padding-top: 12px; }
+.major-catalog-table td { vertical-align: middle; }
+@container (min-width: 640px) { .major-detail-tabs { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@container (max-width: 639px) { .major-detail-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container (max-width: 540px) {
+  .major-detail-identity { grid-template-columns: minmax(0, 1fr); }
+  .major-detail-identity > label { grid-column: 1; grid-row: auto; margin-top: 12px; max-width: none; }
+}
+@media (max-width: 600px) {
+  .major-content-grid { grid-template-columns: minmax(0, 1fr); }
+  .major-detail-hero { padding: 16px; }
+}
+
 /* Scholarship filters share the funding/deadline control appearance. */
 :is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) :is(input, select) {
   height: 48px;
@@ -242,12 +281,12 @@ textarea {
   color: #334155;
   font-family: inherit;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.5;
 }
 :is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > :is(label, div) {
   min-width: 0;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: #64748b;
 }
@@ -269,7 +308,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: #64748b;
 }

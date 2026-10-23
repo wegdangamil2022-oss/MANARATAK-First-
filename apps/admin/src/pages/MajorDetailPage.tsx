@@ -29,16 +29,19 @@ Sparkles,
 X
 } from 'lucide-react';
 import React,{ useEffect,useMemo,useState,useRef } from 'react';
+import {majorDisplayNames,majorAcademicContext,type MajorAcademicMetadata,type MajorProfileAcademicMetadata} from '../utils/majorDisplayNames';
 import { Link,useParams,useSearchParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { ReviewedGraphEditor } from '../components/ReviewedGraphEditor';
 
-interface MajorDetail {
+interface MajorDetail extends Omit<MajorAcademicMetadata,'profiles'> {
   id: string;
   publicId?: string;
   slug?: string;
   displayName: string;
   canonicalName?: string;
+  localizedNameAr?: string;
+  localizedNameEn?: string;
   degreeLevel?: string;
   sourceClassificationSystem?: string;
   academicFieldOrDiscipline?: string | null;
@@ -59,7 +62,7 @@ interface MajorDetail {
   updatedAt?: string;
 }
 
-interface MajorProfile {
+interface MajorProfile extends MajorProfileAcademicMetadata {
   id: string;
   majorId?: string;
   level: string;
@@ -423,6 +426,7 @@ export function MajorDetailPage() {
   const [activeTab, setActiveTab] = useState<DetailTab>('basic');
   const [loading, setLoading] = useState(true);
   const [loadingSections, setLoadingSections] = useState(false);
+  const [contentError,setContentError]=useState<string|null>(null);
   const [relatedState,setRelatedState]=useState<'loading'|'ready'|'error'>('loading');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -553,6 +557,7 @@ export function MajorDetailPage() {
     const generation=++profileReads.current;
     const sameScope=loadedProfile.current===`${majorId}:${profileId}`;
     setLoadingSections(true);
+    setContentError(null);
     try {
       const [sectionResult, versionResult] = await Promise.all([
         adminApiClient.request<{ data: MajorContentSection[] }>(`/admin/majors/${majorId}/content-sections?profileId=${profileId}`),
@@ -577,7 +582,7 @@ export function MajorDetailPage() {
       if(sameScope&&dirtyBlockKeys.size){setEditedBlocks(previous=>({...initialEdits,...Object.fromEntries([...dirtyBlockKeys].map(key=>[key,previous[key]]))}));}
       else {setEditedBlocks(initialEdits);setDirtyBlockKeys(new Set());setEditingBlockKey(null);}
     } catch (err: unknown) {
-      if(generation===profileReads.current)setError(err instanceof Error ? err.message : 'تعذر تحميل أقسام المحتوى لهذا المستوى.');
+      if(generation===profileReads.current){const message=err instanceof Error ? err.message : 'تعذر تحميل أقسام المحتوى لهذا المستوى.';setContentError(message);setError(message);}
     } finally {
       if(generation===profileReads.current)setLoadingSections(false);
     }
@@ -870,11 +875,11 @@ export function MajorDetailPage() {
 
       <header className="major-detail-hero relative overflow-hidden rounded-3xl border border-white/20 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-5 text-white shadow-sm sm:p-6">
         <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
-          <div className="min-w-0">
+          <div className="major-detail-identity min-w-0">
             <div className="mb-3 flex flex-wrap items-center gap-2"><span className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1 text-xs font-semibold"><GraduationCap aria-hidden="true" className="h-4 w-4 text-[#F2CD78]" />{formatLabel(activeDegreeLevel)}</span><span className="rounded-lg bg-white/10 px-3 py-1 text-xs">{activeProfile?.code || major.classificationCode || major.publicId || '—'}</span><Badge value={activeProfile?.status || major.status} /></div>
-            <h1 className="break-words text-2xl font-bold leading-relaxed text-white">{activeProfile?.localizedNameAr || activeProfile?.displayName || major.displayName}</h1>
-            {major.canonicalName&&major.canonicalName!==(activeProfile?.displayName||major.displayName)&&<p className="mt-1 text-sm text-white/75">{major.canonicalName}</p>}
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-white/85">{(activeProfile?.collegeContext||major.collegeOrFaculty)&&<span className="inline-flex items-center gap-2"><Building2 aria-hidden="true" className="h-4 w-4 text-[#F2CD78]" />{activeProfile?.collegeContext||major.collegeOrFaculty}</span>}{major.academicFieldOrDiscipline&&<span className="inline-flex items-center gap-2"><Layers aria-hidden="true" className="h-4 w-4 text-cyan-100" />{major.academicFieldOrDiscipline}</span>}</div>
+            <h1 className="break-words font-bold leading-relaxed text-white">{majorDisplayNames(major,activeProfile).primary}</h1>
+            {majorDisplayNames(major,activeProfile).secondary&&<p dir="ltr" className="major-detail-english mt-1 text-white/75">{majorDisplayNames(major,activeProfile).secondary}</p>}
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-white/85">{majorAcademicContext(major,activeProfile).college&&<span className="inline-flex items-center gap-2"><Building2 aria-hidden="true" className="h-4 w-4 text-[#F2CD78]" />{majorAcademicContext(major,activeProfile).college}</span>}{majorAcademicContext(major,activeProfile).field&&<span className="inline-flex items-center gap-2"><Layers aria-hidden="true" className="h-4 w-4 text-cyan-100" />{majorAcademicContext(major,activeProfile).field}</span>}</div>
             {profiles.length>0&&<label className="mt-4 block max-w-md text-xs font-semibold"><span className="mb-2 inline-flex items-center gap-2"><GraduationCap aria-hidden="true" className="h-4 w-4 text-[#F2CD78]" />ملف الدرجة العلمية</span><select aria-label="ملف الدرجة العلمية" value={activeProfile?.id||''} disabled={saving} onChange={event=>{const profile=profiles.find(item=>item.id===event.target.value);if(profile)void handleSelectLevel(profile);}} className="block min-h-10 w-full rounded-xl border border-white/25 bg-white px-3 py-2 text-xs text-[#142B5F]">{profiles.map(profile=><option key={profile.id} value={profile.id}>{formatLabel(profile.level)} · {profile.code||profile.id.slice(0,8)} · {profile.localizedNameAr||profile.displayName||major.displayName}</option>)}</select></label>}
           </div>
           <div className="major-detail-actions min-w-0 space-y-3">
@@ -933,7 +938,7 @@ export function MajorDetailPage() {
               </a>
             )}
           </div>
-            <p className="text-xs text-white/75">{formatLabel(activeProfile?.completenessStatus||major.completenessStatus)} · {sections.length} كتلة محتوى · {versions.length} نسخة ضمن القراءة</p>
+            <p className="major-detail-content-count text-xs text-white/75">{loadingSections||contentError||!activeProfile?'المحتوى قيد التحقق':`${sections.length} كتلة محتوى · ${versions.length} نسخة`}</p>
           </div>
         </div>
       </header>
@@ -984,12 +989,12 @@ export function MajorDetailPage() {
               </div>
 
               <dl className="grid gap-4 sm:grid-cols-2">
-                <Field label="الاسم العربي المعتمد" value={activeProfile?.localizedNameAr || activeProfile?.displayName || major.displayName} />
-                <Field label="الاسم الإنجليزي / القانوني" icon={Globe} value={major.canonicalName} />
+                <Field label="الاسم العربي" value={majorDisplayNames(major,activeProfile).arabic} />
+                <Field label="الاسم الإنجليزي" icon={Globe} value={majorDisplayNames(major,activeProfile).english} />
                 <Field label="الدرجة الأكاديمية" icon={GraduationCap} value={formatLabel(activeDegreeLevel)} />
                 <Field label="رمز ملف المستوى" icon={Layers3} value={activeProfile?.code || major.classificationCode || major.publicId} />
-                <Field label="الكلية / السياق الأكاديمي" icon={Building2} value={activeProfile?.collegeContext || major.collegeOrFaculty} />
-                <Field label="المجال والتخصص الدقيق" icon={Layers} value={major.academicFieldOrDiscipline} />
+                <Field label="الكلية / السياق الأكاديمي" icon={Building2} value={majorAcademicContext(major,activeProfile).college} />
+                <Field label="المجال والتخصص الدقيق" icon={Layers} value={majorAcademicContext(major,activeProfile).field} />
                 <Field label="نظام التصنيف المرجعي" icon={Layers3} value={major.sourceClassificationSystem || 'غير محدد'} />
                 <Field label="حالة النشر والجاهزية" icon={ShieldCheck} value={formatLabel(activeProfile?.status || major.status)} />
               </dl>
@@ -1026,7 +1031,7 @@ export function MajorDetailPage() {
                   </h2>
                 </div>
                 <p className="mt-1 text-xs font-medium text-slate-500">
-                  {canonicalGroups.length} أقسام رئيسية · {sections.length} كتلة محتوى محفوظة لهذا المستوى.
+                  {canonicalGroups.length} أقسام رئيسية · {loadingSections||contentError||!activeProfile?'عدد الكتل غير متاح بعد':`${sections.length} كتلة محتوى محفوظة لهذا المستوى`}.
                 </p>
               </div>
 
@@ -1079,26 +1084,21 @@ export function MajorDetailPage() {
               <Loader2 className="h-8 w-8 animate-spin text-[#0E7C86]" />
               <p className="text-xs font-bold text-slate-500">جاري تحميل أقسام المحتوى للمستوى النشط...</p>
             </div>
-          ) : sections.length === 0 ? (
-            <div className="rounded-3xl bg-teal-50/40 border border-teal-200 p-8 text-center space-y-3">
-              <BookOpen className="h-10 w-10 text-[#0E7C86] mx-auto opacity-60" />
-              <h3 className="text-sm font-bold text-[#142B5F]">لا توجد كتل محتوى مسجلة لهذا المستوى بعد</h3>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
-                يمكنك التحقق من ملفات الاستيراد أو إضافة محتوى جديد لمستوى {formatLabel(activeDegreeLevel)}.
-              </p>
-            </div>
+          ) : contentError||!activeProfile ? (
+            <div role="status" className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">{contentError?'تعذر التحقق من المحتوى. أعد تحميله باستخدام زر تحديث؛ لا نعدّه فارغًا.':'اختر ملف الدرجة العلمية لعرض محتواه.'}</div>
           ) : (
             /* Canonical Main Sections Display */
-            <div className="space-y-5">
+            <div className="major-content-grid">
+              {sections.length===0&&<p role="status" className="major-content-notice rounded-xl border border-teal-100 bg-teal-50/40 p-3 text-xs text-[#0E7C86]">لا توجد كتل محتوى محفوظة لهذا المستوى بعد. تظهر أدناه عناوين الأقسام المطلوبة؛ وهي لا تعني أن المحتوى مستورد أو مكتمل.</p>}
               {canonicalGroups.map((group) => {
                 const hasBlocks = group.blocks.length > 0;
                 return (
                   <article
                     key={group.number}
-                    className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xs transition hover:border-[#0E7C86]/40"
+                    className={`major-content-section ${hasBlocks?'':'major-content-empty'} overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs transition hover:border-[#0E7C86]/40`}
                   >
                     {/* Main Section Header */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-[#FAF7F0]/60 px-6 py-4">
+                    <div className="major-content-section-heading flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-[#FAF7F0]/60 px-4 py-3">
                       <div className="flex items-center gap-3">
                         <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-[#142B5F] text-xs font-black text-white shrink-0">
                           {group.number}
@@ -1110,15 +1110,15 @@ export function MajorDetailPage() {
 
                       <div className="flex items-center gap-2">
                         <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600">
-                          {group.blocks.length} {group.blocks.length === 1 ? 'كتلة' : 'كتل'}
+                          {hasBlocks?`${group.blocks.length} ${group.blocks.length===1?'كتلة':'كتل'}`:'بانتظار المحتوى'}
                         </span>
                       </div>
                     </div>
 
                     {/* Section Body: Blocks */}
-                    <div className="divide-y divide-slate-100 p-6 space-y-4">
+                    <div className="major-content-section-body divide-y divide-slate-100 p-4 space-y-4">
                       {!hasBlocks ? (
-                        <p className="text-xs text-slate-400 italic">لا توجد كتل محتوى لهذا القسم</p>
+                        <p className="text-xs text-slate-500">لم يُضف المحتوى لهذا القسم بعد.</p>
                       ) : (
                         group.blocks.map((block) => {
                           const isEditing = editingBlockKey === sectionEditKey(block);
@@ -1313,7 +1313,7 @@ export function MajorDetailPage() {
                 profiles.map((profile) => (
                   <div key={profile.id ?? profile.code} className="rounded-2xl border border-slate-200 bg-[#FAF7F0]/50 p-4 flex items-center justify-between">
                     <div>
-                      <p className="font-black text-sm text-[#142B5F]">{profile.displayName || major.displayName}</p>
+                      <p className="font-black text-sm text-[#142B5F]">{majorDisplayNames(major,profile).primary}</p>
                       <p className="mt-1 text-xs font-bold text-slate-500">
                         {formatLabel(profile.level)} · الرمز: {profile.code || '—'} · {profile.collegeContext || major.collegeOrFaculty || 'سياق عام'}
                       </p>
