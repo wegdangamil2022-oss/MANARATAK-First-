@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { BookOpen, BriefcaseBusiness, GraduationCap, Newspaper, School, TestTube2, Users, type LucideIcon } from 'lucide-react';
 import { dashboardMetricHref } from './DashboardSources';
 import { effectiveDashboardState, type DashboardReading } from './DashboardContract';
 import { dashboardLabel, dashboardTime } from './dashboardText';
@@ -24,6 +25,13 @@ export function DashboardMetricCard({
       ? label('unknown')
       : new Intl.NumberFormat(language === 'ar' ? 'ar' : 'en-US').format(value);
   const href = dashboardMetricHref(reading.source, metric);
+  const visual: Record<string, [LucideIcon, string]> = {
+    identities: [Users, '#142B5F'], universities: [School, '#0E7C86'],
+    scholarships: [GraduationCap, '#D6A43B'], majors: [GraduationCap, '#21A7B4'],
+    courses: [BookOpen, '#0E7C86'], tests: [TestTube2, '#D6A43B'],
+    careers: [BriefcaseBusiness, '#142B5F'], cms: [Newspaper, '#21A7B4'],
+  };
+  const [Icon, accent] = visual[reading.source.domain] ?? [BookOpen, '#0E7C86'];
   const scope =
     reading.source.kind === 'imports' && metric === 'batches'
       ? label('batches')
@@ -32,9 +40,16 @@ export function DashboardMetricCard({
         );
   return (
     <article
-      className={card}
+      className={`${card} relative overflow-hidden ${compact ? 'flex min-h-48 flex-col transition hover:-translate-y-0.5 hover:shadow-md' : ''}`}
       aria-label={`${label(reading.source.domain)}: ${label(metric)}; ${label(state)}`}
     >
+      {compact && <>
+        <span className="absolute inset-x-0 top-0 h-1" style={{ backgroundColor: accent }} />
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: `${accent}14`, color: accent }}><Icon aria-hidden="true" className="h-5 w-5" /></span>
+          <span className="rounded-full bg-[#FAF7F0] px-2 py-1 text-[10px] font-bold text-slate-500">{label(state)}</span>
+        </div>
+      </>}
       <h3 className="text-sm font-bold text-[#0E7C86]">
         {label(compact ? reading.source.domain : metric)}
       </h3>
@@ -44,7 +59,7 @@ export function DashboardMetricCard({
       >
         {text}
       </output>
-      <p role="status" className="mt-1 text-xs" title={label(state)}>
+      <p role="status" className={`mt-1 text-xs ${compact ? 'sr-only' : ''}`} title={label(state)}>
         {compact && state === 'available'
           ? language === 'ar'
             ? 'متاح'
@@ -79,8 +94,9 @@ export function DashboardMetricCard({
         <p>
           {label('received')}: {dashboardTime(reading.receivedAt, language)}
         </p>
+        {compact && (reading.errors[metric] || reading.errors.read) && <p role="alert">{label(state)} · <bdi>{reading.errors[metric] ?? reading.errors.read}</bdi></p>}
       </details>
-      {reading.errors[metric] || reading.errors.read ? (
+      {!compact && (reading.errors[metric] || reading.errors.read) ? (
         <p role="alert" className="mt-2 text-sm">
           {label(state)} · <bdi>{reading.errors[metric] ?? reading.errors.read}</bdi>
         </p>

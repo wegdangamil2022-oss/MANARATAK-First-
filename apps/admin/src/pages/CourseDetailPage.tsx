@@ -577,7 +577,7 @@ export function CourseDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <OwnerDescriptionTranslationPanel domain="COURSE" ownerId={course!.id} endpoint="/admin/courses" optionalFields={course!.optionalFields} status={course!.status} onSaved={()=>fetchCourse()}/>
+
 
       <label className="block text-sm font-semibold">سبب التعديل أو المراجعة
         <input value={reviewReason} onChange={event=>setReviewReason(event.target.value)} maxLength={2000}
@@ -629,6 +629,8 @@ export function CourseDetailPage() {
           )}
         </div>
       </div>
+      <details className="admin-section-tools"><summary>ترجمة الاسم والوصف</summary><OwnerDescriptionTranslationPanel domain="COURSE" ownerId={course!.id} endpoint="/admin/courses" optionalFields={course!.optionalFields} status={course!.status} onSaved={()=>fetchCourse()}/></details>
+
 
       {course.status === 'PUBLISHED' && (
         <p className="rounded-xl bg-amber-50 p-3 text-amber-900" dir="rtl">

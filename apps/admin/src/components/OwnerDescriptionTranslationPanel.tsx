@@ -19,13 +19,13 @@ export function OwnerDescriptionTranslationPanel({domain,ownerId,endpoint,option
     } catch(error){if(written)setReloadRequired(true);setError((written?'نجح الحفظ وتعذرت إعادة القراءة؛ أعد تحميل السجل قبل المحاولة. ': '')+(error instanceof Error?error.message:'تعذر الحفظ'));}
     finally {saving.current=false;setBusy(false);}
   }
-  return <section aria-label="ترجمة وصف المالك" className="space-y-3 rounded-xl border bg-white p-4">
-    <h2>ترجمة الاسم والوصف</h2><p>يُراجع الاسم والوصف معًا ضمن نسخة هذا المحتوى. تغيير المصدر يستلزم إعادة المراجعة.</p>
+  return <section aria-label="ترجمة وصف المالك" className="grid gap-4 rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-xs sm:grid-cols-2">
+    <div className="sm:col-span-2"><h2 className="font-black text-[#142B5F]">ترجمة الاسم والوصف</h2><p className="mt-2 text-sm leading-7 text-slate-500">يُراجع الاسم والوصف معًا ضمن نسخة هذا المحتوى. تغيير المصدر يستلزم إعادة المراجعة.</p></div>
     {!enabled&&<p role="status">الكتابة معلقة وفق سياسة الترجمة أو حالة السجل. لا يفعّل هذا النموذج النشر.</p>}
     {error&&<p role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}
     <label>لغة النص<select value={locale} disabled={busy} onChange={event=>setLocale(event.target.value as 'ar'|'en')}><option value="ar">العربية</option><option value="en">English</option></select></label>
     <label>الاسم المترجم<input disabled={!enabled||busy} value={title} maxLength={500} onChange={event=>setTitle(event.target.value)}/></label>
-    <label>الوصف المترجم<textarea disabled={!enabled||busy} value={description} maxLength={100000} onChange={event=>setDescription(event.target.value)}/></label>
+    <label className="sm:col-span-2">الوصف المترجم<textarea className="min-h-32" disabled={!enabled||busy} value={description} maxLength={100000} onChange={event=>setDescription(event.target.value)}/></label>
     <label>سبب التعديل<input disabled={!enabled||busy} value={reason} maxLength={2000} onChange={event=>setReason(event.target.value)}/></label>
     <button disabled={!enabled||busy||reloadRequired||reason.trim().length<3||!title.trim()||!description.trim()} onClick={()=>void save()}>حفظ للمراجعة</button>
     <button disabled={!enabled||busy||reloadRequired||reason.trim().length<3} onClick={()=>void save(true)}>إزالة ترجمة هذه اللغة</button>

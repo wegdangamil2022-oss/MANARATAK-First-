@@ -230,7 +230,7 @@ export function AdminDashboardPage() {
         <h2 id="dashboard-snapshot" className="mb-4 mt-1 text-xl font-black">
           {tr('حجم المنصة الآن', 'Platform snapshot')}
         </h2>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {primaryReadings.map((reading) => (
             <DashboardMetricCard
               key={reading.source.key}

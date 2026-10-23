@@ -3,6 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { ReviewOverview } from '../features/review-queue/ReviewOverview';
+import { ClipboardCheck, RefreshCw, Filter } from 'lucide-react';
 import {
   reviewSources,
   sourceAllowed,
@@ -376,12 +378,15 @@ export function AdminReviewQueuePage() {
   return (
     <div dir={dir} className="admin-owner-workspace mx-auto max-w-7xl space-y-6 text-[#203442]">
       <header className="admin-page-hero relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] px-5 py-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:px-7 sm:py-7">
+        <div><span className="mb-3 inline-flex items-center gap-2 text-xs font-bold text-[#F2CD78]"><ClipboardCheck className="h-4 w-4" aria-hidden="true" />{tr('مركز العمل الإداري', 'Administration work center')}</span>
         <h1 className="text-2xl font-bold">{tr('قائمة المراجعة', 'Enterprise Review Queue')}</h1>
-        <button className="rounded border px-4 py-2" onClick={() => void load()}>
+        <p>{tr('إشارات المراجعة والجودة حسب المجال، مع الانتقال إلى القسم المسؤول لإتمام الإجراء.', 'Review and quality signals by domain, with handoffs to the responsible workspace.')}</p></div>
+        <button disabled={busy} className="inline-flex items-center gap-2 rounded border px-4 py-2" onClick={() => void load()}>
+          <RefreshCw aria-hidden="true" className={`h-4 w-4 ${busy ? 'animate-spin' : ''}`} />
           {tr('تحديث وإعادة التحقق', 'Refresh and recheck')}
         </button>
       </header>
-      <p>
+      <p className="rounded-2xl border border-[#D6A43B]/30 bg-[#F2CD78]/15 p-4 text-sm leading-7 text-[#203442]">
         {tr(
           'للقراءة والتنقل إلى المالك فقط. لا موافقة أو نشر أو رفض من هنا.',
           'Read and navigate to the owner. Decisions remain in owner workspaces.',
@@ -403,12 +408,15 @@ export function AdminReviewQueuePage() {
               'Reads reached available page ends; this is not a unified snapshot.',
             )}
       </p>
-      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <ReviewOverview items={items} states={states.filter(state => allowed.some(source => source.key === state.source.key))} filters={filters} onFilter={updateFilter} language={language} now={clock} />
+      <section className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm" aria-labelledby="review-filters">
+      <h2 id="review-filters" className="mb-4 flex items-center gap-2 text-lg font-black"><Filter aria-hidden="true" className="h-5 w-5 text-[#0E7C86]" />{tr('البحث والتصفية', 'Search and filters')}</h2>
+      <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {(Object.keys(reviewFilterValues) as Array<keyof ReviewFilters>).map((key) => (
           <label key={key} className="flex flex-col gap-1">
             {label(key)}
             <select
-              className="rounded border p-2"
+              className="min-h-11 rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/30 px-3 py-2.5 text-sm font-medium"
               value={filters[key]}
               onChange={(event) => updateFilter(key, event.target.value)}
             >
@@ -421,6 +429,7 @@ export function AdminReviewQueuePage() {
           </label>
         ))}
       </div>
+      </section>
       <p className="text-sm">
         {tr(
           'الفلاتر والأولوية المقترحة ومؤشرات الجودة تخص العينة فقط. العمر يبدأ من دليل دخول المراجعة؛ الاستيراد والتعديل منفصلان. SLA غير معروف دون وقت الدخول والموعد وسياسة المالك.',

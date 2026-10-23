@@ -496,7 +496,7 @@ export function InternationalTestDetailPage() {
   return (
     <TestEditorSaveContext.Provider value={saveRegistry}>
     <div className="max-w-7xl mx-auto space-y-6">
-      <OwnerDescriptionTranslationPanel domain="INTERNATIONAL_TEST" ownerId={test!.id} endpoint="/admin/international-tests" optionalFields={test!.optionalFields} status={test!.status} onSaved={()=>fetchDetail()}/>
+
 
       {/* Top Breadcrumb */}
       <div>
@@ -686,6 +686,8 @@ export function InternationalTestDetailPage() {
           </div>
         </div>
       </section>
+      <details className="admin-section-tools"><summary>ترجمة الاسم والوصف</summary><OwnerDescriptionTranslationPanel domain="INTERNATIONAL_TEST" ownerId={test!.id} endpoint="/admin/international-tests" optionalFields={test!.optionalFields} status={test!.status} onSaved={()=>fetchDetail()}/></details>
+
 
       {/* Four Primary Tabs Navigation */}
       <div className="border-b border-slate-200 overflow-x-auto">

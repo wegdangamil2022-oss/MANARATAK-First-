@@ -410,7 +410,7 @@ export function ScholarshipDetailPage() {
 
   return (
     <div dir="rtl" className="mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
-      <OwnerDescriptionTranslationPanel domain="SCHOLARSHIP" ownerId={scholarship!.id} endpoint="/admin/scholarships" optionalFields={scholarship!.optionalFields} status={scholarship!.status} onSaved={()=>load()}/>
+
 
       {/* Top Breadcrumb */}
       <div className="flex items-center justify-between">
@@ -566,6 +566,8 @@ export function ScholarshipDetailPage() {
           </div>
         </div>
       </header>
+      <details className="admin-section-tools"><summary>ترجمة الاسم والوصف</summary><OwnerDescriptionTranslationPanel domain="SCHOLARSHIP" ownerId={scholarship!.id} endpoint="/admin/scholarships" optionalFields={scholarship!.optionalFields} status={scholarship!.status} onSaved={()=>load()}/></details>
+
 
       {message && (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-bold text-emerald-800 shadow-xs flex items-center justify-between">
