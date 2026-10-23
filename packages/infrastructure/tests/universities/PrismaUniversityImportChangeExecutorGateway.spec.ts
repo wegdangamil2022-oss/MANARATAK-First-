@@ -1,7 +1,45 @@
 import { describe, expect, it, vi } from 'vitest';
 import { PrismaUniversityImportChangeExecutorGateway } from '../../src/universities/PrismaUniversityImportChangeExecutorGateway';
 
+function authorized<T extends object>(transaction: T) {
+  return Object.assign(transaction, {
+    identityRecord: { findUnique: vi.fn().mockResolvedValue({ id: 'admin-1', status: 'ACTIVE', deletedAt: null, user: { isEmailVerified: true }, account: { accessState: 'Active' } }) },
+    roleAssignmentRecord: { findMany: vi.fn().mockResolvedValue([{ id: 'assignment', identityId: 'admin-1', roleId: 'importer', assignedAt: new Date() }]) },
+    roleRecord: { findUnique: vi.fn().mockResolvedValue({ id: 'importer', name: 'Importer', description: 'Test fixture', permissions: ['admin:imports:manage', 'admin:universities:manage'], policyIds: [], createdAt: new Date(), updatedAt: new Date() }) },
+    policyRecord: { findUnique: vi.fn().mockResolvedValue(null) },
+  });
+}
+
 describe('PrismaUniversityImportChangeExecutorGateway', () => {
+  it.each(['unknown', 'unverified', 'inactive', 'student', 'imports-only', 'university-only', 'policy-denied'])('denies %s for apply and rollback before reading receipts', async kind => {
+    for (const mode of ['apply', 'rollback']) {
+      const tx = authorized({
+        $queryRaw: vi.fn().mockResolvedValue([]),
+        universityImportChangeSet: { findUnique: vi.fn() },
+      });
+      if (kind === 'unknown') tx.identityRecord.findUnique.mockResolvedValue(null);
+      if (kind === 'unverified') tx.identityRecord.findUnique.mockResolvedValue({ status: 'ACTIVE', user: { isEmailVerified: false }, account: { accessState: 'Active' } });
+      if (kind === 'inactive') tx.identityRecord.findUnique.mockResolvedValue({ status: 'DISABLED', user: { isEmailVerified: true }, account: { accessState: 'Active' } });
+      const permissions = kind === 'imports-only' ? ['admin:imports:manage'] : kind === 'university-only' ? ['admin:universities:manage'] : [];
+      if (['student', 'imports-only', 'university-only', 'policy-denied'].includes(kind)) tx.roleRecord.findUnique.mockResolvedValue({ id: 'importer', name: 'Importer', description: '', permissions: kind === 'policy-denied' ? ['admin:*'] : permissions, policyIds: kind === 'policy-denied' ? ['missing-policy'] : [], createdAt: new Date(), updatedAt: new Date() });
+      const gateway = new PrismaUniversityImportChangeExecutorGateway({ $transaction: async work => work(tx) } as never);
+      const plan = { changeSetId: 'STAGE_1:fixture', stage: 'STAGE_1' as const, sourceArtifactId: 'fixture', validationIssues: [], changes: [], databaseWrites: 0 as const };
+      await expect(mode === 'apply' ? gateway.apply(plan, 'admin-1') : gateway.rollback(plan.changeSetId, 'admin-1')).rejects.toThrow(/UNIVERSITY_IMPORT_(VERIFIED_ACTIVE_ACTOR_REQUIRED|ACTOR_PERMISSION_DENIED)/);
+      expect(tx.universityImportChangeSet.findUnique).not.toHaveBeenCalled();
+    }
+  });
+
+  it('reauthorizes a replay and locks persisted authorization rows in its transaction', async () => {
+    const tx = authorized({ $queryRaw: vi.fn().mockResolvedValue([]), universityImportChangeSet: { findUnique: vi.fn().mockResolvedValue({ id: 'STAGE_1:fixture', state: 'APPLIED', changes: [] }) } });
+    const gateway = new PrismaUniversityImportChangeExecutorGateway({ $transaction: async work => work(tx) } as never);
+    const plan = { changeSetId: 'STAGE_1:fixture', stage: 'STAGE_1' as const, sourceArtifactId: 'fixture', validationIssues: [], changes: [], databaseWrites: 0 as const };
+    await expect(gateway.apply(plan, 'admin-1')).resolves.toMatchObject({ appliedChanges: 0 });
+    const locks = tx.$queryRaw.mock.calls.map(([query]) => query.sql ?? '').join('\n');
+    expect(locks).toContain('FOR SHARE'); expect(locks).toContain('RoleAssignmentRecord'); expect(locks).toContain('PolicyRecord');
+    tx.roleAssignmentRecord.findMany.mockResolvedValue([]);
+    await expect(gateway.apply(plan, 'admin-1')).rejects.toThrow('ACTOR_PERMISSION_DENIED');
+    expect(tx.universityImportChangeSet.findUnique).toHaveBeenCalledTimes(1);
+  });
   it('rejects a root University whose valid geography ids have incompatible parents', async () => {
     const transaction = {
       $queryRaw: vi.fn().mockResolvedValue([]),
@@ -12,7 +50,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
       administrativeRegion: { findUnique: vi.fn().mockResolvedValue({ countryIso2Code: 'SA', lifecycleState: 'ACTIVE' }) },
       referenceCity: { findUnique: vi.fn().mockResolvedValue({ countryIso2Code: 'YE', administrativeRegionId: 'region-ye', isActive: true, lifecycleState: 'ACTIVE' }) },
     };
-    const prisma = { $transaction: vi.fn(async (work) => work(transaction)) };
+    const prisma = { $transaction: vi.fn(async (work) => work(authorized(transaction))) };
     const gateway = new PrismaUniversityImportChangeExecutorGateway(prisma as never);
     const plan = {
       changeSetId: 'STAGE_1:bad-geography', stage: 'STAGE_1' as const, sourceArtifactId: 'artifact', validationIssues: [], databaseWrites: 0 as const,
@@ -50,7 +88,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
       auditRecord: { create: vi.fn() },
       transactionalOutboxRecord: { create: vi.fn() },
     };
-    const prisma = { $transaction: vi.fn(async (work) => work(transaction)) };
+    const prisma = { $transaction: vi.fn(async (work) => work(authorized(transaction))) };
     const gateway = new PrismaUniversityImportChangeExecutorGateway(prisma as never);
     const plan = {
       changeSetId: 'STAGE_1:artifact-1',
@@ -102,7 +140,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
         update: vi.fn(), create: vi.fn(),
       },
     };
-    const prisma = { $transaction: vi.fn(async (work) => work(transaction)) };
+    const prisma = { $transaction: vi.fn(async (work) => work(authorized(transaction))) };
     const gateway = new PrismaUniversityImportChangeExecutorGateway(prisma as never);
     const plan = {
       changeSetId: 'STAGE_3:artifact-1', stage: 'STAGE_3' as const, sourceArtifactId: 'artifact-1', validationIssues: [], databaseWrites: 0 as const,
@@ -127,7 +165,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
       auditRecord: { create: vi.fn() },
       transactionalOutboxRecord: { create: vi.fn() },
     };
-    const prisma = { $transaction: vi.fn(async (work) => work(transaction)) };
+    const prisma = { $transaction: vi.fn(async (work) => work(authorized(transaction))) };
     const gateway = new PrismaUniversityImportChangeExecutorGateway(prisma as never);
     const plan = {
       changeSetId: 'STAGE_3:artifact-3',
@@ -178,7 +216,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
       auditRecord: { create: vi.fn() },
       transactionalOutboxRecord: { create: vi.fn() },
     };
-    const prisma = { $transaction: vi.fn(async (work) => work(transaction)) };
+    const prisma = { $transaction: vi.fn(async (work) => work(authorized(transaction))) };
     const gateway = new PrismaUniversityImportChangeExecutorGateway(prisma as never);
     const plan = {
       changeSetId: 'STAGE_4:artifact-4',
@@ -245,7 +283,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
       auditRecord: { create: vi.fn() },
       transactionalOutboxRecord: { create: vi.fn() },
     };
-    const prisma = { $transaction: vi.fn(async (work) => work(transaction)) };
+    const prisma = { $transaction: vi.fn(async (work) => work(authorized(transaction))) };
     const gateway = new PrismaUniversityImportChangeExecutorGateway(prisma as never);
 
     await expect(gateway.rollback('STAGE_1:artifact-1', 'admin-1')).resolves.toEqual({

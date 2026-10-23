@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { requireDatabaseMutationGate } from './lib/database-mutation-gate.mjs';
 import { PrismaClient } from '@prisma/client';
 import {
   UniversityImportChangeExecutor,
@@ -62,6 +63,7 @@ if (mode === 'inspect') {
   }
   const actorId = process.env.UNIVERSITY_IMPORT_ACTOR_ID;
   if (!actorId) throw new Error('UNIVERSITY_IMPORT_ACTOR_ID_REQUIRED');
+  requireDatabaseMutationGate('reviewed-university-import', { allowedPurposes: ['import'] });
   const prisma = new PrismaClient();
   try {
     const executor = new UniversityImportChangeExecutor(

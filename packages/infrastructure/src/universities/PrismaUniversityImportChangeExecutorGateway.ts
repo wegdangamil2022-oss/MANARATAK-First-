@@ -1,3 +1,8 @@
+import { AuthorizationEvaluatorService } from '@manaratak/domain';
+import { PrismaRoleRepository } from '../authorization/PrismaRoleRepository';
+import { PrismaRoleAssignmentRepository } from '../authorization/PrismaRoleAssignmentRepository';
+import { PrismaPolicyRepository } from '../authorization/PrismaPolicyRepository';
+import { DefaultPolicyEvaluator } from '../authorization/DefaultPolicyEvaluator';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { UniversityCanonicalRelationshipValidator } from './UniversityCanonicalRelationshipValidator';
 import type {
@@ -18,6 +23,7 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     actorId: string,
   ): Promise<{ changeSetId: string; appliedChanges: number }> {
     return this.prisma.$transaction(async (transaction) => {
+      await this.authorizeOperator(transaction, actorId);
       await transaction.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${plan.changeSetId}, 0))`;
       const existing = await transaction.universityImportChangeSet.findUnique({
         where: { id: plan.changeSetId },
@@ -75,6 +81,7 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     actorId: string,
   ): Promise<{ changeSetId: string; revertedChanges: number }> {
     return this.prisma.$transaction(async (transaction) => {
+      await this.authorizeOperator(transaction, actorId);
       await transaction.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${changeSetId}, 0))`;
       const changeSet = await transaction.universityImportChangeSet.findUnique({
         where: { id: changeSetId },
@@ -102,6 +109,25 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
       );
       return { changeSetId, revertedChanges: changeSet.changes.length };
     });
+  }
+
+  private async authorizeOperator(tx: Transaction, actorId: string): Promise<void> {
+    if (!actorId?.trim()) throw new Error('UNIVERSITY_IMPORT_ACTOR_REQUIRED');
+    await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "IdentityRecord" WHERE "id" = ${actorId} FOR SHARE`);
+    await tx.$queryRaw(Prisma.sql`SELECT "identityId" FROM "UserRecord" WHERE "identityId" = ${actorId} FOR SHARE`);
+    await tx.$queryRaw(Prisma.sql`SELECT "identityId" FROM "AccountRecord" WHERE "identityId" = ${actorId} FOR SHARE`);
+    await tx.$queryRaw(Prisma.sql`SELECT a."id" FROM "RoleAssignmentRecord" a JOIN "RoleRecord" r ON r."id" = a."roleId" WHERE a."identityId" = ${actorId} FOR SHARE OF a, r`);
+    await tx.$queryRaw(Prisma.sql`SELECT p."id" FROM "PolicyRecord" p WHERE p."id" IN (
+      SELECT jsonb_array_elements_text(CASE WHEN jsonb_typeof(r."policyIds") = 'array' THEN r."policyIds" ELSE '[]'::jsonb END)
+      FROM "RoleAssignmentRecord" a JOIN "RoleRecord" r ON r."id" = a."roleId" WHERE a."identityId" = ${actorId}
+    ) FOR SHARE OF p`);
+    const identity = await tx.identityRecord.findUnique({ where: { id: actorId }, include: { user: true, account: true } });
+    if (!identity || identity.deletedAt || identity.status !== 'ACTIVE' || !identity.user?.isEmailVerified || identity.account?.accessState !== 'Active') throw new Error('UNIVERSITY_IMPORT_VERIFIED_ACTIVE_ACTOR_REQUIRED');
+    const client = tx as unknown as PrismaClient;
+    const evaluator = new AuthorizationEvaluatorService(new PrismaRoleRepository(client), new PrismaPolicyRepository(client), new PrismaRoleAssignmentRepository(client), new DefaultPolicyEvaluator());
+    for (const permission of ['admin:imports:manage', 'admin:universities:manage']) {
+      if (!(await evaluator.evaluatePermission(actorId, permission, { requestTime: new Date(), source: 'reviewed-university-import-cli' })).isGranted) throw new Error('UNIVERSITY_IMPORT_ACTOR_PERMISSION_DENIED');
+    }
   }
 
   private async applyChange(

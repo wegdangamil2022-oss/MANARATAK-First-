@@ -1,0 +1,413 @@
+{
+  "kind": "OFFLINE_UNIVERSITY_PILOT_NOT_APPROVED_FOR_WRITE",
+  "observedAt": "2026-10-23T00:22:59.738Z",
+  "databaseConnections": 0,
+  "databaseWrites": 0,
+  "readyToWrite": false,
+  "liveIdentityLookupPerformed": false,
+  "geographyBasis": "PRIOR_VERIFIED_OWNER_APPLY_RECEIPT_REQUIRES_LIVE_RECHECK",
+  "sourceRows": [
+    {
+      "file": "workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx",
+      "sourceRowNumber": 1189,
+      "artifactSha256": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+      "rawSourceRow": {
+        "Reference ID": "INS-CHN-0001",
+        "National Code": "4111010001",
+        "Official English Name": "Peking University",
+        "Local Name": "北京大学",
+        "Country": "China",
+        "ISO3": "CHN",
+        "City": "Beijing",
+        "Institution Type": "Comprehensive University",
+        "Ownership": "Public",
+        "Status": "Active",
+        "Official Website": "https://www.pku.edu.cn/",
+        "Official Source": "https://www.moe.gov.cn/jyb_xxgk/s5743/s5744/202606/t20260618_1441074.html",
+        "City Source ID": "city_cn_beijing",
+        "City Region Code": "CN-BJ",
+        "Geography Status": "SOURCE_MATCHED",
+        "Geography Review Reason": ""
+      },
+      "projection": {
+        "sourceReferenceId": "INS-CHN-0001",
+        "officialName": "Peking University",
+        "countryName": "China",
+        "countryIso3": "CHN",
+        "cityName": "Beijing",
+        "city": "Beijing",
+        "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+        "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+        "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37"
+      },
+      "rowHash": "c68880dfd6510c992484b113542b6fb0ab36174b9f6789378ecc934a14c36844"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx",
+      "sourceRowNumber": 1191,
+      "artifactSha256": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+      "rawSourceRow": {
+        "Reference ID": "INS-CHN-0003",
+        "National Code": "4111010003",
+        "Official English Name": "Tsinghua University",
+        "Local Name": "清华大学",
+        "Country": "China",
+        "ISO3": "CHN",
+        "City": "Beijing",
+        "Institution Type": "Comprehensive University",
+        "Ownership": "Public",
+        "Status": "Active",
+        "Official Website": "https://www.tsinghua.edu.cn/",
+        "Official Source": "https://www.moe.gov.cn/jyb_xxgk/s5743/s5744/202606/t20260618_1441074.html",
+        "City Source ID": "city_cn_beijing",
+        "City Region Code": "CN-BJ",
+        "Geography Status": "SOURCE_MATCHED",
+        "Geography Review Reason": ""
+      },
+      "projection": {
+        "sourceReferenceId": "INS-CHN-0003",
+        "officialName": "Tsinghua University",
+        "countryName": "China",
+        "countryIso3": "CHN",
+        "cityName": "Beijing",
+        "city": "Beijing",
+        "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+        "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+        "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37"
+      },
+      "rowHash": "bbe6058fbd891a7c4c6dd44299e31bf9c89085f5b7d8831ea47692aa2728b9bb"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx",
+      "sourceRowNumber": 629,
+      "artifactSha256": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+      "rawSourceRow": {
+        "Reference ID": "INS-HUN-0006",
+        "National Code": "",
+        "Official English Name": "Eötvös Loránd University",
+        "Local Name": "Eötvös Loránd Tudományegyetem",
+        "Country": "Hungary",
+        "ISO3": "HUN",
+        "City": "Budapest",
+        "Institution Type": "University",
+        "Ownership": "Public",
+        "Status": "Active",
+        "Official Website": "https://www.elte.hu/en/",
+        "Official Source": "https://apply.studyinhungary.hu/institutions",
+        "City Source ID": "city_hu_budapest",
+        "City Region Code": "HU-BU",
+        "Geography Status": "SOURCE_MATCHED",
+        "Geography Review Reason": ""
+      },
+      "projection": {
+        "sourceReferenceId": "INS-HUN-0006",
+        "officialName": "Eötvös Loránd University",
+        "countryName": "Hungary",
+        "countryIso3": "HUN",
+        "cityName": "Budapest",
+        "city": "Budapest",
+        "countryReferenceId": "aa450b59-9731-4869-b3e8-7713aed3ae72",
+        "regionReferenceId": "7ccf3f41-ce49-4693-b545-974edd9d3ef9",
+        "cityReferenceId": "b986d010-bceb-481f-b9d9-572b33acab5e"
+      },
+      "rowHash": "b935225ca7c6997b1aac63f7f56c551b10935c8af27735bf9c1ed2f7d84f04b5"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx",
+      "sourceRowNumber": 2236,
+      "artifactSha256": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+      "rawSourceRow": {
+        "Reference ID": "INS-TUR-0145",
+        "National Code": "",
+        "Official English Name": "Middle East Technical University",
+        "Local Name": "Orta Doğu Teknik Üniversitesi",
+        "Country": "Turkey",
+        "ISO3": "TUR",
+        "City": "Ankara",
+        "Institution Type": "Technical University",
+        "Ownership": "Public",
+        "Status": "Active",
+        "Official Website": "https://www.turkiye.gov.tr/universite-hizmet-listesi",
+        "Official Source": "https://www.turkiye.gov.tr/universite-hizmet-listesi",
+        "City Source ID": "city_tr_ankara",
+        "City Region Code": "TR-06",
+        "Geography Status": "SOURCE_MATCHED",
+        "Geography Review Reason": ""
+      },
+      "projection": {
+        "sourceReferenceId": "INS-TUR-0145",
+        "officialName": "Middle East Technical University",
+        "countryName": "Turkey",
+        "countryIso3": "TUR",
+        "cityName": "Ankara",
+        "city": "Ankara",
+        "countryReferenceId": "2c14f864-d235-4276-8c87-d1bb19ceca0d",
+        "regionReferenceId": "d9db85b6-b3d0-42a7-b45e-5eb6b0b5a66b",
+        "cityReferenceId": "25d9c584-2cd4-47ac-98a4-f7c3e68588ef"
+      },
+      "rowHash": "8e7f5fbf9d1912c296557e0b5304c3bc7477754a6de29eb3abdf88bfd9ad0ad9"
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "databaseWrites": 0,
+    "dispositions": {
+      "NEW": 4,
+      "MATCHED": 0,
+      "UPDATE": 0,
+      "NO_CHANGE": 0,
+      "CONFLICT": 0,
+      "REVIEW_REQUIRED": 0,
+      "REJECTED": 0
+    },
+    "results": [
+      {
+        "disposition": "NEW",
+        "sourceReferenceId": "INS-CHN-0001",
+        "referenceResolution": [
+          {
+            "referenceType": "COUNTRY",
+            "sourceValue": "CHN",
+            "canonicalId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+            "status": "RESOLVED"
+          }
+        ],
+        "validationIssues": [],
+        "provenance": {
+          "sourceSystem": "UNIVERSITY_STAGE_1_XLSX",
+          "acquiredAt": "2026-10-23T00:22:59.736Z",
+          "sourceRowNumber": 1189,
+          "contentHash": "c68880dfd6510c992484b113542b6fb0ab36174b9f6789378ecc934a14c36844"
+        },
+        "databaseWrites": 0
+      },
+      {
+        "disposition": "NEW",
+        "sourceReferenceId": "INS-CHN-0003",
+        "referenceResolution": [
+          {
+            "referenceType": "COUNTRY",
+            "sourceValue": "CHN",
+            "canonicalId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+            "status": "RESOLVED"
+          }
+        ],
+        "validationIssues": [],
+        "provenance": {
+          "sourceSystem": "UNIVERSITY_STAGE_1_XLSX",
+          "acquiredAt": "2026-10-23T00:22:59.737Z",
+          "sourceRowNumber": 1191,
+          "contentHash": "bbe6058fbd891a7c4c6dd44299e31bf9c89085f5b7d8831ea47692aa2728b9bb"
+        },
+        "databaseWrites": 0
+      },
+      {
+        "disposition": "NEW",
+        "sourceReferenceId": "INS-HUN-0006",
+        "referenceResolution": [
+          {
+            "referenceType": "COUNTRY",
+            "sourceValue": "HUN",
+            "canonicalId": "aa450b59-9731-4869-b3e8-7713aed3ae72",
+            "status": "RESOLVED"
+          }
+        ],
+        "validationIssues": [],
+        "provenance": {
+          "sourceSystem": "UNIVERSITY_STAGE_1_XLSX",
+          "acquiredAt": "2026-10-23T00:22:59.737Z",
+          "sourceRowNumber": 629,
+          "contentHash": "b935225ca7c6997b1aac63f7f56c551b10935c8af27735bf9c1ed2f7d84f04b5"
+        },
+        "databaseWrites": 0
+      },
+      {
+        "disposition": "NEW",
+        "sourceReferenceId": "INS-TUR-0145",
+        "referenceResolution": [
+          {
+            "referenceType": "COUNTRY",
+            "sourceValue": "TUR",
+            "canonicalId": "2c14f864-d235-4276-8c87-d1bb19ceca0d",
+            "status": "RESOLVED"
+          }
+        ],
+        "validationIssues": [],
+        "provenance": {
+          "sourceSystem": "UNIVERSITY_STAGE_1_XLSX",
+          "acquiredAt": "2026-10-23T00:22:59.737Z",
+          "sourceRowNumber": 2236,
+          "contentHash": "8e7f5fbf9d1912c296557e0b5304c3bc7477754a6de29eb3abdf88bfd9ad0ad9"
+        },
+        "databaseWrites": 0
+      }
+    ]
+  },
+  "plans": [
+    {
+      "changeSetId": "STAGE_1:24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+      "stage": "STAGE_1",
+      "sourceArtifactId": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+      "changes": [
+        {
+          "sequence": 1,
+          "sourceReferenceId": "INS-CHN-0001",
+          "entityType": "UNIVERSITY",
+          "entityKey": "INS-CHN-0001",
+          "operation": "CREATE",
+          "afterState": {
+            "sourceReferenceId": "INS-CHN-0001",
+            "officialName": "Peking University",
+            "countryName": "China",
+            "countryIso3": "CHN",
+            "cityName": "Beijing",
+            "city": "Beijing",
+            "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+            "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+            "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37"
+          }
+        },
+        {
+          "sequence": 2,
+          "sourceReferenceId": "INS-CHN-0001",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030:1189",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_1",
+            "artifactId": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+            "sourceRowNumber": 1189,
+            "contentHash": "c68880dfd6510c992484b113542b6fb0ab36174b9f6789378ecc934a14c36844"
+          }
+        },
+        {
+          "sequence": 3,
+          "sourceReferenceId": "INS-CHN-0003",
+          "entityType": "UNIVERSITY",
+          "entityKey": "INS-CHN-0003",
+          "operation": "CREATE",
+          "afterState": {
+            "sourceReferenceId": "INS-CHN-0003",
+            "officialName": "Tsinghua University",
+            "countryName": "China",
+            "countryIso3": "CHN",
+            "cityName": "Beijing",
+            "city": "Beijing",
+            "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+            "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+            "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37"
+          }
+        },
+        {
+          "sequence": 4,
+          "sourceReferenceId": "INS-CHN-0003",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030:1191",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_1",
+            "artifactId": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+            "sourceRowNumber": 1191,
+            "contentHash": "bbe6058fbd891a7c4c6dd44299e31bf9c89085f5b7d8831ea47692aa2728b9bb"
+          }
+        }
+      ],
+      "validationIssues": [],
+      "databaseWrites": 0
+    },
+    {
+      "changeSetId": "STAGE_1:0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+      "stage": "STAGE_1",
+      "sourceArtifactId": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+      "changes": [
+        {
+          "sequence": 1,
+          "sourceReferenceId": "INS-HUN-0006",
+          "entityType": "UNIVERSITY",
+          "entityKey": "INS-HUN-0006",
+          "operation": "CREATE",
+          "afterState": {
+            "sourceReferenceId": "INS-HUN-0006",
+            "officialName": "Eötvös Loránd University",
+            "countryName": "Hungary",
+            "countryIso3": "HUN",
+            "cityName": "Budapest",
+            "city": "Budapest",
+            "countryReferenceId": "aa450b59-9731-4869-b3e8-7713aed3ae72",
+            "regionReferenceId": "7ccf3f41-ce49-4693-b545-974edd9d3ef9",
+            "cityReferenceId": "b986d010-bceb-481f-b9d9-572b33acab5e"
+          }
+        },
+        {
+          "sequence": 2,
+          "sourceReferenceId": "INS-HUN-0006",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2:629",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_1",
+            "artifactId": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+            "sourceRowNumber": 629,
+            "contentHash": "b935225ca7c6997b1aac63f7f56c551b10935c8af27735bf9c1ed2f7d84f04b5"
+          }
+        },
+        {
+          "sequence": 3,
+          "sourceReferenceId": "INS-TUR-0145",
+          "entityType": "UNIVERSITY",
+          "entityKey": "INS-TUR-0145",
+          "operation": "CREATE",
+          "afterState": {
+            "sourceReferenceId": "INS-TUR-0145",
+            "officialName": "Middle East Technical University",
+            "countryName": "Turkey",
+            "countryIso3": "TUR",
+            "cityName": "Ankara",
+            "city": "Ankara",
+            "countryReferenceId": "2c14f864-d235-4276-8c87-d1bb19ceca0d",
+            "regionReferenceId": "d9db85b6-b3d0-42a7-b45e-5eb6b0b5a66b",
+            "cityReferenceId": "25d9c584-2cd4-47ac-98a4-f7c3e68588ef"
+          }
+        },
+        {
+          "sequence": 4,
+          "sourceReferenceId": "INS-TUR-0145",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2:2236",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_1",
+            "artifactId": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+            "sourceRowNumber": 2236,
+            "contentHash": "8e7f5fbf9d1912c296557e0b5304c3bc7477754a6de29eb3abdf88bfd9ad0ad9"
+          }
+        }
+      ],
+      "validationIssues": [],
+      "databaseWrites": 0
+    }
+  ],
+  "heldFields": [
+    "officialWebsite",
+    "officialSourceUrl",
+    "institutionType",
+    "ownership",
+    "status",
+    "nationalCode",
+    "localName"
+  ],
+  "pending": [
+    "LIVE_CANONICAL_GEOGRAPHY_AND_IDENTITY_RECHECK",
+    "OFFICIAL_WEBSITE_AND_SOURCE_FIELD_REVIEW",
+    "SOURCE_ASSET_SCREENING_AND_OWNER_REVIEW",
+    "BIND_PLAN_ID_TO_BOUNDED_SELECTION_AND_EXACT_PLAN_HASH",
+    "VERIFIED_AUTHORIZED_ACTOR",
+    "FRESH_BACKUP_RESTORE_AND_EXACT_APPROVAL"
+  ],
+  "notes": [
+    "NEW is an offline disposition without a database identity lookup, not proof of target absence.",
+    "METU source website is a government directory URL; not accepted as an independently verified university homepage.",
+    "One artifact per plan: two source workbooks yield two plans, never a mixed-artifact batch.",
+    "University public INS identifiers are source keys, not fabricated canonical UUIDs."
+  ]
+}
