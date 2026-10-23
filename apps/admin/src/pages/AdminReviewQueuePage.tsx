@@ -413,35 +413,6 @@ export function AdminReviewQueuePage() {
         </button>
         </div>
       </header>
-      <p className="rounded-2xl border border-[#D6A43B]/30 bg-[#F2CD78]/15 p-4 text-sm leading-7 text-[#203442]">
-        {tr(
-          'للقراءة والتنقل إلى المالك فقط. لا موافقة أو نشر أو رفض من هنا.',
-          'Read and navigate to the owner. Decisions remain in owner workspaces.',
-        )}
-      </p>
-      {!busy && unavailableSources.length > 0 && (
-        <p role="status" className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm leading-7 text-rose-900">
-          <AlertTriangle aria-hidden="true" className="mt-1 h-5 w-5 shrink-0" />
-          <span>{tr('بعض المصادر غير متاحة أو تحتاج إعادة تحقق. العدد غير المتاح ليس صفرًا؛ راجع تفاصيل التغطية أدناه.', 'Some sources are unavailable or need rechecking. Missing counts are not zero; see source coverage below.')}</span>
-        </p>
-      )}
-      <p role="status" aria-live="polite">
-        {busy
-          ? tr('جار تحميل صفحات محدودة…', 'Loading bounded source pages…')
-          : tr('انتهت القراءة الحالية', 'Current reads completed')}{' '}
-        · {tr('نطاق العينة المحفوظة', 'Retained sample scope')}: {number(items.length)} ·{' '}
-        {tr('بعد الفلاتر', 'Filtered')}: {number(filtered.length)} ·{' '}
-        {hasPartial
-          ? tr(
-              'التغطية جزئية أو غير متاحة؛ أقدم وأشد المهام عالميًا غير معروف.',
-              'Coverage is partial or unavailable; global oldest and critical workload are unknown.',
-            )
-          : tr(
-              'وصلت القراءات لنهاية الصفحات المتاحة؛ ليست لقطة موحدة.',
-              'Reads reached available page ends; this is not a unified snapshot.',
-            )}
-      </p>
-      <ReviewOverview items={items} states={permittedStates} filters={filters} onFilter={updateFilter} language={language} now={clock} canOpenTranslations={hasPermission('admin:cms:manage')} />
       <section className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm" aria-labelledby="review-filters">
       <h2 id="review-filters" className="mb-4 flex items-center gap-2 text-lg font-black"><Filter aria-hidden="true" className="h-5 w-5 text-[#0E7C86]" />{tr('البحث والتصفية', 'Search and filters')}</h2>
       <div aria-label={tr('الفلاتر السريعة', 'Quick filters')} className="mb-4 flex flex-wrap gap-2">
@@ -492,6 +463,35 @@ export function AdminReviewQueuePage() {
         </button>
       </div>
       </section>
+      <p className="rounded-2xl border border-[#D6A43B]/30 bg-[#F2CD78]/15 p-4 text-sm leading-7 text-[#203442]">
+        {tr(
+          'للقراءة والتنقل إلى المالك فقط. لا موافقة أو نشر أو رفض من هنا.',
+          'Read and navigate to the owner. Decisions remain in owner workspaces.',
+        )}
+      </p>
+      {!busy && unavailableSources.length > 0 && (
+        <p role="status" className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm leading-7 text-rose-900">
+          <AlertTriangle aria-hidden="true" className="mt-1 h-5 w-5 shrink-0" />
+          <span>{tr('بعض المصادر غير متاحة أو تحتاج إعادة تحقق. العدد غير المتاح ليس صفرًا؛ راجع تفاصيل التغطية أدناه.', 'Some sources are unavailable or need rechecking. Missing counts are not zero; see source coverage below.')}</span>
+        </p>
+      )}
+      <p role="status" aria-live="polite">
+        {busy
+          ? tr('جار تحميل صفحات محدودة…', 'Loading bounded source pages…')
+          : tr('انتهت القراءة الحالية', 'Current reads completed')}{' '}
+        · {tr('نطاق العينة المحفوظة', 'Retained sample scope')}: {number(items.length)} ·{' '}
+        {tr('بعد الفلاتر', 'Filtered')}: {number(filtered.length)} ·{' '}
+        {hasPartial
+          ? tr(
+              'التغطية جزئية أو غير متاحة؛ أقدم وأشد المهام عالميًا غير معروف.',
+              'Coverage is partial or unavailable; global oldest and critical workload are unknown.',
+            )
+          : tr(
+              'وصلت القراءات لنهاية الصفحات المتاحة؛ ليست لقطة موحدة.',
+              'Reads reached available page ends; this is not a unified snapshot.',
+            )}
+      </p>
+      <ReviewOverview items={items} states={permittedStates} filters={filters} onFilter={updateFilter} language={language} now={clock} canOpenTranslations={hasPermission('admin:cms:manage')} />
       <p className="text-sm">
         {tr(
           'الفلاتر والأولوية المقترحة ومؤشرات الجودة تخص العينة فقط. العمر يبدأ من دليل دخول المراجعة؛ الاستيراد والتعديل منفصلان. SLA غير معروف دون وقت الدخول والموعد وسياسة المالك.',
