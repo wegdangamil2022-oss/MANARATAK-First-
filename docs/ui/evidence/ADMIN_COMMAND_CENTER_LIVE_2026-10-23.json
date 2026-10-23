@@ -1,0 +1,121 @@
+{
+    "at":  "2026-10-23T20:44:38.318Z",
+    "codeSourceSha":  "1501ae21ed1bc62648bb07570241693dbebca133",
+    "apiSourceSha":  "e8993f79c47fec6d45742c6f42da979b746aa1af",
+    "scope":  "LOCAL_AUTHENTICATED_READ_DIAGNOSTIC",
+    "syntheticResponses":  false,
+    "pass":  true,
+    "contentMutations":  0,
+    "dashboard":  {
+                      "firstCounterMs":  8367,
+                      "allInitialReadsMs":  22551,
+                      "primaryCounters":  [
+                                              {
+                                                  "title":  "الهويات البشرية",
+                                                  "value":  "1",
+                                                  "status":  "متاح"
+                                              },
+                                              {
+                                                  "title":  "الجامعات",
+                                                  "value":  "0",
+                                                  "status":  "متاح"
+                                              },
+                                              {
+                                                  "title":  "المنح",
+                                                  "value":  "0",
+                                                  "status":  "متاح"
+                                              },
+                                              {
+                                                  "title":  "التخصصات وملفاتها",
+                                                  "value":  "3",
+                                                  "status":  "متاح"
+                                              },
+                                              {
+                                                  "title":  "الدورات",
+                                                  "value":  "0",
+                                                  "status":  "متاح"
+                                              },
+                                              {
+                                                  "title":  "الاختبارات الدولية",
+                                                  "value":  "0",
+                                                  "status":  "متاح"
+                                              },
+                                              {
+                                                  "title":  "الوظائف",
+                                                  "value":  "0",
+                                                  "status":  "متاح"
+                                              },
+                                              {
+                                                  "title":  "المحتوى",
+                                                  "value":  "0",
+                                                  "status":  "متاح"
+                                              }
+                                          ],
+                      "attention":  [
+                                        {
+                                            "title":  "منح تحتاج تحقق المصدر",
+                                            "value":  "0",
+                                            "status":  "متاح — عدد مصدر متحقق منه"
+                                        },
+                                        {
+                                            "title":  "منح تحتاج ترجمة",
+                                            "value":  "0",
+                                            "status":  "متاح — عدد مصدر متحقق منه"
+                                        },
+                                        {
+                                            "title":  "سجلات استيراد: تحتاج مراجعة",
+                                            "value":  "0",
+                                            "status":  "متاح — عدد مصدر متحقق منه"
+                                        },
+                                        {
+                                            "title":  "سجلات استيراد: فشل",
+                                            "value":  "0",
+                                            "status":  "متاح — عدد مصدر متحقق منه"
+                                        },
+                                        {
+                                            "title":  "سجلات استيراد في قائمة الأخطاء",
+                                            "value":  "0",
+                                            "status":  "متاح — عدد مصدر متحقق منه"
+                                        }
+                                    ]
+                  },
+    "review":  {
+                   "firstRowMs":  11305,
+                   "initialReadsMs":  18397,
+                   "initialSourcesRead":  10,
+                   "permittedSources":  46,
+                   "retainedSampleRecords":  53,
+                   "visiblePageRecords":  40,
+                   "domainFilterMajorRecords":  3,
+                   "realMajorDetailOpened":  true,
+                   "missingDestinationProfilePageRecords":  50,
+                   "missingDestinationProfileQueryTotal":  194,
+                   "actionVerification":  {
+                                              "at":  "2026-10-23T20:46:25.520Z",
+                                              "localNextPageRecords":  13,
+                                              "localPreviousPageRecords":  40,
+                                              "previewEscapeAndFocus":  true,
+                                              "realSourcePageTwoStatus":  200,
+                                              "continuedRetainedSampleRecords":  103,
+                                              "contentMutations":  0
+                                          }
+               },
+    "verification":  {
+                         "frontendFocusedCases":  16,
+                         "counterAndRouterCases":  25,
+                         "adminTypecheck":  true,
+                         "apiTypecheck":  true,
+                         "artifactBuild":  true,
+                         "syntheticBrowserWidths":  [
+                                                        1360,
+                                                        1000,
+                                                        820,
+                                                        390
+                                                    ]
+                     },
+    "limits":  [
+                   "Observed timings are single-run measurements, not an SLA",
+                   "Only scoped initial review reads were requested; other sources remain available on demand",
+                   "Local runtime permits authentication and content reads; production release readiness is not claimed"
+               ]
+}
