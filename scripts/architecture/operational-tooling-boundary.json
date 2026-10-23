@@ -114,6 +114,14 @@
     "scripts/generate-localized-public-sitemap.ts"
   ],
   "reviewedPrismaScriptContracts": {
+    "scripts/university-screening-preview.ts": {
+      "purpose": "Read persisted university screening receipts and active source assets through the owning-domain preview gateway; no canonical writes or approval",
+      "access": "isolated-read-write",
+      "environment": ["Node22", "NODE_ENV development or test", "Explicit DATABASE_URL and verified operator with imports and universities permissions"],
+      "gate": "Gateway uses RepeatableRead and SET TRANSACTION READ ONLY; result stays OWNER_REVIEW_REQUIRED with databaseWrites zero; this classification grants no database mutation authority",
+      "requiredSourceMarkers": ["UNIVERSITY_SCREENING_PREVIEW_INPUT_REQUIRED", "UNIVERSITY_SCREENING_PREVIEW_INPUT_TOO_LARGE", "previewScreenedSources", "readyToWrite: false", "databaseWrites: 0", "flag: 'wx'", "UNIVERSITY_SCREENING_PREVIEW_FAILED_REDACTED"],
+      "review": "P10a source-bound preview implementation review 2026-10-23; policy access category denotes database-connected operational tooling, while the gateway enforces read-only execution"
+    },
     "scripts/database/remediate-post28-known-source.mjs": {
       "purpose": "Repair one new synthetic known-source R05 incident through real providers and canonical Asset plus append-only Audit persistence",
       "access": "isolated-read-write",
