@@ -1,0 +1,108 @@
+{
+  "kind": "P09A_PROVIDER_RBAC_BASELINE_VERIFIED",
+  "pass": true,
+  "sourceSha": "32351a4abfbd1f499b68981e2ccf2b8ff70515bd",
+  "runId": "b020a856-ed2e-4432-9bf0-7a15774a209f",
+  "observedAt": "2026-10-23T00:01:06.208Z",
+  "all282PreexistingTableFingerprintsPreserved": true,
+  "roles": [
+    {
+      "id": "student",
+      "permissions": [],
+      "policyIds": []
+    },
+    {
+      "id": "administrator",
+      "permissions": [
+        "admin:*"
+      ],
+      "policyIds": []
+    }
+  ],
+  "providers": [
+    {
+      "id": "61eff34b-f6fc-46a9-92d3-4cd132f4cee3",
+      "key": "ETS",
+      "metadata": {
+        "reviewScope": "PROVIDER_IDENTITY_ONLY",
+        "officialEvidence": "https://www.ets.org/toefl.html"
+      },
+      "displayName": "ETS",
+      "providerType": null,
+      "countryIso2Code": null,
+      "localizedNameAr": null,
+      "localizedNameEn": null,
+      "officialWebsite": "https://www.ets.org/"
+    },
+    {
+      "id": "17d3239d-d51b-4ed2-9400-579619bfdd91",
+      "key": "IELTS_PARTNERSHIP",
+      "metadata": {
+        "jointOwners": [
+          "British Council",
+          "IDP IELTS",
+          "Cambridge University Press & Assessment"
+        ],
+        "reviewScope": "PROVIDER_IDENTITY_ONLY",
+        "officialEvidence": "https://ielts.org/about-ielts"
+      },
+      "displayName": "IELTS (joint partnership)",
+      "providerType": null,
+      "countryIso2Code": null,
+      "localizedNameAr": null,
+      "localizedNameEn": null,
+      "officialWebsite": "https://ielts.org/"
+    }
+  ],
+  "identities": 0,
+  "roleAssignments": 0,
+  "tests": 0,
+  "audit": 3,
+  "outbox": 2,
+  "rbacReplayNoNewEffects": true,
+  "restrictedReadOnlyVerification": {
+    "role": "manaratak_probe",
+    "oid": "16395",
+    "version": 160015,
+    "readOnly": "on",
+    "superuser": false,
+    "createRole": false,
+    "createDatabase": false,
+    "bypassRls": false
+  },
+  "backupSha256": "7a65f6571241c511a00adfff79a973839a925dcfac66adb2715867558cc1efad",
+  "restore": {
+    "kind": "P02_NEW_LOCAL_RECOVERY_REHEARSAL",
+    "sourceSha": "32351a4abfbd1f499b68981e2ccf2b8ff70515bd",
+    "runId": "b020a856-ed2e-4432-9bf0-7a15774a209f",
+    "labRunId": "3f850d07-b96c-4bae-845d-136221a4f446",
+    "observedAt": "2026-10-22T23:49:07.005Z",
+    "pass": true,
+    "sourceDatabaseWrites": 0,
+    "restoreTarget": "NEW_DISPOSABLE_LOCAL_POSTGRES16_ONLY",
+    "archiveSha256": "7a65f6571241c511a00adfff79a973839a925dcfac66adb2715867558cc1efad",
+    "tableCount": 282,
+    "allTableCountsMatchPreBackupObservation": true,
+    "allTableDataFingerprintsMatchUnmodifiedManagedSource": true,
+    "fingerprintSha256": "2683e50d39f9ea2369125dd71f310bb55936ab0cc110de153215ac419c5d3da4",
+    "restrictedVerification": {
+      "role": "manaratak_restore_probe",
+      "superuser": false,
+      "createRole": false,
+      "createDatabase": false,
+      "bypassRls": false,
+      "readOnly": true,
+      "ownsRelations": false,
+      "invalidIndexes": 0,
+      "unvalidatedConstraints": 0,
+      "dataMutationPrivilege": false
+    },
+    "priorDatabasesTouched": false,
+    "extensionCommentPreservedAsAlreadyIdentical": true,
+    "excludedTocEntries": [
+      "7344; 0 0 COMMENT - EXTENSION pg_trgm "
+    ]
+  },
+  "productionReady": false,
+  "firstAdminBootstrapped": false
+}
