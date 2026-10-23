@@ -436,8 +436,8 @@ export function ScholarshipDetailPage() {
         <div className="absolute -top-24 end-0 h-64 w-64 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none blur-3xl" />
         <div className="absolute -bottom-24 start-0 h-64 w-64 rounded-full bg-cyan-300 opacity-20 pointer-events-none blur-3xl" />
 
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-3">
+        <div className="relative z-10 flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+          <div className="min-w-0 flex-1 space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3.5 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-md">
                 <GraduationCap className="h-4 w-4" />
@@ -483,13 +483,13 @@ export function ScholarshipDetailPage() {
                   الموعد النهائي:{' '}
                   {form.applicationDeadline
                     ? new Date(form.applicationDeadline).toLocaleDateString('ar-SA')
-                    : 'مفتوحة طوال العام'}
+                    : form.deadlineType === 'OPEN_ALL_YEAR' ? 'مفتوحة طوال العام' : 'غير محدد'}
                 </span>
               </span>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <div className="flex max-w-full flex-wrap items-center gap-2.5 xl:max-w-sm">
             <input aria-label="سبب تعديل المنحة أو قرار النشر" title="سبب التعديل (إلزامي للتدقيق)" placeholder="سبب التعديل / النشر" value={reviewReason} onChange={event => setReviewReason(event.target.value)} className="min-h-11 w-48 rounded-xl border border-white/30 bg-white px-3 text-xs text-[#142B5F]" />
             <button
               disabled={saving || (activeTab === 'degrees_majors' && JSON.stringify(form) === savedForm.current)}
@@ -640,13 +640,10 @@ export function ScholarshipDetailPage() {
           <div className="rounded-3xl border border-[#DDEFF2] bg-[#FAF7F0]/60 p-4 text-xs space-y-2">
             <div className="flex items-center justify-between font-bold text-[#142B5F]">
               <span>اكتمال البيانات</span>
-              <span className="text-emerald-700 font-black">100% مكتمل</span>
-            </div>
-            <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-              <div className="bg-[#0E7C86] h-1.5 rounded-full w-full" />
+              <span className="font-black">{detail.completeness.state === 'COMPLETE' ? 'الحقول المطلوبة مكتملة' : detail.completeness.state === 'NEEDS_REVIEW' ? 'تحتاج مراجعة' : 'غير مكتملة'}</span>
             </div>
             <p className="text-[11px] text-slate-500">
-              جميع الحقول الأساسية ومعايير الأهلية والمزايا مدخلة بشكل صحيح.
+              {detail.completeness.missingFields.length ? `${detail.completeness.missingFields.length} حقول تحتاج استكمالًا. راجع قسم صحة البيانات.` : 'راجع قسم صحة البيانات لمعرفة نتيجة التحقق والروابط غير المحسومة.'}
             </p>
           </div>
         </aside>

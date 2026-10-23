@@ -71,6 +71,12 @@ textarea {
 }
 
 @layer components {
+  .scholarship-filter-fields > label {
+    @apply flex min-w-0 flex-col gap-2 text-xs font-bold text-slate-500;
+  }
+  .scholarship-filter-fields :where(input, select) {
+    @apply min-h-10 w-full rounded-xl border border-[#DDEFF2] bg-white px-3 py-2 text-xs font-semibold text-[#203442];
+  }
   /* The original admin palette and controls also apply to newer owner workspaces.
      Utilities on existing catalog components retain their own intentional styles. */
   .admin-workspace :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {

@@ -22,6 +22,23 @@ async function mount(element: React.ReactElement) { await act(async () => { tree
 function button(text: string) { return tree.root.findAllByType('button').find(node => node.children.some(child => typeof child === 'string' && child.trim() === text.trim()))!; }
 
 describe('B06 canonical choices', () => {
+  it('keeps bounded navigation and exact selections in compact scholarship filters', async () => {
+    const load = vi.fn(async (_query?: string, page = 1) => page === 1
+      ? Array.from({ length: 50 }, (_, index) => record(`country-${index}`))
+      : [record('country-51')]);
+    const change = vi.fn();
+    await mount(<CanonicalPicker label="Country" value="country-existing" onChange={change} load={load} compact paged optional allowInactive />);
+    await flush();
+    expect(tree.root.findAllByType('input')).toHaveLength(0);
+    await act(async () => button('التالي').props.onClick()); await flush();
+    expect(load).toHaveBeenLastCalledWith('', 2, undefined);
+    expect(tree.root.findByType('select').props.value).toBe('country-existing');
+    const search = tree.root.findAllByType('button').find(node => node.props['aria-label'] === 'بحث Country')!;
+    await act(async () => search.props.onClick());
+    await act(async () => tree.root.findByType('input').props.onChange({target:{value:'Rare'}})); await flush();
+    expect(load).toHaveBeenLastCalledWith('Rare', 1, undefined);
+    expect(change).not.toHaveBeenCalled();
+  });
   it.each(['countries', 'majors'] as const)('reaches page three and searches %s without dropping the off-page ID', async kind => {
     mocks.reference.mockImplementation(async (_kind, { page }) => ({ data: [{ id: `country-${page}`, name: `Country ${page}` }] }));
     mocks.request.mockImplementation(async path => ({ data: [{ id: `major-${new URL(path, 'https://local').searchParams.get('page')}`, displayName: 'Major' }] }));
@@ -98,7 +115,7 @@ describe('B06 canonical filters', () => {
     await act(async () => select('Country').props.onChange({ target: { value: 'country-exact' } }));
     expect(observed.countryReferenceId).toBe('country-exact');
     expect(observed.academicProgramId).toBe('program-kept');
-    await act(async () => select('Canonical major').props.onChange({ target: { value: '' } }));
+    await act(async () => select('Major').props.onChange({ target: { value: '' } }));
     expect(observed.academicProgramId).toBe('program-kept');
     expect(Object.keys(observed)).not.toContain('degreeLabel');
     expect(Object.keys(observed)).not.toContain('countryLabel');

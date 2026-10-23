@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { adminApiClient } from '../api/client';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from './CanonicalPicker';
@@ -38,10 +38,12 @@ export function ScholarshipCanonicalFilters({
   value,
   onChange,
   ar,
+  children,
 }: {
   value: ScholarshipCanonicalFilterState;
   onChange: (value: ScholarshipCanonicalFilterState) => void;
   ar: boolean;
+  children?: ReactNode;
 }) {
   const [error, setError] = useState('');
   const [programs, setPrograms] = useState<Array<{ id: string; sourceProgramName: string }>>([]);
@@ -103,12 +105,10 @@ export function ScholarshipCanonicalFilters({
         : {}),
     });
   return (
-    <section className="space-y-4">
-      <h3 className="font-bold">
-        {ar ? 'العلاقات ومراجعة المصدر' : 'Canonical links and source review'}
-      </h3>
+    <div className="space-y-4">
       {error && <p role="status">{error}</p>}
-      <div className="grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="scholarship-filter-fields grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {children}
         {(
           [
             ['countryReferenceId', ar ? 'الدولة' : 'Country', canonicalPickerApi.countries],
@@ -119,10 +119,10 @@ export function ScholarshipCanonicalFilters({
             ],
             ['currencyReferenceId', ar ? 'العملة' : 'Currency', canonicalPickerApi.currencies],
             ['universityId', ar ? 'الجامعة' : 'University', canonicalPickerApi.universities],
-            ['majorId', ar ? 'التخصص الرسمي' : 'Canonical major', canonicalPickerApi.majors],
+            ['majorId', ar ? 'التخصص' : 'Major', canonicalPickerApi.majors],
             [
               'degreeLevelId',
-              ar ? 'الدرجة الرسمية' : 'Canonical degree',
+              ar ? 'الدرجة العلمية' : 'Degree',
               canonicalPickerApi.degreeLevels,
             ],
             ['internationalTestId', ar ? 'الاختبار' : 'Test', canonicalPickerApi.tests],
@@ -136,12 +136,13 @@ export function ScholarshipCanonicalFilters({
             load={loader}
             reloadKey={`scholarship-filter:${key}`}
             optional
+            compact
             paged={key !== 'degreeLevelId'}
             allowInactive
           />
         ))}
         <label>
-          {ar ? 'البرنامج التابع' : 'Dependent academic program'}
+          {ar ? 'البرنامج الأكاديمي' : 'Academic program'}
           <select
             value={value.academicProgramId}
             onChange={(e) => update('academicProgramId', e.target.value)}
@@ -234,6 +235,6 @@ export function ScholarshipCanonicalFilters({
           </select>
         </label>
       </div>
-    </section>
+    </div>
   );
 }

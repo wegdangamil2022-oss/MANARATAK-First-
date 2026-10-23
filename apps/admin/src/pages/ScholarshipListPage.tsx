@@ -18,6 +18,8 @@ GraduationCap,
 LayoutGrid,
 Loader2,
 Network,
+Plus,
+Filter,
 RefreshCw,
 RotateCcw,
 Search,
@@ -43,6 +45,7 @@ interface Scholarship {
   studyCountry?: string;
   countrySourceLabel?: string;
   applicationDeadline?: string;
+  deadlineType?: string;
   isFullyFunded?: boolean;
   fundingTypeCode?: string;
   studyLanguage?: string;
@@ -111,6 +114,7 @@ export function ScholarshipListPage() {
   const [deadlineFilter, setDeadlineFilter] = useState('');
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [showCreate, setShowCreate] = useState(false);
 
   const numberFormatter = useMemo(() => new Intl.NumberFormat(isArabic ? 'ar' : 'en-US'), [isArabic]);
   const formatNumber = (value: number | null | undefined) => (value == null ? '—' : numberFormatter.format(value));
@@ -229,8 +233,8 @@ export function ScholarshipListPage() {
         <div className="absolute -top-20 end-0 h-56 w-56 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none blur-2xl" />
         <div className="absolute -bottom-20 start-0 h-56 w-56 rounded-full bg-cyan-300 opacity-15 pointer-events-none blur-2xl" />
 
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-2">
+        <div className="relative z-10 flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+          <div className="min-w-0 flex-1 space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-md">
               <GraduationCap className="h-4 w-4" />
               <span>
@@ -240,7 +244,7 @@ export function ScholarshipListPage() {
                 )}
               </span>
             </div>
-            <h1 className="text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl text-white">
+            <h1 className="text-2xl font-black leading-relaxed sm:text-3xl text-white">
               {tr('إدارة كتالوج المنح الدراسية', 'Scholarship Catalog Management')}
             </h1>
             <p className="max-w-2xl text-xs font-medium leading-relaxed text-[#DDEFF2] sm:text-sm">
@@ -251,7 +255,10 @@ export function ScholarshipListPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <div className="flex max-w-full flex-wrap items-center gap-2.5 xl:max-w-sm">
+            <button type="button" aria-expanded={showCreate} aria-controls="scholarship-create" onClick={() => setShowCreate(value => !value)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-xs font-bold text-[#142B5F] shadow-sm">
+              <Plus className="h-4 w-4" aria-hidden="true" />{tr('إنشاء منحة جديدة', 'Create scholarship')}
+            </button>
             <button
               onClick={handleRefresh}
               disabled={loading || summaryLoading}
@@ -397,20 +404,12 @@ export function ScholarshipListPage() {
           </div>
         </button>
       </section>
-<details className="admin-section-tools"><summary>{tr('إنشاء منحة جديدة', 'Create scholarship')}</summary><OwnerDraftCreateForm owner="scholarships"/></details>
-<details className="admin-section-tools"><summary>{tr('فلاتر العلاقات والمصدر', 'Relationship and source filters')}</summary><div className="space-y-4">
-      <ScholarshipCanonicalFilters
-        value={canonical}
-        onChange={(value) => {
-          setCanonical(value);
-          setPage(1);
-        }}
-        ar={isArabic}
-      /></div></details>
+      {showCreate && <section id="scholarship-create"><OwnerDraftCreateForm owner="scholarships" defaultOpen /></section>}
 
 
       {/* Multi-Dimensional Filter & Search Card */}
-      <section className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
+      <section aria-labelledby="scholarship-filters" className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
+        <h2 id="scholarship-filters" className="mb-4 flex items-center gap-2 text-lg font-black text-[#142B5F]"><Filter className="h-5 w-5 text-[#0E7C86]" aria-hidden="true" />{tr('البحث والتصفية', 'Search and filters')}</h2>
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="relative flex-1">
@@ -473,7 +472,7 @@ export function ScholarshipListPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 pt-1">
+          <ScholarshipCanonicalFilters value={canonical} onChange={value => { setCanonical(value); setPage(1); }} ar={isArabic}>
 
 
             <div>
@@ -515,7 +514,7 @@ export function ScholarshipListPage() {
                 <option value="CLOSED">منتهية التقديم</option>
               </select>
             </div>
-          </div>
+          </ScholarshipCanonicalFilters>
 
           <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-500">
             <span>
@@ -587,11 +586,11 @@ export function ScholarshipListPage() {
 
             const degreesText = item.degreeTargets && item.degreeTargets.length > 0
               ? item.degreeTargets.map(d => d.degreeLevelName || d.sourceLabel).slice(0, 3).join(' • ')
-              : 'بكالوريوس • ماجستير • دكتوراه';
+              : tr('الدرجات غير محددة', 'Degrees unspecified');
 
             const deadlineText = deadlineDate
               ? `ينتهي ${deadlineDate.toLocaleDateString(isArabic ? 'ar-SA' : 'en-US')}${daysLeft !== null && daysLeft <= 45 ? ` (${daysLeft} يوم)` : ''}`
-              : 'مفتوحة طوال العام';
+              : item.deadlineType === 'OPEN_ALL_YEAR' ? tr('مفتوحة طوال العام', 'Open all year') : tr('الموعد غير محدد', 'Deadline unspecified');
 
             return (
               <article
@@ -663,7 +662,7 @@ export function ScholarshipListPage() {
                   {/* 1. التمويل */}
                   <div className="bg-[#FAF7F0] border border-slate-200/80 rounded-xl px-3.5 py-2 flex items-center justify-center gap-1.5 text-xs font-bold text-slate-800 font-['Cairo']">
                     <Coins className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span className="truncate">{isFull ? 'تمويل كامل 💎' : 'تمويل جزئي'}</span>
+                    <span className="truncate">{isFull ? tr('تمويل كامل 💎', 'Fully funded') : ['PARTIAL', 'PARTIALLY_FUNDED'].includes(item.fundingTypeCode ?? '') ? tr('تمويل جزئي', 'Partially funded') : tr('التمويل غير محدد', 'Funding unspecified')}</span>
                   </div>
 
                   {/* 2. الدرجة العلمية */}

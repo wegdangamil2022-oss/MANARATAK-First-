@@ -7,7 +7,7 @@ import {useAdminAuthorization} from '../security/AdminAuthorizationContext';
 
 type Owner='majors'|'universities'|'scholarships';
 const names:Record<Owner,string>={majors:'تخصص',universities:'جامعة',scholarships:'منحة'};
-export function OwnerDraftCreateForm({owner}:{owner:Owner}) {
+export function OwnerDraftCreateForm({owner,defaultOpen=false}:{owner:Owner;defaultOpen?:boolean}) {
  const {hasPermission}=useAdminAuthorization();
  const [name,setName]=useState('');const [reason,setReason]=useState('');const [source,setSource]=useState('');const [hash,setHash]=useState('');const [website,setWebsite]=useState('');
  const [degree,setDegree]=useState('');const [level,setLevel]=useState('');const [taxonomy,setTaxonomy]=useState('');const [country,setCountry]=useState('');const [funding,setFunding]=useState('');const [sponsor,setSponsor]=useState('');
@@ -24,7 +24,7 @@ export function OwnerDraftCreateForm({owner}:{owner:Owner}) {
      setCreated(result.id);
    }catch(error){setError(error instanceof Error?error.message:'تعذر إنشاء المسودة');}finally{setBusy(false);}
  };
- return <details className="admin-section-tools"><summary>إنشاء مسودة {names[owner]}</summary>
+ return <details open={defaultOpen || undefined} className="admin-section-tools"><summary>إنشاء مسودة {names[owner]}</summary>
  <p>سجل خاص للإكمال والمراجعة. لا ينشر الإنشاء أي محتوى للطلاب.</p>
  {error && <p role="alert">{error}</p>}
  {created && <p role="status">حُفظت المسودة. <Link to={`/${owner}/${encodeURIComponent(created)}`}>فتح المسودة</Link></p>}

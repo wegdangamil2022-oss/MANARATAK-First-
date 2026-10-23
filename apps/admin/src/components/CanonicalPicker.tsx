@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Search } from 'lucide-react';
 import { useTranslation } from '../i18n/I18nProvider';
 import { type CanonicalPickerOption, type CanonicalPickerPage, canonicalOptionIsSelectable } from '../api/canonicalPickers';
 
 type Loader = (query?: string, page?: number) => Promise<CanonicalPickerOption[]>;
 type PickerLoader = (query?: string, page?: number, cursor?: string) => Promise<CanonicalPickerOption[] | CanonicalPickerPage>;
 
-export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'default', optional = false, disabled = false, paged = false, allowInactive = false }: {
+export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'default', optional = false, disabled = false, paged = false, allowInactive = false, compact = false }: {
   label: string;
   value?: string | null;
   onChange: (id: string | null, option?: CanonicalPickerOption) => void;
@@ -16,6 +17,7 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
   paged?: boolean;
   /** Read filters may intentionally target historical inactive records. */
   allowInactive?: boolean;
+  compact?: boolean;
 }) {
   const { language } = useTranslation();
   const ar = language === 'ar';
@@ -25,6 +27,7 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
   const [page, setPage] = useState(1);
   const cursors = useRef<Array<string | undefined>>([undefined]);
   const [nextCursor, setNextCursor] = useState<string | null | undefined>(undefined);
@@ -55,11 +58,11 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
   const missing = Boolean(value) && !selected;
 
   return <div className="min-w-0 space-y-2 text-xs font-medium text-[#203442]">
-    <span>{label}</span>
-    <input type="search" maxLength={200} aria-label={`${ar ? 'بحث' : 'Search'} ${label}`} value={search}
+    <span className="flex min-h-5 items-center justify-between gap-2"><span>{label}</span>{compact && <button type="button" aria-label={`${ar ? 'بحث' : 'Search'} ${label}`} aria-expanded={searchOpen} disabled={disabled} onClick={() => setSearchOpen(open => !open)} className="inline-flex !min-h-0 items-center justify-center !border-0 !p-1 text-[#0E7C86]"><Search className="h-3.5 w-3.5" aria-hidden="true" /></button>}</span>
+    {(!compact || searchOpen) && <input type="search" maxLength={200} aria-label={`${ar ? 'بحث' : 'Search'} ${label}`} value={search}
       disabled={disabled} onChange={event => { setSearch(event.target.value); cursors.current = [undefined]; setNextCursor(undefined); setPage(1); }}
       placeholder={ar ? 'ابحث عن سجل (حتى 50 نتيجة)' : 'Search records (up to 50 results)'}
-      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />}
     <select aria-label={label}
       value={value ?? ''}
       disabled={disabled || state !== 'ready'}
@@ -71,15 +74,15 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
       }}
       className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm disabled:bg-slate-50"
     >
-      <option value="">{state === 'loading' ? (ar ? 'جارٍ التحميل…' : 'Loading…') : optional ? (ar ? '— بدون تحديد —' : '— None —') : (ar ? '— اختر السجل —' : '— Select canonical record —')}</option>
+      <option value="">{state === 'loading' ? (ar ? 'جارٍ التحميل…' : 'Loading…') : optional ? compact ? (ar ? 'الكل' : 'All') : (ar ? '— بدون تحديد —' : '— None —') : (ar ? '— اختر السجل —' : '— Select canonical record —')}</option>
       {missing && <option value={value ?? ''} disabled>{ar ? 'التحديد الحالي (خارج النتائج المعروضة)' : 'Current selection (outside bounded results)'}: {value}</option>}
       {options.map((item) => <option key={item.id} value={item.id} disabled={!allowInactive && !canonicalOptionIsSelectable(item)}>
         {item.label}{item.code ? ` · ${item.code}` : ''} · {item.lifecycle}
       </option>)}
     </select>
-    {value ? <span className="block break-all text-slate-500">{ar ? 'المعرّف' : 'ID'}: {value}</span> : null}
+    {value && !compact ? <span className="block break-all text-slate-500">{ar ? 'المعرّف' : 'ID'}: {value}</span> : null}
     {state === 'error' ? <span className="text-red-600">{error}</span> : null}
-    {paged && <span className="flex flex-wrap items-center gap-3"><button type="button" disabled={disabled || state !== 'ready' || page <= 1} onClick={() => setPage(value => value - 1)}>{ar ? 'السابق' : 'Previous'}</button><span>{page}</span><button type="button" disabled={disabled || state !== 'ready' || options.length === 0 || (nextCursor !== undefined && !nextCursor) || page >= 1000} onClick={() => setPage(value => value + 1)}>{ar ? 'التالي' : 'Next'}</button></span>}
+    {paged && (!compact || page > 1 || (nextCursor !== undefined ? Boolean(nextCursor) : options.length >= 50)) && <span className="flex flex-wrap items-center gap-3"><button type="button" disabled={disabled || state !== 'ready' || page <= 1} onClick={() => setPage(value => value - 1)}>{ar ? 'السابق' : 'Previous'}</button><span>{page}</span><button type="button" disabled={disabled || state !== 'ready' || options.length === 0 || (nextCursor !== undefined && !nextCursor) || page >= 1000} onClick={() => setPage(value => value + 1)}>{ar ? 'التالي' : 'Next'}</button></span>}
     {missing ? <span className="block text-amber-700">{ar ? 'المعرّف الحالي خارج هذه الصفحة. ابحث للتحقق؛ لم تتغير العلاقة.' : 'Current ID is not in this bounded page. Search to verify; no relationship has been changed.'}</span> : null}
     {selectedBlocked ? <span className="block text-amber-700">{ar ? `حالة العلاقة الحالية ${selected.lifecycle}؛ اختر بديلًا نشطًا أو منشورًا قبل الحفظ.` : `Existing relation is ${selected.lifecycle}; choose an ACTIVE/PUBLISHED replacement before saving.`}</span> : null}
   </div>;
