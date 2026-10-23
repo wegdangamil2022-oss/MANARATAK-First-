@@ -190,6 +190,7 @@ export class SecurityMiddlewareFactory {
       if (!principalId) {
         const receivedToken = readAccessCookie(req) || extractBearerToken(req.headers.authorization);
         if (receivedToken && options.tokenProvider) {
+          let checkingStorage = false;
           try {
             const provider = options.tokenProvider as ITokenProvider & {
               verifyAccessTokenSync?: (token: string) => { userId?: string; sessionId?: string };
@@ -202,14 +203,20 @@ export class SecurityMiddlewareFactory {
               && payload.sessionId
               && options.sessionManager
               && options.principalAccessValidator
-              && await options.sessionManager.isSessionActive(payload.userId, payload.sessionId)
-              && await options.principalAccessValidator.isAuthenticationAllowed(payload.userId)
             ) {
-              principalId = payload.userId;
-              principalValidated = true;
-              req.authSessionId = payload.sessionId;
+              checkingStorage = true;
+              if (await options.sessionManager.isSessionActive(payload.userId, payload.sessionId)
+                  && await options.principalAccessValidator.isAuthenticationAllowed(payload.userId)) {
+                principalId = payload.userId;
+                principalValidated = true;
+                req.authSessionId = payload.sessionId;
+              }
             }
           } catch (e) {
+            if (checkingStorage) {
+              res.status(503).json({error:{code:'ADMIN_AUTH_UNAVAILABLE',message:'Admin authentication is temporarily unavailable.'}});
+              return;
+            }
             // Invalid or expired tokens remain unauthenticated.
           }
         }

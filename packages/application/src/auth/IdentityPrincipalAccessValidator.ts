@@ -25,7 +25,10 @@ export class IdentityPrincipalAccessValidator implements IPrincipalAccessValidat
 
       return true;
     } catch {
-      return false;
+      // A missing/inactive identity is a denial; storage failure is not evidence
+      // of suspension. Callers must still fail closed, without treating an
+      // unavailable lookup as grounds to revoke every session.
+      throw new Error('AUTHENTICATION_STATE_UNAVAILABLE');
     }
   }
 }

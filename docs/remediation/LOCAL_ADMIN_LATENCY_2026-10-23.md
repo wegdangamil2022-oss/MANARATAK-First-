@@ -21,3 +21,11 @@
 A live navigation baseline attempt timed out before receiving the login response after 90 seconds. Full real-account latency is not marked resolved. The local gateway still permits authentication and read diagnostics only; content writes and background workers remain disabled. No Neon configuration, migration, schema, role or paid service was changed.
 
 Private evidence is under `private/owner-account-20261023` and `private/admin-performance-20261023`; these artifacts are not committed because they belong to the local runtime.
+
+## Follow-up: false authentication expiry during storage failure
+
+The first live run after progressive loading completed login in 37,418 ms and showed cards in 15,652 ms. Details still took 133,212 ms: the profiles request returned 401 after 30,017 ms, followed by a 46,278 ms CSRF bootstrap and 40,124 ms refresh. This trial exposed a second defect; it is not recorded as an acceptable latency result.
+
+The token bootstrap path caught both invalid signatures and failed storage reads as authentication denial. The lifecycle validator also converted storage exceptions to `false`, making a database outage indistinguishable from an inactive account. It now throws a sanitized `AUTHENTICATION_STATE_UNAVAILABLE` error on lookup failure. Admin bootstrap and current-user boundaries return 503 for storage failures, without revoking sessions or granting access. Login also reports this specific lifecycle lookup failure as temporary unavailability. Explicit inactive/missing/disabled states still deny authentication. Password verification, login postchecks, MFA, audit and session rotation remain in place.
+
+All 12 focused regression cases pass, including session and lifecycle outages in both admin and current-user routes, genuine inactive-account rejection, validation on subsequent requests, error sanitization and process-liveness protection. The application package build passes. Broader student/refresh outage response semantics have not been redesigned in this patch.

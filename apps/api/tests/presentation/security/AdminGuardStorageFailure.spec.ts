@@ -4,6 +4,35 @@ import request from 'supertest';
 vi.mock('../../../src/infrastructure/di/container.js',()=>({container:{resolve:vi.fn()}}));
 import {SecurityMiddlewareFactory} from '../../../src/presentation/security/SecurityMiddlewareFactory';
 import {AuthRouter} from '../../../src/presentation/api/router/AuthRouter';
+import {IdentityPrincipalAccessValidator} from '../../../../../packages/application/src/auth/IdentityPrincipalAccessValidator';
+import {LifeStatus,AccountAccessState} from '@manaratak/domain';
+
+it.each(['identity','credential'])('propagates %s storage unavailability without reporting account suspension',async failure=>{
+  const identity={status:LifeStatus.ACTIVE,account:{accessState:AccountAccessState.ACTIVE},user:{contactRegistry:{isEmailVerified:true}}};
+  const validator=new IdentityPrincipalAccessValidator({findById:failure==='identity'?vi.fn().mockRejectedValue(new Error('PRIVATE_DB_DETAIL')):vi.fn().mockResolvedValue(identity)} as any,{find:vi.fn().mockRejectedValue(new Error('PRIVATE_DB_DETAIL'))} as any);
+  await expect(validator.isAuthenticationAllowed('existing-admin')).rejects.toThrow('AUTHENTICATION_STATE_UNAVAILABLE');
+});
+
+it.each(['admin-session','admin-lifecycle','me-session','me-lifecycle'])('returns 503 for %s failure without revoking valid sessions',async scenario=>{
+  const sessions={isSessionActive:scenario.endsWith('session')?vi.fn().mockRejectedValue(new Error('PRIVATE_DB_DETAIL')):vi.fn().mockResolvedValue(true),revokeAllSessions:vi.fn()};
+  const validator={isAuthenticationAllowed:vi.fn().mockRejectedValue(new Error('AUTHENTICATION_STATE_UNAVAILABLE'))};
+  const tokenProvider={verifyAccessTokenSync:()=>({userId:'existing-admin',sessionId:'session-1'})};
+  const app=express();
+  if(scenario.startsWith('admin')){
+    app.use(SecurityMiddlewareFactory.createAdminGuard({mode:'strict',tokenProvider:tokenProvider as any,sessionManager:sessions as any,principalAccessValidator:validator}));
+    app.get('/protected',(_req,res)=>res.status(200).json({private:true}));
+  }else{
+    app.use(AuthRouter.create({authService:{} as any,identityRepository:{} as any,securityService:{} as any,tokenProvider:tokenProvider as any,sessionManager:sessions as any,principalAccessValidator:validator,forgotPasswordUseCase:{} as any,resetPasswordUseCase:{} as any,authRateLimitKey:value=>value}));
+  }
+  const response=await request(app).get(scenario.startsWith('admin')?'/protected':'/me').set('Cookie','manaratak_access=synthetic-token');
+  expect(response.status).toBe(503);expect(sessions.revokeAllSessions).not.toHaveBeenCalled();
+  expect(JSON.stringify(response.body)).not.toContain('PRIVATE_DB_DETAIL');expect(response.body.private).toBeUndefined();
+});
+
+it('preserves a genuine inactive-account denial',async()=>{
+  const validator=new IdentityPrincipalAccessValidator({findById:vi.fn().mockResolvedValue({status:LifeStatus.ACTIVE,account:{accessState:AccountAccessState.ACTIVE},user:{contactRegistry:{isEmailVerified:true}}})} as any,{find:vi.fn().mockResolvedValue({disabled:true})} as any);
+  await expect(validator.isAuthenticationAllowed('existing-admin')).resolves.toBe(false);
+});
 
 it('does not repeat current-user lifecycle reads and rejects a subsequent inactive request',async()=>{
   let allowed=true;

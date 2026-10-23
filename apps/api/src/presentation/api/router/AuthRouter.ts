@@ -217,6 +217,7 @@ export class AuthRouter {
           const authHeader = req.headers.authorization;
           const token = readAccessCookie(req) || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7).trim() : null);
           if (token && tokenProvider) {
+            let checkingStorage = false;
             try {
               const provider = tokenProvider as ITokenProvider & {
                 verifyAccessTokenSync?: (value: string) => { userId?: string; sessionId?: string };
@@ -228,14 +229,20 @@ export class AuthRouter {
                 payload?.userId
                 && payload.sessionId
                 && sessionManager
-                && await sessionManager.isSessionActive(payload.userId, payload.sessionId)
-                && await principalAccessValidator.isAuthenticationAllowed(payload.userId)
-                && (!cradle.mfaUseCases || await cradle.mfaUseCases.sessionAuthenticated(payload.userId,payload.sessionId))
               ) {
-                principalId = payload.userId;
-                principalValidated = true;
+                checkingStorage = true;
+                if (await sessionManager.isSessionActive(payload.userId, payload.sessionId)
+                    && await principalAccessValidator.isAuthenticationAllowed(payload.userId)
+                    && (!cradle.mfaUseCases || await cradle.mfaUseCases.sessionAuthenticated(payload.userId,payload.sessionId))) {
+                  principalId = payload.userId;
+                  principalValidated = true;
+                }
               }
             } catch (e) {
+              if (checkingStorage) {
+                res.status(503).json(responseFormatter.error({code:'AUTH_UNAVAILABLE',message:'Authentication is temporarily unavailable.'}));
+                return;
+              }
               // Invalid or expired tokens remain unauthenticated.
             }
           }
@@ -363,6 +370,9 @@ export class AuthRouter {
           const sessionTtlSeconds = rememberMe ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60;
           tokens = await (authService as any).login(identity.id.toString(), password, sessionTtlSeconds, mfaCode);
         } catch (authError) {
+          if (authError instanceof Error && authError.message === 'AUTHENTICATION_STATE_UNAVAILABLE') {
+            res.status(503).json(responseFormatter.error({code:'AUTH_UNAVAILABLE',message:'Authentication is temporarily unavailable.'}));return;
+          }
           if (authError instanceof Error && authError.message === 'MFA_REQUIRED') {
             res.status(401).json(responseFormatter.error({ code: 'MFA_REQUIRED', message: 'MFA_REQUIRED' })); return;
           }
