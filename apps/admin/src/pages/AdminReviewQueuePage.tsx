@@ -4,7 +4,8 @@ import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { ReviewOverview } from '../features/review-queue/ReviewOverview';
-import { ClipboardCheck, RefreshCw, Filter } from 'lucide-react';
+import { matchesReviewSearch } from '../features/review-queue/ReviewSearch';
+import { ClipboardCheck, RefreshCw, Filter, Search, X, AlertTriangle, ShieldCheck } from 'lucide-react';
 import {
   reviewSources,
   sourceAllowed,
@@ -83,6 +84,16 @@ const labels: Record<string, [string, string]> = {
   failed: ['فشل', 'Failed'],
   empty: ['لا أحداث في هذا النطاق', 'No events in this scope'],
   on_track: ['ضمن الموعد', 'On track'],
+  DRAFT: ['مسودة', 'Draft'],
+  IMPORTED: ['مستورد', 'Imported'],
+  READY_TO_REVIEW: ['جاهز للمراجعة', 'Ready for review'],
+  IN_REVIEW: ['قيد المراجعة', 'In review'],
+  NEEDS_REVIEW: ['يحتاج مراجعة', 'Needs review'],
+  READY_TO_PUBLISH: ['جاهز للنشر لدى القسم', 'Owner ready to publish'],
+  PUBLISHED: ['منشور', 'Published'],
+  ARCHIVED: ['مؤرشف', 'Archived'],
+  INCOMPLETE: ['ناقص', 'Incomplete'],
+  COMPLETE: ['مكتمل', 'Complete'],
 };
 export function AdminReviewQueuePage() {
   const { language, dir } = useTranslation();
@@ -116,6 +127,7 @@ export function AdminReviewQueuePage() {
   const [busy, setBusy] = useState(false);
   const [selected, setSelected] = useState<ReviewItem | null>(null);
   const [listPage, setListPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
   const [clock, setClock] = useState(Date.now());
   const selectionButton = useRef<HTMLButtonElement | null>(null);
   const dialog = useRef<HTMLDivElement | null>(null);
@@ -211,7 +223,7 @@ export function AdminReviewQueuePage() {
   }, []);
   useEffect(() => {
     setListPage(1);
-  }, [params.toString()]);
+  }, [params.toString(), searchQuery]);
   // Strip unknown keys, PII/free-text and tampered enum values from shared URLs.
   useEffect(() => {
     const safe = serializeReviewFilters(parseReviewFilters(params));
@@ -227,7 +239,7 @@ export function AdminReviewQueuePage() {
       .flatMap((state) => state.rows),
   );
   const filtered = items
-    .filter((item) => matchesReviewItem(item, filters, clock))
+    .filter((item) => matchesReviewItem(item, filters, clock) && matchesReviewSearch(item, searchQuery))
     .sort((a, b) => {
       const rank = (item: ReviewItem) =>
         Math.min(
@@ -246,7 +258,12 @@ export function AdminReviewQueuePage() {
       if (filters.sort === 'oldest') return oldest(a) - oldest(b);
       return rank(a) - rank(b) || a.key.localeCompare(b.key);
     });
-  const hasPartial = states.some((state) => state.availability !== 'ready' || state.windowLimited);
+  const permittedStates = states.filter((state) => allowed.some((source) => source.key === state.source.key));
+  const hasPartial = permittedStates.length === 0 || permittedStates.some((state) => state.availability !== 'ready' || state.windowLimited);
+  const readSources = permittedStates.filter((state) => ['ready', 'partial'].includes(state.availability)).length;
+  const unavailableSources = permittedStates.filter((state) => ['unavailable', 'stale'].includes(state.availability));
+  const lastRead = permittedStates.reduce<string | null>((latest, state) =>
+    state.capturedAt && (!latest || state.capturedAt > latest) ? state.capturedAt : latest, null);
   const openAudit = useCallback(
     async (item: ReviewItem, append = false, cursor?: string) => {
       const query = auditQuery(item, hasPermission('admin:audit:manage'), cursor);
@@ -372,7 +389,7 @@ export function AdminReviewQueuePage() {
   }, [selected, permissionKey, openAudit]);
   const updateFilter = (key: keyof ReviewFilters, value: string) =>
     setParams(serializeReviewFilters({ ...filters, [key]: value }));
-  const canContinue = states.some(
+  const canContinue = permittedStates.some(
     (state) => state.nextPage !== null && state.availability !== 'access_denied',
   );
   return (
@@ -381,10 +398,20 @@ export function AdminReviewQueuePage() {
         <div><span className="mb-3 inline-flex items-center gap-2 text-xs font-bold text-[#F2CD78]"><ClipboardCheck className="h-4 w-4" aria-hidden="true" />{tr('مركز العمل الإداري', 'Administration work center')}</span>
         <h1 className="text-2xl font-bold">{tr('قائمة المراجعة', 'Enterprise Review Queue')}</h1>
         <p>{tr('إشارات المراجعة والجودة حسب المجال، مع الانتقال إلى القسم المسؤول لإتمام الإجراء.', 'Review and quality signals by domain, with handoffs to the responsible workspace.')}</p></div>
+        <div className="flex flex-wrap items-stretch gap-3">
+          <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-xs">
+            <span className="block text-white/75">{tr('استعلامات مصادر مقروءة', 'Source queries read')}</span>
+            <span className="mt-1 block text-xl font-black text-[#F2CD78]">{number(readSources)} / {number(permittedStates.length)}</span>
+          </div>
+          <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-xs">
+            <span className="block text-white/75">{tr('آخر قراءة مصدر ناجحة', 'Latest successful source read')}</span>
+            <span className="mt-2 block max-w-56 break-words font-bold">{date(lastRead)}</span>
+          </div>
         <button disabled={busy} className="inline-flex items-center gap-2 rounded border px-4 py-2" onClick={() => void load()}>
           <RefreshCw aria-hidden="true" className={`h-4 w-4 ${busy ? 'animate-spin' : ''}`} />
           {tr('تحديث وإعادة التحقق', 'Refresh and recheck')}
         </button>
+        </div>
       </header>
       <p className="rounded-2xl border border-[#D6A43B]/30 bg-[#F2CD78]/15 p-4 text-sm leading-7 text-[#203442]">
         {tr(
@@ -392,6 +419,12 @@ export function AdminReviewQueuePage() {
           'Read and navigate to the owner. Decisions remain in owner workspaces.',
         )}
       </p>
+      {!busy && unavailableSources.length > 0 && (
+        <p role="status" className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm leading-7 text-rose-900">
+          <AlertTriangle aria-hidden="true" className="mt-1 h-5 w-5 shrink-0" />
+          <span>{tr('بعض المصادر غير متاحة أو تحتاج إعادة تحقق. العدد غير المتاح ليس صفرًا؛ راجع تفاصيل التغطية أدناه.', 'Some sources are unavailable or need rechecking. Missing counts are not zero; see source coverage below.')}</span>
+        </p>
+      )}
       <p role="status" aria-live="polite">
         {busy
           ? tr('جار تحميل صفحات محدودة…', 'Loading bounded source pages…')
@@ -408,10 +441,33 @@ export function AdminReviewQueuePage() {
               'Reads reached available page ends; this is not a unified snapshot.',
             )}
       </p>
-      <ReviewOverview items={items} states={states.filter(state => allowed.some(source => source.key === state.source.key))} filters={filters} onFilter={updateFilter} language={language} now={clock} />
+      <ReviewOverview items={items} states={permittedStates} filters={filters} onFilter={updateFilter} language={language} now={clock} canOpenTranslations={hasPermission('admin:cms:manage')} />
       <section className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm" aria-labelledby="review-filters">
       <h2 id="review-filters" className="mb-4 flex items-center gap-2 text-lg font-black"><Filter aria-hidden="true" className="h-5 w-5 text-[#0E7C86]" />{tr('البحث والتصفية', 'Search and filters')}</h2>
+      <div aria-label={tr('الفلاتر السريعة', 'Quick filters')} className="mb-4 flex flex-wrap gap-2">
+        {reviewFilterValues.view.map((value) => (
+          <button key={value} type="button" aria-pressed={filters.view === value}
+            onClick={() => updateFilter('view', value)}
+            className="rounded-full border border-[#DDEFF2] bg-[#FAF7F0]/60 px-3 py-2 text-xs font-bold aria-pressed:border-[#0E7C86] aria-pressed:bg-[#0E7C86] aria-pressed:text-white">
+            {label(value)}
+          </button>
+        ))}
+        {hasPermission('admin:scholarships:manage') && hasPermission('admin:imports:manage') ? (
+          <Link to="/imports/scholarships" className="inline-flex min-h-10 items-center rounded-full border border-[#DDEFF2] px-3 py-2 text-xs font-bold text-[#0E7C86]">
+            {tr('تكرار وتعارض الاستيراد — فتح المركز', 'Duplicates & conflicts — open import center')}
+          </Link>
+        ) : null}
+      </div>
       <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <label className="flex flex-col gap-1 sm:col-span-2">
+          {tr('بحث في العينة المحملة', 'Search loaded sample')}
+          <span className="relative">
+            <Search aria-hidden="true" className="pointer-events-none absolute start-3 top-3 h-4 w-4 text-[#0E7C86]" />
+            <input type="search" maxLength={200} value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder={tr('العنوان أو المعرّف أو رمز سبب المراجعة…', 'Title, ID or review reason code…')}
+              className="min-h-11 w-full rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/30 py-2.5 pe-3 ps-10 text-sm" />
+          </span>
+        </label>
         {(Object.keys(reviewFilterValues) as Array<keyof ReviewFilters>).map((key) => (
           <label key={key} className="flex flex-col gap-1">
             {label(key)}
@@ -429,6 +485,12 @@ export function AdminReviewQueuePage() {
           </label>
         ))}
       </div>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#DDEFF2] pt-4">
+        <p className="text-xs text-slate-500">{tr('النتائج داخل العينة', 'Matches in sample')}: {number(filtered.length)} · {tr('البحث محلي ولا يضاف إلى رابط الصفحة.', 'Search stays local and is not added to the page URL.')}</p>
+        <button type="button" onClick={() => { setSearchQuery(''); setParams(new URLSearchParams()); }} className="inline-flex items-center gap-2 text-[#0E7C86]">
+          <X aria-hidden="true" className="h-4 w-4" />{tr('مسح التصفية', 'Clear filters')}
+        </button>
+      </div>
       </section>
       <p className="text-sm">
         {tr(
@@ -436,7 +498,7 @@ export function AdminReviewQueuePage() {
           'Filters, suggested priority and quality indicators apply to the sample. Age uses review entry evidence; import and modification clocks are separate. SLA is unknown without entry time, due time and owner policy.',
         )}
       </p>
-      <details>
+      <details className="admin-section-tools">
         <summary className="cursor-pointer font-semibold">
           {tr('تغطية المصادر والأعداد والأخطاء', 'Source coverage, counts and errors')}
         </summary>
@@ -526,6 +588,12 @@ export function AdminReviewQueuePage() {
       >
         {tr('متابعة صفحة واحدة لكل مصدر متاح', 'Continue one page per available source')}
       </button>
+      <section aria-labelledby="review-pending-work" className="overflow-hidden rounded-3xl border border-[#DDEFF2] bg-white shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#DDEFF2] p-5">
+          <div><h2 id="review-pending-work" className="text-lg font-black text-[#142B5F]">{tr('الأعمال المعلقة في العينة', 'Pending work in sample')}</h2>
+            <p className="mt-1 text-xs text-slate-500">{tr('افتح السجل في قسمه لإتمام المراجعة أو النشر؛ المعاينة هنا للقراءة.', 'Open the owner workspace to review or publish; previews here are read-only.')}</p></div>
+          <span className="rounded-full bg-[#DDEFF2]/60 px-3 py-1 text-xs font-bold text-[#0E7C86]">{number(filtered.length)} {tr('نتيجة', 'results')}</span>
+        </div>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
@@ -554,6 +622,10 @@ export function AdminReviewQueuePage() {
                     {tr('لغة المصدر', 'Source locale')}: {item.locale ?? label('unknown')} ·{' '}
                     {label(item.sourceKind)}
                   </small>
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                    <span className="rounded-full bg-[#DDEFF2]/50 px-2 py-1">{tr('الحالة', 'Status')}: {label(item.status ?? 'unknown')}</span>
+                    <span className="rounded-full bg-[#FAF7F0] px-2 py-1">{tr('الاكتمال', 'Completeness')}: {label(item.completenessStatus ?? 'unknown')}</span>
+                  </div>
                 </td>
                 <td className="p-2">
                   {item.signals.map((signal) => (
@@ -611,7 +683,7 @@ export function AdminReviewQueuePage() {
           )}
         </p>
       )}
-      <nav aria-label={tr('صفحات العينة', 'Sample pages')} className="flex gap-3">
+      <nav aria-label={tr('صفحات العينة', 'Sample pages')} className="flex items-center justify-between gap-3 border-t border-[#DDEFF2] p-4">
         <button disabled={listPage <= 1} onClick={() => setListPage((page) => page - 1)}>
           {tr('السابق', 'Previous')}
         </button>
@@ -625,6 +697,12 @@ export function AdminReviewQueuePage() {
           {tr('التالي', 'Next')}
         </button>
       </nav>
+      </section>
+      <section className="flex items-start gap-3 rounded-3xl border border-[#DDEFF2] bg-[#DDEFF2]/25 p-5">
+        <ShieldCheck aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-[#0E7C86]" />
+        <div><h2 className="font-black text-[#142B5F]">{tr('المراجعة والاعتماد داخل القسم المختص', 'Review and approval in the owner workspace')}</h2>
+          <p className="mt-2 text-xs leading-7 text-slate-600">{tr('تعرض هذه القائمة أدلة المراجعة وتوجّهك إلى القسم المسؤول. يبقى التحرير والاعتماد والنشر وسجل القرار داخل ذلك القسم وفق صلاحياتك.', 'This queue presents review evidence and routes you to the responsible workspace. Editing, approval, publishing and decision records remain there under your permissions.')}</p></div>
+      </section>
       {selected && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
@@ -638,7 +716,7 @@ export function AdminReviewQueuePage() {
             aria-modal="true"
             aria-labelledby="review-preview-title"
             tabIndex={-1}
-            className="max-h-[90vh] w-full max-w-3xl space-y-3 overflow-auto rounded bg-white p-5 text-slate-900"
+            className="max-h-[90vh] w-full max-w-3xl space-y-4 overflow-auto rounded-3xl border border-[#DDEFF2] bg-[#FAF7F0] p-5 text-[#142B5F] shadow-xl sm:p-7"
           >
             <h2 id="review-preview-title" className="text-xl font-bold">
               <bdi>{selected.title}</bdi>

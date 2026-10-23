@@ -22,6 +22,20 @@ beforeEach(()=>{
 });
 afterEach(async()=>{if(tree)await act(async()=>tree.unmount());vi.unstubAllGlobals();});
 describe('Review queue session loss clears old evidence',()=>{
+ it('searches only loaded evidence and clears search without re-requesting sources',async()=>{
+ await mount();
+ const pending=()=>tree.root.findByProps({'aria-labelledby':'review-pending-work'});
+ expect(pending().findAllByType('bdi').some(node=>node.children.includes('LAST-GOOD-OWNER'))).toBe(true);
+ state.request.mockClear();
+ const search=tree.root.findByProps({type:'search'});
+ await act(async()=>search.props.onChange({target:{value:'no matching loaded record'}}));
+ expect(pending().findByType('tbody').findAllByType('tr')).toHaveLength(0);
+ expect(state.request).not.toHaveBeenCalled();
+ await act(async()=>button('Clear filters').props.onClick());
+ expect(tree.root.findByProps({type:'search'}).props.value).toBe('');
+ expect(pending().findByType('tbody').findAllByType('tr')).toHaveLength(1);
+ expect(state.request).not.toHaveBeenCalled();
+ });
  it('does not keep last-good owner rows after a 401 refresh',async()=>{
  await mount();expect(JSON.stringify(tree.toJSON())).toContain('LAST-GOOD-OWNER');
  state.request.mockRejectedValue(new Error('[401] expired'));

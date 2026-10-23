@@ -6,8 +6,22 @@ import { ReviewOverview } from '../../src/features/review-queue/ReviewOverview';
 import { parseReviewFilters } from '../../src/features/review-queue/ReviewContracts';
 import { initialSourceState } from '../../src/features/review-queue/ReviewLoader';
 import { reviewSources } from '../../src/features/review-queue/ReviewSources';
+import { projectReviewItem } from '../../src/features/review-queue/ReviewContracts';
+import { matchesReviewSearch } from '../../src/features/review-queue/ReviewSearch';
 
 describe('Restored review overview retains evidence boundaries', () => {
+  it('searches explicit owner classification without inferring a missing status or reviewer', () => {
+    const source = reviewSources.find(source => source.reason === 'workflow_review')!;
+    const absent = projectReviewItem(source, { id: 'review-one', title: 'Alpha Scholarship', reviewerName: 'PRIVATE_ACTOR' }, '2026-10-23T00:00:00Z')!;
+    expect(absent.status).toBeNull();
+    expect(absent.completenessStatus).toBeNull();
+    expect(matchesReviewSearch(absent, '  ALPHA ')).toBe(true);
+    expect(matchesReviewSearch(absent, 'PRIVATE_ACTOR')).toBe(false);
+    expect(matchesReviewSearch(absent, 'READY_TO_REVIEW')).toBe(false);
+    const explicit = projectReviewItem(source, { id: 'review-two', status: 'READY_TO_REVIEW', completenessStatus: 'INCOMPLETE' }, '2026-10-23T00:00:00Z')!;
+    expect(matchesReviewSearch(explicit, 'ready_to_review')).toBe(true);
+    expect(matchesReviewSearch(explicit, 'incomplete')).toBe(true);
+  });
   it('keeps unavailable counts and unmeasured SLA unknown instead of showing zero', async () => {
     (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
     const source = reviewSources.find(source => source.reason === 'workflow_review')!;

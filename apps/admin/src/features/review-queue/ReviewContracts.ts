@@ -20,6 +20,8 @@ export type ReviewItem = {
   kind: 'canonical' | 'import_record';
   domain: ReviewDomain;
   title: string;
+  status?: string | null;
+  completenessStatus?: string | null;
   locale: string | null;
   href: string;
   detail: boolean;
@@ -179,6 +181,8 @@ export function projectReviewItem(
       text(record.canonicalName) ??
       id,
     locale: text(record.primaryLocale) ?? text(record.locale),
+    status: text(record.status),
+    completenessStatus: text(record.completenessStatus),
     href,
     detail: source.detail,
     signals: [

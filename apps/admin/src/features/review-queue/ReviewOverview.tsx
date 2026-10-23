@@ -2,15 +2,17 @@ import { AlertTriangle, ArrowLeft, ArrowRight, CheckCircle2, Clock3, FileSpreads
 import { Link } from 'react-router-dom';
 import { signalSla, type ReviewFilters, type ReviewItem } from './ReviewContracts';
 import type { ReviewPageState } from './ReviewLoader';
+import { ReviewSupportingPanels } from './ReviewSupportingPanels';
 
 /** Presentation of the retained, permission-filtered window; never a global total. */
-export function ReviewOverview({ items, states, filters, onFilter, language, now }: {
+export function ReviewOverview({ items, states, filters, onFilter, language, now, canOpenTranslations = false }: {
   items: ReviewItem[];
   states: ReviewPageState[];
   filters: ReviewFilters;
   onFilter: (key: keyof ReviewFilters, value: string) => void;
   language: string;
   now: number;
+  canOpenTranslations?: boolean;
 }) {
   const tr = (ar: string, en: string) => language === 'ar' ? ar : en;
   const Arrow = language === 'ar' ? ArrowLeft : ArrowRight;
@@ -29,6 +31,11 @@ export function ReviewOverview({ items, states, filters, onFilter, language, now
   };
   const number = (value: number | null) => value === null ? '—' : new Intl.NumberFormat(language).format(value);
   const sla = items.flatMap(item => item.signals.map(signal => signalSla(signal, now)));
+  const domainCount = (domain: string, reason: string) => {
+    const sources = readable.filter(state => state.source.domain === domain && state.source.reason === reason);
+    const matching = items.filter(item => item.domain === domain && item.signals.some(signal => signal.reason === reason)).length;
+    return matching || sources.some(state => state.availability === 'ready' || state.availability === 'partial') ? matching : null;
+  };
   const metrics = [
     { key: 'workflow_review', title: tr('قيد المراجعة', 'In review'), icon: Clock3, color: '#142B5F', value: count('workflow_review') },
     { key: 'incomplete', title: tr('بيانات ناقصة', 'Incomplete'), icon: AlertTriangle, color: '#D6A43B', value: count('incomplete') },
@@ -46,7 +53,7 @@ export function ReviewOverview({ items, states, filters, onFilter, language, now
     <section className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm" aria-labelledby="review-signals">
       <h2 id="review-signals" className="text-lg font-black text-[#142B5F]">{tr('إشارات دورة المراجعة', 'Review lifecycle signals')}</h2>
       <p className="mb-4 mt-1 text-xs leading-6 text-slate-500">{tr('أعداد العينة المقروءة فقط، قبل الفلاتر. قد تتداخل الإشارات؛ الشرطة تعني أن القياس غير متاح، ولا تعني صفرًا.', 'Retained sample counts before filters. Signals may overlap; a dash means unavailable, never zero.')}</p>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
         {metrics.map(({ key, title, icon: Icon, color, value }) => <button key={key} type="button"
           aria-pressed={key === 'overdue' ? filters.view === 'overdue' : filters.reason === key}
           onClick={() => key === 'overdue' ? onFilter('view', filters.view === 'overdue' ? 'all' : 'overdue') : onFilter('reason', filters.reason === key ? 'all' : key)}
@@ -56,7 +63,14 @@ export function ReviewOverview({ items, states, filters, onFilter, language, now
           <span className="block text-2xl font-black text-[#142B5F]">{number(value)}</span>
           <span className="mt-2 block text-xs font-bold text-slate-600">{title}</span>
         </button>)}
+        <div aria-describedby="review-sla-near-limit" className="relative min-h-36 overflow-hidden rounded-2xl border border-[#DDEFF2] bg-[#DDEFF2]/20 p-4 shadow-xs">
+          <span className="absolute inset-x-0 top-0 h-1 bg-[#21A7B4]" />
+          <Clock3 aria-hidden="true" className="mb-3 h-5 w-5 text-[#21A7B4]" />
+          <span className="block text-2xl font-black text-[#142B5F]">—</span>
+          <span className="mt-2 block text-xs font-bold text-slate-600">{tr('يقترب من SLA', 'Approaching SLA')}</span>
+        </div>
       </div>
+      <p id="review-sla-near-limit" className="mt-3 text-xs leading-6 text-slate-500">{tr('اقتراب SLA غير مقاس هنا؛ يحتاج حدّ إنذار معتمدًا من القسم. لا يُستنتج من وقت تعديل السجل.', 'Approaching SLA is not measured here; an owner-defined warning threshold is required. Record modification time is not a substitute.')}</p>
     </section>
     <section className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm" aria-labelledby="review-quality">
       <h2 id="review-quality" className="mb-4 text-lg font-black text-[#142B5F]">{tr('إشارات الجودة المتخصصة', 'Specialized quality signals')}</h2>
@@ -65,18 +79,28 @@ export function ReviewOverview({ items, states, filters, onFilter, language, now
           <Icon aria-hidden="true" className="h-5 w-5 shrink-0 text-[#0E7C86]" /><span className="flex-1 text-xs font-bold">{title}</span><span className="text-xl font-black">{number(count(key))}</span>
         </button>)}</div>
     </section>
+    <ReviewSupportingPanels language={language} states={readable} canOpenTranslations={canOpenTranslations} />
     <section className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm" aria-labelledby="review-domains">
       <h2 id="review-domains" className="mb-4 text-lg font-black text-[#142B5F]">{tr('المراجعة حسب المجال', 'Review by domain')}</h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{domains.map(source => {
         const readings = readable.filter(state => state.source.domain === source.domain);
         const rows = items.filter(item => item.domain === source.domain);
         const known = rows.length > 0 || readings.some(state => state.availability === 'ready' || state.availability === 'partial');
+        const complete = readings.every(state => state.availability === 'ready' && !state.windowLimited);
         return <article key={source.domain} className="rounded-2xl border border-[#DDEFF2] p-4">
           <button type="button" aria-pressed={filters.domain === source.domain} onClick={() => onFilter('domain', filters.domain === source.domain ? 'all' : source.domain)} className="w-full border-0 p-0 text-start aria-pressed:text-[#0E7C86]">
             <School aria-hidden="true" className="mb-3 h-5 w-5 text-[#0E7C86]" /><span className="block font-black">{names[source.domain] ?? source.domain}</span>
             <span className="mt-2 block text-2xl font-black">{number(known ? rows.length : null)}</span>
             <span className="text-xs text-slate-500">{tr('سجلات في العينة', 'Records in sample')}</span>
           </button>
+          <p className="mt-2 text-xs text-slate-500">{complete ? tr('قراءة متاحة ضمن نطاق المصدر', 'Read available within source scope') : tr('تغطية جزئية أو غير متاحة', 'Coverage partial or unavailable')}</p>
+          <dl className="mt-3 space-y-2 border-t border-[#DDEFF2] pt-3 text-xs">
+            {[
+              ['workflow_review', tr('مراجعة', 'Review')],
+              ['incomplete', tr('ناقص', 'Incomplete')],
+              ['ready_to_publish', tr('جاهز', 'Ready')],
+            ].map(([reason, title]) => <div key={reason} className="flex items-center justify-between gap-2"><dt>{title}</dt><dd className="font-black">{number(domainCount(source.domain, reason))}</dd></div>)}
+          </dl>
           <Link to={source.path} className="mt-4 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-3 py-2 text-xs font-bold text-white hover:bg-[#0E7C86]">{tr('فتح المجال', 'Open workspace')}<Arrow aria-hidden="true" className="h-4 w-4" /></Link>
         </article>;
       })}</div>
