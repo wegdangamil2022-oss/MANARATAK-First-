@@ -71,6 +71,12 @@ export function AdminDashboardPage() {
   const users = resources.users?.data as UserDashboard | null | undefined,
     traffic = resources.traffic?.data as TrafficDashboard | null | undefined,
     applications = resources.applications?.data as ApplicationDashboard | null | undefined;
+  const headlineStatus =
+    userHeadline?.state === 'stale'
+      ? tr('بيانات قديمة — تعذّر التحديث', 'Stale — refresh failed')
+      : userHeadline
+        ? undefined
+        : status(resources.users);
   const health = reading('health'),
     activity = reading('activity'),
     imports = reading('imports'),
@@ -111,6 +117,7 @@ export function AdminDashboardPage() {
     href: string;
     value: string;
     tone: string;
+    stale?: boolean;
   }> = [];
   if (permits('admin:platform:manage'))
     actions.push({
@@ -135,6 +142,7 @@ export function AdminDashboardPage() {
       href: '/imports',
       value: number(failed === null || dlq === null ? null : safeCount(failed + dlq)),
       tone: 'gold',
+      stale: state(imports) === 'stale',
     });
   }
   if (health && (!healthCurrent || healthStatus !== 'UP'))
@@ -152,6 +160,7 @@ export function AdminDashboardPage() {
       href: '/finance',
       value: number(availableCount('finance', 'pendingApprovals')),
       tone: 'indigo',
+      stale: state(finance) === 'stale',
     });
   if (
     permits('admin:dashboard:applications:view') &&
@@ -164,6 +173,7 @@ export function AdminDashboardPage() {
       href: '/services?tab=requests',
       value: number(applications?.attention ?? null),
       tone: 'cyan',
+      stale: resources.applications?.state === 'stale',
     });
   const events = [...(activity?.activity ?? [])]
     .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
@@ -244,7 +254,7 @@ export function AdminDashboardPage() {
               icon={Users}
               tone="indigo"
               href={permits('admin:identities:manage') ? '/identities?type=Human' : undefined}
-              status={status(resources.users)}
+              status={headlineStatus}
               language={language}
             />
           )}
@@ -331,7 +341,7 @@ export function AdminDashboardPage() {
                     'حسابات مؤهلة بدور الطالب؛ إجمالي كل الوقت.',
                     'Eligible accounts with the student role; all-time total.',
                   )}
-                  status={status(resources.users)}
+                  status={headlineStatus}
                 />
               </>
             )}
@@ -459,13 +469,21 @@ export function AdminDashboardPage() {
           </h2>
           {actions.length ? (
             <ul className="executive-action-list">
-              {actions.slice(0, 5).map(({ title, icon: Icon, href, value, tone }) => (
+              {actions.slice(0, 5).map(({ title, icon: Icon, href, value, tone, stale }) => (
                 <li key={href}>
                   <Link to={href}>
                     <span className={`executive-icon ${tone}`}>
                       <Icon aria-hidden="true" />
                     </span>
-                    <span>{title}</span>
+                    <span>
+                      {title}
+                      {stale && (
+                        <small className="executive-caption">
+                          {' '}
+                          · {tr('بيانات قديمة', 'Stale data')}
+                        </small>
+                      )}
+                    </span>
                     <strong>{value}</strong>
                     <Arrow aria-hidden="true" />
                   </Link>

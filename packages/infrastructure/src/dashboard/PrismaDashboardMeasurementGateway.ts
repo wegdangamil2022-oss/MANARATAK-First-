@@ -1,5 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { Prisma, type PrismaClient } from '@prisma/client';
+import { AssetId } from '@manaratak/domain';
+import { PrismaAssetRecordRepository } from '../asset-platform/PrismaAssetRecordRepository';
 import type {
   PublicAnalyticsGateway,
   ManagedApplicationEvidenceGateway,
@@ -146,14 +148,12 @@ export class PrismaManagedApplicationEvidenceGateway implements ManagedApplicati
       select: { id: true, metadata: true },
     });
     return {
-      items: rows
-        .slice(0, 20)
-        .map((row) => ({
-          id: row.id,
-          name: String(
-            (row.metadata as Record<string, unknown>).originalFilename ?? 'Document',
-          ).slice(0, 240),
-        })),
+      items: rows.slice(0, 20).map((row) => ({
+        id: row.id,
+        name: String(
+          (row.metadata as Record<string, unknown>).originalFilename ?? 'Document',
+        ).slice(0, 240),
+      })),
       nextCursor: rows.length > 20 ? rows[19].id : null,
     };
   }
@@ -198,6 +198,8 @@ export class PrismaManagedApplicationEvidenceGateway implements ManagedApplicati
           )
             throw new Error('MANAGED_APPLICATION_DECISION_ALREADY_RECORDED');
         }
+        if (input.evidenceAssetId)
+          await tx.$queryRaw`SELECT id FROM "AssetRecord" WHERE id=${input.evidenceAssetId} FOR SHARE`;
         const asset = input.evidenceAssetId
           ? await tx.assetRecord.findUnique({ where: { id: input.evidenceAssetId } })
           : null;
@@ -206,6 +208,13 @@ export class PrismaManagedApplicationEvidenceGateway implements ManagedApplicati
           'ADMISSION_ACCEPTED',
           'ADMISSION_REJECTED',
         ].includes(input.kind);
+        if (proven && input.evidenceAssetId) {
+          const trustedAsset = await new PrismaAssetRecordRepository(
+            tx as unknown as PrismaClient,
+          ).findById(new AssetId(input.evidenceAssetId));
+          if (!trustedAsset) throw new Error('MANAGED_APPLICATION_EVIDENCE_REQUIRED');
+          trustedAsset.assertCanDeliver();
+        }
         if (
           proven &&
           (!asset ||
