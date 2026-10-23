@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, RefreshCw } from 'lucide-react';
+import { Activity, RefreshCw, ListChecks, ChartNoAxesCombined, Info, Upload, ShieldCheck, ArrowUpLeft } from 'lucide-react';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
@@ -19,6 +19,7 @@ import { loadDashboardSources } from '../features/dashboard/DashboardLoader';
 import { DashboardHealthPanel, DashboardMetricCard } from '../features/dashboard/DashboardCards';
 import { DashboardSectionDirectory } from '../features/dashboard/DashboardSectionDirectory';
 import { dashboardLabel, dashboardTime } from '../features/dashboard/dashboardText';
+import { dashboardInitialKeys } from '../features/dashboard/DashboardSchedule';
 
 export function AdminDashboardPage() {
   const { language, dir } = useTranslation();
@@ -41,12 +42,20 @@ export function AdminDashboardPage() {
   const controller = useRef<AbortController | null>(null),
     generation = useRef(0),
     lock = useRef(false);
+  const requested = useRef(new Set(dashboardInitialKeys));
+  const pendingGroups = useRef(new Set<string>());
   const load = useCallback(
-    async (mode: 'all' | 'due' | 'source' = 'all', key?: string) => {
-      if (lock.current) return;
+    async (mode: 'all' | 'due' | 'source' | 'group' = 'all', key?: string) => {
+      if (mode === 'group') {
+        dashboardSources.filter(source => source.domain === key).forEach(source => requested.current.add(source.key));
+      }
+      if (lock.current) {
+        if (mode === 'group' && key) pendingGroups.current.add(key);
+        return;
+      }
       const permitted = new Set(allowed.map((source) => source.key));
       const candidates = dashboardSources
-        .filter((source) => permitted.has(source.key))
+        .filter((source) => permitted.has(source.key) && (requested.current.has(source.key) || mode === 'source'))
         .map((source) => {
           const previous = currentReadings.current.find(
             (reading) => reading.source.key === source.key,
@@ -58,6 +67,8 @@ export function AdminDashboardPage() {
         .filter((reading) =>
           mode === 'source'
             ? reading.source.key === key
+            : mode === 'group'
+              ? reading.source.domain === key && (!reading.receivedAt || effectiveDashboardState(reading, Date.now()) !== 'available')
             : mode === 'all' ||
               ['loading', 'stale', 'unavailable', 'timed_out', 'network_error'].includes(
                 effectiveDashboardState(reading, Date.now()),
@@ -84,8 +95,7 @@ export function AdminDashboardPage() {
       // Read health and permissioned activity first, without holding catalog cards behind them.
       candidates.sort(
         (a, b) =>
-          Number(['health', 'activity'].includes(b.source.key)) -
-          Number(['health', 'activity'].includes(a.source.key)),
+          Number(b.source.key === 'health') - Number(a.source.key === 'health'),
       );
       try {
         await loadDashboardSources(
@@ -105,6 +115,11 @@ export function AdminDashboardPage() {
           lock.current = false;
           setBusy(false);
           setClock(Date.now());
+          const next = pendingGroups.current.values().next().value;
+          if (next) {
+            pendingGroups.current.delete(next);
+            void load('group', next);
+          }
         }
       }
     },
@@ -194,7 +209,7 @@ export function AdminDashboardPage() {
     'pendingApprovals',
   ]);
   return (
-    <div dir={dir} className="mx-auto max-w-7xl space-y-6 text-[#142B5F]">
+    <div dir={dir} className="admin-command-center mx-auto max-w-7xl space-y-5 text-[#142B5F]">
       <header className="admin-page-hero relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
         <div>
           <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold text-cyan-100">
@@ -223,14 +238,23 @@ export function AdminDashboardPage() {
         {new Intl.NumberFormat(language).format(progress.completed)} /{' '}
         {new Intl.NumberFormat(language).format(progress.total)}
       </p>
+      <nav className="command-shortcuts" aria-label={tr('إجراءات الإدارة', 'Administration actions')}>
+        {[
+          { path: '/review-queue', ar: 'متابعة المراجعات', en: 'Review work', icon: ListChecks, allowed: hasPermission('admin:platform:manage') },
+          { path: '/imports', ar: 'مركز الاستيراد', en: 'Import center', icon: Upload, allowed: hasPermission('admin:imports:manage') },
+          { path: '/health-readiness', ar: 'صحة المنصة', en: 'Platform health', icon: ShieldCheck, allowed: hasPermission('admin:platform:manage') },
+        ].filter(action => action.allowed).map(action => <Link key={action.path} to={action.path}><action.icon aria-hidden="true" /><span>{tr(action.ar, action.en)}</span><ArrowUpLeft aria-hidden="true" /></Link>)}
+      </nav>
+      <DashboardHealthPanel reading={health} language={language} now={clock} />
+      <DashboardSectionDirectory />
       <section aria-labelledby="dashboard-snapshot">
         <p className="text-xs font-black text-[#0E7C86]">
           {tr('المؤشرات الرئيسية', 'Key metrics')}
         </p>
         <h2 id="dashboard-snapshot" className="mb-4 mt-1 text-xl font-black">
-          {tr('حجم المنصة الآن', 'Platform snapshot')}
+          <ChartNoAxesCombined aria-hidden="true" />{tr('بيانات المنصة', 'Platform records')}
         </h2>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="dashboard-snapshot-grid">
           {primaryReadings.map((reading) => (
             <DashboardMetricCard
               key={reading.source.key}
@@ -243,14 +267,14 @@ export function AdminDashboardPage() {
           ))}
         </div>
       </section>
-      <div className="grid items-start gap-5 xl:grid-cols-[1.3fr_0.7fr]">
-        <section aria-labelledby="dashboard-attention">
+        <section className="command-panel" aria-labelledby="dashboard-attention">
           <h2 id="dashboard-attention" className="mb-3 text-lg font-bold">
-            {label('attention')}
+            <ListChecks aria-hidden="true" />{tr('ما يحتاج المتابعة', 'Needs attention')}
           </h2>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <p className="command-caption">{label('attention')}</p>
+          <div className="dashboard-attention-grid">
             {visible
-              .filter((reading) => reading.state !== 'forbidden')
+              .filter((reading) => reading.state !== 'forbidden' && (dashboardInitialKeys.has(reading.source.key) || reading.receivedAt))
               .flatMap((reading) =>
                 reading.source.metrics
                   .filter((metric) => attentionMetrics.has(metric))
@@ -266,19 +290,16 @@ export function AdminDashboardPage() {
               )}
           </div>
         </section>
-        <DashboardHealthPanel reading={health} language={language} now={clock} />
-      </div>
-      <DashboardSectionDirectory />
-      <section aria-labelledby="dashboard-section-metrics" className="space-y-4">
-        <h2 id="dashboard-section-metrics" className="text-xl font-black">
+      <details aria-labelledby="dashboard-section-metrics" className="command-panel dashboard-breakdowns">
+        <summary id="dashboard-section-metrics" className="font-bold">
           {tr('تفاصيل مؤشرات الأقسام ومصادرها', 'Section metrics and source details')}
-        </h2>
+        </summary>
         <div className="space-y-6">
           <p className="text-sm text-slate-600">
             {label('scope')} {label('permission')}
           </p>
           {groups.map((group) => (
-            <details key={group} className="admin-section-tools" aria-labelledby={`dashboard-${group}`}>
+            <details key={group} className="admin-section-tools" aria-labelledby={`dashboard-${group}`} onToggle={event => { if (event.currentTarget.open) void load('group', group); }}>
               <summary id={`dashboard-${group}`} className="text-base font-bold">
                 {label(group)}
               </summary>
@@ -329,11 +350,11 @@ export function AdminDashboardPage() {
             </details>
           ))}
         </div>
-      </section>
-      <section className="rounded-xl border bg-white p-4" aria-labelledby="dashboard-activity">
-        <h2 id="dashboard-activity" className="text-lg font-bold">
+      </details>
+      <details className="command-panel" onToggle={event => { if(event.currentTarget.open) void load('group', 'audit'); }}>
+        <summary id="dashboard-activity" className="text-lg font-bold">
           {label('audit')}
-        </h2>
+        </summary>
         <p role="status">{label(activityState)}</p>
         <p className="text-sm">{label('activity_scope')}</p>
         {activity.activityPartial || ['stale', 'partial'].includes(activityState) ? (
@@ -363,9 +384,9 @@ export function AdminDashboardPage() {
         <p className="text-xs">
           {label('checked')}: {dashboardTime(activity.capturedAt, language)}
         </p>
-      </section>
+      </details>
       <details className="admin-section-tools" aria-labelledby="dashboard-coverage">
-        <summary id="dashboard-coverage">{label('coverage')}</summary>
+        <summary id="dashboard-coverage"><Info className="inline h-4 w-4" aria-hidden="true" /> {label('coverage')}</summary>
         <ul className="space-y-2">
           {unmeasuredCoverage.map((metric) => (
             <li key={metric}>

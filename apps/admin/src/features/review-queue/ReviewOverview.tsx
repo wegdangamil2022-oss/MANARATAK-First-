@@ -57,13 +57,13 @@ export function ReviewOverview({ items, states, filters, onFilter, language, now
         {metrics.map(({ key, title, icon: Icon, color, value }) => <button key={key} type="button"
           aria-pressed={key === 'overdue' ? filters.view === 'overdue' : filters.reason === key}
           onClick={() => key === 'overdue' ? onFilter('view', filters.view === 'overdue' ? 'all' : 'overdue') : onFilter('reason', filters.reason === key ? 'all' : key)}
-          className="relative min-h-36 overflow-hidden rounded-2xl border border-[#DDEFF2] bg-white p-4 text-start shadow-xs transition hover:-translate-y-0.5 hover:shadow-md aria-pressed:ring-2 aria-pressed:ring-[#21A7B4]">
+          className="review-analysis-metric relative overflow-hidden rounded-2xl border border-[#DDEFF2] bg-white p-4 text-start shadow-xs transition hover:shadow-md aria-pressed:ring-2 aria-pressed:ring-[#21A7B4]">
           <span className="absolute inset-x-0 top-0 h-1" style={{ backgroundColor: color }} />
           <Icon aria-hidden="true" className="mb-3 h-5 w-5" style={{ color }} />
           <span className="block text-2xl font-black text-[#142B5F]">{number(value)}</span>
           <span className="mt-2 block text-xs font-bold text-slate-600">{title}</span>
         </button>)}
-        <div aria-describedby="review-sla-near-limit" className="relative min-h-36 overflow-hidden rounded-2xl border border-[#DDEFF2] bg-[#DDEFF2]/20 p-4 shadow-xs">
+        <div aria-describedby="review-sla-near-limit" className="review-analysis-metric relative overflow-hidden rounded-2xl border border-[#DDEFF2] bg-[#DDEFF2]/20 p-4 shadow-xs">
           <span className="absolute inset-x-0 top-0 h-1 bg-[#21A7B4]" />
           <Clock3 aria-hidden="true" className="mb-3 h-5 w-5 text-[#21A7B4]" />
           <span className="block text-2xl font-black text-[#142B5F]">—</span>

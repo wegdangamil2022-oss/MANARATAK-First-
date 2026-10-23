@@ -71,7 +71,7 @@ export async function readNextReviewPage(
         timer = setTimeout(() => {
           controller.abort();
           reject(new Error('SOURCE_TIMEOUT'));
-        }, 8000);
+        }, 30000);
       }),
     ]);
     if (signal.aborted) return state;

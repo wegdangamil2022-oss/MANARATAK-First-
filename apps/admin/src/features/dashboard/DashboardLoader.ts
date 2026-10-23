@@ -29,7 +29,7 @@ export async function readDashboardSource(
         timer = setTimeout(() => {
           controller.abort();
           reject(new Error('TIMED_OUT'));
-        }, 5000);
+        }, 30000);
       }),
     ]);
     if (signal.aborted) return previous;

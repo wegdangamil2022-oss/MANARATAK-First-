@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BookOpen, BriefcaseBusiness, GraduationCap, Newspaper, School, TestTube2, Users, type LucideIcon } from 'lucide-react';
+import { ArrowUpLeft, BookOpen, BriefcaseBusiness, GraduationCap, Newspaper, School, ShieldCheck, TestTube2, Users, type LucideIcon } from 'lucide-react';
 import { dashboardMetricHref } from './DashboardSources';
 import { effectiveDashboardState, type DashboardReading } from './DashboardContract';
 import { dashboardLabel, dashboardTime } from './dashboardText';
@@ -22,7 +22,7 @@ export function DashboardMetricCard({
   const value = state === 'forbidden' ? null : reading.metrics[metric];
   const text =
     value === null || value === undefined
-      ? label('unknown')
+      ? '—'
       : new Intl.NumberFormat(language === 'ar' ? 'ar' : 'en-US').format(value);
   const href = dashboardMetricHref(reading.source, metric);
   const visual: Record<string, [LucideIcon, string]> = {
@@ -40,42 +40,38 @@ export function DashboardMetricCard({
         );
   return (
     <article
-      className={`${card} relative overflow-hidden ${compact ? 'flex min-h-48 flex-col transition hover:-translate-y-0.5 hover:shadow-md' : ''}`}
+      className={`${card} dashboard-metric ${compact ? 'dashboard-metric-primary' : 'dashboard-metric-signal'}`}
       aria-label={`${label(reading.source.domain)}: ${label(metric)}; ${label(state)}`}
     >
       {compact && <>
         <span className="absolute inset-x-0 top-0 h-1" style={{ backgroundColor: accent }} />
-        <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="dashboard-metric-top">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: `${accent}14`, color: accent }}><Icon aria-hidden="true" className="h-5 w-5" /></span>
-          <span className="rounded-full bg-[#FAF7F0] px-2 py-1 text-[10px] font-bold text-slate-500">{label(state)}</span>
+          <h3>{label(reading.source.domain)}</h3>
         </div>
       </>}
       {!compact && <p className="mb-2 text-xs font-bold text-slate-500">{label(reading.source.domain)}</p>}
-      <h3 className="text-sm font-bold text-[#0E7C86]">
+      {!compact && <h3 className="text-sm font-bold text-[#0E7C86]">
+        <Icon aria-hidden="true" className="h-4 w-4" style={{ color: accent }} />
         {label(compact ? reading.source.domain : metric)}
-      </h3>
+      </h3>}
       <output
-        className={`mt-2 block font-black ${compact && value == null ? 'text-lg' : 'text-2xl'}`}
+        className={`dashboard-metric-value ${value == null ? 'dashboard-metric-missing' : ''}`}
         aria-label={`${label(metric)}: ${text}`}
       >
         {text}
       </output>
-      <p role="status" className={`mt-1 text-xs ${compact ? 'sr-only' : ''}`} title={label(state)}>
+      <p role="status" className="dashboard-metric-status" title={label(state)}>
         {compact && state === 'available'
           ? language === 'ar'
             ? 'متاح'
             : 'Available'
           : label(state)}
       </p>
-      {!compact && <p className="mt-2 text-sm text-slate-600">{scope}</p>}
-      {!compact && (
-        <p className="text-xs">
-          {label('checked')}: {dashboardTime(reading.capturedAt, language)}
-        </p>
-      )}
-      <details className="mt-2 text-xs">
+      <details className="dashboard-source-details">
         <summary>{language === 'ar' ? 'تفاصيل المصدر' : 'Source details'}</summary>
         <p>{label('scope')}</p>
+        {!compact && <p>{scope} · {dashboardTime(reading.capturedAt, language)}</p>}
         {compact && (
           <p>
             {label('checked')}: {dashboardTime(reading.capturedAt, language)}
@@ -95,23 +91,16 @@ export function DashboardMetricCard({
         <p>
           {label('received')}: {dashboardTime(reading.receivedAt, language)}
         </p>
-        {compact && (reading.errors[metric] || reading.errors.read) && <p role="alert">{label(state)} · <bdi>{reading.errors[metric] ?? reading.errors.read}</bdi></p>}
+        {(reading.errors[metric] || reading.errors.read) && <p role="alert">{label(state)} · <bdi>{reading.errors[metric] ?? reading.errors.read}</bdi></p>}
       </details>
-      {!compact && (reading.errors[metric] || reading.errors.read) ? (
-        <p role="alert" className="mt-2 text-sm">
-          {label(state)} · <bdi>{reading.errors[metric] ?? reading.errors.read}</bdi>
-        </p>
-      ) : null}
       {state !== 'forbidden' ? (
         <Link
-          className="mt-3 inline-flex min-h-10 items-center rounded-xl bg-[#DDEFF2]/50 px-3 py-2 text-xs font-bold text-[#0E7C86] focus-visible:outline focus-visible:outline-2"
+          className="dashboard-metric-link"
           to={href}
         >
-          {href.startsWith('/review-queue?') ? label('queue') : label('owner')}
+          {language === 'ar' ? (href.startsWith('/review-queue?') ? 'عرض المراجعات' : 'فتح القسم') : (href.startsWith('/review-queue?') ? 'View reviews' : 'Open section')}
+          <ArrowUpLeft aria-hidden="true" className="h-3.5 w-3.5" />
         </Link>
-      ) : null}
-      {!compact && state !== 'forbidden' && !href.startsWith('/review-queue?') ? (
-        <p className="text-xs">{label('list')}</p>
       ) : null}
     </article>
   );
@@ -130,10 +119,9 @@ export function DashboardHealthPanel({
   const health = reading.health,
     current = state === 'available' && health !== null;
   return (
-    <section className={card} aria-label={label('health')}>
-      <h2 className="text-lg font-bold">{label('health')}</h2>
+    <section className={`${card} dashboard-health`} aria-label={label('health')}>
+      <h2 className="text-lg font-bold"><ShieldCheck aria-hidden="true" />{label('health')}</h2>
       <p role="status">{label(state)}</p>
-      <p className="text-sm">{label('health_limit')}</p>
       <dl className="mt-3 grid gap-2 sm:grid-cols-2">
         <div>
           <dt>{label('liveness')}</dt>
@@ -158,9 +146,9 @@ export function DashboardHealthPanel({
           </dd>
         </div>
       </dl>
-      <p className="mt-3 text-xs">
+      <details className="dashboard-source-details"><summary>{language === 'ar' ? 'تفاصيل الجاهزية' : 'Readiness details'}</summary><p>{label('health_limit')}</p><p className="mt-3 text-xs">
         {label('checked')}: {dashboardTime(reading.capturedAt, language)}
-      </p>
+      </p></details>
       {state !== 'forbidden' ? (
         <Link
           to="/health-readiness"

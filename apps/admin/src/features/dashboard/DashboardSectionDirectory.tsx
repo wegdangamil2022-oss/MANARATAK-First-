@@ -21,33 +21,27 @@ export function DashboardSectionDirectory() {
   const tr = (ar: string, en: string) => (language === 'ar' ? ar : en);
 
   return (
-    <section
+    <details
       aria-labelledby="dashboard-shortcuts"
       className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-xs sm:p-6"
     >
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+      <summary className="flex items-center justify-between gap-3">
         <div>
-          <h2 id="dashboard-shortcuts" className="flex items-center gap-2 text-xl font-black">
+          <span id="dashboard-shortcuts" className="flex items-center gap-2 font-bold">
             <LayoutGrid aria-hidden="true" className="h-5 w-5 text-[#0E7C86]" />
-            {tr('أقسام الإدارة والوصول السريع', 'Administration sections & quick access')}
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            {tr(
-              'جميع الأقسام المتاحة لحسابك، مرتبة مثل القائمة الرئيسية. اختر القسم لفتح أدواته.',
-              'All sections available to your account, grouped like the main menu. Select a section to open its tools.',
-            )}
-          </p>
+            {tr('دليل الأقسام', 'Workspace directory')}
+          </span>
         </div>
         <span className="rounded-full bg-[#DDEFF2]/60 px-3 py-1 text-xs font-bold text-[#0E7C86]">
           {tr('الأقسام المتاحة', 'Available sections')}: {new Intl.NumberFormat(language).format(count)}
         </span>
-      </div>
+      </summary>
       {count === 0 ? (
         <p className="text-sm text-slate-600">
           {tr('لا توجد أقسام متاحة لهذا الحساب.', 'No sections are available for this account.')}
         </p>
       ) : null}
-      <div className="space-y-5">
+      <div className="mt-4 space-y-4">
         {groups.map((group) => (
           <section key={group.labelKey} aria-labelledby={`dashboard-directory-${group.labelKey}`}>
             <h3
@@ -77,6 +71,6 @@ export function DashboardSectionDirectory() {
           </section>
         ))}
       </div>
-    </section>
+    </details>
   );
 }

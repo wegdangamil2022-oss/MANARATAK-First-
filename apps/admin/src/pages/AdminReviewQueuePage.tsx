@@ -5,7 +5,8 @@ import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { ReviewOverview } from '../features/review-queue/ReviewOverview';
 import { matchesReviewSearch } from '../features/review-queue/ReviewSearch';
-import { ClipboardCheck, RefreshCw, Filter, Search, X, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { ClipboardCheck, RefreshCw, Filter, Search, X, AlertTriangle, ShieldCheck, ArrowUpLeft, Eye, Layers, Clock3, SlidersHorizontal } from 'lucide-react';
+import { reviewReadScope } from '../features/review-queue/ReviewSchedule';
 import {
   reviewSources,
   sourceAllowed,
@@ -125,6 +126,12 @@ export function AdminReviewQueuePage() {
   const controller = useRef<AbortController | null>(null);
   const generation = useRef(0);
   const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
+  const lastAttempt = useRef(0);
+  const scopeKey = `${filters.domain}|${filters.reason}|${filters.view === 'ready' || filters.view === 'translation' ? filters.view : 'all'}`;
+  const filtersRef = useRef(filters);
+  const activeReadKeys = useRef(new Set<string>());
+  filtersRef.current = filters;
   const [selected, setSelected] = useState<ReviewItem | null>(null);
   const [listPage, setListPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
@@ -143,7 +150,7 @@ export function AdminReviewQueuePage() {
   });
   const previewController = useRef<AbortController | null>(null);
   const load = useCallback(
-    async (continuation = false, sourceKey?: string) => {
+    async (continuation = false, sourceKey?: string, fullCoverage = false) => {
       controller.current?.abort();
       previewController.current?.abort();
       const token = ++generation.current;
@@ -151,6 +158,8 @@ export function AdminReviewQueuePage() {
       controller.current = abort;
       setSelected(null);
       setBusy(true);
+      busyRef.current = true;
+      lastAttempt.current = Date.now();
       const initial = reviewSources.map((source) =>
         initialSourceState(
           source,
@@ -172,8 +181,9 @@ export function AdminReviewQueuePage() {
       const requested = current.filter(
         (state) =>
           allowed.some((source) => source.key === state.source.key) &&
-          (!sourceKey || sourceKey === state.source.key),
+          (sourceKey ? sourceKey === state.source.key : fullCoverage || reviewReadScope(allowed, filtersRef.current).some(source => source.key === state.source.key)),
       );
+      if (!sourceKey) activeReadKeys.current = new Set(requested.map(state => state.source.key));
       await loadReviewSources(
         requested,
         (url, options) => adminApiClient.request(url, options),
@@ -195,17 +205,17 @@ export function AdminReviewQueuePage() {
           );
         },
       );
-      if (token === generation.current) setBusy(false);
+      if (token === generation.current) { setBusy(false); busyRef.current = false; }
     },
     [allowed],
   );
   useEffect(() => {
     void load();
     const visibility = () => {
-      if (document.visibilityState === 'visible') void load();
+      if (document.visibilityState === 'visible' && !busyRef.current && Date.now() - lastAttempt.current > 300000) void load();
     };
     const focus = () => {
-      void load();
+      visibility();
     };
     document.addEventListener('visibilitychange', visibility);
     window.addEventListener('focus', focus);
@@ -216,7 +226,7 @@ export function AdminReviewQueuePage() {
       document.removeEventListener('visibilitychange', visibility);
       window.removeEventListener('focus', focus);
     };
-  }, [load]);
+  }, [load, scopeKey]);
   useEffect(() => {
     const timer = window.setInterval(() => setClock(Date.now()), 60000);
     return () => window.clearInterval(timer);
@@ -261,7 +271,7 @@ export function AdminReviewQueuePage() {
   const permittedStates = states.filter((state) => allowed.some((source) => source.key === state.source.key));
   const hasPartial = permittedStates.length === 0 || permittedStates.some((state) => state.availability !== 'ready' || state.windowLimited);
   const readSources = permittedStates.filter((state) => ['ready', 'partial'].includes(state.availability)).length;
-  const unavailableSources = permittedStates.filter((state) => ['unavailable', 'stale'].includes(state.availability));
+  const unavailableSources = permittedStates.filter((state) => state.errorCode && ['unavailable', 'stale'].includes(state.availability));
   const lastRead = permittedStates.reduce<string | null>((latest, state) =>
     state.capturedAt && (!latest || state.capturedAt > latest) ? state.capturedAt : latest, null);
   const openAudit = useCallback(
@@ -390,23 +400,15 @@ export function AdminReviewQueuePage() {
   const updateFilter = (key: keyof ReviewFilters, value: string) =>
     setParams(serializeReviewFilters({ ...filters, [key]: value }));
   const canContinue = permittedStates.some(
-    (state) => state.nextPage !== null && state.availability !== 'access_denied',
+    (state) => activeReadKeys.current.has(state.source.key) && state.nextPage !== null && state.availability !== 'access_denied',
   );
   return (
-    <div dir={dir} className="admin-owner-workspace mx-auto max-w-7xl space-y-6 text-[#203442]">
+    <div dir={dir} className="admin-owner-workspace admin-review-center mx-auto max-w-7xl space-y-5 text-[#203442]">
       <header className="admin-page-hero relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] px-5 py-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:px-7 sm:py-7">
         <div><span className="mb-3 inline-flex items-center gap-2 text-xs font-bold text-[#F2CD78]"><ClipboardCheck className="h-4 w-4" aria-hidden="true" />{tr('مركز العمل الإداري', 'Administration work center')}</span>
         <h1 className="text-2xl font-bold">{tr('قائمة المراجعة', 'Enterprise Review Queue')}</h1>
         <p>{tr('إشارات المراجعة والجودة حسب المجال، مع الانتقال إلى القسم المسؤول لإتمام الإجراء.', 'Review and quality signals by domain, with handoffs to the responsible workspace.')}</p></div>
         <div className="flex flex-wrap items-stretch gap-3">
-          <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-xs">
-            <span className="block text-white/75">{tr('استعلامات مصادر مقروءة', 'Source queries read')}</span>
-            <span className="mt-1 block text-xl font-black text-[#F2CD78]">{number(readSources)} / {number(permittedStates.length)}</span>
-          </div>
-          <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-xs">
-            <span className="block text-white/75">{tr('آخر قراءة مصدر ناجحة', 'Latest successful source read')}</span>
-            <span className="mt-2 block max-w-56 break-words font-bold">{date(lastRead)}</span>
-          </div>
         <button disabled={busy} className="inline-flex items-center gap-2 rounded border px-4 py-2" onClick={() => void load()}>
           <RefreshCw aria-hidden="true" className={`h-4 w-4 ${busy ? 'animate-spin' : ''}`} />
           {tr('تحديث وإعادة التحقق', 'Refresh and recheck')}
@@ -429,7 +431,7 @@ export function AdminReviewQueuePage() {
           </Link>
         ) : null}
       </div>
-      <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="review-filter-fields">
         <label className="flex flex-col gap-1 sm:col-span-2">
           {tr('بحث في العينة المحملة', 'Search loaded sample')}
           <span className="relative">
@@ -463,19 +465,13 @@ export function AdminReviewQueuePage() {
         </button>
       </div>
       </section>
-      <p className="rounded-2xl border border-[#D6A43B]/30 bg-[#F2CD78]/15 p-4 text-sm leading-7 text-[#203442]">
-        {tr(
-          'للقراءة والتنقل إلى المالك فقط. لا موافقة أو نشر أو رفض من هنا.',
-          'Read and navigate to the owner. Decisions remain in owner workspaces.',
-        )}
-      </p>
       {!busy && unavailableSources.length > 0 && (
         <p role="status" className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm leading-7 text-rose-900">
           <AlertTriangle aria-hidden="true" className="mt-1 h-5 w-5 shrink-0" />
           <span>{tr('بعض المصادر غير متاحة أو تحتاج إعادة تحقق. العدد غير المتاح ليس صفرًا؛ راجع تفاصيل التغطية أدناه.', 'Some sources are unavailable or need rechecking. Missing counts are not zero; see source coverage below.')}</span>
         </p>
       )}
-      <p role="status" aria-live="polite">
+      <p role="status" aria-live="polite" className="review-load-status">
         {busy
           ? tr('جار تحميل صفحات محدودة…', 'Loading bounded source pages…')
           : tr('انتهت القراءة الحالية', 'Current reads completed')}{' '}
@@ -491,13 +487,24 @@ export function AdminReviewQueuePage() {
               'Reads reached available page ends; this is not a unified snapshot.',
             )}
       </p>
-      <ReviewOverview items={items} states={permittedStates} filters={filters} onFilter={updateFilter} language={language} now={clock} canOpenTranslations={hasPermission('admin:cms:manage')} />
-      <p className="text-sm">
+      <p className="command-caption">{tr('نبدأ بعينة المراجعة من كل مجال. اختر مجالًا أو سببًا لتحميل مصادره؛ لا تمثل العينة جميع الأعمال.', 'Start with workflow samples across domains. Select a domain or reason to read its sources; this sample does not represent all work.')}</p>
+      <div className="review-read-summary">
+        <span><Layers aria-hidden="true" />{tr('المصادر المقروءة', 'Sources read')} <b>{number(readSources)} / {number(permittedStates.length)}</b></span>
+        <span><ClipboardCheck aria-hidden="true" />{tr('سجلات العينة', 'Sample records')} <b>{number(items.length)}</b></span>
+        <span><Filter aria-hidden="true" />{tr('نتائج التصفية', 'Filtered results')} <b>{number(filtered.length)}</b></span>
+        <span><Clock3 aria-hidden="true" />{tr('آخر قراءة ناجحة', 'Latest successful read')} <b>{date(lastRead)}</b></span>
+      </div>
+      <details className="command-panel review-guide">
+      <summary><ShieldCheck aria-hidden="true" />{tr('دليل الأولوية وحدود البيانات', 'Priority and data guide')}</summary>
+      <p className="command-caption">{tr('إتمام المراجعة والنشر داخل القسم المختص. هذه الصفحة للمتابعة ومعاينة الأدلة.', 'Review and publish in the responsible workspace. Use this page to track work and preview evidence.')}</p>
+      <p className="command-caption">
         {tr(
           'الفلاتر والأولوية المقترحة ومؤشرات الجودة تخص العينة فقط. العمر يبدأ من دليل دخول المراجعة؛ الاستيراد والتعديل منفصلان. SLA غير معروف دون وقت الدخول والموعد وسياسة المالك.',
           'Filters, suggested priority and quality indicators apply to the sample. Age uses review entry evidence; import and modification clocks are separate. SLA is unknown without entry time, due time and owner policy.',
         )}
       </p>
+      </details>
+      <div className="review-results-layout">
       <details className="admin-section-tools">
         <summary className="cursor-pointer font-semibold">
           {tr('تغطية المصادر والأعداد والأخطاء', 'Source coverage, counts and errors')}
@@ -508,6 +515,7 @@ export function AdminReviewQueuePage() {
             'Query totals can overlap; they are not a unique record total. Live offset pages can change during reads; recheck with the owner.',
           )}
         </p>
+        <button disabled={busy} onClick={() => void load(false, undefined, true)} className="review-outline-button">{tr('قراءة جميع مصادر التغطية', 'Read all coverage sources')}</button>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -533,7 +541,7 @@ export function AdminReviewQueuePage() {
                     <bdi>{state.source.key}</bdi>
                   </td>
                   <td>
-                    {label(state.availability)} {state.errorCode && <bdi>{state.errorCode}</bdi>}
+                    {!state.capturedAt && !state.errorCode ? tr('لم يُطلب بعد', 'Not requested yet') : label(state.availability)} {state.errorCode && <bdi>{state.errorCode}</bdi>}
                   </td>
                   <td>
                     {number(state.scanned)} / {number(state.total)} ({number(state.rows.length)}{' '}
@@ -595,14 +603,13 @@ export function AdminReviewQueuePage() {
           <span className="rounded-full bg-[#DDEFF2]/60 px-3 py-1 text-xs font-bold text-[#0E7C86]">{number(filtered.length)} {tr('نتيجة', 'results')}</span>
         </div>
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full review-work-table">
           <thead>
             <tr>
               {[
                 tr('السجل', 'Record'),
                 tr('الإشارات والأولوية', 'Signals and priority'),
-                tr('الأوقات', 'Clocks'),
-                tr('المالك', 'Owner'),
+                tr('الإجراء', 'Action'),
               ].map((value) => (
                 <th key={value} className="p-2 text-start">
                   {value}
@@ -614,43 +621,30 @@ export function AdminReviewQueuePage() {
             {filtered.slice((listPage - 1) * 40, listPage * 40).map((item) => (
               <tr key={item.key} className="border-t align-top">
                 <td className="p-2">
-                  <bdi>{item.title}</bdi>
-                  <div>
-                    {label(item.domain)} · <bdi>{item.id}</bdi>
+                  <strong className="review-record-title"><bdi>{item.title}</bdi></strong>
+                  <span className="review-record-domain">{label(item.domain)}</span>
+                  <div className="review-record-tags">
+                    {item.status && <span>{label(item.status)}</span>}
+                    {item.completenessStatus && <span>{label(item.completenessStatus)}</span>}
+                    {!item.status && !item.completenessStatus && <span>{tr('التصنيف غير مزود', 'Classification not supplied')}</span>}
                   </div>
-                  <small>
-                    {tr('لغة المصدر', 'Source locale')}: {item.locale ?? label('unknown')} ·{' '}
-                    {label(item.sourceKind)}
-                  </small>
-                  <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                    <span className="rounded-full bg-[#DDEFF2]/50 px-2 py-1">{tr('الحالة', 'Status')}: {label(item.status ?? 'unknown')}</span>
-                    <span className="rounded-full bg-[#FAF7F0] px-2 py-1">{tr('الاكتمال', 'Completeness')}: {label(item.completenessStatus ?? 'unknown')}</span>
-                  </div>
+                  <details className="review-row-details"><summary>{tr('بيانات السجل', 'Record metadata')}</summary><bdi>{item.id}</bdi><p>{tr('لغة المصدر', 'Source locale')}: {item.locale ?? label('unknown')} · {label(item.sourceKind)}</p><p>{tr('استيراد', 'Imported')}: {date(item.importedAt)} · {tr('تعديل', 'Modified')}: {date(item.modifiedAt)}</p><p>{tr('تعيين المراجع غير مزود', 'Reviewer assignment not supplied')}</p></details>
                 </td>
                 <td className="p-2">
-                  {item.signals.map((signal) => (
-                    <div key={signal.key}>
-                      {label(signal.reason)} · {label(signal.priority)} (
+                  <div className="review-reason-tags">{[...new Set(item.signals.map(signal => signal.reason))].map(reason => <span key={reason}>{label(reason)}</span>)}</div>
+                  {[...item.signals].sort((a,b) => ['critical','high','medium','low'].indexOf(a.priority) - ['critical','high','medium','low'].indexOf(b.priority)).slice(0,1).map((signal) => (
+                    <div key={signal.key} className="review-signal">
+                      <span className={`review-priority review-priority-${signal.priority}`}>{label(signal.priority)} (
                       {signal.priorityBasis === 'owner'
                         ? tr('المالك', 'Owner')
                         : tr('مقترحة', 'Suggested')}
-                      ) · SLA: {label(signalSla(signal, clock))}
+                      )</span><small>SLA: {[...new Set(item.signals.map(entry => signalSla(entry, clock)))].map(label).join(' · ')}</small>
                     </div>
                   ))}
                 </td>
-                <td className="p-2 text-sm">
-                  {tr('استيراد', 'Imported')}: {date(item.importedAt)}
-                  <br />
-                  {tr('تعديل', 'Modified')}: {date(item.modifiedAt)}
-                  <br />
-                  {tr(
-                    'تعيين المراجع: غير مزود بعقد المالك',
-                    'Reviewer assignment: not supplied by owner contract',
-                  )}
-                </td>
                 <td className="p-2">
-                  <Link className="underline" to={item.href}>
-                    {tr('فتح لدى المالك', 'Open owner workspace')}
+                  <Link className="review-open-record" to={item.href}>
+                    {tr('فتح السجل', 'Open record')}<ArrowUpLeft aria-hidden="true" />
                   </Link>
                   {!item.detail && (
                     <div className="text-sm">
@@ -661,13 +655,13 @@ export function AdminReviewQueuePage() {
                     </div>
                   )}
                   <button
-                    className="mt-2 block underline"
+                    className="review-preview-button"
                     onClick={(event) => {
                       selectionButton.current = event.currentTarget;
                       setSelected(item);
                     }}
                   >
-                    {tr('معاينة الأدلة', 'Preview evidence')}
+                    <Eye aria-hidden="true" />{tr('معاينة الأدلة', 'Preview evidence')}
                   </button>
                 </td>
               </tr>
@@ -698,6 +692,10 @@ export function AdminReviewQueuePage() {
         </button>
       </nav>
       </section>
+      </div>
+      <details className="command-panel review-analysis"><summary><SlidersHorizontal aria-hidden="true" />{tr('تحليل العينة ومساحات المراجعة', 'Sample analysis and review workspaces')}</summary>
+        <ReviewOverview items={items} states={permittedStates} filters={filters} onFilter={updateFilter} language={language} now={clock} canOpenTranslations={hasPermission('admin:cms:manage')} />
+      </details>
       <section className="flex items-start gap-3 rounded-3xl border border-[#DDEFF2] bg-[#DDEFF2]/25 p-5">
         <ShieldCheck aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-[#0E7C86]" />
         <div><h2 className="font-black text-[#142B5F]">{tr('المراجعة والاعتماد داخل القسم المختص', 'Review and approval in the owner workspace')}</h2>

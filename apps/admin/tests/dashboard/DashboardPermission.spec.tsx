@@ -13,6 +13,17 @@ async function mount(){await act(async()=>{tree=create(view());});}
 beforeEach(()=>{(globalThis as any).IS_REACT_ACT_ENVIRONMENT=true;state.permissions=['admin:scholarships:manage'];vi.stubGlobal('window',{setInterval,clearInterval,addEventListener:vi.fn(),removeEventListener:vi.fn()});vi.stubGlobal('document',{visibilityState:'visible',addEventListener:vi.fn(),removeEventListener:vi.fn()});state.request.mockReset().mockResolvedValue({total:2741,imported:0,missingFields:0,needsVerification:0,needsTranslation:0});});
 afterEach(async()=>{if(tree)await act(async()=>tree.unmount());vi.unstubAllGlobals();});
 describe('Dashboard owner permissions and last-good evidence',()=>{
+ it('defers publication breakdowns until their section is opened', async()=>{
+ await mount();
+ expect(state.request.mock.calls.some(([path])=>path.includes('status='))).toBe(false);
+ expect(state.request.mock.calls.length).toBe(2);
+ const section=tree.root.findByProps({'aria-labelledby':'dashboard-scholarships'});
+ await act(async()=>section.props.onToggle({currentTarget:{open:true}}));
+ expect(state.request.mock.calls.some(([path])=>path.includes('status=PUBLISHED'))).toBe(true);
+ const after=state.request.mock.calls.length;
+ await act(async()=>section.props.onToggle({currentTarget:{open:true}}));
+ expect(state.request.mock.calls.length).toBe(after);
+ });
  it('removes counters and owner links when the owner grant is revoked',async()=>{await mount();expect(JSON.stringify(tree.toJSON())).toContain('2,741');
  const directory=()=>tree.root.findByProps({'aria-labelledby':'dashboard-shortcuts'});
  expect(directory().findAllByType('a').map(link=>link.props.href)).toEqual(['/scholarships','/security']);

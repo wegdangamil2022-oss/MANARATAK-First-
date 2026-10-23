@@ -22,6 +22,22 @@ beforeEach(()=>{
 });
 afterEach(async()=>{if(tree)await act(async()=>tree.unmount());vi.unstubAllGlobals();});
 describe('Review queue session loss clears old evidence',()=>{
+ it('does not reread a fresh sample on window focus',async()=>{
+ await mount();
+ expect(state.request).toHaveBeenCalledTimes(1);
+ const focus=(window.addEventListener as any).mock.calls.find(([event]:[string])=>event==='focus')[1];
+ state.request.mockClear();
+ await act(async()=>focus());
+ expect(state.request).not.toHaveBeenCalled();
+ });
+ it('reads the selected domain sources instead of leaving its other review reasons unread',async()=>{
+ await mount();state.request.mockClear();
+ const domain=tree.root.findAllByType('select').find(select=>select.findAllByType('option').some(option=>option.props.value==='scholarships'))!;
+ await act(async()=>domain.props.onChange({target:{value:'scholarships'}}));
+ expect(state.request.mock.calls.length).toBe(8);
+ expect(state.request.mock.calls.every(([path])=>path.startsWith('/admin/scholarships?'))).toBe(true);
+ expect(state.request.mock.calls.some(([path])=>path.includes('status=READY_TO_PUBLISH'))).toBe(true);
+ });
  it('searches only loaded evidence and clears search without re-requesting sources',async()=>{
  await mount();
  const pending=()=>tree.root.findByProps({'aria-labelledby':'review-pending-work'});
