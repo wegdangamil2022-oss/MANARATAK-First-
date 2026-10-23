@@ -1,0 +1,81 @@
+{
+  "kind": "INITIAL_TEST_IMPORT_POSTGRES16_SYNTHETIC_PROOF",
+  "pass": true,
+  "sourceSha": "46f6cf359d838fe9888874c14458e236e6143563",
+  "runId": "54bc2513-95b6-4049-8f02-6904551d9b02",
+  "observedAt": "2026-10-23T00:15:52.755Z",
+  "postgresMajor": 16,
+  "planHash": "1f3b2c0d41f93d034d94bfd532d3b3b9d19ceb1ee08dc05bca958b39066c7538",
+  "managedDatabaseConnections": 0,
+  "realAccountsCreated": 0,
+  "priorDatabasesTouched": false,
+  "syntheticIdentityVerifiedViaLocalSmtp": true,
+  "firstAdminBootstrap": false,
+  "restrictedApplicationIdentity": {
+    "role": "post28_app",
+    "database": "manaratak_post28_transactions_test",
+    "server": "7699649782136097784",
+    "rolsuper": false,
+    "rolcreaterole": false,
+    "rolcreatedb": false,
+    "rolbypassrls": false,
+    "ledger": false,
+    "ddl": false,
+    "owns": false
+  },
+  "initialCounts": {
+    "roots": 0,
+    "versions": 0,
+    "blocks": 0,
+    "audit": 0,
+    "outbox": 3
+  },
+  "appliedCounts": {
+    "roots": 2,
+    "versions": 2,
+    "blocks": 36,
+    "audit": 1,
+    "outbox": 4
+  },
+  "rollbackCounts": {
+    "roots": 2,
+    "versions": 2,
+    "blocks": 36,
+    "audit": 2,
+    "outbox": 5
+  },
+  "phases": [
+    {
+      "name": "RESTRICTED_APPLICATION_IDENTITY_VERIFIED",
+      "at": "2026-10-23T00:15:50.646Z"
+    },
+    {
+      "name": "SYNTHETIC_REGISTRATION_SMTP_VERIFICATION_AND_DENIALS_VERIFIED",
+      "at": "2026-10-23T00:15:50.833Z"
+    },
+    {
+      "name": "ACTUAL_OUTBOX_PERMISSION_FAILURE_ROLLED_BACK_ALL_WRITES",
+      "at": "2026-10-23T00:15:51.129Z"
+    },
+    {
+      "name": "TWO_REAL_SOURCES_IMPORTED_AS_PRIVATE_DRAFTS",
+      "at": "2026-10-23T00:15:51.258Z",
+      "roots": 2,
+      "versions": 2,
+      "contentBlocks": 36
+    },
+    {
+      "name": "REPLAY_ZERO_WRITES_AND_RECONCILIATION_VERIFIED",
+      "at": "2026-10-23T00:15:51.330Z"
+    },
+    {
+      "name": "SECOND_INITIAL_BATCH_DENIED_ON_NONEMPTY_CATALOG",
+      "at": "2026-10-23T00:15:52.535Z"
+    },
+    {
+      "name": "ROLLBACK_PRESERVES_SOURCE_AND_RETRY_ZERO_WRITES",
+      "at": "2026-10-23T00:15:52.755Z"
+    }
+  ],
+  "productionReady": false
+}
