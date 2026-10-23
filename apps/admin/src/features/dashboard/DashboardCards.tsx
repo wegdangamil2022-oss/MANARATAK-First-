@@ -52,11 +52,19 @@ export function DashboardMetricCard({
           : label(state)}
       </p>
       {!compact && <p className="mt-2 text-sm text-slate-600">{scope}</p>}
-      <p className="text-xs">
-        {label('checked')}: {dashboardTime(reading.capturedAt, language)}
-      </p>
+      {!compact && (
+        <p className="text-xs">
+          {label('checked')}: {dashboardTime(reading.capturedAt, language)}
+        </p>
+      )}
       <details className="mt-2 text-xs">
-        <summary>{label('scope')}</summary>
+        <summary>{language === 'ar' ? 'تفاصيل المصدر' : 'Source details'}</summary>
+        <p>{label('scope')}</p>
+        {compact && (
+          <p>
+            {label('checked')}: {dashboardTime(reading.capturedAt, language)}
+          </p>
+        )}
         {compact && (
           <p>
             {label(metric)} · {scope}

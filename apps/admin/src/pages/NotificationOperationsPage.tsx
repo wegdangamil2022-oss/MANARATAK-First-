@@ -279,7 +279,28 @@ export function NotificationOperationsPage() {
   ];
   return (
     <section dir={dir} className="admin-owner-workspace mx-auto max-w-7xl space-y-6 text-[#203442]">
-      <header className="admin-page-hero rounded-3xl bg-gradient-to-l from-[#142B5F] to-[#0E7C86] p-6 text-white"><h1 className="">{c('إدارة الإشعارات', 'Notification operations')}</h1></header>
+      <header className="admin-page-hero rounded-3xl bg-gradient-to-l from-[#142B5F] to-[#0E7C86] p-6 text-white"><h1 className="">{c('إدارة الإشعارات', 'Notification operations')}</h1><p>{c('قوالب الإرسال، إشعارات الطالب، الجدولة وحالة التسليم.', 'Delivery templates, student notifications, scheduling and delivery status.')}</p><nav className="flex w-full flex-wrap gap-3">
+        <button disabled={busy || loading} onClick={() => setReload((n) => n + 1)}>
+          {c('تحديث', 'Refresh')}
+        </button>
+        {can('intents:create') && can('recipients:pii') && (
+          <button
+            disabled={busy || !!draft}
+            onClick={() => {
+              setDraft(fresh());
+              setLocked(false);
+              setRecipients([]);
+            }}
+          >
+            {c('إنشاء إشعار', 'Create intent')}
+          </button>
+        )}
+        {can('templates:author') && (
+          <button disabled={busy || templateForm} onClick={() => setTemplateForm(true)}>
+            {c('إنشاء إصدار قالب', 'Create template revision')}
+          </button>
+        )}
+      </nav></header>
       <p>
         {c(
           'سجل API فعلي. تحقق قاعدة البيانات والمزود والعامل مؤجل إلى ما بعد القسم 28.',
@@ -308,28 +329,7 @@ export function NotificationOperationsPage() {
         <p>{c('الإحصاءات العامة غير متاحة', 'Global counts unavailable')}</p>
       )}
       {notice && <p role="status">{notice}</p>}
-      <nav className="flex flex-wrap gap-3">
-        <button disabled={busy || loading} onClick={() => setReload((n) => n + 1)}>
-          {c('تحديث', 'Refresh')}
-        </button>
-        {can('intents:create') && can('recipients:pii') && (
-          <button
-            disabled={busy || !!draft}
-            onClick={() => {
-              setDraft(fresh());
-              setLocked(false);
-              setRecipients([]);
-            }}
-          >
-            {c('إنشاء إشعار', 'Create intent')}
-          </button>
-        )}
-        {can('templates:author') && (
-          <button disabled={busy || templateForm} onClick={() => setTemplateForm(true)}>
-            {c('إنشاء إصدار قالب', 'Create template revision')}
-          </button>
-        )}
-      </nav>
+
       {templateForm && (
         <form
           className="space-y-3 border p-4"

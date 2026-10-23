@@ -256,7 +256,7 @@ export function IdentityAdminPage() {
           <p>{t('iam_identity_help')}</p>
         </div>
         {hasPermission('admin:authorization:manage') && (
-          <Link className={buttonClass} to="/authorization">
+          <Link className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold text-white" to="/authorization">
             {t('admin_nav_authorization')}
           </Link>
         )}

@@ -165,7 +165,7 @@ export function InternationalTestsAdminPage() {
       if (searchQuery.trim()) {
         params.append('searchQuery', searchQuery.trim());
       }
-      
+
       const response = await adminApiClient.request<InternationalTestListResponse>(
         `/admin/international-tests?${params.toString()}`,
         { signal }
@@ -214,11 +214,7 @@ export function InternationalTestsAdminPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <div className="grid gap-3 rounded border bg-white p-4 sm:grid-cols-3"><CanonicalPicker paged label={isRtl?'التوفر حسب الدولة':'Availability by country'} value={null} load={(q,page)=>canonicalPickerApi.countries(q,page)} onChange={(_id,item)=>{setCountryFilter(item?.code??'');setPage(1);}} />
-        <CanonicalPicker paged label={isRtl?'الجهة المنظمة':'Provider'} value={null} load={async(q,page)=>{const rows=await adminApiClient.request<Array<{id:string;displayName:string}>>(`/admin/international-tests/providers?search=${encodeURIComponent(q??'')}&page=${page??1}`);return rows.map(row=>({id:row.id,label:row.displayName,lifecycle:'ACTIVE'}));}} onChange={(_id,item)=>{setProviderFilter(item?.label??'');setPage(1);}} />
-        <label>{isRtl?'اكتمال البيانات':'Completeness'}<select value={completenessFilter} onChange={e=>{setCompletenessFilter(e.target.value);setPage(1);}}><option value="">{isRtl?'الكل':'All'}</option>{['INCOMPLETE','COMPLETE','NEEDS_REVIEW'].map(value=><option key={value}>{value}</option>)}</select></label>
-        <label><input type="checkbox" checked={staleOnly} onChange={e=>{setStaleOnly(e.target.checked);setPage(1);}}/>{isRtl?'مصادر تحتاج تحققًا حديثًا':'Sources needing fresh verification'}</label><p>{isRtl?'الإحصاءات تشمل نتائج الفلاتر كاملة.':'Metrics cover all filtered results.'}</p>
-      </div>
+
       <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -top-20 end-0 h-52 w-52 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none" />
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -294,6 +290,12 @@ export function InternationalTestsAdminPage() {
         <MetricCard label={isRtl ? "قيد المراجعة" : "Under Review"} value={tests?.statistics?.underReview ?? 0} icon={AlertCircle} accent="#D6A43B" />
         <MetricCard label={isRtl ? "غير مكتمل" : "Incomplete"} value={tests?.statistics?.incomplete ?? 0} icon={GraduationCap} accent="#B94A48" />
       </div>
+<details className="admin-section-tools"><summary>{isRtl ? 'فلاتر التوفر والاعتماد المتقدمة' : 'Advanced availability and accreditation filters'}</summary><div className="grid gap-3 rounded border bg-white p-4 sm:grid-cols-3"><CanonicalPicker paged label={isRtl?'التوفر حسب الدولة':'Availability by country'} value={null} load={(q,page)=>canonicalPickerApi.countries(q,page)} onChange={(_id,item)=>{setCountryFilter(item?.code??'');setPage(1);}} />
+        <CanonicalPicker paged label={isRtl?'الجهة المنظمة':'Provider'} value={null} load={async(q,page)=>{const rows=await adminApiClient.request<Array<{id:string;displayName:string}>>(`/admin/international-tests/providers?search=${encodeURIComponent(q??'')}&page=${page??1}`);return rows.map(row=>({id:row.id,label:row.displayName,lifecycle:'ACTIVE'}));}} onChange={(_id,item)=>{setProviderFilter(item?.label??'');setPage(1);}} />
+        <label>{isRtl?'اكتمال البيانات':'Completeness'}<select value={completenessFilter} onChange={e=>{setCompletenessFilter(e.target.value);setPage(1);}}><option value="">{isRtl?'الكل':'All'}</option>{['INCOMPLETE','COMPLETE','NEEDS_REVIEW'].map(value=><option key={value}>{value}</option>)}</select></label>
+        <label><input type="checkbox" checked={staleOnly} onChange={e=>{setStaleOnly(e.target.checked);setPage(1);}}/>{isRtl?'مصادر تحتاج تحققًا حديثًا':'Sources needing fresh verification'}</label><p>{isRtl?'الإحصاءات تشمل نتائج الفلاتر كاملة.':'Metrics cover all filtered results.'}</p>
+      </div></details>
+
 
       <div className="bg-white border border-[#DDEFF2] rounded-2xl shadow-sm overflow-hidden">
         <div className="border-b border-slate-100 bg-[#FAF7F0]/40 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

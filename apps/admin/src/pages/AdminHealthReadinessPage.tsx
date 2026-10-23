@@ -174,13 +174,14 @@ export function AdminHealthReadinessPage() {
   return (
     <div dir={dir} className="admin-owner-workspace mx-auto max-w-7xl space-y-6 text-[#203442]">
       <header className="admin-page-hero overflow-hidden rounded-[28px] border border-[#c9dde1] bg-gradient-to-br from-[#142B5F] to-[#0E7C86] shadow-sm">
-        <h1 className="flex items-center gap-2 text-2xl font-bold">
+        <div><h1 className="flex items-center gap-2 text-2xl font-bold">
           <Activity aria-hidden="true" />
           {t('title')}
         </h1>
         <p className="mt-3">{t('description')}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
         <Link to="/cross-module-integrity">{language==='en'?'Cross-module link integrity':'سلامة الروابط بين الأقسام'}</Link>
-        <div className="mt-4 flex flex-wrap gap-3">
           <button
             disabled={loading}
             onClick={() => void refresh()}

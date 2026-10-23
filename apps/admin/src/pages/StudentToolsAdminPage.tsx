@@ -200,7 +200,7 @@ function ToolCatalog() {
       ) : !result.data.length ? (
         <p>{t('tools19_empty')}</p>
       ) : (
-        <table className="w-full">
+        <div className="max-w-full overflow-x-auto rounded-2xl border border-[#DDEFF2] bg-white shadow-xs"><table className="w-full">
           <thead>
             <tr>
               <th>{t('tools19_name')}</th>
@@ -223,7 +223,7 @@ function ToolCatalog() {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       )}
       <div className="flex gap-4">
         <button
