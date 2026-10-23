@@ -1,0 +1,159 @@
+{
+  "kind": "UNIVERSITY_SOURCE_BOUND_PREVIEW_POSTGRES_PROOF",
+  "pass": true,
+  "sourceSha": "04756d50b8bbef2e32891783aa4e7f0abaab947c",
+  "runId": "ac5cb3b4-48b3-4b68-867f-143d4aeeece7",
+  "observedAt": "2026-10-23T01:03:17.383Z",
+  "postgresMajor": 16,
+  "identity": {
+    "role": "post28_app",
+    "server": "7699662203565090372",
+    "rolsuper": false,
+    "rolcreaterole": false,
+    "rolcreatedb": false,
+    "rolbypassrls": false,
+    "ledger": false,
+    "ddl": false,
+    "owns": false
+  },
+  "managedDatabaseConnections": 0,
+  "realAccountsCreated": 0,
+  "realUniversitiesRejectedIncomplete": 4,
+  "syntheticCompleteCandidates": 1,
+  "preview": {
+    "state": "OWNER_REVIEW_REQUIRED",
+    "readyToWrite": false,
+    "databaseWrites": 0,
+    "plans": [
+      {
+        "stage": "STAGE_1",
+        "sourceArtifactId": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "changes": [
+          {
+            "sequence": 1,
+            "sourceReferenceId": "INS-TST-0001",
+            "entityType": "UNIVERSITY",
+            "entityKey": "INS-TST-0001",
+            "operation": "CREATE",
+            "afterState": {
+              "city": "Synthetic City",
+              "country": "Synthetic",
+              "metadata": {
+                "purpose": "SYNTHETIC_PREVIEW_CONTRACT_TEST",
+                "sourceFile": "SYNTHETIC_FIXTURE_ONLY",
+                "rawRowSha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                "reviewSha256": "ab7a339ffecd50aedeb2cc231566c8b9493be2618012fe2127bd1e16c531586d",
+                "sourceRowNumber": 1,
+                "sourceWorkbookSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+              },
+              "universityName": "Synthetic Screening University",
+              "institutionType": "UNIVERSITY",
+              "officialWebsite": "https://university.example.test/",
+              "officialSourceUrl": "https://university.example.test/about",
+              "sourceReferenceId": "INS-TST-0001"
+            }
+          },
+          {
+            "sequence": 2,
+            "sourceReferenceId": "INS-TST-0001",
+            "entityType": "SOURCE_RECORD",
+            "entityKey": "cd72bbe8-0c44-4696-b9c7-2544e9f3bcf6",
+            "operation": "UPSERT_CHILD",
+            "afterState": {
+              "stage": "STAGE_1",
+              "artifactId": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+              "sourceRowNumber": 1,
+              "contentHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            }
+          }
+        ],
+        "validationIssues": [
+          {
+            "code": "UNIVERSITY_SOURCE_OWNER_REVIEW_REQUIRED",
+            "message": "Source-bound preview requires owning-domain review and live canonical relationship resolution before commit."
+          }
+        ],
+        "databaseWrites": 0,
+        "screeningBindings": [
+          {
+            "sourceReferenceId": "INS-TST-0001",
+            "receiptId": "cd72bbe8-0c44-4696-b9c7-2544e9f3bcf6",
+            "requestHash": "785127f0157003f46acdea8799c79fd1dace332f2ed9a3351213cb61c8f71fcc",
+            "assetId": "university-source-ac5cb3b4-48b3-4b68-867f-143d4aeeece7",
+            "artifactSha256": "182d3afb699067875773980e2579f24d0ba52deb4545c3f09362ca5801c1bbb9"
+          }
+        ],
+        "planHash": "f0727474f6ef04c5f1aa12d734b1fb3f464cafda8d1a952ba4e7a752cd03dbcc",
+        "changeSetId": "STAGE_1:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee:f0727474f6ef04c5f1aa12d734b1fb3f464cafda8d1a952ba4e7a752cd03dbcc"
+      }
+    ]
+  },
+  "before": {
+    "receipts": 5,
+    "records": 5,
+    "assets": 1,
+    "universities": 0,
+    "reviews": 0,
+    "outbox": 3,
+    "changeSets": 0
+  },
+  "after": {
+    "receipts": 5,
+    "records": 5,
+    "assets": 1,
+    "universities": 0,
+    "reviews": 0,
+    "outbox": 3,
+    "changeSets": 0
+  },
+  "phases": [
+    {
+      "name": "SOURCE_LAB_RESTRICTED_IDENTITY_VERIFIED",
+      "at": "2026-10-23T01:03:15.851Z"
+    },
+    {
+      "name": "PRIVATE_SOURCE_ASSET_UPLOAD_SCAN_SANITIZE_ACTIVATE_AND_AUTHENTICATED_READ",
+      "at": "2026-10-23T01:03:17.034Z",
+      "sha256": "182d3afb699067875773980e2579f24d0ba52deb4545c3f09362ca5801c1bbb9",
+      "scannerPasses": 2
+    },
+    {
+      "name": "SOURCE_FIXTURES_STAGED_FOUR_REAL_INCOMPLETE_ONE_SYNTHETIC_COMPLETE",
+      "at": "2026-10-23T01:03:17.173Z"
+    },
+    {
+      "name": "FOUR_REAL_INCOMPLETE_RECORDS_REJECTED_WITHOUT_TYPE_INFERENCE",
+      "at": "2026-10-23T01:03:17.328Z"
+    },
+    {
+      "name": "READ_ONLY_SOURCE_BOUND_PLAN_AND_WRITER_BLOCK_VERIFIED",
+      "at": "2026-10-23T01:03:17.373Z"
+    },
+    {
+      "name": "REVOKED_SOURCE_REVIEWER_CANNOT_PREVIEW",
+      "at": "2026-10-23T01:03:17.383Z"
+    }
+  ],
+  "assetSha256": "182d3afb699067875773980e2579f24d0ba52deb4545c3f09362ca5801c1bbb9",
+  "scannerReceipts": [
+    {
+      "provider": "WINDOWS_DEFENDER",
+      "sha256": "182d3afb699067875773980e2579f24d0ba52deb4545c3f09362ca5801c1bbb9",
+      "exitCode": 0,
+      "digestUnchanged": true,
+      "clean": true,
+      "signatureVersion": "1.461.156.0",
+      "signatureUpdatedAt": "2026-10-22T18:40:20.0000000Z"
+    },
+    {
+      "provider": "WINDOWS_DEFENDER",
+      "sha256": "182d3afb699067875773980e2579f24d0ba52deb4545c3f09362ca5801c1bbb9",
+      "exitCode": 0,
+      "digestUnchanged": true,
+      "clean": true,
+      "signatureVersion": "1.461.156.0",
+      "signatureUpdatedAt": "2026-10-22T18:40:20.0000000Z"
+    }
+  ],
+  "productionReady": false
+}
