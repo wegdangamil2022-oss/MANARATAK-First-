@@ -20,6 +20,7 @@ import { DashboardHealthPanel, DashboardMetricCard } from '../features/dashboard
 import { DashboardSectionDirectory } from '../features/dashboard/DashboardSectionDirectory';
 import { dashboardLabel, dashboardTime } from '../features/dashboard/dashboardText';
 import { dashboardInitialKeys } from '../features/dashboard/DashboardSchedule';
+import { AdminDisclosureHeading } from '../components/AdminDisclosureHeading';
 
 export function AdminDashboardPage() {
   const { language, dir } = useTranslation();
@@ -290,19 +291,16 @@ export function AdminDashboardPage() {
               )}
           </div>
         </section>
-      <details aria-labelledby="dashboard-section-metrics" className="command-panel dashboard-breakdowns">
-        <summary id="dashboard-section-metrics" className="font-bold">
-          {tr('تفاصيل مؤشرات الأقسام ومصادرها', 'Section metrics and source details')}
-        </summary>
-        <div className="space-y-6">
+      <details aria-labelledby="dashboard-section-metrics" className="command-panel dashboard-breakdowns admin-disclosure">
+        <AdminDisclosureHeading headingId="dashboard-section-metrics" icon={ChartNoAxesCombined} language={language} title={tr('تفاصيل مؤشرات الأقسام ومصادرها', 'Section metrics and source details')} description={tr('حالات النشر والمراجعة وتفاصيل قراءة كل قسم.', 'Publication, review and source readings by section.')} />
+        <div className="admin-disclosure-body space-y-6">
           <p className="text-sm text-slate-600">
             {label('scope')} {label('permission')}
           </p>
           {groups.map((group) => (
-            <details key={group} className="admin-section-tools" aria-labelledby={`dashboard-${group}`} onToggle={event => { if (event.currentTarget.open) void load('group', group); }}>
-              <summary id={`dashboard-${group}`} className="text-base font-bold">
-                {label(group)}
-              </summary>
+            <details key={group} className="admin-section-tools admin-disclosure admin-disclosure-nested" aria-labelledby={`dashboard-${group}`} onToggle={event => { if (event.currentTarget.open) void load('group', group); }}>
+              <AdminDisclosureHeading headingId={`dashboard-${group}`} icon={ChartNoAxesCombined} language={language} title={label(group)} />
+              <div className="admin-disclosure-body">
               <div className="dashboard-breakdown-grid">
                 {visible
                   .filter((reading) => reading.source.domain === group && reading.state !== 'forbidden')
@@ -347,14 +345,14 @@ export function AdminDashboardPage() {
                   )}
                 </p>
               )}
+              </div>
             </details>
           ))}
         </div>
       </details>
-      <details className="command-panel" onToggle={event => { if(event.currentTarget.open) void load('group', 'audit'); }}>
-        <summary id="dashboard-activity" className="text-lg font-bold">
-          {label('audit')}
-        </summary>
+      <details className="command-panel admin-disclosure" onToggle={event => { if(event.currentTarget.open) void load('group', 'audit'); }}>
+        <AdminDisclosureHeading headingId="dashboard-activity" icon={Activity} language={language} title={label('audit')} description={tr('آخر الأحداث الإدارية المصرح لك بعرضها.', 'Recent administrative events you may access.')} />
+        <div className="admin-disclosure-body">
         <p role="status">{label(activityState)}</p>
         <p className="text-sm">{label('activity_scope')}</p>
         {activity.activityPartial || ['stale', 'partial'].includes(activityState) ? (
@@ -384,9 +382,11 @@ export function AdminDashboardPage() {
         <p className="text-xs">
           {label('checked')}: {dashboardTime(activity.capturedAt, language)}
         </p>
+        </div>
       </details>
-      <details className="admin-section-tools" aria-labelledby="dashboard-coverage">
-        <summary id="dashboard-coverage"><Info className="inline h-4 w-4" aria-hidden="true" /> {label('coverage')}</summary>
+      <details className="admin-section-tools admin-disclosure" aria-labelledby="dashboard-coverage">
+        <AdminDisclosureHeading headingId="dashboard-coverage" icon={Info} language={language} title={label('coverage')} description={tr('المصادر المقاسة وحدود الأرقام والمؤشرات.', 'Measured sources and the limits of reported metrics.')} />
+        <div className="admin-disclosure-body">
         <ul className="space-y-2">
           {unmeasuredCoverage.map((metric) => (
             <li key={metric}>
@@ -399,6 +399,7 @@ export function AdminDashboardPage() {
           <summary>{label('analytics_funnel')}</summary>
           <bdi>{analyticsContract.requiredEvidence.join(', ')}</bdi>
         </details>
+        </div>
       </details>
     </div>
   );

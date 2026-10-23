@@ -7,6 +7,7 @@ import { ReviewOverview } from '../features/review-queue/ReviewOverview';
 import { matchesReviewSearch } from '../features/review-queue/ReviewSearch';
 import { ClipboardCheck, RefreshCw, Filter, Search, X, AlertTriangle, ShieldCheck, ArrowUpLeft, Eye, Layers, Clock3, SlidersHorizontal, ListFilter, Flag, Database, CalendarClock, ArrowDownWideNarrow, LayoutGrid, Languages, FileInput, CheckCircle2, Download, type LucideIcon } from 'lucide-react';
 import { REVIEW_RESULTS_PAGE_SIZE, ReviewResultsPagination } from '../features/review-queue/ReviewResultsPagination';
+import { AdminDisclosureHeading } from '../components/AdminDisclosureHeading';
 import { reviewReadScope } from '../features/review-queue/ReviewSchedule';
 import {
   reviewSources,
@@ -488,8 +489,9 @@ export function AdminReviewQueuePage() {
         <span><Filter aria-hidden="true" />{tr('نتائج التصفية', 'Filtered results')} <b>{number(filtered.length)}</b></span>
         <span><Clock3 aria-hidden="true" />{tr('آخر قراءة ناجحة', 'Latest successful read')} <b>{date(lastRead)}</b></span>
       </div>
-      <details className="command-panel review-guide">
-      <summary><ShieldCheck aria-hidden="true" />{tr('دليل المراجعة وحدود البيانات', 'Review and data guide')}</summary>
+      <details className="command-panel review-guide admin-disclosure">
+      <AdminDisclosureHeading icon={ShieldCheck} language={language} title={tr('دليل المراجعة وحدود البيانات', 'Review and data guide')} description={tr('شرح الأولويات والمواعيد وحدود الأرقام المعروضة.', 'Priorities, deadlines and the scope of reported numbers.')} />
+      <div className="admin-disclosure-body">
       <p className="command-caption">{hasPartial ? tr('هذه عينة جزئية؛ اختر مجالًا أو سببًا لقراءة مصادره، أو استخدم تحميل المزيد. أقدم وأشد الأعمال على مستوى المنصة غير معروف.', 'This is a partial sample. Select a domain or reason to read its sources, or load more. Global oldest and critical work remain unknown.') : tr('وصلت القراءة لنهاية المصادر المطلوبة؛ ليست لقطة موحدة.', 'Requested sources reached their page ends; reads are not an atomic snapshot.')}</p>
       <p className="command-caption">{tr('البحث داخل السجلات المحمّلة فقط ولا يضاف إلى رابط الصفحة.', 'Search only covers loaded records and is not added to the URL.')}</p>
       <p className="command-caption">{tr('إتمام المراجعة والنشر داخل القسم المختص. هذه الصفحة للمتابعة ومعاينة الأدلة.', 'Review and publish in the responsible workspace. Use this page to track work and preview evidence.')}</p>
@@ -499,12 +501,12 @@ export function AdminReviewQueuePage() {
           'Filters, suggested priority and quality indicators apply to the sample. Age uses review entry evidence; import and modification clocks are separate. SLA is unknown without entry time, due time and owner policy.',
         )}
       </p>
+      </div>
       </details>
       <div className="review-results-layout">
-      <details className="admin-section-tools">
-        <summary className="cursor-pointer font-semibold">
-          {tr('تغطية المصادر والأعداد والأخطاء', 'Source coverage, counts and errors')}
-        </summary>
+      <details className="admin-section-tools admin-disclosure">
+        <AdminDisclosureHeading icon={Layers} language={language} title={tr('تغطية المصادر والأعداد والأخطاء', 'Source coverage, counts and errors')} description={tr('حالات اتصال المصادر والأعداد وأسباب التعثر.', 'Source availability, record counts and read errors.')} />
+        <div className="admin-disclosure-body">
         <p>
           {tr(
             'الإجماليات لكل استعلام وقد تتداخل؛ لا تجمعها كإجمالي سجلات فريد. الصفحات حية بترقيم offset، ويمكن أن تتغير أثناء القراءة؛ أعد التحقق لدى المالك.',
@@ -512,7 +514,7 @@ export function AdminReviewQueuePage() {
           )}
         </p>
         <button disabled={busy} onClick={() => void load(false, undefined, true)} className="review-outline-button">{tr('قراءة جميع مصادر التغطية', 'Read all coverage sources')}</button>
-        <div className="overflow-x-auto">
+        <div className="admin-source-table" role="region" aria-label={tr('جدول مصادر المراجعة', 'Review source coverage table')} tabIndex={0}>
           <table className="w-full text-sm">
             <thead>
               <tr>
@@ -584,6 +586,7 @@ export function AdminReviewQueuePage() {
             'At most 500 rows are retained per source. Continue to older pages while earlier window rows are discarded. List handoffs show the record ID for owner lookup.',
           )}
         </p>
+        </div>
       </details>
       <section aria-labelledby="review-pending-work" className="overflow-hidden rounded-3xl border border-[#DDEFF2] bg-white shadow-sm">
         <div className="review-results-heading">
@@ -670,12 +673,17 @@ export function AdminReviewQueuePage() {
         <ReviewResultsPagination page={currentPage} total={filtered.length} language={language} position="bottom" onPage={setListPage} />
       </section>
       </div>
-      <details className="command-panel review-analysis"><summary><SlidersHorizontal aria-hidden="true" />{tr('تحليل العينة ومساحات المراجعة', 'Sample analysis and review workspaces')}</summary>
+      <details className="command-panel review-analysis admin-disclosure">
+        <AdminDisclosureHeading icon={SlidersHorizontal} language={language} title={tr('تحليل العينة ومساحات المراجعة', 'Sample analysis and review workspaces')} description={tr('مؤشرات المراجعة والجودة وروابط الأقسام.', 'Review and quality signals, with section workspaces.')} />
+        <div className="admin-disclosure-body">
         <ReviewOverview items={items} states={permittedStates} filters={filters} onFilter={updateFilter} language={language} now={clock} canOpenTranslations={hasPermission('admin:cms:manage')} />
+        </div>
       </details>
-      <details className="command-panel review-guide">
-        <summary><ShieldCheck aria-hidden="true" />{tr('الاعتماد والنشر داخل القسم المختص', 'Approval and publishing in the responsible workspace')}</summary>
+      <details className="command-panel review-guide admin-disclosure">
+        <AdminDisclosureHeading icon={ShieldCheck} language={language} title={tr('الاعتماد والنشر داخل القسم المختص', 'Approval and publishing in the responsible workspace')} description={tr('مسؤوليات التحرير والمراجعة والنشر.', 'Editing, review and publishing responsibilities.')} />
+        <div className="admin-disclosure-body">
         <p className="command-caption">{tr('تعرض هذه القائمة أدلة المراجعة وتوجّهك إلى القسم المسؤول. يبقى التحرير والاعتماد والنشر وسجل القرار داخل ذلك القسم وفق صلاحياتك.', 'This queue presents review evidence and routes you to the responsible workspace. Editing, approval, publishing and decision records remain there under your permissions.')}</p>
+        </div>
       </details>
       {selected && (
         <div

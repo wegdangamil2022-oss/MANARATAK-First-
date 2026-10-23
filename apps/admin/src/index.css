@@ -440,6 +440,68 @@ textarea {
 }
 @container (max-width: 340px) { .review-filter-fields { grid-template-columns: minmax(0,1fr); } .review-pagination { justify-content: center; } }
 
+/* One disclosure design for dashboard and review, including their expanded content. */
+:is(.admin-command-center, .admin-review-center) .admin-disclosure {
+  position: relative; padding: 0; border: 1px solid #DDE8EF; border-radius: 18px;
+  background: #fff; box-shadow: 0 3px 10px #142B5F06; font-family: 'Cairo', sans-serif;
+  font-size: 15px; line-height: 1.85;
+}
+:is(.admin-command-center, .admin-review-center) .admin-disclosure::before {
+  content: ''; position: absolute; top: 0; bottom: 0; left: -1px; width: 13px;
+  border: 3px solid #D6A43B; border-right: 0; border-radius: 18px 0 0 18px;
+  pointer-events: none;
+}
+:is(.admin-command-center, .admin-review-center) .admin-disclosure > .admin-disclosure-heading {
+  display: grid; grid-template-columns: 38px minmax(0, 1fr) 38px; gap: 12px;
+  align-items: center; min-height: 94px; padding: 17px 22px; margin: 0;
+  border-radius: 18px; list-style: none; cursor: pointer; color: #142B5F;
+  font-family: 'Cairo', sans-serif; font-size: 17px; font-weight: 800; line-height: 1.75;
+}
+.admin-disclosure-heading::-webkit-details-marker { display: none; }
+.admin-disclosure-heading:hover { background: #FCFAF5; }
+.admin-disclosure-heading:focus-visible { outline: 2px solid #0E7C86; outline-offset: 3px; }
+.admin-disclosure-heading-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: #EFF8F9; color: #0E7C86; }
+.admin-disclosure-heading-icon > svg { width: 20px; height: 20px; }
+.admin-disclosure-labels { min-width: 0; display: grid; gap: 3px; }
+.admin-disclosure-title { display: block; font-size: 17px; font-weight: 800; line-height: 1.75; overflow-wrap: normal; }
+.admin-disclosure-description { display: block; font-size: 13px; font-weight: 500; line-height: 1.8; color: #64748b; }
+.admin-disclosure-toggle { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid #E8CB8D; background: #FFF7E6; color: #A77413; }
+.admin-disclosure-toggle > svg { width: 21px; height: 21px; stroke-width: 2.5; transition: transform 160ms ease; }
+.admin-disclosure[open] > .admin-disclosure-heading { border-radius: 18px 18px 0 0; background: #FCFAF5; }
+.admin-disclosure[open] > .admin-disclosure-heading .admin-disclosure-toggle > svg { transform: rotate(180deg); }
+:is(.admin-command-center, .admin-review-center) .admin-disclosure > .admin-disclosure-body {
+  padding: 18px 20px; margin: 0; border-top: 1px solid #E8EEF2; font-family: 'Cairo', sans-serif; font-size: 15px; line-height: 1.85;
+}
+:is(.admin-command-center, .admin-review-center) .admin-disclosure-body :is(p, li, dt, dd, span, a, button, input, select, label, summary, table, th, td, bdi, code, strong, small, h2, h3, h4):not(.admin-disclosure-heading):not(.admin-disclosure-heading *) {
+  font-family: 'Cairo', sans-serif; font-size: 15px; line-height: 1.85;
+}
+:is(.admin-command-center, .admin-review-center) .admin-disclosure-body > p { margin: 0 0 14px; }
+:is(.admin-command-center, .admin-review-center) .admin-disclosure-body > p:last-child { margin-bottom: 0; }
+.admin-disclosure-body > section { padding: 16px; border-radius: 14px; margin-bottom: 16px; box-shadow: none; }
+.admin-disclosure-body > section:last-child { margin-bottom: 0; }
+.admin-disclosure-body .dashboard-metric-value, .admin-disclosure-body .review-analysis-value, .admin-disclosure-body .review-domain-heading > b { font-size: 22px !important; line-height: 1.5 !important; }
+.admin-disclosure-body .dashboard-metric h3 { overflow-wrap: normal; word-break: normal; }
+.admin-disclosure-body .dashboard-breakdown-grid, .admin-disclosure-body .review-analysis-grid, .admin-disclosure-body .review-quality-grid, .admin-disclosure-body .review-domain-grid, .admin-disclosure-body .review-specialist-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 255px), 1fr)); }
+.admin-disclosure-body .review-specialist-card { grid-template-columns: auto minmax(0,1fr); }
+.admin-disclosure-body .review-domain-card > a { white-space: normal; }
+.admin-disclosure-body > ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.admin-disclosure-body > ul > li { padding: 12px 14px; border: 1px solid #DDEFF2; border-radius: 10px; background: #F7FAFC; }
+.admin-source-table { max-height: 440px; overflow: auto; margin-block: 16px; border: 1px solid #DDE8EF; border-radius: 12px; }
+.admin-source-table table { min-width: 880px; border-collapse: collapse; }
+.admin-source-table thead { position: sticky; top: 0; z-index: 1; background: #EFF7F9; color: #142B5F; }
+.admin-source-table :is(th, td) { padding: 12px 14px; text-align: start; vertical-align: top; }
+.admin-source-table tbody tr + tr { border-top: 1px solid #E8EEF2; }
+.admin-source-table tbody tr:nth-child(even) { background: #FAFCFD; }
+.admin-disclosure-body .dashboard-source-body { padding: 12px; }
+.admin-disclosure-body :is(code, bdi) { overflow-wrap: anywhere; }
+@container (max-width: 560px) {
+  :is(.admin-command-center, .admin-review-center) .admin-disclosure > .admin-disclosure-heading { grid-template-columns: 30px minmax(0,1fr) 32px; gap: 9px; padding: 15px 16px; }
+  .admin-disclosure-heading-icon { width: 30px; height: 32px; }
+  .admin-disclosure-toggle { width: 32px; height: 32px; }
+  :is(.admin-command-center, .admin-review-center) .admin-disclosure > .admin-disclosure-body { padding: 16px 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .admin-disclosure-toggle > svg { transition: none; } }
+
 /* Scholarship filters share the funding/deadline control appearance. */
 :is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) :is(input, select) {
   height: 48px;
