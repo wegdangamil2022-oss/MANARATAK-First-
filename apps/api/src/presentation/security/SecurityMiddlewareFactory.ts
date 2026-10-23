@@ -226,10 +226,18 @@ export class SecurityMiddlewareFactory {
         return;
       }
 
-      if (!options.principalAccessValidator || !await options.principalAccessValidator.isAuthenticationAllowed(principalId)) {
-        if (options.sessionManager) await options.sessionManager.revokeAllSessions(principalId);
-        res.status(401).json({
-          error: { code: 'ADMIN_SESSION_NOT_ACTIVE', message: 'Admin authentication is required.' },
+      try {
+        if (!options.principalAccessValidator || !await options.principalAccessValidator.isAuthenticationAllowed(principalId)) {
+          if (options.sessionManager) await options.sessionManager.revokeAllSessions(principalId);
+          res.status(401).json({
+            error: { code: 'ADMIN_SESSION_NOT_ACTIVE', message: 'Admin authentication is required.' },
+            meta: { timestamp: new Date().toISOString() },
+          });
+          return;
+        }
+      } catch {
+        res.status(503).json({
+          error: { code: 'ADMIN_AUTH_UNAVAILABLE', message: 'Admin authentication is temporarily unavailable.' },
           meta: { timestamp: new Date().toISOString() },
         });
         return;
