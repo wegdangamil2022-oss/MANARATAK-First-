@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Activity, RefreshCw } from 'lucide-react';
-import { adminNavigationGroups } from '../components/AdminNavigation';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
@@ -18,10 +17,11 @@ import {
 } from '../features/dashboard/DashboardContract';
 import { loadDashboardSources } from '../features/dashboard/DashboardLoader';
 import { DashboardHealthPanel, DashboardMetricCard } from '../features/dashboard/DashboardCards';
+import { DashboardSectionDirectory } from '../features/dashboard/DashboardSectionDirectory';
 import { dashboardLabel, dashboardTime } from '../features/dashboard/dashboardText';
 
 export function AdminDashboardPage() {
-  const { t, language, dir } = useTranslation();
+  const { language, dir } = useTranslation();
   const { hasPermission, permissions } = useAdminAuthorization();
   const permissionKey = [...permissions].sort().join('|');
   const allowed = useMemo(
@@ -178,7 +178,7 @@ export function AdminDashboardPage() {
   const groups = [
     ...new Set(
       visible
-        .filter((reading) => reading.source.metrics.length)
+        .filter((reading) => reading.source.metrics.length && reading.state !== 'forbidden')
         .map((reading) => reading.source.domain),
     ),
   ];
@@ -243,36 +243,6 @@ export function AdminDashboardPage() {
           ))}
         </div>
       </section>
-      <section
-        aria-labelledby="dashboard-shortcuts"
-        className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-xs"
-      >
-        <h2 id="dashboard-shortcuts" className="mb-4 text-xl font-black">
-          {tr('الوصول السريع', 'Quick access')}
-        </h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
-          {adminNavigationGroups
-            .flatMap((group) => group.items)
-            .filter(
-              (item) =>
-                item.to !== '/dashboard' &&
-                (!item.requiredPermission || hasPermission(item.requiredPermission)),
-            )
-            .map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className="flex min-h-16 items-center gap-3 rounded-2xl border border-[#DDEFF2] bg-[#FAF7F0]/50 p-3 text-sm font-bold transition hover:border-[#21A7B4] hover:bg-[#DDEFF2]/40"
-                >
-                  <Icon aria-hidden="true" className="h-5 w-5 shrink-0 text-[#0E7C86]" />
-                  <span>{t(item.labelKey)}</span>
-                </Link>
-              );
-            })}
-        </div>
-      </section>
       <div className="grid items-start gap-5 xl:grid-cols-[1.3fr_0.7fr]">
         <section aria-labelledby="dashboard-attention">
           <h2 id="dashboard-attention" className="mb-3 text-lg font-bold">
@@ -298,22 +268,23 @@ export function AdminDashboardPage() {
         </section>
         <DashboardHealthPanel reading={health} language={language} now={clock} />
       </div>
-      <details className="admin-section-tools">
-        <summary>
+      <DashboardSectionDirectory />
+      <section aria-labelledby="dashboard-section-metrics" className="space-y-4">
+        <h2 id="dashboard-section-metrics" className="text-xl font-black">
           {tr('تفاصيل مؤشرات الأقسام ومصادرها', 'Section metrics and source details')}
-        </summary>
+        </h2>
         <div className="space-y-6">
           <p className="text-sm text-slate-600">
             {label('scope')} {label('permission')}
           </p>
           {groups.map((group) => (
-            <section key={group} aria-labelledby={`dashboard-${group}`}>
-              <h2 id={`dashboard-${group}`} className="mb-3 text-lg font-bold">
+            <details key={group} className="admin-section-tools" aria-labelledby={`dashboard-${group}`}>
+              <summary id={`dashboard-${group}`} className="text-base font-bold">
                 {label(group)}
-              </h2>
+              </summary>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {visible
-                  .filter((reading) => reading.source.domain === group)
+                  .filter((reading) => reading.source.domain === group && reading.state !== 'forbidden')
                   .flatMap((reading) =>
                     reading.source.metrics.map((metric) => (
                       <DashboardMetricCard
@@ -355,10 +326,10 @@ export function AdminDashboardPage() {
                   )}
                 </p>
               )}
-            </section>
+            </details>
           ))}
         </div>
-      </details>
+      </section>
       <section className="rounded-xl border bg-white p-4" aria-labelledby="dashboard-activity">
         <h2 id="dashboard-activity" className="text-lg font-bold">
           {label('audit')}

@@ -50,6 +50,7 @@ export function DashboardMetricCard({
           <span className="rounded-full bg-[#FAF7F0] px-2 py-1 text-[10px] font-bold text-slate-500">{label(state)}</span>
         </div>
       </>}
+      {!compact && <p className="mb-2 text-xs font-bold text-slate-500">{label(reading.source.domain)}</p>}
       <h3 className="text-sm font-bold text-[#0E7C86]">
         {label(compact ? reading.source.domain : metric)}
       </h3>
