@@ -22,6 +22,18 @@ beforeEach(()=>{
 });
 afterEach(async()=>{if(tree)await act(async()=>tree.unmount());vi.unstubAllGlobals();});
 describe('Review queue session loss clears old evidence',()=>{
+ it('shows ten records per page and resets pagination after a local search without another API read',async()=>{
+ state.request.mockImplementation(async(path:string)=>{const query=new URL(path,'https://local').searchParams;return{data:Array.from({length:23},(_,index)=>({id:`row-${String(index).padStart(2,'0')}`,title:`Record ${index}`,status:'READY_TO_REVIEW'})),total:23,page:Number(query.get('page')),pageSize:Number(query.get('pageSize'))};});
+ await mount();state.request.mockClear();
+ const rows=()=>tree.root.findByProps({'aria-labelledby':'review-pending-work'}).findByType('tbody').findAllByType('tr');
+ expect(rows()).toHaveLength(10);
+ await act(async()=>button('Next').props.onClick());expect(rows()).toHaveLength(10);
+ await act(async()=>button('Next').props.onClick());expect(rows()).toHaveLength(3);
+ await act(async()=>button('Previous').props.onClick());expect(rows()).toHaveLength(10);
+ await act(async()=>tree.root.findByProps({type:'search'}).props.onChange({target:{value:'Record 22'}}));
+ expect(rows()).toHaveLength(1);expect(JSON.stringify(rows()[0].findAllByType('bdi').map(node=>node.children))).toContain('Record 22');
+ expect(state.request).not.toHaveBeenCalled();
+ });
  it('does not reread a fresh sample on window focus',async()=>{
  await mount();
  expect(state.request).toHaveBeenCalledTimes(1);

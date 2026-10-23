@@ -303,7 +303,7 @@ export function AdminDashboardPage() {
               <summary id={`dashboard-${group}`} className="text-base font-bold">
                 {label(group)}
               </summary>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="dashboard-breakdown-grid">
                 {visible
                   .filter((reading) => reading.source.domain === group && reading.state !== 'forbidden')
                   .flatMap((reading) =>
