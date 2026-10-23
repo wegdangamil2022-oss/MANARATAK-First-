@@ -1,0 +1,229 @@
+{
+  "kind": "UNIVERSITY_MINIMAL_OFFICIAL_FIELD_REVIEW",
+  "observedAt": "2026-10-23T00:43:23.632Z",
+  "reviewerCapacity": "DELEGATED_PROJECT_OPERATOR_NOT_INDEPENDENT_HUMAN_SIGNOFF",
+  "scope": [
+    "officialName",
+    "countryIso3",
+    "city",
+    "officialSourceUrl",
+    "officialWebsite_where_successfully_fetched"
+  ],
+  "rawSourcesModified": false,
+  "databaseConnections": 0,
+  "databaseWrites": 0,
+  "readyToWrite": false,
+  "decisions": [
+    {
+      "sourceReferenceId": "INS-CHN-0001",
+      "officialName": "Peking University",
+      "countryIso3": "CHN",
+      "city": "Beijing",
+      "officialSourceUrl": "https://english.pku.edu.cn/detail/11807.html",
+      "officialWebsite": null,
+      "websiteState": "HELD_HOME_PAGE_FETCH_TIMED_OUT",
+      "evidence": "University president office page identifies Peking University and an address in Beijing, P.R.China. Homepage retrieval timed out; no homepage availability claim."
+    },
+    {
+      "sourceReferenceId": "INS-CHN-0003",
+      "officialName": "Tsinghua University",
+      "countryIso3": "CHN",
+      "city": "Beijing",
+      "officialSourceUrl": "https://www.tsinghua.edu.cn/en/Contact.htm",
+      "officialWebsite": "https://www.tsinghua.edu.cn/",
+      "websiteState": "OFFICIAL_PAGE_FETCHED",
+      "evidence": "University contact page identifies Tsinghua University admissions in Haidian, Beijing, P.R.China; homepage also fetched."
+    },
+    {
+      "sourceReferenceId": "INS-HUN-0006",
+      "officialName": "Eötvös Loránd University",
+      "countryIso3": "HUN",
+      "city": "Budapest",
+      "officialSourceUrl": "https://elte.hu/en/central-international-relations-office",
+      "officialWebsite": "https://www.elte.hu/en",
+      "websiteState": "OFFICIAL_PAGE_FETCHED_AFTER_REDIRECT",
+      "evidence": "University international relations page gives Budapest, Hungary. Current English homepage names Eötvös Loránd University; no staff information imported."
+    },
+    {
+      "sourceReferenceId": "INS-TUR-0145",
+      "officialName": "Middle East Technical University",
+      "countryIso3": "TUR",
+      "city": "Ankara",
+      "officialSourceUrl": "https://www.metu.edu.tr/",
+      "officialWebsite": "https://www.metu.edu.tr/",
+      "websiteState": "OFFICIAL_PAGE_FETCHED",
+      "evidence": "Official homepage identifies METU/Middle East Technical University and Ankara campus address. Government directory URL in original workbook retained as raw evidence, replaced only in proposed reviewed website projection."
+    }
+  ],
+  "heldFields": [
+    "institutionType",
+    "ownership",
+    "nationalCode",
+    "localName",
+    "sourceStatus",
+    "foundedYear",
+    "programs",
+    "admissionRequirements"
+  ],
+  "geography": "Prior canonical UUID receipt; current live state still requires recheck",
+  "requiredNext": [
+    "LIVE_CANONICAL_IDENTITY_GEOGRAPHY_RECHECK",
+    "SOURCE_ASSET_SCREENING_OWNER_REVIEW",
+    "VERIFIED_AUTHORIZED_OPERATOR",
+    "FRESH_BACKUP_RESTORE",
+    "EXACT_PLAN_APPROVAL"
+  ],
+  "plans": [
+    {
+      "stage": "STAGE_1",
+      "sourceArtifactId": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+      "changes": [
+        {
+          "sequence": 1,
+          "sourceReferenceId": "INS-CHN-0001",
+          "entityType": "UNIVERSITY",
+          "entityKey": "INS-CHN-0001",
+          "operation": "CREATE",
+          "afterState": {
+            "sourceReferenceId": "INS-CHN-0001",
+            "officialName": "Peking University",
+            "countryName": "China",
+            "countryIso3": "CHN",
+            "cityName": "Beijing",
+            "city": "Beijing",
+            "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+            "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+            "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37",
+            "officialSourceUrl": "https://english.pku.edu.cn/detail/11807.html"
+          }
+        },
+        {
+          "sequence": 2,
+          "sourceReferenceId": "INS-CHN-0001",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030:1189",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_1",
+            "artifactId": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+            "sourceRowNumber": 1189,
+            "contentHash": "c68880dfd6510c992484b113542b6fb0ab36174b9f6789378ecc934a14c36844"
+          }
+        },
+        {
+          "sequence": 3,
+          "sourceReferenceId": "INS-CHN-0003",
+          "entityType": "UNIVERSITY",
+          "entityKey": "INS-CHN-0003",
+          "operation": "CREATE",
+          "afterState": {
+            "sourceReferenceId": "INS-CHN-0003",
+            "officialName": "Tsinghua University",
+            "countryName": "China",
+            "countryIso3": "CHN",
+            "cityName": "Beijing",
+            "city": "Beijing",
+            "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+            "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+            "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37",
+            "officialSourceUrl": "https://www.tsinghua.edu.cn/en/Contact.htm",
+            "officialWebsite": "https://www.tsinghua.edu.cn/"
+          }
+        },
+        {
+          "sequence": 4,
+          "sourceReferenceId": "INS-CHN-0003",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030:1191",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_1",
+            "artifactId": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+            "sourceRowNumber": 1191,
+            "contentHash": "bbe6058fbd891a7c4c6dd44299e31bf9c89085f5b7d8831ea47692aa2728b9bb"
+          }
+        }
+      ],
+      "validationIssues": [],
+      "databaseWrites": 0,
+      "planHash": "071d6c551834c5da31a6cca4cf0e94bcc430d480e90460126c2c8e45ca81b7d6",
+      "changeSetId": "STAGE_1:24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030:071d6c551834c5da31a6cca4cf0e94bcc430d480e90460126c2c8e45ca81b7d6"
+    },
+    {
+      "stage": "STAGE_1",
+      "sourceArtifactId": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+      "changes": [
+        {
+          "sequence": 1,
+          "sourceReferenceId": "INS-HUN-0006",
+          "entityType": "UNIVERSITY",
+          "entityKey": "INS-HUN-0006",
+          "operation": "CREATE",
+          "afterState": {
+            "sourceReferenceId": "INS-HUN-0006",
+            "officialName": "Eötvös Loránd University",
+            "countryName": "Hungary",
+            "countryIso3": "HUN",
+            "cityName": "Budapest",
+            "city": "Budapest",
+            "countryReferenceId": "aa450b59-9731-4869-b3e8-7713aed3ae72",
+            "regionReferenceId": "7ccf3f41-ce49-4693-b545-974edd9d3ef9",
+            "cityReferenceId": "b986d010-bceb-481f-b9d9-572b33acab5e",
+            "officialSourceUrl": "https://elte.hu/en/central-international-relations-office",
+            "officialWebsite": "https://www.elte.hu/en"
+          }
+        },
+        {
+          "sequence": 2,
+          "sourceReferenceId": "INS-HUN-0006",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2:629",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_1",
+            "artifactId": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+            "sourceRowNumber": 629,
+            "contentHash": "b935225ca7c6997b1aac63f7f56c551b10935c8af27735bf9c1ed2f7d84f04b5"
+          }
+        },
+        {
+          "sequence": 3,
+          "sourceReferenceId": "INS-TUR-0145",
+          "entityType": "UNIVERSITY",
+          "entityKey": "INS-TUR-0145",
+          "operation": "CREATE",
+          "afterState": {
+            "sourceReferenceId": "INS-TUR-0145",
+            "officialName": "Middle East Technical University",
+            "countryName": "Turkey",
+            "countryIso3": "TUR",
+            "cityName": "Ankara",
+            "city": "Ankara",
+            "countryReferenceId": "2c14f864-d235-4276-8c87-d1bb19ceca0d",
+            "regionReferenceId": "d9db85b6-b3d0-42a7-b45e-5eb6b0b5a66b",
+            "cityReferenceId": "25d9c584-2cd4-47ac-98a4-f7c3e68588ef",
+            "officialSourceUrl": "https://www.metu.edu.tr/",
+            "officialWebsite": "https://www.metu.edu.tr/"
+          }
+        },
+        {
+          "sequence": 4,
+          "sourceReferenceId": "INS-TUR-0145",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2:2236",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_1",
+            "artifactId": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+            "sourceRowNumber": 2236,
+            "contentHash": "8e7f5fbf9d1912c296557e0b5304c3bc7477754a6de29eb3abdf88bfd9ad0ad9"
+          }
+        }
+      ],
+      "validationIssues": [],
+      "databaseWrites": 0,
+      "planHash": "332577ae8b9a09cee94c5f7528ad82230f1405101381eb29bca206b8f182af8f",
+      "changeSetId": "STAGE_1:0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2:332577ae8b9a09cee94c5f7528ad82230f1405101381eb29bca206b8f182af8f"
+    }
+  ]
+}

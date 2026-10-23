@@ -1,0 +1,83 @@
+{
+  "kind": "UNIVERSITY_ROLLBACK_DRIFT_POSTGRES16_PROOF",
+  "pass": true,
+  "sourceSha": "9a91bf696bb91cd119a070541d61032bb6295311",
+  "runId": "64387f8d-7690-49f8-b350-93697677640f",
+  "observedAt": "2026-10-23T00:42:24.329Z",
+  "managedDatabaseConnections": 0,
+  "realAccountsCreated": 0,
+  "applicationRole": "post28_app",
+  "appliedCounts": {
+    "universities": 4,
+    "sources": 4,
+    "sets": 2,
+    "changes": 8,
+    "audit": 2,
+    "outbox": 5
+  },
+  "rollbackCounts": {
+    "universities": 0,
+    "sources": 0,
+    "sets": 2,
+    "changes": 8,
+    "audit": 4,
+    "outbox": 7
+  },
+  "phases": [
+    {
+      "name": "ISOLATED_RESTRICTED_APPLICATION_VERIFIED",
+      "at": "2026-10-23T00:41:35.427Z"
+    },
+    {
+      "name": "SYNTHETIC_VERIFICATION_AND_UNAUTHORIZED_APPLY_ROLLBACK_DENIED",
+      "at": "2026-10-23T00:41:35.609Z"
+    },
+    {
+      "name": "MODIFIED_PLAN_REJECTED_WITH_ZERO_WRITES",
+      "at": "2026-10-23T00:41:35.636Z"
+    },
+    {
+      "name": "OUTBOX_INSERT_DENIAL_REVERTS_UNIVERSITY_SOURCE_AND_JOURNAL",
+      "at": "2026-10-23T00:41:35.688Z"
+    },
+    {
+      "name": "FOUR_UNIVERSITIES_AND_SOURCE_ROWS_COMMITTED_WITH_CANONICAL_GEOGRAPHY",
+      "at": "2026-10-23T00:41:35.761Z"
+    },
+    {
+      "name": "EXACT_REPLAY_NO_NEW_ROWS_OR_AUDIT_OUTBOX",
+      "at": "2026-10-23T00:41:35.784Z"
+    },
+    {
+      "name": "REVOKED_OPERATOR_CANNOT_REPLAY_OR_ROLLBACK",
+      "at": "2026-10-23T00:41:35.801Z"
+    },
+    {
+      "name": "EDITED_ROOT_ROLLBACK_DENIED_WHOLE_BATCH_PRESERVED",
+      "at": "2026-10-23T00:41:35.879Z"
+    },
+    {
+      "name": "PUBLISHED_ROOT_ROLLBACK_DENIED_WHOLE_BATCH_PRESERVED",
+      "at": "2026-10-23T00:41:35.905Z"
+    },
+    {
+      "name": "EDITED_SOURCE_ROLLBACK_DENIED_WHOLE_BATCH_PRESERVED",
+      "at": "2026-10-23T00:41:35.940Z"
+    },
+    {
+      "name": "NEW_TRANSLATION_ROLLBACK_DENIED_WHOLE_BATCH_PRESERVED",
+      "at": "2026-10-23T00:41:35.976Z"
+    },
+    {
+      "name": "ACTUAL_CONCURRENT_WRITER_LOCK_WAIT_AND_DRIFT_DENIAL",
+      "at": "2026-10-23T00:42:24.209Z"
+    },
+    {
+      "name": "UNCHANGED_BATCH_ROLLBACK_AND_REPLAY_SUCCESS",
+      "at": "2026-10-23T00:42:24.329Z"
+    }
+  ],
+  "resumedAfter": "INITIAL_OBSERVER_COULD_NOT_SEE_OTHER_ROLE_WAIT_EVENT; NO_IMPORT_REPLAYED",
+  "actualLockWaitObserved": true,
+  "productionReady": false
+}
