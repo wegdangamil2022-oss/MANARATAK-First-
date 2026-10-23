@@ -16,11 +16,14 @@ Loader2,
 RotateCcw,
 Search,
 Sparkles,
+Plus,
+ShieldCheck,
 X
 } from 'lucide-react';
 import { useEffect,useMemo,useState } from 'react';
 import { Link,useSearchParams } from 'react-router-dom';
-import { canonicalPickerApi,type CanonicalPickerOption } from '../api/canonicalPickers';
+import { canonicalPickerApi } from '../api/canonicalPickers';
+import { CanonicalPicker } from '../components/CanonicalPicker';
 import { adminApiClient } from '../api/client';
 import { NewMajorCandidatesPanel } from '../components/NewMajorCandidatesPanel';
 import { useTranslation } from "../i18n/I18nProvider";
@@ -141,7 +144,8 @@ export function MajorAdminPage() {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const view = searchParams.get('view') === 'new' ? 'new' : searchParams.get('view') === 'catalog' ? 'catalog' : 'all';
-  const [newCandidatesTotal, setNewCandidatesTotal] = useState(0);
+  const [newCandidatesTotal, setNewCandidatesTotal] = useState<number|null>(null);
+  const [showCreate,setShowCreate]=useState(false);
   const [data, setData] = useState<PaginatedResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -151,16 +155,11 @@ export function MajorAdminPage() {
   const [completenessFilter, setCompletenessFilter] = useState('');
   const [degreeFilter, setDegreeFilter] = useState('');
   const [taxonomyIdFilter, setTaxonomyIdFilter] = useState('');
-  const [taxonomyOptions, setTaxonomyOptions] = useState<CanonicalPickerOption[]>([]);
+  const [academicFieldFilter,setAcademicFieldFilter]=useState('');
+  const [disciplineFilter,setDisciplineFilter]=useState('');
+  const [collegeFilter,setCollegeFilter]=useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-
-  // Load Taxonomy Options
-  useEffect(() => {
-    canonicalPickerApi.taxonomyNodes()
-      .then(setTaxonomyOptions)
-      .catch(() => undefined);
-  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -181,7 +180,10 @@ export function MajorAdminPage() {
         if (statusFilter) params.append('status', statusFilter);
         if (completenessFilter) params.append('completenessStatus', completenessFilter);
         if (degreeFilter) params.append('degreeLevel', degreeFilter);
-        if (taxonomyIdFilter) params.append('taxonomyNodeId', taxonomyIdFilter);
+        if (taxonomyIdFilter && view !== 'catalog') params.append('taxonomyNodeId', taxonomyIdFilter);
+        if (academicFieldFilter && view !== 'catalog') params.set('academicFieldId',academicFieldFilter);
+        if (disciplineFilter && view !== 'catalog') params.set('disciplineId',disciplineFilter);
+        if (collegeFilter.trim() && view !== 'catalog') params.set('collegeOrFaculty',collegeFilter.trim());
         if (search.trim()) params.append('search', search.trim());
         const response = await adminApiClient.request<PaginatedResponse>(`/admin/majors?${params.toString()}`, { signal: controller.signal });
         if (controller.signal.aborted) return;
@@ -198,17 +200,17 @@ export function MajorAdminPage() {
 
     void fetchMajors();
     return () => controller.abort();
-  }, [page, statusFilter, completenessFilter, degreeFilter, taxonomyIdFilter, search, view]);
+  }, [page, statusFilter, completenessFilter, degreeFilter, taxonomyIdFilter, academicFieldFilter,disciplineFilter,collegeFilter,search, view]);
 
   const visibleMajors = useMemo(() => data?.data ?? [], [data?.data]);
   const stats = useMemo(() => ({
-    total: data?.total ?? 0,
-    published: data?.stats?.published ?? visibleMajors.filter((major) => major.status === 'PUBLISHED').length,
-    needsReview: data?.stats?.needsReview ?? visibleMajors.filter((major) => major.completenessStatus === 'NEEDS_REVIEW' || major.status === 'READY_TO_REVIEW').length,
-    complete: data?.stats?.complete ?? visibleMajors.filter((major) => major.completenessStatus === 'COMPLETE').length,
-  }), [data?.total,data?.stats,visibleMajors]);
+    total: data?.total ?? null,
+    published: data?.stats?.published ?? (data?visibleMajors.filter((major) => major.status === 'PUBLISHED').length:null),
+    needsReview: data?.stats?.needsReview ?? (data?visibleMajors.filter((major) => major.completenessStatus === 'NEEDS_REVIEW' || major.status === 'READY_TO_REVIEW').length:null),
+    complete: data?.stats?.complete ?? (data?visibleMajors.filter((major) => major.completenessStatus === 'COMPLETE').length:null),
+  }), [data,visibleMajors]);
 
-  const hasActiveFilters = Boolean(search || degreeFilter || statusFilter || completenessFilter || taxonomyIdFilter);
+  const hasActiveFilters = Boolean(search || degreeFilter || statusFilter || completenessFilter || taxonomyIdFilter || academicFieldFilter || disciplineFilter || collegeFilter);
 
   const handleResetFilters = () => {
     setSearch('');
@@ -216,6 +218,7 @@ export function MajorAdminPage() {
     setStatusFilter('');
     setCompletenessFilter('');
     setTaxonomyIdFilter('');
+    setAcademicFieldFilter('');setDisciplineFilter('');setCollegeFilter('');
     setPage(1);
   };
 
@@ -224,23 +227,24 @@ export function MajorAdminPage() {
       <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -top-20 end-0 h-52 w-52 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none blur-2xl" />
         <div className="absolute -bottom-20 start-0 h-52 w-52 rounded-full bg-cyan-300 opacity-15 pointer-events-none blur-2xl" />
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div>
+        <div className="relative z-10 flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+          <div className="min-w-0 flex-1">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-sm border border-white/15">
               <GraduationCap className="h-4 w-4" />
               <span>القسم الأكاديمي · دليل التخصصات الجامعية</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black leading-tight text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black leading-relaxed text-white">
               {t('admin_majors') || 'إدارة التخصصات الأكاديمية'}
             </h1>
             <p className="mt-2.5 max-w-2xl text-xs sm:text-sm font-medium leading-relaxed text-white/85">
               استعراض وإدارة بطاقات التخصصات، الكليات، الدرجات العلمية، وربطها بالتصنيفات المعيارية والبرامج.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2.5 shrink-0">
+          <div className="flex max-w-full flex-wrap gap-2.5 xl:max-w-sm">
+            <button type="button" aria-expanded={showCreate} aria-controls="major-create" onClick={()=>setShowCreate(value=>!value)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-xs font-bold text-[#142B5F]"><Plus aria-hidden="true" className="h-4 w-4" />إنشاء تخصص جديد</button>
             <button
               type="button"
-              onClick={() => setSearchParams({})}
+              onClick={() => {setPage(1);setSearchParams({});}}
               className={`inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-xs sm:text-sm font-bold transition shadow-xs cursor-pointer ${
                 view === 'all'
                   ? 'bg-[#21A7B4] text-white shadow-md hover:bg-[#1A8D99]'
@@ -252,7 +256,7 @@ export function MajorAdminPage() {
             <button type="button" onClick={()=>{setPage(1);setSearchParams({view:'catalog'});}} className="rounded-xl border border-white/30 px-4 py-2 text-sm">كتالوجات المصدر للمراجعة</button>
             <button
               type="button"
-              onClick={() => setSearchParams({ view: 'new' })}
+              onClick={() => {setPage(1);setSearchParams({ view: 'new' });}}
               className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-xs sm:text-sm font-bold transition shadow-xs cursor-pointer ${
                 view === 'new'
                   ? 'bg-[#21A7B4] text-white shadow-md hover:bg-[#1A8D99]'
@@ -264,7 +268,7 @@ export function MajorAdminPage() {
               <span className={`rounded-full px-2 py-0.5 text-[11px] font-black ${
                 view === 'new' ? 'bg-white/25 text-white' : 'bg-white/15 text-[#F2CD78]'
               }`}>
-                {newCandidatesTotal}
+                {newCandidatesTotal??'—'}
               </span>
             </button>
             <Link
@@ -277,7 +281,7 @@ export function MajorAdminPage() {
           </div>
         </div>
       </section>
-<OwnerDraftCreateForm owner="majors"/>
+      {showCreate&&<section id="major-create"><OwnerDraftCreateForm owner="majors" defaultOpen /></section>}
 
 
       {view === 'new' ? (
@@ -286,21 +290,25 @@ export function MajorAdminPage() {
         <>
           {/* Metrics Overview */}
           <section className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
-            <MetricCard label="إجمالي التخصصات" value={stats.total} icon={BookOpen} accent="#142B5F" />
-            <MetricCard label={data?.stats?"منشورة ضمن النتائج":"منشورة في الصفحة"} value={stats.published} icon={CheckCircle2} accent="#2E7D5A" />
-            <MetricCard label={data?.stats?"تحتاج مراجعة ضمن النتائج":"تحتاج مراجعة في الصفحة"} value={stats.needsReview} icon={AlertCircle} accent="#D6A43B" />
-            <MetricCard label="مكتملة البيانات" value={stats.complete} icon={GraduationCap} accent="#21A7B4" />
+            <MetricCard label="إجمالي التخصصات ضمن النتائج" value={stats.total??'—'} icon={BookOpen} accent="#142B5F" />
+            <MetricCard label={data?.stats?"منشورة ضمن النتائج":"منشورة في الصفحة"} value={stats.published??'—'} icon={CheckCircle2} accent="#2E7D5A" />
+            <MetricCard label={data?.stats?"تحتاج مراجعة ضمن النتائج":"تحتاج مراجعة في الصفحة"} value={stats.needsReview??'—'} icon={AlertCircle} accent="#D6A43B" />
+            <MetricCard label={data?.stats?"مكتملة ضمن النتائج":"مكتملة في الصفحة"} value={stats.complete??'—'} icon={GraduationCap} accent="#21A7B4" />
           </section>
 
           {/* Compact Refined Search & Filter Card */}
-          <section className="rounded-2xl border border-[#DDEFF2] bg-white p-4 sm:p-5 shadow-xs">
+          <section aria-labelledby="major-filters" className="rounded-3xl border border-[#DDEFF2] bg-white p-4 sm:p-5 shadow-sm">
+            <h2 id="major-filters" className="mb-4 flex items-center gap-2 text-lg font-black text-[#142B5F]"><Filter aria-hidden="true" className="h-5 w-5 text-[#0E7C86]" />البحث والتصفية</h2>
+            {view==='catalog'&&<p className="mb-4 rounded-xl bg-amber-50 p-3 text-xs leading-6 text-amber-900">كتالوجات المصدر تدعم البحث والدرجة والحالة والاكتمال. فلاتر التصنيف المعتمد والكلية متاحة في «كل التخصصات».</p>}
             <div className="space-y-3.5">
               {/* Top Row: Search Input & Quick Reset */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <div className="relative flex-1">
                   <Search className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0E7C86]" />
                   <input
-                    type="text"
+                    type="search"
+                    maxLength={200}
+                    aria-label="البحث عن تخصص"
                     value={search}
                     onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                     className="h-11 w-full rounded-xl border border-slate-200 bg-[#FAF7F0]/40 pr-10 pl-10 text-xs sm:text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#0E7C86] focus:bg-white focus:ring-2 focus:ring-[#0E7C86]/15 font-['Cairo']"
@@ -331,12 +339,12 @@ export function MajorAdminPage() {
               </div>
 
               {/* Bottom Row: Filter Dropdowns Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1">
+              <div className="major-filter-fields grid grid-cols-1 gap-4 pt-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {/* Degree Filter */}
                 <div>
-                  <label className="mb-1 block text-[11px] font-bold text-slate-500">الدرجة العلمية</label>
+                  <label htmlFor="major-degree"><GraduationCap aria-hidden="true" className="h-3.5 w-3.5" />الدرجة العلمية</label>
                   <select
-                    value={degreeFilter}
+                    id="major-degree" value={degreeFilter}
                     onChange={(e) => { setDegreeFilter(e.target.value); setPage(1); }}
                     className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 font-['Cairo'] cursor-pointer"
                   >
@@ -351,9 +359,9 @@ export function MajorAdminPage() {
 
                 {/* Status Filter */}
                 <div>
-                  <label className="mb-1 block text-[11px] font-bold text-slate-500">حالة النشر</label>
+                  <label htmlFor="major-status"><ShieldCheck aria-hidden="true" className="h-3.5 w-3.5" />حالة النشر والمراجعة</label>
                   <select
-                    value={statusFilter}
+                    id="major-status" value={statusFilter}
                     onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
                     className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 font-['Cairo'] cursor-pointer"
                   >
@@ -368,9 +376,9 @@ export function MajorAdminPage() {
 
                 {/* Completeness Filter */}
                 <div>
-                  <label className="mb-1 block text-[11px] font-bold text-slate-500">حالة الاكتمال</label>
+                  <label htmlFor="major-completeness"><CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5" />اكتمال البيانات</label>
                   <select
-                    value={completenessFilter}
+                    id="major-completeness" value={completenessFilter}
                     onChange={(e) => { setCompletenessFilter(e.target.value); setPage(1); }}
                     className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 font-['Cairo'] cursor-pointer"
                   >
@@ -383,28 +391,16 @@ export function MajorAdminPage() {
                   </select>
                 </div>
 
-                {/* Taxonomy Filter */}
-                <div>
-                  <label className="mb-1 block text-[11px] font-bold text-slate-500">التصنيف المعياري</label>
-                  <select
-                    value={taxonomyIdFilter}
-                    onChange={(e) => { setTaxonomyIdFilter(e.target.value); setPage(1); }}
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 font-['Cairo'] cursor-pointer"
-                  >
-                    <option value="">كل التصنيفات المعيارية</option>
-                    {taxonomyOptions.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.label}{item.code ? ` (${item.code})` : ''}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <CanonicalPicker label="التصنيف المعياري" icon={<Layers3 aria-hidden="true" className="h-3.5 w-3.5" />} value={taxonomyIdFilter} onChange={id=>{setTaxonomyIdFilter(id??'');setPage(1);}} load={(query,page)=>canonicalPickerApi.taxonomyNodes(undefined,query,page)} reloadKey="major-filter-taxonomy" optional compact paged allowInactive disabled={view==='catalog'} />
+                <CanonicalPicker label="المجال الأكاديمي" icon={<BookOpen aria-hidden="true" className="h-3.5 w-3.5" />} value={academicFieldFilter} onChange={id=>{setAcademicFieldFilter(id??'');setPage(1);}} load={(query,page)=>canonicalPickerApi.taxonomyNodes('ACADEMIC_FIELD',query,page)} reloadKey="major-filter-field" optional compact paged allowInactive disabled={view==='catalog'} />
+                <CanonicalPicker label="التصنيف الفرعي" icon={<Layers3 aria-hidden="true" className="h-3.5 w-3.5" />} value={disciplineFilter} onChange={id=>{setDisciplineFilter(id??'');setPage(1);}} load={(query,page)=>canonicalPickerApi.taxonomyNodes('DISCIPLINE',query,page)} reloadKey="major-filter-discipline" optional compact paged allowInactive disabled={view==='catalog'} />
+                <label><span><Building2 aria-hidden="true" />الكلية</span><input type="search" disabled={view==='catalog'} maxLength={200} value={collegeFilter} onChange={event=>{setCollegeFilter(event.target.value);setPage(1);}} placeholder="اسم الكلية كما ورد في المصدر" /></label>
               </div>
 
               {/* Status footer inside filter */}
               <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-500">
                 <span className="font-medium">
-                  تم العثور على <strong className="text-[#142B5F] font-bold">{data?.total ?? 0}</strong> تخصص
+                  تم العثور على <strong className="text-[#142B5F] font-bold">{data?.total ?? '—'}</strong> تخصص
                 </span>
                 {data && data.totalPages > 1 && (
                   <span className="text-[11px] text-slate-400">
@@ -533,7 +529,7 @@ export function MajorAdminPage() {
                     {/* Card Footer: Action Button */}
                     <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
                       <span className="text-[11px] text-slate-400 font-medium">
-                        {major.updatedAt ? new Date(major.updatedAt).toLocaleDateString('ar-SA') : 'معتمد'}
+                        {major.updatedAt ? new Date(major.updatedAt).toLocaleDateString('ar-SA') : 'تاريخ التحديث غير متاح'}
                       </span>
 
                       <Link

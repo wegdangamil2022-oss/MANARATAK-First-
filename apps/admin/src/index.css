@@ -71,10 +71,10 @@ textarea {
 }
 
 @layer components {
-  :is(.scholarship-filter-fields, .university-filter-fields) > label {
+  :is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > label {
     @apply flex min-w-0 flex-col gap-2 text-xs font-bold text-slate-500;
   }
-  :is(.scholarship-filter-fields, .university-filter-fields) :where(input, select) {
+  :is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) :where(input, select) {
     @apply min-h-10 w-full rounded-xl border border-[#DDEFF2] bg-white px-3 py-2 text-xs font-semibold text-[#203442];
   }
   /* The original admin palette and controls also apply to newer owner workspaces.
@@ -175,7 +175,7 @@ textarea {
 .cms-rich-text blockquote { border-inline-start: 3px solid #0E7C86; padding-inline-start: 1em; }
 
 /* Scholarship filters share the funding/deadline control appearance. */
-:is(.scholarship-filter-fields, .university-filter-fields) :is(input, select) {
+:is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) :is(input, select) {
   height: 48px;
   min-height: 48px;
   margin-top: 0;
@@ -189,26 +189,26 @@ textarea {
   font-weight: 700;
   line-height: 1.5;
 }
-:is(.scholarship-filter-fields, .university-filter-fields) > :is(label, div) {
+:is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > :is(label, div) {
   min-width: 0;
   font-size: 11px;
   font-weight: 700;
   color: #64748b;
 }
-:is(.scholarship-filter-fields, .university-filter-fields) > label,
-:is(.scholarship-filter-fields, .university-filter-fields) > div {
+:is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > label,
+:is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > div {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-:is(.scholarship-filter-fields, .university-filter-fields) > div > *,
-:is(.scholarship-filter-fields, .university-filter-fields) > label > * {
+:is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > div > *,
+:is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > label > * {
   margin-top: 0;
   margin-bottom: 0;
 }
-:is(.scholarship-filter-fields, .university-filter-fields) > label > span,
-:is(.scholarship-filter-fields, .university-filter-fields) > div > label,
-:is(.scholarship-filter-fields, .university-filter-fields) > div > span:first-child {
+:is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > label > span,
+:is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > div > label,
+:is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > div > span:first-child {
   min-height: 24px;
   display: flex;
   align-items: center;
@@ -217,12 +217,12 @@ textarea {
   font-weight: 700;
   color: #64748b;
 }
-:is(.scholarship-filter-fields, .university-filter-fields) > label > span > svg {
+:is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > label > span > svg {
   height: 14px;
   width: 14px;
   flex-shrink: 0;
   color: #0E7C86;
 }
-:is(.scholarship-filter-fields, .university-filter-fields) > :nth-child(3n + 1) svg { color: #D6A43B; }
-:is(.scholarship-filter-fields, .university-filter-fields) > :nth-child(3n + 2) svg { color: #142B5F; }
-:is(.scholarship-filter-fields, .university-filter-fields) > :nth-child(3n + 3) svg { color: #0E7C86; }
+:is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > :nth-child(3n + 1) svg { color: #D6A43B; }
+:is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > :nth-child(3n + 2) svg { color: #142B5F; }
+:is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > :nth-child(3n + 3) svg { color: #0E7C86; }
