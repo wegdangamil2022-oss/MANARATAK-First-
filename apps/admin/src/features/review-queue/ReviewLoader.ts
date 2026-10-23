@@ -77,13 +77,17 @@ export async function readNextReviewPage(
     if (signal.aborted) return state;
     if (!response || typeof response !== 'object') throw new Error('SOURCE_RESPONSE_INVALID');
     const value = response as Record<string, unknown>;
+    // International tests expose the requested page size as `limit` in their owner contract.
+    const responsePageSize = state.source.domain === 'tests' && value.pageSize === undefined
+      ? value.limit : value.pageSize;
     if (
       !Array.isArray(value.data) ||
       value.data.length > pageSize ||
       !Number.isSafeInteger(value.total) ||
       Number(value.total) < 0 ||
       value.page !== page ||
-      value.pageSize !== pageSize
+      responsePageSize !== pageSize ||
+      (state.source.domain === 'tests' && value.limit !== undefined && value.limit !== pageSize)
     )
       throw new Error('SOURCE_PAGE_INVALID');
     const rawTotal = Number(value.total);

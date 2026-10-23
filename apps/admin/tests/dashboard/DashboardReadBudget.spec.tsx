@@ -1,12 +1,23 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {dashboardSources} from '../../src/features/dashboard/DashboardSources';
-import {initialDashboardReading} from '../../src/features/dashboard/DashboardContract';
+import {initialDashboardReading, parseDashboardResponse} from '../../src/features/dashboard/DashboardContract';
 import {readDashboardSource} from '../../src/features/dashboard/DashboardLoader';
 import {initialSourceState, readNextReviewPage} from '../../src/features/review-queue/ReviewLoader';
 import {reviewSources} from '../../src/features/review-queue/ReviewSources';
 
 afterEach(()=>vi.useRealTimers());
 describe('Bounded owner read budgets',()=>{
+ it('reads absent import status groups as zero only when the histogram accounts for the total',()=>{
+  const source=dashboardSources.find(source=>source.key==='imports')!;
+  const empty=parseDashboardResponse(source,{totalBatches:0,totalRecords:0,recordStatusCounts:{}});
+  expect(empty.state).toBe('available');expect(empty.metrics.NEEDS_REVIEW).toBe(0);
+  const promoted=parseDashboardResponse(source,{totalBatches:1,totalRecords:4,recordStatusCounts:{PROMOTED:4}});
+  expect(promoted.metrics.NEEDS_REVIEW).toBe(0);expect(promoted.metrics.PROMOTED).toBe(4);
+  for(const recordStatusCounts of [undefined,{}, {PROMOTED:3},{PROMOTED:null}]){
+   const incomplete=parseDashboardResponse(source,{totalBatches:1,totalRecords:4,recordStatusCounts});
+   expect(incomplete.metrics.NEEDS_REVIEW).toBeNull();expect(incomplete.state).toBe('partial');
+  }
+ });
  it('accepts valid slow responses beyond the former 5/8 second deadlines',async()=>{
   vi.useFakeTimers();
   const source=dashboardSources.find(source=>source.key==='majors:total')!;

@@ -108,10 +108,17 @@ export function parseDashboardResponse(
       count('batches', value.totalBatches);
       count('records', value.totalRecords);
       const counts = object(value.recordStatusCounts) ? value.recordStatusCounts : {};
+      // The owner returns a sparse groupBy histogram. Missing groups mean zero only
+      // when the complete, valid histogram accounts for the independently read total.
+      const histogramValues = Object.values(counts);
+      const completeHistogram = object(value.recordStatusCounts) &&
+        Number.isSafeInteger(value.totalRecords) && Number(value.totalRecords) >= 0 &&
+        histogramValues.every(value => Number.isSafeInteger(value) && Number(value) >= 0) &&
+        histogramValues.reduce<number>((sum, value) => sum + Number(value), 0) === value.totalRecords;
       for (const metric of source.metrics.filter(
         (metric) => !['batches', 'records'].includes(metric),
       ))
-        count(metric, counts[metric]);
+        count(metric, Object.hasOwn(counts, metric) ? counts[metric] : completeHistogram ? 0 : undefined);
       break;
     }
     case 'finance': {
