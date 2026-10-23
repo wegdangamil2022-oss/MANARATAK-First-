@@ -363,6 +363,10 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       ];
     }
 
+    if (filters.countOnly) {
+      const total = await this.prisma.university.count({ where });
+      return { data: [], total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+    }
     const [data, total] = await Promise.all([
       this.prisma.university.findMany({
         where,

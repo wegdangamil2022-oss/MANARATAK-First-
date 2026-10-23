@@ -46,6 +46,12 @@ describe('MajorAdminRouter', () => {
     return app;
   };
 
+  it('parses explicit count-only mode without changing owner filters', async () => {
+    const useCases=createMockUseCases();useCases.listMajors.mockResolvedValue({data:[],total:3,page:1,pageSize:1,totalPages:3});
+    const app=createApp(useCases);
+    expect((await request(app).get('/admin/majors?countOnly=true&catalog=false&status=READY_TO_REVIEW&pageSize=1')).status).toBe(200);
+    expect(useCases.listMajors).toHaveBeenCalledWith({countOnly:true,catalog:'false',status:MajorStatus.READY_TO_REVIEW,page:1,pageSize:1});
+  });
   it('GET /admin/majors calls listMajors with parsed filters', async () => {
     const useCases = createMockUseCases();
     useCases.listMajors.mockResolvedValue({

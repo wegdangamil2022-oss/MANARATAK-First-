@@ -34,6 +34,12 @@ describe('UniversityAdminRouter', () => {
     return app;
   };
 
+  it('parses explicit count-only mode without changing owner filters', async () => {
+    const useCases=createMockUseCases();useCases.listUniversities.mockResolvedValue({data:[],total:7,page:1,pageSize:1,totalPages:7});
+    const app=createApp(useCases);
+    expect((await request(app).get('/admin/universities?countOnly=true&status=READY_TO_REVIEW&countryReferenceId=country-qa&pageSize=1')).status).toBe(200);
+    expect(useCases.listUniversities).toHaveBeenCalledWith({countOnly:true,status:UniversityStatus.READY_TO_REVIEW,countryReferenceId:'country-qa',page:1,pageSize:1});
+  });
   it('GET /admin/universities calls listUniversities with parsed filters', async () => {
     const useCases = createMockUseCases();
     useCases.listUniversities.mockResolvedValue({

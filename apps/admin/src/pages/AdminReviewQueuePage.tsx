@@ -626,7 +626,7 @@ export function AdminReviewQueuePage() {
                   <div className="review-record-tags">
                     {item.status && <span>{label(item.status)}</span>}
                     {item.completenessStatus && <span>{label(item.completenessStatus)}</span>}
-                    {!item.status && !item.completenessStatus && <span>{tr('التصنيف غير مزود', 'Classification not supplied')}</span>}
+                    {!item.status && !item.completenessStatus && <span>{item.domain === 'study-destinations' ? tr('لم يُنشأ ملف وجهة', 'Destination profile not created') : tr('التصنيف غير مزود', 'Classification not supplied')}</span>}
                   </div>
                   <details className="review-row-details"><summary>{tr('بيانات السجل', 'Record metadata')}</summary><bdi>{item.id}</bdi><p>{tr('لغة المصدر', 'Source locale')}: {item.locale ?? label('unknown')} · {label(item.sourceKind)}</p><p>{tr('استيراد', 'Imported')}: {date(item.importedAt)} · {tr('تعديل', 'Modified')}: {date(item.modifiedAt)}</p><p>{tr('تعيين المراجع غير مزود', 'Reviewer assignment not supplied')}</p></details>
                 </td>

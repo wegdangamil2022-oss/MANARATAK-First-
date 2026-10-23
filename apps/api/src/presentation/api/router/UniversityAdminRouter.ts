@@ -36,6 +36,7 @@ export class UniversityAdminRouter {
     };
 
     const listQuerySchema = z.object({
+      countOnly: z.enum(['true', 'false']).transform(value => value === 'true').optional(),
       status: z.preprocess(value => value === '' || value === 'all' || value === 'الكل' ? undefined : value, z.nativeEnum(UniversityStatus).optional()),
       completenessStatus: z.preprocess(value => value === '' || value === 'all' || value === 'الكل' ? undefined : value, z.nativeEnum(UniversityImportCompletenessState).optional()),
       sort:z.enum(['CREATED_DESC','UPDATED_DESC','NAME_ASC']).optional(),

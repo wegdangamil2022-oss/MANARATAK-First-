@@ -385,7 +385,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
       AND (${filters.academicFieldOrDiscipline ?? ''}='' OR EXISTS(SELECT 1 FROM "AcademicTaxonomyNode" n WHERE n.id IN (r."fieldId",r."disciplineId") AND strpos(lower(n."canonicalName"),lower(${filters.academicFieldOrDiscipline ?? ''}))>0))
     )`;
     const [ids,counts]=await Promise.all([
-      this.prisma.$queryRaw<Array<{majorId:string;profileId:string|null}>>(Prisma.sql`${query} SELECT "majorId","profileId" FROM filtered ORDER BY "createdAt" DESC,"rowId" DESC LIMIT ${pageSize} OFFSET ${(page-1)*pageSize}`),
+      filters.countOnly ? Promise.resolve([] as Array<{majorId:string;profileId:string|null}>) : this.prisma.$queryRaw<Array<{majorId:string;profileId:string|null}>>(Prisma.sql`${query} SELECT "majorId","profileId" FROM filtered ORDER BY "createdAt" DESC,"rowId" DESC LIMIT ${pageSize} OFFSET ${(page-1)*pageSize}`),
       this.prisma.$queryRaw<Array<{total:bigint;published:bigint;needsReview:bigint;complete:bigint}>>(Prisma.sql`${query} SELECT count(*) AS total,count(*) FILTER(WHERE status='PUBLISHED') AS published,count(*) FILTER(WHERE status='READY_TO_REVIEW' OR "completenessStatus"='NEEDS_REVIEW') AS "needsReview",count(*) FILTER(WHERE "completenessStatus"='COMPLETE') AS complete FROM filtered`),
     ]);
     const majors=ids.length?await this.prisma.major.findMany({where:{id:{in:[...new Set(ids.map(row=>row.majorId))]}},include:MAJOR_INCLUDE}):[];

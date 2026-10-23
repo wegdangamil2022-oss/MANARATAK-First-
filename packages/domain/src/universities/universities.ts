@@ -237,6 +237,8 @@ export interface UniversityNormalizedDetailsUpdate {
 }
 
 export interface UniversityFilters {
+  /** Admin counter reads omit hydrated university details. */
+  countOnly?: boolean;
   sort?:'CREATED_DESC'|'UPDATED_DESC'|'NAME_ASC';
   status?: UniversityStatus;
   completenessStatus?: UniversityImportCompletenessState;
@@ -255,7 +257,7 @@ export interface UniversityFilters {
   pageSize?: number;
 }
 
-export type PublicUniversityFilters = Omit<UniversityFilters, 'status' | 'completenessStatus' | 'country' | 'city' | 'page' | 'pageSize'> & { cursor?: string; limit?: number };
+export type PublicUniversityFilters = Omit<UniversityFilters, 'countOnly' | 'status' | 'completenessStatus' | 'country' | 'city' | 'page' | 'pageSize'> & { cursor?: string; limit?: number };
 export type PublicUniversityDto = Omit<
   UniversityDto,
   | 'id'

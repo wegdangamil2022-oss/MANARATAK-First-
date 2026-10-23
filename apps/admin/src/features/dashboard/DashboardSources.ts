@@ -62,6 +62,7 @@ export const dashboardSources: DashboardSource[] = ownerCatalogs.flatMap(
       permissions: [permission],
       kind: 'total',
       params: {
+        ...(['universities', 'majors'].includes(domain) ? { countOnly: 'true' } : {}),
         ...(domain === 'majors' ? { catalog: 'false' } : {}),
         ...(status ? { status } : {}),
         page: '1',

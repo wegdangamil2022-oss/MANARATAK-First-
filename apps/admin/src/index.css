@@ -306,6 +306,11 @@ textarea {
 .dashboard-metric-primary .dashboard-metric-status { grid-column: 1 / -1; margin: 0; }
 .dashboard-metric-primary .dashboard-source-details { margin: 0; }
 .dashboard-metric-primary .dashboard-metric-link { margin: 0; padding: 0; border: 0; }
+.dashboard-metric-signal { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; align-items: center; }
+.dashboard-metric-signal > p:first-child { grid-column: 1 / -1; margin: 0; font-size: 10px; }
+.dashboard-metric-signal .dashboard-metric-value { margin: 0; grid-column: 2; grid-row: 2; }
+.dashboard-metric-signal .dashboard-metric-status { grid-column: 1 / -1; }
+.dashboard-metric-signal .dashboard-source-details, .dashboard-metric-signal .dashboard-metric-link { margin: 0; padding: 0; border: 0; }
 .dashboard-breakdowns { font-size: 12px; }
 .dashboard-breakdowns > summary { cursor: pointer; }
 .dashboard-breakdowns .admin-section-tools { padding: 12px; margin-top: 10px; }

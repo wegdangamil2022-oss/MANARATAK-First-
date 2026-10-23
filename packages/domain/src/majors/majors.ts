@@ -402,6 +402,8 @@ export class MajorPhaseLinkingService {
 }
 
 export interface MajorFilters {
+  /** Admin counter reads omit hydrated catalog rows. */
+  countOnly?: boolean;
   taxonomyNodeId?: string;
   status?: MajorLifecycleStatus;
   completenessStatus?: MajorImportCompletenessState;
@@ -415,7 +417,7 @@ export interface MajorFilters {
   pageSize?: number;
 }
 
-export type PublicMajorFilters = Omit<MajorFilters, 'status' | 'completenessStatus' | 'page' | 'pageSize'> & { cursor?: string; limit?: number };
+export type PublicMajorFilters = Omit<MajorFilters, 'countOnly' | 'status' | 'completenessStatus' | 'page' | 'pageSize'> & { cursor?: string; limit?: number };
 
 export interface PaginatedMajorResult<T = MajorDto> {
   data: T[];
