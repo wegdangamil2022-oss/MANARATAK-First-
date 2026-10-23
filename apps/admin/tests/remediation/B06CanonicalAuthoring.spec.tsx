@@ -30,13 +30,13 @@ describe('B06 canonical choices', () => {
     await mount(<CanonicalPicker label="Country" value="country-existing" onChange={change} load={load} compact paged optional allowInactive />);
     await flush();
     expect(tree.root.findAllByType('input')).toHaveLength(0);
-    await act(async () => button('التالي').props.onClick()); await flush();
+    expect(tree.root.findAllByType('button')).toHaveLength(0);
+    await act(async () => tree.root.findByType('select').props.onChange({target:{value:'__canonical_more__'}})); await flush();
     expect(load).toHaveBeenLastCalledWith('', 2, undefined);
     expect(tree.root.findByType('select').props.value).toBe('country-existing');
-    const search = tree.root.findAllByType('button').find(node => node.props['aria-label'] === 'بحث Country')!;
-    await act(async () => search.props.onClick());
-    await act(async () => tree.root.findByType('input').props.onChange({target:{value:'Rare'}})); await flush();
-    expect(load).toHaveBeenLastCalledWith('Rare', 1, undefined);
+    expect(tree.root.findAllByType('option').some(node => node.props.value === 'country-0')).toBe(true);
+    expect(tree.root.findAllByType('option').some(node => node.props.value === 'country-51')).toBe(true);
+    expect(tree.root.findAllByType('option').some(node => node.props.value === '__canonical_more__')).toBe(false);
     expect(change).not.toHaveBeenCalled();
   });
   it.each(['countries', 'majors'] as const)('reaches page three and searches %s without dropping the off-page ID', async kind => {

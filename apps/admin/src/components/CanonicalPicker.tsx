@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Search } from 'lucide-react';
 import { useTranslation } from '../i18n/I18nProvider';
 import { type CanonicalPickerOption, type CanonicalPickerPage, canonicalOptionIsSelectable } from '../api/canonicalPickers';
 
@@ -28,7 +27,7 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [pageHasMore, setPageHasMore] = useState(false);
   const [page, setPage] = useState(1);
   const cursors = useRef<Array<string | undefined>>([undefined]);
   const [nextCursor, setNextCursor] = useState<string | null | undefined>(undefined);
@@ -44,7 +43,8 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
       const cursor = Array.isArray(result) ? undefined : result.nextCursor;
       setNextCursor(cursor);
       cursors.current[page] = cursor ?? undefined;
-      setOptions(items);
+      setPageHasMore(cursor !== undefined ? Boolean(cursor) : items.length >= 50);
+      setOptions(old => compact && page > 1 ? [...old, ...items.filter(item => !old.some(prior => prior.id === item.id))] : items);
       setState('ready');
     }).catch((err: unknown) => {
       if (!active) return;
@@ -52,15 +52,15 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
       setState('error');
     }), 200);
     return () => { active = false; clearTimeout(timer); };
-  }, [reloadKey, search, page, paged]);
+  }, [reloadKey, search, page, paged, compact]);
 
   const selected = useMemo(() => options.find((item) => item.id === value), [options, value]);
   const selectedBlocked = !allowInactive && selected && !canonicalOptionIsSelectable(selected);
   const missing = Boolean(value) && !selected;
 
   return <div className="min-w-0 space-y-2 text-xs font-medium text-[#203442]">
-    <span className="flex min-h-5 items-center justify-between gap-2"><span className="inline-flex items-center gap-1.5">{icon}{label}</span>{compact && <button type="button" aria-label={`${ar ? 'بحث' : 'Search'} ${label}`} aria-expanded={searchOpen} disabled={disabled} onClick={() => setSearchOpen(open => !open)} className="inline-flex !min-h-0 items-center justify-center !border-0 !p-1 text-[#0E7C86]"><Search className="h-3.5 w-3.5" aria-hidden="true" /></button>}</span>
-    {(!compact || searchOpen) && <input type="search" maxLength={200} aria-label={`${ar ? 'بحث' : 'Search'} ${label}`} value={search}
+    <span className="flex min-h-5 items-center gap-1.5">{icon}{label}</span>
+    {!compact && <input type="search" maxLength={200} aria-label={`${ar ? 'بحث' : 'Search'} ${label}`} value={search}
       disabled={disabled} onChange={event => { setSearch(event.target.value); cursors.current = [undefined]; setNextCursor(undefined); setPage(1); }}
       placeholder={ar ? 'ابحث عن سجل (حتى 50 نتيجة)' : 'Search records (up to 50 results)'}
       className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />}
@@ -69,6 +69,7 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
       disabled={disabled || state !== 'ready'}
       onChange={(event) => {
         const id = event.target.value || null;
+        if (compact && id === '__canonical_more__' && pageHasMore && page < 1000) { event.target.value = value ?? ''; setPage(current => current + 1); return; }
         const next = options.find((item) => item.id === id);
         if (id && (!next || (!allowInactive && !canonicalOptionIsSelectable(next)))) return;
         onChange(id, next);
@@ -80,10 +81,11 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
       {options.map((item) => <option key={item.id} value={item.id} disabled={!allowInactive && !canonicalOptionIsSelectable(item)}>
         {item.label}{item.code ? ` · ${item.code}` : ''} · {item.lifecycle}
       </option>)}
+      {compact && paged && pageHasMore && page < 1000 && <option value="__canonical_more__">{ar ? 'عرض خيارات إضافية…' : 'Load more options…'}</option>}
     </select>
     {value && !compact ? <span className="block break-all text-slate-500">{ar ? 'المعرّف' : 'ID'}: {value}</span> : null}
     {state === 'error' ? <span className="text-red-600">{error}</span> : null}
-    {paged && (!compact || page > 1 || (nextCursor !== undefined ? Boolean(nextCursor) : options.length >= 50)) && <span className="flex flex-wrap items-center gap-3"><button type="button" disabled={disabled || state !== 'ready' || page <= 1} onClick={() => setPage(value => value - 1)}>{ar ? 'السابق' : 'Previous'}</button><span>{page}</span><button type="button" disabled={disabled || state !== 'ready' || options.length === 0 || (nextCursor !== undefined && !nextCursor) || page >= 1000} onClick={() => setPage(value => value + 1)}>{ar ? 'التالي' : 'Next'}</button></span>}
+    {paged && !compact && <span className="flex flex-wrap items-center gap-3"><button type="button" disabled={disabled || state !== 'ready' || page <= 1} onClick={() => setPage(value => value - 1)}>{ar ? 'السابق' : 'Previous'}</button><span>{page}</span><button type="button" disabled={disabled || state !== 'ready' || options.length === 0 || (nextCursor !== undefined && !nextCursor) || page >= 1000} onClick={() => setPage(value => value + 1)}>{ar ? 'التالي' : 'Next'}</button></span>}
     {missing ? <span className="block text-amber-700">{ar ? 'المعرّف الحالي خارج هذه الصفحة. ابحث للتحقق؛ لم تتغير العلاقة.' : 'Current ID is not in this bounded page. Search to verify; no relationship has been changed.'}</span> : null}
     {selectedBlocked ? <span className="block text-amber-700">{ar ? `حالة العلاقة الحالية ${selected.lifecycle}؛ اختر بديلًا نشطًا أو منشورًا قبل الحفظ.` : `Existing relation is ${selected.lifecycle}; choose an ACTIVE/PUBLISHED replacement before saving.`}</span> : null}
   </div>;

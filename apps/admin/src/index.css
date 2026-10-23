@@ -223,3 +223,6 @@ textarea {
   flex-shrink: 0;
   color: #0E7C86;
 }
+.scholarship-filter-fields > :nth-child(3n + 1) svg { color: #D6A43B; }
+.scholarship-filter-fields > :nth-child(3n + 2) svg { color: #142B5F; }
+.scholarship-filter-fields > :nth-child(3n + 3) svg { color: #0E7C86; }

@@ -32,3 +32,9 @@ This confirms layout and existing client interactions, not acceptance of live sc
 At the owner's request, all 16 filter fields now share the funding/deadline appearance: 48px controls, Cairo at 12px/700, identical colors, borders and radius, consistent labels, and an icon before each label. Review locale has its own labeled grid cell instead of a second unlabeled row under translation. CSS changes are scoped to the scholarship filter grid; selector icons are optional elsewhere.
 
 Admin TypeScript and Vite build passed. A focused synthetic browser style check at 1360/820/390px confirmed 16 matching computed control styles, all 16 fields with icons, and no horizontal overflow. Existing authoring suites were not repeated for this presentation-only follow-up.
+
+## Simplified filter controls
+
+The owner subsequently requested removal of per-field previous/next controls and search icons. Compact scholarship selectors now place continuation inside the select as “Load more options”; choosing it appends the next bounded owner page without applying the continuation marker as a filter or dropping earlier options/current IDs. Other authoring selectors retain their search and pagination. Filter icons alternate gold, indigo and turquoise. The main scholarship text search remains available.
+
+Verification: 9 focused canonical-authoring tests passed, including compact continuation without external buttons and preservation of earlier options/current selection; admin TypeScript and build passed. Synthetic browser checks at three widths confirmed no per-field buttons, all three icon colors, consistent 48px controls and no horizontal overflow.
