@@ -1,0 +1,688 @@
+{
+  "kind": "UNIVERSITY_STAGE2_PARTIAL_ENRICHMENT_POSTGRES16_PROOF",
+  "pass": true,
+  "sourceSha": "e80f5602c49ee33b84f5d8bb1e3c2a1ae0394508",
+  "runId": "15a2495c-5416-432c-b18c-83a5c57ad084",
+  "observedAt": "2026-10-23T01:46:58.936Z",
+  "postgresMajor": 16,
+  "identity": {
+    "role": "post28_app",
+    "server": "7699672701646329872",
+    "rolsuper": false,
+    "rolcreaterole": false,
+    "rolcreatedb": false,
+    "rolbypassrls": false,
+    "ledger": false,
+    "ddl": false,
+    "owns": false
+  },
+  "managedDatabaseConnections": 0,
+  "realAccountsCreated": 0,
+  "priorDatabasesTouched": false,
+  "existingUniversityFixtureCount": 4,
+  "canonicalUniversitiesCreatedByStage2": 0,
+  "approvedNewFields": [
+    "foundedYear"
+  ],
+  "updated": [
+    {
+      "id": "0ef16574-2bf2-4efe-8faf-b11e4adb12d2",
+      "publicId": "INS-CHN-0001",
+      "foundedYear": 1898,
+      "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+      "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+      "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37",
+      "optionalFields": {
+        "fixtureOnly": true,
+        "manualBaseline": "MUST_BE_PRESERVED"
+      }
+    },
+    {
+      "id": "c4383daa-ed16-45a3-928e-2c1d7e7c53dd",
+      "publicId": "INS-CHN-0003",
+      "foundedYear": 1911,
+      "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+      "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+      "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37",
+      "optionalFields": {
+        "fixtureOnly": true,
+        "manualBaseline": "MUST_BE_PRESERVED"
+      }
+    },
+    {
+      "id": "f0eed938-90b1-4311-b22d-dd26a02aa03a",
+      "publicId": "INS-HUN-0006",
+      "foundedYear": 1635,
+      "countryReferenceId": "aa450b59-9731-4869-b3e8-7713aed3ae72",
+      "regionReferenceId": "7ccf3f41-ce49-4693-b545-974edd9d3ef9",
+      "cityReferenceId": "b986d010-bceb-481f-b9d9-572b33acab5e",
+      "optionalFields": {
+        "fixtureOnly": true,
+        "manualBaseline": "MUST_BE_PRESERVED"
+      }
+    },
+    {
+      "id": "147fd7ad-865f-423d-b0f0-ee02042e9491",
+      "publicId": "INS-TUR-0145",
+      "foundedYear": 1956,
+      "countryReferenceId": "2c14f864-d235-4276-8c87-d1bb19ceca0d",
+      "regionReferenceId": "d9db85b6-b3d0-42a7-b45e-5eb6b0b5a66b",
+      "cityReferenceId": "25d9c584-2cd4-47ac-98a4-f7c3e68588ef",
+      "optionalFields": {
+        "fixtureOnly": true,
+        "manualBaseline": "MUST_BE_PRESERVED"
+      }
+    }
+  ],
+  "before": {
+    "universities": 4,
+    "sources": 4,
+    "sets": 0,
+    "changes": 0,
+    "audit": 0,
+    "outbox": 3,
+    "assets": 1,
+    "receipts": 4
+  },
+  "applied": {
+    "universities": 4,
+    "sources": 8,
+    "sets": 2,
+    "changes": 8,
+    "audit": 2,
+    "outbox": 5,
+    "assets": 1,
+    "receipts": 4
+  },
+  "rolled": {
+    "universities": 4,
+    "sources": 4,
+    "sets": 2,
+    "changes": 8,
+    "audit": 4,
+    "outbox": 7,
+    "assets": 1,
+    "receipts": 4
+  },
+  "sourceArtifactSha256": "3a80dbe918082ad25f36797b8802fbbef1dccbfc055c64c53ba4a9838ee6f8dc",
+  "fieldReviewSha256": "0b5fab450d1661151b9212a150e900dc7e3acb3aeb15b3490c645ddf6e5e927d",
+  "scannerReceipts": [
+    {
+      "provider": "WINDOWS_DEFENDER",
+      "sha256": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee",
+      "exitCode": 0,
+      "digestUnchanged": true,
+      "clean": true,
+      "signatureVersion": "1.461.156.0",
+      "signatureUpdatedAt": "2026-10-22T18:40:20.0000000Z"
+    },
+    {
+      "provider": "WINDOWS_DEFENDER",
+      "sha256": "9705e974bf8f8a9050d7ed74b21ae94eeae4c1eba96a69ded95966942a8bd67f",
+      "exitCode": 0,
+      "digestUnchanged": true,
+      "clean": true,
+      "signatureVersion": "1.461.156.0",
+      "signatureUpdatedAt": "2026-10-22T18:40:20.0000000Z"
+    },
+    {
+      "provider": "WINDOWS_DEFENDER",
+      "sha256": "3a80dbe918082ad25f36797b8802fbbef1dccbfc055c64c53ba4a9838ee6f8dc",
+      "exitCode": 0,
+      "digestUnchanged": true,
+      "clean": true,
+      "signatureVersion": "1.461.156.0",
+      "signatureUpdatedAt": "2026-10-22T18:40:20.0000000Z"
+    },
+    {
+      "provider": "WINDOWS_DEFENDER",
+      "sha256": "3a80dbe918082ad25f36797b8802fbbef1dccbfc055c64c53ba4a9838ee6f8dc",
+      "exitCode": 0,
+      "digestUnchanged": true,
+      "clean": true,
+      "signatureVersion": "1.461.156.0",
+      "signatureUpdatedAt": "2026-10-22T18:40:20.0000000Z"
+    }
+  ],
+  "plans": [
+    {
+      "stage": "STAGE_2",
+      "sourceArtifactId": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee",
+      "changes": [
+        {
+          "sequence": 1,
+          "sourceReferenceId": "INS-CHN-0001",
+          "entityType": "UNIVERSITY",
+          "entityKey": "0ef16574-2bf2-4efe-8faf-b11e4adb12d2",
+          "operation": "UPDATE",
+          "beforeState": {
+            "id": "0ef16574-2bf2-4efe-8faf-b11e4adb12d2",
+            "updatedAt": "2026-10-23T01:46:36.531Z",
+            "stateHash": "d328fe69ec71f9abdadb4791f22d53263bc4a8144fa73cda63fc0f5fb6a63946"
+          },
+          "afterState": {
+            "city": "Beijing",
+            "country": "China",
+            "metadata": {
+              "purpose": "PARTIAL_STAGE2_FOUNDED_YEAR_ONLY_NOT_FULL_WORKBOOK_APPROVAL",
+              "sourceFile": "workspace/import-sources/universities/stage-2-enrichment/Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE(20260813-215654).xlsx",
+              "rawRowSha256": "9c5ad21892690ea2c1722aa6317672f4447d2e228595b2a2aefb33ff99e83945",
+              "rawStage2Row": {
+                "City": "Bei Jing",
+                "Country": "China",
+                "Map URL": "https://www.google.com/maps/search/?api=1&query=Peking+University%2C+Beijing%2C+China",
+                "Continent": "Asia",
+                "Import Date": "2026-08-08",
+                "Country ISO3": "CHN",
+                "Founded Year": "1898",
+                "Import Batch": "Asia-Phase1-Batch-141",
+                "Review Notes": "13/15 quality enrichment Batch 4 (2026-08-14): the institutional description and missing benchmark fields were strengthened using official-first evidence and the verified source trail retained in the record. Unsupported optional values were not inferred; A:I, ID and row order were preserved.",
+                "Review Status": "Under Review",
+                "Verified City": "Beijing",
+                "Official Phone": "",
+                "State / Region": "Beijing Municipality",
+                "Data Confidence": "Medium",
+                "Short Description": "Peking University is a public comprehensive university based in Beijing, Beijing Municipality, China. The record identifies 1898 as its documented founding or institutional-origin year. It provides multidisciplinary higher education and research across academic and professional fields within the national higher-education system. The official website and the Ministry of Education of the People's Republic of China provide the principal source trail used to verify its identity, classification and location.",
+                "Last Verified Date": "2026-08-14",
+                "Original Ownership": "Public",
+                "Primary Source URL": "https://english.pku.edu.cn/about.html",
+                "Verified Ownership": "Public",
+                "Main Campus Address": "",
+                "Official Local Name": "北京大学",
+                "Original Source URL": "https://www.moe.gov.cn/jyb_xxgk/s5743/s5744/202606/t20260618_1441074.html",
+                "Primary Source Type": "Official University Website",
+                "Official Website URL": "https://www.pku.edu.cn/",
+                "Original Website URL": "https://www.pku.edu.cn/",
+                "Import Continent File": "Asia_Universities_Import_English_Complete_Asia.xlsx",
+                "Official Abbreviation": "",
+                "Official English Name": "Peking University",
+                "University System URL": "",
+                "Duplicate Check Status": "No Duplicate Found",
+                "Original Imported Name": "Peking University",
+                "External Institution ID": "",
+                "Government Registry URL": "https://www.moe.gov.cn/",
+                "Official Website Source": "https://english.pku.edu.cn/about.html",
+                "Official Website Status": "Verified",
+                "University Reference ID": "INS-CHN-0001",
+                "Government Authority Name": "Ministry of Education of the People's Republic of China",
+                "Original Institution Type": "Comprehensive University",
+                "Phase 1 Completion Status": "Partially Complete",
+                "Verified Institution Type": "Comprehensive University",
+                "Central Admissions Portal URL": "",
+                "Main Official Social Media URL": "",
+                "Official Application Portal URL": "",
+                "Trusted International Directory URL": ""
+              },
+              "sourceRowNumber": 1405,
+              "approvedNewFields": [
+                "foundedYear"
+              ],
+              "fieldReviewSha256": "0b5fab450d1661151b9212a150e900dc7e3acb3aeb15b3490c645ddf6e5e927d",
+              "sourceWorkbookSha256": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee"
+            },
+            "countryIso3": "CHN",
+            "foundedYear": 1898,
+            "universityName": "Peking University",
+            "institutionType": "UNIVERSITY",
+            "officialWebsite": "https://www.pku.edu.cn/",
+            "officialSourceUrl": "https://english.pku.edu.cn/detail/11807.html",
+            "sourceReferenceId": "INS-CHN-0001",
+            "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+            "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+            "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37"
+          }
+        },
+        {
+          "sequence": 2,
+          "sourceReferenceId": "INS-CHN-0001",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "e51a3dae-e683-4bfd-83ad-8ea50175334f",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_2",
+            "artifactId": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee",
+            "sourceRowNumber": 1405,
+            "contentHash": "9c5ad21892690ea2c1722aa6317672f4447d2e228595b2a2aefb33ff99e83945"
+          }
+        },
+        {
+          "sequence": 3,
+          "sourceReferenceId": "INS-CHN-0003",
+          "entityType": "UNIVERSITY",
+          "entityKey": "c4383daa-ed16-45a3-928e-2c1d7e7c53dd",
+          "operation": "UPDATE",
+          "beforeState": {
+            "id": "c4383daa-ed16-45a3-928e-2c1d7e7c53dd",
+            "updatedAt": "2026-10-23T01:46:36.545Z",
+            "stateHash": "bf2d07598d69c4e148c2773d5206cb38597c5b2db8a95e8ce8f6d1c43cc85054"
+          },
+          "afterState": {
+            "city": "Beijing",
+            "country": "China",
+            "metadata": {
+              "purpose": "PARTIAL_STAGE2_FOUNDED_YEAR_ONLY_NOT_FULL_WORKBOOK_APPROVAL",
+              "sourceFile": "workspace/import-sources/universities/stage-2-enrichment/Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE(20260813-215654).xlsx",
+              "rawRowSha256": "20aec91ebb1241b7367cdc5ce345a97e1cbc94390bca64573b7baa304fb58c4f",
+              "rawStage2Row": {
+                "City": "Bei Jing",
+                "Country": "China",
+                "Map URL": "https://www.google.com/maps/search/?api=1&query=Tsinghua+University%2C+Beijing%2C+China",
+                "Continent": "Asia",
+                "Import Date": "2026-08-08",
+                "Country ISO3": "CHN",
+                "Founded Year": "1911",
+                "Import Batch": "Asia-Phase1-Batch-141",
+                "Review Notes": "13/15 quality enrichment Batch 4 (2026-08-14): the institutional description and missing benchmark fields were strengthened using official-first evidence and the verified source trail retained in the record. Unsupported optional values were not inferred; A:I, ID and row order were preserved.",
+                "Review Status": "Under Review",
+                "Verified City": "Beijing",
+                "Official Phone": "",
+                "State / Region": "Beijing Municipality",
+                "Data Confidence": "Medium",
+                "Short Description": "Tsinghua University is a public comprehensive university based in Beijing, Beijing Municipality, China. The record identifies 1911 as its documented founding or institutional-origin year. It provides multidisciplinary higher education and research across academic and professional fields within the national higher-education system. The official website and the Ministry of Education of the People's Republic of China provide the principal source trail used to verify its identity, classification and location.",
+                "Last Verified Date": "2026-08-14",
+                "Original Ownership": "Public",
+                "Primary Source URL": "https://www.tsinghua.edu.cn/en/About/History.htm",
+                "Verified Ownership": "Public",
+                "Main Campus Address": "",
+                "Official Local Name": "清华大学",
+                "Original Source URL": "https://www.moe.gov.cn/jyb_xxgk/s5743/s5744/202606/t20260618_1441074.html",
+                "Primary Source Type": "Official University Website",
+                "Official Website URL": "https://www.tsinghua.edu.cn/",
+                "Original Website URL": "https://www.tsinghua.edu.cn/",
+                "Import Continent File": "Asia_Universities_Import_English_Complete_Asia.xlsx",
+                "Official Abbreviation": "",
+                "Official English Name": "Tsinghua University",
+                "University System URL": "",
+                "Duplicate Check Status": "No Duplicate Found",
+                "Original Imported Name": "Tsinghua University",
+                "External Institution ID": "",
+                "Government Registry URL": "https://www.moe.gov.cn/",
+                "Official Website Source": "https://www.tsinghua.edu.cn/en/About/History.htm",
+                "Official Website Status": "Verified",
+                "University Reference ID": "INS-CHN-0003",
+                "Government Authority Name": "Ministry of Education of the People's Republic of China",
+                "Original Institution Type": "Comprehensive University",
+                "Phase 1 Completion Status": "Partially Complete",
+                "Verified Institution Type": "Comprehensive University",
+                "Central Admissions Portal URL": "",
+                "Main Official Social Media URL": "",
+                "Official Application Portal URL": "",
+                "Trusted International Directory URL": ""
+              },
+              "sourceRowNumber": 1407,
+              "approvedNewFields": [
+                "foundedYear"
+              ],
+              "fieldReviewSha256": "0b5fab450d1661151b9212a150e900dc7e3acb3aeb15b3490c645ddf6e5e927d",
+              "sourceWorkbookSha256": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee"
+            },
+            "countryIso3": "CHN",
+            "foundedYear": 1911,
+            "universityName": "Tsinghua University",
+            "institutionType": "UNIVERSITY",
+            "officialWebsite": "https://www.tsinghua.edu.cn/",
+            "officialSourceUrl": "https://www.tsinghua.edu.cn/en/Contact.htm",
+            "sourceReferenceId": "INS-CHN-0003",
+            "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+            "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+            "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37"
+          }
+        },
+        {
+          "sequence": 4,
+          "sourceReferenceId": "INS-CHN-0003",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "5a7946cb-ade0-4d2b-a271-37e496c8a188",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_2",
+            "artifactId": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee",
+            "sourceRowNumber": 1407,
+            "contentHash": "20aec91ebb1241b7367cdc5ce345a97e1cbc94390bca64573b7baa304fb58c4f"
+          }
+        }
+      ],
+      "validationIssues": [],
+      "databaseWrites": 0,
+      "screeningBindings": [
+        {
+          "sourceReferenceId": "INS-CHN-0001",
+          "receiptId": "e51a3dae-e683-4bfd-83ad-8ea50175334f",
+          "requestHash": "ac38e936957b3053face8dd8e37ac3051f459701bb14778a1bc2c17973fcd975",
+          "assetId": "university-stage2-source-15a2495c-5416-432c-b18c-83a5c57ad084",
+          "artifactSha256": "3a80dbe918082ad25f36797b8802fbbef1dccbfc055c64c53ba4a9838ee6f8dc"
+        },
+        {
+          "sourceReferenceId": "INS-CHN-0003",
+          "receiptId": "5a7946cb-ade0-4d2b-a271-37e496c8a188",
+          "requestHash": "2c1e8bd30581747c80a3b18b679430992a0ff6181601922e339ea8b9accf6505",
+          "assetId": "university-stage2-source-15a2495c-5416-432c-b18c-83a5c57ad084",
+          "artifactSha256": "3a80dbe918082ad25f36797b8802fbbef1dccbfc055c64c53ba4a9838ee6f8dc"
+        }
+      ],
+      "sourceReview": {
+        "previewPlanHash": "4638dd4b23070ed460681be777878391ebc1b950d835d736e39d7af39e72c47e",
+        "reviewedBy": "d4ce2b0c-18d4-48ed-9818-2fe8aca4c6de",
+        "reason": "Synthetic local reviewer tests the delegated founding-year-only review; preserve all current identity/geography/manual fields, hold the other workbook columns.",
+        "geography": [
+          {
+            "sourceReferenceId": "INS-CHN-0001",
+            "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+            "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+            "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37"
+          },
+          {
+            "sourceReferenceId": "INS-CHN-0003",
+            "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+            "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+            "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37"
+          }
+        ]
+      },
+      "planHash": "4a5d8d075bbae00ffa2fd3057914d2b26c0e68c938b5b9fa417da9518856b9a6",
+      "changeSetId": "STAGE_2:b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee:4a5d8d075bbae00ffa2fd3057914d2b26c0e68c938b5b9fa417da9518856b9a6"
+    },
+    {
+      "stage": "STAGE_2",
+      "sourceArtifactId": "9705e974bf8f8a9050d7ed74b21ae94eeae4c1eba96a69ded95966942a8bd67f",
+      "changes": [
+        {
+          "sequence": 1,
+          "sourceReferenceId": "INS-HUN-0006",
+          "entityType": "UNIVERSITY",
+          "entityKey": "f0eed938-90b1-4311-b22d-dd26a02aa03a",
+          "operation": "UPDATE",
+          "beforeState": {
+            "id": "f0eed938-90b1-4311-b22d-dd26a02aa03a",
+            "updatedAt": "2026-10-23T01:46:36.548Z",
+            "stateHash": "d37885eaa908512d8343e68b745ec06c745652f2ced2c4103ca514bc4997724a"
+          },
+          "afterState": {
+            "city": "Budapest",
+            "country": "Hungary",
+            "metadata": {
+              "purpose": "PARTIAL_STAGE2_FOUNDED_YEAR_ONLY_NOT_FULL_WORKBOOK_APPROVAL",
+              "sourceFile": "workspace/import-sources/universities/stage-2-enrichment/Europe_Universities_Phase_1_Enrichment_2399_74_ENRICHED_FINAL_2026-08-10.xlsx",
+              "rawRowSha256": "aa29d4a14b12ba1107e9db48ec24857ef7b53d809d6082720b45d4d8acfa0970",
+              "rawStage2Row": {
+                "City": "Budapest",
+                "Country": "Hungary",
+                "Map URL": "https://www.google.com/maps/search/?api=1&query=Egyetem%20t%C3%A9r%201-3%2C%201053%20Budapest%2C%20Hungary",
+                "Continent": "Europe",
+                "Import Date": "2026-08-07",
+                "Country ISO3": "HUN",
+                "Founded Year": "1635",
+                "Import Batch": "Europe-Phase1-Batch-065",
+                "Review Notes": "The 1635 foundation is confirmed by official ELTE history. Central Budapest address and the university’s general telephone system were retained from official institutional information.",
+                "Review Status": "Verified",
+                "Verified City": "Budapest",
+                "Official Phone": "+36 1 411 6500",
+                "State / Region": "Budapest",
+                "Data Confidence": "High",
+                "Short Description": "Eötvös Loránd University (ELTE) is a public comprehensive research university founded in 1635 and one of Hungary’s oldest continuously operating universities. Based in Budapest, it offers a broad academic portfolio across humanities, sciences, law, social sciences, education, psychology, informatics and other disciplines. ELTE operates several campuses and faculties, with central university functions located in inner Budapest.",
+                "Last Verified Date": "2026-08-08",
+                "Original Ownership": "Public",
+                "Primary Source URL": "https://www.elte.hu/en/",
+                "Verified Ownership": "Public",
+                "Main Campus Address": "Egyetem tér 1-3, 1053 Budapest, Hungary",
+                "Official Local Name": "Eötvös Loránd Tudományegyetem",
+                "Original Source URL": "https://apply.studyinhungary.hu/institutions",
+                "Primary Source Type": "Official University Website",
+                "Official Website URL": "https://www.elte.hu/en/",
+                "Original Website URL": "https://www.elte.hu/en/",
+                "Import Continent File": "Europe_Universities_Import_English_Complete(1).xlsx",
+                "Official Abbreviation": "ELTE",
+                "Official English Name": "Eötvös Loránd University",
+                "University System URL": "",
+                "Duplicate Check Status": "No Duplicate Found",
+                "Original Imported Name": "Eötvös Loránd University",
+                "External Institution ID": "",
+                "Government Registry URL": "https://apply.studyinhungary.hu/institutions",
+                "Official Website Source": "https://www.elte.hu/en/",
+                "Official Website Status": "Verified",
+                "University Reference ID": "INS-HUN-0006",
+                "Government Authority Name": "Study in Hungary / Tempus Public Foundation",
+                "Original Institution Type": "University",
+                "Phase 1 Completion Status": "Complete",
+                "Verified Institution Type": "University",
+                "Central Admissions Portal URL": "",
+                "Main Official Social Media URL": "",
+                "Official Application Portal URL": "",
+                "Trusted International Directory URL": ""
+              },
+              "sourceRowNumber": 654,
+              "approvedNewFields": [
+                "foundedYear"
+              ],
+              "fieldReviewSha256": "0b5fab450d1661151b9212a150e900dc7e3acb3aeb15b3490c645ddf6e5e927d",
+              "sourceWorkbookSha256": "9705e974bf8f8a9050d7ed74b21ae94eeae4c1eba96a69ded95966942a8bd67f"
+            },
+            "countryIso3": "HUN",
+            "foundedYear": 1635,
+            "universityName": "Eötvös Loránd University",
+            "institutionType": "UNIVERSITY",
+            "officialWebsite": "https://www.elte.hu/en",
+            "officialSourceUrl": "https://elte.hu/en/central-international-relations-office",
+            "sourceReferenceId": "INS-HUN-0006",
+            "countryReferenceId": "aa450b59-9731-4869-b3e8-7713aed3ae72",
+            "regionReferenceId": "7ccf3f41-ce49-4693-b545-974edd9d3ef9",
+            "cityReferenceId": "b986d010-bceb-481f-b9d9-572b33acab5e"
+          }
+        },
+        {
+          "sequence": 2,
+          "sourceReferenceId": "INS-HUN-0006",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "0a788b6f-6aa9-488a-b520-2464408f4fd3",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_2",
+            "artifactId": "9705e974bf8f8a9050d7ed74b21ae94eeae4c1eba96a69ded95966942a8bd67f",
+            "sourceRowNumber": 654,
+            "contentHash": "aa29d4a14b12ba1107e9db48ec24857ef7b53d809d6082720b45d4d8acfa0970"
+          }
+        },
+        {
+          "sequence": 3,
+          "sourceReferenceId": "INS-TUR-0145",
+          "entityType": "UNIVERSITY",
+          "entityKey": "147fd7ad-865f-423d-b0f0-ee02042e9491",
+          "operation": "UPDATE",
+          "beforeState": {
+            "id": "147fd7ad-865f-423d-b0f0-ee02042e9491",
+            "updatedAt": "2026-10-23T01:46:36.553Z",
+            "stateHash": "186d2eff43c0cc8360076493803305510c68a9cf41eddd0a673fd4ef71718812"
+          },
+          "afterState": {
+            "city": "Ankara",
+            "country": "Turkey",
+            "metadata": {
+              "purpose": "PARTIAL_STAGE2_FOUNDED_YEAR_ONLY_NOT_FULL_WORKBOOK_APPROVAL",
+              "sourceFile": "workspace/import-sources/universities/stage-2-enrichment/Europe_Universities_Phase_1_Enrichment_2399_74_ENRICHED_FINAL_2026-08-10.xlsx",
+              "rawRowSha256": "310fe44802851a8a035f7b095f2d97a34051167df713ef4389b49b4fc4b237c4",
+              "rawStage2Row": {
+                "City": "Ankara",
+                "Country": "Turkey",
+                "Map URL": "https://www.google.com/maps/search/?api=1&query=%C3%9Cniversiteler+Mahallesi%2C+Dumlup%C4%B1nar+Bulvar%C4%B1+No%3A1%2C+06800+%C3%87ankaya%2C+Ankara%2C+T%C3%BCrkiye",
+                "Continent": "Europe",
+                "Import Date": "2026-08-08",
+                "Country ISO3": "TUR",
+                "Founded Year": "1956",
+                "Import Batch": "Europe-Phase1-Batch-234",
+                "Review Notes": "Critical QA remediation batch 2 completed on 2026-08-09. Generic e-Government website substitution was replaced with the university's current institutional website. Foundation year was restored from Study in Türkiye/YÖK or current official institutional history. Verified contact data were added where available. Unverified institution-specific application fields were left blank. Original imported fields, University Reference ID, source order and Import Batch were preserved.",
+                "Review Status": "Verified",
+                "Verified City": "Ankara",
+                "Official Phone": "+90 312 210 20 00",
+                "State / Region": "Ankara Province",
+                "Data Confidence": "High",
+                "Short Description": "Middle East Technical University is a public technical university based in Ankara, Türkiye, with its current institutional foundation recorded as 1956. Its Turkish name is Orta Doğu Teknik Üniversitesi. Its academic profile emphasizes engineering, science, technology and applied research, with links to innovation, design and industry-facing professional education. Its principal verified contact location is Üniversiteler Mahallesi, Dumlupınar Bulvarı No:1, 06800 Çankaya, Ankara, Türkiye. The current central telephone recorded from official or YÖK-linked institutional information is +90 312 210 20 00. The institution’s identity, foundation date and website were rechecked against its current official web presence and the Council of Higher Education’s Study in Türkiye/YÖK framework.",
+                "Last Verified Date": "2026-08-09",
+                "Original Ownership": "Public",
+                "Primary Source URL": "https://www.studyinturkiye.gov.tr/UniversityTurkey/Detail?uId=122571",
+                "Verified Ownership": "Public",
+                "Main Campus Address": "Üniversiteler Mahallesi, Dumlupınar Bulvarı No:1, 06800 Çankaya, Ankara, Türkiye",
+                "Official Local Name": "Orta Doğu Teknik Üniversitesi",
+                "Original Source URL": "https://www.turkiye.gov.tr/universite-hizmet-listesi",
+                "Primary Source Type": "Official university website + Study in Türkiye / YÖK",
+                "Official Website URL": "https://www.metu.edu.tr/",
+                "Original Website URL": "https://www.turkiye.gov.tr/universite-hizmet-listesi",
+                "Import Continent File": "Europe_Universities_Import_English_Complete.xlsx",
+                "Official Abbreviation": "METU",
+                "Official English Name": "Middle East Technical University",
+                "University System URL": "https://yokatlas.yok.gov.tr/",
+                "Duplicate Check Status": "Unique within Phase 1 records",
+                "Original Imported Name": "Middle East Technical University",
+                "External Institution ID": "",
+                "Government Registry URL": "https://www.yok.gov.tr/university?type=1",
+                "Official Website Source": "https://www.studyinturkiye.gov.tr/UniversityTurkey/Detail?uId=122571",
+                "Official Website Status": "Verified",
+                "University Reference ID": "INS-TUR-0145",
+                "Government Authority Name": "Council of Higher Education of Türkiye (YÖK)",
+                "Original Institution Type": "Technical University",
+                "Phase 1 Completion Status": "Complete",
+                "Verified Institution Type": "Technical University",
+                "Central Admissions Portal URL": "https://ais.osym.gov.tr/",
+                "Main Official Social Media URL": "",
+                "Official Application Portal URL": "",
+                "Trusted International Directory URL": "https://www.studyinturkiye.gov.tr/UniversityTurkey/Detail?uId=122571"
+              },
+              "sourceRowNumber": 2343,
+              "approvedNewFields": [
+                "foundedYear"
+              ],
+              "fieldReviewSha256": "0b5fab450d1661151b9212a150e900dc7e3acb3aeb15b3490c645ddf6e5e927d",
+              "sourceWorkbookSha256": "9705e974bf8f8a9050d7ed74b21ae94eeae4c1eba96a69ded95966942a8bd67f"
+            },
+            "countryIso3": "TUR",
+            "foundedYear": 1956,
+            "universityName": "Middle East Technical University",
+            "institutionType": "UNIVERSITY",
+            "officialWebsite": "https://www.metu.edu.tr/",
+            "officialSourceUrl": "https://www.metu.edu.tr/",
+            "sourceReferenceId": "INS-TUR-0145",
+            "countryReferenceId": "2c14f864-d235-4276-8c87-d1bb19ceca0d",
+            "regionReferenceId": "d9db85b6-b3d0-42a7-b45e-5eb6b0b5a66b",
+            "cityReferenceId": "25d9c584-2cd4-47ac-98a4-f7c3e68588ef"
+          }
+        },
+        {
+          "sequence": 4,
+          "sourceReferenceId": "INS-TUR-0145",
+          "entityType": "SOURCE_RECORD",
+          "entityKey": "bb528cb3-57bc-419c-9074-e9034e1acfb0",
+          "operation": "UPSERT_CHILD",
+          "afterState": {
+            "stage": "STAGE_2",
+            "artifactId": "9705e974bf8f8a9050d7ed74b21ae94eeae4c1eba96a69ded95966942a8bd67f",
+            "sourceRowNumber": 2343,
+            "contentHash": "310fe44802851a8a035f7b095f2d97a34051167df713ef4389b49b4fc4b237c4"
+          }
+        }
+      ],
+      "validationIssues": [],
+      "databaseWrites": 0,
+      "screeningBindings": [
+        {
+          "sourceReferenceId": "INS-HUN-0006",
+          "receiptId": "0a788b6f-6aa9-488a-b520-2464408f4fd3",
+          "requestHash": "b5dde676493bfc2296fe4d90cf2281ecfa503f07a2b196aa5e05dba0d414eacc",
+          "assetId": "university-stage2-source-15a2495c-5416-432c-b18c-83a5c57ad084",
+          "artifactSha256": "3a80dbe918082ad25f36797b8802fbbef1dccbfc055c64c53ba4a9838ee6f8dc"
+        },
+        {
+          "sourceReferenceId": "INS-TUR-0145",
+          "receiptId": "bb528cb3-57bc-419c-9074-e9034e1acfb0",
+          "requestHash": "ff11256f0e297ffb443ad5c769168cbd2372d01f3867471556631814b0c3a63c",
+          "assetId": "university-stage2-source-15a2495c-5416-432c-b18c-83a5c57ad084",
+          "artifactSha256": "3a80dbe918082ad25f36797b8802fbbef1dccbfc055c64c53ba4a9838ee6f8dc"
+        }
+      ],
+      "sourceReview": {
+        "previewPlanHash": "601ad984524cbdc9cd43e3f20c2dad93ca81abf7bdd22eff16d9a84a4cdb736b",
+        "reviewedBy": "d4ce2b0c-18d4-48ed-9818-2fe8aca4c6de",
+        "reason": "Synthetic local reviewer tests the delegated founding-year-only review; preserve all current identity/geography/manual fields, hold the other workbook columns.",
+        "geography": [
+          {
+            "sourceReferenceId": "INS-HUN-0006",
+            "countryReferenceId": "aa450b59-9731-4869-b3e8-7713aed3ae72",
+            "regionReferenceId": "7ccf3f41-ce49-4693-b545-974edd9d3ef9",
+            "cityReferenceId": "b986d010-bceb-481f-b9d9-572b33acab5e"
+          },
+          {
+            "sourceReferenceId": "INS-TUR-0145",
+            "countryReferenceId": "2c14f864-d235-4276-8c87-d1bb19ceca0d",
+            "regionReferenceId": "d9db85b6-b3d0-42a7-b45e-5eb6b0b5a66b",
+            "cityReferenceId": "25d9c584-2cd4-47ac-98a4-f7c3e68588ef"
+          }
+        ]
+      },
+      "planHash": "50a9c80f5912c31c53dfd5f804bb24d2253f465da3eb8b142083d544a7d5485e",
+      "changeSetId": "STAGE_2:9705e974bf8f8a9050d7ed74b21ae94eeae4c1eba96a69ded95966942a8bd67f:50a9c80f5912c31c53dfd5f804bb24d2253f465da3eb8b142083d544a7d5485e"
+    }
+  ],
+  "phases": [
+    {
+      "name": "SOURCE_LAB_RESTRICTED_IDENTITY_VERIFIED",
+      "at": "2026-10-23T01:46:36.472Z"
+    },
+    {
+      "name": "FOUR_EXISTING_STAGE1_IDENTITIES_AND_SOURCE_ROWS_REPLICATED_AS_NEW_LOCAL_FIXTURES_NOT_A_STAGE1_RETEST",
+      "at": "2026-10-23T01:46:36.553Z"
+    },
+    {
+      "name": "TWO_STAGE2_RAW_WORKBOOKS_SCANNED_WITH_UNCHANGED_HASHES",
+      "at": "2026-10-23T01:46:38.191Z"
+    },
+    {
+      "name": "NEW_STAGE2_SOURCE_ASSET_ACTIVE_PRIVATE_SCANNED_AND_AUTHENTICATED",
+      "at": "2026-10-23T01:46:38.450Z"
+    },
+    {
+      "name": "FOUR_REVIEWED_STAGE2_RECEIPTS_AND_SYNTHETIC_AUTHORIZED_ACTOR_READY",
+      "at": "2026-10-23T01:46:38.699Z"
+    },
+    {
+      "name": "STAGE2_ACTUAL_PREVIEW_AND_REVIEW_CLIS_BIND_EXISTING_FULL_ROW_SNAPSHOTS_WITHOUT_WRITES",
+      "at": "2026-10-23T01:46:45.483Z"
+    },
+    {
+      "name": "DIRECT_SQL_EDIT_WITH_UNCHANGED_TIMESTAMP_BLOCKS_THE_REVIEWED_UPDATE",
+      "at": "2026-10-23T01:46:45.529Z"
+    },
+    {
+      "name": "ACTUAL_ROW_LOCK_WAIT_THEN_FULL_SNAPSHOT_CONFLICT_PRESERVES_CONCURRENT_EDIT",
+      "at": "2026-10-23T01:46:45.701Z",
+      "blockedObserved": true,
+      "writerRole": "post28_app"
+    },
+    {
+      "name": "OUTBOX_FAILURE_ROLLS_BACK_STAGE2_YEAR_SOURCE_REVIEW_AUDIT_AND_CHANGE_JOURNAL",
+      "at": "2026-10-23T01:46:45.774Z"
+    },
+    {
+      "name": "ACTUAL_COMMIT_CLIS_UPDATE_FOUR_FOUNDED_YEARS_WITHOUT_NEW_UNIVERSITIES_OR_IDENTITY_GEOGRAPHY_OPTIONAL_DATA_CHANGES",
+      "at": "2026-10-23T01:46:52.370Z"
+    },
+    {
+      "name": "STAGE2_ACTUAL_COMMIT_REPLAY_HAS_NO_ADDITIONAL_EFFECTS",
+      "at": "2026-10-23T01:46:58.776Z"
+    },
+    {
+      "name": "STAGE2_UNDO_REFUSES_TO_OVERWRITE_LATER_MANUAL_OPTIONAL_DATA",
+      "at": "2026-10-23T01:46:58.845Z"
+    },
+    {
+      "name": "ISOLATED_NEGATIVE_TEST_FIXTURE_RESTORED_EXPLICITLY_TO_TEST_MATCHING_UNDO_NOT_A_REAL_USER_DATA_RESTORE",
+      "at": "2026-10-23T01:46:58.846Z"
+    },
+    {
+      "name": "STAGE2_UNDO_RESTORES_CANONICAL_VALUES_AND_KEEPS_FOUR_ORIGINAL_UNIVERSITIES_AND_SOURCES_WITH_REVIEW_EVIDENCE",
+      "at": "2026-10-23T01:46:58.935Z"
+    }
+  ],
+  "publication": false,
+  "productionReady": false,
+  "fullStage2Accepted": false,
+  "geographyEvidence": "Canonical IDs replicated only as new local fixtures; no live managed validation claimed.",
+  "recoveryGate": "Disposable local rehearsal token; not managed backup authorization."
+}
