@@ -11,6 +11,9 @@
 }
 
 :root {
+  --admin-title-size: 24px;
+  --admin-section-size: 16px;
+  --admin-label-size: 13px;
   --font-sans: "Cairo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-cairo: "Cairo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-family: "Cairo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
@@ -173,6 +176,59 @@ textarea {
 .cms-rich-text ol { list-style: decimal; }
 .cms-rich-text a { color: #0E7C86; text-decoration: underline; }
 .cms-rich-text blockquote { border-inline-start: 3px solid #0E7C86; padding-inline-start: 1em; }
+
+/* One typeface throughout the administration workspace, including legacy
+   monospace utilities. SVG icons continue to use their vector paths. */
+.admin-workspace,
+.admin-workspace * { font-family: var(--font-cairo); }
+.admin-workspace { font-size: 14px; line-height: 1.75; }
+.admin-workspace h1 { font-size: var(--admin-title-size); line-height: 1.5; font-weight: 800; }
+.admin-workspace h2 { font-size: var(--admin-section-size); line-height: 1.65; }
+.major-detail :where(p, li, dt, dd, label, input, select, textarea) {
+  font-size: var(--admin-label-size);
+  line-height: 1.8;
+}
+.major-detail :where(h2, h3, h4) { font-weight: 700; }
+.major-detail h3 { font-size: 14px; line-height: 1.7; }
+.major-detail h4 { font-size: 13px; line-height: 1.7; }
+.major-detail :where(button, summary) { font-size: 13px; font-weight: 700; }
+.major-detail-tabs button { line-height: 1.7; }
+.major-detail-tabs svg { flex-shrink: 0; }
+.major-detail-tabs button:nth-child(3n + 1) svg { color: #D6A43B; }
+.major-detail-tabs button:nth-child(3n + 2) svg { color: #142B5F; }
+.major-detail-tabs button:nth-child(3n + 3) svg { color: #0E7C86; }
+.major-detail-tabs button[aria-pressed="true"] svg { color: #F2CD78; }
+.major-detail-hero h1 { font-size: var(--admin-title-size); font-weight: 800; }
+.major-detail-hero p { font-weight: 500; }
+.major-detail-actions :where(button, a) {
+  width: auto;
+  min-height: 40px;
+  margin-top: 0;
+  padding: 9px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.major-detail-actions .major-detail-links a { min-height: 36px; font-size: 12px; }
+.major-detail-disclosure > summary { list-style: none; }
+.major-detail-disclosure > summary::-webkit-details-marker { display: none; }
+.major-detail-disclosure > summary::after {
+  content: '+';
+  margin-inline-start: auto;
+  color: #0E7C86;
+  font-size: 18px;
+  line-height: 1;
+}
+.major-detail-disclosure[open] > summary::after { content: '−'; }
+.major-detail > details {
+  border: 1px solid #DDEFF2;
+  border-radius: 16px;
+  background: #fff;
+  padding: 16px;
+}
+.major-detail #major-publication > div > section,
+.major-detail #major-technical-info > div > section { border: 0; padding: 0; }
+.major-detail #major-technical-info section > div { border-color: #DDEFF2; border-radius: 12px; }
 
 /* Scholarship filters share the funding/deadline control appearance. */
 :is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) :is(input, select) {

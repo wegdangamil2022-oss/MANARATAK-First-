@@ -1,4 +1,5 @@
 import {FellowshipAuthoringPanel} from '../components/FellowshipAuthoringPanel';
+import {useAdminAuthorization} from '../security/AdminAuthorizationContext';
 import {MajorConsumerUsagePanel} from '../components/MajorConsumerUsagePanel';
 import {MajorGovernanceWorkspace} from '../components/MajorGovernanceWorkspace';
 /// <reference types="vite/client" />
@@ -191,11 +192,11 @@ function Badge({ value }: { value?: string | null }) {
   );
 }
 
-function Field({ label, value }: { label: string; value?: string | number | null }) {
+function Field({ label, value, icon:Icon=BookOpen }: { label: string; value?: string | number | null; icon?:typeof BookOpen }) {
   return (
-    <div className="rounded-2xl border border-slate-100 bg-[#FAF7F0]/40 p-4 transition hover:bg-white hover:border-[#0E7C86]/30">
-      <dt className="text-xs font-bold text-slate-400 font-['Cairo']">{label}</dt>
-      <dd className="mt-1.5 break-words text-sm font-black text-slate-900 font-['Cairo']">{value || '—'}</dd>
+    <div className="rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/30 p-3.5">
+      <dt className="flex items-center gap-2 text-xs font-semibold text-slate-500"><Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-[#0E7C86]" />{label}</dt>
+      <dd className="mt-1.5 break-words text-sm font-semibold text-[#142B5F]">{value || '—'}</dd>
     </div>
   );
 }
@@ -415,6 +416,10 @@ export function MajorDetailPage() {
   const [aliases, setAliases] = useState<MajorAlias[]>([]);
   const [relationships, setRelationships] = useState<MajorRelationship[]>([]);
   const [mappings, setMappings] = useState<MajorClassificationMapping[]>([]);
+  const {hasPermission}=useAdminAuthorization();
+  const [publicationOpen,setPublicationOpen]=useState(false);
+  const [publicationVisited,setPublicationVisited]=useState(false);
+  const [technicalVisited,setTechnicalVisited]=useState(false);
   const [activeTab, setActiveTab] = useState<DetailTab>('basic');
   const [loading, setLoading] = useState(true);
   const [loadingSections, setLoadingSections] = useState(false);
@@ -744,7 +749,7 @@ export function MajorDetailPage() {
     }
   };
 
-  // Direct Smart Workflow Executor (Publish/Unpublish)
+  // Preserve the reviewed publication command boundary when relocating controls.
   const executeActionWithFlow = async (action: string, successMessage: string) => {
     if (!id || !major) return;
     setSaving(true);
@@ -795,7 +800,7 @@ export function MajorDetailPage() {
   }
 
   return (
-    <main dir="rtl" className="mx-auto max-w-7xl space-y-6 font-['Cairo'] pb-16">
+    <main dir="rtl" className="major-detail mx-auto max-w-7xl space-y-4 pb-10">
       {/* Back Button & Top Navigation */}
       <div className="flex items-center justify-between">
         <Link
@@ -850,234 +855,22 @@ export function MajorDetailPage() {
         </div>
       )}
 
-      {/* Level Profiles Navigation Bar */}
-      {profiles.length > 0 && (
-        <section className="rounded-3xl border border-[#DDEFF2] bg-white p-4 sm:p-5 shadow-xs">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3">
-            <div>
-              <h2 className="text-xs font-black text-[#142B5F] flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-[#0E7C86]" />
-                <span>ملفات الدرجات الأكاديمية المرتبطة بهذا التخصص ({profiles.length})</span>
-              </h2>
-              <p className="text-[11px] font-medium text-slate-500 mt-0.5">
-                كل درجة علمية لها ملف وهوية ومحتوى ونسخ مستقلة تماماً داخل النظام دون تكرار الجذور.
-              </p>
-            </div>
-            <div className="text-[11px] font-bold text-[#0E7C86] bg-[#0E7C86]/10 px-3 py-1 rounded-full w-fit">
-              الملف النشط: <strong className="text-[#142B5F]">{activeProfile?.code || '—'}</strong> ({formatLabel(activeProfile?.level)})
-            </div>
+      <header className="major-detail-hero relative overflow-hidden rounded-3xl border border-white/20 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-5 text-white shadow-sm sm:p-6">
+        <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
+          <div className="min-w-0">
+            <div className="mb-3 flex flex-wrap items-center gap-2"><span className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1 text-xs font-semibold"><GraduationCap aria-hidden="true" className="h-4 w-4 text-[#F2CD78]" />{formatLabel(activeDegreeLevel)}</span><span className="rounded-lg bg-white/10 px-3 py-1 text-xs">{activeProfile?.code || major.classificationCode || major.publicId || '—'}</span><Badge value={activeProfile?.status || major.status} /></div>
+            <h1 className="break-words text-2xl font-bold leading-relaxed text-white">{activeProfile?.localizedNameAr || activeProfile?.displayName || major.displayName}</h1>
+            {major.canonicalName&&major.canonicalName!==(activeProfile?.displayName||major.displayName)&&<p className="mt-1 text-sm text-white/75">{major.canonicalName}</p>}
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-white/85">{(activeProfile?.collegeContext||major.collegeOrFaculty)&&<span className="inline-flex items-center gap-2"><Building2 aria-hidden="true" className="h-4 w-4 text-[#F2CD78]" />{activeProfile?.collegeContext||major.collegeOrFaculty}</span>}{major.academicFieldOrDiscipline&&<span className="inline-flex items-center gap-2"><Layers aria-hidden="true" className="h-4 w-4 text-cyan-100" />{major.academicFieldOrDiscipline}</span>}</div>
+            {profiles.length>0&&<label className="mt-4 block max-w-md text-xs font-semibold"><span className="mb-2 inline-flex items-center gap-2"><GraduationCap aria-hidden="true" className="h-4 w-4 text-[#F2CD78]" />ملف الدرجة العلمية</span><select aria-label="ملف الدرجة العلمية" value={activeProfile?.id||''} disabled={saving} onChange={event=>{const profile=profiles.find(item=>item.id===event.target.value);if(profile)void handleSelectLevel(profile);}} className="block min-h-10 w-full rounded-xl border border-white/25 bg-white px-3 py-2 text-xs text-[#142B5F]">{profiles.map(profile=><option key={profile.id} value={profile.id}>{formatLabel(profile.level)} · {profile.code||profile.id.slice(0,8)} · {profile.localizedNameAr||profile.displayName||major.displayName}</option>)}</select></label>}
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-3">
-            {profiles.map((prof) => {
-              const isSelected = prof.id === activeProfile?.id;
-              return (
-                <button
-                  key={prof.id}
-                  type="button"
-                  onClick={() => handleSelectLevel(prof)}
-                  className={`flex flex-col text-right rounded-2xl p-4 border transition-all cursor-pointer ${
-                    isSelected
-                      ? 'border-[#0E7C86] bg-gradient-to-l from-[#FAF7F0] to-teal-50/40 shadow-sm ring-2 ring-[#0E7C86]/20'
-                      : 'border-slate-200 bg-white hover:border-[#21A7B4] hover:bg-slate-50/60'
-                  }`}
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-0.5 text-xs font-black ${
-                      isSelected ? 'bg-[#142B5F] text-white' : 'bg-slate-100 text-slate-700'
-                    }`}>
-                      <GraduationCap className="h-3 w-3" />
-                      <span>{formatLabel(prof.level)}</span>
-                    </span>
-                    <span className="font-mono text-xs font-bold text-slate-500">
-                      #{prof.code || prof.id.slice(0, 8)}
-                    </span>
-                  </div>
-
-                  <div className="mt-2 text-sm font-black text-[#142B5F] line-clamp-1">
-                    {prof.displayName || major.displayName}
-                  </div>
-
-                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
-                    <span>الحالة: {formatLabel(prof.status || major.status)}</span>
-                    <span className="font-bold text-[#0E7C86] flex items-center gap-1">
-                      {isSelected ? 'المستوى المعروض' : 'انقر للعرض والتعديل'}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* Hero Header Card */}
-      <header className="relative overflow-hidden rounded-3xl border border-white/20 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
-        <div className="absolute -top-24 end-0 h-64 w-64 rounded-full bg-[#F2CD78] opacity-15 pointer-events-none blur-3xl" />
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur-xs">
-                <GraduationCap className="h-3.5 w-3.5 text-[#F2CD78]" />
-                <span>{formatLabel(activeDegreeLevel)}</span>
-              </span>
-
-              {(activeProfile?.code || major.classificationCode || major.publicId) && (
-                <span className="inline-flex items-center gap-1 rounded-xl bg-white/10 px-3 py-1 font-mono text-xs font-bold text-white/90 backdrop-blur-xs">
-                  <span>#{activeProfile?.code || major.classificationCode || major.publicId}</span>
-                </span>
-              )}
-
-              <Badge value={activeProfile?.status || major.status} />
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
-              {activeProfile?.displayName || major.displayName}
-            </h1>
-
-            {major.canonicalName && (
-              <p className="text-xs sm:text-sm font-semibold text-white/80 font-mono">
-                {major.canonicalName}
-              </p>
-            )}
-
-            <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-white/80 pt-1">
-              {major.collegeOrFaculty && (
-                <div className="flex items-center gap-1.5">
-                  <Building2 className="h-3.5 w-3.5 text-[#F2CD78]" />
-                  <span>{major.collegeOrFaculty}</span>
-                </div>
-              )}
-              {major.academicFieldOrDiscipline && (
-                <div className="flex items-center gap-1.5">
-                  <Layers className="h-3.5 w-3.5 text-cyan-200" />
-                  <span>{major.academicFieldOrDiscipline}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Quick Metrics */}
-          <div className="flex flex-wrap gap-2.5 sm:gap-3 shrink-0">
-            <div className="rounded-2xl bg-white/10 p-3 text-center backdrop-blur-xs border border-white/10 min-w-20">
-              <div className="text-xl font-black text-white">{sections.length}</div>
-              <div className="text-[11px] font-bold text-white/70">كتل المحتوى</div>
-            </div>
-            <div className="rounded-2xl bg-white/10 p-3 text-center backdrop-blur-xs border border-white/10 min-w-20">
-              <div className="text-xl font-black text-white">{canonicalGroups.length}</div>
-              <div className="text-[11px] font-bold text-white/70">الأقسام الرئيسية</div>
-            </div>
-            <div className="rounded-2xl bg-white/10 p-3 text-center backdrop-blur-xs border border-white/10 min-w-20">
-              <div className="text-xl font-black text-white">{versions.length}</div>
-              <div className="text-[11px] font-bold text-white/70">نسخ العمل</div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Tab Navigation */}
-      <nav className="flex gap-2 overflow-x-auto rounded-2xl border border-[#DDEFF2] bg-white p-2 shadow-xs">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => {if(dirtyBlockKeys.size&&tab.id!=='content'&&!window.confirm('لديك تعديلات غير محفوظة. هل تريد مغادرة محرر المحتوى؟'))return;setActiveTab(tab.id);}}
-              className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-xs sm:text-sm font-bold transition cursor-pointer ${
-                isActive
-                  ? 'bg-[#142B5F] text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-[#FAF7F0] hover:text-[#0E7C86]'
-              }`}
-            >
-              <Icon className={`h-4 w-4 ${isActive ? 'text-[#F2CD78]' : 'text-slate-400'}`} />
-              <span>{tab.label}</span>
-              {tab.id === 'content' && dirtyBlockKeys.size > 0 && (
-                <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
-              )}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Tab 1: Basic Identity Data */}
-      <MajorConsumerUsagePanel key={major.id} majorId={major.id}/>
-      {activeTab === 'basic' && (
-        <section className="grid gap-6 lg:grid-cols-[1fr_300px]">
-          <div className="space-y-6">
-            <div className="rounded-3xl border border-[#DDEFF2] bg-white p-6 shadow-xs space-y-6">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                <div className="flex items-center gap-2.5">
-                  <GraduationCap className="h-5 w-5 text-[#0E7C86]" />
-                  <h2 className="text-base font-black text-[#142B5F]">بطاقة هوية التخصص المعتمدة</h2>
-                </div>
+          <div className="major-detail-actions min-w-0 space-y-3">
+            <div className="flex flex-wrap gap-2"><button type="button" onClick={()=>{setPublicationVisited(true);setPublicationOpen(value=>!value);}} aria-expanded={publicationOpen} aria-controls="major-publication" className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-bold text-[#142B5F]"><ShieldCheck aria-hidden="true" className="h-4 w-4 text-[#0E7C86]" />المراجعة والنشر</button><button type="button" onClick={()=>setShowEditModal(true)} className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-3 py-2 text-xs font-semibold"><Edit3 aria-hidden="true" className="h-4 w-4 text-[#F2CD78]" />تعديل البيانات</button></div>
+            <div className="major-detail-publish">{!isPublished ? (
                 <button
                   type="button"
-                  onClick={() => setShowEditModal(true)}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 transition cursor-pointer"
-                >
-                  <Edit3 className="h-3.5 w-3.5 text-[#0E7C86]" />
-                  <span>تعديل الحقول الأساسية</span>
-                </button>
-              </div>
-
-              <dl className="grid gap-4 sm:grid-cols-2">
-                <Field label="الاسم العربي المعتمد" value={activeProfile?.displayName || major.displayName} />
-                <Field label="الاسم الإنجليزي / القانوني" value={major.canonicalName} />
-                <Field label="الدرجة الأكاديمية" value={formatLabel(activeDegreeLevel)} />
-                <Field label="رمز ملف المستوى" value={activeProfile?.code || major.classificationCode || major.publicId} />
-                <Field label="الكلية / السياق الأكاديمي" value={activeProfile?.collegeContext || major.collegeOrFaculty} />
-                <Field label="المجال والتخصص الدقيق" value={major.academicFieldOrDiscipline} />
-                <Field label="معرف الجذر المشترك (Major ID)" value={major.id} />
-                <Field label="معرف ملف المستوى (Profile ID)" value={activeProfile?.id} />
-                <Field label="نظام التصنيف المرجعي" value={major.sourceClassificationSystem || 'Phase 10 Unified'} />
-                <Field label="حالة النشر والجاهزية" value={formatLabel(activeProfile?.status || major.status)} />
-              </dl>
-            </div>
-
-            {/* Description & Overview */}
-            <div className="rounded-3xl border border-[#DDEFF2] bg-white p-6 shadow-xs space-y-4">
-              <div className="flex items-center gap-2 text-sm font-black text-[#142B5F]">
-                <BookOpen className="h-4 w-4 text-[#0E7C86]" />
-                <span>النبذة والوصف الأكاديمي للطلاب</span>
-              </div>
-              <p className="text-xs sm:text-sm font-medium leading-relaxed text-slate-700 whitespace-pre-wrap bg-[#FAF7F0]/60 p-4 rounded-2xl border border-slate-100">
-                {major.description || major.studentFriendlySummary || 'لا يوجد وصف مضاف لهذا التخصص بعد.'}
-              </p>
-            </div>
-          </div>
-
-          <aside className="space-y-4">
-            {/* Quick Action Side Card */}
-            <div className="rounded-3xl border border-[#DDEFF2] bg-gradient-to-br from-teal-50/50 via-white to-blue-50/40 p-5 shadow-xs space-y-3">
-              <h3 className="text-xs font-black text-[#142B5F] flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4 text-[#0E7C86]" />
-                <span>حالة المستوى في المنظومة</span>
-              </h3>
-              <div className="space-y-2 text-xs font-medium text-slate-600">
-                <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>حالة النشر:</span>
-                  <span className="font-bold text-[#142B5F]">{formatLabel(activeProfile?.status || major.status)}</span>
-                </div>
-                <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>اكتمال الحقول:</span>
-                  <span className="font-bold text-emerald-700">{formatLabel(activeProfile?.completenessStatus || major.completenessStatus)}</span>
-                </div>
-                <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>كتل المحتوى:</span>
-                  <span className="font-bold text-slate-700">{sections.length} كتلة</span>
-                </div>
-                <div className="flex justify-between py-1">
-                  <span>تاريخ التحديث:</span>
-                  <span className="font-bold text-slate-700">
-                    {major.updatedAt ? new Date(major.updatedAt).toLocaleDateString('ar-SA') : 'حديثاً'}
-                  </span>
-                </div>
-              </div>
-
-              {!isPublished ? (
-                <button
-                  type="button"
+                  disabled={saving || !activeProfile || dirtyBlockKeys.size > 0 || !hasPermission('admin:majors:publish') || activeProfile.status!=='READY_TO_PUBLISH'}
+                  title="النشر يتطلب اعتماد الجاهزية وحفظ التعديلات وصلاحية النشر"
                   onClick={() =>
                     setConfirmModal({
                       isOpen: true,
@@ -1100,8 +893,8 @@ export function MajorDetailPage() {
                     <span>منشور ومتاح للطلاب</span>
                   </span>
                 </div>
-              )}
-            </div>
+              )}</div>
+            <div className="major-detail-links flex flex-wrap gap-2">
 
             {(major.officialSourceUrl || major.sourceUrl) && (
               <a
@@ -1126,7 +919,83 @@ export function MajorDetailPage() {
                 <span>فتح الصفحة العامة</span>
               </a>
             )}
-          </aside>
+          </div>
+            <p className="text-xs text-white/75">{formatLabel(activeProfile?.completenessStatus||major.completenessStatus)} · {sections.length} كتلة محتوى · {versions.length} نسخة ضمن القراءة</p>
+          </div>
+        </div>
+      </header>
+      <details id="major-publication" open={publicationOpen} onToggle={event=>{setPublicationOpen(event.currentTarget.open);if(event.currentTarget.open)setPublicationVisited(true);}} className="major-detail-disclosure rounded-2xl border border-[#DDEFF2] bg-white p-4 shadow-sm">
+        <summary className="flex cursor-pointer items-center gap-2 text-sm font-bold text-[#142B5F]"><ShieldCheck aria-hidden="true" className="h-4 w-4 text-[#D6A43B]" />إجراءات المراجعة والنشر</summary>
+        {publicationVisited&&<div className="mt-4"><MajorGovernanceWorkspace key={major.id+':'+activeProfile?.id} majorId={major.id} profileId={activeProfile?.id} onSaved={loadMajorAndProfiles}/></div>}
+      </details>
+
+      {/* Tab Navigation */}
+      <nav aria-label="أقسام تفاصيل التخصص" className="major-detail-tabs grid grid-cols-2 gap-2 rounded-2xl border border-[#DDEFF2] bg-white p-2 shadow-sm sm:grid-cols-3 xl:grid-cols-5">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              aria-pressed={isActive}
+              onClick={() => {if(dirtyBlockKeys.size&&tab.id!=='content'&&!window.confirm('لديك تعديلات غير محفوظة. هل تريد مغادرة محرر المحتوى؟'))return;setActiveTab(tab.id);}}
+              className={`inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl px-3 text-xs font-semibold transition cursor-pointer ${
+                isActive
+                  ? 'bg-[#142B5F] text-white shadow-xs'
+                  : 'text-slate-600 hover:bg-[#FAF7F0] hover:text-[#0E7C86]'
+              }`}
+            >
+              <Icon className={`h-4 w-4 ${isActive ? 'text-[#F2CD78]' : 'text-slate-400'}`} />
+              <span>{tab.label}</span>
+              {tab.id === 'content' && dirtyBlockKeys.size > 0 && (
+                <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+              )}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Tab 1: Basic Identity Data */}
+
+      {activeTab === 'basic' && (
+        <section className="grid gap-4">
+          <div className="space-y-6">
+            <div className="rounded-3xl border border-[#DDEFF2] bg-white p-6 shadow-xs space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <GraduationCap className="h-5 w-5 text-[#0E7C86]" />
+                  <h2 className="text-base font-black text-[#142B5F]">بطاقة هوية التخصص المعتمدة</h2>
+                </div>
+
+              </div>
+
+              <dl className="grid gap-4 sm:grid-cols-2">
+                <Field label="الاسم العربي المعتمد" value={activeProfile?.localizedNameAr || activeProfile?.displayName || major.displayName} />
+                <Field label="الاسم الإنجليزي / القانوني" icon={Globe} value={major.canonicalName} />
+                <Field label="الدرجة الأكاديمية" icon={GraduationCap} value={formatLabel(activeDegreeLevel)} />
+                <Field label="رمز ملف المستوى" icon={Layers3} value={activeProfile?.code || major.classificationCode || major.publicId} />
+                <Field label="الكلية / السياق الأكاديمي" icon={Building2} value={activeProfile?.collegeContext || major.collegeOrFaculty} />
+                <Field label="المجال والتخصص الدقيق" icon={Layers} value={major.academicFieldOrDiscipline} />
+                <Field label="نظام التصنيف المرجعي" icon={Layers3} value={major.sourceClassificationSystem || 'غير محدد'} />
+                <Field label="حالة النشر والجاهزية" icon={ShieldCheck} value={formatLabel(activeProfile?.status || major.status)} />
+              </dl>
+              <details className="major-detail-disclosure rounded-xl border border-[#DDEFF2] p-3"><summary className="flex items-center gap-2 text-xs font-semibold text-slate-500"><Layers3 className="h-4 w-4" aria-hidden="true" />المعرّفات المرجعية</summary><dl className="mt-3 grid gap-3 sm:grid-cols-2"><Field label="معرف الجذر المشترك (Major ID)" value={major.id} /><Field label="معرف ملف المستوى (Profile ID)" value={activeProfile?.id} /></dl></details>
+            </div>
+
+            {/* Description & Overview */}
+            <div className="rounded-3xl border border-[#DDEFF2] bg-white p-6 shadow-xs space-y-4">
+              <div className="flex items-center gap-2 text-sm font-black text-[#142B5F]">
+                <BookOpen className="h-4 w-4 text-[#0E7C86]" />
+                <span>النبذة والوصف الأكاديمي للطلاب</span>
+              </div>
+              <p className="text-xs sm:text-sm font-medium leading-relaxed text-slate-700 whitespace-pre-wrap bg-[#FAF7F0]/60 p-4 rounded-2xl border border-slate-100">
+                {major.description || major.studentFriendlySummary || 'لا يوجد وصف مضاف لهذا التخصص بعد.'}
+              </p>
+            </div>
+          </div>
+
+
         </section>
       )}
 
@@ -1144,7 +1013,7 @@ export function MajorDetailPage() {
                   </h2>
                 </div>
                 <p className="mt-1 text-xs font-medium text-slate-500">
-                  {canonicalGroups.length} قسماً رئيسياً معتمداً من ملفات المصدر تضم {sections.length} كتلة محتوى تفصيلية كاملة.
+                  {canonicalGroups.length} أقسام رئيسية · {sections.length} كتلة محتوى محفوظة لهذا المستوى.
                 </p>
               </div>
 
@@ -1515,7 +1384,8 @@ export function MajorDetailPage() {
       )}
 
       <FellowshipAuthoringPanel major={major} onSaved={loadMajorAndProfiles}/>
-      {activeTab === 'versions' && <MajorGovernanceWorkspace majorId={major.id} profileId={activeProfile?.id} onSaved={loadMajorAndProfiles}/> }
+      <details id="major-technical-info" className="major-detail-disclosure rounded-2xl border border-[#DDEFF2] bg-white p-4" onToggle={event=>{if(event.currentTarget.open)setTechnicalVisited(true);}}><summary className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-[#142B5F]"><GitBranch className="h-4 w-4 text-[#0E7C86]" aria-hidden="true" />معلومات إضافية: الارتباطات وأثر التغيير</summary>{technicalVisited&&<div className="mt-4"><MajorConsumerUsagePanel key={major.id} majorId={major.id}/></div>}</details>
+
 
       {/* Tab 5: Versions and Sources */}
       {activeTab === 'versions' && (
@@ -1674,8 +1544,8 @@ export function MajorDetailPage() {
       {/* Confirmation Modal */}
       {confirmModal.isOpen && (
         <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden p-6 space-y-4">
-            <h3 className="text-base font-black text-slate-900">{confirmModal.title}</h3>
+          <div role="dialog" aria-modal="true" aria-labelledby="major-confirm-title" className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden p-6 space-y-4">
+            <h3 id="major-confirm-title" className="text-base font-black text-slate-900">{confirmModal.title}</h3>
             <p className="text-xs sm:text-sm text-slate-700 leading-relaxed bg-[#FAF7F0] p-4 rounded-2xl border border-slate-100">
               {confirmModal.message}
             </p>
