@@ -124,7 +124,14 @@ export function parseExecutiveData<K extends ExecutiveKey>(
       'officialRejected',
       'directSelfReportedApplications',
     ].forEach((field) => number(field));
-    if (value.definition !== 'SERVICE_RECEIPT_IS_NOT_UNIVERSITY_SUBMISSION')
+    if (
+      value.definition !== 'SERVICE_RECEIPT_IS_NOT_UNIVERSITY_SUBMISSION' ||
+      !['available', 'partial'].includes(String(value.status)) ||
+      ['measurementStartedAt', 'coverageFrom'].some(
+        (field) =>
+          typeof value[field] !== 'string' || !Number.isFinite(Date.parse(value[field] as string)),
+      )
+    )
       throw new Error('SCHEMA_MISMATCH');
   }
   return value as unknown as ExecutivePayload[K];

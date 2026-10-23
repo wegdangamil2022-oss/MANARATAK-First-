@@ -909,6 +909,9 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       // Finance commands authorize their action before replaying owner-ledger receipts.
       // A generic transport replay would bypass that current action permission.
       if (/^\/finance(?:\/|$)/i.test(req.path)) return next();
+      // Evidence commands replay through their atomic owner store only, after
+      // current assignment and action permissions have been checked by the router.
+      if (/^\/services\/requests\/[^/]+\/application-evidence\/?$/i.test(req.path)) return next();
       const command = createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true });
       // Match the existing case-insensitive Scholarship mount before serving
       // receipts, which contain owner data subject to current permissions.

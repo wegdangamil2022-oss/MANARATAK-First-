@@ -95,6 +95,28 @@ describe('Executive dashboard data and independent periods', () => {
       ),
     ).toThrow('SCHEMA_MISMATCH');
     expect(() => parseExecutiveData('users', users(7), 30)).toThrow('SCHEMA_MISMATCH');
+    expect(() =>
+      parseExecutiveData(
+        'applications',
+        {
+          period: users().period,
+          checkedAt: users().checkedAt,
+          status: 'partial',
+          measurementStartedAt: users().checkedAt,
+          coverageFrom: 'invalid-date',
+          managedServiceRequests: 0,
+          processing: 0,
+          needsInformation: 0,
+          attention: 0,
+          managedUniversitySubmissions: 0,
+          officialAccepted: 0,
+          officialRejected: 0,
+          directSelfReportedApplications: 0,
+          definition: 'SERVICE_RECEIPT_IS_NOT_UNIVERSITY_SUBMISSION',
+        },
+        30,
+      ),
+    ).toThrow('SCHEMA_MISMATCH');
   });
   it('ignores late results from a previous period and marks retained totals stale after a refresh failure', async () => {
     await act(async () => {
@@ -116,7 +138,12 @@ describe('Executive dashboard data and independent periods', () => {
     expect(JSON.stringify(tree.toJSON())).toContain('99');
     expect(JSON.stringify(tree.toJSON())).not.toContain('777');
     state.request.mockRejectedValue(new Error('source unavailable'));
-    await act(async () => select('Refresh data').props.onClick());
+    await act(async () =>
+      tree.root
+        .findAllByType('button')
+        .find((node) => node.children.includes('Refresh data'))!
+        .props.onClick(),
+    );
     expect(JSON.stringify(tree.toJSON())).toContain('99');
     expect(JSON.stringify(tree.toJSON())).toContain('Stale — refresh failed');
   });

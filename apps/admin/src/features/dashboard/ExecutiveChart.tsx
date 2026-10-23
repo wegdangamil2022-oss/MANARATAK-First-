@@ -56,7 +56,8 @@ export function ExecutiveChart({
       })
       .join(' ');
   };
-  const selected = focus === null ? null : points[Math.min(focus, points.length - 1)];
+  const focusedIndex = focus === null ? null : Math.min(focus, points.length - 1);
+  const selected = focusedIndex === null ? null : points[focusedIndex];
   const measured = points.some((point) => point.value !== null);
   return (
     <figure className="executive-chart" aria-labelledby={id}>
@@ -145,10 +146,10 @@ export function ExecutiveChart({
                   strokeDasharray="5 3"
                 />
               )}
-              {selected && focus !== null && (
+              {selected && focusedIndex !== null && (
                 <line
-                  x1={x(focus)}
-                  x2={x(focus)}
+                  x1={x(focusedIndex)}
+                  x2={x(focusedIndex)}
                   y1={top}
                   y2={height - bottom}
                   stroke="#D6A43B"

@@ -1,11 +1,9 @@
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import {
-  createExecutiveDashboardRouter,
-  createPublicAnalyticsRouter,
-  createManagedApplicationEvidenceRouter,
-} from '../../../../src/presentation/api/router/ExecutiveDashboardRouter';
+import { createExecutiveDashboardRouter } from '../../../../src/presentation/api/router/ExecutiveDashboardRouter';
+import { createPublicAnalyticsRouter } from '../../../../src/presentation/api/router/PublicAnalyticsRouter';
+import { createManagedApplicationEvidenceRouter } from '../../../../src/presentation/api/router/ManagedApplicationEvidenceRouter';
 import { PublicAnalyticsUseCases } from '@manaratak/application';
 import { ANALYTICS_POLICY_VERSION } from '@manaratak/shared';
 function app(router: express.Router, authenticated = true) {

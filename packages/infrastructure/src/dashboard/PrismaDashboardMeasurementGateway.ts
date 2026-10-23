@@ -219,6 +219,8 @@ export class PrismaManagedApplicationEvidenceGateway implements ManagedApplicati
           proven &&
           (!asset ||
             asset.ownerId !== input.actorId ||
+            !['CONFIDENTIAL', 'RESTRICTED'].includes(asset.securityClassification) ||
+            asset.deletedAt !== null ||
             asset.lifecycleState !== 'ACTIVE' ||
             !asset.checksumHash ||
             !asset.retentionExpiresAt ||
