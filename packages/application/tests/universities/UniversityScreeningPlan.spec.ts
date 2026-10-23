@@ -14,6 +14,12 @@ function snapshot(): UniversityScreeningSnapshot {
   };
 }
 describe('source-bound university screening preview', () => {
+  it('keeps an existing identity out of the initial-create review path', async () => {
+    const data = snapshot(); data.existingUniversity = { id: 'existing', publicId: binding.sourceReferenceId };
+    const [preview] = await planUniversityScreenedSources({ read: async () => data }, [binding]);
+    expect(() => reviewUniversityScreeningPlan(preview, { previewPlanHash: preview.planHash!, reviewedBy: 'reviewer', reason: 'Review',
+      geography: [{ sourceReferenceId: binding.sourceReferenceId, countryReferenceId: 'country', regionReferenceId: 'region', cityReferenceId: 'city' }] })).toThrow('EXISTING_IDENTITY_REQUIRES_UPDATE_WORKFLOW');
+  });
   it('binds an explicit review to the exact preview and permits only canonical geography additions', async () => {
     const [preview] = await planUniversityScreenedSources({ read: vi.fn().mockResolvedValue(snapshot()) }, [binding]);
     const decision = { previewPlanHash: preview.planHash!, reviewedBy: 'reviewer', reason: 'Official fields checked; resolve actual geography IDs.',

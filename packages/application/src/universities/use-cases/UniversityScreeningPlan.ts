@@ -30,6 +30,7 @@ export function reviewUniversityScreeningPlan(preview: UniversityScreeningPlan, 
     || !preview.screeningBindings.length || preview.validationIssues.length !== 1
     || preview.validationIssues[0].code !== 'UNIVERSITY_SOURCE_OWNER_REVIEW_REQUIRED') throw new Error('UNIVERSITY_SOURCE_REVIEW_INVALID');
   const roots = preview.changes.filter(row => row.entityType === 'UNIVERSITY');
+  if (roots.some(row => row.operation !== 'CREATE')) throw new Error('UNIVERSITY_SOURCE_REVIEW_EXISTING_IDENTITY_REQUIRES_UPDATE_WORKFLOW');
   if (!Array.isArray(decision.geography) || roots.length !== preview.screeningBindings.length || decision.geography.length !== roots.length
     || new Set(decision.geography.map(row => row.sourceReferenceId)).size !== roots.length
     || decision.geography.some(row => !roots.some(root => root.sourceReferenceId === row.sourceReferenceId)
