@@ -14,13 +14,15 @@ const coreSchema = z.object({
 export const internationalTestImportEntrySchema = z.object({
   sourceKey: z.string().regex(/^[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.md$/).max(300),
   sourceClassification: z.enum(['NEW_TEST', 'REPLACE_EXISTING', 'REVIEW_REQUIRED']),
-  resolution: z.enum(['APPROVE_CREATE', 'APPROVE_UPDATE']),
+  resolution: z.enum(['APPROVE_CREATE', 'APPROVE_UPDATE', 'APPROVE_INITIAL_CREATE']),
   reviewReason: z.string().trim().min(1).max(2000), evidenceReference: z.string().trim().min(1).max(500),
   targetId: z.string().uuid(), core: coreSchema,
   sourceCycle: z.string().regex(/^\d{4}(?:-\d{4})?$/), sourceUri: z.string().url().max(2048).optional(),
   sourceHash: digest, rawContent: z.string().min(1).max(2_000_000),
 }).strict();
-const planBodySchema = z.object({ schemaVersion: z.literal(1), changeSetId: z.string().uuid(), sourceManifestHash: digest, entries: z.array(internationalTestImportEntrySchema).min(1).max(5), databaseWrites: z.literal(0) }).strict();
+const planBodySchema = z.object({ schemaVersion: z.literal(1), changeSetId: z.string().uuid(), sourceManifestHash: digest,
+  targetMode: z.literal('INDEPENDENT_EMPTY_TEST_CATALOG').optional(),
+  entries: z.array(internationalTestImportEntrySchema).min(1).max(5), databaseWrites: z.literal(0) }).strict();
 export const internationalTestImportPlanSchema = planBodySchema.extend({ planHash: digest });
 export type InternationalTestImportEntry = z.infer<typeof internationalTestImportEntrySchema>;
 export type InternationalTestImportPlan = z.infer<typeof internationalTestImportPlanSchema>;
@@ -54,6 +56,12 @@ export function internationalTestImportHash(value: unknown): string {
 export function internationalTestSourceHash(rawContent: string): string { return createHash('sha256').update(rawContent, 'utf8').digest('hex'); }
 export function prepareInternationalTestImport(input: unknown): InternationalTestImportPlan {
   const body = planBodySchema.parse(input);
+  // Historical comparison remains immutable. Initial creation is a distinct,
+  // explicitly reviewed operation whose empty-target claim is checked live.
+  if (body.entries.some(entry => (entry.resolution === 'APPROVE_INITIAL_CREATE') !== Boolean(body.targetMode)
+    || (entry.resolution === 'APPROVE_INITIAL_CREATE' && entry.sourceClassification !== 'REPLACE_EXISTING'))) {
+    throw new Error('TEST_IMPORT_INITIAL_CREATE_SCOPE_REQUIRED');
+  }
   const sources = new Set<string>(); const targets = new Set<string>(); const publicIds = new Set<string>(); const slugs = new Set<string>(); const canonicalKeys = new Set<string>();
   for (const entry of body.entries) {
     const canonicalKey = `${entry.core.canonicalName.toLowerCase()}|${entry.core.providerId}`;
@@ -62,7 +70,7 @@ export function prepareInternationalTestImport(input: unknown): InternationalTes
     canonicalKeys.add(canonicalKey);
     if (internationalTestSourceHash(entry.rawContent) !== entry.sourceHash) throw new Error('TEST_IMPORT_SOURCE_HASH_MISMATCH');
     if (entry.sourceClassification === 'NEW_TEST' && entry.resolution !== 'APPROVE_CREATE') throw new Error('TEST_IMPORT_CLASSIFICATION_RESOLUTION_MISMATCH');
-    if (entry.sourceClassification === 'REPLACE_EXISTING' && entry.resolution !== 'APPROVE_UPDATE') throw new Error('TEST_IMPORT_CLASSIFICATION_RESOLUTION_MISMATCH');
+    if (entry.sourceClassification === 'REPLACE_EXISTING' && !['APPROVE_UPDATE', 'APPROVE_INITIAL_CREATE'].includes(entry.resolution)) throw new Error('TEST_IMPORT_CLASSIFICATION_RESOLUTION_MISMATCH');
     const blocks = InternationalTestMarkdownParser.parse(entry.rawContent);
     if (!blocks.length || blocks.some((block, index) => block.sectionNumber !== index + 1)) throw new Error('TEST_IMPORT_SOURCE_SECTIONS_INVALID');
   }

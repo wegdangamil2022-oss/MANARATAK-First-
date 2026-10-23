@@ -30,6 +30,9 @@ export async function runReviewedTestImport(args: string[], env = process.env): 
   if (!actorId) throw new Error('TEST_IMPORT_ACTOR_REQUIRED');
   let approval: InternationalTestImportApproval | undefined;
   if (mode === 'approved-write' || mode === 'rollback') {
+    if (plan.targetMode && (env.NODE_ENV !== 'development' || env.DATABASE_MUTATION_ENVIRONMENT !== 'development')) {
+      throw new Error('TEST_IMPORT_INITIAL_CREATE_DEVELOPMENT_ONLY');
+    }
     approval = { actorId, approval: env.TEST_IMPORT_APPROVAL as InternationalTestImportApproval['approval'], planHash: env.TEST_IMPORT_APPROVAL_PLAN_HASH ?? '', previewHash: env.TEST_IMPORT_APPROVAL_PREVIEW_HASH ?? '', recoveryGateToken: env.DATABASE_RECOVERY_GATE_TOKEN ?? '', recoveryEvidenceReference: env.TEST_IMPORT_RECOVERY_EVIDENCE ?? '' };
     // Fail before loading Prisma or opening any connection, including on a retry.
     if (approval.approval !== (mode === 'rollback' ? 'APPROVE_ROLLBACK' : 'APPROVE_WRITE') || approval.planHash !== plan.planHash || !/^[a-f0-9]{64}$/.test(approval.previewHash) || !approval.recoveryGateToken.trim() || !approval.recoveryEvidenceReference.trim()) throw new Error('TEST_IMPORT_EXACT_APPROVAL_AND_RECOVERY_REQUIRED');

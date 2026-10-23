@@ -7,6 +7,7 @@ const manifestPath = 'workspace/import-sources/international-tests/reconciliatio
 const sourcePath = 'workspace/import-sources/international-tests/unified-56';
 const reviewSchema = z.object({
   schemaVersion: z.literal(1), changeSetId: z.string().uuid(), sourceManifestHash: z.string().regex(/^[a-f0-9]{64}$/),
+  targetMode: z.literal('INDEPENDENT_EMPTY_TEST_CATALOG').optional(),
   entries: z.array(internationalTestImportEntrySchema.omit({ rawContent: true })).min(1).max(5),
 }).strict();
 const manifestSchema = z.object({ matching_rows: z.array(z.object({

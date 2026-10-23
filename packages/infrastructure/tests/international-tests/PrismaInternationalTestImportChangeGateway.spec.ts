@@ -39,6 +39,7 @@ function harness() {
     internationalTestProvider: { findUnique: vi.fn(async ({ where }: { where: { id: string } }): Promise<typeof provider | null> => where.id === provider.id ? copy(provider) : null), findUniqueOrThrow: vi.fn(async () => copy(provider)) },
     internationalTestFamily: { findUnique: vi.fn(async () => null) },
     internationalTest: {
+      count: vi.fn(async () => roots.length),
       findUnique: vi.fn(async ({ where }: { where: { id: string } }) => root(where.id)),
       findUniqueOrThrow: vi.fn(async ({ where }: { where: { id: string } }) => { const row = root(where.id); if (!row) throw new Error('missing root'); return row; }),
       findMany: vi.fn(async ({ where }: { where: { id: { not: string }; OR: Array<Record<string, string>> } }) => roots.filter(row => row.id !== where.id.not && where.OR.some(filter => Object.entries(filter).every(([key, value]) => row[key] === value))).map(row => ({ id: row.id }))),
@@ -75,6 +76,42 @@ function harness() {
   return { tx, prisma, executor, plan, approval, provider, state: () => copy({ roots, versions, audits, outbox }), setPermissions: (value: string[]) => { permissions = value; }, setPolicy: () => { policyIds = ['missing-policy']; }, setVerified: () => { verified = false; }, setInactive: () => { active = false; }, fail: (kind: string) => { failAudit = kind === 'audit'; failOutbox = kind === 'outbox'; }, seed: (row: Root) => roots.push(copy(row)), seedVersion: (row: Version) => versions.push(copy(row)), changeRoot: (fields: Record<string, unknown>) => Object.assign(roots[0], fields), changeVersion: (fields: Record<string, unknown>) => Object.assign(versions[0], fields) };
 }
 describe('governed test writer with in-memory Prisma transaction', () => {
+  const initialPlan = () => {
+    const body = reviewBody();
+    return prepareInternationalTestImport({ ...body, targetMode: 'INDEPENDENT_EMPTY_TEST_CATALOG',
+      entries: [{ ...body.entries[0], sourceClassification: 'REPLACE_EXISTING', resolution: 'APPROVE_INITIAL_CREATE' }] });
+  };
+  it('initial catalog creation preserves history, draft visibility, replay and rollback evidence', async () => {
+    const h = harness(), plan = initialPlan();
+    const report = await h.executor.preview(plan, actorId);
+    expect(report).toMatchObject({ state: 'READY', changes: [{ operation: 'CREATE', currentHash: null }] });
+    const approval = { ...await h.approval(), planHash: plan.planHash, previewHash: report.previewHash };
+    expect(await h.executor.commit(plan, approval)).toMatchObject({ created: 1, updated: 0 });
+    expect(h.state().roots[0]).toMatchObject({ status: 'NEEDS_REVIEW', isPubliclyVisible: false });
+    expect(h.state().versions[0].metadata).toMatchObject({ sourceClassification: 'REPLACE_EXISTING', resolution: 'APPROVE_INITIAL_CREATE', targetMode: plan.targetMode });
+    expect(await h.executor.commit(plan, approval)).toMatchObject({ replayed: true, databaseWrites: 0 });
+    await h.executor.rollback(plan, { ...approval, approval: 'APPROVE_ROLLBACK', previewHash: (await h.executor.preview(plan, actorId)).previewHash });
+    expect(h.state().roots[0].status).toBe('ARCHIVED');
+    expect(await h.executor.reconcile(plan, actorId)).toMatchObject({ state: 'PASS' });
+    expect(h.state().audits).toHaveLength(2); expect(h.state().outbox).toHaveLength(2);
+  });
+  it('blocks initial creation if an unrelated owner arrives after preview', async () => {
+    const h = harness(), plan = initialPlan();
+    const approval = { ...await h.approval(), planHash: plan.planHash, previewHash: (await h.executor.preview(plan, actorId)).previewHash };
+    h.seed({ id: randomUUID(), slug: 'unrelated-owner', _count: {} });
+    expect((await h.executor.preview(plan, actorId)).issues).toContain('TEST_IMPORT_INITIAL_CATALOG_NOT_EMPTY');
+    await expect(h.executor.commit(plan, approval)).rejects.toThrow('PREVIEW_BLOCKED');
+    expect(h.state().roots).toHaveLength(1); expect(h.state().audits).toHaveLength(0);
+  });
+  it('initial creation retains verified actor and atomic outbox requirements', async () => {
+    const h = harness(), plan = initialPlan();
+    const approval = { ...await h.approval(), planHash: plan.planHash, previewHash: (await h.executor.preview(plan, actorId)).previewHash };
+    h.fail('outbox');
+    await expect(h.executor.commit(plan, approval)).rejects.toThrow('unavailable');
+    expect(h.state()).toEqual({ roots: [], versions: [], audits: [], outbox: [] });
+    h.setVerified();
+    await expect(h.executor.commit(plan, approval)).rejects.toThrow('VERIFIED_ACTIVE_ACTOR_REQUIRED');
+  });
   it('dry-run uses a READ ONLY snapshot and performs zero mutations', async () => {
     const h = harness(); const report = await h.executor.preview(h.plan, actorId);
     expect(report).toMatchObject({ state: 'READY', databaseWrites: 0 });

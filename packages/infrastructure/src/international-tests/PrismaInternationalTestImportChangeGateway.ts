@@ -93,7 +93,8 @@ export class PrismaInternationalTestImportChangeGateway implements International
             sourceFileName: entry.sourceKey.split('/').at(-1)!, sourceLocale: 'ar', sourceUri: entry.sourceUri,
             sourceHash: entry.sourceHash, rawContent: entry.rawContent, importedBy: approval.actorId,
             unmappedSections: InternationalTestMarkdownParser.parse(entry.rawContent).map(block => ({ sectionKey: block.blockKey, title: block.title, locale: 'ar', content: block.content, sourceSectionPath: block.blockKey })),
-            metadata: { sourceCycle: entry.sourceCycle, sourceKey: entry.sourceKey, sourceClassification: entry.sourceClassification, resolution: entry.resolution, reviewReason: entry.reviewReason, evidenceReference: entry.evidenceReference, sourceManifestHash: plan.sourceManifestHash },
+            metadata: { sourceCycle: entry.sourceCycle, sourceKey: entry.sourceKey, sourceClassification: entry.sourceClassification, resolution: entry.resolution, reviewReason: entry.reviewReason, evidenceReference: entry.evidenceReference, sourceManifestHash: plan.sourceManifestHash,
+              ...(plan.targetMode ? { targetMode: plan.targetMode } : {}) },
           });
           await repository.advanceRevision(entry.targetId,await repository.getRevision(entry.targetId));
           const root = await tx.internationalTest.findUniqueOrThrow({ where: { id: entry.targetId }, include: rootInclude });
@@ -195,13 +196,16 @@ export class PrismaInternationalTestImportChangeGateway implements International
     }
     const observed = [];
     const plannedDedupKeys = new Set<string>();
+    // Rechecked under the same serializable write transaction after locking.
+    // Receipted replay above must remain available after the first creation.
+    if (plan.targetMode && await tx.internationalTest.count() !== 0) issues.push('TEST_IMPORT_INITIAL_CATALOG_NOT_EMPTY');
     for (const entry of plan.entries) {
       const root = await tx.internationalTest.findUnique({ where: { id: entry.targetId }, include: rootInclude });
       const provider = await tx.internationalTestProvider.findUnique({ where: { id: entry.core.providerId } });
       const family = entry.core.familyId ? await tx.internationalTestFamily.findUnique({ where: { id: entry.core.familyId } }) : null;
       if (!provider) issues.push('TEST_IMPORT_PROVIDER_NOT_FOUND');
       if (entry.core.familyId && (!family || family.category !== entry.core.testCategory)) issues.push('TEST_IMPORT_FAMILY_CATEGORY_MISMATCH');
-      if (entry.resolution === 'APPROVE_CREATE' && root) issues.push('TEST_IMPORT_CREATE_ID_EXISTS');
+      if (entry.resolution !== 'APPROVE_UPDATE' && root) issues.push('TEST_IMPORT_CREATE_ID_EXISTS');
       if (entry.resolution === 'APPROVE_UPDATE' && !root) issues.push('TEST_IMPORT_UPDATE_OWNER_NOT_FOUND');
       if (root) {
         if (['PUBLISHED', 'ARCHIVED', 'REJECTED', 'SUPERSEDED', 'MERGED'].includes(root.status) || root.isPubliclyVisible || root.currentPublishedVersionId) issues.push('TEST_IMPORT_OWNER_IMMUTABLE');
@@ -217,7 +221,7 @@ export class PrismaInternationalTestImportChangeGateway implements International
       if (duplicate) issues.push('TEST_IMPORT_SOURCE_CYCLE_ALREADY_EXISTS');
       const currentHash = root ? internationalTestImportHash(root) : null;
       const blockCount = InternationalTestMarkdownParser.parse(entry.rawContent).length + 1;
-      changes.push({ targetId: entry.targetId, operation: entry.resolution === 'APPROVE_CREATE' ? 'CREATE' : 'UPDATE', sourceHash: entry.sourceHash, currentHash, blockCount });
+      changes.push({ targetId: entry.targetId, operation: entry.resolution === 'APPROVE_UPDATE' ? 'UPDATE' : 'CREATE', sourceHash: entry.sourceHash, currentHash, blockCount });
       observed.push({ currentHash, provider, family, collisions, duplicate });
     }
     return { changeSetId: plan.changeSetId, planHash: plan.planHash, previewHash: internationalTestImportHash({ planHash: plan.planHash, observed }), state: issues.length ? 'BLOCKED' : 'READY', changes, issues, databaseWrites: 0 };
@@ -246,7 +250,7 @@ export class PrismaInternationalTestImportChangeGateway implements International
     return { ...before, optionalFields: before.optionalFields === null ? Prisma.DbNull : json(before.optionalFields) };
   }
   private result(plan: InternationalTestImportPlan, state: InternationalTestImportResult['state'], replayed: boolean, databaseWrites: number): InternationalTestImportResult {
-    return { changeSetId: plan.changeSetId, planHash: plan.planHash, state, created: plan.entries.filter(entry => entry.resolution === 'APPROVE_CREATE').length, updated: plan.entries.filter(entry => entry.resolution === 'APPROVE_UPDATE').length, replayed, databaseWrites };
+    return { changeSetId: plan.changeSetId, planHash: plan.planHash, state, created: plan.entries.filter(entry => entry.resolution !== 'APPROVE_UPDATE').length, updated: plan.entries.filter(entry => entry.resolution === 'APPROVE_UPDATE').length, replayed, databaseWrites };
   }
   private audited<T>(tx: Tx, plan: InternationalTestImportPlan, approval: InternationalTestImportApproval, action: string, mutation: () => Promise<T>): Promise<T> {
     const client = tx as unknown as PrismaClient;

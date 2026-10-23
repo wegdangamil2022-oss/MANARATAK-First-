@@ -3,6 +3,17 @@ import { actorId, reviewBody, reviewEntry } from './fixtures/reviewedTestImport'
 import { InternationalTestImportChangeExecutor, internationalTestImportHash, internationalTestSourceHash, prepareInternationalTestImport, validateInternationalTestImportPlan, type InternationalTestImportChangeGateway } from '../../src/tests-platform/use-cases/InternationalTestImportChangeSet';
 
 describe('reviewed test import contract', () => {
+  it('seals explicit initial creation without rewriting historical classification', () => {
+    const entry = { ...reviewEntry(), sourceClassification: 'REPLACE_EXISTING', resolution: 'APPROVE_INITIAL_CREATE' };
+    const body = { ...reviewBody(), targetMode: 'INDEPENDENT_EMPTY_TEST_CATALOG', entries: [entry] };
+    const plan = prepareInternationalTestImport(body);
+    expect(validateInternationalTestImportPlan(plan)).toEqual(plan);
+    expect(plan.entries[0].sourceClassification).toBe('REPLACE_EXISTING');
+    expect(() => prepareInternationalTestImport({ ...body, targetMode: undefined })).toThrow('INITIAL_CREATE_SCOPE');
+    expect(() => prepareInternationalTestImport({ ...body, entries: [{ ...entry, sourceClassification: 'NEW_TEST' }] })).toThrow('INITIAL_CREATE_SCOPE');
+    expect(() => prepareInternationalTestImport({ ...body, entries: [{ ...entry, resolution: 'APPROVE_UPDATE' }] })).toThrow('INITIAL_CREATE_SCOPE');
+    expect(() => validateInternationalTestImportPlan({ ...plan, targetMode: undefined })).toThrow();
+  });
   it('seals all source/mapping decisions and remains offline', () => {
     const plan = prepareInternationalTestImport(reviewBody());
     expect(validateInternationalTestImportPlan(plan)).toEqual(plan);

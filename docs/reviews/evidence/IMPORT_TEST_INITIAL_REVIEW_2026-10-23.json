@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "changeSetId": "3f883b3a-6aea-4b8f-88bd-9a72f5506e20",
+  "sourceManifestHash": "d2e38cfccdf540d7c5e8570718c9b689ffb0adb72a941062fa81a5e6ee015c3f",
+  "targetMode": "INDEPENDENT_EMPTY_TEST_CATALOG",
+  "entries": [
+    {
+      "sourceKey": "01_English_Language_Tests_12/TOEFL_iBT_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "resolution": "APPROVE_INITIAL_CREATE",
+      "reviewReason": "Initial private draft in independent empty catalog; historical comparison retained. Source content remains unverified and requires review before publication.",
+      "evidenceReference": "docs/reviews/IMPORT_TEST_INITIAL_CREATE_2026-10-23.md",
+      "targetId": "8cff3f55-c037-46d9-a885-fde7eb071dea",
+      "core": {
+        "publicId": "TOEFL-IBT",
+        "slug": "toefl-ibt",
+        "canonicalName": "TOEFL iBT",
+        "displayName": "TOEFL iBT",
+        "testCategory": "ENGLISH_LANGUAGE",
+        "providerId": "61eff34b-f6fc-46a9-92d3-4cd132f4cee3"
+      },
+      "sourceCycle": "2026",
+      "sourceHash": "c6512fb6328dc1b714d64b42ffd2f6cfcab5c577552aaa2236560f30db937457"
+    },
+    {
+      "sourceKey": "01_English_Language_Tests_12/IELTS_2026_Complete_Data_AR.md",
+      "sourceClassification": "REPLACE_EXISTING",
+      "resolution": "APPROVE_INITIAL_CREATE",
+      "reviewReason": "Initial private draft in independent empty catalog; historical comparison retained. Source content remains unverified and requires review before publication.",
+      "evidenceReference": "docs/reviews/IMPORT_TEST_INITIAL_CREATE_2026-10-23.md",
+      "targetId": "9a4e33e0-f5db-45be-ac1c-45b5023997f5",
+      "core": {
+        "publicId": "IELTS",
+        "slug": "ielts",
+        "canonicalName": "International English Language Testing System",
+        "displayName": "IELTS",
+        "testCategory": "ENGLISH_LANGUAGE",
+        "providerId": "17d3239d-d51b-4ed2-9400-579619bfdd91"
+      },
+      "sourceCycle": "2026",
+      "sourceHash": "52c7bbea615899ed94eb1ed5b8c5be068f03b900faec77bf6aaa8c293ded48f8"
+    }
+  ]
+}

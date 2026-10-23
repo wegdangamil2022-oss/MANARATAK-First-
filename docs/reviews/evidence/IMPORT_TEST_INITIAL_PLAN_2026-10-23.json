@@ -1,0 +1,38 @@
+{
+  "kind": "OFFLINE_INITIAL_TEST_PLAN_ONLY",
+  "observedAt": "2026-10-23T00:07:46.562Z",
+  "databaseWrites": 0,
+  "databaseConnections": 0,
+  "readyToWrite": false,
+  "planHash": "1f3b2c0d41f93d034d94bfd532d3b3b9d19ceb1ee08dc05bca958b39066c7538",
+  "sourceManifestHash": "d2e38cfccdf540d7c5e8570718c9b689ffb0adb72a941062fa81a5e6ee015c3f",
+  "targetMode": "INDEPENDENT_EMPTY_TEST_CATALOG",
+  "entries": [
+    {
+      "sourceKey": "01_English_Language_Tests_12/TOEFL_iBT_2026_Complete_Data_AR.md",
+      "sourceHash": "c6512fb6328dc1b714d64b42ffd2f6cfcab5c577552aaa2236560f30db937457",
+      "sourceClassification": "REPLACE_EXISTING",
+      "resolution": "APPROVE_INITIAL_CREATE",
+      "targetId": "8cff3f55-c037-46d9-a885-fde7eb071dea",
+      "targetIdState": "PROPOSED_NOT_PERSISTED",
+      "providerId": "61eff34b-f6fc-46a9-92d3-4cd132f4cee3",
+      "rawBytes": 41340
+    },
+    {
+      "sourceKey": "01_English_Language_Tests_12/IELTS_2026_Complete_Data_AR.md",
+      "sourceHash": "52c7bbea615899ed94eb1ed5b8c5be068f03b900faec77bf6aaa8c293ded48f8",
+      "sourceClassification": "REPLACE_EXISTING",
+      "resolution": "APPROVE_INITIAL_CREATE",
+      "targetId": "9a4e33e0-f5db-45be-ac1c-45b5023997f5",
+      "targetIdState": "PROPOSED_NOT_PERSISTED",
+      "providerId": "17d3239d-d51b-4ed2-9400-579619bfdd91",
+      "rawBytes": 58908
+    }
+  ],
+  "pending": [
+    "VERIFIED_ACTIVE_AUTHORIZED_IDENTITY",
+    "EXACT_LIVE_PREVIEW_APPROVAL",
+    "FRESH_RECOVERY_PROOF"
+  ],
+  "sourceContentVerified": false
+}
