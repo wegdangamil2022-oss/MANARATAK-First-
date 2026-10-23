@@ -1,5 +1,8 @@
+import { sealUniversityImportPlan, type UniversityImportChangePlan } from '../../../application/src/universities/use-cases/UniversityImportChangePlan';
 import { describe, expect, it, vi } from 'vitest';
 import { PrismaUniversityImportChangeExecutorGateway } from '../../src/universities/PrismaUniversityImportChangeExecutorGateway';
+
+function sealed(plan: UniversityImportChangePlan) { return Object.assign(plan, sealUniversityImportPlan(plan)); }
 
 function authorized<T extends object>(transaction: T) {
   return Object.assign(transaction, {
@@ -11,6 +14,15 @@ function authorized<T extends object>(transaction: T) {
 }
 
 describe('PrismaUniversityImportChangeExecutorGateway', () => {
+  it('rejects a modified bounded plan before opening a transaction', async () => {
+    const prisma = { $transaction: vi.fn() };
+    const gateway = new PrismaUniversityImportChangeExecutorGateway(prisma as never);
+    const plan = sealed({ changeSetId: '', stage: 'STAGE_1', sourceArtifactId: 'artifact', validationIssues: [], databaseWrites: 0,
+      changes: [{ sequence: 1, sourceReferenceId: 'INS-DZA-0001', entityType: 'UNIVERSITY', entityKey: 'INS-DZA-0001', operation: 'CREATE', afterState: { officialName: 'Original' } }] });
+    plan.changes[0].afterState = { officialName: 'Tampered' };
+    await expect(gateway.apply(plan, 'admin-1')).rejects.toThrow('PLAN_SEAL');
+    expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
   it.each(['unknown', 'unverified', 'inactive', 'student', 'imports-only', 'university-only', 'policy-denied'])('denies %s for apply and rollback before reading receipts', async kind => {
     for (const mode of ['apply', 'rollback']) {
       const tx = authorized({
@@ -23,8 +35,8 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
       const permissions = kind === 'imports-only' ? ['admin:imports:manage'] : kind === 'university-only' ? ['admin:universities:manage'] : [];
       if (['student', 'imports-only', 'university-only', 'policy-denied'].includes(kind)) tx.roleRecord.findUnique.mockResolvedValue({ id: 'importer', name: 'Importer', description: '', permissions: kind === 'policy-denied' ? ['admin:*'] : permissions, policyIds: kind === 'policy-denied' ? ['missing-policy'] : [], createdAt: new Date(), updatedAt: new Date() });
       const gateway = new PrismaUniversityImportChangeExecutorGateway({ $transaction: async work => work(tx) } as never);
-      const plan = { changeSetId: 'STAGE_1:fixture', stage: 'STAGE_1' as const, sourceArtifactId: 'fixture', validationIssues: [], changes: [], databaseWrites: 0 as const };
-      await expect(mode === 'apply' ? gateway.apply(plan, 'admin-1') : gateway.rollback(plan.changeSetId, 'admin-1')).rejects.toThrow(/UNIVERSITY_IMPORT_(VERIFIED_ACTIVE_ACTOR_REQUIRED|ACTOR_PERMISSION_DENIED)/);
+      const plan = { changeSetId: 'STAGE_1:fixture', stage: 'STAGE_1' as const, sourceArtifactId: 'fixture', validationIssues: [], changes: [{ sequence: 1, sourceReferenceId: 'INS-DZA-0001', entityType: 'UNIVERSITY' as const, entityKey: 'INS-DZA-0001', operation: 'CREATE' as const, afterState: { officialName: 'Synthetic' } }], databaseWrites: 0 as const };
+      await expect(mode === 'apply' ? gateway.apply(sealed(plan), 'admin-1') : gateway.rollback(plan.changeSetId, 'admin-1')).rejects.toThrow(/UNIVERSITY_IMPORT_(VERIFIED_ACTIVE_ACTOR_REQUIRED|ACTOR_PERMISSION_DENIED)/);
       expect(tx.universityImportChangeSet.findUnique).not.toHaveBeenCalled();
     }
   });
@@ -32,12 +44,12 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
   it('reauthorizes a replay and locks persisted authorization rows in its transaction', async () => {
     const tx = authorized({ $queryRaw: vi.fn().mockResolvedValue([]), universityImportChangeSet: { findUnique: vi.fn().mockResolvedValue({ id: 'STAGE_1:fixture', state: 'APPLIED', changes: [] }) } });
     const gateway = new PrismaUniversityImportChangeExecutorGateway({ $transaction: async work => work(tx) } as never);
-    const plan = { changeSetId: 'STAGE_1:fixture', stage: 'STAGE_1' as const, sourceArtifactId: 'fixture', validationIssues: [], changes: [], databaseWrites: 0 as const };
-    await expect(gateway.apply(plan, 'admin-1')).resolves.toMatchObject({ appliedChanges: 0 });
+    const plan = { changeSetId: 'STAGE_1:fixture', stage: 'STAGE_1' as const, sourceArtifactId: 'fixture', validationIssues: [], changes: [{ sequence: 1, sourceReferenceId: 'INS-DZA-0001', entityType: 'UNIVERSITY' as const, entityKey: 'INS-DZA-0001', operation: 'CREATE' as const, afterState: { officialName: 'Synthetic' } }], databaseWrites: 0 as const };
+    await expect(gateway.apply(sealed(plan), 'admin-1')).resolves.toMatchObject({ appliedChanges: 0 });
     const locks = tx.$queryRaw.mock.calls.map(([query]) => query.sql ?? '').join('\n');
     expect(locks).toContain('FOR SHARE'); expect(locks).toContain('RoleAssignmentRecord'); expect(locks).toContain('PolicyRecord');
     tx.roleAssignmentRecord.findMany.mockResolvedValue([]);
-    await expect(gateway.apply(plan, 'admin-1')).rejects.toThrow('ACTOR_PERMISSION_DENIED');
+    await expect(gateway.apply(sealed(plan), 'admin-1')).rejects.toThrow('ACTOR_PERMISSION_DENIED');
     expect(tx.universityImportChangeSet.findUnique).toHaveBeenCalledTimes(1);
   });
   it('rejects a root University whose valid geography ids have incompatible parents', async () => {
@@ -57,7 +69,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
       changes: [{ sequence: 1, sourceReferenceId: 'INS-YEM-0001', entityType: 'UNIVERSITY' as const, entityKey: 'INS-YEM-0001', operation: 'CREATE' as const,
         afterState: { officialEnglishName: 'Yemen University', countryReferenceId: 'country-ye', regionReferenceId: 'region-sa', cityReferenceId: 'city-ye' } }],
     };
-    await expect(gateway.apply(plan, 'admin-1')).rejects.toThrow('UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH');
+    await expect(gateway.apply(sealed(plan), 'admin-1')).rejects.toThrow('UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH');
     expect(transaction.university.create).not.toHaveBeenCalled();
   });
 
@@ -116,7 +128,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
       ],
     };
 
-    await expect(gateway.apply(plan, 'admin-1')).resolves.toEqual({
+    await expect(gateway.apply(sealed(plan), 'admin-1')).resolves.toEqual({
       changeSetId: plan.changeSetId,
       appliedChanges: 2,
     });
@@ -146,7 +158,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
       changeSetId: 'STAGE_3:artifact-1', stage: 'STAGE_3' as const, sourceArtifactId: 'artifact-1', validationIssues: [], databaseWrites: 0 as const,
       changes: [{ sequence: 1, sourceReferenceId: 'INS-DZA-0001', entityType: 'SOURCE_RECORD' as const, entityKey: 'handoff-1', operation: 'UPSERT_CHILD' as const, afterState: { sourceRowNumber: 1, contentHash: 'hash-1' } }],
     };
-    await expect(gateway.apply(plan, 'admin-1')).rejects.toThrow('UNIVERSITY_SOURCE_PROVENANCE_OWNERSHIP_MISMATCH');
+    await expect(gateway.apply(sealed(plan), 'admin-1')).rejects.toThrow('UNIVERSITY_SOURCE_PROVENANCE_OWNERSHIP_MISMATCH');
     expect(transaction.universitySourceRecord.update).not.toHaveBeenCalled();
   });
 
@@ -184,7 +196,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
         },
       ],
     };
-    await expect(gateway.apply(plan, 'admin-1')).resolves.toEqual({
+    await expect(gateway.apply(sealed(plan), 'admin-1')).resolves.toEqual({
       changeSetId: plan.changeSetId,
       appliedChanges: 1,
     });
@@ -234,7 +246,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
       }],
     };
 
-    await expect(gateway.apply(plan, 'admin-1')).resolves.toEqual({
+    await expect(gateway.apply(sealed(plan), 'admin-1')).resolves.toEqual({
       changeSetId: plan.changeSetId,
       appliedChanges: 1,
     });

@@ -4,6 +4,7 @@ import { requireDatabaseMutationGate } from './lib/database-mutation-gate.mjs';
 import { PrismaClient } from '@prisma/client';
 import {
   UniversityImportChangeExecutor,
+  validateUniversityImportPlanSeal,
   type UniversityImportChangePlan,
 } from '@manaratak/application';
 import { PrismaUniversityImportChangeExecutorGateway } from '@manaratak/infrastructure';
@@ -35,6 +36,7 @@ if (
 }
 
 if (mode === 'inspect') {
+  validateUniversityImportPlanSeal(plan as UniversityImportChangePlan);
   console.log(
     JSON.stringify(
       {
@@ -63,6 +65,10 @@ if (mode === 'inspect') {
   }
   const actorId = process.env.UNIVERSITY_IMPORT_ACTOR_ID;
   if (!actorId) throw new Error('UNIVERSITY_IMPORT_ACTOR_ID_REQUIRED');
+  if (mode === 'commit') {
+    validateUniversityImportPlanSeal(plan as UniversityImportChangePlan);
+    if (process.env.UNIVERSITY_IMPORT_APPROVAL_PLAN_HASH !== (plan as UniversityImportChangePlan).planHash) throw new Error('UNIVERSITY_IMPORT_EXACT_PLAN_APPROVAL_REQUIRED');
+  }
   requireDatabaseMutationGate('reviewed-university-import', { allowedPurposes: ['import'] });
   const prisma = new PrismaClient();
   try {

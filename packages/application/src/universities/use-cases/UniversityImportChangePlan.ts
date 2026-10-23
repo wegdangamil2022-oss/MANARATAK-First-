@@ -1,4 +1,5 @@
 import type { UniversalImportHandoff } from '@manaratak/domain';
+import { createHash } from 'node:crypto';
 import { inspectUniversitySourceStage } from './UniversitySourceQuality';
 
 export type UniversityImportStage = 'STAGE_1' | 'STAGE_2' | 'STAGE_3' | 'STAGE_4' | 'GLOBAL_RANKINGS';
@@ -15,12 +16,27 @@ export interface UniversityImportPlannedChange {
 }
 
 export interface UniversityImportChangePlan {
+  planHash?: string;
   changeSetId: string;
   stage: UniversityImportStage;
   sourceArtifactId: string;
   changes: readonly UniversityImportPlannedChange[];
   validationIssues: ReadonlyArray<{ code: string; path?: string; message: string }>;
   databaseWrites: 0;
+}
+
+export function sealUniversityImportPlan(plan: UniversityImportChangePlan): UniversityImportChangePlan {
+  const { changeSetId: _id, planHash: _hash, ...body } = plan;
+  const canonical = (value: unknown): unknown => Array.isArray(value) ? value.map(canonical)
+    : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([key, child]) => [key, canonical(child)])) : value;
+  const planHash = createHash('sha256').update(JSON.stringify(canonical(JSON.parse(JSON.stringify(body))))).digest('hex');
+  return { ...body, planHash, changeSetId: `${body.stage}:${body.sourceArtifactId}:${planHash}` };
+}
+
+export function validateUniversityImportPlanSeal(plan: UniversityImportChangePlan): UniversityImportChangePlan {
+  const sealed = sealUniversityImportPlan(plan);
+  if (!plan.planHash || sealed.planHash !== plan.planHash || sealed.changeSetId !== plan.changeSetId) throw new Error('UNIVERSITY_IMPORT_PLAN_SEAL_MISMATCH');
+  return plan;
 }
 
 export interface UniversityImportPlanIdentityLookup {
@@ -61,7 +77,7 @@ export class UniversityImportChangePlanner {
       }
       changes.push({ sequence: changes.length + 1, sourceReferenceId, entityType: 'SOURCE_RECORD', entityKey: handoff.handoffId, operation: 'UPSERT_CHILD', afterState: { stage, artifactId: sourceArtifactId, sourceRowNumber: handoff.provenance.sourceRowNumber, contentHash: handoff.provenance.contentHash } });
     }
-    return { changeSetId: `${stage}:${sourceArtifactId}`, stage, sourceArtifactId, changes, validationIssues, databaseWrites: 0 };
+    return sealUniversityImportPlan({ changeSetId: '', stage, sourceArtifactId, changes, validationIssues, databaseWrites: 0 });
   }
 
   private deriveStageChanges(stage: UniversityImportStage, sourceReferenceId: string, payload: Record<string, unknown>): Array<Omit<UniversityImportPlannedChange, 'sequence'>> {
@@ -172,6 +188,7 @@ export interface UniversityImportChangeExecutorGateway {
 export class UniversityImportChangeExecutor {
   constructor(private readonly gateway: UniversityImportChangeExecutorGateway) {}
   async commit(plan: UniversityImportChangePlan, input: { actorId: string; recoveryGateToken?: string; approval: 'APPROVE_COMMIT' | 'DRY_RUN_ONLY' }) {
+    validateUniversityImportPlanSeal(plan);
     if (plan.validationIssues.length) throw new Error('UNIVERSITY_IMPORT_PLAN_HAS_BLOCKING_ISSUES');
     if (input.approval !== 'APPROVE_COMMIT') throw new Error('EXPLICIT_COMMIT_APPROVAL_REQUIRED');
     if (!input.recoveryGateToken) throw new Error('DATABASE_RECOVERY_GATE_REQUIRED');

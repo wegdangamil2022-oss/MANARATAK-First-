@@ -11,6 +11,7 @@ import type {
   UniversityImportPlannedChange,
 } from '@manaratak/application';
 import { randomUUID } from 'node:crypto';
+import { validateUniversityImportPlanSeal } from '@manaratak/application';
 
 type Transaction = Prisma.TransactionClient;
 type JsonRecord = Record<string, unknown>;
@@ -22,6 +23,8 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     plan: UniversityImportChangePlan,
     actorId: string,
   ): Promise<{ changeSetId: string; appliedChanges: number }> {
+    validateUniversityImportPlanSeal(plan);
+    if (plan.validationIssues.length || plan.databaseWrites !== 0 || !plan.changes.length) throw new Error('UNIVERSITY_IMPORT_PLAN_NOT_WRITABLE');
     return this.prisma.$transaction(async (transaction) => {
       await this.authorizeOperator(transaction, actorId);
       await transaction.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${plan.changeSetId}, 0))`;

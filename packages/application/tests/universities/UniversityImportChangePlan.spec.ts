@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { UniversityImportChangeExecutor, UniversityImportChangePlanner } from '../../src/universities/use-cases/UniversityImportChangePlan';
+import { UniversityImportChangeExecutor, UniversityImportChangePlanner, sealUniversityImportPlan, validateUniversityImportPlanSeal } from '../../src/universities/use-cases/UniversityImportChangePlan';
 
 const handoff = (dryRun = true, normalizedPayload: Record<string, unknown> = { sourceReferenceId: 'INS-DZA-0001', faculties: ['Medicine'] }) => ({
   handoffId: 'artifact:2', ownerDomain: 'PHASE_11_UNIVERSITY',
@@ -11,6 +11,18 @@ const handoff = (dryRun = true, normalizedPayload: Record<string, unknown> = { s
 } as any);
 
 describe('UniversityImportChangePlan', () => {
+  it('binds a bounded selection and every projected field to its identity', async () => {
+    const planner = new UniversityImportChangePlanner();
+    const first = await planner.plan('STAGE_1', [handoff()]);
+    const second = await planner.plan('STAGE_1', [handoff(true, { sourceReferenceId: 'INS-DZA-0002' })]);
+    expect(first.changeSetId).not.toBe(second.changeSetId);
+    expect(validateUniversityImportPlanSeal(first)).toEqual(first);
+    const changed = structuredClone(first);
+    changed.changes[0].afterState = { renamed: 'tampered' };
+    expect(() => validateUniversityImportPlanSeal(changed)).toThrow('PLAN_SEAL');
+    expect(sealUniversityImportPlan(changed).changeSetId).not.toBe(first.changeSetId);
+    expect(() => validateUniversityImportPlanSeal({ ...first, planHash: undefined })).toThrow('PLAN_SEAL');
+  });
   it('creates a zero-write plan and requires a database identity check for later stages', async () => {
     const plan = await new UniversityImportChangePlanner().plan('STAGE_3', [handoff()]);
     expect(plan.databaseWrites).toBe(0);
