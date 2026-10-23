@@ -5,7 +5,8 @@ import type { ReviewSource } from './ReviewSources';
 export function reviewReadScope(sources: ReviewSource[], filters: ReviewFilters): ReviewSource[] {
   const reason = filters.reason !== 'all' ? filters.reason
     : filters.view === 'ready' ? 'ready_to_publish'
-      : filters.view === 'translation' ? 'needs_translation' : null;
+      : filters.view === 'translation' ? 'needs_translation'
+        : filters.view === 'source' ? 'source_verification' : null;
   if (filters.domain !== 'all' || reason) {
     return sources.filter(source => (filters.domain === 'all' || source.domain === filters.domain) && (!reason || source.reason === reason));
   }

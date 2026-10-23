@@ -22,6 +22,14 @@ beforeEach(()=>{
 });
 afterEach(async()=>{if(tree)await act(async()=>tree.unmount());vi.unstubAllGlobals();});
 describe('Review queue session loss clears old evidence',()=>{
+ it('reads source-verification evidence when its quick view is selected',async()=>{
+ await mount();state.request.mockClear();
+ await act(async()=>button('Source verification').props.onClick());
+ expect(state.request).toHaveBeenCalledTimes(2);
+ expect(state.request.mock.calls.every(([path])=>path.includes('verificationStatus='))).toBe(true);
+ expect(state.request.mock.calls.some(([path])=>path.includes('verificationStatus=PENDING'))).toBe(true);
+ expect(state.request.mock.calls.some(([path])=>path.includes('verificationStatus=FAILED'))).toBe(true);
+ });
  it('shows ten records per page and resets pagination after a local search without another API read',async()=>{
  state.request.mockImplementation(async(path:string)=>{const query=new URL(path,'https://local').searchParams;return{data:Array.from({length:23},(_,index)=>({id:`row-${String(index).padStart(2,'0')}`,title:`Record ${index}`,status:'READY_TO_REVIEW'})),total:23,page:Number(query.get('page')),pageSize:Number(query.get('pageSize'))};});
  await mount();state.request.mockClear();

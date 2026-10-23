@@ -139,7 +139,7 @@ export function AdminReviewQueuePage() {
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
   const lastAttempt = useRef(0);
-  const scopeKey = `${filters.domain}|${filters.reason}|${filters.view === 'ready' || filters.view === 'translation' ? filters.view : 'all'}`;
+  const scopeKey = `${filters.domain}|${filters.reason}|${['ready', 'translation', 'source'].includes(filters.view) ? filters.view : 'all'}`;
   const filtersRef = useRef(filters);
   const activeReadKeys = useRef(new Set<string>());
   filtersRef.current = filters;
