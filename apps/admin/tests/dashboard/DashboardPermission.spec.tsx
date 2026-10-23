@@ -4,7 +4,7 @@ import {MemoryRouter} from 'react-router-dom';
 import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
 const state=vi.hoisted(()=>({request:vi.fn(),permissions:['admin:scholarships:manage']}));
 vi.mock('../../src/api/client',()=>({adminApiClient:{request:state.request}}));
-vi.mock('../../src/i18n/I18nProvider',()=>({useTranslation:()=>({language:'en',dir:'ltr'})}));
+vi.mock('../../src/i18n/I18nProvider',()=>({useTranslation:()=>({language:'en',dir:'ltr',t:(key:string)=>key})}));
 vi.mock('../../src/security/AdminAuthorizationContext',()=>({useAdminAuthorization:()=>({permissions:state.permissions,hasPermission:(p:string)=>state.permissions.includes(p)})}));
 import {AdminDashboardPage} from '../../src/pages/AdminDashboardPage';
 let tree:ReturnType<typeof create>;

@@ -65,7 +65,7 @@ export function AccountSecurityPage() {
   };
   return (
     <section dir={dir} className="mx-auto max-w-2xl space-y-5 rounded-2xl border bg-white p-6">
-      <h1 className="text-xl font-bold">{t('mfa_title')}</h1>
+      <header className="admin-page-hero"><h1 className="">{t('mfa_title')}</h1></header>
       <p>{t('mfa_help')}</p>
       {state ? (
         <p>{state.enabled ? t('mfa_enabled') : t('mfa_disabled')}</p>

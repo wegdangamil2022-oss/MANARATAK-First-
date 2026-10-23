@@ -264,8 +264,8 @@ function AdminLayout() {
         {adminAccess === 'authorized' ? (
           <AdminAuthorizationProvider permissions={adminPermissions}>
             <div className="flex flex-1 flex-col lg:flex-row">
-              <AdminNavigation /><a className="block p-3 text-sm underline" href="/admin/security">{t('mfa_title')}</a>
-              <main className="min-w-0 flex-1 p-4 sm:p-6">
+            <AdminNavigation />
+            <main className="admin-workspace min-w-0 flex-1 p-4 sm:p-6">
                 <AdminPermissionNotice />
                 <MfaRequirementBanner/>
                 <Routes>

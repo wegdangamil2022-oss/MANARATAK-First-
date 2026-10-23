@@ -225,16 +225,6 @@ export function ScholarshipListPage() {
 
   return (
     <div dir={dir} className="mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
-      <OwnerDraftCreateForm owner="scholarships"/>
-      <ScholarshipCanonicalFilters
-        value={canonical}
-        onChange={(value) => {
-          setCanonical(value);
-          setPage(1);
-        }}
-        ar={isArabic}
-      />
-      {/* Hero Header Banner with Manaratak Gradient */}
       <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -top-20 end-0 h-56 w-56 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none blur-2xl" />
         <div className="absolute -bottom-20 start-0 h-56 w-56 rounded-full bg-cyan-300 opacity-15 pointer-events-none blur-2xl" />
@@ -407,6 +397,16 @@ export function ScholarshipListPage() {
           </div>
         </button>
       </section>
+<details className="admin-section-tools"><summary>{tr('الإنشاء والتصفية المتقدمة', 'Create and advanced filters')}</summary><div className="space-y-4"><OwnerDraftCreateForm owner="scholarships"/>
+      <ScholarshipCanonicalFilters
+        value={canonical}
+        onChange={(value) => {
+          setCanonical(value);
+          setPage(1);
+        }}
+        ar={isArabic}
+      /></div></details>
+
 
       {/* Multi-Dimensional Filter & Search Card */}
       <section className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm">

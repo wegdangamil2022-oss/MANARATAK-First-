@@ -172,8 +172,8 @@ export function AdminHealthReadinessPage() {
     </span>
   );
   return (
-    <div dir={dir} className="space-y-5 p-5 text-[#142B5F]">
-      <header className="rounded-2xl bg-[#142B5F] p-6 text-white">
+    <div dir={dir} className="admin-owner-workspace mx-auto max-w-7xl space-y-6 text-[#203442]">
+      <header className="admin-page-hero overflow-hidden rounded-[28px] border border-[#c9dde1] bg-gradient-to-br from-[#142B5F] to-[#0E7C86] shadow-sm">
         <h1 className="flex items-center gap-2 text-2xl font-bold">
           <Activity aria-hidden="true" />
           {t('title')}

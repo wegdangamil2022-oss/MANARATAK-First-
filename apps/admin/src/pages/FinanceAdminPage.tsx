@@ -159,8 +159,8 @@ export function FinanceAdminPage() {
   };
   const page: Page | null = listTabs.has(tab) ? data : null;
   return (
-    <div dir={dir} className="mx-auto max-w-7xl space-y-5 text-slate-800">
-      <header className="rounded-3xl bg-[#142B5F] p-6 text-white">
+    <div dir={dir} className="admin-owner-workspace mx-auto max-w-7xl space-y-6 text-[#203442]">
+      <header className="admin-page-hero relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
         <h1 className="text-2xl font-black">{t('finance_title')}</h1>
         <p className="mt-2 text-sm">{t('finance_owner_notice')}</p>
         <button

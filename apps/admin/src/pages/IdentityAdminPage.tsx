@@ -247,8 +247,8 @@ export function IdentityAdminPage() {
   };
 
   return (
-    <section dir={dir} className="space-y-5" aria-labelledby="identity-heading">
-      <header className="flex flex-wrap items-center justify-between gap-3">
+    <section dir={dir} className="admin-owner-workspace mx-auto max-w-7xl space-y-6 text-[#203442]" aria-labelledby="identity-heading">
+      <header className="admin-page-hero">
         <div>
           <h1 id="identity-heading" className="text-2xl font-bold">
             {t('admin_nav_identities')}
@@ -348,7 +348,7 @@ export function IdentityAdminPage() {
             <p>
               {t('iam_total')}: {total}
             </p>
-            <table className="w-full text-start text-sm">
+            <div className="max-w-full overflow-x-auto rounded-2xl border border-[#DDEFF2] bg-white shadow-xs"><table className="w-full text-start text-sm">
               <thead>
                 <tr>
                   {[
@@ -403,7 +403,7 @@ export function IdentityAdminPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
             {items.length === 0 && <p>{t('iam_empty')}</p>}
             <div className="mt-3 flex gap-3">
               <button

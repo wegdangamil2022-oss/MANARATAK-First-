@@ -40,48 +40,132 @@ interface NavigationGroup {
   items: NavigationItem[];
 }
 
-const groups: NavigationGroup[] = [
+export const adminNavigationGroups: NavigationGroup[] = [
   {
     labelKey: 'admin_nav_group_overview',
     items: [
-      { to: '/dashboard', labelKey: 'admin_nav_dashboard', icon: LayoutDashboard, requiredPermission: 'admin:platform:manage' },
-      { to: '/review-queue', labelKey: 'admin_nav_review', icon: ClipboardCheck, requiredPermission: 'admin:platform:manage' },
+      {
+        to: '/dashboard',
+        labelKey: 'admin_nav_dashboard',
+        icon: LayoutDashboard,
+        requiredPermission: 'admin:platform:manage',
+      },
+      {
+        to: '/review-queue',
+        labelKey: 'admin_nav_review',
+        icon: ClipboardCheck,
+        requiredPermission: 'admin:platform:manage',
+      },
     ],
   },
   {
     labelKey: 'admin_nav_group_academic',
     items: [
-      { to: '/scholarships', labelKey: 'admin_nav_scholarships', icon: Sparkles, requiredPermission: 'admin:scholarships:manage' },
-      { to: '/universities', labelKey: 'admin_nav_universities', icon: Building2, requiredPermission: 'admin:universities:manage' },
-      { to: '/majors', labelKey: 'admin_nav_majors', icon: GraduationCap, requiredPermission: 'admin:majors:manage' },
-      { to: '/international-tests', labelKey: 'admin_nav_tests', icon: FileText, requiredPermission: 'admin:international-tests:manage' },
-      { to: '/courses', labelKey: 'admin_nav_courses', icon: BookOpen, requiredPermission: 'admin:courses:manage' },
-      { to: '/study-destinations', labelKey: 'admin_nav_study_destinations', icon: MapPinned, requiredPermission: 'admin:study-destinations:read',
+      {
+        to: '/scholarships',
+        labelKey: 'admin_nav_scholarships',
+        icon: Sparkles,
+        requiredPermission: 'admin:scholarships:manage',
+      },
+      {
+        to: '/universities',
+        labelKey: 'admin_nav_universities',
+        icon: Building2,
+        requiredPermission: 'admin:universities:manage',
+      },
+      {
+        to: '/majors',
+        labelKey: 'admin_nav_majors',
+        icon: GraduationCap,
+        requiredPermission: 'admin:majors:manage',
+      },
+      {
+        to: '/international-tests',
+        labelKey: 'admin_nav_tests',
+        icon: FileText,
+        requiredPermission: 'admin:international-tests:manage',
+      },
+      {
+        to: '/courses',
+        labelKey: 'admin_nav_courses',
+        icon: BookOpen,
+        requiredPermission: 'admin:courses:manage',
+      },
+      {
+        to: '/study-destinations',
+        labelKey: 'admin_nav_study_destinations',
+        icon: MapPinned,
+        requiredPermission: 'admin:study-destinations:read',
       },
     ],
   },
   {
     labelKey: 'admin_nav_group_localization',
     items: [
-      { to: '/translations', labelKey: 'admin_nav_translations', icon: Languages, requiredPermission: 'admin:cms:manage' },
-      { to: '/cms', labelKey: 'admin_nav_cms', icon: FileText, requiredPermission: 'admin:cms:view' },
+      {
+        to: '/translations',
+        labelKey: 'admin_nav_translations',
+        icon: Languages,
+        requiredPermission: 'admin:cms:manage',
+      },
+      {
+        to: '/cms',
+        labelKey: 'admin_nav_cms',
+        icon: FileText,
+        requiredPermission: 'admin:cms:view',
+      },
     ],
   },
   {
     labelKey: 'admin_nav_group_operations',
     items: [
-      { to: '/imports', labelKey: 'admin_nav_imports', icon: UploadCloud, requiredPermission: 'admin:imports:manage' },
-      { to: '/certificates', labelKey: 'admin_nav_certificates', icon: Award, requiredPermission: 'admin:certificates:view' },
-      { to: '/notifications', labelKey: 'admin_nav_notifications', icon: Bell, requiredPermission: 'admin:platform:manage' },
-      { to: '/health-readiness', labelKey: 'admin_nav_health', icon: HeartPulse, requiredPermission: 'admin:platform:manage' },
+      {
+        to: '/imports',
+        labelKey: 'admin_nav_imports',
+        icon: UploadCloud,
+        requiredPermission: 'admin:imports:manage',
+      },
+      {
+        to: '/certificates',
+        labelKey: 'admin_nav_certificates',
+        icon: Award,
+        requiredPermission: 'admin:certificates:view',
+      },
+      {
+        to: '/notifications',
+        labelKey: 'admin_nav_notifications',
+        icon: Bell,
+        requiredPermission: 'admin:platform:manage',
+      },
+      {
+        to: '/health-readiness',
+        labelKey: 'admin_nav_health',
+        icon: HeartPulse,
+        requiredPermission: 'admin:platform:manage',
+      },
     ],
   },
   {
     labelKey: 'admin_nav_group_platform',
     items: [
-      { to: '/services', labelKey: 'admin_nav_services', icon: Wrench, requiredPermission: 'admin:services:manage' },
-      { to: '/finance', labelKey: 'admin_nav_finance', icon: CircleDollarSign, requiredPermission: 'admin:finance:manage' },
-      { to: '/careers', labelKey: 'admin_nav_careers', icon: BriefcaseBusiness, requiredPermission: 'admin:careers:manage' },
+      {
+        to: '/services',
+        labelKey: 'admin_nav_services',
+        icon: Wrench,
+        requiredPermission: 'admin:services:manage',
+      },
+      {
+        to: '/finance',
+        labelKey: 'admin_nav_finance',
+        icon: CircleDollarSign,
+        requiredPermission: 'admin:finance:manage',
+      },
+      {
+        to: '/careers',
+        labelKey: 'admin_nav_careers',
+        icon: BriefcaseBusiness,
+        requiredPermission: 'admin:careers:manage',
+      },
       { to: '/ai', labelKey: 'admin_nav_ai', icon: Bot, requiredPermission: 'admin:ai:view' },
       {
         to: '/student-tools',
@@ -94,19 +178,55 @@ const groups: NavigationGroup[] = [
   {
     labelKey: 'admin_nav_group_governance',
     items: [
-      { to: '/academic-taxonomy', labelKey: 'admin_nav_academic_taxonomy', icon: ShieldCheck, requiredPermission: 'admin:academic-taxonomy:manage' },
+      {
+        to: '/academic-taxonomy',
+        labelKey: 'admin_nav_academic_taxonomy',
+        icon: ShieldCheck,
+        requiredPermission: 'admin:academic-taxonomy:manage',
+      },
       {
         to: '/identities',
         labelKey: 'admin_nav_identities',
         icon: Users,
         requiredPermission: 'admin:identities:manage',
       },
-      { to: '/authorization', labelKey: 'admin_nav_authorization', icon: Users, requiredPermission: 'admin:authorization:manage' },
-      { to: '/audit', labelKey: 'admin_nav_audit', icon: ScrollText, requiredPermission: 'admin:audit:manage' },
-      { to: '/assets', labelKey: 'admin_nav_assets', icon: Images, requiredPermission: 'admin:assets:manage' },
-      { to: '/students', labelKey: 'admin_nav_students', icon: Users, requiredPermission: 'admin:students:support' },
-      { to: '/settings/reference-data', labelKey: 'admin_nav_reference_data', icon: Database, requiredPermission: 'admin:reference-data:manage' },
-      { to: '/settings', labelKey: 'admin_nav_settings', icon: Settings, requiredPermission: 'admin:settings:manage' },
+      {
+        to: '/authorization',
+        labelKey: 'admin_nav_authorization',
+        icon: Users,
+        requiredPermission: 'admin:authorization:manage',
+      },
+      {
+        to: '/audit',
+        labelKey: 'admin_nav_audit',
+        icon: ScrollText,
+        requiredPermission: 'admin:audit:manage',
+      },
+      {
+        to: '/assets',
+        labelKey: 'admin_nav_assets',
+        icon: Images,
+        requiredPermission: 'admin:assets:manage',
+      },
+      {
+        to: '/students',
+        labelKey: 'admin_nav_students',
+        icon: Users,
+        requiredPermission: 'admin:students:support',
+      },
+      {
+        to: '/settings/reference-data',
+        labelKey: 'admin_nav_reference_data',
+        icon: Database,
+        requiredPermission: 'admin:reference-data:manage',
+      },
+      {
+        to: '/settings',
+        labelKey: 'admin_nav_settings',
+        icon: Settings,
+        requiredPermission: 'admin:settings:manage',
+      },
+      { to: '/security', labelKey: 'mfa_title', icon: ShieldCheck },
     ],
   },
 ];
@@ -124,8 +244,10 @@ export function AdminNavigation() {
   const { t } = useTranslation();
   const { hasPermission } = useAdminAuthorization();
 
-  const allItems = groups.flatMap((group) =>
-    group.items.filter((item) => hasPermission(item.requiredPermission))
+  const allItems = adminNavigationGroups.flatMap((group) =>
+    group.items.filter(
+      (item) => !item.requiredPermission || hasPermission(item.requiredPermission),
+    ),
   );
 
   return (
@@ -153,7 +275,9 @@ export function AdminNavigation() {
               >
                 {({ isActive }) => (
                   <>
-                    <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[#21A7B4]' : 'text-[#0E7C86]'}`} />
+                    <Icon
+                      className={`h-4 w-4 shrink-0 ${isActive ? 'text-[#21A7B4]' : 'text-[#0E7C86]'}`}
+                    />
                     <span>{t(item.labelKey)}</span>
                   </>
                 )}
@@ -177,21 +301,27 @@ export function AdminNavigation() {
           </div>
 
           <nav aria-label={t('admin_navigation')} className="space-y-5">
-            {groups.map((group) => (
+            {adminNavigationGroups.map((group) => (
               <section key={group.labelKey}>
                 <h2 className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.16em] text-[#203442]/38">
                   {t(group.labelKey)}
                 </h2>
                 <div className="space-y-1">
                   {group.items
-                    .filter((item) => hasPermission(item.requiredPermission))
+                    .filter(
+                      (item) => !item.requiredPermission || hasPermission(item.requiredPermission),
+                    )
                     .map((item) => {
                       const Icon = item.icon;
                       return (
                         <NavLink
                           key={item.to}
                           to={item.to}
-                          end={item.to === '/dashboard' || item.to === '/imports' || item.to === '/settings'}
+                          end={
+                            item.to === '/dashboard' ||
+                            item.to === '/imports' ||
+                            item.to === '/settings'
+                          }
                           className={({ isActive }) => itemClass(isActive)}
                         >
                           <Icon className="h-4 w-4 shrink-0 text-[#0E7C86] transition group-hover:text-[#21A7B4]" />

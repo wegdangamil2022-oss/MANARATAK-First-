@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from '../i18n/I18nProvider';
 import { type CanonicalPickerOption, type CanonicalPickerPage, canonicalOptionIsSelectable } from '../api/canonicalPickers';
 
 type Loader = (query?: string, page?: number) => Promise<CanonicalPickerOption[]>;
@@ -16,6 +17,8 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
   /** Read filters may intentionally target historical inactive records. */
   allowInactive?: boolean;
 }) {
+  const { language } = useTranslation();
+  const ar = language === 'ar';
   const loaderRef = useRef(load);
   loaderRef.current = load;
   const [options, setOptions] = useState<CanonicalPickerOption[]>([]);
@@ -51,11 +54,11 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
   const selectedBlocked = !allowInactive && selected && !canonicalOptionIsSelectable(selected);
   const missing = Boolean(value) && !selected;
 
-  return <div className="block space-y-1 text-xs font-medium text-slate-700">
+  return <div className="min-w-0 space-y-2 text-xs font-medium text-[#203442]">
     <span>{label}</span>
-    <input type="search" maxLength={200} aria-label={`Search ${label}`} value={search}
+    <input type="search" maxLength={200} aria-label={`${ar ? 'بحث' : 'Search'} ${label}`} value={search}
       disabled={disabled} onChange={event => { setSearch(event.target.value); cursors.current = [undefined]; setNextCursor(undefined); setPage(1); }}
-      placeholder="Search owner records (up to 50 results)"
+      placeholder={ar ? 'ابحث عن سجل (حتى 50 نتيجة)' : 'Search records (up to 50 results)'}
       className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
     <select aria-label={label}
       value={value ?? ''}
@@ -68,17 +71,17 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
       }}
       className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm disabled:bg-slate-50"
     >
-      <option value="">{optional ? '— None —' : state === 'loading' ? 'Loading…' : '— Select canonical record —'}</option>
-      {missing && <option value={value ?? ''} disabled>Current selection (outside bounded results): {value}</option>}
+      <option value="">{state === 'loading' ? (ar ? 'جارٍ التحميل…' : 'Loading…') : optional ? (ar ? '— بدون تحديد —' : '— None —') : (ar ? '— اختر السجل —' : '— Select canonical record —')}</option>
+      {missing && <option value={value ?? ''} disabled>{ar ? 'التحديد الحالي (خارج النتائج المعروضة)' : 'Current selection (outside bounded results)'}: {value}</option>}
       {options.map((item) => <option key={item.id} value={item.id} disabled={!allowInactive && !canonicalOptionIsSelectable(item)}>
         {item.label}{item.code ? ` · ${item.code}` : ''} · {item.lifecycle}
       </option>)}
     </select>
-    {value ? <span className="block break-all text-slate-500">ID: {value}</span> : null}
+    {value ? <span className="block break-all text-slate-500">{ar ? 'المعرّف' : 'ID'}: {value}</span> : null}
     {state === 'error' ? <span className="text-red-600">{error}</span> : null}
-    {paged && <span className="flex gap-3"><button type="button" disabled={disabled || state !== 'ready' || page <= 1} onClick={() => setPage(value => value - 1)}>السابق</button><span>{page}</span><button type="button" disabled={disabled || state !== 'ready' || options.length === 0 || (nextCursor !== undefined && !nextCursor) || page >= 1000} onClick={() => setPage(value => value + 1)}>التالي</button></span>}
-    {missing ? <span className="text-amber-700">Current ID is not in this bounded page. Search to verify; no relationship has been changed.</span> : null}
-    {selectedBlocked ? <span className="text-amber-700">Existing relation is {selected.lifecycle}; choose an ACTIVE/PUBLISHED replacement before saving.</span> : null}
+    {paged && <span className="flex flex-wrap items-center gap-3"><button type="button" disabled={disabled || state !== 'ready' || page <= 1} onClick={() => setPage(value => value - 1)}>{ar ? 'السابق' : 'Previous'}</button><span>{page}</span><button type="button" disabled={disabled || state !== 'ready' || options.length === 0 || (nextCursor !== undefined && !nextCursor) || page >= 1000} onClick={() => setPage(value => value + 1)}>{ar ? 'التالي' : 'Next'}</button></span>}
+    {missing ? <span className="block text-amber-700">{ar ? 'المعرّف الحالي خارج هذه الصفحة. ابحث للتحقق؛ لم تتغير العلاقة.' : 'Current ID is not in this bounded page. Search to verify; no relationship has been changed.'}</span> : null}
+    {selectedBlocked ? <span className="block text-amber-700">{ar ? `حالة العلاقة الحالية ${selected.lifecycle}؛ اختر بديلًا نشطًا أو منشورًا قبل الحفظ.` : `Existing relation is ${selected.lifecycle}; choose an ACTIVE/PUBLISHED replacement before saving.`}</span> : null}
   </div>;
 }
 
@@ -89,6 +92,8 @@ export function CanonicalMultiPicker({ label, values, onChange, load, reloadKey 
   load: Loader;
   reloadKey?: string;
 }) {
+  const { language } = useTranslation();
+  const ar = language === 'ar';
   const loaderRef = useRef(load);
   loaderRef.current = load;
   const [options, setOptions] = useState<CanonicalPickerOption[]>([]);
@@ -104,10 +109,10 @@ export function CanonicalMultiPicker({ label, values, onChange, load, reloadKey 
   }, [reloadKey, search]);
   return <fieldset className="space-y-2 rounded-lg border border-slate-200 p-3">
     <legend className="px-1 text-xs font-semibold text-slate-700">{label}</legend>
-    <input type="search" maxLength={200} aria-label={`Search ${label}`} value={search}
-      onChange={event => setSearch(event.target.value)} placeholder="Search owner records (up to 50)"
+    <input type="search" maxLength={200} aria-label={`${ar ? 'بحث' : 'Search'} ${label}`} value={search}
+      onChange={event => setSearch(event.target.value)} placeholder={ar ? 'ابحث عن سجل (حتى 50 نتيجة)' : 'Search records (up to 50)'}
       className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-    <span className="text-xs text-slate-500">Selected IDs: {values.length}; search does not remove existing selections.</span>
+    <span className="text-xs text-slate-500">{ar ? `المعرّفات المحددة: ${values.length}؛ البحث لا يحذف التحديدات الحالية.` : `Selected IDs: ${values.length}; search does not remove existing selections.`}</span>
     <div className="max-h-44 space-y-1 overflow-auto">
       {options.map((item) => {
         const blocked = !canonicalOptionIsSelectable(item);

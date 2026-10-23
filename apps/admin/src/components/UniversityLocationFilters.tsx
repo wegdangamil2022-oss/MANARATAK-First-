@@ -48,7 +48,7 @@ export function UniversityLocationFilters({
     }
   };
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="grid items-end gap-4 sm:grid-cols-2 xl:grid-cols-3">
       <label>
         {ar ? 'بحث الجغرافيا' : 'Geography search'}
         <input maxLength={200} value={search} onChange={(event) => setSearch(event.target.value)} />

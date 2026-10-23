@@ -374,8 +374,8 @@ export function AdminReviewQueuePage() {
     (state) => state.nextPage !== null && state.availability !== 'access_denied',
   );
   return (
-    <div dir={dir} className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
+    <div dir={dir} className="admin-owner-workspace mx-auto max-w-7xl space-y-6 text-[#203442]">
+      <header className="admin-page-hero relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] px-5 py-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:px-7 sm:py-7">
         <h1 className="text-2xl font-bold">{tr('قائمة المراجعة', 'Enterprise Review Queue')}</h1>
         <button className="rounded border px-4 py-2" onClick={() => void load()}>
           {tr('تحديث وإعادة التحقق', 'Refresh and recheck')}

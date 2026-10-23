@@ -2,17 +2,19 @@ import { Link } from 'react-router-dom';
 import { dashboardMetricHref } from './DashboardSources';
 import { effectiveDashboardState, type DashboardReading } from './DashboardContract';
 import { dashboardLabel, dashboardTime } from './dashboardText';
-const card = 'rounded-xl border border-slate-200 bg-white p-4 shadow-sm';
+const card = 'min-w-0 break-words rounded-2xl border border-[#DDEFF2] bg-white p-4 shadow-xs';
 export function DashboardMetricCard({
   reading,
   metric,
   language,
   now,
+  compact = false,
 }: {
   reading: DashboardReading;
   metric: string;
   language: string;
   now: number;
+  compact?: boolean;
 }) {
   const label = (key: string) => dashboardLabel(key, language);
   const state = effectiveDashboardState(reading, now);
@@ -33,19 +35,33 @@ export function DashboardMetricCard({
       className={card}
       aria-label={`${label(reading.source.domain)}: ${label(metric)}; ${label(state)}`}
     >
-      <h3 className="font-semibold">{label(metric)}</h3>
-      <output className="mt-2 block text-2xl font-bold" aria-label={`${label(metric)}: ${text}`}>
+      <h3 className="text-sm font-bold text-[#0E7C86]">
+        {label(compact ? reading.source.domain : metric)}
+      </h3>
+      <output
+        className={`mt-2 block font-black ${compact && value == null ? 'text-lg' : 'text-2xl'}`}
+        aria-label={`${label(metric)}: ${text}`}
+      >
         {text}
       </output>
-      <p role="status" className="mt-1 text-sm">
-        {label(state)}
+      <p role="status" className="mt-1 text-xs" title={label(state)}>
+        {compact && state === 'available'
+          ? language === 'ar'
+            ? 'متاح'
+            : 'Available'
+          : label(state)}
       </p>
-      <p className="mt-2 text-sm text-slate-600">{scope}</p>
+      {!compact && <p className="mt-2 text-sm text-slate-600">{scope}</p>}
       <p className="text-xs">
         {label('checked')}: {dashboardTime(reading.capturedAt, language)}
       </p>
       <details className="mt-2 text-xs">
         <summary>{label('scope')}</summary>
+        {compact && (
+          <p>
+            {label(metric)} · {scope}
+          </p>
+        )}
         <p>
           <bdi>{reading.source.endpoint}</bdi>
         </p>
@@ -63,13 +79,13 @@ export function DashboardMetricCard({
       ) : null}
       {state !== 'forbidden' ? (
         <Link
-          className="mt-3 inline-block rounded underline focus-visible:outline focus-visible:outline-2"
+          className="mt-3 inline-flex min-h-10 items-center rounded-xl bg-[#DDEFF2]/50 px-3 py-2 text-xs font-bold text-[#0E7C86] focus-visible:outline focus-visible:outline-2"
           to={href}
         >
           {href.startsWith('/review-queue?') ? label('queue') : label('owner')}
         </Link>
       ) : null}
-      {state !== 'forbidden' && !href.startsWith('/review-queue?') ? (
+      {!compact && state !== 'forbidden' && !href.startsWith('/review-queue?') ? (
         <p className="text-xs">{label('list')}</p>
       ) : null}
     </article>

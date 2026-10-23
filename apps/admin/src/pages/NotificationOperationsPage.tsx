@@ -278,8 +278,8 @@ export function NotificationOperationsPage() {
     ),
   ];
   return (
-    <section dir={dir} className="space-y-5 p-6">
-      <h1 className="text-2xl font-bold">{c('إدارة الإشعارات', 'Notification operations')}</h1>
+    <section dir={dir} className="admin-owner-workspace mx-auto max-w-7xl space-y-6 text-[#203442]">
+      <header className="admin-page-hero rounded-3xl bg-gradient-to-l from-[#142B5F] to-[#0E7C86] p-6 text-white"><h1 className="">{c('إدارة الإشعارات', 'Notification operations')}</h1></header>
       <p>
         {c(
           'سجل API فعلي. تحقق قاعدة البيانات والمزود والعامل مؤجل إلى ما بعد القسم 28.',

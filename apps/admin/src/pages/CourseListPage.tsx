@@ -78,7 +78,8 @@ interface PaginatedResponse {
 }
 
 export function CourseListPage() {
-  const { t } = useTranslation();
+  const { t, language: interfaceLanguage } = useTranslation();
+  const tr = (ar: string, en: string) => interfaceLanguage === 'ar' ? ar : en;
   const navigate = useNavigate();
   const [data, setData] = useState<PaginatedResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -234,7 +235,6 @@ export function CourseListPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <CourseLearningPathsWorkspace/>
       <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -top-20 end-0 h-52 w-52 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none" />
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -444,6 +444,8 @@ export function CourseListPage() {
           إعادة ضبط الفلاتر
         </button>
       </section>
+<details className="admin-section-tools"><summary>{tr('إدارة مسارات التعلم', 'Learning path management')}</summary><div className="space-y-4"><CourseLearningPathsWorkspace/></div></details>
+
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
           {error}

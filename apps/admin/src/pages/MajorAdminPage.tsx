@@ -221,8 +221,6 @@ export function MajorAdminPage() {
 
   return (
     <div dir="rtl" className="mx-auto max-w-7xl space-y-6 font-['Cairo']">
-      <OwnerDraftCreateForm owner="majors"/>
-      {/* Header Banner */}
       <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -top-20 end-0 h-52 w-52 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none blur-2xl" />
         <div className="absolute -bottom-20 start-0 h-52 w-52 rounded-full bg-cyan-300 opacity-15 pointer-events-none blur-2xl" />
@@ -279,6 +277,8 @@ export function MajorAdminPage() {
           </div>
         </div>
       </section>
+<OwnerDraftCreateForm owner="majors"/>
+
 
       {view === 'new' ? (
         <><MajorOwnerImportWorkspace/><NewMajorCandidatesPanel onTotalChange={setNewCandidatesTotal} /></>

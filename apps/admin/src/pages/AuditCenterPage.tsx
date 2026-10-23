@@ -109,6 +109,7 @@ const inputClass =
   'mt-2 w-full rounded-xl border border-slate-200 bg-white p-3 text-xs outline-none focus:border-[#21A7B4]';
 export function AuditCenterPage() {
   const { t, dir, language } = useTranslation();
+  const tr = (ar: string, en: string) => language === 'ar' ? ar : en;
   const { hasPermission } = useAdminAuthorization();
   const [timeZone, setTimeZone] = useState<AuditTimeZone>(() => {
     try {
@@ -514,7 +515,6 @@ export function AuditCenterPage() {
   };
   return (
     <div dir={dir} className="mx-auto max-w-7xl space-y-6">
-      <AuditWorkspacePanel />
       <section className="rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-lg sm:p-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -653,6 +653,8 @@ export function AuditCenterPage() {
           </details>
         )}
       </section>
+<details className="admin-section-tools"><summary>{tr('مساحة التدقيق المتقدمة', 'Advanced audit workspace')}</summary><div className="space-y-4"><AuditWorkspacePanel /></div></details>
+
       <form onSubmit={submit} className="rounded-3xl border border-slate-200 bg-white p-5">
         <div className="mb-4 flex flex-wrap gap-2">
           {(['critical', 'authorization', 'finance', 'emergency'] as const).map((type) => (

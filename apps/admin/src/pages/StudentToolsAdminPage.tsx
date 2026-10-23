@@ -91,8 +91,8 @@ export function StudentToolsAdminPage() {
   const { toolKey } = useParams();
   const { t, dir } = useTranslation();
   return (
-    <main dir={dir} className="mx-auto max-w-6xl space-y-5 p-5 text-[#142B5F]">
-      <h1 className="text-2xl font-bold">{t('tools19_title')}</h1>
+    <main dir={dir} className="admin-owner-workspace mx-auto max-w-7xl space-y-6 text-[#203442]">
+      <header className="admin-page-hero relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8"><h1 className="">{t('tools19_title')}</h1></header>
       {toolKey ? <ToolDetail key={toolKey} toolKey={toolKey} /> : <ToolCatalog />}
     </main>
   );

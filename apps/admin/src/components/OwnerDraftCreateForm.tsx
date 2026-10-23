@@ -24,11 +24,11 @@ export function OwnerDraftCreateForm({owner}:{owner:Owner}) {
      setCreated(result.id);
    }catch(error){setError(error instanceof Error?error.message:'تعذر إنشاء المسودة');}finally{setBusy(false);}
  };
- return <details className="rounded-2xl border bg-white p-4"><summary>إنشاء مسودة {names[owner]}</summary>
+ return <details className="admin-section-tools"><summary>إنشاء مسودة {names[owner]}</summary>
  <p>سجل خاص للإكمال والمراجعة. لا ينشر الإنشاء أي محتوى للطلاب.</p>
  {error && <p role="alert">{error}</p>}
  {created && <p role="status">حُفظت المسودة. <Link to={`/${owner}/${encodeURIComponent(created)}`}>فتح المسودة</Link></p>}
- <form className="grid gap-3" onSubmit={event=>{event.preventDefault();void create();}}>
+ <form className="grid items-start gap-4 sm:grid-cols-2" onSubmit={event=>{event.preventDefault();void create();}}>
  <label>الاسم<input required maxLength={300} value={name} onChange={event=>setName(event.target.value)}/></label>
  <label>المصدر الرسمي HTTPS<input required type="url" value={source} onChange={event=>setSource(event.target.value)}/></label>
  <label>سبب الإنشاء<textarea required minLength={3} maxLength={2000} value={reason} onChange={event=>setReason(event.target.value)}/></label>

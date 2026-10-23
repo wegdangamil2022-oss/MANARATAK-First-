@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({ request: vi.fn(), reference: vi.fn() }));
 vi.mock('../../src/api/client', () => ({ adminApiClient: { request: mocks.request } }));
 vi.mock('../../src/api/referenceData', () => ({ getReferenceDataPage: mocks.reference }));
+vi.mock('../../src/i18n/I18nProvider', () => ({ useTranslation: () => ({ language: 'ar', dir: 'rtl' }) }));
 import { CanonicalPicker } from '../../src/components/CanonicalPicker';
 import { canonicalPickerApi } from '../../src/api/canonicalPickers';
 import { ScholarshipCanonicalFilters, emptyScholarshipCanonicalFilters, type ScholarshipCanonicalFilterState } from '../../src/components/ScholarshipCanonicalFilters';
