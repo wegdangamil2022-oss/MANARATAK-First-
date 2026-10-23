@@ -1,0 +1,228 @@
+{
+    "clientDate":  "2026-10-24",
+    "codeSourceSha":  "554d08cfa74c88a1df23db0a3ccfcd36c4290cab",
+    "compiledArtifactManifest":  "bc0fb979b31b09469ea20c7fde7b1944def3ee5748cb56b99394f32c89a03df6",
+    "frontendChecks":  {
+                           "focusedTestCases":  15,
+                           "typecheck":  true,
+                           "lintErrors":  0,
+                           "preExistingLintWarnings":  7,
+                           "productionBuild":  true,
+                           "browser":  {
+                                           "pass":  true,
+                                           "syntheticResponses":  true,
+                                           "checks":  [
+                                                          "expanded dashboard groups adapt to content width; headings stay horizontal; structured source details and query disclosure work",
+                                                          "six unique icon filters with consistent labels and Cairo; ten-row client pages without API refetch; load more above results; real source page two; local search/reset and preview; analysis panels at desktop/compact/mobile widths",
+                                                          "source verification quick filter requests its owner evidence in the compiled bundle"
+                                                      ],
+                                           "layouts":  [
+                                                           {
+                                                               "page":  "dashboard-breakdown",
+                                                               "width":  1360,
+                                                               "columns":  4,
+                                                               "cards":  [
+                                                                             {
+                                                                                 "width":  236,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             },
+                                                                             {
+                                                                                 "width":  236,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             },
+                                                                             {
+                                                                                 "width":  236,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             },
+                                                                             {
+                                                                                 "width":  236,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             }
+                                                                         ],
+                                                               "overflow":  false
+                                                           },
+                                                           {
+                                                               "page":  "dashboard-breakdown",
+                                                               "width":  1000,
+                                                               "columns":  3,
+                                                               "cards":  [
+                                                                             {
+                                                                                 "width":  288,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             },
+                                                                             {
+                                                                                 "width":  288,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             },
+                                                                             {
+                                                                                 "width":  288,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             },
+                                                                             {
+                                                                                 "width":  288,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             }
+                                                                         ],
+                                                               "overflow":  false
+                                                           },
+                                                           {
+                                                               "page":  "dashboard-breakdown",
+                                                               "width":  820,
+                                                               "columns":  2,
+                                                               "cards":  [
+                                                                             {
+                                                                                 "width":  348,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             },
+                                                                             {
+                                                                                 "width":  348,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             },
+                                                                             {
+                                                                                 "width":  348,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             },
+                                                                             {
+                                                                                 "width":  348,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             }
+                                                                         ],
+                                                               "overflow":  false
+                                                           },
+                                                           {
+                                                               "page":  "dashboard-breakdown",
+                                                               "width":  390,
+                                                               "columns":  1,
+                                                               "cards":  [
+                                                                             {
+                                                                                 "width":  294,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             },
+                                                                             {
+                                                                                 "width":  294,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             },
+                                                                             {
+                                                                                 "width":  294,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             },
+                                                                             {
+                                                                                 "width":  294,
+                                                                                 "height":  157,
+                                                                                 "headingLines":  1,
+                                                                                 "overflow":  false
+                                                                             }
+                                                                         ],
+                                                               "overflow":  false
+                                                           },
+                                                           {
+                                                               "page":  "review",
+                                                               "width":  1360,
+                                                               "overflow":  false,
+                                                               "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                               "label":  "14px",
+                                                               "value":  "13px",
+                                                               "status":  "13px",
+                                                               "rows":  10
+                                                           },
+                                                           {
+                                                               "page":  "review",
+                                                               "width":  1000,
+                                                               "overflow":  false,
+                                                               "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                               "label":  "14px",
+                                                               "value":  "13px",
+                                                               "status":  "13px",
+                                                               "rows":  10
+                                                           },
+                                                           {
+                                                               "page":  "review",
+                                                               "width":  820,
+                                                               "overflow":  false,
+                                                               "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                               "label":  "14px",
+                                                               "value":  "13px",
+                                                               "status":  "13px",
+                                                               "rows":  10
+                                                           },
+                                                           {
+                                                               "page":  "review",
+                                                               "width":  390,
+                                                               "overflow":  false,
+                                                               "font":  "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+                                                               "label":  "14px",
+                                                               "value":  "13px",
+                                                               "status":  "13px",
+                                                               "rows":  10
+                                                           }
+                                                       ],
+                                           "contentWrites":  0,
+                                           "pageErrors":  [
+
+                                                          ]
+                                       }
+                       },
+    "databaseProbe":  {
+                          "at":  "2026-10-23T21:29:42.694Z",
+                          "pass":  true,
+                          "role":  "manaratak_probe",
+                          "oid":  "16395",
+                          "transactionReadOnly":  "on",
+                          "elevatedRole":  false,
+                          "databaseWrites":  0
+                      },
+    "liveVerification":  {
+                             "status":  "INCOMPLETE",
+                             "authenticatedChecksCompleted":  false,
+                             "environmentIssue":  "Local authentication and owner reads became slow; browser check could not complete",
+                             "previousLoginMs":  [
+                                                     32590,
+                                                     48424
+                                                 ],
+                             "sessionReadMs":  46257,
+                             "loginTimeoutMs":  90000,
+                             "runtimeRecycledOnce":  true,
+                             "schemaOrPermissionChanges":  false,
+                             "postRestart":  {
+                                                 "pass":  false,
+                                                 "at":  "2026-10-23T21:30:43.784Z",
+                                                 "loginStatus":  200,
+                                                 "loginMs":  66776,
+                                                 "sessionReadMs":  49088,
+                                                 "permissionReferencesReturned":  1,
+                                                 "completedOwnerReads":  5,
+                                                 "failedBoundary":  "Some owner read requests exceeded their deadline; eight resolved primary metrics were not observed",
+                                                 "contentMutations":  0
+                                             }
+                         }
+}
