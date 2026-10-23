@@ -9,6 +9,7 @@ export async function registerRecurringJobs(container: AwilixContainer, config: 
   const backgroundWorkerEnabled = config.getOptional<boolean>('BACKGROUND_WORKER_ENABLED') === true;
   if (backgroundWorkerEnabled) {
     const manager = container.resolve<any>('manageBackgroundJobsUseCase');
+    await manager.ensureRecurringJob({ stableReference: 'system.analytics.retention', jobType: 'analytics.retention.sweep', parameters: {}, cronExpression: '*/15 * * * *', priority: 100, timeoutSeconds: 120, maxAttempts: 5, backoffType: 'exponential', ownerReference: 'analytics:retention' });
     if (config.getOptional<boolean>('ASSET_LIFECYCLE_RECOVERY_ENABLED') === true) {
       await manager.ensureRecurringJob({ stableReference:'system.assets.lifecycle-recovery',jobType:ASSET_LIFECYCLE_RECOVERY_JOB_TYPE,parameters:{limit:25,minimumAgeSeconds:300},cronExpression:'*/5 * * * *',priority:90,timeoutSeconds:300,maxAttempts:5,backoffType:'exponential',ownerReference:'assets:lifecycle-recovery' });
     }

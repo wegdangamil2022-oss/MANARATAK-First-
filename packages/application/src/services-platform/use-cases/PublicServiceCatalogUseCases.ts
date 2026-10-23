@@ -48,6 +48,7 @@ export class PublicServiceCatalogUseCases {
     const localized = locale ? localizedContent[locale] : undefined;
     return {
       approvedPrice:
+        // Financial snapshots remain owned by the service/finance workflow.
         service.approvedPrice &&
         (!service.approvedPrice.effectiveTo ||
           new Date(service.approvedPrice.effectiveTo).getTime() > Date.now())
@@ -55,6 +56,7 @@ export class PublicServiceCatalogUseCases {
           : null,
       cancellationPolicyCode: service.cancellationPolicyCode ?? 'FINANCE_REVIEW_REQUIRED',
       fulfillmentPolicy: service.fulfillmentPolicy ?? 'QUOTE_REQUIRED',
+      managedApplication: service.managedApplication === true,
       inputSchema: service.inputSchema,
       localizedContent,
       publicId: service.publicId,

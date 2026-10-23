@@ -46,6 +46,7 @@ export class AdminServiceCatalogUseCases {
     data: ServiceCreateInput,
     actorId?: string,
   ): Promise<ServiceCatalogItemDto> {
+    if (data.managedApplication && data.fulfillmentType !== 'APPLICATION_SUPPORT') throw new Error('MANAGED_APPLICATION_SERVICE_TYPE_REQUIRED');
     await assertAssetReferenceUsable(this.assetReferences, data.thumbnailAssetId, {
       purpose: 'SERVICE_THUMBNAIL',
     });
@@ -139,6 +140,7 @@ export class AdminServiceCatalogUseCases {
       );
     }
     const merged = { ...existing, ...normalized };
+    if (merged.managedApplication && merged.fulfillmentType !== 'APPLICATION_SUPPORT') throw new Error('MANAGED_APPLICATION_SERVICE_TYPE_REQUIRED');
     if (
       existing.status === ServiceStatus.PUBLISHED &&
       this.classifyCompleteness(merged) !== ServiceCompletenessStatus.COMPLETE

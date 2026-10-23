@@ -7,7 +7,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate as useRouterNavigate } from 'react-router-dom';
 import './template.css';
 import {readStored, writeStored, readStoredArray} from './storage';
-import { usePublicNavigation } from './usePublicNavigation';
+import { usePublicNavigation, publicUrlForState } from './usePublicNavigation';
+import { PublicAnalyticsBoundary } from '../analytics/PublicAnalyticsBoundary';
 import { usePublicLiveData } from './usePublicLiveData';
 import { usePublicRelationshipGraph } from './usePublicRelationshipGraph';
 import { ApiClient, type StablePublicGraphIdentity } from '../../api/client';
@@ -1077,6 +1078,7 @@ export default function App() {
 
   return (
     <div className="manaratak-public flex flex-col min-h-screen w-full bg-[var(--mn-page)] text-[var(--mn-text)] selection:bg-[var(--mn-accent)]/30 selection:text-[var(--mn-heading)] font-['Cairo',sans-serif] pb-24 sm:pb-28 transition-colors mn-panel ">
+      {publicDataMode === 'api' && <PublicAnalyticsBoundary routeKey={publicUrlForState(navigation.state).split('?')[0]} />}
       {cycleIntent&&<div role="dialog" aria-modal="true" aria-label={language==='en'?'Choose application cycle':'اختيار دورة التقديم'} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"><div className="rounded-xl bg-[var(--mn-page)] p-6 space-y-3">
         <p>{language==='en'?'Choose the published application cycle. Each cycle keeps its own progress and history.':'اختر دورة التقديم المنشورة. لكل دورة تقدمها وسجلها المستقل.'}</p>
         {cycleIntent.cycles.map(c=><button type="button" className="block border rounded p-2" key={c.id} disabled={cycleBusy} onClick={()=>{setCycleBusy(true);void ApiClient.createMyStudentApplicationTracker({...cycleIntent.input,cycleId:c.id}).then(finishCycleTracking).catch(error=>triggerInstantPush({title:t('public_template_tracker_error'),body:error instanceof Error?error.message:t('public_template_retry'),type:'system'})).finally(()=>setCycleBusy(false));}}>{applicationCycleLabel(c.cycleKey,language==='en'?'en':'ar')}</button>)}

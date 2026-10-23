@@ -6,6 +6,8 @@ import { BookOpen, Building2, Calendar, DollarSign, FileText, GraduationCap, Glo
 import type { Scholarship } from '../types';
 import { DetailSectionHeader } from './DetailUi';
 import { FundedProgramPairs } from './FundedProgramPairs';
+import { recordPublicEvent } from '../../analytics/publicAnalytics';
+import { ManagedApplicationEntry, DirectApplicationSelfReport } from '../../analytics/ManagedApplicationEntry';
 
 const benefitNames: Record<string, string> = { TUITION: "public_published_tuition_fees", TUITION_FEES: "public_published_tuition_fees", STIPEND: "public_published_stipend_or_allowance", ACCOMMODATION: "public_published_accommodation", HEALTH_INSURANCE: "public_published_health_insurance", TRAVEL: "public_published_travel", LIVING_ALLOWANCE: "public_published_living_allowance" };
 function Text({ value }: { value?: string | null }) {
@@ -79,7 +81,10 @@ export function PublishedScholarshipDetails({ scholarship, onOpenUniversity, onO
     </>)}
     {section('scholarship-application', publicT('public_published_how_to_apply_and_official_links'), ExternalLink, <>
       {dto.applicationMethod && <Text value={dto.applicationMethod} />}
-      {[[scholarship.applicationUrl, publicT('public_published_apply_for_scholarship')], [dto.officialSourceUrl || dto.officialWebsite || dto.sourceUrl, 'المصدر الرسمي']].map(([url, label], index) => url && /^https?:\/\//i.test(url) ? <a key={index} href={url} target="_blank" rel="noopener noreferrer" className="flex gap-2 p-3 rounded-xl border border-[var(--mn-border-brand)] text-[var(--mn-primary)]"><ExternalLink className="w-4 h-4" />{label}</a> : null)}
+      {[[scholarship.applicationUrl, publicT('public_published_apply_for_scholarship')], [dto.officialSourceUrl || dto.officialWebsite || dto.sourceUrl, language === 'ar' ? 'المصدر الرسمي' : 'Official source']].map(([url, label], index) => url && /^https?:\/\//i.test(url) ? <a key={index} href={url} target="_blank" rel="noopener noreferrer" onClick={() => { if (index === 0 && scholarship.slug) void recordPublicEvent('application_outbound_click', 'scholarships', scholarship.slug); }} className="flex gap-2 p-3 rounded-xl border border-[var(--mn-border-brand)] text-[var(--mn-primary)]"><ExternalLink className="w-4 h-4" />{label}</a> : null)}
+      <p className="text-xs">{language === 'ar' ? 'الرابط المباشر ينقلك للجهة لتقدّم بنفسك؛ النقر لا يثبت إتمام الطلب.' : 'The direct link takes you to apply yourself; a click does not prove a completed application.'}</p>
+      <DirectApplicationSelfReport opportunityId={scholarship.slug} />
+      <ManagedApplicationEntry opportunityId={scholarship.slug} />
     </>)}
     {scholarship.participatingUniversities?.length ? section('scholarship-universities', publicT('public_published_participating_universities'), Building2, <div className="space-y-2">{scholarship.participatingUniversities.map(item => <button key={item.id} type="button" onClick={() => onOpenUniversity?.(item.id)} className="w-full rounded-xl border border-[var(--mn-border-brand)] p-3 text-start text-[var(--mn-primary)]">{item.name}</button>)}</div>) : null}
     {scholarship.requiredExams?.length ? section('scholarship-tests', publicT('public_published_required_exams'), ShieldCheck, <div className="space-y-2">{scholarship.requiredExams.map((item, index) => <button key={`${item.id}-${index}`} type="button" onClick={() => onOpenExam?.(item.id)} className="w-full rounded-xl border border-[var(--mn-border-brand)] p-3 text-start text-[var(--mn-primary)]">{item.name}</button>)}</div>) : null}

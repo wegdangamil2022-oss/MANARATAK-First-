@@ -929,6 +929,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
     // Core Admin Domain Routers (Identity & Audit)
     v1Router.use('/admin/identities', requireAdminPermission('admin:identities:manage'), container.resolve<Router>('identityRouter'));
+    v1Router.use('/admin/dashboard', lazyRouter('executiveDashboardRouter'));
+    v1Router.use('/admin/services', requireAdminPermission('admin:services:manage'), lazyRouter('managedApplicationEvidenceRouter'));
     v1Router.use('/identities', SecurityMiddlewareFactory.createAdminGuard({ mfaUseCases: container.resolve('mfaUseCases'), mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator }), createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }), new MutationAuditMiddleware(auditRecordRepository, 'IDENTITY').generate(), requireAdminPermission('admin:identities:manage'), container.resolve<Router>('identityRouter'));
 
     v1Router.use('/admin/audit/workspace', requireAdminPermission('admin:audit:manage'), container.resolve<Router>('auditWorkspaceRouter'));
@@ -1007,6 +1009,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     v1Router.use('/admin/courses', requireAdminPermission('admin:courses:manage'), lazyRouter('courseAdminRouter'));
       v1Router.use('/public/courses', lazyRouter('coursePublicRouter'));
       v1Router.use('/public/graph', lazyRouter('crossDomainReadModelRouter'));
+      v1Router.use('/public/analytics', lazyRouter('publicAnalyticsRouter'));
       v1Router.use('/student/courses', lazyRouter('courseLearnerRouter'));
     // Phase 14 W10: authenticated admin boundary is inherited from /admin;
     // CertificateAdminRouter applies fine-grained view/author/checker/lifecycle/issuer permissions per route.

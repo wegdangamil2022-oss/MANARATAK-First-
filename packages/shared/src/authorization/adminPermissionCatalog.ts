@@ -1,4 +1,8 @@
 export const ADMIN_PERMISSION_CATALOG = [
+  { key: 'admin:services:applications:verify', domain: 'services', action: 'applications:verify', labelAr: 'توثيق إرسال الطلبات والنتائج الجامعية', labelEn: 'Verify university submissions and outcomes', descriptionAr: 'توثيق مستقل بإثبات آمن، ضمن نطاق الحالة المسندة.', descriptionEn: 'Separate evidence-based capability within assigned service case scope.', risk: 'HIGH', delegable: false },
+  { key: 'admin:dashboard:users:view', domain: 'dashboard', action: 'users:view', labelAr: 'إحصاءات الحسابات والطلاب', labelEn: 'Account and student aggregates', descriptionAr: 'مجاميع فقط دون بيانات هوية فردية.', descriptionEn: 'Aggregate counts only; no individual identity data.', risk: 'STANDARD', delegable: false },
+  { key: 'admin:dashboard:analytics:view', domain: 'dashboard', action: 'analytics:view', labelAr: 'تحليلات الزيارات المصرح بها', labelEn: 'Consented traffic analytics', descriptionAr: 'تحليلات عامة مجمعة دون معرّفات الزوار.', descriptionEn: 'Public aggregate analytics without visitor identifiers.', risk: 'STANDARD', delegable: false },
+  { key: 'admin:dashboard:applications:view', domain: 'dashboard', action: 'applications:view', labelAr: 'إحصاءات قنوات التقديم', labelEn: 'Application channel aggregates', descriptionAr: 'أعداد تشغيلية دون ملفات أو تفاصيل الطلاب.', descriptionEn: 'Operational counts without student files or details.', risk: 'HIGH', delegable: false },
   {
     key: 'admin:study-destinations:read',
     domain: 'study-destinations',
