@@ -1,0 +1,120 @@
+{
+  "kind": "UNIVERSITY_SOURCE_ASSET_AND_DURABLE_SCREENING_PROOF",
+  "pass": true,
+  "sourceSha": "dd8ab386f96c8e803c90102c0fd1dac9b2284d3d",
+  "runId": "0f36a6dc-5241-4a3d-8733-c41aa2125655",
+  "observedAt": "2026-10-23T00:51:21.721Z",
+  "managedDatabaseConnections": 0,
+  "realAccountsCreated": 0,
+  "universitiesCreated": 0,
+  "sourceAsset": {
+    "assetId": "university-source-0f36a6dc-5241-4a3d-8733-c41aa2125655",
+    "sha256": "bc09f7f1157de20ecc66b5c3d986f3e515e99ddd223d2073e804cfda6a81e915",
+    "bytes": 2652,
+    "classification": "INTERNAL",
+    "retention": "TEMPORARY",
+    "expiresAt": "2026-11-22T00:50:19.841Z",
+    "malwareScanStatus": {
+      "status": "PASSED",
+      "locator": "quarantine://university-0f36a6dc-5241-4a3d-8733-c41aa2125655/uploads/b0ab3aa6-1e83-435e-97f4-b491bf3204dd",
+      "scannedAt": "2026-10-23T00:50:20.129Z",
+      "archiveOperation": null,
+      "restoreOperation": null,
+      "uploadVerification": {
+        "locator": "quarantine://university-0f36a6dc-5241-4a3d-8733-c41aa2125655/uploads/b0ab3aa6-1e83-435e-97f4-b491bf3204dd",
+        "byteSize": 2652,
+        "verifiedAt": "2026-10-23T00:50:20.081Z",
+        "checksumSha256": "bc09f7f1157de20ecc66b5c3d986f3e515e99ddd223d2073e804cfda6a81e915",
+        "verifiedMimeType": "application/json",
+        "signatureVerified": true
+      },
+      "activationOperation": {
+        "phase": "COMPLETED",
+        "version": 1,
+        "preparedAt": "2026-10-23T00:50:20.136Z",
+        "completedAt": "2026-10-23T00:50:20.142Z",
+        "operationId": "b5ddb580-2f32-4ccb-8787-9daaa07ec498",
+        "sourceLocator": "quarantine://university-0f36a6dc-5241-4a3d-8733-c41aa2125655/uploads/b0ab3aa6-1e83-435e-97f4-b491bf3204dd",
+        "expectedSha256": "bc09f7f1157de20ecc66b5c3d986f3e515e99ddd223d2073e804cfda6a81e915"
+      }
+    },
+    "sanitizationMetadata": {
+      "sanitizedAt": "2026-10-23T00:50:20.080Z",
+      "exifStripped": true,
+      "sanitizerNotes": "Bounded reviewed UTF-8 university JSON; unchanged bytes. Native malware scan before and after sanitization. Not an XLSX sanitizer."
+    },
+    "localOnly": true
+  },
+  "rawWorkbookScans": {
+    "observedAt": "2026-10-23T00:48:07.943Z",
+    "scans": [
+      {
+        "provider": "WINDOWS_DEFENDER",
+        "sha256": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+        "exitCode": 0,
+        "digestUnchanged": true,
+        "clean": true,
+        "signatureVersion": "1.461.156.0",
+        "signatureUpdatedAt": "2026-10-22T18:40:20.0000000Z"
+      },
+      {
+        "provider": "WINDOWS_DEFENDER",
+        "sha256": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+        "exitCode": 0,
+        "digestUnchanged": true,
+        "clean": true,
+        "signatureVersion": "1.461.156.0",
+        "signatureUpdatedAt": "2026-10-22T18:40:20.0000000Z"
+      }
+    ]
+  },
+  "postActivationRescan": [
+    {
+      "provider": "WINDOWS_DEFENDER",
+      "sha256": "bc09f7f1157de20ecc66b5c3d986f3e515e99ddd223d2073e804cfda6a81e915",
+      "exitCode": 0,
+      "digestUnchanged": true,
+      "clean": true,
+      "signatureVersion": "1.461.156.0",
+      "signatureUpdatedAt": "2026-10-22T18:40:20.0000000Z"
+    }
+  ],
+  "stagedRecords": 4,
+  "screeningReceipts": 4,
+  "canonicalOwnerReviews": 0,
+  "stagingStates": {
+    "STAGED_INCOMPLETE": 4
+  },
+  "heldFieldReason": "institutionType deliberately unreviewed; no completeness workaround",
+  "stagingReplay": {
+    "skippedDuplicates": 4,
+    "newRecords": 0
+  },
+  "phases": [
+    {
+      "name": "SOURCE_LAB_RESTRICTED_IDENTITY_VERIFIED",
+      "at": "2026-10-23T00:50:18.932Z"
+    },
+    {
+      "name": "PRIVATE_SOURCE_ASSET_UPLOAD_SCAN_SANITIZE_ACTIVATE_AND_AUTHENTICATED_READ",
+      "at": "2026-10-23T00:50:20.153Z",
+      "sha256": "bc09f7f1157de20ecc66b5c3d986f3e515e99ddd223d2073e804cfda6a81e915",
+      "scannerPasses": 2
+    },
+    {
+      "name": "FOUR_DURABLE_SCREENING_RECEIPTS_WITHOUT_CANONICAL_WRITES",
+      "at": "2026-10-23T00:50:20.311Z",
+      "batchId": "batch-544dfa51-cef3-4589-baf5-499a02c12897"
+    },
+    {
+      "name": "RECEIPT_REPLAY_AND_CHANGED_PAYLOAD_CONFLICT_VERIFIED",
+      "at": "2026-10-23T00:51:20.716Z"
+    },
+    {
+      "name": "P6_DUPLICATES_SKIPPED_NO_CANONICAL_WRITES",
+      "at": "2026-10-23T00:51:20.753Z"
+    }
+  ],
+  "recoveryNote": "Resumed only receipt/replay checks after JSON serialization omitted an undefined field; no asset or initial records recreated. Revalidated active asset via authenticated delivery and retained database malware/sanitization metadata.",
+  "productionReady": false
+}
