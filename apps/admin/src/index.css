@@ -84,7 +84,7 @@ textarea {
     @apply mt-1 block w-full;
   }
   .admin-workspace :where(button) {
-    @apply min-h-10 rounded-xl border border-[#DDEFF2] bg-white px-3 py-2 text-sm font-bold text-[#142B5F] transition disabled:cursor-not-allowed disabled:opacity-50;
+    @apply min-h-10 rounded-xl border border-[#DDEFF2] px-3 py-2 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50;
   }
   .admin-workspace :where(button:not(:disabled):hover) {
     @apply border-[#21A7B4];
