@@ -8,3 +8,4 @@ export * from './PublicUniversityUseCases';
 export * from './LocalizedPublicUniversityUseCases';
 export * from './UniversitySourceQuality';
 export * from './UniversityCitySourceQueue';
+export * from './UniversityScreeningPlan';

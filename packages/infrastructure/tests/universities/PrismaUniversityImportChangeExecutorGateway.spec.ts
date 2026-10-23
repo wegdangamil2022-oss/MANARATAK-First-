@@ -14,6 +14,23 @@ function authorized<T extends object>(transaction: T) {
 }
 
 describe('PrismaUniversityImportChangeExecutorGateway', () => {
+  it('reads screening evidence only in a read-only snapshot after checking operator permissions', async () => {
+    const tx = authorized({ $queryRaw: vi.fn(), $executeRaw: vi.fn(),
+      importScreeningReceipt: { findUnique: vi.fn().mockResolvedValue(null) },
+      assetRecord: { findUnique: vi.fn().mockResolvedValue(null) },
+      university: { findUnique: vi.fn().mockResolvedValue(null), create: vi.fn() },
+    });
+    const transaction = vi.fn(async work => work(tx));
+    const gateway = new PrismaUniversityImportChangeExecutorGateway({ $transaction: transaction } as never);
+    const binding = { sourceReferenceId: 'INS-DZA-0001', receiptId: 'receipt', assetId: 'asset', requestHash: 'a'.repeat(64), artifactSha256: 'b'.repeat(64) };
+    await expect(gateway.previewScreenedSources([binding], 'admin-1')).rejects.toThrow('RECEIPT_MISMATCH');
+    expect((tx.$executeRaw.mock.calls[0][0] as string[])[0]).toBe('SET TRANSACTION READ ONLY');
+    expect(transaction.mock.calls[0][1]).toMatchObject({ isolationLevel: 'RepeatableRead' });
+    expect(tx.university.create).not.toHaveBeenCalled();
+    tx.roleAssignmentRecord.findMany.mockResolvedValue([]); tx.importScreeningReceipt.findUnique.mockClear();
+    await expect(gateway.previewScreenedSources([binding], 'admin-1')).rejects.toThrow('PERMISSION_DENIED');
+    expect(tx.importScreeningReceipt.findUnique).not.toHaveBeenCalled();
+  });
   it.each(['edited', 'published', 'source-edited', 'new-translation'])('preserves the whole batch on rollback drift: %s', async kind => {
     const original = { id: 'u1', status: 'READY_TO_REVIEW', displayName: 'Original' };
     const source = { id: 's1', universityId: 'u1', sourceHash: 'original' };

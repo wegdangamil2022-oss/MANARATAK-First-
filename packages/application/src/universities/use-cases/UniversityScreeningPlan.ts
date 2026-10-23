@@ -1,0 +1,60 @@
+import type { UniversalImportHandoff } from '@manaratak/domain';
+import { UniversityImportChangePlanner, sealUniversityImportPlan, type UniversityImportChangePlan } from './UniversityImportChangePlan';
+
+export interface UniversityScreeningSourceBinding {
+  sourceReferenceId: string; receiptId: string; requestHash: string; assetId: string; artifactSha256: string;
+}
+export interface UniversityScreeningSnapshot {
+  receipt: { id: string; ownerDomain: string; requestHash: string; result: unknown } | null;
+  asset: { id: string; lifecycleState: string; securityClassification: string; checksumAlgorithm: string | null;
+    checksumHash: string | null; retentionExpiresAt: Date | null; deletedAt: Date | null; purgedAt: Date | null } | null;
+  existingUniversity: { id: string; publicId: string } | null;
+}
+export interface UniversityScreeningPlanGateway {
+  read(sourceReferenceId: string, receiptId: string, assetId: string): Promise<UniversityScreeningSnapshot>;
+}
+export interface UniversityScreeningPlan extends UniversityImportChangePlan { screeningBindings: UniversityScreeningSourceBinding[]; }
+
+/** Preview only: creates no review approval, canonical entity or source asset. */
+export async function planUniversityScreenedSources(gateway: UniversityScreeningPlanGateway,
+  bindings: UniversityScreeningSourceBinding[]): Promise<UniversityScreeningPlan[]> {
+  if (!bindings.length || bindings.length > 5 || new Set(bindings.map(row => row.sourceReferenceId)).size !== bindings.length
+    || new Set(bindings.map(row => row.receiptId)).size !== bindings.length) throw new Error('UNIVERSITY_SCREENING_SELECTION_INVALID');
+  const handoffs: UniversalImportHandoff[] = [], existing = new Map<string, { id: string; publicId: string }>();
+  for (const binding of bindings) {
+    if (!/^[a-f0-9]{64}$/.test(binding.requestHash) || !/^[a-f0-9]{64}$/.test(binding.artifactSha256)) throw new Error('UNIVERSITY_SCREENING_BINDING_INVALID');
+    const { receipt, asset, existingUniversity } = await gateway.read(binding.sourceReferenceId, binding.receiptId, binding.assetId);
+    if (!receipt || receipt.id !== binding.receiptId || !['UNIVERSITY', 'UNIVERSITIES'].includes(receipt.ownerDomain)
+      || receipt.requestHash !== binding.requestHash) throw new Error('UNIVERSITY_SCREENING_RECEIPT_MISMATCH');
+    if (!asset || asset.id !== binding.assetId || asset.lifecycleState !== 'ACTIVE' || asset.deletedAt || asset.purgedAt
+      || asset.securityClassification !== 'INTERNAL' || asset.checksumAlgorithm?.toUpperCase() !== 'SHA256'
+      || asset.checksumHash !== binding.artifactSha256 || (asset.retentionExpiresAt && asset.retentionExpiresAt.getTime() <= Date.now())) throw new Error('UNIVERSITY_SCREENING_ASSET_UNAVAILABLE');
+    const result = receipt.result as { stageState?: string; normalizedPayload?: Record<string, unknown>;
+      promotion?: { automatic?: boolean; publication?: boolean; state?: string }; evidence?: {
+        artifact?: { artifactId?: string }; referenceMetadata?: Record<string, string>; validation?: { state?: string } } };
+    const payload = result?.normalizedPayload, metadata = payload?.metadata as Record<string, unknown> | undefined;
+    if (result?.stageState !== 'STAGED_COMPLETE' || result.promotion?.automatic !== false || result.promotion?.publication !== false
+      || result.promotion?.state !== 'MANUAL_REVIEW_REQUIRED' || result.evidence?.validation?.state !== 'VALID') throw new Error('UNIVERSITY_SCREENING_NOT_REVIEWABLE');
+    if (payload?.sourceReferenceId !== binding.sourceReferenceId || result.evidence?.artifact?.artifactId !== asset.id
+      || result.evidence?.referenceMetadata?.artifactSha256 !== asset.checksumHash
+      || !/^[a-f0-9]{64}$/.test(String(metadata?.sourceWorkbookSha256)) || !/^[a-f0-9]{64}$/.test(String(metadata?.rawRowSha256))
+      || !Number.isSafeInteger(metadata?.sourceRowNumber) || Number(metadata?.sourceRowNumber) < 1) throw new Error('UNIVERSITY_SCREENING_PROVENANCE_MISMATCH');
+    if (existingUniversity) existing.set(binding.sourceReferenceId, existingUniversity);
+    handoffs.push({ handoffId: receipt.id, ownerDomain: 'PHASE_11_UNIVERSITY', artifact: {
+      sourceId: 'REVIEWED_UNIVERSITY_SCREENING', artifactId: String(metadata!.sourceWorkbookSha256) }, normalizedPayload: payload!,
+      provenance: { sourceSystem: 'REVIEWED_UNIVERSITY_SCREENING', sourceRowNumber: Number(metadata!.sourceRowNumber), contentHash: String(metadata!.rawRowSha256) },
+      validation: { state: 'VALID', issues: [] }, execution: { executionId: receipt.id, idempotencyKey: receipt.id, attempt: 1, dryRun: true } });
+  }
+  const planner = new UniversityImportChangePlanner({ findBySourceReferenceId: async id => existing.get(id) ?? null });
+  const plans: UniversityScreeningPlan[] = [];
+  for (const artifact of new Set(handoffs.map(row => row.artifact.artifactId))) {
+    const selected = handoffs.filter(row => row.artifact.artifactId === artifact);
+    const plan = await planner.plan('STAGE_1', selected);
+    const ids = new Set(selected.map(row => String(row.normalizedPayload.sourceReferenceId)));
+    const screeningBindings = bindings.filter(row => ids.has(row.sourceReferenceId)).map(row => ({ ...row }));
+    plans.push(sealUniversityImportPlan({ ...plan, screeningBindings, validationIssues: [...plan.validationIssues, {
+      code: 'UNIVERSITY_SOURCE_OWNER_REVIEW_REQUIRED', message: 'Source-bound preview requires owning-domain review and live canonical relationship resolution before commit.',
+    }] } as UniversityScreeningPlan) as UniversityScreeningPlan);
+  }
+  return plans;
+}

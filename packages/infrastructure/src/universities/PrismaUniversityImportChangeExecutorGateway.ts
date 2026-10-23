@@ -12,12 +12,26 @@ import type {
 } from '@manaratak/application';
 import { randomUUID } from 'node:crypto';
 import { validateUniversityImportPlanSeal } from '@manaratak/application';
+import { planUniversityScreenedSources, type UniversityScreeningSourceBinding } from '@manaratak/application';
 
 type Transaction = Prisma.TransactionClient;
 type JsonRecord = Record<string, unknown>;
 
 export class PrismaUniversityImportChangeExecutorGateway implements UniversityImportChangeExecutorGateway {
   constructor(private readonly prisma: PrismaClient) {}
+
+  async previewScreenedSources(bindings: UniversityScreeningSourceBinding[], actorId: string) {
+    return this.prisma.$transaction(async tx => {
+      await tx.$executeRaw`SET TRANSACTION READ ONLY`;
+      await this.verifyOperator(tx, actorId);
+      const plans = await planUniversityScreenedSources({ read: async (sourceReferenceId, receiptId, assetId) => ({
+        receipt: await tx.importScreeningReceipt.findUnique({ where: { id: receiptId } }),
+        asset: await tx.assetRecord.findUnique({ where: { id: assetId } }),
+        existingUniversity: await tx.university.findUnique({ where: { publicId: sourceReferenceId }, select: { id: true, publicId: true } }),
+      }) }, bindings);
+      return { state: 'OWNER_REVIEW_REQUIRED' as const, readyToWrite: false as const, databaseWrites: 0 as const, plans };
+    }, { isolationLevel: 'RepeatableRead', timeout: 15000 });
+  }
 
   async apply(
     plan: UniversityImportChangePlan,
@@ -164,6 +178,11 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
       SELECT jsonb_array_elements_text(CASE WHEN jsonb_typeof(r."policyIds") = 'array' THEN r."policyIds" ELSE '[]'::jsonb END)
       FROM "RoleAssignmentRecord" a JOIN "RoleRecord" r ON r."id" = a."roleId" WHERE a."identityId" = ${actorId}
     ) FOR SHARE OF p`);
+    await this.verifyOperator(tx, actorId);
+  }
+
+  private async verifyOperator(tx: Transaction, actorId: string): Promise<void> {
+    if (!actorId?.trim()) throw new Error('UNIVERSITY_IMPORT_ACTOR_REQUIRED');
     const identity = await tx.identityRecord.findUnique({ where: { id: actorId }, include: { user: true, account: true } });
     if (!identity || identity.deletedAt || identity.status !== 'ACTIVE' || !identity.user?.isEmailVerified || identity.account?.accessState !== 'Active') throw new Error('UNIVERSITY_IMPORT_VERIFIED_ACTIVE_ACTOR_REQUIRED');
     const client = tx as unknown as PrismaClient;
