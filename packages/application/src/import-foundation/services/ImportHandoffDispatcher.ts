@@ -49,6 +49,9 @@ export class ImportHandoffDispatcher {
     if (['REFERENCE_DATA','MAJOR','MAJORS'].includes(owner) && !this.receipts) {
       throw new Error(owner==='REFERENCE_DATA'?'P7_DURABLE_SCREENING_RECEIPT_REQUIRED':'MAJOR_DURABLE_SCREENING_RECEIPT_REQUIRED');
     }
+    if (['UNIVERSITY', 'UNIVERSITIES'].includes(owner) && !this.receipts) {
+      throw new Error('UNIVERSITY_DURABLE_SCREENING_RECEIPT_REQUIRED');
+    }
     return this.receipts ? this.receipts.accept(handoff, () => consumer.accept(handoff)) : consumer.accept(handoff);
   }
 }

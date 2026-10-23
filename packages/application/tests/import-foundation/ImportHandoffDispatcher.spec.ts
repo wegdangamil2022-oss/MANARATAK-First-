@@ -4,6 +4,12 @@ import { ImportHandoffDispatcher } from '../../src/import-foundation/services/Im
 const handoff = { handoffId: 'h-1', ownerDomain: 'SCHOLARSHIPS', artifact: { sourceId: 'source', artifactId: 'artifact', rawArtifactReference: 'raw' }, normalizedPayload: { scholarshipName: 'Example' }, provenance: { sourceSystem: 'source', acquiredAt: new Date(), sourceRowNumber: 4, contentHash: 'hash' }, validation: { state: 'VALID' as const, issues: [] }, execution: { executionId: 'run', dryRun: false, attempt: 1, idempotencyKey: 'key' }, correlationId: 'corr' };
 
 describe('ImportHandoffDispatcher', () => {
+  it.each(['UNIVERSITY', 'UNIVERSITIES'])('requires a durable receipt for %s before invoking screening', async ownerDomain => {
+    const accept = vi.fn().mockResolvedValue({ promotion: { automatic: false } });
+    const dispatcher = new ImportHandoffDispatcher({ [ownerDomain]: { effectMode: 'SCREENING_ONLY', accept } });
+    await expect(dispatcher.dispatch({ ...handoff, ownerDomain })).rejects.toThrow('UNIVERSITY_DURABLE_SCREENING_RECEIPT_REQUIRED');
+    expect(accept).not.toHaveBeenCalled();
+  });
   it('dispatches by owner domain and preserves the handoff unchanged', async () => {
     const accept = vi.fn().mockResolvedValue({ canonicalScreening: [] });
     const dispatcher = new ImportHandoffDispatcher({ SCHOLARSHIPS: { effectMode: 'SCREENING_ONLY', accept } });
