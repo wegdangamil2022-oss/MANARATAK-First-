@@ -29,3 +29,11 @@ The first live run after progressive loading completed login in 37,418 ms and sh
 The token bootstrap path caught both invalid signatures and failed storage reads as authentication denial. The lifecycle validator also converted storage exceptions to `false`, making a database outage indistinguishable from an inactive account. It now throws a sanitized `AUTHENTICATION_STATE_UNAVAILABLE` error on lookup failure. Admin bootstrap and current-user boundaries return 503 for storage failures, without revoking sessions or granting access. Login also reports this specific lifecycle lookup failure as temporary unavailability. Explicit inactive/missing/disabled states still deny authentication. Password verification, login postchecks, MFA, audit and session rotation remain in place.
 
 All 12 focused regression cases pass, including session and lifecycle outages in both admin and current-user routes, genuine inactive-account rejection, validation on subsequent requests, error sanitization and process-liveness protection. The application package build passes. Broader student/refresh outage response semantics have not been redesigned in this patch.
+
+## Final local runtime observation
+
+Runtime API source: `ab9fb834e369093d22213ff981fede9e5cda2420`; admin artifact source: `97ce6016305c6f01f98da5c2ae95d5df0782b276`. Final API type checking also passed.
+
+The real-account run completed login (29,736 ms), displayed cards (64,005 ms, including an initial `/auth/me` response of 46,042 ms), and displayed the details header (12,752 ms). The root and profile responses both returned 200; no spurious 401/refresh loop was observed in this final details journey. These are individual observations under a variable database connection and concurrent local browser activity, not a controlled performance acceptance result. Login/list latency remains unacceptable and is explicitly open.
+
+At 19:32 UTC the independent local runtime was still listening on loopback port 3000. Liveness returned 200, anonymous current-user access returned 401, the login document returned 200, and the actual browser login form rendered without page errors. Existing content-write restrictions and disabled background workers remain enforced.
