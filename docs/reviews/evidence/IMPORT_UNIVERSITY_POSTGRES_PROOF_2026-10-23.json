@@ -1,0 +1,97 @@
+{
+  "kind": "UNIVERSITY_BOUNDED_PLAN_POSTGRES16_PROOF",
+  "pass": true,
+  "sourceSha": "cf88b1f282b132bf2d1f2f9497ee96eb562f532a",
+  "runId": "6cda6261-f953-48eb-81e8-e986a6b98919",
+  "observedAt": "2026-10-23T00:34:58.639Z",
+  "postgresMajor": 16,
+  "managedDatabaseConnections": 0,
+  "realAccountsCreated": 0,
+  "priorDatabasesTouched": false,
+  "identity": {
+    "role": "post28_app",
+    "database": "manaratak_post28_transactions_test",
+    "server": "7699654896593917960",
+    "rolsuper": false,
+    "rolcreaterole": false,
+    "rolcreatedb": false,
+    "rolbypassrls": false,
+    "ledger": false,
+    "ddl": false,
+    "owns": false
+  },
+  "plans": [
+    {
+      "changeSetId": "STAGE_1:24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030:ef1542e912de16b351fa1ebf6a38547fb8503ad8984c405b1ccccb80e51dcfa4",
+      "planHash": "ef1542e912de16b351fa1ebf6a38547fb8503ad8984c405b1ccccb80e51dcfa4",
+      "sourceArtifactId": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+      "changes": 4
+    },
+    {
+      "changeSetId": "STAGE_1:0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2:359c15d02ed9c95f6e512bfa7577f6826485f7780071f4db5e7eb7dc90c20b81",
+      "planHash": "359c15d02ed9c95f6e512bfa7577f6826485f7780071f4db5e7eb7dc90c20b81",
+      "sourceArtifactId": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+      "changes": 4
+    }
+  ],
+  "before": {
+    "universities": 0,
+    "sources": 0,
+    "sets": 0,
+    "changes": 0,
+    "audit": 0,
+    "outbox": 3
+  },
+  "applied": {
+    "universities": 4,
+    "sources": 4,
+    "sets": 2,
+    "changes": 8,
+    "audit": 2,
+    "outbox": 5
+  },
+  "rolled": {
+    "universities": 0,
+    "sources": 0,
+    "sets": 2,
+    "changes": 8,
+    "audit": 4,
+    "outbox": 7
+  },
+  "phases": [
+    {
+      "name": "ISOLATED_RESTRICTED_APPLICATION_VERIFIED",
+      "at": "2026-10-23T00:34:58.148Z"
+    },
+    {
+      "name": "SYNTHETIC_VERIFICATION_AND_UNAUTHORIZED_APPLY_ROLLBACK_DENIED",
+      "at": "2026-10-23T00:34:58.331Z"
+    },
+    {
+      "name": "MODIFIED_PLAN_REJECTED_WITH_ZERO_WRITES",
+      "at": "2026-10-23T00:34:58.360Z"
+    },
+    {
+      "name": "OUTBOX_INSERT_DENIAL_REVERTS_UNIVERSITY_SOURCE_AND_JOURNAL",
+      "at": "2026-10-23T00:34:58.416Z"
+    },
+    {
+      "name": "FOUR_UNIVERSITIES_AND_SOURCE_ROWS_COMMITTED_WITH_CANONICAL_GEOGRAPHY",
+      "at": "2026-10-23T00:34:58.499Z"
+    },
+    {
+      "name": "EXACT_REPLAY_NO_NEW_ROWS_OR_AUDIT_OUTBOX",
+      "at": "2026-10-23T00:34:58.524Z"
+    },
+    {
+      "name": "REVOKED_OPERATOR_CANNOT_REPLAY_OR_ROLLBACK",
+      "at": "2026-10-23T00:34:58.545Z"
+    },
+    {
+      "name": "ROLLBACK_AND_ROLLBACK_REPLAY_JOURNAL_RETAINED",
+      "at": "2026-10-23T00:34:58.638Z"
+    }
+  ],
+  "productionReady": false,
+  "rollbackSourceEvidence": "BEFORE_AFTER_JOURNAL_RETAINED_SOURCE_ROWS_REMOVED_BY_EXISTING_ROLLBACK"
+}
