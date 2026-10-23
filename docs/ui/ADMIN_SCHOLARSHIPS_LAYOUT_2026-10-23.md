@@ -26,3 +26,9 @@ Reference: `C:/Users/HP/Downloads/MANARATAK-First--main.zip`, previously extract
 The current strict scholarship-list API has country, university, major, degree and academic-program IDs, but no faculty/college filter. A faculty control was not fabricated or mapped to an unrelated major ID. Supporting it requires a separately reviewed domain/query contract. No API, database, migration, publishing or production changes are part of this layout change.
 
 This confirms layout and existing client interactions, not acceptance of live scholarship import/publishing against Neon. The local runtime retains its existing authentication/read diagnostic restrictions.
+
+## Filter appearance follow-up
+
+At the owner's request, all 16 filter fields now share the funding/deadline appearance: 48px controls, Cairo at 12px/700, identical colors, borders and radius, consistent labels, and an icon before each label. Review locale has its own labeled grid cell instead of a second unlabeled row under translation. CSS changes are scoped to the scholarship filter grid; selector icons are optional elsewhere.
+
+Admin TypeScript and Vite build passed. A focused synthetic browser style check at 1360/820/390px confirmed 16 matching computed control styles, all 16 fields with icons, and no horizontal overflow. Existing authoring suites were not repeated for this presentation-only follow-up.

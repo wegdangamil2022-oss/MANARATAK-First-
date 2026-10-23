@@ -2,6 +2,9 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { adminApiClient } from '../api/client';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from './CanonicalPicker';
+import { Globe2, Languages, Coins, Building2, GraduationCap, Award, ClipboardCheck, BookOpen, ShieldCheck, FileText, Database, Landmark, ArrowDownWideNarrow } from 'lucide-react';
+
+const filterIcons = {countryReferenceId:Globe2,studyLanguageReferenceId:Languages,currencyReferenceId:Coins,universityId:Building2,majorId:GraduationCap,degreeLevelId:Award,internationalTestId:ClipboardCheck};
 export interface ScholarshipCanonicalFilterState {
   countryReferenceId: string;
   studyLanguageReferenceId: string;
@@ -131,6 +134,7 @@ export function ScholarshipCanonicalFilters({
           <CanonicalPicker
             key={key}
             label={label}
+            icon={(() => { const Icon=filterIcons[key]; return <Icon aria-hidden="true" className="h-3.5 w-3.5 text-[#0E7C86]" />; })()}
             value={value[key]}
             onChange={(id) => update(key, id ?? '')}
             load={loader}
@@ -142,7 +146,7 @@ export function ScholarshipCanonicalFilters({
           />
         ))}
         <label>
-          {ar ? 'البرنامج الأكاديمي' : 'Academic program'}
+          <span><BookOpen aria-hidden="true" />{ar ? 'البرنامج الأكاديمي' : 'Academic program'}</span>
           <select
             value={value.academicProgramId}
             onChange={(e) => update('academicProgramId', e.target.value)}
@@ -171,7 +175,7 @@ export function ScholarshipCanonicalFilters({
           </button>
         )}
         <label>
-          {ar ? 'حالة التحقق' : 'Verification'}
+          <span><ShieldCheck aria-hidden="true" />{ar ? 'حالة التحقق' : 'Verification'}</span>
           <select
             value={value.verificationStatus}
             onChange={(e) => update('verificationStatus', e.target.value)}
@@ -183,9 +187,7 @@ export function ScholarshipCanonicalFilters({
           </select>
         </label>
         <label>
-          {ar
-            ? 'النص المحلي المتاح (لا يعني اعتماد النشر)'
-            : 'Localized text availability (not publication approval)'}
+          <span title={ar ? 'توفر النص المترجم لا يعني اعتماد النشر' : 'Localized text availability does not imply publication approval'}><FileText aria-hidden="true" />{ar ? 'حالة الترجمة' : 'Translation availability'}</span>
           <select
             value={value.translationState}
             onChange={(e) => update('translationState', e.target.value)}
@@ -196,6 +198,9 @@ export function ScholarshipCanonicalFilters({
               {ar ? 'نص محلي مفقود' : 'Localized text missing'}
             </option>
           </select>
+        </label>
+        <label>
+          <span><Languages aria-hidden="true" />{ar ? 'لغة المراجعة' : 'Review locale'}</span>
           <select
             aria-label={ar ? 'لغة المراجعة' : 'Review locale'}
             value={value.translationLocale}
@@ -206,7 +211,7 @@ export function ScholarshipCanonicalFilters({
           </select>
         </label>
         <label>
-          {ar ? 'نوع المصدر' : 'Source type'}
+          <span><Database aria-hidden="true" />{ar ? 'نوع المصدر' : 'Source type'}</span>
           <input
             value={value.sourceType}
             maxLength={100}
@@ -214,7 +219,7 @@ export function ScholarshipCanonicalFilters({
           />
         </label>
         <label>
-          {ar ? 'اسم الممول' : 'Sponsor'}
+          <span><Landmark aria-hidden="true" />{ar ? 'اسم الممول' : 'Sponsor'}</span>
           <input
             value={value.sponsorName}
             maxLength={200}
@@ -222,7 +227,7 @@ export function ScholarshipCanonicalFilters({
           />
         </label>
         <label>
-          {ar ? 'الترتيب' : 'Sort'}
+          <span><ArrowDownWideNarrow aria-hidden="true" />{ar ? 'الترتيب' : 'Sort'}</span>
           <select value={value.sort} onChange={(e) => update('sort', e.target.value)}>
             <option value="CREATED_DESC">{ar ? 'الأحدث إنشاء' : 'Newest created'}</option>
             <option value="UPDATED_DESC">{ar ? 'الأحدث تحديث' : 'Newest updated'}</option>

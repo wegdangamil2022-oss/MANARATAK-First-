@@ -173,3 +173,53 @@ textarea {
 .cms-rich-text ol { list-style: decimal; }
 .cms-rich-text a { color: #0E7C86; text-decoration: underline; }
 .cms-rich-text blockquote { border-inline-start: 3px solid #0E7C86; padding-inline-start: 1em; }
+
+/* Scholarship filters share the funding/deadline control appearance. */
+.scholarship-filter-fields :is(input, select) {
+  height: 48px;
+  min-height: 48px;
+  margin-top: 0;
+  padding: 10px 12px;
+  border: 1px solid #DDEFF2;
+  border-radius: 12px;
+  background-color: #fff;
+  color: #334155;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.scholarship-filter-fields > :is(label, div) {
+  min-width: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+}
+.scholarship-filter-fields > label,
+.scholarship-filter-fields > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.scholarship-filter-fields > div > *,
+.scholarship-filter-fields > label > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.scholarship-filter-fields > label > span,
+.scholarship-filter-fields > div > label,
+.scholarship-filter-fields > div > span:first-child {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+}
+.scholarship-filter-fields > label > span > svg {
+  height: 14px;
+  width: 14px;
+  flex-shrink: 0;
+  color: #0E7C86;
+}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Search } from 'lucide-react';
 import { useTranslation } from '../i18n/I18nProvider';
 import { type CanonicalPickerOption, type CanonicalPickerPage, canonicalOptionIsSelectable } from '../api/canonicalPickers';
@@ -6,7 +6,7 @@ import { type CanonicalPickerOption, type CanonicalPickerPage, canonicalOptionIs
 type Loader = (query?: string, page?: number) => Promise<CanonicalPickerOption[]>;
 type PickerLoader = (query?: string, page?: number, cursor?: string) => Promise<CanonicalPickerOption[] | CanonicalPickerPage>;
 
-export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'default', optional = false, disabled = false, paged = false, allowInactive = false, compact = false }: {
+export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'default', optional = false, disabled = false, paged = false, allowInactive = false, compact = false, icon }: {
   label: string;
   value?: string | null;
   onChange: (id: string | null, option?: CanonicalPickerOption) => void;
@@ -18,6 +18,7 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
   /** Read filters may intentionally target historical inactive records. */
   allowInactive?: boolean;
   compact?: boolean;
+  icon?: ReactNode;
 }) {
   const { language } = useTranslation();
   const ar = language === 'ar';
@@ -58,7 +59,7 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
   const missing = Boolean(value) && !selected;
 
   return <div className="min-w-0 space-y-2 text-xs font-medium text-[#203442]">
-    <span className="flex min-h-5 items-center justify-between gap-2"><span>{label}</span>{compact && <button type="button" aria-label={`${ar ? 'بحث' : 'Search'} ${label}`} aria-expanded={searchOpen} disabled={disabled} onClick={() => setSearchOpen(open => !open)} className="inline-flex !min-h-0 items-center justify-center !border-0 !p-1 text-[#0E7C86]"><Search className="h-3.5 w-3.5" aria-hidden="true" /></button>}</span>
+    <span className="flex min-h-5 items-center justify-between gap-2"><span className="inline-flex items-center gap-1.5">{icon}{label}</span>{compact && <button type="button" aria-label={`${ar ? 'بحث' : 'Search'} ${label}`} aria-expanded={searchOpen} disabled={disabled} onClick={() => setSearchOpen(open => !open)} className="inline-flex !min-h-0 items-center justify-center !border-0 !p-1 text-[#0E7C86]"><Search className="h-3.5 w-3.5" aria-hidden="true" /></button>}</span>
     {(!compact || searchOpen) && <input type="search" maxLength={200} aria-label={`${ar ? 'بحث' : 'Search'} ${label}`} value={search}
       disabled={disabled} onChange={event => { setSearch(event.target.value); cursors.current = [undefined]; setNextCursor(undefined); setPage(1); }}
       placeholder={ar ? 'ابحث عن سجل (حتى 50 نتيجة)' : 'Search records (up to 50 results)'}
