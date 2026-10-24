@@ -9,6 +9,7 @@ export * from './event-foundation/PrismaEventPublishingGateway';
 export * from './event-foundation/PrismaTransactionalOutboxStore';
 export * from './event-foundation/PrismaAtomicPersistenceUnitOfWork';
 export * from './universities/PrismaUniversityRepository';
+export * from './universities/UniversityStageSourceReader';
 export * from './scholarships/PrismaScholarshipRepository';
 export * from './scholarships/PrismaScholarshipImportDecisionPorts';
 export * from './scholarships/InMemoryScholarshipImportDecisionPorts';

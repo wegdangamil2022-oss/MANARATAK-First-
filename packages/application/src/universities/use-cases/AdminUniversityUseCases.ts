@@ -1,4 +1,5 @@
 import {randomUUID} from 'crypto';
+import {UNIVERSITY_STAGE_CARDS, type UniversityStageEvidenceReader} from '@manaratak/domain';
 import { AssetReferencePolicy, assertAssetReferenceUsable } from '../../asset-platform/AssetReferencePolicy';
 import {
   IUniversityRepository,
@@ -38,6 +39,7 @@ export class AdminUniversityUseCases {
     private readonly publicationReadiness = new PublicationReadinessEngine(),
     private readonly publicationPolicy = new UniversityPublicationReadinessPolicy(),
     private readonly assetReferences?: AssetReferencePolicy,
+    private readonly stageEvidence?: UniversityStageEvidenceReader,
   ) {}
 
   public async createDraft(input:{displayName:string;officialWebsite:string;sourceUri:string;sourceHash:string;country?:string;countryReferenceId?:string},context?:UniversityMutationContext):Promise<UniversityDto> {
@@ -76,6 +78,54 @@ export class AdminUniversityUseCases {
       throw new Error(`University with id ${id} not found`);
     }
     return university;
+  }
+
+  public async getSourceStages(id:string) {
+    const university=await this.getUniversity(id);
+    const geography=await this.repository.readStageGeography?.(id);
+    const stages=this.stageEvidence ? await this.stageEvidence.read(university.publicId,university.sourceRecords??[],geography) : Array.from({length:5},(_,index)=>({stage:index+1,sourceState:'UNAVAILABLE',importState:'UNKNOWN',continent:null,fields:{},issues:['SOURCE_READER_UNAVAILABLE']}));
+    let publicHref:string|null=null;
+    if(university.status===UniversityStatus.PUBLISHED&&university.slug){
+      try{const visible=await this.repository.findPublishedBySlug(university.slug);if(visible?.id===id)publicHref='/universities/'+encodeURIComponent(university.slug);}catch{/* An unavailable public read is not publication proof. */}
+    }
+    return {university,stages,publicHref};
+  }
+
+  public async saveStageCard(id:string,cardId:string,values:Record<string,unknown>,proof:{sourceUrl:string;verifiedAt:string},context?:UniversityMutationContext){
+    const definition=UNIVERSITY_STAGE_CARDS.find(card=>card.id===cardId);
+    const editable=definition?.fields.filter(field=>field.canonical)??[];
+    if(!editable.length||!Object.keys(values).length||Object.keys(values).some(key=>!editable.some(f=>f.canonical===key)))throw Error('UNIVERSITY_STAGE_CARD_FIELDS_INVALID');
+    const url=new URL(proof.sourceUrl);
+    if(url.protocol!=='https:'||url.username||url.password||!Number.isFinite(Date.parse(proof.verifiedAt))||Date.parse(proof.verifiedAt)>Date.now()+60000)throw Error('UNIVERSITY_STAGE_CARD_EVIDENCE_INVALID');
+    const existing=await this.getUniversity(id),optional:Record<string,unknown>={},updates:UpdateUniversityDto={};
+    const admissions={...((existing as unknown as Record<string,unknown>).internationalAdmissions as Record<string,unknown>??{})};
+    for(const [key,value]of Object.entries(values)){
+      const field=editable.find(f=>f.canonical===key)!;
+      if(field.type==='number'?(value!==null&&(!Number.isInteger(value)||Number(value)<800||Number(value)>new Date().getUTCFullYear())):field.type==='boolean'?(value!==null&&typeof value!=='boolean'):field.type==='lines'?(!Array.isArray(value)||value.length>100||value.some(v=>typeof v!=='string'||v.length>10000)):(typeof value!=='string'||value.length>20000))throw Error('UNIVERSITY_STAGE_CARD_VALUE_INVALID');
+      if(typeof value==='string'&&value&&(/Url$/.test(key)||key==='officialWebsite')){const link=new URL(value);if(!['https:','http:'].includes(link.protocol)||link.username||link.password)throw Error('UNIVERSITY_STAGE_CARD_URL_INVALID');}
+      if(key==='displayName'&&!String(value).trim())throw Error('UNIVERSITY_NAME_REQUIRED');
+      if(key.startsWith('internationalAdmissions.'))admissions[key.split('.')[1]]=value;
+      else if(['displayName','institutionType','institutionalOwnership','officialWebsite','foundedYear'].includes(key))(updates as Record<string,unknown>)[key]=value;
+      else optional[key]=value;
+    }
+    if(Object.keys(values).some(key=>key.startsWith('internationalAdmissions.')))optional.internationalAdmissions=admissions;
+    const metadata=(existing.metadata??{}),oldProof=metadata.universityCardEvidence as Record<string,unknown>??{};
+    optional.metadata={...metadata,universityCardEvidence:{...oldProof,[cardId]:{...proof,actorId:context?.actorId,fields:Object.keys(values)}}};
+    updates.optionalFields=optional;
+    return this.updateUniversity(id,updates,context);
+  }
+
+  public async restore(id:string,context?:UniversityMutationContext):Promise<void>{
+    const existing=await this.getUniversity(id);
+    if(![UniversityStatus.ARCHIVED,UniversityStatus.REJECTED].includes(existing.status))throw Error('UNIVERSITY_RESTORE_STATE_INVALID');
+    await this.mutate('UNIVERSITY_RESTORED_TO_REVIEW',id,context,repository=>repository.updateStatus(id,UniversityStatus.READY_TO_REVIEW));
+  }
+
+  public async restoreAcademicProgram(id:string,programId:string,context?:UniversityMutationContext){
+    const university=await this.getUniversity(id),program=university.academicPrograms?.find(row=>row.id===programId);
+    if(!program||program.status!=='ARCHIVED')throw Error('UNIVERSITY_PROGRAM_RESTORE_STATE_INVALID');
+    if(!program.degreeLevelId)throw Error('UNIVERSITY_PROGRAM_DEGREE_LEVEL_REQUIRED');
+    return this.upsertAcademicProgram(id,programId,{...program,degreeLevelId:program.degreeLevelId,status:'DRAFT',campusIds:program.campusIds??[],admissionRequirements:program.admissionRequirements??[]},context);
   }
 
   public async listTranslations(id: string): Promise<UniversityTranslationDto[]> {
@@ -145,6 +195,7 @@ export class AdminUniversityUseCases {
         status: existing.status === UniversityStatus.READY_TO_PUBLISH ? UniversityStatus.READY_TO_REVIEW : existing.status,
         completenessStatus: classification.state,
       }),
+      {changedFields:[...Object.keys(updates).filter(key=>key!=='optionalFields'),...Object.keys(updates.optionalFields??{})]},
     );
   }
 
@@ -323,6 +374,7 @@ export class AdminUniversityUseCases {
     id: string,
     context: UniversityMutationContext | undefined,
     mutation: (repository: IUniversityRepository) => Promise<T>,
+    auditDetails:Record<string,unknown>={},
   ): Promise<T> {
     if (!this.atomicMutations || !context?.actorId || !context.reason?.trim())
       throw new Error('UNIVERSITY_AUDITED_REVIEW_CONTEXT_REQUIRED');
@@ -332,7 +384,7 @@ export class AdminUniversityUseCases {
     if (!repository.withTransaction) throw new Error('UNIVERSITY_TRANSACTIONAL_PERSISTENCE_REQUIRED');
     return this.atomicMutations.execute(
       { domain: 'UNIVERSITIES', aggregateType: 'UNIVERSITY', aggregateId: id, action, context,
-        auditMetadata: { reason: context.reason, expectedRevision: context.expectedRevision } },
+        auditMetadata: { ...auditDetails, reason: context.reason, expectedRevision: context.expectedRevision } },
       async (transaction) => {
         const tx = repository.withTransaction!(transaction);
         if (!tx.lockForRevision || !tx.advanceRevision)

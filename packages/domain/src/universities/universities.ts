@@ -337,6 +337,7 @@ export interface PaginatedUniversityOrganizationUnitResult {
 }
 
 export interface IUniversityRepository {
+  readStageGeography?(id:string):Promise<{region:string|null;subregion:string|null}|undefined>;
   readProgramIntegrityReference?(id:string):Promise<{id:string;universityId:string;publiclyEligible:boolean}|null>;
   create(
     data: Omit<UniversityDto, 'id' | 'createdAt' | 'updatedAt'> &

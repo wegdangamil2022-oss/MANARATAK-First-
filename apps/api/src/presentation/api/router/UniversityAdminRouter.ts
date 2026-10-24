@@ -59,6 +59,21 @@ export class UniversityAdminRouter {
     }).strict();
 
     const webUrl=z.string().url().refine(value=>{const url=new URL(value);return ['https:','http:'].includes(url.protocol)&&!url.username&&!url.password;},'HTTP(S) URL required');
+    router.get('/:id/source-stages',asyncHandler(async(req:Request,res:Response)=>{
+      res.setHeader('Cache-Control','no-store');
+      res.json(await adminUniversityUseCases.getSourceStages(req.params.id));
+    }));
+    router.put('/:id/stage-cards/:cardId',asyncHandler(async(req:Request,res:Response)=>{
+      const input=z.object({values:z.record(z.string(),z.unknown()),proof:z.object({sourceUrl:z.string().url(),verifiedAt:z.string().datetime()}).strict()}).strict().parse(req.body);
+      const saved=await adminUniversityUseCases.saveStageCard(req.params.id,req.params.cardId,input.values,input.proof,mutationContext(req));
+      res.setHeader('X-Entity-Revision',String(saved.revision));res.json(saved);
+    }));
+    router.post('/:id/restore',asyncHandler(async(req:Request,res:Response)=>{
+      await adminUniversityUseCases.restore(req.params.id,mutationContext(req));res.json({success:true});
+    }));
+    router.post('/:id/academic-programs/:programId/restore',asyncHandler(async(req:Request,res:Response)=>{
+      res.json(await adminUniversityUseCases.restoreAcademicProgram(req.params.id,req.params.programId,mutationContext(req)));
+    }));
     const httpsSource=z.string().url().refine(value=>{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password;},'HTTPS source required');
     router.post('/',SecurityMiddlewareFactory.createAdminPermissionGuard('admin:universities:manage'),asyncHandler(async(req:Request,res:Response)=>{
       const input=z.object({displayName:z.string().trim().min(1).max(300),officialWebsite:httpsSource,sourceUri:httpsSource,sourceHash:z.string().regex(/^[a-f0-9]{64}$/i),country:z.string().trim().max(200).optional(),countryReferenceId:z.string().uuid().optional(),reason:reasonSchema}).strict().parse(req.body);

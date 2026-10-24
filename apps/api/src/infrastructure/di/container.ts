@@ -1,4 +1,5 @@
 import { PrismaUniversityProgramReadPort } from '@manaratak/infrastructure';
+import { UniversityStageSourceReader } from '@manaratak/infrastructure';
 import { PrismaExecutiveDashboardGateway, PrismaPublicAnalyticsGateway, PrismaManagedApplicationEvidenceGateway, PrismaReviewWorkspaceGateway } from '@manaratak/infrastructure';
 import { ExecutiveDashboardUseCases, PublicAnalyticsUseCases, ManagedApplicationEvidenceUseCases, AnalyticsRetentionBackgroundJobHandler, ReviewWorkspaceUseCases, ReviewNotificationRecipientGateway } from '@manaratak/application';
 import { ReviewWorkspaceRouter } from '../../presentation/api/router/ReviewWorkspaceRouter.js';
@@ -912,8 +913,9 @@ export function registerDependencies(
       new ScholarshipRepositoryDuplicateLookup(scholarshipRepository)).scoped(),
     scholarshipImportHandoffConsumer: asFunction(({ scholarshipHandoffCanonicalScreeningService, scholarshipDuplicateLookup }) =>
       new ScholarshipImportHandoffService(scholarshipHandoffCanonicalScreeningService, scholarshipDuplicateLookup)).scoped(),
-    adminUniversityUseCases: asFunction(({ universityRepository, atomicDomainMutationCoordinator, assetReferencePolicy }) =>
-      new AdminUniversityUseCases(universityRepository, atomicDomainMutationCoordinator, undefined, undefined, assetReferencePolicy)).scoped(),
+    universityStageEvidenceReader: asFunction(() => new UniversityStageSourceReader()).singleton(),
+    adminUniversityUseCases: asFunction(({ universityRepository, atomicDomainMutationCoordinator, assetReferencePolicy, universityStageEvidenceReader }) =>
+      new AdminUniversityUseCases(universityRepository, atomicDomainMutationCoordinator, undefined, undefined, assetReferencePolicy, universityStageEvidenceReader)).scoped(),
     universityImportHandoffConsumer: asFunction(({ universityRepository }) =>
       new UniversityImportHandoffService(universityRepository)).scoped(),
     internationalTestImportHandoffConsumer: asFunction(({ internationalTestRepository }) =>

@@ -1245,6 +1245,11 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     } as unknown as UniversityDto;
   }
 
+  async readStageGeography(id: string) {
+    const record = await this.prisma.university.findUnique({where:{id},select:{countryReference:{select:{region:true,subregion:true}}}});
+    return record?.countryReference ?? undefined;
+  }
+
   private async assertSourceRecordOwnedByUniversity(
     universityId: string,
     sourceRecordId: string | null | undefined,

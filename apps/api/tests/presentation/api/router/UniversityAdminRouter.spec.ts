@@ -18,6 +18,10 @@ describe('UniversityAdminRouter', () => {
     unpublish: vi.fn(),
     reject: vi.fn(),
     archive: vi.fn(),
+    restore: vi.fn(),
+    restoreAcademicProgram: vi.fn(),
+    getSourceStages: vi.fn(),
+    saveStageCard: vi.fn(),
   });
 
   const createApp = (useCases: ReturnType<typeof createMockUseCases>) => {
@@ -33,6 +37,26 @@ describe('UniversityAdminRouter', () => {
     );
     return app;
   };
+
+  it('reads stage evidence without accepting a mutation or claiming source approval',async()=>{
+    const useCases=createMockUseCases();useCases.getSourceStages.mockResolvedValue({university:{id:'u1'},stages:[{stage:5,sourceState:'NOT_SUPPLIED',importState:'UNKNOWN'}]});
+    const result=await request(createApp(useCases)).get('/admin/universities/u1/source-stages');
+    expect(result.status).toBe(200);expect(result.headers['cache-control']).toBe('no-store');expect(result.body.stages[0].importState).toBe('UNKNOWN');expect(useCases.updateUniversity).not.toHaveBeenCalled();
+  });
+  it('requires reason and revision for card writes and forwards only the strict contract',async()=>{
+    const useCases=createMockUseCases();useCases.saveStageCard.mockResolvedValue({id:'u1',revision:3});const app=createApp(useCases);
+    const body={values:{displayName:'Reviewed'},proof:{sourceUrl:'https://example.org/source',verifiedAt:'2026-10-24T00:00:00.000Z'}};
+    expect((await request(app).put('/admin/universities/u1/stage-cards/basic-identity').set('X-Review-Reason','Verified source').send(body)).status).toBe(428);
+    expect((await request(app).put('/admin/universities/u1/stage-cards/basic-identity').set('If-Match','2').send(body)).status).toBe(400);
+    const result=await request(app).put('/admin/universities/u1/stage-cards/basic-identity').set('If-Match','2').set('X-Review-Reason','Verified source').send(body);
+    expect(result.status).toBe(200);expect(useCases.saveStageCard).toHaveBeenCalledWith('u1','basic-identity',body.values,body.proof,expect.objectContaining({actorId:'admin-X',expectedRevision:2,reason:'Verified source'}));
+  });
+  it('restores through the owner contract with review context rather than accepting a status patch',async()=>{
+    const useCases=createMockUseCases();const app=createApp(useCases);
+    expect((await request(app).post('/admin/universities/u1/restore').set('If-Match','2').set('X-Review-Reason','Reopen review').send({})).status).toBe(200);
+    expect(useCases.restore).toHaveBeenCalledWith('u1',expect.objectContaining({actorId:'admin-X',expectedRevision:2}));
+    expect(useCases.updateUniversity).not.toHaveBeenCalled();
+  });
 
   it('parses explicit count-only mode without changing owner filters', async () => {
     const useCases=createMockUseCases();useCases.listUniversities.mockResolvedValue({data:[],total:7,page:1,pageSize:1,totalPages:7});
