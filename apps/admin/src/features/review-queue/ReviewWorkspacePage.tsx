@@ -62,6 +62,7 @@ export function ReviewWorkspacePage() {
     [selectedKey, setSelectedKey] = useState<string | null>(null),
     [selectedKeys, setSelectedKeys] = useState<string[]>([]),
     [views, setViews] = useState<ReviewSavedView[]>([]),
+    [reviewers, setReviewers] = useState<Array<{ id: string; label: string; kind: string }>>([]),
     [cursors, setCursors] = useState<Array<string | undefined>>([undefined]),
     [page, setPage] = useState(0),
     [bulkPriority, setBulkPriority] = useState(''),
@@ -75,6 +76,20 @@ export function ReviewWorkspacePage() {
     pendingSelection = useRef<'first' | 'last' | null>(null),
     syncBusy = useRef(false);
   const canCoordinate = hasPermission('admin:platform:manage');
+  useEffect(() => {
+    const abort = new AbortController();
+    setReviewers([]);
+    void workRequest<typeof reviewers>(
+      '/reviewers' + (query.domain ? '?domain=' + query.domain : ''),
+      undefined,
+      abort.signal,
+    )
+      .then((value) => {
+        if (!abort.signal.aborted) setReviewers(value);
+      })
+      .catch(() => {});
+    return () => abort.abort();
+  }, [query.domain, permissionKey]);
   const canWork = (row: ReviewRecord) =>
     row.profileId !== 'import' &&
     canCoordinate &&
@@ -110,11 +125,11 @@ export function ReviewWorkspacePage() {
     for (const key of ['domain', 'reason', 'view'] as const)
       if (query[key] && query[key] !== 'all') safe.set(key, String(query[key]));
     if (params.toString() !== safe.toString()) setParams(safe, { replace: true });
-  }, [query.domain, query.reason, query.view, params, setParams]);
+  }, [query, params, setParams]);
   const resetTraversal = useCallback(() => {
     snapshot.current = undefined;
     setPage(0);
-    setCursors([undefined]);
+    setCursors((prior) => (prior.length === 1 && prior[0] === undefined ? prior : [undefined]));
     setSelectedKeys([]);
   }, []);
   const change = useCallback(
@@ -174,7 +189,7 @@ export function ReviewWorkspacePage() {
         if (!abort.signal.aborted && generation === requestGeneration.current) setLoading(false);
       });
     return () => abort.abort();
-  }, [query, debounced, page, refresh, permissionKey]);
+  }, [query, debounced, page, refresh, permissionKey, cursors]);
   const synchronize = useCallback(
     async (domain?: ReviewOwner) => {
       if (syncBusy.current) return;
@@ -187,7 +202,11 @@ export function ReviewWorkspacePage() {
         setRefresh((value) => value + 1);
       } catch (cause) {
         setError(workspaceError(cause));
-        if(/\[(401|403)\]/.test(String(cause))){setData(null);setSelectedKey(null);setSelectedKeys([]);}
+        if (/\[(401|403)\]/.test(String(cause))) {
+          setData(null);
+          setSelectedKey(null);
+          setSelectedKeys([]);
+        }
       } finally {
         syncBusy.current = false;
         setSyncing(false);
@@ -217,7 +236,11 @@ export function ReviewWorkspacePage() {
       return true;
     } catch (cause) {
       setError(workspaceError(cause));
-      if(/\[(401|403)\]/.test(String(cause))){setData(null);setSelectedKey(null);setSelectedKeys([]);}
+      if (/\[(401|403)\]/.test(String(cause))) {
+        setData(null);
+        setSelectedKey(null);
+        setSelectedKeys([]);
+      }
       return false;
     } finally {
       setMutating(false);
@@ -275,7 +298,10 @@ export function ReviewWorkspacePage() {
           reason: bulkReason,
           ...(action === 'priority'
             ? { priority: bulkPriority }
-            : { assigneeId: bulkAssignee || null, teamId: null }),
+            : {
+                assigneeId: bulkAssignee.startsWith('person:') ? bulkAssignee.slice(7) : null,
+                teamId: bulkAssignee.startsWith('team:') ? bulkAssignee.slice(5) : null,
+              }),
         }));
       const result = await workRequest<{ results: typeof bulkResults }>('/bulk', { commands });
       setBulkResults(result.results);
@@ -454,6 +480,7 @@ export function ReviewWorkspacePage() {
             views={views}
             saveView={saveView}
             canCoordinate={canCoordinate}
+            reviewers={reviewers}
           />
           {data?.coverage === 'partial' ? (
             <p className="rw-coverage">
@@ -525,15 +552,19 @@ export function ReviewWorkspacePage() {
                   {tr('تطبيق الأولوية', 'Apply priority')}
                 </button>
                 <label>
-                  {tr(
-                    'معرف مراجع مخول — فارغ لإزالة الإسناد',
-                    'Authorized reviewer ID — empty to unassign',
-                  )}
-                  <input
+                  {tr('إسناد إلى مراجع أو فريق', 'Assign to reviewer or team')}
+                  <select
                     value={bulkAssignee}
                     onChange={(event) => setBulkAssignee(event.target.value)}
-                    maxLength={100}
-                  />
+                  >
+                    <option value="">{tr('غير مسندة', 'Unassigned')}</option>
+                    {reviewers.map((person) => (
+                      <option key={person.kind + person.id} value={person.kind + ':' + person.id}>
+                        {person.label}
+                        {person.kind === 'team' ? tr(' — فريق', ' — team') : ''}
+                      </option>
+                    ))}
+                  </select>
                 </label>
                 <button
                   disabled={mutating || bulkReason.trim().length < 5}
@@ -595,6 +626,7 @@ export function ReviewWorkspacePage() {
                         {canWork(row) && row.version > 0 ? (
                           <input
                             type="checkbox"
+                          disabled={selectedKeys.length>=25&&!selectedKeys.includes(row.key)}
                             aria-label={tr('تحديد ', 'Select ') + row.title}
                             checked={selectedKeys.includes(row.key)}
                             onChange={(event) =>

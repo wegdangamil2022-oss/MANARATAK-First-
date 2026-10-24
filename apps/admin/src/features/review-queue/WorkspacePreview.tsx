@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   X,
@@ -44,7 +44,7 @@ export function WorkspacePreview({
   busy: boolean;
 }) {
   const tr = textFor(language),
-    label = labelFor(language),
+    label = useMemo(() => labelFor(language), [language]),
     dialog = useRef<HTMLElement>(null),
     [history, setHistory] = useState<ReviewHistory[]>([]),
     [reviewers, setReviewers] = useState<Array<{ id: string; label: string; kind: string }>>([]),
@@ -52,6 +52,7 @@ export function WorkspacePreview({
     [reason, setReason] = useState(''),
     [note, setNote] = useState(''),
     [priority, setPriority] = useState(row.priority),
+    [workState, setWorkState] = useState<'OPEN' | 'WAITING_INFORMATION' | 'REFERRED'>('OPEN'),
     [message, setMessage] = useState(''),
     [audit, setAudit] = useState<{
       items: Array<{ id: string; action: string; timestamp: string }>;
@@ -107,6 +108,11 @@ export function WorkspacePreview({
     setReason('');
     setNote('');
     setPriority(row.priority);
+    setWorkState(
+      row.workState === 'WAITING_INFORMATION' || row.workState === 'REFERRED'
+        ? row.workState
+        : 'OPEN',
+    );
     setMessage('');
     commandKeys.current.clear();
     void workRequest<ReviewHistory[]>(
@@ -114,16 +120,20 @@ export function WorkspacePreview({
       undefined,
       abort.signal,
     )
-      .then(value=>{if(!abort.signal.aborted)setHistory(value);})
+      .then((value) => {
+        if (!abort.signal.aborted) setHistory(value);
+      })
       .catch((error) => {
         if (!abort.signal.aborted) setMessage(label(workspaceError(error)));
       });
     if (canCoordinate)
       void workRequest<typeof reviewers>('/reviewers?domain=' + row.domain, undefined, abort.signal)
-        .then(value=>{if(!abort.signal.aborted)setReviewers(value);})
+        .then((value) => {
+          if (!abort.signal.aborted) setReviewers(value);
+        })
         .catch(() => {});
     return () => abort.abort();
-  }, [row.key, row.version, canCoordinate]);
+  }, [row.key, row.version, row.domain, row.priority, row.workState, canCoordinate, label]);
   useEffect(() => {
     const abort = new AbortController(),
       item = ownerEvidenceItem(row),
@@ -145,7 +155,10 @@ export function WorkspacePreview({
           }
         })
         .catch((error) => {
-          if (!abort.signal.aborted) {setAuditState(/\[(401|403)\]/.test(String(error))?'forbidden':'unavailable');setAudit({items:[],nextCursor:null,hasMore:false});}
+          if (!abort.signal.aborted) {
+            setAuditState(/\[(401|403)\]/.test(String(error)) ? 'forbidden' : 'unavailable');
+            setAudit({ items: [], nextCursor: null, hasMore: false });
+          }
         });
     if (row.domain === 'scholarships' && row.importRecordId) {
       if (!hasPermission('admin:imports:manage')) setDiffState('forbidden');
@@ -170,7 +183,7 @@ export function WorkspacePreview({
           });
     }
     return () => abort.abort();
-  }, [row.key, row.ownerRevision, auditReload]);
+  }, [row, hasPermission, auditReload]);
   const submit = async (action: ReviewCommand['action']) => {
     if (reason.trim().length < 5) {
       setMessage(
@@ -196,7 +209,7 @@ export function WorkspacePreview({
           : {}),
         ...(action === 'priority' ? { priority } : {}),
         ...(action === 'note' ? { note } : {}),
-        ...(action === 'state' ? { state: 'WAITING_INFORMATION' as const } : {}),
+        ...(action === 'state' ? { state: workState } : {}),
       };
     const fingerprint = JSON.stringify(body);
     let idempotencyKey = commandKeys.current.get(fingerprint);
@@ -223,9 +236,9 @@ export function WorkspacePreview({
       );
       setAudit((previous) => ({ ...next, items: [...previous.items, ...next.items].slice(-120) }));
       setAuditState('ready');
-    } catch(error) {
-      setAudit({items:[],nextCursor:null,hasMore:false});
-      setAuditState(/\[(401|403)\]/.test(String(error))?'forbidden':'unavailable');
+    } catch (error) {
+      setAudit({ items: [], nextCursor: null, hasMore: false });
+      setAuditState(/\[(401|403)\]/.test(String(error)) ? 'forbidden' : 'unavailable');
     }
   };
   return (
@@ -388,8 +401,21 @@ export function WorkspacePreview({
                 <Flag aria-hidden="true" />
                 {tr('حفظ الأولوية', 'Save priority')}
               </button>
+              <label>
+                {tr('حالة العمل — دون إغلاق أو نشر', 'Work state — no closure or publication')}
+                <select
+                  value={workState}
+                  onChange={(event) => setWorkState(event.target.value as typeof workState)}
+                >
+                  {['OPEN', 'WAITING_INFORMATION', 'REFERRED'].map((value) => (
+                    <option key={value} value={value}>
+                      {label(value)}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <button disabled={busy} onClick={() => void submit('state')}>
-                {tr('بانتظار معلومات — تبقى ظاهرة', 'Waiting for information — remains visible')}
+                {tr('حفظ حالة العمل', 'Save work state')}
               </button>
               <label>
                 {tr(

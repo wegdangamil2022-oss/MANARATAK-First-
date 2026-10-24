@@ -92,8 +92,16 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
           errorCode: null,
         };
       const row = checkpoints.find((value) => value.domain === domain);
-      const imports = domain==='scholarships'&&access.imports ? checkpoints.find(value=>(value.domain as string)==='scholarships:imports') : null;
-      const importMissing=domain==='scholarships'&&access.imports&&(!imports?.synchronizedAt||imports.errorCode||Date.now()-+imports.synchronizedAt>300000);
+      const imports =
+        domain === 'scholarships' && access.imports
+          ? checkpoints.find((value) => (value.domain as string) === 'scholarships:imports')
+          : null;
+      const importMissing =
+        domain === 'scholarships' &&
+        access.imports &&
+        (!imports?.synchronizedAt ||
+          imports.errorCode ||
+          Date.now() - +imports.synchronizedAt > 300000);
       return {
         domain,
         state:
@@ -103,7 +111,7 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
               ? 'stale'
               : 'ready',
         synchronizedAt: row?.synchronizedAt?.toISOString() ?? null,
-        observed: domain==='scholarships'&&!access.imports?null:row?.observed ?? null,
+        observed: domain === 'scholarships' && !access.imports ? null : (row?.observed ?? null),
         errorCode: row?.errorCode ?? (row?.synchronizedAt ? null : 'REVIEW_SYNC_REQUIRED'),
       };
     });
@@ -126,12 +134,13 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
               withinSla: boolean | null;
             }>
           >`
-          WITH live AS (SELECT * FROM "ReviewOwnerProjection" WHERE domain=${owner} AND ("profileId" IS DISTINCT FROM 'import' OR ${access.imports===true})), before AS (SELECT c.* FROM "ReviewWorkCase" c WHERE c.domain=${owner} AND (c."profileId" IS DISTINCT FROM 'import' OR ${access.imports===true})),
+          WITH live AS (SELECT * FROM "ReviewOwnerProjection" WHERE domain=${owner} AND ("profileId" IS DISTINCT FROM 'import' OR ${access.imports === true})), before AS (SELECT c.* FROM "ReviewWorkCase" c WHERE c.domain=${owner} AND (c."profileId" IS DISTINCT FROM 'import' OR ${access.imports === true})),
           upserted AS (
-            INSERT INTO "ReviewWorkCase" ("key",domain,"ownerId","profileId","ownerRevision",reasons,"dueAt","policyId")
+            INSERT INTO "ReviewWorkCase" ("key",domain,"ownerId","profileId","ownerRevision",reasons,"dueAt","policyId","policySnapshot")
             SELECT p."key",p.domain,p."ownerId",p."profileId",p."ownerRevision",to_jsonb(p.reasons),
               CASE WHEN s.domain IS NOT NULL THEN CURRENT_TIMESTAMP + make_interval(hours=>s.hours) END,
-              CASE WHEN s.domain IS NOT NULL THEN s.domain||':'||s.version END
+              CASE WHEN s.domain IS NOT NULL THEN s.domain||':'||s.version END,
+              CASE WHEN s.domain IS NOT NULL THEN jsonb_build_object('hours',s.hours,'warningHours',s."warningHours",'timezone',s.timezone,'version',s.version) END
             FROM live p LEFT JOIN "ReviewSlaPolicy" s ON s.domain=p.domain
             ON CONFLICT ("key") DO UPDATE SET
               "ownerRevision"=EXCLUDED."ownerRevision",reasons=EXCLUDED.reasons,
@@ -140,12 +149,13 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
               "enteredAt"=CASE WHEN "ReviewWorkCase".state='COMPLETED' THEN CURRENT_TIMESTAMP ELSE "ReviewWorkCase"."enteredAt" END,
               "dueAt"=CASE WHEN "ReviewWorkCase".state='COMPLETED' THEN EXCLUDED."dueAt" ELSE "ReviewWorkCase"."dueAt" END,
               "policyId"=CASE WHEN "ReviewWorkCase".state='COMPLETED' THEN EXCLUDED."policyId" ELSE "ReviewWorkCase"."policyId" END,
+              "policySnapshot"=CASE WHEN "ReviewWorkCase".state='COMPLETED' THEN EXCLUDED."policySnapshot" ELSE "ReviewWorkCase"."policySnapshot" END,
               "closedAt"=NULL,"version"="ReviewWorkCase".version+1,"updatedAt"=CURRENT_TIMESTAMP,"synchronizedAt"=CURRENT_TIMESTAMP
             WHERE "ReviewWorkCase"."ownerRevision"<>EXCLUDED."ownerRevision" OR "ReviewWorkCase".reasons<>EXCLUDED.reasons OR "ReviewWorkCase".state='COMPLETED'
             RETURNING "key",cycle
           ), closed AS (
             UPDATE "ReviewWorkCase" c SET state='COMPLETED',"closedAt"=CURRENT_TIMESTAMP,"updatedAt"=CURRENT_TIMESTAMP,version=c.version+1,"synchronizedAt"=CURRENT_TIMESTAMP
-            WHERE c.domain=${owner} AND (c."profileId" IS DISTINCT FROM 'import' OR ${access.imports===true}) AND c.state<>'COMPLETED' AND NOT EXISTS(SELECT 1 FROM live p WHERE p."key"=c."key") RETURNING c."key",c.cycle
+            WHERE c.domain=${owner} AND (c."profileId" IS DISTINCT FROM 'import' OR ${access.imports === true}) AND c.state<>'COMPLETED' AND NOT EXISTS(SELECT 1 FROM live p WHERE p."key"=c."key") RETURNING c."key",c.cycle
           )
           SELECT u."key",u.cycle,CASE WHEN b."key" IS NULL THEN 'OBSERVED_ENTERED' WHEN b.state='COMPLETED' THEN 'OBSERVED_REOPENED' ELSE 'OWNER_CHANGED' END action,NULL::float "elapsedHours",NULL::boolean "withinSla" FROM upserted u LEFT JOIN before b ON b."key"=u."key"
           UNION ALL SELECT c."key",c.cycle,'OBSERVED_COMPLETED',extract(epoch FROM CURRENT_TIMESTAMP-b."enteredAt")::float/3600,CASE WHEN b."dueAt" IS NOT NULL AND b."policyId" IS NOT NULL THEN CURRENT_TIMESTAMP<=b."dueAt" END FROM closed c JOIN before b ON b."key"=c."key"`;
@@ -167,7 +177,7 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
       coalesce(c.priority,CASE WHEN p.reasons && ARRAY['incomplete','source_verification','broken_link']::text[] THEN 'high' ELSE 'medium' END) priority,
       CASE WHEN c.priority IS NOT NULL THEN 'reviewer' ELSE 'suggested' END "priorityBasis",
       CASE WHEN c."dueAt" IS NULL OR c."policyId" IS NULL THEN 'unknown' WHEN c."dueAt"<CURRENT_TIMESTAMP THEN 'overdue'
-        WHEN c."dueAt" <= CURRENT_TIMESTAMP + make_interval(hours=>coalesce(policy."warningHours",0)) AND policy."warningHours">0 AND c."policyId"=policy.domain||':'||policy.version THEN 'near_due' ELSE 'on_track' END sla
+        WHEN c."dueAt" <= CURRENT_TIMESTAMP + make_interval(hours=>coalesce((c."policySnapshot"->>'warningHours')::int,0)) AND (c."policySnapshot"->>'warningHours')::int>0 THEN 'near_due' ELSE 'on_track' END sla
       FROM "ReviewOwnerProjection" p LEFT JOIN "ReviewWorkCase" c ON c."key"=p."key" AND c.state<>'COMPLETED'
       LEFT JOIN "UserRecord" u ON u."identityId"=c."assigneeId" LEFT JOIN "RoleRecord" t ON t.id=c."teamId"
       LEFT JOIN "ReviewSourceCheckpoint" s ON s.domain=p.domain LEFT JOIN "ReviewSlaPolicy" policy ON policy.domain=p.domain
@@ -220,7 +230,7 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
           withoutSla: bigint;
           fingerprint: string;
         }>
-      >`${base} SELECT count(*) total,count(*) FILTER(WHERE "assigneeId"=${access.actorId} OR "teamId" IN (SELECT "roleId" FROM "RoleAssignmentRecord" WHERE "identityId"=${access.actorId})) mine,count(*) FILTER(WHERE "assigneeId" IS NULL AND "teamId" IS NULL) unassigned,count(*) FILTER(WHERE priority IN ('critical','high')) urgent,count(*) FILTER(WHERE sla='overdue') overdue,count(*) FILTER(WHERE sla='unknown') "withoutSla",md5(coalesce(string_agg("key"||"ownerRevision"||version::text,',' ORDER BY "key"),'')) fingerprint FROM owners WHERE ${filters}`;
+      >`${base} SELECT count(*) total,count(*) FILTER(WHERE "assigneeId"=${access.actorId} OR "teamId" IN (SELECT "roleId" FROM "RoleAssignmentRecord" WHERE "identityId"=${access.actorId})) mine,count(*) FILTER(WHERE "assigneeId" IS NULL AND "teamId" IS NULL) unassigned,count(*) FILTER(WHERE priority IN ('critical','high')) urgent,count(*) FILTER(WHERE sla='overdue') overdue,count(*) FILTER(WHERE sla='unknown') "withoutSla",md5(coalesce(string_agg("key"||"ownerRevision"||version::text||sla,',' ORDER BY "key"),'')) fingerprint FROM owners WHERE ${filters}`;
       const summary = summaries[0];
       // A changed dataset invalidates traversal explicitly: no silent duplicates,
       // missing updated rows or cross-permission cursor reuse.
@@ -433,7 +443,13 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
       if (prior.length) {
         if (prior[0].actorId !== access.actorId || prior[0].commandHash !== commandHash)
           throw new Error('REVIEW_IDEMPOTENCY_CONFLICT');
-        return prior[0].payload;
+        const receipt = prior[0].payload;
+        return {
+          key: receipt.key,
+          version: receipt.version,
+          cycle: receipt.cycle,
+          action: receipt.action,
+        };
       }
       const tables: Record<ReviewOwner, string> = {
         scholarships: 'Scholarship',
@@ -569,7 +585,7 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
           within: bigint;
           withSla: bigint;
         }>
-      >`SELECT min(e."createdAt") measured,count(*) FILTER(WHERE e.action IN ('OBSERVED_ENTERED','OBSERVED_REOPENED') AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days})) entered,count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days})) completed,percentile_cont(0.5) WITHIN GROUP(ORDER BY (e.payload->>'elapsedHours')::float) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days})) median,count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e.payload->>'withinSla'='true' AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days})) within,count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e.payload->>'withinSla' IS NOT NULL AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days})) "withSla" FROM "ReviewWorkEvent" e JOIN "ReviewWorkCase" c ON c."key"=e."caseKey" WHERE c.${scope(access)}`;
+      >`SELECT min(e."createdAt") measured,count(*) FILTER(WHERE e.action IN ('OBSERVED_ENTERED','OBSERVED_REOPENED') AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days})) entered,count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days})) completed,percentile_cont(0.5) WITHIN GROUP(ORDER BY (e.payload->>'elapsedHours')::float) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days})) median,count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e.payload->>'withinSla'='true' AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days})) "within",count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e.payload->>'withinSla' IS NOT NULL AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days})) "withSla" FROM "ReviewWorkEvent" e JOIN "ReviewWorkCase" c ON c."key"=e."caseKey" WHERE c.${scope(access)}`;
       const series = await tx.$queryRaw<
         Array<{ day: string; entered: bigint; completed: bigint }>
       >`SELECT to_char(e."createdAt",'YYYY-MM-DD') day,count(*) FILTER(WHERE e.action IN ('OBSERVED_ENTERED','OBSERVED_REOPENED')) entered,count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED') completed FROM "ReviewWorkEvent" e JOIN "ReviewWorkCase" c ON c."key"=e."caseKey" WHERE c.${scope(access)} AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days}) GROUP BY 1 ORDER BY 1`;
@@ -613,7 +629,7 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
       };
     });
   }
-  async reviewers(access: ReviewAccess, _domain: ReviewOwner) {
+  async reviewers(access: ReviewAccess, _domain: ReviewOwner | undefined) {
     if (!access.coordinate) throw new Error('REVIEW_FORBIDDEN');
     const rows = await this.db.$queryRaw<
       Array<{ id: string; label: string; kind: 'person' | 'team' }>
@@ -664,6 +680,7 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
       >`INSERT INTO "ReviewSlaPolicy" (domain,version,hours,"warningHours","approvedBy",reason) VALUES (${input.domain},1,${input.hours},${input.warningHours},${access.actorId},${input.reason}) ON CONFLICT(domain) DO UPDATE SET version="ReviewSlaPolicy".version+1,hours=EXCLUDED.hours,"warningHours"=EXCLUDED."warningHours","approvedBy"=EXCLUDED."approvedBy",reason=EXCLUDED.reason,"approvedAt"=CURRENT_TIMESTAMP WHERE "ReviewSlaPolicy".version=${input.version} RETURNING *`;
       if (!rows.length || (input.version !== 0 && rows[0].version !== input.version + 1))
         throw new Error('REVIEW_VERSION_CONFLICT');
+      await tx.$executeRaw`INSERT INTO "AuditRecord" (id,reference,action,category,severity,"actorId","actorType","targetId","targetType",source,timestamp,"contextMetadata","updatedAt") VALUES (${randomUUID()},${'review-policy:' + randomUUID()},'REVIEW_SLA_POLICY_APPROVED','ADMIN','INFO',${access.actorId},'HUMAN',${input.domain},'REVIEW_SLA_POLICY','review-workspace',CURRENT_TIMESTAMP,${json({ version: rows[0].version, hours: input.hours, warningHours: input.warningHours, timezone: 'UTC', reason: input.reason })}::jsonb,CURRENT_TIMESTAMP)`;
       return JSON.parse(JSON.stringify(rows[0]));
     });
   }

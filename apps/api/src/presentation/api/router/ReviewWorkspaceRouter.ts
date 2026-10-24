@@ -142,7 +142,7 @@ export function createReviewWorkspaceRouter(useCases: ReviewWorkspaceUseCases) {
     '/reviewers',
     run(async (req, res) => {
       const { domain } = z
-        .object({ domain: z.enum(reviewDomains) })
+        .object({ domain: z.enum(reviewDomains).optional() })
         .strict()
         .parse(req.query);
       res.json(await useCases.reviewers(req.authUserId ?? '', domain));

@@ -27,6 +27,7 @@ model ReviewWorkCase {
   enteredAt DateTime @default(now())
   dueAt DateTime?
   policyId String?
+  policySnapshot Json?
   closedAt DateTime?
   synchronizedAt DateTime @default(now())
   updatedAt DateTime @default(now())

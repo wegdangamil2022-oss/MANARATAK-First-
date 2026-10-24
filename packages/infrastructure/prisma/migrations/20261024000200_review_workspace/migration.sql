@@ -13,7 +13,7 @@ CREATE TABLE "ReviewWorkCase" (
  "assigneeId" TEXT REFERENCES "IdentityRecord"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
  "teamId" TEXT REFERENCES "RoleRecord"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
  "priority" TEXT CHECK ("priority" IN ('critical','high','medium','low')),
- "enteredAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "dueAt" TIMESTAMP(3), "policyId" TEXT,
+ "enteredAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "dueAt" TIMESTAMP(3), "policyId" TEXT,"policySnapshot" JSONB,
  "closedAt" TIMESTAMP(3), "synchronizedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
  CHECK ("assigneeId" IS NULL OR "teamId" IS NULL),
@@ -31,6 +31,8 @@ CREATE TABLE "ReviewWorkEvent" (
 );
 CREATE INDEX "ReviewWorkEvent_caseKey_createdAt_id_idx" ON "ReviewWorkEvent"("caseKey","createdAt","id");
 CREATE INDEX "ReviewWorkEvent_action_createdAt_idx" ON "ReviewWorkEvent"("action","createdAt");
+CREATE FUNCTION review_event_append_only() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'REVIEW_HISTORY_APPEND_ONLY'; END $$;
+CREATE TRIGGER review_event_append_only BEFORE UPDATE OR DELETE ON "ReviewWorkEvent" FOR EACH ROW EXECUTE FUNCTION review_event_append_only();
 CREATE TABLE "ReviewSourceCheckpoint" ("domain" TEXT PRIMARY KEY,"synchronizedAt" TIMESTAMP(3),"observed" INTEGER,"errorCode" TEXT,"lastAttemptAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP);
 CREATE TABLE "ReviewWorkView" ("id" TEXT PRIMARY KEY,"actorId" TEXT NOT NULL REFERENCES "IdentityRecord"("id") ON DELETE RESTRICT ON UPDATE CASCADE,"name" TEXT NOT NULL,"shared" BOOLEAN NOT NULL DEFAULT false,"filters" JSONB NOT NULL,"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP);
 CREATE INDEX "ReviewWorkView_actorId_shared_idx" ON "ReviewWorkView"("actorId","shared");

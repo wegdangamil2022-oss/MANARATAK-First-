@@ -29,6 +29,7 @@ export function WorkspaceFilters({
   views,
   saveView,
   canCoordinate,
+  reviewers,
 }: {
   language: string;
   query: ReviewQuery;
@@ -39,6 +40,7 @@ export function WorkspaceFilters({
   views: ReviewSavedView[];
   saveView: (name: string, shared: boolean) => Promise<void>;
   canCoordinate: boolean;
+  reviewers: Array<{ id: string; label: string; kind: string }>;
 }) {
   const tr = textFor(language),
     label = labelFor(language),
@@ -95,6 +97,7 @@ export function WorkspaceFilters({
                   {label(value)}
                 </option>
               ))}
+              {key==='assignee'?reviewers.map(person=><option key={person.kind+person.id} value={person.id}>{person.label}{person.kind==='team'?tr(' — فريق',' — team'):''}</option>):null}
             </select>
           </label>
         ))}

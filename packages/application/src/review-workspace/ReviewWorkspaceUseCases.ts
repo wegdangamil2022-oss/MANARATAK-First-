@@ -40,7 +40,7 @@ export interface ReviewWorkspaceGateway {
   analytics(access: ReviewAccess, days: number): Promise<ReviewAnalytics>;
   reviewers(
     access: ReviewAccess,
-    domain: ReviewOwner,
+    domain: ReviewOwner | undefined,
   ): Promise<Array<{ id: string; label: string; kind: 'person' | 'team' }>>;
   views(access: ReviewAccess): Promise<ReviewSavedView[]>;
   saveView(
@@ -102,14 +102,21 @@ export class ReviewWorkspaceUseCases {
   async analytics(actor: string, days: number) {
     return this.gateway.analytics(await this.access(actor), days);
   }
-  async reviewers(actor: string, domain: ReviewOwner) {
+  async reviewers(actor: string, domain?: ReviewOwner) {
     const access = await this.access(actor);
-    if (!access.domains.includes(domain)) throw new Error('REVIEW_FORBIDDEN');
+    if (domain && !access.domains.includes(domain)) throw new Error('REVIEW_FORBIDDEN');
     const candidates = await this.gateway.reviewers(access, domain);
     const eligible = await Promise.all(
       candidates.map(async (candidate) =>
         candidate.kind === 'team' ||
-        (await this.granted(candidate.id, reviewOwnerPermissions[domain]))
+        ((await this.granted(candidate.id, 'admin:platform:manage')) &&
+          (
+            await Promise.all(
+              (domain ? [domain] : access.domains).map((owner) =>
+                this.granted(candidate.id, reviewOwnerPermissions[owner]),
+              ),
+            )
+          ).some(Boolean))
           ? candidate
           : null,
       ),

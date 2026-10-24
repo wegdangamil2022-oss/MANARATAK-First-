@@ -7,7 +7,12 @@ import { preflightTargets } from '../../../../scripts/database/post28-isolation.
 import { readDatabaseIdentity } from '../../../../scripts/database/post28-preflight.mjs';
 import { PrismaReviewWorkspaceGateway } from '../../src/review-workspace/PrismaReviewWorkspaceGateway';
 import { ReviewWorkspaceUseCases, type ReviewAccess } from '@manaratak/application';
-import { reviewDomains, type ReviewCommand, type ReviewRecord } from '@manaratak/shared';
+import {
+  reviewDomains,
+  type ReviewCommand,
+  type ReviewRecord,
+  type ReviewOwner,
+} from '@manaratak/shared';
 
 describe('Section 02 on a new attested isolated PostgreSQL 16 database', () => {
   let db: PrismaClient, gateway: PrismaReviewWorkspaceGateway;
@@ -283,6 +288,19 @@ describe('Section 02 on a new attested isolated PostgreSQL 16 database', () => {
       gateway.command(access, command(fresh, 'note', { note: 'stale note' }), authorize),
     ).rejects.toThrow('REVIEW_VERSION_CONFLICT');
   });
+  it('rolls back coordination when history persistence fails and keeps history append-only', async () => {
+    const row = await find(universityIds[10]);
+    await expect(
+      gateway.command(access, command(row, 'note', { note: 'x'.repeat(2001) }), authorize),
+    ).rejects.toThrow();
+    expect((await find(row.ownerId)).version).toBe(row.version);
+    expect((await gateway.history(access, row.key)).some((event) => event.action === 'NOTE')).toBe(
+      false,
+    );
+    await expect(
+      db.$executeRaw`UPDATE "ReviewWorkEvent" SET note='tampered' WHERE "caseKey"=${row.key}`,
+    ).rejects.toThrow('REVIEW_HISTORY_APPEND_ONLY');
+  });
   it('allows only one of two simultaneous claims', async () => {
     const row = await find(universityIds[3]);
     const result = await Promise.allSettled([
@@ -346,6 +364,15 @@ describe('Section 02 on a new attested isolated PostgreSQL 16 database', () => {
     expect(after.policyId).toBe('courses:1');
     expect(after.sla).toBe('on_track');
     expect(+new Date(after.dueAt!) - +new Date(after.enteredAt!)).toBe(86400000);
+    await gateway.approvePolicy(access, {
+      domain: 'courses',
+      version: 1,
+      hours: 72,
+      warningHours: 2,
+      reason: 'Synthetic updated policy for future cycles only',
+    });
+    await db.$executeRaw`UPDATE "ReviewWorkCase" SET "dueAt"=CURRENT_TIMESTAMP+interval '150 minutes' WHERE "key"=${after.key}`;
+    expect((await find(courseId)).sla).toBe('near_due');
     await db.$executeRaw`UPDATE "ReviewWorkCase" SET "dueAt"=CURRENT_TIMESTAMP-interval '1 second',"enteredAt"=CURRENT_TIMESTAMP-interval '1 day' WHERE "key"=${after.key}`;
     expect(
       (await gateway.list(access, { view: 'overdue' })).records.map((row) => row.ownerId),
@@ -391,6 +418,140 @@ describe('Section 02 on a new attested isolated PostgreSQL 16 database', () => {
       command(b, 'priority', { version: b.version + 99, priority: 'low' }),
     ]);
     expect(result.results.map((row) => row.ok)).toEqual([true, false]);
+  });
+  it('covers all nine owners and preserves profile/import identities', async () => {
+    const canonical = (name: string) => ({
+      id: randomUUID(),
+      publicId: 'RW-' + randomUUID(),
+      slug: 'rw-' + randomUUID(),
+      canonicalName: name,
+      canonicalDedupKey: randomUUID(),
+      displayName: name,
+    });
+    const country = await db.referenceCountry.create({
+      data: {
+        iso2Code: 'XX',
+        iso3Code: 'XXX',
+        name: 'Synthetic destination',
+        nameAr: 'وجهة اختبار معزولة',
+      },
+    });
+    const major = await db.major.create({
+      data: {
+        ...canonical('هندسة اختبار المراجعة'),
+        localizedNameEn: 'Review Engineering',
+        status: 'READY_TO_REVIEW',
+        completenessStatus: 'NEEDS_REVIEW',
+      },
+    });
+    const profile = await db.majorLevelProfile.create({
+      data: {
+        majorId: major.id,
+        level: 'BACHELOR',
+        localizedNameAr: 'هندسة اختبار المراجعة',
+        status: 'READY_TO_REVIEW',
+        completenessStatus: 'NEEDS_REVIEW',
+      },
+    });
+    await db.internationalTest.create({
+      data: {
+        ...canonical('اختبار لغوي معزول'),
+        status: 'READY_TO_REVIEW',
+        completenessStatus: 'INCOMPLETE',
+      },
+    });
+    await db.serviceCatalogRecord.create({
+      data: {
+        ...canonical('خدمة كتالوج اختبار'),
+        status: 'READY_TO_REVIEW',
+        completenessStatus: 'INCOMPLETE',
+        serviceCategory: 'EDUCATION',
+        fulfillmentType: 'MANUAL',
+        serviceDescription: 'Synthetic catalog only',
+        serviceAvailabilityStatus: 'AVAILABLE',
+        requiredInputsOrDocuments: [],
+        deliveryMode: 'ONLINE',
+        responsibleServiceOwnerType: 'INTERNAL',
+      },
+    });
+    await db.cmsContentNode.create({
+      data: {
+        publicId: 'CMS-' + randomUUID(),
+        slug: 'cms-' + randomUUID(),
+        contentType: 'ARTICLE',
+        status: 'IN_REVIEW',
+        title: 'محتوى المراجعة المعزول',
+        authorId: staff,
+        ownerId: staff,
+        lastModifiedBy: staff,
+      },
+    });
+    const employer = await db.careerEmployerRecord.create({
+      data: {
+        ...canonical('Synthetic employer'),
+        employerType: 'ORGANIZATION',
+        verificationStatus: 'VERIFIED',
+      },
+    });
+    await db.careerJobPostingRecord.create({
+      data: {
+        publicId: 'JOB-' + randomUUID(),
+        slug: 'job-' + randomUUID(),
+        canonicalTitle: 'Synthetic review opportunity',
+        canonicalDedupKey: randomUUID(),
+        title: 'فرصة مراجعة معزولة',
+        opportunityType: 'JOB',
+        employmentType: 'FULL_TIME',
+        jobCategory: 'EDUCATION',
+        description: 'Synthetic owner record',
+        countryReferenceId: country.id,
+        status: 'READY_TO_REVIEW',
+        employerId: employer.id,
+      },
+    });
+    const batch = await db.importBatch.create({
+      data: {
+        sourceSystem: 'ISOLATED_OWNER_SOURCE',
+        dataType: 'SCHOLARSHIPS',
+        batchStatus: 'COMPLETED',
+      },
+    });
+    const imported = await db.importRecord.create({
+      data: {
+        batchId: batch.id,
+        status: 'STAGED_INCOMPLETE',
+        rawPayload: { scholarshipName: 'منحة مصدر معزول', _operationalClass: 'REAL' },
+      },
+    });
+    await db.importRecord.create({
+      data: {
+        batchId: batch.id,
+        status: 'STAGED_INCOMPLETE',
+        rawPayload: { scholarshipName: 'Never show DEMO', _operationalClass: 'DEMO' },
+      },
+    });
+    await gateway.synchronize(access);
+    expect((await gateway.list(access, {})).coverage).toBe('complete');
+    for (const domain of reviewDomains)
+      expect((await gateway.list(access, { domain })).records.length).toBeGreaterThan(0);
+    const majorRow = (await gateway.list(access, { domain: 'majors' })).records[0];
+    expect(majorRow.ownerId).toBe(major.id);
+    expect(majorRow.profileId).toBe(profile.id);
+    expect(majorRow.href).toContain('profileId=' + profile.id);
+    const destination = (await gateway.list(access, { domain: 'study-destinations' })).records[0];
+    expect(destination.ownerId).toBe(country.id);
+    expect(destination.href).toBe('/study-destinations/XX');
+    const importPage = await gateway.list(access, { reason: 'import_review' });
+    expect(importPage.total).toBe(1);
+    expect(importPage.records[0].ownerId).toBe(imported.id);
+    expect(importPage.records[0].href).toContain('/imports/scholarships?reviewBatch=');
+    expect(
+      (await gateway.list({ ...access, imports: false }, { reason: 'import_review' })).records,
+    ).toHaveLength(0);
+    await expect(
+      gateway.history({ ...access, imports: false }, importPage.records[0].key),
+    ).rejects.toThrow('REVIEW_FORBIDDEN');
+    evidence.cases.allOwnerCoverage = reviewDomains;
   });
   it('does not leak owner records or history outside explicitly permitted domains', async () => {
     const restricted = { ...access, domains: ['courses'] as ReviewOwner[] };
