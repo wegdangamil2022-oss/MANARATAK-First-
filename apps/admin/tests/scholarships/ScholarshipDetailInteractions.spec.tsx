@@ -87,6 +87,22 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 describe('Scholarship detail template and editing boundaries', () => {
+  it('restores a blocked browser-history transition before the router can discard a draft', async () => {
+    const go=vi.fn();
+    Object.assign(window,{history:{state:{idx:2},go}});
+    await mount();await act(async()=>button('Edit data').props.onClick());
+    await act(async()=>button('Overview').props.onClick());
+    await act(async()=>tree.root.findByType('textarea').props.onChange({target:{value:'Unsaved history draft'}}));
+    const registration=vi.mocked(window.addEventListener).mock.calls.find(call=>call[0]==='popstate')!;
+    expect(registration[2]).toBe(true);
+    const pop=registration[1] as (event:unknown)=>void,stopImmediatePropagation=vi.fn();
+    await act(async()=>pop({state:{idx:1},stopImmediatePropagation}));
+    expect(stopImmediatePropagation).toHaveBeenCalled();expect(go).toHaveBeenCalledWith(1);
+    expect(tree.root.findByType('textarea').props.value).toBe('Unsaved history draft');
+    await act(async()=>pop({state:{idx:2},stopImmediatePropagation:vi.fn()}));
+    await act(async()=>button('Continue editing').props.onClick());
+    expect(tree.root.findByType('textarea').props.value).toBe('Unsaved history draft');
+  });
   it('defaults to saved read-only data with nine horizontal accessible tabs', async () => {
     await mount();
     expect(tree.root.findAllByProps({ role: 'tab' })).toHaveLength(9);

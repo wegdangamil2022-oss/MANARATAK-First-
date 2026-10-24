@@ -283,15 +283,37 @@ export function ScholarshipDetailPage() {
 
   const dirty = !!detail && JSON.stringify(form) !== savedForm.current;
   const unsaved = dirty || relationshipDirty;
+  const leaveApproved = useRef(false);
   const guard = (action: () => void) => {
     if (unsaved) setPendingLeave(() => action);
     else action();
   };
   useEffect(() => {
-    if (!unsaved) return;
+    if (!unsaved) { leaveApproved.current = false; return; }
     const unload = (event: BeforeUnloadEvent) => {
+      if (leaveApproved.current) return;
       event.preventDefault();
       event.returnValue = '';
+    };
+    const historyIndex = window.history?.state?.idx;
+    let restoringHistory = false;
+    const pop = (event: PopStateEvent) => {
+      if (leaveApproved.current || !Number.isSafeInteger(historyIndex) || !Number.isSafeInteger(event.state?.idx)) return;
+      // Capture before BrowserRouter's bubble listener so a refused history
+      // transition cannot unmount the editor and discard its draft.
+      event.stopImmediatePropagation();
+      if (restoringHistory && event.state.idx === historyIndex) {
+        restoringHistory = false;
+        return;
+      }
+      const restoreDelta = historyIndex - event.state.idx;
+      if (!restoreDelta) return;
+      restoringHistory = true;
+      window.history.go(restoreDelta);
+      setPendingLeave(() => () => {
+        leaveApproved.current = true;
+        window.history.go(-restoreDelta);
+      });
     };
     const link = (event: MouseEvent) => {
       const target = event.target instanceof Element ? event.target.closest('a[href]') : null;
@@ -313,9 +335,11 @@ export function ScholarshipDetailPage() {
       });
     };
     window.addEventListener('beforeunload', unload);
+    window.addEventListener('popstate', pop, true);
     document.addEventListener('click', link, true);
     return () => {
       window.removeEventListener('beforeunload', unload);
+      window.removeEventListener('popstate', pop, true);
       document.removeEventListener('click', link, true);
     };
   }, [unsaved]);
@@ -1696,6 +1720,7 @@ export function ScholarshipDetailPage() {
               <button
                 onClick={() => {
                   const leave = pendingLeave;
+                  leaveApproved.current = true;
                   setPendingLeave(null);
                   leave();
                 }}
@@ -1708,6 +1733,7 @@ export function ScholarshipDetailPage() {
                   onClick={async () => {
                     if (await save()) {
                       const leave = pendingLeave;
+                      leaveApproved.current = true;
                       setPendingLeave(null);
                       leave();
                     }
