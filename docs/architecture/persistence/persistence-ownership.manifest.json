@@ -295,7 +295,12 @@
     "PublicAnalyticsEvent": "foundation_control_plane",
     "DashboardMeasurementEpoch": "foundation_control_plane",
     "ServiceApplicationEvidence": "services",
-    "DirectApplicationReport": "services"
+    "DirectApplicationReport": "services",
+    "ReviewWorkCase": "foundation_control_plane",
+    "ReviewWorkEvent": "foundation_control_plane",
+    "ReviewSourceCheckpoint": "foundation_control_plane",
+    "ReviewWorkView": "foundation_control_plane",
+    "ReviewSlaPolicy": "foundation_control_plane"
   },
   "adapterPathOwners": {
     "packages/infrastructure/src/reference-data/": "reference",
@@ -329,7 +334,8 @@
     "packages/infrastructure/src/student-tools/PrismaStudentToolTestDiscoveryLinkRepository.ts": "student_tools",
     "packages/infrastructure/src/services-platform/PrismaServiceTestDiscoveryLinkRepository.ts": "services",
     "packages/infrastructure/src/dashboard/": "foundation_control_plane",
-    "packages/infrastructure/src/services-platform/PrismaManagedApplicationEvidenceGateway.ts": "services"
+    "packages/infrastructure/src/services-platform/PrismaManagedApplicationEvidenceGateway.ts": "services",
+    "packages/infrastructure/src/review-workspace/": "foundation_control_plane"
   },
   "approvedCrossContextReadModels": {
     "packages/infrastructure/src/academic-taxonomy/PrismaAcademicTaxonomyImportGateway.ts": [
@@ -411,6 +417,20 @@
     ],
     "packages/infrastructure/src/services-platform/PrismaManagedApplicationEvidenceGateway.ts": [
       "assets"
+    ],
+    "packages/infrastructure/src/review-workspace/PrismaReviewWorkspaceGateway.ts": [
+      "scholarships",
+      "universities",
+      "majors",
+      "courses",
+      "tests",
+      "services",
+      "cms",
+      "careers",
+      "reference",
+      "identity",
+      "authorization",
+      "import"
     ]
   },
   "historicalMigrationBaseline": [

@@ -10,6 +10,83 @@ generator client {
 
 // --- System & Core ---
 
+// Coordination only. Owner content and publication decisions stay in owner tables.
+model ReviewWorkCase {
+  key String @id
+  domain String
+  ownerId String
+  profileId String?
+  cycle Int @default(1)
+  version Int @default(1)
+  ownerRevision String
+  reasons Json
+  state String @default("OPEN")
+  assigneeId String?
+  teamId String?
+  priority String?
+  enteredAt DateTime @default(now())
+  dueAt DateTime?
+  policyId String?
+  closedAt DateTime?
+  synchronizedAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  events ReviewWorkEvent[]
+  assignee IdentityRecord? @relation("ReviewAssignee",fields:[assigneeId],references:[id],onDelete:Restrict)
+  team RoleRecord? @relation(fields:[teamId],references:[id],onDelete:Restrict)
+  @@index([domain, state, enteredAt, key])
+  @@index([assigneeId, state])
+  @@index([teamId, state])
+  @@index([dueAt, state])
+}
+
+model ReviewWorkEvent {
+  id String @id
+  caseKey String
+  cycle Int
+  action String
+  actorId String?
+  note String?
+  payload Json
+  commandKey String? @unique
+  commandHash String?
+  createdAt DateTime @default(now())
+  case ReviewWorkCase @relation(fields: [caseKey], references: [key], onDelete: Restrict)
+  actor IdentityRecord? @relation("ReviewEventActor",fields:[actorId],references:[id],onDelete:Restrict)
+  @@index([caseKey, createdAt, id])
+  @@index([action, createdAt])
+}
+
+model ReviewSourceCheckpoint {
+  domain String @id
+  synchronizedAt DateTime?
+  observed Int?
+  errorCode String?
+  lastAttemptAt DateTime @default(now())
+}
+
+model ReviewWorkView {
+  id String @id
+  actorId String
+  name String
+  shared Boolean @default(false)
+  filters Json
+  createdAt DateTime @default(now())
+  actor IdentityRecord @relation("ReviewViewActor",fields:[actorId],references:[id],onDelete:Restrict)
+  @@index([actorId, shared])
+}
+
+model ReviewSlaPolicy {
+  domain String @id
+  version Int @default(1)
+  hours Int
+  warningHours Int
+  timezone String @default("UTC")
+  approvedBy String
+  approvedAt DateTime @default(now())
+  reason String
+  approver IdentityRecord @relation("ReviewPolicyApprover",fields:[approvedBy],references:[id],onDelete:Restrict)
+}
+
 model Settings {
   id        String   @id @default(uuid())
   key       String   @unique
@@ -3652,6 +3729,10 @@ model CmsScheduledJob {
 // --- Identity Foundation ---
 
 model IdentityRecord {
+  reviewAssignments ReviewWorkCase[] @relation("ReviewAssignee")
+  reviewEvents ReviewWorkEvent[] @relation("ReviewEventActor")
+  reviewViews ReviewWorkView[] @relation("ReviewViewActor")
+  reviewPolicies ReviewSlaPolicy[] @relation("ReviewPolicyApprover")
   directApplicationReports DirectApplicationReport[]
   id     String @id
   type   String
@@ -3753,6 +3834,7 @@ model AccountRecord {
 // --- Authorization Foundation ---
 
 model RoleRecord {
+  reviewAssignments ReviewWorkCase[]
   id          String   @id
   name        String
   description String

@@ -1,0 +1,136 @@
+export const workspaceLabels: Record<string, [string, string]> = {
+  all: ['الكل', 'All'],
+  scholarships: ['المنح', 'Scholarships'],
+  universities: ['الجامعات', 'Universities'],
+  majors: ['التخصصات', 'Majors'],
+  courses: ['الدورات', 'Courses'],
+  tests: ['الاختبارات', 'Tests'],
+  services: ['الخدمات', 'Services'],
+  cms: ['المحتوى', 'Content'],
+  careers: ['الوظائف', 'Careers'],
+  'study-destinations': ['وجهات الدراسة', 'Study destinations'],
+  workflow_review: ['انتظار المراجعة', 'Workflow review'],
+  incomplete: ['بيانات ناقصة', 'Incomplete data'],
+  ready_to_publish: ['جاهز لدى القسم', 'Ready at owner'],
+  imported_unreviewed: ['مستورد لم يُراجع', 'Unreviewed import'],
+  needs_translation: ['يحتاج ترجمة', 'Translation needed'],
+  source_verification: ['تحقق المصدر', 'Source verification'],
+  broken_link: ['رابط معطل', 'Broken link'],
+  import_review: ['مراجعة الاستيراد', 'Import review'],
+  critical: ['حرجة', 'Critical'],
+  high: ['عالية', 'High'],
+  medium: ['متوسطة', 'Medium'],
+  low: ['منخفضة', 'Low'],
+  suggested: ['مقترحة', 'Suggested'],
+  reviewer: ['حددها المراجع', 'Reviewer assigned'],
+  owner: ['حددها القسم', 'Owner supplied'],
+  OPEN: ['مفتوحة', 'Open'],
+  WAITING_INFORMATION: ['بانتظار معلومات', 'Waiting for information'],
+  REFERRED: ['محالة', 'Referred'],
+  COMPLETED: ['مكتملة لدى القسم', 'Resolved at owner'],
+  READY_TO_REVIEW: ['جاهز للمراجعة', 'Ready for review'],
+  READY_TO_PUBLISH: ['جاهز لدى القسم', 'Owner ready'],
+  IN_REVIEW: ['قيد المراجعة', 'In review'],
+  NO_PROFILE: ['لم يُنشأ ملف الوجهة', 'No destination profile'],
+  DRAFT: ['مسودة', 'Draft'],
+  IMPORTED: ['مستورد', 'Imported'],
+  NEEDS_REVIEW: ['يحتاج مراجعة', 'Needs review'],
+  PUBLISHED: ['منشور', 'Published'],
+  mine: ['مراجعاتي', 'My reviews'],
+  unassigned: ['غير مسندة', 'Unassigned'],
+  urgent: ['عالية / حرجة', 'High / critical'],
+  overdue: ['متأخرة', 'Overdue'],
+  near_due: ['تقترب من الموعد', 'Near deadline'],
+  ready: ['جاهز لدى القسم', 'Ready at owner'],
+  translation: ['الترجمة', 'Translation'],
+  source: ['تحقق المصدر', 'Source verification'],
+  priority: ['الأولوية', 'Priority'],
+  deadline: ['أقرب مهلة', 'Nearest deadline'],
+  oldest: ['الأقدم انتظارًا', 'Oldest waiting'],
+  newest: ['الأحدث تعديلًا', 'Last updated'],
+  domain: ['القسم', 'Section'],
+  assignee: ['المسؤول', 'Assignee'],
+  state: ['حالة المعالجة', 'Work state'],
+  reason: ['سبب المراجعة', 'Review reason'],
+  sourceKind: ['أصل السجل', 'Origin'],
+  age: ['عمر الانتظار', 'Waiting age'],
+  locale: ['لغة السجل', 'Record language'],
+  imported: ['مستورد', 'Imported'],
+  manual: ['يدوي', 'Manual'],
+  unknown: ['غير محدد', 'Not specified'],
+  today: ['آخر 24 ساعة', 'Last 24 hours'],
+  week: ['آخر 7 أيام', 'Last 7 days'],
+  older: ['أقدم من أسبوع', 'Over a week'],
+  ar: ['العربية', 'Arabic'],
+  en: ['الإنجليزية', 'English'],
+  on_track: ['ضمن المهلة المحددة', 'Within approved deadline'],
+  ready_source: ['سليم', 'Healthy'],
+  stale: ['تحتاج تحديثًا', 'Needs refresh'],
+  unavailable: ['تعذرت القراءة', 'Unavailable'],
+  forbidden: ['محجوب بالصلاحية', 'Permission restricted'],
+  CLAIM: ['استلام المراجعة', 'Review claimed'],
+  ASSIGN: ['تغيير الإسناد', 'Assignment changed'],
+  PRIORITY: ['تغيير الأولوية', 'Priority changed'],
+  NOTE: ['ملاحظة داخلية', 'Internal note'],
+  STATE: ['تغيير حالة العمل', 'Work state changed'],
+  OWNER_CHANGED: ['تغير السجل لدى القسم', 'Owner record changed'],
+  OBSERVED_ENTERED: ['بدء رصد المراجعة', 'Review first observed'],
+  OBSERVED_REOPENED: ['رُصدت مراجعة جديدة', 'New review cycle observed'],
+  OBSERVED_COMPLETED: ['رُصد اكتمالها لدى القسم', 'Resolution observed at owner'],
+  REVIEW_OWNER_CHANGED: [
+    'تغير السجل في قسمه؛ حدّث القائمة قبل المتابعة.',
+    'The owner record changed. Refresh before continuing.',
+  ],
+  REVIEW_VERSION_CONFLICT: [
+    'عدّل مراجع آخر هذه القضية؛ حدّث القائمة.',
+    'Another reviewer changed this case. Refresh the list.',
+  ],
+  REVIEW_SNAPSHOT_CHANGED: [
+    'تغيرت النتائج؛ حدّث القائمة لبدء تصفح متسق.',
+    'Results changed. Refresh to restart consistent pagination.',
+  ],
+  REVIEW_FORBIDDEN: ['لا تملك صلاحية هذا الإجراء.', 'You do not have permission for this action.'],
+  REVIEW_ASSIGNEE_FORBIDDEN: [
+    'المراجع لا يملك الوصول المطلوب إلى السجل.',
+    'This reviewer cannot access the owner record.',
+  ],
+  REVIEW_TEAM_FORBIDDEN: [
+    'الفريق غير مؤهل لهذا القسم؛ راجع عضويته وصلاحياته.',
+    'The team is not eligible. Check membership and permissions.',
+  ],
+  REVIEW_ALREADY_ASSIGNED: [
+    'استلم مراجع آخر هذه الحالة.',
+    'This review has already been assigned.',
+  ],
+  REVIEW_UNAVAILABLE: [
+    'تعذر الاتصال بخدمة المراجعة. لم تُحوّل البيانات المفقودة إلى أصفار.',
+    'Review service unavailable. Missing data is not shown as zero.',
+  ],
+  MFA_STEP_UP_REQUIRED: [
+    'أكد العمليات الحساسة في صفحة أمان الحساب ثم أعد المحاولة.',
+    'Confirm sensitive actions in account security, then retry.',
+  ],
+  MFA_ENROLLMENT_REQUIRED: [
+    'فعّل المصادقة الإضافية في أمان الحساب.',
+    'Enable multi-factor authentication in account security.',
+  ],
+};
+export const textFor = (language: string) => (ar: string, en: string) =>
+  language === 'ar' ? ar : en;
+export const labelFor = (language: string) => (value: string) =>
+  workspaceLabels[value]?.[language === 'ar' ? 0 : 1] ?? value;
+export function workspaceError(error: unknown) {
+  const message = error instanceof Error ? error.message : '';
+  return message.match(/(?:REVIEW|MFA)_[A-Z_]+/)?.[0] ?? 'REVIEW_UNAVAILABLE';
+}
+export function displayDate(value: string | null, language: string) {
+  if (!value) return language === 'ar' ? 'غير محدد' : 'Not specified';
+  const stamp = new Date(value);
+  return Number.isFinite(+stamp)
+    ? new Intl.DateTimeFormat(language, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+        timeZone: 'UTC',
+      }).format(stamp) + ' UTC'
+    : '—';
+}
