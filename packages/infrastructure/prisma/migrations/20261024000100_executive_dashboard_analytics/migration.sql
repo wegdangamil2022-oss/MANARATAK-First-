@@ -175,7 +175,7 @@ BEGIN
  IF current_setting('transaction_isolation')<>'read committed' THEN
   RAISE EXCEPTION 'ASSET_REFERENCE_ISOLATION_UNSUPPORTED' USING ERRCODE='23514';
  END IF;
- IF EXISTS (SELECT 1 FROM "ServiceApplicationEvidence" WHERE "evidenceAssetId"=OLD."id") THEN
+ IF EXISTS (SELECT 1 FROM "ServiceApplicationEvidence" WHERE "evidenceAssetId" = OLD."id") THEN
   RAISE EXCEPTION 'ASSET_REFERENCE_IN_USE' USING ERRCODE='23514';
  END IF;
  IF TG_OP='DELETE' THEN RETURN OLD; END IF;
