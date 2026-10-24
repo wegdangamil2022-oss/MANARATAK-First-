@@ -171,12 +171,12 @@ export function WorkspaceAnalytics({
               {data.series.map((row) => (
                 <div key={row.day} className="rw-chart-day">
                   <div>
-                    <button
+                    <span role="img" tabIndex={0}
                       style={{ height: `${Math.max(3, (row.entered / max) * 130)}px` }}
                       title={row.day + ' — ' + tr('جديدة: ', 'New: ') + row.entered}
                       aria-label={row.day + ' ' + tr('جديدة ', 'new ') + row.entered}
                     />
-                    <button
+                    <span role="img" tabIndex={0}
                       style={{ height: `${Math.max(3, (row.completed / max) * 130)}px` }}
                       title={row.day + ' — ' + tr('مكتملة: ', 'Completed: ') + row.completed}
                       aria-label={row.day + ' ' + tr('مكتملة ', 'completed ') + row.completed}

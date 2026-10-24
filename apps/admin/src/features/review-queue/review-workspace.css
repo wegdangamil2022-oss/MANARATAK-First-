@@ -566,7 +566,7 @@
   align-items: end;
   justify-content: center;
 }
-.rw-chart-day button {
+.rw-chart-day span[role=img] {
   background: #142b5f;
   border: 0;
   width: 15px;
@@ -574,7 +574,7 @@
   padding: 0;
   border-radius: 4px 4px 0 0;
 }
-.rw-chart-day button + button {
+.rw-chart-day span[role=img] + span[role=img] {
   background: #0e7c86;
 }
 .rw-source-list {
@@ -943,3 +943,4 @@
     animation: none;
   }
 }
+

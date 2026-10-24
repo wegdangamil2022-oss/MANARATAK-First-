@@ -41,7 +41,7 @@ CREATE TABLE "ReviewSlaPolicy" ("domain" TEXT PRIMARY KEY,"version" INTEGER NOT 
 CREATE FUNCTION review_normalize(value TEXT) RETURNS TEXT LANGUAGE sql IMMUTABLE PARALLEL SAFE AS $$
  SELECT lower(translate(regexp_replace(coalesce(value,''),'[ـًٌٍَُِّْٰ]','','g'),'أإآٱى','ااااي'))
 $$;
-CREATE VIEW "ReviewOwnerProjection" AS
+CREATE VIEW "ReviewOwnerProjection" WITH (security_invoker=true) AS
 WITH owners AS (
  SELECT 'scholarships'::text domain,s.id "ownerId",NULL::text "profileId",to_jsonb(s) j FROM "Scholarship" s
  UNION ALL SELECT 'universities',s.id,NULL,to_jsonb(s) FROM "University" s
