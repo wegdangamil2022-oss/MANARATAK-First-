@@ -1,0 +1,356 @@
+{
+  "sourceCommit": "7a85650946ce3d674c2edb0793bf7bf5946322ca",
+  "scope": "Dashboard ownership/asset-retention follow-up; new isolated PostgreSQL16 cluster only",
+  "migration": {
+    "pass": true,
+    "scope": "NEW_ISOLATED_POSTGRES16_ONLY",
+    "labSourceSha": "7a85650946ce3d674c2edb0793bf7bf5946322ca",
+    "sourceSha": "7a85650946ce3d674c2edb0793bf7bf5946322ca",
+    "migration": "20261024000100_executive_dashboard_analytics",
+    "migrationSha256": "51e4f3c4365a02d7f7c0ad9a2ef2ee9f314f96752b540e782e0f85811488cf02",
+    "existingDatabasesModified": false,
+    "productionOrNeonTouched": false
+  },
+  "tests": [
+    {
+      "report": "ci-owner-source-final.json",
+      "pass": true,
+      "total": 50,
+      "passed": 50,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Dashboard owner permissions and last-good evidence reads only visible headlines and attention evidence, with no hidden publication breakdowns",
+          "status": "passed"
+        },
+        {
+          "name": "Dashboard owner permissions and last-good evidence removes counters and owner links when the owner grant is revoked",
+          "status": "passed"
+        },
+        {
+          "name": "Dashboard owner permissions and last-good evidence preserves last-good counters explicitly stale after an owner failure",
+          "status": "passed"
+        },
+        {
+          "name": "Dashboard owner permissions and last-good evidence expires displayed evidence without polling and refreshes on focus with complete lifecycle cleanup",
+          "status": "passed"
+        },
+        {
+          "name": "Bounded owner read budgets reads absent import status groups as zero only when the histogram accounts for the total",
+          "status": "passed"
+        },
+        {
+          "name": "Bounded owner read budgets accepts valid slow responses beyond the former 5/8 second deadlines",
+          "status": "passed"
+        },
+        {
+          "name": "Bounded owner read budgets still terminates a hung source and cancels its transport",
+          "status": "passed"
+        },
+        {
+          "name": "Executive dashboard data and independent periods uses real registered-account aggregate, not the Human identity list, and keeps totals while the period changes",
+          "status": "passed"
+        },
+        {
+          "name": "Executive dashboard data and independent periods purges all user aggregates on revocation and never sends a forbidden user request",
+          "status": "passed"
+        },
+        {
+          "name": "Executive dashboard data and independent periods rejects fake negative counts and mismatched chart totals rather than coercing them to zero",
+          "status": "passed"
+        },
+        {
+          "name": "Executive dashboard data and independent periods ignores late results from a previous period and marks retained totals stale after a refresh failure",
+          "status": "passed"
+        },
+        {
+          "name": "First-party collection is limited to explicit public navigation classifies public routes without sending personal pages, slugs or query values",
+          "status": "passed"
+        },
+        {
+          "name": "First-party collection is limited to explicit public navigation does not collect without consent, after expiry or under GPC, and never transmits full URLs",
+          "status": "passed"
+        },
+        {
+          "name": "Retention orchestration keeps each domain as its own writer sweeps both owners even when public events are empty, and bounds full batches",
+          "status": "passed"
+        },
+        {
+          "name": "Retention orchestration keeps each domain as its own writer does not perform erasure work after cancellation or for unrecognized parameters",
+          "status": "passed"
+        },
+        {
+          "name": "Executive periods and real registration growth compares exactly equal UTC windows of 7 days, including leap dates",
+          "status": "passed"
+        },
+        {
+          "name": "Executive periods and real registration growth compares exactly equal UTC windows of 30 days, including leap dates",
+          "status": "passed"
+        },
+        {
+          "name": "Executive periods and real registration growth compares exactly equal UTC windows of 90 days, including leap dates",
+          "status": "passed"
+        },
+        {
+          "name": "Executive periods and real registration growth compares exactly equal UTC windows of 365 days, including leap dates",
+          "status": "passed"
+        },
+        {
+          "name": "Executive periods and real registration growth keeps 1/0 growth honest",
+          "status": "passed"
+        },
+        {
+          "name": "Executive periods and real registration growth keeps 0/0 growth honest",
+          "status": "passed"
+        },
+        {
+          "name": "Executive periods and real registration growth keeps 0/4 growth honest",
+          "status": "passed"
+        },
+        {
+          "name": "Executive periods and real registration growth keeps 6/4 growth honest",
+          "status": "passed"
+        },
+        {
+          "name": "Executive periods and real registration growth rejects invalid periods and negative or unsafe counts",
+          "status": "passed"
+        },
+        {
+          "name": "Explicit public analytics consent defaults to no collection until policy activation and never stores a plaintext capability",
+          "status": "passed"
+        },
+        {
+          "name": "Explicit public analytics consent does not reuse student personalization consent or accept another policy",
+          "status": "passed"
+        },
+        {
+          "name": "Explicit public analytics consent excludes bots before storing events; accepts withdrawal even after collection is disabled",
+          "status": "passed"
+        },
+        {
+          "name": "University evidence does not follow from file receipt, tracker or payment requires a reviewed managed-service snapshot and a private trusted proof",
+          "status": "passed"
+        },
+        {
+          "name": "University evidence does not follow from file receipt, tracker or payment rejects expired proof and uncleared paid services without producing an event",
+          "status": "passed"
+        },
+        {
+          "name": "Phase 20 service request ownership and finance handoff only delegates bounded P20 payment triage to its owner repository",
+          "status": "passed"
+        },
+        {
+          "name": "Phase 20 service request ownership and finance handoff allows a student request only for a published owner service",
+          "status": "passed"
+        },
+        {
+          "name": "Phase 20 service request ownership and finance handoff does not classify a published service as managed from an unapproved draft flag",
+          "status": "passed"
+        },
+        {
+          "name": "Phase 20 service request ownership and finance handoff keeps finance authority behind IServiceFinanceGateway and stores only returned invoice identity",
+          "status": "passed"
+        },
+        {
+          "name": "Phase 20 service request ownership and finance handoff blocks paid-service fulfillment until Finance proves clearance",
+          "status": "passed"
+        },
+        {
+          "name": "Phase 20 service request ownership and finance handoff allows fulfillment only after Finance-owned clearance is proven",
+          "status": "passed"
+        },
+        {
+          "name": "Executive aggregate authorization and input boundaries requires current authentication and dedicated permission before any data read",
+          "status": "passed"
+        },
+        {
+          "name": "Executive aggregate authorization and input boundaries permits bounded windows only, rejects unknown query fields and disables shared caches",
+          "status": "passed"
+        },
+        {
+          "name": "Public event shape and policy gates rejects secret/PII/raw URL fields and known bots without persisting them",
+          "status": "passed"
+        },
+        {
+          "name": "Public event shape and policy gates does not accept a generic preference as consent and permits revocation when collection is off",
+          "status": "passed"
+        },
+        {
+          "name": "Managed application evidence belongs to the service owner denies cross-assignment even when the actor has the fulfill action; no proof is recorded",
+          "status": "passed"
+        },
+        {
+          "name": "Managed application evidence belongs to the service owner requires separate proof-verification capability and rejects forged client actor IDs",
+          "status": "passed"
+        },
+        {
+          "name": "StudentWorkspaceRouter returns a student dashboard summary",
+          "status": "passed"
+        },
+        {
+          "name": "StudentWorkspaceRouter derives the normal dashboard path from the authenticated identity",
+          "status": "passed"
+        },
+        {
+          "name": "StudentWorkspaceRouter saves a personal item reference",
+          "status": "passed"
+        },
+        {
+          "name": "StudentWorkspaceRouter denies access to another student workspace",
+          "status": "passed"
+        },
+        {
+          "name": "StudentWorkspaceRouter requires an authenticated student session",
+          "status": "passed"
+        },
+        {
+          "name": "StudentWorkspaceRouter routes privacy toggles through the consent command with authenticated actor evidence",
+          "status": "passed"
+        },
+        {
+          "name": "StudentWorkspaceRouter rejects privacy fields on generic workspace updates instead of stripping them",
+          "status": "passed"
+        },
+        {
+          "name": "StudentWorkspaceRouter rejects public collection type spoofing: FAVORITES",
+          "status": "passed"
+        },
+        {
+          "name": "StudentWorkspaceRouter rejects public collection type spoofing: SMART",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "report": "DATABASE_TEST_REPORT.json",
+      "pass": true,
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Executive dashboard on a new isolated PostgreSQL 16 target counts qualified accounts and canonical students separately; time-series totals and comparisons agree",
+          "status": "passed"
+        },
+        {
+          "name": "Executive dashboard on a new isolated PostgreSQL 16 target has no fabricated traffic history before the first consenting event",
+          "status": "passed"
+        },
+        {
+          "name": "Executive dashboard on a new isolated PostgreSQL 16 target separates visitors from views, retries from events, and outbound referral from application",
+          "status": "passed"
+        },
+        {
+          "name": "Executive dashboard on a new isolated PostgreSQL 16 target creates one submitted service receipt with canonical opportunity and safe documents; uploads/trackers never count",
+          "status": "passed"
+        },
+        {
+          "name": "Executive dashboard on a new isolated PostgreSQL 16 target records university submission only after trusted private proof; audit/outbox/event commit atomically",
+          "status": "passed"
+        },
+        {
+          "name": "Executive dashboard on a new isolated PostgreSQL 16 target enforces one official outcome and no duplicated effect; preserves a distinct unverified self-report",
+          "status": "passed"
+        },
+        {
+          "name": "Executive dashboard on a new isolated PostgreSQL 16 target withdrawal races cannot retain a late event or allow another write; the transaction protects deletion",
+          "status": "passed"
+        },
+        {
+          "name": "Executive dashboard on a new isolated PostgreSQL 16 target purges expired events without deleting current consented observations",
+          "status": "passed"
+        },
+        {
+          "name": "Executive dashboard on a new isolated PostgreSQL 16 target does not expose personal rows and keeps bounded indexed aggregates usable under a small load",
+          "status": "passed"
+        },
+        {
+          "name": "Executive dashboard on a new isolated PostgreSQL 16 target boots the actual API with real sessions and permissions and displays its PostgreSQL aggregates in the browser",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "report": "RETENTION_TEST_REPORT.json",
+      "pass": true,
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Executive evidence retention on the attested synthetic application-role target retains expired attestations under request or asset legal hold while removing only expired unheld rows",
+          "status": "passed"
+        },
+        {
+          "name": "Executive evidence retention on the attested synthetic application-role target rejects direct SQL-null proof digests and duplicate proven stages without weakening the owner safeguards",
+          "status": "passed"
+        },
+        {
+          "name": "Executive evidence retention on the attested synthetic application-role target binds the trusted private asset under the transaction lock and replays its atomic receipt once",
+          "status": "passed"
+        },
+        {
+          "name": "Executive evidence retention on the attested synthetic application-role target keeps the canonical mounted API readable through actual session and permission guards after router separation",
+          "status": "passed"
+        },
+        {
+          "name": "Executive evidence retention on the attested synthetic application-role target detaches only expired unheld source files while preserving attestations and held evidence links",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "database": {
+    "identity": [
+      {
+        "label": "DB-T",
+        "database": "manaratak_post28_transactions_test",
+        "role": "post28_app",
+        "serverIdentity": "7700026661183499104",
+        "databaseOid": "16386",
+        "postgresMajor": 16,
+        "timezone": "UTC",
+        "publicTables": 287,
+        "probeReadOnly": true
+      }
+    ],
+    "fullStory": {
+      "actualAppMount": true,
+      "actualJwtSession": true,
+      "actualRolePermissions": true,
+      "anonymous": 401,
+      "student": 403,
+      "admin": 200,
+      "registeredUsers": 2004,
+      "browser": false,
+      "noExternalServices": true
+    },
+    "latencyMs": [
+      23.214900000000853,
+      17.435499999999593,
+      18.1908999999996,
+      16.930900000001202,
+      18.529499999998734
+    ]
+  },
+  "sourceChecks": {
+    "modelOwnership": "286/286",
+    "assetReferences": {
+      "direct": 33,
+      "json": 4
+    },
+    "referenceReadinessTests": 10,
+    "referenceInventoryTests": 3,
+    "assetPolicyTests": 4,
+    "remediationVerifiers": "17/17",
+    "strictCspTests": "5/5"
+  },
+  "migrationCandidate": "The unreleased migration gained ownership comments and additive evidence-reference guards; no historical main migration changed. Earlier synthetic-cluster hashes are superseded by this fresh replay.",
+  "remoteCi": "Not asserted passing; follow the latest PR head workflow results",
+  "notes": [
+    "The 50 source tests overlap earlier source/UI regression reports and are not added to those counts.",
+    "The fresh follow-up reran actual HTTP API/JWT/session/RBAC and restricted-role DB tests; browser rendering proof from the earlier candidates is retained separately.",
+    "Public analytics and service retention now each mutate only their owner tables; one durable job orchestrates both.",
+    "Current evidence references block asset purge; expired unheld source links are detached without rewriting the immutable digest; legal holds remain protected."
+  ]
+}
