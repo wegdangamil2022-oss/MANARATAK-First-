@@ -976,3 +976,53 @@
     animation: none;
   }
 }
+
+/* Compact record cards retain the existing type scale and every action. */
+@media (max-width: 850px) {
+  .rw-table tr {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas:
+      'record record select'
+      'reason priority assignee'
+      'deadline actions actions';
+    gap: 0;
+    padding: 0;
+    margin-block: 10px;
+    border: 1px solid #ddeff2;
+    border-radius: 12px;
+    overflow: hidden;
+    align-items: stretch;
+  }
+  .rw-table td {
+    min-width: 0;
+    padding: 8px 10px;
+    border-block-end: 1px solid #ddeff2;
+    border-inline-end: 1px solid #ddeff2;
+  }
+  .rw-table td:is([data-label='السجل'], [data-label='Record']) { grid-area: record; }
+  .rw-table td:is([data-label='اختيار'], [data-label='Select']) { grid-area: select; border-inline-end: 0; }
+  .rw-table td:is([data-label='السبب'], [data-label='Reason']) { grid-area: reason; }
+  .rw-table td:is([data-label='الأولوية'], [data-label='Priority']) { grid-area: priority; }
+  .rw-table td:is([data-label='المسؤول'], [data-label='Assignee']) { grid-area: assignee; border-inline-end: 0; }
+  .rw-table td:is([data-label='المهلة'], [data-label='Deadline']) { grid-area: deadline; border-block-end: 0; }
+  .rw-table td:is([data-label='الإجراءات'], [data-label='Actions']) { grid-area: actions; border: 0; }
+  .rw-table td .rw-row-actions { flex-wrap: wrap; justify-content: flex-start; gap: 6px; }
+  .rw-table td .rw-record-english { width: fit-content; }
+  .rw-table td .rw-owner-label { display: inline-block; margin-inline-end: 6px; }
+  .rw-table td:is([data-label='السجل'], [data-label='Record']) > strong { display: inline; }
+  .rw-table td .rw-record-english { display: inline-block; margin-inline: 6px; }
+  .rw-table tr:not(:has(td:is([data-label='اختيار'], [data-label='Select']))) td:is([data-label='السجل'], [data-label='Record']) { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+  .rw-table tr {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      'record select'
+      'reason priority'
+      'assignee deadline'
+      'actions actions';
+  }
+  .rw-table td:is([data-label='الأولوية'], [data-label='Priority']) { border-inline-end: 0; }
+  .rw-table td:is([data-label='المسؤول'], [data-label='Assignee']) { border-inline-end: 1px solid #ddeff2; }
+  .rw-table td:is([data-label='المهلة'], [data-label='Deadline']) { border-inline-end: 0; border-block-end: 1px solid #ddeff2; }
+}
