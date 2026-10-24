@@ -1,3 +1,8 @@
+-- MANARATAK_MIGRATION_OWNER: cross_context
+-- MANARATAK_MIGRATION_SCOPE: cross_context_approved
+-- MANARATAK_ARCH_DECISION: ADR-028
+-- Unreleased Dashboard candidate: additive analytics/service evidence, owner-neutral FKs and indexes.
+-- Review and isolated execution: docs/ui/EXECUTIVE_DASHBOARD_DELIVERY_2026-10-24.md
 -- AlterTable
 ALTER TABLE "ServiceCatalogRecord" ADD COLUMN     "managedApplication" BOOLEAN NOT NULL DEFAULT false;
 
@@ -157,3 +162,24 @@ BEGIN
 END $$;
 CREATE TRIGGER "ServiceApplicationEvidence_immutable" BEFORE UPDATE OR DELETE ON "ServiceApplicationEvidence"
  FOR EACH ROW EXECUTE FUNCTION protect_service_application_evidence();
+
+-- Reuse the canonical asset-owner serialization guard; no historical guard is replaced.
+CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "evidenceAssetId" ON "ServiceApplicationEvidence"
+ FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('evidenceAssetId', 'false', 'false');
+
+CREATE FUNCTION manaratak_guard_service_application_asset_lifecycle() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+ IF TG_OP='UPDATE' THEN
+  IF NEW."id"=OLD."id" AND (NEW."lifecycleState"=OLD."lifecycleState" OR NEW."lifecycleState"='ACTIVE') THEN RETURN NEW; END IF;
+ END IF;
+ IF current_setting('transaction_isolation')<>'read committed' THEN
+  RAISE EXCEPTION 'ASSET_REFERENCE_ISOLATION_UNSUPPORTED' USING ERRCODE='23514';
+ END IF;
+ IF EXISTS (SELECT 1 FROM "ServiceApplicationEvidence" WHERE "evidenceAssetId"=OLD."id") THEN
+  RAISE EXCEPTION 'ASSET_REFERENCE_IN_USE' USING ERRCODE='23514';
+ END IF;
+ IF TG_OP='DELETE' THEN RETURN OLD; END IF;
+ RETURN NEW;
+END $$;
+CREATE TRIGGER "eap_asset_lifecycle_service_application" BEFORE UPDATE OF "id", "lifecycleState" OR DELETE ON "AssetRecord"
+ FOR EACH ROW EXECUTE FUNCTION manaratak_guard_service_application_asset_lifecycle();

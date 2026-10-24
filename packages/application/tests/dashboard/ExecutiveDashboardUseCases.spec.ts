@@ -6,10 +6,37 @@ import {
   analyticsTokenHash,
   ManagedApplicationEvidenceUseCases,
 } from '../../src/dashboard/ExecutiveDashboardUseCases';
+import { AnalyticsRetentionBackgroundJobHandler } from '../../src/dashboard/AnalyticsRetentionBackgroundJobHandler';
 import { ANALYTICS_POLICY_VERSION } from '@manaratak/shared';
 import { AssetReferencePolicy } from '../../src/asset-platform/AssetReferencePolicy';
 
 afterEach(() => vi.useRealTimers());
+describe('Retention orchestration keeps each domain as its own writer', () => {
+  it('sweeps both owners even when public events are empty, and bounds full batches', async () => {
+    const analytics = { purgeExpired: vi.fn().mockResolvedValue(0) };
+    const applications = { purgeExpired: vi.fn().mockResolvedValueOnce(1000).mockResolvedValue(0) };
+    const handler = new AnalyticsRetentionBackgroundJobHandler(
+      analytics as never,
+      applications as never,
+    );
+    await handler.handle({}, { signal: new AbortController().signal } as never);
+    expect(analytics.purgeExpired).toHaveBeenCalledTimes(2);
+    expect(applications.purgeExpired).toHaveBeenCalledTimes(2);
+  });
+  it('does not perform erasure work after cancellation or for unrecognized parameters', async () => {
+    const owner = { purgeExpired: vi.fn() };
+    const handler = new AnalyticsRetentionBackgroundJobHandler(owner as never, owner as never);
+    const controller = new AbortController();
+    controller.abort();
+    await expect(handler.handle({}, { signal: controller.signal } as never)).rejects.toThrow(
+      'ABORTED',
+    );
+    await expect(
+      handler.handle({ unsafe: true }, { signal: new AbortController().signal } as never),
+    ).rejects.toThrow('PAYLOAD_INVALID');
+    expect(owner.purgeExpired).not.toHaveBeenCalled();
+  });
+});
 describe('Executive periods and real registration growth', () => {
   it.each([7, 30, 90, 365])(
     'compares exactly equal UTC windows of %i days, including leap dates',

@@ -4,13 +4,10 @@ import { PrismaClient } from '@prisma/client';
 import { beforeAll, afterAll, describe, expect, it } from 'vitest';
 import { preflightTargets } from '../../../../scripts/database/post28-isolation.mjs';
 import { readDatabaseIdentity } from '../../../../scripts/database/post28-preflight.mjs';
-import {
-  PrismaPublicAnalyticsGateway,
-  PrismaManagedApplicationEvidenceGateway,
-} from '../../src/dashboard/PrismaDashboardMeasurementGateway';
+import { PrismaManagedApplicationEvidenceGateway } from '../../src/dashboard/PrismaDashboardMeasurementGateway';
 
 describe('Executive evidence retention on the attested synthetic application-role target', () => {
-  let db: PrismaClient, purge: PrismaPublicAnalyticsGateway;
+  let db: PrismaClient, purge: PrismaManagedApplicationEvidenceGateway;
   let requestId = '',
     heldRequestId = '',
     assetId = '';
@@ -106,7 +103,7 @@ describe('Executive evidence retention on the attested synthetic application-rol
         idempotencyKey: 'retention-fixture-' + row.id,
       })),
     });
-    purge = new PrismaPublicAnalyticsGateway(db, async () => null);
+    purge = new PrismaManagedApplicationEvidenceGateway(db, async () => null);
   });
   afterAll(async () => {
     await db?.$disconnect();
@@ -216,5 +213,35 @@ describe('Executive evidence retention on the attested synthetic application-rol
       await new Promise<void>((resolve) => server.close(() => resolve()));
       await app.locals.runtimeResourceRegistry?.closeAll();
     }
+  });
+  it('detaches only expired unheld source files while preserving attestations and held evidence links', async () => {
+    const asset = await db.assetRecord.findUniqueOrThrow({ where: { id: assetId } });
+    const retained = await db.serviceApplicationEvidence.create({
+      data: {
+        requestId,
+        kind: 'NEEDS_INFORMATION',
+        actorId: asset.ownerId,
+        idempotencyKey: 'source-retention-' + randomUUID(),
+        evidenceAssetId: assetId,
+        evidenceDigest: asset.checksumHash,
+        expiresAt: new Date(Date.now() + 86400000),
+      },
+    });
+    await db.assetRecord.update({
+      where: { id: assetId },
+      data: { legalHoldUntil: null, retentionExpiresAt: new Date(Date.now() - 1000) },
+    });
+    await purge.purgeExpired();
+    const after = await db.serviceApplicationEvidence.findUniqueOrThrow({
+      where: { id: retained.id },
+    });
+    expect(after.evidenceAssetId).toBeNull();
+    expect(after.evidenceDigest).toBe(retained.evidenceDigest);
+    expect(after.verifiedAt).toEqual(retained.verifiedAt);
+    expect(
+      await db.serviceApplicationEvidence.count({
+        where: { requestId: heldRequestId, evidenceAssetId: assetId },
+      }),
+    ).toBeGreaterThan(0);
   });
 });

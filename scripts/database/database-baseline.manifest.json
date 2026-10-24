@@ -1130,6 +1130,26 @@
     "WorkflowExecutionProjection": {
       "owner": "foundation_control_plane",
       "required": true
+    },
+    "PublicAnalyticsConsent": {
+      "owner": "foundation_control_plane",
+      "required": true
+    },
+    "PublicAnalyticsEvent": {
+      "owner": "foundation_control_plane",
+      "required": true
+    },
+    "DashboardMeasurementEpoch": {
+      "owner": "foundation_control_plane",
+      "required": true
+    },
+    "ServiceApplicationEvidence": {
+      "owner": "services",
+      "required": true
+    },
+    "DirectApplicationReport": {
+      "owner": "services",
+      "required": true
     }
   },
   "consistencyProbes": {

@@ -104,6 +104,7 @@ export class PublicAnalyticsUseCases {
   }
 }
 export interface ManagedApplicationEvidenceGateway {
+  purgeExpired(): Promise<number>;
   assets(
     actorId: string,
     after?: string,
@@ -128,6 +129,9 @@ export class ManagedApplicationEvidenceUseCases {
   ) {}
   evidenceAssets(actorId: string, after?: string) {
     return this.gateway.assets(actorId, after);
+  }
+  purgeExpired() {
+    return this.gateway.purgeExpired();
   }
   async append(input: {
     requestId: string;

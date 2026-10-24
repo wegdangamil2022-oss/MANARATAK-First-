@@ -290,7 +290,12 @@
     "UserRecord": "identity",
     "WorkflowControlRecord": "foundation_control_plane",
     "WorkflowExecutionProjection": "foundation_control_plane",
-    "ScholarshipReferenceTransition": "scholarships"
+    "ScholarshipReferenceTransition": "scholarships",
+    "PublicAnalyticsConsent": "foundation_control_plane",
+    "PublicAnalyticsEvent": "foundation_control_plane",
+    "DashboardMeasurementEpoch": "foundation_control_plane",
+    "ServiceApplicationEvidence": "services",
+    "DirectApplicationReport": "services"
   },
   "adapterPathOwners": {
     "packages/infrastructure/src/reference-data/": "reference",
@@ -322,7 +327,9 @@
     "packages/infrastructure/src/search/": "foundation_control_plane",
     "packages/infrastructure/src/authorization/": "identity",
     "packages/infrastructure/src/student-tools/PrismaStudentToolTestDiscoveryLinkRepository.ts": "student_tools",
-    "packages/infrastructure/src/services-platform/PrismaServiceTestDiscoveryLinkRepository.ts": "services"
+    "packages/infrastructure/src/services-platform/PrismaServiceTestDiscoveryLinkRepository.ts": "services",
+    "packages/infrastructure/src/dashboard/": "foundation_control_plane",
+    "packages/infrastructure/src/services-platform/PrismaManagedApplicationEvidenceGateway.ts": "services"
   },
   "approvedCrossContextReadModels": {
     "packages/infrastructure/src/academic-taxonomy/PrismaAcademicTaxonomyImportGateway.ts": [
@@ -397,6 +404,13 @@
       "assets",
       "reference",
       "academic_taxonomy"
+    ],
+    "packages/infrastructure/src/dashboard/PrismaExecutiveDashboardGateway.ts": [
+      "identity",
+      "services"
+    ],
+    "packages/infrastructure/src/services-platform/PrismaManagedApplicationEvidenceGateway.ts": [
+      "assets"
     ]
   },
   "historicalMigrationBaseline": [

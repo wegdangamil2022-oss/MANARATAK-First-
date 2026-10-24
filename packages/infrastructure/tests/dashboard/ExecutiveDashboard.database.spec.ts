@@ -15,6 +15,8 @@ import {
 } from '../../src/dashboard/PrismaDashboardMeasurementGateway';
 import { PrismaServicePlatformRepository } from '../../src/services-platform/PrismaServicePlatformRepository';
 import { PrismaAssetRecordRepository } from '../../src/asset-platform/PrismaAssetRecordRepository';
+import { PrismaAssetUsageRegistryGateway } from '../../src/asset-platform/PrismaAssetUsageRegistryGateway';
+import { assertAssetReferenceIntegrityInstalled } from '../../src/asset-platform/AssetReferenceIntegrityReadiness';
 import { PrismaScholarshipRepository } from '../../src/scholarships/PrismaScholarshipRepository';
 import {
   PublicScholarshipUseCases,
@@ -136,6 +138,7 @@ describe('Executive dashboard on a new isolated PostgreSQL 16 target', () => {
       : PrismaClient;
     db = new Client({ datasources: { db: { url: process.env.DATABASE_URL } } });
     await db.$connect();
+    await assertAssetReferenceIntegrityInstalled(db);
     expect(await db.identityRecord.count()).toBe(0);
     expect(await db.serviceRequestRecord.count()).toBe(0);
     const role = await db.$queryRaw<
@@ -409,7 +412,13 @@ describe('Executive dashboard on a new isolated PostgreSQL 16 target', () => {
       key: 'dashboard-submit-1',
     };
     const recorded = await useCases.append(input);
+    await expect(
+      db.assetRecord.update({ where: { id: proofId }, data: { lifecycleState: 'PURGED' } }),
+    ).rejects.toThrow();
     expect(await useCases.append(input)).toEqual(recorded);
+    expect(
+      await new PrismaAssetUsageRegistryGateway(db).findUsages(new AssetId(proofId)),
+    ).toContainEqual({ consumer: 'MANAGED_APPLICATION_EVIDENCE', field: 'evidenceAssetId' });
     const source = await reads.applications(dashboardPeriod(30));
     expect(source.managedUniversitySubmissions).toBe(1);
     expect(source.officialAccepted).toBe(0);

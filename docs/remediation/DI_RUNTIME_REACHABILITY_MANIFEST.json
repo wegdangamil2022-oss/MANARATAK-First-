@@ -421,6 +421,7 @@
         "backgroundJobHandlerRegistry"
       ],
       "dependencies": [
+        "managedApplicationEvidenceUseCases",
         "publicAnalyticsUseCases"
       ]
     },
@@ -3351,6 +3352,7 @@
         "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
       ],
       "reachableThroughRegistrations": [
+        "analyticsRetentionBackgroundJobHandler",
         "managedApplicationEvidenceRouter"
       ],
       "dependencies": [
