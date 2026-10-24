@@ -3,6 +3,10 @@
 -- MANARATAK_ARCH_DECISION: ADR-028
 -- Unreleased Dashboard candidate: additive analytics/service evidence, owner-neutral FKs and indexes.
 -- Review and isolated execution: docs/ui/EXECUTIVE_DASHBOARD_DELIVERY_2026-10-24.md
+-- One atomic additive change; contention fails without partial schema effects.
+BEGIN;
+SET LOCAL lock_timeout = '5s';
+SET LOCAL statement_timeout = '60s';
 -- AlterTable
 ALTER TABLE "ServiceCatalogRecord" ADD COLUMN     "managedApplication" BOOLEAN NOT NULL DEFAULT false;
 
@@ -194,3 +198,4 @@ BEGIN
 END $$;
 CREATE TRIGGER "eap_asset_lifecycle_service_application" BEFORE UPDATE OF "id", "lifecycleState" OR DELETE ON "AssetRecord"
  FOR EACH ROW EXECUTE FUNCTION manaratak_guard_service_application_asset_lifecycle();
+COMMIT;

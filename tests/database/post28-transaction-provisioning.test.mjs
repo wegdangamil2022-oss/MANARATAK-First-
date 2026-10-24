@@ -7,6 +7,7 @@ import {preflightTransactionProvisioning,TRANSACTION_APPLICATION_TABLES} from '.
 import {validateTargetDeclaration} from '../../scripts/database/post28-isolation.mjs';
 import {localLabProfile} from '../../scripts/database/post28-lab-profile.mjs';
 import {requireScopedR06Authorization} from '../../scripts/database/post28-r06-authorization.mjs';
+import {reviewedR06SourceFixture} from './post28-reviewed-source-fixture.mjs';
 const sha='a'.repeat(40),env={NODE_ENV:'test',POST28_ISOLATED_EXECUTION:'YES',DATABASE_TARGET_CLASS:'DISPOSABLE'};
 const target={host:'127.0.0.1',port:15432,database:'manaratak_post28_transactions_test',role:'post28_app',roleKind:'APPLICATION',serverIdentity:'12345',databaseOid:'16387',nonce:'b'.repeat(64)};
 const contract={version:1,kind:'POST28_LOCAL_DATABASE_TARGETS',sourceSha:sha,runId:'11111111-1111-4111-8111-111111111111',postgresMajor:16,targets:{'DB-T':target},provisioning:{label:'DB-T',role:'post28_tx_migrator',roleKind:'MIGRATION'}};
@@ -40,7 +41,12 @@ test('application DDL is rejected even when setup role has the expected grants',
  await assert.rejects(preflightTransactionProvisioning(contract,app,setup,env,sha,async(_,e)=>live(e,e.roleKind==='APPLICATION'?{schemaCreate:true}:{})),/APPLICATION_DDL_FORBIDDEN/);
 });
 test('R06 disposition preserves the real R05 blocker and never grants full acceptance or deployment',()=>{
- const r=requireScopedR06Authorization();assert.equal(r.R05,'BLOCKED_USER_AUTHORIZED_SCOPED_R06');assert.equal(r.fullR06Acceptance,false);assert.equal(r.deploymentAuthorized,false);
+ const fixture=reviewedR06SourceFixture();try{
+ const r=requireScopedR06Authorization(fixture.root);assert.equal(r.R05,'BLOCKED_USER_AUTHORIZED_SCOPED_R06');assert.equal(r.fullR06Acceptance,false);assert.equal(r.deploymentAuthorized,false);
+ }finally{fixture.dispose();}
+});
+test('historical scoped authorization rejects the new Dashboard schema rather than silently expanding approval',()=>{
+ assert.throws(()=>requireScopedR06Authorization(),/POST28_R04_ACCEPTED_SCHEMA_REQUIRED/);
 });
 test('missing or tampered stage authority cannot silently allow R06',()=>{
  const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'post28-disposition-'));
