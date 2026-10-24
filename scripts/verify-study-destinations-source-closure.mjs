@@ -30,6 +30,7 @@ const countryModal = read('apps/web/src/features/public-template/components/Coun
 const adminNav = read('apps/admin/src/components/AdminNavigation.tsx');
 const testDetail = read('apps/admin/src/pages/InternationalTestDetailPage.tsx');
 const universityAdmin = read('apps/admin/src/pages/UniversityAdminPage.tsx');
+const universityLocationFilters = read('apps/admin/src/components/UniversityLocationFilters.tsx');
 
 check('Study Destination domain module exists', exists('packages/domain/src/study-destinations/index.ts'));
 check('Study Destination is exported from domain root', read('packages/domain/src/index.ts').includes("./study-destinations"));
@@ -115,7 +116,13 @@ check('Academic program rows deep-link to owning university', adminDetail.includ
 check('Academic program rows deep-link canonical majors', adminDetail.includes('/majors/${encodeURIComponent(p.majorOwnerId)}'));
 check('Country relations deep-link majors, scholarships, and tests to owner domains', ['/majors','/scholarships','/international-tests'].every((path) => adminDetail.includes(`detailBasePath="${path}"`)));
 check('University admin consumes canonical countryReferenceId query filter', universityAdmin.includes("searchParams.get('countryReferenceId')") && universityAdmin.includes("params.append('countryReferenceId', countryReferenceId)"));
-check('University admin exposes an explicit clear action for country filter', universityAdmin.includes("next.delete('countryReferenceId')") && universityAdmin.includes('setSearchParams(next)'));
+// Country selection now comes from the shared optional picker. Follow that
+// composition rather than requiring the former literal delete call in the page.
+check('University admin exposes an explicit clear action for country filter',
+  /<UniversityLocationFilters[\s\S]*?onChange=\{\(key,value\)=>\{[^}]*if\(value\)next\.set\(key,value\);else next\.delete\(key\);/.test(universityAdmin) &&
+  universityAdmin.includes('setSearchParams(next)') &&
+  universityLocationFilters.includes("onChange('countryReferenceId',id??'')") &&
+  /reloadKey="university-filter-countries"[^>]*\boptional\b/.test(universityLocationFilters));
 
 check('Public client has Study Destination DTO', webClient.includes('PublicStudyDestinationDto'));
 check('Public client reads Study Destination endpoint', webClient.includes('getStudyDestinations') && webClient.includes('/study-destinations'));
