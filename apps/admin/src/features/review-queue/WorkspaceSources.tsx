@@ -24,21 +24,39 @@ export function WorkspaceSources({
     [warning, setWarning] = useState(''),
     [reason, setReason] = useState(''),
     [saving, setSaving] = useState(false),
+    [policyState, setPolicyState] = useState('loading'),
+    [policyReload, setPolicyReload] = useState(0),
     [message, setMessage] = useState('');
+  const allowedSources = sources.filter((source) => source.state !== 'forbidden');
+  const selectedDomain = allowedSources.some((source) => source.domain === domain)
+    ? domain
+    : allowedSources[0]?.domain;
   useEffect(() => {
     const abort = new AbortController();
+    setPolicyState('loading');
     void workRequest<ReviewSlaPolicy[]>('/policies', undefined, abort.signal)
-      .then(setPolicies)
-      .catch(() => {});
+      .then((value) => {
+        if (!abort.signal.aborted) {
+          setPolicies(value);
+          setPolicyState('ready');
+        }
+      })
+      .catch((error) => {
+        if (!abort.signal.aborted) {
+          setPolicies([]);
+          setPolicyState(workspaceError(error));
+        }
+      });
     return () => abort.abort();
-  }, []);
+  }, [policyReload]);
   const submit = async () => {
+    if (saving || policyState !== 'ready' || !selectedDomain) return;
     setSaving(true);
     setMessage('');
     try {
       const policy = await workRequest<ReviewSlaPolicy>('/policies', {
-        domain,
-        version: policies.find((p) => p.domain === domain)?.version ?? 0,
+        domain: selectedDomain,
+        version: policies.find((p) => p.domain === selectedDomain)?.version ?? 0,
         hours: Number(hours),
         warningHours: Number(warning),
         reason,
@@ -133,7 +151,22 @@ export function WorkspaceSources({
             'There are no default deadlines. An authorized owner approves explicit elapsed hours, 24/7 in UTC, for new review cycles only. Content modification time is never treated as review entry time.',
           )}
         </p>
-        {policies.length ? (
+        {policyState === 'loading' ? (
+          <p role="status">{tr('جارٍ تحميل سياسات المهل…', 'Loading deadline policies…')}</p>
+        ) : policyState !== 'ready' ? (
+          <div role="alert">
+            <p>
+              {tr(
+                'تعذرت قراءة السياسات الحالية. أعد المحاولة قبل اعتماد سياسة.',
+                'Current policies could not be loaded. Retry before approving a policy.',
+              )}
+            </p>
+            <button onClick={() => setPolicyReload((value) => value + 1)}>
+              <RefreshCw aria-hidden="true" />
+              {tr('إعادة تحميل السياسات', 'Retry policies')}
+            </button>
+          </div>
+        ) : policies.length ? (
           <ul>
             {policies.map((policy) => (
               <li key={policy.domain}>
@@ -146,7 +179,7 @@ export function WorkspaceSources({
         ) : (
           <p>{tr('لم تُعتمد سياسة لهذا النطاق.', 'No policy has been approved in this scope.')}</p>
         )}
-        {canCoordinate ? (
+        {canCoordinate && selectedDomain ? (
           <form
             className="rw-policy-form"
             onSubmit={(event) => {
@@ -157,16 +190,14 @@ export function WorkspaceSources({
             <label>
               <span>{tr('القسم', 'Section')}</span>
               <select
-                value={domain}
+                value={selectedDomain}
                 onChange={(event) => setDomain(event.target.value as ReviewOwner)}
               >
-                {sources
-                  .filter((s) => s.state !== 'forbidden')
-                  .map((source) => (
-                    <option key={source.domain} value={source.domain}>
-                      {label(source.domain)}
-                    </option>
-                  ))}
+                {allowedSources.map((source) => (
+                  <option key={source.domain} value={source.domain}>
+                    {label(source.domain)}
+                  </option>
+                ))}
               </select>
             </label>
             <label>
@@ -201,7 +232,11 @@ export function WorkspaceSources({
                 onChange={(event) => setReason(event.target.value)}
               />
             </label>
-            <button className="rw-primary" type="submit" disabled={saving}>
+            <button
+              className="rw-primary"
+              type="submit"
+              disabled={saving || policyState !== 'ready'}
+            >
               {tr('اعتماد السياسة للمراجعات الجديدة', 'Approve policy for new reviews')}
             </button>
           </form>

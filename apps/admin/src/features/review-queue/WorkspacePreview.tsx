@@ -31,6 +31,7 @@ export function WorkspacePreview({
   canCoordinate,
   hasPermission,
   busy,
+  refresh,
 }: {
   language: string;
   row: ReviewRecord;
@@ -42,11 +43,16 @@ export function WorkspacePreview({
   canCoordinate: boolean;
   hasPermission: (key: string) => boolean;
   busy: boolean;
+  refresh: () => void;
 }) {
   const tr = textFor(language),
     label = useMemo(() => labelFor(language), [language]),
     dialog = useRef<HTMLElement>(null),
     [history, setHistory] = useState<ReviewHistory[]>([]),
+    [historyState, setHistoryState] = useState('loading'),
+    [historyReload, setHistoryReload] = useState(0),
+    [reviewerState, setReviewerState] = useState('loading'),
+    [reviewerReload, setReviewerReload] = useState(0),
     [reviewers, setReviewers] = useState<Array<{ id: string; label: string; kind: string }>>([]),
     [assignee, setAssignee] = useState(''),
     [reason, setReason] = useState(''),
@@ -101,9 +107,6 @@ export function WorkspacePreview({
     };
   }, [close]);
   useEffect(() => {
-    const abort = new AbortController();
-    setHistory([]);
-    setReviewers([]);
     setAssignee(row.assigneeId ?? row.teamId ?? '');
     setReason('');
     setNote('');
@@ -115,23 +118,38 @@ export function WorkspacePreview({
     );
     setMessage('');
     commandKeys.current.clear();
+  }, [row.key, row.version, row.assigneeId, row.teamId, row.priority, row.workState]);
+  useEffect(() => {
+    const abort = new AbortController();
+    setHistory([]);
+    setHistoryState('loading');
+    setReviewerState('loading');
+    setReviewers([]);
     void workRequest<ReviewHistory[]>(
       '/history?' + new URLSearchParams({ key: row.key }),
       undefined,
       abort.signal,
     )
       .then((value) => {
-        if (!abort.signal.aborted) setHistory(value);
+        if (!abort.signal.aborted) {
+          setHistory(value);
+          setHistoryState('ready');
+        }
       })
       .catch((error) => {
-        if (!abort.signal.aborted) setMessage(label(workspaceError(error)));
+        if (!abort.signal.aborted) setHistoryState(workspaceError(error));
       });
     if (canCoordinate)
       void workRequest<typeof reviewers>('/reviewers?domain=' + row.domain, undefined, abort.signal)
         .then((value) => {
-          if (!abort.signal.aborted) setReviewers(value);
+          if (!abort.signal.aborted) {
+            setReviewers(value);
+            setReviewerState('ready');
+          }
         })
-        .catch(() => {});
+        .catch((error) => {
+          if (!abort.signal.aborted) setReviewerState(workspaceError(error));
+        });
     return () => abort.abort();
   }, [
     row.key,
@@ -143,6 +161,8 @@ export function WorkspacePreview({
     row.teamId,
     canCoordinate,
     label,
+    historyReload,
+    reviewerReload,
   ]);
   useEffect(() => {
     const abort = new AbortController(),
@@ -383,7 +403,11 @@ export function WorkspacePreview({
               ) : null}
               <label>
                 {tr('إسناد إلى مراجع أو فريق', 'Assign to reviewer or team')}
-                <select value={assignee} onChange={(event) => setAssignee(event.target.value)}>
+                <select
+                  value={assignee}
+                  disabled={reviewerState !== 'ready' || busy}
+                  onChange={(event) => setAssignee(event.target.value)}
+                >
                   <option value="">
                     {tr('غير مسندة — إزالة الإسناد', 'Unassigned — remove assignment')}
                   </option>
@@ -401,7 +425,26 @@ export function WorkspacePreview({
                   ))}
                 </select>
               </label>
-              <button disabled={busy} onClick={() => void submit('assign')}>
+              {reviewerState !== 'ready' ? (
+                <p role="status">
+                  {reviewerState === 'loading'
+                    ? tr('جارٍ تحميل المراجعين المخولين…', 'Loading eligible reviewers…')
+                    : tr(
+                        'تعذرت قراءة المراجعين؛ الإسناد الحالي محفوظ.',
+                        'Reviewers could not be loaded; the current assignment is preserved.',
+                      )}
+                </p>
+              ) : null}
+              {reviewerState !== 'ready' && reviewerState !== 'loading' ? (
+                <button onClick={() => setReviewerReload((value) => value + 1)}>
+                  <RefreshCw aria-hidden="true" />
+                  {tr('إعادة تحميل المراجعين', 'Retry reviewers')}
+                </button>
+              ) : null}
+              <button
+                disabled={busy || reviewerState !== 'ready'}
+                onClick={() => void submit('assign')}
+              >
                 <Users aria-hidden="true" />
                 {tr('حفظ الإسناد', 'Save assignment')}
               </button>
@@ -464,12 +507,39 @@ export function WorkspacePreview({
             </p>
           ) : null}
           <p role="status">{message}</p>
+          {message ? (
+            <div className="rw-preview-nav">
+              <button onClick={refresh} disabled={busy}>
+                <RefreshCw aria-hidden="true" />
+                {tr('تحديث حالة السجل', 'Refresh case')}
+              </button>
+              <Link to="/security">
+                <ShieldCheck aria-hidden="true" />
+                {tr('أمان الحساب وتأكيد المصادقة', 'Account security and authentication')}
+              </Link>
+            </div>
+          ) : null}
           <section>
             <h3>
               <History aria-hidden="true" />
               {tr('سجل عمل المراجعة', 'Review work history')}
             </h3>
-            {history.length ? (
+            {historyState === 'loading' ? (
+              <p role="status">{tr('جارٍ تحميل سجل المراجعة…', 'Loading review history…')}</p>
+            ) : historyState !== 'ready' ? (
+              <div role="alert">
+                <p>
+                  {tr(
+                    'تعذرت قراءة سجل المراجعة؛ لا يعني ذلك أنه فارغ.',
+                    'Review history could not be loaded; it is not known to be empty.',
+                  )}
+                </p>
+                <button onClick={() => setHistoryReload((value) => value + 1)}>
+                  <RefreshCw aria-hidden="true" />
+                  {tr('إعادة تحميل السجل', 'Retry history')}
+                </button>
+              </div>
+            ) : history.length ? (
               <ol className="rw-timeline">
                 {history.map((event) => (
                   <li key={event.id}>

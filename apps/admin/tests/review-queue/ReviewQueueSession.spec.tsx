@@ -29,6 +29,45 @@ beforeEach(()=>{
 });
 afterEach(async()=>{if(tree)await act(async()=>tree.unmount());vi.useRealTimers();vi.unstubAllGlobals();});
 describe('Server-wide review queue interaction and session safety',()=>{
+  it('distinguishes unavailable history from empty history and retries without losing a draft',async()=>{
+    let failed=true;
+    state.request.mockImplementation(async(path:string)=>{
+      if(path.endsWith('/query'))return page();
+      if(path.includes('/history?')&&failed)throw new Error('[503] unavailable');
+      return [];
+    });
+    await mount();await act(async()=>button('Preview').props.onClick());
+    expect(JSON.stringify(tree.toJSON())).toContain('Review history could not be loaded');
+    expect(JSON.stringify(tree.toJSON())).not.toContain('No events recorded for this case.');
+    const note=tree.root.findByType('textarea');
+    await act(async()=>note.props.onChange({target:{value:'Keep this unsaved internal note'}}));
+    failed=false;await act(async()=>button('Retry history').props.onClick());
+    expect(tree.root.findByType('textarea').props.value).toBe('Keep this unsaved internal note');
+    expect(JSON.stringify(tree.toJSON())).toContain('No events recorded for this case.');
+  });
+  it('disables assignment after reviewer failure and allows a safe retry',async()=>{
+    let failed=true;
+    state.request.mockImplementation(async(path:string)=>{
+      if(path.endsWith('/query'))return page();
+      if(path.includes('/reviewers')&&failed)throw new Error('[503] unavailable');
+      return [];
+    });
+    await mount();await act(async()=>button('Preview').props.onClick());
+    expect(button('Save assignment').props.disabled).toBe(true);
+    expect(JSON.stringify(tree.toJSON())).toContain('current assignment is preserved');
+    failed=false;await act(async()=>button('Retry reviewers').props.onClick());
+    expect(button('Save assignment').props.disabled).toBe(false);
+  });
+  it('provides an actionable refresh and account security link after a command conflict',async()=>{
+    await mount();await act(async()=>button('Preview').props.onClick());
+    const reason=tree.root.findAllByType('label').find(node=>node.children.includes('Action reason'))!;
+    await act(async()=>reason.findByType('input').props.onChange({target:{value:'Concurrent review edit'}}));
+    state.request.mockImplementation(async(path:string)=>{if(path.endsWith('/commands'))throw new Error('[409] REVIEW_VERSION_CONFLICT');if(path.endsWith('/query'))return page();return [];});
+    await act(async()=>button('Claim review').props.onClick());
+    expect(tree.root.findAllByType('a').some(link=>link.props.href==='/security')).toBe(true);
+    state.request.mockClear();await act(async()=>button('Refresh case').props.onClick());
+    expect(queries()).toHaveLength(1);
+  });
   it('shows a command conflict inside the open preview rather than only behind the drawer',async()=>{
     await mount();await act(async()=>button('Preview').props.onClick());
     const reasonLabel=tree.root.findAllByType('label').find(node=>node.children.includes('Action reason'))!;

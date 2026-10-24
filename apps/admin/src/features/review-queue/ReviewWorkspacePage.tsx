@@ -425,7 +425,10 @@ export function ReviewWorkspacePage() {
                     ? 0
                     : event.key === 'End'
                       ? 2
-                      : (index + (event.key === 'ArrowRight' ? 1 : -1)*(dir==='rtl'?-1:1)+3) % 3;
+                      : (index +
+                          (event.key === 'ArrowRight' ? 1 : -1) * (dir === 'rtl' ? -1 : 1) +
+                          3) %
+                        3;
                 setTab(keys[next]);
                 document.getElementById('rw-tab-' + keys[next])?.focus();
               }
@@ -773,6 +776,7 @@ export function ReviewWorkspacePage() {
           canCoordinate={canWork(selected)}
           hasPermission={hasPermission}
           busy={mutating}
+          refresh={reload}
         />
       ) : null}
     </main>
