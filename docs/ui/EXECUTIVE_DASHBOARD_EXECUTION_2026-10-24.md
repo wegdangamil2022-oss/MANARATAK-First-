@@ -19,10 +19,12 @@ Baseline: main 10179ab97eddba9b236238714dea1d68859f469e. Work branch: feat/execu
 
 Collection defaults OFF. Activating requires explicit PUBLIC_ANALYTICS_ENABLED=true and PUBLIC_ANALYTICS_POLICY_VERSION=public-analytics-v1-2026-10-24, a running durable background worker and the retention schedule. This configuration is a deployment control, not a fabricated legal approval. Review the opt-in wording and jurisdictional privacy requirements before public activation.
 
-Visitor consent lasts 30 days, raw anonymous events 90 days. Explicit withdrawal stops local collection immediately and deletes the token-linked events; failed deletion remains retryable. Student self-reports and service attestations have up to 180-day retention, with existing legal holds preserved for service evidence. No previous student consent is rewritten or reused as blanket analytics permission.
+Visitor consent lasts 30 days, raw pseudonymous events 90 days. Explicit withdrawal stops local collection immediately and deletes the token-linked events; failed deletion remains retryable. Student self-reports expire after 180 days. Service attestations inherit the existing request retention deadline, with a 180-day fallback and existing request/asset legal holds preserved. No previous student consent is rewritten or reused as blanket analytics permission.
 
 Additive migration 20261024000100_executive_dashboard_analytics adds indexes and missing event contracts; it must be reviewed and tested on a new isolated PostgreSQL 16 cluster. No production/Neon migration is authorized or performed by this work. No historical migrations are edited.
 
 The dashboard UI uses scoped styles and no chart library dependency. Other catalog/review designs remain untouched; service/public components receive only the functional additions necessary for the two application channels.
 
 Verification status is recorded in the delivery evidence after execution. Code existence alone is not a PASS.
+
+Delivery evidence: [implementation and verification report](EXECUTIVE_DASHBOARD_DELIVERY_2026-10-24.md).
