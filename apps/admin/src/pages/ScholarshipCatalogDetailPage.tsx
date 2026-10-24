@@ -1,3 +1,5 @@
+import { scholarshipDetailText } from '../features/scholarships/ScholarshipDetailText';
+import { registerScholarshipHistoryGuard } from '../features/scholarships/ScholarshipHistoryGuard';
 import {
   ScholarshipDetailReadView,
   scholarshipHttpUrl,
@@ -215,6 +217,7 @@ function Textarea({
 export function ScholarshipDetailPage() {
   const { dir, t, language } = useTranslation();
   const tr = (ar: string, en: string) => (language === 'ar' ? ar : en);
+  const lt = (value: string) => scholarshipDetailText(language, value);
   const [editing, setEditing] = useState(false);
   const [relationshipEditing, setRelationshipEditing] = useState(false);
   const [relationshipDirty, setRelationshipDirty] = useState(false);
@@ -247,32 +250,85 @@ export function ScholarshipDetailPage() {
   });
 
   const savedForm = useRef('');
-  const loadRequest = useRef(0);
-  const load = useCallback(async () => {
-    const request = ++loadRequest.current;
-    if (!id) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await scholarshipCatalogApi.detail(id);
-      if (request !== loadRequest.current) return;
-      if (response && response.scholarship) {
-        setDetail(response);
-        const nextForm = toUpdate(response.scholarship);
-        savedForm.current = JSON.stringify(nextForm);
-        setForm(nextForm);
-        return true;
-      } else {
-        setError('تعذر العثور على بيانات المنحة المطلوبة.');
+  useEffect(() => {
+    if (!confirmModal.isOpen && !pendingLeave) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const dialog = document.querySelector?.<HTMLElement>('[data-scholarship-dialog]');
+    dialog?.focus();
+    const keyboard = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setConfirmModal((value) => ({ ...value, isOpen: false }));
+        setPendingLeave(null);
+        return;
       }
-    } catch (err: unknown) {
-      if (request === loadRequest.current)
-        setError(err instanceof Error ? err.message : 'تعذر تحميل بيانات المنحة الدراسية.');
-    } finally {
-      if (request === loadRequest.current) setLoading(false);
-    }
-    return false;
-  }, [id]);
+      if (event.key !== 'Tab' || !dialog) return;
+      const nodes = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'button:not(:disabled),input:not(:disabled),a[href],textarea:not(:disabled)',
+        ),
+      );
+      const first = nodes[0],
+        last = nodes.at(-1);
+      if (!first || !last) return;
+      if (
+        event.shiftKey &&
+        (document.activeElement === first || document.activeElement === dialog)
+      ) {
+        event.preventDefault();
+        last.focus();
+      } else if (
+        !event.shiftKey &&
+        (document.activeElement === last || document.activeElement === dialog)
+      ) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', keyboard);
+    return () => {
+      document.removeEventListener('keydown', keyboard);
+      previous?.focus?.();
+    };
+  }, [confirmModal.isOpen, pendingLeave]);
+  const loadRequest = useRef(0);
+  const load = useCallback(
+    async (expected?: ScholarshipDto) => {
+      const request = ++loadRequest.current;
+      if (!id) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await scholarshipCatalogApi.detail(id);
+        if (request !== loadRequest.current) return;
+        if (response && response.scholarship) {
+          if (response.scholarship.id !== id)
+            throw new Error('SCHOLARSHIP_READBACK_TARGET_MISMATCH');
+          if (
+            expected &&
+            (response.scholarship.id !== expected.id ||
+              response.scholarship.revision !== expected.revision ||
+              JSON.stringify(toUpdate(response.scholarship)) !== JSON.stringify(toUpdate(expected)))
+          )
+            throw new Error('SCHOLARSHIP_READBACK_MISMATCH');
+          setDetail(response);
+          const nextForm = toUpdate(response.scholarship);
+          savedForm.current = JSON.stringify(nextForm);
+          setForm(nextForm);
+          return true;
+        } else {
+          setError('تعذر العثور على بيانات المنحة المطلوبة.');
+        }
+      } catch (err: unknown) {
+        if (request === loadRequest.current)
+          setError(err instanceof Error ? err.message : 'تعذر تحميل بيانات المنحة الدراسية.');
+      } finally {
+        if (request === loadRequest.current) setLoading(false);
+      }
+      return false;
+    },
+    [id],
+  );
 
   useEffect(() => {
     void load();
@@ -289,7 +345,10 @@ export function ScholarshipDetailPage() {
     else action();
   };
   useEffect(() => {
-    if (!unsaved) { leaveApproved.current = false; return; }
+    if (!unsaved) {
+      leaveApproved.current = false;
+      return;
+    }
     const unload = (event: BeforeUnloadEvent) => {
       if (leaveApproved.current) return;
       event.preventDefault();
@@ -298,7 +357,12 @@ export function ScholarshipDetailPage() {
     const historyIndex = window.history?.state?.idx;
     let restoringHistory = false;
     const pop = (event: PopStateEvent) => {
-      if (leaveApproved.current || !Number.isSafeInteger(historyIndex) || !Number.isSafeInteger(event.state?.idx)) return;
+      if (
+        leaveApproved.current ||
+        !Number.isSafeInteger(historyIndex) ||
+        !Number.isSafeInteger(event.state?.idx)
+      )
+        return;
       // Capture before BrowserRouter's bubble listener so a refused history
       // transition cannot unmount the editor and discard its draft.
       event.stopImmediatePropagation();
@@ -335,11 +399,11 @@ export function ScholarshipDetailPage() {
       });
     };
     window.addEventListener('beforeunload', unload);
-    window.addEventListener('popstate', pop, true);
+    const unregisterHistory = registerScholarshipHistoryGuard(pop);
     document.addEventListener('click', link, true);
     return () => {
       window.removeEventListener('beforeunload', unload);
-      window.removeEventListener('popstate', pop, true);
+      unregisterHistory();
       document.removeEventListener('click', link, true);
     };
   }, [unsaved]);
@@ -361,22 +425,28 @@ export function ScholarshipDetailPage() {
   );
 
   const save = async () => {
-    if (!id || detail?.scholarship.id !== id || loading || saving || relationshipDirty) return false;
+    if (!id || detail?.scholarship.id !== id || loading || saving || relationshipDirty)
+      return false;
     if (reviewReason.trim().length < 3) {
-      setError('أدخل سبب التعديل للمراجعة (3 أحرف على الأقل).');
+      setError(
+        tr(
+          'أدخل سبب التعديل للمراجعة (3 أحرف على الأقل).',
+          'Enter an edit reason of at least three characters.',
+        ),
+      );
       return;
     }
     setSaving(true);
     setError(null);
     setMessage(null);
     try {
-      await scholarshipCatalogApi.update(
+      const updated = await scholarshipCatalogApi.update(
         id,
         form,
         reviewReason.trim(),
         detail!.scholarship.revision,
       );
-      if (!(await load()))
+      if (!(await load(updated)))
         throw new Error(
           tr(
             'نجح طلب الحفظ وتعذرت إعادة القراءة؛ تحقق من السجل قبل تكرار الحفظ.',
@@ -416,7 +486,8 @@ export function ScholarshipDetailPage() {
   };
 
   const executeConfirmedAction = async () => {
-    if (!id || detail?.scholarship.id !== id || loading || actionLoading || !confirmModal.type) return;
+    if (!id || detail?.scholarship.id !== id || loading || actionLoading || !confirmModal.type)
+      return;
     if (decisionReason.trim().length < 3) {
       setError(
         tr(
@@ -444,7 +515,7 @@ export function ScholarshipDetailPage() {
         decisionReason.trim(),
         detail!.scholarship.revision,
       );
-      setMessage(`تم تنفيذ الأمر (${command}) بنجاح.`);
+      setMessage(tr('تم تنفيذ القرار بنجاح.', 'The owner decision completed successfully.'));
       await load();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'تعذر تنفيذ إجراء المنحة.');
@@ -453,12 +524,12 @@ export function ScholarshipDetailPage() {
     }
   };
 
-  if (loading && !detail) {
+  if (loading && (!detail || detail.scholarship.id !== id)) {
     return (
       <div className="flex h-96 flex-col items-center justify-center gap-3 rounded-3xl border border-[#DDEFF2] bg-white p-8">
         <Loader2 className="h-10 w-10 animate-spin text-[#0E7C86]" />
         <p className="text-xs font-bold text-slate-500 font-['Cairo']">
-          جارٍ تحميل بيانات المنحة الدراسية وتفاصيلها الكاملة...
+          {lt('جارٍ تحميل بيانات المنحة الدراسية وتفاصيلها الكاملة...')}
         </p>
       </div>
     );
@@ -470,7 +541,7 @@ export function ScholarshipDetailPage() {
         <div className="flex items-center gap-3">
           <AlertCircle className="h-6 w-6 text-rose-600" />
           <h2 className="text-base font-bold">
-            {error ?? 'لم يتم العثور على المنحة الدراسية المطلوبة.'}
+            {error ?? lt('لم يتم العثور على المنحة الدراسية المطلوبة.')}
           </h2>
         </div>
         <button
@@ -478,13 +549,17 @@ export function ScholarshipDetailPage() {
           className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-xs border border-slate-200"
         >
           <ArrowIcon className="h-4 w-4" />
-          <span>العودة لقائمة المنح الدراسية</span>
+          <span>{lt('العودة لقائمة المنح الدراسية')}</span>
         </button>
       </div>
     );
   }
 
-  const canEdit = hasPermission('admin:scholarships:manage');
+  const canManage = hasPermission('admin:scholarships:manage');
+  const canEdit =
+    canManage &&
+    scholarship.publicationStatus === 'DRAFT' &&
+    !['ARCHIVED', 'REJECTED'].includes(scholarship.status);
   const officialUrl = scholarshipHttpUrl(scholarship.officialSourceUrl);
   const statusLabel = (value: unknown) => {
     const pairs: Record<string, [string, string]> = {
@@ -498,6 +573,10 @@ export function ScholarshipDetailPage() {
       VERIFIED: ['متحقق منها', 'Verified'],
       UNVERIFIED: ['غير متحقق منها', 'Unverified'],
       FAILED: ['فشل التحقق', 'Verification failed'],
+      PENDING: ['بانتظار التحقق', 'Verification pending'],
+      COMPLETE: ['مكتملة', 'Complete'],
+      INCOMPLETE: ['غير مكتملة', 'Incomplete'],
+      NEEDS_REVIEW: ['تحتاج مراجعة', 'Needs review'],
     };
     return pairs[String(value)]?.[language === 'ar' ? 0 : 1] ?? tr('غير معروفة', 'Unknown');
   };
@@ -536,6 +615,34 @@ export function ScholarshipDetailPage() {
     links_unis: tr('الروابط والمصادر', 'Links and sources'),
     notes: tr('الملاحظات', 'Notes'),
     health_audit: tr('الصحة والتدقيق', 'Health and audit'),
+  };
+  const missingFieldTabs: Record<string, TabKey> = {
+    cleanedScholarshipName: 'identity',
+    provider: 'identity',
+    sourceUrl: 'links_unis',
+    fundingType: 'funding',
+    benefits: 'funding',
+    countryOrScope: 'identity',
+    degreeTargets: 'degrees_majors',
+    eligibility: 'eligibility',
+    requiredDocumentsOrTests: 'documents',
+    deadlineMode: 'identity',
+    officialSourceUrl: 'links_unis',
+    description: 'overview',
+  };
+  const missingFieldLabels: Record<string, string> = {
+    cleanedScholarshipName: tr('اسم المنحة', 'Scholarship name'),
+    provider: tr('الجهة المانحة', 'Provider'),
+    sourceUrl: tr('المصدر', 'Source'),
+    fundingType: tr('نوع التمويل', 'Funding type'),
+    benefits: tr('المزايا', 'Benefits'),
+    countryOrScope: tr('الدولة أو النطاق', 'Country or scope'),
+    degreeTargets: tr('الدرجات', 'Degrees'),
+    eligibility: tr('الأهلية', 'Eligibility'),
+    requiredDocumentsOrTests: tr('المستندات أو الاختبارات', 'Documents or tests'),
+    deadlineMode: tr('الموعد', 'Deadline'),
+    officialSourceUrl: tr('المصدر الرسمي', 'Official source'),
+    description: tr('النبذة', 'Overview'),
   };
   const isFullFunding =
     form.isFullyFunded ||
@@ -612,11 +719,11 @@ export function ScholarshipDetailPage() {
           className="inline-flex items-center gap-2 text-xs font-black text-[#0E7C86] hover:text-[#142B5F] transition-colors cursor-pointer bg-teal-50 hover:bg-teal-100 border border-teal-200 px-3.5 py-2 rounded-xl"
         >
           <ArrowIcon className="h-4 w-4" />
-          <span>العودة إلى كتالوج المنح الدراسية</span>
+          <span>{lt('العودة إلى كتالوج المنح الدراسية')}</span>
         </button>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-slate-500">رمز المنحة:</span>
+          <span className="text-xs font-bold text-slate-500">{lt('رمز المنحة:')}</span>
           <span className="rounded-lg bg-slate-100 border border-slate-200 px-2.5 py-1 text-xs font-mono font-bold text-[#142B5F]">
             {scholarship.publicId || scholarship.id}
           </span>
@@ -641,7 +748,21 @@ export function ScholarshipDetailPage() {
         </div>
         <div className="scholarship-detail-actions">
           {canEdit && !editing && (
-            <button onClick={() => setEditing(true)}>
+            <button
+              disabled={relationshipDirty}
+              title={
+                relationshipDirty
+                  ? tr(
+                      'احفظ العلاقات أو ألغِ تحريرها أولًا',
+                      'Save or cancel relationship changes first',
+                    )
+                  : undefined
+              }
+              onClick={() => {
+                setRelationshipEditing(false);
+                setEditing(true);
+              }}
+            >
               <FileText />
               {tr('تعديل البيانات', 'Edit data')}
             </button>
@@ -660,6 +781,12 @@ export function ScholarshipDetailPage() {
             <a href={officialUrl} target="_blank" rel="noopener noreferrer">
               <ExternalLink />
               {tr('المصدر الرسمي', 'Official source')}
+            </a>
+          )}
+          {detail.publicHref && /^\/scholarships\/[^/?#]+$/.test(detail.publicHref) && (
+            <a href={detail.publicHref} target="_blank" rel="noopener noreferrer">
+              <ExternalLink aria-hidden="true" />
+              {tr('فتح الصفحة العامة', 'Open public page')}
             </a>
           )}
         </div>
@@ -681,9 +808,25 @@ export function ScholarshipDetailPage() {
       )}
 
       {error && (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-bold text-rose-800 shadow-xs flex items-center gap-2">
+        <div
+          role="alert"
+          className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-bold text-rose-800 shadow-xs flex flex-wrap items-center gap-2"
+        >
           <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
-          <span>{error}</span>
+          <span>{lt(error)}</span>
+          <button
+            disabled={saving || actionLoading}
+            onClick={() =>
+              guard(() => {
+                setEditing(false);
+                setRelationshipEditing(false);
+                setRelationshipDirty(false);
+                void load();
+              })
+            }
+          >
+            {tr('إعادة تحميل أحدث سجل', 'Reload latest record')}
+          </button>
         </div>
       )}
 
@@ -736,8 +879,26 @@ export function ScholarshipDetailPage() {
               )}
             </p>
             {canEdit && (
-              <button disabled={saving || dirty} onClick={() => setRelationshipEditing(true)}>
+              <button
+                disabled={saving || dirty}
+                onClick={() => {
+                  setEditing(false);
+                  setRelationshipEditing(true);
+                }}
+              >
                 {tr('تعديل الارتباطات', 'Edit relationships')}
+              </button>
+            )}
+            {relationshipEditing && (
+              <button
+                onClick={() =>
+                  guard(() => {
+                    setRelationshipEditing(false);
+                    setRelationshipDirty(false);
+                  })
+                }
+              >
+                {tr('إنهاء تحرير العلاقات', 'Finish relationship editing')}
               </button>
             )}
             {dirty && (
@@ -764,25 +925,28 @@ export function ScholarshipDetailPage() {
             />
           </div>
         )}
-        {!editing && activeTab !== 'health_audit' && (
-          <ScholarshipDetailReadView
-            scholarship={scholarship}
-            tab={activeTab}
-            language={language}
-          />
-        )}
+        {!editing &&
+          activeTab !== 'health_audit' &&
+          !(relationshipEditing && activeTab === 'degrees_majors') && (
+            <ScholarshipDetailReadView
+              scholarship={scholarship}
+              tab={activeTab}
+              language={language}
+            />
+          )}
         {/* Active Tab Content */}
         <main className="space-y-5">
           {(editing || activeTab === 'health_audit') && (
             <fieldset disabled={saving || actionLoading || !canEdit} className="contents">
               <p className="rounded-xl bg-teal-50 p-3 text-xs">
-                الدرجات والتخصصات الجديدة تُحفظ للمراجعة. استخدم «إدارة العلاقات» لاختيار المراجع
-                الفعلية؛ الروابط القائمة محفوظة دون تغيير.
+                {lt(
+                  'الدرجات والتخصصات الجديدة تُحفظ للمراجعة. استخدم «إدارة العلاقات» لاختيار المراجع الفعلية؛ الروابط القائمة محفوظة دون تغيير.',
+                )}
               </p>
               {(form.majorTargets ?? []).filter((item) => !item.metadata?.degreeTargetKey).length >
                 0 && (
                 <div className="rounded-xl border p-3 text-xs">
-                  <p className="mb-2 font-bold">التخصصات المشتركة المحفوظة للمنحة</p>
+                  <p className="mb-2 font-bold">{lt('التخصصات المشتركة المحفوظة للمنحة')}</p>
                   {(form.majorTargets ?? [])
                     .filter((item) => !item.metadata?.degreeTargetKey)
                     .map((item) => (
@@ -799,38 +963,40 @@ export function ScholarshipDetailPage() {
               {activeTab === 'identity' && (
                 <div className="space-y-6">
                   <Card
-                    title="البيانات التعريفية وهوية المنحة"
-                    subtitle="اسم المنحة الرسمي، الجهة المانحة، العام الأكاديمي، والموقع الجغرافي"
+                    title={lt('البيانات التعريفية وهوية المنحة')}
+                    subtitle={lt(
+                      'اسم المنحة الرسمي، الجهة المانحة، العام الأكاديمي، والموقع الجغرافي',
+                    )}
                     icon={<Building2 className="h-5 w-5" />}
                   >
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="sm:col-span-2">
-                        <Field label="اسم المنحة الرسمي للعرض (Display Name)">
+                        <Field label={lt('اسم المنحة الرسمي للعرض (Display Name)')}>
                           <Input
                             value={form.displayName}
                             onChange={(val) => setForm((x) => ({ ...x, displayName: val }))}
-                            placeholder="مثال: منحة الحكومة التركية الممولة بالكامل"
+                            placeholder={lt('مثال: منحة الحكومة التركية الممولة بالكامل')}
                           />
                         </Field>
                       </div>
 
-                      <Field label="الجهة المانحة / الراعية (Provider / Sponsor)">
+                      <Field label={lt('الجهة المانحة / الراعية (Provider / Sponsor)')}>
                         <Input
                           value={form.providerName}
                           onChange={(val) => setForm((x) => ({ ...x, providerName: val }))}
-                          placeholder="مثال: رئاسة أتراك المهجر (YTB)"
+                          placeholder={lt('مثال: رئاسة أتراك المهجر (YTB)')}
                         />
                       </Field>
 
-                      <Field label="الدولة / بلد الدراسة (Study Country)">
+                      <Field label={lt('الدولة / بلد الدراسة (Study Country)')}>
                         <Input
                           value={form.countrySourceLabel}
                           onChange={(val) => setForm((x) => ({ ...x, countrySourceLabel: val }))}
-                          placeholder="مثال: تركيا، المملكة المتحدة، ألمانيا"
+                          placeholder={lt('مثال: تركيا، المملكة المتحدة، ألمانيا')}
                         />
                       </Field>
 
-                      <Field label="العام الأكاديمي (Academic Year)">
+                      <Field label={lt('العام الأكاديمي (Academic Year)')}>
                         <Input
                           value={form.academicYear}
                           onChange={(val) => setForm((x) => ({ ...x, academicYear: val }))}
@@ -838,25 +1004,25 @@ export function ScholarshipDetailPage() {
                         />
                       </Field>
 
-                      <Field label="الدورة / المرحلة (Cycle Name)">
+                      <Field label={lt('الدورة / المرحلة (Cycle Name)')}>
                         <Input
                           value={form.cycleName}
                           onChange={(val) => setForm((x) => ({ ...x, cycleName: val }))}
-                          placeholder="دورة الخريف 2027"
+                          placeholder={lt('دورة الخريف 2027')}
                         />
                       </Field>
 
-                      <Field label="لغة الدراسة (Study Language)">
+                      <Field label={lt('لغة الدراسة (Study Language)')}>
                         <Input
                           value={form.studyLanguageSourceLabel}
                           onChange={(val) =>
                             setForm((x) => ({ ...x, studyLanguageSourceLabel: val }))
                           }
-                          placeholder="الإنجليزية / التركية / الألمانية"
+                          placeholder={lt('الإنجليزية / التركية / الألمانية')}
                         />
                       </Field>
 
-                      <Field label="الموعد النهائي للتقديم (Application Deadline)">
+                      <Field label={lt('الموعد النهائي للتقديم (Application Deadline)')}>
                         <Input
                           type="date"
                           value={dateInput(form.applicationDeadline)}
@@ -871,41 +1037,43 @@ export function ScholarshipDetailPage() {
                         />
                       </Field>
 
-                      <Field label="نوع الموعد النهائي (Deadline Type)">
+                      <Field label={lt('نوع الموعد النهائي (Deadline Type)')}>
                         <select
                           value={asText(form.deadlineType)}
                           onChange={(e) => setForm((x) => ({ ...x, deadlineType: e.target.value }))}
                           className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-[#203442] outline-none transition focus:border-[#0E7C86] font-['Cairo']"
                         >
-                          <option value="HARD_DEADLINE">موعد نهائي صارم (Hard Deadline)</option>
-                          <option value="ROLLING">تقديم مستمر طوال العام (Rolling)</option>
-                          <option value="STAGED">مراحل متعددة (Staged)</option>
+                          <option value="HARD_DEADLINE">
+                            {lt('موعد نهائي صارم (Hard Deadline)')}
+                          </option>
+                          <option value="ROLLING">{lt('تقديم مستمر طوال العام (Rolling)')}</option>
+                          <option value="STAGED">{lt('مراحل متعددة (Staged)')}</option>
                         </select>
                       </Field>
 
-                      <Field label="طريقة وآلية التقديم (Application Method)">
+                      <Field label={lt('طريقة وآلية التقديم (Application Method)')}>
                         <Input
                           value={form.applicationMethod}
                           onChange={(val) => setForm((x) => ({ ...x, applicationMethod: val }))}
-                          placeholder="بوابة التقديم الإلكترونية الرسمية"
+                          placeholder={lt('بوابة التقديم الإلكترونية الرسمية')}
                         />
                       </Field>
                     </div>
                   </Card>
 
                   <Card
-                    title="المعرفات القانونية والضبط"
-                    subtitle="بيانات النظام والربط المعياري (للقراءة فقط)"
+                    title={lt('المعرفات القانونية والضبط')}
+                    subtitle={lt('بيانات النظام والربط المعياري (للقراءة فقط)')}
                     icon={<Layers3 className="h-5 w-5" />}
                   >
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                      <Field label="المعرف العام (Public ID)">
+                      <Field label={lt('المعرف العام (Public ID)')}>
                         <Input value={scholarship.publicId} readOnly />
                       </Field>
-                      <Field label="الاسم القانوني المعياري">
+                      <Field label={lt('الاسم القانوني المعياري')}>
                         <Input value={scholarship.canonicalName} readOnly />
                       </Field>
-                      <Field label="مفتاح منع التكرار (Dedupe Key)">
+                      <Field label={lt('مفتاح منع التكرار (Dedupe Key)')}>
                         <Input value={scholarship.canonicalDedupKey} readOnly />
                       </Field>
                     </div>
@@ -917,33 +1085,40 @@ export function ScholarshipDetailPage() {
               {activeTab === 'overview' && (
                 <div className="space-y-6">
                   <Card
-                    title="نبذة تعريفية شاملة عن المنحة (Scholarship Overview)"
-                    subtitle="الوصف التعريفي الكامل، أهداف المنحة، ورسالة البرنامج الأكاديمي"
+                    title={lt('نبذة تعريفية شاملة عن المنحة (Scholarship Overview)')}
+                    subtitle={lt('الوصف التعريفي الكامل، أهداف المنحة، ورسالة البرنامج الأكاديمي')}
                     icon={<Info className="h-5 w-5" />}
                   >
                     <div className="space-y-4">
-                      <Field label="الوصف العام والشامل للمنحة (Description)">
+                      <Field label={lt('الوصف العام والشامل للمنحة (Description)')}>
                         <Textarea
                           rows={6}
                           value={form.description}
                           onChange={(val) => setForm((x) => ({ ...x, description: val }))}
-                          placeholder="اكتب هنا نبذة مفصلة عن المنحة وتاريخها وأهم ما يميزها والجامعات التي تشملها..."
+                          placeholder={lt(
+                            'اكتب هنا نبذة مفصلة عن المنحة وتاريخها وأهم ما يميزها والجامعات التي تشملها...',
+                          )}
                         />
                       </Field>
 
                       <div className="rounded-2xl bg-teal-50/60 border border-teal-200/80 p-4 text-xs space-y-2 text-[#142B5F]">
                         <div className="flex items-center gap-2 font-black text-[#0E7C86]">
                           <Sparkles className="h-4 w-4" />
-                          <span>إرشادات صياغة النبذة:</span>
+                          <span>{lt('إرشادات صياغة النبذة:')}</span>
                         </div>
                         <ul className="list-disc list-inside space-y-1 text-slate-600 font-medium">
-                          <li>وضّح أهمية المنحة والدولة المستضيفة والمستوى الأكاديمي للجامعات.</li>
                           <li>
-                            بيّن ما إذا كانت المنحة تشمل سنة تحضيرية لتعلم اللغة أو تتيح الدراسة
-                            باللغة الإنجليزية.
+                            {lt('وضّح أهمية المنحة والدولة المستضيفة والمستوى الأكاديمي للجامعات.')}
                           </li>
                           <li>
-                            اذكر الفئات الأكثر حظاً في القبول والهدف التنموي أو الأكاديمي للمنحة.
+                            {lt(
+                              'بيّن ما إذا كانت المنحة تشمل سنة تحضيرية لتعلم اللغة أو تتيح الدراسة باللغة الإنجليزية.',
+                            )}
+                          </li>
+                          <li>
+                            {lt(
+                              'اذكر الفئات الأكثر حظاً في القبول والهدف التنموي أو الأكاديمي للمنحة.',
+                            )}
                           </li>
                         </ul>
                       </div>
@@ -956,12 +1131,12 @@ export function ScholarshipDetailPage() {
               {activeTab === 'funding' && (
                 <div className="space-y-6">
                   <Card
-                    title="الحزمة المالية ونوع التغطية"
-                    subtitle="تحديد نوع التمويل (كامل أو جزئي)، البدلات والرواتب"
+                    title={lt('الحزمة المالية ونوع التغطية')}
+                    subtitle={lt('تحديد نوع التمويل (كامل أو جزئي)، البدلات والرواتب')}
                     icon={<Coins className="h-5 w-5" />}
                   >
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                      <Field label="نوع التمويل والتغطية">
+                      <Field label={lt('نوع التمويل والتغطية')}>
                         <select
                           value={asText(form.fundingTypeCode)}
                           onChange={(e) => {
@@ -974,13 +1149,17 @@ export function ScholarshipDetailPage() {
                           }}
                           className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-[#142B5F] outline-none transition focus:border-[#0E7C86] font-['Cairo']"
                         >
-                          <option value="FULLY_FUNDED">تمويل كامل وفق الحقل (Fully Funded)</option>
-                          <option value="PARTIALLY_FUNDED">تمويل جزئي (Partially Funded)</option>
-                          <option value="TUITION_ONLY">إعفاء من الرسوم الدراسية فقط</option>
+                          <option value="FULLY_FUNDED">
+                            {lt('تمويل كامل وفق الحقل (Fully Funded)')}
+                          </option>
+                          <option value="PARTIALLY_FUNDED">
+                            {lt('تمويل جزئي (Partially Funded)')}
+                          </option>
+                          <option value="TUITION_ONLY">{lt('إعفاء من الرسوم الدراسية فقط')}</option>
                         </select>
                       </Field>
 
-                      <Field label="هل المنحة ممولة بالكامل؟">
+                      <Field label={lt('هل المنحة ممولة بالكامل؟')}>
                         <div
                           className={`flex h-11 items-center rounded-xl border px-3.5 text-xs font-black ${
                             isFullFunding
@@ -988,19 +1167,19 @@ export function ScholarshipDetailPage() {
                               : 'border-amber-200 bg-amber-50 text-amber-700'
                           }`}
                         >
-                          {isFullFunding ? '✓ نعم - تمويل كامل وشامل' : '✗ لا - تمويل جزئي'}
+                          {isFullFunding ? lt('✓ نعم - تمويل كامل وشامل') : lt('✗ لا - تمويل جزئي')}
                         </div>
                       </Field>
 
-                      <Field label="المبلغ التقديري أو الراتب (بالوحدات)">
+                      <Field label={lt('المبلغ التقديري أو الراتب (بالوحدات)')}>
                         <Input
                           value={form.amountMinorUnits}
                           onChange={(val) => setForm((x) => ({ ...x, amountMinorUnits: val }))}
-                          placeholder="مثال: 3500"
+                          placeholder={lt('مثال: 3500')}
                         />
                       </Field>
 
-                      <Field label="رمز العملة (Currency Code)">
+                      <Field label={lt('رمز العملة (Currency Code)')}>
                         <Input
                           value={form.amountCurrencyCode}
                           onChange={(val) => setForm((x) => ({ ...x, amountCurrencyCode: val }))}
@@ -1011,8 +1190,10 @@ export function ScholarshipDetailPage() {
                   </Card>
 
                   <Card
-                    title="قائمة المزايا والبدلات المغطاة (Benefits & Allowances)"
-                    subtitle="الرسوم، السكن، التذاكر، التأمين الصحي، الراتب المعيشي، وتأشيرة السفر"
+                    title={lt('قائمة المزايا والبدلات المغطاة (Benefits & Allowances)')}
+                    subtitle={lt(
+                      'الرسوم، السكن، التذاكر، التأمين الصحي، الراتب المعيشي، وتأشيرة السفر',
+                    )}
                     icon={<Sparkles className="h-5 w-5" />}
                   >
                     <div className="space-y-3.5">
@@ -1023,7 +1204,7 @@ export function ScholarshipDetailPage() {
                         >
                           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                             <div className="flex-1">
-                              <Field label="الميزة المالية المغطاة (اكتب نص الميزة مباشرة)">
+                              <Field label={lt('الميزة المالية المغطاة (اكتب نص الميزة مباشرة)')}>
                                 <Input
                                   value={item.valueText}
                                   onChange={(val) => {
@@ -1032,7 +1213,9 @@ export function ScholarshipDetailPage() {
                                     );
                                     setForm((x) => ({ ...x, benefits: updated }));
                                   }}
-                                  placeholder="مثال: إعفاء كامل 100% من جميع الرسوم الدراسية / راتب شهري 1500 ليرة / سكن جامعي مجاني"
+                                  placeholder={lt(
+                                    'مثال: إعفاء كامل 100% من جميع الرسوم الدراسية / راتب شهري 1500 ليرة / سكن جامعي مجاني',
+                                  )}
                                 />
                               </Field>
                             </div>
@@ -1045,10 +1228,10 @@ export function ScholarshipDetailPage() {
                                   setForm((x) => ({ ...x, benefits: updated }));
                                 }}
                                 className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-800 p-2.5 rounded-xl hover:bg-rose-50 border border-transparent hover:border-rose-200 transition cursor-pointer"
-                                title="حذف الميزة"
+                                title={lt('حذف الميزة')}
                               >
                                 <Trash2 className="h-4 w-4" />
-                                <span>حذف</span>
+                                <span>{lt('حذف')}</span>
                               </button>
                             </div>
                           </div>
@@ -1076,7 +1259,7 @@ export function ScholarshipDetailPage() {
                         className="inline-flex items-center gap-2 rounded-2xl border border-dashed border-[#0E7C86] bg-teal-50/50 hover:bg-teal-50 px-5 py-3 text-xs font-black text-[#0E7C86] transition cursor-pointer"
                       >
                         <Plus className="h-4 w-4" />
-                        <span>+ إضافة ميزة مالية جديدة (مربع نصي)</span>
+                        <span>{lt('+ إضافة ميزة مالية جديدة (مربع نصي)')}</span>
                       </button>
                     </div>
                   </Card>
@@ -1088,8 +1271,8 @@ export function ScholarshipDetailPage() {
               {activeTab === 'eligibility' && (
                 <div className="space-y-6">
                   <Card
-                    title="معايير وشروط الأهلية والقبول (Eligibility Criteria)"
-                    subtitle="المعدل الأكاديمي الأدنى، شروط السن، اختبارات اللغة، والجنسيات"
+                    title={lt('معايير وشروط الأهلية والقبول (Eligibility Criteria)')}
+                    subtitle={lt('المعدل الأكاديمي الأدنى، شروط السن، اختبارات اللغة، والجنسيات')}
                     icon={<CheckCheck className="h-5 w-5" />}
                   >
                     <div className="space-y-3.5">
@@ -1097,7 +1280,8 @@ export function ScholarshipDetailPage() {
                         .filter((item) => item.internationalTestId)
                         .map((item) => (
                           <p key={item.itemKey} className="text-xs text-slate-500">
-                            مرجع الاختبار المعتمد: {item.internationalTestId}
+                            {lt('مرجع الاختبار المعتمد:')}
+                            {item.internationalTestId}
                           </p>
                         ))}
                       {eligibility.map((item, index) => (
@@ -1107,7 +1291,7 @@ export function ScholarshipDetailPage() {
                         >
                           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                             <div className="flex-1">
-                              <Field label="نص الشرط والمعيار بالأهلية (يكتب نصاً مباشرة)">
+                              <Field label={lt('نص الشرط والمعيار بالأهلية (يكتب نصاً مباشرة)')}>
                                 <Input
                                   value={item.valueText}
                                   onChange={(val) => {
@@ -1116,7 +1300,9 @@ export function ScholarshipDetailPage() {
                                     );
                                     setForm((x) => ({ ...x, eligibilityItems: updated }));
                                   }}
-                                  placeholder="مثال: معدل تراكمي لا يقل عن 70% للبكالوريوس أو 75% للدراسات العليا / السن أقل من 21 سنة للبكالوريوس"
+                                  placeholder={lt(
+                                    'مثال: معدل تراكمي لا يقل عن 70% للبكالوريوس أو 75% للدراسات العليا / السن أقل من 21 سنة للبكالوريوس',
+                                  )}
                                 />
                               </Field>
                             </div>
@@ -1134,7 +1320,7 @@ export function ScholarshipDetailPage() {
                                   }}
                                   className="rounded text-[#0E7C86] focus:ring-[#0E7C86]"
                                 />
-                                <span>شرط إلزامي</span>
+                                <span>{lt('شرط إلزامي')}</span>
                               </label>
 
                               <button
@@ -1144,7 +1330,7 @@ export function ScholarshipDetailPage() {
                                   setForm((x) => ({ ...x, eligibilityItems: updated }));
                                 }}
                                 className="text-rose-500 hover:text-rose-700 p-2 rounded-xl hover:bg-rose-50 border border-transparent hover:border-rose-200 cursor-pointer"
-                                title="حذف الشرط"
+                                title={lt('حذف الشرط')}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </button>
@@ -1175,7 +1361,7 @@ export function ScholarshipDetailPage() {
                         className="inline-flex items-center gap-2 rounded-2xl border border-dashed border-[#0E7C86] bg-teal-50/50 hover:bg-teal-50 px-5 py-3 text-xs font-black text-[#0E7C86] transition cursor-pointer"
                       >
                         <Plus className="h-4 w-4" />
-                        <span>+ إضافة معيار أهلية جديد (مربع نصي)</span>
+                        <span>{lt('+ إضافة معيار أهلية جديد (مربع نصي)')}</span>
                       </button>
                     </div>
                   </Card>
@@ -1192,8 +1378,8 @@ export function ScholarshipDetailPage() {
               {activeTab === 'documents' && (
                 <div className="space-y-6">
                   <Card
-                    title="المستندات والوثائق المطلوبة للتقديم (Required Documents)"
-                    subtitle="جواز السفر، الشهادات، خطابات التوصية، وخطاب الحافز"
+                    title={lt('المستندات والوثائق المطلوبة للتقديم (Required Documents)')}
+                    subtitle={lt('جواز السفر، الشهادات، خطابات التوصية، وخطاب الحافز')}
                     icon={<FileText className="h-5 w-5" />}
                   >
                     <div className="space-y-3.5">
@@ -1204,7 +1390,7 @@ export function ScholarshipDetailPage() {
                         >
                           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                             <div className="flex-1">
-                              <Field label="اسم المستند والوثيقة المطلوبة (يكتب نصاً مباشرة)">
+                              <Field label={lt('اسم المستند والوثيقة المطلوبة (يكتب نصاً مباشرة)')}>
                                 <Input
                                   value={item.displayName}
                                   onChange={(val) => {
@@ -1213,7 +1399,9 @@ export function ScholarshipDetailPage() {
                                     );
                                     setForm((x) => ({ ...x, requiredDocumentItems: updated }));
                                   }}
-                                  placeholder="مثال: جواز السفر ساري المفعول / شهادة الثانوية العامة وكشف الدرجات مترجم ومصدق"
+                                  placeholder={lt(
+                                    'مثال: جواز السفر ساري المفعول / شهادة الثانوية العامة وكشف الدرجات مترجم ومصدق',
+                                  )}
                                 />
                               </Field>
                             </div>
@@ -1231,7 +1419,7 @@ export function ScholarshipDetailPage() {
                                   }}
                                   className="rounded text-[#0E7C86] focus:ring-[#0E7C86]"
                                 />
-                                <span>مستند إلزامي</span>
+                                <span>{lt('مستند إلزامي')}</span>
                               </label>
 
                               <button
@@ -1241,7 +1429,7 @@ export function ScholarshipDetailPage() {
                                   setForm((x) => ({ ...x, requiredDocumentItems: updated }));
                                 }}
                                 className="text-rose-500 hover:text-rose-700 p-2 rounded-xl hover:bg-rose-50 border border-transparent hover:border-rose-200 cursor-pointer"
-                                title="حذف المستند"
+                                title={lt('حذف المستند')}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </button>
@@ -1272,7 +1460,7 @@ export function ScholarshipDetailPage() {
                         className="inline-flex items-center gap-2 rounded-2xl border border-dashed border-[#0E7C86] bg-teal-50/50 hover:bg-teal-50 px-5 py-3 text-xs font-black text-[#0E7C86] transition cursor-pointer"
                       >
                         <Plus className="h-4 w-4" />
-                        <span>+ إضافة وثيقة ومستند جديد (مربع نصي)</span>
+                        <span>{lt('+ إضافة وثيقة ومستند جديد (مربع نصي)')}</span>
                       </button>
                     </div>
                   </Card>
@@ -1283,12 +1471,12 @@ export function ScholarshipDetailPage() {
               {activeTab === 'links_unis' && (
                 <div className="grid gap-6 lg:grid-cols-2">
                   <Card
-                    title="روابط التقديم والمصادر الرسمية"
-                    subtitle="بوابة التسجيل الإلكترونية والموقع الرسمي للجهة المانحة"
+                    title={lt('روابط التقديم والمصادر الرسمية')}
+                    subtitle={lt('بوابة التسجيل الإلكترونية والموقع الرسمي للجهة المانحة')}
                     icon={<ExternalLink className="h-5 w-5" />}
                   >
                     <div className="space-y-4">
-                      <Field label="رابط بوابة التقديم المباشرة (Application URL)">
+                      <Field label={lt('رابط بوابة التقديم المباشرة (Application URL)')}>
                         <Input
                           value={form.applicationUrl}
                           onChange={(val) => setForm((x) => ({ ...x, applicationUrl: val }))}
@@ -1296,7 +1484,7 @@ export function ScholarshipDetailPage() {
                         />
                       </Field>
 
-                      <Field label="الموقع الرسمي للمنحة (Official Website)">
+                      <Field label={lt('الموقع الرسمي للمنحة (Official Website)')}>
                         <Input
                           value={form.officialWebsite}
                           onChange={(val) => setForm((x) => ({ ...x, officialWebsite: val }))}
@@ -1304,7 +1492,7 @@ export function ScholarshipDetailPage() {
                         />
                       </Field>
 
-                      <Field label="رابط المصدر والإعلان المرجعي (Official Source URL)">
+                      <Field label={lt('رابط المصدر والإعلان المرجعي (Official Source URL)')}>
                         <Input
                           value={form.officialSourceUrl}
                           onChange={(val) => setForm((x) => ({ ...x, officialSourceUrl: val }))}
@@ -1312,23 +1500,32 @@ export function ScholarshipDetailPage() {
                         />
                       </Field>
 
-                      {scholarshipHttpUrl(form.applicationUrl) ? <div className="pt-2">
-                        <a
-                          href={scholarshipHttpUrl(form.applicationUrl) ?? undefined}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 rounded-xl bg-[#142B5F] hover:bg-[#0E7C86] px-4 py-2.5 text-xs font-bold text-white transition shadow-xs"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                          <span>زيارة بوابة التقديم الرسمية الآن</span>
-                        </a>
-                      </div> : <p>{tr('لا توجد بوابة تقديم صالحة محفوظة.','No valid application portal saved.')}</p>}
+                      {scholarshipHttpUrl(form.applicationUrl) ? (
+                        <div className="pt-2">
+                          <a
+                            href={scholarshipHttpUrl(form.applicationUrl) ?? undefined}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 rounded-xl bg-[#142B5F] hover:bg-[#0E7C86] px-4 py-2.5 text-xs font-bold text-white transition shadow-xs"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            <span>{lt('زيارة بوابة التقديم الرسمية الآن')}</span>
+                          </a>
+                        </div>
+                      ) : (
+                        <p>
+                          {tr(
+                            'لا توجد بوابة تقديم صالحة محفوظة.',
+                            'No valid application portal saved.',
+                          )}
+                        </p>
+                      )}
                     </div>
                   </Card>
 
                   <Card
-                    title="أدلة المصدر"
-                    subtitle="سجل المصادر والتحقق المحفوظ للمنحة"
+                    title={lt('أدلة المصدر')}
+                    subtitle={lt('سجل المصادر والتحقق المحفوظ للمنحة')}
                     icon={<ExternalLink className="h-5 w-5" />}
                   >
                     <div className="space-y-3">
@@ -1344,22 +1541,23 @@ export function ScholarshipDetailPage() {
                             {evidence.sourceUrl}
                           </p>
                           <p className="mt-2 text-xs">
-                            الثقة: {display(evidence.trustLevel)} · التحقق:{' '}
-                            {display(evidence.verifiedAt)}
+                            {lt('الثقة:')}
+                            {display(evidence.trustLevel)}
+                            {lt('· التحقق:')} {display(evidence.verifiedAt)}
                           </p>
                         </div>
                       ))}
                       {!scholarship.sourceEvidence?.length && (
                         <p className="text-sm text-slate-500">
-                          لا توجد أدلة مصدر محفوظة لهذه المنحة.
+                          {lt('لا توجد أدلة مصدر محفوظة لهذه المنحة.')}
                         </p>
                       )}
                     </div>
                   </Card>
 
                   <Card
-                    title="الجامعات والبرامج الشريكة (University Links)"
-                    subtitle="الجامعات التي تستضيف المنحة والبرامج الأكاديمية المتاحة"
+                    title={lt('الجامعات والبرامج الشريكة (University Links)')}
+                    subtitle={lt('الجامعات التي تستضيف المنحة والبرامج الأكاديمية المتاحة')}
                     icon={<Landmark className="h-5 w-5" />}
                   >
                     <div className="space-y-3">
@@ -1373,8 +1571,9 @@ export function ScholarshipDetailPage() {
                             <span>{item.sourceLabel || item.linkKey}</span>
                           </div>
                           <div className="mt-2 text-xs text-slate-500">
-                            معرف الجامعة: {display(item.universityId)} · البرنامج:{' '}
-                            {display(item.academicProgramId)}
+                            {lt('معرف الجامعة:')}
+                            {display(item.universityId)}
+                            {lt('· البرنامج:')} {display(item.academicProgramId)}
                           </div>
                         </div>
                       ))}
@@ -1382,7 +1581,7 @@ export function ScholarshipDetailPage() {
                       {(!scholarship.universityLinks ||
                         scholarship.universityLinks.length === 0) && (
                         <div className="rounded-2xl bg-slate-50 p-6 text-center text-xs text-slate-500 font-bold">
-                          لا توجد جامعات أو برامج موثقة مرتبطة بهذه المنحة.
+                          {lt('لا توجد جامعات أو برامج موثقة مرتبطة بهذه المنحة.')}
                         </div>
                       )}
                     </div>
@@ -1394,17 +1593,21 @@ export function ScholarshipDetailPage() {
               {activeTab === 'notes' && (
                 <div className="space-y-6">
                   <Card
-                    title="ملاحظات وتوجيهات هامة للطلاب (Important Notes & Guidance)"
-                    subtitle="تعليمات التقديم الخاصة، نصائح النجاح، المحاذير، وملاحظات الإدارة الداخلية"
+                    title={lt('ملاحظات وتوجيهات هامة للطلاب (Important Notes & Guidance)')}
+                    subtitle={lt(
+                      'تعليمات التقديم الخاصة، نصائح النجاح، المحاذير، وملاحظات الإدارة الداخلية',
+                    )}
                     icon={<Lightbulb className="h-5 w-5" />}
                   >
                     <div className="space-y-4">
-                      <Field label="نص الملاحظات والتوجيهات العامة للطلاب (Important Notes)">
+                      <Field label={lt('نص الملاحظات والتوجيهات العامة للطلاب (Important Notes)')}>
                         <Textarea
                           rows={6}
                           value={form.notes}
                           onChange={(val) => setForm((x) => ({ ...x, notes: val }))}
-                          placeholder="اكتب هنا التنبيهات الخاصة بالتقديم، مثل مجانية التقديم، متطلبات التوثيق، والمحاذير..."
+                          placeholder={lt(
+                            'اكتب هنا التنبيهات الخاصة بالتقديم، مثل مجانية التقديم، متطلبات التوثيق، والمحاذير...',
+                          )}
                         />
                       </Field>
                     </div>
@@ -1416,8 +1619,8 @@ export function ScholarshipDetailPage() {
               {activeTab === 'health_audit' && (
                 <div className="grid gap-6 lg:grid-cols-2">
                   <Card
-                    title="مؤشرات اكتمال البيانات وصحة السجل"
-                    subtitle="التحقق من تغطية جميع الحقول الإلزامية والربط المعياري"
+                    title={lt('مؤشرات اكتمال البيانات وصحة السجل')}
+                    subtitle={lt('التحقق من تغطية جميع الحقول الإلزامية والربط المعياري')}
                     icon={<ShieldCheck className="h-5 w-5" />}
                   >
                     <div className="space-y-4">
@@ -1428,32 +1631,48 @@ export function ScholarshipDetailPage() {
                           <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                           <span>
                             {detail.completeness.state === 'COMPLETE'
-                              ? 'الحقول المطلوبة مكتملة'
+                              ? lt('الحقول المطلوبة مكتملة')
                               : detail.completeness.state === 'NEEDS_REVIEW'
-                                ? 'تحتاج البيانات إلى مراجعة'
-                                : 'البيانات غير مكتملة'}
+                                ? lt('تحتاج البيانات إلى مراجعة')
+                                : lt('البيانات غير مكتملة')}
                           </span>
                         </div>
                         <span className="rounded-full bg-emerald-600 px-3 py-0.5 text-xs font-black text-white">
                           {scholarship.status === 'PUBLISHED'
-                            ? 'منشورة'
-                            : 'جاهزية النشر تحددها بوابة المراجعة'}
+                            ? lt('منشورة')
+                            : lt('جاهزية النشر تحددها بوابة المراجعة')}
                         </span>
                       </div>
 
                       <div>
                         <h4 className="mb-2 text-xs font-bold text-slate-700">
-                          الحقول المفقودة أو الناقصة:
+                          {lt('الحقول المفقودة أو الناقصة:')}
                         </h4>
                         {detail.completeness.missingFields.length ? (
                           <ul className="space-y-1 text-xs text-amber-800 font-bold">
                             {detail.completeness.missingFields.map((field) => (
-                              <li key={field}>• {field}</li>
+                              <li key={field}>
+                                {missingFieldTabs[field] ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const next = missingFieldTabs[field];
+                                      setActiveTab(next);
+                                      document.getElementById('scholarship-tab-' + next)?.focus();
+                                    }}
+                                  >
+                                    {missingFieldLabels[field] ?? field} —{' '}
+                                    {tr('فتح القسم', 'Open section')}
+                                  </button>
+                                ) : (
+                                  field
+                                )}
+                              </li>
                             ))}
                           </ul>
                         ) : (
                           <p className="text-xs text-emerald-700 font-bold">
-                            ✓ لا توجد أي حقول ناقصة، كافة بيانات المنحة مدخلة بالكامل.
+                            {lt('✓ لا توجد أي حقول ناقصة، كافة بيانات المنحة مدخلة بالكامل.')}
                           </p>
                         )}
                       </div>
@@ -1461,8 +1680,8 @@ export function ScholarshipDetailPage() {
                   </Card>
 
                   <Card
-                    title="سجل العمليات والتدقيق (Audit Trail)"
-                    subtitle="تاريخ التعديلات والأوامر التي طرأت على هذا السجل"
+                    title={lt('سجل العمليات والتدقيق (Audit Trail)')}
+                    subtitle={lt('تاريخ التعديلات والأوامر التي طرأت على هذا السجل')}
                     icon={<History className="h-5 w-5" />}
                   >
                     {detail.historyLimit && (
@@ -1481,12 +1700,12 @@ export function ScholarshipDetailPage() {
                     <div className="space-y-2.5">
                       {!detail.historyAvailable && (
                         <p className="text-xs text-amber-800">
-                          سجل التدقيق غير متاح؛ لا يمكن إثبات التاريخ من هذه الشاشة.
+                          {lt('سجل التدقيق غير متاح؛ لا يمكن إثبات التاريخ من هذه الشاشة.')}
                         </p>
                       )}
                       {detail.historyAvailable && !detail.history.length && (
                         <p className="text-xs text-slate-500">
-                          لا توجد أحداث ضمن نافذة السجل المتاحة.
+                          {lt('لا توجد أحداث ضمن نافذة السجل المتاحة.')}
                         </p>
                       )}
                       {detail.history.map((event) => (
@@ -1501,7 +1720,8 @@ export function ScholarshipDetailPage() {
                             </span>
                           </div>
                           <div className="mt-1 text-[11px] text-slate-500 font-medium">
-                            بواسطة: {event.actorId} ({event.source})
+                            {lt('بواسطة:')}
+                            {event.actorId} ({event.source})
                           </div>
                         </div>
                       ))}
@@ -1555,8 +1775,8 @@ export function ScholarshipDetailPage() {
           </button>
         </form>
       )}
-      {activeTab === 'overview' && (
-        <div className="scholarship-read-card">
+      {(activeTab === 'overview' || translationOpen) && (
+        <div hidden={activeTab !== 'overview'} className="scholarship-read-card">
           <button
             disabled={dirty || relationshipDirty}
             onClick={() => setTranslationOpen((value) => !value)}
@@ -1569,6 +1789,7 @@ export function ScholarshipDetailPage() {
               ownerId={scholarship.id}
               endpoint="/admin/scholarships"
               revision={scholarship.revision}
+              uiLanguage={language}
               optionalFields={scholarship.optionalFields}
               status={scholarship.status}
               onSaved={async () => {
@@ -1582,7 +1803,7 @@ export function ScholarshipDetailPage() {
         <h2>{tr('المراجعة والنشر', 'Review and publication')}</h2>
         <p>{publicationIssues.join(' · ')}</p>
         <div className="scholarship-detail-actions">
-          {canEdit && (
+          {canManage && (
             <>
               <button
                 disabled={
@@ -1697,6 +1918,8 @@ export function ScholarshipDetailPage() {
         <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
           <section
             role="dialog"
+            data-scholarship-dialog
+            tabIndex={-1}
             aria-modal="true"
             aria-label={tr('تغييرات غير محفوظة', 'Unsaved changes')}
             className="scholarship-read-card"
@@ -1750,7 +1973,14 @@ export function ScholarshipDetailPage() {
       {/* Confirmation Modal */}
       {confirmModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-lg rounded-3xl border border-[#DDEFF2] bg-white p-6 sm:p-7 shadow-2xl space-y-5 font-['Cairo']">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={confirmModal.title}
+            data-scholarship-dialog
+            tabIndex={-1}
+            className="w-full max-w-lg rounded-3xl border border-[#DDEFF2] bg-white p-6 sm:p-7 shadow-2xl space-y-5 font-['Cairo']"
+          >
             <div className="flex items-start gap-4">
               <div
                 className={`flex h-12 w-12 items-center justify-center rounded-2xl shrink-0 ${
@@ -1793,7 +2023,7 @@ export function ScholarshipDetailPage() {
                 onClick={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
                 className="rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-4 py-2.5 text-xs font-bold text-slate-700 transition cursor-pointer"
               >
-                تراجع وإلغاء
+                {lt('تراجع وإلغاء')}
               </button>
 
               <button

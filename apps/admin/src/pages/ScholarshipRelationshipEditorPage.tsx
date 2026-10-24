@@ -234,7 +234,14 @@ export function ScholarshipRelationshipEditorPage({
         },
       );
       if (current !== generation.current) return;
-      hydrate(saved);
+      const verified = await adminApiClient.request<ScholarshipDetail>(
+        `/admin/scholarships/${encodeURIComponent(id)}`,
+        { cache: 'no-store' },
+      );
+      if (current !== generation.current) return;
+      if (verified.id !== saved.id || verified.revision !== saved.revision)
+        throw new Error('SCHOLARSHIP_READBACK_MISMATCH');
+      hydrate(verified);
       await onSaved?.();
       if (current === generation.current)
         setMessage(

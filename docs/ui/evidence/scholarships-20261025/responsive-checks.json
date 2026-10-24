@@ -1,0 +1,37 @@
+[
+  {
+    "columns": "259.141px 259.156px 259.141px 259.156px 259.141px",
+    "overflow": false,
+    "tabs": 9,
+    "title": "22px",
+    "width": 1440
+  },
+  {
+    "columns": "228.75px 228.75px 228.75px 228.75px 228.75px",
+    "overflow": false,
+    "tabs": 9,
+    "title": "22px",
+    "width": 1280
+  },
+  {
+    "columns": "224.438px 224.453px 224.453px",
+    "overflow": false,
+    "tabs": 9,
+    "title": "22px",
+    "width": 768
+  },
+  {
+    "columns": "161.125px 161.125px",
+    "overflow": false,
+    "tabs": 9,
+    "title": "22px",
+    "width": 390
+  },
+  {
+    "columns": "146.875px 146.875px",
+    "overflow": false,
+    "tabs": 9,
+    "title": "22px",
+    "width": 360
+  }
+]

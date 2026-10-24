@@ -65,7 +65,10 @@ const labels: Record<string, [string, string]> = {
   accessedAt: ['وقت الوصول', 'Access time'],
   verifiedAt: ['وقت التحقق', 'Verification time'],
   title: ['العنوان', 'Title'],
-  sourceType: ['نوع المصدر', 'Source type'],
+  sourceTypeCode: ['نوع المصدر', 'Source type'],
+  sourceName: ['اسم المصدر', 'Source name'],
+  trustLevel: ['مستوى الثقة', 'Trust level'],
+  capturedAt: ['وقت توثيق المصدر', 'Captured at'],
   retrievedAt: ['وقت الجلب', 'Retrieved at'],
   descriptionText: ['الوصف', 'Description'],
   resolutionStatus: ['حالة الربط', 'Resolution state'],
@@ -95,12 +98,31 @@ export function ScholarshipDetailReadView({
           ? JSON.stringify(value)
           : String(value);
   const data = scholarship as unknown as Record<string, unknown>;
+  const fieldValue = (key: string, value: unknown) => {
+    if (
+      ['applicationDeadline', 'accessedAt', 'retrievedAt', 'capturedAt', 'verifiedAt'].includes(
+        key,
+      ) &&
+      value
+    ) {
+      const date = new Date(String(value));
+      if (Number.isFinite(+date))
+        return (
+          new Intl.DateTimeFormat(language, {
+            dateStyle: 'medium',
+            ...(key === 'applicationDeadline' ? {} : { timeStyle: 'short' as const }),
+            timeZone: 'UTC',
+          }).format(date) + ' UTC'
+        );
+    }
+    return scalar(value);
+  };
   const fields = (row: Record<string, unknown>, keys: string[]) => (
     <dl className="scholarship-read-grid">
       {keys.map((key) => (
         <div key={key}>
           <dt>{label(key)}</dt>
-          <dd>{scalar(row[key])}</dd>
+          <dd>{fieldValue(key, row[key])}</dd>
         </div>
       ))}
     </dl>
@@ -272,12 +294,13 @@ export function ScholarshipDetailReadView({
           })}
         </section>
         {group('sourceEvidence', tr('أدلة المصدر', 'Source evidence'), [
+          'sourceName',
           'sourceUrl',
-          'sourceType',
+          'sourceTypeCode',
+          'trustLevel',
           'isOfficial',
-          'retrievedAt',
+          'capturedAt',
           'verifiedAt',
-          'notes',
         ])}
         {group(
           'universityLinks',

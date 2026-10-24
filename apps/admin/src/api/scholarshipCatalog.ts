@@ -35,6 +35,7 @@ export interface ScholarshipCatalogAuditEvent {
 }
 
 export interface ScholarshipCatalogDetailResponse {
+  publicHref?: string | null;
   publicationReadiness?: { eligible: boolean; blocker: string | null };
   scholarship: ScholarshipDto;
   completeness: {
