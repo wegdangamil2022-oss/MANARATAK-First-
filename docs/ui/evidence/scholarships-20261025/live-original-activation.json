@@ -1,0 +1,15 @@
+{
+  "pass": true,
+  "scope": "ORIGINAL_NEON_DEVELOPMENT",
+  "sourceSha": "97209ec14a486ee0083000ab10ee3628d14a1d12",
+  "liveness": 200,
+  "readiness": 503,
+  "staticBuildMatches": true,
+  "schemaChanges": false,
+  "scholarshipDataMutations": false,
+  "mfaPreserved": true,
+  "workerScope": [
+    "analytics.retention.sweep"
+  ],
+  "at": "2026-10-24T23:21:06.694Z"
+}
