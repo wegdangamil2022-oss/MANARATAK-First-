@@ -29,6 +29,16 @@ beforeEach(()=>{
 });
 afterEach(async()=>{if(tree)await act(async()=>tree.unmount());vi.useRealTimers();vi.unstubAllGlobals();});
 describe('Server-wide review queue interaction and session safety',()=>{
+  it('shows a command conflict inside the open preview rather than only behind the drawer',async()=>{
+    await mount();await act(async()=>button('Preview').props.onClick());
+    const reasonLabel=tree.root.findAllByType('label').find(node=>node.children.includes('Action reason'))!;
+    await act(async()=>reasonLabel.findByType('input').props.onChange({target:{value:'Competing session claim'}}));
+    state.request.mockImplementation(async(path:string)=>{if(path.endsWith('/commands'))throw new Error('[409] REVIEW_VERSION_CONFLICT');if(path.endsWith('/query'))return page();return [];});
+    await act(async()=>button('Claim review').props.onClick());
+    const dialog=tree.root.findByProps({role:'dialog'});
+    expect(dialog.findAll(node=>node.props.role==='status').map(node=>node.children.join(' ')).join(' ')).toContain('Another reviewer changed this case. Refresh the list.');
+    expect(dialog.findAll(node=>node.props.role==='status').map(node=>node.children.join(' ')).join(' ')).not.toContain('Change saved; refreshing the case.');
+  });
   it('shows three explicit tabs and five metrics with no essential accordion',async()=>{await mount();expect(tree.root.findAll(node=>node.props.role==='tab')).toHaveLength(3);expect(tree.root.findByProps({className:'rw-metrics'}).findAllByType('button')).toHaveLength(5);expect(tree.root.findAllByType('details')).toHaveLength(0);expect(JSON.stringify(tree.toJSON())).toContain('LAST-GOOD-OWNER');});
   it('sends filters to a single server query instead of requesting multiple overlapping source pages',async()=>{await mount();state.request.mockClear();const domain=tree.root.findAllByType('select').find(select=>select.findAllByType('option').some(option=>option.props.value==='scholarships'))!;await act(async()=>domain.props.onChange({target:{value:'scholarships'}}));expect(queries()).toHaveLength(1);expect(JSON.parse(queries()[0][1].body)).toMatchObject({domain:'scholarships'});});
   it('debounces private free text into POST body and does not locally filter the existing sample',async()=>{await mount();state.request.mockClear();vi.useFakeTimers();await act(async()=>tree.root.findByProps({id:'rw-search'}).props.onChange({target:{value:'Record beyond 500'}}));expect(queries()).toHaveLength(0);await act(async()=>{await vi.advanceTimersByTimeAsync(310);});expect(queries()).toHaveLength(1);expect(JSON.parse(queries()[0][1].body).search).toBe('Record beyond 500');expect(queries()[0][0]).not.toContain('Record');});

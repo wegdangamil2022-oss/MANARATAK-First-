@@ -241,7 +241,7 @@ export function ReviewWorkspacePage() {
         setSelectedKey(null);
         setSelectedKeys([]);
       }
-      return false;
+      return workspaceError(cause);
     } finally {
       setMutating(false);
     }

@@ -38,7 +38,7 @@ export function WorkspacePreview({
   move: (delta: number) => void;
   canPrevious: boolean;
   canNext: boolean;
-  command: (command: ReviewCommand) => Promise<boolean>;
+  command: (command: ReviewCommand) => Promise<boolean | string>;
   canCoordinate: boolean;
   hasPermission: (key: string) => boolean;
   busy: boolean;
@@ -237,8 +237,9 @@ export function WorkspacePreview({
       commandKeys.current.set(fingerprint, idempotencyKey);
     }
     const ok = await command({ ...body, idempotencyKey });
-    if (ok)
+    if (ok === true)
       setMessage(tr('حُفظ التغيير، ويجري تحديث الحالة.', 'Change saved; refreshing the case.'));
+    else setMessage(label(typeof ok === 'string' ? ok : 'REVIEW_UNAVAILABLE'));
   };
   const loadMoreAudit = async () => {
     const query = auditQuery(
