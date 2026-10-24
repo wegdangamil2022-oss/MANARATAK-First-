@@ -64,6 +64,8 @@ interface PaginatedResponse {
 }
 
 interface ScholarshipSummary {
+  inReview?: number;
+  incomplete?: number;
   all: number;
   imported: number;
   missingFields: number;
@@ -371,7 +373,7 @@ export function ScholarshipListPage() {
             </div>
           </div>
           <div className="mt-2.5 text-2xl font-black text-amber-700">
-            {summaryLoading ? <Loader2 className="h-6 w-6 animate-spin text-slate-300" /> : formatNumber(summary?.needsVerification ?? summary?.imported)}
+            {summaryLoading ? <Loader2 className="h-6 w-6 animate-spin text-slate-300" /> : formatNumber(summary?.inReview)}
           </div>
           <div className="mt-1 text-[11px] font-bold text-amber-600">
             <span>{tr('بانتظار تدقيق البيانات', 'Awaiting Verification')}</span>
@@ -396,7 +398,7 @@ export function ScholarshipListPage() {
             {summaryLoading ? (
               <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
             ) : (
-              formatNumber(summary?summary.missingFields+summary.needsTranslation:null)
+              formatNumber(summary?.incomplete)
             )}
           </div>
           <div className="mt-1 text-[11px] font-bold text-rose-600">
@@ -518,7 +520,7 @@ export function ScholarshipListPage() {
 
           <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-500">
             <span>
-              عرض <strong className="text-[#142B5F] font-bold">{filteredItems.length}</strong> من أصل <strong className="text-[#142B5F] font-bold">{data?.total ?? 0}</strong> منحة معتمدة
+              {tr('عرض ', 'Showing ')}<strong className="text-[#142B5F] font-bold">{formatNumber(filteredItems.length)}</strong>{tr(' سجلًا من أصل ', ' records of ')}<strong className="text-[#142B5F] font-bold">{formatNumber(data?.total)}</strong>{tr(' نتيجة', ' matching results')}
             </span>
             {hasActiveFilters && (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 border border-teal-200 px-3 py-0.5 text-[11px] text-[#0E7C86] font-bold">

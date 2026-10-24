@@ -9,7 +9,15 @@ import type {
 import { adminApiClient } from './client';
 
 export interface ScholarshipCatalogUnresolvedLink {
-  area: 'COUNTRY' | 'STUDY_LANGUAGE' | 'CURRENCY' | 'DEGREE' | 'MAJOR' | 'UNIVERSITY' | 'ACADEMIC_PROGRAM' | 'INTERNATIONAL_TEST';
+  area:
+    | 'COUNTRY'
+    | 'STUDY_LANGUAGE'
+    | 'CURRENCY'
+    | 'DEGREE'
+    | 'MAJOR'
+    | 'UNIVERSITY'
+    | 'ACADEMIC_PROGRAM'
+    | 'INTERNATIONAL_TEST';
   key: string;
   rawValue: string | null;
   canonicalId: string | null;
@@ -27,6 +35,7 @@ export interface ScholarshipCatalogAuditEvent {
 }
 
 export interface ScholarshipCatalogDetailResponse {
+  publicationReadiness?: { eligible: boolean; blocker: string | null };
   scholarship: ScholarshipDto;
   completeness: {
     state: 'INCOMPLETE' | 'NEEDS_REVIEW' | 'COMPLETE';
@@ -75,18 +84,29 @@ export interface ScholarshipCatalogUpdate {
 }
 
 const BASE = '/admin/scholarships';
+function revisionHeader(revision: number | undefined) {
+  if (!Number.isSafeInteger(revision) || revision! < 1)
+    throw new Error('SCHOLARSHIP_REVISION_PRECONDITION_REQUIRED');
+  return String(revision);
+}
 
 export const scholarshipCatalogApi = {
   detail(id: string) {
     return adminApiClient.request<ScholarshipCatalogDetailResponse>(
       `${BASE}/${encodeURIComponent(id)}/catalog-detail`,
+      { cache: 'no-store' },
     );
   },
 
-  update(id: string, input: ScholarshipCatalogUpdate, reason: string) {
+  update(
+    id: string,
+    input: ScholarshipCatalogUpdate,
+    reason: string,
+    revision: number | undefined,
+  ) {
     return adminApiClient.request<ScholarshipDto>(`${BASE}/${encodeURIComponent(id)}`, {
       method: 'PATCH',
-      headers: { 'X-Review-Reason': reason },
+      headers: { 'X-Review-Reason': reason, 'If-Match': revisionHeader(revision) },
       body: JSON.stringify(input),
     });
   },
@@ -95,10 +115,14 @@ export const scholarshipCatalogApi = {
     id: string,
     command: 'mark-ready' | 'mark-publishable' | 'publish' | 'unpublish' | 'archive' | 'reject',
     reason: string,
+    revision: number | undefined,
   ) {
     return adminApiClient.request<{ success: true }>(
       `${BASE}/${encodeURIComponent(id)}/${command}`,
-      { method: 'POST', headers: { 'X-Review-Reason': reason } },
+      {
+        method: 'POST',
+        headers: { 'X-Review-Reason': reason, 'If-Match': revisionHeader(revision) },
+      },
     );
   },
 };

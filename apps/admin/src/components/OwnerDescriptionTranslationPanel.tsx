@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {canAuthorDomainTranslations,type TranslationDomainKey} from '@manaratak/shared';
 import {adminApiClient} from '../api/client';
-export function OwnerDescriptionTranslationPanel({domain,ownerId,endpoint,optionalFields,status,onSaved}:{domain:Extract<TranslationDomainKey,'COURSE'|'SCHOLARSHIP'|'INTERNATIONAL_TEST'>;ownerId:string;endpoint:string;optionalFields?:Record<string,unknown>;status:string;onSaved:()=>void|Promise<void>}) {
+export function OwnerDescriptionTranslationPanel({domain,ownerId,endpoint,optionalFields,status,onSaved,revision}:{domain:Extract<TranslationDomainKey,'COURSE'|'SCHOLARSHIP'|'INTERNATIONAL_TEST'>;ownerId:string;endpoint:string;optionalFields?:Record<string,unknown>;status:string;onSaved:()=>void|Promise<void>;revision?:number}) {
   const [locale,setLocale]=useState<'ar'|'en'>('ar');const [title,setTitle]=useState('');const [description,setDescription]=useState('');
   const [reason,setReason]=useState('');const [error,setError]=useState('');const [notice,setNotice]=useState('');const [busy,setBusy]=useState(false);const [reloadRequired,setReloadRequired]=useState(false);const saving=useRef(false);
   const enabled=canAuthorDomainTranslations(domain) && !['ARCHIVED','REJECTED'].includes(status) && (domain==='INTERNATIONAL_TEST'||status!=='PUBLISHED');
@@ -9,7 +9,8 @@ export function OwnerDescriptionTranslationPanel({domain,ownerId,endpoint,option
   async function save(remove=false) {
     if(saving.current||!enabled||reloadRequired)return;saving.current=true;setBusy(true);setError('');setNotice('');let written=false;
     try {
-      await adminApiClient.request(`${endpoint}/${encodeURIComponent(ownerId)}/localized-description`,{method:'POST',headers:{'X-Review-Reason':reason},body:JSON.stringify(remove?{locale,remove:true}:{locale,displayName:title,description})});
+      if(domain==='SCHOLARSHIP'&&(!Number.isSafeInteger(revision)||revision!<1))throw new Error('SCHOLARSHIP_REVISION_PRECONDITION_REQUIRED');
+      await adminApiClient.request(`${endpoint}/${encodeURIComponent(ownerId)}/localized-description`,{method:'POST',headers:{'X-Review-Reason':reason,...(domain==='SCHOLARSHIP'?{'If-Match':String(revision)}:{})},body:JSON.stringify(remove?{locale,remove:true}:{locale,displayName:title,description})});
       written=true;
       const response=await adminApiClient.request<Record<string,unknown>>(`${endpoint}/${encodeURIComponent(ownerId)}`);
       const readback=(response.scholarship??response) as {id?:string;optionalFields?:{ownerLocalizedDescriptions?:Record<string,{displayName?:string;description?:string}>}};

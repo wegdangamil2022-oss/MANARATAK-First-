@@ -518,7 +518,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   }
 
   async getAdminSummary() {
-    const [all, imported, missingFields, needsVerification, needsTranslation, readyToPublish, published, archived] = await Promise.all([
+    const [all, imported, missingFields, needsVerification, needsTranslation, readyToPublish, published, archived, inReview, incomplete] = await Promise.all([
       this.prisma.scholarship.count(),
       this.prisma.scholarship.count({ where: { status: { in: [ScholarshipStatus.IMPORTED, ScholarshipStatus.READY_TO_REVIEW] } } }),
       this.prisma.scholarship.count({ where: { OR: [{ completenessStatus: { not: ScholarshipCompletenessState.COMPLETE } }, { applicationDeadline: null }] } }),
@@ -527,8 +527,10 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       this.prisma.scholarship.count({ where: { status: ScholarshipStatus.READY_TO_PUBLISH } }),
       this.prisma.scholarship.count({ where: { status: ScholarshipStatus.PUBLISHED } }),
       this.prisma.scholarship.count({ where: { status: ScholarshipStatus.ARCHIVED } }),
+      this.prisma.scholarship.count({ where: { status: ScholarshipStatus.READY_TO_REVIEW } }),
+      this.prisma.scholarship.count({ where: { completenessStatus: ScholarshipCompletenessState.INCOMPLETE } }),
     ]);
-    return { all, imported, missingFields, needsVerification, needsTranslation, readyToPublish, published, archived };
+    return { all, imported, missingFields, needsVerification, needsTranslation, readyToPublish, published, archived, inReview, incomplete };
   }
 
   async listPublishedProgramRelationshipsPage(programIds:string[],limit:number):Promise<Record<string,PublishedProgramScholarshipPage>>{
