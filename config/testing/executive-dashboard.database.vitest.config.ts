@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import { resolve } from 'node:path';
-import baseline from './.section16-vitest.config';
+import baseline from '../../.section16-vitest.config';
 export default defineConfig({
   ...baseline,
   resolve: {
