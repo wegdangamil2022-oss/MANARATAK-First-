@@ -48,7 +48,7 @@
   font-weight: 700;
   line-height: 1.7;
 }
-.executive-dashboard svg:not([data-chart]) {
+.executive-dashboard svg:not([data-chart]):not([data-bar]) {
   width: 19px;
   height: 19px;
   flex-shrink: 0;
@@ -408,17 +408,19 @@ a.executive-kpi:hover {
   border-radius: 5px;
   overflow: hidden;
 }
-.executive-bar-track i {
+.executive-bar-track svg {
   display: block;
+  width: 100%;
   height: 100%;
-  background: #0e7c86;
-  border-radius: 5px;
 }
-.executive-bar-row:nth-child(2n) i {
-  background: #142b5f;
+.executive-bar-track rect {
+  fill: #0e7c86;
 }
-.executive-bar-row:nth-child(3n) i {
-  background: #d6a43b;
+.executive-bar-row:nth-child(2n) rect {
+  fill: #142b5f;
+}
+.executive-bar-row:nth-child(3n) rect {
+  fill: #d6a43b;
 }
 .executive-direct-grid {
   display: grid;

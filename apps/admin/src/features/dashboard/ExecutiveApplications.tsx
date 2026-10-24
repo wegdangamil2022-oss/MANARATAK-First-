@@ -94,7 +94,9 @@ export function ExecutiveApplications({
                   <div className="executive-bar-row" key={title}>
                     <span>{title}</span>
                     <div className="executive-bar-track">
-                      <i style={{ width: `${(value / maximum) * 100}%` }} />
+                      <svg data-bar="true" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true">
+                        <rect x={language === 'ar' ? 100 - (value / maximum) * 100 : 0} y="0" width={(value / maximum) * 100} height="12" rx="4" />
+                      </svg>
                     </div>
                     <b>{number(value)}</b>
                   </div>

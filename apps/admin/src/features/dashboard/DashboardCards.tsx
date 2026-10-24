@@ -3,6 +3,7 @@ import { ArrowUpLeft, BookOpen, BriefcaseBusiness, Database, GraduationCap, News
 import { dashboardMetricHref } from './DashboardSources';
 import { effectiveDashboardState, type DashboardReading } from './DashboardContract';
 import { dashboardLabel, dashboardTime } from './dashboardText';
+import { brandPalette } from '../../components/BrandPalette';
 const card = 'min-w-0 break-words rounded-2xl border border-[#DDEFF2] bg-white p-4 shadow-xs';
 export function DashboardMetricCard({
   reading,
@@ -32,6 +33,7 @@ export function DashboardMetricCard({
     careers: [BriefcaseBusiness, '#142B5F'], cms: [Newspaper, '#21A7B4'],
   };
   const [Icon, accent] = visual[reading.source.domain] ?? [BookOpen, '#0E7C86'];
+  const tone = brandPalette[accent];
   const scope =
     reading.source.kind === 'imports' && metric === 'batches'
       ? label('batches')
@@ -49,10 +51,10 @@ export function DashboardMetricCard({
       className={`${card} dashboard-metric ${compact ? 'dashboard-metric-primary' : 'dashboard-metric-signal'}`}
       aria-label={`${label(reading.source.domain)}: ${label(metric)}; ${label(state)}`}
     >
-      <span className="absolute inset-x-0 top-0 h-1" style={{ backgroundColor: accent }} />
+      <span className={`absolute inset-x-0 top-0 h-1 ${tone.accent}`} />
       <div className="dashboard-metric-heading">
         <div className="dashboard-metric-top">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: `${accent}14`, color: accent }}><Icon aria-hidden="true" className="h-5 w-5" /></span>
+          <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${tone.surface} ${tone.foreground}`}><Icon aria-hidden="true" className="h-5 w-5" /></span>
           <div>{!compact && <p className="dashboard-metric-domain">{label(reading.source.domain)}</p>}<h3>{title}</h3></div>
         </div>
       <output
