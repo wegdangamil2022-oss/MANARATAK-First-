@@ -104,7 +104,7 @@ export function WorkspacePreview({
     const abort = new AbortController();
     setHistory([]);
     setReviewers([]);
-    setAssignee('');
+    setAssignee(row.assigneeId ?? row.teamId ?? '');
     setReason('');
     setNote('');
     setPriority(row.priority);
@@ -133,7 +133,17 @@ export function WorkspacePreview({
         })
         .catch(() => {});
     return () => abort.abort();
-  }, [row.key, row.version, row.domain, row.priority, row.workState, canCoordinate, label]);
+  }, [
+    row.key,
+    row.version,
+    row.domain,
+    row.priority,
+    row.workState,
+    row.assigneeId,
+    row.teamId,
+    canCoordinate,
+    label,
+  ]);
   useEffect(() => {
     const abort = new AbortController(),
       item = ownerEvidenceItem(row),
@@ -194,23 +204,32 @@ export function WorkspacePreview({
       );
       return;
     }
-    const target = reviewers.find((value) => value.id === assignee),
-      body = {
-        key: row.key,
-        version: row.version,
-        ownerRevision: row.ownerRevision,
-        action,
-        reason,
-        ...(action === 'assign'
-          ? {
-              assigneeId: target?.kind === 'person' ? target.id : null,
-              teamId: target?.kind === 'team' ? target.id : null,
-            }
-          : {}),
-        ...(action === 'priority' ? { priority } : {}),
-        ...(action === 'note' ? { note } : {}),
-        ...(action === 'state' ? { state: workState } : {}),
-      };
+    const target = reviewers.find((value) => value.id === assignee);
+    if (action === 'assign' && assignee && !target) {
+      setMessage(
+        tr(
+          'اختر مراجعًا مخولًا أو أزل الإسناد صراحةً.',
+          'Select an eligible reviewer or explicitly remove the assignment.',
+        ),
+      );
+      return;
+    }
+    const body = {
+      key: row.key,
+      version: row.version,
+      ownerRevision: row.ownerRevision,
+      action,
+      reason,
+      ...(action === 'assign'
+        ? {
+            assigneeId: target?.kind === 'person' ? target.id : null,
+            teamId: target?.kind === 'team' ? target.id : null,
+          }
+        : {}),
+      ...(action === 'priority' ? { priority } : {}),
+      ...(action === 'note' ? { note } : {}),
+      ...(action === 'state' ? { state: workState } : {}),
+    };
     const fingerprint = JSON.stringify(body);
     let idempotencyKey = commandKeys.current.get(fingerprint);
     if (!idempotencyKey) {
@@ -367,6 +386,12 @@ export function WorkspacePreview({
                   <option value="">
                     {tr('غير مسندة — إزالة الإسناد', 'Unassigned — remove assignment')}
                   </option>
+                  {assignee && !reviewers.some((person) => person.id === assignee) ? (
+                    <option value={assignee} disabled>
+                      {row.assigneeLabel ??
+                        tr('الإسناد الحالي — غير متاح', 'Current assignment — unavailable')}
+                    </option>
+                  ) : null}
                   {reviewers.map((person) => (
                     <option key={person.kind + person.id} value={person.id}>
                       {person.label}
@@ -465,7 +490,7 @@ export function WorkspacePreview({
             </h3>
             <p>
               {tr('حالة التحقق: ', 'Verification: ')}
-              {row.verificationState}
+              {label(row.verificationState)}
             </p>
             {row.sourceUrl ? (
               <>

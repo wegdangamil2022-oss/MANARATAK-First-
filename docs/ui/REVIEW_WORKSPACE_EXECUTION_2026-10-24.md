@@ -1,6 +1,6 @@
 # Review workspace — section 02 execution
 
-Status: implementation and isolated verification in progress; not accepted or deployed.
+Status: implementation and isolated verification completed; ready for code review, not deployed. See `REVIEW_WORKSPACE_DELIVERY_2026-10-24.md` for evidence and explicit acceptance boundaries.
 
 - User authority: implement section 02, especially 02.11–02.27; no production writes or main merge.
 - Attached document labels itself cumulative 1.2, despite the requested v1.10 filename. Its complete section 02 requirements are preserved in `REVIEW_WORKSPACE_APPROVED_SPEC_2026-10-24.md`.
@@ -20,14 +20,16 @@ Status: implementation and isolated verification in progress; not accepted or de
 
 ## Acceptance ledger
 
-- [ ] Real PostgreSQL full search beyond row 500, no browser full scan.
-- [ ] Unique counts, all nine domains, import owner evidence and exclusion of TEST/DEMO.
-- [ ] Stable pagination; explicit restart on changed source or permissions.
-- [ ] Assignment persistence, current assignee permission, team membership, stale version, stale owner and replay protection.
-- [ ] Internal notes, audit, targeted outbox, partial bulk outcomes.
-- [ ] No fabricated SLA, approved policies and measured observation-only analytics.
-- [ ] Existing source diff, audit pagination, safe URLs and owner handoff preserved.
-- [ ] Three tabs, five metrics, central table, side preview, focus restoration, responsive list, Cairo measurements.
-- [ ] Unit/API/database/UI/build/lint verification and desktop/mobile RTL/LTR evidence.
+- [x] Real PostgreSQL full search beyond row 500, no browser full scan.
+- [x] Unique counts, all nine domains, import owner evidence and exclusion of TEST/DEMO.
+- [x] Stable pagination; explicit restart on changed source or permissions.
+- [x] Assignment persistence, current assignee permission, team membership, stale version, stale owner and replay protection.
+- [x] Internal notes, audit, targeted outbox, partial bulk outcomes.
+- [x] No fabricated SLA, approved policies and measured observation-only analytics.
+- [x] Existing source diff, audit pagination, safe URLs and owner handoff preserved in contracts/tests; cross-owner editing E2E is not claimed.
+- [x] Three tabs, five metrics, central table, side preview, focus restoration, responsive list, Cairo measurements.
+- [x] Unit/API/database/UI/build/lint verification and desktop/mobile RTL/LTR evidence.
+- [ ] Full canonical login/MFA plus owner editing in multiple browser sessions against the complete application. Current browser evidence uses explicitly isolated fixture authentication.
+- [ ] Formal browser text-zoom 200% acceptance. A 720 CSS-pixel/DPR2 reflow simulation and 360/390/768/1440 viewport checks passed; these are not represented as an actual browser zoom test.
 
 No application of the new migration to Neon/original or production has been authorized by this document. Evidence will name its actual isolated target and test boundaries.

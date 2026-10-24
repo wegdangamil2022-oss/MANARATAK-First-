@@ -202,7 +202,7 @@ export function WorkspaceSources({
               />
             </label>
             <button className="rw-primary" type="submit" disabled={saving}>
-              {tr('اعتماد السياسة للدورات الجديدة', 'Approve policy for new cycles')}
+              {tr('اعتماد السياسة للمراجعات الجديدة', 'Approve policy for new reviews')}
             </button>
           </form>
         ) : null}

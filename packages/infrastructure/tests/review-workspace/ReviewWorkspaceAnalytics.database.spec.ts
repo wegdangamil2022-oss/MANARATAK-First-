@@ -4,7 +4,7 @@ import { beforeAll, afterAll, describe, it, expect } from 'vitest';
 import { preflightTargets } from '../../../../scripts/database/post28-isolation.mjs';
 import { readDatabaseIdentity } from '../../../../scripts/database/post28-preflight.mjs';
 import { PrismaReviewWorkspaceGateway } from '../../src/review-workspace/PrismaReviewWorkspaceGateway';
-import { reviewDomains } from '@manaratak/shared';
+import { reviewDomains, reviewReasons } from '@manaratak/shared';
 describe('Read-only regression of measured review analytics on the attested fixture target', () => {
   let db: PrismaClient, gateway: PrismaReviewWorkspaceGateway, actor: string;
   const evidence: { isolation: unknown; periods: unknown[] } = { isolation: null, periods: [] };
@@ -72,6 +72,9 @@ describe('Read-only regression of measured review analytics on the attested fixt
       expect(result.series.reduce((sum, row) => sum + row.entered, 0)).toBe(result.newCases);
       expect(result.series.reduce((sum, row) => sum + row.completed, 0)).toBe(result.completed);
       expect(result.domains.every((row) => row.count > 0)).toBe(true);
+      expect(
+        result.reasons.every((row) => (reviewReasons as readonly string[]).includes(row.key)),
+      ).toBe(true);
       evidence.periods.push(result);
     },
   );

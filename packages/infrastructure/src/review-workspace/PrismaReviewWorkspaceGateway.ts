@@ -6,6 +6,7 @@ import { PrismaImportRepository } from '../import-foundation/PrismaImportReposit
 import { PrismaScholarshipRepository } from '../scholarships/PrismaScholarshipRepository';
 import {
   reviewDomains,
+  reviewReasons,
   type ReviewOwner,
   type ReviewPage,
   type ReviewQuery,
@@ -602,7 +603,7 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
         assignees = await aggregate(Prisma.sql`coalesce("assigneeLabel",'unassigned')`);
       const reasonRows = await tx.$queryRaw<
         Array<{ key: string; count: bigint }>
-      >`${base} SELECT unnest(reasons) "key",count(*) count FROM owners GROUP BY 1 ORDER BY count DESC`;
+      >`${base} SELECT reason "key",count(*) count FROM owners CROSS JOIN LATERAL unnest(reasons) reason WHERE reason IN (${Prisma.join([...reviewReasons])}) GROUP BY 1 ORDER BY count DESC,"key"`;
       const [totals] = await tx.$queryRaw<
         Array<{ open: bigint; overdue: bigint; unknown: bigint }>
       >`${base} SELECT count(*) open,count(*) FILTER(WHERE sla='overdue') overdue,count(*) FILTER(WHERE sla='unknown') unknown FROM owners`;
