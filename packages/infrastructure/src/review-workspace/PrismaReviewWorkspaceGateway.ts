@@ -81,7 +81,7 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
         observed: number | null;
         errorCode: string | null;
       }>
-    >`SELECT * FROM "ReviewSourceCheckpoint" WHERE ${scope(access)}`;
+    >`SELECT * FROM "ReviewSourceCheckpoint" WHERE ${scope(access)} OR domain='scholarships:imports'`;
     return reviewDomains.map((domain) => {
       if (!access.domains.includes(domain))
         return {
@@ -92,16 +92,18 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
           errorCode: null,
         };
       const row = checkpoints.find((value) => value.domain === domain);
+      const imports = domain==='scholarships'&&access.imports ? checkpoints.find(value=>(value.domain as string)==='scholarships:imports') : null;
+      const importMissing=domain==='scholarships'&&access.imports&&(!imports?.synchronizedAt||imports.errorCode||Date.now()-+imports.synchronizedAt>300000);
       return {
         domain,
         state:
-          !row?.synchronizedAt || row.errorCode
+          !row?.synchronizedAt || row.errorCode || importMissing
             ? 'unavailable'
             : Date.now() - +row.synchronizedAt > 300000
               ? 'stale'
               : 'ready',
         synchronizedAt: row?.synchronizedAt?.toISOString() ?? null,
-        observed: row?.observed ?? null,
+        observed: domain==='scholarships'&&!access.imports?null:row?.observed ?? null,
         errorCode: row?.errorCode ?? (row?.synchronizedAt ? null : 'REVIEW_SYNC_REQUIRED'),
       };
     });
@@ -113,7 +115,7 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
     for (const owner of domain ? [domain] : access.domains) {
       try {
         await this.transaction(async (tx) => {
-          await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('review-workspace'),hashtext(${owner}))`;
+          await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('review-workspace'),hashtext(${owner}))::text`;
           if (owner === 'scholarships' && access.imports) await this.synchronizeImports(tx);
           const changed = await tx.$queryRaw<
             Array<{
@@ -124,7 +126,7 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
               withinSla: boolean | null;
             }>
           >`
-          WITH live AS (SELECT * FROM "ReviewOwnerProjection" WHERE domain=${owner}), before AS (SELECT c.* FROM "ReviewWorkCase" c WHERE c.domain=${owner}),
+          WITH live AS (SELECT * FROM "ReviewOwnerProjection" WHERE domain=${owner} AND ("profileId" IS DISTINCT FROM 'import' OR ${access.imports===true})), before AS (SELECT c.* FROM "ReviewWorkCase" c WHERE c.domain=${owner} AND (c."profileId" IS DISTINCT FROM 'import' OR ${access.imports===true})),
           upserted AS (
             INSERT INTO "ReviewWorkCase" ("key",domain,"ownerId","profileId","ownerRevision",reasons,"dueAt","policyId")
             SELECT p."key",p.domain,p."ownerId",p."profileId",p."ownerRevision",to_jsonb(p.reasons),
@@ -143,7 +145,7 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
             RETURNING "key",cycle
           ), closed AS (
             UPDATE "ReviewWorkCase" c SET state='COMPLETED',"closedAt"=CURRENT_TIMESTAMP,"updatedAt"=CURRENT_TIMESTAMP,version=c.version+1,"synchronizedAt"=CURRENT_TIMESTAMP
-            WHERE c.domain=${owner} AND c.state<>'COMPLETED' AND NOT EXISTS(SELECT 1 FROM live p WHERE p."key"=c."key") RETURNING c."key",c.cycle
+            WHERE c.domain=${owner} AND (c."profileId" IS DISTINCT FROM 'import' OR ${access.imports===true}) AND c.state<>'COMPLETED' AND NOT EXISTS(SELECT 1 FROM live p WHERE p."key"=c."key") RETURNING c."key",c.cycle
           )
           SELECT u."key",u.cycle,CASE WHEN b."key" IS NULL THEN 'OBSERVED_ENTERED' WHEN b.state='COMPLETED' THEN 'OBSERVED_REOPENED' ELSE 'OWNER_CHANGED' END action,NULL::float "elapsedHours",NULL::boolean "withinSla" FROM upserted u LEFT JOIN before b ON b."key"=u."key"
           UNION ALL SELECT c."key",c.cycle,'OBSERVED_COMPLETED',extract(epoch FROM CURRENT_TIMESTAMP-b."enteredAt")::float/3600,CASE WHEN b."dueAt" IS NOT NULL AND b."policyId" IS NOT NULL THEN CURRENT_TIMESTAMP<=b."dueAt" END FROM closed c JOIN before b ON b."key"=c."key"`;
@@ -407,6 +409,7 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
       }
       after = candidates.at(-1)!.id;
     }
+    await tx.$executeRaw`INSERT INTO "ReviewSourceCheckpoint" (domain,"synchronizedAt",observed,"errorCode") VALUES ('scholarships:imports',CURRENT_TIMESTAMP,NULL,NULL) ON CONFLICT(domain) DO UPDATE SET "synchronizedAt"=CURRENT_TIMESTAMP,"errorCode"=NULL,"lastAttemptAt"=CURRENT_TIMESTAMP`;
   }
   async command(
     access: ReviewAccess,
@@ -422,7 +425,7 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
     if (input.assigneeId && !(await authorize(input.assigneeId, domain, ownerId)))
       throw new Error('REVIEW_ASSIGNEE_FORBIDDEN');
     return this.transaction(async (tx) => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('review-workspace'),hashtext(${domain}))`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('review-workspace'),hashtext(${domain}))::text`;
       const prior = await tx.$queryRaw<
         Array<{ commandHash: string; payload: Record<string, unknown>; actorId: string }>
       >`SELECT "commandHash",payload,"actorId" FROM "ReviewWorkEvent" WHERE "commandKey"=${input.idempotencyKey}`;

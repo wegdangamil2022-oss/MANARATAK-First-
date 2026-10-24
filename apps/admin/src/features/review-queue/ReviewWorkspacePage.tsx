@@ -187,6 +187,7 @@ export function ReviewWorkspacePage() {
         setRefresh((value) => value + 1);
       } catch (cause) {
         setError(workspaceError(cause));
+        if(/\[(401|403)\]/.test(String(cause))){setData(null);setSelectedKey(null);setSelectedKeys([]);}
       } finally {
         syncBusy.current = false;
         setSyncing(false);
@@ -216,6 +217,7 @@ export function ReviewWorkspacePage() {
       return true;
     } catch (cause) {
       setError(workspaceError(cause));
+      if(/\[(401|403)\]/.test(String(cause))){setData(null);setSelectedKey(null);setSelectedKeys([]);}
       return false;
     } finally {
       setMutating(false);

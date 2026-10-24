@@ -114,13 +114,13 @@ export function WorkspacePreview({
       undefined,
       abort.signal,
     )
-      .then(setHistory)
+      .then(value=>{if(!abort.signal.aborted)setHistory(value);})
       .catch((error) => {
         if (!abort.signal.aborted) setMessage(label(workspaceError(error)));
       });
     if (canCoordinate)
       void workRequest<typeof reviewers>('/reviewers?domain=' + row.domain, undefined, abort.signal)
-        .then(setReviewers)
+        .then(value=>{if(!abort.signal.aborted)setReviewers(value);})
         .catch(() => {});
     return () => abort.abort();
   }, [row.key, row.version, canCoordinate]);
@@ -144,8 +144,8 @@ export function WorkspacePreview({
             setAuditState('ready');
           }
         })
-        .catch(() => {
-          if (!abort.signal.aborted) setAuditState('unavailable');
+        .catch((error) => {
+          if (!abort.signal.aborted) {setAuditState(/\[(401|403)\]/.test(String(error))?'forbidden':'unavailable');setAudit({items:[],nextCursor:null,hasMore:false});}
         });
     if (row.domain === 'scholarships' && row.importRecordId) {
       if (!hasPermission('admin:imports:manage')) setDiffState('forbidden');
@@ -223,8 +223,9 @@ export function WorkspacePreview({
       );
       setAudit((previous) => ({ ...next, items: [...previous.items, ...next.items].slice(-120) }));
       setAuditState('ready');
-    } catch {
-      setAuditState('unavailable');
+    } catch(error) {
+      setAudit({items:[],nextCursor:null,hasMore:false});
+      setAuditState(/\[(401|403)\]/.test(String(error))?'forbidden':'unavailable');
     }
   };
   return (

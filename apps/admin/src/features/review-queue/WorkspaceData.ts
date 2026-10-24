@@ -33,7 +33,7 @@ export function parseWorkspacePage(value: ReviewPage): ReviewPage {
       !Array.isArray(row.reasons) ||
       typeof row.title !== 'string' ||
       typeof row.href !== 'string' ||
-      !/^\/(scholarships|universities|majors|courses|international-tests|services|cms|careers|study-destinations)(\/|\?|$)/.test(
+      !/^\/(scholarships|universities|majors|courses|international-tests|services|cms|careers|study-destinations|imports\/scholarships)(\/|\?|$)/.test(
         row.href,
       ) ||
       !Number.isInteger(row.version)
