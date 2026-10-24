@@ -1,13 +1,13 @@
 {
-  "sourceCommit": "7a85650946ce3d674c2edb0793bf7bf5946322ca",
+  "sourceCommit": "306f420dff01d1f2c05b2b8498c29dc3828fb465",
   "scope": "Dashboard ownership/asset-retention follow-up; new isolated PostgreSQL16 cluster only",
   "migration": {
     "pass": true,
     "scope": "NEW_ISOLATED_POSTGRES16_ONLY",
-    "labSourceSha": "7a85650946ce3d674c2edb0793bf7bf5946322ca",
-    "sourceSha": "7a85650946ce3d674c2edb0793bf7bf5946322ca",
+    "labSourceSha": "306f420dff01d1f2c05b2b8498c29dc3828fb465",
+    "sourceSha": "306f420dff01d1f2c05b2b8498c29dc3828fb465",
     "migration": "20261024000100_executive_dashboard_analytics",
-    "migrationSha256": "51e4f3c4365a02d7f7c0ad9a2ef2ee9f314f96752b540e782e0f85811488cf02",
+    "migrationSha256": "cc7c609d4b7201b6c6c95d9016113e9d32d4c0dbd59fb46208345391110bcaa0",
     "existingDatabasesModified": false,
     "productionOrNeonTouched": false
   },
@@ -273,8 +273,8 @@
     {
       "report": "RETENTION_TEST_REPORT.json",
       "pass": true,
-      "total": 5,
-      "passed": 5,
+      "total": 6,
+      "passed": 6,
       "failed": 0,
       "tests": [
         {
@@ -296,6 +296,10 @@
         {
           "name": "Executive evidence retention on the attested synthetic application-role target detaches only expired unheld source files while preserving attestations and held evidence links",
           "status": "passed"
+        },
+        {
+          "name": "Executive evidence retention on the attested synthetic application-role target blocks direct evidence-link removal under asset hold, live retention or request hold",
+          "status": "passed"
         }
       ]
     }
@@ -306,7 +310,7 @@
         "label": "DB-T",
         "database": "manaratak_post28_transactions_test",
         "role": "post28_app",
-        "serverIdentity": "7700026661183499104",
+        "serverIdentity": "7700031820380846832",
         "databaseOid": "16386",
         "postgresMajor": 16,
         "timezone": "UTC",
@@ -326,11 +330,11 @@
       "noExternalServices": true
     },
     "latencyMs": [
-      23.214900000000853,
-      17.435499999999593,
-      18.1908999999996,
-      16.930900000001202,
-      18.529499999998734
+      21.288300000000163,
+      16.368800000000192,
+      15.83350000000064,
+      15.957900000001246,
+      15.746000000002823
     ]
   },
   "sourceChecks": {
