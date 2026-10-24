@@ -59,18 +59,22 @@ export class PrismaExecutiveDashboardGateway implements ExecutiveDashboardGatewa
   users(period: DashboardPeriod): Promise<UserDashboard> {
     return this.read(async (tx) => {
       const [totals] = await tx.$queryRaw<
-        Array<{ total: bigint; students: bigint; current: bigint; previous: bigint }>
+        Array<{ total: bigint; students: bigint; current: bigint; previous: bigint;
+          series: Array<{ day: string; value: string }> }>
       >`
-        SELECT count(*) AS total,
-          count(*) FILTER (WHERE EXISTS (SELECT 1 FROM "RoleAssignmentRecord" r WHERE r."identityId"=i.id AND r."roleId"='student')) AS students,
-          count(*) FILTER (WHERE i."createdAt">=${new Date(period.from)} AND i."createdAt"<${new Date(period.until)}) AS current,
-          count(*) FILTER (WHERE i."createdAt">=${new Date(period.previousFrom)} AND i."createdAt"<${new Date(period.from)}) AS previous
-        FROM "IdentityRecord" i JOIN "UserRecord" u ON u."identityId"=i.id JOIN "AccountRecord" a ON a."identityId"=i.id
-        WHERE ${eligible} AND i."createdAt"<${new Date(period.until)}`;
-      const series = await tx.$queryRaw<Array<{ day: Date; value: bigint }>>`
-        SELECT date_trunc('day',i."createdAt" AT TIME ZONE 'UTC') AS day, count(*) AS value
-        FROM "IdentityRecord" i JOIN "UserRecord" u ON u."identityId"=i.id JOIN "AccountRecord" a ON a."identityId"=i.id
-        WHERE ${eligible} AND i."createdAt">=${new Date(period.from)} AND i."createdAt"<${new Date(period.until)} GROUP BY 1 ORDER BY 1`;
+        WITH accounts AS MATERIALIZED (
+          SELECT i."createdAt", EXISTS (SELECT 1 FROM "RoleAssignmentRecord" r WHERE r."identityId"=i.id AND r."roleId"='student') AS student
+          FROM "IdentityRecord" i JOIN "UserRecord" u ON u."identityId"=i.id JOIN "AccountRecord" a ON a."identityId"=i.id
+          WHERE ${eligible} AND i."createdAt"<${new Date(period.until)}
+        ), daily AS (
+          SELECT to_char("createdAt" AT TIME ZONE 'UTC','YYYY-MM-DD') AS day,count(*)::text AS value
+          FROM accounts WHERE "createdAt">=${new Date(period.from)} GROUP BY 1
+        )
+        SELECT count(*) AS total,count(*) FILTER (WHERE student) AS students,
+          count(*) FILTER (WHERE "createdAt">=${new Date(period.from)}) AS current,
+          count(*) FILTER (WHERE "createdAt">=${new Date(period.previousFrom)} AND "createdAt"<${new Date(period.from)}) AS previous,
+          (SELECT coalesce(jsonb_agg(d ORDER BY d.day),'[]'::jsonb) FROM daily d) AS series FROM accounts`;
+      const series = totals.series.map(row => ({ day: new Date(row.day + 'T00:00:00.000Z'), value: BigInt(row.value) }));
       const current = count(totals.current),
         previous = count(totals.previous);
       return {
@@ -115,25 +119,29 @@ export class PrismaExecutiveDashboardGateway implements ExecutiveDashboardGatewa
       const from = new Date(Math.max(+earliest, +new Date(period.from))),
         until = new Date(period.until);
       const [totals] = await tx.$queryRaw<
-        Array<{ views: bigint; visitors: bigint; clicks: bigint; outgoing: bigint }>
+        Array<{ views: bigint; visitors: bigint; clicks: bigint; outgoing: bigint;
+          series: Array<{day: string; value: string; secondary: string}>;
+          destinations: Array<{host: string; clicks: string}> }>
       >`
+        WITH measured AS MATERIALIZED (
+          SELECT e.* FROM "PublicAnalyticsEvent" e JOIN "PublicAnalyticsConsent" c ON c."tokenHash"=e."consentHash"
+          WHERE c."revokedAt" IS NULL AND e."expiresAt">now() AND e."receivedAt">=${from} AND e."receivedAt"<${until}
+        ), daily AS (
+          SELECT to_char("receivedAt" AT TIME ZONE 'UTC','YYYY-MM-DD') AS day,
+            count(DISTINCT "consentHash")::text AS value,count(*)::text AS secondary
+          FROM measured WHERE kind='page_view' GROUP BY 1
+        ), destinations AS (
+          SELECT "destinationHost" AS host,count(*) AS clicks FROM measured WHERE kind='application_outbound_click'
+          GROUP BY 1 ORDER BY 2 DESC,1 LIMIT 5
+        )
         SELECT count(*) FILTER (WHERE e.kind='page_view') AS views,
           count(DISTINCT e."consentHash") FILTER (WHERE e.kind='page_view') AS visitors,
           count(*) FILTER (WHERE e.kind='application_outbound_click') AS clicks,
-          count(DISTINCT e."consentHash") FILTER (WHERE e.kind='application_outbound_click') AS outgoing
-        FROM "PublicAnalyticsEvent" e JOIN "PublicAnalyticsConsent" c ON c."tokenHash"=e."consentHash"
-        WHERE c."revokedAt" IS NULL AND e."expiresAt">now() AND e."receivedAt">=${from} AND e."receivedAt"<${until}`;
-      const series = await tx.$queryRaw<Array<{ day: Date; value: bigint; secondary: bigint }>>`
-        SELECT date_trunc('day',e."receivedAt" AT TIME ZONE 'UTC') AS day,
-          count(DISTINCT e."consentHash") AS value, count(*) AS secondary
-        FROM "PublicAnalyticsEvent" e JOIN "PublicAnalyticsConsent" c ON c."tokenHash"=e."consentHash"
-        WHERE e.kind='page_view' AND c."revokedAt" IS NULL AND e."expiresAt">now() AND e."receivedAt">=${from} AND e."receivedAt"<${until}
-        GROUP BY 1 ORDER BY 1`;
-      const destinations = await tx.$queryRaw<Array<{ host: string; clicks: bigint }>>`
-        SELECT e."destinationHost" AS host, count(*) AS clicks FROM "PublicAnalyticsEvent" e
-        JOIN "PublicAnalyticsConsent" c ON c."tokenHash"=e."consentHash"
-        WHERE e.kind='application_outbound_click' AND c."revokedAt" IS NULL AND e."expiresAt">now()
-          AND e."receivedAt">=${from} AND e."receivedAt"<${until} GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 5`;
+          count(DISTINCT e."consentHash") FILTER (WHERE e.kind='application_outbound_click') AS outgoing,
+          (SELECT coalesce(jsonb_agg(d ORDER BY d.day),'[]'::jsonb) FROM daily d) AS series,
+          (SELECT coalesce(jsonb_agg(jsonb_build_object('host',d.host,'clicks',d.clicks::text) ORDER BY d.clicks DESC,d.host),'[]'::jsonb) FROM destinations d) AS destinations
+        FROM measured e`;
+      const series = totals.series.map(row => ({day:new Date(row.day+'T00:00:00.000Z'),value:BigInt(row.value),secondary:BigInt(row.secondary)}));
       return {
         ...base,
         status: +earliest > +new Date(period.from) ? 'partial' : 'available',
@@ -143,52 +151,51 @@ export class PrismaExecutiveDashboardGateway implements ExecutiveDashboardGatewa
         outboundClicks: count(totals.clicks),
         outboundVisitors: count(totals.outgoing),
         visits: dashboardSeries(period, series, earliest),
-        destinations: destinations.map((row) => ({ host: row.host, clicks: count(row.clicks) })),
+        destinations: totals.destinations.map((row) => ({ host: row.host, clicks: count(BigInt(row.clicks)) })),
       };
     });
   }
   applications(period: DashboardPeriod): Promise<ApplicationDashboard> {
     return this.read(async (tx) => {
-      const [epoch] = await tx.$queryRaw<
-        Array<{ startedAt: Date }>
-      >`SELECT "startedAt" FROM "DashboardMeasurementEpoch" WHERE key='managed-application-v1'`;
+      const [epoch] = await tx.$queryRaw<Array<{
+        startedAt: Date; received: bigint; processing: bigint; information: bigint; attention: bigint;
+        submitted: bigint; accepted: bigint; rejected: bigint; reports: bigint;
+      }>>`
+        WITH requests AS (
+          SELECT count(*) FILTER (WHERE r."createdAt">=${new Date(period.from)}) AS received,
+            count(*) FILTER (WHERE r.status='IN_PROGRESS' AND r."createdAt">=${new Date(period.from)}) AS processing,
+            count(*) FILTER (WHERE last.kind='NEEDS_INFORMATION' AND r."createdAt">=${new Date(period.from)}) AS information,
+            count(*) FILTER (WHERE r.status NOT IN ('COMPLETED','CANCELLED') AND (last.kind='NEEDS_INFORMATION' OR r."dueAt"<${new Date(period.until)})) AS attention
+          FROM "ServiceRequestRecord" r
+          LEFT JOIN LATERAL (SELECT kind FROM "ServiceApplicationEvidence" e WHERE e."requestId"=r.id ORDER BY e."verifiedAt" DESC,e.id DESC LIMIT 1) last ON true
+          WHERE r."serviceSnapshot"->>'managedApplication'='true' AND r."createdAt"<${new Date(period.until)}
+        ), events AS (
+          SELECT count(*) FILTER (WHERE e.kind='UNIVERSITY_SUBMITTED') AS submitted,
+            count(*) FILTER (WHERE e.kind='ADMISSION_ACCEPTED') AS accepted,
+            count(*) FILTER (WHERE e.kind='ADMISSION_REJECTED') AS rejected
+          FROM "ServiceApplicationEvidence" e JOIN "ServiceRequestRecord" r ON r.id=e."requestId"
+          WHERE r."serviceSnapshot"->>'managedApplication'='true' AND e."verifiedAt">=${new Date(period.from)} AND e."verifiedAt"<${new Date(period.until)}
+            AND e."evidenceDigest" IS NOT NULL
+        )
+        SELECT epoch."startedAt",requests.*,events.*,
+          (SELECT count(*) FROM "DirectApplicationReport" WHERE "reportedAt">=${new Date(period.from)} AND "reportedAt"<${new Date(period.until)} AND "expiresAt">${new Date()}) AS reports
+        FROM "DashboardMeasurementEpoch" epoch CROSS JOIN requests CROSS JOIN events WHERE epoch.key='managed-application-v1'`;
       if (!epoch) throw new Error('DASHBOARD_APPLICATION_MEASUREMENT_UNAVAILABLE');
       const coverageFrom = new Date(Math.max(+epoch.startedAt, Date.now() - 180 * 86400000));
-      const [requests] = await tx.$queryRaw<
-        Array<{ received: bigint; processing: bigint; information: bigint; attention: bigint }>
-      >`
-        SELECT count(*) FILTER (WHERE r."createdAt">=${new Date(period.from)}) AS received,
-          count(*) FILTER (WHERE r.status='IN_PROGRESS' AND r."createdAt">=${new Date(period.from)}) AS processing,
-          count(*) FILTER (WHERE last.kind='NEEDS_INFORMATION' AND r."createdAt">=${new Date(period.from)}) AS information,
-          count(*) FILTER (WHERE r.status NOT IN ('COMPLETED','CANCELLED') AND (last.kind='NEEDS_INFORMATION' OR r."dueAt"<${new Date(period.until)})) AS attention
-        FROM "ServiceRequestRecord" r
-        LEFT JOIN LATERAL (SELECT kind FROM "ServiceApplicationEvidence" e WHERE e."requestId"=r.id ORDER BY e."verifiedAt" DESC,e.id DESC LIMIT 1) last ON true
-        WHERE r."serviceSnapshot"->>'managedApplication'='true' AND r."createdAt"<${new Date(period.until)}`;
-      const events = await tx.$queryRaw<Array<{ kind: string; total: bigint }>>`
-        SELECT e.kind, count(*) AS total FROM "ServiceApplicationEvidence" e JOIN "ServiceRequestRecord" r ON r.id=e."requestId"
-        WHERE r."serviceSnapshot"->>'managedApplication'='true' AND e."verifiedAt">=${new Date(period.from)} AND e."verifiedAt"<${new Date(period.until)}
-        AND (e.kind NOT IN ('UNIVERSITY_SUBMITTED','ADMISSION_ACCEPTED','ADMISSION_REJECTED') OR e."evidenceDigest" IS NOT NULL) GROUP BY e.kind`;
-      const map = new Map(events.map((row) => [row.kind, count(row.total)]));
-      const reports = await tx.directApplicationReport.count({
-        where: {
-          reportedAt: { gte: new Date(period.from), lt: new Date(period.until) },
-          expiresAt: { gt: new Date() },
-        },
-      });
       return {
         period,
         checkedAt: new Date().toISOString(),
         status: +coverageFrom > +new Date(period.from) ? 'partial' : 'available',
         measurementStartedAt: epoch.startedAt.toISOString(),
         coverageFrom: coverageFrom.toISOString(),
-        managedServiceRequests: count(requests.received),
-        processing: count(requests.processing),
-        needsInformation: count(requests.information),
-        attention: count(requests.attention),
-        managedUniversitySubmissions: map.get('UNIVERSITY_SUBMITTED') ?? 0,
-        officialAccepted: map.get('ADMISSION_ACCEPTED') ?? 0,
-        officialRejected: map.get('ADMISSION_REJECTED') ?? 0,
-        directSelfReportedApplications: reports,
+        managedServiceRequests: count(epoch.received),
+        processing: count(epoch.processing),
+        needsInformation: count(epoch.information),
+        attention: count(epoch.attention),
+        managedUniversitySubmissions: count(epoch.submitted),
+        officialAccepted: count(epoch.accepted),
+        officialRejected: count(epoch.rejected),
+        directSelfReportedApplications: count(epoch.reports),
         definition: 'SERVICE_RECEIPT_IS_NOT_UNIVERSITY_SUBMISSION',
       };
     });

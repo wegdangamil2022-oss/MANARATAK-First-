@@ -8,6 +8,8 @@ import { beforeAll, afterAll, describe, expect, it } from 'vitest';
 import { preflightTargets } from '../../../../scripts/database/post28-isolation.mjs';
 import { readDatabaseIdentity } from '../../../../scripts/database/post28-preflight.mjs';
 import { PrismaExecutiveDashboardGateway } from '../../src/dashboard/PrismaExecutiveDashboardGateway';
+import { PrismaIdentityRepository } from '../../src/identity/PrismaIdentityRepository';
+import { PrismaBackgroundJobExecutionGateway } from '../../src/background-jobs/PrismaBackgroundJobExecutionGateway';
 import {
   PrismaPublicAnalyticsGateway,
   PrismaManagedApplicationEvidenceGateway,
@@ -710,4 +712,20 @@ describe('Executive dashboard on a new isolated PostgreSQL 16 target', () => {
       await app.locals.runtimeResourceRegistry?.closeAll();
     }
   }, 60000);
+
+  it('reads the same identity aggregate with one SQL join and claims only retention work', async () => {
+    const repository=new PrismaIdentityRepository(db),identity=await repository.findById(student);
+    expect(identity?.id.toString()).toBe(student);
+    expect(identity?.user?.contactRegistry.isEmailVerified).toBe(true);
+    expect(identity?.technicalMetadata.props.createdAt).toBeInstanceOf(Date);
+    const retention=randomUUID(),notification=randomUUID(),due=new Date(Date.now()-1000);
+    await db.backgroundJobRecord.createMany({data:[
+      {id:retention,reference:retention,jobType:'analytics.retention.sweep',parameters:{},priority:1,availableAt:due},
+      {id:notification,reference:notification,jobType:'notification.delivery',parameters:{},priority:100,availableAt:due},
+    ]});
+    const claims=await new PrismaBackgroundJobExecutionGateway(db,['analytics.retention.sweep']).claimDue({workerId:'analytics-only-test',batchSize:10,leaseDurationMs:60000,now:new Date()});
+    expect(claims.map(claim=>claim.jobReference)).toEqual([retention]);
+    const untouched=await db.backgroundJobRecord.findUniqueOrThrow({where:{reference:notification}});
+    expect(untouched.status).toBe('SCHEDULED');expect(untouched.attempt).toBe(0);expect(untouched.leaseToken).toBeNull();
+  });
 });
