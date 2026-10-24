@@ -242,12 +242,7 @@ export function WorkspacePreview({
     }
   };
   return (
-    <div
-      className="rw-drawer-backdrop"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) close();
-      }}
-    >
+    <div className="rw-drawer-backdrop">
       <aside
         className="rw-drawer"
         role="dialog"

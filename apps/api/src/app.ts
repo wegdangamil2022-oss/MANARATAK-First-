@@ -41,7 +41,6 @@ import { MonitoringMiddleware } from './presentation/monitoring/MonitoringMiddle
 import { SecurityMiddlewareFactory } from './presentation/security/SecurityMiddlewareFactory.js';
 import { SecurityValidator } from './presentation/security/SecurityValidator.js';
 import { MutationAuditMiddleware } from './presentation/audit/MutationAuditMiddleware.js';
-import { isAdministrativeReadQuery } from './presentation/security/AdministrativeReadQuery.js';
 import { RuntimeResourceRegistry } from './infrastructure/runtime/RuntimeResourceRegistry.js';
 import { buildCanonicalCorsOrigins } from './presentation/security/CanonicalApiCorsPolicy.js';
 
@@ -929,15 +928,14 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       }
       return command(req, res, next);
     });
-    const administrativeMutationAudit = new MutationAuditMiddleware(auditRecordRepository, 'ADMIN').generate();
-    v1Router.use('/admin', (req,res,next) => isAdministrativeReadQuery(req) ? next() : administrativeMutationAudit(req,res,next));
+    v1Router.use('/admin', new MutationAuditMiddleware(auditRecordRepository, 'ADMIN').generate());
 
     v1Router.use('/admin/translations', createTranslationWorkspaceRouter(new PrismaTranslationWorkspaceReadGateway(container.resolve('prisma')), container.resolve('authEvaluatorService'), new PrismaTranslationImportGateway(container.resolve('prisma'),container.resolve('authEvaluatorService'))));
 
     // Core Admin Domain Routers (Identity & Audit)
     v1Router.use('/admin/identities', requireAdminPermission('admin:identities:manage'), container.resolve<Router>('identityRouter'));
     v1Router.use('/admin/dashboard', lazyRouter('executiveDashboardRouter'));
-    v1Router.use('/admin/review-workspace', lazyRouter('reviewWorkspaceRouter'));
+    v1Router.use('/admin/review-workspace', requireAdminPermission('admin:platform:manage'), lazyRouter('reviewWorkspaceRouter'));
     v1Router.use('/admin/services', requireAdminPermission('admin:services:manage'), lazyRouter('managedApplicationEvidenceRouter'));
     v1Router.use('/identities', SecurityMiddlewareFactory.createAdminGuard({ mfaUseCases: container.resolve('mfaUseCases'), mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator }), createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }), new MutationAuditMiddleware(auditRecordRepository, 'IDENTITY').generate(), requireAdminPermission('admin:identities:manage'), container.resolve<Router>('identityRouter'));
 

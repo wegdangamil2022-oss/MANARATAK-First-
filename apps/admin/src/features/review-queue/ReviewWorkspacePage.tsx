@@ -425,7 +425,7 @@ export function ReviewWorkspacePage() {
                     ? 0
                     : event.key === 'End'
                       ? 2
-                      : (index + (event.key === 'ArrowRight' ? 1 : 2)) % 3;
+                      : (index + (event.key === 'ArrowRight' ? 1 : -1)*(dir==='rtl'?-1:1)+3) % 3;
                 setTab(keys[next]);
                 document.getElementById('rw-tab-' + keys[next])?.focus();
               }
@@ -466,6 +466,14 @@ export function ReviewWorkspacePage() {
                 <strong>{number(value)}</strong>
                 {key === 'overdue' && value == null ? (
                   <small>{tr('لا توجد مهلة مقاسة', 'No measured deadline')}</small>
+                ) : null}
+                {key === 'overdue' && value != null && data?.counters.withoutSla ? (
+                  <small>
+                    {number(data.counters.withoutSla)} {tr('بلا مهلة', 'without a deadline')}
+                  </small>
+                ) : null}
+                {key === 'urgent' ? (
+                  <small>{tr('تشمل الأولويات المقترحة', 'Includes suggested priorities')}</small>
                 ) : null}
               </button>
             ))}
@@ -626,7 +634,7 @@ export function ReviewWorkspacePage() {
                         {canWork(row) && row.version > 0 ? (
                           <input
                             type="checkbox"
-                          disabled={selectedKeys.length>=25&&!selectedKeys.includes(row.key)}
+                            disabled={selectedKeys.length >= 25 && !selectedKeys.includes(row.key)}
                             aria-label={tr('تحديد ', 'Select ') + row.title}
                             checked={selectedKeys.includes(row.key)}
                             onChange={(event) =>

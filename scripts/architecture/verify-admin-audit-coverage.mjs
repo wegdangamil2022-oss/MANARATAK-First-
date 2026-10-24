@@ -230,7 +230,9 @@ export function buildAuditInventory({ appSource, containerSource, routerSources,
         output.push({ method, path: fullPath, owner: mount.owner,
           classification,
           permissionEvidence, conditionalPermissionReview: conditional,
-          validationEvidence: validation, idempotency: method === 'DELETE' ? 'DELETE_SEMANTICS_OWNER_VERIFICATION_REQUIRED'
+          validationEvidence: validation, idempotency: fullPath === '/admin/review-workspace/query' ? 'READ_ONLY_BODY_QUERY'
+            : fullPath.startsWith('/admin/review-workspace/') ? 'OWNER_COORDINATION_IDEMPOTENCY_REQUIRED'
+            : method === 'DELETE' ? 'DELETE_SEMANTICS_OWNER_VERIFICATION_REQUIRED'
             : fullPath === '/admin/student-tools/:toolKey/test' ? 'OWNER_ENCRYPTED_EXECUTION_REQUIRED' : 'GLOBAL_ADMIN_REQUIRED',
           ...(inheritedPolicies.length ? { conditionalPermissionPolicies: inheritedPolicies } : {}),
           auditEvidence: classification === 'NO_AUDIT_REQUIRED' ? 'REVIEWED_NON_MUTATING_POST_EXEMPTION' : 'REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME',

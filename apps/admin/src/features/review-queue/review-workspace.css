@@ -349,7 +349,10 @@
 .rw-table td > strong {
   font-size: 13px;
   font-weight: 700;
-  display: block;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .rw-table td small {
   display: block;
@@ -464,6 +467,7 @@
   width: 16px;
   height: 16px;
 }
+.review-workspace[dir=ltr] .rw-pagination svg,.review-workspace[dir=ltr] .rw-preview-nav svg{transform:rotate(180deg)}
 .rw-alert,
 .rw-coverage {
   border: 1px solid #e5d9b8;

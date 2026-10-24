@@ -210,3 +210,6 @@ export function createReviewWorkspaceRouter(useCases: ReviewWorkspaceUseCases) {
   });
   return router;
 }
+export class ReviewWorkspaceRouter {
+  static create = createReviewWorkspaceRouter;
+}

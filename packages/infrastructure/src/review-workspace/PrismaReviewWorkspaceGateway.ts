@@ -171,15 +171,16 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
     return this.transaction((tx) => this.sourceStatus(tx, access));
   }
   private base(access: ReviewAccess) {
-    return Prisma.sql`WITH owners AS (SELECT p.*,c."key" "caseId",coalesce(c.version,0) version,coalesce(c.cycle,0) cycle,c."assigneeId",c."teamId",
-      CASE WHEN c."assigneeId" IS NOT NULL THEN coalesce(u."displayName",'Reviewer') WHEN c."teamId" IS NOT NULL THEN t.name END "assigneeLabel",
-      coalesce(c.state,'OPEN') "workState",c."enteredAt",c."dueAt",c."policyId",s."synchronizedAt",
+    return Prisma.sql`WITH owners AS (SELECT p.*,c."key" "caseId",coalesce(c.version,0) version,coalesce(c.cycle,0) cycle,coalesce(c."assigneeId",ia."assigneeId") "assigneeId",c."teamId",
+      CASE WHEN coalesce(c."assigneeId",ia."assigneeId") IS NOT NULL THEN coalesce(u."displayName",'Reviewer') WHEN c."teamId" IS NOT NULL THEN t.name END "assigneeLabel",
+      coalesce(c.state,'OPEN') "workState",c."enteredAt",coalesce(c."dueAt",ia."dueAt") "dueAt",c."policyId",s."synchronizedAt",
       coalesce(c.priority,CASE WHEN p.reasons && ARRAY['incomplete','source_verification','broken_link']::text[] THEN 'high' ELSE 'medium' END) priority,
       CASE WHEN c.priority IS NOT NULL THEN 'reviewer' ELSE 'suggested' END "priorityBasis",
       CASE WHEN c."dueAt" IS NULL OR c."policyId" IS NULL THEN 'unknown' WHEN c."dueAt"<CURRENT_TIMESTAMP THEN 'overdue'
         WHEN c."dueAt" <= CURRENT_TIMESTAMP + make_interval(hours=>coalesce((c."policySnapshot"->>'warningHours')::int,0)) AND (c."policySnapshot"->>'warningHours')::int>0 THEN 'near_due' ELSE 'on_track' END sla
       FROM "ReviewOwnerProjection" p LEFT JOIN "ReviewWorkCase" c ON c."key"=p."key" AND c.state<>'COMPLETED'
-      LEFT JOIN "UserRecord" u ON u."identityId"=c."assigneeId" LEFT JOIN "RoleRecord" t ON t.id=c."teamId"
+      LEFT JOIN "ImportReviewAssignment" ia ON p."profileId"='import' AND ia."recordId"=p."ownerId" AND ia."ownerDomain"='SCHOLARSHIPS' AND ia.state='ASSIGNED'
+      LEFT JOIN "UserRecord" u ON u."identityId"=coalesce(c."assigneeId",ia."assigneeId") LEFT JOIN "RoleRecord" t ON t.id=c."teamId"
       LEFT JOIN "ReviewSourceCheckpoint" s ON s.domain=p.domain LEFT JOIN "ReviewSlaPolicy" policy ON policy.domain=p.domain
       WHERE p.${scope(access)} AND (p."profileId" IS DISTINCT FROM 'import' OR ${access.imports === true}))`;
   }
@@ -230,7 +231,7 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
           withoutSla: bigint;
           fingerprint: string;
         }>
-      >`${base} SELECT count(*) total,count(*) FILTER(WHERE "assigneeId"=${access.actorId} OR "teamId" IN (SELECT "roleId" FROM "RoleAssignmentRecord" WHERE "identityId"=${access.actorId})) mine,count(*) FILTER(WHERE "assigneeId" IS NULL AND "teamId" IS NULL) unassigned,count(*) FILTER(WHERE priority IN ('critical','high')) urgent,count(*) FILTER(WHERE sla='overdue') overdue,count(*) FILTER(WHERE sla='unknown') "withoutSla",md5(coalesce(string_agg("key"||"ownerRevision"||version::text||sla,',' ORDER BY "key"),'')) fingerprint FROM owners WHERE ${filters}`;
+      >`${base} SELECT count(*) total,count(*) FILTER(WHERE "assigneeId"=${access.actorId} OR "teamId" IN (SELECT "roleId" FROM "RoleAssignmentRecord" WHERE "identityId"=${access.actorId})) mine,count(*) FILTER(WHERE "assigneeId" IS NULL AND "teamId" IS NULL) unassigned,count(*) FILTER(WHERE priority IN ('critical','high')) urgent,count(*) FILTER(WHERE sla='overdue') overdue,count(*) FILTER(WHERE sla='unknown') "withoutSla",md5(coalesce(string_agg("key"||"ownerRevision"||version::text||sla||coalesce("assigneeId",'')||coalesce("teamId",'')||coalesce("dueAt"::text,''),',' ORDER BY "key"),'')) fingerprint FROM owners WHERE ${filters}`;
       const summary = summaries[0];
       // A changed dataset invalidates traversal explicitly: no silent duplicates,
       // missing updated rows or cross-permission cursor reuse.
@@ -300,6 +301,7 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
         };
         delete row.search;
         delete row.sortValue;
+        row.verificationState = row.verificationState || 'UNKNOWN';
         if (!row.detail && row.profileId !== 'import')
           row.href =
             '/' +
@@ -585,10 +587,10 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
           within: bigint;
           withSla: bigint;
         }>
-      >`SELECT min(e."createdAt") measured,count(*) FILTER(WHERE e.action IN ('OBSERVED_ENTERED','OBSERVED_REOPENED') AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days})) entered,count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days})) completed,percentile_cont(0.5) WITHIN GROUP(ORDER BY (e.payload->>'elapsedHours')::float) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days})) median,count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e.payload->>'withinSla'='true' AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days})) "within",count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e.payload->>'withinSla' IS NOT NULL AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days})) "withSla" FROM "ReviewWorkEvent" e JOIN "ReviewWorkCase" c ON c."key"=e."caseKey" WHERE c.${scope(access)}`;
+      >`SELECT min(e."createdAt") measured,count(*) FILTER(WHERE e.action IN ('OBSERVED_ENTERED','OBSERVED_REOPENED') AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days}::int)) entered,count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days}::int)) completed,percentile_cont(0.5) WITHIN GROUP(ORDER BY (e.payload->>'elapsedHours')::float) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days}::int)) median,count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e.payload->>'withinSla'='true' AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days}::int)) "within",count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e.payload->>'withinSla' IS NOT NULL AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days}::int)) "withSla" FROM "ReviewWorkEvent" e JOIN "ReviewWorkCase" c ON c."key"=e."caseKey" WHERE c.${scope(access)}`;
       const series = await tx.$queryRaw<
         Array<{ day: string; entered: bigint; completed: bigint }>
-      >`SELECT to_char(e."createdAt",'YYYY-MM-DD') day,count(*) FILTER(WHERE e.action IN ('OBSERVED_ENTERED','OBSERVED_REOPENED')) entered,count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED') completed FROM "ReviewWorkEvent" e JOIN "ReviewWorkCase" c ON c."key"=e."caseKey" WHERE c.${scope(access)} AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days}) GROUP BY 1 ORDER BY 1`;
+      >`SELECT to_char(e."createdAt",'YYYY-MM-DD') AS "day",count(*) FILTER(WHERE e.action IN ('OBSERVED_ENTERED','OBSERVED_REOPENED')) entered,count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED') completed FROM "ReviewWorkEvent" e JOIN "ReviewWorkCase" c ON c."key"=e."caseKey" WHERE c.${scope(access)} AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days}::int) GROUP BY 1 ORDER BY 1`;
       const base = this.base(access);
       const aggregate = async (field: Prisma.Sql) => {
         const rows = await tx.$queryRaw<
@@ -650,10 +652,10 @@ export class PrismaReviewWorkspaceGateway implements ReviewWorkspaceGateway {
     input: { name: string; shared: boolean; filters: ReviewQuery },
   ): Promise<ReviewSavedView> {
     if (input.filters.search) throw new Error('REVIEW_SEARCH_STORAGE_FORBIDDEN');
-    const id = randomUUID(),
-      filters = { ...input.filters, cursor: undefined, snapshot: undefined };
+    const filters = { ...input.filters, cursor: undefined, snapshot: undefined },
+      id = hash([access.actorId, input.name, input.shared, filters]);
     await this.db
-      .$executeRaw`INSERT INTO "ReviewWorkView" (id,"actorId",name,shared,filters) VALUES (${id},${access.actorId},${input.name},${input.shared},${json(filters)}::jsonb)`;
+      .$executeRaw`INSERT INTO "ReviewWorkView" (id,"actorId",name,shared,filters) VALUES (${id},${access.actorId},${input.name},${input.shared},${json(filters)}::jsonb) ON CONFLICT(id) DO NOTHING`;
     return { id, name: input.name, shared: input.shared, filters };
   }
   async policies(access: ReviewAccess): Promise<ReviewSlaPolicy[]> {
