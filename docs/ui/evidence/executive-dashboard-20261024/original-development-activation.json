@@ -1,0 +1,88 @@
+{
+  "scope": "ORIGINAL_NEON_DEVELOPMENT",
+  "sourceSha": "207a76d5e1d6deab5fc7791e482b06738d56decb",
+  "productionTouched": false,
+  "mainMerged": false,
+  "backup": {
+    "schemaSha256": "a1e9b38065583f92ba96abbcfb50ecd59ea20256776c7218b74a33d2afb170a8",
+    "sequenceCount": 0,
+    "dataSha256": "b345eb29e4fc5b3213691dc6930561647f986fd23faae284ad8be0a20b93c581",
+    "losslessNumericTransport": true,
+    "rawDataPublished": false,
+    "tableCount": 282,
+    "pass": true
+  },
+  "restore": {
+    "pass": true,
+    "triggerBypass": false,
+    "allRowFingerprintsMatched": true
+  },
+  "activation": {
+    "allExistingBusinessRowsUnchanged": true,
+    "migration": {
+      "name": "20261024000100_executive_dashboard_analytics",
+      "checksum": "b6f6580c2a4b48407116451757462f276b604dc53cd794e10e1330d74d0386d5",
+      "bytes": 10333
+    },
+    "historicalMigrationRowsUnchanged": true,
+    "applicationRoleHasDdl": false,
+    "schemaDiffPassed": true,
+    "applicationRoleHasLedgerAccess": false,
+    "pass": true
+  },
+  "account": {
+    "endpoints": [
+      {
+        "endpoint": "/auth/me",
+        "status": 200,
+        "durationMs": 13666
+      },
+      {
+        "endpoint": "/admin/dashboard/users?days=30",
+        "status": 200,
+        "durationMs": 10238
+      },
+      {
+        "endpoint": "/admin/dashboard/traffic?days=30",
+        "status": 200,
+        "durationMs": 2564
+      },
+      {
+        "endpoint": "/admin/dashboard/applications?days=30",
+        "status": 200,
+        "durationMs": 16200
+      }
+    ],
+    "normalLoginStatus": 200,
+    "passwordChanged": false,
+    "permissionChanged": false
+  },
+  "runtime": {
+    "backgroundWorkers": false,
+    "bind": "127.0.0.1:3000",
+    "analyticsCollection": false,
+    "financeEnabled": false,
+    "originalCounts": {
+      "majorProfiles": 3,
+      "languages": 260,
+      "universities": 0,
+      "scholarships": 0,
+      "users": 1,
+      "currencies": 168,
+      "countries": 194
+    },
+    "mode": "AUTH_AND_READ_REVIEW"
+  },
+  "ci": {
+    "allNineWorkflowsSucceeded": true,
+    "existingConditionalJobStepsMayBeSkipped": true,
+    "sourceSha": "207a76d5e1d6deab5fc7791e482b06738d56decb",
+    "enterpriseRun": 40101747302
+  },
+  "browser": {
+    "authenticatedDashboardVisualVerification": "BLOCKED_BROWSER_TOOL_TRANSPORT_CLOSED",
+    "priorSyntheticResponsiveChecksRetained": true,
+    "originalLoginPageObserved": true
+  },
+  "observedAt": "2026-10-24T14:37:02.5900187Z"
+}

@@ -21,7 +21,7 @@ Collection defaults OFF. Activating requires explicit PUBLIC_ANALYTICS_ENABLED=t
 
 Visitor consent lasts 30 days, raw pseudonymous events 90 days. Explicit withdrawal stops local collection immediately and deletes the token-linked events; failed deletion remains retryable. Student self-reports expire after 180 days. Service attestations inherit the existing request retention deadline, with a 180-day fallback and existing request/asset legal holds preserved. No previous student consent is rewritten or reused as blanket analytics permission.
 
-Additive migration 20261024000100_executive_dashboard_analytics adds indexes and missing event contracts; it must be reviewed and tested on a new isolated PostgreSQL 16 cluster. No production/Neon migration is authorized or performed by this work. No historical migrations are edited.
+Additive migration 20261024000100_executive_dashboard_analytics adds indexes and missing event contracts. Following the owner's subsequent request to run against the original development database, candidate 207a76d5 was backed up, restored and rehearsed privately, then deployed through the canonical mutation gate to that exact Neon development target. Existing business-row fingerprints and historical ledger rows remained unchanged. Production remains out of scope; no historical migrations were edited. See the latest activation evidence in the delivery report.
 
 The dashboard UI uses scoped styles and no chart library dependency. Other catalog/review designs remain untouched; service/public components receive only the functional additions necessary for the two application channels.
 
