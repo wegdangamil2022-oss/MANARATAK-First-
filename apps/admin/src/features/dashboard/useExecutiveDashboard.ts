@@ -8,7 +8,7 @@ import {
   type DashboardReading,
   effectiveDashboardState,
 } from './DashboardContract';
-import { loadDashboardSources } from './DashboardLoader';
+import { loadDashboardSources, dashboardRefreshNeeded } from './DashboardLoader';
 import {
   executivePermissions,
   readExecutive,
@@ -63,6 +63,7 @@ export function useExecutiveDashboard(days: DashboardDays) {
   const [coreBusy, setCoreBusy] = useState(false),
     [periodBusy, setPeriodBusy] = useState(false),
     [refresh, setRefresh] = useState(0);
+  const [clock, setClock] = useState(Date.now);
   const coreGeneration = useRef(0),
     periodGeneration = useRef(0),
     lock = useRef(false);
@@ -72,6 +73,25 @@ export function useExecutiveDashboard(days: DashboardDays) {
       setRefresh((value) => value + 1);
     }
   }, []);
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    const observe = () => {
+      if (document.visibilityState !== 'hidden') setClock(Date.now());
+    };
+    const resume = () => {
+      observe();
+      if (document.visibilityState !== 'hidden' && dashboardRefreshNeeded(latest.current))
+        refreshData();
+    };
+    const timer = window.setInterval(observe, 5000);
+    window.addEventListener('focus', resume);
+    document.addEventListener('visibilitychange', resume);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', resume);
+      document.removeEventListener('visibilitychange', resume);
+    };
+  }, [refreshData]);
   useEffect(() => {
     const controller = new AbortController(),
       generation = ++coreGeneration.current;
@@ -179,7 +199,7 @@ export function useExecutiveDashboard(days: DashboardDays) {
     }),
   ) as Partial<Record<ExecutiveKey, ExecutiveReading>>;
   const state = (reading?: DashboardReading) =>
-    reading ? effectiveDashboardState(reading, Date.now()) : 'loading';
+    reading ? effectiveDashboardState(reading, Math.max(clock, Date.now())) : 'loading';
   const userHeadline =
     permits(executivePermissions.users) && headline?.permissionKey === permissionKey
       ? headline

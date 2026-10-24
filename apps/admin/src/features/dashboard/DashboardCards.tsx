@@ -106,7 +106,7 @@ export function DashboardHealthPanel({
   const label = (key: string) => dashboardLabel(key, language),
     state = effectiveDashboardState(reading, now);
   const health = reading.health,
-    current = ['available', 'stale'].includes(state) && health !== null;
+    current = ['available', 'partial'].includes(state) && health !== null;
   return (
     <section className={`${card} dashboard-health`} aria-label={label('health')}>
       <h2 className="text-lg font-bold"><ShieldCheck aria-hidden="true" />{label('health')}</h2>

@@ -4,7 +4,9 @@ import fs from 'node:fs';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createRequire } from 'node:module';
-const { MemoryRouter } = createRequire(new URL('../../apps/admin/package.json', import.meta.url))('react-router-dom');
+const { MemoryRouter } = createRequire(new URL('../../apps/admin/package.json', import.meta.url))(
+  'react-router-dom',
+);
 import {
   dashboardAllowed,
   dashboardMetricHref,
@@ -358,7 +360,14 @@ test('timeout is bounded and distinct from runtime failure', async (t) => {
     async () => new Promise(() => {}),
     signal,
   );
-  t.mock.timers.tick(5001);
+  let settled = false;
+  void pending.then(() => {
+    settled = true;
+  });
+  t.mock.timers.tick(29999);
+  await Promise.resolve();
+  assert.equal(settled, false);
+  t.mock.timers.tick(2);
   const result = await pending;
   assert.equal(result.state, 'timed_out');
   assert.equal(result.health, null);
@@ -592,12 +601,12 @@ test('AR/EN static rendering: accessible exact/partial/forbidden states and zero
 test('stale health render never advertises a current green/UP gate', () => {
   const reading = parseDashboardResponse(source('health'), healthFixture('UP'), when);
   const fresh = render(createElement(DashboardHealthPanel, { reading, language: 'en', now }));
-  assert.ok(fresh.includes('Operational'));
+  assert.ok(fresh.includes('<dd>Operational</dd>'));
   const old = render(
     createElement(DashboardHealthPanel, { reading, language: 'en', now: now + 31000 }),
   );
   assert.ok(old.includes('Stale'));
-  assert.ok(!old.includes('Operational'));
+  assert.ok(!old.includes('<dd>Operational</dd>'));
   assert.ok(!old.includes('Current diagnostic gate passed'));
 });
 test('integration source boundaries: owner guards retained, activity GET query-only, lifecycle cleanup fenced', () => {
@@ -607,32 +616,86 @@ test('integration source boundaries: owner guards retained, activity GET query-o
   assert.ok(router.includes("router.get('/dashboard-activity'"));
   assert.ok(router.includes('authEvaluatorService.evaluatePermission'));
   const page = fs.readFileSync('apps/admin/src/pages/AdminDashboardPage.tsx', 'utf8');
-  assert.ok(page.includes('generation.current'));
-  assert.ok(page.includes('controller.current?.abort()'));
-  assert.ok(page.includes('removeEventListener'));
+  const hook = fs.readFileSync(
+    'apps/admin/src/features/dashboard/useExecutiveDashboard.ts',
+    'utf8',
+  );
+  assert.ok(page.includes('useExecutiveDashboard(days)'));
+  assert.ok(hook.includes('generation !== periodGeneration.current || controller.signal.aborted'));
+  assert.ok(hook.includes('generation === coreGeneration.current && !controller.signal.aborted'));
+  assert.ok(hook.includes('controller.abort()'));
+  assert.ok(hook.includes('removeEventListener'));
   assert.ok(page.includes('disabled={busy}'));
   assert.ok(!/method:\s*['"](?:POST|PATCH|DELETE|PUT)/.test(page));
 });
 
-
 test('malformed owner and receipt clocks cannot turn a response into fresh evidence', () => {
-  assert.throws(() => parseDashboardResponse(source('scholarships:review'), { total: 1, checkedAt: 'invalid' }, when), /SCHEMA_MISMATCH/);
-  assert.throws(() => parseDashboardResponse(source('scholarships:review'), { total: 1 }, 'invalid'), /SCHEMA_MISMATCH/);
+  assert.throws(
+    () =>
+      parseDashboardResponse(
+        source('scholarships:review'),
+        { total: 1, checkedAt: 'invalid' },
+        when,
+      ),
+    /SCHEMA_MISMATCH/,
+  );
+  assert.throws(
+    () => parseDashboardResponse(source('scholarships:review'), { total: 1 }, 'invalid'),
+    /SCHEMA_MISMATCH/,
+  );
 });
 test('invalid and future receipt clocks are stale even when capture time is valid', () => {
   const reading = parseDashboardResponse(source('scholarships:review'), { total: 1 }, when);
-  for (const patch of [{ capturedAt: 'invalid' }, { receivedAt: 'invalid' }, { receivedAt: new Date(now + 60000).toISOString() }])
+  for (const patch of [
+    { capturedAt: 'invalid' },
+    { receivedAt: 'invalid' },
+    { receivedAt: new Date(now + 60000).toISOString() },
+  ])
     assert.equal(effectiveDashboardState({ ...reading, ...patch }, now), 'stale');
 });
 test('partial activity semantics must match the owner availability', () => {
-  const value = { protocolVersion: 1, availability: 'AVAILABLE', partial: true, scope: 'PERMISSIONED_OWNER_AUDIT_EVENTS', checkedAt: when, items: [] };
+  const value = {
+    protocolVersion: 1,
+    availability: 'AVAILABLE',
+    partial: true,
+    scope: 'PERMISSIONED_OWNER_AUDIT_EVENTS',
+    checkedAt: when,
+    items: [],
+  };
   assert.throws(() => parseDashboardResponse(source('activity'), value, when), /SCHEMA_MISMATCH/);
-  const partial = parseDashboardResponse(source('activity'), { ...value, availability: 'PARTIAL' }, when);
+  const partial = parseDashboardResponse(
+    source('activity'),
+    { ...value, availability: 'PARTIAL' },
+    when,
+  );
   assert.equal(partial.state, 'partial');
 });
 test('activity cannot carry blank event identities or action fields', () => {
-  const item = { id: 'event', action: 'RECORD_UPDATED', targetClass: 'FINANCE', owner: 'finance', actorAlias: 'SYSTEM', timestamp: when, result: 'SUCCESS' };
-  const value = { protocolVersion: 1, availability: 'AVAILABLE', partial: false, scope: 'PERMISSIONED_OWNER_AUDIT_EVENTS', checkedAt: when, items: [item] };
+  const item = {
+    id: 'event',
+    action: 'RECORD_UPDATED',
+    targetClass: 'FINANCE',
+    owner: 'finance',
+    actorAlias: 'SYSTEM',
+    timestamp: when,
+    result: 'SUCCESS',
+  };
+  const value = {
+    protocolVersion: 1,
+    availability: 'AVAILABLE',
+    partial: false,
+    scope: 'PERMISSIONED_OWNER_AUDIT_EVENTS',
+    checkedAt: when,
+    items: [item],
+  };
   for (const key of ['id', 'action', 'targetClass', 'owner'])
-    assert.throws(() => parseDashboardResponse(source('activity'), { ...value, items: [{ ...item, [key]: ' ' }] }, when), /SCHEMA_MISMATCH/);
+    assert.throws(
+      () =>
+        parseDashboardResponse(
+          source('activity'),
+          { ...value, items: [{ ...item, [key]: ' ' }] },
+          when,
+        ),
+      /SCHEMA_MISMATCH/,
+    );
 });
