@@ -266,3 +266,6 @@ export * from './student-tools/PrismaStudentToolTestDiscoveryLinkRepository';
 export * from './services-platform/PrismaServiceTestDiscoveryLinkRepository';
 
 export * from './universities/PrismaUniversityProgramReadPort';
+
+export * from './dashboard/PrismaExecutiveDashboardGateway';
+export * from './dashboard/PrismaDashboardMeasurementGateway';

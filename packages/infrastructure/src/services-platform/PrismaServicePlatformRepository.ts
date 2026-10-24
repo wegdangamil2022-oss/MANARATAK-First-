@@ -85,6 +85,7 @@ export class PrismaServicePlatformRepository
         this.catalog(tx).create({
           data: {
             publicId: data.publicId,
+            managedApplication: data.managedApplication ?? false,
             approvedPrice: data.approvedPrice === null ? Prisma.DbNull : data.approvedPrice,
             cancellationPolicyCode: data.cancellationPolicyCode,
             reviewEvidence: data.reviewEvidence === null ? Prisma.DbNull : data.reviewEvidence,
@@ -170,6 +171,7 @@ export class PrismaServicePlatformRepository
               cancellationPolicyCode: data.cancellationPolicyCode,
               reviewEvidence: data.reviewEvidence === null ? Prisma.DbNull : data.reviewEvidence,
               fulfillmentPolicy: data.fulfillmentPolicy,
+              managedApplication: data.managedApplication,
               inputSchema: data.inputSchema,
               localizedContent: data.localizedContent,
               makerActorId: data.makerActorId,
@@ -971,6 +973,7 @@ export class PrismaServicePlatformRepository
 
   private mapCatalog(row: any): ServiceCatalogItemDto {
     return {
+      managedApplication: row.managedApplication === true,
       approvedPrice: asRecord(row.approvedPrice) as any,
       cancellationPolicyCode: row.cancellationPolicyCode,
       reviewEvidence: asRecord(row.reviewEvidence),
@@ -1023,6 +1026,7 @@ export class PrismaServicePlatformRepository
 
   private mapRequest(row: any): ServiceRequestDto {
     return {
+      applicationOpportunityId: row.applicationOpportunityId,
       id: row.id,
       publicId: row.publicId,
       studentReferenceId: row.studentReferenceId,

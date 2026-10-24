@@ -108,4 +108,20 @@ describe('PrismaIdentityRepository', () => {
     expect(retrieved?.user?.contactRegistry.primaryEmail).toBe('testprisma@manaratak.local');
     expect(retrieved?.account.storageQuotaBytes).toBe(2000);
   });
+
+  it('maps the production aggregate in one bound query and preserves service identities and missing-account failure', async () => {
+    const record={id:'service-id',type:'Service',status:'ACTIVE',createdBy:'test',createdAt:new Date(),version:1,user:null,
+      account:{identityId:'service-id',accessState:'Active',storageQuotaBytes:'2000',rateLimitMax:10,rateLimitWindowMs:60000,configurationFlags:null}};
+    mockPrisma.$queryRaw=vi.fn().mockResolvedValue([record]);
+    const found=await repository.findById('service-id');
+    expect(found?.id.toString()).toBe('service-id');expect(found?.user).toBeNull();
+    expect(found?.technicalMetadata.props.createdAt).toBe(record.createdAt);
+    expect(mockPrisma.$queryRaw.mock.calls[0][1]).toBe('service-id');
+    expect(mockPrisma.identityRecord.findUnique).not.toHaveBeenCalled();
+    mockPrisma.$queryRaw.mockResolvedValue([]);expect(await repository.findById('missing')).toBeNull();
+    mockPrisma.$queryRaw.mockResolvedValue([{...record,account:null}]);
+    await expect(repository.findById('broken')).rejects.toThrow('missing an account');
+    mockPrisma.$queryRaw.mockRejectedValue(new Error('storage failure'));
+    await expect(repository.findById('unavailable')).rejects.toThrow('storage failure');
+  });
 });

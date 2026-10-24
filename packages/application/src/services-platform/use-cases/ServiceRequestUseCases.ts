@@ -23,6 +23,7 @@ export class StudentServiceRequestUseCases {
     private readonly catalog: IServiceCatalogRepository,
     private readonly requests: IServiceRequestRepository,
     private readonly assets?: AssetReferencePolicy,
+    private readonly publishedApplicationOpportunity?: (id: string) => Promise<string | null>,
   ) {}
 
   async createRequest(input: {
@@ -31,6 +32,7 @@ export class StudentServiceRequestUseCases {
     requestParameters?: Record<string, unknown>;
     idempotencyKey?: string;
     consent?: boolean;
+    applicationOpportunityId?: string;
   }): Promise<ServiceRequestDto> {
     const service =
       (await this.catalog.findById(input.serviceId)) ??
@@ -46,9 +48,16 @@ export class StudentServiceRequestUseCases {
       throw new Error('SERVICE_IDEMPOTENCY_KEY_REQUIRED');
     if (input.consent !== true) throw new Error('SERVICE_INPUT_CONSENT_REQUIRED');
     const published = service.publishedSnapshot
-      ? ({ ...service, ...service.publishedSnapshot } as typeof service)
+      ? ({ ...service, ...service.publishedSnapshot, managedApplication: service.publishedSnapshot.managedApplication === true } as typeof service)
       : service;
     const parameters = serviceInput(published, input.requestParameters ?? {});
+    let applicationOpportunityId: string | undefined;
+    if (published.managedApplication === true) {
+      applicationOpportunityId = input.applicationOpportunityId ? await this.publishedApplicationOpportunity?.(input.applicationOpportunityId) ?? undefined : undefined;
+      if (published.fulfillmentType !== 'APPLICATION_SUPPORT' || !input.applicationOpportunityId ||
+        !applicationOpportunityId)
+        throw new Error('MANAGED_APPLICATION_PUBLISHED_OPPORTUNITY_REQUIRED');
+    } else if (input.applicationOpportunityId) throw new Error('MANAGED_APPLICATION_SERVICE_REQUIRED');
     for (const field of published.inputSchema ?? []) {
       if (field.type === 'ASSET' && parameters[field.key])
         await assertAssetReferenceUsable(this.assets, String(parameters[field.key]), {
@@ -67,6 +76,7 @@ export class StudentServiceRequestUseCases {
       serviceId: service.id,
       parameters,
       consent: true,
+      ...(applicationOpportunityId ? { applicationOpportunityId } : {}),
     });
     const previous = await this.requests.findRequestByPublicId(publicId);
     if (previous) {
@@ -77,6 +87,7 @@ export class StudentServiceRequestUseCases {
     return this.studentProjection(
       await this.requests.createRequest({
         publicId,
+        applicationOpportunityId,
         payloadFingerprint,
         retentionUntil: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
         dueAt: new Date(
@@ -88,6 +99,7 @@ export class StudentServiceRequestUseCases {
           version: published.version,
           fulfillmentPolicy: published.fulfillmentPolicy ?? 'QUOTE_REQUIRED',
           fulfillmentType: published.fulfillmentType,
+          managedApplication: published.managedApplication === true,
           displayName: published.displayName,
           inputSchema: published.inputSchema ?? [],
           deliveryArtifactTypes: published.deliveryArtifactTypes ?? [],

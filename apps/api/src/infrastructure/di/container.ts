@@ -1,4 +1,9 @@
 import { PrismaUniversityProgramReadPort } from '@manaratak/infrastructure';
+import { PrismaExecutiveDashboardGateway, PrismaPublicAnalyticsGateway, PrismaManagedApplicationEvidenceGateway } from '@manaratak/infrastructure';
+import { ExecutiveDashboardUseCases, PublicAnalyticsUseCases, ManagedApplicationEvidenceUseCases, AnalyticsRetentionBackgroundJobHandler } from '@manaratak/application';
+import { ExecutiveDashboardRouter } from '../../presentation/api/router/ExecutiveDashboardRouter.js';
+import { ManagedApplicationEvidenceRouter } from '../../presentation/api/router/ManagedApplicationEvidenceRouter.js';
+import { createPublicAnalyticsRouter } from '../../presentation/api/router/PublicAnalyticsRouter.js';
 import { createHmac } from 'node:crypto';
 import { DEVELOPMENT_CSRF_SECRET, isStrongRuntimeSecret } from '@manaratak/config';
 import {StudentDocumentUploadUseCases,StudentDocumentReviewUseCases} from '@manaratak/application';
@@ -1124,7 +1129,7 @@ export function registerDependencies(
     serviceReferenceGateway: asFunction(({ referenceResolver }) => new CanonicalServiceReferenceGateway(referenceResolver)).scoped(),
     adminServiceCatalogUseCases: asFunction(({ serviceCatalogRepository, serviceReferenceGateway, assetReferencePolicy, serviceOperationsRepository }) => new AdminServiceCatalogUseCases(serviceCatalogRepository, serviceReferenceGateway, assetReferencePolicy, serviceOperationsRepository)).scoped(),
     publicServiceCatalogUseCases: asFunction(({ serviceCatalogRepository }) => new PublicServiceCatalogUseCases(serviceCatalogRepository)).scoped(),
-    studentServiceRequestUseCases: asFunction(({ serviceCatalogRepository, serviceRequestRepository, assetReferencePolicy }) => new StudentServiceRequestUseCases(serviceCatalogRepository, serviceRequestRepository, assetReferencePolicy)).scoped(),
+    studentServiceRequestUseCases: asFunction(({ serviceCatalogRepository, serviceRequestRepository, assetReferencePolicy, publishedApplicationResolver }) => new StudentServiceRequestUseCases(serviceCatalogRepository, serviceRequestRepository, assetReferencePolicy, async (id: string) => (await publishedApplicationResolver(id))?.id ?? null)).scoped(),
     financeAdminUseCases: asFunction(({ financeRepository }) => new FinanceAdminUseCases(financeRepository)).scoped(),
     financePlatformUseCases: asFunction(({ financeRepository, financeCurrencyReferenceGateway, financePaymentGatewayRegistry, financeBankTransferGatewayRegistry, financeFxRateProvider, financeTransferFeePolicy, assetReferencePolicy }) =>
       new FinancePlatformUseCases(financeRepository, {
@@ -1203,7 +1208,9 @@ export function registerDependencies(
     serviceMaintenanceBackgroundJobHandler: asFunction(({ adminServiceFulfillmentUseCases, serviceOperationsUseCases }) => new ServiceMaintenanceBackgroundJobHandler(adminServiceFulfillmentUseCases,serviceOperationsUseCases,readConfig<boolean>('SERVICES_MAINTENANCE_ENABLED') === true)).scoped(),
     financeReconciliationBackgroundJobHandler: asFunction(({ financePlatformUseCases }) => new FinanceReconciliationBackgroundJobHandler(financePlatformUseCases)).scoped(),
     notificationDeliveryBackgroundJobHandler: asFunction(({ notificationDeliveryRepo, notificationDeliveryGateway, notificationPrefGateway, studentApplicationReminderDeliveryPolicy, notificationRecipientGateway }) => new NotificationDeliveryBackgroundJobHandler(notificationDeliveryRepo, notificationDeliveryGateway, notificationPrefGateway, studentApplicationReminderDeliveryPolicy, notificationRecipientGateway)).scoped(),
-    backgroundJobHandlerRegistry: asFunction(({ assetLifecycleRecoveryBackgroundJobHandler, auditAlertEvaluationBackgroundJobHandler, careerMaintenanceBackgroundJobHandler, serviceMaintenanceBackgroundJobHandler, assetActivationRecoveryBackgroundJobHandler, retentionBackgroundJobHandler, cmsScheduledPublishingBackgroundJobHandler, importQueueBackgroundJobHandler, aiAsyncBackgroundJobHandler, financeReconciliationBackgroundJobHandler, notificationDeliveryBackgroundJobHandler }) => new BackgroundJobHandlerRegistry([
+    analyticsRetentionBackgroundJobHandler: asFunction(({ publicAnalyticsUseCases, managedApplicationEvidenceUseCases }) => new AnalyticsRetentionBackgroundJobHandler(publicAnalyticsUseCases, managedApplicationEvidenceUseCases)).scoped(),
+    backgroundJobHandlerRegistry: asFunction(({ analyticsRetentionBackgroundJobHandler, assetLifecycleRecoveryBackgroundJobHandler, auditAlertEvaluationBackgroundJobHandler, careerMaintenanceBackgroundJobHandler, serviceMaintenanceBackgroundJobHandler, assetActivationRecoveryBackgroundJobHandler, retentionBackgroundJobHandler, cmsScheduledPublishingBackgroundJobHandler, importQueueBackgroundJobHandler, aiAsyncBackgroundJobHandler, financeReconciliationBackgroundJobHandler, notificationDeliveryBackgroundJobHandler }) => new BackgroundJobHandlerRegistry([
+      analyticsRetentionBackgroundJobHandler,
       assetLifecycleRecoveryBackgroundJobHandler,
       auditAlertEvaluationBackgroundJobHandler,
       assetActivationRecoveryBackgroundJobHandler,
@@ -1485,6 +1492,21 @@ export function registerDependencies(
     fileManagementRouter: asFunction((cradle) => FileManagementRouter.create(cradle)).singleton(),
     notificationRouter: asFunction((cradle) => NotificationRouter.create(cradle)).singleton(),
     auditRouter: asFunction((cradle) => AuditRouter.create(cradle)).singleton(),
+    publishedApplicationResolver: asFunction(({ scholarshipRepository, publicScholarshipUseCases }) => async (id: string) => {
+      const owner = /^[a-f0-9-]{36}$/i.test(id) ? await scholarshipRepository.findById(id) : await scholarshipRepository.findBySlug(id);
+      if (!owner) return null;
+      try { const published = await publicScholarshipUseCases.getScholarship(owner.slug, 'ar'); return { id: owner.id, applicationUrl: published.applicationUrl }; }
+      catch { return null; }
+    }).scoped(),
+    executiveDashboardGateway: asFunction(({ prisma }) => new PrismaExecutiveDashboardGateway(prisma)).scoped(),
+    publicAnalyticsGateway: asFunction(({ prisma, publishedApplicationResolver }) => new PrismaPublicAnalyticsGateway(prisma, publishedApplicationResolver)).scoped(),
+    executiveDashboardUseCases: asFunction(({ executiveDashboardGateway }) => new ExecutiveDashboardUseCases(executiveDashboardGateway, readConfig<boolean>('PUBLIC_ANALYTICS_ENABLED') === true)).scoped(),
+    publicAnalyticsUseCases: asFunction(({ publicAnalyticsGateway }) => new PublicAnalyticsUseCases(publicAnalyticsGateway, readConfig<boolean>('PUBLIC_ANALYTICS_ENABLED') === true)).scoped(),
+    managedApplicationEvidenceGateway: asFunction(({ prisma, publishedApplicationResolver }) => new PrismaManagedApplicationEvidenceGateway(prisma, publishedApplicationResolver)).scoped(),
+    managedApplicationEvidenceUseCases: asFunction(({ managedApplicationEvidenceGateway, serviceRequestRepository, assetReferencePolicy, serviceFinanceGateway }) => new ManagedApplicationEvidenceUseCases(managedApplicationEvidenceGateway, serviceRequestRepository, assetReferencePolicy, serviceFinanceGateway)).scoped(),
+    executiveDashboardRouter: asFunction(({ executiveDashboardUseCases, authEvaluatorService }) => ExecutiveDashboardRouter.create(executiveDashboardUseCases, authEvaluatorService)).singleton(),
+    publicAnalyticsRouter: asFunction(({ publicAnalyticsUseCases }) => createPublicAnalyticsRouter(publicAnalyticsUseCases)).singleton(),
+    managedApplicationEvidenceRouter: asFunction(({ managedApplicationEvidenceUseCases, authEvaluatorService, serviceRequestRepository }) => ManagedApplicationEvidenceRouter.create(managedApplicationEvidenceUseCases, authEvaluatorService, serviceRequestRepository)).singleton(),
     searchRouter: asFunction((cradle) => SearchRouter.create(cradle)).singleton(),
     cacheRouter: asFunction((cradle) => CacheRouter.create(cradle)).singleton(),
     backgroundJobRouter: asFunction((cradle) => BackgroundJobRouter.create(cradle)).singleton(),

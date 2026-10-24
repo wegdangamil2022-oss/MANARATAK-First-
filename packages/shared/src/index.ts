@@ -15,3 +15,5 @@ export * from './certificates/approvedCertificateDesign';
 export * from './localization/readiness';
 
 export * from './localization/ownerCapabilities';
+
+export * from './dashboard/ExecutiveDashboard';

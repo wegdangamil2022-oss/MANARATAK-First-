@@ -557,6 +557,11 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Preserve the four-column NULLS NOT DISTINCT admission identity and all existing rows. A failed apply rolls back its index replacement atomically; do not drop the stronger index or delete conflicting rows as recovery. Applied shared targets require a verified compatible pre-mutation backup, reconciliation of subsequent writes and separate restore or forward-fix authorization. Local promotion review and measured backup/restore evidence: docs/remediation/POST28_R06_NULL_IDENTITY_ROLLOUT_REVIEW_2026-10-19.md and docs/remediation/POST28_R06_CORE_CLOSURE_2026-10-19.md. Those proofs authorize only fresh isolated synthetic labs, not shared-target recovery. No destructive down SQL is authorized."
+    },
+    "20261024000100_executive_dashboard_analytics": {
+      "recoveryClass": "FORWARD_FIX_ONLY",
+      "artifact": "docs/operations/EXECUTIVE_DASHBOARD_MIGRATION_RECOVERY.md",
+      "decision": "Additive schema only; retain consent, service attestations, ledger and outbox on application rollback. Disable collection/commands and prepare a reviewed forward fix. Isolated synthetic PostgreSQL 16 rehearsal only; shared target execution requires its normal backup, review and mutation gates."
     }
   }
 }

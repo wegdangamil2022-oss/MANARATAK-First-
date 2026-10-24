@@ -1678,6 +1678,8 @@ model UniversityImportChange {
 // --- Scholarships ---
 
 model Scholarship {
+  managedServiceRequests ServiceRequestRecord[]
+  directApplicationReports DirectApplicationReport[]
   id                   String    @id @default(uuid())
   publicId             String    @unique
   slug                 String    @unique
@@ -2876,6 +2878,7 @@ model InternationalTestContentBlock {
 // --- Student Workspace ---
 
 model AssetRecord {
+  applicationEvidence ServiceApplicationEvidence[]
   studentApplicationDocuments StudentApplicationDocumentBinding[]
   id                       String    @id
   reference                String    @unique
@@ -3649,6 +3652,7 @@ model CmsScheduledJob {
 // --- Identity Foundation ---
 
 model IdentityRecord {
+  directApplicationReports DirectApplicationReport[]
   id     String @id
   type   String
   status String
@@ -3670,6 +3674,7 @@ model IdentityRecord {
   roleAssignments RoleAssignmentRecord[]
   emailVerificationTokens EmailVerificationTokenRecord[]
   passwordResetTokens PasswordResetTokenRecord[]
+  @@index([type, status, createdAt])
 }
 
 model CredentialRecord {
@@ -5078,6 +5083,7 @@ model FinanceEstimateRecord {
 
 // --- Phase 20 Enterprise Services Platform (P8 source closure) ---
 model ServiceCatalogRecord {
+  managedApplication Boolean @default(false)
   approvedPrice Json?
   cancellationPolicyCode String @default("FINANCE_REVIEW_REQUIRED")
   reviewEvidence Json?
@@ -5158,6 +5164,9 @@ model ServiceCatalogLanguageRecord {
 }
 
 model ServiceRequestRecord {
+  applicationOpportunityId String?
+  applicationOpportunity Scholarship? @relation(fields: [applicationOpportunityId], references: [id], onDelete: Restrict)
+  applicationEvidence ServiceApplicationEvidence[]
   slaEscalatedAt DateTime?
   invoiceNextCheckAt DateTime @default(now())
   cancellationNextCheckAt DateTime @default(now())
@@ -5192,8 +5201,74 @@ model ServiceRequestRecord {
   @@index([studentReferenceId, status, updatedAt])
   @@index([serviceId, status])
   @@index([financeInvoiceId])
+  @@index([createdAt, status])
+  @@index([applicationOpportunityId])
 
   @@index([assignedStaffId,status,dueAt], map:"ServiceRequestRecord_staff_due")
+}
+
+// Public analytics deliberately has no identity, workspace, URL, IP or user-agent fields.
+model PublicAnalyticsConsent {
+  tokenHash String @id
+  policyVersion String
+  grantedAt DateTime @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+  events PublicAnalyticsEvent[]
+  @@index([expiresAt])
+}
+
+model DashboardMeasurementEpoch {
+  key String @id
+  startedAt DateTime @default(now())
+}
+
+model PublicAnalyticsEvent {
+  id String @id
+  consentHash String
+  eventId String
+  kind String
+  pageKey String
+  opportunityId String?
+  destinationHost String?
+  receivedAt DateTime @default(now())
+  expiresAt DateTime
+  consent PublicAnalyticsConsent @relation(fields: [consentHash], references: [tokenHash], onDelete: Cascade)
+  @@unique([consentHash, eventId])
+  @@index([kind, receivedAt, consentHash])
+  @@index([expiresAt])
+}
+
+// Append-only verified service events; separate from personal student trackers.
+model ServiceApplicationEvidence {
+  id String @id @default(uuid())
+  requestId String
+  kind String
+  actorId String
+  idempotencyKey String
+  evidenceAssetId String?
+  evidenceDigest String?
+  verifiedAt DateTime @default(now())
+  expiresAt DateTime
+  request ServiceRequestRecord @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  asset AssetRecord? @relation(fields: [evidenceAssetId], references: [id], onDelete: SetNull)
+  @@unique([requestId, idempotencyKey])
+  @@index([kind, verifiedAt])
+  @@index([expiresAt])
+  @@index([requestId, verifiedAt(sort: Desc), id(sort: Desc)], map: "ServiceApplicationEvidence_request_latest")
+}
+
+model DirectApplicationReport {
+  id String @id @default(uuid())
+  studentId String
+  opportunityId String
+  reportedAt DateTime @default(now())
+  expiresAt DateTime
+  student IdentityRecord @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  opportunity Scholarship @relation(fields: [opportunityId], references: [id], onDelete: Restrict)
+  @@unique([studentId, opportunityId])
+  @@index([reportedAt])
+  @@index([expiresAt])
 }
 
 

@@ -77,6 +77,7 @@ export class ServiceAdminRouter {
     });
 
     const serviceBodySchema = z.object({
+      managedApplication: z.boolean().default(false),
       fulfillmentPolicy: z.enum(['FREE', 'CHARGEABLE', 'QUOTE_REQUIRED']).default('QUOTE_REQUIRED'),
       inputSchema: z
         .array(

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { signalSla, type ReviewFilters, type ReviewItem } from './ReviewContracts';
 import type { ReviewPageState } from './ReviewLoader';
 import { ReviewSupportingPanels } from './ReviewSupportingPanels';
+import { brandPalette } from '../../components/BrandPalette';
 
 /** Presentation of the retained, permission-filtered window; never a global total. */
 export function ReviewOverview({ items, states, filters, onFilter, language, now, canOpenTranslations = false }: {
@@ -59,8 +60,8 @@ export function ReviewOverview({ items, states, filters, onFilter, language, now
           aria-pressed={key === 'overdue' ? filters.view === 'overdue' : filters.reason === key}
           onClick={() => key === 'overdue' ? onFilter('view', filters.view === 'overdue' ? 'all' : 'overdue') : onFilter('reason', filters.reason === key ? 'all' : key)}
           className="review-analysis-metric relative overflow-hidden rounded-2xl border border-[#DDEFF2] bg-white p-4 text-start shadow-xs transition hover:shadow-md aria-pressed:ring-2 aria-pressed:ring-[#21A7B4]">
-          <span className="absolute inset-x-0 top-0 h-1" style={{ backgroundColor: color }} />
-          <Icon aria-hidden="true" style={{ color }} />
+          <span className={`absolute inset-x-0 top-0 h-1 ${brandPalette[color].accent}`} />
+          <Icon aria-hidden="true" className={brandPalette[color].foreground} />
           <span className="review-analysis-title">{title}</span>
           <span className="review-analysis-value">{number(value)}</span>
         </button>)}

@@ -255,3 +255,6 @@ export * from './students/use-cases/StudentDocumentReviewUseCases';
 export * from './integration/CatalogLifecycleReadPolicy';
 
 export * from './localization/OwnerLocalizedDescription';
+
+export * from './dashboard/ExecutiveDashboardUseCases';
+export * from './dashboard/AnalyticsRetentionBackgroundJobHandler';

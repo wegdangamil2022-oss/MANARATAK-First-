@@ -3016,9 +3016,9 @@ export class ApiClient {
     return res.json();
   }
 
-  static async createMyStudentServiceRequest(input: { serviceId: string; requestParameters?: Record<string, unknown>; idempotencyKey?: string; consent?: boolean }): Promise<StudentServiceRequestDto> {
+  static async createMyStudentServiceRequest(input: { serviceId: string; applicationOpportunityId?: string; requestParameters?: Record<string, unknown>; idempotencyKey?: string; consent?: boolean }): Promise<StudentServiceRequestDto> {
     const res = await apiFetch(`${API_BASE_URL}/student/services/requests`, {
-      method: 'POST', headers: getStudentHeaders({ 'Content-Type': 'application/json', 'Idempotency-Key': input.idempotencyKey ?? crypto.randomUUID() }), body: JSON.stringify({ serviceId: input.serviceId, requestParameters: input.requestParameters, consent: input.consent }),
+      method: 'POST', headers: getStudentHeaders({ 'Content-Type': 'application/json', 'Idempotency-Key': input.idempotencyKey ?? crypto.randomUUID() }), body: JSON.stringify({ serviceId: input.serviceId, requestParameters: input.requestParameters, consent: input.consent, ...(input.applicationOpportunityId ? {applicationOpportunityId: input.applicationOpportunityId} : {}) }),
     });
     if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر إنشاء طلب الخدمة')); }
     return res.json();

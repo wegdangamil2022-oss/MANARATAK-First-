@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 424,
-  "reachableCount": 424,
+  "registrationCount": 435,
+  "reachableCount": 435,
   "unreachable": [],
   "registrations": [
     {
@@ -414,6 +414,18 @@
       ]
     },
     {
+      "name": "analyticsRetentionBackgroundJobHandler",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "backgroundJobHandlerRegistry"
+      ],
+      "dependencies": [
+        "managedApplicationEvidenceUseCases",
+        "publicAnalyticsUseCases"
+      ]
+    },
+    {
       "name": "apiExposureGateway",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -596,6 +608,7 @@
         "financePlatformUseCases",
         "importArtifactUseCase",
         "internationalTestAdminUseCases",
+        "managedApplicationEvidenceUseCases",
         "referenceDataUseCases",
         "serviceOperationsUseCases",
         "studentApplicationTrackerUseCases",
@@ -890,7 +903,9 @@
       "reachableThroughRegistrations": [
         "disablePasswordCredentialUseCase",
         "evaluateAccessUseCase",
+        "executiveDashboardRouter",
         "importGovernanceUseCases",
+        "managedApplicationEvidenceRouter",
         "notificationRecipientGateway"
       ],
       "dependencies": [
@@ -997,6 +1012,7 @@
       ],
       "dependencies": [
         "aiAsyncBackgroundJobHandler",
+        "analyticsRetentionBackgroundJobHandler",
         "assetActivationRecoveryBackgroundJobHandler",
         "assetLifecycleRecoveryBackgroundJobHandler",
         "auditAlertEvaluationBackgroundJobHandler",
@@ -2273,6 +2289,40 @@
       ]
     },
     {
+      "name": "executiveDashboardGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "executiveDashboardUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "executiveDashboardRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "authEvaluatorService",
+        "executiveDashboardUseCases"
+      ]
+    },
+    {
+      "name": "executiveDashboardUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "executiveDashboardRouter"
+      ],
+      "dependencies": [
+        "executiveDashboardGateway"
+      ]
+    },
+    {
       "name": "externalCourseProviderRepository",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -3271,6 +3321,48 @@
       ]
     },
     {
+      "name": "managedApplicationEvidenceGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "managedApplicationEvidenceUseCases"
+      ],
+      "dependencies": [
+        "prisma",
+        "publishedApplicationResolver"
+      ]
+    },
+    {
+      "name": "managedApplicationEvidenceRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "authEvaluatorService",
+        "managedApplicationEvidenceUseCases",
+        "serviceRequestRepository"
+      ]
+    },
+    {
+      "name": "managedApplicationEvidenceUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "analyticsRetentionBackgroundJobHandler",
+        "managedApplicationEvidenceRouter"
+      ],
+      "dependencies": [
+        "assetReferencePolicy",
+        "managedApplicationEvidenceGateway",
+        "serviceFinanceGateway",
+        "serviceRequestRepository"
+      ]
+    },
+    {
       "name": "manualUploadSourceConnector",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -3687,6 +3779,7 @@
         "emergencyAccessRepository",
         "enterpriseEventRepo",
         "eventPublishingGateway",
+        "executiveDashboardGateway",
         "externalCourseProviderRepository",
         "financeCurrencyReferenceGateway",
         "financeRepository",
@@ -3706,6 +3799,7 @@
         "majorProgramUsageGateway",
         "majorRepository",
         "majorScholarshipUsageGateway",
+        "managedApplicationEvidenceGateway",
         "mfaGateway",
         "newMajorCandidateRepository",
         "notificationIntentRepo",
@@ -3715,6 +3809,7 @@
         "passwordResetTokenRepository",
         "phase10CatalogRepository",
         "policyRepository",
+        "publicAnalyticsGateway",
         "referenceDataRepository",
         "referenceOwnerReviewGateway",
         "registerUserUseCase",
@@ -3799,6 +3894,41 @@
       ]
     },
     {
+      "name": "publicAnalyticsGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "publicAnalyticsUseCases"
+      ],
+      "dependencies": [
+        "prisma",
+        "publishedApplicationResolver"
+      ]
+    },
+    {
+      "name": "publicAnalyticsRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "publicAnalyticsUseCases"
+      ]
+    },
+    {
+      "name": "publicAnalyticsUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "analyticsRetentionBackgroundJobHandler",
+        "publicAnalyticsRouter"
+      ],
+      "dependencies": [
+        "publicAnalyticsGateway"
+      ]
+    },
+    {
       "name": "publicCmsUseCases",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -3830,7 +3960,9 @@
       "directRuntimeConsumers": [
         "apps/api/src/presentation/api/router/ScholarshipPublicRouter.ts"
       ],
-      "reachableThroughRegistrations": [],
+      "reachableThroughRegistrations": [
+        "publishedApplicationResolver"
+      ],
       "dependencies": [
         "scholarshipRepository"
       ]
@@ -3844,6 +3976,20 @@
       "reachableThroughRegistrations": [],
       "dependencies": [
         "serviceCatalogRepository"
+      ]
+    },
+    {
+      "name": "publishedApplicationResolver",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "managedApplicationEvidenceGateway",
+        "publicAnalyticsGateway",
+        "studentServiceRequestUseCases"
+      ],
+      "dependencies": [
+        "publicScholarshipUseCases",
+        "scholarshipRepository"
       ]
     },
     {
@@ -4340,6 +4486,7 @@
         "crossDomainGraphReadService",
         "crossModuleIntegrityUseCase",
         "publicScholarshipUseCases",
+        "publishedApplicationResolver",
         "scholarshipDuplicateLookup",
         "scholarshipRecommendationGateway",
         "scholarshipStudentSavedItemHydrationGateway",
@@ -4453,6 +4600,7 @@
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "adminServiceFulfillmentUseCases",
+        "managedApplicationEvidenceUseCases",
         "serviceOperationsUseCases"
       ],
       "dependencies": [
@@ -4544,6 +4692,8 @@
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "adminServiceFulfillmentUseCases",
+        "managedApplicationEvidenceRouter",
+        "managedApplicationEvidenceUseCases",
         "serviceOperationsUseCases",
         "studentServiceRequestUseCases"
       ],
@@ -4982,6 +5132,7 @@
       ],
       "dependencies": [
         "assetReferencePolicy",
+        "publishedApplicationResolver",
         "serviceCatalogRepository",
         "serviceRequestRepository"
       ]

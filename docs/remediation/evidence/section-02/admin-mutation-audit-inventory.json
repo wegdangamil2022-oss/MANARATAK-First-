@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 8,
   "baseline": "b1702289f43d0363d7bbf91f8eba465e4355c53c",
   "scope": "Mounted canonical admin mutations; candidate permission sets for conditional policies, with policy fingerprints; source checks, not runtime or owner atomicity proof",
   "routes": [
@@ -8478,6 +8478,25 @@
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
       "source": "apps/api/src/presentation/api/router/UniversityAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/requests/:requestId/application-evidence",
+      "owner": "ManagedApplicationEvidenceRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:requests:fulfill",
+        "admin:services:requests:all",
+        "admin:services:applications:verify"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ManagedApplicationEvidenceRouter.ts"
     }
   ],
   "knownRouteCollisions": [

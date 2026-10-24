@@ -1,7 +1,7 @@
 # MANARATAK 2.0 Documentation Index
 
 **Status:** ACTIVE / SOURCE-ALIGNED  
-**Updated:** 2026-10-11
+**Updated:** 2026-10-24
 **Repository phase coverage:** Phase 02 through Phase 24, including the two current Phase 10 documentation roots.
 
 This file is the navigation entrypoint for the current `docs/` tree. It does not certify runtime or production readiness. Completion terminology is governed by [`governance/COMPLETION_STATUS_LIFECYCLE.md`](./governance/COMPLETION_STATUS_LIFECYCLE.md).
@@ -32,6 +32,7 @@ This file is the navigation entrypoint for the current `docs/` tree. It does not
 | `plans/` | Bounded execution plans, import source registers and progress tracking; [current import plan](./plans/imports/plan.md). |
 | `standards/` | Shared repository/documentation standards. |
 | `templates/` | Editable design references and preview artifacts; not issued credentials. |
+| `ui/` | Approved interface specifications and scoped implementation evidence; [executive Dashboard delivery](./ui/EXECUTIVE_DASHBOARD_DELIVERY_2026-10-24.md). |
 | `legacy/` | Superseded historical artifacts only. |
 | root `*_FINAL_CLOSURE_*.md` files | Domain-specific closure artifacts retained at `docs/` root for compatibility; consult remediation/governance authority before treating them as current runtime evidence. |
 

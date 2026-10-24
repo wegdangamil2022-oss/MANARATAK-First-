@@ -37,6 +37,7 @@ const deliveryModes = Object.values(ServiceDeliveryMode);
 const availabilityStatuses = Object.values(ServiceAvailabilityStatus);
 
 const emptyForm = {
+  managedApplication: false,
   fulfillmentPolicy: 'QUOTE_REQUIRED',
   providerReferenceId: '',
   inputFieldKeys: '',
@@ -303,6 +304,7 @@ export function ServicesAdminPage() {
     setDirty(false);
     setSelectedService(service);
     const nextForm = {
+      managedApplication: service.managedApplication === true,
       fulfillmentPolicy: service.fulfillmentPolicy ?? 'QUOTE_REQUIRED',
       providerReferenceId: service.providerReferenceId ?? '',
       inputFieldKeys: (service.inputSchema ?? []).map((field) => field.key).join(', '),
@@ -342,6 +344,7 @@ export function ServicesAdminPage() {
   const unchanged = (key: keyof typeof emptyForm) =>
     form[key] === JSON.parse(formBaseline.current)[key];
   const buildPayload = () => ({
+    managedApplication: form.managedApplication,
     displayName: form.displayName.trim(),
     serviceCategory: form.serviceCategory,
     fulfillmentType: form.fulfillmentType,
@@ -939,6 +942,7 @@ export function ServicesAdminPage() {
                     setForm({ ...form, deliveryMode: value as ServiceDeliveryMode })
                   }
                 />
+                {form.fulfillmentType === ServiceFulfillmentType.APPLICATION_SUPPORT && <label className="flex items-center gap-2 text-xs font-bold"><input type="checkbox" checked={form.managedApplication} onChange={event=>setForm({...form,managedApplication:event.target.checked})}/>{language==='ar'?'خدمة تتولى فيها منارتك التقديم للجامعة نيابة عن الطالب (تخضع للمراجعة والنشر)':'MANARATAK applies to universities on the student’s behalf (requires review and publication)'}</label>}
                 <SelectField
                   label={t('availability')}
                   value={form.serviceAvailabilityStatus}

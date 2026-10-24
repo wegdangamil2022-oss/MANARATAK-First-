@@ -15,7 +15,14 @@ export class PrismaBackgroundJobExecutionGateway implements IBackgroundJobExecut
   public readonly capabilityStatus = 'PRODUCTION_CAPABLE' as const;
   public readonly persistenceClassification = 'DURABLE' as const;
 
-  public constructor(private readonly prisma: PrismaClient) {}
+  private readonly claimJobTypes?: readonly string[];
+
+  public constructor(private readonly prisma: PrismaClient, claimJobTypes?: readonly string[]) {
+    if (claimJobTypes !== undefined && (!Array.isArray(claimJobTypes) || !claimJobTypes.length ||
+        claimJobTypes.length > 32 || claimJobTypes.some(type => typeof type !== 'string' ||
+          !/^[a-z][a-z0-9.-]{0,199}$/.test(type)))) throw new Error('BACKGROUND_JOB_CLAIM_SCOPE_INVALID');
+    this.claimJobTypes = claimJobTypes === undefined ? undefined : Object.freeze([...new Set(claimJobTypes)]);
+  }
 
   public async schedule(jobReference: string, runAt: Date): Promise<void> {
     this.assertValidDate(runAt, 'BACKGROUND_JOB_RUN_AT_INVALID');
@@ -59,6 +66,7 @@ export class PrismaBackgroundJobExecutionGateway implements IBackgroundJobExecut
         SELECT "reference"
         FROM "BackgroundJobRecord"
         WHERE "status" IN ('SCHEDULED', 'STARTED')
+          ${this.claimJobTypes ? Prisma.sql`AND "jobType" IN (${Prisma.join(this.claimJobTypes)})` : Prisma.empty}
           AND "availableAt" <= ${request.now}
           AND ("leaseUntil" IS NULL OR "leaseUntil" < ${request.now})
         ORDER BY "priority" DESC, "availableAt" ASC, "createdAt" ASC
@@ -75,6 +83,7 @@ export class PrismaBackgroundJobExecutionGateway implements IBackgroundJobExecut
         const updated = await (tx as any).backgroundJobRecord.updateMany({
           where: {
             reference: candidate.reference,
+            ...(this.claimJobTypes ? { jobType: { in: [...this.claimJobTypes] } } : {}),
             status: { in: ['SCHEDULED', 'STARTED'] },
             OR: [{ leaseUntil: null }, { leaseUntil: { lt: request.now } }],
           },
