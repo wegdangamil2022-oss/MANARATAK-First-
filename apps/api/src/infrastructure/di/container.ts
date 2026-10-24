@@ -1,6 +1,7 @@
 import { PrismaUniversityProgramReadPort } from '@manaratak/infrastructure';
-import { PrismaExecutiveDashboardGateway, PrismaPublicAnalyticsGateway, PrismaManagedApplicationEvidenceGateway } from '@manaratak/infrastructure';
-import { ExecutiveDashboardUseCases, PublicAnalyticsUseCases, ManagedApplicationEvidenceUseCases, AnalyticsRetentionBackgroundJobHandler } from '@manaratak/application';
+import { PrismaExecutiveDashboardGateway, PrismaPublicAnalyticsGateway, PrismaManagedApplicationEvidenceGateway, PrismaReviewWorkspaceGateway } from '@manaratak/infrastructure';
+import { ExecutiveDashboardUseCases, PublicAnalyticsUseCases, ManagedApplicationEvidenceUseCases, AnalyticsRetentionBackgroundJobHandler, ReviewWorkspaceUseCases, ReviewNotificationRecipientGateway } from '@manaratak/application';
+import { ReviewWorkspaceRouter } from '../../presentation/api/router/ReviewWorkspaceRouter.js';
 import { ExecutiveDashboardRouter } from '../../presentation/api/router/ExecutiveDashboardRouter.js';
 import { ManagedApplicationEvidenceRouter } from '../../presentation/api/router/ManagedApplicationEvidenceRouter.js';
 import { createPublicAnalyticsRouter } from '../../presentation/api/router/PublicAnalyticsRouter.js';
@@ -856,7 +857,7 @@ export function registerDependencies(
 
     // --- Gateways & Providers ---
     storageGateway: asFunction(() => createUnavailableCapability('fileStorage')).singleton(),
-    notificationRecipientGateway: asFunction(({ identityRepository, roleAssignmentRepository, studentWorkspaceRepository, authEvaluatorService, principalAccessValidator }) => new AuditAdministratorRecipientGateway(new StudentNotificationRecipientGateway(identityRepository, roleAssignmentRepository, studentWorkspaceRepository), identityRepository, authEvaluatorService, principalAccessValidator)).scoped(),
+    notificationRecipientGateway: asFunction(({ identityRepository, roleAssignmentRepository, studentWorkspaceRepository, authEvaluatorService, principalAccessValidator }) => new ReviewNotificationRecipientGateway(new AuditAdministratorRecipientGateway(new StudentNotificationRecipientGateway(identityRepository, roleAssignmentRepository, studentWorkspaceRepository), identityRepository, authEvaluatorService, principalAccessValidator),identityRepository,authEvaluatorService,principalAccessValidator)).scoped(),
     notificationPrefGateway: asFunction(({ prisma }) => new PrismaStudentNotificationPreferenceGateway(prisma)).singleton(),
     notificationDeliveryGateway: asFunction(() => {
       const options = notificationProviderOptions();
@@ -1499,6 +1500,9 @@ export function registerDependencies(
       catch { return null; }
     }).scoped(),
     executiveDashboardGateway: asFunction(({ prisma }) => new PrismaExecutiveDashboardGateway(prisma)).scoped(),
+    reviewWorkspaceGateway: asFunction(({ prisma }) => new PrismaReviewWorkspaceGateway(prisma)).scoped(),
+    reviewWorkspaceUseCases: asFunction(({ reviewWorkspaceGateway, authEvaluatorService }) => new ReviewWorkspaceUseCases(reviewWorkspaceGateway, authEvaluatorService)).scoped(),
+    reviewWorkspaceRouter: asFunction(({ reviewWorkspaceUseCases }) => ReviewWorkspaceRouter.create(reviewWorkspaceUseCases)).singleton(),
     publicAnalyticsGateway: asFunction(({ prisma, publishedApplicationResolver }) => new PrismaPublicAnalyticsGateway(prisma, publishedApplicationResolver)).scoped(),
     executiveDashboardUseCases: asFunction(({ executiveDashboardGateway }) => new ExecutiveDashboardUseCases(executiveDashboardGateway, readConfig<boolean>('PUBLIC_ANALYTICS_ENABLED') === true)).scoped(),
     publicAnalyticsUseCases: asFunction(({ publicAnalyticsGateway }) => new PublicAnalyticsUseCases(publicAnalyticsGateway, readConfig<boolean>('PUBLIC_ANALYTICS_ENABLED') === true)).scoped(),

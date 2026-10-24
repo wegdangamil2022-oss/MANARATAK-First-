@@ -262,7 +262,7 @@ export class SecurityMiddlewareFactory {
           if (!await options.mfaUseCases.sessionAuthenticated(principalId, req.authSessionId ?? '')) {
             res.status(401).json({ error: { code: 'MFA_SESSION_REQUIRED' } }); return;
           }
-          if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method)) await options.mfaUseCases.assertFresh(principalId, req.authSessionId);
+          if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method) && !isAdministrativeReadQuery(req)) await options.mfaUseCases.assertFresh(principalId, req.authSessionId);
         } catch (error) {
           const stepUp = error instanceof Error && ['MFA_STEP_UP_REQUIRED','MFA_ENROLLMENT_REQUIRED'].includes(error.message);
           res.status(stepUp ? 403 : 503).json({ error: { code: stepUp && error instanceof Error ? error.message : 'MFA_AUTH_UNAVAILABLE' } }); return;
@@ -372,3 +372,4 @@ function extractBearerToken(value: string | undefined): string | null {
   if (scheme !== 'Bearer' || !token) return null;
   return token;
 }
+import { isAdministrativeReadQuery } from './AdministrativeReadQuery.js';

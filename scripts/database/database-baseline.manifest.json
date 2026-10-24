@@ -1150,6 +1150,26 @@
     "DirectApplicationReport": {
       "owner": "services",
       "required": true
+    },
+    "ReviewWorkCase": {
+      "required": true,
+      "owner": "foundation_control_plane"
+    },
+    "ReviewWorkEvent": {
+      "required": true,
+      "owner": "foundation_control_plane"
+    },
+    "ReviewSourceCheckpoint": {
+      "required": true,
+      "owner": "foundation_control_plane"
+    },
+    "ReviewWorkView": {
+      "required": true,
+      "owner": "foundation_control_plane"
+    },
+    "ReviewSlaPolicy": {
+      "required": true,
+      "owner": "foundation_control_plane"
     }
   },
   "consistencyProbes": {

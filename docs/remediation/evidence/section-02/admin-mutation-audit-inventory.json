@@ -1,5 +1,5 @@
 {
-  "version": 8,
+  "version": 9,
   "baseline": "b1702289f43d0363d7bbf91f8eba465e4355c53c",
   "scope": "Mounted canonical admin mutations; candidate permission sets for conditional policies, with policy fingerprints; source checks, not runtime or owner atomicity proof",
   "routes": [
@@ -8497,6 +8497,102 @@
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
       "source": "apps/api/src/presentation/api/router/ManagedApplicationEvidenceRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/review-workspace/bulk",
+      "owner": "ReviewWorkspaceRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:platform:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "OWNER_COORDINATION_IDEMPOTENCY_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReviewWorkspaceRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/review-workspace/commands",
+      "owner": "ReviewWorkspaceRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:platform:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "OWNER_COORDINATION_IDEMPOTENCY_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReviewWorkspaceRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/review-workspace/policies",
+      "owner": "ReviewWorkspaceRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:platform:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "OWNER_COORDINATION_IDEMPOTENCY_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReviewWorkspaceRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/review-workspace/query",
+      "owner": "ReviewWorkspaceRouter",
+      "classification": "NO_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:platform:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "READ_ONLY_BODY_QUERY",
+      "auditEvidence": "REVIEWED_NON_MUTATING_POST_EXEMPTION",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReviewWorkspaceRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/review-workspace/synchronize",
+      "owner": "ReviewWorkspaceRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:platform:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "OWNER_COORDINATION_IDEMPOTENCY_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReviewWorkspaceRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/review-workspace/views",
+      "owner": "ReviewWorkspaceRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:platform:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "OWNER_COORDINATION_IDEMPOTENCY_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReviewWorkspaceRouter.ts"
     }
   ],
   "knownRouteCollisions": [
@@ -8571,5 +8667,18 @@
     "removedHandlers": 0,
     "report": "docs/remediation/POST28_CI_PREFLIGHT_FIX_2026-10-16.md",
     "scope": "Source inventory review only; exact route permissions and named helper fingerprints retained. No owner transaction, runtime, release or production acceptance."
+  },
+  "reviewWorkspaceCoordinationReview": {
+    "date": "2026-10-24",
+    "scope": "New section 02 routes only; existing route contracts unchanged. Owner permissions remain independently checked. Search is read-only and excluded from audit payloads; commands replay only after current actor and recipient checks. Synchronization, deterministic saved views and version-guarded policies do not repeat their business effects.",
+    "added": [
+      "POST /admin/review-workspace/bulk @ReviewWorkspaceRouter",
+      "POST /admin/review-workspace/commands @ReviewWorkspaceRouter",
+      "POST /admin/review-workspace/policies @ReviewWorkspaceRouter",
+      "POST /admin/review-workspace/query @ReviewWorkspaceRouter",
+      "POST /admin/review-workspace/synchronize @ReviewWorkspaceRouter",
+      "POST /admin/review-workspace/views @ReviewWorkspaceRouter"
+    ],
+    "report": "docs/ui/REVIEW_WORKSPACE_EXECUTION_2026-10-24.md"
   }
 }

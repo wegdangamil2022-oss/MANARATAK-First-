@@ -23,9 +23,31 @@ function setup(errorCode?: string) {
   );
   app.get('/admin/read', (_req, res) => res.status(200).end());
   app.post('/admin/edit', (_req, res) => res.status(204).end());
+  app.post('/api/v1/admin/review-workspace/query', (_req, res) => res.status(200).end());
+  app.post('/api/v1/admin/review-workspace/query/commands', (_req, res) => res.status(204).end());
+  app.post('/api/v1/admin/review-workspace/commands', (_req, res) => res.status(204).end());
   return { app, mfa };
 }
 describe('administrative MFA policy boundary (fake signed-token verifier, no live auth)', () => {
+  it('allows only the exact review read-only POST without a fresh mutation step-up', async () => {
+    const s = setup('MFA_STEP_UP_REQUIRED');
+    expect((await request(s.app).post('/api/v1/admin/review-workspace/query').set('Authorization', 'Bearer test')).status).toBe(200);
+    expect(s.mfa.sessionAuthenticated).toHaveBeenCalledWith('actor', 'session');
+    expect(s.mfa.assertFresh).not.toHaveBeenCalled();
+    for (const path of ['/api/v1/admin/review-workspace/commands', '/api/v1/admin/review-workspace/query/commands']) {
+      const result = await request(s.app).post(path).set('Authorization', 'Bearer test');
+      expect(result.status).toBe(403);
+      expect(result.body.error.code).toBe('MFA_STEP_UP_REQUIRED');
+    }
+  });
+  it('retains MFA-authenticated session proof for the review read-only POST', async () => {
+    const s = setup();
+    s.mfa.sessionAuthenticated.mockResolvedValue(false);
+    const result = await request(s.app).post('/api/v1/admin/review-workspace/query').set('Authorization', 'Bearer test');
+    expect(result.status).toBe(401);
+    expect(result.body.error.code).toBe('MFA_SESSION_REQUIRED');
+    expect(s.mfa.assertFresh).not.toHaveBeenCalled();
+  });
   it.each(['MFA_ENROLLMENT_REQUIRED', 'MFA_STEP_UP_REQUIRED'])(
     'denies a write for %s',
     async (code) => {
