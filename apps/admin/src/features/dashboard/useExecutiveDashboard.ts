@@ -107,12 +107,13 @@ export function useExecutiveDashboard(days: DashboardDays) {
         state: reading.receivedAt ? 'stale' : 'loading',
       })),
     );
-    // Basic cards get the first slots. Activity/health are independent and never block rendering.
+    // Executive metrics enter the shared API queue first; catalog reads must not
+    // consume their shorter timeout while they are still waiting for a slot.
     candidates.sort(
       (a, b) =>
         Number(primaryKeys.includes(b.source.key)) - Number(primaryKeys.includes(a.source.key)),
     );
-    void loadDashboardSources(
+    void Promise.resolve().then(() => loadDashboardSources(
       candidates,
       (url, options) => adminApiClient.request(url, options),
       controller.signal,
@@ -122,7 +123,7 @@ export function useExecutiveDashboard(days: DashboardDays) {
             rows.map((row) => (row.source.key === reading.source.key ? reading : row)),
           );
       },
-    ).finally(() => {
+    )).finally(() => {
       if (generation === coreGeneration.current && !controller.signal.aborted) setCoreBusy(false);
     });
     return () => {

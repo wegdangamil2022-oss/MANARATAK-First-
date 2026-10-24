@@ -1,0 +1,155 @@
+{
+  "sourceSha": "422a9f517a30fc7c8aed596d52932852505d9ebb",
+  "scope": "ORIGINAL_NEON_DEVELOPMENT_ONLY",
+  "measuredQueryChanges": [
+    {
+      "beforeCommands": 3,
+      "stage": "identity",
+      "afterMs": 341,
+      "afterCommands": 1,
+      "beforeMs": 1961
+    },
+    {
+      "beforeCommands": 6,
+      "stage": "users",
+      "afterMs": 1227,
+      "afterCommands": 5,
+      "beforeMs": 2415
+    },
+    {
+      "beforeCommands": 8,
+      "stage": "applications",
+      "afterMs": 951,
+      "afterCommands": 5,
+      "beforeMs": 5031
+    }
+  ],
+  "measurementLimit": "Single sequential read-only observation per target; not a production percentile or latency guarantee",
+  "httpChecks": [
+    {
+      "endpoint": "/__local/runtime",
+      "status": 200,
+      "durationMs": 50
+    },
+    {
+      "endpoint": "/api/v1/public/analytics/configuration",
+      "status": 200,
+      "durationMs": 11
+    },
+    {
+      "endpoint": "/api/v1/public/analytics/consent",
+      "status": 400,
+      "durationMs": 11
+    },
+    {
+      "endpoint": "/api/v1/admin/majors",
+      "status": 401,
+      "durationMs": 3
+    },
+    {
+      "endpoint": "/api/v1/auth/login",
+      "status": 200,
+      "durationMs": 4817
+    },
+    {
+      "endpoint": "/api/v1/auth/me",
+      "status": 200,
+      "durationMs": 1424
+    },
+    {
+      "endpoint": "/api/v1/auth/mfa",
+      "status": 200,
+      "durationMs": 1199
+    },
+    {
+      "endpoint": "/api/v1/admin/dashboard/users?days=30",
+      "status": 200,
+      "durationMs": 2396
+    },
+    {
+      "endpoint": "/api/v1/admin/dashboard/traffic?days=30",
+      "status": 200,
+      "durationMs": 2506
+    },
+    {
+      "endpoint": "/api/v1/admin/dashboard/applications?days=30",
+      "status": 200,
+      "durationMs": 2283
+    },
+    {
+      "endpoint": "/api/v1/auth/csrf-token",
+      "status": 200,
+      "durationMs": 633
+    },
+    {
+      "endpoint": "/api/v1/admin/majors",
+      "status": 403,
+      "durationMs": 812
+    }
+  ],
+  "contentGate": {
+    "userEnrollmentPendingAtProbe": true,
+    "temporary423Removed": true,
+    "contentMutatedByProbe": false,
+    "canonicalMfaRequired": true,
+    "observedCode": "MFA_ENROLLMENT_REQUIRED"
+  },
+  "analytics": {
+    "trafficState": "not_measured",
+    "policyVersion": "public-analytics-v1-2026-10-24",
+    "fabricatedOriginalEventsInserted": false,
+    "enabled": true,
+    "consentDays": 30,
+    "eventRetentionDays": 90,
+    "nonConsentRejected": 400
+  },
+  "retention": {
+    "claimScope": [
+      "analytics.retention.sweep"
+    ],
+    "cron": "*/15 * * * *",
+    "nextScheduledAt": "2026-10-24T15:00:00Z",
+    "unrelatedJobsAndOutboxUnchangedDuringActivation": true,
+    "otherWorkersEnabled": false,
+    "pass": true,
+    "firstCompletedAt": "2026-10-24T14:54:15.777Z"
+  },
+  "tests": {
+    "authStorageFailure": 12,
+    "apiBuildTypecheck": true,
+    "postgres16Integration": 11,
+    "existingLintWarnings": 39,
+    "dashboardSourceContracts": 32,
+    "affectedFilesLintErrors": 0,
+    "focusedUnits": 9,
+    "productionDependencyAuditFindings": 0
+  },
+  "browser": {
+    "userViewedSecurityPage": true,
+    "credentialEntryHandedToUser": true,
+    "automatedOriginalDashboardVisualReview": "AUTHENTICATED_PAGE_OBSERVED_LOADING_TIMEOUTS_REMAIN_UNDER_REVIEW"
+  },
+  "mainMerged": false,
+  "productionTouched": false,
+  "recordedAt": "2026-10-24T15:01:29.9663288Z",
+  "ownerMfaFollowup": {
+    "confirmed": true,
+    "credentialSecretsPublished": false,
+    "verificationSource": "READ_ONLY_ACCOUNT_STATUS_AND_USER_BROWSER",
+    "loginVerified": true,
+    "unrevokedSessions": 1
+  },
+  "schedulingFollowup": {
+    "pageTestsPassed": 5,
+    "regressionReproduced": true,
+    "apiRestarted": false,
+    "adminTypecheckAndBuild": true,
+    "networkTimeoutsNotDeclaredResolved": true,
+    "executiveQueuedBeforeCatalog": true
+  },
+  "ciFollowup": {
+    "enterpriseRun": 40105074440,
+    "sourceSha": "422a9f517a30fc7c8aed596d52932852505d9ebb",
+    "allNineWorkflowsSucceeded": true
+  }
+}

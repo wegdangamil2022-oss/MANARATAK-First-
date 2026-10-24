@@ -49,6 +49,12 @@ afterEach(async () => {
   if (tree) await act(async () => tree.unmount());
 });
 describe('Executive dashboard data and independent periods', () => {
+  it('admits executive metrics before catalog reads so queued catalog work cannot consume their timeout', async () => {
+    state.permissions = ['admin:dashboard:users:view','admin:majors:manage'];
+    await act(async () => { tree = create(view()); });
+    expect(state.request.mock.calls[0][0]).toContain('/admin/dashboard/users?days=30');
+    expect(state.request.mock.calls[1][0]).toContain('/admin/majors?');
+  });
   it('uses real registered-account aggregate, not the Human identity list, and keeps totals while the period changes', async () => {
     await act(async () => {
       tree = create(view());
