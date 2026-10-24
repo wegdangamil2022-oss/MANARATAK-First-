@@ -244,4 +244,41 @@ describe('Executive evidence retention on the attested synthetic application-rol
       }),
     ).toBeGreaterThan(0);
   });
+  it('blocks direct evidence-link removal under asset hold, live retention or request hold', async () => {
+    const asset = await db.assetRecord.findUniqueOrThrow({ where: { id: assetId } });
+    const createEvidence = (ownerRequest: string) => db.serviceApplicationEvidence.create({
+      data: {
+        requestId: ownerRequest,
+        actorId: asset.ownerId,
+        kind: 'NEEDS_INFORMATION',
+        idempotencyKey: 'direct-link-guard-' + randomUUID(),
+        evidenceAssetId: assetId,
+        evidenceDigest: asset.checksumHash,
+        expiresAt: new Date(Date.now() + 86400000),
+      },
+    });
+    const ordinary = await createEvidence(requestId);
+    const heldRequest = await createEvidence(heldRequestId);
+    const detach = (id: string) => db.serviceApplicationEvidence.update({
+      where: { id }, data: { evidenceAssetId: null },
+    });
+    await db.assetRecord.update({ where: { id: assetId }, data: {
+      retentionExpiresAt: new Date(Date.now() - 1000),
+      legalHoldUntil: new Date(Date.now() + 86400000),
+    } });
+    await expect(detach(ordinary.id)).rejects.toThrow(/SERVICE_APPLICATION_EVIDENCE_RETENTION_PROTECTED/);
+    await db.assetRecord.update({ where: { id: assetId }, data: {
+      retentionExpiresAt: new Date(Date.now() + 86400000), legalHoldUntil: null,
+    } });
+    await expect(detach(ordinary.id)).rejects.toThrow(/SERVICE_APPLICATION_EVIDENCE_RETENTION_PROTECTED/);
+    await db.assetRecord.update({ where: { id: assetId }, data: {
+      retentionExpiresAt: new Date(Date.now() - 1000),
+    } });
+    await expect(detach(heldRequest.id)).rejects.toThrow(/SERVICE_APPLICATION_EVIDENCE_RETENTION_PROTECTED/);
+    const detached = await detach(ordinary.id);
+    expect(detached.evidenceDigest).toBe(ordinary.evidenceDigest);
+    expect(detached.verifiedAt).toEqual(ordinary.verifiedAt);
+    expect(detached.evidenceAssetId).toBeNull();
+    expect((await db.serviceApplicationEvidence.findUniqueOrThrow({ where: { id: heldRequest.id } })).evidenceAssetId).toBe(assetId);
+  });
 });

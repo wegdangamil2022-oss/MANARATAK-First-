@@ -148,10 +148,21 @@ ALTER TABLE "DirectApplicationReport" ADD CONSTRAINT "DirectApplicationReport_li
 
 CREATE FUNCTION protect_service_application_evidence() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
+ -- Serialize retention against changes to either owner's legal hold.
+ PERFORM 1 FROM "ServiceRequestRecord" WHERE id=OLD."requestId" FOR SHARE;
+ PERFORM 1 FROM "AssetRecord" WHERE id=OLD."evidenceAssetId" FOR SHARE;
  IF TG_OP='UPDATE' THEN
   -- Asset retention may remove the file link, while the verified digest attestation remains immutable.
   IF NEW."evidenceAssetId" IS NULL AND OLD."evidenceAssetId" IS NOT NULL
-    AND (to_jsonb(NEW)-'evidenceAssetId')=(to_jsonb(OLD)-'evidenceAssetId') THEN RETURN NEW; END IF;
+    AND (to_jsonb(NEW)-'evidenceAssetId')=(to_jsonb(OLD)-'evidenceAssetId') THEN
+   IF EXISTS (SELECT 1 FROM "AssetRecord" a WHERE a.id=OLD."evidenceAssetId"
+       AND a."retentionExpiresAt"<=CURRENT_TIMESTAMP
+       AND (a."legalHoldUntil" IS NULL OR a."legalHoldUntil"<=CURRENT_TIMESTAMP))
+     AND NOT EXISTS (SELECT 1 FROM "ServiceRequestRecord" r WHERE r.id=OLD."requestId" AND r."legalHoldUntil">CURRENT_TIMESTAMP) THEN
+    RETURN NEW;
+   END IF;
+   RAISE EXCEPTION 'SERVICE_APPLICATION_EVIDENCE_RETENTION_PROTECTED';
+  END IF;
   RAISE EXCEPTION 'SERVICE_APPLICATION_EVIDENCE_IMMUTABLE';
  END IF;
  IF OLD."expiresAt">CURRENT_TIMESTAMP OR EXISTS (SELECT 1 FROM "ServiceRequestRecord" r WHERE r.id=OLD."requestId" AND r."legalHoldUntil">CURRENT_TIMESTAMP)
