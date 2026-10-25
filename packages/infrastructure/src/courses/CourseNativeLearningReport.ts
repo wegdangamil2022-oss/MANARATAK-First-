@@ -9,6 +9,7 @@ const cohort = (filters: CourseFilters) => Prisma.sql`${filters.cohortFrom ? Pri
  * Reporting stays in the database; neither enrollment rows nor all matching course IDs leave it. */
 export function nativeCourseReportWhere(filters: CourseFilters): Prisma.Sql {
   const conditions: Prisma.Sql[] = [Prisma.sql`c."originType" = 'NATIVE_MANARATAK_COURSE'`];
+  if (filters.courseId) conditions.push(Prisma.sql`c.id = ${filters.courseId}`);
   if (filters.status) conditions.push(Prisma.sql`c.status = ${filters.status}`);
   if (filters.accessType) conditions.push(Prisma.sql`c."accessType" = ${filters.accessType}`);
   if (filters.category) conditions.push(contains(Prisma.sql`c.category`, filters.category));

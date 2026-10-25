@@ -54,7 +54,7 @@ try{
   ledger=verifyMigrationLedger(migrationInventory(root),rows);
   await assertAdmissionNullIdentity(setup);
   const models=[...fs.readFileSync(schema,'utf8').matchAll(/^model\s+(\w+)\s*\{/gm)].map(m=>m[1]);
-  if(models.length!==281||[...TRANSACTION_APPLICATION_TABLES,...CERTIFICATE_FIXTURE_APPLICATION_TABLES,...COURSE_FIXTURE_APPLICATION_TABLES,...LEARNING_PATH_FIXTURE_APPLICATION_TABLES,...R08_OUTBOX_FIXTURE_APPLICATION_TABLES,...R08_SESSION_FIXTURE_APPLICATION_TABLES,...R08_PROVIDER_FIXTURE_APPLICATION_TABLES,...R09_LEARNER_APPLICATION_TABLES].some(t=>!models.includes(t)))fail('POST28_TRANSACTION_GRANT_TABLE_SET_INVALID');
+  if(models.length!==292||[...TRANSACTION_APPLICATION_TABLES,...CERTIFICATE_FIXTURE_APPLICATION_TABLES,...COURSE_FIXTURE_APPLICATION_TABLES,...LEARNING_PATH_FIXTURE_APPLICATION_TABLES,...R08_OUTBOX_FIXTURE_APPLICATION_TABLES,...R08_SESSION_FIXTURE_APPLICATION_TABLES,...R08_PROVIDER_FIXTURE_APPLICATION_TABLES,...R09_LEARNER_APPLICATION_TABLES].some(t=>!models.includes(t)))fail('POST28_TRANSACTION_GRANT_TABLE_SET_INVALID');
   const quoted=names=>names.map(n=>'public."'+n+'"').join(',');
   if(R09_WORKFLOW_APPLICATION_TABLES.some(table=>!models.includes(table)))fail('POST28_TRANSACTION_GRANT_TABLE_SET_INVALID');
   if(R14_ADMIN_CMS_APPLICATION_TABLES.some(table=>!models.includes(table)))fail('POST28_TRANSACTION_GRANT_TABLE_SET_INVALID');
@@ -74,7 +74,7 @@ try{
   if(r14AdminCmsFixtures)await setup.$executeRawUnsafe('GRANT INSERT,UPDATE,DELETE ON '+quoted(R14_ADMIN_CMS_APPLICATION_TABLES)+' TO post28_app');
  }finally{await setup.$disconnect();}
  const finalIdentity=await preflightTargets(contract,[{label:'DB-T',url:process.env.DATABASE_URL}],process.env,sourceSha,readDatabaseIdentity,{requireValidatedCatalog:true});
- const result={kind:'POST28_R06_LOCAL_DB_T_SETUP',sourceSha,runId:contract.runId,authorization,identities,finalIdentity,ledger,certificateFixtureWriteTables:certificateFixtures?CERTIFICATE_FIXTURE_APPLICATION_TABLES:[],courseFixtureWriteTables:courseFixtures?COURSE_FIXTURE_APPLICATION_TABLES:[],applicationReadTables:281,applicationUpdateOnlyReferenceLockTables:certificateFixtures?[]:['CertificateTemplate','CertificateIssuer'],applicationWriteTables:TRANSACTION_APPLICATION_TABLES,ledgerGranted:false,DDLGranted:false,schemaDiffExitCode:0,R06Accepted:false};
+ const result={kind:'POST28_R06_LOCAL_DB_T_SETUP',sourceSha,runId:contract.runId,authorization,identities,finalIdentity,ledger,certificateFixtureWriteTables:certificateFixtures?CERTIFICATE_FIXTURE_APPLICATION_TABLES:[],courseFixtureWriteTables:courseFixtures?COURSE_FIXTURE_APPLICATION_TABLES:[],applicationReadTables:292,applicationUpdateOnlyReferenceLockTables:certificateFixtures?[]:['CertificateTemplate','CertificateIssuer'],applicationWriteTables:TRANSACTION_APPLICATION_TABLES,ledgerGranted:false,DDLGranted:false,schemaDiffExitCode:0,R06Accepted:false};
  result.learningPathFixtureWriteTables=learningPathFixtures?LEARNING_PATH_FIXTURE_APPLICATION_TABLES:[];
  result.r08OutboxFixtureWriteTables=r08Fixtures?R08_OUTBOX_FIXTURE_APPLICATION_TABLES:[];
  result.r08SessionFixtureWriteTables=r08SessionFixtures?R08_SESSION_FIXTURE_APPLICATION_TABLES:[];

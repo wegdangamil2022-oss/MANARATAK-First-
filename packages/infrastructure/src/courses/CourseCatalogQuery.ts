@@ -32,6 +32,7 @@ export function courseStudyWhere(state: NonNullable<CourseFilters['studyAccess']
 
 export function courseCatalogWhere(filters: CourseFilters): Prisma.CourseWhereInput {
   const where: Prisma.CourseWhereInput = {};
+  if (filters.courseId) where.id = filters.courseId;
   if (filters.status) where.status = filters.status;
   if (filters.completenessStatus) where.completenessStatus = filters.completenessStatus;
   if (filters.accessType) where.accessType = filters.accessType;

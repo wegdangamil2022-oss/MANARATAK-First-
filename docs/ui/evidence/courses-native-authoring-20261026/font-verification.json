@@ -1,0 +1,74 @@
+[
+  {
+    "url": "http://127.0.0.2:3157/admin/login",
+    "loadedCairo": [
+      {
+        "family": "Cairo",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "Cairo",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "Cairo",
+        "weight": "700",
+        "status": "loaded"
+      },
+      {
+        "family": "Cairo",
+        "weight": "700",
+        "status": "loaded"
+      },
+      {
+        "family": "Cairo",
+        "weight": "900",
+        "status": "loaded"
+      },
+      {
+        "family": "Cairo",
+        "weight": "900",
+        "status": "loaded"
+      }
+    ],
+    "computed": "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif"
+  },
+  {
+    "url": "http://127.0.0.2:3157/ar/student/courses/ab59dd6b-56a8-4598-898c-a858559f326e",
+    "loadedCairo": [
+      {
+        "family": "Cairo",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "Cairo",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "Cairo",
+        "weight": "500",
+        "status": "loaded"
+      },
+      {
+        "family": "Cairo",
+        "weight": "500",
+        "status": "loaded"
+      },
+      {
+        "family": "Cairo",
+        "weight": "700",
+        "status": "loaded"
+      },
+      {
+        "family": "Cairo",
+        "weight": "700",
+        "status": "loaded"
+      }
+    ],
+    "computed": "Cairo, sans-serif"
+  }
+]

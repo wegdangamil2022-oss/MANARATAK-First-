@@ -50,6 +50,14 @@ export class AdminCourseUseCases {
     return course;
   }
 
+  public async getNativeLearningReport(id: string, dates: { cohortFrom?: string; cohortTo?: string }) {
+    const course = await this.getCourse(id);
+    if (course.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE) throw new Error('NATIVE_COURSE_REQUIRED');
+    const result = await this.listCourses({ courseId: id, originType: CourseOriginType.NATIVE_MANARATAK_COURSE, ...dates, includeStatistics: true, page: 1, pageSize: 1 });
+    if (!result.nativeLearning) throw new Error('COURSE_LEARNING_REPORT_UNAVAILABLE');
+    return result.nativeLearning;
+  }
+
   public async getExternalReadiness(id: string) {
     const course = await this.getCourse(id);
     if (course.originType !== CourseOriginType.EXTERNAL_LINKED_COURSE) throw new Error('EXTERNAL_COURSE_REQUIRED');
@@ -79,6 +87,9 @@ export class AdminCourseUseCases {
     assertNoForgedOwnerDescriptions(updates.optionalFields);
     const existing = await this.getCourse(id);
     if ([CourseStatus.ARCHIVED, CourseStatus.REJECTED].includes(existing.status)) throw new Error('COURSE_INACTIVE_IMMUTABLE');
+    if (existing.originType === CourseOriginType.NATIVE_MANARATAK_COURSE && updates.learningLanguage !== undefined && updates.learningLanguage !== existing.learningLanguage) {
+      updates = { ...updates, learningLanguageRaw: updates.learningLanguage };
+    }
     if (updates.originType && updates.originType !== existing.originType) {
       throw new Error('COURSE_ORIGIN_TYPE_MUTATION_FORBIDDEN');
     }

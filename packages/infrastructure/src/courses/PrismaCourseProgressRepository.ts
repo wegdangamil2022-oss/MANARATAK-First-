@@ -33,6 +33,53 @@ const json = (value: unknown): Prisma.InputJsonValue | undefined =>
 export class PrismaCourseProgressRepository implements ITransactionalCourseProgressRepository {
   public constructor(private readonly prisma: PrismaClient) {}
 
+  public async listCourseLearners(courseId: string, input: { page: number; pageSize: number; status?: string; search?: string }): ReturnType<NonNullable<ICourseProgressRepository['listCourseLearners']>> {
+    if (typeof this.prisma.$transaction === 'function') return this.prisma.$transaction(tx => new PrismaCourseProgressRepository(tx as unknown as PrismaClient).listCourseLearners(courseId, input), { isolationLevel: 'RepeatableRead' });
+    const where = { courseId, ...(input.status ? { status: input.status } : {}), ...(input.search ? { id: { contains: input.search, mode: 'insensitive' as const } } : {}) };
+    const total = await this.prisma.courseEnrollment.count({ where });
+    const rows = await this.prisma.courseEnrollment.findMany({ where, select: { id: true, status: true, enrolledAt: true, progressPercentage: true },
+      orderBy: [{ enrolledAt: 'desc' }, { id: 'asc' }], skip: (input.page - 1) * input.pageSize, take: input.pageSize });
+    const flags = rows.length ? await this.prisma.$queryRaw<Array<{ id: string; started: boolean; completed: boolean; certificateEligible: boolean }>>(Prisma.sql`
+      SELECT e.id, e.status IN ('ACTIVE','COMPLETED') AND (
+        EXISTS (SELECT 1 FROM "CourseLessonProgress" p WHERE p."courseId"=e."courseId" AND p."studentReferenceId"=e."studentReferenceId" AND p."progressPercentage">0 AND p.status IN ('IN_PROGRESS','COMPLETED')) OR
+        EXISTS (SELECT 1 FROM "CourseQuizAttempt" q WHERE q."courseId"=e."courseId" AND q."studentReferenceId"=e."studentReferenceId" AND q."submittedAt" IS NOT NULL AND q.status IN ('SUBMITTED','PASSED','FAILED'))
+      ) AS started,
+      e.status IN ('ACTIVE','COMPLETED') AND EXISTS (SELECT 1 FROM "CourseCompletion" f WHERE f."courseId"=e."courseId" AND f."studentReferenceId"=e."studentReferenceId" AND f.status IN ('COMPLETED','CERTIFICATE_SIGNAL_READY')) AS completed,
+      e.status IN ('ACTIVE','COMPLETED') AND EXISTS (SELECT 1 FROM "CourseCompletion" f WHERE f."courseId"=e."courseId" AND f."studentReferenceId"=e."studentReferenceId" AND f.status IN ('COMPLETED','CERTIFICATE_SIGNAL_READY') AND f."eligibleForCertificate"=true) AS "certificateEligible"
+      FROM "CourseEnrollment" e WHERE e."courseId"=${courseId} AND e.id IN (${Prisma.join(rows.map(row => row.id))})
+    `) : [];
+    if (rows.some(row => !flags.some(flag => flag.id === row.id))) throw new Error('COURSE_LEARNER_EVIDENCE_READ_INCOMPLETE');
+    return { data: rows.map(row => ({ ...row, label: 'STU-' + row.id.slice(0, 8), started: flags.find(flag => flag.id === row.id)!.started,
+      completed: flags.find(flag => flag.id === row.id)!.completed, certificateEligible: flags.find(flag => flag.id === row.id)!.certificateEligible })),
+      total, page: input.page, pageSize: input.pageSize, totalPages: Math.ceil(total / input.pageSize) };
+  }
+
+  public async getCourseLearnerReview(courseId: string, enrollmentId: string, query = { lessonsPage: 1, attemptsPage: 1 }): ReturnType<NonNullable<ICourseProgressRepository['getCourseLearnerReview']>> {
+    if (typeof this.prisma.$transaction === 'function') return this.prisma.$transaction(tx => new PrismaCourseProgressRepository(tx as unknown as PrismaClient).getCourseLearnerReview(courseId, enrollmentId, query), { isolationLevel: 'RepeatableRead' });
+    const enrollment = await this.prisma.courseEnrollment.findFirst({ where: { id: enrollmentId, courseId } });
+    if (!enrollment) return null;
+    const where = { courseId, studentReferenceId: enrollment.studentReferenceId }, pageSize = 20;
+    const [lessons, attempts, completion, lessonCount, attemptCount] = await Promise.all([
+      this.prisma.courseLessonProgress.findMany({ where, select: { lessonId: true, status: true, progressPercentage: true }, orderBy: { lessonId: 'asc' }, take: pageSize, skip: (query.lessonsPage - 1) * pageSize }),
+      this.prisma.courseQuizAttempt.findMany({ where, select: { id: true, quizId: true, status: true, score: true, passed: true, submittedAt: true }, orderBy: [{ startedAt: 'desc' }, { id: 'asc' }], take: pageSize, skip: (query.attemptsPage - 1) * pageSize }),
+      this.prisma.courseCompletion.findUnique({ where: { courseId_studentReferenceId: where }, select: { status: true, completedAt: true, eligibleForCertificate: true } }),
+      this.prisma.courseLessonProgress.count({ where }), this.prisma.courseQuizAttempt.count({ where }),
+    ]);
+    const rawVersion = (enrollment.metadata as Record<string, unknown> | null)?.courseVersion;
+    const courseVersion = Number.isSafeInteger(rawVersion) && Number(rawVersion) > 0 ? Number(rawVersion) : null;
+    const definition = await new PrismaCourseCurriculumRepository(this.prisma).getLearningVersion(courseId, courseVersion ?? undefined, enrollment.enrolledAt);
+    const eligibleModules = new Set(definition?.curriculum.modules.filter(module => module.status !== 'ARCHIVED').map(module => module.id));
+    const curriculumLessons = definition?.curriculum.lessons.filter(lesson => lesson.status !== 'ARCHIVED' && eligibleModules.has(lesson.moduleId));
+    const completedLessonCount = curriculumLessons ? await this.prisma.courseLessonProgress.count({ where: {
+      ...where, lessonId: { in: curriculumLessons.map(lesson => lesson.id) }, status: 'COMPLETED', progressPercentage: 100,
+    } }) : null;
+    return { id: enrollment.id, status: enrollment.status, progressPercentage: enrollment.progressPercentage,
+      courseVersion, curriculumLessonCount: curriculumLessons?.length ?? null, completedLessonCount,
+      lessons: lessons.map(row => ({ ...row, title: curriculumLessons?.find(lesson => lesson.id === row.lessonId)?.title ?? null })),
+      attempts: attempts.map(row => ({ ...row, title: definition?.curriculum.quizzes.find(quiz => quiz.id === row.quizId)?.title ?? null })),
+      completion, lessonCount, attemptCount, ...query, pageSize };
+  }
+
   public withTransaction(context: AtomicPersistenceContext): ICourseProgressRepository {
     const transactionClient = (context as Partial<CourseProgressTransactionContext>).transactionClient;
     if (!context.boundaryId || !transactionClient) throw new Error('COURSE_PROGRESS_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');

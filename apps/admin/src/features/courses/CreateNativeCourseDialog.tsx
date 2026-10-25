@@ -18,7 +18,7 @@ export function CreateNativeCourseDialog({ onClose, returnTo }: { onClose: () =>
     setBusy(true); setError('');
     try {
       const created = await adminApiClient.request<{ id: string }>('/admin/courses', { method: 'POST', headers: reviewReasonHeaders(reason.trim()), body: JSON.stringify(form) });
-      navigate(`/courses/${encodeURIComponent(created.id)}?returnTo=${encodeURIComponent(returnTo)}`);
+      navigate(`/courses/${encodeURIComponent(created.id)}/editor?returnTo=${encodeURIComponent(returnTo)}`);
     } catch (error) { setError(error instanceof Error ? error.message : tr('تعذر إنشاء المسودة', 'Could not create draft')); }
     finally { setBusy(false); }
   };

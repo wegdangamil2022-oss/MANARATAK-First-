@@ -8,6 +8,8 @@ import {
   type StudentCourseQuizAttemptDto,
 } from '../../api/client';
 import { preservePostLoginReturn } from '../students/postLoginIntent';
+import { CourseLessonBlocks } from './CourseLessonBlocks';
+import './course-learner.css';
 
 function currentProgress(workspace: CourseLearnerWorkspaceDto | null, lessonId: string): number {
   return (
@@ -32,6 +34,7 @@ export function CourseLearnerPage() {
     url: string;
     type: 'video' | 'audio' | 'image';
     title: string;
+    referenceId: string;
   } | null>(null);
   useEffect(
     () => () => {
@@ -187,7 +190,7 @@ export function CourseLearnerPage() {
             ? 'image'
             : null;
       if (type) {
-        setMedia({ url: assetUrl, type, title });
+        setMedia({ url: assetUrl, type, title, referenceId: assetReferenceId });
         return;
       }
       const link = document.createElement('a');
@@ -217,13 +220,13 @@ export function CourseLearnerPage() {
 
   if (loading)
     return (
-      <div className="mn-page-shell grid min-h-[50vh] place-items-center">
+      <div className="mn-course-learner mn-page-shell grid min-h-[50vh] place-items-center">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
   if (authRequired)
     return (
-      <main dir="rtl" className="mn-page-shell mx-auto max-w-xl py-16 text-center">
+      <main dir={locale === 'ar' ? 'rtl' : 'ltr'} className="mn-course-learner mn-page-shell mx-auto max-w-xl py-16 text-center">
         <LockKeyhole className="mx-auto h-10 w-10 text-[var(--mn-primary)]" />
         <h1 className="mt-4 text-xl font-bold">سجّل الدخول لمتابعة التعلم</h1>
         <p className="mt-2 text-sm text-[var(--mn-text-muted)]">
@@ -241,7 +244,7 @@ export function CourseLearnerPage() {
 
   if (!workspace)
     return (
-      <main dir="rtl" className="mn-page-shell mx-auto max-w-xl py-16 text-center">
+      <main dir={locale === 'ar' ? 'rtl' : 'ltr'} className="mn-course-learner mn-page-shell mx-auto max-w-xl py-16 text-center">
         <BookOpen className="mx-auto h-10 w-10 text-[var(--mn-primary)]" />
         <h1 className="mt-4 text-xl font-bold">{enrollmentRequired ? 'ابدأ هذه الدورة على منارتك' : 'تعذر فتح مساحة التعلم'}</h1>
         <p className="mt-2 text-sm text-[var(--mn-text-muted)]">
@@ -264,12 +267,12 @@ export function CourseLearnerPage() {
 
   const progress = workspace.progress.enrollment.progressPercentage;
   return (
-    <main dir="rtl" className="mn-page-shell mx-auto max-w-4xl space-y-5 py-8">
+    <main dir={locale === 'ar' ? 'rtl' : 'ltr'} className="mn-course-learner mn-page-shell mx-auto max-w-4xl space-y-5 py-8">
       <section className="mn-card rounded-3xl p-5 sm:p-7">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold text-[var(--mn-secondary)]">مساحة التعلم</p>
-            <h1 className="mt-1 text-2xl font-bold">دورة منارتك</h1>
+            <h1 className="mt-1 text-[22px] font-bold">{workspace.course?.displayName ?? (locale === 'ar' ? 'دورة منارتك' : 'Manaratak course')}</h1>
           </div>
           <span className="rounded-full bg-[var(--mn-gold-surface)] px-3 py-1 text-sm font-bold">
             {progress}%
@@ -300,6 +303,7 @@ export function CourseLearnerPage() {
                   return (
                     <article
                       key={lesson.id}
+                      data-lesson-id={lesson.id}
                       className="rounded-2xl border border-[var(--mn-border)] p-4"
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -322,9 +326,12 @@ export function CourseLearnerPage() {
                           {lesson.contentText}
                         </div>
                       )}
+                      <CourseLessonBlocks blocks={(workspace.curriculum.contentBlocks ?? []).filter(block => block.lessonId === lesson.id)} busy={busy}
+                        onAsset={(reference, title) => void openLessonAsset(lesson.id, reference, title)} onQuiz={quizId => void startQuiz(quizId)}
+                        media={block => media && media.referenceId === block.assetReferenceId ? media.type === 'video' ? <video className="mt-3 w-full" controls src={media.url} aria-label={media.title}/> : media.type === 'audio' ? <audio className="mt-3 w-full" controls src={media.url} aria-label={media.title}/> : <img className="mt-3 max-w-full" src={media.url} alt={String(block.payload.alt ?? media.title)}/> : null}/>
                       <div className="mt-3 flex flex-wrap gap-2">
                         {workspace.curriculum.assets
-                          .filter((asset) => asset.lessonId === lesson.id)
+                          .filter((asset) => asset.lessonId === lesson.id && !(workspace.curriculum.contentBlocks ?? []).some(block => block.assetReferenceId === asset.id))
                           .map((asset) => (
                             <button
                               key={asset.id}
@@ -452,7 +459,7 @@ export function CourseLearnerPage() {
           );
         })}
 
-      {media && (
+      {media && !(workspace?.curriculum.contentBlocks ?? []).some(block => block.assetReferenceId === media.referenceId) && (
         <section className="rounded-2xl border bg-[var(--mn-surface)] p-4">
           <div className="flex justify-between gap-3">
             <h2 className="font-bold">{media.title}</h2>

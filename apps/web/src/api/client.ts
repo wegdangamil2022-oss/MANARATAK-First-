@@ -758,8 +758,10 @@ export interface CourseLearnerQuestionDto {
 }
 
 export interface CourseLearnerWorkspaceDto {
+  course?: { id: string; displayName: string; version: number };
   progress: StudentCourseProgressSnapshotDto;
   curriculum: {
+    contentBlocks?: Omit<import('@manaratak/domain').CourseContentBlockDto, 'courseId' | 'status'>[];
     modules: CourseModuleDto[];
     lessons: CourseLessonDto[];
     assets: Array<{ id: string; lessonId: string; title?: string | null; assetType: string; position: number; isRequired: boolean }>;

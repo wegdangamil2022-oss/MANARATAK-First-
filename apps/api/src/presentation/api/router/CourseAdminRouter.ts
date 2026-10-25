@@ -4,6 +4,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import {
   CourseAccessType,
+  courseBlockTypes,
   CourseContentStatus,
   CourseImportCompletenessState,
   CourseLessonType,
@@ -72,6 +73,23 @@ export class CourseAdminRouter {
 
     const assessmentHandler = (fn: (req: Request, res: Response) => Promise<unknown>) =>
       (req: Request, res: Response, next: NextFunction) => { Promise.resolve().then(() => fn(req, res)).catch(next); };
+    router.get('/:id/learning-report', assessmentHandler(async (req, res) => {
+      const query = z.object({ cohortFrom: z.string().date().optional(), cohortTo: z.string().date().optional() }).strict().parse(req.query);
+      if (query.cohortFrom && query.cohortTo && query.cohortFrom >= query.cohortTo) return res.status(400).json({ error: 'COURSE_COHORT_RANGE_INVALID' });
+      res.json(await cradle.adminCourseUseCases.getNativeLearningReport(req.params.id, query));
+    }));
+    router.get('/:id/learners', assessmentHandler(async (req, res) => {
+      const query = z.object({ page: z.coerce.number().int().min(1).max(100000).default(1), pageSize: z.coerce.number().int().min(1).max(100).default(20),
+        status: z.enum(['PENDING','WAITLISTED','ACTIVE','COMPLETED','CANCELLED','SUSPENDED']).optional(), search: z.string().trim().max(100).optional(),
+      }).strict().parse(req.query);
+      res.json(await cradle.courseProgressUseCases.listCourseLearners(req.params.id, query));
+    }));
+    router.get('/:id/learners/:enrollmentId', assessmentHandler(async (req, res) => {
+      const query = z.object({ lessonsPage: z.coerce.number().int().min(1).max(100000).default(1), attemptsPage: z.coerce.number().int().min(1).max(100000).default(1) }).strict().parse(req.query);
+      const result = await cradle.courseProgressUseCases.getCourseLearnerReview(req.params.id, z.string().uuid().parse(req.params.enrollmentId), query);
+      if (!result) return res.status(404).json({ error: 'COURSE_ENROLLMENT_NOT_FOUND' });
+      res.json(result);
+    }));
     router.get('/:id/assessment-reviews', assessmentHandler(async (req, res) => {
       const query = z.object({page: z.coerce.number().int().positive().default(1), pageSize: z.coerce.number().int().min(1).max(50).default(20)}).parse(req.query);
       res.json({data: await cradle.courseProgressUseCases.listPendingAssessments(req.params.id, query.page, query.pageSize)});
@@ -437,6 +455,12 @@ export class CourseAdminRouter {
       res.json(await nativeCourseUseCases.getReadiness(req.params.id));
     }));
 
+    router.put('/:id/lessons/:lessonId/content-blocks', asyncHandler(async (req, res, scope) => {
+      const body = z.object({ blocks: z.array(z.object({ id: z.string().uuid(), type: z.enum(courseBlockTypes), payload: z.record(z.string(), z.unknown()),
+        assetReferenceId: z.string().uuid().nullable().optional(), quizId: z.string().uuid().nullable().optional(),
+      }).strict()).max(200) }).strict().parse(req.body);
+      res.json({ data: await scope.courseCurriculumUseCases.replaceLessonBlocks(req.params.id, req.params.lessonId, body.blocks) });
+    }));
     router.get('/:id/modules', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {courseCurriculumUseCases}=scope;
       const modules = await courseCurriculumUseCases.listModules(req.params.id);

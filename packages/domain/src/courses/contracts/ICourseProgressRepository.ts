@@ -15,6 +15,18 @@ import {
 } from '../entities/CourseProgress';
 
 export interface ICourseProgressRepository {
+  listCourseLearners?(courseId: string, input: { page: number; pageSize: number; status?: string; search?: string }): Promise<{
+    data: Array<{ id: string; label: string; status: string; enrolledAt: Date; progressPercentage: number; started: boolean; completed: boolean; certificateEligible: boolean }>;
+    total: number; page: number; pageSize: number; totalPages: number;
+  }>;
+  getCourseLearnerReview?(courseId: string, enrollmentId: string, query?: { lessonsPage: number; attemptsPage: number }): Promise<{
+    id: string; status: string; progressPercentage: number; courseVersion: number | null;
+    lessons: Array<{ lessonId: string; title: string | null; status: string; progressPercentage: number }>;
+    attempts: Array<{ id: string; quizId: string; title: string | null; status: string; score: number | null; passed: boolean | null; submittedAt: Date | null }>;
+    curriculumLessonCount: number | null; completedLessonCount: number | null;
+    completion: { status: string; completedAt: Date; eligibleForCertificate: boolean } | null;
+    lessonCount: number; attemptCount: number; lessonsPage: number; attemptsPage: number; pageSize: number;
+  } | null>;
   enroll(data: CreateCourseEnrollmentDto): Promise<CourseEnrollmentDto>;
   enrollWithCapacity(data: CreateCourseEnrollmentDto, maximumSeats: number | null, waitlistEnabled: boolean): Promise<CourseEnrollmentDto>;
   lockEnrollment?(courseId: string, studentReferenceId: string): Promise<void>;

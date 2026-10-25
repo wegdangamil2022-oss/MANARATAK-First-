@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-26",
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "unit": {
+    "passed": 411,
+    "gatedSkipped": 5,
+    "failed": 0
+  },
+  "postgresql": {
+    "failed": 0,
+    "passed": 32
+  },
+  "migration": {
+    "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+    "migration": "20261025210000_course_lesson_content_blocks",
+    "applied": true,
+    "rollbackVerified": true,
+    "originalWrites": 0
+  },
+  "adminBrowser": {
+    "pageErrors": 0,
+    "passed": true,
+    "checks": 16,
+    "canonicalMfa": true,
+    "screens": 11
+  },
+  "studentBrowser": {
+    "pageErrors": 0,
+    "passed": true,
+    "checks": 7,
+    "fixturePurpose": "SEEDED_PUBLISHED_READ_FIXTURE_NOT_PUBLICATION_GATE_ACCEPTANCE",
+    "screens": 4
+  },
+  "typeScript": "PASS_API_ADMIN_WEB",
+  "builds": {
+    "warnings": [
+      "Existing large bundle warnings",
+      "Cairo admin font paths unresolved at build; actual runtime font checks passed"
+    ],
+    "api": "PASS",
+    "web": "PASS",
+    "admin": "PASS"
+  },
+  "eslint": {
+    "errors": 0,
+    "warnings": 162,
+    "newFilesWarnings": 0
+  },
+  "fullSection07BClosed": false,
+  "report": "../../COURSES_NATIVE_AUTHORING_EXECUTION_2026-10-26.md"
+}

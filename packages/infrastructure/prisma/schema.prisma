@@ -389,6 +389,7 @@ model Course {
   majorProjections           CourseMajorProjection[]
   internationalTestRelationships CourseInternationalTestRelationship[]
   modules                    CourseModule[]
+  contentBlocks              CourseLessonContentBlock[]
   lessons                    CourseLesson[]
   lessonAssets               CourseLessonAsset[]
   quizzes                    CourseQuiz[]
@@ -450,9 +451,11 @@ model CourseLesson {
   course   Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
   module   CourseModule           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   assets   CourseLessonAsset[]
+  contentBlocks CourseLessonContentBlock[]
   quizzes  CourseQuiz[]
   progress CourseLessonProgress[]
 
+  @@unique([courseId, id])
   @@unique([moduleId, position])
   @@index([courseId, status])
   @@index([moduleId])
@@ -474,6 +477,7 @@ model CourseLessonAsset {
 
   course Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lesson CourseLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  contentBlocks CourseLessonContentBlock[]
 
   @@unique([lessonId, position])
   @@unique([lessonId, assetId])
@@ -501,10 +505,30 @@ model CourseQuiz {
   lesson    CourseLesson?       @relation(fields: [lessonId], references: [id], onDelete: SetNull)
   questions CourseQuestion[]
   attempts  CourseQuizAttempt[]
+  contentBlocks CourseLessonContentBlock[]
 
   @@unique([courseId, position])
   @@index([moduleId])
   @@index([lessonId])
+  @@index([courseId, status])
+}
+
+model CourseLessonContentBlock {
+  id               String @id
+  courseId         String
+  lessonId         String
+  type             String
+  payload          Json
+  assetReferenceId String?
+  quizId           String?
+  position         Int
+  version          Int @default(1)
+  status           String @default("READY_TO_REVIEW")
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson CourseLesson @relation(fields: [courseId, lessonId], references: [courseId, id], onDelete: Cascade)
+  asset CourseLessonAsset? @relation(fields: [assetReferenceId], references: [id], onDelete: SetNull)
+  quiz CourseQuiz? @relation(fields: [quizId], references: [id], onDelete: SetNull)
+  @@unique([lessonId, position])
   @@index([courseId, status])
 }
 

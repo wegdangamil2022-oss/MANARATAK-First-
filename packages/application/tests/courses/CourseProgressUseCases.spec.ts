@@ -80,7 +80,7 @@ describe('CourseProgressUseCases W9 integrity', () => {
   it('enrolls only through guarded capacity enrollment', async () => {
     (progressRepo.findEnrollment as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
     await useCases.enroll('course-1', 'student-1');
-    expect(progressRepo.enrollWithCapacity).toHaveBeenCalledWith({ courseId: 'course-1', studentReferenceId: 'student-1', metadata: {courseVersion: 3} }, null, false);
+    expect(progressRepo.enrollWithCapacity).toHaveBeenCalledWith({ courseId: 'course-1', studentReferenceId: 'student-1', metadata: {courseVersion: 3, requiresFinancialClearance: false} }, null, false);
   });
 
   it('requires server financial clearance for a paid course before any enrollment mutation', async () => {

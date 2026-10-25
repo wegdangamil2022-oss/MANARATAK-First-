@@ -7,6 +7,8 @@ import { CreateCourseDto, CourseDto } from '../entities/Course';
 import { PublicCourseFilters } from './PublicCourseFilters';
 
 export interface CourseFilters {
+  /** Internal owner-scoped read boundary, never a public catalog query parameter. */
+  courseId?: string;
   search?: string;
   externalProviderId?: string;
   majorId?: string;

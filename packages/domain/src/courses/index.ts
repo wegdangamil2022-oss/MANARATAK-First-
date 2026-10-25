@@ -9,3 +9,4 @@ export * from './import-analysis';
 export * from './relationships';
 export * from './imported-operations';
 export * from './bulk-publication';
+export * from './content-blocks';

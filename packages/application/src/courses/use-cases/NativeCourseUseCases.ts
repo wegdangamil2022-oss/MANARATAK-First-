@@ -5,6 +5,7 @@ import { CoursePublicationService } from '../services/CoursePublicationService';
 import { courseSourceRelationshipReviewRequired } from '../services/CourseSourceRelationshipReadiness';
 import {
   AssetId,
+  normalizeCourseBlock,
   AssetLifecycleState,
   CourseAccessType,
   CourseContentStatus,
@@ -124,11 +125,23 @@ export class NativeCourseUseCases {
     const lessonQuizzes = new Set(
       curriculum.quizzes.filter((quiz) => quiz.lessonId && quiz.status !== CourseContentStatus.ARCHIVED).map((quiz) => quiz.lessonId as string),
     );
+    let invalidBlockCount = 0;
+    const contentLessonIds = new Set<string>();
+    for (const block of curriculum.contentBlocks ?? []) {
+      if (block.status === 'ARCHIVED') continue;
+      try {
+        normalizeCourseBlock(block);
+        if (!lessons.some(lesson => lesson.id === block.lessonId) ||
+          (block.assetReferenceId && !curriculum.assets.some(asset => asset.id === block.assetReferenceId && asset.lessonId === block.lessonId && (block.type === 'FILE' || asset.assetType === block.type))) ||
+          (block.quizId && !curriculum.quizzes.some(quiz => quiz.id === block.quizId && quiz.lessonId === block.lessonId && quiz.status !== 'ARCHIVED'))) throw new Error('COURSE_CONTENT_BLOCK_REFERENCE_INVALID');
+        if (block.type !== 'HEADING') contentLessonIds.add(block.lessonId);
+      } catch { invalidBlockCount++; }
+    }
     const incompleteLessons = lessons.filter((lesson) => {
       const hasText = Boolean(lesson.contentText?.trim());
       const hasAsset = (lessonAssets.get(lesson.id) ?? 0) > 0;
       const hasQuiz = lessonQuizzes.has(lesson.id);
-      return !hasText && !hasAsset && !hasQuiz;
+      return !hasText && !hasAsset && !hasQuiz && !contentLessonIds.has(lesson.id);
     });
     const invalidAssets = curriculum.assets.filter(
       (asset) => !asset.assetId?.trim() || /^https?:\/\//i.test(asset.assetId),
@@ -243,7 +256,7 @@ export class NativeCourseUseCases {
       this.check(
         'lesson-content',
         'محتوى الدروس',
-        lessons.length > 0 && incompleteLessons.length === 0,
+        lessons.length > 0 && incompleteLessons.length === 0 && invalidBlockCount === 0,
         incompleteLessons.length
           ? `${incompleteLessons.length} درس/دروس بلا محتوى فعلي.`
           : undefined,

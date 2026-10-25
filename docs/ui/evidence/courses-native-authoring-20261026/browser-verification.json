@@ -1,0 +1,105 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "canonicalMfa": true,
+  "checks": [
+    "Actual UI create -> basics -> module -> lecture -> ordered persisted blocks; Arabic audit reasons accepted",
+    {
+      "name": "desktop-native-curriculum",
+      "width": 1440,
+      "scroll": 1440,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    {
+      "name": "mobile-native-curriculum",
+      "width": 360,
+      "scroll": 360,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    {
+      "name": "narrow-native-curriculum",
+      "width": 320,
+      "scroll": 320,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    {
+      "name": "desktop-native-conflict",
+      "width": 1440,
+      "scroll": 1440,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    "Saving a second lecture retains its selection and saved content instead of jumping to the first lecture",
+    "Lecture description/duration saved; live preview escapes script text; real assessment and question created in editor and linked as a lecture block",
+    {
+      "name": "desktop-native-assessment-block",
+      "width": 1440,
+      "scroll": 1440,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    {
+      "name": "desktop-native-readiness",
+      "width": 1440,
+      "scroll": 1440,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    "Version conflict retains the block draft; explicit reload restores saved content; incomplete course cannot publish",
+    {
+      "name": "desktop-native-learners",
+      "width": 1440,
+      "scroll": 1440,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    {
+      "name": "mobile-native-learners",
+      "width": 360,
+      "scroll": 360,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    {
+      "name": "desktop-native-learning-report",
+      "width": 1440,
+      "scroll": 1440,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    {
+      "name": "mobile-native-learning-report",
+      "width": 360,
+      "scroll": 360,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    "Actual learner rows and bounded progress details; exact owner-only reporting and cohort aggregates without student identity or answers",
+    {
+      "name": "english-mobile-native-editor",
+      "width": 360,
+      "scroll": 360,
+      "cairo": true,
+      "dir": "ltr"
+    }
+  ],
+  "errors": [],
+  "screens": [
+    "desktop-native-curriculum",
+    "mobile-native-curriculum",
+    "narrow-native-curriculum",
+    "desktop-native-conflict",
+    "desktop-native-assessment-block",
+    "desktop-native-readiness",
+    "desktop-native-learners",
+    "mobile-native-learners",
+    "desktop-native-learning-report",
+    "mobile-native-learning-report",
+    "english-mobile-native-editor"
+  ],
+  "courseId": "4249ccd4-7c30-46cc-be6f-ec10bde33069",
+  "passed": true
+}

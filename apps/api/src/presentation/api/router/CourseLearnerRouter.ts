@@ -15,9 +15,9 @@ export class CourseLearnerRouter {
     const router = Router();
     const { courseProgressUseCases, learningPathUseCases, tokenProvider, sessionManager, principalAccessValidator, apiIdempotencyStore } = cradle;
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => Promise.resolve(fn(req, res, next)).catch(error => {
-      if (error instanceof Error && error.message === 'COURSE_ENROLLMENT_REQUIRED') {
+      if (error instanceof Error && (error.message === 'COURSE_ENROLLMENT_REQUIRED' || error.message === 'COURSE_FINANCIAL_CLEARANCE_REQUIRED' || error.message.startsWith('COURSE_ENROLLMENT_NOT_ACCESSIBLE:') || error.message.startsWith('COURSE_ENROLLMENT_NOT_ACTIVE:'))) {
         res.status(403).type('application/problem+json').json(problemDetails({
-          status: 403, code: 'COURSE_ENROLLMENT_REQUIRED', detail: 'COURSE_ENROLLMENT_REQUIRED',
+          status: 403, code: error.message, detail: error.message,
           instance: req.originalUrl, traceId: String(req.headers['x-request-id'] || 'unknown'),
         }));
         return;

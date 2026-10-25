@@ -463,15 +463,16 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
   }
 
   private async captureVersion(db: any, course: any, reason: string): Promise<void> {
-    const [modules, lessons, assets, quizzes, questionBanks, questions] = await Promise.all([
+    const [modules, lessons, assets, quizzes, questionBanks, questions, contentBlocks] = await Promise.all([
       db.courseModule.findMany({ where: { courseId: course.id }, orderBy: { position: 'asc' } }),
       db.courseLesson.findMany({ where: { courseId: course.id }, orderBy: [{ moduleId: 'asc' }, { position: 'asc' }] }),
       db.courseLessonAsset.findMany({ where: { courseId: course.id }, orderBy: [{ lessonId: 'asc' }, { position: 'asc' }] }),
       db.courseQuiz.findMany({ where: { courseId: course.id }, orderBy: { position: 'asc' } }),
       db.courseQuestionBank.findMany({ where: { courseId: course.id }, orderBy: { createdAt: 'asc' } }),
       db.courseQuestion.findMany({ where: { courseId: course.id }, orderBy: [{ quizId: 'asc' }, { position: 'asc' }] }),
+      db.courseLessonContentBlock.findMany({ where: { courseId: course.id, status: { not: 'ARCHIVED' } }, orderBy: [{ lessonId: 'asc' }, { position: 'asc' }] }),
     ]);
-    const snapshot = JSON.parse(JSON.stringify({ course, modules, lessons, assets, quizzes, questionBanks, questions }));
+    const snapshot = JSON.parse(JSON.stringify({ course, modules, lessons, assets, quizzes, questionBanks, questions, contentBlocks }));
     await db.courseVersion.create({
       data: { courseId: course.id, versionNumber: course.version, reason, snapshot },
     });

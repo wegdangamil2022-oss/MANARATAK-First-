@@ -109,3 +109,51 @@
 .courses-workspace .course-row-learning dd { margin:2px 0 0; font-size:14px; font-weight:800; color:#142B5F; }
 @media(max-width:1100px) { .course-native-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media(max-width:640px) { .course-native-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .course-native-metrics .course-metric:last-child { grid-column:1/-1; } }
+.native-editor-tabs { display:flex; gap:6px; overflow-x:auto; padding:8px; border:1px solid #DDEFF2; border-radius:14px; background:#fff; margin-bottom:18px; }
+.native-editor-tabs button { white-space:nowrap; flex-shrink:0; font-size:12px; }
+.native-editor-tabs button[aria-current=page] { background:#142B5F; color:#fff; border-color:#142B5F; }
+.native-editor .course-panel { padding:18px; margin-bottom:14px; }
+.native-editor h2 { font-size:15px; display:flex; align-items:center; gap:8px; margin:0 0 14px; }
+.native-editor h3 { font-size:14px; margin:0 0 12px; }
+.native-editor h4 { font-size:13px; font-weight:700; margin:10px 0; }
+.native-editor p { font-size:13px; line-height:1.8; }
+.native-editor fieldset { padding:0; border:0; display:grid; gap:14px; min-width:0; }
+.native-editor fieldset>label { display:flex; gap:8px; align-items:center; }
+.native-editor fieldset>label.course-field { display:grid; }
+.native-editor .course-hero>div { margin:12px 0 0; }
+.native-editor .course-hero span { color:inherit; }
+.native-curriculum-layout { display:grid; grid-template-columns:minmax(190px,250px) minmax(0,1fr); gap:16px; align-items:start; }
+.native-curriculum-tree { max-height:72dvh; overflow:auto; position:sticky; top:80px; }
+.native-curriculum-tree h4 { display:flex; gap:6px; align-items:start; color:#0E7C86; }
+.native-curriculum-tree button { display:block; text-align:start; width:100%; margin-bottom:6px; font-size:12px; overflow-wrap:anywhere; }
+.native-curriculum-tree button[aria-current=true] { color:#fff; background:#142B5F; }
+.native-lecture-content { min-width:0; }
+.native-block { padding:14px; border:1px solid #DDEFF2; border-inline-start:3px solid #D6A43B; border-radius:12px; background:#fff; margin:12px 0; }
+.native-block>header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.native-block>header>div { display:flex; gap:5px; }
+.native-block>header button { min-width:34px; padding:6px; min-height:34px; }
+.native-block .course-field { margin-bottom:10px; }
+.native-block-editor>.course-drawer-toolbar select { width:auto; max-width:100%; }
+.native-preserved-text { white-space:pre-wrap; overflow-wrap:anywhere; }
+.native-assessments form { border-bottom:1px solid #DDEFF2; padding-bottom:16px; margin-bottom:16px; }
+.native-readiness-list { list-style:none; padding:0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.native-readiness-list li { border:1px solid #DDEFF2; border-inline-start:3px solid #D6A43B; border-radius:8px; padding:10px; display:grid; gap:5px; font-size:12px; }
+.native-readiness-list li[data-state=READY],.native-readiness-list li[data-state=PASS] { border-inline-start-color:#0E7C86; }
+.native-preview-grid { display:grid; gap:14px; }
+.native-preview-grid>section { border:1px solid #DDEFF2; border-radius:12px; padding:14px; }
+.native-preview-grid article { border-top:1px solid #DDEFF2; margin-top:12px; padding-top:8px; }
+.native-preview-block { padding:10px; border-inline-start:2px solid #21A7B4; margin-block:8px; }
+.native-preview-block pre { max-width:100%; overflow:auto; font:inherit; }
+.native-learner-detail { padding:16px; border:1px solid #DDEFF2; border-radius:12px; background:#f7fafb; margin-top:16px; overflow-wrap:anywhere; }
+@media(max-width:800px) { .native-curriculum-layout { grid-template-columns:1fr; } .native-curriculum-tree { position:static; max-height:250px; } .native-readiness-list { grid-template-columns:1fr; } }.native-editor .native-editor-content { display:block; }
+.native-report-bars { display:grid; gap:14px; margin:22px 0; }
+.native-report-bars>div { display:grid; grid-template-columns:minmax(110px,180px) minmax(0,1fr) 55px; gap:12px; align-items:center; font-size:12px; }
+.native-report-bar { appearance:none; border:0; width:100%; height:17px; border-radius:6px; background:#edf3f7; overflow:hidden; }
+.native-report-bar::-webkit-progress-bar { background:#edf3f7; }
+.native-report-bar::-webkit-progress-value { background:var(--bar-color); border-radius:6px; }
+.native-report-bar::-moz-progress-bar { background:var(--bar-color); border-radius:6px; }
+.native-report-bar-0 { --bar-color:#142B5F; }.native-report-bar-1 { --bar-color:#0E7C86; }.native-report-bar-2 { --bar-color:#21A7B4; }.native-report-bar-3 { --bar-color:#D6A43B; }
+@media(max-width:500px) { .native-report-bars>div { grid-template-columns:100px minmax(0,1fr) 38px; gap:7px; } }
+.native-block-preview{padding:18px;border:1px solid #DDEFF2;border-radius:14px;background:#FBF9F3;margin-block:16px}.native-block-preview>section+section{margin-block-start:14px}.native-block-preview p{white-space:pre-wrap;overflow-wrap:anywhere}.native-block-preview small{display:block;color:#61718B;margin-block-start:4px}.native-block-preview svg{vertical-align:middle;margin-inline-end:8px;color:#0E7C86}.native-block-preview pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#142B5F;color:white;padding:14px;border-radius:10px}.native-block-preview ul{list-style:disc;padding-inline-start:24px}.native-block-preview ol{list-style:decimal;padding-inline-start:24px}
+
+.native-curriculum-tree h4>button{width:30px;flex:0 0 30px;display:inline-grid;place-items:center;margin-inline-start:auto;min-height:30px;padding:4px}

@@ -14,10 +14,10 @@
 
 ## 3. Native / 07.B
 - [x] Native catalog and cohort counts from original enrollment/progress/completion tables; 393 unit/contract tests, 26 isolated PostgreSQL tests, 12 actual browser checks and desktop/mobile RTL/LTR evidence. See docs/ui/COURSES_NATIVE_LEARNING_EXECUTION_2026-10-25.md.
-- [ ] Unified native authoring and permission-scoped student workspace.
-- [ ] Ordered safe content blocks, media, historical versions and learner access/progress.
-- [ ] Assessments, reports, completion/certificate boundaries; preserve existing financial gates.
-- [ ] Verify learner/admin roles, concurrency/history, real browser flows and accurate completion report.
+- [x] Eight-tab native editor, curriculum metadata, structured blocks with live preview, actual assessment creation, bounded private learners and course cohort report. Existing advanced tools retained.
+- [x] Persisted/ordered/versioned content blocks, protected EAP references, immutable enrollment content and actual learner progress/completion. Original media processing service was not exercised live.
+- [x] Verify 411 unit/contract tests (5 gated skips), 32 isolated PostgreSQL tests, 16 admin browser checks and complete student enrollment/progress/history browser flow; TypeScript/build/lint and actual desktop/mobile evidence. See docs/ui/COURSES_NATIVE_AUTHORING_EXECUTION_2026-10-26.md.
+- [ ] Close remaining 07.B acceptance: draft duplication, unified advanced assessment authoring, public previews/resume/scheduling, scoped instructor roles, live asset pipeline/certificate binding and issuance proof. Financial operations remain deferred by 07.C.07; existing financial guards retained.
 
 ## Release
 - [x] Phase 1 foundation committed and pushed on feat/courses-admin-workspaces-20261025; no main merge.

@@ -2,6 +2,8 @@ import type { AtomicPersistenceContext } from '@manaratak/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   CourseContentStatus,
+  CourseContentBlockDto,
+  CourseContentBlockInput,
   CourseLearningVersionDto,
   CourseDto,
   CourseStatus,
@@ -63,6 +65,7 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
     await this.inTransaction(async tx => {
       await tx.courseModule.update({where: {id}, data: {status: CourseContentStatus.ARCHIVED}});
       await tx.courseLesson.updateMany({where: {moduleId: id}, data: {status: CourseContentStatus.ARCHIVED}});
+      await tx.courseLessonContentBlock.updateMany({ where: { lesson: { moduleId: id } }, data: { status: 'ARCHIVED' } });
       await tx.courseQuiz.updateMany({where: {OR: [{moduleId: id}, {lesson: {moduleId: id}}]}, data: {status: CourseContentStatus.ARCHIVED}});
     });
   }
@@ -95,6 +98,7 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
   public async deleteLesson(id: string): Promise<void> {
     await this.inTransaction(async tx => {
       await tx.courseLesson.update({where: {id}, data: {status: CourseContentStatus.ARCHIVED}});
+      await tx.courseLessonContentBlock.updateMany({ where: { lessonId: id }, data: { status: 'ARCHIVED' } });
       await tx.courseQuiz.updateMany({where: {lessonId: id}, data: {status: CourseContentStatus.ARCHIVED}});
     });
   }
@@ -280,7 +284,7 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
   }
 
   public async getCurriculumSnapshot(courseId: string): Promise<CourseCurriculumSnapshotDto> {
-    const [modules, lessons, assets, quizzes, questionBanks, questions] = await Promise.all([
+    const [modules, lessons, assets, quizzes, questionBanks, questions, contentBlocks] = await Promise.all([
       this.prisma.courseModule.findMany({ where: { courseId }, orderBy: { position: 'asc' } }),
       this.prisma.courseLesson.findMany({
         where: { courseId },
@@ -299,6 +303,7 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
         where: { courseId, status: { not: CourseContentStatus.ARCHIVED } },
         orderBy: [{ quizId: 'asc' }, { position: 'asc' }],
       }),
+      this.prisma.courseLessonContentBlock.findMany({ where: { courseId, status: { not: 'ARCHIVED' } }, orderBy: [{ lessonId: 'asc' }, { position: 'asc' }] }),
     ]);
     return {
       modules: modules.map((item) => this.module(item)),
@@ -307,6 +312,7 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
       quizzes: quizzes.map((item) => this.quiz(item)),
       questionBanks: questionBanks.map((item) => this.bank(item)),
       questions: questions.map((item) => this.question(item)),
+      contentBlocks: contentBlocks.map(row => ({ ...row, type: row.type as CourseContentBlockDto['type'], payload: row.payload as Record<string, unknown> })),
     };
   }
 
@@ -326,7 +332,25 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
       modules: snapshot.modules.map(dated), lessons: snapshot.lessons.map(dated), assets: snapshot.assets.map(dated),
       quizzes: snapshot.quizzes.map(record => ({...dated(record), assessmentType: record.assessmentType ?? 'QUIZ'})),
       questionBanks: snapshot.questionBanks.map(dated), questions: snapshot.questions.map(dated),
+      contentBlocks: snapshot.contentBlocks ?? [],
     }};
+  }
+
+  public async replaceLessonBlocks(courseId: string, lessonId: string, blocks: CourseContentBlockInput[]): Promise<CourseContentBlockDto[]> {
+    return this.inTransaction(async tx => {
+      const foreign = await tx.courseLessonContentBlock.count({ where: { id: { in: blocks.map(block => block.id) }, OR: [{ courseId: { not: courseId } }, { lessonId: { not: lessonId } }] } });
+      if (foreign) throw new Error('COURSE_CONTENT_BLOCK_SCOPE_MISMATCH');
+      const existing = await tx.courseLessonContentBlock.findMany({ where: { courseId, lessonId }, orderBy: { id: 'asc' } });
+      // Park rows beyond the current negative range before assigning dense active positions.
+      const floor = Math.min(0, ...existing.map(row => row.position)) - existing.length - 1;
+      for (const [index, row] of existing.entries()) await tx.courseLessonContentBlock.update({ where: { id: row.id }, data: { position: floor - index, status: 'ARCHIVED' } });
+      for (const [index, block] of blocks.entries()) await tx.courseLessonContentBlock.upsert({ where: { id: block.id },
+        create: { ...block, payload: json(block.payload)!, courseId, lessonId, position: index + 1 },
+        update: { type: block.type, payload: json(block.payload), assetReferenceId: block.assetReferenceId, quizId: block.quizId, position: index + 1, status: 'READY_TO_REVIEW', version: { increment: 1 } },
+      });
+      const rows = await tx.courseLessonContentBlock.findMany({ where: { courseId, lessonId, status: { not: 'ARCHIVED' } }, orderBy: { position: 'asc' } });
+      return rows.map(row => ({ ...row, type: row.type as CourseContentBlockDto['type'], payload: row.payload as Record<string, unknown> }));
+    });
   }
 
   private async reorder(

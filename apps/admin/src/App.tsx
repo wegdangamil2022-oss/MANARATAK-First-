@@ -14,6 +14,7 @@ import { CourseListPage } from './pages/CourseListPage';
 import { CourseCatalogPage } from './features/courses/CourseCatalogPage';
 import { CourseLearningPathsPage, CoursePaidPreparationPage } from './features/courses/CourseUtilityPages';
 import { CourseDetailPage } from './pages/CourseDetailPage';
+import { NativeCourseEditorPage } from './features/courses/NativeCourseEditorPage';
 import { CertificateAdminPage } from './pages/CertificateAdminPage';
 import { CertificateDetailPage } from './pages/CertificateDetailPage';
 import { CmsAdminPage } from './pages/CmsAdminPage';
@@ -294,6 +295,7 @@ function AdminLayout() {
                   <Route path="/courses/paid" element={<RequireAdminPermission permission="admin:courses:manage"><CoursePaidPreparationPage /></RequireAdminPermission>} />
                   <Route path="/courses/learning-paths" element={<RequireAdminPermission permission="admin:courses:manage"><CourseLearningPathsPage /></RequireAdminPermission>} />
                   <Route path="/courses/providers" element={<RequireAdminPermission permission="admin:courses:manage"><CourseProviderRegistryPage /></RequireAdminPermission>} />
+                  <Route path="/courses/:id/editor" element={<RequireAdminPermission permission="admin:courses:manage"><NativeCourseEditorPage /></RequireAdminPermission>} />
                   <Route path="/courses/:id" element={<RequireAdminPermission permission="admin:courses:manage"><CourseDetailPage /></RequireAdminPermission>} />
                   <Route path="/certificates" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateAdminPage /></RequireAdminPermission>} />
                   <Route path="/certificates/:id" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateDetailPage /></RequireAdminPermission>} />

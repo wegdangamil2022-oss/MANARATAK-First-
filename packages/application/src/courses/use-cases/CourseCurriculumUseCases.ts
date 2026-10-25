@@ -1,5 +1,7 @@
 import {
   AssetId,
+  CourseContentBlockInput,
+  normalizeCourseBlock,
   AssetLifecycleState,
   AssetSecurityClassification,
   CourseDto,
@@ -83,6 +85,26 @@ export class CourseCurriculumUseCases {
     // PrismaCourseRepository turns even a no-field update into an immutable
     // version checkpoint containing the complete current curriculum snapshot.
     await this.courseRepository.update(courseId, {});
+  }
+
+  public async replaceLessonBlocks(courseId: string, lessonId: string, input: CourseContentBlockInput[]) {
+    await this.ensureMutableCourse(courseId);
+    await this.ensureCurriculumMember(courseId, 'lessons', lessonId);
+    if (input.length > 200 || new Set(input.map(block => block.id)).size !== input.length) throw new Error('COURSE_CONTENT_BLOCK_LIMIT_OR_DUPLICATE');
+    const blocks = input.map(normalizeCourseBlock), snapshot = await this.curriculumRepository.getCurriculumSnapshot(courseId);
+    const lesson = snapshot.lessons.find(row => row.id === lessonId);
+    if (!lesson || lesson.status === 'ARCHIVED' || !snapshot.modules.some(row => row.id === lesson.moduleId && row.status !== 'ARCHIVED')) throw new Error('COURSE_CONTENT_BLOCK_LESSON_ARCHIVED');
+    for (const block of blocks) {
+      if (block.assetReferenceId) {
+        const asset = snapshot.assets.find(row => row.id === block.assetReferenceId && row.lessonId === lessonId);
+        if (!asset || (block.type !== 'FILE' && asset.assetType !== block.type)) throw new Error('COURSE_CONTENT_BLOCK_ASSET_SCOPE_OR_TYPE_MISMATCH');
+      }
+      if (block.quizId && !snapshot.quizzes.some(row => row.id === block.quizId && row.lessonId === lessonId && row.status !== 'ARCHIVED')) throw new Error('COURSE_CONTENT_BLOCK_QUIZ_SCOPE_MISMATCH');
+    }
+    if (!this.curriculumRepository.replaceLessonBlocks) throw new Error('COURSE_CONTENT_BLOCK_PERSISTENCE_REQUIRED');
+    const result = await this.curriculumRepository.replaceLessonBlocks(courseId, lessonId, blocks);
+    await this.checkpointCourseVersion(courseId);
+    return result;
   }
 
   private assertExactIds(expected: readonly string[], actual: readonly string[], code: string): void {
@@ -242,6 +264,7 @@ export class CourseCurriculumUseCases {
   public async detachAssetFromLesson(courseId: string, assetId: string): Promise<void> {
     await this.ensureMutableCourse(courseId);
     await this.ensureCurriculumMember(courseId, 'assets', assetId);
+    if ((await this.curriculumRepository.getCurriculumSnapshot(courseId)).contentBlocks?.some(block => block.assetReferenceId === assetId && block.status !== 'ARCHIVED')) throw new Error('COURSE_CONTENT_BLOCK_ASSET_IN_USE');
     await this.curriculumRepository.detachAssetFromLesson(assetId);
     await this.checkpointCourseVersion(courseId);
   }
@@ -279,6 +302,7 @@ export class CourseCurriculumUseCases {
   public async deleteQuiz(courseId: string, quizId: string): Promise<void> {
     await this.ensureMutableCourse(courseId);
     await this.ensureCurriculumMember(courseId, 'quizzes', quizId);
+    if ((await this.curriculumRepository.getCurriculumSnapshot(courseId)).contentBlocks?.some(block => block.quizId === quizId && block.status !== 'ARCHIVED')) throw new Error('COURSE_CONTENT_BLOCK_QUIZ_IN_USE');
     await this.curriculumRepository.deleteQuiz(quizId);
     await this.checkpointCourseVersion(courseId);
   }

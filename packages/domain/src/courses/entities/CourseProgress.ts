@@ -150,8 +150,10 @@ export interface CourseLearnerAssetDto {
 }
 
 export interface CourseLearnerWorkspaceDto {
+  course?: { id: string; displayName: string; version: number };
   progress: StudentCourseProgressSnapshotDto;
   curriculum: {
+    contentBlocks?: Omit<import('../content-blocks').CourseContentBlockDto, 'courseId' | 'status'>[];
     modules: Omit<import('./CourseCurriculum').CourseModuleDto,'createdAt'|'updatedAt'|'metadata'>[];
     lessons: Omit<import('./CourseCurriculum').CourseLessonDto,'createdAt'|'updatedAt'|'metadata'>[];
     assets: CourseLearnerAssetDto[];

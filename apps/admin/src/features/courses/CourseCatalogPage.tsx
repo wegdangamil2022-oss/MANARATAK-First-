@@ -88,7 +88,7 @@ export function CourseCatalogPage({ fixedScope }: { fixedScope?: CourseScope }) 
   const returnTo = `${location.pathname}${location.search}`;
   const open = (row: CatalogRow) => {
     if (row.originType === 'EXTERNAL_LINKED_COURSE') presentation('course', row.id);
-    else navigate(`/courses/${encodeURIComponent(row.id)}?returnTo=${encodeURIComponent(returnTo)}`);
+    else navigate(`/courses/${encodeURIComponent(row.id)}${row.originType === 'NATIVE_MANARATAK_COURSE' ? '/editor' : ''}?returnTo=${encodeURIComponent(returnTo)}`);
   };
   const title = fixedScope === 'native' ? tr('إدارة دورات منارتك', 'Manaratak course management') : fixedScope === 'external' ? tr('إدارة الدورات التدريبية الخارجية', 'External course management') : tr('إدارة الدورات التدريبية', 'Training course management');
   const description = fixedScope === 'native' ? tr('إدارة المحتوى والمنهج والمراجعة لدورات التعلم داخل منارتك.', 'Manage content, curriculum and reviews for learning inside Manaratak.') : fixedScope === 'external' ? tr('اكتشاف ومراجعة دورات الجهات الخارجية مع الحفاظ على بيانات المصدر.', 'Discover and review external courses while preserving their source records.') : tr('كتالوج موحد للدورات، مع مساحة متخصصة لكل مسار.', 'A unified catalog with a dedicated workspace for each course origin.');
