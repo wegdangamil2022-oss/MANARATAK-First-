@@ -1,3 +1,4 @@
+import {type MajorContentSectionEdit} from '@manaratak/domain';
 import { randomUUID } from 'crypto';
 import {
   IMajorRepository,
@@ -127,11 +128,21 @@ export class AdminMajorUseCases {
     });
   }
 
-  public async listMajors(filters: MajorFilters & { catalog?: string }): Promise<PaginatedMajorResult<any>> {
+  public async listMajors(filters: MajorFilters & { catalog?: string }): Promise<PaginatedMajorResult<MajorDto>> {
     if (this.catalogRepository && filters.catalog === 'true' && !filters.taxonomyNodeId) {
       return this.catalogRepository.listCatalog(filters);
     }
-    return this.repository.list(filters);
+    const result=await this.repository.list(filters);
+    // Content review alone is not publication readiness: use the existing guard.
+    for(const row of result.data) {
+      if(row.contentReview?.state!=='REVIEWED')continue;
+      try {
+        const target=await this.getPublicationTarget(row.profileId??row.id);
+        const gate=await this.evaluatePublicationReadiness(row.profileId??row.id,target);
+        row.contentReview={...row.contentReview,state:gate.ready?'READY':'NEEDS_REVIEW',blockingCodes:gate.blockingIssues.map(issue=>issue.code)};
+      } catch {row.contentReview={...row.contentReview,state:'UNAVAILABLE'};}
+    }
+    return result;
   }
 
   public async listNewMajorCandidates(filters: NewMajorCandidateFilters): Promise<PaginatedNewMajorCandidateResult> {
@@ -404,7 +415,7 @@ export class AdminMajorUseCases {
     input: {
       profileId?: string;
       versionId?: string;
-      sections: Array<{ id?: string; sectionKey: string; locale?: string; title?: string; content: string; reviewStatus?: string }>;
+      sections: MajorContentSectionEdit[];
     },
     context?: MajorMutationContext,
   ): Promise<{ success: boolean; profileId: string; versionId: string; count: number; data: MajorContentSectionDto[] }> {
@@ -442,7 +453,7 @@ export class AdminMajorUseCases {
     const result = await this.mutate('MAJOR_CONTENT_SECTIONS_UPDATED', major.id, context, repository => {
       if (!repository.updateContentSections) throw new Error('CONTENT_SECTION_UPDATE_NOT_SUPPORTED');
       return repository.updateContentSections(profileId, versionId, input.sections);
-    }, { profileId, versionId, sectionCount: input.sections.length });
+    }, { profileId, versionId, sectionCount: input.sections.length,groupAssignments:input.sections.filter(section=>section.groupNumber!==undefined).map(section=>({id:section.id,sectionKey:section.sectionKey,locale:section.locale??'ar',groupNumber:section.groupNumber,sourceUri:section.sourceUri})) });
 
     return {
       success: true,
@@ -521,6 +532,11 @@ export class AdminMajorUseCases {
       if(!current || [MajorStatus.PUBLISHED,MajorStatus.ARCHIVED,MajorStatus.REJECTED].includes(current.status)) throw new Error('MAJOR_PUBLISHED_STRUCTURE_IMMUTABLE');
       return repository.update(id,{...updates,status:MajorStatus.READY_TO_REVIEW,completenessStatus:classification.state});
     });
+  }
+
+  public async correctDegreeReference(profileId:string,input:{degreeLevelId:string;sourceUri:string},context?:MajorMutationContext):Promise<void>{
+    this.assertMutableCanonicalMajorId(profileId);
+    await this.mutate('MAJOR_DEGREE_REFERENCE_CORRECTED',profileId,context,async repository=>{if(!repository.correctDegreeReference)throw Error('MAJOR_GRAPH_TRANSACTIONAL_PERSISTENCE_REQUIRED');await repository.correctDegreeReference(profileId,input.degreeLevelId,input.sourceUri,context!.actorId);},{degreeLevelId:input.degreeLevelId,sourceUri:input.sourceUri});
   }
 
   public async addClassificationMapping(id: string, input: ReviewedMajorClassificationInput, context?: MajorMutationContext): Promise<MajorClassificationMappingDto> {
@@ -628,6 +644,16 @@ export class AdminMajorUseCases {
       throw new Error('MAJOR_EXPLICIT_UNPUBLISH_REQUIRED');
     }
     await this.mutate('MAJOR_ARCHIVED', id, context, repository => repository.updateStatus(id, MajorStatus.ARCHIVED));
+  }
+
+  public async restore(id:string,context?:MajorMutationContext):Promise<void> {
+    this.assertMutableCanonicalMajorId(id);
+    const existing=await this.getPublicationTarget(id);
+    if(![MajorStatus.ARCHIVED,MajorStatus.REJECTED].includes(existing.status))throw Error('MAJOR_RESTORE_REQUIRES_ARCHIVED_OR_REJECTED');
+    await this.mutate('MAJOR_RESTORED_FOR_REVIEW',id,context,repository=>{
+      if(!repository.restoreForReview)throw Error('MAJOR_RESTORE_PERSISTENCE_REQUIRED');
+      return repository.restoreForReview(id,context!.actorId!,context!.reason!);
+    });
   }
 
   private assertMutableCanonicalMajorId(id: string): void {
@@ -739,7 +765,8 @@ export class AdminMajorUseCases {
       auditMetadata:{...auditMetadata,profileReference:id!==owner.id?id:undefined,reason:context.reason,expectedRevision:context.expectedRevision} },async transaction=>{
         const tx=repository.withTransaction!(transaction);
         if(!tx.lockForRevision || !tx.advanceRevision) throw new Error('MAJOR_REVISION_PERSISTENCE_REQUIRED');
-        await tx.lockForRevision(id,context.expectedRevision!);
+        if(action==='MAJOR_RESTORED_FOR_REVIEW')await tx.lockForRevision(id,context.expectedRevision!,{archivedRestore:true});
+        else await tx.lockForRevision(id,context.expectedRevision!);
         const result=await mutation(tx);
         const revision=await tx.advanceRevision(id,context.expectedRevision!);
         if(result && typeof result==='object' && 'id' in result) Object.assign(result,{revision});

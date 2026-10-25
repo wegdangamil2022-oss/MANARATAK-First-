@@ -554,3 +554,31 @@ textarea {
 :is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > :nth-child(3n + 1) svg { color: #D6A43B; }
 :is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > :nth-child(3n + 2) svg { color: #142B5F; }
 :is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > :nth-child(3n + 3) svg { color: #0E7C86; }
+
+/* Section 05 additions preserve the approved major cards and detail scale. */
+.major-admin,.major-discovery,.major-detail-publication {font-family:'Cairo',sans-serif}
+.major-admin *,.major-discovery *,.major-detail-publication * {font-family:inherit!important}
+.major-discovery-title {font-size:16px;font-weight:700;color:#142B5F}
+.major-discovery-title::after {content:'';display:block;width:42px;height:3px;margin-top:6px;border-radius:4px;background:#D6A43B}
+.major-discovery-list {display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:12px}
+@media(min-width:768px){.major-discovery-list {grid-template-columns:repeat(2,minmax(0,1fr))}}
+.major-detail-publication {font-size:13px;line-height:1.8}
+.major-detail-publication h2 {font-size:14px;font-weight:700}
+.major-detail-publication button {min-height:40px;border:1px solid #DDEFF2;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:700;color:#142B5F;background:#FAF7F0}
+.major-detail-publication button:disabled {opacity:.45;cursor:not-allowed}
+.major-detail-publication input,.major-detail-publication textarea,.major-detail-publication select,
+.major-content-grid form input,.major-content-grid form textarea,.major-content-grid form select,
+.major-content-grid label>input,.major-content-grid label>textarea,.major-content-grid label>select {display:block;width:100%;min-height:40px;margin-top:4px;padding:8px 10px;border:1px solid #DDEFF2;border-radius:10px;background:white;font:inherit;font-size:13px;color:#142B5F}
+.major-content-grid form {font-size:13px;min-width:0}
+.major-content-grid form button {font-size:12px;font-weight:700}
+.major-discovery :is(button,input,select,textarea):focus-visible,.major-detail-publication :is(button,input,select,textarea):focus-visible {outline:2px solid #0E7C86;outline-offset:3px}
+.major-discovery :is(button,input,select,textarea):disabled {opacity:.5}
+
+@media(max-width:640px){
+ body:has(:is(.major-admin,.major-detail)) #root header.sticky {flex-wrap:wrap;gap:10px}
+ body:has(:is(.major-admin,.major-detail)) #root header.sticky>div {min-width:0;max-width:100%}
+}
+.major-detail .major-governance {font-size:13px;line-height:1.8}
+.major-detail .major-governance h2 {font-size:14px;font-weight:700}
+.major-detail .major-governance :is(input,textarea,select) {display:block;width:100%;min-height:40px;border:1px solid #DDEFF2;border-radius:10px;padding:8px;font:inherit}
+.major-detail .major-governance :is(button,summary) {min-height:40px;font-size:12px;font-weight:700}

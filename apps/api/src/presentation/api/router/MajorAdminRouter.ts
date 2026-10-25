@@ -36,6 +36,7 @@ export class MajorAdminRouter {
 
     const allAsUndefined = (value: unknown) => typeof value === 'string' && ['', 'all', 'الكل'].includes(value.trim().toLowerCase()) ? undefined : value;
     const listQuerySchema = z.object({
+      sort:z.enum(['UPDATED_DESC','NAME_AR','NAME_EN','DEGREE','STATUS']).optional(),
       countOnly: z.enum(['true', 'false']).transform(value => value === 'true').optional(),
       taxonomyNodeId: z.string().uuid().optional(),
       status: z.preprocess(allAsUndefined, z.nativeEnum(MajorStatus).optional()),
@@ -54,6 +55,7 @@ export class MajorAdminRouter {
     const newCandidateListQuerySchema = z.object({
       search: z.string().trim().min(1).max(200).optional(),
       sourceType: z.enum(['UNIVERSITY_PROGRAM', 'SCHOLARSHIP_MAJOR_TARGET', 'SCHOLARSHIP_ELIGIBILITY']).optional(),
+      degreeLevel: z.enum(['BACHELOR', 'MASTER', 'DOCTORATE', 'FELLOWSHIP', 'UNKNOWN']).optional(),
       page: z.coerce.number().int().min(1).max(1000).default(1),
       pageSize: z.coerce.number().int().min(1).max(100).default(25),
     }).strict();
@@ -287,6 +289,8 @@ export class MajorAdminRouter {
           title: z.string().nullable().optional(),
           content: z.string().max(100000),
           reviewStatus: z.enum(['NEEDS_REVIEW','COMPLETE','INCOMPLETE']).optional(),
+          groupNumber:z.number().int().min(1).max(19).optional(),
+          sourceUri:sourceUrlSchema.optional(),
         }),
       ).max(100),
     }).strict();
@@ -305,6 +309,8 @@ export class MajorAdminRouter {
 
     router.put(
       '/:id/content-sections',
+      SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:manage'),
+      (req:Request,res:Response,next:NextFunction)=>Array.isArray(req.body?.sections)&&req.body.sections.some((section:{id?:unknown;groupNumber?:unknown})=>section?.id&&section.groupNumber!==undefined)?SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:review')(req,res,next):next(),
       asyncHandler(async (req: Request, res: Response) => {
         const body = updateContentSectionsBodySchema.parse(req.body);
         const result = await adminMajorUseCases.updateContentSections(
@@ -319,6 +325,7 @@ export class MajorAdminRouter {
               title: s.title ?? undefined,
               content: s.content,
               reviewStatus: s.reviewStatus,
+              groupNumber:s.groupNumber,sourceUri:s.sourceUri,
             })),
           },
           mutationContext(req),
@@ -448,6 +455,7 @@ export class MajorAdminRouter {
 
     router.post(
       '/:id/reject',
+      SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:review'),
       asyncHandler(async (req: Request, res: Response) => {
         z.object({reason:reasonSchema}).strict().parse(req.body);
         await adminMajorUseCases.reject(req.params.id, mutationContext(req));
@@ -458,6 +466,7 @@ export class MajorAdminRouter {
 
     router.post(
       '/:id/archive',
+      SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:review'),
       asyncHandler(async (req: Request, res: Response) => {
         z.object({reason:reasonSchema}).strict().parse(req.body);
         await adminMajorUseCases.archive(req.params.id, mutationContext(req));
@@ -465,6 +474,19 @@ export class MajorAdminRouter {
         res.status(200).json({ success: true });
       }),
     );
+
+    router.post('/:id/degree-reference',SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:review'),asyncHandler(async(req,res)=>{
+      const body=z.object({degreeLevelId:z.string().uuid(),sourceUri:sourceUrlSchema,reason:reasonSchema}).strict().parse(req.body);
+      await adminMajorUseCases.correctDegreeReference(req.params.id,body,mutationContext(req));
+      res.setHeader('X-Entity-Revision',String((await adminMajorUseCases.getMajor(req.params.id)).revision));res.json({success:true});
+    }));
+
+    router.post('/:id/restore',SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:review'),asyncHandler(async(req,res)=>{
+      z.object({reason:reasonSchema}).strict().parse(req.body);
+      await adminMajorUseCases.restore(req.params.id,mutationContext(req));
+      res.setHeader('X-Entity-Revision',String((await adminMajorUseCases.getMajor(req.params.id)).revision));
+      res.json({success:true});
+    }));
 
     router.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
       if (err instanceof z.ZodError) {

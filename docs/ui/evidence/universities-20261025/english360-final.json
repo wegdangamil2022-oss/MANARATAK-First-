@@ -1,0 +1,8 @@
+{
+  "pass": true,
+  "viewport": 360,
+  "document": 360,
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "realBrowser": "Edge headless",
+  "at": "2026-10-25T15:22:11.415Z"
+}

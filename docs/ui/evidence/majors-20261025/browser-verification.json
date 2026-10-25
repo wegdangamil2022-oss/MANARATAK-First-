@@ -1,0 +1,62 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "realApi": true,
+  "canonicalMfa": true,
+  "originalDatabaseTouched": false,
+  "checks": [
+    {
+      "label": "desktop bachelor",
+      "viewport": 1440,
+      "page": 1440,
+      "fonts": true
+    },
+    "dirty draft blocks profile switch and preserves content",
+    "real browser create, exact independent API readback and source proof",
+    "MASTER exact source groups 16",
+    "DOCTORATE exact source groups 19",
+    "FELLOWSHIP exact source groups 18",
+    {
+      "label": "mobile fellowship",
+      "viewport": 360,
+      "page": 360,
+      "fonts": true
+    },
+    {
+      "label": "mobile list",
+      "viewport": 360,
+      "page": 360,
+      "fonts": true
+    },
+    "same exact four profiles in cards and table with URL state",
+    "server discovery search pages 25+3, no review form mounted until requested",
+    {
+      "label": "desktop discovery",
+      "viewport": 1440,
+      "page": 1440,
+      "fonts": true
+    },
+    {
+      "label": "mobile discovery",
+      "viewport": 360,
+      "page": 360,
+      "fonts": true
+    },
+    {
+      "label": "English mobile discovery",
+      "viewport": 360,
+      "page": 360,
+      "fonts": true
+    }
+  ],
+  "errors": [],
+  "screens": [
+    "desktop-bachelor",
+    "mobile-fellowship",
+    "mobile-list",
+    "desktop-list",
+    "desktop-discovery",
+    "mobile-discovery",
+    "mobile-english-discovery"
+  ],
+  "pass": true
+}

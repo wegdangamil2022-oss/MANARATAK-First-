@@ -114,6 +114,7 @@ export class Phase10CatalogRepository {
     const details=this.loadDetails();
     const source=rawCatalog.map(item=>{const detail=details.get(item.code);return detail?{...item,collegeOrField:detail.collegeOrFaculty||item.collegeOrField,collegeOrFaculty:detail.collegeOrFaculty||item.collegeOrFaculty,sectionCount:detail.sections.length,sourceType:'DETAIL_DOSSIER',sourceFileName:detail.sourceFileName}:item;});
     // Enrichment, filters, counts and paging happen in SQL. Only one bounded page leaves PostgreSQL.
+    const order=Prisma.raw(({UPDATED_DESC:"item->>'updatedAt' DESC NULLS LAST",NAME_AR:"coalesce(item->>'nameAr',item->>'displayName') COLLATE \"C\" ASC",NAME_EN:"coalesce(item->>'nameEn',item->>'displayName') COLLATE \"C\" ASC",DEGREE:"item->>'degreeLevel' ASC",STATUS:"item->>'status' ASC"} as const)[filters.sort??'UPDATED_DESC']);
     const cte=Prisma.sql`WITH source AS (SELECT item,ordinality AS position FROM jsonb_array_elements(${JSON.stringify(source)}::jsonb) WITH ORDINALITY AS src(item,ordinality)),
       collisions AS (SELECT p.code FROM source JOIN "MajorLevelProfile" p ON p.code=source.item->>'code' GROUP BY p.code HAVING COUNT(*)>1),
       enriched AS (SELECT source.position,source.item || CASE WHEN p.id IS NULL THEN jsonb_build_object('hasDbDetails',false)
@@ -131,12 +132,12 @@ export class Phase10CatalogRepository {
         AND (${filters.completenessStatus??null}::text IS NULL OR item->>'completenessStatus'=${filters.completenessStatus??null})
         AND (${filters.academicFieldOrDiscipline??null}::text IS NULL OR COALESCE(item->>'collegeOrField','') ILIKE ${'%'+(filters.academicFieldOrDiscipline??'')+'%'} OR COALESCE(item->>'academicFieldOrDiscipline','') ILIKE ${'%'+(filters.academicFieldOrDiscipline??'')+'%'})
         AND (${filters.search??null}::text IS NULL OR concat_ws(' ',item->>'code',item->>'displayName',item->>'nameAr',item->>'nameEn',item->>'collegeOrField') ILIKE ${'%'+(filters.search??'')+'%'})),
-      paged AS (SELECT position,item FROM matching ORDER BY position,item->>'code',item->>'id' LIMIT ${pageSize} OFFSET ${(page-1)*pageSize})
-      SELECT COALESCE((SELECT jsonb_agg(item ORDER BY position,item->>'code',item->>'id') FROM paged),'[]'::jsonb) AS data,(SELECT COUNT(*)::text FROM matching) AS total,(SELECT COUNT(*)::int FROM collisions) AS "ambiguousCodes"`;
+      paged AS (SELECT item,row_number() OVER(ORDER BY ${order},position,item->>'code',item->>'id') AS rank FROM matching ORDER BY ${order},position,item->>'code',item->>'id' LIMIT ${pageSize} OFFSET ${(page-1)*pageSize})
+      SELECT COALESCE((SELECT jsonb_agg(item ORDER BY rank) FROM paged),'[]'::jsonb) AS data,(SELECT COUNT(*)::text FROM matching) AS total,(SELECT COUNT(*)::int FROM collisions) AS "ambiguousCodes"`;
     const rows=await this.prisma.$queryRaw<Array<{data:CatalogItemDto[];total:string;ambiguousCodes:number}>>(cte);
     if(!rows[0])throw new Error('MAJOR_CATALOG_READ_UNAVAILABLE');
     if(rows[0].ambiguousCodes>0)throw new Error('MAJOR_SOURCE_CODE_CONFLICT');
-    const total=Number(rows[0].total);return {data:rows[0].data,total,page,pageSize,totalPages:Math.ceil(total/pageSize)};
+    const total=Number(rows[0].total);return {data:rows[0].data,total,page,pageSize,countUnit:'SOURCE_CATALOG_ENTRY',totalPages:Math.ceil(total/pageSize)};
   }
 
   public maxCodeNumber(prefix: 'MJR' | 'MAS' | 'DOC' | 'FEL'): number {

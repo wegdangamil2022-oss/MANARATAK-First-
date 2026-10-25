@@ -39,6 +39,8 @@ export interface NewMajorCandidateDto {
   degreeLevelIds: string[];
   degreeLevelCodes: string[];
   degreeLevelLabels: string[];
+  /** Only a degree explicitly attached to this owner reference is confirmed. */
+  confirmedDegree?: 'BACHELOR' | 'MASTER' | 'DOCTORATE' | 'FELLOWSHIP' | 'UNKNOWN';
   facultyOrUnitNames: string[];
   officialSourceUrls: string[];
   sources: NewMajorCandidateSourceRef[];
@@ -49,6 +51,7 @@ export interface NewMajorCandidateDto {
 export interface NewMajorCandidateFilters {
   search?: string;
   sourceType?: NewMajorCandidateSourceType;
+  degreeLevel?: 'BACHELOR' | 'MASTER' | 'DOCTORATE' | 'FELLOWSHIP' | 'UNKNOWN';
   page?: number;
   pageSize?: number;
 }

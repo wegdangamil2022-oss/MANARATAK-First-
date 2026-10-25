@@ -1,0 +1,24 @@
+{
+  "source": "workspace/phase-10-major-catalogs/MANARATAK_Fellowships_By_Professional_Domains_v1.0.md",
+  "uniqueCatalogIdentities": 329,
+  "firstTenPresent": [
+    "FEL-0001",
+    "FEL-0002",
+    "FEL-0003",
+    "FEL-0004",
+    "FEL-0005",
+    "FEL-0006",
+    "FEL-0007",
+    "FEL-0008",
+    "FEL-0009",
+    "FEL-0010"
+  ],
+  "detailDossierDirectories": [
+    "bachelor",
+    "doctorate",
+    "master"
+  ],
+  "independentFellowshipDossierDirectoryPresent": false,
+  "imported": false,
+  "generatedContent": false
+}

@@ -414,3 +414,5 @@ export * from './students/StudentDocumentAttestationPolicy';
 
 export * from './universities/UniversityProgramReadPort';
 export * from './universities/UniversityStageDefinitions';
+
+export * from './majors/MajorContentAuthoring';

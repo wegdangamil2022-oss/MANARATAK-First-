@@ -1,3 +1,4 @@
+import {type MajorContentSectionEdit,assertMajorContentGroup,majorContentSlots,MAJOR_REVIEW_TEMPLATE} from '@manaratak/domain';
 import { validateMajorVersionTranslations } from './MajorTranslationEvidence';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {createHash} from 'crypto';
@@ -77,13 +78,57 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     );
   }
 
-  async lockForRevision(id:string,expectedRevision:number):Promise<void> {
+  async lockForRevision(id:string,expectedRevision:number,options?:{archivedRestore?:boolean}):Promise<void> {
     if(!this.transactionBound) throw new Error('MAJOR_TRANSACTIONAL_PERSISTENCE_REQUIRED');
     const majorId=await this.resolveMajorId(id);
     const rows=await this.prisma.$queryRaw<Array<{revision:bigint;status:string}>>`SELECT floor(extract(epoch FROM "updatedAt")*1000)::bigint AS revision,status FROM "Major" WHERE id=${majorId} FOR UPDATE`;
     if(!rows.length) throw new Error('MAJOR_NOT_FOUND');
     if(Number(rows[0].revision)!==expectedRevision) throw new Error('MAJOR_STALE_REVISION');
-    if(rows[0].status==='ARCHIVED') throw new Error('MAJOR_ARCHIVED_IMMUTABLE');
+    if(rows[0].status==='ARCHIVED'&&!options?.archivedRestore) throw new Error('MAJOR_ARCHIVED_IMMUTABLE');
+  }
+
+  async correctDegreeReference(profileId:string,degreeLevelId:string,sourceUri:string,actorId:string):Promise<void> {
+    if(!this.transactionBound)throw Error('MAJOR_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+    const profile=await this.prisma.majorLevelProfile.findUnique({where:{id:profileId}});
+    if(!profile)throw Error('TARGET_MAJOR_PROFILE_REQUIRED');
+    if(profile.currentPublishedVersionId||['PUBLISHED','ARCHIVED','REJECTED'].includes(profile.status))throw Error('MAJOR_PUBLISHED_STRUCTURE_IMMUTABLE');
+    const degree=await this.prisma.degreeLevel.findUnique({where:{id:degreeLevelId}});
+    if(!degree||degree.status!=='ACTIVE'||degree.canonicalCode!==profile.level)throw Error('MAJOR_DEGREE_REFERENCE_LEVEL_MISMATCH');
+    if(profile.degreeLevelId===degreeLevelId)throw Error('MAJOR_DEGREE_REFERENCE_ALREADY_EXISTS');
+    const source=new URL(sourceUri);if(source.protocol!=='https:'||source.username||source.password)throw Error('MAJOR_HTTPS_SOURCE_REQUIRED');
+    const latest=await this.prisma.majorVersion.findFirst({where:{profileId},orderBy:{versionNumber:'desc'}});
+    if(latest&&(latest.publishedAt||['PUBLISHED','SUPERSEDED','ARCHIVED','REJECTED'].includes(latest.status)))throw Error('MAJOR_PUBLISHED_VERSION_IMMUTABLE');
+    const metadata=this.asRecord(profile.metadata),history=Array.isArray(metadata.degreeReferenceHistory)?metadata.degreeReferenceHistory:[];
+    await this.prisma.majorLevelProfile.update({where:{id:profileId},data:{degreeLevelId,status:'READY_TO_REVIEW',completenessStatus:'NEEDS_REVIEW',metadata:{...metadata,degreeReferenceHistory:[...history,{before:profile.degreeLevelId,after:degreeLevelId,level:profile.level,sourceUri,actorId,at:new Date().toISOString()}].slice(-100)} as Prisma.InputJsonObject}});
+    if(latest){await this.prisma.majorVersion.update({where:{id:latest.id},data:{status:'NEEDS_REVIEW',approvedBy:null,metadata:{...this.asRecord(latest.metadata),reviewApproval:null}}});await this.prisma.majorContentSection.updateMany({where:{versionId:latest.id},data:{reviewStatus:'NEEDS_REVIEW'}});}
+    await this.prisma.major.update({where:{id:profile.majorId},data:{completenessStatus:'NEEDS_REVIEW'}});
+  }
+
+  async restoreForReview(id:string,actorId:string,reason:string):Promise<void> {
+    if(!this.transactionBound)throw Error('MAJOR_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+    const majorId=await this.resolveMajorId(id);
+    await this.acquireVersionAllocationLock(majorId);
+    const profiles=await this.prisma.majorLevelProfile.findMany({where:{majorId}});
+    const profile=profiles.find(row=>row.id===id||row.code===id)??(profiles.length===1?profiles[0]:undefined);
+    if(profiles.length&&!profile)throw Error('TARGET_MAJOR_PROFILE_REQUIRED');
+    if(profile) {
+      if(!['ARCHIVED','REJECTED'].includes(profile.status))throw Error('MAJOR_RESTORE_REQUIRES_ARCHIVED_OR_REJECTED');
+      await this.prisma.majorLevelProfile.update({where:{id:profile.id},data:{status:'READY_TO_REVIEW',completenessStatus:'NEEDS_REVIEW',currentPublishedVersionId:null}});
+      const latest=await this.prisma.majorVersion.findFirst({where:{profileId:profile.id},orderBy:{versionNumber:'desc'}});
+      if(latest) {
+        if(latest.publishedAt||['PUBLISHED','SUPERSEDED','ARCHIVED','REJECTED'].includes(latest.status)) {
+          await this.startWorkingCopy(profile.id,actorId,reason);
+        } else {
+          await this.prisma.majorVersion.update({where:{id:latest.id},data:{status:'NEEDS_REVIEW',approvedBy:null,metadata:{...this.asRecord(latest.metadata),reviewApproval:null}}});
+          await this.prisma.majorContentSection.updateMany({where:{profileId:profile.id,versionId:latest.id},data:{reviewStatus:'NEEDS_REVIEW'}});
+        }
+      }
+    } else {
+      const root=await this.prisma.major.findUnique({where:{id:majorId}});
+      if(!root||!['ARCHIVED','REJECTED'].includes(root.status))throw Error('MAJOR_RESTORE_REQUIRES_ARCHIVED_OR_REJECTED');
+    }
+    const live=await this.prisma.majorLevelProfile.findFirst({where:{majorId,currentPublishedVersionId:{not:null}}});
+    await this.prisma.major.update({where:{id:majorId},data:{status:live?'PUBLISHED':'READY_TO_REVIEW',completenessStatus:'NEEDS_REVIEW',currentPublishedVersionId:live?.currentPublishedVersionId??null}});
   }
 
   async advanceRevision(id:string,expectedRevision:number):Promise<number> {
@@ -101,10 +146,10 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     if(!profile || ['ARCHIVED','REJECTED'].includes(profile.status)) throw new Error('TARGET_MAJOR_PROFILE_REQUIRED');
     const latest=await this.prisma.majorVersion.findFirst({where:{majorId,profileId:profile.id},orderBy:{versionNumber:'desc'}});
     if(!latest) throw new Error('MAJOR_WORKING_COPY_SOURCE_REQUIRED');
-    if(!latest.publishedAt && !['PUBLISHED','SUPERSEDED','ARCHIVED'].includes(latest.status)) throw new Error('MAJOR_WORKING_COPY_ALREADY_EXISTS');
+    if(!latest.publishedAt && !['PUBLISHED','SUPERSEDED','ARCHIVED','REJECTED'].includes(latest.status)) throw new Error('MAJOR_WORKING_COPY_ALREADY_EXISTS');
     const version=await this.prisma.majorVersion.create({data:{majorId,profileId:profile.id,versionNumber:latest.versionNumber+1,status:'NEEDS_REVIEW',sourceHash:latest.sourceHash,sourceUri:latest.sourceUri,sourceFileName:latest.sourceFileName,sourceImportRecordId:latest.sourceImportRecordId,rawContentBlocks:latest.rawContentBlocks ?? undefined,metadata:{workingCopyOf:latest.id,actorId,reason}}});
     const sections=await this.prisma.majorContentSection.findMany({where:{profileId:profile.id,versionId:latest.id}});
-    await this.prisma.majorContentSection.createMany({data:sections.map(section=>({profileId:profile.id,versionId:version.id,sectionKey:section.sectionKey,title:section.title,locale:section.locale,content:section.content,sourceSectionPath:section.sourceSectionPath,reviewStatus:'NEEDS_REVIEW'}))});
+    await this.prisma.majorContentSection.createMany({data:sections.map(section=>({profileId:profile.id,versionId:version.id,sectionKey:section.sectionKey,title:section.title,locale:section.locale,content:section.content,sourceSectionPath:section.sourceSectionPath,reviewStatus:'NEEDS_REVIEW',metadata:section.metadata??undefined}))});
     await this.prisma.majorLevelProfile.update({where:{id:profile.id},data:{status:'READY_TO_REVIEW',completenessStatus:'NEEDS_REVIEW'}});
   }
 
@@ -122,7 +167,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     if(!this.transactionBound) throw new Error('MAJOR_TRANSACTIONAL_PERSISTENCE_REQUIRED');
     const majorId=await this.resolveMajorId(id);
     const version=await this.prisma.majorVersion.findFirst({where:{id:versionId,majorId},include:{profile:true}});
-    if(!version?.profileId || !version.profile || version.publishedAt || ['PUBLISHED','SUPERSEDED','ARCHIVED'].includes(version.status)) throw new Error('MAJOR_REVIEW_WORKING_VERSION_REQUIRED');
+    if(!version?.profileId || !version.profile || version.publishedAt || ['PUBLISHED','SUPERSEDED','ARCHIVED','REJECTED'].includes(version.status)) throw new Error('MAJOR_REVIEW_WORKING_VERSION_REQUIRED');
     const profile=version.profile;
     if(['PUBLISHED','ARCHIVED','REJECTED'].includes(profile.status)) throw new Error('MAJOR_REVIEW_PROFILE_IMMUTABLE');
     const sections=await this.prisma.majorContentSection.findMany({where:{profileId:profile.id,versionId},orderBy:[{sectionKey:'asc'},{id:'asc'}]});
@@ -362,13 +407,13 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
   async list(filters:MajorFilters):Promise<PaginatedMajorResult<MajorDto>> {
     const page=Math.min(1000,Math.max(1,filters.page || 1));const pageSize=Math.min(50,Math.max(1,filters.pageSize || 25));
     const query=Prisma.sql`WITH rows AS (
-      SELECT p.id AS "rowId",m.id AS "majorId",p.id AS "profileId",p."createdAt",p.status,p."completenessStatus",p.level,
+      SELECT p.id AS "rowId",m.id AS "majorId",p.id AS "profileId",p."updatedAt" AS "createdAt",p.status,p."completenessStatus",p.level,
         coalesce(p."academicFieldId",m."academicFieldId") AS "fieldId",coalesce(p."disciplineId",m."disciplineId") AS "disciplineId",
         coalesce(p."displayName",m."displayName") AS "displayName",m."canonicalName",coalesce(p."localizedNameAr",m."localizedNameAr") AS "nameAr",
         coalesce(p."localizedNameEn",m."localizedNameEn") AS "nameEn",p.code,m."facultyName",m."optionalFields"
       FROM "MajorLevelProfile" p JOIN "Major" m ON m.id=p."majorId"
       UNION ALL
-      SELECT m.id,m.id,NULL::text,m."createdAt",m.status,m."completenessStatus",m."optionalFields"->>'degreeLevel',m."academicFieldId",m."disciplineId",
+      SELECT m.id,m.id,NULL::text,m."updatedAt",m.status,m."completenessStatus",m."optionalFields"->>'degreeLevel',m."academicFieldId",m."disciplineId",
         m."displayName",m."canonicalName",m."localizedNameAr",m."localizedNameEn",m."publicId",m."facultyName",m."optionalFields"
       FROM "Major" m WHERE NOT EXISTS(SELECT 1 FROM "MajorLevelProfile" p WHERE p."majorId"=m.id)
     ), filtered AS (SELECT * FROM rows r WHERE
@@ -384,20 +429,31 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
       AND (${filters.collegeOrFaculty ?? ''}='' OR strpos(lower(coalesce(r."facultyName",'')),lower(${filters.collegeOrFaculty ?? ''}))>0)
       AND (${filters.academicFieldOrDiscipline ?? ''}='' OR EXISTS(SELECT 1 FROM "AcademicTaxonomyNode" n WHERE n.id IN (r."fieldId",r."disciplineId") AND strpos(lower(n."canonicalName"),lower(${filters.academicFieldOrDiscipline ?? ''}))>0))
     )`;
+    const order=Prisma.raw(({UPDATED_DESC:'"createdAt" DESC',NAME_AR:'coalesce("nameAr","displayName") COLLATE "C" ASC',NAME_EN:'coalesce("nameEn","canonicalName") COLLATE "C" ASC',DEGREE:'level ASC NULLS LAST',STATUS:'status ASC'} as const)[filters.sort??'UPDATED_DESC']);
     const [ids,counts]=await Promise.all([
-      filters.countOnly ? Promise.resolve([] as Array<{majorId:string;profileId:string|null}>) : this.prisma.$queryRaw<Array<{majorId:string;profileId:string|null}>>(Prisma.sql`${query} SELECT "majorId","profileId" FROM filtered ORDER BY "createdAt" DESC,"rowId" DESC LIMIT ${pageSize} OFFSET ${(page-1)*pageSize}`),
-      this.prisma.$queryRaw<Array<{total:bigint;published:bigint;needsReview:bigint;complete:bigint}>>(Prisma.sql`${query} SELECT count(*) AS total,count(*) FILTER(WHERE status='PUBLISHED') AS published,count(*) FILTER(WHERE status='READY_TO_REVIEW' OR "completenessStatus"='NEEDS_REVIEW') AS "needsReview",count(*) FILTER(WHERE "completenessStatus"='COMPLETE') AS complete FROM filtered`),
+      filters.countOnly ? Promise.resolve([] as Array<{majorId:string;profileId:string|null}>) : this.prisma.$queryRaw<Array<{majorId:string;profileId:string|null}>>(Prisma.sql`${query} SELECT "majorId","profileId" FROM filtered ORDER BY ${order},"rowId" DESC LIMIT ${pageSize} OFFSET ${(page-1)*pageSize}`),
+      this.prisma.$queryRaw<Array<{total:bigint;uniqueRootTotal:bigint;published:bigint;needsReview:bigint;complete:bigint}>>(Prisma.sql`${query} SELECT count(*) AS total,count(DISTINCT "majorId") AS "uniqueRootTotal",count(*) FILTER(WHERE status='PUBLISHED') AS published,count(*) FILTER(WHERE status='READY_TO_REVIEW' OR "completenessStatus"='NEEDS_REVIEW') AS "needsReview",count(*) FILTER(WHERE "completenessStatus"='COMPLETE') AS complete FROM filtered`),
     ]);
     const majors=ids.length?await this.prisma.major.findMany({where:{id:{in:[...new Set(ids.map(row=>row.majorId))]}},include:MAJOR_INCLUDE}):[];
+    const profileIds=ids.flatMap(row=>row.profileId?[row.profileId]:[]);
+    const content=profileIds.length?await this.prisma.$queryRaw<Array<{profileId:string;versionId:string;state:'NO_CONTENT'|'INCOMPLETE'|'NEEDS_REVIEW'|'REVIEWED'}>>(Prisma.sql`
+      SELECT p.id AS "profileId",v.id AS "versionId",CASE WHEN count(s.id)=0 THEN 'NO_CONTENT'
+        WHEN bool_or(btrim(s.content)='' OR s."reviewStatus"='INCOMPLETE') THEN 'INCOMPLETE'
+        WHEN v.status='APPROVED' AND v."approvedBy" IS NOT NULL AND bool_and(s."reviewStatus"='APPROVED') THEN 'REVIEWED' ELSE 'NEEDS_REVIEW' END AS state
+      FROM "MajorLevelProfile" p LEFT JOIN LATERAL (SELECT id,status,"approvedBy" FROM "MajorVersion" WHERE "profileId"=p.id ORDER BY "versionNumber" DESC LIMIT 1) v ON true
+      LEFT JOIN "MajorContentSection" s ON s."versionId"=v.id AND s."profileId"=p.id
+      WHERE p.id IN (${Prisma.join(profileIds)}) GROUP BY p.id,v.id,v.status,v."approvedBy"`):[];
     const data=ids.map(row=>{
       const record=majors.find(major=>major.id===row.majorId);if(!record) throw new Error('MAJOR_LIST_OWNER_CHANGED');
       const major=this.mapToDto(record);const profile=major.profiles?.find(item=>item.id===row.profileId);
       return profile?{...major,profileId:profile.id,status:profile.status ?? major.status,completenessStatus:profile.completenessStatus ?? major.completenessStatus,
+        updatedAt:profile.updatedAt,currentPublishedVersionId:profile.currentPublishedVersionId??null,
+        contentReview:content.find(item=>item.profileId===profile.id)??{state:'UNAVAILABLE' as const},
         degreeLevel:profile.level,classificationCode:profile.code,publicId:profile.code || major.publicId,displayName:profile.displayName || major.displayName,
         nameAr:profile.localizedNameAr || major.localizedNameAr,nameEn:profile.localizedNameEn || major.localizedNameEn || major.canonicalName}:major;
     });
     const total=Number(counts[0]?.total ?? 0);
-    return {data,total,page,pageSize,totalPages:Math.ceil(total/pageSize),stats:{published:Number(counts[0]?.published ?? 0),needsReview:Number(counts[0]?.needsReview ?? 0),complete:Number(counts[0]?.complete ?? 0)}};
+    return {data,total,page,pageSize,totalPages:Math.ceil(total/pageSize),countUnit:'DEGREE_PROFILE_OR_UNPROFILED_ROOT',uniqueRootTotal:Number(counts[0]?.uniqueRootTotal??0),stats:{published:Number(counts[0]?.published ?? 0),needsReview:Number(counts[0]?.needsReview ?? 0),complete:Number(counts[0]?.complete ?? 0)}};
   }
 
   async findPublishedSnapshot(slug:string,options?:{degreeLevel?:string;profileCode?:string}):Promise<MajorDto|null> {
@@ -671,7 +727,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
   async updateContentSections(
     profileId: string,
     versionId: string,
-    sections: Array<{ id?: string; sectionKey: string; locale?: string; title?: string; content: string; reviewStatus?: string }>
+    sections: MajorContentSectionEdit[]
   ): Promise<{ count: number; sections: MajorContentSectionDto[] }> {
     if (!this.transactionBound) throw new Error('MAJOR_CONTENT_TRANSACTION_REQUIRED');
     if(sections.length>100) throw new Error('MAJOR_CONTENT_SECTION_LIMIT');
@@ -685,13 +741,14 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     if (version.profileId !== profileId || version.profile?.majorId !== version.majorId) {
       throw new Error('MAJOR_CONTENT_FOREIGN_VERSION');
     }
-    if (version.publishedAt || ['PUBLISHED', 'ARCHIVED', 'SUPERSEDED'].includes(version.status)
-      || ['PUBLISHED', 'ARCHIVED'].includes(version.profile.status)) {
+    if (version.publishedAt || ['PUBLISHED', 'ARCHIVED', 'SUPERSEDED', 'REJECTED'].includes(version.status)
+      || ['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(version.profile.status)) {
       throw new Error('MAJOR_CONTENT_PUBLISHED_VERSION_IMMUTABLE');
     }
     const latest=await this.prisma.majorVersion.findFirst({where:{profileId},orderBy:{versionNumber:'desc'},select:{id:true}});
     if(!latest||latest.id!==versionId)throw new Error('MAJOR_CONTENT_STALE_WORKING_VERSION');
     const sectionKeys = new Set<string>();
+    const metadata=new Map<string,Prisma.InputJsonObject>();
     for (const sec of sections) {
       if (!sec.sectionKey.trim() || sectionKeys.has(JSON.stringify([sec.sectionKey,sec.locale??'ar']))) throw new Error('MAJOR_CONTENT_DUPLICATE_OR_EMPTY_SECTION_KEY');
       if (sec.reviewStatus && !['NEEDS_REVIEW', 'COMPLETE', 'INCOMPLETE'].includes(sec.reviewStatus)) {
@@ -699,13 +756,24 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
       }
       if(!['ar','en'].includes(sec.locale??'ar'))throw new Error('MAJOR_CONTENT_LOCALE_INVALID');
       sectionKeys.add(JSON.stringify([sec.sectionKey,sec.locale??'ar']));
+      if(sec.groupNumber!==undefined) {
+        assertMajorContentGroup(version.profile.level,sec.groupNumber);
+        let url:URL;try {url=new URL(sec.sourceUri??'');}catch {throw Error('MAJOR_CONTENT_SOURCE_REQUIRED');}
+        if(url.protocol!=='https:'||url.username||url.password)throw Error('MAJOR_CONTENT_SOURCE_REQUIRED');
+      }
+      if(!sec.id && !MAJOR_REVIEW_TEMPLATE[version.profile.level]?.includes(sec.sectionKey) && (sec.groupNumber===undefined || !majorContentSlots(version.profile.level,sec.groupNumber).includes(sec.sectionKey)))throw Error('MAJOR_CONTENT_TEMPLATE_SLOT_REQUIRED');
       if (sec.id) {
         const existing = await this.prisma.majorContentSection.findUnique({
           where: { id: sec.id },
-          select: { profileId: true, versionId: true, sectionKey: true, locale: true },
+          select: { profileId: true, versionId: true, sectionKey: true, locale: true,metadata:true },
         });
         if (!existing || existing.profileId !== profileId || existing.versionId !== versionId || existing.sectionKey !== sec.sectionKey || (existing.locale??'ar') !== (sec.locale??'ar')) {
           throw new Error('MAJOR_CONTENT_FOREIGN_SECTION');
+        }
+        if(sec.groupNumber!==undefined) {
+          const prior=this.asRecord(existing.metadata);
+          const history=Array.isArray(prior.groupAssignmentHistory)?prior.groupAssignmentHistory:[];
+          metadata.set(sec.id,{...prior,manualGroupNumber:sec.groupNumber,groupAssignmentHistory:[...history,{before:prior.manualGroupNumber??null,after:sec.groupNumber,sourceUri:sec.sourceUri!,at:new Date().toISOString()}].slice(-100)} as Prisma.InputJsonObject);
         }
       }
     }
@@ -716,37 +784,16 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
           where: { id: sec.id },
           data: {
             title: sec.title,
+            metadata:sec.id?metadata.get(sec.id):undefined,
             content: sec.content,
             reviewStatus: sec.reviewStatus || 'NEEDS_REVIEW',
             updatedAt: new Date(),
           }
         });
       } else {
-        await this.prisma.majorContentSection.upsert({
-          where: {
-            profileId_versionId_sectionKey_locale: {
-              profileId,
-              versionId,
-              sectionKey: sec.sectionKey,
-              locale: sec.locale??'ar',
-            }
-          },
-          update: {
-            title: sec.title,
-            content: sec.content,
-            reviewStatus: sec.reviewStatus || 'NEEDS_REVIEW',
-            updatedAt: new Date(),
-          },
-          create: {
-            profileId,
-            versionId,
-            sectionKey: sec.sectionKey,
-            title: sec.title,
-            content: sec.content,
-            locale: sec.locale??'ar',
-            reviewStatus: sec.reviewStatus || 'NEEDS_REVIEW',
-          }
-        });
+        // Creation never overwrites an existing locale/template slot. The unique
+        // constraint also protects concurrent creators inside the owner transaction.
+        await this.prisma.majorContentSection.create({data:{profileId,versionId,sectionKey:sec.sectionKey,title:sec.title,content:sec.content,locale:sec.locale??'ar',reviewStatus:sec.reviewStatus||'NEEDS_REVIEW',metadata:sec.groupNumber!==undefined?{manualGroupNumber:sec.groupNumber,authoringEvidence:{sourceUri:sec.sourceUri!,at:new Date().toISOString()}}:undefined}});
       }
     }
 
@@ -830,6 +877,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
 
   async listRelationships(idOrProfileId: string): Promise<MajorRelationshipDto[]> {
     const majorId = await this.resolveMajorId(idOrProfileId);
+    const identity={id:true,displayName:true,localizedNameAr:true,publicId:true} as const;
     const records = await this.prisma.majorRelationship.findMany({
       where: {
         OR: [
@@ -840,10 +888,17 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
         ],
       },
       orderBy: [{ relationshipType: 'asc' }, { createdAt: 'asc' }],
+      include:{sourceMajor:{select:identity},targetMajor:{select:identity},sourceProfile:{include:{major:{select:identity}}},targetProfile:{include:{major:{select:identity}}}},
     });
 
-    return records.map((record) => ({
-      ...record,
+    return records.map((record) => {
+      const outgoing=record.sourceMajorId===majorId||record.sourceProfile?.majorId===majorId;
+      const profile=outgoing?record.targetProfile:record.sourceProfile;
+      const owner=profile?.major??(outgoing?record.targetMajor:record.sourceMajor);
+      const {sourceMajor:_source,targetMajor:_target,sourceProfile:_from,targetProfile:_to,...data}=record;
+      return ({
+      ...data,
+      relatedMajor:owner?{id:owner.id,profileId:profile?.id,name:profile?.localizedNameAr||profile?.displayName||owner.localizedNameAr||owner.displayName,code:profile?.code??owner.publicId,level:profile?.level}:undefined,
       sourceMajorId: record.sourceMajorId ?? undefined,
       targetMajorId: record.targetMajorId ?? undefined,
       sourceProfileId: record.sourceProfileId ?? undefined,
@@ -852,7 +907,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
       confidence: record.confidence ?? undefined,
       notes: record.notes ?? undefined,
       metadata: this.asRecord(record.metadata),
-    }));
+    });});
   }
 
   async createClassificationMappings(data: Array<Omit<MajorClassificationMappingDto, 'id'>>): Promise<{ count: number }> {
@@ -955,9 +1010,10 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
         ],
       },
       orderBy: [{ relationshipType: 'asc' }, { createdAt: 'asc' }],
+      include:{taxonomyNode:{include:{childEdges:{where:{isPrimary:true},include:{parentNode:true},take:10}}}},
     });
 
-    return records.map((record) => this.mapClassificationMappingToDto(record));
+    return records.map((record) => ({...this.mapClassificationMappingToDto(record),taxonomy:{name:typeof this.asRecord(record.taxonomyNode.localizedNames).ar==='string'?this.asRecord(record.taxonomyNode.localizedNames).ar as string:record.taxonomyNode.canonicalName,code:record.taxonomyNode.canonicalCode,standardType:record.taxonomyNode.standardType,parents:record.taxonomyNode.childEdges.map(edge=>({id:edge.parentNodeId,name:edge.parentNode.canonicalName,code:edge.parentNode.canonicalCode}))}}));
   }
 
   async createSource(data: Omit<MajorSourceDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<MajorSourceDto> {

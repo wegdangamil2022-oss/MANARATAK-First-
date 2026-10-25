@@ -19,6 +19,7 @@ interface CandidateTransactionContext extends AtomicPersistenceContext {
 
 interface CandidateProjection {
   candidateKey:string; normalizedLabel:string; displayLabel:string; sourceDigest:string; sourceCount:number;
+  confirmedDegree?: NewMajorCandidateDto['confirmedDegree'];
   sources:NewMajorCandidateSourceRef[]; firstSeenAt:Date; lastSeenAt:Date; total:number;
 }
 
@@ -127,21 +128,34 @@ export class PrismaNewMajorCandidateRepository
           CASE WHEN "rawLabel" ~ '[؀-ۿ]' THEN translate(regexp_replace(normalize("rawLabel",NFKD),'[ً-ٰٟـ]','','g'),'إأآىؤئة','ااايويه')
           ELSE lower(normalize("rawLabel",NFKD)) END, '[^[:alnum:][:space:]]',' ','g'),'[[:space:]]+',' ','g')) AS "normalizedLabel"
         FROM source_rows WHERE btrim(coalesce("rawLabel",'')) <> ''
-      ), keyed AS (
+      ), legacy_keyed AS (
         SELECT *, 'NMC-' || upper(substr(encode(sha256(convert_to("normalizedLabel",'UTF8')),'hex'),1,20)) AS "candidateKey",
           row_number() OVER (PARTITION BY "normalizedLabel" ORDER BY "sourceType","sourceId") AS rn
         FROM normalized WHERE "normalizedLabel" NOT IN ('','unknown')
+      ), legacy_groups AS (
+        -- Preserve the exact pre-degree projection digest. An unchanged rejected
+        -- source set remains rejected after repartitioning; no decision is rewritten.
+        SELECT "candidateKey", encode(sha256(convert_to(jsonb_agg(to_jsonb(k) - 'rn' ORDER BY "sourceType","sourceId")::text,'UTF8')),'hex') AS digest
+        FROM legacy_keyed k GROUP BY "candidateKey"
+      ), keyed AS (
+        SELECT k.*, 'NMC-' || upper(substr(encode(sha256(convert_to("normalizedLabel" || chr(10) || coalesce("degreeLevelId",'UNKNOWN'),'UTF8')),'hex'),1,20)) AS "candidateKey",
+          row_number() OVER (PARTITION BY "normalizedLabel","degreeLevelId" ORDER BY "sourceType","sourceId") AS rn,
+          CASE WHEN "degreeLevelId" IS NOT NULL AND "degreeLevelCode" IN ('BACHELOR','MASTER','DOCTORATE','FELLOWSHIP') THEN "degreeLevelCode" ELSE 'UNKNOWN' END AS "confirmedDegree"
+        FROM (SELECT l."sourceType",l."sourceId",l."ownerId",l."ownerPublicId",l."ownerDisplayName",l."rawLabel",l."degreeLevelId",l."degreeLevelCode",l."degreeLevelLabel",l."facultyOrUnitName",l."officialSourceUrl",l."sourceUrl",l.status,l."createdAt",l."sourceUpdatedAt",l."degreeReferences",l."normalizedLabel",l."candidateKey" AS "legacyKey" FROM legacy_keyed l) k
       ), grouped AS (
         SELECT "candidateKey", min("normalizedLabel") AS "normalizedLabel", min("rawLabel") AS "displayLabel", count(*)::integer AS "sourceCount",
           jsonb_agg(to_jsonb(k) ORDER BY "sourceType","sourceId") FILTER (WHERE rn <= 500) AS sources,
           encode(sha256(convert_to(jsonb_agg(to_jsonb(k) - 'rn' ORDER BY "sourceType","sourceId")::text,'UTF8')),'hex') AS "sourceDigest",
           min("createdAt") AS "firstSeenAt", max("sourceUpdatedAt") AS "lastSeenAt",
+          min("legacyKey") AS "legacyKey", min("confirmedDegree") AS "confirmedDegree",
           bool_or(${filters.sourceType ?? null}::text IS NULL OR "sourceType"=${filters.sourceType ?? null}) AS "matchesType",
           bool_or(${search}='' OR strpos(lower("rawLabel"),lower(${search}))>0 OR strpos("normalizedLabel",lower(${search}))>0) AS "matchesSearch"
         FROM keyed k GROUP BY "candidateKey"
       ), visible AS (
-        SELECT * FROM grouped g WHERE "matchesType" AND "matchesSearch" AND (${key ?? null}::text IS NULL OR "candidateKey"=${key ?? null})
+        SELECT g.* FROM grouped g WHERE "matchesType" AND "matchesSearch" AND (${key ?? null}::text IS NULL OR "candidateKey"=${key ?? null})
+          AND (${filters.degreeLevel ?? null}::text IS NULL OR "confirmedDegree"=${filters.degreeLevel ?? null})
           AND NOT EXISTS (SELECT 1 FROM "NewMajorCandidateDecision" x WHERE x."candidateKey"=g."candidateKey" AND x."sourceDigest"=g."sourceDigest" AND x.decision='REJECTED')
+          AND NOT EXISTS (SELECT 1 FROM "NewMajorCandidateDecision" x JOIN legacy_groups l ON l."candidateKey"=x."candidateKey" AND l.digest=x."sourceDigest" WHERE l."candidateKey"=g."legacyKey" AND x.decision='REJECTED')
       ), page AS (SELECT * FROM visible ORDER BY "lastSeenAt" DESC,"candidateKey" LIMIT ${size} OFFSET ${(page-1)*size})
       SELECT page.*, totals.total FROM (SELECT count(*)::integer AS total FROM visible) totals LEFT JOIN page ON true`;
   }
@@ -151,8 +165,9 @@ export class PrismaNewMajorCandidateRepository
     const unique = (values:(string|null|undefined)[]) => [...new Set(values.filter((value):value is string => Boolean(value)))];
     return {candidateKey:row.candidateKey,sourceDigest:row.sourceDigest,normalizedLabel:row.normalizedLabel,displayLabel:row.displayLabel,
       sourceCount:Number(row.sourceCount),sourcesTruncated:Number(row.sourceCount)>sources.length,
-      sourceTypes:[...new Set(sources.map(source=>source.sourceType))],degreeLevelIds:unique(sources.flatMap(source=>[source.degreeLevelId,...(source.degreeReferences ?? []).map(degree=>degree.id)])),
-      degreeLevelCodes:unique(sources.flatMap(source=>[source.degreeLevelCode,...(source.degreeReferences ?? []).map(degree=>degree.code)])),degreeLevelLabels:unique(sources.flatMap(source=>[source.degreeLevelLabel,...(source.degreeReferences ?? []).map(degree=>degree.label)])),
+      confirmedDegree:row.confirmedDegree ?? 'UNKNOWN',
+      sourceTypes:[...new Set(sources.map(source=>source.sourceType))],degreeLevelIds:unique(sources.map(source=>source.degreeLevelId)),
+      degreeLevelCodes:unique(sources.map(source=>source.degreeLevelCode)),degreeLevelLabels:unique(sources.map(source=>source.degreeLevelLabel)),
       facultyOrUnitNames:unique(sources.map(source=>source.facultyOrUnitName)),officialSourceUrls:unique(sources.flatMap(source=>[source.officialSourceUrl,source.sourceUrl])),
       sources,firstSeenAt:row.firstSeenAt,lastSeenAt:row.lastSeenAt};
   }

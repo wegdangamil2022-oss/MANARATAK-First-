@@ -1,0 +1,18 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16",
+  "canonicalAuthentication": true,
+  "canonicalMfa": true,
+  "workersStarted": false,
+  "originalDatabaseTouched": false,
+  "checks": [
+    "two independent canonical MFA/CSRF sessions",
+    "canonical HTTP concurrent writes produce 200/409 and independent exact profile/version/source readback",
+    "stale and duplicate edits rejected without overwriting text",
+    "real unauthenticated and CSRF protections",
+    "authenticated no-role identity denied on canonical middleware",
+    "content manager cannot execute reviewer archive",
+    "profile archive and restore preserve content and return to review without publication",
+    "audit and atomic outbox persisted"
+  ],
+  "pass": true
+}
