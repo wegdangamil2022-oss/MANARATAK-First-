@@ -17,10 +17,7 @@ export enum UniversityImportCompletenessState {
 }
 
 export type UniversityTranslationReviewStatus =
-  'NEEDS_REVIEW'
-  | 'APPROVED'
-  | 'PUBLISHED'
-  | 'REJECTED';
+  'NEEDS_REVIEW' | 'APPROVED' | 'PUBLISHED' | 'REJECTED';
 
 export interface UniversityTranslationDto {
   /** Computed by the owner reader; never accepted as publication approval. */
@@ -239,7 +236,7 @@ export interface UniversityNormalizedDetailsUpdate {
 export interface UniversityFilters {
   /** Admin counter reads omit hydrated university details. */
   countOnly?: boolean;
-  sort?:'CREATED_DESC'|'UPDATED_DESC'|'NAME_ASC';
+  sort?: 'CREATED_DESC' | 'UPDATED_DESC' | 'NAME_ASC';
   status?: UniversityStatus;
   completenessStatus?: UniversityImportCompletenessState;
   country?: string;
@@ -257,7 +254,10 @@ export interface UniversityFilters {
   pageSize?: number;
 }
 
-export type PublicUniversityFilters = Omit<UniversityFilters, 'countOnly' | 'status' | 'completenessStatus' | 'country' | 'city' | 'page' | 'pageSize'> & { cursor?: string; limit?: number };
+export type PublicUniversityFilters = Omit<
+  UniversityFilters,
+  'countOnly' | 'status' | 'completenessStatus' | 'country' | 'city' | 'page' | 'pageSize'
+> & { cursor?: string; limit?: number };
 export type PublicUniversityDto = Omit<
   UniversityDto,
   | 'id'
@@ -274,7 +274,7 @@ export type PublicUniversityDto = Omit<
   | 'revision'
   | 'metadata'
   | 'sourceUrl'
-> & {localization?: Record<string, unknown>};
+> & { localization?: Record<string, unknown> };
 
 export interface PaginatedUniversityResult<T = UniversityDto> {
   data: T[];
@@ -285,7 +285,6 @@ export interface PaginatedUniversityResult<T = UniversityDto> {
   hasMore?: boolean;
   nextCursor?: string | null;
 }
-
 
 export interface PublishedAcademicProgramReadModel {
   localizedNames?: Record<string, string>;
@@ -301,7 +300,6 @@ export interface PublishedAcademicProgramReadModel {
   majorMappingState: string;
   status: string;
 }
-
 
 export interface UniversityOrganizationUnitSummaryDto {
   id: string;
@@ -337,8 +335,12 @@ export interface PaginatedUniversityOrganizationUnitResult {
 }
 
 export interface IUniversityRepository {
-  readStageGeography?(id:string):Promise<{region:string|null;subregion:string|null}|undefined>;
-  readProgramIntegrityReference?(id:string):Promise<{id:string;universityId:string;publiclyEligible:boolean}|null>;
+  readStageGeography?(
+    id: string,
+  ): Promise<{ region: string | null; subregion: string | null } | undefined>;
+  readProgramIntegrityReference?(
+    id: string,
+  ): Promise<{ id: string; universityId: string; publiclyEligible: boolean } | null>;
   create(
     data: Omit<UniversityDto, 'id' | 'createdAt' | 'updatedAt'> &
       Partial<Pick<UniversityDto, 'id' | 'createdAt' | 'updatedAt'>>,
@@ -353,7 +355,16 @@ export interface IUniversityRepository {
   listPublished(
     filters: PublicUniversityFilters,
   ): Promise<PaginatedUniversityResult<UniversityDto>>;
-  listPublishedMajorGraph?(filters:{countryReferenceId:string;cursor?:string;limit?:number}):Promise<{data:Array<{ownerId:string}>;total:number;hasMore:boolean;nextCursor:string|null}>;
+  listPublishedMajorGraph?(filters: {
+    countryReferenceId: string;
+    cursor?: string;
+    limit?: number;
+  }): Promise<{
+    data: Array<{ ownerId: string }>;
+    total: number;
+    hasMore: boolean;
+    nextCursor: string | null;
+  }>;
   listPublishedProgramGraph?(filters: {
     countryReferenceId?: string;
     universityId?: string;
@@ -368,7 +379,9 @@ export interface IUniversityRepository {
     hasMore: boolean;
     nextCursor: string | null;
   }>;
-  listOrganizationUnits?(filters: UniversityOrganizationUnitFilters): Promise<PaginatedUniversityOrganizationUnitResult>;
+  listOrganizationUnits?(
+    filters: UniversityOrganizationUnitFilters,
+  ): Promise<PaginatedUniversityOrganizationUnitResult>;
   findPublishedByPublicIds?(publicIds: string[]): Promise<UniversityDto[]>;
   findPublishedByIds?(ids: string[]): Promise<UniversityDto[]>;
   findPublishedAcademicProgramsByIds?(ids: string[]): Promise<PublishedAcademicProgramReadModel[]>;
@@ -392,6 +405,8 @@ export interface IUniversityRepository {
     input: UniversityAcademicProgramAuthoringInput,
   ): Promise<UniversityDto>;
   archiveAcademicProgram?(universityId: string, programId: string): Promise<UniversityDto>;
+  restoreAcademicProgram?(universityId: string, programId: string): Promise<UniversityDto>;
+  lockForRestoreRevision?(id: string, expectedRevision: number): Promise<void>;
   lockForRevision?(id: string, expectedRevision: number): Promise<void>;
   advanceRevision?(id: string, expectedRevision: number): Promise<number>;
 }
@@ -518,9 +533,12 @@ export class UniversityDeduplicationService {
   }
 }
 
-
 export interface UniversityProgramAdmissionRequirementReadDto {
-  internationalTest?: { displayName: string; canonicalName: string; slug: string; status: string;
+  internationalTest?: {
+    displayName: string;
+    canonicalName: string;
+    slug: string;
+    status: string;
     currentPublishedVersion?: {
       testId?: string;
       id: string;
@@ -548,13 +566,21 @@ export interface UniversityProgramAdmissionRequirementReadDto {
 
 export interface UniversityAcademicProgramReadDto {
   /** Internal P10 owner/profile publication state; never exposed in public DTOs. */
-  major?: { status: string; levelProfiles: Array<{
-    id?: string;
-    currentPublishedVersion?: { id: string; majorId: string; profileId: string | null; status: string } | null;
-    degreeLevelId: string | null;
+  major?: {
     status: string;
-    currentPublishedVersionId: string | null;
-  }> } | null;
+    levelProfiles: Array<{
+      id?: string;
+      currentPublishedVersion?: {
+        id: string;
+        majorId: string;
+        profileId: string | null;
+        status: string;
+      } | null;
+      degreeLevelId: string | null;
+      status: string;
+      currentPublishedVersionId: string | null;
+    }>;
+  } | null;
   degreeLevel?: { canonicalCode: string; nameAr?: string | null; nameEn?: string | null } | null;
   id: string;
   universityId: string;

@@ -1,0 +1,352 @@
+.university-stages {
+  --admin-title-size: 22px;
+  --admin-section-size: 15px;
+  --u-indigo: #142b5f;
+  --u-petrol: #0e7c86;
+  --u-gold: #d6a43b;
+  max-width: 1280px;
+  width: 95%;
+  margin: 20px auto;
+  color: var(--u-indigo);
+  font-family: Cairo, sans-serif;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.university-stages *,
+.university-stages input,
+.university-stages select,
+.university-stages button,
+.university-stages textarea {
+  font-family: Cairo, sans-serif;
+  box-sizing: border-box;
+}
+.university-stages button,
+.university-stages .university-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #ddeff2;
+  border-radius: 10px;
+  padding: 8px 12px;
+  min-height: 44px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #fff;
+  color: var(--u-petrol);
+  cursor: pointer;
+}
+.university-stages button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.university-stages :focus-visible {
+  outline: 2px solid var(--u-gold);
+  outline-offset: 3px;
+}
+.university-stages a {
+  color: var(--u-petrol);
+  overflow-wrap: anywhere;
+}
+.university-stages svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.university-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 20px 24px;
+  border-radius: 18px;
+  background: linear-gradient(110deg, #142b5f, #0e7c86);
+  color: #fff;
+  margin: 14px 0;
+}
+.university-stages .university-top h1 {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0 0 6px;
+  overflow-wrap: anywhere;
+}
+.university-top p {
+  font-size: 12px;
+  margin: 4px 0;
+}
+.university-top small {
+  font-size: 11px;
+}
+.university-top button {
+  background: #fff;
+}
+.university-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+.university-stage-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: 16px 0;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+}
+.university-stage-tabs button {
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 86px;
+  color: var(--u-indigo);
+  white-space: normal;
+}
+.university-stage-tabs button[aria-selected='true'] {
+  background: var(--u-indigo);
+  color: white;
+}
+.university-stage-tabs svg {
+  color: var(--u-gold);
+}
+.university-stage-tabs small {
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+.university-stage-tabs strong {
+  font-size: 12px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.university-card {
+  background: white;
+  border: 1px solid #ddeff2;
+  border-radius: 14px;
+  padding: 18px;
+  margin: 16px 0;
+  min-width: 0;
+}
+.university-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.university-card h2,
+.university-stages h2 {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.6;
+  margin: 0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.university-card > header h2 {
+  border-inline-start: 3px solid var(--u-gold);
+  padding-inline-start: 10px;
+}
+.university-card h2 svg {
+  color: var(--u-petrol);
+}
+.university-stages h3 {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 8px 0;
+}
+.university-values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 20px;
+  margin: 0;
+}
+.university-values > div {
+  border-bottom: 1px solid #edf5f6;
+  padding-bottom: 10px;
+  min-width: 0;
+}
+.university-values dt,
+.university-stages label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--u-indigo);
+}
+.university-values dd {
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 4px 0 0;
+}
+.university-values small {
+  display: block;
+  color: #62718d;
+  font-size: 11px;
+  margin-top: 4px;
+}
+.university-values dd a {
+  display: inline-flex;
+  gap: 5px;
+  align-items: baseline;
+}
+.university-wide {
+  grid-column: 1/-1;
+}
+.university-stages input:not([type='checkbox']),
+.university-stages select,
+.university-stages textarea {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #ddeff2;
+  border-radius: 9px;
+  background: #fff;
+  padding: 9px 10px;
+  color: var(--u-indigo);
+  font-size: 13px;
+  line-height: 1.6;
+  margin-top: 5px;
+}
+.university-stages textarea {
+  resize: vertical;
+}
+.university-stage-status,
+.university-notice {
+  background: #f6fafb;
+  border: 1px solid #ddeff2;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  font-size: 12px;
+}
+.university-stage-status p {
+  margin: 4px 0;
+}
+.university-stages [role='alert'] {
+  background: #fff3ef;
+  color: #9b332b;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+.university-stages [role='status'] {
+  background: #edf9f5;
+  color: #176752;
+  padding: 10px;
+  border-radius: 10px;
+}
+.university-row {
+  border-top: 1px solid #ddeff2;
+  padding: 14px 0;
+}
+.university-row:first-child {
+  border-top: 0;
+}
+.university-links {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.university-stages .university-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #142b5f77;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+.university-dialog {
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+  background: white;
+  border-radius: 14px;
+  padding: 22px;
+  border: 1px solid #ddeff2;
+}
+.university-dialog h2 {
+  margin-bottom: 12px;
+}
+@media (max-width: 760px) {
+  .university-stages {
+    width: 95%;
+    margin: 12px auto;
+  }
+  .university-values {
+    grid-template-columns: 1fr;
+  }
+  .university-top {
+    padding: 16px;
+  }
+  .university-stage-tabs {
+    display: flex;
+    scroll-snap-type: x proximity;
+  }
+  .university-stage-tabs button {
+    min-width: 155px;
+    scroll-snap-align: start;
+  }
+  .university-card {
+    padding: 16px;
+  }
+  .university-stages .university-top h1 {
+    font-size: 21px;
+  }
+  .university-top .university-actions {
+    width: 100%;
+  }
+}
+.admin-workspace .university-stages,
+.admin-workspace .university-stages * {
+  font-family: 'Cairo', sans-serif !important;
+}
+.university-stage-status p {
+  overflow-wrap: anywhere;
+}
+.university-stages fieldset {
+  min-width: 0;
+}
+.university-linked-records {
+  border-top: 1px solid #ddeff2;
+  margin-top: 14px;
+  padding-top: 12px;
+}
+.university-change-preview {
+  border: 1px solid #ddeff2;
+  background: #fffdf7;
+  border-radius: 10px;
+  padding: 12px;
+  margin-block: 12px;
+}
+.university-program-study fieldset {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 20px;
+}
+.university-program-study fieldset > :is(h4, p, button) {
+  grid-column: 1/-1;
+}
+.university-program-study fieldset > * {
+  margin: 0;
+  min-width: 0;
+}
+@media (max-width: 640px) {
+  body:has(.university-stages) #root header.sticky {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  body:has(.university-stages) #root header.sticky > div {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .university-program-study fieldset {
+    grid-template-columns: 1fr;
+  }
+}

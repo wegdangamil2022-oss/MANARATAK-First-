@@ -1,306 +1,859 @@
-import {AdmissionRequirementScoreEditor} from '../features/integration/AdmissionRequirementScoreEditor';
-import { FormEvent, useEffect, useState, useRef } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Globe2, Plus, Save, ShieldCheck, Trash2, Undo2, School, MapPin, Building2, Coins, House, Award, BookOpen } from 'lucide-react';
-import { adminApiClient } from '../api/client';
-import { canonicalPickerApi } from '../api/canonicalPickers';
-import { CanonicalPicker } from '../components/CanonicalPicker';
-import { UniversitySectionsEditor } from '../components/UniversitySectionsEditor';
-import { CanonicalCityPicker } from '../components/CanonicalCityPicker';
-
-interface CampusRow { id: string; sourceReferenceId?: string | null; name: string; }
-interface OrganizationRow { id: string; sourceReferenceId?: string | null; name: string; }
-interface RequirementRow {
-  id?: string;
-  internationalTestId: string;
-  testVariantId?: string | null;
-  testVersionId?: string | null;
-  minimumScore?: number | null;
-  status: string;
-  sectionScores?: Record<string, unknown> | null;
-  validityMetadata?: Record<string, unknown> | null;
-  restrictionMetadata?: Record<string, unknown> | null;
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import {
+  ArrowRight,
+  RefreshCw,
+  School,
+  Layers,
+  BookOpen,
+  Coins,
+  Award,
+  ShieldCheck,
+  Archive,
+  RotateCcw,
+  Globe,
+  ExternalLink,
+} from 'lucide-react';
+import {
+  UNIVERSITY_STAGE_CARDS,
+  UNIVERSITY_STAGE_NAMES,
+  type UniversityStageEvidence,
+} from '@manaratak/domain';
+import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
+import { reviewReasonHeaders } from '@manaratak/shared';
+import { useTranslation } from '../i18n/I18nProvider';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import {
+  UniversityStageCard,
+  universityField,
+  universityUrl,
+  type UniversityData,
+  type Commit,
+} from '../features/universities/UniversityStageCard';
+import { UniversityNormalizedCard } from '../features/universities/UniversityNormalizedCard';
+import { UniversityLocationCard } from '../features/universities/UniversityLocationCard';
+import { UniversityProgramsCard } from '../features/universities/UniversityProgramsCard';
+import { registerUniversityHistoryGuard } from '../features/universities/UniversityHistoryGuard';
+import { universityIssueLabels } from '../features/universities/UniversityLabels';
+import '../features/universities/university-stages.css';
+interface Snapshot {
+  university: UniversityData;
+  stages: UniversityStageEvidence[];
+  publicHref: string | null;
 }
-interface ProgramRow {
-  id?: string;
-  organizationUnitId?: string | null;
-  sourceReferenceId?: string | null;
-  sourceProgramName: string;
-  degreeLevelId?: string | null;
-  majorId?: string | null;
-  majorMappingState: string;
-  status: string;
-  campusIds: string[];
-  admissionRequirements: RequirementRow[];
-  metadata?: Record<string, unknown> | null;
-}
-
-interface PublicationReadinessIssue { code: string; message: string; field?: string; }
-interface PublicationReadiness {
+interface Readiness {
   ready: boolean;
-  blockingIssues: PublicationReadinessIssue[];
-  warnings: PublicationReadinessIssue[];
+  blockingIssues: Array<{ code: string; message: string; field?: string }>;
+  warnings: Array<{ code: string; message: string }>;
 }
-
-interface UniversityDetail {
-  [key: string]: unknown;
-  slug?: string;
-  country?: string | null;
-  city?: string | null;
-  id: string;
-  displayName: string;
-  countryReferenceId?: string | null;
-  regionReferenceId?: string | null;
-  cityReferenceId?: string | null;
-  status: string;
-  completenessStatus?: string;
-  campuses?: CampusRow[];
-  organizationUnits?: OrganizationRow[];
-  academicPrograms?: ProgramRow[];
+type Confirmation = {
+  message: string;
+  action: (reason: string) => void | Promise<void>;
+  reasonRequired: boolean;
+};
+const specialTuition = (row: Record<string, unknown>) =>
+  /MEDIC|ENGINEER|SPECIAL/i.test(
+    String(row.profileType ?? '') + ' ' + String(row.organizationUnitName ?? ''),
+  );
+const icons = [School, Layers, BookOpen, Coins, Award];
+function status(value: string, ar: boolean) {
+  const labels: Record<string, string> = {
+    IMPORTED: 'مستوردة',
+    READY_TO_REVIEW: 'جاهزة للمراجعة',
+    READY_TO_PUBLISH: 'جاهزة للنشر',
+    PUBLISHED: 'منشورة',
+    ARCHIVED: 'مؤرشفة',
+    REJECTED: 'مرفوضة',
+    COMPLETE: 'مكتملة وفق عقد الجامعة',
+    INCOMPLETE: 'غير مكتملة وفق عقد الجامعة',
+    NEEDS_REVIEW: 'تحتاج مراجعة',
+  };
+  return ar ? (labels[value] ?? 'حالة تتطلب مراجعة') : value.replaceAll('_', ' ');
 }
-
-const blankProgram = (): ProgramRow => ({
-  sourceReferenceId: `admin-program-${crypto.randomUUID()}`,
-  sourceProgramName: '',
-  degreeLevelId: null,
-  majorId: null,
-  majorMappingState: 'UNMAPPED',
-  status: 'DRAFT',
-  campusIds: [],
-  admissionRequirements: [],
-});
-
 export function UniversityRelationshipEditorPage() {
-  const { id = '' } = useParams();
-  const [university, setUniversity] = useState<UniversityDetail | null>(null);
-  const [countryReferenceId, setCountryReferenceId] = useState<string | null>(null);
-  const [regionReferenceId, setRegionReferenceId] = useState<string | null>(null);
-  const [cityReferenceId, setCityReferenceId] = useState<string | null>(null);
-  const [countryIso2, setCountryIso2] = useState('');
-  const [programs, setPrograms] = useState<ProgramRow[]>([]);
-  const [savedPrograms, setSavedPrograms] = useState<ProgramRow[]>([]);
-  const [sectionsDirty, setSectionsDirty] = useState(false);
-  const loadRequest = useRef(0);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
-  const [reviewReason, setReviewReason] = useState('');
-  const reviewHeaders = () => ({ 'X-Review-Reason': reviewReason.trim() });
-  const [readiness, setReadiness] = useState<PublicationReadiness | null>(null);
-
-  const refreshReadiness = async () => {
-    setReadiness(await adminApiClient.request<PublicationReadiness>(`/admin/universities/${encodeURIComponent(id)}/publication-readiness`).catch(() => null));
-  };
-  const refreshUniversity = async () => {
-    setUniversity(await adminApiClient.request<UniversityDetail>(`/admin/universities/${encodeURIComponent(id)}`));
-    await refreshReadiness();
-  };
-  const load = async () => {
-    const request = ++loadRequest.current;
-    const detail = await adminApiClient.request<UniversityDetail>(`/admin/universities/${encodeURIComponent(id)}`);
-    if (request !== loadRequest.current) return;
-    setUniversity(detail);
-    setCountryIso2('');
-    const readinessResult = await adminApiClient.request<PublicationReadiness>(`/admin/universities/${encodeURIComponent(id)}/publication-readiness`).catch(() => null);
-    setReadiness(readinessResult);
-    setCountryReferenceId(detail.countryReferenceId ?? null);
-    setRegionReferenceId(detail.regionReferenceId ?? null);
-    setCityReferenceId(detail.cityReferenceId ?? null);
-    setPrograms((detail.academicPrograms ?? []).filter((program) => program.status !== 'ARCHIVED').map((program) => ({ ...program, campusIds: program.campusIds ?? [], admissionRequirements: program.admissionRequirements ?? [] })));
-    setSavedPrograms((detail.academicPrograms ?? []).filter(program => program.status !== 'ARCHIVED').map(program => ({ ...program, campusIds: program.campusIds ?? [], admissionRequirements: program.admissionRequirements ?? [] })));
-    if (detail.countryReferenceId) {
-      const countries = await canonicalPickerApi.countries();
-      setCountryIso2(countries.find((item) => item.id === detail.countryReferenceId)?.code ?? '');
-    }
-  };
-
-  useEffect(() => { setUniversity(null); setSectionsDirty(false); load().catch((err) => setError(err instanceof Error ? err.message : 'Unable to load university.')); return () => { ++loadRequest.current; }; }, [id]);
-
-
-  const saveLocation = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!reviewReason.trim()) { setError('اكتب سبب التعديل أو المراجعة قبل الحفظ.'); return; }
-    if (!countryReferenceId) return setError('Country canonical relationship is required.');
-    setSaving(true); setError(''); setMessage('');
+  const { id = '' } = useParams(),
+    [params, setParams] = useSearchParams(),
+    { language, dir } = useTranslation(),
+    { hasPermission } = useAdminAuthorization();
+  const ar = language === 'ar';
+  const requested = Number(params.get('stage') ?? 1),
+    stage = Number.isInteger(requested) && requested >= 1 && requested <= 5 ? requested : 1;
+  const [data, setData] = useState<Snapshot | null>(null),
+    [readiness, setReadiness] = useState<Readiness | null>(null),
+    [busy, setBusy] = useState(false),
+    [loading, setLoading] = useState(true),
+    [error, setError] = useState(''),
+    [message, setMessage] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null),
+    [dirty, setDirtyState] = useState(false),
+    dirtyRef = useRef(false),
+    savingLock = useRef(false),
+    generation = useRef(0),
+    approvedLeave = useRef(false);
+  const [confirmation, setConfirmation] = useState<Confirmation | null>(null),
+    [pending, setPending] = useState<(() => void) | null>(null),
+    [decisionReason, setDecisionReason] = useState(''),
+    [dialogError, setDialogError] = useState(''),
+    [tool, setTool] = useState<string | null>(null);
+  const setDirty = useCallback((value: boolean) => {
+    dirtyRef.current = value;
+    setDirtyState(value);
+  }, []);
+  const externalBusy = useRef(false);
+  const setProgramBusy = useCallback((value: boolean) => {
+    externalBusy.current = value;
+    setBusy(value);
+  }, []);
+  const read = useCallback(async () => {
+    const snapshot = await adminApiClient.request<Snapshot>(
+      `/admin/universities/${encodeURIComponent(id)}/source-stages`,
+      { cache: 'no-store' },
+    );
+    if (snapshot.university.id !== id) throw Error('UNIVERSITY_OWNER_READ_MISMATCH');
+    return snapshot;
+  }, [id]);
+  const refresh = useCallback(async () => {
+    const current = ++generation.current;
+    setLoading(true);
+    setError('');
     try {
-      await adminApiClient.request<UniversityDetail>(`/admin/universities/${encodeURIComponent(id)}`, {
-        method: 'PATCH', headers: reviewHeaders(), body: JSON.stringify({ countryReferenceId, regionReferenceId, cityReferenceId }),
-      });
-      setUniversity(await adminApiClient.request<UniversityDetail>(`/admin/universities/${encodeURIComponent(id)}`)); await refreshReadiness(); setMessage('Canonical university location saved through the University owner API.');
-    } catch (err) { setError(err instanceof Error ? err.message : 'Unable to save location.'); }
-    finally { setSaving(false); }
-  };
-
-  const saveProgram = async (index: number) => {
-    const program = programs[index];
-    if (!reviewReason.trim()) { setError('اكتب سبب التعديل أو المراجعة قبل الحفظ.'); return; }
-    if (!program || !program.sourceProgramName.trim() || !program.degreeLevelId) {
-      setError('Every academic program needs a name and canonical Degree Level before saving.');
-      return;
-    }
-    if (program.admissionRequirements.some((requirement) => !requirement.internationalTestId)) {
-      setError('Every admission test requirement needs a canonical International Test.');
-      return;
-    }
-    setSaving(true); setError(''); setMessage('');
-    try {
-      const payload = {
-        sourceReferenceId: program.sourceReferenceId || null,
-        organizationUnitId: program.organizationUnitId || null,
-        sourceProgramName: program.sourceProgramName.trim(),
-        degreeLevelId: program.degreeLevelId,
-        majorId: program.majorId || null,
-        majorMappingState: program.majorId ? 'CANONICALLY_MAPPED' : 'UNMAPPED',
-        status: program.status || 'DRAFT',
-        campusIds: program.campusIds,
-        metadata: program.metadata || null,
-        admissionRequirements: program.admissionRequirements.map((requirement) => ({
-          internationalTestId: requirement.internationalTestId,
-          testVariantId: requirement.testVariantId || null,
-          testVersionId: requirement.testVersionId || null,
-          minimumScore: requirement.minimumScore ?? null,
-          status: requirement.status || 'REVIEW_REQUIRED',
-          sectionScores: requirement.sectionScores ?? null,
-          validityMetadata: requirement.validityMetadata ?? null,
-          restrictionMetadata: requirement.restrictionMetadata ?? null,
-        })),
-      };
-      const endpoint = program.id
-        ? `/admin/universities/${encodeURIComponent(id)}/academic-programs/${encodeURIComponent(program.id)}`
-        : `/admin/universities/${encodeURIComponent(id)}/academic-programs`;
-      const saved = await adminApiClient.request<UniversityDetail>(endpoint, {
-        method: program.id ? 'PUT' : 'POST',
-        headers: reviewHeaders(),
-        body: JSON.stringify(payload),
-      });
-      setUniversity(saved);
-      const readBack = await adminApiClient.request<UniversityDetail>(`/admin/universities/${encodeURIComponent(id)}`);
-      const persisted = (readBack.academicPrograms ?? []).find(item => program.id ? item.id === program.id : item.sourceReferenceId === program.sourceReferenceId);
-      if (!persisted) throw new Error('لم يظهر البرنامج في القراءة بعد الحفظ.');
-      const normalized = { ...persisted, campusIds: persisted.campusIds ?? [], admissionRequirements: persisted.admissionRequirements ?? [] };
-      setUniversity(readBack);
-      setPrograms(current => current.map((item, idx) => idx === index ? normalized : item));
-      setSavedPrograms(current => [...current.filter(item => item.id !== normalized.id), normalized]);
-      await refreshReadiness();
-      setMessage(program.id ? 'Academic program relationships updated without changing the canonical Program ID.' : 'Academic program created through the University owner API.');
-    } catch (err) { setError(err instanceof Error ? err.message : 'Unable to save academic program.'); }
-    finally { setSaving(false); }
-  };
-
-  const archiveProgram = async (index: number) => {
-    const program = programs[index];
-    if (!reviewReason.trim()) { setError('اكتب سبب التعديل أو المراجعة قبل الحفظ.'); return; }
-    if (!program) return;
-    if (!program.id) {
-      setPrograms((current) => current.filter((_, idx) => idx !== index));
-      return;
-    }
-    setSaving(true); setError(''); setMessage('');
-    try {
-      const saved = await adminApiClient.request<UniversityDetail>(
-        `/admin/universities/${encodeURIComponent(id)}/academic-programs/${encodeURIComponent(program.id)}`,
-        { method: 'DELETE', headers: reviewHeaders() },
-      );
-      setUniversity(saved);
-      setPrograms(current => current.filter((_, idx) => idx !== index));
-      setSavedPrograms(current => current.filter(item => item.id !== program.id));
-      await refreshReadiness();
-      setMessage('Academic program archived; its canonical ID was preserved for existing relationships.');
-    } catch (err) { setError(err instanceof Error ? err.message : 'Unable to archive academic program.'); }
-    finally { setSaving(false); }
-  };
-
-  const runLifecycleAction = async (action: 'mark-ready' | 'mark-publishable' | 'publish' | 'unpublish') => {
-    if (!reviewReason.trim()) { setError('اكتب سبب التعديل أو المراجعة قبل الحفظ.'); return; }
-    if (hasUnsavedChanges) { setError('احفظ تعديلات الأقسام والبرامج والموقع قبل تغيير حالة النشر.'); return; }
-    setSaving(true); setError(''); setMessage('');
-    try {
-      await adminApiClient.request(`/admin/universities/${encodeURIComponent(id)}/${action}`, { method: 'POST', headers: reviewHeaders() });
-      await load();
-      const labels: Record<string, string> = {
-        'mark-ready': 'University moved to READY_TO_REVIEW.',
-        'mark-publishable': 'University passed the publication gate and is READY_TO_PUBLISH.',
-        publish: 'University published. Public country, major and scholarship relationships now read only this published record.',
-        unpublish: 'University unpublished and removed from public university/relationship reads.',
-      };
-      setMessage(labels[action]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to change university publication state.');
+      const [snapshot, gate] = await Promise.all([
+        read(),
+        adminApiClient
+          .request<Readiness>(
+            `/admin/universities/${encodeURIComponent(id)}/publication-readiness`,
+            { cache: 'no-store' },
+          )
+          .catch(() => null),
+      ]);
+      if (current !== generation.current) return;
+      setData(snapshot);
+      setReadiness(gate);
+    } catch (e) {
+      if (current === generation.current) setError(e instanceof Error ? e.message : String(e));
     } finally {
-      setSaving(false);
+      if (current === generation.current) setLoading(false);
+    }
+  }, [id, read]);
+  const cancelReads = useCallback(() => {
+    generation.current++;
+  }, []);
+  useEffect(() => {
+    setData(null);
+    setEditingId(null);
+    setDirty(false);
+    void refresh();
+    return cancelReads;
+  }, [refresh, setDirty, cancelReads]);
+  const transition = (action: () => void) => {
+    if (externalBusy.current || savingLock.current) return;
+    if (dirtyRef.current) setPending(() => action);
+    else action();
+  };
+  const cancel = () =>
+    transition(() => {
+      setDirty(false);
+      setEditingId(null);
+    });
+  const requestEdit = (key: string) => {
+    transition(() => {
+      setDirty(false);
+      setEditingId(key);
+    });
+  };
+  const confirm = (
+    text: string,
+    action: (reason: string) => void | Promise<void>,
+    reasonRequired = false,
+  ) => {
+    const open = () => {
+      setDecisionReason('');
+      setDialogError('');
+      setConfirmation({ message: text, action, reasonRequired });
+    };
+    if (reasonRequired) transition(open);
+    else open();
+  };
+  const commit: Commit = async (path, method, body, reason) => {
+    if (!data || savingLock.current || !hasPermission('admin:universities:manage'))
+      throw Error('UNIVERSITY_OPERATION_UNAVAILABLE');
+    const revision = data.university.revision;
+    if (!Number.isSafeInteger(revision)) throw Error('UNIVERSITY_EXPECTED_REVISION_REQUIRED');
+    savingLock.current = true;
+    setBusy(true);
+    setMessage('');
+    try {
+      const saved = await adminApiClient.request<Partial<UniversityData>>(
+        `/admin/universities/${encodeURIComponent(id)}${path}`,
+        {
+          method,
+          headers: { 'If-Match': String(revision), ...reviewReasonHeaders(reason) },
+          idempotencyKey: createAdminIdempotencyKey(),
+          ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+        },
+      );
+      const snapshot = await read();
+      if (
+        snapshot.university.revision === revision ||
+        (saved.revision !== undefined && snapshot.university.revision !== saved.revision)
+      )
+        throw Error(
+          ar
+            ? 'أُرسل الحفظ وتعذر إثبات آخر نسخة؛ أعد قراءة السجل قبل المحاولة.'
+            : 'Save sent but latest revision could not be verified; reload before retrying.',
+        );
+      if (path.startsWith('/stage-cards/') && body && typeof body === 'object')
+        for (const [key, value] of Object.entries(
+          (body as { values: Record<string, unknown> }).values,
+        ))
+          if (JSON.stringify(universityField(snapshot.university, key)) !== JSON.stringify(value))
+            throw Error('UNIVERSITY_CARD_READBACK_MISMATCH');
+      setData(snapshot);
+      setDirty(false);
+      setEditingId(null);
+      setMessage(
+        ar
+          ? 'تم حفظ الوحدة وإعادة قراءتها؛ لم تُحفظ بطاقات أخرى ولم يحدث نشر تلقائي.'
+          : 'Unit saved and read back; other cards were not saved and publication was not automatic.',
+      );
+      setReadiness(
+        await adminApiClient
+          .request<Readiness>(
+            `/admin/universities/${encodeURIComponent(id)}/publication-readiness`,
+            { cache: 'no-store' },
+          )
+          .catch(() => null),
+      );
+    } finally {
+      savingLock.current = false;
+      setBusy(false);
     }
   };
-
-  const updateProgram = (index: number, patch: Partial<ProgramRow>) => setPrograms((current) => current.map((program, idx) => idx === index ? { ...program, ...patch } : program));
-
-  if (!university) return <div className="p-6 text-sm text-slate-600">{error || 'Loading university relationships…'}</div>;
-  const immutable = university.status === 'PUBLISHED';
-  const hasUnsavedChanges = sectionsDirty || countryReferenceId !== (university.countryReferenceId ?? null) || regionReferenceId !== (university.regionReferenceId ?? null) || cityReferenceId !== (university.cityReferenceId ?? null) || programs.some(program => JSON.stringify(program) !== JSON.stringify(savedPrograms.find(saved => program.id ? saved.id === program.id : saved.sourceReferenceId === program.sourceReferenceId)));
-
-  return <div dir="rtl" className="university-detail mx-auto max-w-6xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
-    <header className="rounded-3xl bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-lg sm:p-8">
-      <Link to="/universities" className="inline-flex items-center gap-2 text-xs font-bold text-[#F2CD78]"><ArrowLeft className="h-4 w-4" />العودة إلى دليل الجامعات</Link>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-4"><h1 className="min-w-0 break-words text-2xl font-black sm:text-3xl">{university.displayName}</h1><span className="rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold">{university.status}</span></div>
-      <p className="mt-3 text-sm leading-7 text-[#DDEFF2]">تفاصيل الجامعة، القبول والوثائق، الكليات والبرامج الأكاديمية، الرسوم والسكن والتصنيفات.</p>
-    </header>
-    <nav aria-label="أقسام تفاصيل الجامعة" className="grid grid-cols-2 gap-2 rounded-3xl border border-[#DDEFF2] bg-white p-4 shadow-sm sm:grid-cols-3 lg:grid-cols-5">
-      {[
-        ['identity','الهوية والوثائق',School],['location','الموقع الجغرافي',MapPin],['admissions','القبول والتقديم',Globe2],['accreditations','الاعتمادات',ShieldCheck],['campuses','الحرم الجامعي',MapPin],['organizationUnits','الكليات والأقسام',Building2],['programs','البرامج والاختبارات',BookOpen],['tuitionProfiles','الرسوم الدراسية',Coins],['accommodationProfiles','السكن والمعيشة',House],['rankings','التصنيفات',Award],
-      ].map(([key,title,Icon],index)=>{const SectionIcon=Icon as typeof School;return <a key={String(key)} href={'#university-section-'+key} className="inline-flex items-center gap-2 rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/40 px-3 py-3 text-xs font-bold text-[#142B5F] hover:bg-teal-50"><SectionIcon aria-hidden="true" className={'h-4 w-4 shrink-0 '+(['text-[#D6A43B]','text-[#142B5F]','text-[#0E7C86]'][index%3])} />{String(title)}</a>;})}
-    </nav>
-
-    <div className="rounded-2xl border border-[#DDEFF2] bg-white p-4 shadow-sm">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 font-black text-[#142B5F]"><ShieldCheck className="h-4 w-4 text-[#0E7C86]" />المراجعة والنشر</div>
-          <p className="mt-1 text-xs leading-6 text-[#203442]/65">النشر مشروط باكتمال البيانات وصحة العلاقات المعتمدة. استيراد الجامعة يحفظها للمراجعة.</p>
-          {readiness ? <div className="mt-3 text-xs">
-            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-black ${readiness.ready ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800'}`}>{readiness.ready ? <CheckCircle2 className="h-3.5 w-3.5" /> : <ShieldCheck className="h-3.5 w-3.5" />}{readiness.ready ? 'Publication gate ready' : `${readiness.blockingIssues.length} blocking issue(s)`}</span>
-            {readiness.blockingIssues.length ? <ul className="mt-2 space-y-1 text-amber-800">{readiness.blockingIssues.map((issue) => <li key={`${issue.code}:${issue.field ?? ''}`}>• {issue.code}{issue.field ? ` · ${issue.field}` : ''}</li>)}</ul> : null}
-            {readiness.warnings.length ? <ul className="mt-2 space-y-1 text-[#203442]/65">{readiness.warnings.map((issue) => <li key={`${issue.code}:${issue.field ?? ''}`}>• {issue.message}</li>)}</ul> : null}
-          </div> : null}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {university.status === 'IMPORTED' && <button type="button" disabled={saving || university.completenessStatus === 'INCOMPLETE'} onClick={() => void runLifecycleAction('mark-ready')} className="inline-flex items-center gap-2 rounded-xl border border-[#21A7B4]/35 bg-[#DDEFF2]/45 px-3 py-2 text-xs font-black text-[#142B5F] disabled:opacity-40"><ShieldCheck className="h-4 w-4" /> جاهز للمراجعة</button>}
-          {university.status === 'READY_TO_REVIEW' && <button type="button" disabled={saving || hasUnsavedChanges || university.completenessStatus !== 'COMPLETE'} onClick={() => void runLifecycleAction('mark-publishable')} className="inline-flex items-center gap-2 rounded-xl bg-[#0E7C86] px-3 py-2 text-xs font-black text-white disabled:opacity-40"><CheckCircle2 className="h-4 w-4" /> جاهز للنشر</button>}
-          {university.status === 'READY_TO_PUBLISH' && <button type="button" disabled={saving || hasUnsavedChanges || readiness?.ready !== true} onClick={() => void runLifecycleAction('publish')} className="inline-flex items-center gap-2 rounded-xl bg-[#142B5F] px-3 py-2 text-xs font-black text-white disabled:opacity-40"><Globe2 className="h-4 w-4" /> نشر للعامة</button>}
-          {university.status === 'PUBLISHED' && <button type="button" disabled={saving} onClick={() => void runLifecycleAction('unpublish')} className="inline-flex items-center gap-2 rounded-xl border border-[#D6A43B]/50 bg-[#FAF7F0] px-3 py-2 text-xs font-black text-[#142B5F] disabled:opacity-40"><Undo2 className="h-4 w-4" /> إلغاء النشر</button>}
-        </div>
+  useEffect(() => {
+    if (!dirty) return;
+    const historyIndex = window.history?.state?.idx;
+    let restoring = false;
+    const unload = (event: BeforeUnloadEvent) => {
+      if (!approvedLeave.current) {
+        event.preventDefault();
+        event.returnValue = '';
+      }
+    };
+    const pop = (event: PopStateEvent) => {
+      if (
+        approvedLeave.current ||
+        !Number.isSafeInteger(historyIndex) ||
+        !Number.isSafeInteger(event.state?.idx)
+      )
+        return;
+      event.stopImmediatePropagation();
+      if (restoring && event.state.idx === historyIndex) {
+        restoring = false;
+        return;
+      }
+      const delta = historyIndex - event.state.idx;
+      if (!delta) return;
+      restoring = true;
+      window.history.go(delta);
+      setPending(() => () => {
+        approvedLeave.current = true;
+        window.history.go(-delta);
+      });
+    };
+    const link = (event: MouseEvent) => {
+      const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null;
+      if (
+        !(anchor instanceof HTMLAnchorElement) ||
+        anchor.target === '_blank' ||
+        event.defaultPrevented ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey ||
+        anchor.href === location.href
+      )
+        return;
+      event.preventDefault();
+      event.stopPropagation();
+      setPending(() => () => {
+        approvedLeave.current = true;
+        window.location.assign(anchor.href);
+      });
+    };
+    const unregister = registerUniversityHistoryGuard(pop);
+    window.addEventListener('beforeunload', unload);
+    document.addEventListener('click', link, true);
+    return () => {
+      unregister();
+      window.removeEventListener('beforeunload', unload);
+      document.removeEventListener('click', link, true);
+    };
+  }, [dirty]);
+  useEffect(() => {
+    if (!confirmation && !pending) return;
+    const previous = document.activeElement as HTMLElement | null,
+      dialog = document.querySelector<HTMLElement>('[data-university-dialog]');
+    dialog?.focus();
+    const keyboard = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !savingLock.current) {
+        event.preventDefault();
+        setConfirmation(null);
+        setPending(null);
+      }
+      if (event.key !== 'Tab' || !dialog) return;
+      const nodes = [
+          ...dialog.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled)'),
+        ],
+        first = nodes[0],
+        last = nodes.at(-1);
+      if (
+        event.shiftKey &&
+        (document.activeElement === first || document.activeElement === dialog)
+      ) {
+        event.preventDefault();
+        last?.focus();
+      } else if (
+        !event.shiftKey &&
+        (document.activeElement === last || document.activeElement === dialog)
+      ) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+    document.addEventListener('keydown', keyboard);
+    return () => {
+      document.removeEventListener('keydown', keyboard);
+      previous?.focus();
+    };
+  }, [confirmation, pending]);
+  if (!data)
+    return (
+      <main className="university-stages" dir={dir}>
+        {error ? (
+          <>
+            <p role="alert">{error}</p>
+            <button onClick={() => void refresh()}>{ar ? 'إعادة المحاولة' : 'Retry'}</button>
+          </>
+        ) : (
+          <p>
+            {ar ? 'جارٍ تحميل الجامعة ومصادر مراحلها…' : 'Loading university and source stages…'}
+          </p>
+        )}
+      </main>
+    );
+  const u = data.university,
+    immutable = ['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(u.status),
+    disabled = immutable || !hasPermission('admin:universities:manage'),
+    evidence = data.stages.find((s) => s.stage === stage);
+  const sourceLabel = (item?: UniversityStageEvidence) =>
+    !item
+      ? ar
+        ? 'حالة المصدر غير متاحة'
+        : 'Source unavailable'
+      : item.sourceState === 'NOT_SUPPLIED'
+        ? ar
+          ? 'ملف المرحلة غير موفّر'
+          : 'Stage file not supplied'
+        : item.sourceState === 'AVAILABLE'
+          ? ar
+            ? 'ملف مصدر متوفر'
+            : 'Source file available'
+          : ar
+            ? 'تعذر التحقق من المصدر'
+            : 'Source check unavailable';
+  const common = (key: string) => ({
+    university: u,
+    ar,
+    busy,
+    disabled,
+    editing: editingId === key,
+    onEdit: () => requestEdit(key),
+    onCancel: cancel,
+    onDirty: setDirty,
+    commit,
+  });
+  const normalized = (
+    key: string,
+    kind: string,
+    title: string,
+    options: Partial<React.ComponentProps<typeof UniversityNormalizedCard>> = {},
+  ) => (
+    <UniversityNormalizedCard
+      key={key}
+      {...common(key)}
+      kind={kind}
+      title={title}
+      confirm={confirm}
+      {...options}
+    />
+  );
+  const action = (command: string, label: string) =>
+    confirm(
+      (ar ? 'تنفيذ «' : 'Run “') +
+        label +
+        (ar
+          ? '» على الجامعة كاملة. يتطلب سببًا ويسجل في التدقيق.'
+          : '” for the entire university. A reason and audit record are required.'),
+      (reason) => commit('/' + command, 'POST', {}, reason),
+      true,
+    );
+  return (
+    <main className="university-stages" dir={dir}>
+      <div className="university-links">
+        <Link to="/universities">
+          <ArrowRight size={16} /> {ar ? 'العودة إلى الجامعات' : 'Back to universities'}
+        </Link>
+        <button
+          type="button"
+          disabled={busy || loading}
+          onClick={() =>
+            transition(() => {
+              setEditingId(null);
+              setDirty(false);
+              void refresh();
+            })
+          }
+        >
+          <RefreshCw />
+          {ar ? 'تحديث السجل' : 'Refresh record'}
+        </button>
       </div>
-    </div>
-
-    <label className="block text-sm font-semibold text-[#142B5F]">سبب التعديل / المراجعة
-      <input value={reviewReason} onChange={event => setReviewReason(event.target.value)} maxLength={2000} placeholder="اكتب مبررًا واضحًا لكل عملية حفظ أو نشر" className="mt-2 w-full rounded-lg border border-[#DDEFF2] bg-white p-3 text-sm" />
-    </label>
-    {immutable ? <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">الجامعة منشورة حالياً. ألغِ نشرها أولاً لتعديل الأقسام والعلاقات، ثم احفظها وأعد نشرها.</div> : null}
-    {error ? <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
-    {message ? <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">{message}</div> : null}
-
-    <form id="university-section-location" onSubmit={saveLocation} className="grid scroll-mt-28 gap-4 rounded-2xl border border-[#DDEFF2] bg-white p-5 md:grid-cols-3">
-      <h2 className="flex items-center gap-2 font-black text-[#142B5F] md:col-span-3"><MapPin className="h-5 w-5 text-[#D6A43B]" aria-hidden="true" />الموقع الجغرافي والعلاقات المعتمدة</h2>
-      <CanonicalPicker label="Country" value={countryReferenceId} onChange={(next, option) => { setCountryReferenceId(next); setCountryIso2(option?.code ?? ''); setRegionReferenceId(null); setCityReferenceId(null); }} load={() => canonicalPickerApi.countries()} reloadKey="university-country" disabled={saving || immutable} />
-      <CanonicalPicker label="Region" value={regionReferenceId} onChange={(next) => { setRegionReferenceId(next); setCityReferenceId(null); }} load={() => canonicalPickerApi.regions(countryIso2 || undefined)} reloadKey={`university-regions:${countryIso2}`} optional disabled={saving || immutable || !countryIso2} />
-      <CanonicalCityPicker countryIso2Code={countryIso2} regionId={regionReferenceId} value={cityReferenceId} rawLabel={university.city ?? ''} onChange={setCityReferenceId} disabled={saving || immutable} />
-      <div className="md:col-span-3"><button disabled={saving || immutable || !countryReferenceId} className="inline-flex items-center gap-2 rounded-lg bg-[#0E7C86] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"><Save className="h-4 w-4" /> Save canonical location</button></div>
-    </form>
-
-    <UniversitySectionsEditor key={id} id={id} initial={university} reviewReason={reviewReason} disabled={saving || immutable} onDirtyChange={setSectionsDirty} onSaved={refreshUniversity} />
-    {hasUnsavedChanges && <p className="text-sm font-bold text-amber-700">توجد تعديلات غير محفوظة؛ احفظ كل قسم قبل النشر.</p>}
-    {university.status==='PUBLISHED' && university.slug && <a href={`/universities/${university.slug}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-[#0E7C86]">عرض الجامعة في الصفحة العامة</a>}
-    <section id="university-section-programs" className="scroll-mt-28 space-y-4 rounded-2xl border border-[#DDEFF2] bg-white p-5">
-      <div className="flex items-center justify-between"><div><h3 className="font-bold">Academic programs</h3><p className="text-xs text-slate-500">Program → Degree Level / Major / International Test. Each program is saved independently to preserve its canonical Program ID; remove archives the program instead of hard-deleting it.</p></div><button type="button" disabled={saving || immutable} onClick={() => setPrograms((current) => [...current, blankProgram()])} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm"><Plus className="h-4 w-4" /> Program</button></div>
-      {programs.map((program, index) => <fieldset disabled={saving || immutable} key={program.id ?? program.sourceReferenceId ?? index} className="space-y-4 rounded-xl border border-[#DDEFF2] p-4">
-        <div className="flex gap-3"><label className="flex-1 text-xs font-medium">Program name<input value={program.sourceProgramName} onChange={(event) => updateProgram(index, { sourceProgramName: event.target.value })} className="mt-1 w-full rounded-lg border px-3 py-2 text-sm" /></label><button type="button" title="Save program" disabled={saving || immutable} onClick={() => saveProgram(index)} className="self-end rounded-lg border border-[#21A7B4]/35 p-2 text-[#0E7C86] disabled:opacity-50"><Save className="h-4 w-4" /></button><button type="button" title={program.id ? 'Archive program' : 'Remove unsaved program'} disabled={saving || immutable} onClick={() => archiveProgram(index)} className="self-end rounded-lg border border-red-200 p-2 text-red-600 disabled:opacity-50"><Trash2 className="h-4 w-4" /></button></div>
-        <label className="text-xs font-bold">الكلية / القسم<select value={program.organizationUnitId ?? ''} onChange={event=>updateProgram(index,{organizationUnitId:event.target.value||null})} className="mt-1 w-full rounded-lg border p-2"><option value="">غير محدد</option>{(university.organizationUnits ?? []).map(unit=><option key={unit.id} value={unit.id}>{unit.name}</option>)}</select></label>
-        <label className="text-xs font-bold">حالة ظهور البرنامج<select value={program.status} onChange={event=>updateProgram(index,{status:event.target.value})} className="mt-1 w-full rounded-lg border p-2">{['DRAFT','REVIEW_REQUIRED','ACTIVE','INACTIVE'].map(status=><option key={status}>{status}</option>)}</select></label>
-        <div className="grid gap-3 md:grid-cols-2"><CanonicalPicker label="Degree Level" value={program.degreeLevelId} onChange={(next) => updateProgram(index, { degreeLevelId: next })} load={() => canonicalPickerApi.degreeLevels()} reloadKey="university-degree-levels" /><CanonicalPicker label="Major" value={program.majorId} onChange={(next) => updateProgram(index, { majorId: next, majorMappingState: next ? 'CANONICALLY_MAPPED' : 'UNMAPPED' })} load={() => canonicalPickerApi.majors()} reloadKey="university-majors" optional /></div>
-        {!program.majorId && <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-          لا يتم إنشاء تخصص معتمد تلقائيًا. يُعرض اسم البرنامج غير المرتبط ومصدره في مسار مراجعة القسم 9.
-          <Link to="/majors" className="mr-2 font-bold underline">فتح قائمة التخصصات الجديدة</Link>
-        </p>}
-        {(university.campuses ?? []).length ? <fieldset className="rounded-lg border p-3"><legend className="px-1 text-xs font-semibold">Campuses</legend><div className="flex flex-wrap gap-3">{(university.campuses ?? []).map((campus) => <label key={campus.id} className="text-xs"><input type="checkbox" className="mr-1" checked={program.campusIds.includes(campus.id)} onChange={(event) => updateProgram(index, { campusIds: event.target.checked ? [...program.campusIds, campus.id] : program.campusIds.filter((value) => value !== campus.id) })} />{campus.name}</label>)}</div></fieldset> : null}
-        <div className="space-y-3"><div className="flex items-center justify-between"><h4 className="text-sm font-semibold">Admission test requirements</h4><button type="button" onClick={() => updateProgram(index, { admissionRequirements: [...program.admissionRequirements, { internationalTestId: '', minimumScore: null, status: 'REVIEW_REQUIRED' }] })} className="text-xs font-bold text-[#0E7C86]">+ Test requirement</button></div>{program.admissionRequirements.map((requirement, requirementIndex) => <div key={requirement.id ?? requirementIndex} className="grid items-end gap-3 rounded-lg bg-slate-50 p-3 md:grid-cols-[1fr_160px_auto]"><CanonicalPicker label="International Test" value={requirement.internationalTestId} onChange={(next) => updateProgram(index, { admissionRequirements: program.admissionRequirements.map((item, idx) => idx === requirementIndex ? { ...item, internationalTestId: next ?? '',testVariantId:null,testVersionId:null,minimumScore:null,sectionScores:null } : item) })} load={() => canonicalPickerApi.tests()} reloadKey="university-tests" /><label className="text-xs font-medium">حالة شرط الاختبار<select value={requirement.status} onChange={event=>updateProgram(index,{admissionRequirements:program.admissionRequirements.map((item,idx)=>idx===requirementIndex?{...item,status:event.target.value}:item)})} className="mt-1 w-full rounded-lg border p-2">{['DRAFT','REVIEW_REQUIRED','ACTIVE','INACTIVE'].map(status=><option key={status}>{status}</option>)}</select></label><label className="text-xs font-medium">Minimum score<input type="number" step="0.01" value={requirement.minimumScore ?? ''} onChange={(event) => updateProgram(index, { admissionRequirements: program.admissionRequirements.map((item, idx) => idx === requirementIndex ? { ...item, minimumScore: event.target.value === '' ? null : Number(event.target.value) } : item) })} className="mt-1 w-full rounded-lg border px-3 py-2 text-sm" /></label><button type="button" onClick={() => updateProgram(index, { admissionRequirements: program.admissionRequirements.filter((_, idx) => idx !== requirementIndex) })} className="rounded-lg border border-red-200 p-2 text-red-600"><Trash2 className="h-4 w-4" /></button><AdmissionRequirementScoreEditor requirement={requirement} onChange={patch=>updateProgram(index,{admissionRequirements:program.admissionRequirements.map((item,idx)=>idx===requirementIndex?{...item,...patch}:item)})}/></div>)}</div>
-      </fieldset>)}
-    </section>
-  </div>;
+      <header className="university-top">
+        <div>
+          <h1>
+            {String(
+              (u.localizedNames as Record<string, string> | undefined)?.[language] ?? u.displayName,
+            )}
+          </h1>
+          <p>
+            {String(u.country ?? (ar ? 'دولة غير محددة' : 'Country unspecified'))} · {u.publicId} ·{' '}
+            {status(u.status, ar)}
+          </p>
+          <small>{status(String(u.completenessStatus ?? ''), ar)}</small>
+        </div>
+        <div className="university-actions">
+          {u.status === 'IMPORTED' && (
+            <button
+              disabled={busy || dirty || u.completenessStatus === 'INCOMPLETE'}
+              onClick={() => action('mark-ready', ar ? 'جاهزة للمراجعة' : 'Ready for review')}
+            >
+              <ShieldCheck />
+              {ar ? 'جاهزة للمراجعة' : 'Ready for review'}
+            </button>
+          )}
+          {u.status === 'READY_TO_REVIEW' && (
+            <button
+              disabled={busy || dirty || u.completenessStatus !== 'COMPLETE'}
+              onClick={() => action('mark-publishable', ar ? 'جاهزة للنشر' : 'Ready to publish')}
+            >
+              <ShieldCheck />
+              {ar ? 'جاهزة للنشر' : 'Ready to publish'}
+            </button>
+          )}
+          {u.status === 'READY_TO_PUBLISH' && (
+            <button
+              disabled={busy || dirty || readiness?.ready !== true}
+              onClick={() => action('publish', ar ? 'نشر الجامعة' : 'Publish university')}
+            >
+              <Globe />
+              {ar ? 'نشر الجامعة' : 'Publish university'}
+            </button>
+          )}
+          {u.status === 'PUBLISHED' && (
+            <button
+              disabled={busy || dirty}
+              onClick={() => action('unpublish', ar ? 'إلغاء النشر' : 'Unpublish')}
+            >
+              <RotateCcw />
+              {ar ? 'إلغاء النشر' : 'Unpublish'}
+            </button>
+          )}
+          {!['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(u.status) && (
+            <>
+              <button
+                disabled={busy || dirty}
+                onClick={() => action('archive', ar ? 'أرشفة الجامعة' : 'Archive university')}
+              >
+                <Archive />
+                {ar ? 'أرشفة الجامعة' : 'Archive university'}
+              </button>
+              <button
+                disabled={busy || dirty}
+                onClick={() => action('reject', ar ? 'رفض وإيقاف المراجعة' : 'Reject review')}
+              >
+                {ar ? 'رفض المراجعة' : 'Reject review'}
+              </button>
+            </>
+          )}
+          {['ARCHIVED', 'REJECTED'].includes(u.status) && (
+            <button
+              disabled={busy || dirty}
+              onClick={() => action('restore', ar ? 'استعادة للمراجعة' : 'Restore to review')}
+            >
+              <RotateCcw />
+              {ar ? 'استعادة للمراجعة' : 'Restore to review'}
+            </button>
+          )}
+          {data.publicHref && universityUrl(location.origin + data.publicHref) && (
+            <a href={data.publicHref} target="_blank" rel="noopener noreferrer">
+              <ExternalLink />
+              {ar ? 'فتح الصفحة العامة' : 'Open public page'}
+            </a>
+          )}
+        </div>
+      </header>
+      {immutable && (
+        <p className="university-notice">
+          {ar
+            ? 'تعديل المحتوى مقفل وفق حالة الجامعة. إلغاء النشر أو الاستعادة يتم بإجراء صريح دون نشر تلقائي.'
+            : 'Content editing is locked by the university state. Unpublishing or restoration requires an explicit action; publication is never automatic.'}
+        </p>
+      )}
+      <section
+        className="university-stage-status"
+        aria-label={ar ? 'جاهزية الجامعة' : 'University readiness'}
+      >
+        <h2>
+          <ShieldCheck />
+          {ar ? 'الجاهزية' : 'Readiness'}
+        </h2>
+        {readiness ? (
+          <>
+            <p>
+              {readiness.ready
+                ? ar
+                  ? 'اجتازت فحص الجاهزية الحالي؛ لا يعني ذلك نشرها.'
+                  : 'Current readiness check passed; this does not publish the record.'
+                : ar
+                  ? 'غير جاهزة للنشر؛ راجع البنود التالية.'
+                  : 'Not ready for publication; review the following items.'}
+            </p>
+            {readiness.blockingIssues.map((issue) => (
+              <p key={issue.code + issue.field}>
+                {ar ? 'يتطلب مراجعة: ' : 'Review required: '}
+                {ar ? (universityIssueLabels[issue.code] ?? issue.code) : issue.message}
+              </p>
+            ))}
+            {readiness.warnings.map((issue) => (
+              <p key={issue.code}>
+                {ar ? 'تنبيه: ' + (universityIssueLabels[issue.code] ?? issue.code) : issue.message}
+              </p>
+            ))}
+          </>
+        ) : (
+          <p>
+            {ar
+              ? 'تعذر التحقق من الجاهزية؛ النشر غير متاح.'
+              : 'Readiness unavailable; publication is disabled.'}
+          </p>
+        )}
+      </section>
+      {error && <p role="alert">{error}</p>}
+      {message && <p role="status">{message}</p>}
+      {dirty && (
+        <p className="university-notice">
+          {ar ? 'تعديلات غير محفوظة في البطاقة الحالية.' : 'Unsaved changes in the current card.'}
+        </p>
+      )}
+      <nav
+        className="university-stage-tabs"
+        role="tablist"
+        aria-label={ar ? 'مراحل مصادر الجامعة' : 'University source stages'}
+        onKeyDown={(event) => {
+          const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+          if (!keys.includes(event.key)) return;
+          event.preventDefault();
+          const buttons = [
+            ...event.currentTarget.querySelectorAll<HTMLButtonElement>('[role=tab]'),
+          ];
+          const offset = event.key === 'ArrowRight' ? (ar ? -1 : 1) : ar ? 1 : -1;
+          const index =
+            event.key === 'Home' ? 0 : event.key === 'End' ? 4 : (stage - 1 + offset + 5) % 5;
+          buttons[index]?.focus();
+          buttons[index]?.click();
+        }}
+      >
+        {UNIVERSITY_STAGE_NAMES.map((name, index) => {
+          const number = index + 1,
+            Icon = icons[index];
+          return (
+            <button
+              type="button"
+              key={number}
+              role="tab"
+              id={'university-stage-' + number}
+              aria-controls="university-stage-content"
+              aria-selected={stage === number}
+              tabIndex={stage === number ? 0 : -1}
+              disabled={busy}
+              onClick={() =>
+                transition(() => {
+                  setDirty(false);
+                  setEditingId(null);
+                  const next = new URLSearchParams(params);
+                  next.set('stage', String(number));
+                  setParams(next);
+                })
+              }
+            >
+              <strong>
+                <Icon />
+                {String(number).padStart(2, '0')} {name[ar ? 0 : 1]}
+                {dirty && stage === number ? ' •' : ''}
+              </strong>
+              <small>{sourceLabel(data.stages.find((s) => s.stage === number))}</small>
+            </button>
+          );
+        })}
+      </nav>
+      <div className="university-stage-status">
+        <h2>{UNIVERSITY_STAGE_NAMES[stage - 1][ar ? 0 : 1]}</h2>
+        <p>
+          {sourceLabel(evidence)} ·{' '}
+          {evidence?.importState === 'IMPORTED'
+            ? ar
+              ? 'يوجد دليل استيراد لهذه المرحلة'
+              : 'Owner import evidence exists'
+            : ar
+              ? 'حالة الاستيراد غير متاحة'
+              : 'Import state unavailable'}
+        </p>
+        {evidence?.sourceFile && (
+          <p>
+            {ar ? 'الملف: ' : 'File: '}
+            {evidence.sourceFile.split('/').at(-1)}
+          </p>
+        )}
+        {evidence?.importedAt && (
+          <p>
+            {ar ? 'آخر استيراد موثق: ' : 'Last evidenced import: '}
+            {evidence.importedAt}
+          </p>
+        )}
+        {evidence?.issues.map((code) => (
+          <p key={code} role="alert">
+            {ar ? 'ملاحظة مصدر تحتاج مراجعة: ' : 'Source review issue: '}
+            {ar ? (universityIssueLabels[code] ?? code) : code}
+          </p>
+        ))}
+        <Link to={'/review-queue?search=' + encodeURIComponent(u.publicId)}>
+          {ar ? 'فتح سجل المراجعة' : 'Open review workspace'}
+        </Link>{' '}
+        ·{' '}
+        <Link to="/imports/universities">
+          {ar ? 'مركز استيراد الجامعات' : 'University import center'}
+        </Link>
+      </div>
+      <div
+        id="university-stage-content"
+        role="tabpanel"
+        aria-labelledby={'university-stage-' + stage}
+      >
+        {UNIVERSITY_STAGE_CARDS.filter((card) => card.stage === stage).map((card) => (
+          <UniversityStageCard
+            key={card.id}
+            definition={card}
+            evidence={evidence}
+            {...common(card.id)}
+          >
+            {card.id === 'basic-location' && <UniversityLocationCard {...common('location')} />}
+            {card.id === 'fees-general' &&
+              normalized(
+                'tuition-general',
+                'tuitionProfiles',
+                ar ? 'الرسوم العامة المعتمدة' : 'Canonical general tuition',
+                { embedded: true, filter: (row) => !specialTuition(row) },
+              )}
+            {card.id === 'fees-special' &&
+              normalized(
+                'tuition-special',
+                'tuitionProfiles',
+                ar ? 'الرسوم التخصصية المعتمدة' : 'Canonical specialized tuition',
+                { embedded: true, filter: specialTuition },
+              )}
+            {card.id === 'accommodation' &&
+              normalized(
+                'canonical-accommodation',
+                'accommodationProfiles',
+                ar ? 'السكن المعتمد' : 'Canonical accommodation',
+                {
+                  embedded: true,
+                  fieldKeys: [
+                    'accommodationAvailable',
+                    'internationalEligible',
+                    'typicalCost',
+                    'currencyCode',
+                    'currencyReferenceId',
+                  ],
+                },
+              )}
+            {card.id === 'living' &&
+              normalized(
+                'canonical-living',
+                'accommodationProfiles',
+                ar ? 'المعيشة المعتمدة' : 'Canonical living costs',
+                {
+                  embedded: true,
+                  fieldKeys: [
+                    'averageMonthlyLivingCost',
+                    'livingCostCurrencyCode',
+                    'livingCostCurrencyReferenceId',
+                    'costVariationNote',
+                  ],
+                },
+              )}
+          </UniversityStageCard>
+        ))}
+        {stage === 3 && (
+          <UniversityProgramsCard
+            university={u}
+            ar={ar}
+            editingId={editingId}
+            busy={busy}
+            disabled={disabled}
+            requestEdit={requestEdit}
+            cancel={cancel}
+            onDirty={setDirty}
+            commit={commit}
+            confirm={confirm}
+            onSaved={async () => {
+              setDirty(false);
+              setEditingId(null);
+              await refresh();
+            }}
+            onBusyChange={setProgramBusy}
+          />
+        )}
+        {stage === 5 &&
+          ['QS', 'THE', 'ARWU'].map((provider) =>
+            normalized('rank-' + provider, 'rankings', provider, { provider }),
+          )}
+      </div>
+      <section className="university-stage-status">
+        <h2>
+          {ar
+            ? 'أدوات مؤسسية إضافية — خارج حقول ملفات المراحل'
+            : 'Additional institutional tools — separate from source-file fields'}
+        </h2>
+        <div className="university-actions">
+          {[
+            ['campuses', 'الحرم الجامعي', 'Campuses'],
+            ['organizationUnits', 'الكليات والأقسام', 'Faculties and departments'],
+            ['accreditations', 'الاعتمادات المؤسسية', 'Institutional accreditations'],
+          ].map(([key, label, en]) => (
+            <button
+              type="button"
+              key={key}
+              aria-pressed={tool === key}
+              onClick={() =>
+                transition(() => {
+                  setDirty(false);
+                  setEditingId(null);
+                  setTool(tool === key ? null : key);
+                })
+              }
+            >
+              {ar ? label : en}
+            </button>
+          ))}
+        </div>
+      </section>
+      {tool &&
+        normalized(
+          'tool-' + tool,
+          tool,
+          ar
+            ? tool === 'campuses'
+              ? 'الحرم الجامعي'
+              : tool === 'organizationUnits'
+                ? 'الكليات والأقسام'
+                : 'الاعتمادات المؤسسية'
+            : tool,
+        )}
+      <details>
+        <summary>{ar ? 'أدلة تقنية للمراحل' : 'Technical stage evidence'}</summary>
+        {data.stages.map((row) => (
+          <p key={row.stage}>
+            {row.stage} · {row.sourceHash ?? '—'} · {ar ? 'صف المصدر: ' : 'Source row: '}
+            {row.sourceRow ?? '—'} · {row.sourceRecordId ?? '—'}
+          </p>
+        ))}
+      </details>
+      {(pending || confirmation) && (
+        <div className="university-dialog-backdrop">
+          <section
+            className="university-dialog"
+            data-university-dialog
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="university-dialog-title"
+            tabIndex={-1}
+          >
+            <h2 id="university-dialog-title">
+              {pending
+                ? ar
+                  ? 'تغييرات غير محفوظة'
+                  : 'Unsaved changes'
+                : ar
+                  ? 'تأكيد الإجراء'
+                  : 'Confirm action'}
+            </h2>
+            <p>
+              {pending
+                ? ar
+                  ? 'هل تريد تجاهل مسودة البطاقة والمتابعة؟ لن تتغير النسخة المحفوظة.'
+                  : 'Discard this card draft and continue? The saved version remains unchanged.'
+                : confirmation?.message}
+            </p>
+            {confirmation?.reasonRequired && (
+              <label>
+                {ar ? 'سبب القرار' : 'Decision reason'}
+                <input
+                  value={decisionReason}
+                  onChange={(e) => setDecisionReason(e.target.value)}
+                  maxLength={2000}
+                />
+              </label>
+            )}
+            {dialogError && <p role="alert">{dialogError}</p>}
+            <div className="university-actions">
+              <button
+                disabled={busy || (!!confirmation?.reasonRequired && !decisionReason.trim())}
+                onClick={() => {
+                  if (pending) {
+                    const action = pending;
+                    setPending(null);
+                    setDirty(false);
+                    setEditingId(null);
+                    action();
+                  } else if (confirmation) {
+                    void Promise.resolve()
+                      .then(() => confirmation.action(decisionReason))
+                      .then(() => setConfirmation(null))
+                      .catch((e) => setDialogError(e instanceof Error ? e.message : String(e)));
+                  }
+                }}
+              >
+                {pending
+                  ? ar
+                    ? 'تجاهل والمتابعة'
+                    : 'Discard and continue'
+                  : ar
+                    ? 'تأكيد'
+                    : 'Confirm'}
+              </button>
+              <button
+                disabled={busy}
+                onClick={() => {
+                  setPending(null);
+                  setConfirmation(null);
+                }}
+              >
+                {pending ? (ar ? 'متابعة التحرير' : 'Keep editing') : ar ? 'إلغاء' : 'Cancel'}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+    </main>
+  );
 }

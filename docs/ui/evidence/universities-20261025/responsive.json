@@ -1,0 +1,41 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "measurements": [
+    {
+      "font": "Cairo, sans-serif",
+      "scrollWidth": 1425,
+      "tabs": 5,
+      "titleSize": "22px",
+      "width": 1440
+    },
+    {
+      "font": "Cairo, sans-serif",
+      "scrollWidth": 1265,
+      "tabs": 5,
+      "titleSize": "22px",
+      "width": 1280
+    },
+    {
+      "font": "Cairo, sans-serif",
+      "scrollWidth": 753,
+      "tabs": 5,
+      "titleSize": "22px",
+      "width": 768
+    },
+    {
+      "font": "Cairo, sans-serif",
+      "scrollWidth": 384,
+      "tabs": 5,
+      "titleSize": "21px",
+      "width": 390
+    },
+    {
+      "font": "Cairo, sans-serif",
+      "scrollWidth": 384,
+      "tabs": 5,
+      "titleSize": "21px",
+      "width": 360
+    }
+  ],
+  "originalDatabaseTouched": false
+}

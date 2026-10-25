@@ -1,4 +1,4 @@
-import {SecurityMiddlewareFactory} from '../../security/SecurityMiddlewareFactory.js';
+import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory.js';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import {
@@ -7,6 +7,7 @@ import {
   UpdateUniversityDto,
 } from '@manaratak/domain';
 import { AdminUniversityUseCases } from '@manaratak/application';
+import { readReviewReasonHeader } from '@manaratak/shared';
 
 export class UniversityAdminRouter {
   public static create(cradle: { adminUniversityUseCases: AdminUniversityUseCases }): Router {
@@ -20,12 +21,21 @@ export class UniversityAdminRouter {
     const mutationContext = (req: Request) => {
       if (!req.authUserId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
       const rawRevision = req.get('If-Match');
-      const expectedRevision = rawRevision && /^(?:"[0-9]+"|[0-9]+)$/.test(rawRevision)
-        ? Number(rawRevision.replace(/"/g, '')) : undefined;
-      if (req.params.id && !Number.isSafeInteger(expectedRevision)) throw new Error('UNIVERSITY_EXPECTED_REVISION_REQUIRED');
+      const expectedRevision =
+        rawRevision && /^(?:"[0-9]+"|[0-9]+)$/.test(rawRevision)
+          ? Number(rawRevision.replace(/"/g, ''))
+          : undefined;
+      if (req.params.id && !Number.isSafeInteger(expectedRevision))
+        throw new Error('UNIVERSITY_EXPECTED_REVISION_REQUIRED');
       return {
         expectedRevision,
-        reason: reasonSchema.parse(req.get('X-Review-Reason') ?? z.object({ reason: z.string().optional() }).strip().parse(req.body ?? {}).reason),
+        reason: reasonSchema.parse(
+          readReviewReasonHeader(req.get('X-Review-Reason'), req.get('X-Review-Reason-Encoding')) ??
+            z
+              .object({ reason: z.string().optional() })
+              .strip()
+              .parse(req.body ?? {}).reason,
+        ),
         actorId: req.authUserId,
         actorType: 'IDENTITY',
         correlationId:
@@ -35,50 +45,128 @@ export class UniversityAdminRouter {
       };
     };
 
-    const listQuerySchema = z.object({
-      countOnly: z.enum(['true', 'false']).transform(value => value === 'true').optional(),
-      status: z.preprocess(value => value === '' || value === 'all' || value === 'الكل' ? undefined : value, z.nativeEnum(UniversityStatus).optional()),
-      completenessStatus: z.preprocess(value => value === '' || value === 'all' || value === 'الكل' ? undefined : value, z.nativeEnum(UniversityImportCompletenessState).optional()),
-      sort:z.enum(['CREATED_DESC','UPDATED_DESC','NAME_ASC']).optional(),
-      institutionType:z.enum(['UNIVERSITY','COLLEGE','INSTITUTE','ACADEMY','OTHER']).optional(),
-      countryReferenceId: z.string().min(1).optional(),
-      regionReferenceId: z.string().min(1).optional(),
-      cityReferenceId: z.string().min(1).optional(),
-      search: z.string().trim().min(1).max(200).optional(),
-      page: z.coerce.number().int().min(1).default(1),
-      pageSize: z.coerce.number().int().min(1).max(100).default(50),
-    }).strict();
+    const listQuerySchema = z
+      .object({
+        countOnly: z
+          .enum(['true', 'false'])
+          .transform((value) => value === 'true')
+          .optional(),
+        status: z.preprocess(
+          (value) => (value === '' || value === 'all' || value === 'الكل' ? undefined : value),
+          z.nativeEnum(UniversityStatus).optional(),
+        ),
+        completenessStatus: z.preprocess(
+          (value) => (value === '' || value === 'all' || value === 'الكل' ? undefined : value),
+          z.nativeEnum(UniversityImportCompletenessState).optional(),
+        ),
+        sort: z.enum(['CREATED_DESC', 'UPDATED_DESC', 'NAME_ASC']).optional(),
+        institutionType: z
+          .enum(['UNIVERSITY', 'COLLEGE', 'INSTITUTE', 'ACADEMY', 'OTHER'])
+          .optional(),
+        countryReferenceId: z.string().min(1).optional(),
+        regionReferenceId: z.string().min(1).optional(),
+        cityReferenceId: z.string().min(1).optional(),
+        search: z.string().trim().min(1).max(200).optional(),
+        page: z.coerce.number().int().min(1).default(1),
+        pageSize: z.coerce.number().int().min(1).max(100).default(50),
+      })
+      .strict();
 
-    const organizationUnitListQuerySchema = z.object({
-      universityId: z.string().min(1).optional(),
-      unitType: z.enum(['FACULTY', 'SCHOOL', 'COLLEGE', 'DEPARTMENT']).optional(),
-      status: z.string().trim().min(1).optional(),
-      search: z.string().trim().min(1).max(200).optional(),
-      page: z.coerce.number().int().min(1).default(1),
-      pageSize: z.coerce.number().int().min(1).max(100).default(50),
-    }).strict();
+    const organizationUnitListQuerySchema = z
+      .object({
+        universityId: z.string().min(1).optional(),
+        unitType: z.enum(['FACULTY', 'SCHOOL', 'COLLEGE', 'DEPARTMENT']).optional(),
+        status: z.string().trim().min(1).optional(),
+        search: z.string().trim().min(1).max(200).optional(),
+        page: z.coerce.number().int().min(1).default(1),
+        pageSize: z.coerce.number().int().min(1).max(100).default(50),
+      })
+      .strict();
 
-    const webUrl=z.string().url().refine(value=>{const url=new URL(value);return ['https:','http:'].includes(url.protocol)&&!url.username&&!url.password;},'HTTP(S) URL required');
-    router.get('/:id/source-stages',asyncHandler(async(req:Request,res:Response)=>{
-      res.setHeader('Cache-Control','no-store');
-      res.json(await adminUniversityUseCases.getSourceStages(req.params.id));
-    }));
-    router.put('/:id/stage-cards/:cardId',asyncHandler(async(req:Request,res:Response)=>{
-      const input=z.object({values:z.record(z.string(),z.unknown()),proof:z.object({sourceUrl:z.string().url(),verifiedAt:z.string().datetime()}).strict()}).strict().parse(req.body);
-      const saved=await adminUniversityUseCases.saveStageCard(req.params.id,req.params.cardId,input.values,input.proof,mutationContext(req));
-      res.setHeader('X-Entity-Revision',String(saved.revision));res.json(saved);
-    }));
-    router.post('/:id/restore',asyncHandler(async(req:Request,res:Response)=>{
-      await adminUniversityUseCases.restore(req.params.id,mutationContext(req));res.json({success:true});
-    }));
-    router.post('/:id/academic-programs/:programId/restore',asyncHandler(async(req:Request,res:Response)=>{
-      res.json(await adminUniversityUseCases.restoreAcademicProgram(req.params.id,req.params.programId,mutationContext(req)));
-    }));
-    const httpsSource=z.string().url().refine(value=>{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password;},'HTTPS source required');
-    router.post('/',SecurityMiddlewareFactory.createAdminPermissionGuard('admin:universities:manage'),asyncHandler(async(req:Request,res:Response)=>{
-      const input=z.object({displayName:z.string().trim().min(1).max(300),officialWebsite:httpsSource,sourceUri:httpsSource,sourceHash:z.string().regex(/^[a-f0-9]{64}$/i),country:z.string().trim().max(200).optional(),countryReferenceId:z.string().uuid().optional(),reason:reasonSchema}).strict().parse(req.body);
-      res.status(201).json(await adminUniversityUseCases.createDraft(input,mutationContext(req)));
-    }));
+    const webUrl = z
+      .string()
+      .url()
+      .refine((value) => {
+        const url = new URL(value);
+        return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password;
+      }, 'HTTP(S) URL required');
+    router.get(
+      '/:id/source-stages',
+      asyncHandler(async (req: Request, res: Response) => {
+        res.setHeader('Cache-Control', 'no-store');
+        res.json(await adminUniversityUseCases.getSourceStages(req.params.id));
+      }),
+    );
+    router.put(
+      '/:id/stage-cards/:cardId',
+      asyncHandler(async (req: Request, res: Response) => {
+        const input = z
+          .object({
+            values: z.record(z.string(), z.unknown()),
+            proof: z
+              .object({ sourceUrl: z.string().url(), verifiedAt: z.string().datetime() })
+              .strict(),
+          })
+          .strict()
+          .parse(req.body);
+        const saved = await adminUniversityUseCases.saveStageCard(
+          req.params.id,
+          req.params.cardId,
+          input.values,
+          input.proof,
+          mutationContext(req),
+        );
+        res.setHeader('X-Entity-Revision', String(saved.revision));
+        res.json(saved);
+      }),
+    );
+    router.post(
+      '/:id/restore',
+      asyncHandler(async (req: Request, res: Response) => {
+        await adminUniversityUseCases.restore(req.params.id, mutationContext(req));
+        res.json({ success: true });
+      }),
+    );
+    router.post(
+      '/:id/academic-programs/:programId/restore',
+      asyncHandler(async (req: Request, res: Response) => {
+        res.json(
+          await adminUniversityUseCases.restoreAcademicProgram(
+            req.params.id,
+            req.params.programId,
+            mutationContext(req),
+          ),
+        );
+      }),
+    );
+    const httpsSource = z
+      .string()
+      .url()
+      .refine((value) => {
+        const url = new URL(value);
+        return url.protocol === 'https:' && !url.username && !url.password;
+      }, 'HTTPS source required');
+    router.post(
+      '/',
+      SecurityMiddlewareFactory.createAdminPermissionGuard('admin:universities:manage'),
+      asyncHandler(async (req: Request, res: Response) => {
+        const input = z
+          .object({
+            displayName: z.string().trim().min(1).max(300),
+            officialWebsite: httpsSource,
+            sourceUri: httpsSource,
+            sourceHash: z.string().regex(/^[a-f0-9]{64}$/i),
+            country: z.string().trim().max(200).optional(),
+            countryReferenceId: z.string().uuid().optional(),
+            reason: reasonSchema,
+          })
+          .strict()
+          .parse(req.body);
+        res
+          .status(201)
+          .json(await adminUniversityUseCases.createDraft(input, mutationContext(req)));
+      }),
+    );
 
     const updateBodySchema = z.object({
       displayName: z.string().optional(),
@@ -95,15 +183,26 @@ export class UniversityAdminRouter {
       logoAssetId: z.string().optional(),
       foundedYear: z.number().int().min(1000).max(new Date().getFullYear()).nullable().optional(),
       localizedNames: z.record(z.string(), z.string()).optional(),
-      accreditations: z.array(z.object({
-        name: z.string().trim().min(1),
-        organization: z.string().trim().min(1),
-        officialUrl: webUrl.refine(value => value.startsWith('https://'), 'HTTPS accreditation evidence required'),
-        reviewStatus: z.enum(['NEEDS_REVIEW', 'APPROVED', 'REJECTED']).default('NEEDS_REVIEW'),
-        validFrom: z.string().optional(),
-        validUntil: z.string().optional(),
-        note: z.string().optional(),
-      }).strict()).optional(),
+      accreditations: z
+        .array(
+          z
+            .object({
+              name: z.string().trim().min(1),
+              organization: z.string().trim().min(1),
+              officialUrl: webUrl.refine(
+                (value) => value.startsWith('https://'),
+                'HTTPS accreditation evidence required',
+              ),
+              reviewStatus: z
+                .enum(['NEEDS_REVIEW', 'APPROVED', 'REJECTED'])
+                .default('NEEDS_REVIEW'),
+              validFrom: z.string().optional(),
+              validUntil: z.string().optional(),
+              note: z.string().optional(),
+            })
+            .strict(),
+        )
+        .optional(),
       description: z.string().optional(),
       languagesOfInstruction: z.array(z.string()).optional(),
       contactEmail: z.union([z.string().email(), z.literal('')]).optional(),
@@ -128,29 +227,40 @@ export class UniversityAdminRouter {
     });
 
     const academicProgramStatusSchema = z.enum(['DRAFT', 'REVIEW_REQUIRED', 'ACTIVE', 'INACTIVE']);
-    const admissionRequirementStatusSchema = z.enum(['DRAFT', 'REVIEW_REQUIRED', 'ACTIVE', 'INACTIVE']);
+    const admissionRequirementStatusSchema = z.enum([
+      'DRAFT',
+      'REVIEW_REQUIRED',
+      'ACTIVE',
+      'INACTIVE',
+    ]);
 
-    const academicProgramAuthoringSchema = z.object({
-      sourceReferenceId: z.string().min(1).nullable().optional(),
-      organizationUnitId: z.string().min(1).nullable().optional(),
-      sourceProgramName: z.string().trim().min(1),
-      degreeLevelId: z.string().min(1),
-      majorId: z.string().min(1).nullable().optional(),
-      majorMappingState: z.string().min(1),
-      status: academicProgramStatusSchema.optional(),
-      campusIds: z.array(z.string().min(1)).optional(),
-      metadata: z.record(z.string(), z.unknown()).nullable().optional(),
-      admissionRequirements: z.array(z.object({
-        internationalTestId: z.string().min(1),
-        testVariantId: z.string().min(1).nullable().optional(),
-        testVersionId: z.string().min(1).nullable().optional(),
-        minimumScore: z.number().nullable().optional(),
-        sectionScores: z.record(z.string(), z.unknown()).nullable().optional(),
-        validityMetadata: z.record(z.string(), z.unknown()).nullable().optional(),
-        restrictionMetadata: z.record(z.string(), z.unknown()).nullable().optional(),
-        status: admissionRequirementStatusSchema.optional(),
-      })).optional(),
-    }).strict();
+    const academicProgramAuthoringSchema = z
+      .object({
+        sourceReferenceId: z.string().min(1).nullable().optional(),
+        organizationUnitId: z.string().min(1).nullable().optional(),
+        sourceProgramName: z.string().trim().min(1),
+        degreeLevelId: z.string().min(1),
+        majorId: z.string().min(1).nullable().optional(),
+        majorMappingState: z.string().min(1),
+        status: academicProgramStatusSchema.optional(),
+        campusIds: z.array(z.string().min(1)).optional(),
+        metadata: z.record(z.string(), z.unknown()).nullable().optional(),
+        admissionRequirements: z
+          .array(
+            z.object({
+              internationalTestId: z.string().min(1),
+              testVariantId: z.string().min(1).nullable().optional(),
+              testVersionId: z.string().min(1).nullable().optional(),
+              minimumScore: z.number().nullable().optional(),
+              sectionScores: z.record(z.string(), z.unknown()).nullable().optional(),
+              validityMetadata: z.record(z.string(), z.unknown()).nullable().optional(),
+              restrictionMetadata: z.record(z.string(), z.unknown()).nullable().optional(),
+              status: admissionRequirementStatusSchema.optional(),
+            }),
+          )
+          .optional(),
+      })
+      .strict();
 
     const normalizedDetailsSchema = z
       .object({
@@ -315,7 +425,10 @@ export class UniversityAdminRouter {
           { locale, ...payload },
           mutationContext(req),
         );
-        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
+        res.setHeader(
+          'X-Entity-Revision',
+          String((await adminUniversityUseCases.getUniversity(req.params.id)).revision),
+        );
         res.json(translation);
       }),
     );
@@ -337,7 +450,12 @@ export class UniversityAdminRouter {
         if (updates.contactPhone !== undefined) optionalFields.contactPhone = updates.contactPhone;
         if (updates.socialLinks !== undefined) optionalFields.socialLinks = updates.socialLinks;
         if (updates.metadata !== undefined) optionalFields.metadata = updates.metadata;
-        for (const key of ['generalRequiredDocuments', 'additionalGraduateRequirements', 'officialRequiredDocumentsUrl', 'internationalAdmissions'] as const) {
+        for (const key of [
+          'generalRequiredDocuments',
+          'additionalGraduateRequirements',
+          'officialRequiredDocumentsUrl',
+          'internationalAdmissions',
+        ] as const) {
           if (updates[key] !== undefined) optionalFields[key] = updates[key];
         }
 
@@ -429,7 +547,10 @@ export class UniversityAdminRouter {
       '/:id/mark-ready',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.markReadyToReview(req.params.id, mutationContext(req));
-        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
+        res.setHeader(
+          'X-Entity-Revision',
+          String((await adminUniversityUseCases.getUniversity(req.params.id)).revision),
+        );
         res.status(200).json({ success: true });
       }),
     );
@@ -438,7 +559,10 @@ export class UniversityAdminRouter {
       '/:id/mark-publishable',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.markReadyToPublish(req.params.id, mutationContext(req));
-        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
+        res.setHeader(
+          'X-Entity-Revision',
+          String((await adminUniversityUseCases.getUniversity(req.params.id)).revision),
+        );
         res.status(200).json({ success: true });
       }),
     );
@@ -454,7 +578,10 @@ export class UniversityAdminRouter {
       '/:id/publish',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.publish(req.params.id, mutationContext(req));
-        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
+        res.setHeader(
+          'X-Entity-Revision',
+          String((await adminUniversityUseCases.getUniversity(req.params.id)).revision),
+        );
         res.status(200).json({ success: true });
       }),
     );
@@ -463,7 +590,10 @@ export class UniversityAdminRouter {
       '/:id/unpublish',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.unpublish(req.params.id, mutationContext(req));
-        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
+        res.setHeader(
+          'X-Entity-Revision',
+          String((await adminUniversityUseCases.getUniversity(req.params.id)).revision),
+        );
         res.status(200).json({ success: true });
       }),
     );
@@ -472,7 +602,10 @@ export class UniversityAdminRouter {
       '/:id/reject',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.reject(req.params.id, mutationContext(req));
-        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
+        res.setHeader(
+          'X-Entity-Revision',
+          String((await adminUniversityUseCases.getUniversity(req.params.id)).revision),
+        );
         res.status(200).json({ success: true });
       }),
     );
@@ -481,7 +614,10 @@ export class UniversityAdminRouter {
       '/:id/archive',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.archive(req.params.id, mutationContext(req));
-        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
+        res.setHeader(
+          'X-Entity-Revision',
+          String((await adminUniversityUseCases.getUniversity(req.params.id)).revision),
+        );
         res.status(200).json({ success: true });
       }),
     );
@@ -490,9 +626,12 @@ export class UniversityAdminRouter {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }
-      if (err?.code === 'P2002' || err?.message === 'UNIVERSITY_DUPLICATE_IDENTITY') return res.status(409).json({error:'UNIVERSITY_DUPLICATE_IDENTITY'});
-      if (err?.message === 'UNIVERSITY_STALE_REVISION') return res.status(409).json({ error: err.message });
-      if (err?.message === 'UNIVERSITY_EXPECTED_REVISION_REQUIRED') return res.status(428).json({ error: err.message });
+      if (err?.code === 'P2002' || err?.message === 'UNIVERSITY_DUPLICATE_IDENTITY')
+        return res.status(409).json({ error: 'UNIVERSITY_DUPLICATE_IDENTITY' });
+      if (err?.message === 'UNIVERSITY_STALE_REVISION')
+        return res.status(409).json({ error: err.message });
+      if (err?.message === 'UNIVERSITY_EXPECTED_REVISION_REQUIRED')
+        return res.status(428).json({ error: err.message });
       res.status(400).json({ error: err.message || 'An error occurred' });
     });
 

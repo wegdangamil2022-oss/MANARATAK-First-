@@ -1,18 +1,29 @@
 import { useState } from 'react';
-import { Save, Plus, School, Globe2, ShieldCheck, MapPin, Building2, Coins, House, Award } from 'lucide-react';
+import {
+  Save,
+  Plus,
+  School,
+  Globe2,
+  ShieldCheck,
+  MapPin,
+  Building2,
+  Coins,
+  House,
+  Award,
+} from 'lucide-react';
 import { adminApiClient } from '../api/client';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from './CanonicalPicker';
 
-type Row = Record<string, unknown>;
-type Field = {
+export type Row = Record<string, unknown>;
+export type Field = {
   key: string;
   label: string;
   type?: 'number' | 'boolean' | 'lines' | 'date' | 'select' | 'currency';
   options?: string[];
   optionLabels?: Record<string, string>;
 };
-const sectionDefinitions: {
+export const sectionDefinitions: {
   key: string;
   title: string;
   fields: Field[];
@@ -28,7 +39,12 @@ const sectionDefinitions: {
       { key: 'name', label: 'اسم الاعتماد' },
       { key: 'organization', label: 'الجهة' },
       { key: 'officialUrl', label: 'الرابط الرسمي' },
-      { key: 'reviewStatus', label: 'حالة المراجعة', type: 'select', options: ['NEEDS_REVIEW', 'APPROVED', 'REJECTED'] },
+      {
+        key: 'reviewStatus',
+        label: 'حالة المراجعة',
+        type: 'select',
+        options: ['NEEDS_REVIEW', 'APPROVED', 'REJECTED'],
+      },
       { key: 'note', label: 'ملاحظات' },
     ],
   },
@@ -40,7 +56,7 @@ const sectionDefinitions: {
       { key: 'name', label: 'الاسم' },
       { key: 'address', label: 'العنوان' },
       { key: 'campusType', label: 'نوع الحرم' },
-      { key: 'status', label: 'الحالة', type: 'select', options: ['ACTIVE','ARCHIVED'] },
+      { key: 'status', label: 'الحالة', type: 'select', options: ['ACTIVE', 'ARCHIVED'] },
     ],
   },
   {
@@ -56,7 +72,7 @@ const sectionDefinitions: {
         type: 'select',
         options: ['FACULTY', 'SCHOOL', 'COLLEGE', 'DEPARTMENT'],
       },
-      { key: 'status', label: 'الحالة', type: 'select', options: ['ACTIVE','ARCHIVED'] },
+      { key: 'status', label: 'الحالة', type: 'select', options: ['ACTIVE', 'ARCHIVED'] },
     ],
   },
   {
@@ -134,7 +150,8 @@ const admissionsFields: Field[] = [
   { key: 'applicationPortalUrl', label: 'بوابة التقديم' },
 ];
 const nullableKeys = new Set([
-  'campusSourceReferenceId', 'parentSourceReferenceId',
+  'campusSourceReferenceId',
+  'parentSourceReferenceId',
   'campusType',
   'address',
   'organizationUnitName',
@@ -157,11 +174,13 @@ const listKeys = new Set([
   'generalRequiredDocuments',
   'additionalGraduateRequirements',
 ]);
-function fieldsForm(
+export function fieldsForm(
   fields: Field[],
   row: Row,
   change: (key: string, value: unknown) => void,
   disabled: boolean,
+  ar = true,
+  allowReferences = true,
 ) {
   return (
     <fieldset disabled={disabled} className="grid gap-3 md:grid-cols-2">
@@ -171,24 +190,44 @@ function fieldsForm(
         return (
           <label key={field.key} className="text-xs font-bold text-[#142B5F]">
             {field.label}
-            {field.type === 'currency' ? (
-              <CanonicalPicker label={field.label} value={typeof value === 'string' ? value : null}
-                load={() => canonicalPickerApi.currencies()} reloadKey="university-currencies"
+            {field.type === 'currency' && !allowReferences ? (
+              <span className="block mt-1">
+                {text || (ar ? 'غير محددة' : 'Unspecified')}
+                <small className="block">
+                  {ar
+                    ? 'تغيير العملة يتطلب صلاحية البيانات المرجعية.'
+                    : 'Changing currency requires reference-data permission.'}
+                </small>
+              </span>
+            ) : field.type === 'currency' ? (
+              <CanonicalPicker
+                label={field.label}
+                value={typeof value === 'string' ? value : null}
+                load={() => canonicalPickerApi.currencies()}
+                reloadKey="university-currencies"
                 onChange={(next, option) => {
                   change(field.key, next);
-                  change(field.key === 'livingCostCurrencyReferenceId' ? 'livingCostCurrencyCode' : 'currencyCode', option?.code ?? null);
-                }} optional disabled={disabled} />
+                  change(
+                    field.key === 'livingCostCurrencyReferenceId'
+                      ? 'livingCostCurrencyCode'
+                      : 'currencyCode',
+                    option?.code ?? null,
+                  );
+                }}
+                optional
+                disabled={disabled}
+              />
             ) : field.type === 'boolean' ? (
               <select
                 value={value == null ? '' : String(value)}
                 onChange={(e) =>
-                  change(field.key, e.target.value === '' ? undefined : e.target.value === 'true')
+                  change(field.key, e.target.value === '' ? null : e.target.value === 'true')
                 }
                 className="mt-1 w-full rounded-lg border p-2"
               >
-                <option value="">غير محدد</option>
-                <option value="true">نعم</option>
-                <option value="false">لا</option>
+                <option value="">{ar ? 'غير محدد' : 'Not specified'}</option>
+                <option value="true">{ar ? 'نعم' : 'Yes'}</option>
+                <option value="false">{ar ? 'لا' : 'No'}</option>
               </select>
             ) : field.type === 'select' ? (
               <select
@@ -196,9 +235,11 @@ function fieldsForm(
                 onChange={(e) => change(field.key, e.target.value)}
                 className="mt-1 w-full rounded-lg border p-2"
               >
-                <option value="">اختر</option>
+                <option value="">{ar ? 'اختر' : 'Choose'}</option>
                 {field.options?.map((option) => (
-                  <option key={option} value={option}>{field.optionLabels?.[option] ?? option}</option>
+                  <option key={option} value={option}>
+                    {field.optionLabels?.[option] ?? option}
+                  </option>
                 ))}
               </select>
             ) : field.type === 'lines' ? (
@@ -237,10 +278,16 @@ function fieldsForm(
   );
 }
 export function hydrateUniversityStructureRows(key: string, source: Row[]): Row[] {
-  return source.map(row => key === 'organizationUnits' ? {...row,
-    campusSourceReferenceId: row.campusSourceReferenceId ?? row.campusId ?? null,
-    parentSourceReferenceId: row.parentSourceReferenceId ?? row.parentOrganizationUnitId ?? null,
-  } : {...row});
+  return source.map((row) =>
+    key === 'organizationUnits'
+      ? {
+          ...row,
+          campusSourceReferenceId: row.campusSourceReferenceId ?? row.campusId ?? null,
+          parentSourceReferenceId:
+            row.parentSourceReferenceId ?? row.parentOrganizationUnitId ?? null,
+        }
+      : { ...row },
+  );
 }
 export function UniversitySectionsEditor({
   id,
@@ -268,7 +315,10 @@ export function UniversitySectionsEditor({
   const [admissions, setAdmissions] = useState<Row>((initial.internationalAdmissions as Row) ?? {});
   const [rows, setRows] = useState<Record<string, Row[]>>(() =>
     Object.fromEntries(
-      sectionDefinitions.map((section) => [section.key, hydrateUniversityStructureRows(section.key, (initial[section.key] as Row[]) ?? [])]),
+      sectionDefinitions.map((section) => [
+        section.key,
+        hydrateUniversityStructureRows(section.key, (initial[section.key] as Row[]) ?? []),
+      ]),
     ),
   );
   const [revision, setRevision] = useState(initial.revision);
@@ -281,7 +331,10 @@ export function UniversitySectionsEditor({
     onDirtyChange(true);
   };
   const save = async (key: string) => {
-    if (!reviewReason.trim()) { setError('اكتب سبب التعديل أو المراجعة قبل الحفظ.'); return; }
+    if (!reviewReason.trim()) {
+      setError('اكتب سبب التعديل أو المراجعة قبل الحفظ.');
+      return;
+    }
     setSaving(key);
     setError('');
     setMessage('');
@@ -365,7 +418,11 @@ export function UniversitySectionsEditor({
           ),
         );
       else if (key === 'admissions') setAdmissions((saved.internationalAdmissions as Row) ?? {});
-      else setRows((current) => ({ ...current, [key]: hydrateUniversityStructureRows(key, (saved[key] as Row[]) ?? []) }));
+      else
+        setRows((current) => ({
+          ...current,
+          [key]: hydrateUniversityStructureRows(key, (saved[key] as Row[]) ?? []),
+        }));
       const next = new Set(dirty);
       next.delete(key);
       setDirty(next);
@@ -402,8 +459,14 @@ export function UniversitySectionsEditor({
           {message}
         </p>
       )}
-      <section id="university-section-identity" className="scroll-mt-28 rounded-2xl border bg-white p-5">
-        <h3 className="mb-4 flex items-center gap-2 font-black text-[#142B5F]"><School className="h-5 w-5 text-[#D6A43B]" aria-hidden="true" />الهوية والبيانات الأساسية والوثائق</h3>
+      <section
+        id="university-section-identity"
+        className="scroll-mt-28 rounded-2xl border bg-white p-5"
+      >
+        <h3 className="mb-4 flex items-center gap-2 font-black text-[#142B5F]">
+          <School className="h-5 w-5 text-[#D6A43B]" aria-hidden="true" />
+          الهوية والبيانات الأساسية والوثائق
+        </h3>
         {fieldsForm(
           identityFields,
           identity,
@@ -415,8 +478,14 @@ export function UniversitySectionsEditor({
         )}
         {button('identity')}
       </section>
-      <section id="university-section-admissions" className="scroll-mt-28 rounded-2xl border bg-white p-5">
-        <h3 className="mb-4 flex items-center gap-2 font-black text-[#142B5F]"><Globe2 className="h-5 w-5 text-[#0E7C86]" aria-hidden="true" />قبول الطلاب الدوليين والتقديم</h3>
+      <section
+        id="university-section-admissions"
+        className="scroll-mt-28 rounded-2xl border bg-white p-5"
+      >
+        <h3 className="mb-4 flex items-center gap-2 font-black text-[#142B5F]">
+          <Globe2 className="h-5 w-5 text-[#0E7C86]" aria-hidden="true" />
+          قبول الطلاب الدوليين والتقديم
+        </h3>
         {fieldsForm(
           admissionsFields,
           admissions,
@@ -429,8 +498,27 @@ export function UniversitySectionsEditor({
         {button('admissions')}
       </section>
       {sectionDefinitions.map((section) => (
-        <section key={section.key} id={'university-section-'+section.key} className="scroll-mt-28 rounded-2xl border bg-white p-5">
-          <h3 className="mb-4 flex items-center gap-2 font-black text-[#142B5F]">{section.key==='accreditations'?<ShieldCheck className="h-5 w-5 text-[#0E7C86]" aria-hidden="true" />:section.key==='campuses'?<MapPin className="h-5 w-5 text-[#D6A43B]" aria-hidden="true" />:section.key==='organizationUnits'?<Building2 className="h-5 w-5 text-[#142B5F]" aria-hidden="true" />:section.key==='tuitionProfiles'?<Coins className="h-5 w-5 text-[#D6A43B]" aria-hidden="true" />:section.key==='accommodationProfiles'?<House className="h-5 w-5 text-[#0E7C86]" aria-hidden="true" />:<Award className="h-5 w-5 text-[#142B5F]" aria-hidden="true" />}{section.title}</h3>
+        <section
+          key={section.key}
+          id={'university-section-' + section.key}
+          className="scroll-mt-28 rounded-2xl border bg-white p-5"
+        >
+          <h3 className="mb-4 flex items-center gap-2 font-black text-[#142B5F]">
+            {section.key === 'accreditations' ? (
+              <ShieldCheck className="h-5 w-5 text-[#0E7C86]" aria-hidden="true" />
+            ) : section.key === 'campuses' ? (
+              <MapPin className="h-5 w-5 text-[#D6A43B]" aria-hidden="true" />
+            ) : section.key === 'organizationUnits' ? (
+              <Building2 className="h-5 w-5 text-[#142B5F]" aria-hidden="true" />
+            ) : section.key === 'tuitionProfiles' ? (
+              <Coins className="h-5 w-5 text-[#D6A43B]" aria-hidden="true" />
+            ) : section.key === 'accommodationProfiles' ? (
+              <House className="h-5 w-5 text-[#0E7C86]" aria-hidden="true" />
+            ) : (
+              <Award className="h-5 w-5 text-[#142B5F]" aria-hidden="true" />
+            )}
+            {section.title}
+          </h3>
           {rows[section.key].map((row, index) => (
             <div key={String(row.id ?? index)} className="mb-3 rounded-xl border p-3">
               {fieldsForm(
@@ -438,20 +526,38 @@ export function UniversitySectionsEditor({
                   ? [
                       ...section.fields,
                       {
-                        key: 'campusSourceReferenceId', label: 'الحرم الجامعي', type: 'select' as const,
-                        options: rows.campuses.map(item => String(item.id ?? item.sourceReferenceId ?? '')).filter(Boolean),
-                        optionLabels: Object.fromEntries(rows.campuses.map(item => [
-                          String(item.id ?? item.sourceReferenceId ?? ''), String(item.name ?? ''),
-                        ])),
+                        key: 'campusSourceReferenceId',
+                        label: 'الحرم الجامعي',
+                        type: 'select' as const,
+                        options: rows.campuses
+                          .map((item) => String(item.id ?? item.sourceReferenceId ?? ''))
+                          .filter(Boolean),
+                        optionLabels: Object.fromEntries(
+                          rows.campuses.map((item) => [
+                            String(item.id ?? item.sourceReferenceId ?? ''),
+                            String(item.name ?? ''),
+                          ]),
+                        ),
                       },
                       {
-                        key: 'parentSourceReferenceId', label: 'الكلية أو الوحدة الأم', type: 'select' as const,
+                        key: 'parentSourceReferenceId',
+                        label: 'الكلية أو الوحدة الأم',
+                        type: 'select' as const,
                         options: rows.organizationUnits
-                          .filter(item => item !== row && item.unitType !== 'DEPARTMENT' && item.status !== 'ARCHIVED')
-                          .map(item => String(item.id ?? item.sourceReferenceId ?? '')).filter(Boolean),
-                        optionLabels: Object.fromEntries(rows.organizationUnits.map(item => [
-                          String(item.id ?? item.sourceReferenceId ?? ''), String(item.name ?? ''),
-                        ])),
+                          .filter(
+                            (item) =>
+                              item !== row &&
+                              item.unitType !== 'DEPARTMENT' &&
+                              item.status !== 'ARCHIVED',
+                          )
+                          .map((item) => String(item.id ?? item.sourceReferenceId ?? ''))
+                          .filter(Boolean),
+                        optionLabels: Object.fromEntries(
+                          rows.organizationUnits.map((item) => [
+                            String(item.id ?? item.sourceReferenceId ?? ''),
+                            String(item.name ?? ''),
+                          ]),
+                        ),
                       },
                     ]
                   : section.fields,
@@ -479,11 +585,15 @@ export function UniversitySectionsEditor({
               onClick={() => {
                 setRows((current) => ({
                   ...current,
-                  [section.key]: [...current[section.key], {
-                    ...section.defaults,
-                    ...(['campuses', 'organizationUnits'].includes(section.key)
-                      ? { sourceReferenceId: `admin-${section.key}-${crypto.randomUUID()}` } : {}),
-                  }],
+                  [section.key]: [
+                    ...current[section.key],
+                    {
+                      ...section.defaults,
+                      ...(['campuses', 'organizationUnits'].includes(section.key)
+                        ? { sourceReferenceId: `admin-${section.key}-${crypto.randomUUID()}` }
+                        : {}),
+                    },
+                  ],
                 }));
                 mark(section.key);
               }}

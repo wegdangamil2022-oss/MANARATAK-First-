@@ -1,0 +1,39 @@
+{
+  "at": "2026-10-25T14:08:37.822Z",
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "unit": {
+    "passed": 62,
+    "total": 62,
+    "failed": 0
+  },
+  "database": {
+    "passed": 8,
+    "total": 8,
+    "failed": 0
+  },
+  "http": {
+    "scope": "ISOLATED_LOCAL_POSTGRES16",
+    "canonicalAuthentication": true,
+    "canonicalMfa": true,
+    "workersStarted": false,
+    "originalDatabaseTouched": false,
+    "checks": [
+      "two independent canonical MFA/CSRF sessions",
+      "compiled HTTP conditional card writes yield 200/409 and independent exact readback without import claim",
+      "immutable raw-source evidence and stale overwrite rejected",
+      "unauthenticated 401 and authenticated no-role 403 on real middleware",
+      "canonical program creation, study profile and intake persist through actual HTTP and independent readback with exact Program ID",
+      "canonical archive and restore retain University ID and never restore publication",
+      "real audit and transactional outbox persisted"
+    ],
+    "pass": true
+  },
+  "typescript": "passed",
+  "build": "passed",
+  "originalDatabaseTouched": false,
+  "visual": {
+    "desktop": "passed",
+    "arabic360": "passed",
+    "english360": "overflow identified; scoped fix compiled; final browser recheck interrupted by unavailable browser transport"
+  }
+}
