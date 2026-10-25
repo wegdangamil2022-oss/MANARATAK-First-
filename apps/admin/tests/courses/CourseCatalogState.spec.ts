@@ -2,6 +2,18 @@ import { describe, expect, it } from 'vitest';
 import { catalogQuery, changeCatalogFilters, certificateFact, studyFact } from '../../src/features/courses/catalogState';
 
 describe('course catalog facts and query scope', () => {
+  it('keeps native enrollment cohorts and false enrollment filters while presentation changes', () => {
+    const params = new URLSearchParams('scope=native&cohortFrom=2026-01-01&cohortTo=2026-02-01&hasEnrollments=false&instructor=Teacher&view=cards');
+    const query = catalogQuery(params);
+    expect(query.get('cohortFrom')).toBe('2026-01-01'); expect(query.get('cohortTo')).toBe('2026-02-01');
+    expect(query.get('hasEnrollments')).toBe('false'); expect(query.get('instructor')).toBe('Teacher');
+    for (const scope of ['all', 'external']) {
+      const next = changeCatalogFilters(params, { scope });
+      for (const key of ['cohortFrom', 'cohortTo', 'instructor', 'hasEnrollments']) expect(next.has(key)).toBe(false);
+      expect(next.get('view')).toBe('cards');
+      expect(catalogQuery(params, scope as 'all' | 'external').has('cohortFrom')).toBe(false);
+    }
+  });
   it('clears hidden external filters when moving to native without dropping search or access', () => {
     const next = changeCatalogFilters(new URLSearchParams('scope=external&provider=prov-1&linkHealth=BROKEN&completenessStatus=INCOMPLETE&q=arabic&studyAccess=FREE&page=7&view=cards'), { scope: 'native' });
     expect(next.get('provider')).toBeNull();

@@ -38,6 +38,13 @@ describe('AdminCourseUseCases', () => {
     expect(mockRepo.list).toHaveBeenCalledWith(filters);
   });
 
+  it('rejects native learning filters outside native scope and rejects invalid cohort dates', async () => {
+    await expect(useCases.listCourses({ hasEnrollments: false })).rejects.toThrow('NATIVE_COURSE_SCOPE_REQUIRED');
+    await expect(useCases.listCourses({ originType: CourseOriginType.NATIVE_MANARATAK_COURSE, cohortFrom: '2026-02-30' })).rejects.toThrow('COURSE_COHORT_DATE_INVALID');
+    await expect(useCases.listCourses({ originType: CourseOriginType.NATIVE_MANARATAK_COURSE, cohortFrom: '2026-02-01', cohortTo: '2026-01-01' })).rejects.toThrow('COURSE_COHORT_RANGE_INVALID');
+    expect(mockRepo.list).not.toHaveBeenCalled();
+  });
+
   it('updateCourse updates fields and recomputes completeness', async () => {
     mockRepo.findById = vi.fn().mockResolvedValue({
       id: 'course-1',

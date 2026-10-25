@@ -34,6 +34,8 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
     category: tr('المجال', 'Field'), platformName: tr('منصة المصدر', 'Source platform'),
     completenessStatus: tr('اكتمال بيانات الخارجية', 'External data completeness'), originType: tr('التصنيف القائم', 'Existing origin'),
     linkHealth: tr('فحص الرابط المسجل', 'Recorded link check'),
+    instructor: tr('المدرب', 'Instructor'), hasEnrollments: tr('وجود تسجيلات', 'Has enrollments'),
+    cohortFrom: tr('فوج التسجيل من', 'Enrollment cohort from'), cohortTo: tr('فوج التسجيل قبل', 'Enrollment cohort before'),
   };
   const active = [...params].filter(([key, value]) => value && filterTitles[key] && !(fixedScope && key === 'scope'));
   const chipValue = (key: string, value: string) => {
@@ -43,6 +45,7 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
     if (key === 'certificateState') return certificateLabels[value as keyof typeof certificateLabels]?.[ar ? 0 : 1] ?? '';
     if (key === 'scope') return value === 'native' ? tr('منارتك', 'Manaratak') : tr('خارجية', 'External');
     if (key === 'originType') return tr('مدفوع قائم', 'Legacy paid');
+    if (key === 'hasEnrollments') return value === 'true' ? tr('لديها تسجيلات', 'With enrollments') : tr('دون تسجيلات', 'No enrollments');
     if (key === 'linkHealth') return ({ VERIFIED: tr('متحقق منه سابقًا', 'Previously verified'), BROKEN: tr('معطل / مرفوض', 'Broken / rejected'), NEEDS_REVIEW: tr('يحتاج تحققًا', 'Needs verification'), UNKNOWN: tr('غير معلوم', 'Unknown') } as Record<string, string>)[value] ?? '';
     if (key === 'completenessStatus') return ({ IMPORTED: tr('مستوردة', 'Imported'), INCOMPLETE: tr('غير مكتملة', 'Incomplete'), NEEDS_REVIEW: tr('تحتاج مراجعة', 'Needs review'), COMPLETE: tr('مكتملة', 'Complete'), REJECTED: tr('مرفوضة', 'Rejected') } as Record<string, string>)[value] ?? tr('حالة محددة', 'Selected state');
     return value;
@@ -64,6 +67,12 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
     {scope === 'all' && params.get('provider') && <p className="course-hint"><Building2 size={16}/>{tr('اختيار مزود يقيد النتائج بالدورات الخارجية.', 'Selecting a provider limits results to external courses.')}</p>}
     <details className="course-extra-filters"><summary><SlidersHorizontal size={16}/>{tr('فلاتر إضافية', 'Additional filters')}</summary><div className="course-filter-grid">
       {facet('learningLanguage', tr('لغة التدريس', 'Learning language'))}{facet('difficultyLevel', tr('المستوى', 'Level'))}
+      {scope === 'native' && <>
+        <label className="course-field"><span><GraduationCap size={16}/>{tr('المدرب — مطابقة النص', 'Instructor — case-sensitive text')}</span><input maxLength={200} value={params.get('instructor') ?? ''} onChange={event => change({ instructor: event.target.value })}/></label>
+        {field('hasEnrollments', tr('وجود تسجيلات في الفوج', 'Enrollments in cohort'), [['true', tr('لديها تسجيلات', 'With enrollments')], ['false', tr('دون تسجيلات', 'No enrollments')]])}
+        <label className="course-field"><span><Filter size={16}/>{tr('فوج التسجيل: من (شامل) UTC', 'Enrollment cohort: from (inclusive) UTC')}</span><input type="date" value={params.get('cohortFrom') ?? ''} onChange={event => change({ cohortFrom: event.target.value })}/></label>
+        <label className="course-field"><span><Filter size={16}/>{tr('فوج التسجيل: قبل (غير شامل) UTC', 'Enrollment cohort: before (exclusive) UTC')}</span><input type="date" value={params.get('cohortTo') ?? ''} onChange={event => change({ cohortTo: event.target.value })}/></label>
+      </>}
       <label className="course-field"><span><GraduationCap size={16}/>{tr('المجال / موضوع الدورة', 'Course field / topic')}</span><input value={params.get('category') ?? ''} maxLength={200} onChange={event => change({ category: event.target.value })}/></label>
       {scope !== 'native' && <>
         {field('linkHealth', tr('نتيجة فحص الرابط المسجلة', 'Recorded link check outcome'), [['VERIFIED', tr('متحقق منه سابقًا', 'Previously verified')], ['BROKEN', tr('معطل / مرفوض', 'Broken / rejected')], ['NEEDS_REVIEW', tr('يحتاج تحققًا', 'Needs verification')], ['UNKNOWN', tr('غير معلوم', 'Unknown')]])}

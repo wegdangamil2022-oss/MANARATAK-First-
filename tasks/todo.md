@@ -13,13 +13,14 @@
 - [x] Verify roles/source/versions/large data/runtime: 389 unit/contract tests, 20 isolated PostgreSQL tests, actual MFA/CSRF browser create/edit/conflict/individual and bulk publication, RTL/LTR/phone and audit/outbox evidence. See docs/ui/COURSES_EXTERNAL_EXECUTION_2026-10-25.md.
 
 ## 3. Native / 07.B
-- [ ] Unified authoring and source-backed native list/student aggregation.
+- [x] Native catalog and cohort counts from original enrollment/progress/completion tables; 393 unit/contract tests, 26 isolated PostgreSQL tests, 12 actual browser checks and desktop/mobile RTL/LTR evidence. See docs/ui/COURSES_NATIVE_LEARNING_EXECUTION_2026-10-25.md.
+- [ ] Unified native authoring and permission-scoped student workspace.
 - [ ] Ordered safe content blocks, media, historical versions and learner access/progress.
 - [ ] Assessments, reports, completion/certificate boundaries; preserve existing financial gates.
 - [ ] Verify learner/admin roles, concurrency/history, real browser flows and accurate completion report.
 
 ## Release
 - [x] Phase 1 foundation committed and pushed on feat/courses-admin-workspaces-20261025; no main merge.
-- [ ] Commit and push verified external-course implementation and evidence on the same independent branch.
-- [ ] Open draft PR when GitHub API connectivity recovers. Connector transport failed; direct API attempts failed during TLS. Branch push and remote head were independently verified.
+- [x] External implementation and evidence committed at 3d0257be and remote head independently verified.
+- [x] Draft PR #45 created and attached: https://github.com/wegdangamil2022-oss/MANARATAK-First-/pull/45. Targets feat/international-tests-admin-20261025; no main merge.
 - [x] Report evidence and genuine remaining work, distinguish isolated fixtures from original data.

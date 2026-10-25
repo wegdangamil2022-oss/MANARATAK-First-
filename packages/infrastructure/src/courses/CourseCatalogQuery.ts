@@ -65,7 +65,15 @@ export function courseCatalogWhere(filters: CourseFilters): Prisma.CourseWhereIn
       { displayName: { contains: filters.search, mode: 'insensitive' } },
       { canonicalName: { contains: filters.search, mode: 'insensitive' } },
     ] } } },
+    { ...native, optionalFields: { path: ['instructor'], string_contains: filters.search } },
+    { majorProjections: { some: { projectionState: 'APPROVED', major: { displayName: { contains: filters.search, mode: 'insensitive' } } } } },
   ] });
+  if (filters.instructor) and.push({ ...native, optionalFields: { path: ['instructor'], string_contains: filters.instructor } });
+  if (filters.hasEnrollments !== undefined) and.push({ enrollments: { [filters.hasEnrollments ? 'some' : 'none']: {
+    ...(filters.cohortFrom || filters.cohortTo ? { enrolledAt: {
+      ...(filters.cohortFrom ? { gte: new Date(filters.cohortFrom) } : {}), ...(filters.cohortTo ? { lt: new Date(filters.cohortTo) } : {}),
+    } } : {}),
+  } } });
   if (and.length) where.AND = and;
   return where;
 }

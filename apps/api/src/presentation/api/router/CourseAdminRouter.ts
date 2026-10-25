@@ -100,6 +100,10 @@ export class CourseAdminRouter {
       studyAccess: z.enum(['FREE', 'PAID', 'UNKNOWN']).optional(),
       certificateState: z.enum(['FREE', 'NON_FREE', 'UNAVAILABLE', 'UNKNOWN']).optional(),
       linkHealth: z.enum(['VERIFIED', 'BROKEN', 'NEEDS_REVIEW', 'UNKNOWN']).optional(),
+      cohortFrom: z.string().date().optional(),
+      cohortTo: z.string().date().optional(),
+      hasEnrollments: z.enum(['true', 'false']).transform(value => value === 'true').optional(),
+      instructor: z.string().trim().max(200).optional(),
       sort: z.enum(['UPDATED_DESC', 'UPDATED_ASC', 'NAME_ASC', 'NAME_DESC', 'STATUS_ASC']).optional(),
       page: z.coerce.number().int().min(1).max(100000).default(1),
       pageSize: z.coerce.number().int().min(1).max(100).default(20),
@@ -122,6 +126,8 @@ export class CourseAdminRouter {
         if (scope !== 'all') filters.originType = scope === 'native' ? CourseOriginType.NATIVE_MANARATAK_COURSE : CourseOriginType.EXTERNAL_LINKED_COURSE;
         // A registry provider identifies external courses, never a native instructor.
         if (scope === 'all' && (filters.externalProviderId || filters.platformName || filters.completenessStatus || filters.linkHealth)) filters.originType = CourseOriginType.EXTERNAL_LINKED_COURSE;
+        if ((filters.cohortFrom || filters.cohortTo || filters.instructor || filters.hasEnrollments !== undefined) && filters.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE) return res.status(400).json({ error: 'NATIVE_COURSE_SCOPE_REQUIRED' });
+        if (filters.cohortFrom && filters.cohortTo && filters.cohortFrom >= filters.cohortTo) return res.status(400).json({ error: 'COURSE_COHORT_RANGE_INVALID' });
         const result = await adminCourseUseCases.listCourses({ ...filters, includeStatistics: true });
         res.json({ ...result, data: result.data.map(course => ({
           id: course.id, publicId: course.publicId, displayName: course.displayName, originalSourceTitle: course.originalSourceTitle,

@@ -13,6 +13,20 @@ function setup() {
   return { app, listCourses, getCourse, catalogOptions };
 }
 describe('course catalog read routes', () => {
+  it('accepts bounded native cohort and instructor filters, including false has-enrollments', async () => {
+    const { app, listCourses } = setup();
+    const response = await request(app).get('/admin/courses/catalog/native?cohortFrom=2026-01-01&cohortTo=2026-02-01&instructor=Teacher&hasEnrollments=false');
+    expect(response.status).toBe(200);
+    expect(listCourses).toHaveBeenCalledWith(expect.objectContaining({ originType: 'NATIVE_MANARATAK_COURSE', cohortFrom: '2026-01-01', cohortTo: '2026-02-01', instructor: 'Teacher', hasEnrollments: false }));
+  });
+  it('rejects impossible or inverted cohorts and never applies native learning filters to external/all scope', async () => {
+    const { app, listCourses } = setup();
+    for (const path of ['catalog/native?cohortFrom=2026-02-30', 'catalog/native?cohortFrom=2026-02-01&cohortTo=2026-01-01',
+      'catalog/native?cohortFrom=2026-01-01&cohortTo=2026-01-01', 'catalog/external?hasEnrollments=true', 'catalog?instructor=Teacher', 'catalog/native?hasEnrollments=maybe']) {
+      expect((await request(app).get('/admin/courses/' + path)).status, path).toBe(400);
+    }
+    expect(listCourses).not.toHaveBeenCalled();
+  });
   it('enforces native scope on the server and keeps legacy paid origin out of native', async () => {
     const { app, listCourses } = setup();
     const response = await request(app).get('/admin/courses/catalog/native?originType=EXTERNAL_LINKED_COURSE&studyAccess=PAID&sort=NAME_ASC');

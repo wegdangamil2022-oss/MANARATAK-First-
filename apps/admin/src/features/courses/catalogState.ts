@@ -13,9 +13,12 @@ export interface CatalogRow extends CatalogFacts {
 export interface CatalogResult {
   data: CatalogRow[]; total: number; page: number; pageSize: number; totalPages: number;
   externalOverview?: { incomplete: number; broken: number; needsVerification: number; ready: number; archived: number };
+  nativeLearning?: { scope: 'FILTERED_ENROLLMENT_COHORT'; asOf: string; cohortFrom: string | null; cohortTo: string | null;
+    eligibleStatuses: string[]; totals: NativeLearningCounts; byCourse: Record<string, NativeLearningCounts> };
   statistics?: { scope: 'FILTERED'; total: number; published: number; drafts: number; needsReview: number;
     native: number; external: number; legacyPaidOrigin: number };
 }
+export interface NativeLearningCounts { enrollments: number; uniqueStudents: number; eligibleEnrollments: number; started: number; completions: number; averageProgress: number | null; completionRate: number | null }
 
 export function certificateFact(course: CatalogFacts): 'FREE' | 'NON_FREE' | 'UNAVAILABLE' | 'UNKNOWN' {
   if (course.certificateAvailable === false) return 'UNAVAILABLE';
@@ -41,6 +44,7 @@ export function changeCatalogFilters(current: URLSearchParams, updates: Record<s
   const next = new URLSearchParams(current);
   for (const [key, value] of Object.entries(updates)) value ? next.set(key, value) : next.delete(key);
   if (updates.scope === 'native') for (const key of externalKeys) next.delete(key);
+  if (updates.scope !== undefined && updates.scope !== 'native') for (const key of ['cohortFrom', 'cohortTo', 'instructor', 'hasEnrollments']) next.delete(key);
   next.delete('page');
   return next;
 }
@@ -50,6 +54,7 @@ export function catalogQuery(params: URLSearchParams, fixedScope?: CourseScope):
   const size = Number(params.get('pageSize'));
   const query = new URLSearchParams({ page: String(Number.isSafeInteger(page) && page > 0 && page <= 100000 ? page : 1), pageSize: String([20, 50, 100].includes(size) ? size : 20) });
   const keys = ['status', 'studyAccess', 'certificateState', 'majorId', 'category', 'learningLanguage', 'difficultyLevel', 'sort'];
+  if (scope === 'native') keys.push('cohortFrom', 'cohortTo', 'instructor', 'hasEnrollments');
   if (scope !== 'native') keys.push('platformName', 'completenessStatus', 'linkHealth');
   for (const key of keys) if (params.get(key)) query.set(key, params.get(key)!);
   if (params.get('q')?.trim()) query.set('search', params.get('q')!.trim().slice(0, 200));

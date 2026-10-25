@@ -31,6 +31,11 @@ export class AdminCourseUseCases {
   ) {}
 
   public async listCourses(filters: CourseFilters): Promise<PaginatedCourseResult<CourseDto>> {
+    if (filters.cohortFrom || filters.cohortTo || filters.instructor || filters.hasEnrollments !== undefined) {
+      if (filters.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE) throw new Error('NATIVE_COURSE_SCOPE_REQUIRED');
+      for (const value of [filters.cohortFrom, filters.cohortTo]) if (value && (!/^\d{4}-\d{2}-\d{2}$/.test(value) || !Number.isFinite(Date.parse(value)) || new Date(value).toISOString().slice(0, 10) !== value)) throw new Error('COURSE_COHORT_DATE_INVALID');
+      if (filters.cohortFrom && filters.cohortTo && filters.cohortFrom >= filters.cohortTo) throw new Error('COURSE_COHORT_RANGE_INVALID');
+    }
     return this.repository.list(filters);
   }
 

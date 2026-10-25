@@ -19,6 +19,11 @@ export interface CourseFilters {
   linkHealth?: 'VERIFIED' | 'BROKEN' | 'NEEDS_REVIEW' | 'UNKNOWN';
   sort?: 'UPDATED_DESC' | 'UPDATED_ASC' | 'NAME_ASC' | 'NAME_DESC' | 'STATUS_ASC';
   includeStatistics?: boolean;
+  /** Native learning cohort: UTC enrollment dates, inclusive from / exclusive to. */
+  cohortFrom?: string;
+  cohortTo?: string;
+  hasEnrollments?: boolean;
+  instructor?: string;
 
   status?: CourseStatus;
   completenessStatus?: CourseImportCompletenessState;
@@ -37,11 +42,21 @@ export interface PaginatedCourseResult<T> {
   totalPages: number;
   hasMore?: boolean;
   externalOverview?: { incomplete: number; broken: number; needsVerification: number; ready: number; archived: number };
+  nativeLearning?: {
+    scope: 'FILTERED_ENROLLMENT_COHORT'; asOf: string; cohortFrom: string | null; cohortTo: string | null;
+    eligibleStatuses: readonly string[]; totals: NativeCourseLearningCounts;
+    byCourse: Record<string, NativeCourseLearningCounts>;
+  };
   nextCursor?: string | null;
   statistics?: {
     scope: 'FILTERED'; total: number; published: number; needsReview: number; drafts: number;
     native: number; external: number; legacyPaidOrigin: number;
   };
+}
+
+export interface NativeCourseLearningCounts {
+  enrollments: number; uniqueStudents: number; eligibleEnrollments: number; started: number; completions: number;
+  averageProgress: number | null; completionRate: number | null;
 }
 
 export interface UpdateCourseDto {

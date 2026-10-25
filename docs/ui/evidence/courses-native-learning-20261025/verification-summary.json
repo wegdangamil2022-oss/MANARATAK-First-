@@ -1,0 +1,138 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "schemaMigrations": 0,
+  "mainMerged": false,
+  "unit": {
+    "passed": 393,
+    "failed": 0,
+    "skipped": 5
+  },
+  "database": {
+    "passed": 26,
+    "failed": 0,
+    "cases": [
+      {
+        "name": "external publication snapshots on attested isolated PostgreSQL16 freezes 10,005 IDs/versions server-side, pages 20, and does not expand with later matching records",
+        "status": "passed"
+      },
+      {
+        "name": "external publication snapshots on attested isolated PostgreSQL16 requires audited transaction and rejects mixed native/missing IDs atomically",
+        "status": "passed"
+      },
+      {
+        "name": "external publication snapshots on attested isolated PostgreSQL16 serializes duplicate snapshot requests and rejects a different request under the same key",
+        "status": "passed"
+      },
+      {
+        "name": "external publication snapshots on attested isolated PostgreSQL16 requires complete preview and explicit eligible-only consent, guards leases and frozen item identity",
+        "status": "passed"
+      },
+      {
+        "name": "external publication snapshots on attested isolated PostgreSQL16 bounds each preview to 20 and execution to 5, cancellation preserves completed outcomes",
+        "status": "passed"
+      },
+      {
+        "name": "external publication snapshots on attested isolated PostgreSQL16 recovers publication only with the exact canonical receipt correlation and actor",
+        "status": "passed"
+      },
+      {
+        "name": "course catalog on attested isolated PostgreSQL16 matches all 324 NULL/boolean/origin/access combinations against displayed certificate semantics",
+        "status": "passed"
+      },
+      {
+        "name": "course catalog on attested isolated PostgreSQL16 keeps free/paid/unknown study independent of certificate and legacy paid origin",
+        "status": "passed"
+      },
+      {
+        "name": "course catalog on attested isolated PostgreSQL16 pages a 10,005-record tied-name/timestamp catalog stably without loading the whole catalog",
+        "status": "passed"
+      },
+      {
+        "name": "course catalog on attested isolated PostgreSQL16 returns filtered whole-result metrics in the same read transaction, not page counts",
+        "status": "passed"
+      },
+      {
+        "name": "course catalog on attested isolated PostgreSQL16 searches source title and topics and combines conditions with AND",
+        "status": "passed"
+      },
+      {
+        "name": "course catalog on attested isolated PostgreSQL16 reads real bounded language options with server scope and rejects free-form field selection at the API",
+        "status": "passed"
+      },
+      {
+        "name": "course catalog on attested isolated PostgreSQL16 paginates distinct options in PostgreSQL and never treats SQL wildcard characters as search wildcards",
+        "status": "passed"
+      },
+      {
+        "name": "manual external creation on attested isolated PostgreSQL16 creates one canonical course, source identity, unverified history and version without a fake import batch",
+        "status": "passed"
+      },
+      {
+        "name": "manual external creation on attested isolated PostgreSQL16 rejects normalized URL/title/language duplicates and safely serializes concurrent manual submissions",
+        "status": "passed"
+      },
+      {
+        "name": "manual external creation on attested isolated PostgreSQL16 permits distinct source language versions without duplicating an identical identity",
+        "status": "passed"
+      },
+      {
+        "name": "manual external creation on attested isolated PostgreSQL16 requires a transaction and rolls back source/course/version together",
+        "status": "passed"
+      },
+      {
+        "name": "manual external creation on attested isolated PostgreSQL16 preserves source lineage during section edits and invalidates reviewed language on source change",
+        "status": "passed"
+      },
+      {
+        "name": "manual external creation on attested isolated PostgreSQL16 filters recorded current link outcomes on the server and reports filtered totals, preserving unknown states",
+        "status": "passed"
+      },
+      {
+        "name": "manual external creation on attested isolated PostgreSQL16 makes unresolved source language/level searchable without pretending they are canonical references",
+        "status": "passed"
+      },
+      {
+        "name": "native learning counts on attested PostgreSQL only counts enrollment IDs, distinct students, genuine starts and completions without attempt fanout",
+        "status": "passed"
+      },
+      {
+        "name": "native learning counts on attested PostgreSQL only uses the database snapshot clock even when the application clock is behind",
+        "status": "passed"
+      },
+      {
+        "name": "native learning counts on attested PostgreSQL only uses an enrollment cohort with inclusive/exclusive UTC boundaries, not completion-event dates",
+        "status": "passed"
+      },
+      {
+        "name": "native learning counts on attested PostgreSQL only filters courses by actual cohort enrollments and excludes unresolved legacy paid origins",
+        "status": "passed"
+      },
+      {
+        "name": "native learning counts on attested PostgreSQL only matches canonical filters and null facts in both the catalog and SQL aggregate predicate",
+        "status": "passed"
+      },
+      {
+        "name": "native learning counts on attested PostgreSQL only returns bounded page reports for 1005 courses and 2010 enrollments while preserving whole-scope unique counts",
+        "status": "passed"
+      }
+    ]
+  },
+  "browser": {
+    "passed": true,
+    "checks": 12,
+    "pageErrors": 0,
+    "screens": 9
+  },
+  "typescript": "PASS",
+  "adminBuild": "PASS_WITH_EXISTING_CHUNK_SIZE_WARNING",
+  "apiBuild": "PASS",
+  "lint": {
+    "errors": 0,
+    "existingWarnings": 11,
+    "newFilesWarnings": 0
+  },
+  "coverage": "07.B native catalog and learning cohort metrics only",
+  "nativeAuthoringAndBlocks": "PENDING",
+  "pr": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/pull/45"
+}

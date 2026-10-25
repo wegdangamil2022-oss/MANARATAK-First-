@@ -1,4 +1,5 @@
 import { currentPublicCourseEligibility } from './CoursePublicEligibility';
+import { nativeCourseLearningReport } from './CourseNativeLearningReport';
 import { courseCatalogOrder, courseCatalogWhere, courseLinkHealthWhere } from './CourseCatalogQuery';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
@@ -335,6 +336,7 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
   }
 
   public async list(filters: CourseFilters): Promise<PaginatedCourseResult<CourseDto>> {
+    const nativeMetrics = filters.includeStatistics && filters.originType === CourseOriginType.NATIVE_MANARATAK_COURSE;
     if (filters.includeStatistics && !this.transactionBound) return this.prisma.$transaction(
       tx => new PrismaCourseRepository(tx as unknown as PrismaClient, true).list(filters),
       { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
@@ -343,6 +345,7 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
     const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 20));
     const where = courseCatalogWhere(filters);
     const result = await this.listPage(where, page, pageSize, filters.sort, filters.includeStatistics);
+    if (nativeMetrics) result.nativeLearning = await nativeCourseLearningReport(this.prisma, filters, result.data.map(row => row.id));
     if (filters.includeStatistics) {
       const groups = await this.prisma.course.groupBy({ by: ['status', 'completenessStatus', 'originType'], where, _count: { _all: true } });
       const sum = (predicate: (row: typeof groups[number]) => boolean) => groups.reduce((count, row) => count + (predicate(row) ? row._count._all : 0), 0);
