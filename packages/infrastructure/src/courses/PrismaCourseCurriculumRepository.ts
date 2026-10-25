@@ -32,8 +32,8 @@ import {
   UpdateCourseQuizDto,
 } from '@manaratak/domain';
 
-const json = (value: unknown): Prisma.InputJsonValue | undefined =>
-  value === undefined ? undefined : (JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue);
+const json = (value: unknown): Prisma.InputJsonValue | typeof Prisma.JsonNull | undefined =>
+  value === undefined ? undefined : value === null ? Prisma.JsonNull : (JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue);
 
 export class PrismaCourseCurriculumRepository implements ICourseCurriculumRepository {
   public constructor(private readonly prisma: PrismaClient) {}

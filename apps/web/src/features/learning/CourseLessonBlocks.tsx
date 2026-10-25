@@ -10,7 +10,7 @@ export function CourseLessonBlocks({
 }: {
   blocks: Block[];
   busy: boolean;
-  onAsset: (referenceId: string, title: string) => void;
+  onAsset: (referenceId: string, title: string, subtitle?: { id: string; language: string }) => void;
   onQuiz: (quizId: string) => void;
   media?: (block: Block) => ReactNode;
 }) {
@@ -100,7 +100,7 @@ export function CourseLessonBlocks({
                   type="button"
                   disabled={busy}
                   className="rounded-xl border px-4 py-2 text-sm font-bold"
-                  onClick={() => onAsset(block.assetReferenceId!, title)}
+                  onClick={() => onAsset(block.assetReferenceId!, title, block.type === 'VIDEO' && p.subtitleReferenceId ? { id: String(p.subtitleReferenceId), language: String(p.subtitleLanguage) } : undefined)}
                 >
                   {title}
                 </button>

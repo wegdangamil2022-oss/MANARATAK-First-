@@ -17,7 +17,9 @@
 - [x] Eight-tab native editor, curriculum metadata, structured blocks with live preview, actual assessment creation, bounded private learners and course cohort report. Existing advanced tools retained.
 - [x] Persisted/ordered/versioned content blocks, protected EAP references, immutable enrollment content and actual learner progress/completion. Original media processing service was not exercised live.
 - [x] Verify 411 unit/contract tests (5 gated skips), 32 isolated PostgreSQL tests, 16 admin browser checks and complete student enrollment/progress/history browser flow; TypeScript/build/lint and actual desktop/mobile evidence. See docs/ui/COURSES_NATIVE_AUTHORING_EXECUTION_2026-10-26.md.
-- [ ] Close remaining 07.B acceptance: draft duplication, unified advanced assessment authoring, public previews/resume/scheduling, scoped instructor roles, live asset pipeline/certificate binding and issuance proof. Financial operations remain deferred by 07.C.07; existing financial guards retained.
+- [x] Course/module/lecture draft copying, explicit legacy conversion, unified objective/written assessment authoring and immutable manual rubric; existing audit/outbox and learner history retained.
+- [x] Real HTTPS media transfer through existing EAP adapters, interruption/retry, verification/fixture-fenced scan/sanitation/promotion, VTT delivery and playback; isolated integration authorized by owner. 436 unit/contract checks, 36 PostgreSQL checks, 7 browser groups and 3 security-rejection groups. See docs/ui/COURSES_NATIVE_CLOSURE_2026-10-26.md.
+- [ ] Full 07.B still includes scoped instructor roles, controlled pre-enrollment/free previews/resume/scheduling, advanced enrollment approval when enabled, and certificate issuer/template binding + issuance evidence. Production media provider unavailable; fixture integration is not production AV/sanitization. New financial operations remain deferred by 07.C.07.
 
 ## Release
 - [x] Phase 1 foundation committed and pushed on feat/courses-admin-workspaces-20261025; no main merge.

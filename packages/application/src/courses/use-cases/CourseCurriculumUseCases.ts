@@ -30,6 +30,8 @@ import {
   UpdateCourseQuestionDto,
   UpdateCourseQuizDto,
 } from '@manaratak/domain';
+import { randomUUID } from 'node:crypto';
+import { copyNativeCurriculum, type NativeCurriculumCopyOptions } from '../services/CopyNativeCurriculum';
 
 export class CourseCurriculumUseCases {
   constructor(
@@ -87,6 +89,28 @@ export class CourseCurriculumUseCases {
     await this.courseRepository.update(courseId, {});
   }
 
+  public async duplicateContent(courseId: string, input: NativeCurriculumCopyOptions) {
+    const course = await this.ensureMutableCourse(courseId);
+    if (course.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE || (!input.moduleId && !input.lessonId) || (input.moduleId && input.lessonId)) throw Error('COURSE_COPY_SCOPE_INVALID');
+    const result = await copyNativeCurriculum(this.curriculumRepository, this.assetRepository, courseId, courseId, input);
+    await this.checkpointCourseVersion(courseId); return result;
+  }
+
+  public async convertLegacyLessonText(courseId: string, lessonId: string) {
+    await this.ensureMutableCourse(courseId); await this.ensureCurriculumMember(courseId, 'lessons', lessonId);
+    const snapshot = await this.curriculumRepository.getCurriculumSnapshot(courseId), lesson = snapshot.lessons.find(row => row.id === lessonId)!;
+    if (!lesson.contentText?.trim()) throw Error('COURSE_LESSON_LEGACY_TEXT_EMPTY');
+    const blocks: CourseContentBlockInput[] = [];
+    for (let offset = 0; offset < lesson.contentText.length;) {
+      let end = Math.min(offset + 50000, lesson.contentText.length);
+      if (end < lesson.contentText.length && /[\uD800-\uDBFF]/.test(lesson.contentText[end - 1])) end--;
+      blocks.push({ id: randomUUID(), type: 'TEXT', payload: { text: lesson.contentText.slice(offset, end) } }); offset = end;
+    }
+    await this.replaceLessonBlocks(courseId, lessonId, [...blocks, ...(snapshot.contentBlocks ?? []).filter(row => row.lessonId === lessonId && row.status !== 'ARCHIVED')]);
+    await this.curriculumRepository.updateLesson(lessonId, { contentText: null });
+    await this.checkpointCourseVersion(courseId); return { convertedBlocks: blocks.length };
+  }
+
   public async replaceLessonBlocks(courseId: string, lessonId: string, input: CourseContentBlockInput[]) {
     await this.ensureMutableCourse(courseId);
     await this.ensureCurriculumMember(courseId, 'lessons', lessonId);
@@ -95,6 +119,7 @@ export class CourseCurriculumUseCases {
     const lesson = snapshot.lessons.find(row => row.id === lessonId);
     if (!lesson || lesson.status === 'ARCHIVED' || !snapshot.modules.some(row => row.id === lesson.moduleId && row.status !== 'ARCHIVED')) throw new Error('COURSE_CONTENT_BLOCK_LESSON_ARCHIVED');
     for (const block of blocks) {
+      if (block.type === 'VIDEO' && block.payload.subtitleReferenceId && !snapshot.assets.some(row => row.id === block.payload.subtitleReferenceId && row.lessonId === lessonId && row.assetType === 'SUBTITLE')) throw Error('COURSE_CONTENT_BLOCK_SUBTITLE_SCOPE_MISMATCH');
       if (block.assetReferenceId) {
         const asset = snapshot.assets.find(row => row.id === block.assetReferenceId && row.lessonId === lessonId);
         if (!asset || (block.type !== 'FILE' && asset.assetType !== block.type)) throw new Error('COURSE_CONTENT_BLOCK_ASSET_SCOPE_OR_TYPE_MISMATCH');
@@ -264,7 +289,7 @@ export class CourseCurriculumUseCases {
   public async detachAssetFromLesson(courseId: string, assetId: string): Promise<void> {
     await this.ensureMutableCourse(courseId);
     await this.ensureCurriculumMember(courseId, 'assets', assetId);
-    if ((await this.curriculumRepository.getCurriculumSnapshot(courseId)).contentBlocks?.some(block => block.assetReferenceId === assetId && block.status !== 'ARCHIVED')) throw new Error('COURSE_CONTENT_BLOCK_ASSET_IN_USE');
+    if ((await this.curriculumRepository.getCurriculumSnapshot(courseId)).contentBlocks?.some(block => (block.assetReferenceId === assetId || block.payload.subtitleReferenceId === assetId) && block.status !== 'ARCHIVED')) throw new Error('COURSE_CONTENT_BLOCK_ASSET_IN_USE');
     await this.curriculumRepository.detachAssetFromLesson(assetId);
     await this.checkpointCourseVersion(courseId);
   }

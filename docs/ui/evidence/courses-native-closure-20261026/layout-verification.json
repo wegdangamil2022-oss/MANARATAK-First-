@@ -1,0 +1,14 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "checks": [
+    "English/LTR advanced editor at 1440/320px with Cairo on headings, controls and buttons; no document overflow",
+    "Native copy dialog keyboard focus/Escape and mobile layout"
+  ],
+  "screens": [
+    "english-native-advanced-1440",
+    "english-native-advanced-320",
+    "english-mobile-copy-dialog"
+  ],
+  "passed": true
+}

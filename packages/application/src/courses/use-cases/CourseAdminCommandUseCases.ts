@@ -49,11 +49,16 @@ export class CourseAdminCommandUseCases {
         if(kind==='COURSE'){
           const current=await courses.findById(id);
           if(!current) throw new Error('COURSE_NOT_FOUND');
-          if(['ARCHIVED','REJECTED'].includes(current.status)) throw new Error('COURSE_INACTIVE_IMMUTABLE');
-          if(current.status==='PUBLISHED' && !['COURSE_UNPUBLISH','COURSE_ARCHIVE'].includes(action)) throw new Error('COURSE_PUBLISHED_STRUCTURE_IMMUTABLE_UNPUBLISH_FIRST');
+          if(['ARCHIVED','REJECTED'].includes(current.status) && action !== 'COURSE_DUPLICATE') throw new Error('COURSE_INACTIVE_IMMUTABLE');
+          if(current.status==='PUBLISHED' && !['COURSE_UNPUBLISH','COURSE_ARCHIVE','COURSE_DUPLICATE'].includes(action)) throw new Error('COURSE_PUBLISHED_STRUCTURE_IMMUTABLE_UNPUBLISH_FIRST');
         }
       }
       const value=await command(this.factory(persistence));
+      if (action === 'COURSE_DUPLICATE') {
+        if (!value || typeof value !== 'object' || !('id' in value) || typeof value.id !== 'string' || value.id === id) throw Error('COURSE_COPY_RESULT_INVALID');
+        entityReference.id = value.id; payload.sourceCourseId = id; payload.entityId = value.id;
+        return { value, version: (await courses.findById(value.id))?.version };
+      }
       if(!id) {
         if(value && typeof value==='object' && 'id' in value && typeof value.id==='string') {
           entityReference.id=value.id;

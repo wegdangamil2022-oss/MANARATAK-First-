@@ -157,3 +157,13 @@
 .native-block-preview{padding:18px;border:1px solid #DDEFF2;border-radius:14px;background:#FBF9F3;margin-block:16px}.native-block-preview>section+section{margin-block-start:14px}.native-block-preview p{white-space:pre-wrap;overflow-wrap:anywhere}.native-block-preview small{display:block;color:#61718B;margin-block-start:4px}.native-block-preview svg{vertical-align:middle;margin-inline-end:8px;color:#0E7C86}.native-block-preview pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#142B5F;color:white;padding:14px;border-radius:10px}.native-block-preview ul{list-style:disc;padding-inline-start:24px}.native-block-preview ol{list-style:decimal;padding-inline-start:24px}
 
 .native-curriculum-tree h4>button{width:30px;flex:0 0 30px;display:inline-grid;place-items:center;margin-inline-start:auto;min-height:30px;padding:4px}
+
+/* Compact confirmation dialogs do not inherit the full-screen content editor. */
+.course-dialog.native-copy-dialog { width:min(640px,calc(100vw - 24px));max-width:calc(100vw - 24px);height:fit-content;max-height:calc(100dvh - 32px);min-height:0;margin:auto;padding:20px;border-radius:18px;overflow:auto; }
+.native-copy-dialog form,.native-copy-dialog fieldset { display:grid;gap:14px;min-width:0; }
+.native-copy-dialog fieldset { border:0;padding:0;margin:0; }
+.native-copy-dialog form>header { display:flex;align-items:center;justify-content:space-between;gap:12px; }
+.native-copy-dialog :is(p,label) { font-size:13px;line-height:1.8; }
+.native-copy-dialog fieldset>label:not(.course-field) { display:flex;align-items:flex-start;gap:10px; }
+.native-copy-dialog input[type=checkbox] { width:18px;height:18px;margin-block-start:4px;flex-shrink:0;accent-color:#0E7C86; }
+@media(max-width:640px) { .course-dialog.native-copy-dialog {padding:16px;} }

@@ -170,7 +170,7 @@ export class CourseProgressUseCases {
     const assetIds = new Set(assets.map(asset => asset.id));
     const contentBlocks = (curriculum.contentBlocks ?? []).filter(block => block.status !== 'ARCHIVED' && lessonIds.has(block.lessonId))
       .sort((a, b) => a.position - b.position).map(({ id, lessonId, type, payload, assetReferenceId, quizId, position, version }) => {
-        if ((assetReferenceId && !assetIds.has(assetReferenceId)) || (quizId && !quizIds.has(quizId))) throw new Error('COURSE_LEARNING_BLOCK_REFERENCE_INVALID');
+        if ((assetReferenceId && !assetIds.has(assetReferenceId)) || (quizId && !quizIds.has(quizId)) || (payload.subtitleReferenceId && !assetIds.has(String(payload.subtitleReferenceId)))) throw new Error('COURSE_LEARNING_BLOCK_REFERENCE_INVALID');
         return { id, lessonId, type, payload: type === 'QUIZ' && !payload.title ? { ...payload, title: quizzes.find(quiz => quiz.id === quizId)?.title ?? '' } : payload, assetReferenceId, quizId, position, version };
       });
     return { course: { id: definition.course.id, displayName: definition.course.displayName, version: definition.course.version }, progress: this.learnerSnapshot(progress), curriculum: { modules:publicModules, lessons:publicLessons, assets, quizzes:publicQuizzes, questions, contentBlocks } };
@@ -344,9 +344,9 @@ export class CourseProgressUseCases {
       const points = question.points;
       if (!Number.isFinite(points) || points <= 0) throw new Error('COURSE_ASSESSMENT_INVALID_POINTS');
       total += points;
-      if (question.questionType === CourseQuestionType.ESSAY || question.questionType === CourseQuestionType.SHORT_ANSWER) {
-        if (typeof answerMap[question.id] !== 'string' || !(answerMap[question.id] as string).trim()) throw new Error('COURSE_ASSESSMENT_WRITTEN_ANSWER_REQUIRED');
-        manualQuestions.push({id: question.id, prompt: question.prompt, maximumPoints: points});
+      if (question.questionType === CourseQuestionType.ESSAY || question.questionType === CourseQuestionType.SHORT_ANSWER || quiz.assessmentType === 'ASSIGNMENT') {
+        if (answerMap[question.id] == null || (typeof answerMap[question.id] === 'string' && !(answerMap[question.id] as string).trim()) || ([CourseQuestionType.ESSAY, CourseQuestionType.SHORT_ANSWER].includes(question.questionType) && typeof answerMap[question.id] !== 'string')) throw new Error('COURSE_ASSESSMENT_WRITTEN_ANSWER_REQUIRED');
+        manualQuestions.push({id: question.id, prompt: question.prompt, maximumPoints: points, ...(question.explanation ? {rubric: question.explanation} : {})});
         continue;
       }
       if (question.correctAnswer === undefined || question.correctAnswer === null) throw new Error('COURSE_ASSESSMENT_ANSWER_KEY_REQUIRED');

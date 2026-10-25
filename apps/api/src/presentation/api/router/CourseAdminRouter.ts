@@ -16,10 +16,12 @@ import {
 } from '@manaratak/domain';
 import type { CourseProgressUseCases } from '@manaratak/application';
 import type {} from '../../middleware/AuthMiddleware.js';
+import { CourseMediaRouter, type CourseMediaCradle } from './CourseMediaRouter.js';
 
 export class CourseAdminRouter {
-  public static create(cradle: CourseAdminScope & {courseAdminCommandUseCases:CourseAdminCommandUseCases; courseProgressUseCases: CourseProgressUseCases}): Router {
+  public static create(cradle: CourseAdminScope & CourseMediaCradle & {courseAdminCommandUseCases:CourseAdminCommandUseCases; courseProgressUseCases: CourseProgressUseCases}): Router {
     const router = Router();
+    router.use('/:id/media', CourseMediaRouter.create(cradle));
     const {learningPathUseCases} = cradle;
 
     const mutationContext = (req: Request): CourseAdminContext => {
@@ -43,7 +45,11 @@ export class CourseAdminRouter {
           // Publication retains its dedicated domain event and atomic coordinator.
           if(req.params.id && req.route.path === '/:id/publish') {
             let body:unknown;
-            const buffered:Response=new Proxy(res,{get(target,key){if(key==='json')return (value:unknown)=>{body=value;return buffered;};const value=Reflect.get(target,key);return typeof value==='function'?value.bind(target):value;}});
+            const buffered:Response=new Proxy(res,{get(target,key){
+              if(key==='json')return (value:unknown)=>{body=value;return buffered;};
+              if(key==='status')return (code:number)=>{target.statusCode=code;return buffered;};
+              const value=Reflect.get(target,key);return typeof value==='function'?value.bind(target):value;
+            }});
             await fn(req,buffered,cradle);
             const current=await cradle.adminCourseUseCases.getCourse(req.params.id);
             res.setHeader('X-Entity-Version',String(current.version));
@@ -54,6 +60,7 @@ export class CourseAdminRouter {
           const id=req.params.pathId ?? req.params.id;
           const commandName=req.route.path === '/:id/unpublish'?'COURSE_UNPUBLISH':
             req.route.path === '/:id/archive'?'COURSE_ARCHIVE':
+            req.route.path === '/:id/duplicate'?'COURSE_DUPLICATE':
             `ADMIN_${req.method}_${req.route.path.replace(/[^a-zA-Z0-9]+/g,'_').toUpperCase()}`;
           // Buffer response bodies until the business/audit/outbox transaction commits.
           let responseBody: unknown;
@@ -227,8 +234,8 @@ export class CourseAdminRouter {
 
     const quizBodySchema = z.object({
       assessmentType: z.enum(['QUIZ', 'ASSIGNMENT']).optional(),
-      moduleId: z.string().optional(),
-      lessonId: z.string().optional(),
+      moduleId: z.string().nullable().optional(),
+      lessonId: z.string().nullable().optional(),
       title: z.string().min(1),
       instructions: z.string().nullable().optional(),
       position: z.number().int().positive(),
@@ -308,6 +315,22 @@ export class CourseAdminRouter {
       const {nativeCourseUseCases}=scope;
       const course = await nativeCourseUseCases.create(nativeCreateBodySchema.parse(req.body));
       res.status(201).json(course);
+    }));
+
+    const copyOptionsSchema = z.object({ includeAssets: z.boolean(), acknowledgeAssetRights: z.boolean() }).strict();
+    router.post('/:id/duplicate', asyncHandler(async (req, res, scope) => {
+      const input = copyOptionsSchema.extend({ titleAr: z.string().trim().min(2).max(500) }).strict().parse(req.body);
+      res.status(201).json(await scope.nativeCourseUseCases.duplicate(req.params.id, input));
+    }));
+    router.post('/:id/modules/:moduleId/duplicate', asyncHandler(async (req, res, scope) => {
+      res.status(201).json(await scope.courseCurriculumUseCases.duplicateContent(req.params.id, { ...copyOptionsSchema.parse(req.body), moduleId: req.params.moduleId }));
+    }));
+    router.post('/:id/lessons/:lessonId/duplicate', asyncHandler(async (req, res, scope) => {
+      res.status(201).json(await scope.courseCurriculumUseCases.duplicateContent(req.params.id, { ...copyOptionsSchema.parse(req.body), lessonId: req.params.lessonId }));
+    }));
+    router.post('/:id/lessons/:lessonId/convert-text', asyncHandler(async (req, res, scope) => {
+      z.object({}).strict().parse(req.body);
+      res.json(await scope.courseCurriculumUseCases.convertLegacyLessonText(req.params.id, req.params.lessonId));
     }));
 
     router.get('/', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
@@ -580,13 +603,13 @@ export class CourseAdminRouter {
       const body = quizBodySchema.parse(req.body);
       const quiz = await courseCurriculumUseCases.createQuiz({
         courseId: req.params.id,
-        moduleId: body.moduleId,
-        lessonId: body.lessonId,
+        moduleId: body.moduleId ?? undefined,
+        lessonId: body.lessonId ?? undefined,
         title: body.title,
         instructions: body.instructions ?? undefined,
         position: body.position,
-        passingScore: body.passingScore ?? undefined,
-        maxAttempts: body.maxAttempts ?? undefined,
+        passingScore: body.passingScore,
+        maxAttempts: body.maxAttempts,
         assessmentType: body.assessmentType,
         status: body.status,
       });

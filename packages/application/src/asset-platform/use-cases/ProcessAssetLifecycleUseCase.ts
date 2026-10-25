@@ -36,6 +36,11 @@ export class ProcessAssetLifecycleUseCase {
     private readonly sanitizationGateway?: IAssetSanitizationGateway
   ) {}
 
+  public mediaCapabilities() {
+    const scanner = this.malwareScannerGateway as { capabilityStatus?: string } | undefined, sanitizer = this.sanitizationGateway as { capabilityStatus?: string } | undefined;
+    return { upload: typeof this.storageGateway.generateUploadGrant === 'function', delivery: typeof this.storageGateway.generateDeliveryGrant === 'function', scanning: Boolean(scanner && scanner.capabilityStatus !== 'UNAVAILABLE'), sanitization: Boolean(sanitizer && sanitizer.capabilityStatus !== 'UNAVAILABLE') };
+  }
+
   public assertAuthenticatedDeliveryConfigured(): void {
     if (!this.storageGateway.openRead && !this.storageGateway.read)
       throw new Error('ASSET_AUTHENTICATED_READ_NOT_CONFIGURED');

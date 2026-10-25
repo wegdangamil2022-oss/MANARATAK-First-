@@ -86,8 +86,8 @@ export interface CreateCourseQuizDto {
   title: string;
   instructions?: string;
   position: number;
-  passingScore?: number;
-  maxAttempts?: number;
+  passingScore?: number | null;
+  maxAttempts?: number | null;
   assessmentType?: 'QUIZ' | 'ASSIGNMENT';
   status?: CourseContentStatus;
 }

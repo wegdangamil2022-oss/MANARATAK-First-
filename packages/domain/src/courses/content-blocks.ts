@@ -102,6 +102,9 @@ export function normalizeCourseBlock(input: CourseContentBlockInput): CourseCont
       text('caption', 1000);
       break;
     case 'VIDEO':
+      text('title', 500, true); text('caption', 1000); text('subtitleReferenceId', 36); text('subtitleLanguage', 35);
+      if (Boolean(source.subtitleReferenceId) !== Boolean(source.subtitleLanguage) || (source.subtitleReferenceId && (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(source.subtitleReferenceId)) || !/^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/i.test(String(source.subtitleLanguage))))) throw Error('COURSE_CONTENT_BLOCK_SUBTITLE_INVALID');
+      break;
     case 'AUDIO':
     case 'FILE':
       text('title', 500, true);

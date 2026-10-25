@@ -70,7 +70,7 @@ export interface AssessmentReviewSnapshot {
   passingScore: number;
   totalPoints: number;
   automaticPoints: number;
-  questions: { id: string; prompt: string; maximumPoints: number }[];
+  questions: { id: string; prompt: string; maximumPoints: number; rubric?: string }[];
 }
 
 export interface PendingAssessmentSubmissionDto {

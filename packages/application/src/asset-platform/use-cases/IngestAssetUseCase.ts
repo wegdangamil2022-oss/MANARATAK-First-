@@ -12,6 +12,7 @@ import {
   AssetStorageZone,
   AssetLifecycleState,
   AssetSecurityClassification,
+  validateAssetRights,
 } from '@manaratak/domain';
 
 import {
@@ -34,6 +35,20 @@ export class IngestAssetUseCase {
   ): Promise<AssetUploadLocatorDto> {
     AssetValidator.validate(input);
     return this.allocateUpload(input);
+  }
+
+  public async requestCourseMediaUpload(input: RequestAssetUploadLocatorDto, lessonId: string, actorId: string, rights: {rightsSource: string; attribution: string}): Promise<AssetUploadLocatorDto> {
+    AssetValidator.validateCourseMedia(input);
+    if (!lessonId || !actorId || !this.storageGateway.generateUploadGrant) throw Error('COURSE_MEDIA_UPLOAD_PROVIDER_UNAVAILABLE');
+    return this.allocateUpload(input, { purpose: 'COURSE_LESSON_MEDIA', courseId: input.ownerId, lessonId, uploadedBy: actorId, rights: validateAssetRights({ ...rights, usageScope: 'INTERNAL', publicationPolicy: 'MANDATORY' }) });
+  }
+
+  public async refreshCourseMediaUpload(assetId: string, courseId: string) {
+    const record = await this.assetRepository.findById(new AssetId(assetId));
+    if (!record || record.owner.ownerId !== courseId || record.owner.ownerType !== 'COURSE' || record.metadata.extraMetadata?.purpose !== 'COURSE_LESSON_MEDIA' || record.state !== AssetLifecycleState.INITIATED || !this.storageGateway.refreshUploadGrant) throw Error('COURSE_MEDIA_UPLOAD_RESUME_NOT_AVAILABLE');
+    const grant = await this.storageGateway.refreshUploadGrant(record.locator, { assetId, originalFilename: record.metadata.originalFilename, mimeType: record.metadata.mimeType, byteSize: record.metadata.byteSize });
+      if (grant.locator.value !== record.locator.value) throw Error('COURSE_MEDIA_UPLOAD_RESUME_LOCATOR_MISMATCH');
+    return { assetId, uploadGrant: { uploadUrl: grant.uploadUrl, method: grant.method, headers: grant.headers, expiresAt: grant.expiresAt } };
   }
 
   /** Internal P15 entry records purpose/consent while retaining the normal quarantine pipeline. */

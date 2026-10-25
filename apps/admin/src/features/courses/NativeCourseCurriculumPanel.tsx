@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { CourseCurriculumSnapshotDto } from '@manaratak/domain';
-import { BookOpen, Plus, Paperclip, Layers, Pencil } from 'lucide-react';
+import { BookOpen, Plus, Paperclip, Layers, Pencil, Copy } from 'lucide-react';
 import { CourseDraftStructurePanel } from '../../components/CourseDraftStructurePanel';
 import { AssetPicker } from '../../components/AssetPicker';
 import { NativeLessonBlockEditor } from './NativeLessonBlockEditor';
 import { useCourseCopy } from './useCourseCopy';
-export type NativeCourseCommand = (path: string, body?: object, method?: string) => Promise<void>;
+import { NativeCurriculumCopyDialog } from './NativeCourseCopyDialog';
+import { NativeCourseMediaUpload } from './NativeCourseMediaUpload';
+export type NativeCourseCommand = (path: string, body?: object, method?: string) => Promise<unknown>;
 export function NativeCourseCurriculumPanel({
   id,
   version,
+  reason,
   status,
   snapshot,
   busy,
@@ -20,6 +23,7 @@ export function NativeCourseCurriculumPanel({
 }: {
   id: string;
   version: number;
+  reason: string;
   status: string;
   snapshot: CourseCurriculumSnapshotDto;
   busy: boolean;
@@ -49,6 +53,8 @@ export function NativeCourseCurriculumPanel({
     [assetType, setAssetType] = useState('VIDEO');
   const [description, setDescription] = useState(''),
     [duration, setDuration] = useState('');
+  const [copy, setCopy] = useState<{kind: 'modules' | 'lessons'; id: string}>();
+  const openCopy = (kind: 'modules' | 'lessons', target: string) => { if (dirty && !window.confirm(tr('تجاهل التعديلات غير المحفوظة؟', 'Discard unsaved changes?'))) return; onDirty(false); setCopy({kind, id: target}); };
   const editable = !['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(status),
     lesson = lessons.find((lesson) => lesson.id === selected);
   const switchMode = (next: string, lessonId = selected) => {
@@ -308,6 +314,7 @@ export function NativeCourseCurriculumPanel({
                 <h4>
                   <BookOpen size={16} />
                   {module.title}
+                  <button type="button" aria-label={tr('نسخ الوحدة', 'Copy module')} disabled={!editable || busy} onClick={() => openCopy('modules', module.id)}><Copy size={15}/></button>
                   <button
                     type="button"
                     aria-label={tr('تعديل الوحدة', 'Edit module')}
@@ -335,6 +342,7 @@ export function NativeCourseCurriculumPanel({
           )}
         </nav>
         <div className="native-lecture-content">
+          {copy && <NativeCurriculumCopyDialog kind={copy.kind} id={copy.id} command={command} onClose={() => setCopy(undefined)}/>}
           {mode === 'structure' ? (
             <CourseDraftStructurePanel
               courseId={id}
@@ -366,12 +374,16 @@ export function NativeCourseCurriculumPanel({
                     <Paperclip size={16} />
                     {tr('إضافة ملف', 'Attach file')}
                   </button>
+                  <button type="button" disabled={!editable || busy} onClick={() => openCopy('lessons', lesson.id)}><Copy size={16}/>{tr('نسخ المحاضرة', 'Copy lecture')}</button>
+                  <button type="button" disabled={!editable || busy} onClick={() => switchMode(mode === 'upload' ? 'blocks' : 'upload')}>{mode === 'upload' ? tr('تحرير المحتوى', 'Edit content') : tr('رفع ملف جديد', 'Upload new media')}</button>
                 </div>
               </header>
+              {mode === 'upload' ? <NativeCourseMediaUpload key={lesson.id} courseId={id} lessonId={lesson.id} version={version} reason={reason} attachedAssetIds={snapshot.assets.filter(row => row.lessonId === lesson.id).map(row => row.assetId)} onDirty={onDirty} onAttach={asset => command(`lessons/${lesson.id}/assets`, { ...asset, position: Math.max(0, ...snapshot.assets.filter(row => row.lessonId === lesson.id).map(row => row.position)) + 1 })}/> : <>
               {lesson.contentText && (
                 <section className="course-panel">
                   <h4>{tr('النص السابق المحفوظ', 'Preserved existing text')}</h4>
                   <p className="native-preserved-text">{lesson.contentText}</p>
+                  <button type="button" disabled={!editable || busy || dirty} onClick={() => { if (window.confirm(tr('تحويل النص المحفوظ إلى كتل قابلة للتحرير؟ سيحفظ ترتيبه والنص كاملًا، وتبقى النسخ التاريخية.', 'Convert preserved text into editable blocks? The full text and ordering are retained, and historical versions remain.'))) void command(`lessons/${lesson.id}/convert-text`, {}).catch(() => undefined); }}>{tr('تحويل النص إلى كتل', 'Convert text to blocks')}</button>
                 </section>
               )}
               <NativeLessonBlockEditor
@@ -385,6 +397,7 @@ export function NativeCourseCurriculumPanel({
                   command(`lessons/${lesson.id}/content-blocks`, { blocks }, 'PUT')
                 }
               />
+              </>}
             </>
           ) : (
             <p className="course-panel">

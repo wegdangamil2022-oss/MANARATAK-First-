@@ -32,7 +32,7 @@ export function NativeLessonBlockEditor({
   editable: boolean;
   busy: boolean;
   onDirty: (value: boolean) => void;
-  onSave: (blocks: CourseContentBlockInput[]) => Promise<void>;
+  onSave: (blocks: CourseContentBlockInput[]) => Promise<unknown>;
 }) {
   const { tr, ar } = useCourseCopy();
   const initial = (snapshot.contentBlocks ?? [])
@@ -230,6 +230,7 @@ export function NativeLessonBlockEditor({
               <label className="course-field">
                 <span>{tr('ملف المحاضرة المعتمد', 'Approved lecture attachment')}</span>
                 <select
+                  aria-label={tr('ملف المحاضرة المعتمد', 'Approved lecture attachment')}
                   disabled={!editable || busy}
                   value={block.assetReferenceId ?? ''}
                   onChange={(event) =>
@@ -254,6 +255,7 @@ export function NativeLessonBlockEditor({
               </label>
             </>
           )}
+          {block.type === 'VIDEO' && <><label className="course-field"><span>{tr('ترجمة الفيديو VTT — اختياري', 'Video captions VTT — optional')}</span><select aria-label={tr('ترجمة الفيديو VTT — اختياري', 'Video captions VTT — optional')} disabled={!editable || busy} value={String(block.payload.subtitleReferenceId ?? '')} onChange={event => { const { subtitleReferenceId: _ref, subtitleLanguage: _language, ...rest } = block.payload; update(index, { payload: { ...rest, ...(event.target.value ? { subtitleReferenceId: event.target.value, subtitleLanguage: 'ar' } : {}) } }); }}><option value="">{tr('دون ترجمة مرفقة', 'No caption attachment')}</option>{snapshot.assets.filter(asset => asset.lessonId === lessonId && asset.assetType === 'SUBTITLE').map(asset => <option key={asset.id} value={asset.id}>{asset.title || 'VTT'}</option>)}</select></label>{Boolean(block.payload.subtitleReferenceId) && input(block, index, 'subtitleLanguage', tr('رمز لغة الترجمة — مثل ar أو en', 'Caption language code — e.g. ar or en'))}</>}
           {block.type === 'QUIZ' && (
             <>
               <label className="course-field">

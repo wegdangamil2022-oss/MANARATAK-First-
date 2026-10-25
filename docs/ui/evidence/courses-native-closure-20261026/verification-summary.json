@@ -1,0 +1,38 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "unit": {
+    "passed": 436,
+    "skipped": 5,
+    "failed": 0
+  },
+  "postgres": {
+    "passed": 36,
+    "failed": 0
+  },
+  "browserGroups": 7,
+  "securityRejectionGroups": 3,
+  "layoutGroups": 2,
+  "screens": [
+    "desktop-course-media-active",
+    "desktop-native-advanced-authoring",
+    "mobile-native-advanced-authoring",
+    "desktop-native-copy-curriculum",
+    "desktop-student-video-captions",
+    "mobile-student-video-captions",
+    "mobile-student-graded-completion",
+    "english-native-advanced-1440",
+    "english-native-advanced-320",
+    "english-mobile-copy-dialog"
+  ],
+  "typescript": "PASS_API_ADMIN_WEB",
+  "build": "PASS_API_ADMIN_WEB",
+  "eslint": {
+    "newFilesErrors": 0,
+    "newFilesWarnings": 0,
+    "changedTypeScriptErrors": 0,
+    "existingWarnings": 25
+  },
+  "productionMediaProviderTested": false,
+  "full07BClosed": false
+}

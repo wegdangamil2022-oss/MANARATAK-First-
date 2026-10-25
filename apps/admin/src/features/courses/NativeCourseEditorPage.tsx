@@ -33,6 +33,8 @@ import { NativeCourseReportsPanel } from './NativeCourseReportsPanel';
 import { ExternalCourseRelationships } from './ExternalCourseRelationships';
 import { useCourseCopy } from './useCourseCopy';
 import './courses.css';
+import { NativeCourseCopyDialog } from './NativeCourseCopyDialog';
+import { NativeAssessmentAuthoring as NativeAssessments } from './NativeAssessmentAuthoring';
 type Readiness = {
   ready: boolean;
   percentage: number;
@@ -57,6 +59,7 @@ export function NativeCourseEditorPage() {
     [error, setError] = useState(''),
     [notice, setNotice] = useState('');
   const loadGeneration = useRef(0);
+  const [copyOpen, setCopyOpen] = useState(false);
   const tab = params.get('tab') ?? 'basics';
   const returnTo =
     params.get('returnTo')?.startsWith('/courses') && !params.get('returnTo')?.startsWith('//')
@@ -146,7 +149,7 @@ export function NativeCourseEditorPage() {
     setNotice('');
     let committed = false;
     try {
-      await adminApiClient.request(`/admin/courses/${id}${path ? '/' + path : ''}`, {
+      const result = await adminApiClient.request(`/admin/courses/${id}${path ? '/' + path : ''}`, {
         method,
         headers: { ...reviewReasonHeaders(reason.trim()), 'If-Match': String(data.course.version) },
         body: JSON.stringify(body ?? {}),
@@ -154,6 +157,7 @@ export function NativeCourseEditorPage() {
       committed = true;
       await load();
       setNotice(tr('حُفظت التغييرات في نسخة جديدة.', 'Changes saved in a new version.'));
+      return result;
     } catch (error) {
       const message = error instanceof Error ? error.message : '';
       setError(
@@ -225,7 +229,9 @@ export function NativeCourseEditorPage() {
         <Link to={`/courses/${id}?returnTo=${encodeURIComponent(returnTo)}`}>
           {tr('أدوات الإدارة المتقدمة الحالية', 'Existing advanced administration')}
         </Link>
+        <button type="button" disabled={busy || loading || !data} onClick={() => { if (confirmDiscard()) setCopyOpen(true); }}>{tr('نسخ الدورة', 'Copy course')}</button>
       </div>
+      {copyOpen && data && <NativeCourseCopyDialog course={data.course} onClose={() => setCopyOpen(false)} onCreated={copyId => { setCopyOpen(false); setDirty(false); navigate(`/courses/${copyId}/editor`); }}/>}
       <label className="course-field course-reason-field">
         <span>{tr('مبرر الإجراء', 'Action reason')}</span>
         <input
@@ -297,19 +303,19 @@ export function NativeCourseEditorPage() {
                   onDirty={changeDirty}
                   command={command}
                 />
-                <OwnerDescriptionTranslationPanel
+                <div onChangeCapture={() => changeDirty(true)}><OwnerDescriptionTranslationPanel
                   domain="COURSE"
                   ownerId={id}
                   endpoint="/admin/courses"
                   optionalFields={data.course.optionalFields}
                   status={data.course.status}
                   onSaved={load}
-                />
+                /></div>
                 <ExternalCourseRelationships
                   id={id}
                   editable={!readonly}
                   busy={busy}
-                  command={(path, body) => command(path, body).catch(() => undefined)}
+                  command={async (path, body) => { await command(path, body); }}
                 />
               </>
             )}
@@ -328,6 +334,7 @@ export function NativeCourseEditorPage() {
                 id={id}
                 version={data.course.version}
                 status={data.course.status}
+                reason={reason}
                 snapshot={data.curriculum}
                 busy={busy}
                 dirty={dirty}
@@ -345,14 +352,14 @@ export function NativeCourseEditorPage() {
                   command={command}
                   onDirty={changeDirty}
                 />
-                <CourseQuestionBanksPanel
+                <div onChangeCapture={() => changeDirty(true)}><CourseQuestionBanksPanel
                   courseId={id}
                   version={data.course.version}
                   status={data.course.status}
                   snapshot={data.curriculum}
                   onSaved={load}
-                />
-                <AssessmentReviewPanel courseId={id} />
+                /></div>
+                <AssessmentReviewPanel courseId={id} onDirty={changeDirty}/>
               </>
             )}
             {tab === 'completion' && (
@@ -821,227 +828,5 @@ function NativeCompletion({
         </button>
       </fieldset>
     </form>
-  );
-}
-
-function NativeAssessments({
-  snapshot,
-  busy,
-  readonly,
-  command,
-  onDirty,
-}: {
-  snapshot: CourseCurriculumSnapshotDto;
-  busy: boolean;
-  readonly: boolean;
-  command: NativeCourseCommand;
-  onDirty: (value: boolean) => void;
-}) {
-  const { tr } = useCourseCopy();
-  const [title, setTitle] = useState(''),
-    [lessonId, setLessonId] = useState(''),
-    [quizId, setQuizId] = useState(snapshot.quizzes[0]?.id ?? ''),
-    [prompt, setPrompt] = useState(''),
-    [choices, setChoices] = useState(''),
-    [answer, setAnswer] = useState(''),
-    [passingScore, setPassingScore] = useState('70'),
-    [attempts, setAttempts] = useState('3'),
-    [points, setPoints] = useState('1');
-  return (
-    <section className="course-panel native-assessments">
-      <h2>
-        <FileQuestion size={18} />
-        {tr('بناء التقييمات', 'Assessment authoring')}
-      </h2>
-      <fieldset disabled={readonly || busy}>
-        <form
-          className="course-section-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            const lesson = snapshot.lessons.find((lesson) => lesson.id === lessonId);
-            void command('quizzes', {
-              title,
-              ...(lesson ? { lessonId, moduleId: lesson.moduleId } : {}),
-              passingScore: Number(passingScore),
-              maxAttempts: attempts ? Number(attempts) : null,
-              position: Math.max(0, ...snapshot.quizzes.map((quiz) => quiz.position)) + 1,
-            }).catch(() => undefined);
-          }}
-        >
-          <label className="course-field">
-            <span>{tr('عنوان الاختبار', 'Assessment title')}</span>
-            <input
-              required
-              value={title}
-              onChange={(event) => {
-                setTitle(event.target.value);
-                onDirty(true);
-              }}
-            />
-          </label>
-          <label className="course-field">
-            <span>{tr('موضع الاختبار', 'Assessment location')}</span>
-            <select
-              aria-label={tr('موضع الاختبار', 'Assessment location')}
-              value={lessonId}
-              onChange={(event) => {
-                setLessonId(event.target.value);
-                onDirty(true);
-              }}
-            >
-              <option value="">{tr('ختامي للدورة', 'Course final')}</option>
-              {snapshot.lessons
-                .filter((lesson) => lesson.status !== 'ARCHIVED')
-                .map((lesson) => (
-                  <option key={lesson.id} value={lesson.id}>
-                    {lesson.title}
-                  </option>
-                ))}
-            </select>
-          </label>
-          <label className="course-field">
-            <span>{tr('درجة النجاح %', 'Passing score %')}</span>
-            <input
-              type="number"
-              min={0}
-              max={100}
-              required
-              value={passingScore}
-              onChange={(event) => {
-                setPassingScore(event.target.value);
-                onDirty(true);
-              }}
-            />
-          </label>
-          <label className="course-field">
-            <span>{tr('حد المحاولات — فارغ دون حد', 'Attempt limit — blank for unlimited')}</span>
-            <input
-              type="number"
-              min={1}
-              value={attempts}
-              onChange={(event) => {
-                setAttempts(event.target.value);
-                onDirty(true);
-              }}
-            />
-          </label>
-          <button type="submit">{tr('إضافة الاختبار', 'Add assessment')}</button>
-        </form>
-        <form
-          className="course-section-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            const options = choices
-              .split('\n')
-              .map((value) => value.trim())
-              .filter(Boolean);
-            if (!options.includes(answer)) return;
-            void command('questions', {
-              quizId,
-              questionType: 'MULTIPLE_CHOICE',
-              prompt,
-              choices: options,
-              correctAnswer: answer,
-              points: Number(points),
-              position:
-                Math.max(
-                  0,
-                  ...snapshot.questions
-                    .filter((question) => question.quizId === quizId)
-                    .map((question) => question.position),
-                ) + 1,
-            }).catch(() => undefined);
-          }}
-        >
-          <h3>{tr('سؤال متعدد الخيارات', 'Multiple-choice question')}</h3>
-          <label className="course-field">
-            <span>{tr('الاختبار', 'Assessment')}</span>
-            <select
-              aria-label={tr('الاختبار', 'Assessment')}
-              required
-              value={quizId}
-              onChange={(event) => {
-                setQuizId(event.target.value);
-                onDirty(true);
-              }}
-            >
-              <option value="">{tr('اختر اختبارًا', 'Choose assessment')}</option>
-              {snapshot.quizzes
-                .filter((quiz) => quiz.status !== 'ARCHIVED')
-                .map((quiz) => (
-                  <option value={quiz.id} key={quiz.id}>
-                    {quiz.title}
-                  </option>
-                ))}
-            </select>
-          </label>
-          <label className="course-field">
-            <span>{tr('السؤال', 'Question')}</span>
-            <textarea
-              required
-              value={prompt}
-              onChange={(event) => {
-                setPrompt(event.target.value);
-                onDirty(true);
-              }}
-            />
-          </label>
-          <label className="course-field">
-            <span>{tr('الخيارات — خيار لكل سطر', 'Choices — one per line')}</span>
-            <textarea
-              required
-              value={choices}
-              onChange={(event) => {
-                setChoices(event.target.value);
-                setAnswer('');
-                onDirty(true);
-              }}
-            />
-          </label>
-          <label className="course-field">
-            <span>{tr('الإجابة الصحيحة', 'Correct answer')}</span>
-            <select
-              aria-label={tr('الإجابة الصحيحة', 'Correct answer')}
-              required
-              value={answer}
-              onChange={(event) => {
-                setAnswer(event.target.value);
-                onDirty(true);
-              }}
-            >
-              <option value="">{tr('اختر الإجابة', 'Choose answer')}</option>
-              {choices
-                .split('\n')
-                .map((value) => value.trim())
-                .filter(Boolean)
-                .map((value, index) => (
-                  <option value={value} key={index}>
-                    {value}
-                  </option>
-                ))}
-            </select>
-          </label>
-          <label className="course-field">
-            <span>{tr('درجة السؤال', 'Question points')}</span>
-            <input
-              type="number"
-              min={1}
-              required
-              value={points}
-              onChange={(event) => {
-                setPoints(event.target.value);
-                onDirty(true);
-              }}
-            />
-          </label>
-          <button
-            type="submit"
-            disabled={choices.split('\n').filter((value) => value.trim()).length < 2}
-          >
-            {tr('حفظ السؤال', 'Save question')}
-          </button>
-        </form>
-      </fieldset>
-    </section>
   );
 }

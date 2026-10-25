@@ -10,6 +10,8 @@ import {
 import { preservePostLoginReturn } from '../students/postLoginIntent';
 import { CourseLessonBlocks } from './CourseLessonBlocks';
 import './course-learner.css';
+import { CourseMediaPlayer, type LearningMedia } from './CourseMediaPlayer';
+import { fetchCourseMediaBlob } from './course-media-delivery';
 
 function currentProgress(workspace: CourseLearnerWorkspaceDto | null, lessonId: string): number {
   return (
@@ -30,15 +32,10 @@ export function CourseLearnerPage() {
   const [activeAttempt, setActiveAttempt] = useState<StudentCourseQuizAttemptDto | null>(null);
   const [activeQuizId, setActiveQuizId] = useState<string | null>(null);
   const assetRequest = useRef(0);
-  const [media, setMedia] = useState<{
-    url: string;
-    type: 'video' | 'audio' | 'image';
-    title: string;
-    referenceId: string;
-  } | null>(null);
+  const [media, setMedia] = useState<LearningMedia | null>(null);
   useEffect(
     () => () => {
-      if (media) URL.revokeObjectURL(media.url);
+      if (media) { URL.revokeObjectURL(media.url); if (media.subtitleUrl) URL.revokeObjectURL(media.subtitleUrl); }
     },
     [media],
   );
@@ -166,7 +163,7 @@ export function CourseLearnerPage() {
     }
   }
 
-  async function openLessonAsset(lessonId: string, assetReferenceId: string, title: string) {
+  async function openLessonAsset(lessonId: string, assetReferenceId: string, title: string, subtitle?: { id: string; language: string }) {
     setBusy(true);
     setError(null);
     const request = ++assetRequest.current;
@@ -176,10 +173,15 @@ export function CourseLearnerPage() {
         lessonId,
         assetReferenceId,
       );
-      if (!/^https?:\/\//i.test(grant.url)) throw new Error('رابط المحتوى غير صالح.');
-      const response = await fetch(grant.url, { headers: grant.headers });
-      if (!response.ok) throw new Error('تعذر تحميل محتوى الدرس.');
-      const blob = await response.blob();
+      const blob = await fetchCourseMediaBlob(grant);
+      let subtitleUrl: string | undefined;
+      if (subtitle) {
+        const captionGrant = await ApiClient.getStudentCourseAssetDeliveryGrant(courseId, lessonId, subtitle.id);
+        const caption = await fetchCourseMediaBlob(captionGrant, 2 * 1024 * 1024);
+        if (!['text/vtt','text/plain'].includes(caption.type)) throw Error('COURSE_MEDIA_SUBTITLE_TYPE_INVALID');
+        if (request !== assetRequest.current) return;
+        subtitleUrl = URL.createObjectURL(new Blob([caption], { type: 'text/vtt' }));
+      }
       if (request !== assetRequest.current) return;
       const assetUrl = URL.createObjectURL(blob);
       const type = blob.type.startsWith('video/')
@@ -190,13 +192,14 @@ export function CourseLearnerPage() {
             ? 'image'
             : null;
       if (type) {
-        setMedia({ url: assetUrl, type, title, referenceId: assetReferenceId });
+        setMedia({ url: assetUrl, type, title, referenceId: assetReferenceId, subtitleUrl, subtitleLanguage: subtitle?.language });
         return;
       }
       const link = document.createElement('a');
       link.href = assetUrl;
       link.download = `${title || 'course-content'}${blob.type === 'application/pdf' ? '.pdf' : ''}`;
       link.click();
+      if (subtitleUrl) URL.revokeObjectURL(subtitleUrl);
       setTimeout(() => URL.revokeObjectURL(assetUrl), 60000);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'تعذر فتح محتوى الدرس');
@@ -327,8 +330,8 @@ export function CourseLearnerPage() {
                         </div>
                       )}
                       <CourseLessonBlocks blocks={(workspace.curriculum.contentBlocks ?? []).filter(block => block.lessonId === lesson.id)} busy={busy}
-                        onAsset={(reference, title) => void openLessonAsset(lesson.id, reference, title)} onQuiz={quizId => void startQuiz(quizId)}
-                        media={block => media && media.referenceId === block.assetReferenceId ? media.type === 'video' ? <video className="mt-3 w-full" controls src={media.url} aria-label={media.title}/> : media.type === 'audio' ? <audio className="mt-3 w-full" controls src={media.url} aria-label={media.title}/> : <img className="mt-3 max-w-full" src={media.url} alt={String(block.payload.alt ?? media.title)}/> : null}/>
+                        onAsset={(reference, title, subtitle) => void openLessonAsset(lesson.id, reference, title, subtitle)} onQuiz={quizId => void startQuiz(quizId)}
+                        media={block => media && media.referenceId === block.assetReferenceId ? <CourseMediaPlayer media={media} alt={String(block.payload.alt ?? media.title)} onError={() => setError(locale === 'ar' ? 'تعذر تشغيل الملف؛ أعد فتحه للحصول على إذن جديد.' : 'Playback failed; reopen the file to obtain a fresh grant.')}/> : null}/>
                       <div className="mt-3 flex flex-wrap gap-2">
                         {workspace.curriculum.assets
                           .filter((asset) => asset.lessonId === lesson.id && !(workspace.curriculum.contentBlocks ?? []).some(block => block.assetReferenceId === asset.id))
@@ -364,6 +367,7 @@ export function CourseLearnerPage() {
                 {quizzes.map((quiz) => (
                   <article
                     key={quiz.id}
+                    data-course-quiz-id={quiz.id}
                     className="rounded-2xl border border-[var(--mn-border-gold)] bg-[var(--mn-gold-surface)] p-4"
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -465,13 +469,7 @@ export function CourseLearnerPage() {
             <h2 className="font-bold">{media.title}</h2>
             <button onClick={() => setMedia(null)}>إغلاق المحتوى</button>
           </div>
-          {media.type === 'video' ? (
-            <video src={media.url} controls className="mt-3 w-full max-h-[70vh]" />
-          ) : media.type === 'audio' ? (
-            <audio src={media.url} controls className="mt-3 w-full" />
-          ) : (
-            <img src={media.url} alt={media.title} className="mt-3 max-h-[70vh] mx-auto" />
-          )}
+          <CourseMediaPlayer media={media} onError={() => setError(locale === 'ar' ? 'تعذر تشغيل الملف؛ أعد فتحه للحصول على إذن جديد.' : 'Playback failed; reopen the file to obtain a fresh grant.')}/>
         </section>
       )}
       {error && (
