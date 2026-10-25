@@ -1,4 +1,4 @@
-import { CsrfClientManager } from '@manaratak/shared';
+import { CsrfClientManager, reviewReasonHeaders } from '@manaratak/shared';
 import { assertLocalReadOnlyRequestAllowed } from '../security/LocalAdminReadOnlyPolicy';
 
 const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) || '/api/v1';
@@ -72,6 +72,10 @@ export function setCourseReviewReason(id:string,reason:string):void {
   if(reason.trim()) courseReviewReasons.set(id,reason.trim());else courseReviewReasons.delete(id);
 }
 const testRevisions = new Map<string,number>();
+const testReviewReasons = new Map<string,string>();
+export function setInternationalTestReviewReason(id:string,reason:string):void {
+  if(reason.trim())testReviewReasons.set(id,reason.trim());else testReviewReasons.delete(id);
+}
 const majorRevisions = new Map<string,number>();
 const universityRevisions = new Map<string,number>();
 const scholarshipRevisions = new Map<string,number>();
@@ -89,7 +93,7 @@ export function setAdminAuthStatus(state: AdminAuthState): void {
 
 export function abortAllPendingAdminRequests(): void {
   sessionGeneration++;
-  testRevisions.clear(); courseVersions.clear(); courseReviewReasons.clear();
+  testRevisions.clear(); testReviewReasons.clear(); courseVersions.clear(); courseReviewReasons.clear();
   majorRevisions.clear(); majorOwnerAliases.clear(); universityRevisions.clear(); scholarshipRevisions.clear();
   globalAbortController.abort();
   globalAbortController = new AbortController();
@@ -246,6 +250,13 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
     const revision=testRevisions.get(testOwner);
     if(revision===undefined) throw new Error('Reload the test before editing (revision required).');
     headers.set('If-Match',`"${revision}"`);
+  }
+  if(testOwner&&isMutation(options.method)&&!headers.has('X-Review-Reason')) {
+    let supplied:unknown;
+    if(typeof options.body==='string') {try {const body=JSON.parse(options.body);supplied=body.reason??(endpoint.endsWith('/review-source-names')?body.reviewReason:undefined);}catch{/* Route validation handles malformed payloads. */}}
+    const reason=typeof supplied==='string'?supplied.trim():testReviewReasons.get(testOwner);
+    if(!reason||reason.length<3)throw new Error('اكتب مبرر التعديل قبل حفظ بيانات الاختبار.');
+    for(const [name,value]of Object.entries(reviewReasonHeaders(reason)))headers.set(name,value);
   }
 
   const majorMatch=endpoint.match(/^\/admin\/majors\/([^/?]+)(?:\/|\?|$)/);
@@ -476,9 +487,11 @@ export const adminApiClient = {
     return adminRequest<T>(`/admin/international-tests/providers${query}`);
   },
 
-  upsertInternationalTestProvider<T = unknown>(payload: unknown) {
+  upsertInternationalTestProvider<T = unknown>(payload: unknown, reason?:string) {
+    if(!reason||reason.trim().length<3)throw new Error('اكتب مبرر إنشاء المزود قبل الحفظ.');
     return adminRequest<T>('/admin/international-tests/providers', {
       method: 'POST',
+      headers:reviewReasonHeaders(reason),
       body: JSON.stringify(payload),
     });
   },
@@ -579,9 +592,10 @@ export const adminApiClient = {
     return adminRequest<T>(`/admin/international-tests/${testId}/import-versions`);
   },
 
-  reviewInternationalTestSourceNames<T = unknown>(testId: string, payload: unknown) {
+  reviewInternationalTestSourceNames<T = unknown>(testId: string, payload: unknown,expectedRevision?:number) {
     return adminRequest<T>(`/admin/international-tests/${testId}/review-source-names`, {
       method: 'POST',
+      headers:expectedRevision!==undefined?{'If-Match':String(expectedRevision)}:undefined,
       body: JSON.stringify(payload),
     });
   },

@@ -565,6 +565,8 @@ export interface UpsertInternationalTestPolicyDto {
 }
 
 export interface InternationalTestReferenceRelationshipDto {
+  referenceNameAr?: string;
+  referenceNameEn?: string;
   id: string;
   testId: string;
   canonicalReferenceId?: string;
@@ -583,6 +585,8 @@ export interface UpsertInternationalTestReferenceRelationshipDto {
 }
 
 export interface InternationalTestDegreeRelationshipReference {
+  referenceNameAr?: string;
+  referenceNameEn?: string;
   degreeLevelId?: string;
   canonicalCode?: CanonicalDegreeLevelCode;
   relationshipType: string;
@@ -607,6 +611,9 @@ export interface InternationalTestCycleReference {
 }
 
 export interface InternationalTestAcademicTaxonomyRelationshipDto {
+  referenceNameAr?: string;
+  referenceNameEn?: string;
+  referenceCode?: string;
   id: string;
   testId: string;
   taxonomyNodeId: string;
