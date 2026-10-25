@@ -43,6 +43,20 @@
 .course-dialog { font-family:Cairo,sans-serif; color:#142B5F; font-size:13px; background:#f7fafb; padding:0; width:min(1100px,94vw); max-width:94vw; max-height:92dvh; border:1px solid #DDEFF2; border-radius:18px; box-shadow:0 20px 80px #142B5F40; }.course-dialog::backdrop { background:#10203985; }.course-dialog>header { display:flex; align-items:center; justify-content:space-between; padding:15px 20px; background:#fff; border-bottom:1px solid #DDEFF2; gap:12px; position:sticky; top:0; z-index:2; }.course-dialog h2 { font-size:16px; font-weight:800; margin:0; overflow-wrap:anywhere; }.course-dialog-body { padding:20px; }.course-create-form { display:grid; gap:16px; }.course-dialog textarea { min-height:80px; resize:vertical; }
 .course-detail-groups { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }.course-detail-groups .course-panel { padding:16px; }.course-detail-groups dl { display:grid; gap:13px; margin:0; }.course-detail-value { min-width:0; border-bottom:1px solid #eef3f6; padding-bottom:10px; }.course-detail-value dt { font-size:12px; font-weight:700; color:#64748b; margin-bottom:4px; }.course-detail-value dd { font-size:13px; white-space:pre-wrap; overflow-wrap:anywhere; margin:0; line-height:1.8; }.course-source-group { grid-column:1/-1; }.course-source-group dl { grid-template-columns:repeat(2,minmax(0,1fr)); }.course-drawer-toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:16px; }.course-preparation { display:grid; justify-items:center; text-align:center; padding:36px 20px; gap:12px; }.course-preparation p { max-width:65ch; font-size:13px; }
 .course-spin { animation:course-spin 1s linear infinite; }@keyframes course-spin {to{transform:rotate(360deg)}}@keyframes course-shimmer {to{background-position:200%}}
+.course-section-heading { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:12px; }
+.course-section-heading h3 { margin-bottom:0; }
+.course-dialog .course-section-heading button { min-height:36px; padding:6px 10px; }
+.course-section-form { display:grid; gap:14px; }
+.course-dialog .course-section-form .course-filter-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.course-dialog .course-wide-field { grid-column:1/-1; }
+.course-dialog .course-field small { font-size:11px; color:#64748b; }
+.course-dialog .course-lookup-trigger { display:flex; justify-content:space-between; width:100%; text-align:start; }
+.course-dialog .course-lookup { margin-top:12px; }
+.course-dialog .course-lookup-options>button { display:block; width:100%; text-align:start; margin-bottom:4px; }
+.course-reason-field { margin-block:12px; }
+.course-success { display:flex; align-items:center; gap:8px; border:1px solid #c7e8db; background:#edf9f4; color:#12654a; border-radius:10px; padding:12px; font-size:13px; }
+.course-operations { margin-bottom:16px; }
+@media(max-width:640px) { .course-dialog .course-section-form .course-filter-grid {grid-template-columns:1fr}.course-detail-groups {align-items:start} }
 @media(min-width:1500px) { .course-cards {grid-template-columns:repeat(4,minmax(0,1fr))} }
 @media(max-width:1050px) { .course-entry-grid {gap:10px}.course-entry small {font-size:11px}.course-cards {grid-template-columns:repeat(2,minmax(0,1fr))}.course-filter-grid {grid-template-columns:repeat(2,minmax(0,1fr))}.course-metric {padding:12px;gap:8px} }
 @media(max-width:640px) { .courses-workspace {gap:12px}.course-hero {padding:20px;border-radius:18px}.course-hero h1 {font-size:22px}.course-entry-grid {grid-template-columns:1fr;gap:8px}.courses-workspace a.course-entry {padding:13px 14px}.course-entry small {font-size:12px}.course-metrics {grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.course-metric strong {font-size:24px}.course-panel {padding:14px}.course-filter-grid {grid-template-columns:1fr;gap:12px}.course-search-field {grid-column:auto}.course-results {padding:0}.course-results-header {padding:14px}.course-results-controls {width:100%;justify-content:space-between;gap:8px}.course-results-controls>label {flex:1;min-width:0}.courses-workspace .course-results-controls select {max-width:135px}.course-cards {grid-template-columns:1fr;padding:0 12px 12px}.course-pagination {padding:12px}.course-dialog {width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;margin:0;inset:0}.course-dialog-body {padding:12px}.course-dialog>header {padding:12px}.course-detail-groups {grid-template-columns:1fr}.course-source-group dl {grid-template-columns:1fr}.course-toolbar {gap:6px}.course-toolbar>a,.course-toolbar>button {flex:1 1 auto}.course-filter-footer {flex-wrap:wrap} }
@@ -57,3 +71,31 @@
   body:has(.courses-workspace) .admin-shell-header h1 { font-size:13px; line-height:1.5; }
   body:has(.courses-workspace) .admin-shell-header :is(button,a) { padding-inline:8px; }
 }
+.courses-workspace .course-bulk-counts { display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:16px 0; }
+.courses-workspace .course-bulk-counts button { display:flex;flex-direction:column;align-items:center;gap:4px;background:white;border:1px solid #DDEFF2;border-top:3px solid #0E7C86;border-radius:12px;padding:12px; }
+.courses-workspace .course-bulk-counts button:nth-child(3n) { border-top-color:#D6A43B; }
+.courses-workspace .course-bulk-counts button[aria-pressed=true] { background:#E9F6F7;box-shadow:0 0 0 1px #0E7C86; }
+.courses-workspace .course-bulk-counts strong { font-size:24px;line-height:1.4;font-weight:800;color:#142B5F; }
+.courses-workspace .course-bulk-counts span { font-size:12px; }
+.courses-workspace .course-bulk-consent { display:flex;align-items:center;gap:10px;margin:12px 0;font-size:13px; }
+.courses-workspace .course-bulk-consent input { width:18px;height:18px; }
+.courses-workspace .course-bulk-progress { display:grid;gap:8px;font-size:13px;margin:14px 0; }
+.courses-workspace .course-bulk-progress progress { width:100%;accent-color:#0E7C86;height:14px; }
+.courses-workspace .course-batch-history { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0; }
+.courses-workspace .course-batch-history button { display:grid;gap:5px;text-align:start;padding:14px;border:1px solid #DDEFF2;border-radius:12px;background:#FAFCFD;overflow-wrap:anywhere; }
+@media(max-width:650px) { .courses-workspace .course-bulk-counts { grid-template-columns:repeat(2,minmax(0,1fr)); } .courses-workspace .course-batch-history { grid-template-columns:1fr; } }
+.course-dialog .course-relations { border-top:1px solid #DDEFF2;margin-top:16px;padding-top:12px; }
+.course-dialog h4 { display:flex;align-items:center;gap:7px;color:#142B5F;font-size:13px;font-weight:700;margin:12px 0; }
+.course-dialog .course-relations fieldset { border:0;padding:0;margin:12px 0;min-width:0; }
+.course-dialog .course-relation-list, .course-dialog .course-history-list { display:grid;gap:8px; }
+.course-dialog .course-relation-list article { border:1px solid #DDEFF2;padding:10px 12px;border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap; }
+.course-dialog .course-relation-list article>div:first-child { display:grid;gap:3px; }
+.course-dialog .course-history-list article { display:grid;gap:3px;padding:10px 12px;border-inline-start:3px solid #D6A43B;background:#FAFCFD;border-radius:8px;overflow-wrap:anywhere; }
+.course-dialog .course-history-list article>span, .course-dialog .course-history-list small { color:#64748b;font-size:12px; }.courses-workspace .course-external-overview { display:flex;gap:8px;flex-wrap:wrap; }
+.courses-workspace .course-external-overview button { flex:1 1 150px;justify-content:flex-start;padding:9px 12px; }
+.courses-workspace .course-external-overview strong { margin-inline-start:auto;font-size:17px;color:#142B5F; }
+.course-dialog .course-bulk-table { table-layout:fixed;min-width:720px; }
+.course-dialog .course-bulk-table :is(th,td):first-child { width:34%;min-width:230px;overflow-wrap:anywhere; }
+.course-dialog .course-bulk-table :is(th,td):nth-child(2) { width:8%; }
+.course-dialog .course-bulk-table :is(th,td):nth-child(3) { width:12%; }
+.course-dialog .course-bulk-table :is(th,td):nth-child(4) { width:46%;overflow-wrap:anywhere; }

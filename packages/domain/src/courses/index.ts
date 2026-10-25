@@ -8,3 +8,4 @@ export * from './provider-registry';
 export * from './import-analysis';
 export * from './relationships';
 export * from './imported-operations';
+export * from './bulk-publication';

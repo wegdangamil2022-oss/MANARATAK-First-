@@ -99,6 +99,7 @@ export class CourseAdminRouter {
       isFreeCertificate: z.enum(['true', 'false']).transform(v => v === 'true').optional(),
       studyAccess: z.enum(['FREE', 'PAID', 'UNKNOWN']).optional(),
       certificateState: z.enum(['FREE', 'NON_FREE', 'UNAVAILABLE', 'UNKNOWN']).optional(),
+      linkHealth: z.enum(['VERIFIED', 'BROKEN', 'NEEDS_REVIEW', 'UNKNOWN']).optional(),
       sort: z.enum(['UPDATED_DESC', 'UPDATED_ASC', 'NAME_ASC', 'NAME_DESC', 'STATUS_ASC']).optional(),
       page: z.coerce.number().int().min(1).max(100000).default(1),
       pageSize: z.coerce.number().int().min(1).max(100).default(20),
@@ -115,18 +116,18 @@ export class CourseAdminRouter {
       const path = scope === 'all' ? '/catalog' : `/catalog/${scope}`;
       router.get(path, asyncHandler(async (req, res, { adminCourseUseCases }) => {
         const filters = listQuerySchema.parse(req.query);
-        if (scope === 'native' && (filters.externalProviderId || filters.platformName || filters.completenessStatus)) {
+        if (scope === 'native' && (filters.externalProviderId || filters.platformName || filters.completenessStatus || filters.linkHealth)) {
           return res.status(400).json({ error: 'NATIVE_COURSE_EXTERNAL_FILTER_FORBIDDEN' });
         }
         if (scope !== 'all') filters.originType = scope === 'native' ? CourseOriginType.NATIVE_MANARATAK_COURSE : CourseOriginType.EXTERNAL_LINKED_COURSE;
         // A registry provider identifies external courses, never a native instructor.
-        if (scope === 'all' && (filters.externalProviderId || filters.platformName || filters.completenessStatus)) filters.originType = CourseOriginType.EXTERNAL_LINKED_COURSE;
+        if (scope === 'all' && (filters.externalProviderId || filters.platformName || filters.completenessStatus || filters.linkHealth)) filters.originType = CourseOriginType.EXTERNAL_LINKED_COURSE;
         const result = await adminCourseUseCases.listCourses({ ...filters, includeStatistics: true });
         res.json({ ...result, data: result.data.map(course => ({
           id: course.id, publicId: course.publicId, displayName: course.displayName, originalSourceTitle: course.originalSourceTitle,
           originType: course.originType, accessType: course.accessType, status: course.status, completenessStatus: course.completenessStatus,
           providerDisplayName: course.providerDisplayName, providerName: course.providerName, platformName: course.platformName,
-          learningLanguage: course.learningLanguage, studyDuration: course.studyDuration, difficultyLevel: course.difficultyLevel,
+          learningLanguage: course.learningLanguage ?? course.learningLanguageRaw, studyDuration: course.studyDuration ?? course.studyDurationRaw, difficultyLevel: course.difficultyLevel ?? course.studyLevelRaw,
           isStudyFree: course.isStudyFree, isFreeCertificate: course.isFreeCertificate, certificateAvailable: course.certificateAvailable,
           certificateType: course.certificateType, category: course.category, relatedMajors: course.relatedMajors,
           instructor: typeof course.optionalFields?.instructor === 'string' ? course.optionalFields.instructor : undefined,

@@ -1,0 +1,66 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "section": "07.A",
+  "originalDatabaseWrites": 0,
+  "schemaMigrations": 0,
+  "unit": {
+    "failed": 0,
+    "passed": 389,
+    "skipped": 5
+  },
+  "postgresql": {
+    "snapshotSize": 10005,
+    "failed": 0,
+    "passed": 20,
+    "largeCatalogSize": 10005
+  },
+  "browser": {
+    "realApi": true,
+    "locales": [
+      "ar",
+      "en"
+    ],
+    "checks": 17,
+    "scrollContext": {
+      "before": 1381,
+      "after": {
+        "y": 1381,
+        "height": 1240.8125,
+        "pageHeight": 2381,
+        "viewport": 1000
+      }
+    },
+    "errors": 0,
+    "individualPublicationVersion": 7,
+    "widths": [
+      1440,
+      768,
+      360,
+      320
+    ],
+    "canonicalMfa": true,
+    "passed": true
+  },
+  "audit": {
+    "uniqueBulkPublications": 2,
+    "verified": true
+  },
+  "typeScript": {
+    "passed": true,
+    "command": "tsc -b apps/api apps/admin"
+  },
+  "adminBuild": {
+    "knownLargeBundleWarning": true,
+    "passed": true
+  },
+  "apiBuild": {
+    "passed": true
+  },
+  "eslint": {
+    "newFeatureFilesWarnings": 0,
+    "errors": 0,
+    "warnings": 72
+  },
+  "native07B": "PENDING",
+  "mainMerged": false
+}

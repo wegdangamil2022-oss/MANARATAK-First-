@@ -39,10 +39,17 @@ export function courseCatalogWhere(filters: CourseFilters): Prisma.CourseWhereIn
   if (filters.platformName) where.platformName = { contains: filters.platformName, mode: 'insensitive' };
   if (filters.externalProviderId) where.externalProviderId = filters.externalProviderId;
   if (filters.category) where.category = { contains: filters.category, mode: 'insensitive' };
-  if (filters.learningLanguage) where.learningLanguage = { contains: filters.learningLanguage, mode: 'insensitive' };
-  if (filters.difficultyLevel) where.difficultyLevel = { contains: filters.difficultyLevel, mode: 'insensitive' };
   if (filters.majorId) where.majorProjections = { some: { majorId: filters.majorId, projectionState: 'APPROVED' } };
   const and: Prisma.CourseWhereInput[] = [];
+  if (filters.learningLanguage) and.push({ OR: [
+    { learningLanguage: { contains: filters.learningLanguage, mode: 'insensitive' } },
+    { ...external, learningLanguageRaw: { contains: filters.learningLanguage, mode: 'insensitive' } },
+  ] });
+  if (filters.difficultyLevel) and.push({ OR: [
+    { difficultyLevel: { contains: filters.difficultyLevel, mode: 'insensitive' } },
+    { ...external, studyLevelRaw: { contains: filters.difficultyLevel, mode: 'insensitive' } },
+  ] });
+  if (filters.linkHealth) and.push(courseLinkHealthWhere(filters.linkHealth));
   // Preserve the pre-existing boolean filter for older consumers. The catalog uses the richer fact filter.
   if (filters.isFreeCertificate !== undefined) and.push({ OR: [
     { ...external, isFreeCertificate: filters.isFreeCertificate },
@@ -61,6 +68,18 @@ export function courseCatalogWhere(filters: CourseFilters): Prisma.CourseWhereIn
   ] });
   if (and.length) where.AND = and;
   return where;
+}
+
+/** Recorded current-source link outcomes, never a claim that an old check is fresh. */
+export function courseLinkHealthWhere(state: NonNullable<CourseFilters['linkHealth']>): Prisma.CourseWhereInput {
+  const current = { status: 'ACTIVE', urlHistory: { some: { isCurrent: true } } };
+  if (state === 'UNKNOWN') return { ...external, sourceIdentities: { none: current } };
+  if (state === 'NEEDS_REVIEW') return { ...external, OR: [
+    { sourceIdentities: { none: current } },
+    { sourceIdentities: { some: { status: 'ACTIVE', urlHistory: { some: { isCurrent: true, verificationState: 'UNVERIFIED' } } } } },
+  ] };
+  const values = state === 'VERIFIED' ? ['VERIFIED', 'REDIRECTED'] : state === 'BROKEN' ? ['BROKEN', 'REJECTED'] : ['UNVERIFIED'];
+  return { ...external, sourceIdentities: { some: { status: 'ACTIVE', urlHistory: { some: { isCurrent: true, verificationState: { in: values } } } } } };
 }
 
 export function courseCatalogOrder(sort?: CourseFilters['sort']): Prisma.CourseOrderByWithRelationInput[] {

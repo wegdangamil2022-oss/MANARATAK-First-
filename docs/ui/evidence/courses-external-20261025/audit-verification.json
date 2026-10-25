@@ -1,0 +1,34 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "manual": {
+    "id": "22f7a344-065c-4f35-bdc5-2cc2e329f4d3",
+    "status": "DRAFT",
+    "versions": 3,
+    "audits": 3,
+    "identities": 1,
+    "urlHistories": 1,
+    "importBatchInvented": false,
+    "unknownCertificatePreserved": true
+  },
+  "bulk": {
+    "receipts": [
+      {
+        "courseId": "8782c0de-c051-4a01-98f9-7ea684cb6750",
+        "outboxCount": 1,
+        "auditCount": 1,
+        "correlation": "ba853df9-bc24-47c0-8d99-050697b9c440"
+      },
+      {
+        "courseId": "b5df5c2b-6da0-4c6c-9128-d2d0af3a74fb",
+        "outboxCount": 1,
+        "auditCount": 1,
+        "correlation": "aa51294d-9ec7-48a1-9b04-0d519854e464"
+      }
+    ],
+    "uniquePublications": 2,
+    "retryExcludesSuccessfulRecord": true,
+    "individualPublicationVersion": 7
+  },
+  "passed": true
+}

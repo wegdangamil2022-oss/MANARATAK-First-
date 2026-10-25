@@ -33,6 +33,7 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
     learningLanguage: tr('اللغة', 'Language'), difficultyLevel: tr('المستوى', 'Level'),
     category: tr('المجال', 'Field'), platformName: tr('منصة المصدر', 'Source platform'),
     completenessStatus: tr('اكتمال بيانات الخارجية', 'External data completeness'), originType: tr('التصنيف القائم', 'Existing origin'),
+    linkHealth: tr('فحص الرابط المسجل', 'Recorded link check'),
   };
   const active = [...params].filter(([key, value]) => value && filterTitles[key] && !(fixedScope && key === 'scope'));
   const chipValue = (key: string, value: string) => {
@@ -42,6 +43,7 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
     if (key === 'certificateState') return certificateLabels[value as keyof typeof certificateLabels]?.[ar ? 0 : 1] ?? '';
     if (key === 'scope') return value === 'native' ? tr('منارتك', 'Manaratak') : tr('خارجية', 'External');
     if (key === 'originType') return tr('مدفوع قائم', 'Legacy paid');
+    if (key === 'linkHealth') return ({ VERIFIED: tr('متحقق منه سابقًا', 'Previously verified'), BROKEN: tr('معطل / مرفوض', 'Broken / rejected'), NEEDS_REVIEW: tr('يحتاج تحققًا', 'Needs verification'), UNKNOWN: tr('غير معلوم', 'Unknown') } as Record<string, string>)[value] ?? '';
     if (key === 'completenessStatus') return ({ IMPORTED: tr('مستوردة', 'Imported'), INCOMPLETE: tr('غير مكتملة', 'Incomplete'), NEEDS_REVIEW: tr('تحتاج مراجعة', 'Needs review'), COMPLETE: tr('مكتملة', 'Complete'), REJECTED: tr('مرفوضة', 'Rejected') } as Record<string, string>)[value] ?? tr('حالة محددة', 'Selected state');
     return value;
   };
@@ -64,6 +66,7 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
       {facet('learningLanguage', tr('لغة التدريس', 'Learning language'))}{facet('difficultyLevel', tr('المستوى', 'Level'))}
       <label className="course-field"><span><GraduationCap size={16}/>{tr('المجال / موضوع الدورة', 'Course field / topic')}</span><input value={params.get('category') ?? ''} maxLength={200} onChange={event => change({ category: event.target.value })}/></label>
       {scope !== 'native' && <>
+        {field('linkHealth', tr('نتيجة فحص الرابط المسجلة', 'Recorded link check outcome'), [['VERIFIED', tr('متحقق منه سابقًا', 'Previously verified')], ['BROKEN', tr('معطل / مرفوض', 'Broken / rejected')], ['NEEDS_REVIEW', tr('يحتاج تحققًا', 'Needs verification')], ['UNKNOWN', tr('غير معلوم', 'Unknown')]])}
         {field('completenessStatus', tr('اكتمال بيانات الخارجية', 'External data completeness'), [['IMPORTED', tr('مستوردة', 'Imported')], ['INCOMPLETE', tr('غير مكتملة', 'Incomplete')], ['NEEDS_REVIEW', tr('تحتاج مراجعة', 'Needs review')], ['COMPLETE', tr('مكتملة', 'Complete')], ['REJECTED', tr('مرفوضة', 'Rejected')]])}
         <label className="course-field"><span><Building2 size={16}/>{tr('اسم منصة المصدر (قد يختلف عن المزود)', 'Source platform (may differ from provider)')}</span><input maxLength={200} value={params.get('platformName') ?? ''} onChange={event => change({ platformName: event.target.value })}/></label>
       </>}

@@ -1,4 +1,6 @@
 import { PrismaUniversityProgramReadPort } from '@manaratak/infrastructure';
+import { PrismaCourseBulkPublicationRepository } from '@manaratak/infrastructure';
+import { CourseBulkPublicationUseCases } from '@manaratak/application';
 import { UniversityStageSourceReader } from '@manaratak/infrastructure';
 import { PrismaExecutiveDashboardGateway, PrismaPublicAnalyticsGateway, PrismaManagedApplicationEvidenceGateway, PrismaReviewWorkspaceGateway } from '@manaratak/infrastructure';
 import { ExecutiveDashboardUseCases, PublicAnalyticsUseCases, ManagedApplicationEvidenceUseCases, AnalyticsRetentionBackgroundJobHandler, ReviewWorkspaceUseCases, ReviewNotificationRecipientGateway } from '@manaratak/application';
@@ -939,6 +941,9 @@ export function registerDependencies(
       new CourseImportCoordinator(courseImportTransferGateway, courseRepository, atomicDomainMutationCoordinator)).scoped(),
     importedCourseAdminUseCases: asFunction(({ importedCourseOperationsRepository, externalCourseProviderRepository, adminCourseUseCases, importedCourseLinkChecker }) =>
       new ImportedCourseAdminUseCases(importedCourseOperationsRepository, externalCourseProviderRepository, adminCourseUseCases, importedCourseLinkChecker)).scoped(),
+    courseBulkPublicationRepository: asFunction(({ prisma }) => new PrismaCourseBulkPublicationRepository(prisma)).scoped(),
+    courseBulkPublicationUseCases: asFunction(({ courseBulkPublicationRepository, adminCourseUseCases, importedCourseAdminUseCases, atomicDomainMutationCoordinator }) =>
+      new CourseBulkPublicationUseCases(courseBulkPublicationRepository, adminCourseUseCases, importedCourseAdminUseCases, atomicDomainMutationCoordinator)).scoped(),
     courseProviderRegistryUseCases: asFunction(({ externalCourseProviderRepository, atomicAuditedOutboxMutationExecutor }) => new CourseProviderRegistryUseCases(externalCourseProviderRepository, atomicAuditedOutboxMutationExecutor)).scoped(),
     courseImportOperationsUseCases: asFunction(({ importedCourseOperationsRepository, importRepository, courseImportCoordinator, courseImportIdentityDiffUseCase }) =>
       new CourseImportOperationsUseCases(importedCourseOperationsRepository, importRepository, courseImportCoordinator, courseImportIdentityDiffUseCase)).scoped(),

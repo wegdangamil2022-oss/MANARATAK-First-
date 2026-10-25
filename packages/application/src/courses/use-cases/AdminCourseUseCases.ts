@@ -45,6 +45,21 @@ export class AdminCourseUseCases {
     return course;
   }
 
+  public async getExternalReadiness(id: string) {
+    const course = await this.getCourse(id);
+    if (course.originType !== CourseOriginType.EXTERNAL_LINKED_COURSE) throw new Error('EXTERNAL_COURSE_REQUIRED');
+    if (!this.publicationService) throw new Error('COURSE_PUBLICATION_POLICY_NOT_CONFIGURED');
+    const blockers: string[] = [];
+    if (course.status !== CourseStatus.READY_TO_PUBLISH) blockers.push('COURSE_READY_TO_PUBLISH_REQUIRED');
+    try { await this.publicationService.assertPublicationReady(course); }
+    catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      if (!/^(COURSE_|IMPORTED_COURSE_|OWNER_)/.test(message) && message !== 'TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED') throw error;
+      blockers.push(message);
+    }
+    return { courseId: course.id, version: course.version, eligible: blockers.length === 0, blockers };
+  }
+
   public async saveLocalizedDescription(id:string,input:OwnerDescriptionInput):Promise<CourseDto> {
     const existing=await this.getCourse(id);
     if(['PUBLISHED','ARCHIVED','REJECTED'].includes(existing.status)) throw new Error('COURSE_PUBLISHED_STRUCTURE_IMMUTABLE_UNPUBLISH_FIRST');

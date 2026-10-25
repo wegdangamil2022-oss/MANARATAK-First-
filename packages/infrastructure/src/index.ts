@@ -271,3 +271,4 @@ export * from './universities/PrismaUniversityProgramReadPort';
 export * from './dashboard/PrismaExecutiveDashboardGateway';
 export * from './review-workspace/PrismaReviewWorkspaceGateway';
 export * from './dashboard/PrismaDashboardMeasurementGateway';
+export * from './courses/PrismaCourseBulkPublicationRepository';

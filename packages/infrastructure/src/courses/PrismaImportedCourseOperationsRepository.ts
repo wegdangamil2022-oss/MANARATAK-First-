@@ -1,5 +1,6 @@
 import type {AtomicPersistenceContext} from '@manaratak/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaCourseRepository } from './PrismaCourseRepository';
 import {
   CourseImportOperationsOverview,
   CourseImportReviewPage,
@@ -13,6 +14,8 @@ import {
   ImportedCourseLinkCheckResult,
   ImportedCourseLinkHealth,
   ImportedCourseOverview,
+  ManualExternalCoursePlan, CourseDto,
+  ExternalCourseHistoryPage,
   ImportedCoursePage,
   ImportedCourseVerificationContext,
 } from '@manaratak/domain';
@@ -71,7 +74,57 @@ function pageSize(value: unknown, fallback: number): number {
 }
 
 export class PrismaImportedCourseOperationsRepository implements IImportedCourseOperationsRepository {
+  public async history(id: string, page = 1): Promise<ExternalCourseHistoryPage> {
+    const where: Prisma.AuditRecordWhereInput = { targetType: 'COURSE', category: 'COURSES_MUTATION', OR: [
+      { targetId: id }, { contextMetadata: { path: ['entityReference', 'id'], equals: id } },
+    ] };
+    const [auditTotal, versionTotal] = await Promise.all([this.prisma.auditRecord.count({ where }), this.prisma.courseVersion.count({ where: { courseId: id } })]);
+    const total = Math.max(auditTotal, versionTotal);
+    const totalPages = Math.max(1, Math.ceil(total / 20)), safePage = Math.min(totalPages, Math.max(1, page));
+    const [records, versions] = await Promise.all([
+      this.prisma.auditRecord.findMany({ where, take: 20, skip: (safePage - 1) * 20, orderBy: [{ timestamp: 'desc' }, { id: 'asc' }],
+        select: { id: true, action: true, actorId: true, timestamp: true, contextMetadata: true } }),
+      this.prisma.courseVersion.findMany({ where: { courseId: id }, take: 20, skip: (safePage - 1) * 20, orderBy: { versionNumber: 'desc' }, select: { versionNumber: true, createdAt: true, reason: true } }),
+    ]);
+    return { page: safePage, totalPages, data: records.map(record => ({ id: record.id, action: record.action, actorId: record.actorId,
+      occurredAt: record.timestamp.toISOString(), reason: typeof (record.contextMetadata as Record<string, unknown>)?.reason === 'string' ? String((record.contextMetadata as Record<string, unknown>).reason) : undefined })),
+      versions: versions.map(version => ({ version: version.versionNumber, createdAt: version.createdAt.toISOString(), reason: version.reason })) };
+  }
   public constructor(private readonly prisma: PrismaClient, private readonly transactionBound = false) {}
+  public async createManualCourse(plan: ManualExternalCoursePlan): Promise<CourseDto> {
+    if (!this.transactionBound) throw new Error('MANUAL_COURSE_AUDITED_TRANSACTION_REQUIRED');
+    const providerId = plan.identity.providerId;
+    // Serialize manual identity claims per provider and lock its approval/domain policy.
+    await this.prisma.$queryRaw(Prisma.sql`SELECT pg_advisory_xact_lock(hashtext(${`manual-course:${providerId}`}))::text`);
+    await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM "ExternalCourseProvider" WHERE "id" = ${providerId} FOR SHARE`);
+    const provider = await this.prisma.externalCourseProvider.findUnique({ where: { id: providerId }, include: { allowedDomains: true } });
+    if (!provider || provider.status !== 'APPROVED') throw new Error('MANUAL_COURSE_PROVIDER_NOT_APPROVED');
+    const domains = provider.allowedDomains.map(row => row.normalizedDomain);
+    for (const url of [plan.course.directCourseUrl, plan.course.officialSourceUrl]) {
+      const target = new URL(url ?? '');
+      if (target.protocol !== 'https:' || target.username || target.password || !domains.some(domain => hostMatches(target.hostname, domain))) throw new Error('MANUAL_COURSE_DOMAIN_NOT_APPROVED');
+    }
+    const collision = await this.prisma.courseSourceIdentity.findFirst({ where: {
+      providerId, languageVersionKey: plan.identity.languageVersionKey, OR: [
+        { sourceNativeKey: plan.identity.sourceNativeKey }, { normalizedOriginalTitle: plan.identity.normalizedOriginalTitle },
+        { urlHistory: { some: { normalizedUrl: plan.normalizedUrl } } },
+      ],
+    }, select: { id: true } });
+    const existing = await this.prisma.course.findFirst({ where: { externalProviderId: providerId, OR: [
+      { canonicalDedupKey: plan.course.canonicalDedupKey },
+      { directCourseUrl: plan.normalizedUrl, learningLanguageRaw: plan.course.learningLanguageRaw ?? null },
+    ] }, select: { id: true } });
+    if (collision || existing) throw new Error('MANUAL_COURSE_DUPLICATE_REQUIRES_REVIEW');
+    const course = await new PrismaCourseRepository(this.prisma, true).create(plan.course);
+    const identity = await this.prisma.courseSourceIdentity.create({ data: {
+      providerId, courseId: course.id, sourceNativeKey: plan.identity.sourceNativeKey, identityStrategy: plan.identity.identityStrategy,
+      originalTitle: plan.identity.originalTitle, normalizedOriginalTitle: plan.identity.normalizedOriginalTitle,
+      languageVersionKey: plan.identity.languageVersionKey, currentUrl: plan.course.directCourseUrl, status: 'ACTIVE',
+    } });
+    await this.prisma.courseSourceUrlHistory.create({ data: { courseSourceIdentityId: identity.id, url: plan.course.directCourseUrl,
+      normalizedUrl: plan.normalizedUrl, isCurrent: true, verificationState: 'UNVERIFIED' } });
+    return course;
+  }
   public withTransaction(context:AtomicPersistenceContext):IImportedCourseOperationsRepository {
     const tx=(context as AtomicPersistenceContext & {transactionClient?:unknown}).transactionClient;
     if(!context.boundaryId||!tx) throw new Error('COURSE_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
@@ -129,11 +182,17 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
     if (!record) return null;
 
     const mapped = this.mapCourse(record) as ImportedCourseAdminDetail;
-    const analysis = record.sourceImportRecordId
-      ? await this.prisma.courseImportAnalysis.findUnique({
-          where: { importRecordId: record.sourceImportRecordId },
-        })
-      : null;
+    const [analysis, staged] = record.sourceImportRecordId ? await Promise.all([
+      this.prisma.courseImportAnalysis.findUnique({ where: { importRecordId: record.sourceImportRecordId } }),
+      this.prisma.importRecord.findUnique({ where: { id: record.sourceImportRecordId }, select: { batchId: true } }),
+    ]) : [null, null];
+
+    mapped.sourceBatchId = staged?.batchId ?? null;
+    const original = this.objectOrNull(this.objectOrNull(analysis?.normalizedPayload)?.semanticRow);
+    if (original) mapped.originalSourceRow = Object.fromEntries([
+      'sourceOrder', 'providerLabel', 'courseName', 'directCourseUrl', 'studyFreeRaw', 'freeCertificateRaw',
+      'certificateTypeRaw', 'languageRaw', 'studyLevelRaw', 'courseDurationRaw', 'shortCourseTopicsRaw',
+    ].map(key => [key, typeof original[key] === 'string' || typeof original[key] === 'number' ? original[key] : null]));
 
     const sourceIdentity = this.ownedSourceIdentity(record);
     mapped.provider = record.externalProvider

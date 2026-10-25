@@ -1,3 +1,4 @@
+import { CourseSourceIdentityPolicy } from '../services/CourseSourceIdentityPolicy';
 import { createHash } from 'crypto';
 import {
   CourseImportAnalysisDto,
@@ -77,27 +78,7 @@ export interface CourseImportIdentityBatchResult {
   analyses: CourseImportAnalysisDto[];
 }
 
-const TRACKING_QUERY_KEYS = new Set(['gclid', 'fbclid', 'mc_cid', 'mc_eid']);
 const PAGE_SIZE = 100;
-const LANGUAGE_VERSION_ALIASES = new Map<string, string>([
-  ['english', 'en'], ['eng', 'en'], ['en', 'en'],
-  ['spanish', 'es'], ['spa', 'es'], ['es', 'es'],
-  ['french', 'fr'], ['fra', 'fr'], ['fre', 'fr'], ['fr', 'fr'],
-  ['arabic', 'ar'], ['ara', 'ar'], ['ar', 'ar'],
-  ['german', 'de'], ['deu', 'de'], ['ger', 'de'], ['de', 'de'],
-  ['portuguese', 'pt'], ['por', 'pt'], ['pt', 'pt'],
-  ['italian', 'it'], ['ita', 'it'], ['it', 'it'],
-  ['japanese', 'ja'], ['jpn', 'ja'], ['ja', 'ja'],
-  ['chinese', 'zh'], ['zho', 'zh'], ['chi', 'zh'], ['zh', 'zh'],
-  ['korean', 'ko'], ['kor', 'ko'], ['ko', 'ko'],
-  ['russian', 'ru'], ['rus', 'ru'], ['ru', 'ru'],
-  ['dutch', 'nl'], ['nld', 'nl'], ['dut', 'nl'], ['nl', 'nl'],
-  ['turkish', 'tr'], ['tur', 'tr'], ['tr', 'tr'],
-  ['hindi', 'hi'], ['hin', 'hi'], ['hi', 'hi'],
-  ['indonesian', 'id'], ['ind', 'id'], ['id', 'id'],
-  ['vietnamese', 'vi'], ['vie', 'vi'], ['vi', 'vi'],
-  ['polish', 'pl'], ['pol', 'pl'], ['pl', 'pl'],
-]);
 
 export interface CourseImportAnalysisOptions {
   force?: boolean;
@@ -384,6 +365,20 @@ export class CourseImportIdentityDiffUseCase {
         );
 
     if (!previous) {
+      if (identity.courseId) {
+        // A manual owner record has no import baseline. Require explicit field
+        // review rather than classifying its first later import as a new row.
+        return this.persistAnalysis(item, {
+          matchState: CourseImportMatchState.EXACT_EXISTING,
+          changeState: CourseImportChangeState.METADATA_CHANGED,
+          matchedCourseId: identity.courseId,
+          requiresReview: true,
+          fieldDiffs: { reason: 'EXISTING_COURSE_WITHOUT_IMPORT_BASELINE', fields: Object.fromEntries(
+            Object.entries(this.semanticMetadata(item.row)).map(([field, after]) => [field, { before: null, after }]),
+          ) },
+          relationshipProposals: { sourceIdentityId: identity.id },
+        });
+      }
       return this.persistAnalysis(item, {
         matchState: CourseImportMatchState.NOT_DUPLICATE,
         changeState: CourseImportChangeState.NEW,
@@ -625,60 +620,10 @@ export class CourseImportIdentityDiffUseCase {
     return value as unknown as Fingerprints;
   }
 
-  private normalizeTitle(value: string): string {
-    return value
-      .normalize('NFKC')
-      .trim()
-      .toLocaleLowerCase('en-US')
-      .replace(/[\u2010-\u2015\u2212]/g, '-')
-      .replace(/\s+/g, ' ');
-  }
-
-  private normalizeLanguageVersion(value: string): string {
-    const normalized = this.normalizeTextValue(value).toLocaleLowerCase('en-US');
-    if (!normalized) return '';
-    const locale = normalized.replace(/_/g, '-');
-    const alias = LANGUAGE_VERSION_ALIASES.get(locale);
-    if (alias) return alias;
-    const [base, ...rest] = locale.split('-');
-    const canonicalBase = LANGUAGE_VERSION_ALIASES.get(base);
-    return canonicalBase && rest.length > 0 ? [canonicalBase, ...rest].join('-') : locale;
-  }
-
-  private normalizeTextValue(value: string): string {
-    return value.normalize('NFKC').trim().replace(/\s+/g, ' ');
-  }
-
-  private normalizeUrl(value: string): string {
-    const parsed = new URL(value.trim());
-    if (parsed.protocol !== 'https:') throw new Error('COURSE_DIRECT_URL_HTTPS_REQUIRED');
-    parsed.hash = '';
-    parsed.hostname = parsed.hostname.toLocaleLowerCase('en-US').replace(/\.$/, '');
-    if (parsed.port === '443') parsed.port = '';
-
-    const keys = [...parsed.searchParams.keys()];
-    for (const key of keys) {
-      const lower = key.toLocaleLowerCase('en-US');
-      if (lower.startsWith('utm_') || TRACKING_QUERY_KEYS.has(lower)) {
-        parsed.searchParams.delete(key);
-        continue;
-      }
-      if (
-        lower === 'active-tab' &&
-        (parsed.hostname === 'open.edu' || parsed.hostname.endsWith('.open.edu'))
-      ) {
-        parsed.searchParams.delete(key);
-      }
-    }
-
-    const sorted = [...parsed.searchParams.entries()].sort(([aKey, aValue], [bKey, bValue]) =>
-      aKey === bKey ? aValue.localeCompare(bValue) : aKey.localeCompare(bKey),
-    );
-    parsed.search = '';
-    for (const [key, item] of sorted) parsed.searchParams.append(key, item);
-    if (parsed.pathname.length > 1) parsed.pathname = parsed.pathname.replace(/\/+$/, '');
-    return parsed.toString();
-  }
+  private normalizeTitle(value: string): string { return CourseSourceIdentityPolicy.normalizeTitle(value); }
+  private normalizeLanguageVersion(value: string): string { return CourseSourceIdentityPolicy.normalizeLanguageVersion(value); }
+  private normalizeTextValue(value: string): string { return CourseSourceIdentityPolicy.normalizeTextValue(value); }
+  private normalizeUrl(value: string): string { return CourseSourceIdentityPolicy.normalizeUrl(value); }
 
   private stableJson(value: unknown): string {
     const normalize = (item: unknown): unknown => {

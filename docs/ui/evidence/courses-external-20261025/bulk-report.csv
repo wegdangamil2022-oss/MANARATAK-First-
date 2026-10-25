@@ -1,0 +1,4 @@
+﻿"id","course","version","state","reasons"
+"22f7a344-065c-4f35-bdc5-2cc2e329f4d3","دورة خارجية موثقة — External manual acceptance fea18b65-3059-4cd7-a366-43bdaf650626","3","BLOCKED","COURSE_READY_TO_PUBLISH_REQUIRED | COURSE_PUBLICATION_CANONICAL_LANGUAGE_REQUIRED"
+"8782c0de-c051-4a01-98f9-7ea684cb6750","اختبار نشر جماعي a55fed8f-c09e-44e8-9cf1-46f9bde00834 0","1","SUCCESS",""
+"b5df5c2b-6da0-4c6c-9128-d2d0af3a74fb","اختبار نشر جماعي a55fed8f-c09e-44e8-9cf1-46f9bde00834 1","1","FAILED","COURSE_STALE_VERSION"

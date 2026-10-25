@@ -1,5 +1,5 @@
 import { currentPublicCourseEligibility } from './CoursePublicEligibility';
-import { courseCatalogOrder, courseCatalogWhere } from './CourseCatalogQuery';
+import { courseCatalogOrder, courseCatalogWhere, courseLinkHealthWhere } from './CourseCatalogQuery';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   AtomicPersistenceContext,
@@ -268,6 +268,10 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
           isFreeCertificate: updates.isFreeCertificate,
           certificateType: updates.certificateType,
           learningLanguageRaw: updates.learningLanguageRaw,
+          ...(updates.learningLanguageRaw !== undefined && updates.learningLanguageRaw !== existing.learningLanguageRaw ? {
+            learningLanguageReferenceId: null, learningLanguageResolutionState: 'UNRESOLVED', learningLanguageResolutionMethod: null,
+            learningLanguageReviewedBy: null, learningLanguageAdminReviewedRaw: null,
+          } : {}),
           studyLevelRaw: updates.studyLevelRaw,
           studyDurationRaw: updates.studyDurationRaw,
           shortCourseTopicsRaw: updates.shortCourseTopicsRaw,
@@ -350,6 +354,12 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
         external: sum(row => row.originType === 'EXTERNAL_LINKED_COURSE'),
         legacyPaidOrigin: sum(row => row.originType === 'PAID_COURSE'),
       };
+      if (filters.originType === CourseOriginType.EXTERNAL_LINKED_COURSE) {
+        const broken = await this.prisma.course.count({ where: { AND: [where, courseLinkHealthWhere('BROKEN')] } });
+        const needsVerification = await this.prisma.course.count({ where: { AND: [where, { OR: [courseLinkHealthWhere('UNKNOWN'), courseLinkHealthWhere('NEEDS_REVIEW')] }] } });
+        result.externalOverview = { broken, needsVerification, incomplete: sum(row => row.completenessStatus === 'INCOMPLETE'),
+          ready: sum(row => row.status === 'READY_TO_PUBLISH'), archived: sum(row => row.status === 'ARCHIVED') };
+      }
     }
     return result;
   }
@@ -360,7 +370,9 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
 
   public async catalogOptions(input: { field: 'learningLanguage' | 'difficultyLevel'; originType?: CourseOriginType; search?: string; page: number }): Promise<{ data: string[]; hasMore: boolean }> {
     if (!['learningLanguage', 'difficultyLevel'].includes(input.field)) throw new Error('COURSE_CATALOG_OPTION_FIELD_FORBIDDEN');
-    const column = input.field === 'learningLanguage' ? Prisma.sql`"learningLanguage"` : Prisma.sql`"difficultyLevel"`;
+    const column = input.field === 'learningLanguage'
+      ? Prisma.sql`COALESCE(NULLIF(btrim("learningLanguage"), ''), CASE WHEN "originType" = 'EXTERNAL_LINKED_COURSE' THEN NULLIF(btrim("learningLanguageRaw"), '') END)`
+      : Prisma.sql`COALESCE(NULLIF(btrim("difficultyLevel"), ''), CASE WHEN "originType" = 'EXTERNAL_LINKED_COURSE' THEN NULLIF(btrim("studyLevelRaw"), '') END)`;
     const origin = input.originType ? Prisma.sql`AND "originType" = ${input.originType}` : Prisma.empty;
     const search = input.search ? Prisma.sql`AND strpos(lower(${column}), lower(${input.search})) > 0` : Prisma.empty;
     // DISTINCT must execute in PostgreSQL; Prisma's client-side distinct may otherwise

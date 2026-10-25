@@ -1,4 +1,4 @@
-import type {CourseAdminCommandUseCases,CourseAdminContext,AdminCourseUseCases} from '@manaratak/application';
+import type {CourseAdminCommandUseCases,CourseAdminContext,AdminCourseUseCases,CourseBulkPublicationUseCases} from '@manaratak/application';
 import { readReviewReasonHeader } from '@manaratak/shared';
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
@@ -6,11 +6,12 @@ import {
   CourseAccessType,
   CourseImportCompletenessState,
   CourseOriginType,
+  CourseStatus,
 } from '@manaratak/domain';
 import { ImportedCourseAdminUseCases } from '@manaratak/application';
 
 export class ImportedCourseAdminRouter {
-  public static create(cradle: { courseAdminCommandUseCases:CourseAdminCommandUseCases; adminCourseUseCases:AdminCourseUseCases; importedCourseAdminUseCases: ImportedCourseAdminUseCases }): Router {
+  public static create(cradle: { courseAdminCommandUseCases:CourseAdminCommandUseCases; adminCourseUseCases:AdminCourseUseCases; importedCourseAdminUseCases: ImportedCourseAdminUseCases; courseBulkPublicationUseCases?: CourseBulkPublicationUseCases }): Router {
     const router = Router();
     const useCases = cradle.importedCourseAdminUseCases;
 
@@ -19,7 +20,7 @@ export class ImportedCourseAdminRouter {
       const reason=z.string().trim().min(3).max(2000).parse(readReviewReasonHeader(req.get('X-Review-Reason'),req.get('X-Review-Reason-Encoding'))??z.object({ reason: z.string().optional() }).strip().parse(req.body ?? {}).reason);
       const match=/^(?:"(\d+)"|(\d+))$/.exec(req.get('If-Match')??'');
       const expectedVersion=match?Number(match[1]??match[2]):undefined;
-      if(!Number.isSafeInteger(expectedVersion)||expectedVersion!<1) throw new Error('COURSE_VERSION_PRECONDITION_REQUIRED');
+      if(req.params.id && (!Number.isSafeInteger(expectedVersion)||expectedVersion!<1)) throw new Error('COURSE_VERSION_PRECONDITION_REQUIRED');
       return {actorId:req.authUserId,actorType:'IDENTITY',source:'admin-imported-course-api',reason,expectedVersion};
     };
     const asyncHandler=(fn:(req:Request,res:Response,useCases:ImportedCourseAdminUseCases)=>Promise<unknown>)=>
@@ -39,9 +40,9 @@ export class ImportedCourseAdminRouter {
             await fn(req,buffered,useCases);
             version=(await cradle.adminCourseUseCases.getCourse(req.params.id)).version;
           }else{
-            const action=req.route.path==='/:id/unpublish'?'COURSE_UNPUBLISH':req.route.path==='/:id/archive'?'COURSE_ARCHIVE':'IMPORTED_COURSE_ADMIN_COMMAND';
+            const action=req.route.path==='/' && req.method==='POST'?'MANUAL_EXTERNAL_COURSE_CREATED':req.method==='PATCH'?'EXTERNAL_COURSE_SECTION_UPDATED':req.route.path==='/:id/unpublish'?'COURSE_UNPUBLISH':req.route.path==='/:id/archive'?'COURSE_ARCHIVE':'IMPORTED_COURSE_ADMIN_COMMAND';
             const result=await cradle.courseAdminCommandUseCases.execute('COURSE',req.params.id,action,context,
-              scope=>fn(req,buffered,scope.importedCourseAdminUseCases));
+              async scope=>{ await fn(req,buffered,scope.importedCourseAdminUseCases); return body; });
             version=result.version;
           }
           if(version!==undefined)res.setHeader('X-Entity-Version',String(version));
@@ -99,7 +100,76 @@ export class ImportedCourseAdminRouter {
       officialSourceUrl: z.string().url().nullable().optional(),
       thumbnailAssetId: z.string().nullable().optional(),
       completenessStatus: z.nativeEnum(CourseImportCompletenessState).optional(),
+      description: z.string().max(100000).optional(),
+      learningOutcomes: z.array(z.string().max(2000)).max(100).optional(),
+      prerequisites: z.array(z.string().max(2000)).max(100).optional(),
+      acquiredSkills: z.array(z.string().max(2000)).max(100).optional(),
+      certificateConditions: z.string().max(10000).optional(),
     }).strict();
+
+    const https = z.string().trim().max(4000).url().refine(value => { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password; }, 'HTTPS URL without credentials required');
+    const text = z.string().trim().max(2000).optional();
+    const createSchema = z.object({
+      originalSourceTitle: z.string().trim().min(2).max(500), displayName: z.string().trim().min(2).max(500).optional(),
+      externalProviderId: z.string().min(1).max(200), directCourseUrl: https, evidenceUrl: https,
+      evidenceObservedAt: z.string().datetime(), evidenceNote: text, platformName: text, learningLanguageRaw: text,
+      studyLevelRaw: text, studyDurationRaw: text, shortCourseTopicsRaw: z.string().max(20000).optional(), certificateType: text,
+      certificateConditions: z.string().max(10000).optional(), isStudyFree: z.boolean().nullable().optional(),
+      isFreeCertificate: z.boolean().nullable().optional(), certificateAvailable: z.boolean().nullable().optional(),
+      description: z.string().max(100000).optional(), learningOutcomes: z.array(z.string().max(2000)).max(100).optional(),
+      prerequisites: z.array(z.string().max(2000)).max(100).optional(), acquiredSkills: z.array(z.string().max(2000)).max(100).optional(),
+    }).strict();
+
+    router.post('/', asyncHandler(async (req, res, useCases) => {
+      const input = createSchema.parse(req.body);
+      const course = await useCases.createManual(input, req.authUserId!);
+      res.status(201).json(course);
+    }));
+
+    const bulk = () => { if (!cradle.courseBulkPublicationUseCases) throw new Error('COURSE_BULK_NOT_CONFIGURED'); return cradle.courseBulkPublicationUseCases; };
+    const bulkHandler = (fn: (req: Request, res: Response) => Promise<unknown>) => (req: Request, res: Response, next: NextFunction) => {
+      if (!req.authUserId) { res.status(401).json({ error: 'AUTHENTICATED_ADMIN_ACTOR_REQUIRED' }); return; }
+      Promise.resolve().then(() => fn(req, res)).catch(next);
+    };
+    const bulkReason = (req: Request) => z.string().trim().min(3).max(2000).parse(readReviewReasonHeader(req.get('X-Review-Reason'), req.get('X-Review-Reason-Encoding')));
+    const filterText = z.string().trim().max(200).optional();
+    const bulkFilters = z.object({ search: filterText, externalProviderId: filterText, majorId: filterText, category: filterText,
+      learningLanguage: filterText, difficultyLevel: filterText, platformName: filterText, status: z.nativeEnum(CourseStatus).optional(),
+      completenessStatus: z.nativeEnum(CourseImportCompletenessState).optional(), studyAccess: z.enum(['FREE', 'PAID', 'UNKNOWN']).optional(),
+      certificateState: z.enum(['FREE', 'NON_FREE', 'UNAVAILABLE', 'UNKNOWN']).optional(), linkHealth: z.enum(['VERIFIED', 'BROKEN', 'NEEDS_REVIEW', 'UNKNOWN']).optional() }).strict();
+    const selectionSchema = z.discriminatedUnion('mode', [
+      z.object({ mode: z.literal('IDS'), ids: z.array(z.string().uuid()).min(1).max(20000) }).strict(),
+      z.object({ mode: z.literal('FILTER'), filters: bulkFilters }).strict(),
+    ]);
+    const batchId = (req: Request) => z.string().uuid().parse(req.params.batchId);
+    router.get('/bulk', bulkHandler(async (req, res) => {
+      const { page } = z.object({ page: z.coerce.number().int().min(1).max(1000).default(1) }).strict().parse(req.query);
+      res.json(await bulk().list(req.authUserId!, page));
+    }));
+    router.post('/bulk/preview', bulkHandler(async (req, res) => {
+      const input = selectionSchema.parse(req.body), selection = input.mode === 'IDS' ? { ids: input.ids } : { filters: input.filters };
+      res.status(201).json(await bulk().preview(selection, req.authUserId!, bulkReason(req), z.string().parse(req.get('Idempotency-Key'))));
+    }));
+    router.get('/bulk/:batchId', bulkHandler(async (req, res) => {
+      const query = z.object({ page: z.coerce.number().int().min(1).max(1000).default(1), state: z.enum(['PENDING', 'ELIGIBLE', 'BLOCKED', 'SUCCESS', 'FAILED', 'NOT_EXECUTED']).optional() }).strict().parse(req.query);
+      res.json(await bulk().read(batchId(req), req.authUserId!, query.page, query.state));
+    }));
+    router.post('/bulk/:batchId/step', bulkHandler(async (req, res) => {
+      z.object({}).strict().parse(req.body ?? {});
+      res.json(await bulk().step(batchId(req), req.authUserId!));
+    }));
+    router.post('/bulk/:batchId/confirm', bulkHandler(async (req, res) => {
+      const input = z.object({ digest: z.string().regex(/^[a-f0-9]{64}$/), eligibleOnly: z.boolean() }).strict().parse(req.body);
+      res.json(await bulk().confirm(batchId(req), req.authUserId!, input.digest, input.eligibleOnly, bulkReason(req)));
+    }));
+    router.post('/bulk/:batchId/cancel', bulkHandler(async (req, res) => {
+      z.object({}).strict().parse(req.body ?? {});
+      res.json(await bulk().cancel(batchId(req), req.authUserId!, bulkReason(req)));
+    }));
+    router.post('/bulk/:batchId/retry', bulkHandler(async (req, res) => {
+      z.object({}).strict().parse(req.body ?? {});
+      res.status(201).json(await bulk().retry(batchId(req), req.authUserId!, bulkReason(req), z.string().parse(req.get('Idempotency-Key'))));
+    }));
 
     router.get('/', asyncHandler(async (req, res, useCases) => {
       const filters = listSchema.parse(req.query);
@@ -110,8 +180,18 @@ export class ImportedCourseAdminRouter {
       res.json(await useCases.get(req.params.id));
     }));
 
+    router.get('/:id/readiness', asyncHandler(async (req, res) => {
+      res.json(await cradle.adminCourseUseCases.getExternalReadiness(req.params.id));
+    }));
+    router.get('/:id/history', asyncHandler(async (req, res, useCases) => {
+      const { page } = z.object({ page: z.coerce.number().int().min(1).max(100000).default(1) }).strict().parse(req.query);
+      res.json(await useCases.history(req.params.id, page));
+    }));
+
     router.patch('/:id', asyncHandler(async (req, res, useCases) => {
-      const update = updateSchema.parse(req.body);
+      const { description, learningOutcomes, prerequisites, acquiredSkills, certificateConditions, ...fields } = updateSchema.parse(req.body);
+      const optional = Object.fromEntries(Object.entries({ description, learningOutcomes, prerequisites, acquiredSkills, certificateConditions }).filter(([, value]) => value !== undefined));
+      const update = { ...fields, ...(Object.keys(optional).length ? { optionalFields: optional } : {}) };
       res.json(await useCases.update(req.params.id, update));
     }));
 
@@ -151,6 +231,8 @@ export class ImportedCourseAdminRouter {
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       if(err.message==='COURSE_VERSION_PRECONDITION_REQUIRED')return res.status(428).json({error:err.message});
       if(['COURSE_STALE_VERSION','COURSE_PUBLICATION_STATE_CHANGED'].includes(err.message))return res.status(409).json({error:err.message});
+      if(err.code === 'P2002' || err.message === 'MANUAL_COURSE_DUPLICATE_REQUIRES_REVIEW')return res.status(409).json({error:'MANUAL_COURSE_DUPLICATE_REQUIRES_REVIEW'});
+      if (err.message?.startsWith('COURSE_BULK_')) return res.status(err.message === 'COURSE_BULK_NOT_FOUND' ? 404 : err.message === 'COURSE_BULK_NOT_CONFIGURED' ? 503 : 409).json({error:err.message});
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }
@@ -168,7 +250,8 @@ export class ImportedCourseAdminRouter {
       ) {
         return res.status(409).json({ error: message });
       }
-      return res.status(400).json({ error: message });
+      if (/^(COURSE_|IMPORTED_COURSE_|MANUAL_COURSE_)[A-Z0-9_]+$/.test(message)) return res.status(400).json({ error: message });
+      return res.status(503).json({ error: 'IMPORTED_COURSE_SERVICE_UNAVAILABLE' });
     });
 
     return router;

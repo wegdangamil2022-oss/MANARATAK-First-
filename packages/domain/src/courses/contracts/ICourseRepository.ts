@@ -16,6 +16,7 @@ export interface CourseFilters {
   isFreeCertificate?: boolean;
   studyAccess?: 'FREE' | 'PAID' | 'UNKNOWN';
   certificateState?: 'FREE' | 'NON_FREE' | 'UNAVAILABLE' | 'UNKNOWN';
+  linkHealth?: 'VERIFIED' | 'BROKEN' | 'NEEDS_REVIEW' | 'UNKNOWN';
   sort?: 'UPDATED_DESC' | 'UPDATED_ASC' | 'NAME_ASC' | 'NAME_DESC' | 'STATUS_ASC';
   includeStatistics?: boolean;
 
@@ -35,6 +36,7 @@ export interface PaginatedCourseResult<T> {
   pageSize: number;
   totalPages: number;
   hasMore?: boolean;
+  externalOverview?: { incomplete: number; broken: number; needsVerification: number; ready: number; archived: number };
   nextCursor?: string | null;
   statistics?: {
     scope: 'FILTERED'; total: number; published: number; needsReview: number; drafts: number;

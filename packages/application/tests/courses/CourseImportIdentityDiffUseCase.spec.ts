@@ -15,6 +15,7 @@ import {
   UpsertCourseImportAnalysisInput,
 } from '@manaratak/domain';
 import { CourseImportIdentityDiffUseCase } from '../../src/courses/use-cases/CourseImportIdentityDiffUseCase';
+import { CourseSourceIdentityPolicy } from '../../src/courses/services/CourseSourceIdentityPolicy';
 
 const now = new Date('2026-08-22T00:00:00.000Z');
 
@@ -162,6 +163,17 @@ function record(id: string, payload: Record<string, unknown>) {
 }
 
 describe('WP-IC-04 stable identity / dedup / diff engine', () => {
+  it('requires field review on the first import matching an existing manual course without an import baseline', async () => {
+    const repo = new AnalysisRepo(); const source = row();
+    const derived = CourseSourceIdentityPolicy.derive(wipo, source.courseName, source.languageRaw, source.directCourseUrl);
+    const claimed = await repo.ensureSourceIdentity(derived); claimed.identity.courseId = 'manual-owner-course';
+    await repo.recordInitialUrl({ courseSourceIdentityId: claimed.identity.id, normalizedUrl: derived.normalizedUrl });
+    const useCase = new CourseImportIdentityDiffUseCase(batchReader({ manual: [record('manual-later-import', source)] }), new ProviderRepo(), repo);
+    const result = (await useCase.analyzeBatch('manual')).analyses[0];
+    expect(result).toMatchObject({ matchedCourseId: 'manual-owner-course', requiresReview: true, changeState: CourseImportChangeState.METADATA_CHANGED });
+    expect(result.fieldDiffs).toMatchObject({ reason: 'EXISTING_COURSE_WITHOUT_IMPORT_BASELINE', fields: { courseName: { before: null, after: source.courseName } } });
+    expect(repo.identities).toHaveLength(1);
+  });
   it('does not create a second identity proposal for an identical course across batches', async () => {
     const repo = new AnalysisRepo();
     const useCase = new CourseImportIdentityDiffUseCase(
