@@ -1,0 +1,13 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalWrites": 0,
+  "canonicalBrowserCreation": true,
+  "readBackVerified": true,
+  "arabicAuditReasonVerified": true,
+  "audit": 1,
+  "outbox": 1,
+  "versionSnapshots": 1,
+  "status": "DRAFT",
+  "originType": "NATIVE_MANARATAK_COURSE",
+  "pass": true
+}
