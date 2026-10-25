@@ -19,5 +19,6 @@
 - [ ] Verify learner/admin roles, concurrency/history, real browser flows and accurate completion report.
 
 ## Release
-- [ ] Each completed phase committed and pushed on an independent branch; review PR, no main merge.
-- [ ] Report evidence and genuine remaining work, distinguish isolated fixtures from original data.
+- [x] Phase 1 foundation committed and pushed on feat/courses-admin-workspaces-20261025; no main merge.
+- [ ] Open draft PR when GitHub API connectivity recovers. Connector transport failed; direct API attempts failed during TLS. Branch push and remote head were independently verified.
+- [x] Report evidence and genuine remaining work, distinguish isolated fixtures from original data.
