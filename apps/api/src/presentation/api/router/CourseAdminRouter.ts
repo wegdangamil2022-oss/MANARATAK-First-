@@ -1,4 +1,5 @@
 import type {CourseAdminScope, CourseAdminContext, CourseAdminCommandUseCases} from '@manaratak/application';
+import { readReviewReasonHeader } from '@manaratak/shared';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import {
@@ -22,7 +23,7 @@ export class CourseAdminRouter {
 
     const mutationContext = (req: Request): CourseAdminContext => {
       if (!req.authUserId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
-      const reason = z.string().trim().min(3).max(2000).parse(req.get('X-Review-Reason') ?? z.object({ reason: z.string().optional() }).strip().parse(req.body ?? {}).reason);
+      const reason = z.string().trim().min(3).max(2000).parse(readReviewReasonHeader(req.get('X-Review-Reason'), req.get('X-Review-Reason-Encoding')) ?? z.object({ reason: z.string().optional() }).strip().parse(req.body ?? {}).reason);
       const raw = req.get('If-Match');
       let expectedVersion: number | undefined;
       if (req.params.id || req.params.pathId) {
@@ -88,17 +89,51 @@ export class CourseAdminRouter {
       completenessStatus: z.nativeEnum(CourseImportCompletenessState).optional(),
       accessType: z.nativeEnum(CourseAccessType).optional(),
       originType: z.nativeEnum(CourseOriginType).optional(),
-      platformName: z.string().optional(),
+      platformName: z.string().trim().max(200).optional(),
       search: z.string().trim().max(200).optional(),
-      externalProviderId: z.string().trim().min(1).optional(),
-      majorId: z.string().trim().min(1).optional(),
-      category: z.string().trim().optional(),
-      learningLanguage: z.string().trim().optional(),
-      difficultyLevel: z.string().trim().optional(),
+      externalProviderId: z.string().trim().min(1).max(200).optional(),
+      majorId: z.string().trim().min(1).max(200).optional(),
+      category: z.string().trim().max(200).optional(),
+      learningLanguage: z.string().trim().max(200).optional(),
+      difficultyLevel: z.string().trim().max(200).optional(),
       isFreeCertificate: z.enum(['true', 'false']).transform(v => v === 'true').optional(),
-      page: z.coerce.number().int().min(1).default(1),
+      studyAccess: z.enum(['FREE', 'PAID', 'UNKNOWN']).optional(),
+      certificateState: z.enum(['FREE', 'NON_FREE', 'UNAVAILABLE', 'UNKNOWN']).optional(),
+      sort: z.enum(['UPDATED_DESC', 'UPDATED_ASC', 'NAME_ASC', 'NAME_DESC', 'STATUS_ASC']).optional(),
+      page: z.coerce.number().int().min(1).max(100000).default(1),
       pageSize: z.coerce.number().int().min(1).max(100).default(20),
     });
+
+    // Static, read-only catalog routes precede /:id. Scope is enforced here,
+    // independently of the visual filters, using the existing Course repository.
+    router.get('/catalog/options', asyncHandler(async (req, res, { adminCourseUseCases }) => {
+      const query = z.object({ field: z.enum(['learningLanguage', 'difficultyLevel']), originType: z.nativeEnum(CourseOriginType).optional(),
+        search: z.string().trim().max(200).optional(), page: z.coerce.number().int().min(1).max(1000).default(1) }).parse(req.query);
+      res.json(await adminCourseUseCases.catalogOptions(query));
+    }));
+    for (const scope of ['all', 'native', 'external'] as const) {
+      const path = scope === 'all' ? '/catalog' : `/catalog/${scope}`;
+      router.get(path, asyncHandler(async (req, res, { adminCourseUseCases }) => {
+        const filters = listQuerySchema.parse(req.query);
+        if (scope === 'native' && (filters.externalProviderId || filters.platformName || filters.completenessStatus)) {
+          return res.status(400).json({ error: 'NATIVE_COURSE_EXTERNAL_FILTER_FORBIDDEN' });
+        }
+        if (scope !== 'all') filters.originType = scope === 'native' ? CourseOriginType.NATIVE_MANARATAK_COURSE : CourseOriginType.EXTERNAL_LINKED_COURSE;
+        // A registry provider identifies external courses, never a native instructor.
+        if (scope === 'all' && (filters.externalProviderId || filters.platformName || filters.completenessStatus)) filters.originType = CourseOriginType.EXTERNAL_LINKED_COURSE;
+        const result = await adminCourseUseCases.listCourses({ ...filters, includeStatistics: true });
+        res.json({ ...result, data: result.data.map(course => ({
+          id: course.id, publicId: course.publicId, displayName: course.displayName, originalSourceTitle: course.originalSourceTitle,
+          originType: course.originType, accessType: course.accessType, status: course.status, completenessStatus: course.completenessStatus,
+          providerDisplayName: course.providerDisplayName, providerName: course.providerName, platformName: course.platformName,
+          learningLanguage: course.learningLanguage, studyDuration: course.studyDuration, difficultyLevel: course.difficultyLevel,
+          isStudyFree: course.isStudyFree, isFreeCertificate: course.isFreeCertificate, certificateAvailable: course.certificateAvailable,
+          certificateType: course.certificateType, category: course.category, relatedMajors: course.relatedMajors,
+          instructor: typeof course.optionalFields?.instructor === 'string' ? course.optionalFields.instructor : undefined,
+          updatedAt: course.updatedAt, version: course.version,
+        })) });
+      }));
+    }
 
     router.post('/:id/localized-description',asyncHandler(async(req,res,{adminCourseUseCases})=>{
       res.json(await adminCourseUseCases.saveLocalizedDescription(req.params.id,z.object({locale:z.enum(['ar','en']),displayName:z.string().trim().min(1).max(500).optional(),description:z.string().trim().min(1).max(100000).optional(),remove:z.boolean().optional()}).strict().parse(req.body)));

@@ -11,6 +11,8 @@ import { ScholarshipListPage } from './pages/ScholarshipListPage';
 import { ScholarshipDetailPage } from './pages/ScholarshipCatalogDetailPage';
 import { ScholarshipRelationshipEditorPage } from './pages/ScholarshipRelationshipEditorPage';
 import { CourseListPage } from './pages/CourseListPage';
+import { CourseCatalogPage } from './features/courses/CourseCatalogPage';
+import { CourseLearningPathsPage, CoursePaidPreparationPage } from './features/courses/CourseUtilityPages';
 import { CourseDetailPage } from './pages/CourseDetailPage';
 import { CertificateAdminPage } from './pages/CertificateAdminPage';
 import { CertificateDetailPage } from './pages/CertificateDetailPage';
@@ -195,7 +197,7 @@ function AdminLayout() {
     <BrowserRouter basename={adminBasename}>
       <div className="min-h-screen bg-slate-50 text-[#142B5F] flex flex-col font-sans">
         {adminAccess === 'authorized' && (
-          <header className="sticky top-0 z-40 flex min-h-[73px] items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3 shadow-xs backdrop-blur sm:px-6">
+          <header className="admin-shell-header sticky top-0 z-40 flex min-h-[73px] items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3 shadow-xs backdrop-blur sm:px-6">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#142B5F] text-white shadow-sm overflow-hidden p-1 border border-[#21A7B4]/20 shrink-0">
                 <img
@@ -287,6 +289,10 @@ function AdminLayout() {
                   <Route path="/majors/:id" element={<RequireAdminPermission permission="admin:majors:manage"><MajorDetailPage /></RequireAdminPermission>} />
                   <Route path="/translations" element={<RequireAdminPermission permission="admin:cms:manage"><AdminTranslationWorkspacePage /></RequireAdminPermission>} />
                   <Route path="/courses" element={<RequireAdminPermission permission="admin:courses:manage"><CourseListPage /></RequireAdminPermission>} />
+                  <Route path="/courses/native" element={<RequireAdminPermission permission="admin:courses:manage"><CourseCatalogPage fixedScope="native" /></RequireAdminPermission>} />
+                  <Route path="/courses/external" element={<RequireAdminPermission permission="admin:courses:manage"><CourseCatalogPage fixedScope="external" /></RequireAdminPermission>} />
+                  <Route path="/courses/paid" element={<RequireAdminPermission permission="admin:courses:manage"><CoursePaidPreparationPage /></RequireAdminPermission>} />
+                  <Route path="/courses/learning-paths" element={<RequireAdminPermission permission="admin:courses:manage"><CourseLearningPathsPage /></RequireAdminPermission>} />
                   <Route path="/courses/providers" element={<RequireAdminPermission permission="admin:courses:manage"><CourseProviderRegistryPage /></RequireAdminPermission>} />
                   <Route path="/courses/:id" element={<RequireAdminPermission permission="admin:courses:manage"><CourseDetailPage /></RequireAdminPermission>} />
                   <Route path="/certificates" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateAdminPage /></RequireAdminPermission>} />

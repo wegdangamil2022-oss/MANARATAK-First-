@@ -1,4 +1,5 @@
 import type {CourseAdminCommandUseCases,CourseAdminContext,AdminCourseUseCases} from '@manaratak/application';
+import { readReviewReasonHeader } from '@manaratak/shared';
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -15,7 +16,7 @@ export class ImportedCourseAdminRouter {
 
     const mutationContext=(req:Request):CourseAdminContext=>{
       if(!req.authUserId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
-      const reason=z.string().trim().min(3).max(2000).parse(req.get('X-Review-Reason')??z.object({ reason: z.string().optional() }).strip().parse(req.body ?? {}).reason);
+      const reason=z.string().trim().min(3).max(2000).parse(readReviewReasonHeader(req.get('X-Review-Reason'),req.get('X-Review-Reason-Encoding'))??z.object({ reason: z.string().optional() }).strip().parse(req.body ?? {}).reason);
       const match=/^(?:"(\d+)"|(\d+))$/.exec(req.get('If-Match')??'');
       const expectedVersion=match?Number(match[1]??match[2]):undefined;
       if(!Number.isSafeInteger(expectedVersion)||expectedVersion!<1) throw new Error('COURSE_VERSION_PRECONDITION_REQUIRED');

@@ -279,7 +279,7 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
     if(!headers.has('X-Review-Reason')) {
       const reason=courseReviewReasons.get(courseOwner);
       if(!reason || reason.length<3) throw new Error('اكتب سبب التعديل قبل الحفظ.');
-      headers.set('X-Review-Reason',reason);
+      for (const [name, value] of Object.entries(reviewReasonHeaders(reason))) headers.set(name, value);
     }
   }
   const universityMatch = endpoint.match(/^\/admin\/universities\/([^/?]+)(?:\/|\?|$)/);

@@ -255,7 +255,7 @@ describe('PrismaCourseRepository', () => {
       },
       skip: 100,
       take: 100,
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
     });
     expect(result).toMatchObject({ total: 201, page: 2, pageSize: 100, totalPages: 3 });
   });

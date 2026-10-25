@@ -34,6 +34,11 @@ export class AdminCourseUseCases {
     return this.repository.list(filters);
   }
 
+  public async catalogOptions(input: { field: 'learningLanguage' | 'difficultyLevel'; originType?: CourseOriginType; search?: string; page: number }): Promise<{ data: string[]; hasMore: boolean }> {
+    if (!this.repository.catalogOptions) throw new Error('COURSE_CATALOG_OPTIONS_NOT_CONFIGURED');
+    return this.repository.catalogOptions(input);
+  }
+
   public async getCourse(id: string): Promise<CourseDto> {
     const course = await this.repository.findById(id);
     if (!course) throw new Error(`Course with id ${id} not found`);

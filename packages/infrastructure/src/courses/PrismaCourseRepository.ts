@@ -1,4 +1,5 @@
 import { currentPublicCourseEligibility } from './CoursePublicEligibility';
+import { courseCatalogOrder, courseCatalogWhere } from './CourseCatalogQuery';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   AtomicPersistenceContext,
@@ -21,6 +22,7 @@ interface CourseTransactionContext extends AtomicPersistenceContext {
 }
 
 interface CourseRecord {
+  externalProvider?: { displayName: string } | null;
   majorProjections?: Array<{major:{id:string;displayName:string}}> ;
   id: string;
   publicId: string;
@@ -329,39 +331,46 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
   }
 
   public async list(filters: CourseFilters): Promise<PaginatedCourseResult<CourseDto>> {
+    if (filters.includeStatistics && !this.transactionBound) return this.prisma.$transaction(
+      tx => new PrismaCourseRepository(tx as unknown as PrismaClient, true).list(filters),
+      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+    );
     const page = Math.max(1, filters.page ?? 1);
     const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 20));
-    const where: Prisma.CourseWhereInput = {};
-
-    if (filters.status) where.status = filters.status;
-    if (filters.completenessStatus) where.completenessStatus = filters.completenessStatus;
-    if (filters.accessType) where.accessType = filters.accessType;
-    if (filters.originType) where.originType = filters.originType;
-    if (filters.platformName) where.platformName = {contains:filters.platformName,mode:"insensitive"};
-
-    if (filters.externalProviderId) where.externalProviderId = filters.externalProviderId;
-    if (filters.category) where.category = { contains: filters.category, mode: 'insensitive' };
-    if (filters.learningLanguage) where.learningLanguage = { contains: filters.learningLanguage, mode: 'insensitive' };
-    if (filters.difficultyLevel) where.difficultyLevel = { contains: filters.difficultyLevel, mode: 'insensitive' };
-    if (filters.isFreeCertificate !== undefined) where.OR = [
-      { originType: 'EXTERNAL_LINKED_COURSE', isFreeCertificate: filters.isFreeCertificate },
-      filters.isFreeCertificate
-        ? { originType: 'NATIVE_MANARATAK_COURSE', certificateAvailable: true, accessType: { in: ['FREE_CERTIFICATE', 'FREE_STUDY_AND_CERTIFICATE'] } }
-        : { originType: 'NATIVE_MANARATAK_COURSE', NOT: { certificateAvailable: true, accessType: { in: ['FREE_CERTIFICATE', 'FREE_STUDY_AND_CERTIFICATE'] } } },
-    ];
-    if (filters.majorId) where.majorProjections = { some: { majorId: filters.majorId, projectionState: 'APPROVED' } };
-    if (filters.search) where.AND = [{ OR: [
-      { displayName: { contains: filters.search, mode: 'insensitive' } },
-      { canonicalName: { contains: filters.search, mode: 'insensitive' } },
-      { publicId: { contains: filters.search, mode: 'insensitive' } },
-      { platformName: { contains: filters.search, mode: 'insensitive' } },
-      { providerName: { contains: filters.search, mode: 'insensitive' } },
-    ] }];
-    return this.listPage(where, page, pageSize);
+    const where = courseCatalogWhere(filters);
+    const result = await this.listPage(where, page, pageSize, filters.sort, filters.includeStatistics);
+    if (filters.includeStatistics) {
+      const groups = await this.prisma.course.groupBy({ by: ['status', 'completenessStatus', 'originType'], where, _count: { _all: true } });
+      const sum = (predicate: (row: typeof groups[number]) => boolean) => groups.reduce((count, row) => count + (predicate(row) ? row._count._all : 0), 0);
+      result.statistics = { scope: 'FILTERED', total: result.total,
+        published: sum(row => row.status === 'PUBLISHED'), drafts: sum(row => row.status === 'DRAFT'),
+        needsReview: sum(row => !['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(row.status) &&
+          (['IMPORTED', 'INCOMPLETE', 'READY_TO_REVIEW'].includes(row.status) || ['NEEDS_REVIEW', 'INCOMPLETE'].includes(row.completenessStatus))),
+        native: sum(row => row.originType === 'NATIVE_MANARATAK_COURSE'),
+        external: sum(row => row.originType === 'EXTERNAL_LINKED_COURSE'),
+        legacyPaidOrigin: sum(row => row.originType === 'PAID_COURSE'),
+      };
+    }
+    return result;
   }
 
   private publishedWhere(scope: Prisma.CourseWhereInput = {}): Promise<Prisma.CourseWhereInput> {
     return currentPublicCourseEligibility(this.prisma, scope);
+  }
+
+  public async catalogOptions(input: { field: 'learningLanguage' | 'difficultyLevel'; originType?: CourseOriginType; search?: string; page: number }): Promise<{ data: string[]; hasMore: boolean }> {
+    if (!['learningLanguage', 'difficultyLevel'].includes(input.field)) throw new Error('COURSE_CATALOG_OPTION_FIELD_FORBIDDEN');
+    const column = input.field === 'learningLanguage' ? Prisma.sql`"learningLanguage"` : Prisma.sql`"difficultyLevel"`;
+    const origin = input.originType ? Prisma.sql`AND "originType" = ${input.originType}` : Prisma.empty;
+    const search = input.search ? Prisma.sql`AND strpos(lower(${column}), lower(${input.search})) > 0` : Prisma.empty;
+    // DISTINCT must execute in PostgreSQL; Prisma's client-side distinct may otherwise
+    // materialize the catalog before applying the picker page boundary.
+    const data = await this.prisma.$queryRaw<Array<{ value: string }>>(Prisma.sql`
+      SELECT DISTINCT ${column} AS "value" FROM "Course"
+      WHERE ${column} IS NOT NULL AND btrim(${column}) <> '' ${origin} ${search}
+      ORDER BY "value" ASC LIMIT 26 OFFSET ${(Math.max(1, Math.min(input.page, 1000)) - 1) * 25}
+    `);
+    return { data: data.slice(0, 25).map(row => row.value), hasMore: data.length > 25 };
   }
 
   public async findPublishedBySlug(slug: string): Promise<CourseDto | null> {
@@ -400,13 +409,19 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
     where: Prisma.CourseWhereInput,
     page: number,
     pageSize: number,
+    sort?: CourseFilters['sort'],
+    catalog = false,
   ): Promise<PaginatedCourseResult<CourseDto>> {
     const [data, total] = await Promise.all([
       this.prisma.course.findMany({
         where,
         skip: (page - 1) * pageSize,
         take: pageSize,
-        orderBy: { createdAt: 'desc' },
+        orderBy: courseCatalogOrder(sort),
+        ...(catalog ? { include: {
+          externalProvider: { select: { displayName: true } },
+          majorProjections: { where: { projectionState: 'APPROVED' }, select: { major: { select: { id: true, displayName: true } } } },
+        } } : {}),
       }),
       this.prisma.course.count({ where }),
     ]);
@@ -450,6 +465,7 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
   private mapToDto(record: CourseRecord): CourseDto {
     return {
       id: record.id,
+      providerDisplayName: record.externalProvider?.displayName,
       relatedMajors: [...new Map((record.majorProjections ?? []).map(row=>[row.major.id,{id:row.major.id,name:row.major.displayName}])).values()],
       publicId: record.publicId,
       slug: record.slug,

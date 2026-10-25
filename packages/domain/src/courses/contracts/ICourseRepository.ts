@@ -14,6 +14,10 @@ export interface CourseFilters {
   learningLanguage?: string;
   difficultyLevel?: string;
   isFreeCertificate?: boolean;
+  studyAccess?: 'FREE' | 'PAID' | 'UNKNOWN';
+  certificateState?: 'FREE' | 'NON_FREE' | 'UNAVAILABLE' | 'UNKNOWN';
+  sort?: 'UPDATED_DESC' | 'UPDATED_ASC' | 'NAME_ASC' | 'NAME_DESC' | 'STATUS_ASC';
+  includeStatistics?: boolean;
 
   status?: CourseStatus;
   completenessStatus?: CourseImportCompletenessState;
@@ -32,6 +36,10 @@ export interface PaginatedCourseResult<T> {
   totalPages: number;
   hasMore?: boolean;
   nextCursor?: string | null;
+  statistics?: {
+    scope: 'FILTERED'; total: number; published: number; needsReview: number; drafts: number;
+    native: number; external: number; legacyPaidOrigin: number;
+  };
 }
 
 export interface UpdateCourseDto {
@@ -79,6 +87,7 @@ export interface ICourseRepository {
   updateImportLink(id: string, sourceImportRecordId: string): Promise<void>;
   listByStatus(status: CourseStatus): Promise<CourseDto[]>;
   list(filters: CourseFilters): Promise<PaginatedCourseResult<CourseDto>>;
+  catalogOptions?(input: { field: 'learningLanguage' | 'difficultyLevel'; originType?: CourseOriginType; search?: string; page: number }): Promise<{ data: string[]; hasMore: boolean }>;
   listPublished(filters: PublicCourseFilters): Promise<PaginatedCourseResult<CourseDto>>;
 }
 
