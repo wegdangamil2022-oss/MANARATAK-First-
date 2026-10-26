@@ -51,6 +51,21 @@ describe('Translation workspace owner boundary', () => {
     expect((await request(f.app).get('/workspace?domain=STUDENT&page=10001')).status).toBe(400);
     expect(f.reader.search).not.toHaveBeenCalled();
   });
+  it('validates server sorting and rejected-state filters without interpolating arbitrary SQL', async () => {
+    const f = fixture(true);
+    expect(
+      (await request(f.app).get('/workspace?domain=UNIVERSITY&reviewState=REJECTED&sort=NAME_ASC'))
+        .status,
+    ).toBe(200);
+    expect(f.reader.search).toHaveBeenCalledWith(
+      expect.objectContaining({ reviewState: 'REJECTED', sort: 'NAME_ASC' }),
+    );
+    f.reader.search.mockClear();
+    expect(
+      (await request(f.app).get('/workspace?domain=UNIVERSITY&sort=NAME_ASC;DROP')).status,
+    ).toBe(400);
+    expect(f.reader.search).not.toHaveBeenCalled();
+  });
   it('requires an authenticated reader and rejects repeated locale parameters before a read', async () => {
     const reader = { search: vi.fn() };
     const auth = { evaluatePermission: vi.fn() };

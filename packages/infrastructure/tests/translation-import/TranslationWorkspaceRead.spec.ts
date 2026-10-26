@@ -93,4 +93,26 @@ describe('Translation workspace global owner projection contracts', () => {
     });
     expect(result.data[0].translations).toBeUndefined();
   });
+  it('searches translated names before counting and paging and escapes literal wildcard characters', async () => {
+    const { reader, tx } = fixture();
+    await reader.search({
+      domain: 'SCHOLARSHIP',
+      page: 3,
+      pageSize: 20,
+      q: 'منحة_100%',
+      locale: 'ar',
+      sort: 'NAME_ASC',
+      reviewState: 'REJECTED',
+    });
+    const [page, count] = tx.$queryRaw.mock.calls.map(([query]) => query);
+    for (const query of [page, count]) {
+      expect(query.sql).toContain('"localizedNameAr" ILIKE');
+      expect(query.sql).toContain('"localizedNameEn" ILIKE');
+      expect(query.sql).toContain('"translationStateAr" = \'REJECTED\'');
+      expect(query.sql).not.toContain('منحة_100%');
+      expect(query.values).toContain('%منحة\\_100\\%%');
+    }
+    expect(page.sql).toMatch(/ORDER BY COALESCE\(NULLIF\("localizedNameAr"/);
+    expect(page.values.slice(-2)).toEqual([20, 40]);
+  });
 });

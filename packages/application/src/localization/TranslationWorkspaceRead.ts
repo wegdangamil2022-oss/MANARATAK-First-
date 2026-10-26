@@ -8,7 +8,8 @@ export interface TranslationWorkspaceQuery {
   q?: string;
   coverage?: 'ALL' | 'MISSING_AR' | 'MISSING_EN' | 'COMPLETE';
   locale?: 'ar' | 'en';
-  reviewState?: 'ALL' | 'NEEDS_REVIEW' | 'PUBLISHED';
+  reviewState?: 'ALL' | 'NEEDS_REVIEW' | 'PUBLISHED' | 'REJECTED';
+  sort?: 'UPDATED_DESC' | 'UPDATED_ASC' | 'NAME_ASC';
   updatedFrom?: Date;
 }
 export interface TranslationWorkspaceResult {

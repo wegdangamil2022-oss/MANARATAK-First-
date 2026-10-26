@@ -10,7 +10,12 @@ import type {
   ITranslationWorkspaceReadGateway,
   TranslationOwnerPublisher,
 } from '@manaratak/application';
-const fieldKeySchema=z.string().refine(value=>value==='displayName'||value==='description'||/^section:[a-zA-Z0-9_-]+$/.test(value));
+const fieldKeySchema = z
+  .string()
+  .refine(
+    (value) =>
+      value === 'displayName' || value === 'description' || /^section:[a-zA-Z0-9_-]+$/.test(value),
+  );
 const grants = {
   UNIVERSITY: 'admin:universities:manage',
   MAJOR: 'admin:majors:manage',
@@ -24,14 +29,29 @@ export function createTranslationWorkspaceRouter(
   writer?: TranslationOwnerPublisher,
 ): Router {
   const router = Router();
-  router.get('/capabilities',async(req,res,next)=>{
+  router.get('/capabilities', async (req, res, next) => {
     try {
-      if(!req.authUserId){res.status(401).json({error:{code:'ADMIN_AUTH_REQUIRED'}});return;}
-      const actor=req.authUserId;
-      const capabilities=await Promise.all(Object.values(TRANSLATION_OWNER_CAPABILITIES).map(async capability=>
-        (await authorization.evaluatePermission(actor,capability.permission,{ip:req.ip,requestTime:new Date()})).isGranted?capability:null));
-      res.json({data:capabilities.filter(item=>item!==null)});
-    } catch(error){next(error);}
+      if (!req.authUserId) {
+        res.status(401).json({ error: { code: 'ADMIN_AUTH_REQUIRED' } });
+        return;
+      }
+      const actor = req.authUserId;
+      const capabilities = await Promise.all(
+        Object.values(TRANSLATION_OWNER_CAPABILITIES).map(async (capability) =>
+          (
+            await authorization.evaluatePermission(actor, capability.permission, {
+              ip: req.ip,
+              requestTime: new Date(),
+            })
+          ).isGranted
+            ? capability
+            : null,
+        ),
+      );
+      res.json({ data: capabilities.filter((item) => item !== null) });
+    } catch (error) {
+      next(error);
+    }
   });
   router.get('/workspace', async (req, res, next) => {
     try {
@@ -47,7 +67,8 @@ export function createTranslationWorkspaceRouter(
           q: z.string().trim().max(120).optional(),
           coverage: z.enum(['ALL', 'MISSING_AR', 'MISSING_EN', 'COMPLETE']).default('ALL'),
           locale: z.enum(['ar', 'en']).default('en'),
-          reviewState: z.enum(['ALL', 'NEEDS_REVIEW', 'PUBLISHED']).default('ALL'),
+          reviewState: z.enum(['ALL', 'NEEDS_REVIEW', 'PUBLISHED', 'REJECTED']).default('ALL'),
+          sort: z.enum(['UPDATED_DESC', 'UPDATED_ASC', 'NAME_ASC']).default('UPDATED_DESC'),
           updatedFrom: z.coerce.date().optional(),
         })
         .strict()
@@ -82,7 +103,11 @@ export function createTranslationWorkspaceRouter(
         })
         .parse(req.params);
       const query = z
-        .object({ fieldKey: fieldKeySchema.default('displayName'),profileId:z.string().min(1).optional(),versionId:z.string().min(1).optional() })
+        .object({
+          fieldKey: fieldKeySchema.default('displayName'),
+          profileId: z.string().min(1).optional(),
+          versionId: z.string().min(1).optional(),
+        })
         .strict()
         .parse(req.query);
       if (params.domain === 'MAJOR' && query.fieldKey === 'description')
@@ -101,15 +126,24 @@ export function createTranslationWorkspaceRouter(
         return;
       }
       if (!writer) throw new Error('TRANSLATION_OWNER_PUBLISHER_UNAVAILABLE');
-      if(params.domain==='MAJOR' && (!query.profileId||!query.versionId)) throw new Error('TRANSLATION_SECTION_OWNER_REQUIRED');
+      if (params.domain === 'MAJOR' && (!query.profileId || !query.versionId))
+        throw new Error('TRANSLATION_SECTION_OWNER_REQUIRED');
       const target = await writer.resolveExact({
         entityKind: params.domain,
         entityPublicId: params.publicId,
         locale: params.locale,
         fieldKey: query.fieldKey,
-        fieldKind: query.fieldKey === 'displayName' ? 'DISPLAY_NAME' : query.fieldKey==='description' ? 'DESCRIPTION' : 'CONTENT_SECTION',
-        sectionKey:query.fieldKey.startsWith('section:')?query.fieldKey.slice(8):undefined,
-        sectionOwner:params.domain==='MAJOR'?{profileId:query.profileId,versionId:query.versionId}:undefined,
+        fieldKind:
+          query.fieldKey === 'displayName'
+            ? 'DISPLAY_NAME'
+            : query.fieldKey === 'description'
+              ? 'DESCRIPTION'
+              : 'CONTENT_SECTION',
+        sectionKey: query.fieldKey.startsWith('section:') ? query.fieldKey.slice(8) : undefined,
+        sectionOwner:
+          params.domain === 'MAJOR'
+            ? { profileId: query.profileId, versionId: query.versionId }
+            : undefined,
       });
       if (!target) {
         res.status(404).json({ error: { code: 'TRANSLATION_CANONICAL_TARGET_NOT_FOUND' } });
@@ -152,7 +186,8 @@ export function createTranslationWorkspaceRouter(
       const body = z
         .object({
           fieldKey: fieldKeySchema,
-          profileId:z.string().min(1).optional(),versionId:z.string().min(1).optional(),
+          profileId: z.string().min(1).optional(),
+          versionId: z.string().min(1).optional(),
           expectedRevision: z.string().min(1).max(100),
           expectedSourceDigest: z.string().length(64),
           approvalId: z.string().min(1).max(120),
@@ -162,14 +197,23 @@ export function createTranslationWorkspaceRouter(
         .parse(req.body);
       if (params.domain === 'MAJOR' && body.fieldKey === 'description')
         throw new Error('UNSUPPORTED_TARGET_OWNER');
-      if(params.domain==='MAJOR' && (!body.profileId||!body.versionId)) throw new Error('TRANSLATION_SECTION_OWNER_REQUIRED');
+      if (params.domain === 'MAJOR' && (!body.profileId || !body.versionId))
+        throw new Error('TRANSLATION_SECTION_OWNER_REQUIRED');
       const target = await writer.resolveExact({
         entityKind: params.domain,
         entityPublicId: params.publicId,
         locale: params.locale,
-        fieldKind: body.fieldKey === 'displayName' ? 'DISPLAY_NAME' : body.fieldKey==='description' ? 'DESCRIPTION' : 'CONTENT_SECTION',
-        sectionKey:body.fieldKey.startsWith('section:')?body.fieldKey.slice(8):undefined,
-        sectionOwner:params.domain==='MAJOR'?{profileId:body.profileId,versionId:body.versionId}:undefined,
+        fieldKind:
+          body.fieldKey === 'displayName'
+            ? 'DISPLAY_NAME'
+            : body.fieldKey === 'description'
+              ? 'DESCRIPTION'
+              : 'CONTENT_SECTION',
+        sectionKey: body.fieldKey.startsWith('section:') ? body.fieldKey.slice(8) : undefined,
+        sectionOwner:
+          params.domain === 'MAJOR'
+            ? { profileId: body.profileId, versionId: body.versionId }
+            : undefined,
         fieldKey: body.fieldKey,
       });
       if (
@@ -207,11 +251,11 @@ export function createTranslationWorkspaceRouter(
       TRANSLATION_OWNER_PUBLISHER_UNAVAILABLE: 503,
       TRANSLATION_CANONICAL_TARGET_NOT_FOUND: 404,
       TRANSLATION_STALE_DIFF_REVIEW_REQUIRED: 409,
-      TRANSLATION_OWNER_WORKING_VERSION_REQUIRED:409,
-      TRANSLATION_SECTION_OWNER_REQUIRED:422,
-      TRANSLATION_FIELD_UNSUPPORTED:422,
-      TRANSLATION_SECTION_PROFILE_VERSION_MISMATCH:422,
-      TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED:409,
+      TRANSLATION_OWNER_WORKING_VERSION_REQUIRED: 409,
+      TRANSLATION_SECTION_OWNER_REQUIRED: 422,
+      TRANSLATION_FIELD_UNSUPPORTED: 422,
+      TRANSLATION_SECTION_PROFILE_VERSION_MISMATCH: 422,
+      TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED: 409,
       TRANSLATION_OWNER_PERMISSION_DENIED: 403,
       TRANSLATION_TRUSTED_INDEPENDENT_APPROVAL_REQUIRED: 403,
       GOVERNANCE_APPROVAL_REQUIRED: 403,

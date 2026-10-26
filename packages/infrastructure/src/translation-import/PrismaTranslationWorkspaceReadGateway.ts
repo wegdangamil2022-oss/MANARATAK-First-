@@ -52,14 +52,23 @@ export class PrismaTranslationWorkspaceReadGateway implements ITranslationWorksp
         ? Prisma.sql`${statusField} <> 'PUBLISHED'`
         : input.reviewState === 'PUBLISHED'
           ? Prisma.sql`${statusField} = 'PUBLISHED'`
-          : Prisma.sql`true`;
-    const where = Prisma.sql`${coverage} AND ${review} AND (${input.updatedFrom ?? null}::timestamptz IS NULL OR "updatedAt" >= ${input.updatedFrom ?? null})`;
-    const cte = Prisma.sql`WITH source AS (SELECT o.id,o."publicId",o.slug,o."displayName",o.status,o."updatedAt", ${name('ar')} AS "localizedNameAr",${name('en')} AS "localizedNameEn",${state('ar')} AS "translationStateAr",${state('en')} AS "translationStateEn", ${published()} AS "publicReadyAr",${published()} AS "publicReadyEn" FROM ${table} o WHERE (${input.q ?? ''}='' OR o."displayName" ILIKE ${'%' + (input.q ?? '') + '%'} OR o."publicId" ILIKE ${'%' + (input.q ?? '') + '%'})), coverage AS (SELECT *,NULLIF(trim("localizedNameAr"),'') IS NOT NULL AS "hasAr",NULLIF(trim("localizedNameEn"),'') IS NOT NULL AS "hasEn" FROM source)`;
+          : input.reviewState === 'REJECTED'
+            ? Prisma.sql`${statusField} = 'REJECTED'`
+            : Prisma.sql`true`;
+    const term = '%' + (input.q ?? '').replace(/[\\%_]/g, (value) => '\\' + value) + '%';
+    const where = Prisma.sql`${coverage} AND ${review} AND (${input.updatedFrom ?? null}::timestamptz IS NULL OR "updatedAt" >= ${input.updatedFrom ?? null}) AND (${input.q ?? ''}='' OR "displayName" ILIKE ${term} OR "publicId" ILIKE ${term} OR slug ILIKE ${term} OR "localizedNameAr" ILIKE ${term} OR "localizedNameEn" ILIKE ${term})`;
+    const order =
+      input.sort === 'UPDATED_ASC'
+        ? Prisma.sql`"updatedAt" ASC,id ASC`
+        : input.sort === 'NAME_ASC'
+          ? Prisma.sql`COALESCE(NULLIF(${input.locale === 'ar' ? Prisma.raw('"localizedNameAr"') : Prisma.raw('"localizedNameEn"')},''),"displayName") ASC,id ASC`
+          : Prisma.sql`"updatedAt" DESC,id ASC`;
+    const cte = Prisma.sql`WITH source AS (SELECT o.id,o."publicId",o.slug,o."displayName",o.status,o."updatedAt", ${name('ar')} AS "localizedNameAr",${name('en')} AS "localizedNameEn",${state('ar')} AS "translationStateAr",${state('en')} AS "translationStateEn", ${published()} AS "publicReadyAr",${published()} AS "publicReadyEn" FROM ${table} o), coverage AS (SELECT *,NULLIF(trim("localizedNameAr"),'') IS NOT NULL AS "hasAr",NULLIF(trim("localizedNameEn"),'') IS NOT NULL AS "hasEn" FROM source)`;
     // Stable owner ordering, server-side filtering before count and pagination.
     return this.prisma.$transaction(
       async (tx) => {
         const data = await tx.$queryRaw<Array<Record<string, unknown>>>(
-          Prisma.sql`${cte} SELECT * FROM coverage WHERE ${where} ORDER BY "updatedAt" DESC,id ASC LIMIT ${input.pageSize} OFFSET ${(input.page - 1) * input.pageSize}`,
+          Prisma.sql`${cte} SELECT * FROM coverage WHERE ${where} ORDER BY ${order} LIMIT ${input.pageSize} OFFSET ${(input.page - 1) * input.pageSize}`,
         );
         const [counts] = await tx.$queryRaw<
           Array<{
@@ -97,7 +106,9 @@ export class PrismaTranslationWorkspaceReadGateway implements ITranslationWorksp
           ownerSourceStatus: 'CANONICAL_OWNER_READ',
           runtimeProof: 'UNVERIFIED',
           migrationRequired: input.domain === 'SCHOLARSHIP' || input.domain === 'COURSE',
-          publicationReadiness: university ? 'UNKNOWN_OWNER_SOURCE_EVIDENCE' : 'UNKNOWN_OWNER_FIELD_EVIDENCE',
+          publicationReadiness: university
+            ? 'UNKNOWN_OWNER_SOURCE_EVIDENCE'
+            : 'UNKNOWN_OWNER_FIELD_EVIDENCE',
           importSupported: ['UNIVERSITY', 'MAJOR'].includes(input.domain),
           stats: {
             complete: Number(counts.complete),

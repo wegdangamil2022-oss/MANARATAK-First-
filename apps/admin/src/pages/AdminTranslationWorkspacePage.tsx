@@ -1,326 +1,106 @@
-import {TranslationOwnerCapabilitiesPanel} from '../components/TranslationOwnerCapabilitiesPanel';
-import {TRANSLATION_OWNER_CAPABILITIES} from '@manaratak/shared';
-import { resolveSourceLocaleEvidence } from '@manaratak/shared';
+import { TranslationOwnerCapabilitiesPanel } from '../components/TranslationOwnerCapabilitiesPanel';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ArrowUpLeft,
+  ArrowDownWideNarrow,
+  CalendarDays,
+  Eye,
+  Files,
+  Globe2,
+  LayoutGrid,
+  ListFilter,
+  RotateCcw,
+  Route,
+  Table2,
   BookOpen,
-  Building2,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Database,
   FileText,
-  GraduationCap,
   Languages,
   Loader2,
   RefreshCw,
-  Save,
   Search,
   ShieldCheck,
-  Sparkles,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { TRANSLATION_CONTENT_MODE, canAuthorDomainTranslations } from '@manaratak/shared';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useTranslationOwnerCapabilities } from '../features/translations/useTranslationOwnerCapabilities';
+import {
+  translationWorkspaceState,
+  changeTranslationWorkspaceState,
+} from '../features/translations/workspaceState';
+import { TranslationRecordDialog } from '../features/translations/TranslationRecordDialog';
+import { useAdministrationDraftGuard } from '../features/reference-data/useAdministrationDraftGuard';
+import '../features/translations/translations.css';
+import { canAuthorDomainTranslations, TRANSLATION_CONTENT_MODE } from '@manaratak/shared';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 
-function MetricCard({
-  icon: Icon,
-  label,
-  value,
-  accent,
-}: {
-  icon: typeof Languages;
-  label: string;
-  value: number | string;
-  accent: string;
-}) {
-  const tone = metricAccentClasses(accent);
-  return (
-    <div className="rounded-2xl border border-[#DDEFF2] bg-white p-4 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div className={`grid h-9 w-9 place-items-center rounded-xl ${tone.icon}`}>
-          <Icon className="h-4.5 w-4.5" />
-        </div>
-        <div className={`text-2xl font-black ${tone.text}`}>{value}</div>
-      </div>
-      <div className="mt-3 text-[11px] font-black text-slate-600">{label}</div>
-    </div>
-  );
-}
-
-function metricAccentClasses(accent: string) {
-  if (accent === '#142B5F')
-    return { icon: 'bg-[#142B5F]/10 text-[#142B5F]', text: 'text-[#142B5F]' };
-  if (accent === '#0E7C86')
-    return { icon: 'bg-[#0E7C86]/10 text-[#0E7C86]', text: 'text-[#0E7C86]' };
-  if (accent === '#21A7B4')
-    return { icon: 'bg-[#21A7B4]/10 text-[#21A7B4]', text: 'text-[#21A7B4]' };
-  if (accent === '#D6A43B')
-    return { icon: 'bg-[#D6A43B]/10 text-[#D6A43B]', text: 'text-[#D6A43B]' };
-  if (accent === '#B94A48')
-    return { icon: 'bg-[#B94A48]/10 text-[#B94A48]', text: 'text-[#B94A48]' };
-  return { icon: 'bg-[#2E7D5A]/10 text-[#2E7D5A]', text: 'text-[#2E7D5A]' };
-}
-
-type WorkspaceDomain = 'SCHOLARSHIP' | 'UNIVERSITY' | 'MAJOR' | 'INTERNATIONAL_TEST' | 'COURSE';
-type CoverageFilter = 'ALL' | 'MISSING_AR' | 'MISSING_EN' | 'COMPLETE';
-type SupportedLocale = 'ar' | 'en';
-type UniversityTranslationReviewStatus = 'NEEDS_REVIEW' | 'APPROVED' | 'PUBLISHED' | 'REJECTED';
-type TranslationStorage = 'NORMALIZED' | 'EXPLICIT_FIELDS' | 'COMPATIBILITY_OVERLAY';
-type AdminTranslationKey = Parameters<ReturnType<typeof useTranslation>['t']>[0];
-
-interface UniversityTranslation {
-  id?: string;
-  locale: string;
-  displayName?: string | null;
-  description?: string | null;
-  reviewStatus?: UniversityTranslationReviewStatus;
-  sourceRecordId?: string | null;
-}
-
-interface SourceRecord {
-  sourceLocale?: string | null;
-}
-
-interface WorkspaceEntity {
-  id: string;
-  profileId?: string;
-  publicId?: string;
-  slug?: string;
-  canonicalName?: string;
-  displayName: string;
-  status?: string;
-  completenessStatus?: string;
-  localizedNameAr?: string | null;
-  localizedNameEn?: string | null;
-  localizedNames?: Record<string, string>;
-  sourceLocale?: string | null;
-  sourceRecords?: SourceRecord[];
-  translations?: UniversityTranslation[];
-  optionalFields?: Record<string, unknown>;
-}
-
-interface MajorSource {
-  sourceLocale?: string | null;
-}
-
-interface Paginated<T> {
-  data: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-  coverageScope?: 'GLOBAL';
-  ownerSourceStatus?: string;
-  runtimeProof?: string;
-  publicationReadiness?: string;
-  importSupported?: boolean;
-  stats?: {complete?:number;pending?:number;rejected?:number;published?:number;missingAr:number;missingEn:number;publicReadyAr:number;publicReadyEn:number};
-}
-
-interface TranslationDraft {
-  arName: string;
-  arDescription: string;
-  arStatus: UniversityTranslationReviewStatus;
-  enName: string;
-  enDescription: string;
-  enStatus: UniversityTranslationReviewStatus;
-}
-
-interface DomainConfig {
-  key: WorkspaceDomain;
-  labelKey:
-    | 'translation_domain_scholarships'
-    | 'translation_domain_universities'
-    | 'translation_domain_majors'
-    | 'translation_domain_tests'
-    | 'translation_domain_courses';
-  endpoint: string;
-  detailHref: (entity: WorkspaceEntity) => string;
-  storage: TranslationStorage;
-  icon: typeof Sparkles;
-  supportsDescriptions: boolean;
-  searchParam?: 'search' | 'query';
-}
-
-const reviewStates: UniversityTranslationReviewStatus[] = [
-  'NEEDS_REVIEW',
-  'APPROVED',
-  'PUBLISHED',
-  'REJECTED',
-];
-
-const domainConfigs: DomainConfig[] = [
-  {
-    key: 'SCHOLARSHIP',
-    labelKey: 'translation_domain_scholarships',
-    endpoint: '/admin/scholarships',
-    detailHref: (entity) => `/scholarships/${entity.id}`,
-    storage: 'COMPATIBILITY_OVERLAY',
-    icon: Sparkles,
-    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.SCHOLARSHIP.centralDescriptionEditor,
-    searchParam: 'query',
-  },
-  {
-    key: 'UNIVERSITY',
-    labelKey: 'translation_domain_universities',
-    endpoint: '/admin/universities',
-    detailHref: (entity) => `/universities/${entity.id}`,
-    storage: 'NORMALIZED',
-    icon: Building2,
-    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.UNIVERSITY.centralDescriptionEditor,
-    searchParam: 'search',
-  },
-  {
-    key: 'MAJOR',
-    labelKey: 'translation_domain_majors',
-    endpoint: '/admin/majors',
-    detailHref: (entity) =>
-      `/majors/${entity.id}${entity.profileId ? `?profileId=${encodeURIComponent(entity.profileId)}` : ''}`,
-    storage: 'EXPLICIT_FIELDS',
-    icon: GraduationCap,
-    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.MAJOR.centralDescriptionEditor,
-    searchParam: 'search',
-  },
-  {
-    key: 'INTERNATIONAL_TEST',
-    labelKey: 'translation_domain_tests',
-    endpoint: '/admin/international-tests',
-    detailHref: (entity) => `/international-tests/${entity.id}`,
-    storage: 'EXPLICIT_FIELDS',
-    icon: FileText,
-    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.INTERNATIONAL_TEST.centralDescriptionEditor,
-    searchParam: 'search',
-  },
-  {
-    key: 'COURSE',
-    labelKey: 'translation_domain_courses',
-    endpoint: '/admin/courses',
-    detailHref: (entity) => `/courses/${entity.id}`,
-    storage: 'COMPATIBILITY_OVERLAY',
-    icon: BookOpen,
-    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.COURSE.centralDescriptionEditor,
-    searchParam: 'search',
-  },
-];
-
-function nonEmpty(value?: string | null): boolean {
-  return Boolean(value?.trim());
-}
-
-function normalizedNames(entity: WorkspaceEntity): Record<string, string> {
-  if (entity.localizedNames && typeof entity.localizedNames === 'object')
-    return entity.localizedNames;
-  const optional = entity.optionalFields;
-  if (!optional || typeof optional !== 'object' || Array.isArray(optional)) return {};
-  const localizedNames = optional.localizedNames;
-  if (!localizedNames || typeof localizedNames !== 'object' || Array.isArray(localizedNames))
-    return {};
-  return Object.fromEntries(
-    Object.entries(localizedNames).filter(
-      (entry): entry is [string, string] => typeof entry[1] === 'string',
-    ),
-  );
-}
-
-function universityLocalePresent(entity: WorkspaceEntity, locale: SupportedLocale): boolean {
-  const translation = entity.translations?.find((item) => item.locale === locale);
-  return Boolean(
-    translation && nonEmpty(translation.displayName) && translation.reviewStatus !== 'REJECTED',
-  );
-}
-
-function coverage(domain: WorkspaceDomain, entity: WorkspaceEntity) {
-  if (domain === 'UNIVERSITY') {
-    return {
-      ar: universityLocalePresent(entity, 'ar'),
-      en: universityLocalePresent(entity, 'en'),
-    };
-  }
-
-  if (domain === 'MAJOR' || domain === 'INTERNATIONAL_TEST') {
-    return {
-      ar: nonEmpty(entity.localizedNameAr),
-      en: nonEmpty(entity.localizedNameEn),
-    };
-  }
-
-  const names = normalizedNames(entity);
-  return {
-    ar: nonEmpty(names.ar),
-    en: nonEmpty(names.en),
-  };
-}
-
-function sourceLocaleFrom(
-  values: readonly { sourceLocale?: string | null }[] | undefined,
-): SupportedLocale | null {
-  return resolveSourceLocaleEvidence(values).locale;
-}
-
-function makeDraft(domain: WorkspaceDomain, entity: WorkspaceEntity): TranslationDraft {
-  if (domain === 'UNIVERSITY') {
-    const ar = entity.translations?.find((item) => item.locale === 'ar');
-    const en = entity.translations?.find((item) => item.locale === 'en');
-    return {
-      arName: ar?.displayName ?? '',
-      arDescription: ar?.description ?? '',
-      arStatus: ar?.reviewStatus ?? 'NEEDS_REVIEW',
-      enName: en?.displayName ?? '',
-      enDescription: en?.description ?? '',
-      enStatus: en?.reviewStatus ?? 'NEEDS_REVIEW',
-    };
-  }
-
-  if (domain === 'MAJOR' || domain === 'INTERNATIONAL_TEST') {
-    return {
-      arName: entity.localizedNameAr ?? '',
-      arDescription: '',
-      arStatus: 'NEEDS_REVIEW',
-      enName: entity.localizedNameEn ?? '',
-      enDescription: '',
-      enStatus: 'NEEDS_REVIEW',
-    };
-  }
-
-  const names = normalizedNames(entity);
-  return {
-    arName: names.ar ?? '',
-    arDescription: '',
-    arStatus: 'NEEDS_REVIEW',
-    enName: names.en ?? '',
-    enDescription: '',
-    enStatus: 'NEEDS_REVIEW',
-  };
-}
-
-function recordMatchesSearch(entity: WorkspaceEntity, search: string): boolean {
-  if (!search.trim()) return true;
-  const query = search.trim().toLocaleLowerCase();
-  return [
-    entity.displayName,
-    entity.canonicalName,
-    entity.publicId,
-    entity.slug,
-    entity.localizedNameAr,
-    entity.localizedNameEn,
-    ...Object.values(normalizedNames(entity)),
-    ...(entity.translations ?? []).map((item) => item.displayName),
-  ]
-    .filter((value): value is string => typeof value === 'string')
-    .some((value) => value.toLocaleLowerCase().includes(query));
-}
-
+import {
+  domainConfigs,
+  coverage,
+  normalizedNames,
+  makeDraft,
+  sourceLocaleFrom,
+  storageLabel,
+  type Paginated,
+  type WorkspaceEntity,
+  type MajorSource,
+  type TranslationDraft,
+  type SupportedLocale,
+  type UniversityTranslation,
+} from '../features/translations/workspaceModel';
+import {
+  LocaleEditor,
+  LocaleBadge,
+  InfoPill,
+  RuntimeNotice,
+} from '../features/translations/TranslationLocaleContent';
 export function AdminTranslationWorkspacePage() {
   const { t, language, dir } = useTranslation();
-  const [domain, setDomain] = useState<WorkspaceDomain>('SCHOLARSHIP');
-  const [coverageFilter, setCoverageFilter] = useState<CoverageFilter>('ALL');
-  const [search, setSearch] = useState('');
-  const [reviewState, setReviewState] = useState('ALL');
-  const [reviewLocale, setReviewLocale] = useState<SupportedLocale>('en');
-  const [updatedFrom, setUpdatedFrom] = useState('');
-  const [page, setPage] = useState(1);
+  const ar = language === 'ar';
+  const tr = (arabic: string, english: string) => (ar ? arabic : english);
+  const number = (value: number) => new Intl.NumberFormat(language).format(value);
+  const { hasPermission } = useAdminAuthorization();
+  const [params, setParams] = useSearchParams();
+  const queryState = translationWorkspaceState(params);
+  const capabilities = useTranslationOwnerCapabilities();
+  const allowedDomains = useMemo(
+    () =>
+      domainConfigs.filter((item) =>
+        capabilities.data?.some((capability) => capability.key === item.key),
+      ),
+    [capabilities.data],
+  );
+  const domain =
+    !params.has('domain') && allowedDomains.length ? allowedDomains[0].key : queryState.domain;
+  const canReadSelected = allowedDomains.some((item) => item.key === domain);
+  const {
+    coverage: coverageFilter,
+    search,
+    reviewState,
+    locale: reviewLocale,
+    updatedFrom,
+    page,
+    pageSize,
+    sort,
+    tab: activeTab,
+  } = queryState;
+  const [view, setView] = useState<'table' | 'cards'>('table');
+  const [previewLocale, setPreviewLocale] = useState<SupportedLocale>('ar');
+  const [detailArea, setDetailArea] = useState<'content' | 'source'>('content');
+  const [detailError, setDetailError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [requestedRecord, setRequestedRecord] = useState<WorkspaceEntity | null>(null);
+  const listAbort = useRef<AbortController | null>(null),
+    detailAbort = useRef<AbortController | null>(null);
+  const setPage = useCallback(
+    (value: number) =>
+      setParams((current) => changeTranslationWorkspaceState(current, { page: String(value) })),
+    [setParams],
+  );
   const [result, setResult] = useState<Paginated<WorkspaceEntity> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -331,7 +111,7 @@ export function AdminTranslationWorkspacePage() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [readbackFailed, setReadbackFailed] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState(queryState.search.trim());
   const listGeneration = useRef(0);
   const detailGeneration = useRef(0);
   const mutationBusy = useRef(false);
@@ -352,43 +132,89 @@ export function AdminTranslationWorkspacePage() {
     return () => window.clearTimeout(timeout);
   }, [search]);
 
-  useEffect(() => {
-    const onUnload = (event: BeforeUnloadEvent) => {
-      if (dirty) {
-        event.preventDefault();
-        event.returnValue = '';
-      }
-    };
-    window.addEventListener('beforeunload', onUnload);
-    return () => window.removeEventListener('beforeunload', onUnload);
-  }, [dirty]);
-
+  useAdministrationDraftGuard(dirty && typeof document !== 'undefined' && !!window.history, ar);
+  const change = (updates: Record<string, string>, replace = false) => {
+    if (!allowNavigation()) return;
+    setParams((current) => changeTranslationWorkspaceState(current, { domain, ...updates }), {
+      replace,
+    });
+  };
+  const closeDetail = () => {
+    if (!allowNavigation()) return;
+    ++detailGeneration.current;
+    detailAbort.current?.abort();
+    setSelected(null);
+    setDraft(null);
+    setRequestedRecord(null);
+    setDetailError(null);
+    setDetailLoading(false);
+    setSaveError(null);
+  };
   const config = domainConfigs.find((item) => item.key === domain)!;
   const contentAuthoringEnabled = canAuthorDomainTranslations(domain);
 
   const load = useCallback(async () => {
     const generation = ++listGeneration.current;
+    listAbort.current?.abort();
+    detailAbort.current?.abort();
+    const abort = new AbortController();
+    listAbort.current = abort;
     ++detailGeneration.current;
     setLoading(true);
     setError(null);
     setNotice(null);
     setResult(null);
+    setDetailError(null);
+    setRequestedRecord(null);
     setSelected(null);
     setDraft(null);
     setMajorSources([]);
     setDetailLoading(false);
     setReadbackFailed(false);
     try {
-      const params = new URLSearchParams({ page: String(page), pageSize: '40' });
-      params.set('domain',domain); params.set('coverage',coverageFilter); params.set('locale',reviewLocale); params.set('reviewState',reviewState);
-      if (updatedFrom) params.set('updatedFrom',new Date(updatedFrom).toISOString());
-      if (debouncedSearch) params.set('q',debouncedSearch);
+      if (
+        capabilities.loading ||
+        capabilities.error ||
+        !canReadSelected ||
+        activeTab !== 'records' ||
+        search.trim() !== debouncedSearch
+      ) {
+        if (
+          !capabilities.loading &&
+          !capabilities.error &&
+          !canReadSelected &&
+          capabilities.data?.length
+        )
+          setError(
+            language === 'ar'
+              ? 'هذا القسم غير مصرح لحسابك. اختر قسمًا متاحًا.'
+              : 'This owner is not permitted. Choose an available section.',
+          );
+        return;
+      }
+      const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize), sort });
+      params.set('domain', domain);
+      params.set('coverage', coverageFilter);
+      params.set('locale', reviewLocale);
+      params.set('reviewState', reviewState);
+      if (updatedFrom) params.set('updatedFrom', new Date(updatedFrom).toISOString());
+      if (debouncedSearch) params.set('q', debouncedSearch);
       const response = await adminApiClient.request<Paginated<WorkspaceEntity>>(
         `/admin/translations/workspace?${params.toString()}`,
+        { signal: abort.signal, cache: 'no-store' },
       );
       if (generation !== listGeneration.current) return;
-      if (!Array.isArray(response.data)) throw new Error('Invalid translation list response');
-      const totalPages = Math.max(1, response.totalPages ?? Math.ceil(response.total / 40));
+      if (
+        !Array.isArray(response.data) ||
+        response.coverageScope !== 'GLOBAL' ||
+        !Number.isSafeInteger(response.total) ||
+        response.total < 0 ||
+        !Number.isSafeInteger(response.totalPages) ||
+        response.totalPages < 0 ||
+        response.data.some((row) => typeof row.id !== 'string' || !row.id)
+      )
+        throw new Error('Invalid translation list response');
+      const totalPages = Math.max(1, response.totalPages ?? Math.ceil(response.total / pageSize));
       if (page > totalPages) {
         setPage(totalPages);
         return;
@@ -400,44 +226,82 @@ export function AdminTranslationWorkspacePage() {
     } finally {
       if (generation === listGeneration.current) setLoading(false);
     }
-  }, [domain, page, debouncedSearch, t, coverageFilter, reviewLocale, reviewState, updatedFrom]);
+  }, [
+    domain,
+    page,
+    pageSize,
+    sort,
+    debouncedSearch,
+    search,
+    t,
+    coverageFilter,
+    reviewLocale,
+    reviewState,
+    updatedFrom,
+    capabilities.loading,
+    capabilities.error,
+    capabilities.data,
+    canReadSelected,
+    activeTab,
+    language,
+    setPage,
+  ]);
 
   useEffect(() => {
+    const listEpoch = listGeneration,
+      detailEpoch = detailGeneration;
     void load();
     return () => {
-      ++listGeneration.current;
-      ++detailGeneration.current;
+      listAbort.current?.abort();
+      detailAbort.current?.abort();
+      ++listEpoch.current;
+      ++detailEpoch.current;
     };
   }, [load]);
 
-  const records = useMemo(()=>result?.data ?? [],[result]);
+  const records = useMemo(() => result?.data ?? [], [result]);
 
-  const stats = useMemo(() => {
-    const states = records.map((entity) => coverage(domain, entity));
-    return {
-      loaded: records.length,
-      missingAr: result?.stats?.missingAr ?? states.filter((item) => !item.ar).length,
-      missingEn: result?.stats?.missingEn ?? states.filter((item) => !item.en).length,
-      complete: result?.stats?.complete ?? states.filter((item) => item.ar && item.en).length,
-    };
-  }, [domain, records, result]);
-
-  const visible = useMemo(
-    () =>
-      result?.coverageScope === 'GLOBAL' ? records : records.filter((entity) => {
-        const state = coverage(domain, entity);
-        if (!config.searchParam && !recordMatchesSearch(entity, search)) return false;
-        if (coverageFilter === 'MISSING_AR') return !state.ar;
-        if (coverageFilter === 'MISSING_EN') return !state.en;
-        if (coverageFilter === 'COMPLETE') return state.ar && state.en;
-        return true;
-      }),
-    [config.searchParam, coverageFilter, domain, records, search, result?.coverageScope],
+  const visible = records;
+  const selectedIndex = visible.findIndex(
+    (row) => row.id === selected?.id && row.profileId === selected?.profileId,
   );
-
+  const recordName = (entity: WorkspaceEntity) =>
+    (ar
+      ? entity.localizedNameAr ||
+        normalizedNames(entity).ar ||
+        entity.translations?.find((row) => row.locale === 'ar' && row.reviewStatus !== 'REJECTED')
+          ?.displayName
+      : entity.localizedNameEn ||
+        normalizedNames(entity).en ||
+        entity.translations?.find((row) => row.locale === 'en' && row.reviewStatus !== 'REJECTED')
+          ?.displayName) || entity.displayName;
+  const stateLabel = (arabic?: string, english?: string) => {
+    const state = reviewLocale === 'ar' ? arabic : english;
+    const labels: Record<string, [string, string]> = {
+      MISSING: ['الاسم غير موجود', 'Name missing'],
+      NEEDS_REVIEW: ['تحتاج مراجعة', 'Needs review'],
+      APPROVED: ['معتمدة حسب السجل', 'Recorded as approved'],
+      PUBLISHED: ['منشورة حسب السجل', 'Recorded as published'],
+      REJECTED: ['مرفوضة', 'Rejected'],
+      VALUE_PRESENT_NOT_PUBLIC_READY: [
+        'قيمة محفوظة؛ النشر غير مثبت',
+        'Value present; publication unverified',
+      ],
+    };
+    return state && labels[state]
+      ? labels[state][ar ? 0 : 1]
+      : tr('غير مثبتة في هذا العرض', 'Not verified in this view');
+  };
   const selectRecord = async (entity: WorkspaceEntity) => {
     if (!allowNavigation()) return;
     const generation = ++detailGeneration.current;
+    detailAbort.current?.abort();
+    const abort = new AbortController();
+    detailAbort.current = abort;
+    setRequestedRecord(entity);
+    setDetailArea('content');
+    setDetailError(null);
+    setSaveError(null);
     setSelected(null);
     setDraft(null);
     setMajorSources([]);
@@ -447,6 +311,7 @@ export function AdminTranslationWorkspacePage() {
     try {
       const detail = await adminApiClient.request<WorkspaceEntity>(
         `${config.endpoint}/${encodeURIComponent(entity.id)}`,
+        { signal: abort.signal, cache: 'no-store' },
       );
       if (generation !== detailGeneration.current) return;
       if (detail.id !== entity.id) throw new Error('Translation record identity mismatch');
@@ -456,12 +321,13 @@ export function AdminTranslationWorkspacePage() {
       if (domain === 'MAJOR') {
         const response = await adminApiClient.request<{ data: MajorSource[] }>(
           `/admin/majors/${encodeURIComponent(entity.id)}/sources`,
+          { signal: abort.signal, cache: 'no-store' },
         );
         if (generation === detailGeneration.current) setMajorSources(response.data ?? []);
       }
     } catch (err: unknown) {
       if (generation === detailGeneration.current)
-        setError(err instanceof Error ? err.message : t('translation_load_error'));
+        setDetailError(err instanceof Error ? err.message : t('translation_load_error'));
     } finally {
       if (generation === detailGeneration.current) setDetailLoading(false);
     }
@@ -505,12 +371,12 @@ export function AdminTranslationWorkspacePage() {
     if (!selected || !draft || mutationBusy.current || detailLoading || loading || readbackFailed)
       return;
     if (!contentAuthoringEnabled) {
-      setError(t('translation_content_writes_blocked'));
+      setSaveError(t('translation_content_writes_blocked'));
       return;
     }
     mutationBusy.current = true;
     setSaving(locale);
-    setError(null);
+    setSaveError(null);
     setNotice(null);
     let written = false;
     const submittedDraft = draft;
@@ -574,7 +440,7 @@ export function AdminTranslationWorkspacePage() {
     } catch (err: unknown) {
       if (written) setReadbackFailed(true);
       const message = err instanceof Error ? err.message : t('translation_save_error');
-      setError(
+      setSaveError(
         written
           ? (language === 'ar'
               ? 'نجح طلب الحفظ، لكن تعذرت إعادة القراءة. أعد التحميل قبل إعادة الحفظ: '
@@ -588,589 +454,788 @@ export function AdminTranslationWorkspacePage() {
   };
 
   return (
-    <main className="mx-auto max-w-[1500px] space-y-5 text-[#203442]" dir={dir}>
-      <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
-        <div className="absolute -top-20 end-0 h-52 w-52 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none" />
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-sm border border-white/15">
-                <Languages className="h-3.5 w-3.5" /> {t('translation_center_badge')}
-              </span>
-              <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-sm">
-                AR + EN
-              </span>
-            </div>
-            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">
-              {t('translation_center_title')}
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-white/80">
-              {t('translation_center_subtitle')}
-            </p>
-          </div>
-          <button
-            type="button"
-            disabled={loading || Boolean(saving)}
-            onClick={() => {
-              if (allowNavigation()) void load();
-            }}
-            className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#21A7B4] px-5 text-sm font-black text-white shadow-md transition hover:bg-[#1A8D99] disabled:opacity-60"
-          >
-            <RefreshCw className="h-4 w-4" /> {t('refresh')}
+    <main className="translation-workspace" dir={dir}>
+      <header className="translation-header">
+        <div>
+          <span className="translation-eyebrow">
+            <Languages aria-hidden="true" />
+            {tr('الترجمة والتوطين', 'Translation and localization')}
+          </span>
+          <h1>{tr('مركز الترجمة', 'Translation center')}</h1>
+          <p>
+            {tr(
+              'تابع الأسماء العربية والإنجليزية، وافتح السجل الأصلي لاستكمال المحتوى ومراجعته.',
+              'Track Arabic and English names, then open the original record for content and review.',
+            )}
+          </p>
+        </div>
+        <button
+          type="button"
+          disabled={loading || Boolean(saving) || capabilities.loading}
+          onClick={() => {
+            if (allowNavigation()) {
+              if (capabilities.error) capabilities.reload();
+              else void load();
+            }
+          }}
+        >
+          <RefreshCw aria-hidden="true" className={loading ? 'translation-spin' : ''} />
+          {t('refresh')}
+        </button>
+      </header>
+      <nav
+        className="translation-tabs"
+        aria-label={tr('مساحات مركز الترجمة', 'Translation workspaces')}
+      >
+        <button
+          type="button"
+          aria-current={activeTab === 'records' ? 'page' : undefined}
+          onClick={() => change({ tab: 'records' })}
+        >
+          <Languages aria-hidden="true" />
+          {tr('سجلات الترجمة', 'Translation records')}
+        </button>
+        <button
+          type="button"
+          aria-current={activeTab === 'routes' ? 'page' : undefined}
+          onClick={() => change({ tab: 'routes' })}
+        >
+          <Route aria-hidden="true" />
+          {tr('مسارات الترجمة', 'Translation routes')}
+        </button>
+      </nav>
+      <div className="translation-policy">
+        <ShieldCheck aria-hidden="true" />
+        <span>
+          <strong>
+            {TRANSLATION_CONTENT_MODE === 'INFRASTRUCTURE_ONLY'
+              ? tr('وضع المتابعة فقط', 'Tracking-only mode')
+              : tr('وضع إدارة المحتوى', 'Content management mode')}
+          </strong>{' '}
+          —{' '}
+          {contentAuthoringEnabled
+            ? tr(
+                'النشر والاعتماد يتبعان صلاحيات وسير عمل القسم الأصلي.',
+                'Publication and approval follow the original owner workflow.',
+              )
+            : tr(
+                'المتابعة والمعاينة متاحتان. تحرير الترجمات ونشرها معلقان حاليًا بسياسة المنصة.',
+                'Tracking and preview are available. Translation writing and publication are currently paused by platform policy.',
+              )}
+        </span>
+      </div>
+      {capabilities.loading && (
+        <p className="translation-status" role="status">
+          <Loader2 className="translation-spin" aria-hidden="true" />
+          {tr('جارٍ تحميل الأقسام المصرح بها…', 'Loading permitted sections…')}
+        </p>
+      )}
+      {capabilities.error && (
+        <div className="translation-alert" role="alert">
+          <span>
+            {tr(
+              'تعذر معرفة الأقسام المتاحة؛ لن تُعرض أرقام أو روابط مفترضة.',
+              'Available sections could not be loaded. Counts and routes are unavailable.',
+            )}
+          </span>
+          <button type="button" onClick={capabilities.reload}>
+            <RefreshCw aria-hidden="true" />
+            {tr('إعادة المحاولة', 'Retry')}
           </button>
         </div>
-      </section>
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
-          {error}
-        </div>
       )}
-
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          label={t('translation_loaded_records')}
-          value={stats.loaded}
-          icon={Database}
-          accent="#142B5F"
-        />
-        <MetricCard
-          label={language === 'ar' ? 'الأسماء متوفرة (AR + EN)' : 'Names available (AR + EN)'}
-          value={stats.complete}
-          icon={CheckCircle2}
-          accent="#2E7D5A"
-        />
-        <MetricCard
-          label={t('translation_missing_ar')}
-          value={stats.missingAr}
-          icon={Languages}
-          accent="#D6A43B"
-        />
-        <MetricCard
-          label={t('translation_missing_en')}
-          value={stats.missingEn}
-          icon={Sparkles}
-          accent="#21A7B4"
-        />
-      </div>
-
-      <section className="flex flex-col gap-3 rounded-2xl border border-[#D6A43B]/30 bg-[#F2CD78]/15 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 gap-3">
-          <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#8A6517]" />
-          <div>
-            <div className="text-xs font-black text-[#725718]">
-              {t('translation_infrastructure_only_title')}
-            </div>
-            <p className="mt-1 text-[11px] font-semibold leading-6 text-[#725718]/85">
-              {t('translation_infrastructure_only_help')}
-            </p>
-          </div>
-        </div>
-        <code className="shrink-0 rounded-lg border border-[#D6A43B]/25 bg-white/70 px-3 py-2 text-[10px] font-black text-[#725718]">
-          {TRANSLATION_CONTENT_MODE}
-        </code>
-      </section>
-
-      <TranslationOwnerCapabilitiesPanel/>
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8">
-        {domainConfigs.map((item) => {
-          const Icon = item.icon;
-          const active = domain === item.key;
-          return (
-            <button
-              type="button"
-              key={item.key}
-              disabled={Boolean(saving)}
-              onClick={() => {
-                if (!allowNavigation()) return;
-                setDomain(item.key);
-                setSearch('');
-                setDebouncedSearch('');
-                setPage(1);
-                setCoverageFilter('ALL');
-              }}
-              className={`rounded-2xl border p-4 text-start transition ${active ? 'border-[#0E7C86] bg-[#DDEFF2]/55 ring-2 ring-[#21A7B4]/15' : 'border-[#DDEFF2] bg-white hover:border-[#21A7B4]/55'}`}
-            >
-              <span
-                className={`flex h-10 w-10 items-center justify-center rounded-xl ${active ? 'bg-[#142B5F] text-white' : 'bg-[#FAF7F0] text-[#0E7C86]'}`}
-              >
-                <Icon className="h-5 w-5" />
-              </span>
-              <div className="mt-3 text-xs font-black text-[#142B5F]">{t(item.labelKey)}</div>
-              <div className="mt-1 text-[10px] font-bold text-slate-400">
-                {storageLabel(item.storage, t)}
-              </div>
-            </button>
-          );
-        })}
-
-        <Link
-          to="/cms"
-          className="rounded-2xl border border-[#D6A43B]/30 bg-[#F2CD78]/15 p-4 text-start transition hover:border-[#D6A43B]"
-        >
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D6A43B] text-white">
-            <FileText className="h-5 w-5" />
-          </span>
-          <div className="mt-3 text-xs font-black text-[#142B5F]">
-            {t('translation_domain_cms')}
-          </div>
-          <div className="mt-1 text-[10px] font-bold text-[#8A6517]">
-            {t('translation_cms_managed_in_cms')}
-          </div>
-        </Link>
-
-        <Link
-          to="/settings/reference-data"
-          className="rounded-2xl border border-[#0E7C86]/20 bg-[#DDEFF2]/25 p-4 text-start transition hover:border-[#0E7C86]"
-        >
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0E7C86] text-white">
-            <Database className="h-5 w-5" />
-          </span>
-          <div className="mt-3 text-xs font-black text-[#142B5F]">
-            {t('translation_domain_reference')}
-          </div>
-          <div className="mt-1 text-[10px] font-bold text-[#0E7C86]">
-            {t('translation_reference_source_managed')}
-          </div>
-        </Link>
-
-        <div className="rounded-2xl border border-[#21A7B4]/25 bg-[#DDEFF2]/25 p-4 text-start">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#21A7B4] text-white">
-            <Languages className="h-5 w-5" />
-          </span>
-          <div className="mt-3 text-xs font-black text-[#142B5F]">
-            {t('translation_domain_interface')}
-          </div>
-          <div className="mt-1 text-[10px] font-bold text-[#0E7C86]">
-            {t('translation_ui_source_managed')}
-          </div>
-        </div>
-      </section>
-
-      <p className="text-xs font-semibold text-slate-500">
-        {language === 'ar'
-          ? 'التغطية والفلترة من جميع سجلات المجال في الخادم؛ وجود الاسم منفصل عن جاهزية النشر.'
-          : 'Coverage filters query all owner records on the server. Name availability is separate from publication readiness.'}
-      </p>
-
-      <section className="flex flex-wrap items-end gap-3 rounded-xl border p-4">
-        <label>{language === 'ar' ? 'لغة المراجعة' : 'Review locale'}<select value={reviewLocale} onChange={e=>{if(allowNavigation()){setPage(1);setReviewLocale(e.target.value as SupportedLocale);}}}><option value="ar">العربية</option><option value="en">English</option></select></label>
-        <label>{language === 'ar' ? 'قائمة مهام المراجعة' : 'Review work queue'}<select value={reviewState} onChange={e=>{if(allowNavigation()){setPage(1);setReviewState(e.target.value);}}}><option value="ALL">{language==='ar'?'الكل':'All'}</option><option value="NEEDS_REVIEW">{language==='ar'?'تحتاج مراجعة / غير منشورة':'Needs review / unpublished'}</option><option value="PUBLISHED">{language==='ar'?'منشورة':'Published'}</option></select></label>
-        <label>{language === 'ar' ? 'عُدّلت منذ' : 'Updated since'}<input type="date" value={updatedFrom} onChange={e=>{if(allowNavigation()){setPage(1);setUpdatedFrom(e.target.value);}}}/></label>
-        <p role="status">{language==='ar'?'مصدر المالك · جاهزية تشغيل غير مثبتة · الاستيراد للجامعات والتخصصات فقط':'Canonical owner · runtime unverified · imports support universities and majors only'}</p>
-        {result?.stats && <p>{result.publicationReadiness?.startsWith('UNKNOWN_') ? (language==='ar'?'جاهزية النشر غير محسومة؛ تُراجع في مسار المالك':'Publication readiness requires owner verification') : `${language==='ar'?'جاهزة للنشر بالحقول المطلوبة':'Required-field publication ready'}: AR ${result.stats.publicReadyAr} · EN ${result.stats.publicReadyEn}`} · {language==='ar'?'معلّقة / مرفوضة / منشورة':'Pending / rejected / published'}: {result.stats.pending ?? 0} / {result.stats.rejected ?? 0} / {result.stats.published ?? 0}</p>}
-      </section>
-      <section className="grid gap-3 rounded-2xl border border-[#DDEFF2] bg-white p-4 md:grid-cols-[220px_1fr_auto]">
-        <select
-          value={coverageFilter}
-          disabled={Boolean(saving)}
-          onChange={(event) => {if (allowNavigation()) {setPage(1);setCoverageFilter(event.target.value as CoverageFilter);}}}
-          className="min-h-11 rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/60 px-3 text-xs font-bold outline-none focus:border-[#21A7B4]"
-        >
-          <option value="ALL">{t('translation_filter_all')}</option>
-          <option value="MISSING_AR">{t('translation_missing_ar')}</option>
-          <option value="MISSING_EN">{t('translation_missing_en')}</option>
-          <option value="COMPLETE">{t('translation_complete_bilingual')}</option>
-        </select>
-        <label className="relative">
-          <Search
-            className={`pointer-events-none absolute top-3.5 h-4 w-4 text-slate-400 ${language === 'ar' ? 'right-3' : 'left-3'}`}
+      {activeTab === 'routes' ? (
+        <>
+          <TranslationOwnerCapabilitiesPanel
+            capabilities={capabilities.data ?? []}
+            loading={capabilities.loading}
+            error={capabilities.error}
+            onRetry={capabilities.reload}
+            language={language}
           />
-          <input
-            value={search}
-            disabled={Boolean(saving)}
-            maxLength={200}
-            onChange={(event) => {
-              if (!allowNavigation()) return;
-              setSearch(event.target.value);
-              setPage(1);
-            }}
-            aria-label={t('translation_search')}
-            placeholder={t('translation_search_placeholder')}
-            className={`min-h-11 w-full rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/45 text-xs font-bold outline-none focus:border-[#21A7B4] ${language === 'ar' ? 'pr-10 pl-3' : 'pl-10 pr-3'}`}
-          />
-        </label>
-        <span className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#142B5F] px-4 text-xs font-black text-white">
-          {t(config.labelKey)}
-        </span>
-      </section>
-
-      <RuntimeNotice storage={config.storage} />
-      {domain === 'MAJOR' && (
-        <p className="rounded-xl bg-teal-50 p-3 text-xs text-teal-800">
-          {language === 'ar'
-            ? 'هذه مساحة أسماء الجذر المشترك للتخصص. محتوى كل درجة وحالته ونشره تُدار من صفحة التخصص بملف المستوى المحدد.'
-            : 'This workspace reads shared major root names. Manage each degree profile’s content, status, and publication from its detail page.'}
-        </p>
-      )}
-
-      {notice && (
-        <div
-          role="status"
-          className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-800"
-        >
-          {notice}
-        </div>
-      )}
-      {dirty && (
-        <p className="text-xs text-amber-700">
-          {language === 'ar' ? 'توجد تعديلات غير محفوظة.' : 'Unsaved changes.'}
-        </p>
-      )}
-
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(430px,0.85fr)]">
-        <section className="overflow-hidden rounded-2xl border border-[#DDEFF2] bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-[#DDEFF2] px-5 py-4">
-            <div>
-              <h2 className="text-sm font-black text-[#142B5F]">
-                {t('translation_records_title')}
-              </h2>
-              <p className="mt-1 text-[11px] font-medium text-slate-500">
-                {t('translation_records_help')}
+          <section className="translation-card">
+            <h2>
+              <BookOpen aria-hidden="true" />
+              {tr('مساحات مرتبطة', 'Related workspaces')}
+            </h2>
+            <div className="translation-related">
+              {hasPermission('admin:cms:manage') && (
+                <Link to="/cms">
+                  <FileText aria-hidden="true" />
+                  {tr(
+                    'ترجمات المحتوى والأدلة داخل إدارة المحتوى',
+                    'Content and guide translations in CMS',
+                  )}
+                  <ArrowUpLeft aria-hidden="true" />
+                </Link>
+              )}
+              {hasPermission('admin:reference-data:manage') && (
+                <Link to="/settings/reference-data">
+                  <Globe2 aria-hidden="true" />
+                  {tr(
+                    'الأسماء المرجعية للدول واللغات والمدن',
+                    'Country, language and city reference names',
+                  )}
+                  <ArrowUpLeft aria-hidden="true" />
+                </Link>
+              )}
+              <p>
+                <Languages aria-hidden="true" />
+                {tr(
+                  'نصوص واجهة الموقع تُدار في ملفات الواجهة وتُفحص آليًا؛ تسجيل لغة مرجعية لا يفعّل ترجمتها.',
+                  'Interface copy is maintained in source and checked automatically. Registering a reference language does not activate a translation.',
+                )}
               </p>
             </div>
-            <span className="rounded-full bg-[#DDEFF2]/60 px-3 py-1 text-[10px] font-black text-[#0E7C86]">
-              {visible.length}
-            </span>
-          </div>
-          {loading ? (
-            <div className="flex h-72 items-center justify-center">
-              <Loader2 className="h-7 w-7 animate-spin text-[#0E7C86]" />
-            </div>
-          ) : visible.length === 0 ? (
-            <div className="p-12 text-center text-sm font-semibold text-slate-500">
-              {t('translation_no_records')}
-            </div>
-          ) : (
-            <div className="divide-y divide-[#DDEFF2]">
-              {visible.map((entity) => {
-                const state = coverage(domain, entity);
-                const active =
-                  selected?.id === entity.id && selected?.profileId === entity.profileId;
-                return (
+          </section>
+        </>
+      ) : (
+        <>
+          {!capabilities.loading && !capabilities.error && !allowedDomains.length && (
+            <section className="translation-card">
+              <h2>{tr('لا توجد سجلات مركزية مصرح بها', 'No permitted central records')}</h2>
+              <p>
+                {tr(
+                  'قد تكون مساراتك متاحة داخل الأقسام الأصلية. افتح تبويب مسارات الترجمة.',
+                  'Your translation workflows may live in their original sections. Open Translation routes.',
+                )}
+              </p>
+              <button type="button" onClick={() => change({ tab: 'routes' })}>
+                <Route aria-hidden="true" />
+                {tr('عرض المسارات المتاحة', 'View available routes')}
+              </button>
+            </section>
+          )}
+          {!!allowedDomains.length && (
+            <>
+              <nav className="translation-domains" aria-label={tr('القسم المالك', 'Owner section')}>
+                {allowedDomains.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      type="button"
+                      key={item.key}
+                      aria-pressed={domain === item.key}
+                      disabled={Boolean(saving)}
+                      onClick={() => {
+                        if (allowNavigation()) {
+                          setDebouncedSearch('');
+                          change({ domain: item.key, q: '', coverage: 'ALL', reviewState: 'ALL' });
+                        }
+                      }}
+                    >
+                      <Icon aria-hidden="true" />
+                      {t(item.labelKey)}
+                    </button>
+                  );
+                })}
+              </nav>
+              <section
+                className="translation-metrics"
+                aria-label={tr(
+                  'مؤشرات الأسماء في نتائج التصفية',
+                  'Name metrics for filtered results',
+                )}
+              >
+                {[
+                  {
+                    key: 'ALL',
+                    label: tr('نتائج التصفية', 'Filtered records'),
+                    value: result?.total,
+                    icon: Database,
+                    tone: 'navy',
+                  },
+                  {
+                    key: 'COMPLETE',
+                    label: tr('الاسم متوفر باللغتين', 'Name in both languages'),
+                    value: result?.stats?.complete,
+                    icon: CheckCircle2,
+                    tone: 'petrol',
+                  },
+                  {
+                    key: 'MISSING_AR',
+                    label: tr('ناقص الاسم العربي', 'Missing Arabic name'),
+                    value: result?.stats?.missingAr,
+                    icon: Languages,
+                    tone: 'gold',
+                  },
+                  {
+                    key: 'MISSING_EN',
+                    label: tr('ناقص الاسم الإنجليزي', 'Missing English name'),
+                    value: result?.stats?.missingEn,
+                    icon: Languages,
+                    tone: 'cyan',
+                  },
+                ].map((metric) => (
                   <button
-                    key={`${domain}:${entity.id}:${entity.profileId ?? 'root'}`}
                     type="button"
-                    disabled={Boolean(saving)}
-                    onClick={() => void selectRecord(entity)}
-                    className={`grid w-full gap-3 p-4 text-start transition sm:grid-cols-[1fr_auto] sm:items-center ${active ? 'bg-[#DDEFF2]/45' : 'hover:bg-[#FAF7F0]/60'}`}
+                    key={metric.key}
+                    className={`translation-metric tone-${metric.tone}`}
+                    disabled={loading || !!error || !result}
+                    aria-pressed={coverageFilter === metric.key}
+                    onClick={() => change({ coverage: metric.key })}
                   >
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-black text-[#142B5F]">
-                        {(language === 'ar'
-                          ? entity.localizedNameAr ||
-                            normalizedNames(entity).ar ||
-                            entity.translations?.find(
-                              (item) => item.locale === 'ar' && item.reviewStatus !== 'REJECTED',
-                            )?.displayName
-                          : entity.localizedNameEn ||
-                            normalizedNames(entity).en ||
-                            entity.translations?.find(
-                              (item) => item.locale === 'en' && item.reviewStatus !== 'REJECTED',
-                            )?.displayName) || entity.displayName}
-                      </div>
-                      <div className="mt-1 flex flex-wrap gap-2 text-[10px] font-bold text-slate-400">
-                        <span>{entity.publicId || entity.slug || entity.id}</span>
-                        {entity.status && <span>• {entity.status}</span>}
-                        <span>{entity.translations?.map(row=>`${row.locale}: ${row.reviewStatus}`).join(' · ') || (language==='ar'?'وجود قيمة لا يثبت النشر':'Value presence does not prove publication')}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <LocaleBadge locale="AR" complete={state.ar} />
-                      <LocaleBadge locale="EN" complete={state.en} />
-                    </div>
+                    <span>
+                      <metric.icon aria-hidden="true" />
+                      {metric.label}
+                    </span>
+                    <strong>
+                      {loading ? '…' : metric.value === undefined ? '—' : number(metric.value)}
+                    </strong>
                   </button>
-                );
-              })}
-            </div>
-          )}
-
-          {(result?.totalPages ?? 0) > 1 && (
-            <div className="flex items-center justify-between border-t border-[#DDEFF2] p-4">
-              <button
-                type="button"
-                disabled={loading || Boolean(saving) || page <= 1}
-                onClick={() => {
-                  if (allowNavigation()) setPage((value) => Math.max(1, value - 1));
-                }}
-                className="inline-flex items-center gap-1 rounded-lg border border-[#DDEFF2] px-3 py-2 text-[11px] font-black text-[#0E7C86] disabled:opacity-40"
-              >
-                {language === 'ar' ? (
-                  <ChevronRight className="h-4 w-4" />
-                ) : (
-                  <ChevronLeft className="h-4 w-4" />
+                ))}
+              </section>
+              <p className="translation-muted">
+                {tr(
+                  'الأعداد تخص أسماء السجلات المطابقة للفلاتر في هذا القسم، وليست اكتمال المحتوى أو اعتماد النشر.',
+                  'Counts cover matching record names in this section, not complete content or publication approval.',
                 )}
-                {t('previous')}
-              </button>
-              <span className="text-[11px] font-black text-slate-500">
-                {t('page')} {page} {t('of')} {result?.totalPages ?? 1}
-              </span>
-              <button
-                type="button"
-                disabled={loading || Boolean(saving) || page >= (result?.totalPages ?? 1)}
-                onClick={() => {
-                  if (allowNavigation()) setPage((value) => value + 1);
-                }}
-                className="inline-flex items-center gap-1 rounded-lg bg-[#142B5F] px-3 py-2 text-[11px] font-black text-white disabled:opacity-40"
-              >
-                {t('next')}
-                {language === 'ar' ? (
-                  <ChevronLeft className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-          )}
-        </section>
-
-        <section className="rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
-          {detailLoading ? (
-            <div className="flex min-h-[420px] items-center justify-center">
-              <Loader2 className="h-7 w-7 animate-spin text-teal-700" />
-            </div>
-          ) : !selected || !draft ? (
-            <div className="flex min-h-[420px] flex-col items-center justify-center text-center">
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#DDEFF2]/70 text-[#0E7C86]">
-                <Languages className="h-7 w-7" />
-              </span>
-              <h2 className="mt-4 text-base font-black text-[#142B5F]">
-                {t('translation_select_record')}
-              </h2>
-              <p className="mt-2 max-w-sm text-xs font-medium leading-6 text-slate-500">
-                {t('translation_select_record_help')}
               </p>
+              <section className="translation-card translation-filters">
+                <div className="translation-section-heading">
+                  <h2>
+                    <ListFilter aria-hidden="true" />
+                    {tr('البحث والتصفية', 'Search and filters')}
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDebouncedSearch('');
+                      change({
+                        q: '',
+                        coverage: 'ALL',
+                        locale: 'en',
+                        reviewState: 'ALL',
+                        updatedFrom: '',
+                        sort: 'UPDATED_DESC',
+                      });
+                    }}
+                  >
+                    <RotateCcw aria-hidden="true" />
+                    {tr('مسح التصفية', 'Clear filters')}
+                  </button>
+                </div>
+                <div className="translation-filter-grid">
+                  <label className="translation-search">
+                    <span>
+                      <Search aria-hidden="true" />
+                      {tr('بحث في جميع سجلات القسم', 'Search all owner records')}
+                    </span>
+                    <input
+                      value={search}
+                      maxLength={120}
+                      disabled={Boolean(saving)}
+                      onChange={(e) => change({ q: e.target.value }, true)}
+                      placeholder={tr(
+                        'الاسم العربي أو الإنجليزي أو المعرف…',
+                        'Arabic or English name, or ID…',
+                      )}
+                    />
+                  </label>
+                  <label>
+                    <span>
+                      <Languages aria-hidden="true" />
+                      {tr('تغطية الاسم', 'Name coverage')}
+                    </span>
+                    <select
+                      value={coverageFilter}
+                      onChange={(e) => change({ coverage: e.target.value })}
+                    >
+                      <option value="ALL">{tr('جميع الحالات', 'All coverage')}</option>
+                      <option value="MISSING_AR">{tr('ناقص العربية', 'Missing Arabic')}</option>
+                      <option value="MISSING_EN">{tr('ناقص الإنجليزية', 'Missing English')}</option>
+                      <option value="COMPLETE">
+                        {tr('الاسم متوفر باللغتين', 'Name in both languages')}
+                      </option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>
+                      <Languages aria-hidden="true" />
+                      {tr('لغة المراجعة والترتيب', 'Review and sort language')}
+                    </span>
+                    <select
+                      value={reviewLocale}
+                      onChange={(e) => change({ locale: e.target.value })}
+                    >
+                      <option value="ar">العربية</option>
+                      <option value="en">English</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>
+                      <ShieldCheck aria-hidden="true" />
+                      {tr('حالة الترجمة المسجلة', 'Recorded translation state')}
+                    </span>
+                    <select
+                      value={reviewState}
+                      onChange={(e) => change({ reviewState: e.target.value })}
+                    >
+                      <option value="ALL">{tr('الكل', 'All')}</option>
+                      <option value="NEEDS_REVIEW">
+                        {tr('غير منشورة / تحتاج مراجعة', 'Unpublished / needs review')}
+                      </option>
+                      <option value="PUBLISHED">
+                        {tr('منشورة حسب السجل', 'Recorded as published')}
+                      </option>
+                      <option value="REJECTED">{tr('مرفوضة', 'Rejected')}</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>
+                      <CalendarDays aria-hidden="true" />
+                      {tr('عُدلت منذ', 'Updated since')}
+                    </span>
+                    <input
+                      type="date"
+                      value={updatedFrom}
+                      onChange={(e) => change({ updatedFrom: e.target.value })}
+                    />
+                  </label>
+                  <label>
+                    <span>
+                      <ArrowDownWideNarrow aria-hidden="true" />
+                      {tr('الترتيب', 'Sort')}
+                    </span>
+                    <select value={sort} onChange={(e) => change({ sort: e.target.value })}>
+                      <option value="UPDATED_DESC">
+                        {tr('الأحدث تعديلًا', 'Recently updated')}
+                      </option>
+                      <option value="UPDATED_ASC">{tr('الأقدم تعديلًا', 'Oldest updated')}</option>
+                      <option value="NAME_ASC">
+                        {tr('الاسم حسب لغة المراجعة', 'Name in review language')}
+                      </option>
+                    </select>
+                  </label>
+                </div>
+              </section>
+              <section className="translation-card translation-results" aria-busy={loading}>
+                <div className="translation-section-heading">
+                  <h2>
+                    <Files aria-hidden="true" />
+                    {tr('سجلات القسم', 'Owner records')}
+                    <span className="translation-count">
+                      {loading ? '…' : result ? number(result.total) : '—'}
+                    </span>
+                  </h2>
+                  <div
+                    className="translation-view-switch"
+                    aria-label={tr('طريقة العرض', 'View mode')}
+                  >
+                    <button
+                      type="button"
+                      aria-pressed={view === 'table'}
+                      onClick={() => setView('table')}
+                    >
+                      <Table2 aria-hidden="true" />
+                      {tr('جدول', 'Table')}
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={view === 'cards'}
+                      onClick={() => setView('cards')}
+                    >
+                      <LayoutGrid aria-hidden="true" />
+                      {tr('بطاقات', 'Cards')}
+                    </button>
+                  </div>
+                </div>
+                {error ? (
+                  <div className="translation-alert" role="alert">
+                    <p>
+                      {tr(
+                        'تعذر تحميل السجلات. الأعداد غير متاحة.',
+                        'Records could not be loaded. Counts are unavailable.',
+                      )}
+                      <small>{error}</small>
+                    </p>
+                    <button type="button" onClick={() => void load()}>
+                      <RefreshCw aria-hidden="true" />
+                      {tr('إعادة المحاولة', 'Retry')}
+                    </button>
+                  </div>
+                ) : loading ? (
+                  <p role="status" className="translation-status">
+                    <Loader2 aria-hidden="true" className="translation-spin" />
+                    {tr('جارٍ تحميل سجلات القسم…', 'Loading owner records…')}
+                  </p>
+                ) : !visible.length ? (
+                  <div className="translation-empty">
+                    <Search aria-hidden="true" />
+                    <h3>{tr('لا توجد سجلات مطابقة', 'No matching records')}</h3>
+                    <p>
+                      {tr(
+                        'غيّر الفلاتر أو افتح القسم الأصلي لمراجعة سجلاته.',
+                        'Change the filters or open the original section to review its records.',
+                      )}
+                    </p>
+                    <Link to={config.endpoint.replace('/admin', '')}>
+                      {tr('فتح القسم الأصلي', 'Open original section')}
+                      <ArrowUpLeft aria-hidden="true" />
+                    </Link>
+                  </div>
+                ) : (
+                  <div
+                    className={
+                      view === 'cards' ? 'translation-record-cards' : 'translation-table-scroll'
+                    }
+                  >
+                    {view === 'table' ? (
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>{tr('السجل', 'Record')}</th>
+                            <th>{tr('العربية', 'Arabic')}</th>
+                            <th>English</th>
+                            <th>{tr('حالة الترجمة', 'Translation state')}</th>
+                            <th>{tr('الإجراء', 'Action')}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {visible.map((entity) => {
+                            const state = coverage(domain, entity);
+                            return (
+                              <tr key={entity.id + ':' + (entity.profileId ?? 'root')}>
+                                <td>
+                                  <strong>{recordName(entity)}</strong>
+                                  <small dir="auto">
+                                    {entity.publicId || entity.slug || entity.id}
+                                  </small>
+                                </td>
+                                <td>
+                                  <LocaleBadge locale="AR" complete={state.ar} />
+                                </td>
+                                <td>
+                                  <LocaleBadge locale="EN" complete={state.en} />
+                                </td>
+                                <td>
+                                  {stateLabel(entity.translationStateAr, entity.translationStateEn)}
+                                </td>
+                                <td>
+                                  <button
+                                    type="button"
+                                    className="translation-preview-button"
+                                    onClick={() => void selectRecord(entity)}
+                                  >
+                                    <Eye aria-hidden="true" />
+                                    {tr('معاينة', 'Preview')}
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    ) : (
+                      visible.map((entity) => {
+                        const state = coverage(domain, entity);
+                        return (
+                          <article key={entity.id + ':' + (entity.profileId ?? 'root')}>
+                            <h3>{recordName(entity)}</h3>
+                            <small dir="auto">{entity.publicId || entity.slug || entity.id}</small>
+                            <div className="translation-locale-badges">
+                              <LocaleBadge locale="AR" complete={state.ar} />
+                              <LocaleBadge locale="EN" complete={state.en} />
+                            </div>
+                            <p>
+                              {stateLabel(entity.translationStateAr, entity.translationStateEn)}
+                            </p>
+                            <button type="button" onClick={() => void selectRecord(entity)}>
+                              <Eye aria-hidden="true" />
+                              {tr('معاينة', 'Preview')}
+                            </button>
+                          </article>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
+                {!!result && !error && (
+                  <nav
+                    className="translation-pagination"
+                    aria-label={tr('صفحات سجلات الترجمة', 'Translation record pages')}
+                  >
+                    <label>
+                      {tr('لكل صفحة', 'Per page')}
+                      <select
+                        value={pageSize}
+                        onChange={(e) => change({ pageSize: e.target.value })}
+                      >
+                        {[20, 40, 100].map((size) => (
+                          <option key={size}>{size}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <span>
+                      {tr('صفحة', 'Page')} {number(page)} / {number(Math.max(1, result.totalPages))}
+                    </span>
+                    <div>
+                      <button
+                        type="button"
+                        disabled={loading || page <= 1}
+                        onClick={() => setPage(page - 1)}
+                      >
+                        <ChevronRight aria-hidden="true" />
+                        {t('previous')}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={loading || page >= result.totalPages}
+                        onClick={() => setPage(page + 1)}
+                      >
+                        {t('next')}
+                        <ChevronLeft aria-hidden="true" />
+                      </button>
+                    </div>
+                  </nav>
+                )}
+              </section>
+            </>
+          )}
+        </>
+      )}
+      {(detailLoading || selected || detailError) && (
+        <TranslationRecordDialog
+          ar={ar}
+          title={tr('معاينة الترجمة', 'Translation preview')}
+          onClose={closeDetail}
+        >
+          {detailLoading ? (
+            <p role="status" className="translation-status">
+              <Loader2 aria-hidden="true" className="translation-spin" />
+              {tr('جارٍ تحميل السجل الأصلي…', 'Loading the original record…')}
+            </p>
+          ) : detailError ? (
+            <div role="alert" className="translation-alert">
+              <p>
+                {tr('تعذر تحميل تفاصيل السجل.', 'Could not load record details.')}
+                <small>{detailError}</small>
+              </p>
+              {requestedRecord && (
+                <button type="button" onClick={() => void selectRecord(requestedRecord)}>
+                  <RefreshCw aria-hidden="true" />
+                  {tr('إعادة المحاولة', 'Retry')}
+                </button>
+              )}
             </div>
           ) : (
-            <div className="space-y-5">
-              <div className="rounded-2xl bg-[#FAF7F0]/80 p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="text-[10px] font-black uppercase tracking-wider text-[#0E7C86]">
-                      {t('translation_canonical_source')}
-                    </div>
-                    <h2 className="mt-1 break-words text-lg font-black text-[#142B5F]">
-                      {selected.canonicalName || selected.displayName}
-                    </h2>
-                    <div className="mt-1 text-[10px] font-bold text-slate-400">
-                      {selected.publicId || selected.id}
-                    </div>
+            selected &&
+            draft && (
+              <>
+                <div className="translation-record-heading">
+                  <div>
+                    <h3>{recordName(selected)}</h3>
+                    <small dir="auto">{selected.publicId || selected.id}</small>
                   </div>
                   <Link
                     to={config.detailHref(selected)}
                     onClick={(event) => {
                       if (!allowNavigation()) event.preventDefault();
                     }}
-                    className="rounded-xl border border-[#DDEFF2] bg-white px-3 py-2 text-[10px] font-black text-[#0E7C86] hover:border-[#21A7B4]"
                   >
-                    {t('translation_open_domain_record')}
+                    <ArrowUpLeft aria-hidden="true" />
+                    {tr('فتح السجل الأصلي', 'Open original record')}
                   </Link>
                 </div>
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                  <InfoPill
-                    label={t('translation_source_locale')}
-                    value={sourceLocale?.toUpperCase() || t('translation_unknown')}
-                  />
-                  <InfoPill
-                    label={t('translation_storage')}
-                    value={storageLabel(config.storage, t)}
-                  />
-                </div>
-              </div>
-
-              <LocaleEditor
-                locale="ar"
-                label={t('translation_arabic')}
-                name={draft.arName}
-                description={draft.arDescription}
-                status={draft.arStatus}
-                supportsDescriptions={config.supportsDescriptions}
-                supportsReviewStatus={domain === 'UNIVERSITY'}
-                saving={saving === 'ar'}
-                contentAuthoringEnabled={
-                  contentAuthoringEnabled &&
-                  !saving &&
-                  !loading &&
-                  !detailLoading &&
-                  !readbackFailed
-                }
-                onNameChange={(value) =>
-                  setDraft((current) => (current ? { ...current, arName: value } : current))
-                }
-                onDescriptionChange={(value) =>
-                  setDraft((current) => (current ? { ...current, arDescription: value } : current))
-                }
-                onStatusChange={(value) =>
-                  setDraft((current) => (current ? { ...current, arStatus: value } : current))
-                }
-                onSave={() => void saveLocale('ar')}
-              />
-
-              <LocaleEditor
-                locale="en"
-                label={t('translation_english')}
-                name={draft.enName}
-                description={draft.enDescription}
-                status={draft.enStatus}
-                supportsDescriptions={config.supportsDescriptions}
-                supportsReviewStatus={domain === 'UNIVERSITY'}
-                saving={saving === 'en'}
-                contentAuthoringEnabled={
-                  contentAuthoringEnabled &&
-                  !saving &&
-                  !loading &&
-                  !detailLoading &&
-                  !readbackFailed
-                }
-                onNameChange={(value) =>
-                  setDraft((current) => (current ? { ...current, enName: value } : current))
-                }
-                onDescriptionChange={(value) =>
-                  setDraft((current) => (current ? { ...current, enDescription: value } : current))
-                }
-                onStatusChange={(value) =>
-                  setDraft((current) => (current ? { ...current, enStatus: value } : current))
-                }
-                onSave={() => void saveLocale('en')}
-              />
-
-              {!config.supportsDescriptions && (
-                <div className="flex gap-3 rounded-xl border border-[#D6A43B]/25 bg-[#F2CD78]/15 p-4 text-xs font-semibold leading-6 text-[#725718]">
-                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span>{t('translation_long_form_governance_note')}</span>
-                </div>
-              )}
-            </div>
+                {domain === 'MAJOR' && (
+                  <p className="translation-policy">
+                    {tr(
+                      'الأسماء هنا للجذر المشترك. محتوى كل درجة ونسختها ومراجعتها داخل ملف التخصص.',
+                      'These are shared root names. Each degree’s versioned content and review belong in the major profile.',
+                    )}
+                  </p>
+                )}
+                <nav className="translation-tabs" aria-label={tr('تفاصيل السجل', 'Record details')}>
+                  <button
+                    type="button"
+                    aria-current={detailArea === 'content' ? 'page' : undefined}
+                    onClick={() => setDetailArea('content')}
+                  >
+                    <Languages aria-hidden="true" />
+                    {tr('المحتوى اللغوي', 'Language content')}
+                  </button>
+                  <button
+                    type="button"
+                    aria-current={detailArea === 'source' ? 'page' : undefined}
+                    onClick={() => setDetailArea('source')}
+                  >
+                    <ShieldCheck aria-hidden="true" />
+                    {tr('المصدر والجاهزية', 'Source and readiness')}
+                  </button>
+                </nav>
+                {detailArea === 'source' ? (
+                  <div className="translation-source-grid">
+                    <InfoPill
+                      label={tr('لغة المصدر المثبتة', 'Evidenced source language')}
+                      value={sourceLocale?.toUpperCase() || tr('غير معروفة', 'Unknown')}
+                    />
+                    <InfoPill
+                      label={tr('حالة السجل الأصلي', 'Original record state')}
+                      value={selected.status || tr('غير معروفة', 'Unknown')}
+                    />
+                    <InfoPill
+                      label={tr('طريقة حفظ الأسماء', 'Name storage')}
+                      value={storageLabel(config.storage, t)}
+                    />
+                    <InfoPill
+                      label={tr('جاهزية النشر', 'Publication readiness')}
+                      value={tr(
+                        'يحددها فحص ومراجعة القسم الأصلي',
+                        'Determined by the original owner review',
+                      )}
+                    />
+                    <RuntimeNotice storage={config.storage} />
+                  </div>
+                ) : contentAuthoringEnabled ? (
+                  <>
+                    <LocaleEditor
+                      locale="ar"
+                      label={t('translation_arabic')}
+                      name={draft.arName}
+                      description={draft.arDescription}
+                      status={draft.arStatus}
+                      supportsDescriptions={config.supportsDescriptions}
+                      supportsReviewStatus={domain === 'UNIVERSITY'}
+                      saving={saving === 'ar'}
+                      contentAuthoringEnabled={!saving && !loading && !readbackFailed}
+                      onNameChange={(value) =>
+                        setDraft((current) => (current ? { ...current, arName: value } : current))
+                      }
+                      onDescriptionChange={(value) =>
+                        setDraft((current) =>
+                          current ? { ...current, arDescription: value } : current,
+                        )
+                      }
+                      onStatusChange={(value) =>
+                        setDraft((current) => (current ? { ...current, arStatus: value } : current))
+                      }
+                      onSave={() => void saveLocale('ar')}
+                    />
+                    <LocaleEditor
+                      locale="en"
+                      label={t('translation_english')}
+                      name={draft.enName}
+                      description={draft.enDescription}
+                      status={draft.enStatus}
+                      supportsDescriptions={config.supportsDescriptions}
+                      supportsReviewStatus={domain === 'UNIVERSITY'}
+                      saving={saving === 'en'}
+                      contentAuthoringEnabled={!saving && !loading && !readbackFailed}
+                      onNameChange={(value) =>
+                        setDraft((current) => (current ? { ...current, enName: value } : current))
+                      }
+                      onDescriptionChange={(value) =>
+                        setDraft((current) =>
+                          current ? { ...current, enDescription: value } : current,
+                        )
+                      }
+                      onStatusChange={(value) =>
+                        setDraft((current) => (current ? { ...current, enStatus: value } : current))
+                      }
+                      onSave={() => void saveLocale('en')}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <div
+                      className="translation-view-switch"
+                      aria-label={tr('لغة المعاينة', 'Preview language')}
+                    >
+                      <button
+                        type="button"
+                        aria-pressed={previewLocale === 'ar'}
+                        onClick={() => setPreviewLocale('ar')}
+                      >
+                        العربية
+                      </button>
+                      <button
+                        type="button"
+                        aria-pressed={previewLocale === 'en'}
+                        onClick={() => setPreviewLocale('en')}
+                      >
+                        English
+                      </button>
+                    </div>
+                    <section
+                      className="translation-read-content"
+                      dir={previewLocale === 'ar' ? 'rtl' : 'ltr'}
+                    >
+                      <h3>{tr('الاسم المحفوظ', 'Saved name')}</h3>
+                      <p>
+                        {(previewLocale === 'ar' ? draft.arName : draft.enName) ||
+                          tr('لم يُسجل اسم بهذه اللغة.', 'No name recorded in this language.')}
+                      </p>
+                      {config.supportsDescriptions && (
+                        <>
+                          <h3>{tr('الوصف المحفوظ', 'Saved description')}</h3>
+                          <p>
+                            {(previewLocale === 'ar' ? draft.arDescription : draft.enDescription) ||
+                              tr(
+                                'لم يُسجل وصف بهذه اللغة.',
+                                'No description recorded in this language.',
+                              )}
+                          </p>
+                        </>
+                      )}
+                    </section>
+                    {!config.supportsDescriptions && (
+                      <p className="translation-muted">
+                        {tr(
+                          'محتوى الأقسام والوصف التفصيلي يُراجع من السجل الأصلي، وفق نسخته وصلاحياته.',
+                          'Sections and detailed descriptions are reviewed in the original record, under its version and permissions.',
+                        )}
+                      </p>
+                    )}
+                  </>
+                )}
+                {saveError && (
+                  <p role="alert" className="translation-alert">
+                    {saveError}
+                  </p>
+                )}
+                {notice && (
+                  <p role="status" className="translation-policy">
+                    {notice}
+                  </p>
+                )}
+                {readbackFailed && (
+                  <p role="alert" className="translation-alert">
+                    {tr(
+                      'تعذرت إعادة القراءة بعد الحفظ. أعد تحميل السجل قبل إعادة المحاولة.',
+                      'Readback after saving failed. Reload this record before retrying.',
+                    )}
+                  </p>
+                )}
+                {dirty && <p role="status">{tr('توجد تعديلات غير محفوظة.', 'Unsaved changes.')}</p>}
+                <nav
+                  className="translation-detail-pagination"
+                  aria-label={tr('التنقل داخل الصفحة الحالية', 'Navigate current page')}
+                >
+                  <button
+                    type="button"
+                    disabled={selectedIndex <= 0 || Boolean(saving)}
+                    onClick={() => void selectRecord(visible[selectedIndex - 1])}
+                  >
+                    <ChevronRight aria-hidden="true" />
+                    {t('previous')}
+                  </button>
+                  <small>{tr('داخل الصفحة الحالية', 'Within this page')}</small>
+                  <button
+                    type="button"
+                    disabled={
+                      selectedIndex < 0 || selectedIndex >= visible.length - 1 || Boolean(saving)
+                    }
+                    onClick={() => void selectRecord(visible[selectedIndex + 1])}
+                  >
+                    {t('next')}
+                    <ChevronLeft aria-hidden="true" />
+                  </button>
+                </nav>
+              </>
+            )
           )}
-        </section>
-      </div>
+        </TranslationRecordDialog>
+      )}
     </main>
   );
-}
-
-function LocaleEditor(props: {
-  locale: SupportedLocale;
-  label: string;
-  name: string;
-  description: string;
-  status: UniversityTranslationReviewStatus;
-  supportsDescriptions: boolean;
-  supportsReviewStatus: boolean;
-  saving: boolean;
-  contentAuthoringEnabled: boolean;
-  onNameChange: (value: string) => void;
-  onDescriptionChange: (value: string) => void;
-  onStatusChange: (value: UniversityTranslationReviewStatus) => void;
-  onSave: () => void;
-}) {
-  const { t } = useTranslation();
-  const textDirection = props.locale === 'ar' ? 'rtl' : 'ltr';
-  return (
-    <div className="rounded-2xl border border-[#DDEFF2] p-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <LocaleBadge locale={props.locale.toUpperCase()} complete={nonEmpty(props.name)} />
-          <span className="text-xs font-black text-[#142B5F]">{props.label}</span>
-        </div>
-        {props.supportsReviewStatus && (
-          <select
-            value={props.status}
-            disabled={!props.contentAuthoringEnabled}
-            onChange={(event) =>
-              props.onStatusChange(event.target.value as UniversityTranslationReviewStatus)
-            }
-            className="rounded-lg border border-[#DDEFF2] bg-[#FAF7F0]/50 px-2 py-1.5 text-[10px] font-bold disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {reviewStates.map((state) => (
-              <option key={state} value={state}>
-                {state}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
-      <label className="block text-[10px] font-black text-slate-500">
-        {t('translation_display_name')}
-      </label>
-      <input
-        dir={textDirection}
-        value={props.name}
-        readOnly={!props.contentAuthoringEnabled}
-        onChange={(event) => props.onNameChange(event.target.value)}
-        className={`mt-1 min-h-11 w-full rounded-xl border border-[#DDEFF2] px-3 text-sm font-bold outline-none focus:border-[#21A7B4] ${props.contentAuthoringEnabled ? 'bg-[#FAF7F0]/40' : 'cursor-not-allowed bg-slate-50 text-slate-500'}`}
-      />
-      {props.supportsDescriptions && (
-        <>
-          <label className="mt-3 block text-[10px] font-black text-slate-500">
-            {t('translation_description')}
-          </label>
-          <textarea
-            dir={textDirection}
-            value={props.description}
-            readOnly={!props.contentAuthoringEnabled}
-            onChange={(event) => props.onDescriptionChange(event.target.value)}
-            rows={4}
-            className={`mt-1 w-full rounded-xl border border-[#DDEFF2] p-3 text-xs font-medium leading-6 outline-none focus:border-[#21A7B4] ${props.contentAuthoringEnabled ? 'bg-[#FAF7F0]/40' : 'cursor-not-allowed bg-slate-50 text-slate-500'}`}
-          />
-        </>
-      )}
-      <button
-        type="button"
-        onClick={props.onSave}
-        disabled={props.saving || !props.contentAuthoringEnabled}
-        className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 text-xs font-black text-white transition hover:bg-[#0E7C86] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"
-      >
-        {props.saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}{' '}
-        {props.contentAuthoringEnabled
-          ? t('translation_save_locale')
-          : t('translation_content_deferred')}
-      </button>
-    </div>
-  );
-}
-
-function LocaleBadge({ locale, complete }: { locale: string; complete: boolean }) {
-  return (
-    <span
-      className={`rounded-full border px-2.5 py-1 text-[10px] font-black ${complete ? 'border-[#0E7C86]/20 bg-[#0E7C86]/8 text-[#0E7C86]' : 'border-amber-200 bg-amber-50 text-amber-700'}`}
-    >
-      {locale} {complete ? '✓' : '—'}
-    </span>
-  );
-}
-
-function InfoPill({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-[#DDEFF2] bg-white px-3 py-2">
-      <div className="text-[9px] font-black text-slate-400">{label}</div>
-      <div className="mt-1 text-[11px] font-black text-[#203442]">{value}</div>
-    </div>
-  );
-}
-
-function RuntimeNotice({ storage }: { storage: TranslationStorage }) {
-  const { t } = useTranslation();
-  if (storage !== 'COMPATIBILITY_OVERLAY') {
-    return (
-      <div className="flex gap-3 rounded-2xl border border-[#0E7C86]/15 bg-[#DDEFF2]/30 p-4 text-xs font-semibold leading-6 text-[#203442]">
-        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#0E7C86]" />
-        <span>{t('translation_source_only_notice')}</span>
-      </div>
-    );
-  }
-  return (
-    <div className="flex gap-3 rounded-2xl border border-[#D6A43B]/25 bg-[#F2CD78]/15 p-4 text-xs font-semibold leading-6 text-[#725718]">
-      <Database className="mt-0.5 h-4 w-4 shrink-0" />
-      <span>{t('translation_compatibility_storage_notice')}</span>
-    </div>
-  );
-}
-
-function storageLabel(
-  storage: TranslationStorage,
-  t: (key: AdminTranslationKey) => string,
-): string {
-  if (storage === 'NORMALIZED') return t('translation_storage_normalized');
-  if (storage === 'EXPLICIT_FIELDS') return t('translation_storage_explicit');
-  return t('translation_storage_compatibility');
 }
