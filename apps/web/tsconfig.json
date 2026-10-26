@@ -33,6 +33,9 @@
   ],
   "references": [
     {
+      "path": "../../packages/domain/tsconfig.json"
+    },
+    {
       "path": "../../packages/ui/tsconfig.json"
     },
     {
