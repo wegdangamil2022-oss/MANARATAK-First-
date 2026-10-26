@@ -52,8 +52,8 @@ check('Admin readiness route exists', router.includes("router.get('/:id/readines
 check('Admin relationship read route exists', router.includes("router.get('/:id/relationships'"));
 
 check('Admin public page uses slug instead of owner id',
-  adminDetail.includes('href={`/international-tests/${test.slug}`}') && !adminDetail.includes('href={`/international-tests/${test.id}`}'));
-check('Admin reads canonical providers', adminDetail.includes('<CanonicalPicker paged') && adminDetail.includes('/admin/international-tests/providers?search='));
+  adminDetail.includes('/international-tests/${encodeURIComponent(test.slug)}') && adminDetail.includes("test.status === 'PUBLISHED'") && adminDetail.includes('test.isPubliclyVisible === true') && !adminDetail.includes('href={`/international-tests/${test.id}`}'));
+check('Admin reads canonical providers', /<CanonicalPicker\s+paged/.test(adminDetail) && adminDetail.includes('/admin/international-tests/providers?search=') && adminDetail.includes('value={form.providerId || null}'));
 check('Admin can create/link canonical provider', adminDetail.includes('upsertInternationalTestProvider') && adminDetail.includes('providerId'));
 check('Admin uses canonical evidence trust enum values',
   adminDetail.includes("sourceTrustLevel: 'AUTHORITATIVE'") && !adminDetail.includes("sourceTrustLevel: 'OFFICIAL_PROVIDER'"));

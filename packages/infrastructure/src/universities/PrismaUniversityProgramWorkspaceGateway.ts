@@ -241,6 +241,7 @@ export class PrismaUniversityProgramWorkspaceGateway implements IUniversityProgr
                 }),
             sourceProgramName: row.sourceProgramName,
             degreeLevelId: row.degreeLevelId,
+            majorId: row.majorId,
             degreeLevelName:
               input.locale === 'ar' ? row.degreeLevel?.nameAr : row.degreeLevel?.nameEn,
             majorName:

@@ -29,9 +29,11 @@ type Row = {
   status: string;
   parentStatus?: string;
   universityName: string;
+  universityId?: string;
   universitySlug: string;
   degreeLevelName?: string;
   majorName?: string;
+  majorId?: string | null;
   majorStatus?: string;
   tests: Array<{ id: string; displayName: string; status: string; requirementStatus: string }>;
   study?: {
@@ -322,6 +324,21 @@ export function AcademicProgramExplorerPanel({
               <p>
                 {row.universityName} · {row.degreeLevelName ?? '—'} · {row.majorName ?? '—'}
               </p>
+              <nav
+                className="flex flex-wrap gap-3"
+                aria-label={en ? 'Program owners' : 'الأقسام المالكة للبرنامج'}
+              >
+                {row.universityId && (
+                  <Link to={`/universities/${encodeURIComponent(row.universityId)}?stage=3`}>
+                    {en ? 'Open university programs' : 'فتح برامج الجامعة'}
+                  </Link>
+                )}
+                {row.majorId && (
+                  <Link to={`/majors/${encodeURIComponent(row.majorId)}`}>
+                    {en ? 'Open canonical major' : 'فتح التخصص المعتمد'}
+                  </Link>
+                )}
+              </nav>
               {visibility === 'ADMIN_ALL' && (
                 <p>
                   {en ? 'Program / university / major state' : 'حالة البرنامج / الجامعة / التخصص'}:{' '}

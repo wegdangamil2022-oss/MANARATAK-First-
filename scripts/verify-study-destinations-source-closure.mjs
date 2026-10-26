@@ -23,6 +23,9 @@ const di = read('apps/api/src/infrastructure/di/container.ts');
 const graph = read('packages/application/src/read-models/CrossDomainGraphReadService.ts');
 const adminList = read('apps/admin/src/pages/StudyDestinationsAdminPage.tsx');
 const adminDetail = read('apps/admin/src/pages/StudyDestinationDetailPage.tsx');
+const destinationNavigation = read('apps/admin/src/features/destinations/destinationNavigation.ts');
+const destinationOwners = read('apps/admin/src/features/destinations/DestinationOwnerList.tsx');
+const programExplorer = read('apps/admin/src/features/integration/AcademicProgramExplorerPanel.tsx');
 const webClient = read('apps/web/src/api/client.ts');
 const publicData = read('apps/web/src/features/public-template/publicLiveDataSource.ts');
 const countriesPage = read('apps/web/src/features/public-template/components/CountriesSearchPage.tsx');
@@ -101,20 +104,20 @@ check('Admin list uses Study Destination API rather than public Reference Data A
 check('Admin list does not read legacy study-destination metadata', !adminList.includes('studyDestinationCandidate') && !adminList.includes('destinationReviewStatus') && !adminList.includes('publicStatus'));
 check('Admin list has one profile status filter', (adminList.match(/value=\{status\}/g) || []).length === 1);
 check('Admin list uses MANARATAK primary navy', adminList.includes('#142B5F'));
-check('Admin detail has seven coherent workflow tabs', ['overview','study','visa','living','relations','sources','publish'].every((x) => adminDetail.includes(`'${x}'`)));
+check('Admin detail composes all ten destination workflows and retains legacy relation navigation', adminDetail.includes('destinationSection(searchParams.get') && ['overview','study','visa','living','universities','programs','scholarships','supporting','sources','publish'].every((x) => destinationNavigation.includes(`'${x}'`)) && destinationNavigation.includes("value === 'relations'"));
 check('Admin detail removed Pending panels', !adminDetail.includes('PendingPanel'));
 check('Admin detail edits visa data', adminDetail.includes('visaOfficialUrl') && adminDetail.includes('visaRequirementsAr'));
 check('Admin detail edits living cost and currency', adminDetail.includes('averageMonthlyLivingCostMin') && adminDetail.includes('livingCostCurrencyReferenceId'));
 check('Admin detail edits canonical study languages', adminDetail.includes('studyLanguageReferenceIds'));
 check('Admin detail edits official links and evidence', adminDetail.includes('officialLinks') && adminDetail.includes('evidenceSources'));
 check('Admin detail exposes owner-domain relationship counts', ['universities','academicPrograms','majors','scholarships','internationalTests','services','careerJobs'].every((x) => adminDetail.includes(x)));
-check('Admin detail labels provider-HQ courses as not study-country semantics', adminDetail.includes('ليست «دورات للدراسة في الدولة»'));
+check('Admin detail labels provider-HQ courses as not study-country semantics', adminDetail.includes('العلاقة بمقر مزود الدورة، وليست ببلد الدراسة.'));
 check('Admin detail uses MANARATAK navy and gold', adminDetail.includes('#142B5F') && adminDetail.includes('#D6A43B'));
-check('Country relations link each university to University Domain detail', adminDetail.includes('detailBasePath="/universities"') && adminDetail.includes('encodeURIComponent(item.ownerId)'));
-check('Country relations expose a canonical all-universities country filter', adminDetail.includes('/universities?countryReferenceId=') && adminDetail.includes('country.id'));
-check('Academic program rows deep-link to owning university', adminDetail.includes('/universities/${encodeURIComponent(p.universityOwnerId)}'));
-check('Academic program rows deep-link canonical majors', adminDetail.includes('/majors/${encodeURIComponent(p.majorOwnerId)}'));
-check('Country relations deep-link majors, scholarships, and tests to owner domains', ['/majors','/scholarships','/international-tests'].every((path) => adminDetail.includes(`detailBasePath="${path}"`)));
+check('Country relations link each university to University Domain detail', adminDetail.includes('<DestinationOwnerList') && destinationOwners.includes("kind: 'universities' | 'scholarships'") && destinationOwners.includes('/${kind}/${encodeURIComponent(row.id)}'));
+check('Country relations expose a canonical all-universities country filter', destinationOwners.includes('/${kind}?countryReferenceId=${encodeURIComponent(countryId)}') && adminDetail.includes('countryId={country.id}'));
+check('Academic program rows deep-link to owning university', adminDetail.includes('<AcademicProgramExplorerPanel') && programExplorer.includes('/universities/${encodeURIComponent(row.universityId)}'));
+check('Academic program rows deep-link canonical majors', programExplorer.includes('/majors/${encodeURIComponent(row.majorId)}'));
+check('Country relations deep-link majors, scholarships, and tests to owner domains', programExplorer.includes('/majors/${encodeURIComponent(row.majorId)}') && destinationOwners.includes('/${kind}/${encodeURIComponent(row.id)}') && adminDetail.includes("['internationalTests', 'testPage', '/international-tests']"));
 check('University admin consumes canonical countryReferenceId query filter', universityAdmin.includes("searchParams.get('countryReferenceId')") && universityAdmin.includes("params.append('countryReferenceId', countryReferenceId)"));
 // Country selection now comes from the shared optional picker. Follow that
 // composition rather than requiring the former literal delete call in the page.
@@ -138,7 +141,7 @@ check('Country detail renders exams and majors', countryModal.includes('country.
 check('Country detail renders official links', countryModal.includes('country.officialLinks'));
 
 check('Admin navigation order is Tests then Courses then Study Destinations', adminNav.indexOf("to: '/international-tests'") < adminNav.indexOf("to: '/courses'") && adminNav.indexOf("to: '/courses'") < adminNav.indexOf("to: '/study-destinations'"));
-check('International Test admin no longer claims preparation courses are unintegrated', testDetail.includes('الدورات التحضيرية المعتمدة') && !testDetail.includes('غير موصولة بعد. الملكية ستكون لمجال الدورات'));
+check('International Test admin no longer claims preparation courses are unintegrated', testDetail.includes("key: 'preparationCourses'") && testDetail.includes("path: '/courses/'") && testDetail.includes('to={group.path + encodeURIComponent(row.ownerId)}') && !testDetail.includes('غير موصولة بعد. الملكية ستكون لمجال الدورات'));
 
 // Structural regressions supplement the focused behavioral suite; they do not certify runtime.
 check('Editor schema cannot certify evidence time', !adminRouter.slice(adminRouter.indexOf('const evidenceSources'),adminRouter.indexOf('export class')).includes('verifiedAt'));
@@ -159,9 +162,9 @@ check('References are batch-resolved and lifecycle checked', useCases.includes('
 check('Admin work queue filters before paging with a bounded join/count', repo.includes('listAdminCountries') && repo.includes('this.missingWhere') && repo.includes('studyDestinationProfile: { include }') && adminList.includes('missingCheck'));
 check('Public country discovery is server paged', countriesPage.includes('searchPublishedCountries') && countriesPage.includes('serverPage') && publicRouter.includes('q:'));
 check('Featured grid uses published profile identities rather than fixed counts', read('apps/web/src/features/public-template/components/FeaturedCountries.tsx').includes('item.isFeatured') && !read('apps/web/src/features/public-template/components/FeaturedCountries.tsx').includes('scholarshipsCount:'));
-check('Country graph has independent owner cursors throughout the stack', ['universityCursor','scholarshipCursor','serviceCursor','courseCursor','programCursor'].every(key=>graph.includes(key)&&adminRouter.includes(key)&&adminDetail.includes(key)));
+check('Country graph retains owner cursors while independent admin workspaces page authoritative owners', ['universityCursor','scholarshipCursor','serviceCursor','courseCursor','programCursor'].every(key=>graph.includes(key)&&adminRouter.includes(key)) && destinationOwners.includes("page: String(page)") && destinationOwners.includes('countryReferenceId: countryId') && destinationOwners.includes('/admin/${kind}?${params}') && programExplorer.includes('cursor') && adminDetail.includes("['services', 'serviceCursor'") && adminDetail.includes("['providerHeadquartersCourses', 'courseCursor'"));
 check('Monthly living costs preserve original currency without USD fiction', publicData.includes('monthlyLivingCostRange') && !publicData.includes('averageLivingCostUsd'));
-check('Scholarship owner list accepts canonical country deep links', read('apps/admin/src/pages/ScholarshipListPage.tsx').includes('Object.keys(emptyScholarshipCanonicalFilters).map(key=>[key,params.get(key)') && read('apps/admin/src/components/ScholarshipCanonicalFilters.tsx').includes("countryReferenceId: ''") && read('apps/admin/src/pages/ScholarshipListPage.tsx').includes('Object.entries(canonical))if(value)params.set(key,value)') && adminDetail.includes('All country scholarships'));
+check('Scholarship owner list accepts canonical country deep links', read('apps/admin/src/pages/ScholarshipListPage.tsx').includes('Object.keys(emptyScholarshipCanonicalFilters).map(key=>[key,params.get(key)') && read('apps/admin/src/components/ScholarshipCanonicalFilters.tsx').includes("countryReferenceId: ''") && read('apps/admin/src/pages/ScholarshipListPage.tsx').includes('Object.entries(canonical))if(value)params.set(key,value)') && destinationOwners.includes('All country scholarships') && destinationOwners.includes('/${kind}?countryReferenceId=${encodeURIComponent(countryId)}'));
 check('Prisma repository no longer bypasses generated schema with any', !/\bany\b/.test(repo) && repo.includes('StudyDestinationProfileGetPayload') && repo.includes('Prisma.StudyDestinationProfileWhereInput'));
 check('Owner application regressions are committed', exists('packages/application/tests/study-destinations/StudyDestinationGovernance.spec.ts'));
 check('Owner API negative regressions are committed', exists('apps/api/tests/presentation/api/router/StudyDestinationGovernanceRouter.spec.ts'));

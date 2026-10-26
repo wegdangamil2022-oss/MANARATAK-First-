@@ -93,6 +93,15 @@ export function DestinationOwnerList({
           ? 'السجلات من القسم المالك؛ حالة النشر مستقلة عن نشر ملف الدولة.'
           : 'Owner records; their publication is independent of the destination.'}
       </p>
+      <Link to={`/${kind}?countryReferenceId=${encodeURIComponent(countryId)}`}>
+        {kind === 'universities'
+          ? isAr
+            ? 'جميع جامعات الدولة'
+            : 'All country universities'
+          : isAr
+            ? 'جميع منح الدولة'
+            : 'All country scholarships'}
+      </Link>
       <div className="destination-field-grid">
         <label>
           {isAr ? 'بحث' : 'Search'}

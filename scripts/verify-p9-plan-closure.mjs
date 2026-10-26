@@ -28,6 +28,8 @@ const picker = 'apps/admin/src/components/CanonicalPicker.tsx';
 const app = 'apps/admin/src/App.tsx';
 const referenceRouter = 'apps/api/src/presentation/api/router/ReferenceDataAdminRouter.ts';
 const universityPage = 'apps/admin/src/pages/UniversityRelationshipEditorPage.tsx';
+const universityLocation = 'apps/admin/src/features/universities/UniversityLocationCard.tsx';
+const universityPrograms = 'apps/admin/src/features/universities/UniversityProgramsCard.tsx';
 const universityRouter = 'apps/api/src/presentation/api/router/UniversityAdminRouter.ts';
 const scholarshipPage = 'apps/admin/src/pages/ScholarshipRelationshipEditorPage.tsx';
 const scholarshipRouter = 'apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts';
@@ -67,14 +69,14 @@ check('P9-BOUNDARY-001 no direct prisma client usage in Admin source', !/\bprism
 
 // University authoring through P11 owner APIs.
 check('P9-UNI-001 University relationship editor route exists', has(app, 'UniversityRelationshipEditorPage') && has(app, 'path="/universities/:id"'));
-check('P9-UNI-001 geography writes canonical IDs', has(universityPage, 'countryReferenceId') && has(universityPage, 'regionReferenceId') && has(universityPage, 'cityReferenceId'));
-check('P9-UNI-001 geography mutation calls owner PATCH API', has(universityPage, "method: 'PATCH'") && has(universityPage, 'JSON.stringify({ countryReferenceId, regionReferenceId, cityReferenceId })'));
-check('P9-UNI-002 AcademicProgram authoring uses stable owner CRUD API', has(universityPage, '/academic-programs') && has(universityRouter, "'/:id/academic-programs'") && has(universityRouter, "'/:id/academic-programs/:programId'"));
-check('P9-UNI-002 program editor consumes Degree/Major/Test canonical pickers', has(universityPage, 'canonicalPickerApi.degreeLevels()') && has(universityPage, 'canonicalPickerApi.majors()') && has(universityPage, 'canonicalPickerApi.tests()'));
+check('P9-UNI-001 geography writes canonical IDs', has(universityPage, '<UniversityLocationCard') && ['countryReferenceId', 'regionReferenceId', 'cityReferenceId'].every(key => has(universityLocation, key)));
+check('P9-UNI-001 geography mutation calls owner PATCH API', has(universityLocation, "commit('', 'PATCH', draft, reason)") && has(universityPage, 'body: JSON.stringify(body)') && has(universityPage, 'const commit: Commit'));
+check('P9-UNI-002 AcademicProgram authoring uses stable owner CRUD API', has(universityPage, '<UniversityProgramsCard') && has(universityPrograms, '/academic-programs') && has(universityRouter, "'/:id/academic-programs'") && has(universityRouter, "'/:id/academic-programs/:programId'"));
+check('P9-UNI-002 program editor consumes Degree/Major/Test canonical pickers', has(universityPrograms, 'canonicalPickerApi.degreeLevels()') && has(universityPrograms, 'canonicalPickerApi.majors()') && has(universityPrograms, 'canonicalPickerApi.tests()'));
 check('P9-UNI-003 University owner router accepts canonical geography IDs', has(universityRouter, 'countryReferenceId') && has(universityRouter, 'regionReferenceId') && has(universityRouter, 'cityReferenceId'));
 check('P9-UNI-003 organization-unit identity is retained in read DTO path', has('packages/domain/src/universities/universities.ts', 'organizationUnitId?: string | null') && has('packages/infrastructure/src/universities/PrismaUniversityRepository.ts', 'organizationUnitId'));
 check('P9-UNI-004 Program canonical ID is preserved on edit', has('packages/domain/src/universities/universities.ts', 'upsertAcademicProgram?(') && has('packages/infrastructure/src/universities/PrismaUniversityRepository.ts', 'const program = programId') && has('packages/infrastructure/src/universities/PrismaUniversityRepository.ts', 'universityAcademicProgram.update'));
-check('P9-UNI-004 Program removal archives instead of hard-deleting canonical identity', has('packages/infrastructure/src/universities/PrismaUniversityRepository.ts', "data: { status: 'ARCHIVED' }") && /method:\s*'DELETE'/.test(read(universityPage)));
+check('P9-UNI-004 Program removal archives instead of hard-deleting canonical identity', has('packages/infrastructure/src/universities/PrismaUniversityRepository.ts', "data: { status: 'ARCHIVED' }") && has(universityPrograms, "commit('/academic-programs/' + program.id, 'DELETE', undefined, reason)"));
 check('P9-UNI-004 Admin editor no longer uses destructive normalized-details replacement for programs', notHas(universityPage, '/normalized-details'));
 check('P9-UNI-005 owner validation constrains Program campus/unit to the same University', has('packages/infrastructure/src/universities/UniversityCanonicalRelationshipValidator.ts', 'validateProgramAuthoring') && has('packages/infrastructure/src/universities/UniversityCanonicalRelationshipValidator.ts', "where: { id: input.organizationUnitId, universityId, status: 'ACTIVE' }") && has('packages/infrastructure/src/universities/UniversityCanonicalRelationshipValidator.ts', "where: { universityId, id: { in: campusIds }, status: 'ACTIVE' }"));
 check('P9-UNI-005 owner validation rejects inactive canonical relationships', has('packages/infrastructure/src/universities/UniversityCanonicalRelationshipValidator.ts', 'UNIVERSITY_PROGRAM_DEGREE_LEVEL_NOT_ACTIVE') && has('packages/infrastructure/src/universities/UniversityCanonicalRelationshipValidator.ts', 'UNIVERSITY_ADMISSION_TEST_NOT_ACTIVE'));

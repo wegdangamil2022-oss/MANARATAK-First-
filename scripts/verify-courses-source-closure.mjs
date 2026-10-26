@@ -9,6 +9,10 @@ const check = (name, condition) => checks.push({ name, passed: Boolean(condition
 
 const adminApp = read('apps/admin/src/App.tsx');
 const adminList = read('apps/admin/src/pages/CourseListPage.tsx');
+const catalog = read('apps/admin/src/features/courses/CourseCatalogPage.tsx');
+const catalogState = read('apps/admin/src/features/courses/catalogState.ts');
+const catalogFilters = read('apps/admin/src/features/courses/CourseCatalogFilters.tsx');
+const catalogCopy = read('apps/admin/src/features/courses/useCourseCopy.ts');
 const adminDetail = read('apps/admin/src/pages/CourseDetailPage.tsx');
 const adminRouter = read('apps/api/src/presentation/api/router/CourseAdminRouter.ts');
 const publicRouter = read('apps/api/src/presentation/api/router/CoursePublicRouter.ts');
@@ -28,8 +32,8 @@ const publicDataSource = read('apps/web/src/features/public-template/publicLiveD
 
 check('Shadow Admin course UI is removed', !exists('apps/web/src/features/admin-preview'));
 check('Official Admin owns course routes', adminApp.includes('<CourseListPage') && adminApp.includes('<CourseDetailPage'));
-check('Official Admin list reads live course API', adminList.includes('/admin/courses?') && adminList.includes('originType') && adminList.includes('accessType'));
-check('Paid is an access type, not a course origin', adminList.includes('value="PAID"') && !adminList.includes('value="PAID_COURSE"'));
+check('Official Admin list reads live course API', adminList.includes('<CourseCatalogPage') && catalog.includes('adminApiClient.request<CatalogResult>(`/admin/courses/catalog') && catalog.includes('catalogQuery') && catalogState.includes('originType') && catalogState.includes('accessType'));
+check('Paid study is an access fact independent of course origin', catalogFilters.includes("field('studyAccess'") && catalogCopy.includes("PAID: ['دراسة مدفوعة'") && catalogState.includes("course.accessType === 'PAID'") && catalogState.includes("if (course.isStudyFree === false) return 'PAID'"));
 check('Official Admin detail reads curriculum and relationships', adminDetail.includes('/curriculum') && adminDetail.includes('/relationships'));
 check('External direct URL is source-owned', adminDetail.includes('readOnly={isExternalLinkedCourse}') && adminDetail.includes('editableFields'));
 check('Official Admin reviews canonical language', adminDetail.includes('/relationships/language') && adminDetail.includes('canonicalPickerApi.languages'));
