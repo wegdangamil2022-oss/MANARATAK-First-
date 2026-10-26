@@ -37,8 +37,6 @@ export function CourseCatalogPage({ fixedScope }: { fixedScope?: CourseScope }) 
   const paidEntry = !fixedScope && params.get('scope') === 'paid';
   const query = catalogQuery(params, scope).toString();
   const generation = useRef(0);
-  const resultsRegion = useRef<HTMLElement>(null);
-  const refreshHeight = useRef(0);
   useEffect(() => {
     if (paidEntry) { navigate('/courses/paid', { replace: true }); return; }
     if (fixedScope === 'native' && ['provider', 'platformName', 'completenessStatus', 'linkHealth', 'scope'].some(key => params.has(key))) {
@@ -55,7 +53,6 @@ export function CourseCatalogPage({ fixedScope }: { fixedScope?: CourseScope }) 
   useEffect(() => {
     if (paidEntry) return;
     const controller = new AbortController(); const request = ++generation.current;
-    refreshHeight.current = resultsRegion.current?.getBoundingClientRect().height ?? 0;
     setLoading(true); setError('');
     const suffix = fixedScope && fixedScope !== 'all' ? `/${fixedScope}` : '';
     const timer = setTimeout(() => adminApiClient.request<CatalogResult>(`/admin/courses/catalog${suffix}?${query}`, { signal: controller.signal }).then(result => {
@@ -123,7 +120,7 @@ export function CourseCatalogPage({ fixedScope }: { fixedScope?: CourseScope }) 
       ] as Array<{ label: string; value?: number; filter: Record<string, string> }>).map(item => <button type="button" key={item.label} disabled={loading || Boolean(error)} onClick={() => change(item.filter)}><ClipboardCheck size={16}/>{item.label}<strong>{!loading && !error && item.value !== undefined ? number(item.value) : '—'}</strong></button>)}
     </nav>}
     <CourseCatalogFilters params={params} fixedScope={fixedScope} scope={scope} search={search} onSearch={setSearch} change={change} reset={reset}/>
-    <section ref={resultsRegion} className="course-panel course-results" style={loading && data ? { minHeight: refreshHeight.current } : undefined} aria-busy={loading} aria-labelledby="course-results-title">
+    <section className="course-panel course-results" aria-busy={loading} aria-labelledby="course-results-title">
       <header className="course-results-header"><h2 id="course-results-title"><BookOpen size={18}/>{tr('كتالوج الدورات', 'Course catalog')} <span>{!loading && !error && data ? number(data.total) : '—'}</span></h2>
         <div className="course-results-controls"><label>{tr('الترتيب', 'Sort')}<select aria-label={tr('ترتيب الدورات', 'Course sort order')} value={params.get('sort') ?? 'UPDATED_DESC'} onChange={event => change({ sort: event.target.value })}>
           {[['UPDATED_DESC', tr('آخر تحديث', 'Recently updated')], ['UPDATED_ASC', tr('الأقدم تحديثًا', 'Oldest update')], ['NAME_ASC', tr('الاسم تصاعديًا', 'Name ascending')], ['NAME_DESC', tr('الاسم تنازليًا', 'Name descending')], ['STATUS_ASC', tr('الحالة', 'Status')]].map(([id, label]) => <option key={id} value={id}>{label}</option>)}

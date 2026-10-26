@@ -1170,6 +1170,10 @@
     "ReviewSlaPolicy": {
       "required": true,
       "owner": "foundation_control_plane"
+    },
+    "CourseLessonContentBlock": {
+      "owner": "learning",
+      "required": true
     }
   },
   "consistencyProbes": {

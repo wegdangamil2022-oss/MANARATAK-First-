@@ -300,7 +300,8 @@
     "ReviewWorkEvent": "foundation_control_plane",
     "ReviewSourceCheckpoint": "foundation_control_plane",
     "ReviewWorkView": "foundation_control_plane",
-    "ReviewSlaPolicy": "foundation_control_plane"
+    "ReviewSlaPolicy": "foundation_control_plane",
+    "CourseLessonContentBlock": "learning"
   },
   "adapterPathOwners": {
     "packages/infrastructure/src/reference-data/": "reference",
@@ -353,7 +354,8 @@
       "identity"
     ],
     "packages/infrastructure/src/majors/PrismaMajorRepository.ts": [
-      "academic_taxonomy"
+      "academic_taxonomy",
+      "reference"
     ],
     "packages/infrastructure/src/courses/PrismaCourseImportTransferGateway.ts": [
       "import"
@@ -365,7 +367,8 @@
       "tests"
     ],
     "packages/infrastructure/src/courses/PrismaImportedCourseOperationsRepository.ts": [
-      "import"
+      "import",
+      "audit"
     ],
     "packages/infrastructure/src/international-tests/PrismaInternationalTestRepository.ts": [
       "reference"
@@ -431,6 +434,10 @@
       "identity",
       "authorization",
       "import"
+    ],
+    "packages/infrastructure/src/background-jobs/PrismaCourseBulkPublicationRepository.ts": [
+      "learning",
+      "events"
     ]
   },
   "historicalMigrationBaseline": [
@@ -695,6 +702,14 @@
       "decision": "ADR-028",
       "reason": "Reconcile ownership metadata for committed owner-local SQL without modifying the migration or asserting database application. Inspected table/function targets belong to the declared owner.",
       "reviewReference": "docs/reviews/SECTION_27_OWNER_LINKS_2026-10-15.md"
+    },
+    "20261025210000_course_lesson_content_blocks": {
+      "sha256": "38d827e8e7164b52cf71b8af06f53394c9fc6c45f7d8632d6aac30a638c4987c",
+      "owner": "learning",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Already-applied additive course lesson-block owner migration. Preserve exact SQL bytes and the original database ledger checksum; record ownership outside immutable historical SQL.",
+      "reviewReference": "Cumulative admin release review, 2026-10-26; docs/ui/COURSES_NATIVE_AUTHORING_EXECUTION_2026-10-26.md and explicit original activation receipt."
     }
   }
 }

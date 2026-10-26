@@ -58,7 +58,7 @@ test('preparation inventories real source and keeps all later execution unaccept
   assert.equal(plan.relationCoverage.rows,77);assert.equal(plan.relationCoverage.cases,42);
   const {readFileSync}=await import('node:fs');
   const schemaModels=[...readFileSync('packages/infrastructure/prisma/schema.prisma','utf8').matchAll(/^model\s+(\w+)\s*\{/gm)].map(match=>match[1]).sort();
-  assert.equal(schemaModels.length,286);
+  assert.equal(schemaModels.length,292);
   assert.deepEqual(plan.R05.upgradePlan.requiredModels,schemaModels);
   for(const model of ['PublicAnalyticsConsent','PublicAnalyticsEvent','DashboardMeasurementEpoch','ServiceApplicationEvidence','DirectApplicationReport'])assert.ok(schemaModels.includes(model));
   assert.equal(plan.laterStages.length,9);

@@ -310,7 +310,13 @@ export class MajorAdminRouter {
     router.put(
       '/:id/content-sections',
       SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:manage'),
-      (req:Request,res:Response,next:NextFunction)=>Array.isArray(req.body?.sections)&&req.body.sections.some((section:{id?:unknown;groupNumber?:unknown})=>section?.id&&section.groupNumber!==undefined)?SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:review')(req,res,next):next(),
+      (req:Request,res:Response,next:NextFunction)=>{
+        const parsed=updateContentSectionsBodySchema.safeParse(req.body);
+        if(!parsed.success){next(parsed.error);return;}
+        if(parsed.data.sections.some(section=>section.id&&section.groupNumber!==undefined))
+          SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:review')(req,res,next);
+        else next();
+      },
       asyncHandler(async (req: Request, res: Response) => {
         const body = updateContentSectionsBodySchema.parse(req.body);
         const result = await adminMajorUseCases.updateContentSections(

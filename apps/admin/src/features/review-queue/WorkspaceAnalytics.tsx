@@ -29,9 +29,7 @@ function Breakdown({
             const content = (
               <>
                 <span>{label(row.key)}</span>
-                <span className="rw-bar-track">
-                  <span style={{ width: `${(row.count / max) * 100}%` }} />
-                </span>
+                <progress className="rw-bar-track" max={max} value={row.count} aria-hidden="true" />
                 <strong>{new Intl.NumberFormat(language).format(row.count)}</strong>
               </>
             );
@@ -187,20 +185,38 @@ export function WorkspaceAnalytics({
                 {data.series.map((row) => (
                   <div key={row.day} className="rw-chart-day">
                     <div>
-                      <span
+                      <svg
                         role="img"
                         tabIndex={0}
-                        style={{ height: `${Math.max(3, (row.entered / max) * 130)}px` }}
-                        title={row.day + ' — ' + tr('جديدة: ', 'New: ') + row.entered}
+                        viewBox="0 0 15 130"
                         aria-label={row.day + ' ' + tr('جديدة ', 'new ') + row.entered}
-                      />
-                      <span
+                      >
+                        <title>{row.day + ' — ' + tr('جديدة: ', 'New: ') + row.entered}</title>
+                        <rect
+                          x="0"
+                          y={130 - Math.max(3, (row.entered / max) * 130)}
+                          width="15"
+                          height={Math.max(3, (row.entered / max) * 130)}
+                          rx="3"
+                        />
+                      </svg>
+                      <svg
                         role="img"
                         tabIndex={0}
-                        style={{ height: `${Math.max(3, (row.completed / max) * 130)}px` }}
-                        title={row.day + ' — ' + tr('مكتملة: ', 'Completed: ') + row.completed}
+                        viewBox="0 0 15 130"
                         aria-label={row.day + ' ' + tr('مكتملة ', 'completed ') + row.completed}
-                      />
+                      >
+                        <title>
+                          {row.day + ' — ' + tr('مكتملة: ', 'Completed: ') + row.completed}
+                        </title>
+                        <rect
+                          x="0"
+                          y={130 - Math.max(3, (row.completed / max) * 130)}
+                          width="15"
+                          height={Math.max(3, (row.completed / max) * 130)}
+                          rx="3"
+                        />
+                      </svg>
                     </div>
                     <span>{row.day.slice(5)}</span>
                   </div>
