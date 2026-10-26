@@ -12,6 +12,7 @@ vi.mock('@manaratak/shared', async (importer) => ({
   canAuthorDomainTranslations: () => controls.canWrite,
 }));
 import { AdminTranslationWorkspacePage } from '../../src/pages/AdminTranslationWorkspacePage';
+import { TRANSLATION_OWNER_CAPABILITIES } from '@manaratak/shared';
 const row = { id: 's1', displayName: 'First', localizedNames: { ar: 'أول', en: 'First EN' } };
 const page = (data: any[]) => ({
   data,
@@ -30,19 +31,26 @@ function text(node: any): string {
       .join('') ?? ''
   );
 }
-async function mount() {
+async function mount(
+  capabilities = Object.values(TRANSLATION_OWNER_CAPABILITIES),
+  entries = ['/translations'],
+) {
+  const implementation = controls.request.getMockImplementation();
+  controls.request.mockImplementation((url: string, ...args: unknown[]) =>
+    url.endsWith('/capabilities')
+      ? Promise.resolve({ data: capabilities })
+      : implementation?.(url, ...args),
+  );
   await act(async () => {
     tree = create(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={entries}>
         <AdminTranslationWorkspacePage />
       </MemoryRouter>,
     );
   });
 }
 async function selectFirst() {
-  const button = tree.root
-    .findAllByType('button')
-    .find((node) => String(node.props.className).includes('grid w-full'))!;
+  const button = tree.root.findAllByType('button').find((node) => text(node) === 'Preview')!;
   await act(async () => {
     button.props.onClick();
   });
@@ -98,24 +106,32 @@ describe('Translation workspace lightweight component interactions', () => {
     expect(tree.root.findAllByType('input').some((node) => node.props.value === 'First EN')).toBe(
       false,
     );
-    expect(
-      tree.root.findAllByType('button').some((node) => text(node).includes('University')),
-    ).toBe(true);
+    expect(tree.root.findAllByType('td').some((node) => text(node).includes('University'))).toBe(
+      true,
+    );
+    expect(tree.root.findAllByProps({ role: 'dialog' })).toHaveLength(0);
   });
   it('keeps authoring disabled by the actual workspace policy', async () => {
     controls.request.mockImplementation((url: string) =>
-      Promise.resolve(url.endsWith('/capabilities') ? {data:[]} : url.includes('/workspace?') ? page([row]) : row),
+      Promise.resolve(
+        url.endsWith('/capabilities')
+          ? { data: [] }
+          : url.includes('/workspace?')
+            ? page([row])
+            : row,
+      ),
     );
     await mount();
     await selectFirst();
-    expect(saveButtons()).toHaveLength(2);
-    expect(saveButtons().every((button) => button.props.disabled)).toBe(true);
+    expect(saveButtons()).toHaveLength(0);
+    expect(JSON.stringify(tree.toJSON())).toContain('Saved name');
+    expect(controls.request.mock.calls.some(([_url, options]) => options?.method)).toBe(false);
   });
   it('preserves the unsaved English draft when Arabic save/readback succeeds', async () => {
     controls.canWrite = true;
     let written = false;
     controls.request.mockImplementation((url: string, options?: any) => {
-      if (url.endsWith('/capabilities')) return Promise.resolve({data:[]});
+      if (url.endsWith('/capabilities')) return Promise.resolve({ data: [] });
       if (url.includes('/workspace?')) return Promise.resolve(page([row]));
       if (options?.method === 'PATCH') {
         written = true;
@@ -147,7 +163,7 @@ describe('Translation workspace lightweight component interactions', () => {
     controls.canWrite = true;
     let written = false;
     controls.request.mockImplementation((url: string, options?: any) => {
-      if (url.endsWith('/capabilities')) return Promise.resolve({data:[]});
+      if (url.endsWith('/capabilities')) return Promise.resolve({ data: [] });
       if (url.includes('/workspace?')) return Promise.resolve(page([row]));
       if (options?.method === 'PATCH') {
         written = true;
@@ -166,5 +182,74 @@ describe('Translation workspace lightweight component interactions', () => {
     expect(
       controls.request.mock.calls.filter(([_url, options]) => options?.method === 'PATCH'),
     ).toHaveLength(1);
+  });
+  it('uses server-wide totals and server name coverage instead of a loaded-page fallback', async () => {
+    controls.request.mockResolvedValue({
+      ...page([{ ...row, hasAr: true, hasEn: true }]),
+      total: 900,
+      totalPages: 45,
+      stats: { missingAr: 200, missingEn: 300, complete: 400 },
+    });
+    await mount();
+    const metrics = tree.root.findAllByProps({ className: 'translation-metrics' })[0];
+    expect(text(metrics)).toContain('900');
+    expect(text(metrics)).toContain('400');
+    expect(tree.root.findAllByType('tbody')[0].findAllByType('span').map(text)).toEqual([
+      'AR ✓',
+      'EN ✓',
+    ]);
+  });
+  it('selects only permitted central owners and never queries an unauthorized default', async () => {
+    controls.request.mockResolvedValue(page([]));
+    await mount([TRANSLATION_OWNER_CAPABILITIES.MAJOR]);
+    const lists = controls.request.mock.calls.filter(([url]) => url.includes('/workspace?'));
+    expect(lists.length).toBeGreaterThan(0);
+    expect(lists.every(([url]) => url.includes('domain=MAJOR'))).toBe(true);
+    expect(
+      tree.root
+        .findAllByType('button')
+        .some((node) => text(node).includes('translation_domain_scholarships')),
+    ).toBe(false);
+  });
+  it('keeps failed counts unavailable and offers a real retry instead of an empty-state verdict', async () => {
+    controls.request.mockRejectedValue(new Error('owner offline'));
+    await mount();
+    const alert = tree.root.findByProps({ role: 'alert' });
+    expect(text(alert)).toContain('Counts are unavailable');
+    expect(text(tree.root.findAllByProps({ className: 'translation-metrics' })[0])).not.toContain(
+      '0',
+    );
+    controls.request.mockResolvedValue(page([row]));
+    await act(async () => alert.findByType('button').props.onClick());
+    expect(tree.root.findAllByType('tbody')).toHaveLength(1);
+  });
+  it('hydrates filters from the URL and sends rejected state and server sorting', async () => {
+    controls.request.mockResolvedValue({ ...page([]), total: 80, totalPages: 4 });
+    await mount(undefined, [
+      '/translations?domain=UNIVERSITY&reviewState=REJECTED&sort=NAME_ASC&page=2&pageSize=20&locale=ar&q=Arabic',
+    ]);
+    const [url] = controls.request.mock.calls.find(([url]) => url.includes('/workspace?'))!;
+    const query = new URLSearchParams(url.split('?')[1]);
+    expect(Object.fromEntries(query)).toMatchObject({
+      domain: 'UNIVERSITY',
+      reviewState: 'REJECTED',
+      sort: 'NAME_ASC',
+      page: '2',
+      pageSize: '20',
+      locale: 'ar',
+      q: 'Arabic',
+    });
+  });
+  it.each([
+    ['NATIVE_MANARATAK_COURSE', '/courses/s1/editor'],
+    ['EXTERNAL_LINKED_COURSE', '/courses/external?course=s1'],
+  ])('opens the current owning workspace for %s', async (originType, href) => {
+    controls.request.mockImplementation((url: string) =>
+      Promise.resolve(url.includes('/workspace?') ? page([row]) : { ...row, originType }),
+    );
+    await mount(undefined, ['/translations?domain=COURSE']);
+    await selectFirst();
+    const dialog = tree.root.findByProps({ role: 'dialog' });
+    expect(dialog.findByType('a').props.href).toBe(href);
   });
 });

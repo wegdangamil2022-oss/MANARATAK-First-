@@ -1,56 +1,135 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  ArrowUpLeft,
+  Building2,
+  GraduationCap,
+  FileText,
+  Sparkles,
+  BookOpen,
+  Globe2,
+  BriefcaseBusiness,
+  HandHelping,
+  RefreshCw,
+  Route,
+} from 'lucide-react';
 import type { TranslationOwnerCapability } from '@manaratak/shared';
-import { adminApiClient } from '../api/client';
-const names: Record<string, string> = {
-  UNIVERSITY: 'الجامعات',
-  MAJOR: 'التخصصات والزمالات',
-  INTERNATIONAL_TEST: 'الاختبارات الدولية',
-  SCHOLARSHIP: 'المنح',
-  COURSE: 'الدورات',
-  STUDY_DESTINATION: 'وجهات الدراسة',
-  SERVICE: 'الخدمات',
-  CAREER_JOB: 'الوظائف',
+import { useTranslationOwnerCapabilities } from '../features/translations/useTranslationOwnerCapabilities';
+const names: Record<string, readonly [string, string]> = {
+  UNIVERSITY: ['الجامعات', 'Universities'],
+  MAJOR: ['التخصصات والزمالات', 'Majors and fellowships'],
+  INTERNATIONAL_TEST: ['الاختبارات الدولية', 'International tests'],
+  SCHOLARSHIP: ['المنح الدراسية', 'Scholarships'],
+  COURSE: ['الدورات التدريبية', 'Courses'],
+  STUDY_DESTINATION: ['وجهات الدراسة', 'Study destinations'],
+  SERVICE: ['الخدمات', 'Services'],
+  CAREER_JOB: ['الوظائف', 'Jobs'],
 };
-const workflows: Record<TranslationOwnerCapability['descriptionWorkflow'], string> = {
-  NORMALIZED_OWNER: 'الوصف له مسار ترجمة لدى المالك؛ تفعيل الكتابة معلق.',
-  VERSIONED_SECTIONS: 'الأوصاف ضمن أقسام نسخة التخصص؛ لا يُنشأ وصف موازٍ.',
-  NATIVE_OWNER_WORKSPACE: 'تُراجع النصوص العربية والإنجليزية وتُنشر من مساحة المالك الأصلية.',
-  OWNER_CONTRACT_REQUIRED: 'إتاحة ترجمة الوصف تنتظر اكتمال عقد المصدر والمراجعة والنشر.',
+const icons = {
+  UNIVERSITY: Building2,
+  MAJOR: GraduationCap,
+  INTERNATIONAL_TEST: FileText,
+  SCHOLARSHIP: Sparkles,
+  COURSE: BookOpen,
+  STUDY_DESTINATION: Globe2,
+  SERVICE: HandHelping,
+  CAREER_JOB: BriefcaseBusiness,
 };
-export function TranslationOwnerCapabilitiesPanel() {
-  const [data, setData] = useState<TranslationOwnerCapability[]>([]);
-  const [error, setError] = useState('');
-  useEffect(() => {
-    const controller = new AbortController();
-    adminApiClient
-      .request<{ data: TranslationOwnerCapability[] }>('/admin/translations/capabilities', {
-        signal: controller.signal,
-      })
-      .then((result) => {
-        if (!controller.signal.aborted) setData(result.data);
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) setError('تعذر تحميل قدرات المالكين.');
-      });
-    return () => controller.abort();
-  }, []);
+const workflows: Record<
+  TranslationOwnerCapability['descriptionWorkflow'],
+  readonly [string, string]
+> = {
+  NORMALIZED_OWNER: [
+    'الاسم والوصف مرتبطان بمصدر الجامعة ومراجعته.',
+    'Name and description follow the university source and review.',
+  ],
+  VERSIONED_SECTIONS: [
+    'الترجمة مرتبطة بالدرجة ونسخة المحتوى؛ افتح ملف التخصص المحدد.',
+    'Translation belongs to the degree profile and content version.',
+  ],
+  NATIVE_OWNER_WORKSPACE: [
+    'تحرير المحتوى ومراجعته ونشره من داخل السجل الأصلي.',
+    'Edit, review and publish through the original owner record.',
+  ],
+  OWNER_CONTRACT_REQUIRED: [
+    'مسار الترجمة ينتظر اكتمال عقد المصدر والمراجعة.',
+    'Source and review contracts are still required.',
+  ],
+};
+export function TranslationOwnerCapabilitiesPanel(
+  props: {
+    capabilities?: TranslationOwnerCapability[];
+    loading?: boolean;
+    error?: string;
+    onRetry?: () => void;
+    language?: string;
+  } = {},
+) {
+  const own = useTranslationOwnerCapabilities(props.capabilities === undefined);
+  const data = props.capabilities ?? own.data ?? [];
+  const error = props.error ?? own.error,
+    loading = props.loading ?? own.loading;
+  const en = props.language === 'en',
+    at = en ? 1 : 0;
   return (
-    <section aria-label="قدرات الترجمة لدى المالكين" className="rounded-2xl border bg-white p-4">
-      <h2>نطاقات الترجمة ومسارات المراجعة</h2>
-      <p>
-        تعرض هذه القائمة المسارات المسموحة لك. ظهور النطاق لا يمنح إذنًا بالنشر أو يفعّل تحريرًا
-        معلقًا.
+    <section
+      className="translation-routes"
+      aria-label={en ? 'Translation owner routes' : 'قدرات الترجمة لدى المالكين'}
+    >
+      <h2>
+        <Route aria-hidden="true" />
+        {en ? 'Where is each translation managed?' : 'أين تُدار ترجمة كل قسم؟'}
+      </h2>
+      <p className="translation-muted">
+        {en
+          ? 'This is a guide to the real owner workspaces, not a second review queue. Availability follows your permissions.'
+          : 'هذا دليل للوصول إلى مساحات الأقسام الأصلية، وليس قائمة مراجعة ثانية. تظهر المسارات المصرح لك بها فقط.'}
       </p>
-      {error && <p role="alert">{error}</p>}
-      <ul>
-        {data.map((capability) => (
-          <li key={capability.key}>
-            <Link to={capability.ownerPath}>{names[capability.key] ?? capability.key}</Link> —{' '}
-            {workflows[capability.descriptionWorkflow]}
-          </li>
-        ))}
-      </ul>
+      {loading && (
+        <p role="status">{en ? 'Loading available routes…' : 'جارٍ تحميل المسارات المتاحة…'}</p>
+      )}
+      {error && (
+        <div role="alert">
+          <p>{en ? 'Could not load owner routes.' : 'تعذر تحميل قدرات المالكين.'}</p>
+          <button type="button" onClick={props.onRetry ?? own.reload}>
+            <RefreshCw aria-hidden="true" />
+            {en ? 'Retry' : 'إعادة المحاولة'}
+          </button>
+        </div>
+      )}
+      {!loading && !error && !data.length && (
+        <p>
+          {en
+            ? 'No owner routes are available to this account.'
+            : 'لا توجد مسارات ترجمة مصرح بها لهذا الحساب.'}
+        </p>
+      )}
+      <div className="translation-route-grid">
+        {data.map((capability, index) => {
+          const Icon = icons[capability.key];
+          return (
+            <article key={capability.key} className={`translation-route tone-${index % 3}`}>
+              <h3>
+                <Icon aria-hidden="true" />
+                {names[capability.key]?.[at]}
+              </h3>
+              <p>{workflows[capability.descriptionWorkflow][at]}</p>
+              <small>
+                {capability.importSupported
+                  ? en
+                    ? 'Central translation import is not activated yet.'
+                    : 'استيراد الترجمات المركزي غير مفعّل حاليًا.'
+                  : en
+                    ? 'Translation follows the owner workflow.'
+                    : 'الترجمة تتبع مسار القسم الأصلي.'}
+              </small>
+              <Link to={capability.ownerPath}>
+                {en ? 'Open section' : 'فتح القسم'}
+                <ArrowUpLeft aria-hidden="true" />
+              </Link>
+            </article>
+          );
+        })}
+      </div>
     </section>
   );
 }

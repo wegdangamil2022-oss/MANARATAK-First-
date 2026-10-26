@@ -210,3 +210,11 @@ test('inline immutable action lists enumerate mutations and reject nonliteral me
   assert.equal(buildAuditInventory({...fixture, routerSources:{'TestRouter.ts':source}}).length, 2);
   assert.throws(() => buildAuditInventory({...fixture, routerSources:{'TestRouter.ts':source.replace("'archive'", 'runtimeAction')}}), /DYNAMIC_ROUTE/);
 });
+
+test('Windows checkout line endings preserve policy fingerprints while actual policy changes remain detectable',()=>{
+  const source=`const router=Router();\nconst guard=(action)=>\n  SecurityMiddlewareFactory.createAdminPermissionGuard('admin:study-destinations:'+action);\nrouter.post('/publish',guard('publish'),handler);`;
+  const inventory=text=>buildAuditInventory({...fixture,routerSources:{'TestRouter.ts':text}});
+  const lf=inventory(source),crlf=inventory(source.replace(/\n/g,'\r\n'));
+  assert.deepEqual(crlf,lf);
+  assert.match(checkAuditInventory(inventory(source.replace("guard('publish')","guard('read')")),lf).join(),/AUDIT_CONTRACT_CHANGED/);
+});

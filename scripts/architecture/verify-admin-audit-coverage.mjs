@@ -7,7 +7,9 @@ import { createHash } from 'node:crypto';
 
 const root = process.cwd();
 const manifestPath = 'docs/remediation/evidence/section-02/admin-mutation-audit-inventory.json';
-const parse = (name, source) => ts.createSourceFile(name, source, ts.ScriptTarget.Latest, true);
+// Git may check out CRLF on Windows. Permission fingerprints describe the same
+// TypeScript policy on every platform; SQL migration byte identity is separate.
+const parse = (name, source) => ts.createSourceFile(name, source.replace(/\r\n/g, '\n'), ts.ScriptTarget.Latest, true);
 const visit = (node, callback) => { callback(node); ts.forEachChild(node, child => visit(child, callback)); };
 const literal = node => node && ts.isStringLiteralLike(node) ? node.text : null;
 
