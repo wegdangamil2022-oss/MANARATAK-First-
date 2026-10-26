@@ -15,6 +15,12 @@ import {
 } from '../entities/CourseProgress';
 
 export interface ICourseProgressRepository {
+  saveResumeLesson?(
+    courseId: string,
+    studentReferenceId: string,
+    courseVersion: number,
+    lessonId: string,
+  ): Promise<void>;
   listCourseLearners?(courseId: string, input: { page: number; pageSize: number; status?: string; search?: string }): Promise<{
     data: Array<{ id: string; label: string; status: string; enrolledAt: Date; progressPercentage: number; started: boolean; completed: boolean; certificateEligible: boolean }>;
     total: number; page: number; pageSize: number; totalPages: number;

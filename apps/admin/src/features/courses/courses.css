@@ -167,3 +167,4 @@
 .native-copy-dialog fieldset>label:not(.course-field) { display:flex;align-items:flex-start;gap:10px; }
 .native-copy-dialog input[type=checkbox] { width:18px;height:18px;margin-block-start:4px;flex-shrink:0;accent-color:#0E7C86; }
 @media(max-width:640px) { .course-dialog.native-copy-dialog {padding:16px;} }
+.native-delivery .course-table {min-width:600px}.native-delivery .course-table td:first-child {width:auto;min-width:170px}.native-delivery input[type=checkbox]{width:18px;height:18px;accent-color:#0E7C86}.native-delivery input[type=datetime-local]{max-width:240px;min-height:40px;font-size:12px}.native-delivery .course-table th svg{vertical-align:middle;margin-inline-end:6px;color:#D6A43B}

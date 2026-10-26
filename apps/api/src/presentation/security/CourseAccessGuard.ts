@@ -14,7 +14,8 @@ export function courseRequestAction(method: string, path: string): CourseAction 
     /^(modules|lessons|quizzes|questions|question-banks|media|relationships)(?:\/|$)/.test(
       suffix,
     ) ||
-    suffix === 'mark-ready'
+    suffix === 'mark-ready' ||
+    suffix === 'delivery-policy'
   )
     return 'edit';
   return 'manage';

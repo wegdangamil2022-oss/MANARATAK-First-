@@ -12,6 +12,8 @@ import { NativeCourseUseCases } from '../../../application/src/courses/use-cases
 import { CourseCurriculumUseCases } from '../../../application/src/courses/use-cases/CourseCurriculumUseCases';
 import { PrismaCourseRepository } from '../../src/courses/PrismaCourseRepository';
 import { PrismaCourseCurriculumRepository } from '../../src/courses/PrismaCourseCurriculumRepository';
+import { PrismaCourseProgressRepository } from '../../src/courses/PrismaCourseProgressRepository';
+import { CourseProgressUseCases } from '../../../application/src/courses/use-cases/CourseProgressUseCases';
 import { preflightTargets } from '../../../../scripts/database/post28-isolation.mjs';
 import { readDatabaseIdentity } from '../../../../scripts/database/post28-preflight.mjs';
 
@@ -222,8 +224,8 @@ describe('native copy and advanced authoring on attested DB-T', () => {
     const id = ids[1],
       initial = (await repo.getCurriculumSnapshot(id)).lessons[0];
     await command(async (owner, curriculum) =>
-      new CourseCurriculumUseCases(owner, curriculum).convertLegacyLessonText(id, initial.id),
-    );
+        new CourseCurriculumUseCases(owner, curriculum).convertLegacyLessonText(id, initial.id),
+      );
     const current = await repo.getCurriculumSnapshot(id),
       blocks = current
         .contentBlocks!.filter((row) => row.lessonId === initial.id && row.type === 'TEXT')
@@ -271,5 +273,68 @@ describe('native copy and advanced authoring on attested DB-T', () => {
     expect(assignment.moduleId).toBeNull();
     expect(assignment.maxAttempts).toBeNull();
     expect(final.questions.find((row) => row.quizId === assignment.id)!.correctAnswer).toBeNull();
+  });
+  it('freezes release policy for enrolled learners and atomically saves resume without losing other enrollment metadata', async () => {
+    const id = ids[1],
+      snapshot = await repo.getCurriculumSnapshot(id),
+      first = snapshot.lessons[0].id;
+    await command(async (owner, curriculum) =>
+      new CourseCurriculumUseCases(owner, curriculum).setDeliveryPolicy(id, {
+        version: 1,
+        sequence: 'FREE',
+        lessons: { [first]: { preview: false, availableAt: '2099-01-01T00:00:00Z' } },
+      }),
+    );
+    await courses.updateStatus(id, CourseStatus.PUBLISHED);
+    const published = (await courses.findById(id))!;
+    const student = prefix + '-resume';
+    const enrollment = await db.courseEnrollment.create({
+      data: {
+        courseId: id,
+        studentReferenceId: student,
+        status: 'ACTIVE',
+        metadata: {
+          courseVersion: published.version,
+          financialEvidence: 'preserve',
+          preferences: { captions: true },
+        },
+      },
+    });
+    await courses.updateStatus(id, CourseStatus.DRAFT);
+    await command(async (owner, curriculum) =>
+      new CourseCurriculumUseCases(owner, curriculum).setDeliveryPolicy(id, {
+        version: 1,
+        sequence: 'FREE',
+        lessons: {},
+      }),
+    );
+    const progress = new PrismaCourseProgressRepository(db),
+      learning = new CourseProgressUseCases(courses, repo, progress);
+    const workspace = await learning.getLearningWorkspace(id, student);
+    expect(workspace.course.version).toBe(published.version);
+    expect(workspace.curriculum.lessons.find((row) => row.id === first)).toMatchObject({
+      locked: true,
+      contentText: null,
+    });
+    await expect(learning.saveResumeLesson(id, student, first)).rejects.toThrow(
+      'COURSE_LESSON_LOCKED',
+    );
+    const available = workspace.curriculum.lessons.find((row) => !row.locked)!;
+    expect(available).toBeTruthy();
+    await learning.saveResumeLesson(id, student, available.id);
+    const stored = await db.courseEnrollment.findUniqueOrThrow({ where: { id: enrollment.id } });
+    expect(stored.progressPercentage).toBe(0);
+    expect(stored.metadata).toMatchObject({
+      courseVersion: published.version,
+      financialEvidence: 'preserve',
+      preferences: { captions: true },
+      resume: { lessonId: available.id },
+    });
+    await expect(
+      progress.saveResumeLesson(id, student, published.version + 1, available.id),
+    ).rejects.toThrow('CONFLICT');
+    await expect(
+      progress.saveResumeLesson(id, prefix + '-foreign', published.version, available.id),
+    ).rejects.toThrow('CONFLICT');
   });
 });

@@ -6,7 +6,9 @@ import { CourseRelationshipQueryService, PublicCourseUseCases } from '@manaratak
 import { parseRequestLocale, toApiValidationErrorPayload } from '../locale/LocaleQueryContract.js';
 
 export class CoursePublicRouter {
-  public static create(cradle: PublishedCatalogImageServices & { publicCourseUseCases: PublicCourseUseCases; courseRelationshipQueryService: CourseRelationshipQueryService }): Router {
+  public static create(
+    cradle: PublishedCatalogImageServices & { publicCourseUseCases: PublicCourseUseCases; courseRelationshipQueryService: CourseRelationshipQueryService },
+  ): Router {
     const router = Router();
     const { publicCourseUseCases, courseRelationshipQueryService } = cradle;
 
@@ -28,6 +30,39 @@ export class CoursePublicRouter {
       cursor: z.string().trim().min(1).max(2048).optional(),
       limit: z.coerce.number().int().min(1).max(100).default(20),
     }).strict();
+
+    router.get(
+      '/:slug/preview',
+      asyncHandler(async (req: Request, res: Response) => {
+        res.setHeader('Cache-Control', 'no-store');
+        res.json(
+          await publicCourseUseCases.preview(req.params.slug, parseRequestLocale(req.query)),
+        );
+      }),
+    );
+    router.post(
+      '/:slug/lessons/:lessonId/assets/:referenceId/preview-delivery-grant',
+      asyncHandler(async (req: Request, res: Response) => {
+        if (!cradle.assetReferencePolicy || !cradle.processAssetLifecycleUseCase)
+          return res.status(503).json({ error: 'COURSE_PREVIEW_MEDIA_UNAVAILABLE' });
+        const assetId = await publicCourseUseCases.resolvePreviewAsset(
+          req.params.slug,
+          req.params.lessonId,
+          req.params.referenceId,
+        );
+        await cradle.assetReferencePolicy.assertUsable(assetId, {
+          purpose: 'COURSE_PUBLIC_PREVIEW',
+          publicPublication: true,
+        });
+        res.setHeader('Cache-Control', 'no-store');
+        res.json(
+          await cradle.processAssetLifecycleUseCase.requestDeliveryGrant({
+            assetId,
+            expiresInSeconds: 300,
+          }),
+        );
+      }),
+    );
 
     router.get('/', asyncHandler(async (req: Request, res: Response) => {
       const locale = parseRequestLocale(req.query);
@@ -65,6 +100,8 @@ export class CoursePublicRouter {
     }));
 
     router.use((err: any, req: Request, res: Response, next: NextFunction) => {
+      if (err?.message === 'Course not found' || err?.message === 'Course preview not found')
+        return res.status(404).json({ error: 'COURSE_PREVIEW_NOT_FOUND' });
       if (err instanceof z.ZodError) {
         return res.status(400).json(toApiValidationErrorPayload(err));
       }

@@ -1,4 +1,5 @@
-import type {CourseAccessService} from '@manaratak/application';
+import type { CourseAccessService, CertificateUseCases } from '@manaratak/application';
+import type { AuthorizationEvaluatorService } from '@manaratak/domain';
 import type {CourseAdminScope, CourseAdminContext, CourseAdminCommandUseCases} from '@manaratak/application';
 import { readReviewReasonHeader } from '@manaratak/shared';
 import { Router, Request, Response, NextFunction } from 'express';
@@ -20,7 +21,16 @@ import type {} from '../../middleware/AuthMiddleware.js';
 import { CourseMediaRouter, type CourseMediaCradle } from './CourseMediaRouter.js';
 
 export class CourseAdminRouter {
-  public static create(cradle: CourseAdminScope & CourseMediaCradle & {courseAccessService?:CourseAccessService; courseAdminCommandUseCases:CourseAdminCommandUseCases; courseProgressUseCases: CourseProgressUseCases}): Router {
+  public static create(
+    cradle: CourseAdminScope &
+      CourseMediaCradle & {
+        certificateUseCases?: CertificateUseCases;
+        authEvaluatorService?: AuthorizationEvaluatorService;
+        courseAccessService?: CourseAccessService;
+        courseAdminCommandUseCases: CourseAdminCommandUseCases;
+        courseProgressUseCases: CourseProgressUseCases;
+      },
+  ): Router {
     const router = Router();
     router.get('/assigned', (req,res,next) => {
       if(!cradle.courseAccessService || !req.authUserId){res.status(503).json({error:'COURSE_ACCESS_NOT_CONFIGURED'});return;}
@@ -33,7 +43,7 @@ export class CourseAdminRouter {
       void cradle.courseAccessService.capabilities(req.authUserId,req.params.id,{ip:req.ip,requestTime:new Date()}).then(value=>{res.setHeader('Cache-Control','no-store');res.json(value);}).catch(next);
     });
     router.use('/:id/media', CourseMediaRouter.create(cradle));
-    const {learningPathUseCases} = cradle;
+    const { learningPathUseCases } = cradle;
 
     const mutationContext = (req: Request): CourseAdminContext => {
       if (!req.authUserId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
@@ -89,6 +99,77 @@ export class CourseAdminRouter {
         run().catch(next);
       };
 
+    const canBindCertificate = async (req: Request) =>
+      Boolean(
+        req.authUserId &&
+        cradle.authEvaluatorService &&
+        (
+          await cradle.authEvaluatorService.evaluatePermission(
+            req.authUserId,
+            'admin:certificates:templates:approve',
+            { ip: req.ip, requestTime: new Date() },
+          )
+        ).isGranted,
+      );
+    router.get(
+      '/:id/certificate-binding',
+      asyncHandler(async (req, res, scope) => {
+        const course = await scope.adminCourseUseCases.getCourse(req.params.id),
+          canBind = await canBindCertificate(req);
+        res.setHeader('Cache-Control', 'no-store');
+        res.json({
+          binding: course.optionalFields?.certificateBinding ?? null,
+          health: cradle.certificateUseCases
+            ? await cradle.certificateUseCases.courseBindingStatus(
+                course.optionalFields?.certificateBinding,
+              )
+            : { status: 'UNAVAILABLE', code: 'CERTIFICATE_OWNER_UNAVAILABLE' },
+          canBind,
+          templates:
+            canBind && cradle.certificateUseCases
+              ? await cradle.certificateUseCases.courseBindingChoices()
+              : [],
+        });
+      }),
+    );
+    router.put(
+      '/:id/certificate-binding',
+      (req, res, next) => {
+        void canBindCertificate(req)
+          .then((allowed) => {
+            if (!allowed) {
+              res.status(403).json({ error: 'COURSE_CERTIFICATE_BIND_PERMISSION_REQUIRED' });
+              return;
+            }
+            next();
+          })
+          .catch(next);
+      },
+      asyncHandler(async (req, res, scope) => {
+        if (!cradle.certificateUseCases) throw Error('COURSE_CERTIFICATE_OWNER_UNAVAILABLE');
+        const input = z
+          .object({
+            binding: z
+              .object({
+                templateId: z.string().uuid(),
+                templateVersionId: z.string().uuid(),
+                issuerId: z.string().uuid(),
+              })
+              .strict()
+              .nullable(),
+          })
+          .strict()
+          .parse(req.body);
+        const binding =
+          input.binding === null
+            ? null
+            : await cradle.certificateUseCases.validateCourseBinding(input.binding);
+        res.json(
+          await scope.courseCurriculumUseCases.setCertificateBinding(req.params.id, binding),
+        );
+      }),
+    );
+
     const assessmentHandler = (fn: (req: Request, res: Response) => Promise<unknown>) =>
       (req: Request, res: Response, next: NextFunction) => { Promise.resolve().then(() => fn(req, res)).catch(next); };
     router.get('/:id/learning-report', assessmentHandler(async (req, res) => {
@@ -121,7 +202,10 @@ export class CourseAdminRouter {
     }));
 
     const listQuerySchema = z.object({
-      status: z.preprocess(v => v === '' || v === 'all' ? undefined : v, z.nativeEnum(CourseStatus).optional()),
+      status: z.preprocess(
+        (v) => (v === '' || v === 'all' ? undefined : v),
+        z.nativeEnum(CourseStatus).optional(),
+      ),
       completenessStatus: z.nativeEnum(CourseImportCompletenessState).optional(),
       accessType: z.nativeEnum(CourseAccessType).optional(),
       originType: z.nativeEnum(CourseOriginType).optional(),
@@ -501,6 +585,25 @@ export class CourseAdminRouter {
       res.json({ data: modules });
     }));
 
+    router.put(
+      '/:id/delivery-policy',
+      asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+        const body = z
+          .object({
+            version: z.literal(1),
+            sequence: z.enum(['FREE', 'SEQUENTIAL']),
+            lessons: z.record(
+              z.string().uuid(),
+              z
+                .object({ preview: z.boolean(), availableAt: z.string().datetime().nullable() })
+                .strict(),
+            ),
+          })
+          .strict()
+          .parse(req.body);
+        res.json(await scope.courseCurriculumUseCases.setDeliveryPolicy(req.params.id, body));
+      }),
+    );
     router.post('/:id/modules', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {courseCurriculumUseCases}=scope;
       const body = moduleBodySchema.parse(req.body);
@@ -784,9 +887,19 @@ export class CourseAdminRouter {
     }));
 
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-      if (['COURSE_STALE_VERSION','LEARNING_PATH_STALE_VERSION','COURSE_PUBLICATION_STATE_CHANGED','COURSE_ASSESSMENT_REVIEW_CONFLICT','COURSE_ASSESSMENT_NOT_PENDING'].includes(err.message)) return res.status(409).json({error:err.message});
+      if (
+        [
+          'COURSE_STALE_VERSION',
+          'COURSE_CERTIFICATE_BINDING_STALE',
+          'LEARNING_PATH_STALE_VERSION',
+          'COURSE_PUBLICATION_STATE_CHANGED',
+          'COURSE_ASSESSMENT_REVIEW_CONFLICT',
+          'COURSE_ASSESSMENT_NOT_PENDING',
+        ].includes(err.message)
+      )
+        return res.status(409).json({ error: err.message });
       if (err.message === 'COURSE_VERSION_PRECONDITION_REQUIRED') return res.status(428).json({error:err.message});
-      const translationCode=err instanceof Error?err.message:'';
+      const translationCode = err instanceof Error ? err.message : '';
       if(translationCode.startsWith('TRANSLATION_CONTENT_AUTHORING_DISABLED')) return res.status(403).json({error:'TRANSLATION_CONTENT_AUTHORING_DISABLED'});
       if(translationCode==='TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED') return res.status(409).json({error:translationCode});
       if(translationCode.startsWith('TRANSLATION_')) return res.status(422).json({error:translationCode});
@@ -794,7 +907,7 @@ export class CourseAdminRouter {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }
       if(typeof err.message==='string' && /^(COURSE_|NATIVE_COURSE_|LEARNING_PATH_|IMPORTED_COURSE_|AUTHENTICATED_ADMIN_)/.test(err.message)) return res.status(400).json({error:err.message});
-      res.status(500).json({error:'COURSE_OPERATION_FAILED'});
+      res.status(500).json({ error: 'COURSE_OPERATION_FAILED' });
     });
 
     return router;

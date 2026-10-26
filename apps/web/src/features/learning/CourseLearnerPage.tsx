@@ -9,6 +9,7 @@ import {
 } from '../../api/client';
 import { preservePostLoginReturn } from '../students/postLoginIntent';
 import { CourseLessonBlocks } from './CourseLessonBlocks';
+import {CourseCompletionCertificate} from './CourseCompletionCertificate';
 import './course-learner.css';
 import { CourseMediaPlayer, type LearningMedia } from './CourseMediaPlayer';
 import { fetchCourseMediaBlob } from './course-media-delivery';
@@ -33,6 +34,16 @@ export function CourseLearnerPage() {
   const [activeQuizId, setActiveQuizId] = useState<string | null>(null);
   const assetRequest = useRef(0);
   const [media, setMedia] = useState<LearningMedia | null>(null);
+  const [openedLesson, setOpenedLesson] = useState<string | null>(null);
+  async function openLesson(lessonId: string) {
+    setError(null);
+    try {
+      await ApiClient.saveStudentCourseResume(courseId, lessonId);
+      setOpenedLesson(lessonId);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'COURSE_RESUME_FAILED');
+    }
+  }
   useEffect(
     () => () => {
       if (media) { URL.revokeObjectURL(media.url); if (media.subtitleUrl) URL.revokeObjectURL(media.subtitleUrl); }
@@ -61,6 +72,7 @@ export function CourseLearnerPage() {
       const result = await ApiClient.getStudentCourseWorkspace(courseId);
       if (request !== workspaceRequest.current) return;
       setWorkspace(result);
+      setOpenedLesson(result.resumeLessonId ?? null);
     } catch (cause) {
       if (request !== workspaceRequest.current) return;
       const message = cause instanceof Error ? cause.message : 'LEARNER_WORKSPACE_UNAVAILABLE';
@@ -249,7 +261,9 @@ export function CourseLearnerPage() {
     return (
       <main dir={locale === 'ar' ? 'rtl' : 'ltr'} className="mn-course-learner mn-page-shell mx-auto max-w-xl py-16 text-center">
         <BookOpen className="mx-auto h-10 w-10 text-[var(--mn-primary)]" />
-        <h1 className="mt-4 text-xl font-bold">{enrollmentRequired ? 'ابدأ هذه الدورة على منارتك' : 'تعذر فتح مساحة التعلم'}</h1>
+        <h1 className="mt-4 text-xl font-bold">
+          {enrollmentRequired ? 'ابدأ هذه الدورة على منارتك' : 'تعذر فتح مساحة التعلم'}
+        </h1>
         <p className="mt-2 text-sm text-[var(--mn-text-muted)]">
           التسجيل والتقدم والاختبارات تُدار من نظام التعلم الداخلي.
         </p>
@@ -260,7 +274,7 @@ export function CourseLearnerPage() {
         )}
         <button
           disabled={busy}
-          onClick={() => enrollmentRequired ? void enroll() : void load()}
+          onClick={() => (enrollmentRequired ? void enroll() : void load())}
           className="mt-6 rounded-xl bg-[var(--mn-primary)] px-5 py-3 font-bold text-white disabled:opacity-60"
         >
           {busy ? 'جارٍ التسجيل...' : enrollmentRequired ? 'التسجيل في الدورة' : 'إعادة المحاولة'}
@@ -275,13 +289,28 @@ export function CourseLearnerPage() {
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold text-[var(--mn-secondary)]">مساحة التعلم</p>
-            <h1 className="mt-1 text-[22px] font-bold">{workspace.course?.displayName ?? (locale === 'ar' ? 'دورة منارتك' : 'Manaratak course')}</h1>
+            <h1 className="mt-1 text-[22px] font-bold">
+              {workspace.course?.displayName ?? (locale === 'ar' ? 'دورة منارتك' : 'Manaratak course')}
+            </h1>
           </div>
           <span className="rounded-full bg-[var(--mn-gold-surface)] px-3 py-1 text-sm font-bold">
             {progress}%
           </span>
         </div>
         <progress className="mn-native-progress mt-4 h-2 w-full" value={progress} max={100} />
+        {workspace.resumeLessonId && (
+          <button
+            className="mt-3 rounded-xl border px-4 py-2 text-sm font-bold"
+            onClick={() => {
+              void openLesson(workspace.resumeLessonId!);
+              document
+                .getElementById(`lecture-${workspace.resumeLessonId}`)
+                ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+          >
+            {locale === 'ar' ? 'متابعة التعلم' : 'Resume learning'}
+          </button>
+        )}
       </section>
 
       {[...workspace.curriculum.modules, ...(workspace.curriculum.quizzes.some(quiz => !quiz.moduleId) ?
@@ -306,6 +335,7 @@ export function CourseLearnerPage() {
                   return (
                     <article
                       key={lesson.id}
+                      id={`lecture-${lesson.id}`}
                       data-lesson-id={lesson.id}
                       className="rounded-2xl border border-[var(--mn-border)] p-4"
                     >
@@ -324,14 +354,48 @@ export function CourseLearnerPage() {
                           <PlayCircle className="h-5 w-5 text-[var(--mn-secondary)]" />
                         )}
                       </div>
-                      {lesson.contentText && (
+                      {lesson.locked ? (
+                        <p className="mt-3 flex gap-2 text-sm">
+                          <LockKeyhole size={18} />
+                          {lesson.lockReason === 'SCHEDULED'
+                            ? (locale === 'ar' ? 'تتاح في ' : 'Available at ') +
+                              (lesson.availableAt
+                                ? new Date(lesson.availableAt).toLocaleString(
+                                    locale === 'ar' ? 'ar' : 'en',
+                                  )
+                                : '')
+                            : locale === 'ar'
+                              ? 'أكمل المحاضرة السابقة لفتح هذه المحاضرة.'
+                              : 'Complete the previous lecture to unlock this lecture.'}
+                        </p>
+                      ) : (
+                        <button
+                          disabled={busy}
+                          aria-pressed={openedLesson === lesson.id}
+                          className="mt-3 rounded-xl border px-3 py-2 text-sm font-bold"
+                          onClick={() => void openLesson(lesson.id)}
+                        >
+                          {locale === 'ar'
+                            ? 'فتح المحاضرة وحفظ موضع المتابعة'
+                            : 'Open lecture and save resume position'}
+                        </button>
+                      )}
+                      {lesson.contentText && !lesson.locked && (
                         <div className="mt-3 whitespace-pre-wrap text-sm leading-7">
                           {lesson.contentText}
                         </div>
                       )}
-                      <CourseLessonBlocks blocks={(workspace.curriculum.contentBlocks ?? []).filter(block => block.lessonId === lesson.id)} busy={busy}
-                        onAsset={(reference, title, subtitle) => void openLessonAsset(lesson.id, reference, title, subtitle)} onQuiz={quizId => void startQuiz(quizId)}
-                        media={block => media && media.referenceId === block.assetReferenceId ? <CourseMediaPlayer media={media} alt={String(block.payload.alt ?? media.title)} onError={() => setError(locale === 'ar' ? 'تعذر تشغيل الملف؛ أعد فتحه للحصول على إذن جديد.' : 'Playback failed; reopen the file to obtain a fresh grant.')}/> : null}/>
+                      <CourseLessonBlocks
+                        blocks={(workspace.curriculum.contentBlocks ?? []).filter(block => block.lessonId === lesson.id)}
+                        busy={busy}
+                        onAsset={(reference, title, subtitle) => void openLessonAsset(lesson.id, reference, title, subtitle)}
+                        onQuiz={(quizId) => void startQuiz(quizId)}
+                        media={(block) =>
+                          media && media.referenceId === block.assetReferenceId ? (
+                            <CourseMediaPlayer media={media} alt={String(block.payload.alt ?? media.title)} onError={() => setError(locale === 'ar' ? 'تعذر تشغيل الملف؛ أعد فتحه للحصول على إذن جديد.' : 'Playback failed; reopen the file to obtain a fresh grant.')}/>
+                          ) : null
+                        }
+                      />
                       <div className="mt-3 flex flex-wrap gap-2">
                         {workspace.curriculum.assets
                           .filter((asset) => asset.lessonId === lesson.id && !(workspace.curriculum.contentBlocks ?? []).some(block => block.assetReferenceId === asset.id))
@@ -352,7 +416,7 @@ export function CourseLearnerPage() {
                             </button>
                           ))}
                       </div>
-                      {!done && (
+                      {!done && !lesson.locked && (
                         <button
                           disabled={busy}
                           onClick={() => void completeLesson(lesson.id)}
@@ -377,12 +441,17 @@ export function CourseLearnerPage() {
                       </div>
                       <Award className="h-5 w-5" />
                     </div>
-                    {workspace?.progress.quizAttempts.filter(attempt => attempt.quizId === quiz.id).map(attempt => (
-                      <p key={attempt.id} className="mt-2 text-sm" role="status">
-                        المحاولة {attempt.attemptNumber}: {attempt.status === 'SUBMITTED' ? 'بانتظار التصحيح اليدوي' : attempt.score != null ? `${attempt.score}% — ${attempt.passed ? 'ناجح' : 'لم يجتز'}` : 'قيد الحل'}
-                        {attempt.metadata?.assessmentGrade?.feedback && <span className="block">ملاحظات المصحّح: {attempt.metadata.assessmentGrade.feedback}</span>}
-                      </p>
-                    ))}
+                    {workspace?.progress.quizAttempts.filter(attempt => attempt.quizId === quiz.id).map((attempt) => (
+                        <p key={attempt.id} className="mt-2 text-sm" role="status">
+                          المحاولة {attempt.attemptNumber}:{' '}
+                          {attempt.status === 'SUBMITTED' ? 'بانتظار التصحيح اليدوي' : attempt.score != null ? `${attempt.score}% — ${attempt.passed ? 'ناجح' : 'لم يجتز'}` : 'قيد الحل'}
+                          {attempt.metadata?.assessmentGrade?.feedback && (
+                            <span className="block">
+                              ملاحظات المصحّح: {attempt.metadata.assessmentGrade.feedback}
+                            </span>
+                          )}
+                        </p>
+                      ))}
                     {activeQuizId !== quiz.id ? (
                       <button
                         disabled={busy}
@@ -464,14 +533,14 @@ export function CourseLearnerPage() {
         })}
 
       {media && !(workspace?.curriculum.contentBlocks ?? []).some(block => block.assetReferenceId === media.referenceId) && (
-        <section className="rounded-2xl border bg-[var(--mn-surface)] p-4">
-          <div className="flex justify-between gap-3">
-            <h2 className="font-bold">{media.title}</h2>
-            <button onClick={() => setMedia(null)}>إغلاق المحتوى</button>
-          </div>
-          <CourseMediaPlayer media={media} onError={() => setError(locale === 'ar' ? 'تعذر تشغيل الملف؛ أعد فتحه للحصول على إذن جديد.' : 'Playback failed; reopen the file to obtain a fresh grant.')}/>
-        </section>
-      )}
+          <section className="rounded-2xl border bg-[var(--mn-surface)] p-4">
+            <div className="flex justify-between gap-3">
+              <h2 className="font-bold">{media.title}</h2>
+              <button onClick={() => setMedia(null)}>إغلاق المحتوى</button>
+            </div>
+            <CourseMediaPlayer media={media} onError={() => setError(locale === 'ar' ? 'تعذر تشغيل الملف؛ أعد فتحه للحصول على إذن جديد.' : 'Playback failed; reopen the file to obtain a fresh grant.')}/>
+          </section>
+        )}
       {error && (
         <p
           role="alert"
@@ -481,20 +550,7 @@ export function CourseLearnerPage() {
         </p>
       )}
       {workspace.progress.completion && (
-        <section className="mn-card rounded-2xl p-5 text-center">
-          <h2 className="font-bold">اكتملت الدورة</h2>
-          <p className="mt-2 text-sm">
-            {workspace.progress.completion.eligibleForCertificate
-              ? 'تُجهز شهادة منارتك بعد التحقق من الاستحقاق. ستظهر في حسابك عند اكتمال الإصدار.'
-              : 'لم يسجل النظام استحقاق شهادة لهذه الدورة.'}
-          </p>
-          <Link
-            to={`/${locale}/student?tab=LEARNING#certificates`}
-            className="mt-3 inline-block text-[var(--mn-secondary)] underline"
-          >
-            عرض شهاداتي في حساب الطالب
-          </Link>
-        </section>
+        <CourseCompletionCertificate key={courseId} courseId={courseId} locale={locale}/>
       )}
       <section className="text-center">
         <button

@@ -72,6 +72,8 @@ export * from './authorization/repositories/IRoleRepository';
 export * from './authorization/services/AuthorizationEvaluatorService';
 export * from './authorization/services/IPolicyEvaluator';
 export * from './authorization/services/CourseScopePolicy';
+export * from './courses/CourseDeliveryPolicy';
+export * from './courses/CourseCertificateBinding';
 export * from './authorization/services/InheritanceValidatorService';
 export * from './authorization/value-objects/AccessDecision';
 export * from './authorization/value-objects/Action';

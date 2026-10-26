@@ -11,6 +11,7 @@ import {
   Clock,
   DollarSign,
   ExternalLink,
+  Eye,
   GraduationCap,
   PlayCircle,
   ShieldCheck,
@@ -50,9 +51,9 @@ export function OwnerCourseDetail({
       className="w-full max-w-md mx-auto pt-0 pb-12 text-start font-['Cairo',sans-serif] animate-in fade-in duration-200 bg-[var(--mn-surface-muted)] min-h-screen mn-panel"
       dir={publicDir}
     >
-      {/* ========================================================================= */}
+      {/* 3. 2-COLUMN X 2-ROW SUMMARY GRID (Matching Scholarships / Universities Style) */}
       {/* 1. TOP HERO CONTAINER (Matches Scholarship & University Detail Header) */}
-      {/* ========================================================================= */}
+      {/* 3. 2-COLUMN X 2-ROW SUMMARY GRID (Matching Scholarships / Universities Style) */}
       <div className="relative w-full overflow-hidden">
         <div className="absolute top-2 left-2 z-30 scale-80 origin-top-left">
           <DetailBackButton onBack={onBack} mode="close" />
@@ -132,9 +133,9 @@ export function OwnerCourseDetail({
         </div>
       </div>
 
-      {/* ========================================================================= */}
+      {/* 3. 2-COLUMN X 2-ROW SUMMARY GRID (Matching Scholarships / Universities Style) */}
       {/* MAIN CONTENT WRAPPER */}
-      {/* ========================================================================= */}
+      {/* 3. 2-COLUMN X 2-ROW SUMMARY GRID (Matching Scholarships / Universities Style) */}
       <div className="px-1.5 sm:px-2 space-y-2.5 z-20 relative -mt-2 sm:-mt-2.5">
         {/* 2. PROVIDER / AUTHORITY CARD */}
         <div
@@ -184,7 +185,9 @@ export function OwnerCourseDetail({
               <div className="flex flex-col min-w-0 text-start">
                 <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-tight truncate">{publicT('public_lectures_2')}</span>
                 <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif] leading-tight truncate mt-0.5">
-                  {course.lessonsCount ? publicT('public_lecture_count', { v0: course.lessonsCount }) : (course.ownerId ? publicT('public_review_the_course_syllabus') : publicT('public_8_lectures'))}
+                  {course.lessonsCount
+                    ? publicT('public_lecture_count', { v0: course.lessonsCount })
+                    : course.ownerId ? publicT('public_review_the_course_syllabus') : publicT('public_8_lectures')}
                 </span>
               </div>
             </div>
@@ -223,9 +226,33 @@ export function OwnerCourseDetail({
           </div>
         </div>
 
-        {course.description && <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir={publicDir}><DetailSectionHeader id="course-description-header" icon={BookOpen} title={publicT('public_course_overview')} level={3} titleClassName="mn-imported-detail-title"/><p className="mt-3 text-xs leading-7 whitespace-pre-wrap">{course.description}</p></section>}
-        {[{title:'متطلبات الالتحاق',items:course.prerequisites},{title:'الفئات المستهدفة',items:course.targetAudience}].map(section=>section.items?.length ? <section key={section.title} className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir={publicDir}><h3 className="mn-imported-detail-title">{section.title}</h3><ul className="mt-3 space-y-2 text-xs">{section.items.map((item,index)=><li key={index}>{item}</li>)}</ul></section>:null)}
-        {course.ownerId && <p className="text-xs font-bold text-[var(--mn-secondary)]">{course.certificateAvailable?publicT('public_the_course_offers_a_manaratak_certificate_after_completion'):publicT('public_no_certificate_is_enabled_for_this_course')}</p>}
+        {course.description && (
+          <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir={publicDir}><DetailSectionHeader id="course-description-header" icon={BookOpen} title={publicT('public_course_overview')} level={3} titleClassName="mn-imported-detail-title"/><p className="mt-3 text-xs leading-7 whitespace-pre-wrap">{course.description}</p></section>
+        )}
+        {[{title:'متطلبات الالتحاق',items:course.prerequisites},{title:'الفئات المستهدفة',items:course.targetAudience}].map((section) =>
+          section.items?.length ? (
+            <section key={section.title} className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir={publicDir}>
+              <h3 className="mn-imported-detail-title">{section.title}</h3>
+              <ul className="mt-3 space-y-2 text-xs">
+                {section.items.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            </section>
+          ) : null,
+        )}
+        {course.ownerId && (
+          <p className="text-xs font-bold text-[var(--mn-secondary)]">{course.certificateAvailable?publicT('public_the_course_offers_a_manaratak_certificate_after_completion'):publicT('public_no_certificate_is_enabled_for_this_course')}</p>
+        )}
+        {dataMode === 'api' && course.ownerId && course.slug && (
+          <Link
+            className="my-3 inline-flex items-center gap-2 rounded-xl border border-[#DDEFF2] px-4 py-2 text-xs font-bold text-[#0E7C86]"
+            to={`/${locale}/courses/${encodeURIComponent(course.slug)}/preview`}
+          >
+            <Eye size={18} />
+            {locale === 'ar' ? 'فهرس الدورة والمعاينات' : 'Course outline and previews'}
+          </Link>
+        )}
         {/* 4. BRIEF COURSE DESCRIPTION (وصف مختصر للدورة) */}
         {course.courseContent && (
           <div
@@ -312,7 +339,16 @@ export function OwnerCourseDetail({
           </div>
         )}
 
-        {course.acquiredSkills && course.acquiredSkills.length > 0 && <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir={publicDir}><DetailSectionHeader id="course-skills-header" icon={BookOpen} title={publicT('public_skills_gained')} level={3} titleClassName="mn-imported-detail-title"/><ul className="mt-3 space-y-2 text-xs">{course.acquiredSkills.map((skill,index)=><li key={index}>{skill}</li>)}</ul></section>}
+        {course.acquiredSkills && course.acquiredSkills.length > 0 && (
+          <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir={publicDir}>
+            <DetailSectionHeader id="course-skills-header" icon={BookOpen} title={publicT('public_skills_gained')} level={3} titleClassName="mn-imported-detail-title"/>
+            <ul className="mt-3 space-y-2 text-xs">
+              {course.acquiredSkills.map((skill, index) => (
+                <li key={index}>{skill}</li>
+              ))}
+            </ul>
+          </section>
+        )}
         {/* 7. ACTION CTA BUTTON */}
         <div className="pt-2">
           {dataMode === 'prototype' && onStartStudy ? (

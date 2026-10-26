@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import type {CertificateReadModelService} from '@manaratak/application';
 import { z } from 'zod';
 import { IPrincipalAccessValidator, ISessionManager, ITokenProvider } from '@manaratak/core';
 import { CourseProgressUseCases, LearningPathUseCases, ProcessAssetLifecycleUseCase } from '@manaratak/application';
@@ -11,19 +12,41 @@ import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
 import { problemDetails } from '../../http/ProblemDetails.js';
 
 export class CourseLearnerRouter {
-  public static create(cradle: { processAssetLifecycleUseCase: ProcessAssetLifecycleUseCase; roleAssignmentRepository: IRoleAssignmentRepository; courseProgressUseCases: CourseProgressUseCases; learningPathUseCases: LearningPathUseCases; tokenProvider: ITokenProvider; sessionManager: ISessionManager; principalAccessValidator: IPrincipalAccessValidator; apiIdempotencyStore: PrismaApiIdempotencyStore }): Router {
+  public static create(cradle: {
+    certificateReadModelService?:CertificateReadModelService;
+    processAssetLifecycleUseCase: ProcessAssetLifecycleUseCase;
+    roleAssignmentRepository: IRoleAssignmentRepository;
+    courseProgressUseCases: CourseProgressUseCases;
+    learningPathUseCases: LearningPathUseCases;
+    tokenProvider: ITokenProvider;
+    sessionManager: ISessionManager;
+    principalAccessValidator: IPrincipalAccessValidator;
+    apiIdempotencyStore: PrismaApiIdempotencyStore;
+  }): Router {
     const router = Router();
     const { courseProgressUseCases, learningPathUseCases, tokenProvider, sessionManager, principalAccessValidator, apiIdempotencyStore } = cradle;
-    const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => Promise.resolve(fn(req, res, next)).catch(error => {
-      if (error instanceof Error && (error.message === 'COURSE_ENROLLMENT_REQUIRED' || error.message === 'COURSE_FINANCIAL_CLEARANCE_REQUIRED' || error.message.startsWith('COURSE_ENROLLMENT_NOT_ACCESSIBLE:') || error.message.startsWith('COURSE_ENROLLMENT_NOT_ACTIVE:'))) {
+    const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
+      Promise.resolve(fn(req, res, next)).catch((error) => {
+        if (error instanceof Error && error.message === 'COURSE_RESUME_ENROLLMENT_CONFLICT') {
+          res.status(409).json({ error: error.message });
+          return;
+        }
+        if (
+          error instanceof Error &&
+          (error.message === 'COURSE_LESSON_LOCKED' ||
+            error.message === 'COURSE_ENROLLMENT_REQUIRED' ||
+            error.message === 'COURSE_FINANCIAL_CLEARANCE_REQUIRED' ||
+            error.message.startsWith('COURSE_ENROLLMENT_NOT_ACCESSIBLE:') ||
+            error.message.startsWith('COURSE_ENROLLMENT_NOT_ACTIVE:'))
+        ) {
         res.status(403).type('application/problem+json').json(problemDetails({
           status: 403, code: error.message, detail: error.message,
           instance: req.originalUrl, traceId: String(req.headers['x-request-id'] || 'unknown'),
         }));
         return;
       }
-      next(error);
-    });
+        next(error);
+      });
     router.use(new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator).generate());
     router.use(createStudentRoleGuard(cradle.roleAssignmentRepository));
     router.use(createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }));
@@ -42,6 +65,28 @@ export class CourseLearnerRouter {
       res.json(await cradle.processAssetLifecycleUseCase.requestDeliveryGrant({assetId, expiresInSeconds:300}));
     }));
     router.post('/:courseId/enroll', asyncHandler(async (req: Request, res: Response) => res.status(201).json(await courseProgressUseCases.enroll(req.params.courseId, student(req)))));
+    router.post(
+      '/:courseId/resume',
+      asyncHandler(async (req: Request, res: Response) => {
+        const body = z.object({ lessonId: z.string().uuid() }).strict().parse(req.body);
+        res.json(
+          await courseProgressUseCases.saveResumeLesson(
+            req.params.courseId,
+            student(req),
+            body.lessonId,
+          ),
+        );
+      }),
+    );
+    router.get(
+      '/:courseId/certificate-status',asyncHandler(async(req:Request,res:Response)=>{
+        const owner=student(req),snapshot=await courseProgressUseCases.getProgress(req.params.courseId,owner);
+        res.setHeader('Cache-Control','no-store');
+        if(!snapshot?.completion)return res.json({status:'NOT_COMPLETED',certificateId:null,pdfAvailable:false});
+        if(!snapshot.completion.eligibleForCertificate)return res.json({status:'NOT_ELIGIBLE',certificateId:null,pdfAvailable:false});
+        if(!cradle.certificateReadModelService)return res.status(503).json({error:'CERTIFICATE_STATUS_UNAVAILABLE'});
+        res.json(await cradle.certificateReadModelService.courseCompletionStatus(owner,req.params.courseId,snapshot.completion.id));
+      }));
     router.get('/:courseId/workspace', asyncHandler(async (req: Request, res: Response) => res.json(await courseProgressUseCases.getLearningWorkspace(req.params.courseId, student(req)))));
     router.get('/:courseId/progress', asyncHandler(async (req: Request, res: Response) => res.json(await courseProgressUseCases.getProgress(req.params.courseId, student(req)))));
     router.put('/:courseId/lessons/:lessonId/progress', asyncHandler(async (req: Request, res: Response) => {

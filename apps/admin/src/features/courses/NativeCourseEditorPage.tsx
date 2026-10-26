@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { NativeCourseDeliveryPanel } from './NativeCourseDeliveryPanel';
+import { NativeCourseCertificatePanel } from './NativeCourseCertificatePanel';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import type {
   CourseDto,
@@ -62,8 +64,14 @@ export function NativeCourseEditorPage() {
     [notice, setNotice] = useState('');
   const loadGeneration = useRef(0);
   const [copyOpen, setCopyOpen] = useState(false);
-  const requestedTab=params.get('tab')??'basics';
-  const allowedTab=(key:string)=>!data || data.access.manage || (key==='curriculum' && data.access.edit) || (key==='assessments' && (data.access.edit||data.access.grade)) || key==='publication' || (['students','reports'].includes(key)&&data.access.learners);
+  const requestedTab = params.get('tab') ?? 'basics';
+  const allowedTab = (key: string) =>
+    !data ||
+    data.access.manage ||
+    (['curriculum', 'delivery'].includes(key) && data.access.edit) ||
+    (key === 'assessments' && (data.access.edit || data.access.grade)) ||
+    key === 'publication' ||
+    (['students', 'reports'].includes(key) && data.access.learners);
   const tab=allowedTab(requestedTab)?requestedTab:data?.access.edit?'curriculum':data?.access.grade?'assessments':'publication';
   const returnTo =
     params.get('returnTo')?.startsWith('/courses') && !params.get('returnTo')?.startsWith('//')
@@ -187,8 +195,10 @@ export function NativeCourseEditorPage() {
     ['basics', tr('المعلومات الأساسية', 'Basics'), BookOpen],
     ['enrollment', tr('التسجيل والإتاحة', 'Enrollment and access'), ShieldCheck],
     ['curriculum', tr('المنهج والمحاضرات', 'Curriculum and lectures'), Layers],
+    ['delivery', tr('المعاينات والجدولة', 'Previews and scheduling'), Eye],
     ['assessments', tr('التقييمات', 'Assessments'), FileQuestion],
     ['completion', tr('الإكمال والشهادة', 'Completion and certificate'), Award],
+    ['certificate', tr('ربط الشهادة', 'Certificate binding'), Award],
     ['publication', tr('المعاينة والنشر', 'Preview and publication'), Eye],
     ['students', tr('الطلاب والتقدم', 'Learners and progress'), Users],
     ['reports', tr('التقارير', 'Reports'), ClipboardCheck],
@@ -231,12 +241,20 @@ export function NativeCourseEditorPage() {
           <RefreshCw size={16} />
           {tr('قراءة النسخة الأحدث', 'Reload current version')}
         </button>
-        {data?.access.manage && <Link to={`/courses/${id}?returnTo=${encodeURIComponent(returnTo)}`}>
-          {tr('أدوات الإدارة المتقدمة الحالية', 'Existing advanced administration')}
-        </Link>}
-        {data?.access.manage && <button type="button" disabled={busy || loading || !data} onClick={() => { if (confirmDiscard()) setCopyOpen(true); }}>{tr('نسخ الدورة', 'Copy course')}</button>}
+        {data?.access.manage && (
+          <Link to={`/courses/${id}?returnTo=${encodeURIComponent(returnTo)}`}>
+            {tr('أدوات الإدارة المتقدمة الحالية', 'Existing advanced administration')}
+          </Link>
+        )}
+        {data?.access.manage && (
+          <button type="button" disabled={busy || loading || !data} onClick={() => { if (confirmDiscard()) setCopyOpen(true); }}>
+            {tr('نسخ الدورة', 'Copy course')}
+          </button>
+        )}
       </div>
-      {copyOpen && data && <NativeCourseCopyDialog course={data.course} onClose={() => setCopyOpen(false)} onCreated={copyId => { setCopyOpen(false); setDirty(false); navigate(`/courses/${copyId}/editor`); }}/>}
+      {copyOpen && data && (
+        <NativeCourseCopyDialog course={data.course} onClose={() => setCopyOpen(false)} onCreated={copyId => { setCopyOpen(false); setDirty(false); navigate(`/courses/${copyId}/editor`); }}/>
+      )}
       <label className="course-field course-reason-field">
         <span>{tr('مبرر الإجراء', 'Action reason')}</span>
         <input
@@ -260,8 +278,10 @@ export function NativeCourseEditorPage() {
         className="native-editor-tabs"
         aria-label={tr('أقسام محرر الدورة', 'Course editor sections')}
       >
-        {tabs.filter(([key])=>allowedTab(key)).map(([key, label, Icon]) => (
-          <button
+        {tabs
+          .filter(([key]) => allowedTab(key))
+          .map(([key, label, Icon]) => (
+            <button
             key={key}
             type="button"
             aria-current={tab === key ? 'page' : undefined}
@@ -277,10 +297,10 @@ export function NativeCourseEditorPage() {
               });
             }}
           >
-            <Icon size={17} />
-            {label}
-          </button>
-        ))}
+              <Icon size={17} />
+              {label}
+            </button>
+          ))}
       </nav>
       {loading && !data ? (
         <p role="status">{tr('جارٍ قراءة الدورة…', 'Loading course…')}</p>
@@ -308,14 +328,16 @@ export function NativeCourseEditorPage() {
                   onDirty={changeDirty}
                   command={command}
                 />
-                <div onChangeCapture={() => changeDirty(true)}><OwnerDescriptionTranslationPanel
+                <div onChangeCapture={() => changeDirty(true)}>
+                  <OwnerDescriptionTranslationPanel
                   domain="COURSE"
                   ownerId={id}
                   endpoint="/admin/courses"
                   optionalFields={data.course.optionalFields}
                   status={data.course.status}
                   onSaved={load}
-                /></div>
+                />
+                </div>
                 <ExternalCourseRelationships
                   id={id}
                   editable={!readonly}
@@ -349,6 +371,16 @@ export function NativeCourseEditorPage() {
                 reload={load}
               />
             )}
+            {tab === 'delivery' && (
+              <NativeCourseDeliveryPanel
+                key={`delivery-${data.course.version}`}
+                course={data.course}
+                snapshot={data.curriculum}
+                command={command}
+                disabled={busy || readonly || !data.access.edit}
+                onDirty={changeDirty}
+              />
+            )}
             {tab === 'assessments' && (
               <>
                 <NativeAssessments
@@ -358,13 +390,17 @@ export function NativeCourseEditorPage() {
                   command={command}
                   onDirty={changeDirty}
                 />
-                {data.access.manage && <div onChangeCapture={() => changeDirty(true)}><CourseQuestionBanksPanel
+                {data.access.manage && (
+                  <div onChangeCapture={() => changeDirty(true)}>
+                    <CourseQuestionBanksPanel
                   courseId={id}
                   version={data.course.version}
                   status={data.course.status}
                   snapshot={data.curriculum}
                   onSaved={load}
-                /></div>}
+                />
+                  </div>
+                )}
                 {data.access.grade && <AssessmentReviewPanel courseId={id} onDirty={changeDirty}/>}
               </>
             )}
@@ -375,6 +411,15 @@ export function NativeCourseEditorPage() {
                 busy={busy}
                 onDirty={changeDirty}
                 command={command}
+              />
+            )}
+            {tab === 'certificate' && (
+              <NativeCourseCertificatePanel
+                key={`certificate-${data.course.version}`}
+                id={id}
+                command={command}
+                disabled={busy || readonly}
+                onDirty={changeDirty}
               />
             )}
             {tab === 'publication' && (
@@ -455,14 +500,14 @@ export function NativeCourseEditorPage() {
                 </ul>
                 <div className="course-drawer-toolbar">
                   {data.access.edit && data.course.status !== 'PUBLISHED' && data.course.status !== 'ARCHIVED' && (
-                    <button
+                      <button
                       type="button"
                       disabled={busy}
                       onClick={() => void command('mark-ready', {}).catch(() => undefined)}
                     >
-                      {tr('إرسال للمراجعة', 'Submit for review')}
-                    </button>
-                  )}
+                        {tr('إرسال للمراجعة', 'Submit for review')}
+                      </button>
+                    )}
                   {data.access.review && data.course.status === 'READY_TO_REVIEW' && (
                     <button
                       type="button"

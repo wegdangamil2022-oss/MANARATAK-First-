@@ -31,6 +31,7 @@ import {
   UpdateCourseQuizDto,
 } from '@manaratak/domain';
 import { randomUUID } from 'node:crypto';
+import { normalizeCourseCertificateBinding } from '@manaratak/domain';
 import { copyNativeCurriculum, type NativeCurriculumCopyOptions } from '../services/CopyNativeCurriculum';
 
 export class CourseCurriculumUseCases {
@@ -82,7 +83,6 @@ export class CourseCurriculumUseCases {
       throw new Error('COURSE_CURRICULUM_SCOPE_MISMATCH');
   }
 
-
   private async checkpointCourseVersion(courseId: string): Promise<void> {
     // PrismaCourseRepository turns even a no-field update into an immutable
     // version checkpoint containing the complete current curriculum snapshot.
@@ -94,6 +94,36 @@ export class CourseCurriculumUseCases {
     if (course.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE || (!input.moduleId && !input.lessonId) || (input.moduleId && input.lessonId)) throw Error('COURSE_COPY_SCOPE_INVALID');
     const result = await copyNativeCurriculum(this.curriculumRepository, this.assetRepository, courseId, courseId, input);
     await this.checkpointCourseVersion(courseId); return result;
+  }
+  public async setDeliveryPolicy(courseId: string, input: unknown) {
+    const course = await this.ensureMutableCourse(courseId);
+    if (course.originType !== 'NATIVE_MANARATAK_COURSE') throw Error('NATIVE_COURSE_REQUIRED');
+    const policy = normalizeCourseDeliveryPolicy(input),
+      snapshot = await this.curriculumRepository.getCurriculumSnapshot(courseId);
+    const active = new Set(
+      snapshot.lessons
+        .filter(
+          (row) =>
+            row.status !== 'ARCHIVED' &&
+            snapshot.modules.some(
+              (module) => module.id === row.moduleId && module.status !== 'ARCHIVED',
+            ),
+        )
+        .map((row) => row.id),
+    );
+    if (Object.keys(policy.lessons).some((id) => !active.has(id)))
+      throw Error('COURSE_DELIVERY_LESSON_SCOPE_MISMATCH');
+    return this.courseRepository.update(courseId, { optionalFields: { deliveryPolicy: policy } });
+  }
+
+  public async setCertificateBinding(courseId: string, input: unknown) {
+    const course = await this.ensureMutableCourse(courseId);
+    if (course.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE)
+      throw Error('NATIVE_COURSE_REQUIRED');
+    const binding = input === null ? null : normalizeCourseCertificateBinding(input);
+    return this.courseRepository.update(courseId, {
+      optionalFields: { certificateBinding: binding },
+    });
   }
 
   public async convertLegacyLessonText(courseId: string, lessonId: string) {
@@ -410,3 +440,4 @@ export class CourseCurriculumUseCases {
     return this.curriculumRepository.getCurriculumSnapshot(courseId);
   }
 }
+import { normalizeCourseDeliveryPolicy } from '@manaratak/domain';

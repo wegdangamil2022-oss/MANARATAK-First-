@@ -28,9 +28,21 @@ interface CourseProgressTransactionContext extends AtomicPersistenceContext {
 
 type Db = PrismaClient | Prisma.TransactionClient;
 const json = (value: unknown): Prisma.InputJsonValue | undefined =>
-  value === undefined ? undefined : JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
+  value === undefined ? undefined : (JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue);
 
 export class PrismaCourseProgressRepository implements ITransactionalCourseProgressRepository {
+  async saveResumeLesson(
+    courseId: string,
+    studentReferenceId: string,
+    courseVersion: number,
+    lessonId: string,
+  ): Promise<void> {
+    const resume = JSON.stringify({ lessonId, savedAt: new Date().toISOString() });
+    const count = await this.prisma.$executeRaw(
+      Prisma.sql`UPDATE "CourseEnrollment" SET "metadata"=COALESCE("metadata",'{}'::jsonb) || jsonb_build_object('resume',${resume}::jsonb),"updatedAt"=NOW() WHERE "courseId"=${courseId} AND "studentReferenceId"=${studentReferenceId} AND "status" IN ('ACTIVE','COMPLETED') AND ("metadata"->>'courseVersion'=${String(courseVersion)} OR "metadata"->>'courseVersion' IS NULL)`,
+    );
+    if (count !== 1) throw Error('COURSE_RESUME_ENROLLMENT_CONFLICT');
+  }
   public constructor(private readonly prisma: PrismaClient) {}
 
   public async listCourseLearners(courseId: string, input: { page: number; pageSize: number; status?: string; search?: string }): ReturnType<NonNullable<ICourseProgressRepository['listCourseLearners']>> {

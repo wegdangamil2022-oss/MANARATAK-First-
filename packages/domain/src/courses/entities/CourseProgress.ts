@@ -150,12 +150,17 @@ export interface CourseLearnerAssetDto {
 }
 
 export interface CourseLearnerWorkspaceDto {
+  resumeLessonId?: string | null;
   course?: { id: string; displayName: string; version: number };
   progress: StudentCourseProgressSnapshotDto;
   curriculum: {
     contentBlocks?: Omit<import('../content-blocks').CourseContentBlockDto, 'courseId' | 'status'>[];
     modules: Omit<import('./CourseCurriculum').CourseModuleDto,'createdAt'|'updatedAt'|'metadata'>[];
-    lessons: Omit<import('./CourseCurriculum').CourseLessonDto,'createdAt'|'updatedAt'|'metadata'>[];
+    lessons: (Omit<import('./CourseCurriculum').CourseLessonDto,'createdAt'|'updatedAt'|'metadata'> & {
+      locked?: boolean;
+      lockReason?: 'SCHEDULED' | 'PREVIOUS_LESSON' | null;
+      availableAt?: string | null;
+    })[];
     assets: CourseLearnerAssetDto[];
     quizzes: Omit<import('./CourseCurriculum').CourseQuizDto,'createdAt'|'updatedAt'|'metadata'>[];
     questions: CourseLearnerQuestionDto[];

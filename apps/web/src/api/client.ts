@@ -758,17 +758,46 @@ export interface CourseLearnerQuestionDto {
 }
 
 export interface CourseLearnerWorkspaceDto {
+  resumeLessonId?: string | null;
   course?: { id: string; displayName: string; version: number };
   progress: StudentCourseProgressSnapshotDto;
   curriculum: {
     contentBlocks?: Omit<import('@manaratak/domain').CourseContentBlockDto, 'courseId' | 'status'>[];
     modules: CourseModuleDto[];
-    lessons: CourseLessonDto[];
+    lessons: (CourseLessonDto & {
+      locked?: boolean;
+      lockReason?: 'SCHEDULED' | 'PREVIOUS_LESSON' | null;
+      availableAt?: string | null;
+    })[];
     assets: Array<{ id: string; lessonId: string; title?: string | null; assetType: string; position: number; isRequired: boolean }>;
     quizzes: CourseQuizDto[];
     questions: CourseLearnerQuestionDto[];
   };
 }
+
+export type CoursePublicPreviewDto = {
+  course: {
+    id: string;
+    slug: string;
+    displayName: string;
+    description?: string;
+    learningOutcomes?: unknown;
+  };
+  curriculum: {
+    modules: { id: string; title: string; position: number }[];
+    lessons: {
+      id: string;
+      moduleId: string;
+      title: string;
+      summary?: string | null;
+      contentText?: string | null;
+      previewAvailable: boolean;
+      position: number;
+    }[];
+    contentBlocks: NonNullable<CourseLearnerWorkspaceDto['curriculum']['contentBlocks']>;
+    assets: CourseLearnerWorkspaceDto['curriculum']['assets'];
+  };
+};
 
 export interface StudentCourseQuizAttemptDto {
   id: string;
@@ -1407,7 +1436,6 @@ export interface StablePublicGraphIdentity {
   displayName: string;
 }
 
-
 export interface PublicEditorialGraphIdentity {
   contentId: string;
   publicId: string;
@@ -1580,9 +1608,9 @@ export async function apiFetch(
             const payload = await refreshRes.json().catch(() => ({}));
             if (payload?.data?.authenticated === true) {
               try {
-                window.localStorage?.removeItem('manaratak_refresh_token');
-                window.sessionStorage?.removeItem('manaratak_refresh_token');
-              } catch {}
+      window.localStorage?.removeItem('manaratak_refresh_token');
+      window.sessionStorage?.removeItem('manaratak_refresh_token');
+    } catch {}
               csrfManager.clearToken();
               webRefreshFailedPermanently = false;
               return true;
@@ -1591,8 +1619,8 @@ export async function apiFetch(
             webRefreshFailedPermanently = true;
           }
         } catch {
-          // A transient network failure must not disable later refresh attempts.
-        }
+    // Storage may be unavailable in privacy-restricted contexts; server-side network limiting still applies.
+  }
         return false;
       })();
     }
@@ -1756,7 +1784,6 @@ export class ApiClient {
     if (!res.ok) throw new Error(await parseErrorMessage(res, 'تعذر تنفيذ البحث العام'));
     return res.json();
   }
-
 
   static async getAdminHealthOverview(): Promise<any> {
     const res = await apiFetch(`${API_BASE_URL}/monitoring/overview`, {
@@ -2177,6 +2204,40 @@ export class ApiClient {
     return studentCourseRequest<CourseLearnerWorkspaceDto>(`/${encodeURIComponent(courseId)}/workspace`);
   }
 
+  static getStudentCourseCertificateStatus(courseId:string):Promise<{status:string;certificateId:string|null;pdfAvailable:boolean}>{
+    return studentCourseRequest(`/${encodeURIComponent(courseId)}/certificate-status`);
+  }
+
+  static async getCoursePublicPreview(slug: string): Promise<CoursePublicPreviewDto> {
+    const res = await apiFetch(
+      `${API_BASE_URL}/public/courses/${encodeURIComponent(slug)}/preview?locale=${currentPublicLocale()}`,
+    );
+    if (!res.ok) throw Error('COURSE_PREVIEW_UNAVAILABLE');
+    return res.json();
+  }
+  static async getCoursePublicPreviewGrant(
+    slug: string,
+    lessonId: string,
+    referenceId: string,
+  ): Promise<StudentAssetDeliveryGrantDto> {
+    const res = await apiFetch(
+      `${API_BASE_URL}/public/courses/${encodeURIComponent(slug)}/lessons/${encodeURIComponent(lessonId)}/assets/${encodeURIComponent(referenceId)}/preview-delivery-grant`,
+      { method: 'POST' },
+    );
+    if (!res.ok) throw Error('COURSE_PREVIEW_MEDIA_UNAVAILABLE');
+    return res.json();
+  }
+
+  static saveStudentCourseResume(
+    courseId: string,
+    lessonId: string,
+  ): Promise<{ lessonId: string }> {
+    return studentCourseRequest(`/${encodeURIComponent(courseId)}/resume`, {
+      method: 'POST',
+      body: JSON.stringify({ lessonId }),
+    });
+  }
+
   static markStudentCourseLessonComplete(courseId: string, lessonId: string): Promise<StudentCourseProgressSnapshotDto> {
     return studentCourseRequest<StudentCourseProgressSnapshotDto>(`/${encodeURIComponent(courseId)}/lessons/${encodeURIComponent(lessonId)}/progress`, {
       method: 'PUT',
@@ -2283,10 +2344,10 @@ export class ApiClient {
     payload: Omit<AdminCertificateTemplateDto, 'id' | 'publicId' | 'status' | 'updatedAt'>,
   ): Promise<AdminCertificateTemplateDto> {
     return this.adminCertificateRequest('/admin/certificates/templates', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
   }
   static async updateAdminCertificateTemplate(
     id: string,
@@ -2317,10 +2378,10 @@ export class ApiClient {
     payload: Record<string, unknown>,
   ): Promise<AdminCertificateDto> {
     return this.adminCertificateRequest(`/admin/certificates/${encodeURIComponent(id)}/${action}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
   }
   private static async adminCertificateRequest(path: string, init?: RequestInit): Promise<any> {
     const res = await apiFetch(`${API_BASE_URL}${path}`, init);
@@ -3060,14 +3121,10 @@ export class ApiClient {
     const res = await apiFetch(
       `${API_BASE_URL}/student/${encodeURIComponent(studentReferenceId)}/workspace`,
       {
-        method: 'PUT',
-        headers: getStudentHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(workspace),
-      },
+      method: 'PUT', headers: getStudentHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(workspace),
+    },
     );
-    if (!res.ok) {
-      throw new Error(await parseErrorMessage(res, 'تعذر حفظ إعدادات مساحة الطالب'));
-    }
+    if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر حفظ إعدادات مساحة الطالب')); }
     return res.json();
   }
 
@@ -3128,14 +3185,10 @@ export class ApiClient {
     const res = await apiFetch(
       `${API_BASE_URL}/student/${encodeURIComponent(studentReferenceId)}/collections`,
       {
-        method: 'POST',
-        headers: getStudentHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(collection),
-      },
+      method: 'POST', headers: getStudentHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(collection),
+    },
     );
-    if (!res.ok) {
-      throw new Error(await parseErrorMessage(res, 'تعذر إنشاء المجموعة'));
-    }
+    if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر إنشاء المجموعة')); }
     return res.json();
   }
 
@@ -3183,14 +3236,10 @@ export class ApiClient {
     const res = await apiFetch(
       `${API_BASE_URL}/student/${encodeURIComponent(studentReferenceId)}/snapshots`,
       {
-        method: 'POST',
-        headers: getStudentHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ label }),
-      },
+      method: 'POST', headers: getStudentHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ label }),
+    },
     );
-    if (!res.ok) {
-      throw new Error(await parseErrorMessage(res, 'تعذر حفظ نسخة الإعدادات'));
-    }
+    if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر حفظ نسخة الإعدادات')); }
     return res.json();
   }
 
@@ -3715,9 +3764,9 @@ export class ApiClient {
 
   static async executeAdminMajorAction(id: string, action: string): Promise<void> {
     const res = await apiFetch(`${API_BASE_URL}/admin/majors/${encodeURIComponent(id)}/${action}`, {
-      method: 'POST',
-      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
-    });
+        method: 'POST',
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(
@@ -4123,7 +4172,6 @@ export class ApiClient {
     return Array.isArray(body?.data) ? body.data : [];
   }
 
-
   static async getAdminScholarships(
     filters: AdminScholarshipFilters,
   ): Promise<PaginatedResult<any>> {
@@ -4165,10 +4213,10 @@ export class ApiClient {
 
   static async createAdminScholarship(payload: any): Promise<any> {
     const res = await apiFetch(`${API_BASE_URL}/admin/scholarships`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       if (errorData.details && Array.isArray(errorData.details)) {
@@ -4278,10 +4326,10 @@ export class ApiClient {
     dataText: string;
   }): Promise<any> {
     const res = await apiFetch(`${API_BASE_URL}/admin/imports/preflight`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(
@@ -4622,10 +4670,10 @@ export class ApiClient {
 
   static async preflightCourseImport(payload: Record<string, unknown>): Promise<any> {
     const res = await apiFetch(`${API_BASE_URL}/admin/imports/courses/preflight`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(errorData.error || 'Course import preflight failed');
@@ -4635,10 +4683,10 @@ export class ApiClient {
 
   static async createCourseImportBatch(payload: Record<string, unknown>): Promise<any> {
     const res = await apiFetch(`${API_BASE_URL}/admin/imports/courses/batches`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(errorData.error || 'Failed to create course import batch');
@@ -4720,5 +4768,4 @@ export class ApiClient {
     }
     return res.json();
   }
-
 }

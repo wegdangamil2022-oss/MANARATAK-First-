@@ -41,6 +41,14 @@ export class CertificateReadModelService {
 
   public deliveryArtifact(id: string, kind: 'pdf' | 'preview', ownerId: string) { return this.certificates.deliveryArtifact(id, kind, ownerId); }
 
+  public async courseCompletionStatus(studentId:string,courseId:string,completionId:string){
+    const row=await this.repository.findBySourceCompletionId(completionId);
+    if(!row)return{status:'NOT_ISSUED' as const,certificateId:null,pdfAvailable:false};
+    if(row.studentReferenceId!==studentId||row.achievementType!=='COURSE'||row.achievementId!==courseId)throw Error('CERTIFICATE_STUDENT_OWNER_MISMATCH');
+    const status=row.status==='ACTIVE'&&row.expiresAt&&new Date(row.expiresAt)<=new Date()?'EXPIRED':row.status;
+    return{status,certificateId:row.id,pdfAvailable:status==='ACTIVE'&&Boolean(row.certificatePdfAssetId)};
+  }
+
   public async verifyPublic(verificationCode: string): Promise<PublicCertificateVerificationDto> {
     const row: CertificateVerificationDto = await this.certificates.verifyByCode(verificationCode);
     if (!row.integrityVerified) return {publicId:row.publicId,serialNumber:row.serialNumber,verificationCode:row.verificationCode,status:row.status,lifecycleStatus:row.lifecycleStatus,temporalStatus:row.temporalStatus,verificationFailure:'INTEGRITY_INVALID',isValid:false,integrityVerified:false,skills:[],competencies:[]};
