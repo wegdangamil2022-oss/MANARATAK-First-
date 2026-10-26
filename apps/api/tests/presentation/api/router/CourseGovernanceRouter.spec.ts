@@ -52,7 +52,7 @@ function setup(allowed = true) {
       courseAdminCommandUseCases: { execute },
     } as never),
   );
-  const put = (path: string, body: unknown, version = true) => {
+  const put = (path: string, body: object, version = true) => {
     const agent = request(app)
       .put('/courses/c/' + path)
       .set('X-Review-Reason', 'Governed authoring')

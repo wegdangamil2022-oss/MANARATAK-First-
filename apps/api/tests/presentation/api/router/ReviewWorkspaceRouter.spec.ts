@@ -5,7 +5,7 @@ import { ReviewWorkspaceUseCases, type ReviewWorkspaceGateway } from '@manaratak
 import { createReviewWorkspaceRouter } from '../../../../src/presentation/api/router/ReviewWorkspaceRouter';
 describe('Review workspace HTTP boundary', () => {
   const gateway = {
-    list: vi.fn(async () => ({ records: [], total: 0 })),
+    list: vi.fn(async (..._input: Parameters<ReviewWorkspaceGateway['list']>) => ({ records: [], total: 0 })),
     synchronize: vi.fn(async () => []),
     command: vi.fn(async () => ({ saved: true })),
     history: vi.fn(async () => []),
