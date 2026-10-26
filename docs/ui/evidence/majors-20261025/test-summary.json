@@ -1,0 +1,45 @@
+{
+  "at": "2026-10-25T15:19:09.928Z",
+  "unit": {
+    "total": 245,
+    "passed": 238,
+    "failed": 0,
+    "skipped": 7
+  },
+  "isolatedPostgresql": {
+    "passed": 12,
+    "failed": 0,
+    "scope": "ISOLATED_NATIVE_POSTGRES16_ONLY"
+  },
+  "skipped": [
+    {
+      "name": "Major Import Promotion DB Tests (MAS-0501 to MAS-1116) MAS-0501 does not return MAS-0001 content",
+      "file": "apps/api/tests/presentation/api/router/MajorImportE2E.spec.ts"
+    },
+    {
+      "name": "Major Import Promotion DB Tests (MAS-0501 to MAS-1116) MAS-0501 does not return MAS-0500 content",
+      "file": "apps/api/tests/presentation/api/router/MajorImportE2E.spec.ts"
+    },
+    {
+      "name": "Major Import Promotion DB Tests (MAS-0501 to MAS-1116) MAS-0601 does not return MAS-0501 content",
+      "file": "apps/api/tests/presentation/api/router/MajorImportE2E.spec.ts"
+    },
+    {
+      "name": "Major Import Promotion DB Tests (MAS-0501 to MAS-1116) MAS-1001 does not return MAS-0001 content",
+      "file": "apps/api/tests/presentation/api/router/MajorImportE2E.spec.ts"
+    },
+    {
+      "name": "Major Import Promotion DB Tests (MAS-0501 to MAS-1116) MAS-1101 returns its exact dossier",
+      "file": "apps/api/tests/presentation/api/router/MajorImportE2E.spec.ts"
+    },
+    {
+      "name": "Major Import Promotion DB Tests (MAS-0501 to MAS-1116) MAS-1116 returns its exact dossier",
+      "file": "apps/api/tests/presentation/api/router/MajorImportE2E.spec.ts"
+    },
+    {
+      "name": "Major Import Promotion DB Tests (MAS-0501 to MAS-1116) Re-import does not create duplicates",
+      "file": "apps/api/tests/presentation/api/router/MajorImportE2E.spec.ts"
+    }
+  ],
+  "originalDatabaseWrites": 0
+}

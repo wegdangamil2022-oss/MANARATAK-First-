@@ -1,5 +1,5 @@
 import { isIP } from 'node:net';
-import { Policy, IPolicyEvaluator, EvaluationContext, AccessDecision } from '@manaratak/domain';
+import { Policy, IPolicyEvaluator, EvaluationContext, AccessDecision, parseCourseScope } from '@manaratak/domain';
 
 type TimeRule = {
   start: string;
@@ -16,6 +16,13 @@ export class DefaultPolicyEvaluator implements IPolicyEvaluator {
   public async evaluate(policy: Policy, context: EvaluationContext): Promise<AccessDecision> {
     try {
       switch (policy.ruleType.trim().toUpperCase()) {
+        case 'COURSE_SCOPE': {
+          const ids = parseCourseScope(policy.ruleConfiguration);
+          if (context.resourceUrn.value !== 'admin:courses') return AccessDecision.denied('Course scope cannot authorize other domains');
+          if (context.action.value === 'workspace') return AccessDecision.granted('Course workspace entry only');
+          return typeof context.courseId === 'string' && ids.includes(context.courseId)
+            ? AccessDecision.granted('Assigned course scope') : AccessDecision.denied('Course scope mismatch');
+        }
         case 'TIME':
           return this.evaluateTime(policy.ruleConfiguration, context);
         case 'IP':

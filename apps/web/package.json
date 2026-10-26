@@ -12,6 +12,7 @@
     "build:production": "npm run build && npm run prerender"
   },
   "dependencies": {
+    "@manaratak/domain": "*",
     "@manaratak/shared": "*",
     "@manaratak/types": "*",
     "@manaratak/ui": "*",

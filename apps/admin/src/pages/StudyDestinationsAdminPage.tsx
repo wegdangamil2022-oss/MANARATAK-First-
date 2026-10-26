@@ -1,5 +1,7 @@
+import { destinationRepairTarget } from '../features/destinations/destinationNavigation';
+import '../features/destinations/destinations.css';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   AlertCircle,
   CheckCircle2,
@@ -97,6 +99,7 @@ function flagEmoji(code: string): string {
 }
 
 export function StudyDestinationsAdminPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { language } = useTranslation();
   const isAr = language === 'ar';
   const [result, setResult] = useState<PageResult>({
@@ -109,14 +112,42 @@ export function StudyDestinationsAdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const sequence = useRef(0);
-  const [page, setPage] = useState(1);
-  const [query, setQuery] = useState('');
-  const [region, setRegion] = useState('');
-  const [status, setStatus] = useState('');
-  const [completeness, setCompleteness] = useState('');
-  const [missingCheck, setMissingCheck] = useState('');
+  const [page, setPage] = useState(() => Math.max(1, Number(searchParams.get('page')) || 1));
+  const [query, setQuery] = useState(() => searchParams.get('q') ?? '');
+  const [region, setRegion] = useState(() => searchParams.get('region') ?? '');
+  const [status, setStatus] = useState(() => searchParams.get('status') ?? '');
+  const [completeness, setCompleteness] = useState(
+    () => searchParams.get('completenessStatus') ?? '',
+  );
+  const [missingCheck, setMissingCheck] = useState(() => searchParams.get('missingCheck') ?? '');
   const [cooldown, setCooldown] = useState<number | null>(null);
+  useEffect(() => {
+    const restore = () => {
+      const params = new URLSearchParams(location.search);
+      setPage(Math.max(1, Number(params.get('page')) || 1));
+      setQuery(params.get('q') ?? '');
+      setRegion(params.get('region') ?? '');
+      setStatus(params.get('status') ?? '');
+      setCompleteness(params.get('completenessStatus') ?? '');
+      setMissingCheck(params.get('missingCheck') ?? '');
+    };
+    window.addEventListener('popstate', restore);
+    return () => window.removeEventListener('popstate', restore);
+  }, []);
 
+  useEffect(() => {
+    const next = new URLSearchParams();
+    for (const [key, value] of Object.entries({
+      page: String(page),
+      q: query,
+      region,
+      status,
+      completenessStatus: completeness,
+      missingCheck,
+    }))
+      if (value) next.set(key, value);
+    setSearchParams(next, { replace: true });
+  }, [page, query, region, status, completeness, missingCheck, setSearchParams]);
   const load = useCallback(async () => {
     const request = ++sequence.current;
     setLoading(true);
@@ -181,7 +212,7 @@ export function StudyDestinationsAdminPage() {
   }, [result]);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
+    <div className="destination-workspace" dir={isAr ? 'rtl' : 'ltr'}>
       <header className="rounded-3xl border border-[#142B5F]/15 bg-gradient-to-br from-[#142B5F] to-[#0E7C86] p-6 text-white shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -189,7 +220,7 @@ export function StudyDestinationsAdminPage() {
               <Globe2 className="h-5 w-5" />
               <span className="text-sm font-bold">MANARATAK · Study Destinations</span>
             </div>
-            <h1 className="text-3xl font-black">{isAr ? 'دول الدراسة' : 'Study Destinations'}</h1>
+            <h1 className="font-bold">{isAr ? 'دول الدراسة' : 'Study Destinations'}</h1>
             <p className="mt-2 max-w-3xl text-sm text-white/80">
               {isAr
                 ? 'ملفات تحريرية موثقة فوق الدولة المرجعية Canonical؛ لا تُعامل كل دولة في Reference Data تلقائيًا كوجهة دراسة.'
@@ -244,48 +275,57 @@ export function StudyDestinationsAdminPage() {
             <Metric
               icon={Globe2}
               label={isAr ? 'دول ضمن النتيجة' : 'Countries in result'}
-              value={stats.canonical}
+              value={loading ? null : stats.canonical}
             />
             <Metric
               icon={ShieldCheck}
               label={isAr ? 'مهيأة في الصفحة' : 'Configured on page'}
-              value={stats.configured}
+              value={loading ? null : stats.configured}
             />
             <Metric
               icon={CheckCircle2}
               label={isAr ? 'منشورة في الصفحة' : 'Published on page'}
-              value={stats.published}
+              value={loading ? null : stats.published}
               accent
             />
             <Metric
               icon={CheckCircle2}
               label={isAr ? 'جاهزة في الصفحة' : 'Ready on page'}
-              value={stats.ready}
+              value={loading ? null : stats.ready}
             />
             <Metric
               icon={FileWarning}
               label={isAr ? 'بدون ملف في الصفحة' : 'No profile on page'}
-              value={stats.missing}
+              value={loading ? null : stats.missing}
             />
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <label className="mb-3 block">
-              {isAr ? 'النقص المطلوب معالجته' : 'Missing requirement'}
-              <select
-                className="mx-2 rounded border p-2"
-                value={missingCheck}
-                onChange={(event) => {
-                  setMissingCheck(event.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">{isAr ? 'كل النواقص' : 'Any requirement'}</option>
-                {STUDY_DESTINATION_READINESS_KEYS.map((key) => (
-                  <option key={key} value={key}>{studyDestinationCheckLabels[key]?.[isAr ? 0 : 1] ?? key}</option>
-                ))}
-              </select>
-            </label>
+            <details className="mb-3">
+              <summary>
+                {isAr
+                  ? 'فلاتر إضافية — المتطلبات الناقصة'
+                  : 'Additional filters — missing requirements'}
+              </summary>
+              <label className="mb-3 block">
+                {isAr ? 'النقص المطلوب معالجته' : 'Missing requirement'}
+                <select
+                  className="mx-2 rounded border p-2"
+                  value={missingCheck}
+                  onChange={(event) => {
+                    setMissingCheck(event.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="">{isAr ? 'كل النواقص' : 'Any requirement'}</option>
+                  {STUDY_DESTINATION_READINESS_KEYS.map((key) => (
+                    <option key={key} value={key}>
+                      {studyDestinationCheckLabels[key]?.[isAr ? 0 : 1] ?? key}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </details>
             <div className="grid gap-3 lg:grid-cols-[2fr_1fr_1fr_1fr]">
               <label className="relative block">
                 <Search
@@ -408,7 +448,7 @@ export function StudyDestinationsAdminPage() {
                       </div>
                     )}
                     <Link
-                      to={`/study-destinations/${country.iso2Code}${missingCheck ? '?section=' + (missingCheck.startsWith('visa') ? 'visa' : missingCheck.startsWith('living') || missingCheck.startsWith('cost') ? 'living' : missingCheck.startsWith('source') || missingCheck.startsWith('evidence') || missingCheck.startsWith('official') ? 'sources' : missingCheck.startsWith('study') || missingCheck.startsWith('admission') ? 'study' : 'overview') : ''}`}
+                      to={`/study-destinations/${country.iso2Code}?${new URLSearchParams({ returnTo: '/study-destinations?' + searchParams.toString(), ...(missingCheck ? { section: destinationRepairTarget(missingCheck).section, card: destinationRepairTarget(missingCheck).card, contentLocale: destinationRepairTarget(missingCheck).locale } : {}) })}`}
                       className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[#142B5F] px-4 py-2.5 text-sm font-black text-white transition hover:bg-[#142B5F]"
                     >
                       {profile
@@ -457,7 +497,7 @@ function Metric({
 }: {
   icon: typeof Globe2;
   label: string;
-  value: number;
+  value: number | null;
   accent?: boolean;
 }) {
   return (
@@ -468,7 +508,7 @@ function Metric({
         <span className="text-xs font-bold text-slate-500">{label}</span>
         <Icon className={`h-4 w-4 ${accent ? 'text-[#D6A43B]' : 'text-[#142B5F]'}`} />
       </div>
-      <div className="mt-2 text-2xl font-black text-slate-900">{value}</div>
+      <div className="mt-2 text-2xl font-black text-slate-900">{value ?? '—'}</div>
     </div>
   );
 }

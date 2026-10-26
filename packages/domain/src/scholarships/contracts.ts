@@ -318,6 +318,8 @@ export interface ScholarshipFilters {
 }
 
 export interface ScholarshipAdminSummary {
+  inReview?: number;
+  incomplete?: number;
   all: number;
   imported: number;
   missingFields: number;

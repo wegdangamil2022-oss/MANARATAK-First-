@@ -176,6 +176,94 @@ describe('CertificateUseCases W10 trust model', () => {
     expect(() => useCases.revoke('cert-1', 'short', 'checker-1')).toThrow('REVOCATION_REASON_TOO_SHORT');
   });
 
+  it('pins a course certificate to the governed template version and issuer in the frozen enrollment version', async () => {
+    const binding = {
+      templateId: '11111111-1111-4111-8111-111111111111',
+      templateVersionId: '22222222-2222-4222-8222-222222222222',
+      issuerId: '33333333-3333-4333-8333-333333333333',
+    };
+    const selected = {
+      ...template,
+      id: binding.templateId,
+      currentVersionId: binding.templateVersionId,
+      issuerId: binding.issuerId,
+      currentVersion: {
+        ...version,
+        id: binding.templateVersionId,
+        templateId: binding.templateId,
+        issuerId: binding.issuerId,
+      },
+    };
+    repository.findTemplateById.mockResolvedValue(selected);
+    repository.findIssuerById.mockResolvedValue({ ...issuer, id: binding.issuerId });
+    const frozen = { ...course, optionalFields: { certificateBinding: binding } };
+    const bound = new CertificateUseCases(
+      repository,
+      courses,
+      undefined,
+      {
+      signingKeyReference: issuer.signingKeyReference,
+      signingSecret: 'test-secret',
+      productionLike: false,
+    },
+      learningPaths,
+      undefined,
+      { getLearningVersion: vi.fn().mockResolvedValue({ course: frozen }) } as any,
+    );
+    await bound.consumeCompletionEvent(courseEvent());
+    expect(repository.findActiveTemplateByName).not.toHaveBeenCalled();
+    expect(repository.issue).toHaveBeenCalledWith(
+      expect.objectContaining({
+        templateId: binding.templateId,
+        templateVersionId: binding.templateVersionId,
+        issuerId: binding.issuerId,
+      }),
+    );
+    repository.issue.mockClear();
+    repository.findTemplateById.mockResolvedValue({
+      ...selected,
+      currentVersionId: '44444444-4444-4444-8444-444444444444',
+    });
+    await expect(bound.consumeCompletionEvent(courseEvent())).rejects.toThrow(
+      'COURSE_CERTIFICATE_BINDING_STALE',
+    );
+    expect(repository.issue).not.toHaveBeenCalled();
+  });
+
+  it('rejects malformed, revoked and mismatched certificate bindings without falling back to a default', async () => {
+    const binding = {
+      templateId: '11111111-1111-4111-8111-111111111111',
+      templateVersionId: '22222222-2222-4222-8222-222222222222',
+      issuerId: '33333333-3333-4333-8333-333333333333',
+    };
+    await expect(
+      useCases.validateCourseBinding({ ...binding, secret: 'forbidden' }),
+    ).rejects.toThrow('BINDING_INVALID');
+    repository.findTemplateById.mockResolvedValue({ ...template, status: 'ARCHIVED' });
+    await expect(useCases.validateCourseBinding(binding)).rejects.toThrow(
+      'ACTIVE_CERTIFICATE_TEMPLATE_REQUIRED',
+    );
+    repository.findTemplateById.mockResolvedValue({
+      ...template,
+      id: binding.templateId,
+      currentVersionId: binding.templateVersionId,
+      issuerId: binding.issuerId,
+      currentVersion: { ...version, issuerId: binding.issuerId },
+    });
+    repository.findIssuerById.mockResolvedValue({ ...issuer, status: 'INACTIVE' });
+    await expect(useCases.validateCourseBinding(binding)).rejects.toThrow(
+      'ACTIVE_CERTIFICATE_ISSUER_REQUIRED',
+    );
+    repository.findIssuerById.mockResolvedValue({ ...issuer, id: binding.issuerId });
+    expect(await useCases.validateCourseBinding(binding)).toEqual(binding);
+    await expect(
+      useCases.validateCourseBinding({
+        ...binding,
+        issuerId: '44444444-4444-4444-8444-444444444444',
+      }),
+    ).rejects.toThrow('BINDING_STALE');
+  });
+
   it('verifies signed certificate integrity and records the public verification ledger event', async () => {
     const issued = await useCases.consumeCompletionEvent(courseEvent());
     repository.findByVerificationCode.mockResolvedValue(issued);
@@ -185,5 +273,4 @@ describe('CertificateUseCases W10 trust model', () => {
     expect(verification.integrityVerified).toBe(true);
     expect(repository.recordVerification).toHaveBeenCalledWith(issued.id, 'VALID', 'PUBLIC_CODE');
   });
-
 });

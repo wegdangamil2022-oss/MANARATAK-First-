@@ -8,6 +8,7 @@ type DelegateCheck = {
 };
 
 const DIRECT_USAGE_CHECKS: DelegateCheck[] = [
+  { delegate: 'serviceApplicationEvidence', field: 'evidenceAssetId', consumer: 'MANAGED_APPLICATION_EVIDENCE' },
   { delegate: 'assetRenditionRecord', field: 'assetId', consumer: 'ASSET_RENDITION_SOURCE' },
   { delegate: 'assetRenditionRecord', field: 'generatedAssetId', consumer: 'ASSET_RENDITION' },
   { delegate: 'course', field: 'thumbnailAssetId', consumer: 'COURSE' },

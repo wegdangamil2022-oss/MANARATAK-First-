@@ -1,3 +1,5 @@
+import { useTranslation } from '../i18n/I18nProvider';
+import { scholarshipRelationshipText } from '../features/scholarships/ScholarshipRelationshipText';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react';
@@ -6,26 +8,110 @@ import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 
 type JsonObject = Record<string, unknown>;
-interface BenefitRow { benefitKey: string; benefitTypeCode: string; coverageTypeCode?: string | null; amount?: string | number | null; currencyReferenceId?: string | null; valueText?: string | null; durationText?: string | null; frequencyCode?: string | null; isCovered?: boolean; isOptional?: boolean; displayOrder?: number; notes?: string | null; metadata?: JsonObject | null; }
-interface DegreeRow { targetKey: string; sourceLabel?: string | null; degreeLevelId?: string | null; metadata?: JsonObject | null; }
-interface MajorRow { targetKey: string; sourceLabel?: string | null; majorId?: string | null; metadata?: JsonObject | null; }
-interface EligibilityRow { itemKey: string; itemTypeCode: string; operatorCode?: string | null; valueText?: string | null; minimumValue?: string | number | null; maximumValue?: string | number | null; countryReferenceId?: string | null; degreeLevelId?: string | null; majorId?: string | null; internationalTestId?: string | null; isRequired?: boolean; priorityOrder?: number; metadata?: JsonObject | null; }
-interface DocumentRow { documentKey: string; documentTypeCode?: string | null; displayName: string; description?: string | null; internationalTestId?: string | null; sourceLabel?: string | null; isRequired?: boolean; displayOrder?: number; metadata?: JsonObject | null; }
-interface UniversityLinkRow { linkKey: string; universityId?: string | null; academicProgramId?: string | null; sourceLabel?: string | null; relationshipTypeCode?: string; metadata?: JsonObject | null; }
+interface BenefitRow {
+  benefitKey: string;
+  benefitTypeCode: string;
+  coverageTypeCode?: string | null;
+  amount?: string | number | null;
+  currencyReferenceId?: string | null;
+  valueText?: string | null;
+  durationText?: string | null;
+  frequencyCode?: string | null;
+  isCovered?: boolean;
+  isOptional?: boolean;
+  displayOrder?: number;
+  notes?: string | null;
+  metadata?: JsonObject | null;
+}
+interface DegreeRow {
+  targetKey: string;
+  sourceLabel?: string | null;
+  degreeLevelId?: string | null;
+  metadata?: JsonObject | null;
+}
+interface MajorRow {
+  targetKey: string;
+  sourceLabel?: string | null;
+  majorId?: string | null;
+  metadata?: JsonObject | null;
+}
+interface EligibilityRow {
+  itemKey: string;
+  itemTypeCode: string;
+  operatorCode?: string | null;
+  valueText?: string | null;
+  minimumValue?: string | number | null;
+  maximumValue?: string | number | null;
+  countryReferenceId?: string | null;
+  degreeLevelId?: string | null;
+  majorId?: string | null;
+  internationalTestId?: string | null;
+  isRequired?: boolean;
+  priorityOrder?: number;
+  metadata?: JsonObject | null;
+}
+interface DocumentRow {
+  documentKey: string;
+  documentTypeCode?: string | null;
+  displayName: string;
+  description?: string | null;
+  internationalTestId?: string | null;
+  sourceLabel?: string | null;
+  isRequired?: boolean;
+  displayOrder?: number;
+  metadata?: JsonObject | null;
+}
+interface UniversityLinkRow {
+  linkKey: string;
+  universityId?: string | null;
+  academicProgramId?: string | null;
+  sourceLabel?: string | null;
+  relationshipTypeCode?: string;
+  metadata?: JsonObject | null;
+}
 interface ScholarshipDetail {
-  fundedProgramPairs?: Array<{linkKey:string;degreeLevelId:string;majorId:string;programName:string;degreeLabel?:string;majorLabel?:string;studyLanguages?:Array<{id:string;name:string}>}>;
-  id: string; revision: number; displayName: string; status: string; publicationStatus?: string;
-  sponsorContext?: { universityId?: string | null }; countryReferenceId?: string | null; studyLanguageReferenceId?: string | null;
-  benefits?: BenefitRow[]; degreeTargets?: DegreeRow[]; majorTargets?: MajorRow[];
-  eligibilityItems?: EligibilityRow[]; requiredDocumentItems?: DocumentRow[]; universityLinks?: UniversityLinkRow[];
+  fundedProgramPairs?: Array<{
+    linkKey: string;
+    degreeLevelId: string;
+    majorId: string;
+    programName: string;
+    degreeLabel?: string;
+    majorLabel?: string;
+    studyLanguages?: Array<{ id: string; name: string }>;
+  }>;
+  id: string;
+  revision: number;
+  displayName: string;
+  status: string;
+  publicationStatus?: string;
+  sponsorContext?: { universityId?: string | null };
+  countryReferenceId?: string | null;
+  studyLanguageReferenceId?: string | null;
+  benefits?: BenefitRow[];
+  degreeTargets?: DegreeRow[];
+  majorTargets?: MajorRow[];
+  eligibilityItems?: EligibilityRow[];
+  requiredDocumentItems?: DocumentRow[];
+  universityLinks?: UniversityLinkRow[];
 }
 const key = (prefix: string) => `${prefix}-${crypto.randomUUID()}`;
 
-export function ScholarshipRelationshipEditorPage({ embedded = false, disabled = false, onSaved }: {
-  embedded?: boolean; disabled?: boolean; onSaved?: () => Promise<void>;
+export function ScholarshipRelationshipEditorPage({
+  embedded = false,
+  disabled = false,
+  onSaved,
+  onDirtyChange,
+}: {
+  embedded?: boolean;
+  disabled?: boolean;
+  onSaved?: () => Promise<void>;
+  onDirtyChange?: (dirty: boolean) => void;
 } = {}) {
+  const { language, dir } = useTranslation();
+  const tr = (value: string) => scholarshipRelationshipText(language, value);
   const { id = '' } = useParams();
   const generation = useRef(0);
+  const baseline = useRef('');
   const [scholarship, setScholarship] = useState<ScholarshipDetail | null>(null);
   const [sponsorUniversityId, setSponsorUniversityId] = useState<string | null>(null);
   const [countryReferenceId, setCountryReferenceId] = useState<string | null>(null);
@@ -37,72 +123,735 @@ export function ScholarshipRelationshipEditorPage({ embedded = false, disabled =
   const [requiredDocumentItems, setRequiredDocumentItems] = useState<DocumentRow[]>([]);
   const [universityLinks, setUniversityLinks] = useState<UniversityLinkRow[]>([]);
   const [reviewReason, setReviewReason] = useState('');
-  const [saving, setSaving] = useState(false); const [error, setError] = useState(''); const [message, setMessage] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   const hydrate = (detail: ScholarshipDetail) => {
-    setScholarship(detail); setSponsorUniversityId(detail.sponsorContext?.universityId ?? null); setCountryReferenceId(detail.countryReferenceId ?? null); setStudyLanguageReferenceId(detail.studyLanguageReferenceId ?? null);
-    setBenefits(detail.benefits ?? []); setDegreeTargets(detail.degreeTargets ?? []); setMajorTargets(detail.majorTargets ?? []); setEligibilityItems(detail.eligibilityItems ?? []); setRequiredDocumentItems(detail.requiredDocumentItems ?? []); setUniversityLinks(detail.universityLinks ?? []);
+    baseline.current = JSON.stringify([
+      detail.sponsorContext?.universityId ?? null,
+      detail.countryReferenceId ?? null,
+      detail.studyLanguageReferenceId ?? null,
+      detail.benefits ?? [],
+      detail.degreeTargets ?? [],
+      detail.majorTargets ?? [],
+      detail.eligibilityItems ?? [],
+      detail.requiredDocumentItems ?? [],
+      detail.universityLinks ?? [],
+    ]);
+    setScholarship(detail);
+    setSponsorUniversityId(detail.sponsorContext?.universityId ?? null);
+    setCountryReferenceId(detail.countryReferenceId ?? null);
+    setStudyLanguageReferenceId(detail.studyLanguageReferenceId ?? null);
+    setBenefits(detail.benefits ?? []);
+    setDegreeTargets(detail.degreeTargets ?? []);
+    setMajorTargets(detail.majorTargets ?? []);
+    setEligibilityItems(detail.eligibilityItems ?? []);
+    setRequiredDocumentItems(detail.requiredDocumentItems ?? []);
+    setUniversityLinks(detail.universityLinks ?? []);
   };
+  const dirty =
+    !!scholarship &&
+    JSON.stringify([
+      sponsorUniversityId,
+      countryReferenceId,
+      studyLanguageReferenceId,
+      benefits,
+      degreeTargets,
+      majorTargets,
+      eligibilityItems,
+      requiredDocumentItems,
+      universityLinks,
+    ]) !== baseline.current;
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [dirty]);
   useEffect(() => {
     let active = true;
     const request = ++generation.current;
-    setScholarship(null); setSaving(false); setError(''); setMessage('');
-    adminApiClient.request<ScholarshipDetail>(`/admin/scholarships/${encodeURIComponent(id)}`, { cache: 'no-store' })
-      .then(detail => { if (active) hydrate(detail); })
-      .catch(err => { if (active) setError(err instanceof Error ? err.message : 'Unable to load scholarship relationships.'); });
-    return () => { active = false; generation.current = request + 1; };
+    setScholarship(null);
+    setSaving(false);
+    setError('');
+    setMessage('');
+    adminApiClient
+      .request<ScholarshipDetail>(`/admin/scholarships/${encodeURIComponent(id)}`, {
+        cache: 'no-store',
+      })
+      .then((detail) => {
+        if (active) hydrate(detail);
+      })
+      .catch((err) => {
+        if (active)
+          setError(
+            err instanceof Error ? err.message : 'Unable to load scholarship relationships.',
+          );
+      });
+    return () => {
+      active = false;
+      generation.current = request + 1;
+    };
   }, [id]);
 
   const save = async () => {
     if (disabled || saving || scholarship?.publicationStatus === 'PUBLISHED') return;
-    if (reviewReason.trim().length < 3) { setError('Enter a review reason before saving.'); return; }
+    if (reviewReason.trim().length < 3) {
+      setError(tr('Enter a review reason before saving.'));
+      return;
+    }
     const current = generation.current;
-    setSaving(true); setError(''); setMessage('');
+    setSaving(true);
+    setError('');
+    setMessage('');
     try {
-      const saved = await adminApiClient.request<ScholarshipDetail>(`/admin/scholarships/${encodeURIComponent(id)}/canonical-relationships`, {
-        method: 'PUT', headers: { 'X-Review-Reason': reviewReason.trim(), 'If-Match': String(scholarship?.revision) }, body: JSON.stringify({ sponsorUniversityId, countryReferenceId, studyLanguageReferenceId, benefits, degreeTargets, majorTargets, eligibilityItems, requiredDocumentItems, universityLinks }),
-      });
+      const saved = await adminApiClient.request<ScholarshipDetail>(
+        `/admin/scholarships/${encodeURIComponent(id)}/canonical-relationships`,
+        {
+          method: 'PUT',
+          headers: {
+            'X-Review-Reason': reviewReason.trim(),
+            'If-Match': String(scholarship?.revision),
+          },
+          body: JSON.stringify({
+            sponsorUniversityId,
+            countryReferenceId,
+            studyLanguageReferenceId,
+            benefits,
+            degreeTargets,
+            majorTargets,
+            eligibilityItems,
+            requiredDocumentItems,
+            universityLinks,
+          }),
+        },
+      );
       if (current !== generation.current) return;
-      hydrate(saved); await onSaved?.(); if (current === generation.current) setMessage('Canonical scholarship relationships saved through the Scholarship owner API.');
-    } catch (err) { if (current === generation.current) setError(err instanceof Error ? err.message : 'Unable to save scholarship relationships.'); }
-    finally { if (current === generation.current) setSaving(false); }
+      const verified = await adminApiClient.request<ScholarshipDetail>(
+        `/admin/scholarships/${encodeURIComponent(id)}`,
+        { cache: 'no-store' },
+      );
+      if (current !== generation.current) return;
+      if (verified.id !== saved.id || verified.revision !== saved.revision)
+        throw new Error('SCHOLARSHIP_READBACK_MISMATCH');
+      hydrate(verified);
+      await onSaved?.();
+      if (current === generation.current)
+        setMessage(
+          tr('Canonical scholarship relationships saved through the Scholarship owner API.'),
+        );
+    } catch (err) {
+      if (current === generation.current)
+        setError(
+          err instanceof Error ? err.message : tr('Unable to save scholarship relationships.'),
+        );
+    } finally {
+      if (current === generation.current) setSaving(false);
+    }
   };
 
-  if (!scholarship) return <div className="p-6 text-sm text-slate-600">{error || 'Loading scholarship relationships…'}</div>;
+  if (!scholarship)
+    return (
+      <div className="p-6 text-sm text-slate-600">
+        {error || tr('Loading scholarship relationships…')}
+      </div>
+    );
   const immutable = scholarship.publicationStatus === 'PUBLISHED';
 
-  return <div className="mx-auto max-w-6xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
-    <div className="flex items-center justify-between gap-4"><div>{!embedded && <Link to={`/scholarships/${id}`} className="inline-flex items-center gap-1 text-sm font-semibold text-[#0E7C86]"><ArrowLeft className="h-4 w-4" /> Scholarship</Link>}<h2 className="mt-2 text-2xl font-bold">{scholarship.displayName}</h2><p className="text-sm text-[#203442]/65">العلاقات المعتمدة — المعرّف مستقل عن وصف المصدر</p></div><span className="rounded-full bg-[#DDEFF2]/60 text-[#142B5F] px-3 py-1 text-xs font-semibold">{scholarship.status}</span></div>
-    {immutable ? <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Published scholarship structure is immutable. Unpublish before changing relationships.</div> : null}
-    {disabled && <p role="status">احفظ التعديلات الوصفية أولاً قبل تحرير العلاقات.</p>}
-    <section aria-label="Funded degree and major pairs" className="rounded-lg border p-4">
-      <h3 className="font-bold">Funded degree and major pairs</h3>
-      {scholarship.fundedProgramPairs?.length ? <table className="w-full text-left text-sm"><thead><tr><th>Degree</th><th>Major</th><th>Programme</th><th>Teaching languages</th></tr></thead><tbody>{scholarship.fundedProgramPairs.map(pair => <tr key={pair.linkKey}><td>{pair.degreeLabel || pair.degreeLevelId}</td><td>{pair.majorLabel || pair.majorId}</td><td>{pair.programName}</td><td>{pair.studyLanguages?.map(language=>language.name).join(", ") || "Unspecified"}</td></tr>)}</tbody></table> : <p>No evidenced degree and major pair specified.</p>}
-    </section>
-    <fieldset disabled={disabled || saving || immutable} className="space-y-6">
-    <label className="block text-sm font-medium">Review reason (required for audit)<input value={reviewReason} onChange={event => setReviewReason(event.target.value)} placeholder="Why are these relationships changing?" className="mt-2 w-full rounded-lg border border-[#DDEFF2] px-3 py-2" /></label>
-    {(majorTargets.some(row => row.sourceLabel?.trim() && !row.majorId)) ? <Link to="/majors" className="text-sm text-[#0E7C86] underline">Unresolved scholarship majors: review them in the Section 09 New Majors queue, with their evidence and source references. Do not auto-create a Major.</Link> : null}
-    {error ? <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}{message ? <div className="rounded-lg border border-[#21A7B4]/30 bg-[#DDEFF2]/45 p-3 text-sm text-[#0E7C86]">{message}</div> : null}
+  return (
+    <div dir={dir} className="mx-auto max-w-6xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          {!embedded && (
+            <Link
+              to={`/scholarships/${id}`}
+              className="inline-flex items-center gap-1 text-sm font-semibold text-[#0E7C86]"
+            >
+              <ArrowLeft className="h-4 w-4" /> Scholarship
+            </Link>
+          )}
+          <h2 className="mt-2 text-2xl font-bold">{scholarship.displayName}</h2>
+          <p className="text-sm text-[#203442]/65">
+            العلاقات المعتمدة — المعرّف مستقل عن وصف المصدر
+          </p>
+        </div>
+        <span className="rounded-full bg-[#DDEFF2]/60 text-[#142B5F] px-3 py-1 text-xs font-semibold">
+          {scholarship.status}
+        </span>
+      </div>
+      {immutable ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          {tr(
+            'Published scholarship structure is immutable. Unpublish before changing relationships.',
+          )}
+        </div>
+      ) : null}
+      {disabled && <p role="status">احفظ التعديلات الوصفية أولاً قبل تحرير العلاقات.</p>}
+      <section aria-label={tr('Funded degree and major pairs')} className="rounded-lg border p-4">
+        <h3 className="font-bold">{tr('Funded degree and major pairs')}</h3>
+        {scholarship.fundedProgramPairs?.length ? (
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr>
+                <th>{tr('Degree')}</th>
+                <th>{tr('Major')}</th>
+                <th>{tr('Programme')}</th>
+                <th>{tr('Teaching languages')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {scholarship.fundedProgramPairs.map((pair) => (
+                <tr key={pair.linkKey}>
+                  <td>{pair.degreeLabel || pair.degreeLevelId}</td>
+                  <td>{pair.majorLabel || pair.majorId}</td>
+                  <td>{pair.programName}</td>
+                  <td>
+                    {pair.studyLanguages?.map((language) => language.name).join(', ') ||
+                      tr('Unspecified')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>{tr('No evidenced degree and major pair specified.')}</p>
+        )}
+      </section>
+      <fieldset disabled={disabled || saving || immutable} className="space-y-6">
+        <label className="block text-sm font-medium">
+          {tr('Review reason (required for audit)')}
+          <input
+            value={reviewReason}
+            onChange={(event) => setReviewReason(event.target.value)}
+            placeholder={tr('Why are these relationships changing?')}
+            className="mt-2 w-full rounded-lg border border-[#DDEFF2] px-3 py-2"
+          />
+        </label>
+        {majorTargets.some((row) => row.sourceLabel?.trim() && !row.majorId) ? (
+          <Link to="/majors" className="text-sm text-[#0E7C86] underline">
+            {tr(
+              'Unresolved scholarship majors: review them in the Section 09 New Majors queue, with their evidence and source references. Do not auto-create a Major.',
+            )}
+          </Link>
+        ) : null}
+        {error ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </div>
+        ) : null}
+        {message ? (
+          <div className="rounded-lg border border-[#21A7B4]/30 bg-[#DDEFF2]/45 p-3 text-sm text-[#0E7C86]">
+            {message}
+          </div>
+        ) : null}
 
-    <section className="grid gap-4 rounded-2xl border border-[#DDEFF2] bg-white p-5 md:grid-cols-2"><CanonicalPicker label="Sponsoring university (when applicable)" value={sponsorUniversityId} onChange={setSponsorUniversityId} load={canonicalPickerApi.universities} paged reloadKey="scholarship-sponsor-university" optional /><CanonicalPicker label="Study country" value={countryReferenceId} onChange={(next) => setCountryReferenceId(next)} load={canonicalPickerApi.countries} paged reloadKey="scholarship-countries" optional /><CanonicalPicker label="Study language" value={studyLanguageReferenceId} onChange={(next) => setStudyLanguageReferenceId(next)} load={canonicalPickerApi.languages} paged reloadKey="scholarship-languages" optional /></section>
+        <section className="grid gap-4 rounded-2xl border border-[#DDEFF2] bg-white p-5 md:grid-cols-2">
+          <CanonicalPicker
+            label={tr('Sponsoring university (when applicable)')}
+            value={sponsorUniversityId}
+            onChange={setSponsorUniversityId}
+            load={canonicalPickerApi.universities}
+            paged
+            reloadKey="scholarship-sponsor-university"
+            optional
+          />
+          <CanonicalPicker
+            label={tr('Study country')}
+            value={countryReferenceId}
+            onChange={(next) => setCountryReferenceId(next)}
+            load={canonicalPickerApi.countries}
+            paged
+            reloadKey="scholarship-countries"
+            optional
+          />
+          <CanonicalPicker
+            label={tr('Study language')}
+            value={studyLanguageReferenceId}
+            onChange={(next) => setStudyLanguageReferenceId(next)}
+            load={canonicalPickerApi.languages}
+            paged
+            reloadKey="scholarship-languages"
+            optional
+          />
+        </section>
 
-    <EditorSection title="Degree targets" onAdd={() => setDegreeTargets((rows) => [...rows, { targetKey: key('degree'), sourceLabel: '', degreeLevelId: null }])}>{degreeTargets.map((row, index) => <Row key={row.targetKey} onDelete={() => { setDegreeTargets(rows => rows.filter((_, i) => i !== index)); setMajorTargets(rows => rows.map(item => item.metadata?.degreeTargetKey === row.targetKey ? { ...item, metadata: { ...item.metadata, degreeTargetKey: null } } : item)); }}><CanonicalPicker label="Canonical degree" value={row.degreeLevelId} onChange={(next, option) => setDegreeTargets((rows) => rows.map((item, i) => i === index ? { ...item, degreeLevelId: next, sourceLabel: item.sourceLabel || option?.label } : item))} load={() => canonicalPickerApi.degreeLevels()} reloadKey="scholarship-degrees" optional /><SourceLabel value={row.sourceLabel ?? ''} onChange={(value) => setDegreeTargets((rows) => rows.map((item, i) => i === index ? { ...item, sourceLabel: value } : item))} /></Row>)}</EditorSection>
+        <EditorSection
+          title={tr('Degree targets')}
+          onAdd={() =>
+            setDegreeTargets((rows) => [
+              ...rows,
+              { targetKey: key('degree'), sourceLabel: '', degreeLevelId: null },
+            ])
+          }
+        >
+          {degreeTargets.map((row, index) => (
+            <Row
+              key={row.targetKey}
+              onDelete={() => {
+                setDegreeTargets((rows) => rows.filter((_, i) => i !== index));
+                setMajorTargets((rows) =>
+                  rows.map((item) =>
+                    item.metadata?.degreeTargetKey === row.targetKey
+                      ? { ...item, metadata: { ...item.metadata, degreeTargetKey: null } }
+                      : item,
+                  ),
+                );
+              }}
+            >
+              <CanonicalPicker
+                label={tr('Canonical degree')}
+                value={row.degreeLevelId}
+                onChange={(next, option) =>
+                  setDegreeTargets((rows) =>
+                    rows.map((item, i) =>
+                      i === index
+                        ? {
+                            ...item,
+                            degreeLevelId: next,
+                            sourceLabel: item.sourceLabel || option?.label,
+                          }
+                        : item,
+                    ),
+                  )
+                }
+                load={() => canonicalPickerApi.degreeLevels()}
+                reloadKey="scholarship-degrees"
+                optional
+              />
+              <SourceLabel
+                value={row.sourceLabel ?? ''}
+                onChange={(value) =>
+                  setDegreeTargets((rows) =>
+                    rows.map((item, i) => (i === index ? { ...item, sourceLabel: value } : item)),
+                  )
+                }
+              />
+            </Row>
+          ))}
+        </EditorSection>
 
-    <EditorSection title="Major targets" onAdd={() => setMajorTargets((rows) => [...rows, { targetKey: key('major'), sourceLabel: '', majorId: null }])}>{majorTargets.map((row, index) => <Row key={row.targetKey} onDelete={() => setMajorTargets((rows) => rows.filter((_, i) => i !== index))}><CanonicalPicker label="Canonical major" value={row.majorId} onChange={(next, option) => setMajorTargets((rows) => rows.map((item, i) => i === index ? { ...item, majorId: next, sourceLabel: item.sourceLabel || option?.label } : item))} load={canonicalPickerApi.majors} paged reloadKey="scholarship-majors" optional /><label className="text-xs font-medium">Source degree group (optional)<select aria-label="Major degree group" value={String(row.metadata?.degreeTargetKey ?? '')} onChange={event => setMajorTargets(rows => rows.map((item, i) => i === index ? { ...item, metadata: { ...item.metadata, degreeTargetKey: event.target.value || null } } : item))}><option value="">Unassigned source group</option>{degreeTargets.map(degree => <option key={degree.targetKey} value={degree.targetKey}>{degree.sourceLabel || degree.degreeLevelId || degree.targetKey}</option>)}</select></label><SourceLabel value={row.sourceLabel ?? ''} onChange={(value) => setMajorTargets((rows) => rows.map((item, i) => i === index ? { ...item, sourceLabel: value } : item))} /></Row>)}</EditorSection>
+        <EditorSection
+          title={tr('Major targets')}
+          onAdd={() =>
+            setMajorTargets((rows) => [
+              ...rows,
+              { targetKey: key('major'), sourceLabel: '', majorId: null },
+            ])
+          }
+        >
+          {majorTargets.map((row, index) => (
+            <Row
+              key={row.targetKey}
+              onDelete={() => setMajorTargets((rows) => rows.filter((_, i) => i !== index))}
+            >
+              <CanonicalPicker
+                label={tr('Canonical major')}
+                value={row.majorId}
+                onChange={(next, option) =>
+                  setMajorTargets((rows) =>
+                    rows.map((item, i) =>
+                      i === index
+                        ? { ...item, majorId: next, sourceLabel: item.sourceLabel || option?.label }
+                        : item,
+                    ),
+                  )
+                }
+                load={canonicalPickerApi.majors}
+                paged
+                reloadKey="scholarship-majors"
+                optional
+              />
+              <label className="text-xs font-medium">
+                {tr('Source degree group (optional)')}
+                <select
+                  aria-label={tr('Major degree group')}
+                  value={String(row.metadata?.degreeTargetKey ?? '')}
+                  onChange={(event) =>
+                    setMajorTargets((rows) =>
+                      rows.map((item, i) =>
+                        i === index
+                          ? {
+                              ...item,
+                              metadata: {
+                                ...item.metadata,
+                                degreeTargetKey: event.target.value || null,
+                              },
+                            }
+                          : item,
+                      ),
+                    )
+                  }
+                >
+                  <option value="">{tr('Unassigned source group')}</option>
+                  {degreeTargets.map((degree) => (
+                    <option key={degree.targetKey} value={degree.targetKey}>
+                      {degree.sourceLabel || degree.degreeLevelId || degree.targetKey}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <SourceLabel
+                value={row.sourceLabel ?? ''}
+                onChange={(value) =>
+                  setMajorTargets((rows) =>
+                    rows.map((item, i) => (i === index ? { ...item, sourceLabel: value } : item)),
+                  )
+                }
+              />
+            </Row>
+          ))}
+        </EditorSection>
 
-    <EditorSection title="Benefits → currency" onAdd={() => setBenefits((rows) => [...rows, { benefitKey: key('benefit'), benefitTypeCode: 'OTHER', isCovered: true, currencyReferenceId: null }])}>{benefits.map((row, index) => <Row key={row.benefitKey} onDelete={() => setBenefits((rows) => rows.filter((_, i) => i !== index))}><label className="text-xs font-medium">Benefit type<input className="mt-1 w-full rounded-lg border border-[#DDEFF2] bg-white px-3 py-2 text-sm outline-none focus:border-[#21A7B4] focus:ring-2 focus:ring-[#21A7B4]/15" value={row.benefitTypeCode} onChange={(event) => setBenefits((rows) => rows.map((item, i) => i === index ? { ...item, benefitTypeCode: event.target.value } : item))} /></label><CanonicalPicker label="Canonical currency" value={row.currencyReferenceId} onChange={(next) => setBenefits((rows) => rows.map((item, i) => i === index ? { ...item, currencyReferenceId: next } : item))} load={canonicalPickerApi.currencies} paged reloadKey="scholarship-currencies" optional /></Row>)}</EditorSection>
+        <EditorSection
+          title={tr('Benefits → currency')}
+          onAdd={() =>
+            setBenefits((rows) => [
+              ...rows,
+              {
+                benefitKey: key('benefit'),
+                benefitTypeCode: 'OTHER',
+                isCovered: true,
+                currencyReferenceId: null,
+              },
+            ])
+          }
+        >
+          {benefits.map((row, index) => (
+            <Row
+              key={row.benefitKey}
+              onDelete={() => setBenefits((rows) => rows.filter((_, i) => i !== index))}
+            >
+              <label className="text-xs font-medium">
+                {tr('Benefit type')}
+                <input
+                  className="mt-1 w-full rounded-lg border border-[#DDEFF2] bg-white px-3 py-2 text-sm outline-none focus:border-[#21A7B4] focus:ring-2 focus:ring-[#21A7B4]/15"
+                  value={row.benefitTypeCode}
+                  onChange={(event) =>
+                    setBenefits((rows) =>
+                      rows.map((item, i) =>
+                        i === index ? { ...item, benefitTypeCode: event.target.value } : item,
+                      ),
+                    )
+                  }
+                />
+              </label>
+              <CanonicalPicker
+                label={tr('Canonical currency')}
+                value={row.currencyReferenceId}
+                onChange={(next) =>
+                  setBenefits((rows) =>
+                    rows.map((item, i) =>
+                      i === index ? { ...item, currencyReferenceId: next } : item,
+                    ),
+                  )
+                }
+                load={canonicalPickerApi.currencies}
+                paged
+                reloadKey="scholarship-currencies"
+                optional
+              />
+            </Row>
+          ))}
+        </EditorSection>
 
-    <EditorSection title="Eligibility canonical relationships" onAdd={() => setEligibilityItems((rows) => [...rows, { itemKey: key('eligibility'), itemTypeCode: 'OTHER', isRequired: true }])}>{eligibilityItems.map((row, index) => <Row key={row.itemKey} onDelete={() => setEligibilityItems((rows) => rows.filter((_, i) => i !== index))} wide><label className="text-xs font-medium">Eligibility type<input className="mt-1 w-full rounded-lg border border-[#DDEFF2] bg-white px-3 py-2 text-sm outline-none focus:border-[#21A7B4] focus:ring-2 focus:ring-[#21A7B4]/15" value={row.itemTypeCode} onChange={(event) => setEligibilityItems((rows) => rows.map((item, i) => i === index ? { ...item, itemTypeCode: event.target.value } : item))} /></label><CanonicalPicker label={row.itemTypeCode === "NATIONALITY" ? "Applicant nationality country" : "Country for this condition"} value={row.countryReferenceId} onChange={(next) => setEligibilityItems((rows) => rows.map((item, i) => i === index ? { ...item, countryReferenceId: next } : item))} load={canonicalPickerApi.countries} paged reloadKey="eligibility-countries" optional /><CanonicalPicker label="Degree" value={row.degreeLevelId} onChange={(next) => setEligibilityItems((rows) => rows.map((item, i) => i === index ? { ...item, degreeLevelId: next } : item))} load={() => canonicalPickerApi.degreeLevels()} reloadKey="eligibility-degrees" optional /><CanonicalPicker label="Major" value={row.majorId} onChange={(next) => setEligibilityItems((rows) => rows.map((item, i) => i === index ? { ...item, majorId: next } : item))} load={canonicalPickerApi.majors} paged reloadKey="eligibility-majors" optional /><CanonicalPicker label="International test" value={row.internationalTestId} onChange={(next) => setEligibilityItems((rows) => rows.map((item, i) => i === index ? { ...item, internationalTestId: next } : item))} load={canonicalPickerApi.tests} paged reloadKey="eligibility-tests" optional /></Row>)}</EditorSection>
+        <EditorSection
+          title={tr('Eligibility canonical relationships')}
+          onAdd={() =>
+            setEligibilityItems((rows) => [
+              ...rows,
+              { itemKey: key('eligibility'), itemTypeCode: 'OTHER', isRequired: true },
+            ])
+          }
+        >
+          {eligibilityItems.map((row, index) => (
+            <Row
+              key={row.itemKey}
+              onDelete={() => setEligibilityItems((rows) => rows.filter((_, i) => i !== index))}
+              wide
+            >
+              <label className="text-xs font-medium">
+                {tr('Eligibility type')}
+                <input
+                  className="mt-1 w-full rounded-lg border border-[#DDEFF2] bg-white px-3 py-2 text-sm outline-none focus:border-[#21A7B4] focus:ring-2 focus:ring-[#21A7B4]/15"
+                  value={row.itemTypeCode}
+                  onChange={(event) =>
+                    setEligibilityItems((rows) =>
+                      rows.map((item, i) =>
+                        i === index ? { ...item, itemTypeCode: event.target.value } : item,
+                      ),
+                    )
+                  }
+                />
+              </label>
+              <CanonicalPicker
+                label={tr(
+                  row.itemTypeCode === 'NATIONALITY'
+                    ? 'Applicant nationality country'
+                    : 'Country for this condition',
+                )}
+                value={row.countryReferenceId}
+                onChange={(next) =>
+                  setEligibilityItems((rows) =>
+                    rows.map((item, i) =>
+                      i === index ? { ...item, countryReferenceId: next } : item,
+                    ),
+                  )
+                }
+                load={canonicalPickerApi.countries}
+                paged
+                reloadKey="eligibility-countries"
+                optional
+              />
+              <CanonicalPicker
+                label={tr('Degree')}
+                value={row.degreeLevelId}
+                onChange={(next) =>
+                  setEligibilityItems((rows) =>
+                    rows.map((item, i) => (i === index ? { ...item, degreeLevelId: next } : item)),
+                  )
+                }
+                load={() => canonicalPickerApi.degreeLevels()}
+                reloadKey="eligibility-degrees"
+                optional
+              />
+              <CanonicalPicker
+                label={tr('Major')}
+                value={row.majorId}
+                onChange={(next) =>
+                  setEligibilityItems((rows) =>
+                    rows.map((item, i) => (i === index ? { ...item, majorId: next } : item)),
+                  )
+                }
+                load={canonicalPickerApi.majors}
+                paged
+                reloadKey="eligibility-majors"
+                optional
+              />
+              <CanonicalPicker
+                label={tr('International test')}
+                value={row.internationalTestId}
+                onChange={(next) =>
+                  setEligibilityItems((rows) =>
+                    rows.map((item, i) =>
+                      i === index ? { ...item, internationalTestId: next } : item,
+                    ),
+                  )
+                }
+                load={canonicalPickerApi.tests}
+                paged
+                reloadKey="eligibility-tests"
+                optional
+              />
+            </Row>
+          ))}
+        </EditorSection>
 
-    <EditorSection title="Required documents → international test" onAdd={() => setRequiredDocumentItems((rows) => [...rows, { documentKey: key('document'), displayName: 'Required document', isRequired: true }])}>{requiredDocumentItems.map((row, index) => <Row key={row.documentKey} onDelete={() => setRequiredDocumentItems((rows) => rows.filter((_, i) => i !== index))}><label className="text-xs font-medium">Document<input className="mt-1 w-full rounded-lg border border-[#DDEFF2] bg-white px-3 py-2 text-sm outline-none focus:border-[#21A7B4] focus:ring-2 focus:ring-[#21A7B4]/15" value={row.displayName} onChange={(event) => setRequiredDocumentItems((rows) => rows.map((item, i) => i === index ? { ...item, displayName: event.target.value } : item))} /></label><CanonicalPicker label="International test" value={row.internationalTestId} onChange={(next, option) => setRequiredDocumentItems((rows) => rows.map((item, i) => i === index ? { ...item, internationalTestId: next, sourceLabel: item.sourceLabel || option?.label } : item))} load={canonicalPickerApi.tests} paged reloadKey="document-tests" optional /></Row>)}</EditorSection>
+        <EditorSection
+          title={tr('Required documents → international test')}
+          onAdd={() =>
+            setRequiredDocumentItems((rows) => [
+              ...rows,
+              { documentKey: key('document'), displayName: 'Required document', isRequired: true },
+            ])
+          }
+        >
+          {requiredDocumentItems.map((row, index) => (
+            <Row
+              key={row.documentKey}
+              onDelete={() =>
+                setRequiredDocumentItems((rows) => rows.filter((_, i) => i !== index))
+              }
+            >
+              <label className="text-xs font-medium">
+                {tr('Document')}
+                <input
+                  className="mt-1 w-full rounded-lg border border-[#DDEFF2] bg-white px-3 py-2 text-sm outline-none focus:border-[#21A7B4] focus:ring-2 focus:ring-[#21A7B4]/15"
+                  value={row.displayName}
+                  onChange={(event) =>
+                    setRequiredDocumentItems((rows) =>
+                      rows.map((item, i) =>
+                        i === index ? { ...item, displayName: event.target.value } : item,
+                      ),
+                    )
+                  }
+                />
+              </label>
+              <CanonicalPicker
+                label={tr('International test')}
+                value={row.internationalTestId}
+                onChange={(next, option) =>
+                  setRequiredDocumentItems((rows) =>
+                    rows.map((item, i) =>
+                      i === index
+                        ? {
+                            ...item,
+                            internationalTestId: next,
+                            sourceLabel: item.sourceLabel || option?.label,
+                          }
+                        : item,
+                    ),
+                  )
+                }
+                load={canonicalPickerApi.tests}
+                paged
+                reloadKey="document-tests"
+                optional
+              />
+            </Row>
+          ))}
+        </EditorSection>
 
-    <EditorSection title="University / academic-program links" onAdd={() => setUniversityLinks((rows) => [...rows, { linkKey: key('university'), universityId: null, academicProgramId: null, relationshipTypeCode: 'ELIGIBLE' }])}>{universityLinks.map((row, index) => <Row key={row.linkKey} onDelete={() => setUniversityLinks((rows) => rows.filter((_, i) => i !== index))}><CanonicalPicker label="University" value={row.universityId} onChange={(next, option) => setUniversityLinks((rows) => rows.map((item, i) => i === index ? { ...item, universityId: next, academicProgramId: next === item.universityId ? item.academicProgramId : null, sourceLabel: item.sourceLabel || option?.label } : item))} load={canonicalPickerApi.universities} paged reloadKey="scholarship-universities" optional /><CanonicalPicker label="Academic program" value={row.academicProgramId} onChange={(next) => setUniversityLinks((rows) => rows.map((item, i) => i === index ? { ...item, academicProgramId: next } : item))} load={(query, page, cursor) => canonicalPickerApi.programs(row.universityId ?? '', query, page, cursor)} paged reloadKey={`scholarship-programs:${row.universityId ?? ''}`} optional disabled={!row.universityId} /></Row>)}</EditorSection>
+        <EditorSection
+          title={tr('University / academic-program links')}
+          onAdd={() =>
+            setUniversityLinks((rows) => [
+              ...rows,
+              {
+                linkKey: key('university'),
+                universityId: null,
+                academicProgramId: null,
+                relationshipTypeCode: 'ELIGIBLE',
+              },
+            ])
+          }
+        >
+          {universityLinks.map((row, index) => (
+            <Row
+              key={row.linkKey}
+              onDelete={() => setUniversityLinks((rows) => rows.filter((_, i) => i !== index))}
+            >
+              <CanonicalPicker
+                label={tr('University')}
+                value={row.universityId}
+                onChange={(next, option) =>
+                  setUniversityLinks((rows) =>
+                    rows.map((item, i) =>
+                      i === index
+                        ? {
+                            ...item,
+                            universityId: next,
+                            academicProgramId:
+                              next === item.universityId ? item.academicProgramId : null,
+                            sourceLabel: item.sourceLabel || option?.label,
+                          }
+                        : item,
+                    ),
+                  )
+                }
+                load={canonicalPickerApi.universities}
+                paged
+                reloadKey="scholarship-universities"
+                optional
+              />
+              <CanonicalPicker
+                label={tr('Academic program')}
+                value={row.academicProgramId}
+                onChange={(next) =>
+                  setUniversityLinks((rows) =>
+                    rows.map((item, i) =>
+                      i === index ? { ...item, academicProgramId: next } : item,
+                    ),
+                  )
+                }
+                load={(query, page, cursor) =>
+                  canonicalPickerApi.programs(row.universityId ?? '', query, page, cursor)
+                }
+                paged
+                reloadKey={`scholarship-programs:${row.universityId ?? ''}`}
+                optional
+                disabled={!row.universityId}
+              />
+            </Row>
+          ))}
+        </EditorSection>
 
-    <div className="sticky bottom-4 flex justify-end"><button type="button" onClick={save} disabled={disabled || saving || immutable} className="inline-flex items-center gap-2 rounded-xl bg-[#0E7C86] px-5 py-3 text-sm font-bold text-white shadow-lg transition-colors hover:bg-[#142B5F] disabled:opacity-50"><Save className="h-4 w-4" /> Save all canonical relationships</button></div>
-    </fieldset>
-  </div>;
+        <div className="sticky bottom-4 flex justify-end">
+          <button
+            type="button"
+            onClick={save}
+            disabled={disabled || saving || immutable}
+            className="inline-flex items-center gap-2 rounded-xl bg-[#0E7C86] px-5 py-3 text-sm font-bold text-white shadow-lg transition-colors hover:bg-[#142B5F] disabled:opacity-50"
+          >
+            <Save className="h-4 w-4" /> Save all canonical relationships
+          </button>
+        </div>
+      </fieldset>
+    </div>
+  );
 }
 
-function EditorSection({ title, onAdd, children }: { title: string; onAdd: () => void; children: React.ReactNode }) { return <section className="space-y-3 rounded-2xl border border-[#DDEFF2] bg-white p-5"><div className="flex items-center justify-between"><h3 className="font-bold">{title}</h3><button type="button" onClick={onAdd} className="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs"><Plus className="h-3.5 w-3.5" /> Add</button></div>{children}</section>; }
-function Row({ onDelete, children, wide = false }: { onDelete: () => void; children: React.ReactNode; wide?: boolean }) { return <div className={`grid items-end gap-3 rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/35 p-3 ${wide ? 'md:grid-cols-5' : 'md:grid-cols-[1fr_1fr_auto]'}`}>{children}<button type="button" onClick={onDelete} className="rounded-lg border border-red-200 p-2 text-red-600" title="Delete relationship"><Trash2 className="h-4 w-4" /></button></div>; }
-function SourceLabel({ value, onChange }: { value: string; onChange: (value: string) => void }) { return <label className="text-xs font-medium">Source label<input className="mt-1 w-full rounded-lg border border-[#DDEFF2] bg-white px-3 py-2 text-sm outline-none focus:border-[#21A7B4] focus:ring-2 focus:ring-[#21A7B4]/15" value={value} onChange={(event) => onChange(event.target.value)} /></label>; }
+function EditorSection({
+  title,
+  onAdd,
+  children,
+}: {
+  title: string;
+  onAdd: () => void;
+  children: React.ReactNode;
+}) {
+  const { language } = useTranslation();
+  const tr = (value: string) => scholarshipRelationshipText(language, value);
+  return (
+    <section className="space-y-3 rounded-2xl border border-[#DDEFF2] bg-white p-5">
+      <div className="flex items-center justify-between">
+        <h3 className="font-bold">{title}</h3>
+        <button
+          type="button"
+          onClick={onAdd}
+          className="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs"
+        >
+          <Plus className="h-3.5 w-3.5" /> {tr('Add')}
+        </button>
+      </div>
+      {children}
+    </section>
+  );
+}
+function Row({
+  onDelete,
+  children,
+  wide = false,
+}: {
+  onDelete: () => void;
+  children: React.ReactNode;
+  wide?: boolean;
+}) {
+  const { language } = useTranslation();
+  const tr = (value: string) => scholarshipRelationshipText(language, value);
+  return (
+    <div
+      className={`grid items-end gap-3 rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/35 p-3 ${wide ? 'md:grid-cols-5' : 'md:grid-cols-[1fr_1fr_auto]'}`}
+    >
+      {children}
+      <button
+        type="button"
+        onClick={onDelete}
+        className="rounded-lg border border-red-200 p-2 text-red-600"
+        title={tr('Delete relationship')}
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+function SourceLabel({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const { language } = useTranslation();
+  const tr = (value: string) => scholarshipRelationshipText(language, value);
+  return (
+    <label className="text-xs font-medium">
+      {tr('Source label')}
+      <input
+        className="mt-1 w-full rounded-lg border border-[#DDEFF2] bg-white px-3 py-2 text-sm outline-none focus:border-[#21A7B4] focus:ring-2 focus:ring-[#21A7B4]/15"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </label>
+  );
+}

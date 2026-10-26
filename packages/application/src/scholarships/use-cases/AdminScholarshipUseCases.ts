@@ -85,6 +85,8 @@ export class AdminScholarshipUseCases {
   }
 
   public async getScholarshipCatalogDetail(id: string): Promise<{
+    publicHref: string | null;
+    publicationReadiness: { eligible: boolean; blocker: string | null };
     scholarship: ScholarshipDto;
     completeness: ReturnType<typeof ScholarshipCompletenessClassifier.classify>;
     unresolvedLinks: Array<{
@@ -97,7 +99,23 @@ export class AdminScholarshipUseCases {
     }>;
   }> {
     const scholarship = await this.getScholarship(id);
+    let publicHref: string | null = null;
+    if (scholarship.slug && scholarship.status === ScholarshipStatus.PUBLISHED && scholarship.publicationStatus === ScholarshipPublicationStatus.PUBLISHED && typeof this.repository.findPublishedBySlug === 'function') {
+      try {
+        const visible = await this.repository.findPublishedBySlug(scholarship.slug);
+        if (visible?.id === scholarship.id) publicHref = '/scholarships/' + encodeURIComponent(scholarship.slug);
+      } catch { /* A failed visibility read must not manufacture a public link. */ }
+    }
+    let publicationReadiness: { eligible: boolean; blocker: string | null };
+    try {
+      await this.assertPublicationReady(scholarship);
+      publicationReadiness = { eligible: true, blocker: null };
+    } catch (error) {
+      publicationReadiness = { eligible: false, blocker: error instanceof Error && /^[A-Z][A-Z0-9_]+$/.test(error.message) ? error.message : 'SCHOLARSHIP_READINESS_UNAVAILABLE' };
+    }
     return {
+      publicHref,
+      publicationReadiness,
       scholarship,
       completeness: this.catalogCompleteness(scholarship),
       unresolvedLinks: this.unresolvedLinks(scholarship),

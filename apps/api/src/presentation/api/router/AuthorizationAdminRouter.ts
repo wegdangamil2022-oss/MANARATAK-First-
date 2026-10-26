@@ -440,13 +440,14 @@ export class AuthorizationAdminRouter {
     const policyDefinitionSchema = z.object({
         name: z.string().trim().min(1).max(240),
         description: z.string().trim().max(2000),
-        ruleType: z.enum(['TIME', 'IP']),
+        ruleType: z.enum(['TIME', 'IP', 'COURSE_SCOPE']),
         configuration: z.object({
             start: z.string().optional(),
             end: z.string().optional(),
             timezone: z.string().max(120).optional(),
             daysOfWeek: z.array(z.number().int().min(0).max(6)).max(7).optional(),
             allowedIps: z.array(z.string().max(60)).max(100).optional(),
+              courseIds: z.array(z.string().uuid()).min(1).max(100).optional(),
           })
           .strict(),
       })
@@ -491,14 +492,16 @@ export class AuthorizationAdminRouter {
         const body = policyDefinitionSchema
           .extend({
             testIp: z.string().max(60).optional(),
+            testCourseId:z.string().uuid().optional(),
             testTime: z.string().datetime().optional(),
           })
           .parse(req.body);
         const policy = managePoliciesUseCase.definition({ ...body, id: 'preview' });
         const decision = await policyEvaluator.evaluate(policy, {
           identityId: requireAuthenticatedPrincipal(req).principalId,
-          resourceUrn: new ResourceUrn('admin:authorization'),
-          action: new Action('manage'),
+          resourceUrn: new ResourceUrn(body.ruleType==='COURSE_SCOPE'?'admin:courses':'admin:authorization'),
+          action: new Action(body.ruleType==='COURSE_SCOPE'?'read':'manage'),
+          courseId:body.testCourseId,
           ip: body.testIp || req.ip,
           requestTime: body.testTime ? new Date(body.testTime) : new Date(),
         });
@@ -604,7 +607,7 @@ export class AuthorizationAdminRouter {
           if (!managePoliciesUseCase) throw new Error('POLICY_MANAGEMENT_UNAVAILABLE');
           for (const id of body.policyIds) {
             const policy = await managePoliciesUseCase.get(id);
-            if (!policy || !['TIME', 'IP'].includes(policy.ruleType))
+            if (!policy || !['TIME', 'IP', 'COURSE_SCOPE'].includes(policy.ruleType))
               throw new Error('POLICY_REFERENCE_INVALID');
           }
         }
@@ -653,7 +656,7 @@ export class AuthorizationAdminRouter {
           if (!managePoliciesUseCase) throw new Error('POLICY_MANAGEMENT_UNAVAILABLE');
           for (const id of body.policyIds) {
             const policy = await managePoliciesUseCase.get(id);
-            if (!policy || !['TIME', 'IP'].includes(policy.ruleType))
+            if (!policy || !['TIME', 'IP', 'COURSE_SCOPE'].includes(policy.ruleType))
               throw new Error('POLICY_REFERENCE_INVALID');
           }
         }

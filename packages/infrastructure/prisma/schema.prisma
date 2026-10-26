@@ -10,6 +10,84 @@ generator client {
 
 // --- System & Core ---
 
+// Coordination only. Owner content and publication decisions stay in owner tables.
+model ReviewWorkCase {
+  key String @id
+  domain String
+  ownerId String
+  profileId String?
+  cycle Int @default(1)
+  version Int @default(1)
+  ownerRevision String
+  reasons Json
+  state String @default("OPEN")
+  assigneeId String?
+  teamId String?
+  priority String?
+  enteredAt DateTime @default(now())
+  dueAt DateTime?
+  policyId String?
+  policySnapshot Json?
+  closedAt DateTime?
+  synchronizedAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  events ReviewWorkEvent[]
+  assignee IdentityRecord? @relation("ReviewAssignee",fields:[assigneeId],references:[id],onDelete:Restrict)
+  team RoleRecord? @relation(fields:[teamId],references:[id],onDelete:Restrict)
+  @@index([domain, state, enteredAt, key])
+  @@index([assigneeId, state])
+  @@index([teamId, state])
+  @@index([dueAt, state])
+}
+
+model ReviewWorkEvent {
+  id String @id
+  caseKey String
+  cycle Int
+  action String
+  actorId String?
+  note String?
+  payload Json
+  commandKey String? @unique
+  commandHash String?
+  createdAt DateTime @default(now())
+  case ReviewWorkCase @relation(fields: [caseKey], references: [key], onDelete: Restrict)
+  actor IdentityRecord? @relation("ReviewEventActor",fields:[actorId],references:[id],onDelete:Restrict)
+  @@index([caseKey, createdAt, id])
+  @@index([action, createdAt])
+}
+
+model ReviewSourceCheckpoint {
+  domain String @id
+  synchronizedAt DateTime?
+  observed Int?
+  errorCode String?
+  lastAttemptAt DateTime @default(now())
+}
+
+model ReviewWorkView {
+  id String @id
+  actorId String
+  name String
+  shared Boolean @default(false)
+  filters Json
+  createdAt DateTime @default(now())
+  actor IdentityRecord @relation("ReviewViewActor",fields:[actorId],references:[id],onDelete:Restrict)
+  @@index([actorId, shared])
+}
+
+model ReviewSlaPolicy {
+  domain String @id
+  version Int @default(1)
+  hours Int
+  warningHours Int
+  timezone String @default("UTC")
+  approvedBy String
+  approvedAt DateTime @default(now())
+  reason String
+  approver IdentityRecord @relation("ReviewPolicyApprover",fields:[approvedBy],references:[id],onDelete:Restrict)
+}
+
 model Settings {
   id        String   @id @default(uuid())
   key       String   @unique
@@ -311,6 +389,7 @@ model Course {
   majorProjections           CourseMajorProjection[]
   internationalTestRelationships CourseInternationalTestRelationship[]
   modules                    CourseModule[]
+  contentBlocks              CourseLessonContentBlock[]
   lessons                    CourseLesson[]
   lessonAssets               CourseLessonAsset[]
   quizzes                    CourseQuiz[]
@@ -372,9 +451,11 @@ model CourseLesson {
   course   Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
   module   CourseModule           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   assets   CourseLessonAsset[]
+  contentBlocks CourseLessonContentBlock[]
   quizzes  CourseQuiz[]
   progress CourseLessonProgress[]
 
+  @@unique([courseId, id])
   @@unique([moduleId, position])
   @@index([courseId, status])
   @@index([moduleId])
@@ -396,6 +477,7 @@ model CourseLessonAsset {
 
   course Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lesson CourseLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  contentBlocks CourseLessonContentBlock[]
 
   @@unique([lessonId, position])
   @@unique([lessonId, assetId])
@@ -423,10 +505,30 @@ model CourseQuiz {
   lesson    CourseLesson?       @relation(fields: [lessonId], references: [id], onDelete: SetNull)
   questions CourseQuestion[]
   attempts  CourseQuizAttempt[]
+  contentBlocks CourseLessonContentBlock[]
 
   @@unique([courseId, position])
   @@index([moduleId])
   @@index([lessonId])
+  @@index([courseId, status])
+}
+
+model CourseLessonContentBlock {
+  id               String @id
+  courseId         String
+  lessonId         String
+  type             String
+  payload          Json
+  assetReferenceId String?
+  quizId           String?
+  position         Int
+  version          Int @default(1)
+  status           String @default("READY_TO_REVIEW")
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson CourseLesson @relation(fields: [courseId, lessonId], references: [courseId, id], onDelete: Cascade)
+  asset CourseLessonAsset? @relation(fields: [assetReferenceId], references: [id], onDelete: SetNull)
+  quiz CourseQuiz? @relation(fields: [quizId], references: [id], onDelete: SetNull)
+  @@unique([lessonId, position])
   @@index([courseId, status])
 }
 
@@ -1678,6 +1780,8 @@ model UniversityImportChange {
 // --- Scholarships ---
 
 model Scholarship {
+  managedServiceRequests ServiceRequestRecord[]
+  directApplicationReports DirectApplicationReport[]
   id                   String    @id @default(uuid())
   publicId             String    @unique
   slug                 String    @unique
@@ -2876,6 +2980,7 @@ model InternationalTestContentBlock {
 // --- Student Workspace ---
 
 model AssetRecord {
+  applicationEvidence ServiceApplicationEvidence[]
   studentApplicationDocuments StudentApplicationDocumentBinding[]
   id                       String    @id
   reference                String    @unique
@@ -3649,6 +3754,11 @@ model CmsScheduledJob {
 // --- Identity Foundation ---
 
 model IdentityRecord {
+  reviewAssignments ReviewWorkCase[] @relation("ReviewAssignee")
+  reviewEvents ReviewWorkEvent[] @relation("ReviewEventActor")
+  reviewViews ReviewWorkView[] @relation("ReviewViewActor")
+  reviewPolicies ReviewSlaPolicy[] @relation("ReviewPolicyApprover")
+  directApplicationReports DirectApplicationReport[]
   id     String @id
   type   String
   status String
@@ -3670,6 +3780,7 @@ model IdentityRecord {
   roleAssignments RoleAssignmentRecord[]
   emailVerificationTokens EmailVerificationTokenRecord[]
   passwordResetTokens PasswordResetTokenRecord[]
+  @@index([type, status, createdAt])
 }
 
 model CredentialRecord {
@@ -3748,6 +3859,7 @@ model AccountRecord {
 // --- Authorization Foundation ---
 
 model RoleRecord {
+  reviewAssignments ReviewWorkCase[]
   id          String   @id
   name        String
   description String
@@ -5078,6 +5190,7 @@ model FinanceEstimateRecord {
 
 // --- Phase 20 Enterprise Services Platform (P8 source closure) ---
 model ServiceCatalogRecord {
+  managedApplication Boolean @default(false)
   approvedPrice Json?
   cancellationPolicyCode String @default("FINANCE_REVIEW_REQUIRED")
   reviewEvidence Json?
@@ -5158,6 +5271,9 @@ model ServiceCatalogLanguageRecord {
 }
 
 model ServiceRequestRecord {
+  applicationOpportunityId String?
+  applicationOpportunity Scholarship? @relation(fields: [applicationOpportunityId], references: [id], onDelete: Restrict)
+  applicationEvidence ServiceApplicationEvidence[]
   slaEscalatedAt DateTime?
   invoiceNextCheckAt DateTime @default(now())
   cancellationNextCheckAt DateTime @default(now())
@@ -5192,8 +5308,74 @@ model ServiceRequestRecord {
   @@index([studentReferenceId, status, updatedAt])
   @@index([serviceId, status])
   @@index([financeInvoiceId])
+  @@index([createdAt, status])
+  @@index([applicationOpportunityId])
 
   @@index([assignedStaffId,status,dueAt], map:"ServiceRequestRecord_staff_due")
+}
+
+// Public analytics deliberately has no identity, workspace, URL, IP or user-agent fields.
+model PublicAnalyticsConsent {
+  tokenHash String @id
+  policyVersion String
+  grantedAt DateTime @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+  events PublicAnalyticsEvent[]
+  @@index([expiresAt])
+}
+
+model DashboardMeasurementEpoch {
+  key String @id
+  startedAt DateTime @default(now())
+}
+
+model PublicAnalyticsEvent {
+  id String @id
+  consentHash String
+  eventId String
+  kind String
+  pageKey String
+  opportunityId String?
+  destinationHost String?
+  receivedAt DateTime @default(now())
+  expiresAt DateTime
+  consent PublicAnalyticsConsent @relation(fields: [consentHash], references: [tokenHash], onDelete: Cascade)
+  @@unique([consentHash, eventId])
+  @@index([kind, receivedAt, consentHash])
+  @@index([expiresAt])
+}
+
+// Append-only verified service events; separate from personal student trackers.
+model ServiceApplicationEvidence {
+  id String @id @default(uuid())
+  requestId String
+  kind String
+  actorId String
+  idempotencyKey String
+  evidenceAssetId String?
+  evidenceDigest String?
+  verifiedAt DateTime @default(now())
+  expiresAt DateTime
+  request ServiceRequestRecord @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  asset AssetRecord? @relation(fields: [evidenceAssetId], references: [id], onDelete: SetNull)
+  @@unique([requestId, idempotencyKey])
+  @@index([kind, verifiedAt])
+  @@index([expiresAt])
+  @@index([requestId, verifiedAt(sort: Desc), id(sort: Desc)], map: "ServiceApplicationEvidence_request_latest")
+}
+
+model DirectApplicationReport {
+  id String @id @default(uuid())
+  studentId String
+  opportunityId String
+  reportedAt DateTime @default(now())
+  expiresAt DateTime
+  student IdentityRecord @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  opportunity Scholarship @relation(fields: [opportunityId], references: [id], onDelete: Restrict)
+  @@unique([studentId, opportunityId])
+  @@index([reportedAt])
+  @@index([expiresAt])
 }
 
 

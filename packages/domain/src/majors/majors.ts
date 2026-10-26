@@ -1,3 +1,4 @@
+import type {MajorContentSectionEdit} from './MajorContentAuthoring';
 import { z } from 'zod';
 import { MajorImportCompletenessState, MajorStatus } from './enums';
 import { AcademicTaxonomyNodeDto } from '../academic-taxonomy/contracts';
@@ -55,6 +56,7 @@ export interface MajorAliasDto {
 }
 
 export interface MajorClassificationMappingDto {
+  taxonomy?: {name:string;code:string;standardType?:string;parents:Array<{id:string;name:string;code:string}>};
   id?: string;
   majorId?: string;
   profileId?: string;
@@ -76,6 +78,7 @@ export interface ReviewedMajorClassificationInput {
 }
 
 export interface MajorRelationshipDto {
+  relatedMajor?:{id:string;profileId?:string;name:string;code?:string;level?:string};
   id?: string;
   sourceMajorId?: string;
   targetMajorId?: string;
@@ -101,6 +104,7 @@ export interface MajorSourceDto {
 }
 
 export interface MajorLevelProfileDto {
+  updatedAt?:Date;
   id?: string;
   majorId?: string;
   level: MajorLevel;
@@ -180,6 +184,8 @@ export interface MajorPhaseLinkSummaryDto {
 }
 
 export interface MajorDto {
+  profileId?: string;
+  contentReview?: MajorContentReviewSummary;
   revision?: number;
   id: string;
   publicId: string;
@@ -401,7 +407,14 @@ export class MajorPhaseLinkingService {
   }
 }
 
+export type MajorAdminSort = 'UPDATED_DESC'|'NAME_AR'|'NAME_EN'|'DEGREE'|'STATUS';
+export interface MajorContentReviewSummary {
+  state:'NO_CONTENT'|'INCOMPLETE'|'NEEDS_REVIEW'|'REVIEWED'|'READY'|'UNAVAILABLE';
+  versionId?:string;
+  blockingCodes?:string[];
+}
 export interface MajorFilters {
+  sort?: MajorAdminSort;
   /** Admin counter reads omit hydrated catalog rows. */
   countOnly?: boolean;
   taxonomyNodeId?: string;
@@ -426,6 +439,8 @@ export interface PaginatedMajorResult<T = MajorDto> {
   pageSize: number;
   totalPages: number;
   stats?: {published:number;needsReview:number;complete:number};
+  countUnit?:'DEGREE_PROFILE_OR_UNPROFILED_ROOT'|'SOURCE_CATALOG_ENTRY';
+  uniqueRootTotal?:number;
   hasMore?: boolean;
   nextCursor?: string | null;
 }
@@ -460,7 +475,8 @@ export interface TaxonomyMappedMajorDto {
 }
 
 export interface IMajorRepository {
-  lockForRevision?(id:string,expectedRevision:number):Promise<void>;
+  lockForRevision?(id:string,expectedRevision:number,options?:{archivedRestore?:boolean}):Promise<void>;
+  restoreForReview?(id:string,actorId:string,reason:string):Promise<void>;
   advanceRevision?(id:string,expectedRevision:number):Promise<number>;
   startWorkingCopy?(id:string,actorId:string,reason:string):Promise<void>;
   unpublishProfile?(id:string):Promise<void>;
@@ -489,7 +505,8 @@ export interface IMajorRepository {
   listLevelProfiles?(majorId: string): Promise<MajorLevelProfileDto[]>;
   createContentSections?(data: Array<Omit<MajorContentSectionDto, 'id'>>): Promise<{ count: number }>;
   listContentSections?(majorId: string, options?: { profileId?: string; versionId?: string; publishedOnly?: boolean }): Promise<MajorContentSectionDto[]>;
-  updateContentSections?(profileId: string, versionId: string, sections: Array<{ id?: string; sectionKey: string; locale?: string; title?: string; content: string; reviewStatus?: string }>): Promise<{ count: number; sections: MajorContentSectionDto[] }>;
+  updateContentSections?(profileId: string, versionId: string, sections: MajorContentSectionEdit[]): Promise<{ count: number; sections: MajorContentSectionDto[] }>;
+  correctDegreeReference?(profileId:string,degreeLevelId:string,sourceUri:string,actorId:string):Promise<void>;
   createAliases?(data: Array<Omit<MajorAliasDto, 'id'>>): Promise<{ count: number }>;
   listAliases?(majorId: string): Promise<MajorAliasDto[]>;
   createRelationships?(data: Array<Omit<MajorRelationshipDto, 'id'>>): Promise<{ count: number }>;

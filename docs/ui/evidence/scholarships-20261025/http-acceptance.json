@@ -1,0 +1,14 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16",
+  "canonicalAuthentication": true,
+  "canonicalMfa": true,
+  "workersStarted": false,
+  "originalDatabaseTouched": false,
+  "checks": [
+    "two independent authenticated MFA sessions",
+    "HTTP two-session conditional write: one 200 and one 409; exact independent readback",
+    "unauthenticated API write rejected",
+    "HTTP summary matches independent SQL owner counts"
+  ],
+  "pass": true
+}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { reviewReasonHeaders } from '@manaratak/shared';
 import { adminApiClient } from '../api/client';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 type Row = { id: string; title: string; position: number; status: string };
@@ -41,7 +42,7 @@ export function CourseDraftStructurePanel({
     try {
       await adminApiClient.request(`/admin/courses/${courseId}/${path}`, {
         method,
-        headers: { 'If-Match': String(version), 'X-Review-Reason': reason.trim() },
+        headers: { 'If-Match': String(version), ...reviewReasonHeaders(reason.trim()) },
         body: body ? JSON.stringify(body) : undefined,
       });
       await onSaved();
@@ -75,7 +76,7 @@ export function CourseDraftStructurePanel({
         </button>
         <button
           disabled={row.status === 'ARCHIVED' || !reason.trim()}
-          onClick={() => void command(`${kind}/${row.id}`, 'DELETE')}
+          onClick={() => { if (window.confirm(kind === 'modules' ? 'أرشفة الوحدة ومحاضراتها وكتلها واختباراتها؟ تبقى النسخ التاريخية محفوظة.' : 'أرشفة المحاضرة وكتلها واختباراتها؟ تبقى النسخ التاريخية محفوظة.')) void command(`${kind}/${row.id}`, 'DELETE'); }}
         >
           {kind === 'modules' ? 'أرشفة الوحدة وعناصرها' : 'أرشفة الدرس واختباراته'}
         </button>

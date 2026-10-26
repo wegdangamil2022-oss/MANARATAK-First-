@@ -56,7 +56,11 @@ test('preparation inventories real source and keeps all later execution unaccept
   const plan=prepareAcceptance();assert.equal(plan.runtimeAcceptance,false);assert.equal(plan.runtimeExecuted,false);
   assert.equal(plan.databaseHosting.existingGuardSupport,'LOCAL_ONLY');
   assert.equal(plan.relationCoverage.rows,77);assert.equal(plan.relationCoverage.cases,42);
-  assert.equal(plan.R05.upgradePlan.requiredModels.length,281);
+  const {readFileSync}=await import('node:fs');
+  const schemaModels=[...readFileSync('packages/infrastructure/prisma/schema.prisma','utf8').matchAll(/^model\s+(\w+)\s*\{/gm)].map(match=>match[1]).sort();
+  assert.equal(schemaModels.length,292);
+  assert.deepEqual(plan.R05.upgradePlan.requiredModels,schemaModels);
+  for(const model of ['PublicAnalyticsConsent','PublicAnalyticsEvent','DashboardMeasurementEpoch','ServiceApplicationEvidence','DirectApplicationReport'])assert.ok(schemaModels.includes(model));
   assert.equal(plan.laterStages.length,9);
   assert.ok(plan.notValidCandidates.length>1);
 });
@@ -67,7 +71,7 @@ test('preparation CLI never overwrites artifacts or writes into the checkout (in
     const run=file=>cp.spawnSync(process.execPath,['scripts/database/prepare-post28-acceptance.mjs',file],{encoding:'utf8'});
     const output=path.join(root,'plan.json');assert.equal(run(output).status,0);
     const original=fs.readFileSync(output,'utf8');assert.notEqual(run(output).status,0);assert.equal(fs.readFileSync(output,'utf8'),original);
-    fs.symlinkSync(process.cwd(),path.join(root,'checkout'));
+    fs.symlinkSync(process.cwd(),path.join(root,'checkout'),process.platform==='win32'?'junction':'dir');
     const inside=path.join(root,'checkout','must-not-write.json');assert.notEqual(run(inside).status,0);assert.equal(fs.existsSync(inside),false);
     assert.notEqual(run(path.join(process.cwd(),'must-not-write.json')).status,0);
   }finally{fs.rmSync(root,{recursive:true,force:true});}

@@ -1,24 +1,32 @@
-import {AcademicProgramExplorerPanel} from '../features/integration/AcademicProgramExplorerPanel';
+import { useAdministrationDraftGuard } from '../features/reference-data/useAdministrationDraftGuard';
+import {
+  DestinationCard,
+  DestinationEditorContext,
+} from '../features/destinations/DestinationCard';
+import { DestinationOwnerList } from '../features/destinations/DestinationOwnerList';
+import {
+  destinationGroups,
+  destinationSection,
+  destinationRepairTarget,
+  destinationListContext,
+  type DestinationSection,
+} from '../features/destinations/destinationNavigation';
+import '../features/destinations/destinations.css';
+import { AcademicProgramExplorerPanel } from '../features/integration/AcademicProgramExplorerPanel';
 import { listAllReferenceData } from '../api/referenceData';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
   AlertCircle,
   ArrowLeft,
-  BadgeCheck,
-  BookOpenCheck,
-  BriefcaseBusiness,
   Building2,
   CheckCircle2,
   ExternalLink,
   FileCheck2,
   Globe2,
   GraduationCap,
-  Languages,
   Loader2,
   RefreshCw,
-  Save,
-  ScrollText,
   ShieldCheck,
   Stamp,
   WalletCards,
@@ -34,7 +42,7 @@ import {
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 
-type TabKey = 'overview' | 'study' | 'visa' | 'living' | 'relations' | 'sources' | 'publish';
+type TabKey = DestinationSection;
 type CostTier = 'LOW' | 'MODERATE' | 'HIGH' | 'VERY_HIGH';
 
 type ReferenceCountry = {
@@ -108,6 +116,10 @@ type Profile = {
   studyLanguageReferenceIds: string[];
   isFeatured: boolean;
   publishedAt?: string | null;
+  governance?: {
+    lastEditorId?: string;
+    proof?: { reviewedAt?: string; verifiedAt?: string; reviewerId?: string } | null;
+  };
 };
 type Readiness = {
   readyForReview: boolean;
@@ -200,13 +212,13 @@ type FormState = {
   averageMonthlyLivingCostMin: string;
   averageMonthlyLivingCostMax: string;
   livingCostCurrencyReferenceId: string;
-  costHighlightsAr: string;
-  costHighlightsEn: string;
+  costHighlightsAr: CostItem[];
+  costHighlightsEn: CostItem[];
   studentLifeHighlightsAr: string;
   studentLifeHighlightsEn: string;
   officialLinks: LinkItem[];
   cityReferenceIds: string[];
-  evidenceSources: string;
+  evidenceSources: EvidenceItem[];
   sourceAuditDate: string;
   studyLanguageReferenceIds: string[];
   isFeatured: boolean;
@@ -229,13 +241,13 @@ const emptyForm: FormState = {
   averageMonthlyLivingCostMin: '',
   averageMonthlyLivingCostMax: '',
   livingCostCurrencyReferenceId: '',
-  costHighlightsAr: '',
-  costHighlightsEn: '',
+  costHighlightsAr: [],
+  costHighlightsEn: [],
   studentLifeHighlightsAr: '',
   studentLifeHighlightsEn: '',
   officialLinks: [],
   cityReferenceIds: [],
-  evidenceSources: '',
+  evidenceSources: [],
   sourceAuditDate: '',
   studyLanguageReferenceIds: [],
   isFeatured: false,
@@ -247,30 +259,6 @@ const lines = (value: string) =>
     .map((item) => item.trim())
     .filter(Boolean);
 const stringifyLines = (value?: string[]) => (value ?? []).join('\n');
-const costLines = (items?: CostItem[]) =>
-  (items ?? []).map((item) => `${item.label} | ${item.value}`).join('\n');
-const parseCostLines = (value: string): CostItem[] =>
-  lines(value)
-    .map((row) => {
-      const [label, ...rest] = row.split('|').map((x) => x.trim());
-      return { label, value: rest.join(' | ') };
-    })
-    .map((item) => {
-      if (!item.label || !item.value) throw new Error('أكمل كل سطر تكلفة: العنصر | القيمة.');
-      return item;
-    });
-const evidenceLines = (items?: EvidenceItem[]) =>
-  (items ?? []).map((item) => `${item.label} | ${item.url} | ${item.sourceType}`).join('\n');
-const parseEvidenceLines = (value: string): EvidenceItem[] =>
-  lines(value)
-    .map((row) => {
-      const [label, url, sourceType = 'OTHER_OFFICIAL'] = row.split('|').map((x) => x.trim());
-      return { label, url, sourceType };
-    })
-    .map((item) => {
-      if (!item.label || !item.url) throw new Error('أكمل كل دليل: الوصف | الرابط | نوع المصدر.');
-      return item;
-    });
 const dateInput = (value?: string | null) => (value ? value.slice(0, 10) : '');
 const optionLabel = (item: RefOption, isAr: boolean) =>
   (isAr ? item.nameAr : item.name) ||
@@ -298,7 +286,12 @@ function flagEmoji(code: string) {
 export function StudyDestinationDetailPage() {
   const { countryIso2Code = '' } = useParams();
   const iso2 = countryIso2Code.toUpperCase();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [contentLocale, setContentLocale] = useState<'ar' | 'en'>(() =>
+    searchParams.get('contentLocale') === 'en' ? 'en' : 'ar',
+  );
+  const [editingCard, setEditingCard] = useState('');
+  const [preview, setPreview] = useState<Aggregate | null>(null);
   const { hasPermission, permissions } = useAdminAuthorization();
   const canEdit = hasPermission('admin:study-destinations:edit');
   const [reason, setReason] = useState('');
@@ -317,13 +310,20 @@ export function StudyDestinationDetailPage() {
   const [languages, setLanguages] = useState<RefOption[]>([]);
   const [currencies, setCurrencies] = useState<RefOption[]>([]);
   const [form, setForm] = useState<FormState>(emptyForm);
-  const [tab, setTab] = useState<TabKey>(
-    (
-      ['overview', 'study', 'visa', 'living', 'relations', 'sources', 'publish'] as string[]
-    ).includes(searchParams.get('section') ?? '')
-      ? (searchParams.get('section') as TabKey)
-      : 'overview',
-  );
+  const tab: TabKey = destinationSection(searchParams.get('section'));
+  const setTab = (key: TabKey) => {
+    if (
+      dirty &&
+      !window.confirm(isAr ? 'تجاهل التعديلات غير المحفوظة؟' : 'Discard unsaved changes?')
+    )
+      return;
+    hydrateForm(aggregate?.profile ?? null);
+    setEditingCard('');
+    const next = new URLSearchParams(searchParams);
+    next.set('section', key);
+    next.delete('card');
+    setSearchParams(next);
+  };
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [action, setAction] = useState<string | null>(null);
@@ -359,13 +359,13 @@ export function StudyDestinationDetailPage() {
           ? ''
           : String(profile.averageMonthlyLivingCostMax),
       livingCostCurrencyReferenceId: profile.livingCostCurrencyReferenceId ?? '',
-      costHighlightsAr: costLines(profile.costHighlightsAr),
-      costHighlightsEn: costLines(profile.costHighlightsEn),
+      costHighlightsAr: profile.costHighlightsAr ?? [],
+      costHighlightsEn: profile.costHighlightsEn ?? [],
       studentLifeHighlightsAr: stringifyLines(profile.studentLifeHighlightsAr),
       studentLifeHighlightsEn: stringifyLines(profile.studentLifeHighlightsEn),
       officialLinks: profile.officialLinks ?? [],
       cityReferenceIds: profile.cityReferenceIds ?? [],
-      evidenceSources: evidenceLines(profile.evidenceSources),
+      evidenceSources: profile.evidenceSources ?? [],
       sourceAuditDate: dateInput(profile.sourceAuditDate),
       studyLanguageReferenceIds: profile.studyLanguageReferenceIds ?? [],
       isFeatured: profile.isFeatured,
@@ -380,21 +380,12 @@ export function StudyDestinationDetailPage() {
     setLoading(true);
     setError(null);
     try {
-      const [detailResult, languageResult, currencyResult] = await Promise.allSettled([
-        adminApiClient.request<Aggregate>(`/admin/study-destinations/${encodeURIComponent(iso2)}`),
-        listAllReferenceData<RefOption>('languages'),
-        listAllReferenceData<RefOption>('currencies'),
-      ]);
+      const detail = await adminApiClient.request<Aggregate>(
+        `/admin/study-destinations/${encodeURIComponent(iso2)}`,
+      );
       if (request !== sequence.current) return;
-      if (detailResult.status === 'rejected') throw detailResult.reason;
-      setAggregate(detailResult.value);
-      hydrateForm(detailResult.value.profile);
-      if (languageResult.status === 'fulfilled')
-        setLanguages(languageResult.value.filter((item) => item.isActive !== false));
-      if (currencyResult.status === 'fulfilled')
-        setCurrencies(currencyResult.value.filter((item) => item.isActive !== false));
-      if (languageResult.status === 'rejected' || currencyResult.status === 'rejected')
-        setError('تعذر تحميل بعض مراجع اللغات أو العملات. أعد التحميل قبل تغييرها.');
+      setAggregate(detail);
+      hydrateForm(detail.profile);
     } catch (cause) {
       if (request === sequence.current) {
         setAggregate(null);
@@ -413,6 +404,7 @@ export function StudyDestinationDetailPage() {
     void load();
   }, [load, permissions.join('|')]);
   useEffect(() => {
+    if (tab !== 'supporting') return;
     let active = true;
     setGraphLoading(true);
     setGraphError(null);
@@ -433,36 +425,51 @@ export function StudyDestinationDetailPage() {
     return () => {
       active = false;
     };
-  }, [iso2, edgeParams, language]);
-  const dirty = JSON.stringify(form) !== baseline.current;
+  }, [iso2, edgeParams, language, tab]);
   useEffect(() => {
-    if (!dirty) return;
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = '';
+    if (tab !== 'study' && tab !== 'living') return;
+    let live = true;
+    const kind = tab === 'study' ? 'languages' : 'currencies';
+    listAllReferenceData<RefOption>(kind)
+      .then((rows) => {
+        if (!live) return;
+        const active = rows.filter((x) => x.isActive !== false);
+        if (kind === 'languages') setLanguages(active);
+        else setCurrencies(active);
+      })
+      .catch(() => {
+        if (live)
+          setError(
+            isAr
+              ? 'تعذر تحميل المراجع؛ لا تغير الاختيارات قبل إعادة المحاولة.'
+              : 'References unavailable; retry before changing selections.',
+          );
+      });
+    return () => {
+      live = false;
     };
-    window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
-  }, [dirty]);
+  }, [tab, isAr]);
+  const dirty = JSON.stringify(form) !== baseline.current;
+  useAdministrationDraftGuard(dirty, isAr, () => {
+    hydrateForm(aggregate?.profile ?? null);
+    setEditingCard('');
+  });
   const reload = () => {
     if (saving || action) return;
     if (dirty && !window.confirm('تجاهل التعديلات غير المحفوظة وإعادة التحميل؟')) return;
     void load();
   };
 
+  // English authoring is disabled. Omit read-only fields rather than serializing
+  // display text back into lists and normalizing historical translations.
   const buildPayload = () => ({
     expectedUpdatedAt: aggregate?.profile?.updatedAt,
     imageAssetId: form.imageAssetId || null,
     overviewAr: form.overviewAr || null,
-    overviewEn: form.overviewEn || null,
     studySystemSummaryAr: form.studySystemSummaryAr || null,
-    studySystemSummaryEn: form.studySystemSummaryEn || null,
     admissionHighlightsAr: lines(form.admissionHighlightsAr),
-    admissionHighlightsEn: lines(form.admissionHighlightsEn),
     visaSummaryAr: form.visaSummaryAr || null,
-    visaSummaryEn: form.visaSummaryEn || null,
     visaRequirementsAr: lines(form.visaRequirementsAr),
-    visaRequirementsEn: lines(form.visaRequirementsEn),
     visaOfficialUrl: form.visaOfficialUrl || null,
     livingCostTier: form.livingCostTier || null,
     averageMonthlyLivingCostMin:
@@ -470,22 +477,15 @@ export function StudyDestinationDetailPage() {
     averageMonthlyLivingCostMax:
       form.averageMonthlyLivingCostMax === '' ? null : Number(form.averageMonthlyLivingCostMax),
     livingCostCurrencyReferenceId: form.livingCostCurrencyReferenceId || null,
-    costHighlightsAr:
-      form.costHighlightsAr === costLines(aggregate?.profile?.costHighlightsAr)
-        ? (aggregate?.profile?.costHighlightsAr ?? [])
-        : parseCostLines(form.costHighlightsAr),
-    costHighlightsEn:
-      form.costHighlightsEn === costLines(aggregate?.profile?.costHighlightsEn)
-        ? (aggregate?.profile?.costHighlightsEn ?? [])
-        : parseCostLines(form.costHighlightsEn),
+    costHighlightsAr: form.costHighlightsAr,
     studentLifeHighlightsAr: lines(form.studentLifeHighlightsAr),
-    studentLifeHighlightsEn: lines(form.studentLifeHighlightsEn),
     officialLinks: form.officialLinks,
     cityReferenceIds: form.cityReferenceIds,
-    evidenceSources:
-      form.evidenceSources === evidenceLines(aggregate?.profile?.evidenceSources)
-        ? (aggregate?.profile?.evidenceSources ?? [])
-        : parseEvidenceLines(form.evidenceSources),
+    evidenceSources: form.evidenceSources.map(({ label, url, sourceType }) => ({
+      label,
+      url,
+      sourceType,
+    })),
     sourceAuditDate:
       form.sourceAuditDate === dateInput(aggregate?.profile?.sourceAuditDate)
         ? (aggregate?.profile?.sourceAuditDate ?? null)
@@ -509,6 +509,15 @@ export function StudyDestinationDetailPage() {
       setError(isAr ? 'اكتب سبب التعديل أو الإجراء.' : 'Enter a reason for the change.');
       return;
     }
+    if (
+      aggregate?.profile?.status === 'PUBLISHED' &&
+      !window.confirm(
+        isAr
+          ? 'هذا التعديل قد يعيد الدولة إلى المسودة ويلغي ظهورها العام، ويلزم توثيقًا ونشرًا جديدين. متابعة؟'
+          : 'This change may unpublish the destination and require a new review. Continue?',
+      )
+    )
+      return;
     mutation.current = true;
     setSaving(true);
     setError(null);
@@ -537,6 +546,7 @@ export function StudyDestinationDetailPage() {
       );
       saved = true;
       await readSaved();
+      setEditingCard('');
       setNotice(
         isAr
           ? 'تم الحفظ وإعادة قراءة ملف الدولة من الخادم. تغييرات المحتوى الموثق تتطلب توثيقًا جديدًا قبل النشر.'
@@ -655,972 +665,1301 @@ export function StudyDestinationDetailPage() {
     { key: 'visa', label: isAr ? 'التأشيرة' : 'Visa', icon: Stamp },
     { key: 'living', label: isAr ? 'المعيشة والحياة' : 'Living & life', icon: WalletCards },
     {
-      key: 'relations',
-      label: isAr ? 'المواقع والعلاقات' : 'Locations & relations',
+      key: 'supporting',
+      label: isAr ? 'المدن والعلاقات المساندة' : 'Cities & supporting relations',
       icon: Building2,
     },
+    { key: 'universities', label: isAr ? 'الجامعات' : 'Universities', icon: Building2 },
+    {
+      key: 'programs',
+      label: isAr ? 'البرامج والتخصصات' : 'Programs & majors',
+      icon: GraduationCap,
+    },
+    { key: 'scholarships', label: isAr ? 'المنح الدراسية' : 'Scholarships', icon: GraduationCap },
     { key: 'sources', label: isAr ? 'المصادر والروابط' : 'Sources & links', icon: FileCheck2 },
     { key: 'publish', label: isAr ? 'الجاهزية والنشر' : 'Readiness & publish', icon: ShieldCheck },
   ];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-5" dir={isAr ? 'rtl' : 'ltr'}>
-      <header className="rounded-3xl border border-[#142B5F]/15 bg-white p-5 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-4">
-            <Link
-              to="/study-destinations"
-              className="rounded-xl border border-slate-200 p-2 text-slate-500 hover:bg-slate-50"
-            >
-              <ArrowLeft className={`h-5 w-5 ${isAr ? 'rotate-180' : ''}`} />
-            </Link>
-            <div className="text-5xl">{flagEmoji(country.iso2Code)}</div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-black text-slate-900">
-                  {isAr ? country.nameAr || country.name : country.name}
-                </h1>
-                <Badge value={profile?.status ?? 'NO_PROFILE'} />
+    <DestinationEditorContext.Provider
+      value={{
+        active: editingCard,
+        canEdit,
+        busy: saving || Boolean(action),
+        isAr,
+        locale: contentLocale,
+        reason,
+        setReason,
+        edit: setEditingCard,
+        cancel: () => {
+          hydrateForm(profile);
+          setEditingCard('');
+        },
+        save,
+      }}
+    >
+      <div className="destination-workspace" dir={isAr ? 'rtl' : 'ltr'}>
+        <header className="destination-header">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-4">
+              <Link
+                to={destinationListContext(searchParams)}
+                className="rounded-xl border border-slate-200 p-2 text-slate-500 hover:bg-slate-50"
+              >
+                <ArrowLeft className={`h-5 w-5 ${isAr ? 'rotate-180' : ''}`} />
+              </Link>
+              <div className="text-5xl">{flagEmoji(country.iso2Code)}</div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="font-bold">
+                    {isAr ? country.nameAr || country.name : country.name}
+                  </h1>
+                  <Badge value={profile?.status ?? 'NO_PROFILE'} />
+                </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  <span dir="ltr">
+                    {country.iso2Code} · {country.iso3Code}
+                  </span>{' '}
+                  · {country.region || '—'}
+                  <span className="destination-header-meta">
+                    <Badge value={profile?.sourceVerificationStatus ?? 'UNVERIFIED'} />
+                    <Badge value={profile?.completenessStatus ?? 'INCOMPLETE'} />
+                  </span>
+                </p>
+                <p className="destination-muted">
+                  {isAr ? 'آخر مراجعة مستقلة: ' : 'Last independent review: '}
+                  {profile?.governance?.proof?.reviewedAt
+                    ? new Date(profile.governance.proof.reviewedAt).toLocaleString(language)
+                    : isAr
+                      ? 'لم توثّق بعد'
+                      : 'Not recorded'}
+                </p>
               </div>
-              <p className="mt-1 text-xs text-slate-500">
-                {country.iso2Code} · {country.iso3Code} · {country.region || '-'} · Canonical
-                Country ID: {country.id}
-              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                aria-label={isAr ? 'تحديث ملف الدولة' : 'Refresh destination'}
+                disabled={saving || Boolean(action)}
+                onClick={reload}
+                className="rounded-xl border border-slate-200 p-2.5 text-slate-600"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const result = await adminApiClient.request<Aggregate>(
+                      `/admin/study-destinations/${iso2}/preview`,
+                    );
+                    setPreview(result);
+                  } catch (cause) {
+                    setError(cause instanceof Error ? cause.message : 'PREVIEW_UNAVAILABLE');
+                  }
+                }}
+              >
+                {isAr ? 'معاينة الطالب' : 'Student preview'}
+              </button>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              disabled={saving || Boolean(action)}
-              onClick={reload}
-              className="rounded-xl border border-slate-200 p-2.5 text-slate-600"
-            >
-              <RefreshCw className="h-4 w-4" />
-            </button>
-            <button
-              disabled={!canEdit || !reason.trim() || saving || Boolean(action) || !dirty}
-              onClick={save}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#142B5F] px-4 py-2.5 text-sm font-black text-white disabled:opacity-50"
-            >
-              <Save className="h-4 w-4" />
-              {saving ? (isAr ? 'حفظ...' : 'Saving...') : isAr ? 'حفظ' : 'Save'}
-            </button>
-          </div>
-        </div>
-      </header>
+        </header>
 
-      {dirty && (
-        <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
-          توجد تعديلات غير محفوظة.
-        </p>
-      )}
-      {profile?.status === 'PUBLISHED' && (
-        <a
-          href={`${(import.meta.env.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '')}/${language}/countries/${profile.slug}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block font-bold text-[#0E7C86]"
-        >
-          عرض الدولة في الصفحة العامة ↗
-        </a>
-      )}
-      {error && (
-        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
-          <AlertCircle className="h-5 w-5" />
-          {error}
-        </div>
-      )}
-      {!!aggregate.referenceWarnings?.length && (
-        <p role="status" className="text-amber-800">
-          {isAr ? 'مراجع تحتاج إعادة المراجعة: ' : 'References requiring review: '}
-          {aggregate.referenceWarnings.join(', ')}
-        </p>
-      )}
-      {notice && (
-        <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">
-          <CheckCircle2 className="h-5 w-5" />
-          {notice}
-        </div>
-      )}
-
-      <div className="rounded-xl border bg-white p-4 space-y-3">
-        <TextArea
-          label={isAr ? 'سبب التعديل / قرار المراجعة' : 'Change / review reason'}
-          value={reason}
-          onChange={setReason}
-          rows={2}
-        />
-        {tab === 'publish' && hasPermission('admin:study-destinations:verify') && (
-          <div className="space-y-3">
-            <p>
-              {isAr
-                ? 'أضف كل نطاق مصدر، اسم الجهة، ورابط إثبات اعتمادها. الاستثناء لجهة غير حكومية يحتاج تبريرًا صريحًا.'
-                : 'Approve every source origin with authority name and supporting URL. Non-government authorities require an explicit exception reason.'}
-            </p>
-            {authorities.map((item, index) => (
-              <div key={index} className="grid gap-2 sm:grid-cols-2">
-                {(['origin', 'authorityName', 'evidenceUrl', 'exceptionReason'] as const).map(
-                  (key) => (
-                    <Input
-                      key={key}
-                      label={studyDestinationFieldLabels[key]?.[isAr ? 0 : 1] ?? key}
-                      value={item[key] ?? ''}
-                      onChange={(value) =>
-                        setAuthorities((old) =>
-                          old.map((row, i) => (i === index ? { ...row, [key]: value } : row)),
-                        )
-                      }
-                    />
-                  ),
-                )}
-                <button onClick={() => setAuthorities((old) => old.filter((_, i) => i !== index))}>
-                  {isAr ? 'إزالة الجهة' : 'Remove authority'}
-                </button>
-              </div>
-            ))}
-            <button
-              onClick={() =>
-                setAuthorities((old) => [
-                  ...old,
-                  { origin: '', authorityName: '', evidenceUrl: '' },
-                ])
-              }
-            >
-              {isAr ? 'إضافة اعتماد جهة' : 'Add authority approval'}
-            </button>
+        {dirty && (
+          <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
+            توجد تعديلات غير محفوظة.
+          </p>
+        )}
+        {profile?.status === 'PUBLISHED' && (
+          <a
+            href={`${(import.meta.env.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '')}/${language}/countries/${profile.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block font-bold text-[#0E7C86]"
+          >
+            عرض الدولة في الصفحة العامة ↗
+          </a>
+        )}
+        {error && (
+          <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
+            <AlertCircle className="h-5 w-5" />
+            {error}
           </div>
         )}
-      </div>
-      <div className="grid gap-5 xl:grid-cols-[220px_minmax(0,1fr)]">
-        <nav className="h-fit rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
-          {tabs.map(({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              className={`mb-1 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold transition ${tab === key ? 'bg-[#142B5F] text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+        {!!aggregate.referenceWarnings?.length && (
+          <p role="status" className="text-amber-800">
+            {isAr ? 'مراجع تحتاج إعادة المراجعة: ' : 'References requiring review: '}
+            {aggregate.referenceWarnings.join(', ')}
+          </p>
+        )}
+        {notice && (
+          <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">
+            <CheckCircle2 className="h-5 w-5" />
+            {notice}
+          </div>
+        )}
+
+        <div className="destination-toolbar">
+          <label>
+            {isAr ? 'لغة المحتوى' : 'Content language'}
+            <select
+              value={contentLocale}
+              onChange={(e) => {
+                if (dirty && !window.confirm(isAr ? 'تجاهل التعديلات؟' : 'Discard changes?'))
+                  return;
+                hydrateForm(profile);
+                setEditingCard('');
+                setContentLocale(e.target.value as 'ar' | 'en');
+                const next = new URLSearchParams(searchParams);
+                next.set('contentLocale', e.target.value);
+                setSearchParams(next);
+              }}
             >
-              <Icon className="h-4 w-4" />
-              {label}
-            </button>
-          ))}
-        </nav>
-        <fieldset
-          disabled={
-            saving || Boolean(action) || (!canEdit && tab !== 'publish' && tab !== 'relations')
-          }
-          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-        >
-          {tab === 'overview' && (
-            <div className="mb-5 space-y-3">
-              <CanonicalCityPicker
-                countryIso2Code={iso2}
-                regionId={null}
-                value={null}
-                onChange={(id) => {
-                  if (id)
-                    setForm((old) => ({
-                      ...old,
-                      cityReferenceIds: [...new Set([...old.cityReferenceIds, id])].slice(0, 25),
-                    }));
-                }}
-              />
-              {form.cityReferenceIds.map((id) => (
-                <button
-                  key={id}
-                  onClick={() =>
-                    setForm((old) => ({
-                      ...old,
-                      cityReferenceIds: old.cityReferenceIds.filter((value) => value !== id),
-                    }))
-                  }
-                  aria-label={isAr ? 'إزالة المدينة' : 'Remove city'}
-                >
-                  {aggregate.cities?.find((city) => city.id === id)
-                    ? optionLabel(
-                        aggregate.cities.find((city) => city.id === id)!,
-                        isAr,
-                      )
-                    : isAr
-                      ? 'مدينة مختارة'
-                      : 'Selected city'}{' '}
-                  ×
-                </button>
-              ))}
-            </div>
-          )}
-          {tab === 'overview' && (
-            <OverviewPanel country={country} form={form} setForm={setForm} isAr={isAr} />
-          )}
-          {tab === 'study' && (
-            <StudyPanel form={form} setForm={setForm} languages={languages} isAr={isAr} />
-          )}
-          {tab === 'visa' && <VisaPanel form={form} setForm={setForm} isAr={isAr} />}
-          {tab === 'living' && (
-            <LivingPanel form={form} setForm={setForm} currencies={currencies} isAr={isAr} />
-          )}
-          {tab === 'relations' && (
-            <>
-              <AcademicProgramExplorerPanel key={country.id} countryReferenceId={country.id}/>
-              <p className="mb-3 text-xs text-slate-500">
-                كل علاقة محفوظة في قسمها الأصلي. تظهر هنا النتائج المنشورة بحسب الصفحة.
-              </p>
-              {graphLoading ? (
-                <Loader2 className="h-6 w-6 animate-spin" />
-              ) : graphError ? (
-                <p className="text-red-700">{graphError}</p>
-              ) : (
-                <RelationsPanel graph={graph} country={country} isAr={isAr} />
-              )}
-              {(
-                [
-                  'universities',
-                  'scholarships',
-                  'services',
-                  'providerHeadquartersCourses',
-                  'academicPrograms',
-                  'internationalTests',
-                  'careerJobs',
-                ] as const
-              ).map((edge) => {
-                const param = {
-                  universities: 'universityCursor',
-                  scholarships: 'scholarshipCursor',
-                  services: 'serviceCursor',
-                  providerHeadquartersCourses: 'courseCursor',
-                  academicPrograms: 'programCursor',
-                  internationalTests: 'testPage',
-                  careerJobs: 'careerPage',
-                }[edge];
-                const collection = graph?.relationships[edge];
-                const page = Number(edgeParams[param] ?? 1);
-                const offset = param.endsWith('Page');
-                const nextCursor =
-                  graph?.readScope?.collections[edge]?.nextCursor ??
-                  (!Array.isArray(collection) ? collection?.nextCursor : null);
-                const history = edgeHistory[param] ?? [];
-                const unavailable = graph?.readScope?.collections[edge]?.state === 'UNAVAILABLE';
-                return (
-                  <div
-                    key={edge}
-                    className="mt-3 flex items-center gap-3"
-                    aria-label={studyDestinationEdgeLabels[edge]?.[isAr ? 0 : 1]}
-                  >
-                    <span>
-                      {studyDestinationEdgeLabels[edge]?.[isAr ? 0 : 1] ?? edge}
-                      {unavailable ? (isAr ? ' — تعذر قراءة القسم' : ' — unavailable') : ''}
-                    </span>
+              <option value="ar">العربية</option>
+              <option value="en">English</option>
+            </select>
+          </label>
+          <span>
+            {isAr ? 'العربية' : 'Arabic'}: {languageReadiness(aggregate.readiness, 'ar', isAr)} ·
+            English: {languageReadiness(aggregate.readiness, 'en', isAr)} ·{' '}
+            <Link to="/translations">{isAr ? 'مركز الترجمة' : 'Translation workspace'}</Link>
+          </span>
+        </div>
+        {tab === 'publish' && (
+          <section className="destination-content-card">
+            <TextArea
+              label={isAr ? 'سبب قرار المراجعة' : 'Review decision reason'}
+              value={reason}
+              onChange={setReason}
+              rows={2}
+            />
+            {tab === 'publish' && hasPermission('admin:study-destinations:verify') && (
+              <div className="space-y-3">
+                <p>
+                  {isAr
+                    ? 'أضف كل نطاق مصدر، اسم الجهة، ورابط إثبات اعتمادها. الاستثناء لجهة غير حكومية يحتاج تبريرًا صريحًا.'
+                    : 'Approve every source origin with authority name and supporting URL. Non-government authorities require an explicit exception reason.'}
+                </p>
+                {authorities.map((item, index) => (
+                  <div key={index} className="grid gap-2 sm:grid-cols-2">
+                    {(['origin', 'authorityName', 'evidenceUrl', 'exceptionReason'] as const).map(
+                      (key) => (
+                        <Input
+                          key={key}
+                          label={studyDestinationFieldLabels[key]?.[isAr ? 0 : 1] ?? key}
+                          value={item[key] ?? ''}
+                          onChange={(value) =>
+                            setAuthorities((old) =>
+                              old.map((row, i) => (i === index ? { ...row, [key]: value } : row)),
+                            )
+                          }
+                        />
+                      ),
+                    )}
                     <button
-                      disabled={
-                        graphLoading || unavailable || (offset ? page <= 1 : !history.length)
-                      }
-                      onClick={() => {
-                        const previous = history.at(-1) ?? '';
-                        setEdgeParams((old) => ({
-                          ...old,
-                          [param]: offset ? String(page - 1) : previous,
-                        }));
-                        if (!offset)
-                          setEdgeHistory((old) => ({ ...old, [param]: history.slice(0, -1) }));
-                      }}
+                      onClick={() => setAuthorities((old) => old.filter((_, i) => i !== index))}
                     >
-                      {isAr ? 'السابق' : 'Previous'}
-                    </button>
-                    <button
-                      disabled={
-                        graphLoading ||
-                        unavailable ||
-                        (offset
-                          ? !collection ||
-                            Array.isArray(collection) ||
-                            page >= collection.totalPages
-                          : !nextCursor)
-                      }
-                      onClick={() => {
-                        if (!offset)
-                          setEdgeHistory((old) => ({
-                            ...old,
-                            [param]: [...history, edgeParams[param] ?? ''],
-                          }));
-                        setEdgeParams((old) => ({
-                          ...old,
-                          [param]: offset ? String(page + 1) : nextCursor!,
-                        }));
-                      }}
-                    >
-                      {isAr ? 'التالي' : 'Next'}
+                      {isAr ? 'إزالة الجهة' : 'Remove authority'}
                     </button>
                   </div>
-                );
-              })}
-            </>
-          )}
-          {tab === 'sources' && (
-            <SourcesPanel form={form} setForm={setForm} profile={profile} isAr={isAr} />
-          )}
-          {tab === 'publish' && (
-            <PublishPanel
-              profile={profile}
-              readiness={readiness}
-              blocking={blocking}
-              action={action || (saving ? 'saving' : dirty ? 'unsaved' : null)}
-              execute={execute}
-              isAr={isAr}
-              hasPermission={hasPermission}
-            />
-          )}
-        </fieldset>
+                ))}
+                <button
+                  onClick={() =>
+                    setAuthorities((old) => [
+                      ...old,
+                      { origin: '', authorityName: '', evidenceUrl: '' },
+                    ])
+                  }
+                >
+                  {isAr ? 'إضافة اعتماد جهة' : 'Add authority approval'}
+                </button>
+              </div>
+            )}
+          </section>
+        )}
+        <div className="destination-layout">
+          <nav
+            className="destination-navigation"
+            aria-label={isAr ? 'أقسام ملف الدولة' : 'Destination sections'}
+          >
+            {destinationGroups.map((group, i) => (
+              <section key={i}>
+                <h2>{group.label[isAr ? 0 : 1]}</h2>
+                {group.sections.map((key) => {
+                  const item = tabs.find((x) => x.key === key)!;
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      type="button"
+                      key={key}
+                      aria-current={tab === key ? 'page' : undefined}
+                      onClick={() => setTab(key)}
+                    >
+                      <Icon aria-hidden="true" />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </section>
+            ))}
+          </nav>
+          <fieldset disabled={saving || Boolean(action)} className="destination-section">
+            {tab === 'supporting' && (
+              <DestinationCard
+                id="cities"
+                title={isAr ? 'مدن معروضة في ملف الوجهة' : 'Featured destination cities'}
+                editor={
+                  <div className="space-y-3">
+                    <CanonicalCityPicker
+                      countryIso2Code={iso2}
+                      regionId={null}
+                      value={null}
+                      onChange={(id) => {
+                        if (id)
+                          setForm((old) => ({
+                            ...old,
+                            cityReferenceIds: [...new Set([...old.cityReferenceIds, id])].slice(
+                              0,
+                              25,
+                            ),
+                          }));
+                      }}
+                    />
+                    {form.cityReferenceIds.map((id) => (
+                      <button
+                        key={id}
+                        onClick={() =>
+                          setForm((old) => ({
+                            ...old,
+                            cityReferenceIds: old.cityReferenceIds.filter((value) => value !== id),
+                          }))
+                        }
+                        aria-label={isAr ? 'إزالة المدينة' : 'Remove city'}
+                      >
+                        {aggregate.cities?.find((city) => city.id === id)
+                          ? optionLabel(
+                              aggregate.cities.find((city) => city.id === id)!,
+                              isAr,
+                            )
+                          : isAr
+                            ? 'مدينة مختارة'
+                            : 'Selected city'}{' '}
+                        ×
+                      </button>
+                    ))}
+                  </div>
+                }
+              >
+                {aggregate.cities?.length
+                  ? aggregate.cities.map((city) => optionLabel(city, isAr)).join(' · ')
+                  : isAr
+                    ? 'لا توجد مدن مختارة.'
+                    : 'No selected cities.'}
+                <Link to={`/settings/reference-data?section=cities&p7Country=${iso2}`}>
+                  {isAr ? ' جميع المدن المرجعية' : ' All reference cities'}
+                </Link>
+              </DestinationCard>
+            )}
+
+            {tab === 'overview' && (
+              <OverviewPanel country={country} form={form} setForm={setForm} isAr={isAr} />
+            )}
+            {tab === 'study' && (
+              <StudyPanel form={form} setForm={setForm} languages={languages} isAr={isAr} />
+            )}
+            {tab === 'visa' && <VisaPanel form={form} setForm={setForm} isAr={isAr} />}
+            {tab === 'living' && (
+              <LivingPanel form={form} setForm={setForm} currencies={currencies} isAr={isAr} />
+            )}
+            {(tab === 'universities' || tab === 'scholarships') && (
+              <DestinationOwnerList
+                key={tab + country.id}
+                kind={tab}
+                countryId={country.id}
+                iso2={iso2}
+                isAr={isAr}
+              />
+            )}
+            {tab === 'programs' && (
+              <>
+                <p className="destination-warning">
+                  {isAr
+                    ? 'البرنامج تقدمه جامعة وله درجة؛ التخصص المرجعي مفهوم مستقل. المطابقة غير المعتمدة لا تعني تخصصًا موثقًا.'
+                    : 'A program belongs to a university and degree; a canonical major is an independent concept.'}
+                </p>
+                <AcademicProgramExplorerPanel key={country.id} countryReferenceId={country.id} />
+              </>
+            )}
+            {tab === 'supporting' && (
+              <SupportingRelations
+                graph={graph}
+                loading={graphLoading}
+                error={graphError}
+                isAr={isAr}
+                edgeParams={edgeParams}
+                edgeHistory={edgeHistory}
+                setEdgeParams={setEdgeParams}
+                setEdgeHistory={setEdgeHistory}
+              />
+            )}
+            {tab === 'sources' && (
+              <SourcesPanel form={form} setForm={setForm} profile={profile} isAr={isAr} />
+            )}
+            {tab === 'publish' && (
+              <PublishPanel
+                profile={profile}
+                readiness={readiness}
+                blocking={blocking}
+                action={action || (saving ? 'saving' : dirty ? 'unsaved' : null)}
+                execute={execute}
+                isAr={isAr}
+                hasPermission={hasPermission}
+                repair={(key) => {
+                  const target = destinationRepairTarget(key);
+                  setContentLocale(target.locale);
+                  const next = new URLSearchParams(searchParams);
+                  next.set('section', target.section);
+                  next.set('card', target.card);
+                  next.set('contentLocale', target.locale);
+                  setSearchParams(next);
+                }}
+              />
+            )}
+          </fieldset>
+        </div>
+        {preview && (
+          <DestinationPreview
+            aggregate={preview}
+            isAr={isAr}
+            locale={contentLocale}
+            close={() => setPreview(null)}
+          />
+        )}
       </div>
-    </div>
+    </DestinationEditorContext.Provider>
   );
 }
 
+type PanelProps = {
+  form: FormState;
+  setForm: React.Dispatch<React.SetStateAction<FormState>>;
+  isAr: boolean;
+};
+function ReadContent({ value, isAr }: { value: unknown; isAr: boolean }) {
+  return (
+    <>
+      {Array.isArray(value) ? (
+        value.length ? (
+          <ul>
+            {value.map((v, i) => (
+              <li key={i}>{typeof v === 'string' ? v : JSON.stringify(v)}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="destination-muted">
+            {isAr ? 'لا توجد معلومات مسجلة.' : 'No information recorded.'}
+          </p>
+        )
+      ) : (
+        <p>
+          {typeof value === 'string' && value.trim()
+            ? value
+            : isAr
+              ? 'المحتوى غير موجود لهذه اللغة.'
+              : 'No content in this language.'}
+        </p>
+      )}
+    </>
+  );
+}
+function ListRows({
+  value,
+  onChange,
+  isAr,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  isAr: boolean;
+}) {
+  const rows = value ? value.split('\n') : [];
+  const change = (index: number, text: string) =>
+    onChange(rows.map((r, i) => (i === index ? text : r)).join('\n'));
+  return (
+    <div className="space-y-2">
+      {rows.map((text, index) => (
+        <div className="destination-row-editor" key={index}>
+          <input
+            aria-label={`${isAr ? 'النقطة' : 'Item'} ${index + 1}`}
+            value={text}
+            onChange={(e) => change(index, e.target.value)}
+          />
+          <footer>
+            <button
+              type="button"
+              disabled={index === 0}
+              onClick={() => {
+                const next = [...rows];
+                [next[index - 1], next[index]] = [next[index], next[index - 1]];
+                onChange(next.join('\n'));
+              }}
+            >
+              {isAr ? 'للأعلى' : 'Move up'}
+            </button>
+            <button
+              type="button"
+              disabled={index === rows.length - 1}
+              onClick={() => {
+                const next = [...rows];
+                [next[index + 1], next[index]] = [next[index], next[index + 1]];
+                onChange(next.join('\n'));
+              }}
+            >
+              {isAr ? 'للأسفل' : 'Move down'}
+            </button>
+            <button
+              type="button"
+              onClick={() => onChange(rows.filter((_, i) => i !== index).join('\n'))}
+            >
+              {isAr ? 'إزالة' : 'Remove'}
+            </button>
+          </footer>
+        </div>
+      ))}
+      <button type="button" onClick={() => onChange([...rows, ' '].join('\n'))}>
+        {isAr ? 'إضافة نقطة' : 'Add item'}
+      </button>
+    </div>
+  );
+}
+function LocalizedCard({
+  base,
+  id,
+  title,
+  form,
+  setForm,
+  isAr,
+  list = false,
+}: {
+  base:
+    | 'overview'
+    | 'studySystemSummary'
+    | 'admissionHighlights'
+    | 'visaSummary'
+    | 'visaRequirements'
+    | 'studentLifeHighlights';
+  id: string;
+  title: string;
+  list?: boolean;
+} & PanelProps) {
+  const { locale } = useContext(DestinationEditorContext);
+  const key = (base + (locale === 'ar' ? 'Ar' : 'En')) as keyof FormState;
+  const value = String(form[key] ?? '');
+  return (
+    <DestinationCard
+      id={id}
+      title={title}
+      translated
+      editor={
+        list ? (
+          <ListRows
+            value={value}
+            isAr={isAr}
+            onChange={(v) => setForm((x) => ({ ...x, [key]: v }))}
+          />
+        ) : (
+          <TextArea
+            label={title}
+            value={value}
+            dir={locale === 'ar' ? 'rtl' : 'ltr'}
+            onChange={(v) => setForm((x) => ({ ...x, [key]: v }))}
+          />
+        )
+      }
+    >
+      <ReadContent value={list ? lines(value) : value} isAr={isAr} />
+    </DestinationCard>
+  );
+}
 function OverviewPanel({
   country,
   form,
   setForm,
   isAr,
-}: {
-  country: ReferenceCountry;
-  form: FormState;
-  setForm: React.Dispatch<React.SetStateAction<FormState>>;
-  isAr: boolean;
-}) {
+}: PanelProps & { country: ReferenceCountry }) {
   return (
-    <section className="space-y-5">
-      <Title icon={Globe2}>
-        {isAr ? 'هوية الدولة وملف الوجهة' : 'Country identity & destination profile'}
-      </Title>
-      <AssetPicker
-        label={isAr ? 'صورة الوجهة' : 'Destination image'}
-        purpose="STUDY_DESTINATION_IMAGE"
-        mimeTypePrefix="image/"
-        value={form.imageAssetId}
-        onChange={(imageAssetId) => setForm((value) => ({ ...value, imageAssetId }))}
+    <>
+      <section className="destination-content-card">
+        <Title icon={Globe2}>{isAr ? 'هوية الدولة المرجعية' : 'Reference country identity'}</Title>
+        <div className="destination-field-grid">
+          <ReadOnly label="ISO2 / ISO3" value={country.iso2Code + ' / ' + country.iso3Code} />
+          <ReadOnly
+            label={isAr ? 'المنطقة والإقليم' : 'Region/subregion'}
+            value={[country.region, country.subregion].filter(Boolean).join(' / ')}
+          />
+          <ReadOnly
+            label={isAr ? 'العملة الافتراضية' : 'Default currency'}
+            value={country.defaultCurrencyCode}
+          />
+          <ReadOnly
+            label={isAr ? 'اللغة الافتراضية' : 'Default language'}
+            value={country.defaultLanguageCode}
+          />
+          <ReadOnly label={isAr ? 'رمز الاتصال' : 'Calling code'} value={country.callingCode} />
+        </div>
+        <Link to={`/settings/reference-data?section=countries&recordId=${country.id}`}>
+          {isAr ? 'عرض المرجع المالك' : 'Open canonical reference'}
+        </Link>
+      </section>
+      <LocalizedCard
+        id="overview"
+        base="overview"
+        title={isAr ? 'نبذة عن وجهة الدراسة' : 'Destination overview'}
+        form={form}
+        setForm={setForm}
+        isAr={isAr}
       />
-      <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-900">
-        {isAr
-          ? 'هوية ISO والعملة/اللغة الافتراضية تظل مملوكة لـReference Data وهي للقراءة فقط هنا. هذا القسم يحرر محتوى وجهة الدراسة فقط.'
-          : 'ISO identity and default reference fields remain owned by Reference Data and are read-only here.'}
-      </div>
-      <div className="grid gap-3 md:grid-cols-3">
-        <ReadOnly label="ISO2" value={country.iso2Code} />
-        <ReadOnly label="ISO3" value={country.iso3Code} />
-        <ReadOnly
-          label={isAr ? 'المنطقة' : 'Region'}
-          value={[country.region, country.subregion].filter(Boolean).join(' / ')}
-        />
-        <ReadOnly
-          label={isAr ? 'العملة المرجعية' : 'Reference currency'}
-          value={country.defaultCurrencyCode}
-        />
-        <ReadOnly
-          label={isAr ? 'اللغة المرجعية' : 'Reference language'}
-          value={country.defaultLanguageCode}
-        />
-        <ReadOnly label={isAr ? 'رمز الاتصال' : 'Calling code'} value={country.callingCode} />
-      </div>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <TextArea
-          label={isAr ? 'نبذة عربية' : 'Arabic overview'}
-          value={form.overviewAr}
-          onChange={(value) => setForm((x) => ({ ...x, overviewAr: value }))}
-          rows={8}
-        />
-        <TextArea
-          label={isAr ? 'نبذة إنجليزية' : 'English overview'}
-          value={form.overviewEn}
-          onChange={(value) => setForm((x) => ({ ...x, overviewEn: value }))}
-          rows={8}
-          dir="ltr"
-        />
-      </div>
-      <label className="flex items-center gap-2 rounded-xl border border-slate-200 p-3 text-sm font-bold">
-        <input
-          type="checkbox"
-          checked={form.isFeatured}
-          onChange={(e) => setForm((x) => ({ ...x, isFeatured: e.target.checked }))}
-          className="h-4 w-4 accent-[#142B5F]"
-        />
-        {isAr
-          ? 'تمييز الدولة في واجهة الوجهات بعد النشر'
-          : 'Feature this destination after publication'}
-      </label>
-    </section>
-  );
-}
-
-function StudyPanel({
-  form,
-  setForm,
-  languages,
-  isAr,
-}: {
-  form: FormState;
-  setForm: React.Dispatch<React.SetStateAction<FormState>>;
-  languages: RefOption[];
-  isAr: boolean;
-}) {
-  return (
-    <section className="space-y-5">
-      <Title icon={BookOpenCheck}>
-        {isAr ? 'نظام الدراسة والقبول' : 'Study system & admission'}
-      </Title>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <TextArea
-          label={isAr ? 'ملخص نظام الدراسة — عربي' : 'Study system — Arabic'}
-          value={form.studySystemSummaryAr}
-          onChange={(value) => setForm((x) => ({ ...x, studySystemSummaryAr: value }))}
-          rows={7}
-        />
-        <TextArea
-          label={isAr ? 'ملخص نظام الدراسة — إنجليزي' : 'Study system — English'}
-          value={form.studySystemSummaryEn}
-          onChange={(value) => setForm((x) => ({ ...x, studySystemSummaryEn: value }))}
-          rows={7}
-          dir="ltr"
-        />
-        <LineEditor
-          label={isAr ? 'أبرز نقاط القبول — عربي (سطر لكل نقطة)' : 'Admission highlights — Arabic'}
-          value={form.admissionHighlightsAr}
-          onChange={(value) => setForm((x) => ({ ...x, admissionHighlightsAr: value }))}
-        />
-        <LineEditor
-          label={isAr ? 'أبرز نقاط القبول — إنجليزي' : 'Admission highlights — English'}
-          value={form.admissionHighlightsEn}
-          onChange={(value) => setForm((x) => ({ ...x, admissionHighlightsEn: value }))}
-          dir="ltr"
-        />
-      </div>
-      <div>
-        <label className="mb-2 block text-sm font-black text-slate-800">
-          <Languages className="me-2 inline h-4 w-4 text-[#142B5F]" />
-          {isAr ? 'لغات الدراسة Canonical' : 'Canonical study languages'}
-        </label>
-        <div className="grid max-h-64 gap-2 overflow-auto rounded-xl border border-slate-200 p-3 sm:grid-cols-2 lg:grid-cols-3">
-          {languages.map((item) => (
-            <label
-              key={item.id}
-              className="flex items-center gap-2 rounded-lg p-2 text-sm hover:bg-slate-50"
-            >
+      <DestinationCard
+        id="image"
+        title={isAr ? 'صورة الوجهة وإبرازها' : 'Destination image and featuring'}
+        editor={
+          <>
+            <AssetPicker
+              label={isAr ? 'صورة الوجهة' : 'Destination image'}
+              purpose="STUDY_DESTINATION_IMAGE"
+              mimeTypePrefix="image/"
+              value={form.imageAssetId}
+              onChange={(imageAssetId) => setForm((x) => ({ ...x, imageAssetId }))}
+            />
+            <label>
               <input
                 type="checkbox"
-                checked={form.studyLanguageReferenceIds.includes(item.id)}
-                onChange={(e) =>
-                  setForm((x) => ({
-                    ...x,
-                    studyLanguageReferenceIds: e.target.checked
-                      ? [...x.studyLanguageReferenceIds, item.id]
-                      : x.studyLanguageReferenceIds.filter((id) => id !== item.id),
-                  }))
-                }
-                className="accent-[#142B5F]"
+                checked={form.isFeatured}
+                onChange={(e) => setForm((x) => ({ ...x, isFeatured: e.target.checked }))}
               />
-              {optionLabel(item, isAr)}
+              {isAr ? 'إبراز الدولة بعد النشر' : 'Feature after publication'}
             </label>
-          ))}
-        </div>
-      </div>
-    </section>
+          </>
+        }
+      >
+        <p>
+          {form.imageAssetId
+            ? isAr
+              ? 'صورة مرتبطة بمنصة الأصول'
+              : 'Image linked through Asset Platform'
+            : isAr
+              ? 'صورة الوجهة غير محددة'
+              : 'No destination image'}
+        </p>
+        <p>
+          {form.isFeatured
+            ? isAr
+              ? 'مميزة بعد النشر'
+              : 'Featured after publication'
+            : isAr
+              ? 'عرض عادي'
+              : 'Standard listing'}
+        </p>
+      </DestinationCard>
+    </>
   );
 }
-
-function VisaPanel({
-  form,
-  setForm,
-  isAr,
-}: {
-  form: FormState;
-  setForm: React.Dispatch<React.SetStateAction<FormState>>;
-  isAr: boolean;
-}) {
+function StudyPanel({ form, setForm, languages, isAr }: PanelProps & { languages: RefOption[] }) {
   return (
-    <section className="space-y-5">
-      <Title icon={Stamp}>{isAr ? 'التأشيرة والإقامة الطلابية' : 'Student visa & residence'}</Title>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <TextArea
-          label={isAr ? 'ملخص التأشيرة — عربي' : 'Visa summary — Arabic'}
-          value={form.visaSummaryAr}
-          onChange={(value) => setForm((x) => ({ ...x, visaSummaryAr: value }))}
-          rows={7}
-        />
-        <TextArea
-          label={isAr ? 'ملخص التأشيرة — إنجليزي' : 'Visa summary — English'}
-          value={form.visaSummaryEn}
-          onChange={(value) => setForm((x) => ({ ...x, visaSummaryEn: value }))}
-          rows={7}
-          dir="ltr"
-        />
-        <LineEditor
-          label={isAr ? 'متطلبات التأشيرة — عربي' : 'Visa requirements — Arabic'}
-          value={form.visaRequirementsAr}
-          onChange={(value) => setForm((x) => ({ ...x, visaRequirementsAr: value }))}
-        />
-        <LineEditor
-          label={isAr ? 'متطلبات التأشيرة — إنجليزي' : 'Visa requirements — English'}
-          value={form.visaRequirementsEn}
-          onChange={(value) => setForm((x) => ({ ...x, visaRequirementsEn: value }))}
-          dir="ltr"
-        />
-      </div>
-      <Input
-        label={isAr ? 'الرابط الحكومي/الرسمي للتأشيرة' : 'Official visa URL'}
-        value={form.visaOfficialUrl}
-        onChange={(value) => setForm((x) => ({ ...x, visaOfficialUrl: value }))}
-        placeholder="https://..."
-        dir="ltr"
+    <>
+      <LocalizedCard
+        id="study-system"
+        base="studySystemSummary"
+        title={isAr ? 'نظام الدراسة' : 'Education system'}
+        form={form}
+        setForm={setForm}
+        isAr={isAr}
       />
-    </section>
+      <LocalizedCard
+        id="admission"
+        base="admissionHighlights"
+        title={isAr ? 'شروط القبول العامة' : 'General admission guidance'}
+        form={form}
+        setForm={setForm}
+        isAr={isAr}
+        list
+      />
+      <DestinationCard
+        id="study-languages"
+        title={isAr ? 'لغات الدراسة' : 'Study languages'}
+        editor={
+          <div className="destination-field-grid">
+            {languages.map((item) => (
+              <label key={item.id}>
+                <input
+                  type="checkbox"
+                  checked={form.studyLanguageReferenceIds.includes(item.id)}
+                  onChange={(e) =>
+                    setForm((x) => ({
+                      ...x,
+                      studyLanguageReferenceIds: e.target.checked
+                        ? [...x.studyLanguageReferenceIds, item.id]
+                        : x.studyLanguageReferenceIds.filter((id) => id !== item.id),
+                    }))
+                  }
+                />
+                {optionLabel(item, isAr)}
+              </label>
+            ))}
+          </div>
+        }
+      >
+        <p>
+          {form.studyLanguageReferenceIds
+            .map((id) => {
+              const item = languages.find((x) => x.id === id);
+              return item
+                ? optionLabel(item, isAr)
+                : isAr
+                  ? 'مرجع غير متاح'
+                  : 'Reference unavailable';
+            })
+            .join(' · ') || (isAr ? 'لم تحدد لغات الدراسة.' : 'No study languages recorded.')}
+        </p>
+      </DestinationCard>
+      <section className="destination-content-card">
+        <h3>{isAr ? 'المصادر وحدود الإرشادات' : 'Sources and guidance scope'}</h3>
+        <p>
+          {isAr
+            ? 'هذه إرشادات عامة؛ شروط كل جامعة وبرنامج تؤخذ من مالكها.'
+            : 'General guidance only; university and program requirements remain owned by their domains.'}
+        </p>
+        <Link to="?section=sources">
+          {isAr ? 'مراجعة المصادر الرسمية' : 'Review official sources'}
+        </Link>
+      </section>
+    </>
   );
 }
-
+function VisaPanel(props: PanelProps) {
+  const { form, setForm, isAr } = props;
+  return (
+    <>
+      <p className="destination-warning">
+        {isAr
+          ? 'تختلف إجراءات التأشيرة بحسب الجنسية ونوع الدراسة وتاريخ التقديم؛ راجع الجهة الحكومية المختصة.'
+          : 'Visa procedures vary by nationality, study type and application date; consult the official authority.'}
+      </p>
+      <LocalizedCard
+        {...props}
+        id="visa-summary"
+        base="visaSummary"
+        title={isAr ? 'نبذة التأشيرة والإقامة' : 'Student visa and residence'}
+      />
+      <LocalizedCard
+        {...props}
+        id="visa-requirements"
+        base="visaRequirements"
+        title={isAr ? 'المتطلبات والوثائق العامة' : 'General requirements and documents'}
+        list
+      />
+      <DestinationCard
+        id="visa-link"
+        title={isAr ? 'المصدر الحكومي للتأشيرة' : 'Official immigration source'}
+        editor={
+          <Input
+            label={isAr ? 'رابط HTTPS الرسمي' : 'Official HTTPS URL'}
+            value={form.visaOfficialUrl}
+            onChange={(v) => setForm((x) => ({ ...x, visaOfficialUrl: v }))}
+          />
+        }
+      >
+        <SafeSource
+          url={form.visaOfficialUrl}
+          label={isAr ? 'فتح المصدر الرسمي' : 'Open official source'}
+        />
+      </DestinationCard>
+    </>
+  );
+}
 function LivingPanel({
   form,
   setForm,
   currencies,
   isAr,
-}: {
-  form: FormState;
-  setForm: React.Dispatch<React.SetStateAction<FormState>>;
-  currencies: RefOption[];
-  isAr: boolean;
-}) {
+}: PanelProps & { currencies: RefOption[] }) {
+  const { locale } = useContext(DestinationEditorContext);
+  const key = locale === 'ar' ? 'costHighlightsAr' : 'costHighlightsEn';
+  const currency = currencies.find((x) => x.id === form.livingCostCurrencyReferenceId);
   return (
-    <section className="space-y-5">
-      <Title icon={WalletCards}>
-        {isAr ? 'تكلفة المعيشة والحياة الطلابية' : 'Living cost & student life'}
-      </Title>
-      <div className="grid gap-3 md:grid-cols-4">
-        <Select
-          label={isAr ? 'مستوى التكلفة' : 'Cost tier'}
-          value={form.livingCostTier}
-          onChange={(value) =>
-            setForm((x) => ({ ...x, livingCostTier: value as FormState['livingCostTier'] }))
-          }
-          options={[
-            ['', '—'],
-            ['LOW', isAr ? 'منخفض' : 'Low'],
-            ['MODERATE', isAr ? 'متوسط' : 'Moderate'],
-            ['HIGH', isAr ? 'مرتفع' : 'High'],
-            ['VERY_HIGH', isAr ? 'مرتفع جدًا' : 'Very high'],
-          ]}
-        />
-        <Input
-          label={isAr ? 'متوسط شهري — الحد الأدنى' : 'Monthly min'}
-          value={form.averageMonthlyLivingCostMin}
-          onChange={(value) => setForm((x) => ({ ...x, averageMonthlyLivingCostMin: value }))}
-          type="number"
-        />
-        <Input
-          label={isAr ? 'متوسط شهري — الحد الأعلى' : 'Monthly max'}
-          value={form.averageMonthlyLivingCostMax}
-          onChange={(value) => setForm((x) => ({ ...x, averageMonthlyLivingCostMax: value }))}
-          type="number"
-        />
-        <label className="space-y-1.5">
-          <span className="text-sm font-black text-slate-700">
-            {isAr ? 'العملة Canonical' : 'Canonical currency'}
-          </span>
-          <select
-            value={form.livingCostCurrencyReferenceId}
-            onChange={(e) =>
-              setForm((x) => ({ ...x, livingCostCurrencyReferenceId: e.target.value }))
-            }
-            className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
-          >
-            <option value="">—</option>
-            {currencies.map((item) => (
-              <option key={item.id} value={item.id}>
-                {optionLabel(item, isAr)}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <LineEditor
-          label={
-            isAr
-              ? 'تفاصيل التكلفة — عربي (العنصر | القيمة)'
-              : 'Cost highlights — Arabic (label | value)'
-          }
-          value={form.costHighlightsAr}
-          onChange={(value) => setForm((x) => ({ ...x, costHighlightsAr: value }))}
-        />
-        <LineEditor
-          label={isAr ? 'تفاصيل التكلفة — إنجليزي' : 'Cost highlights — English'}
-          value={form.costHighlightsEn}
-          onChange={(value) => setForm((x) => ({ ...x, costHighlightsEn: value }))}
-          dir="ltr"
-        />
-        <LineEditor
-          label={isAr ? 'الحياة الطلابية — عربي' : 'Student life — Arabic'}
-          value={form.studentLifeHighlightsAr}
-          onChange={(value) => setForm((x) => ({ ...x, studentLifeHighlightsAr: value }))}
-        />
-        <LineEditor
-          label={isAr ? 'الحياة الطلابية — إنجليزي' : 'Student life — English'}
-          value={form.studentLifeHighlightsEn}
-          onChange={(value) => setForm((x) => ({ ...x, studentLifeHighlightsEn: value }))}
-          dir="ltr"
-        />
-      </div>
-    </section>
-  );
-}
-
-function RelationsPanel({
-  graph,
-  country,
-  isAr,
-}: {
-  graph: CountryGraph | null;
-  country: ReferenceCountry;
-  isAr: boolean;
-}) {
-  const { hasPermission } = useAdminAuthorization();
-  if (!graph)
-    return <Empty text={isAr ? 'تعذر تحميل شبكة العلاقات.' : 'Relationship graph unavailable.'} />;
-  const r = graph.relationships;
-  const scholarshipsHref = `/scholarships?countryReferenceId=${encodeURIComponent(country.id)}`;
-  const universitiesHref = `/universities?countryReferenceId=${encodeURIComponent(country.id)}`;
-  return (
-    <section className="space-y-6">
-      <Title icon={Building2}>
-        {isAr ? 'العلاقات المملوكة للمجالات الأخرى' : 'Owner-domain relationships'}
-      </Title>
-      {hasPermission('admin:scholarships:manage') &&
-        graph.readScope?.collections.scholarships?.state !== 'UNAVAILABLE' && (
-          <Link to={scholarshipsHref} className="text-blue-700 underline">
-            {isAr ? 'كل منح الدولة' : 'All country scholarships'}
-          </Link>
-        )}
-      <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900">
-        {isAr
-          ? 'لا نخزن جامعة/منحة/اختبار/خدمة/وظيفة كقائمة JSON داخل ملف الدولة. كل علاقة تُقرأ من المجال المالك باستخدام Country Reference ID أو ISO2 Canonical.'
-          : 'Universities, scholarships, tests, services, and jobs remain owned by their domains and are composed by canonical country identity.'}
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-        <RelationMetric
-          icon={Building2}
-          label={isAr ? 'جامعات' : 'Universities'}
-          value={
-            graph.readScope?.collections.universities?.state === 'AVAILABLE'
-              ? r.universities.total
-              : null
-          }
-        />
-        <RelationMetric
-          icon={GraduationCap}
-          label={isAr ? 'تخصصات الصفحة' : 'Majors on page'}
-          value={r.majors.length}
-        />
-        <RelationMetric
-          icon={BadgeCheck}
-          label={isAr ? 'منح' : 'Scholarships'}
-          value={
-            graph.readScope?.collections.scholarships?.state === 'AVAILABLE'
-              ? r.scholarships.total
-              : null
-          }
-        />
-        <RelationMetric
-          icon={ScrollText}
-          label={isAr ? 'اختبارات' : 'Tests'}
-          value={
-            graph.readScope?.collections.internationalTests?.state === 'AVAILABLE'
-              ? r.internationalTests.total
-              : null
-          }
-        />
-        <RelationMetric
-          icon={ShieldCheck}
-          label={isAr ? 'خدمات' : 'Services'}
-          value={
-            graph.readScope?.collections.services?.state === 'AVAILABLE' ? r.services.total : null
-          }
-        />
-        <RelationMetric
-          icon={BriefcaseBusiness}
-          label={isAr ? 'وظائف' : 'Jobs'}
-          value={
-            graph.readScope?.collections.careerJobs?.state === 'AVAILABLE'
-              ? r.careerJobs.total
-              : null
-          }
-        />
-      </div>
-
-      <div className="space-y-3 rounded-2xl border border-[#142B5F]/15 bg-[#142B5F]/5 p-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h3 className="font-black text-slate-900">
-              {isAr ? 'جامعات هذه الدولة' : 'Universities in this destination'}
-            </h3>
-            <p className="mt-1 text-xs text-slate-600">
-              {isAr
-                ? 'القائمة مأخوذة مباشرة من University Domain بواسطة Country Reference ID؛ لا توجد نسخة ثانية من بيانات الجامعة داخل الدولة.'
-                : 'This list is read directly from University Domain using the canonical Country Reference ID.'}
-            </p>
+    <>
+      <DestinationCard
+        id="living-costs"
+        title={isAr ? 'المصاريف الشهرية بالعملة الأصلية' : 'Monthly costs in original currency'}
+        editor={
+          <div className="destination-field-grid">
+            <Input
+              type="number"
+              label={isAr ? 'الحد الأدنى الشهري' : 'Monthly minimum'}
+              value={form.averageMonthlyLivingCostMin}
+              onChange={(v) => setForm((x) => ({ ...x, averageMonthlyLivingCostMin: v }))}
+            />
+            <Input
+              type="number"
+              label={isAr ? 'الحد الأعلى الشهري' : 'Monthly maximum'}
+              value={form.averageMonthlyLivingCostMax}
+              onChange={(v) => setForm((x) => ({ ...x, averageMonthlyLivingCostMax: v }))}
+            />
+            <Select
+              label={isAr ? 'العملة المعتمدة' : 'Canonical currency'}
+              value={form.livingCostCurrencyReferenceId}
+              onChange={(v) => setForm((x) => ({ ...x, livingCostCurrencyReferenceId: v }))}
+              options={[
+                { value: '', label: '—' },
+                ...currencies.map((c) => ({ value: c.id, label: optionLabel(c, isAr) })),
+              ]}
+            />
+            <Select
+              label={isAr ? 'تصنيف التكلفة' : 'Cost tier'}
+              value={form.livingCostTier}
+              onChange={(v) => setForm((x) => ({ ...x, livingCostTier: v as CostTier }))}
+              options={[
+                { value: '', label: '—' },
+                ...['LOW', 'MODERATE', 'HIGH', 'VERY_HIGH'].map((v, i) => ({
+                  value: v,
+                  label: (isAr
+                    ? ['منخفضة', 'متوسطة', 'مرتفعة', 'مرتفعة جدًا']
+                    : ['Low', 'Moderate', 'High', 'Very high'])[i],
+                })),
+              ]}
+            />
           </div>
-          {hasPermission('admin:universities:manage') &&
-            graph.readScope?.collections.universities?.state !== 'UNAVAILABLE' && (
-              <Link
-                to={universitiesHref}
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 text-xs font-black text-white hover:bg-[#033b2d]"
-              >
-                <Building2 className="h-4 w-4" />
-                {isAr ? 'فتح قسم جامعات هذه الدولة' : 'Open this country’s universities'}
-                <ExternalLink className="h-3.5 w-3.5" />
-              </Link>
-            )}
-        </div>
-        <RelationList
-          title=""
-          items={r.universities.data}
-          detailBasePath="/universities"
-          linkLabel={isAr ? 'فتح الجامعة' : 'Open university'}
-        />
-      </div>
-
-      <div>
-        <h3 className="mb-3 font-black text-slate-900">
-          {isAr ? 'البرامج والتخصصات عبر الجامعات' : 'Programs & majors through universities'}
-        </h3>
-        {r.academicPrograms.length ? (
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="p-3 text-start">{isAr ? 'الجامعة' : 'University'}</th>
-                  <th className="p-3 text-start">{isAr ? 'البرنامج' : 'Program'}</th>
-                  <th className="p-3 text-start">{isAr ? 'التخصص' : 'Major'}</th>
-                  <th className="p-3 text-start">{isAr ? 'الحالة' : 'State'}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {r.academicPrograms.map((p) => (
-                  <tr key={p.ownerId}>
-                    <td className="p-3">
-                      <Link
-                        to={`/universities/${encodeURIComponent(p.universityOwnerId)}`}
-                        className="inline-flex items-center gap-1.5 font-bold text-[#142B5F] hover:underline"
-                      >
-                        {p.universityDisplayName}
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </Link>
-                    </td>
-                    <td className="p-3 font-semibold">{p.sourceProgramName}</td>
-                    <td className="p-3">
-                      {p.majorOwnerId ? (
-                        <Link
-                          to={`/majors/${encodeURIComponent(p.majorOwnerId)}`}
-                          className="font-mono text-xs font-bold text-[#142B5F] hover:underline"
-                        >
-                          {p.majorOwnerId}
-                        </Link>
-                      ) : (
-                        '-'
-                      )}
-                    </td>
-                    <td className="p-3">
-                      <Badge value={p.majorMappingState} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <Empty
-            text={isAr ? 'لا توجد برامج منشورة مرتبطة بعد.' : 'No published linked programs yet.'}
-          />
-        )}
-      </div>
-
-      <RelationList
-        title={
-          isAr
-            ? 'التخصصات Canonical المرتبطة عبر برامج الجامعات'
-            : 'Canonical majors linked through university programs'
         }
-        items={r.majors}
-        detailBasePath="/majors"
-        linkLabel={isAr ? 'فتح التخصص' : 'Open major'}
-      />
-      <RelationList
-        title={isAr ? 'المنح المنشورة' : 'Published scholarships'}
-        items={r.scholarships.data}
-        detailBasePath="/scholarships"
-        linkLabel={isAr ? 'فتح المنحة' : 'Open scholarship'}
-      />
-      <RelationList
-        title={isAr ? 'الاختبارات المرتبطة بالدولة' : 'Country-linked international tests'}
-        items={r.internationalTests.data}
-        detailBasePath="/international-tests"
-        linkLabel={isAr ? 'فتح الاختبار' : 'Open test'}
-      />
-      <RelationList
-        title={isAr ? 'الخدمات المتاحة لهذه الدولة' : 'Services supporting this country'}
-        items={r.services.data}
-      />
-      <RelationList
-        title={isAr ? 'الوظائف في هذه الدولة' : 'Jobs in this country'}
-        items={r.careerJobs.data}
-      />
-      <div>
-        <h3 className="mb-2 font-black text-slate-900">
-          {isAr ? 'دورات مزودين مقرهم في الدولة' : 'Provider-headquarters courses'}
-        </h3>
-        <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-900">
-          {isAr
-            ? 'هذه ليست «دورات للدراسة في الدولة». العلاقة تعني فقط أن مقر مزود الدورة في الدولة، لذلك لا تُستخدم كدليل على وجهة الدراسة.'
-            : 'These are not courses “in” the study destination; the relationship is provider headquarters only.'}
-        </div>
-        <RelationList
-          title=""
-          items={r.providerHeadquartersCourses.data}
-          detailBasePath="/courses"
-        />
-      </div>
-      <RelationList
-        title={isAr ? 'محتوى CMS المتعلق بالدولة' : 'Country editorial content'}
-        items={r.editorialContent.map((item) => ({
-          ownerId: item.contentId,
-          displayName: item.title,
-          slug: item.slug,
-        }))}
-      />
-      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-        Country canonical owner: <span className="font-mono">{country.id}</span>
-      </div>
-    </section>
-  );
-}
-function SourcesPanel({
-  form,
-  setForm,
-  profile,
-  isAr,
-}: {
-  form: FormState;
-  setForm: React.Dispatch<React.SetStateAction<FormState>>;
-  profile: Profile | null;
-  isAr: boolean;
-}) {
-  return (
-    <section className="space-y-5">
-      <Title icon={FileCheck2}>
-        {isAr ? 'المصادر الرسمية والروابط' : 'Official sources & links'}
-      </Title>
-      <div
-        className={`rounded-xl border p-4 text-sm font-bold ${profile?.sourceVerificationStatus === 'VERIFIED' ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-amber-200 bg-amber-50 text-amber-900'}`}
       >
-        {isAr
-          ? `حالة التحقق: ${profile?.sourceVerificationStatus ?? 'UNVERIFIED'}`
-          : `Verification: ${profile?.sourceVerificationStatus ?? 'UNVERIFIED'}`}
-      </div>
-      <Input
-        label={isAr ? 'تاريخ تدقيق المصادر' : 'Source audit date'}
-        value={form.sourceAuditDate}
-        onChange={(value) => setForm((x) => ({ ...x, sourceAuditDate: value }))}
-        type="date"
-      />
-      <div className="space-y-3">
-        <h3>{isAr ? 'الروابط الرسمية' : 'Official links'}</h3>
-        {form.officialLinks.map((item, index) => (
-          <div key={index} className="grid gap-2 sm:grid-cols-2">
-            {(['labelAr', 'labelEn', 'url', 'noteAr', 'noteEn'] as const).map((key) => (
-              <Input
-                key={key}
-                label={studyDestinationFieldLabels[key]?.[isAr ? 0 : 1] ?? key}
-                value={item[key] ?? ''}
-                onChange={(value) =>
-                  setForm((old) => ({
-                    ...old,
-                    officialLinks: old.officialLinks.map((row, i) =>
-                      i === index ? { ...row, [key]: value } : row,
-                    ),
-                  }))
-                }
-              />
+        <p>
+          {form.averageMonthlyLivingCostMin || form.averageMonthlyLivingCostMax
+            ? `${form.averageMonthlyLivingCostMin || '—'} – ${form.averageMonthlyLivingCostMax || '—'} ${currency ? optionLabel(currency, isAr) : '—'}`
+            : isAr
+              ? 'لا توجد أرقام موثقة للتكلفة.'
+              : 'No recorded cost figures.'}
+        </p>
+        <p className="destination-muted">
+          {isAr
+            ? 'نطاق شهري إرشادي؛ ليس رسمًا جامعيًا أو ضمانًا، ولا يتضمن تحويل عملة.'
+            : 'Monthly guidance, not tuition or a guarantee; no currency conversion.'}
+        </p>
+      </DestinationCard>
+      <DestinationCard
+        id="cost-details"
+        title={isAr ? 'تفاصيل بنود الصرف' : 'Cost breakdown'}
+        translated
+        editor={
+          <div className="space-y-3">
+            {form[key].map((row, index) => (
+              <div className="destination-row-editor" key={index}>
+                <Input
+                  label={isAr ? 'البند' : 'Item'}
+                  value={row.label}
+                  onChange={(v) =>
+                    setForm((x) => ({
+                      ...x,
+                      [key]: x[key].map((r, i) => (i === index ? { ...r, label: v } : r)),
+                    }))
+                  }
+                />
+                <Input
+                  label={isAr ? 'القيمة الوصفية' : 'Recorded value'}
+                  value={row.value}
+                  onChange={(v) =>
+                    setForm((x) => ({
+                      ...x,
+                      [key]: x[key].map((r, i) => (i === index ? { ...r, value: v } : r)),
+                    }))
+                  }
+                />
+                <button
+                  onClick={() =>
+                    setForm((x) => ({ ...x, [key]: x[key].filter((_, i) => i !== index) }))
+                  }
+                >
+                  {isAr ? 'إزالة' : 'Remove'}
+                </button>
+              </div>
             ))}
-            <label>
-              {isAr ? 'التصنيف' : 'Category'}
-              <select
-                value={item.category}
-                onChange={(event) =>
-                  setForm((old) => ({
-                    ...old,
-                    officialLinks: old.officialLinks.map((row, i) =>
-                      i === index ? { ...row, category: event.target.value } : row,
-                    ),
-                  }))
-                }
-              >
-                {[
-                  'GOVERNMENT_STUDY',
-                  'IMMIGRATION_VISA',
-                  'EDUCATION_AUTHORITY',
-                  'SCHOLARSHIP_PORTAL',
-                  'COST_OF_LIVING',
-                  'STUDENT_SUPPORT',
-                  'OTHER',
-                ].map((category) => (
-                  <option key={category}>{category}</option>
-                ))}
-              </select>
-            </label>
             <button
               onClick={() =>
-                setForm((old) => ({
-                  ...old,
-                  officialLinks: old.officialLinks.filter((_, i) => i !== index),
+                setForm((x) => ({ ...x, [key]: [...x[key], { label: '', value: '' }] }))
+              }
+            >
+              {isAr ? 'إضافة بند' : 'Add item'}
+            </button>
+          </div>
+        }
+      >
+        <ul>
+          {form[key].map((r, i) => (
+            <li key={i}>
+              {r.label}: {r.value}
+            </li>
+          ))}
+        </ul>
+        {!form[key].length && <p>{isAr ? 'لم تسجل بنود موثقة.' : 'No recorded cost breakdown.'}</p>}
+      </DestinationCard>
+      <LocalizedCard
+        id="student-life"
+        base="studentLifeHighlights"
+        title={isAr ? 'الحياة الطلابية' : 'Student life'}
+        form={form}
+        setForm={setForm}
+        isAr={isAr}
+        list
+      />
+    </>
+  );
+}
+const categories: Record<string, [string, string]> = {
+  GOVERNMENT_STUDY: ['الدراسة الحكومية', 'Government study'],
+  IMMIGRATION_VISA: ['الهجرة والتأشيرة', 'Immigration/visa'],
+  EDUCATION_AUTHORITY: ['جهة التعليم', 'Education authority'],
+  SCHOLARSHIP_PORTAL: ['بوابة المنح', 'Scholarship portal'],
+  COST_OF_LIVING: ['المعيشة', 'Living costs'],
+  STUDENT_SUPPORT: ['دعم الطلاب', 'Student support'],
+  OTHER: ['أخرى', 'Other'],
+};
+const evidenceTypes: Record<string, [string, string]> = {
+  GOVERNMENT: ['جهة حكومية', 'Government'],
+  OFFICIAL_EDUCATION_AUTHORITY: ['جهة تعليم رسمية', 'Official education authority'],
+  OFFICIAL_IMMIGRATION: ['هجرة رسمية', 'Official immigration'],
+  OFFICIAL_STATISTICS: ['إحصاءات رسمية', 'Official statistics'],
+  OTHER_OFFICIAL: ['مصدر رسمي آخر', 'Other official source'],
+};
+function SafeSource({ url, label }: { url?: string | null; label: string }) {
+  let safe = false;
+  try {
+    safe = new URL(url ?? '').protocol === 'https:';
+  } catch {
+    /* A missing source is not a usable link. */
+  }
+  return safe ? (
+    <a href={url!} target="_blank" rel="noopener noreferrer">
+      {label} ↗
+    </a>
+  ) : (
+    <span>—</span>
+  );
+}
+function SourcesPanel({ form, setForm, profile, isAr }: PanelProps & { profile: Profile | null }) {
+  const { locale } = useContext(DestinationEditorContext);
+  return (
+    <>
+      <DestinationCard
+        id="sources"
+        title={isAr ? 'الروابط الرسمية' : 'Official links'}
+        translated
+        editor={
+          <div className="space-y-3">
+            {form.officialLinks.map((row, index) => (
+              <div className="destination-row-editor" key={index}>
+                {(['labelAr', 'url', 'noteAr'] as const).map((key) => (
+                  <Input
+                    key={key}
+                    label={studyDestinationFieldLabels[key][isAr ? 0 : 1]}
+                    value={row[key] ?? ''}
+                    onChange={(v) =>
+                      setForm((x) => ({
+                        ...x,
+                        officialLinks: x.officialLinks.map((r, i) =>
+                          i === index ? { ...r, [key]: v } : r,
+                        ),
+                      }))
+                    }
+                  />
+                ))}
+                <Select
+                  label={isAr ? 'التصنيف' : 'Category'}
+                  value={row.category}
+                  onChange={(v) =>
+                    setForm((x) => ({
+                      ...x,
+                      officialLinks: x.officialLinks.map((r, i) =>
+                        i === index ? { ...r, category: v } : r,
+                      ),
+                    }))
+                  }
+                  options={Object.entries(categories).map(([value, labels]) => ({
+                    value,
+                    label: labels[isAr ? 0 : 1],
+                  }))}
+                />
+                <button
+                  onClick={() =>
+                    setForm((x) => ({
+                      ...x,
+                      officialLinks: x.officialLinks.filter((_, i) => i !== index),
+                    }))
+                  }
+                >
+                  {isAr ? 'إزالة الرابط' : 'Remove link'}
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() =>
+                setForm((x) => ({
+                  ...x,
+                  officialLinks: [...x.officialLinks, { labelAr: '', url: '', category: 'OTHER' }],
                 }))
               }
             >
-              {isAr ? 'إزالة الرابط' : 'Remove link'}
+              {isAr ? 'إضافة رابط' : 'Add link'}
             </button>
           </div>
-        ))}
-        <button
-          onClick={() =>
-            setForm((old) => ({
-              ...old,
-              officialLinks: [
-                ...old.officialLinks,
-                { labelAr: '', labelEn: '', url: '', category: 'OTHER' },
-              ],
-            }))
-          }
-        >
-          {isAr ? 'إضافة رابط' : 'Add link'}
-        </button>
-      </div>
-      <LineEditor
-        label={
-          isAr
-            ? 'أدلة التحقق — سطر: الوصف | الرابط | نوع المصدر'
-            : 'Evidence: label | URL | source type'
         }
-        value={form.evidenceSources}
-        onChange={(value) => setForm((x) => ({ ...x, evidenceSources: value }))}
-        rows={8}
-        dir="ltr"
-      />
-      <p className="text-xs text-slate-500">
-        Source types: GOVERNMENT, OFFICIAL_EDUCATION_AUTHORITY, OFFICIAL_IMMIGRATION,
-        OFFICIAL_STATISTICS, OTHER_OFFICIAL
-      </p>
-      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
-        {isAr
-          ? 'زر «توثيق المصادر» موجود في مرحلة الجاهزية. لا يمكن ضبط VERIFIED يدويًا من نموذج التحرير، وأي تغيير جوهري بعد التوثيق يعيده إلى UNVERIFIED.'
-          : 'VERIFIED cannot be set through the editor. Source-sensitive edits automatically reset verification.'}
-      </div>
-    </section>
+      >
+        <ul>
+          {form.officialLinks.map((row, i) => (
+            <li key={i}>
+              <SafeSource
+                url={row.url}
+                label={(locale === 'ar' ? row.labelAr : row.labelEn) || row.labelAr}
+              />
+              <span> · {categories[row.category]?.[isAr ? 0 : 1] ?? row.category}</span>
+              <p>{locale === 'ar' ? row.noteAr : row.noteEn}</p>
+              {locale === 'en' && !row.labelEn && <small>{isAr ? 'العنوان العربي معروض لعدم توفر ترجمة إنجليزية؛ لا يُعد ترجمة مكتملة.' : 'Arabic label shown because English is unavailable; this does not satisfy translation readiness.'}</small>}
+            </li>
+          ))}
+        </ul>
+        {!form.officialLinks.length && (
+          <p>{isAr ? 'لا توجد روابط مسجلة.' : 'No recorded links.'}</p>
+        )}
+      </DestinationCard>
+      <DestinationCard
+        id="evidence"
+        title={isAr ? 'أدلة المصدر' : 'Source evidence'}
+        editor={
+          <div className="space-y-3">
+            {form.evidenceSources.map((row, index) => (
+              <div className="destination-row-editor" key={index}>
+                <Input
+                  label={isAr ? 'الوصف' : 'Description'}
+                  value={row.label}
+                  onChange={(v) =>
+                    setForm((x) => ({
+                      ...x,
+                      evidenceSources: x.evidenceSources.map((r, i) =>
+                        i === index ? { ...r, label: v } : r,
+                      ),
+                    }))
+                  }
+                />
+                <Input
+                  label="HTTPS URL"
+                  value={row.url}
+                  onChange={(v) =>
+                    setForm((x) => ({
+                      ...x,
+                      evidenceSources: x.evidenceSources.map((r, i) =>
+                        i === index ? { ...r, url: v } : r,
+                      ),
+                    }))
+                  }
+                />
+                <Select
+                  label={isAr ? 'نوع المصدر' : 'Source type'}
+                  value={row.sourceType}
+                  options={Object.entries(evidenceTypes).map(([value, label]) => ({
+                    value,
+                    label: label[isAr ? 0 : 1],
+                  }))}
+                  onChange={(v) =>
+                    setForm((x) => ({
+                      ...x,
+                      evidenceSources: x.evidenceSources.map((r, i) =>
+                        i === index ? { ...r, sourceType: v } : r,
+                      ),
+                    }))
+                  }
+                />
+                <button
+                  onClick={() =>
+                    setForm((x) => ({
+                      ...x,
+                      evidenceSources: x.evidenceSources.filter((_, i) => i !== index),
+                    }))
+                  }
+                >
+                  {isAr ? 'إزالة' : 'Remove'}
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() =>
+                setForm((x) => ({
+                  ...x,
+                  evidenceSources: [
+                    ...x.evidenceSources,
+                    { label: '', url: '', sourceType: 'GOVERNMENT' },
+                  ],
+                }))
+              }
+            >
+              {isAr ? 'إضافة دليل' : 'Add evidence'}
+            </button>
+          </div>
+        }
+      >
+        <ul>
+          {form.evidenceSources.map((row, i) => (
+            <li key={i}>
+              <SafeSource url={row.url} label={row.label} /> ·{' '}
+              {evidenceTypes[row.sourceType]?.[isAr ? 0 : 1] ?? row.sourceType}
+            </li>
+          ))}
+        </ul>
+      </DestinationCard>
+      <DestinationCard
+        id="source-audit"
+        title={isAr ? 'تاريخ تدقيق المحتوى' : 'Content audit date'}
+        editor={
+          <Input
+            type="date"
+            label={isAr ? 'تاريخ تدقيق المحتوى' : 'Content audit date'}
+            value={form.sourceAuditDate}
+            onChange={(v) => setForm((x) => ({ ...x, sourceAuditDate: v }))}
+          />
+        }
+      >
+        <p>{form.sourceAuditDate || '—'}</p>
+        <p className="destination-muted">
+          {isAr
+            ? 'يختلف عن وقت اعتماد المراجع المستقل؛ الحداثة تحددها سياسة الخادم في الجاهزية.'
+            : 'Separate from independent reviewer approval; freshness is evaluated by the server policy.'}
+        </p>
+      </DestinationCard>
+      <section className="destination-content-card">
+        <h3>{isAr ? 'اعتماد المراجع المستقل' : 'Independent source approval'}</h3>
+        <Badge value={profile?.sourceVerificationStatus ?? 'UNVERIFIED'} />
+        <p>
+          {isAr ? 'وقت القرار الموثق' : 'Recorded decision time'}:{' '}
+          {profile?.governance?.proof?.reviewedAt || '—'}
+        </p>
+        <Link to="?section=publish">
+          {isAr ? 'الجاهزية وإجراءات الاعتماد' : 'Readiness and approval actions'}
+        </Link>
+      </section>
+    </>
   );
 }
-
+function SupportingRelations({
+  graph,
+  loading,
+  error,
+  isAr,
+  edgeParams,
+  edgeHistory,
+  setEdgeParams,
+  setEdgeHistory,
+}: {
+  graph: CountryGraph | null;
+  loading: boolean;
+  error: string | null;
+  isAr: boolean;
+  edgeParams: Record<string, string>;
+  edgeHistory: Record<string, string[]>;
+  setEdgeParams: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  setEdgeHistory: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
+}) {
+  if (loading)
+    return (
+      <p role="status">{isAr ? 'تحميل العلاقات المساندة…' : 'Loading supporting relations…'}</p>
+    );
+  if (error)
+    return (
+      <p role="alert">
+        {isAr
+          ? 'مصدر العلاقات غير متاح؛ لا يمكن إثبات العدد. '
+          : 'Relationship source unavailable; counts unknown. '}
+        {error}
+      </p>
+    );
+  if (!graph) return null;
+  const r = graph.relationships;
+  const groups = [
+    ['internationalTests', 'testPage', '/international-tests'],
+    ['services', 'serviceCursor', '/services'],
+    ['careerJobs', 'careerPage', '/careers'],
+    ['providerHeadquartersCourses', 'courseCursor', '/courses'],
+  ] as const;
+  return (
+    <>
+      {groups.map(([edge, param, base]) => {
+        const collection = r[edge],
+          history = edgeHistory[param] ?? [],
+          page = Number(edgeParams[param] ?? 1),
+          offset = param.endsWith('Page'),
+          scope = graph.readScope?.collections[edge],
+          unavailable = scope?.state === 'UNAVAILABLE',
+          next = scope?.nextCursor ?? collection.nextCursor;
+        return (
+          <details className="destination-content-card" key={edge}>
+            <summary>
+              {studyDestinationEdgeLabels[edge]?.[isAr ? 0 : 1]} ·{' '}
+              {unavailable ? (isAr ? 'غير متاح' : 'Unavailable') : collection.total}
+            </summary>
+            {edge === 'providerHeadquartersCourses' && (
+              <p className="destination-warning">
+                {isAr
+                  ? 'العلاقة بمقر مزود الدورة، وليست ببلد الدراسة.'
+                  : 'Provider headquarters only, not a course study country.'}
+              </p>
+            )}
+            {unavailable ? (
+              <p>{isAr ? 'تعذرت قراءة المصدر.' : 'Source unavailable.'}</p>
+            ) : (
+              <>
+                <RelationList title="" items={collection.data} detailBasePath={base} />
+                <nav className="destination-toolbar">
+                  <button
+                    disabled={offset ? page <= 1 : !history.length}
+                    onClick={() => {
+                      setEdgeParams((old) => ({
+                        ...old,
+                        [param]: offset ? String(page - 1) : (history.at(-1) ?? ''),
+                      }));
+                      if (!offset)
+                        setEdgeHistory((old) => ({ ...old, [param]: history.slice(0, -1) }));
+                    }}
+                  >
+                    {isAr ? 'السابق' : 'Previous'}
+                  </button>
+                  <button
+                    disabled={offset ? page >= collection.totalPages : !next}
+                    onClick={() => {
+                      if (!offset)
+                        setEdgeHistory((old) => ({
+                          ...old,
+                          [param]: [...history, edgeParams[param] ?? ''],
+                        }));
+                      setEdgeParams((old) => ({
+                        ...old,
+                        [param]: offset ? String(page + 1) : next!,
+                      }));
+                    }}
+                  >
+                    {isAr ? 'التالي' : 'Next'}
+                  </button>
+                </nav>
+              </>
+            )}
+          </details>
+        );
+      })}
+      <details className="destination-content-card">
+        <summary>{isAr ? 'المحتوى التحريري المرتبط' : 'Related editorial content'}</summary>
+        {graph.readScope?.collections.editorialContent?.state === 'UNAVAILABLE' ? (
+          <p>{isAr ? 'المصدر غير متاح' : 'Source unavailable'}</p>
+        ) : (
+          <RelationList
+            title=""
+            items={r.editorialContent.map((x) => ({ ownerId: x.contentId, displayName: x.title }))}
+            detailBasePath="/cms"
+          />
+        )}
+      </details>
+    </>
+  );
+}
+function DestinationPreview({
+  aggregate,
+  isAr,
+  locale,
+  close,
+}: {
+  aggregate: Aggregate;
+  isAr: boolean;
+  locale: 'ar' | 'en';
+  close: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null;
+    ref.current?.focus();
+    const key = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+      if (e.key === 'Tab') {
+        const nodes = ref.current?.querySelectorAll<HTMLElement>('button,a[href]');
+        if (nodes?.length) {
+          const first = nodes[0],
+            last = nodes[nodes.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    };
+    document.addEventListener('keydown', key);
+    return () => {
+      document.removeEventListener('keydown', key);
+      previous?.focus();
+    };
+  }, [close]);
+  const p = aggregate.profile;
+  return (
+    <div
+      ref={ref}
+      tabIndex={-1}
+      className="destination-preview"
+      role="dialog"
+      aria-modal="true"
+      aria-label={isAr ? 'معاينة وجهة الدراسة' : 'Destination preview'}
+    >
+      <button onClick={close}>{isAr ? 'إغلاق' : 'Close'}</button>
+      <h1>{isAr ? aggregate.country.nameAr || aggregate.country.name : aggregate.country.name}</h1>
+      <p className="destination-warning">
+        {isAr
+          ? 'معاينة إدارية للبيانات المحفوظة؛ لا تنشر المسودة ولا تتجاوز الجاهزية.'
+          : 'Administrative preview of saved content; drafts remain private and readiness rules still apply.'}
+      </p>
+      {!p ? (
+        <p>{isAr ? 'لم يُنشأ الملف بعد.' : 'Profile not created.'}</p>
+      ) : (
+        <div lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+          {(
+            [
+              'overview',
+              'studySystemSummary',
+              'admissionHighlights',
+              'visaSummary',
+              'visaRequirements',
+              'costHighlights',
+              'studentLifeHighlights',
+            ] as const
+          ).map((base) => {
+            const value = p[(base + (locale === 'ar' ? 'Ar' : 'En')) as keyof Profile];
+            return (
+              <section className="destination-content-card" key={base}>
+                <h2>
+                  {
+                    {
+                      overview: ['التعريف', 'Overview'],
+                      studySystemSummary: ['نظام الدراسة', 'Education system'],
+                      admissionHighlights: ['القبول', 'Admissions'],
+                      visaSummary: ['التأشيرة', 'Visa'],
+                      visaRequirements: ['المتطلبات', 'Requirements'],
+                      costHighlights: ['المعيشة', 'Living'],
+                      studentLifeHighlights: ['الحياة الطلابية', 'Student life'],
+                    }[base][isAr ? 0 : 1]
+                  }
+                </h2>
+                <ReadContent value={value} isAr={isAr} />
+              </section>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 function PublishPanel({
   hasPermission,
+  repair,
   profile,
   readiness,
   blocking,
@@ -1633,6 +1972,7 @@ function PublishPanel({
   blocking: Readiness['checks'];
   action: string | null;
   hasPermission: (permission: string) => boolean;
+  repair: (key: string) => void;
   execute: (name: 'submit-review' | 'verify-source' | 'publish' | 'archive') => Promise<void>;
   isAr: boolean;
 }) {
@@ -1675,7 +2015,21 @@ function PublishPanel({
               <div className="font-black">
                 {studyDestinationCheckLabels[check.key]?.[isAr ? 0 : 1] ?? check.label}
               </div>
-              <div className="text-xs opacity-80">{check.message || check.key}</div>
+              <div className="destination-muted">
+                {check.message ||
+                  (check.complete
+                    ? isAr
+                      ? 'مكتمل'
+                      : 'Complete'
+                    : isAr
+                      ? 'يحتاج استكمالًا'
+                      : 'Needs attention')}
+              </div>
+              {!check.complete && (
+                <button type="button" onClick={() => repair(check.key)}>
+                  {isAr ? 'اذهب للإصلاح' : 'Go to repair'}
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -1737,7 +2091,7 @@ function PublishPanel({
 
 function Title({ icon: Icon, children }: { icon: typeof Globe2; children: React.ReactNode }) {
   return (
-    <h2 className="flex items-center gap-2 border-b border-slate-100 pb-3 text-xl font-black text-slate-900">
+    <h2 className="flex items-center gap-2">
       <Icon className="h-5 w-5 text-[#142B5F]" />
       {children}
     </h2>
@@ -1779,15 +2133,6 @@ function TextArea({
     </label>
   );
 }
-function LineEditor(props: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  rows?: number;
-  dir?: 'ltr' | 'rtl';
-}) {
-  return <TextArea {...props} rows={props.rows ?? 7} />;
-}
 function Input({
   label,
   value,
@@ -1826,7 +2171,7 @@ function Select({
   label: string;
   value: string;
   onChange: (value: string) => void;
-  options: Array<[string, string]>;
+  options: Array<{ value: string; label: string }>;
 }) {
   return (
     <label className="space-y-1.5">
@@ -1836,7 +2181,7 @@ function Select({
         onChange={(e) => onChange(e.target.value)}
         className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
       >
-        {options.map(([v, l]) => (
+        {options.map(({ value: v, label: l }) => (
           <option key={v} value={v}>
             {l}
           </option>
@@ -1846,32 +2191,40 @@ function Select({
   );
 }
 function Badge({ value }: { value: string }) {
+  const { language } = useTranslation();
+  const labels: Record<string, [string, string]> = {
+    DRAFT: ['مسودة', 'Draft'],
+    PUBLISHED: ['منشور', 'Published'],
+    NO_PROFILE: ['بلا ملف', 'No profile'],
+    VERIFIED: ['مصادر معتمدة', 'Verified sources'],
+    UNVERIFIED: ['مصادر غير معتمدة', 'Unverified sources'],
+    COMPLETE: ['مكتمل', 'Complete'],
+    INCOMPLETE: ['غير مكتمل', 'Incomplete'],
+    READY_TO_REVIEW: ['جاهز للمراجعة', 'Ready for review'],
+    READY_TO_PUBLISH: ['جاهز للنشر', 'Ready to publish'],
+    CANONICALLY_MAPPED: ['مرتبط مرجعيًا', 'Canonically mapped'],
+    UNMAPPED: ['غير مرتبط', 'Unmapped'],
+    PASS: ['مستوفى', 'Passed'],
+  };
   const bad = /INCOMPLETE|UNVERIFIED|NO_PROFILE|UNMAPPED|DRAFT/.test(value);
-  const good = /PUBLISHED|VERIFIED|COMPLETE|CANONICALLY_MAPPED|PASS/.test(value);
+  const good = !bad && /PUBLISHED|VERIFIED|COMPLETE|CANONICALLY_MAPPED|PASS/.test(value);
   return (
     <span
       className={`rounded-full px-2.5 py-1 text-[11px] font-black ${good ? 'bg-emerald-100 text-emerald-800' : bad ? 'bg-amber-100 text-amber-800' : 'bg-blue-50 text-blue-700'}`}
     >
-      {value}
+      {labels[value]?.[language === 'ar' ? 0 : 1] ?? value}
     </span>
   );
 }
-function RelationMetric({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof Building2;
-  label: string;
-  value: number | null;
-}) {
-  return (
-    <div className="rounded-xl border border-slate-200 p-3">
-      <Icon className="h-4 w-4 text-[#142B5F]" />
-      <div className="mt-2 text-xl font-black">{value ?? '—'}</div>
-      <div className="text-[11px] font-bold text-slate-500">{label}</div>
-    </div>
+function languageReadiness(readiness: Readiness | null, locale: 'ar' | 'en', isAr: boolean) {
+  const checks = readiness?.checks.filter((check) =>
+    locale === 'en'
+      ? check.key.endsWith('-en')
+      : check.key.endsWith('-ar') ||
+        ['admission-highlights', 'visa-requirements'].includes(check.key),
   );
+  if (!checks?.length) return isAr ? 'غير مقاسة' : 'Not measured';
+  return `${checks.filter((check) => check.complete).length}/${checks.length} ${isAr ? 'عناصر مستوفاة' : 'checks met'}`;
 }
 function RelationList({
   title,
@@ -1900,9 +2253,10 @@ function RelationList({
               >
                 <div className="min-w-0">
                   <div className="truncate text-sm font-bold">{item.displayName}</div>
-                  <div className="truncate font-mono text-[10px] text-slate-400">
-                    {item.ownerId}
-                  </div>
+                  <details className="destination-muted">
+                    <summary>معلومات تقنية / Technical details</summary>
+                    <code dir="ltr">{item.ownerId}</code>
+                  </details>
                 </div>
                 {href ? (
                   <Link

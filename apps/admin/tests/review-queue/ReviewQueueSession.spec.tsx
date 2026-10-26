@@ -1,91 +1,90 @@
+// Updated acceptance tests follow the server-wide section 02 contract.
 import React from 'react';
 import {act,create} from 'react-test-renderer';
 import {MemoryRouter} from 'react-router-dom';
 import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
-const state=vi.hoisted(()=>({request:vi.fn(),permissions:['admin:scholarships:manage','admin:audit:manage'],hasPermission:(permission:string)=>['admin:scholarships:manage','admin:audit:manage'].includes(permission)}));
-vi.mock('../../src/api/client',()=>({adminApiClient:{request:state.request}}));
+import type {ReviewPage,ReviewRecord} from '@manaratak/shared';
+const state=vi.hoisted(()=>({request:vi.fn(),permissions:['admin:platform:manage','admin:scholarships:manage','admin:audit:manage']}));
+vi.mock('../../src/api/client',()=>({adminApiClient:{request:state.request},createAdminIdempotencyKey:()=>crypto.randomUUID()}));
 vi.mock('../../src/i18n/I18nProvider',()=>({useTranslation:()=>({language:'en',dir:'ltr'})}));
-vi.mock('../../src/security/AdminAuthorizationContext',()=>({useAdminAuthorization:()=>({permissions:state.permissions,hasPermission:state.hasPermission})}));
+vi.mock('../../src/security/AdminAuthorizationContext',()=>({useAdminAuthorization:()=>({permissions:state.permissions,hasPermission:(permission:string)=>state.permissions.includes(permission)})}));
 import {AdminReviewQueuePage} from '../../src/pages/AdminReviewQueuePage';
+import {parseWorkspacePage} from '../../src/features/review-queue/WorkspaceData';
 let tree:ReturnType<typeof create>;
-function button(label:string){return tree.root.findAllByType('button').find(n=>n.children.includes(label))!;}
+const record=(id='item1'):ReviewRecord=>({key:'scholarships:'+id+':',ownerId:id,domain:'scholarships',profileId:null,title:'LAST-GOOD-OWNER '+id,titleEn:null,reference:id,status:'READY_TO_REVIEW',reasons:['workflow_review'],priority:'medium',priorityBasis:'suggested',ownerRevision:'a'.repeat(32),modifiedAt:'2026-10-24T12:00:00Z',sourceKind:'unknown',locale:null,sourceUrl:'https://example.invalid',verificationState:'UNKNOWN',importRecordId:null,batchId:null,sourceRowNumber:null,href:'/scholarships/'+id,detail:true,auditType:'SCHOLARSHIP',caseId:'case1',version:1,cycle:1,assigneeId:null,teamId:null,assigneeLabel:null,workState:'OPEN',enteredAt:'2026-10-24T12:00:00Z',dueAt:null,policyId:null,sla:'unknown',synchronizedAt:'2026-10-24T12:00:00Z'});
+const page=(records=[record()]):ReviewPage=>({records,total:1,counters:{open:1,mine:0,unassigned:1,urgent:0,overdue:null,withoutSla:1},sources:[],snapshot:'b'.repeat(64),nextCursor:null,coverage:'complete',canCoordinate:true,readAt:'2026-10-24T12:00:00Z'});
+const button=(label:string)=>tree.root.findAllByType('button').find(node=>node.children.includes(label))!;
+const queries=()=>state.request.mock.calls.filter(([path])=>path.endsWith('/query'));
 async function mount(){await act(async()=>{tree=create(<MemoryRouter><AdminReviewQueuePage/></MemoryRouter>);});}
 beforeEach(()=>{
- (globalThis as any).IS_REACT_ACT_ENVIRONMENT=true;
- vi.stubGlobal('window',{setInterval,clearInterval,addEventListener:vi.fn(),removeEventListener:vi.fn()});
- vi.stubGlobal('document',{visibilityState:'visible',addEventListener:vi.fn(),removeEventListener:vi.fn()});
- state.request.mockReset().mockImplementation(async(path:string)=>{
- const query=new URL(path,'https://local').searchParams;
- if(path.startsWith('/admin/audit/'))return{items:[{id:'audit1',action:'LAST-GOOD-AUDIT',timestamp:'2026-10-14T00:00:00Z',target:{targetId:query.get('targetId'),targetType:query.get('targetType')}}],hasMore:true,nextCursor:'next'};
- return{data:[{id:'item1',title:'LAST-GOOD-OWNER',status:'READY_TO_REVIEW'}],total:1,page:Number(query.get('page')),pageSize:Number(query.get('pageSize'))};
- });
+  (globalThis as {IS_REACT_ACT_ENVIRONMENT?:boolean}).IS_REACT_ACT_ENVIRONMENT=true;
+  vi.stubGlobal('window',{addEventListener:vi.fn(),removeEventListener:vi.fn()});
+  vi.stubGlobal('document',{activeElement:{focus:vi.fn()},body:{style:{overflow:''}},addEventListener:vi.fn(),removeEventListener:vi.fn()});
+  state.permissions=['admin:platform:manage','admin:scholarships:manage','admin:audit:manage'];
+  state.request.mockReset().mockImplementation(async(path:string)=>{
+    if(path.endsWith('/query'))return page();
+    if(path.startsWith('/admin/audit/'))return {items:[{id:'a1',action:'LAST-GOOD-AUDIT',timestamp:'2026-10-24T12:00:00Z',target:{targetId:'item1',targetType:'SCHOLARSHIP'}}],hasMore:true,nextCursor:'audit-next'};
+    return [];
+  });
 });
-afterEach(async()=>{if(tree)await act(async()=>tree.unmount());vi.unstubAllGlobals();});
-describe('Review queue session loss clears old evidence',()=>{
- it('reads source-verification evidence when its quick view is selected',async()=>{
- await mount();state.request.mockClear();
- await act(async()=>button('Source verification').props.onClick());
- expect(state.request).toHaveBeenCalledTimes(2);
- expect(state.request.mock.calls.every(([path])=>path.includes('verificationStatus='))).toBe(true);
- expect(state.request.mock.calls.some(([path])=>path.includes('verificationStatus=PENDING'))).toBe(true);
- expect(state.request.mock.calls.some(([path])=>path.includes('verificationStatus=FAILED'))).toBe(true);
- });
- it('shows ten records per page and resets pagination after a local search without another API read',async()=>{
- state.request.mockImplementation(async(path:string)=>{const query=new URL(path,'https://local').searchParams;return{data:Array.from({length:23},(_,index)=>({id:`row-${String(index).padStart(2,'0')}`,title:`Record ${index}`,status:'READY_TO_REVIEW'})),total:23,page:Number(query.get('page')),pageSize:Number(query.get('pageSize'))};});
- await mount();state.request.mockClear();
- const rows=()=>tree.root.findByProps({'aria-labelledby':'review-pending-work'}).findByType('tbody').findAllByType('tr');
- expect(rows()).toHaveLength(10);
- await act(async()=>button('Next').props.onClick());expect(rows()).toHaveLength(10);
- await act(async()=>button('Next').props.onClick());expect(rows()).toHaveLength(3);
- await act(async()=>button('Previous').props.onClick());expect(rows()).toHaveLength(10);
- await act(async()=>tree.root.findByProps({type:'search'}).props.onChange({target:{value:'Record 22'}}));
- expect(rows()).toHaveLength(1);expect(JSON.stringify(rows()[0].findAllByType('bdi').map(node=>node.children))).toContain('Record 22');
- expect(state.request).not.toHaveBeenCalled();
- });
- it('does not reread a fresh sample on window focus',async()=>{
- await mount();
- expect(state.request).toHaveBeenCalledTimes(1);
- const focus=(window.addEventListener as any).mock.calls.find(([event]:[string])=>event==='focus')[1];
- state.request.mockClear();
- await act(async()=>focus());
- expect(state.request).not.toHaveBeenCalled();
- });
- it('reads the selected domain sources instead of leaving its other review reasons unread',async()=>{
- await mount();state.request.mockClear();
- const domain=tree.root.findAllByType('select').find(select=>select.findAllByType('option').some(option=>option.props.value==='scholarships'))!;
- await act(async()=>domain.props.onChange({target:{value:'scholarships'}}));
- expect(state.request.mock.calls.length).toBe(8);
- expect(state.request.mock.calls.every(([path])=>path.startsWith('/admin/scholarships?'))).toBe(true);
- expect(state.request.mock.calls.some(([path])=>path.includes('status=READY_TO_PUBLISH'))).toBe(true);
- });
- it('searches only loaded evidence and clears search without re-requesting sources',async()=>{
- await mount();
- const pending=()=>tree.root.findByProps({'aria-labelledby':'review-pending-work'});
- expect(pending().findAllByType('bdi').some(node=>node.children.includes('LAST-GOOD-OWNER'))).toBe(true);
- state.request.mockClear();
- const search=tree.root.findByProps({type:'search'});
- await act(async()=>search.props.onChange({target:{value:'no matching loaded record'}}));
- expect(pending().findByType('tbody').findAllByType('tr')).toHaveLength(0);
- expect(state.request).not.toHaveBeenCalled();
- await act(async()=>button('Clear filters').props.onClick());
- expect(tree.root.findByProps({type:'search'}).props.value).toBe('');
- expect(pending().findByType('tbody').findAllByType('tr')).toHaveLength(1);
- expect(state.request).not.toHaveBeenCalled();
- });
- it('does not keep last-good owner rows after a 401 refresh',async()=>{
- await mount();expect(JSON.stringify(tree.toJSON())).toContain('LAST-GOOD-OWNER');
- state.request.mockRejectedValue(new Error('[401] expired'));
- await act(async()=>button('Refresh and recheck').props.onClick());
- expect(JSON.stringify(tree.toJSON())).not.toContain('LAST-GOOD-OWNER');
- expect(JSON.stringify(tree.toJSON())).toContain('SESSION_REQUIRED');
- });
- it('clears last-good audit evidence after a 401 continuation',async()=>{
- await mount();await act(async()=>button('Preview evidence').props.onClick({currentTarget:{focus:vi.fn()}}));
- expect(JSON.stringify(tree.toJSON())).toContain('LAST-GOOD-AUDIT');
- state.request.mockRejectedValue(new Error('[401] expired'));
- const next=tree.root.findAllByType('button').find(n=>typeof n.props.onClick==='function'&&n.children.some(c=>typeof c==='string'&&c.includes('audit')))!;
- await act(async()=>next.props.onClick());
- expect(JSON.stringify(tree.toJSON())).not.toContain('LAST-GOOD-AUDIT');
- expect(JSON.stringify(tree.toJSON())).toContain('Forbidden');
- });
+afterEach(async()=>{if(tree)await act(async()=>tree.unmount());vi.useRealTimers();vi.unstubAllGlobals();});
+describe('Server-wide review queue interaction and session safety',()=>{
+  it('distinguishes unavailable history from empty history and retries without losing a draft',async()=>{
+    let failed=true;
+    state.request.mockImplementation(async(path:string)=>{
+      if(path.endsWith('/query'))return page();
+      if(path.includes('/history?')&&failed)throw new Error('[503] unavailable');
+      return [];
+    });
+    await mount();await act(async()=>button('Preview').props.onClick());
+    expect(JSON.stringify(tree.toJSON())).toContain('Review history could not be loaded');
+    expect(JSON.stringify(tree.toJSON())).not.toContain('No events recorded for this case.');
+    const note=tree.root.findByType('textarea');
+    await act(async()=>note.props.onChange({target:{value:'Keep this unsaved internal note'}}));
+    failed=false;await act(async()=>button('Retry history').props.onClick());
+    expect(tree.root.findByType('textarea').props.value).toBe('Keep this unsaved internal note');
+    expect(JSON.stringify(tree.toJSON())).toContain('No events recorded for this case.');
+  });
+  it('disables assignment after reviewer failure and allows a safe retry',async()=>{
+    let failed=true;
+    state.request.mockImplementation(async(path:string)=>{
+      if(path.endsWith('/query'))return page();
+      if(path.includes('/reviewers')&&failed)throw new Error('[503] unavailable');
+      return [];
+    });
+    await mount();await act(async()=>button('Preview').props.onClick());
+    expect(button('Save assignment').props.disabled).toBe(true);
+    expect(JSON.stringify(tree.toJSON())).toContain('current assignment is preserved');
+    failed=false;await act(async()=>button('Retry reviewers').props.onClick());
+    expect(button('Save assignment').props.disabled).toBe(false);
+  });
+  it('provides an actionable refresh and account security link after a command conflict',async()=>{
+    await mount();await act(async()=>button('Preview').props.onClick());
+    const reason=tree.root.findAllByType('label').find(node=>node.children.includes('Action reason'))!;
+    await act(async()=>reason.findByType('input').props.onChange({target:{value:'Concurrent review edit'}}));
+    state.request.mockImplementation(async(path:string)=>{if(path.endsWith('/commands'))throw new Error('[409] REVIEW_VERSION_CONFLICT');if(path.endsWith('/query'))return page();return [];});
+    await act(async()=>button('Claim review').props.onClick());
+    expect(tree.root.findAllByType('a').some(link=>link.props.href==='/security')).toBe(true);
+    state.request.mockClear();await act(async()=>button('Refresh case').props.onClick());
+    expect(queries()).toHaveLength(1);
+  });
+  it('shows a command conflict inside the open preview rather than only behind the drawer',async()=>{
+    await mount();await act(async()=>button('Preview').props.onClick());
+    const reasonLabel=tree.root.findAllByType('label').find(node=>node.children.includes('Action reason'))!;
+    await act(async()=>reasonLabel.findByType('input').props.onChange({target:{value:'Competing session claim'}}));
+    state.request.mockImplementation(async(path:string)=>{if(path.endsWith('/commands'))throw new Error('[409] REVIEW_VERSION_CONFLICT');if(path.endsWith('/query'))return page();return [];});
+    await act(async()=>button('Claim review').props.onClick());
+    const dialog=tree.root.findByProps({role:'dialog'});
+    expect(dialog.findAll(node=>node.props.role==='status').map(node=>node.children.join(' ')).join(' ')).toContain('Another reviewer changed this case. Refresh the list.');
+    expect(dialog.findAll(node=>node.props.role==='status').map(node=>node.children.join(' ')).join(' ')).not.toContain('Change saved; refreshing the case.');
+  });
+  it('shows three explicit tabs and five metrics with no essential accordion',async()=>{await mount();expect(tree.root.findAll(node=>node.props.role==='tab')).toHaveLength(3);expect(tree.root.findByProps({className:'rw-metrics'}).findAllByType('button')).toHaveLength(5);expect(tree.root.findAllByType('details')).toHaveLength(0);expect(JSON.stringify(tree.toJSON())).toContain('LAST-GOOD-OWNER');});
+  it('sends filters to a single server query instead of requesting multiple overlapping source pages',async()=>{await mount();state.request.mockClear();const domain=tree.root.findAllByType('select').find(select=>select.findAllByType('option').some(option=>option.props.value==='scholarships'))!;await act(async()=>domain.props.onChange({target:{value:'scholarships'}}));expect(queries()).toHaveLength(1);expect(JSON.parse(queries()[0][1].body)).toMatchObject({domain:'scholarships'});});
+  it('debounces private free text into POST body and does not locally filter the existing sample',async()=>{await mount();state.request.mockClear();vi.useFakeTimers();await act(async()=>tree.root.findByProps({id:'rw-search'}).props.onChange({target:{value:'Record beyond 500'}}));expect(queries()).toHaveLength(0);await act(async()=>{await vi.advanceTimersByTimeAsync(310);});expect(queries()).toHaveLength(1);expect(JSON.parse(queries()[0][1].body).search).toBe('Record beyond 500');expect(queries()[0][0]).not.toContain('Record');});
+  it('passes the opaque server cursor and restarts at the first page after a filter changes',async()=>{state.request.mockImplementation(async(path:string,options:{body?:string})=>{if(!path.endsWith('/query'))return[];const input=JSON.parse(options.body!);return {...page([record(input.cursor?'second':'first')]),nextCursor:input.cursor?null:'server-cursor'};});await mount();await act(async()=>button('Next').props.onClick());expect(JSON.parse(queries().at(-1)![1].body)).toMatchObject({cursor:'server-cursor',snapshot:'b'.repeat(64)});expect(JSON.stringify(tree.toJSON())).toContain('OWNER second');await act(async()=>button('High / critical').props.onClick());expect(JSON.parse(queries().at(-1)![1].body)).not.toHaveProperty('cursor');});
+  it('revalidates after returning from the owner instead of trusting an old sample',async()=>{await mount();state.request.mockClear();const focus=vi.mocked(window.addEventListener).mock.calls.find(([event])=>event==='focus')![1] as ()=>void;await act(async()=>focus());expect(queries()).toHaveLength(1);});
+  it('clears last-good owner rows when refresh loses the session',async()=>{await mount();expect(JSON.stringify(tree.toJSON())).toContain('LAST-GOOD-OWNER');state.request.mockRejectedValue(new Error('[401] expired'));await act(async()=>button('Refresh and recheck').props.onClick());expect(JSON.stringify(tree.toJSON())).not.toContain('LAST-GOOD-OWNER');});
+  it('clears last-good audit evidence when continuation is unauthorized',async()=>{await mount();await act(async()=>button('Preview').props.onClick());expect(JSON.stringify(tree.toJSON())).toContain('LAST-GOOD-AUDIT');state.request.mockRejectedValue(new Error('[403] denied'));await act(async()=>button('Earlier events').props.onClick());expect(JSON.stringify(tree.toJSON())).not.toContain('LAST-GOOD-AUDIT');expect(JSON.stringify(tree.toJSON())).toContain('Permission restricted');});
+  it('preserves an existing assignee instead of defaulting the form to removal',async()=>{state.request.mockImplementation(async(path:string)=>path.endsWith('/query')?page([{...record(),assigneeId:'reviewer-existing',assigneeLabel:'Existing reviewer'}]):[]);await mount();await act(async()=>button('Preview').props.onClick());const select=tree.root.findAllByType('select').find(node=>node.props.value==='reviewer-existing');expect(select).toBeDefined();expect(select!.findAllByType('option').some(option=>option.props.value==='reviewer-existing'&&option.props.disabled)).toBe(true);});
+  it('distinguishes unknown totals from real zero and rejects duplicates or unsafe links',()=>{const partial={...page([]),coverage:'partial' as const,total:null,counters:{open:null,mine:null,unassigned:null,urgent:null,overdue:null,withoutSla:null}};expect(parseWorkspacePage(partial).total).toBeNull();expect(parseWorkspacePage({...page([]),total:0}).total).toBe(0);expect(()=>parseWorkspacePage(page([record(),record()]))).toThrow('REVIEW_DUPLICATE_INVALID');expect(()=>parseWorkspacePage(page([{...record(),href:'javascript:alert(1)'}]))).toThrow('REVIEW_RECORD_INVALID');expect(parseWorkspacePage(page([{...record(),href:'/imports/scholarships?reviewBatch=abc'}])).records).toHaveLength(1);});
 });

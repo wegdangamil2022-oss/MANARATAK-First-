@@ -1,8 +1,13 @@
+import type { CourseAccessService, CourseCertificateBindingOwner } from '@manaratak/application';
+import type { AuthorizationEvaluatorService } from '@manaratak/domain';
 import type {CourseAdminScope, CourseAdminContext, CourseAdminCommandUseCases} from '@manaratak/application';
+import { readReviewReasonHeader } from '@manaratak/shared';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import {
+  AssetId,
   CourseAccessType,
+  courseBlockTypes,
   CourseContentStatus,
   CourseImportCompletenessState,
   CourseLessonType,
@@ -14,15 +19,36 @@ import {
 } from '@manaratak/domain';
 import type { CourseProgressUseCases } from '@manaratak/application';
 import type {} from '../../middleware/AuthMiddleware.js';
+import { CourseMediaRouter, type CourseMediaCradle } from './CourseMediaRouter.js';
 
 export class CourseAdminRouter {
-  public static create(cradle: CourseAdminScope & {courseAdminCommandUseCases:CourseAdminCommandUseCases; courseProgressUseCases: CourseProgressUseCases}): Router {
+  public static create(
+    cradle: CourseAdminScope &
+      CourseMediaCradle & {
+        certificateUseCases?: CourseCertificateBindingOwner;
+        authEvaluatorService?: AuthorizationEvaluatorService;
+        courseAccessService?: CourseAccessService;
+        courseAdminCommandUseCases: CourseAdminCommandUseCases;
+        courseProgressUseCases: CourseProgressUseCases;
+      },
+  ): Router {
     const router = Router();
-    const {learningPathUseCases} = cradle;
+    router.get('/assigned', (req,res,next) => {
+      if(!cradle.courseAccessService || !req.authUserId){res.status(503).json({error:'COURSE_ACCESS_NOT_CONFIGURED'});return;}
+      const offset=z.coerce.number().int().min(0).max(1000).safeParse(req.query.offset??0);
+      if(!offset.success){res.status(400).json({error:'INVALID_OFFSET'});return;}
+      void cradle.courseAccessService.assigned(req.authUserId,offset.data,{ip:req.ip,requestTime:new Date()}).then(value=>res.json(value)).catch(next);
+    });
+    router.get('/:id/access', (req,res,next) => {
+      if(!cradle.courseAccessService || !req.authUserId){res.status(503).json({error:'COURSE_ACCESS_NOT_CONFIGURED'});return;}
+      void cradle.courseAccessService.capabilities(req.authUserId,req.params.id,{ip:req.ip,requestTime:new Date()}).then(value=>{res.setHeader('Cache-Control','no-store');res.json(value);}).catch(next);
+    });
+    router.use('/:id/media', CourseMediaRouter.create(cradle));
+    const { learningPathUseCases } = cradle;
 
     const mutationContext = (req: Request): CourseAdminContext => {
       if (!req.authUserId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
-      const reason = z.string().trim().min(3).max(2000).parse(req.get('X-Review-Reason') ?? z.object({ reason: z.string().optional() }).strip().parse(req.body ?? {}).reason);
+      const reason = z.string().trim().min(3).max(2000).parse(readReviewReasonHeader(req.get('X-Review-Reason'), req.get('X-Review-Reason-Encoding')) ?? z.object({ reason: z.string().optional() }).strip().parse(req.body ?? {}).reason);
       const raw = req.get('If-Match');
       let expectedVersion: number | undefined;
       if (req.params.id || req.params.pathId) {
@@ -41,7 +67,11 @@ export class CourseAdminRouter {
           // Publication retains its dedicated domain event and atomic coordinator.
           if(req.params.id && req.route.path === '/:id/publish') {
             let body:unknown;
-            const buffered:Response=new Proxy(res,{get(target,key){if(key==='json')return (value:unknown)=>{body=value;return buffered;};const value=Reflect.get(target,key);return typeof value==='function'?value.bind(target):value;}});
+            const buffered:Response=new Proxy(res,{get(target,key){
+              if(key==='json')return (value:unknown)=>{body=value;return buffered;};
+              if(key==='status')return (code:number)=>{target.statusCode=code;return buffered;};
+              const value=Reflect.get(target,key);return typeof value==='function'?value.bind(target):value;
+            }});
             await fn(req,buffered,cradle);
             const current=await cradle.adminCourseUseCases.getCourse(req.params.id);
             res.setHeader('X-Entity-Version',String(current.version));
@@ -52,6 +82,7 @@ export class CourseAdminRouter {
           const id=req.params.pathId ?? req.params.id;
           const commandName=req.route.path === '/:id/unpublish'?'COURSE_UNPUBLISH':
             req.route.path === '/:id/archive'?'COURSE_ARCHIVE':
+            req.route.path === '/:id/duplicate'?'COURSE_DUPLICATE':
             `ADMIN_${req.method}_${req.route.path.replace(/[^a-zA-Z0-9]+/g,'_').toUpperCase()}`;
           // Buffer response bodies until the business/audit/outbox transaction commits.
           let responseBody: unknown;
@@ -69,8 +100,96 @@ export class CourseAdminRouter {
         run().catch(next);
       };
 
+    const canBindCertificate = async (req: Request) =>
+      Boolean(
+        req.authUserId &&
+        cradle.authEvaluatorService &&
+        (
+          await cradle.authEvaluatorService.evaluatePermission(
+            req.authUserId,
+            'admin:certificates:templates:approve',
+            { ip: req.ip, requestTime: new Date() },
+          )
+        ).isGranted,
+      );
+    router.get(
+      '/:id/certificate-binding',
+      asyncHandler(async (req, res, scope) => {
+        const course = await scope.adminCourseUseCases.getCourse(req.params.id),
+          canBind = await canBindCertificate(req);
+        res.setHeader('Cache-Control', 'no-store');
+        res.json({
+          binding: course.optionalFields?.certificateBinding ?? null,
+          health: cradle.certificateUseCases
+            ? await cradle.certificateUseCases.courseBindingStatus(
+                course.optionalFields?.certificateBinding,
+              )
+            : { status: 'UNAVAILABLE', code: 'CERTIFICATE_OWNER_UNAVAILABLE' },
+          canBind,
+          templates:
+            canBind && cradle.certificateUseCases
+              ? await cradle.certificateUseCases.courseBindingChoices()
+              : [],
+        });
+      }),
+    );
+    router.put(
+      '/:id/certificate-binding',
+      (req, res, next) => {
+        void canBindCertificate(req)
+          .then((allowed) => {
+            if (!allowed) {
+              res.status(403).json({ error: 'COURSE_CERTIFICATE_BIND_PERMISSION_REQUIRED' });
+              return;
+            }
+            next();
+          })
+          .catch(next);
+      },
+      asyncHandler(async (req, res, scope) => {
+        if (!cradle.certificateUseCases) throw Error('COURSE_CERTIFICATE_OWNER_UNAVAILABLE');
+        const input = z
+          .object({
+            binding: z
+              .object({
+                templateId: z.string().uuid(),
+                templateVersionId: z.string().uuid(),
+                issuerId: z.string().uuid(),
+              })
+              .strict()
+              .nullable(),
+          })
+          .strict()
+          .parse(req.body);
+        const binding =
+          input.binding === null
+            ? null
+            : await cradle.certificateUseCases.validateCourseBinding(input.binding);
+        res.json(
+          await scope.courseCurriculumUseCases.setCertificateBinding(req.params.id, binding),
+        );
+      }),
+    );
+
     const assessmentHandler = (fn: (req: Request, res: Response) => Promise<unknown>) =>
       (req: Request, res: Response, next: NextFunction) => { Promise.resolve().then(() => fn(req, res)).catch(next); };
+    router.get('/:id/learning-report', assessmentHandler(async (req, res) => {
+      const query = z.object({ cohortFrom: z.string().date().optional(), cohortTo: z.string().date().optional() }).strict().parse(req.query);
+      if (query.cohortFrom && query.cohortTo && query.cohortFrom >= query.cohortTo) return res.status(400).json({ error: 'COURSE_COHORT_RANGE_INVALID' });
+      res.json(await cradle.adminCourseUseCases.getNativeLearningReport(req.params.id, query));
+    }));
+    router.get('/:id/learners', assessmentHandler(async (req, res) => {
+      const query = z.object({ page: z.coerce.number().int().min(1).max(100000).default(1), pageSize: z.coerce.number().int().min(1).max(100).default(20),
+        status: z.enum(['PENDING','WAITLISTED','ACTIVE','COMPLETED','CANCELLED','SUSPENDED']).optional(), search: z.string().trim().max(100).optional(),
+      }).strict().parse(req.query);
+      res.json(await cradle.courseProgressUseCases.listCourseLearners(req.params.id, query));
+    }));
+    router.get('/:id/learners/:enrollmentId', assessmentHandler(async (req, res) => {
+      const query = z.object({ lessonsPage: z.coerce.number().int().min(1).max(100000).default(1), attemptsPage: z.coerce.number().int().min(1).max(100000).default(1) }).strict().parse(req.query);
+      const result = await cradle.courseProgressUseCases.getCourseLearnerReview(req.params.id, z.string().uuid().parse(req.params.enrollmentId), query);
+      if (!result) return res.status(404).json({ error: 'COURSE_ENROLLMENT_NOT_FOUND' });
+      res.json(result);
+    }));
     router.get('/:id/assessment-reviews', assessmentHandler(async (req, res) => {
       const query = z.object({page: z.coerce.number().int().positive().default(1), pageSize: z.coerce.number().int().min(1).max(50).default(20)}).parse(req.query);
       res.json({data: await cradle.courseProgressUseCases.listPendingAssessments(req.params.id, query.page, query.pageSize)});
@@ -84,21 +203,65 @@ export class CourseAdminRouter {
     }));
 
     const listQuerySchema = z.object({
-      status: z.preprocess(v => v === '' || v === 'all' ? undefined : v, z.nativeEnum(CourseStatus).optional()),
+      status: z.preprocess(
+        (v) => (v === '' || v === 'all' ? undefined : v),
+        z.nativeEnum(CourseStatus).optional(),
+      ),
       completenessStatus: z.nativeEnum(CourseImportCompletenessState).optional(),
       accessType: z.nativeEnum(CourseAccessType).optional(),
       originType: z.nativeEnum(CourseOriginType).optional(),
-      platformName: z.string().optional(),
+      platformName: z.string().trim().max(200).optional(),
       search: z.string().trim().max(200).optional(),
-      externalProviderId: z.string().trim().min(1).optional(),
-      majorId: z.string().trim().min(1).optional(),
-      category: z.string().trim().optional(),
-      learningLanguage: z.string().trim().optional(),
-      difficultyLevel: z.string().trim().optional(),
+      externalProviderId: z.string().trim().min(1).max(200).optional(),
+      majorId: z.string().trim().min(1).max(200).optional(),
+      category: z.string().trim().max(200).optional(),
+      learningLanguage: z.string().trim().max(200).optional(),
+      difficultyLevel: z.string().trim().max(200).optional(),
       isFreeCertificate: z.enum(['true', 'false']).transform(v => v === 'true').optional(),
-      page: z.coerce.number().int().min(1).default(1),
+      studyAccess: z.enum(['FREE', 'PAID', 'UNKNOWN']).optional(),
+      certificateState: z.enum(['FREE', 'NON_FREE', 'UNAVAILABLE', 'UNKNOWN']).optional(),
+      linkHealth: z.enum(['VERIFIED', 'BROKEN', 'NEEDS_REVIEW', 'UNKNOWN']).optional(),
+      cohortFrom: z.string().date().optional(),
+      cohortTo: z.string().date().optional(),
+      hasEnrollments: z.enum(['true', 'false']).transform(value => value === 'true').optional(),
+      instructor: z.string().trim().max(200).optional(),
+      sort: z.enum(['UPDATED_DESC', 'UPDATED_ASC', 'NAME_ASC', 'NAME_DESC', 'STATUS_ASC']).optional(),
+      page: z.coerce.number().int().min(1).max(100000).default(1),
       pageSize: z.coerce.number().int().min(1).max(100).default(20),
     });
+
+    // Static, read-only catalog routes precede /:id. Scope is enforced here,
+    // independently of the visual filters, using the existing Course repository.
+    router.get('/catalog/options', asyncHandler(async (req, res, { adminCourseUseCases }) => {
+      const query = z.object({ field: z.enum(['learningLanguage', 'difficultyLevel']), originType: z.nativeEnum(CourseOriginType).optional(),
+        search: z.string().trim().max(200).optional(), page: z.coerce.number().int().min(1).max(1000).default(1) }).parse(req.query);
+      res.json(await adminCourseUseCases.catalogOptions(query));
+    }));
+    for (const scope of ['all', 'native', 'external'] as const) {
+      const path = scope === 'all' ? '/catalog' : `/catalog/${scope}`;
+      router.get(path, asyncHandler(async (req, res, { adminCourseUseCases }) => {
+        const filters = listQuerySchema.parse(req.query);
+        if (scope === 'native' && (filters.externalProviderId || filters.platformName || filters.completenessStatus || filters.linkHealth)) {
+          return res.status(400).json({ error: 'NATIVE_COURSE_EXTERNAL_FILTER_FORBIDDEN' });
+        }
+        if (scope !== 'all') filters.originType = scope === 'native' ? CourseOriginType.NATIVE_MANARATAK_COURSE : CourseOriginType.EXTERNAL_LINKED_COURSE;
+        // A registry provider identifies external courses, never a native instructor.
+        if (scope === 'all' && (filters.externalProviderId || filters.platformName || filters.completenessStatus || filters.linkHealth)) filters.originType = CourseOriginType.EXTERNAL_LINKED_COURSE;
+        if ((filters.cohortFrom || filters.cohortTo || filters.instructor || filters.hasEnrollments !== undefined) && filters.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE) return res.status(400).json({ error: 'NATIVE_COURSE_SCOPE_REQUIRED' });
+        if (filters.cohortFrom && filters.cohortTo && filters.cohortFrom >= filters.cohortTo) return res.status(400).json({ error: 'COURSE_COHORT_RANGE_INVALID' });
+        const result = await adminCourseUseCases.listCourses({ ...filters, includeStatistics: true });
+        res.json({ ...result, data: result.data.map(course => ({
+          id: course.id, publicId: course.publicId, displayName: course.displayName, originalSourceTitle: course.originalSourceTitle,
+          originType: course.originType, accessType: course.accessType, status: course.status, completenessStatus: course.completenessStatus,
+          providerDisplayName: course.providerDisplayName, providerName: course.providerName, platformName: course.platformName,
+          learningLanguage: course.learningLanguage ?? course.learningLanguageRaw, studyDuration: course.studyDuration ?? course.studyDurationRaw, difficultyLevel: course.difficultyLevel ?? course.studyLevelRaw,
+          isStudyFree: course.isStudyFree, isFreeCertificate: course.isFreeCertificate, certificateAvailable: course.certificateAvailable,
+          certificateType: course.certificateType, category: course.category, relatedMajors: course.relatedMajors,
+          instructor: typeof course.optionalFields?.instructor === 'string' ? course.optionalFields.instructor : undefined,
+          updatedAt: course.updatedAt, version: course.version,
+        })) });
+      }));
+    }
 
     router.post('/:id/localized-description',asyncHandler(async(req,res,{adminCourseUseCases})=>{
       res.json(await adminCourseUseCases.saveLocalizedDescription(req.params.id,z.object({locale:z.enum(['ar','en']),displayName:z.string().trim().min(1).max(500).optional(),description:z.string().trim().min(1).max(100000).optional(),remove:z.boolean().optional()}).strict().parse(req.body)));
@@ -167,8 +330,8 @@ export class CourseAdminRouter {
 
     const quizBodySchema = z.object({
       assessmentType: z.enum(['QUIZ', 'ASSIGNMENT']).optional(),
-      moduleId: z.string().optional(),
-      lessonId: z.string().optional(),
+      moduleId: z.string().nullable().optional(),
+      lessonId: z.string().nullable().optional(),
       title: z.string().min(1),
       instructions: z.string().nullable().optional(),
       position: z.number().int().positive(),
@@ -248,6 +411,22 @@ export class CourseAdminRouter {
       const {nativeCourseUseCases}=scope;
       const course = await nativeCourseUseCases.create(nativeCreateBodySchema.parse(req.body));
       res.status(201).json(course);
+    }));
+
+    const copyOptionsSchema = z.object({ includeAssets: z.boolean(), acknowledgeAssetRights: z.boolean() }).strict();
+    router.post('/:id/duplicate', asyncHandler(async (req, res, scope) => {
+      const input = copyOptionsSchema.extend({ titleAr: z.string().trim().min(2).max(500) }).strict().parse(req.body);
+      res.status(201).json(await scope.nativeCourseUseCases.duplicate(req.params.id, input));
+    }));
+    router.post('/:id/modules/:moduleId/duplicate', asyncHandler(async (req, res, scope) => {
+      res.status(201).json(await scope.courseCurriculumUseCases.duplicateContent(req.params.id, { ...copyOptionsSchema.parse(req.body), moduleId: req.params.moduleId }));
+    }));
+    router.post('/:id/lessons/:lessonId/duplicate', asyncHandler(async (req, res, scope) => {
+      res.status(201).json(await scope.courseCurriculumUseCases.duplicateContent(req.params.id, { ...copyOptionsSchema.parse(req.body), lessonId: req.params.lessonId }));
+    }));
+    router.post('/:id/lessons/:lessonId/convert-text', asyncHandler(async (req, res, scope) => {
+      z.object({}).strict().parse(req.body);
+      res.json(await scope.courseCurriculumUseCases.convertLegacyLessonText(req.params.id, req.params.lessonId));
     }));
 
     router.get('/', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
@@ -395,12 +574,37 @@ export class CourseAdminRouter {
       res.json(await nativeCourseUseCases.getReadiness(req.params.id));
     }));
 
+    router.put('/:id/lessons/:lessonId/content-blocks', asyncHandler(async (req, res, scope) => {
+      const body = z.object({ blocks: z.array(z.object({ id: z.string().uuid(), type: z.enum(courseBlockTypes), payload: z.record(z.string(), z.unknown()),
+        assetReferenceId: z.string().uuid().nullable().optional(), quizId: z.string().uuid().nullable().optional(),
+      }).strict()).max(200) }).strict().parse(req.body);
+      res.json({ data: await scope.courseCurriculumUseCases.replaceLessonBlocks(req.params.id, req.params.lessonId, body.blocks) });
+    }));
     router.get('/:id/modules', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {courseCurriculumUseCases}=scope;
       const modules = await courseCurriculumUseCases.listModules(req.params.id);
       res.json({ data: modules });
     }));
 
+    router.put(
+      '/:id/delivery-policy',
+      asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+        const body = z
+          .object({
+            version: z.literal(1),
+            sequence: z.enum(['FREE', 'SEQUENTIAL']),
+            lessons: z.record(
+              z.string().uuid(),
+              z
+                .object({ preview: z.boolean(), availableAt: z.string().datetime().nullable() })
+                .strict(),
+            ),
+          })
+          .strict()
+          .parse(req.body);
+        res.json(await scope.courseCurriculumUseCases.setDeliveryPolicy(req.params.id, body));
+      }),
+    );
     router.post('/:id/modules', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {courseCurriculumUseCases}=scope;
       const body = moduleBodySchema.parse(req.body);
@@ -484,6 +688,13 @@ export class CourseAdminRouter {
     router.post('/:id/lessons/:lessonId/assets', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {courseCurriculumUseCases}=scope;
       const body = lessonAssetBodySchema.parse(req.body);
+      if (cradle.courseAccessService && !await cradle.courseAccessService.globalManager(req.authUserId!, { ip: req.ip, requestTime: new Date() })) {
+        const candidate = await cradle.assetRecordRepository?.findById(new AssetId(body.assetId));
+        if (!candidate || candidate.owner.ownerType !== 'COURSE' || candidate.owner.ownerId !== req.params.id) {
+          res.status(403).json({ error: 'COURSE_ASSET_OWNER_SCOPE_REQUIRED' });
+          return;
+        }
+      }
       const asset = await courseCurriculumUseCases.attachAssetToLesson(req.params.id, {
         lessonId: req.params.lessonId,
         assetId: body.assetId,
@@ -514,13 +725,13 @@ export class CourseAdminRouter {
       const body = quizBodySchema.parse(req.body);
       const quiz = await courseCurriculumUseCases.createQuiz({
         courseId: req.params.id,
-        moduleId: body.moduleId,
-        lessonId: body.lessonId,
+        moduleId: body.moduleId ?? undefined,
+        lessonId: body.lessonId ?? undefined,
         title: body.title,
         instructions: body.instructions ?? undefined,
         position: body.position,
-        passingScore: body.passingScore ?? undefined,
-        maxAttempts: body.maxAttempts ?? undefined,
+        passingScore: body.passingScore,
+        maxAttempts: body.maxAttempts,
         assessmentType: body.assessmentType,
         status: body.status,
       });
@@ -684,9 +895,19 @@ export class CourseAdminRouter {
     }));
 
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-      if (['COURSE_STALE_VERSION','LEARNING_PATH_STALE_VERSION','COURSE_PUBLICATION_STATE_CHANGED','COURSE_ASSESSMENT_REVIEW_CONFLICT','COURSE_ASSESSMENT_NOT_PENDING'].includes(err.message)) return res.status(409).json({error:err.message});
+      if (
+        [
+          'COURSE_STALE_VERSION',
+          'COURSE_CERTIFICATE_BINDING_STALE',
+          'LEARNING_PATH_STALE_VERSION',
+          'COURSE_PUBLICATION_STATE_CHANGED',
+          'COURSE_ASSESSMENT_REVIEW_CONFLICT',
+          'COURSE_ASSESSMENT_NOT_PENDING',
+        ].includes(err.message)
+      )
+        return res.status(409).json({ error: err.message });
       if (err.message === 'COURSE_VERSION_PRECONDITION_REQUIRED') return res.status(428).json({error:err.message});
-      const translationCode=err instanceof Error?err.message:'';
+      const translationCode = err instanceof Error ? err.message : '';
       if(translationCode.startsWith('TRANSLATION_CONTENT_AUTHORING_DISABLED')) return res.status(403).json({error:'TRANSLATION_CONTENT_AUTHORING_DISABLED'});
       if(translationCode==='TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED') return res.status(409).json({error:translationCode});
       if(translationCode.startsWith('TRANSLATION_')) return res.status(422).json({error:translationCode});
@@ -694,7 +915,7 @@ export class CourseAdminRouter {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }
       if(typeof err.message==='string' && /^(COURSE_|NATIVE_COURSE_|LEARNING_PATH_|IMPORTED_COURSE_|AUTHENTICATED_ADMIN_)/.test(err.message)) return res.status(400).json({error:err.message});
-      res.status(500).json({error:'COURSE_OPERATION_FAILED'});
+      res.status(500).json({ error: 'COURSE_OPERATION_FAILED' });
     });
 
     return router;

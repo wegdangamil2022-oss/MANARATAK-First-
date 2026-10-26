@@ -22,12 +22,13 @@ LayoutGrid,
 Table2,
 X
 } from 'lucide-react';
-import { useEffect,useMemo,useState } from 'react';
+import { useEffect,useMemo,useState,useRef } from 'react';
 import { Link,useSearchParams } from 'react-router-dom';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { adminApiClient } from '../api/client';
 import {majorDisplayNames,majorAcademicContext,type MajorAcademicMetadata} from '../utils/majorDisplayNames';
+import {useAdminAuthorization} from '../security/AdminAuthorizationContext';
 import { NewMajorCandidatesPanel } from '../components/NewMajorCandidatesPanel';
 import { useTranslation } from "../i18n/I18nProvider";
 
@@ -49,6 +50,7 @@ interface Major extends MajorAcademicMetadata {
   sourceClassificationSystem?: string | null;
   sourceImportRecordId?: string | null;
   currentPublishedVersionId?: string | null;
+  contentReview?:{state:string;versionId?:string};
   status: MajorStatus;
   completenessStatus: MajorCompletenessStatus;
   updatedAt?: string;
@@ -61,6 +63,7 @@ interface PaginatedResponse {
   pageSize: number;
   totalPages: number;
   stats?:{published:number;needsReview:number;complete:number};
+  countUnit?:string;uniqueRootTotal?:number;
 }
 
 const degreeOptions = [
@@ -145,30 +148,48 @@ function metricAccentClasses(accent: string) {
 
 export function MajorAdminPage() {
   const { t } = useTranslation();
+  const {hasPermission}=useAdminAuthorization();
+  const canReadTaxonomy=hasPermission('admin:academic-taxonomy:manage');
+  const [showOwnerImport,setShowOwnerImport]=useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const view = searchParams.get('view') === 'new' ? 'new' : searchParams.get('view') === 'catalog' ? 'catalog' : 'all';
   const [newCandidatesTotal, setNewCandidatesTotal] = useState<number|null>(null);
   const [showCreate,setShowCreate]=useState(false);
-  const [displayMode,setDisplayMode]=useState<'cards'|'table'>('cards');
+  const [refresh,setRefresh]=useState(0);
+
   const [data, setData] = useState<PaginatedResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters
-  const [statusFilter, setStatusFilter] = useState('');
-  const [completenessFilter, setCompletenessFilter] = useState('');
-  const [degreeFilter, setDegreeFilter] = useState('');
-  const [taxonomyIdFilter, setTaxonomyIdFilter] = useState('');
-  const [academicFieldFilter,setAcademicFieldFilter]=useState('');
-  const [disciplineFilter,setDisciplineFilter]=useState('');
-  const [collegeFilter,setCollegeFilter]=useState('');
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
+  // Preserve list scope through browser navigation and detail return links.
+  const queryRef=useRef(searchParams);queryRef.current=searchParams;
+  const setQuery=(key:string,value:string,resetPage=true)=>{
+    const next=new URLSearchParams(queryRef.current);
+    if(value)next.set(key,value);else next.delete(key);
+    if(resetPage)next.delete('page');queryRef.current=next;setSearchParams(next,{replace:true});
+  };
+  const statusFilter=searchParams.get('status')??'',setStatusFilter=(v:string)=>setQuery('status',v);
+  const completenessFilter=searchParams.get('completenessStatus')??'',setCompletenessFilter=(v:string)=>setQuery('completenessStatus',v);
+  const degreeFilter=searchParams.get('degreeLevel')??'',setDegreeFilter=(v:string)=>setQuery('degreeLevel',v);
+  const taxonomyIdFilter=view==='catalog'?'':searchParams.get('taxonomyNodeId')??'',setTaxonomyIdFilter=(v:string)=>setQuery('taxonomyNodeId',v);
+  const academicFieldFilter=view==='catalog'?'':searchParams.get('academicFieldId')??'',setAcademicFieldFilter=(v:string)=>setQuery('academicFieldId',v);
+  const disciplineFilter=view==='catalog'?'':searchParams.get('disciplineId')??'',setDisciplineFilter=(v:string)=>setQuery('disciplineId',v);
+  const collegeFilter=view==='catalog'?'':searchParams.get('collegeOrFaculty')??'',setCollegeFilter=(v:string)=>setQuery('collegeOrFaculty',v);
+  const search=searchParams.get('search')??'',setSearch=(v:string)=>setQuery('search',v);
+  const page=Math.min(1000,Math.max(1,Math.floor(Number(searchParams.get('page'))||1)));
+  const setPage=(value:number|((previous:number)=>number))=>setQuery('page',String(typeof value==='function'?value(page):value),false);
+  const sort=['UPDATED_DESC','NAME_AR','NAME_EN','DEGREE','STATUS'].includes(searchParams.get('sort')??'')?searchParams.get('sort')!:'UPDATED_DESC';
+  const displayMode=searchParams.get('mode')==='table'?'table':'cards',setDisplayMode=(v:string)=>setQuery('mode',v,false);
+  const detailLink=(major:Major)=>{
+    const params=new URLSearchParams({returnTo:'/majors?'+searchParams.toString()});
+    if(major.profileId)params.set('profileId',major.profileId);
+    return '/majors/'+encodeURIComponent(major.id)+'?'+params;
+  };
 
   useEffect(() => {
     const controller = new AbortController();
     adminApiClient.request<{ total: number }>(`/admin/majors/new-candidates?page=1&pageSize=1`, { signal: controller.signal })
-      .then((result) => setNewCandidatesTotal(result.total ?? 0))
+      .then((result) => setNewCandidatesTotal(Number.isFinite(result.total)?result.total:null))
       .catch(() => undefined);
     return () => controller.abort();
   }, []);
@@ -189,6 +210,7 @@ export function MajorAdminPage() {
         if (disciplineFilter && view !== 'catalog') params.set('disciplineId',disciplineFilter);
         if (collegeFilter.trim() && view !== 'catalog') params.set('collegeOrFaculty',collegeFilter.trim());
         if (search.trim()) params.append('search', search.trim());
+        params.set('sort',sort);
         const response = await adminApiClient.request<PaginatedResponse>(`/admin/majors?${params.toString()}`, { signal: controller.signal });
         if (controller.signal.aborted) return;
         if (response.total > 0 && page > response.totalPages) { setPage(Math.max(1, response.totalPages)); return; }
@@ -202,17 +224,17 @@ export function MajorAdminPage() {
       }
     };
 
-    void fetchMajors();
-    return () => controller.abort();
-  }, [page, statusFilter, completenessFilter, degreeFilter, taxonomyIdFilter, academicFieldFilter,disciplineFilter,collegeFilter,search, view]);
+    const timer=window.setTimeout(()=>void fetchMajors(),250);
+    return () => {window.clearTimeout(timer);controller.abort();};
+  }, [page, statusFilter, completenessFilter, degreeFilter, taxonomyIdFilter, academicFieldFilter,disciplineFilter,collegeFilter,search, view,sort,refresh]);
 
   const visibleMajors = useMemo(() => data?.data ?? [], [data?.data]);
   const stats = useMemo(() => ({
-    total: data?.total ?? null,
-    published: data?.stats?.published ?? (data?visibleMajors.filter((major) => major.status === 'PUBLISHED').length:null),
-    needsReview: data?.stats?.needsReview ?? (data?visibleMajors.filter((major) => major.completenessStatus === 'NEEDS_REVIEW' || major.status === 'READY_TO_REVIEW').length:null),
-    complete: data?.stats?.complete ?? (data?visibleMajors.filter((major) => major.completenessStatus === 'COMPLETE').length:null),
-  }), [data,visibleMajors]);
+    total: error?null:data?.total ?? null,
+    published: error?null:data?.stats?.published ?? (data?visibleMajors.filter((major) => major.status === 'PUBLISHED').length:null),
+    needsReview: error?null:data?.stats?.needsReview ?? (data?visibleMajors.filter((major) => major.completenessStatus === 'NEEDS_REVIEW' || major.status === 'READY_TO_REVIEW').length:null),
+    complete: error?null:data?.stats?.complete ?? (data?visibleMajors.filter((major) => major.completenessStatus === 'COMPLETE').length:null),
+  }), [data,visibleMajors,error]);
 
   const hasActiveFilters = Boolean(search || degreeFilter || statusFilter || completenessFilter || taxonomyIdFilter || academicFieldFilter || disciplineFilter || collegeFilter);
 
@@ -227,7 +249,7 @@ export function MajorAdminPage() {
   };
 
   return (
-    <div dir="rtl" className="mx-auto max-w-7xl space-y-6 font-['Cairo']">
+    <div dir="rtl" className="major-admin mx-auto max-w-7xl space-y-6 font-['Cairo']">
       <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -top-20 end-0 h-52 w-52 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none blur-2xl" />
         <div className="absolute -bottom-20 start-0 h-52 w-52 rounded-full bg-cyan-300 opacity-15 pointer-events-none blur-2xl" />
@@ -248,7 +270,7 @@ export function MajorAdminPage() {
             <button type="button" aria-expanded={showCreate} aria-controls="major-create" onClick={()=>setShowCreate(value=>!value)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-xs font-bold text-[#142B5F]"><Plus aria-hidden="true" className="h-4 w-4" />إنشاء تخصص جديد</button>
             <button
               type="button"
-              onClick={() => {setPage(1);setSearchParams({});}}
+              onClick={() => {setPage(1);setQuery('view','');}}
               className={`inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-xs sm:text-sm font-bold transition shadow-xs cursor-pointer ${
                 view === 'all'
                   ? 'bg-[#21A7B4] text-white shadow-md hover:bg-[#1A8D99]'
@@ -260,7 +282,7 @@ export function MajorAdminPage() {
             <button type="button" onClick={()=>{setPage(1);setSearchParams({view:'catalog'});}} className="rounded-xl border border-white/30 px-4 py-2 text-sm">كتالوجات المصدر للمراجعة</button>
             <button
               type="button"
-              onClick={() => {setPage(1);setSearchParams({ view: 'new' });}}
+              onClick={() => {setPage(1);setQuery('view','new');}}
               className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-xs sm:text-sm font-bold transition shadow-xs cursor-pointer ${
                 view === 'new'
                   ? 'bg-[#21A7B4] text-white shadow-md hover:bg-[#1A8D99]'
@@ -289,17 +311,18 @@ export function MajorAdminPage() {
 
 
       {view === 'new' ? (
-        <><MajorOwnerImportWorkspace/><NewMajorCandidatesPanel onTotalChange={setNewCandidatesTotal} /></>
+        <><NewMajorCandidatesPanel onTotalChange={setNewCandidatesTotal} /><button type="button" className="min-h-10 rounded-xl border border-[#DDEFF2] bg-white px-4 text-[13px] font-bold" aria-expanded={showOwnerImport} onClick={()=>setShowOwnerImport(value=>!value)}>استيراد التخصصات من المصدر</button>{showOwnerImport&&<MajorOwnerImportWorkspace/>}</>
       ) : (
         <>
           {/* Metrics Overview */}
           <section className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
-            <MetricCard label="إجمالي التخصصات ضمن النتائج" value={stats.total??'—'} icon={BookOpen} accent="#142B5F" />
+            <MetricCard label={data?.countUnit==='SOURCE_CATALOG_ENTRY'?'مدخلات كتالوج المصدر':'ملفات الدرجات ضمن النتائج'} value={stats.total??'—'} icon={BookOpen} accent="#142B5F" />
             <MetricCard label={data?.stats?"منشورة ضمن النتائج":"منشورة في الصفحة"} value={stats.published??'—'} icon={CheckCircle2} accent="#2E7D5A" />
             <MetricCard label={data?.stats?"تحتاج مراجعة ضمن النتائج":"تحتاج مراجعة في الصفحة"} value={stats.needsReview??'—'} icon={AlertCircle} accent="#D6A43B" />
             <MetricCard label={data?.stats?"هويات مكتملة ضمن النتائج":"هويات مكتملة في الصفحة"} value={stats.complete??'—'} icon={GraduationCap} accent="#21A7B4" />
           </section>
 
+          {data?.uniqueRootTotal!==undefined&&<p className="text-[12px] text-slate-500">الجذور الفريدة: {data.uniqueRootTotal} · كل بطاقة تخص ملف درجة؛ الجذر الذي بلا ملفات يظهر مرة واحدة.</p>}
           {/* Compact Refined Search & Filter Card */}
           <section aria-labelledby="major-filters" className="rounded-3xl border border-[#DDEFF2] bg-white p-4 sm:p-5 shadow-sm">
             <h2 id="major-filters" className="mb-4 flex items-center gap-2 text-lg font-black text-[#142B5F]"><Filter aria-hidden="true" className="h-5 w-5 text-[#0E7C86]" />البحث والتصفية</h2>
@@ -342,6 +365,7 @@ export function MajorAdminPage() {
                 )}
               </div>
 
+              <label className="block text-[13px] font-bold text-[#142B5F]">الترتيب<select value={sort} onChange={event=>setQuery('sort',event.target.value)} className="ms-3 min-h-11 rounded-xl border border-[#DDEFF2] px-3 text-[12px]"><option value="UPDATED_DESC">الأحدث تعديلًا</option><option value="NAME_AR">الاسم العربي</option><option value="NAME_EN">الاسم الإنجليزي</option><option value="DEGREE">الدرجة</option><option value="STATUS">حالة النشر</option></select></label>
               {/* Bottom Row: Filter Dropdowns Grid */}
               <div className="major-filter-fields grid grid-cols-1 gap-4 pt-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {/* Degree Filter */}
@@ -395,9 +419,9 @@ export function MajorAdminPage() {
                   </select>
                 </div>
 
-                <CanonicalPicker label="التصنيف المعياري" icon={<Layers3 aria-hidden="true" className="h-3.5 w-3.5" />} value={taxonomyIdFilter} onChange={id=>{setTaxonomyIdFilter(id??'');setPage(1);}} load={(query,page)=>canonicalPickerApi.taxonomyNodes(undefined,query,page)} reloadKey="major-filter-taxonomy" optional compact paged allowInactive disabled={view==='catalog'} />
-                <CanonicalPicker label="المجال الأكاديمي" icon={<BookOpen aria-hidden="true" className="h-3.5 w-3.5" />} value={academicFieldFilter} onChange={id=>{setAcademicFieldFilter(id??'');setPage(1);}} load={(query,page)=>canonicalPickerApi.taxonomyNodes('ACADEMIC_FIELD',query,page)} reloadKey="major-filter-field" optional compact paged allowInactive disabled={view==='catalog'} />
-                <CanonicalPicker label="التصنيف الفرعي" icon={<Layers3 aria-hidden="true" className="h-3.5 w-3.5" />} value={disciplineFilter} onChange={id=>{setDisciplineFilter(id??'');setPage(1);}} load={(query,page)=>canonicalPickerApi.taxonomyNodes('DISCIPLINE',query,page)} reloadKey="major-filter-discipline" optional compact paged allowInactive disabled={view==='catalog'} />
+                {canReadTaxonomy&&view!=='catalog'&&<CanonicalPicker label="التصنيف المعياري" icon={<Layers3 aria-hidden="true" className="h-3.5 w-3.5" />} value={taxonomyIdFilter} onChange={id=>{setTaxonomyIdFilter(id??'');setPage(1);}} load={(query,page)=>canonicalPickerApi.taxonomyNodes(undefined,query,page)} reloadKey="major-filter-taxonomy" optional compact paged allowInactive />}
+                {canReadTaxonomy&&view!=='catalog'&&<CanonicalPicker label="المجال الأكاديمي" icon={<BookOpen aria-hidden="true" className="h-3.5 w-3.5" />} value={academicFieldFilter} onChange={id=>{setAcademicFieldFilter(id??'');setPage(1);}} load={(query,page)=>canonicalPickerApi.taxonomyNodes('ACADEMIC_FIELD',query,page)} reloadKey="major-filter-field" optional compact paged allowInactive />}
+                {canReadTaxonomy&&view!=='catalog'&&<CanonicalPicker label="التصنيف الفرعي" icon={<Layers3 aria-hidden="true" className="h-3.5 w-3.5" />} value={disciplineFilter} onChange={id=>{setDisciplineFilter(id??'');setPage(1);}} load={(query,page)=>canonicalPickerApi.taxonomyNodes('DISCIPLINE',query,page)} reloadKey="major-filter-discipline" optional compact paged allowInactive />}
                 <label><span><Building2 aria-hidden="true" />الكلية</span><input type="search" disabled={view==='catalog'} maxLength={200} value={collegeFilter} onChange={event=>{setCollegeFilter(event.target.value);setPage(1);}} placeholder="اسم الكلية كما ورد في المصدر" /></label>
               </div>
 
@@ -422,6 +446,7 @@ export function MajorAdminPage() {
             </div>
           )}
 
+          {loading&&<p role="status" className="text-[12px] text-[#0E7C86]">جارٍ تحميل نطاق البحث الجديد…</p>}
           {/* Cards Grid Section */}
           <section className="space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -436,7 +461,7 @@ export function MajorAdminPage() {
                 <Loader2 className="h-9 w-9 animate-spin text-[#0E7C86]" />
                 <p className="text-xs font-bold text-slate-500">جاري تحميل بيانات التخصصات...</p>
               </div>
-            ) : visibleMajors.length === 0 ? (
+            ) : error&&!data ? <div role="alert">تعذر تحميل القائمة.<button type="button" className="m-2 min-h-10 rounded-lg border px-3" onClick={()=>setRefresh(value=>value+1)}>إعادة المحاولة</button></div> : visibleMajors.length === 0 ? (
               <div className="flex min-h-72 flex-col items-center justify-center gap-3 rounded-2xl border border-[#DDEFF2] bg-white p-8 text-center shadow-xs">
                 <div className="h-14 w-14 rounded-2xl bg-slate-100 grid place-items-center text-slate-400">
                   <BookOpen className="h-7 w-7" />
@@ -474,11 +499,11 @@ export function MajorAdminPage() {
                   <tbody className="divide-y divide-slate-100">{visibleMajors.map(major=>{
                     const names=majorDisplayNames(major);
                     return <tr key={major.profileId||major.id} className="hover:bg-slate-50/70">
-                      <th scope="row" className="px-4 py-3 font-normal"><Link to={`/majors/${major.id}${major.profileId?`?profileId=${major.profileId}`:''}`} className="font-bold text-[#142B5F]">{names.primary}</Link>{names.secondary&&<span dir="ltr" className="mt-0.5 block text-[11px] text-slate-500">{names.secondary}</span>}<span className="mt-1 block text-[10px] text-slate-400">{major.classificationCode||major.publicId||'الرمز غير محدد'}</span></th>
+                      <th scope="row" className="px-4 py-3 font-normal"><Link to={detailLink(major)} className="font-bold text-[#142B5F]">{names.primary}</Link>{names.secondary&&<span dir="ltr" className="mt-0.5 block text-[11px] text-slate-500">{names.secondary}</span>}<span className="mt-1 block text-[10px] text-slate-400">{major.classificationCode||major.publicId||'الرمز غير محدد'}</span></th>
                       <td className="px-4 py-3">{getDegreeArabicLabel(major.degreeLevel)}</td><td className="px-4 py-3">{majorAcademicContext(major).college||'غير محددة'}</td><td className="px-4 py-3">{majorAcademicContext(major).field||'غير محدد'}</td>
                       <td className="px-4 py-3"><span className={`inline-flex rounded-lg border px-2 py-1 text-[11px] ${statusBadgeClasses(major.status)}`}>{getStatusArabicLabel(major.status)}</span></td>
-                      <td className="px-4 py-3">{completenessOptions.find(option=>option.value===major.completenessStatus)?.labelAr||'غير محدد'}</td>
-                      <td className="px-4 py-3"><Link aria-label={`تفاصيل ${names.primary}`} to={`/majors/${major.id}${major.profileId?`?profileId=${major.profileId}`:''}`} className="inline-flex items-center gap-1.5 rounded-lg bg-[#142B5F] px-3 py-2 font-semibold text-white"><Eye aria-hidden="true" className="h-3.5 w-3.5"/>عرض</Link></td>
+                      <td className="px-4 py-3">{completenessOptions.find(option=>option.value===major.completenessStatus)?.labelAr||'غير محدد'}<span className="block text-[11px] text-[#0E7C86]">المحتوى: {({NO_CONTENT:'لا محتوى مستورد',INCOMPLETE:'غير مكتمل',NEEDS_REVIEW:'بحاجة لمراجعة',READY:'جاهز وفق حارس النشر',UNAVAILABLE:'تعذر التحقق'} as Record<string,string>)[major.contentReview?.state??'UNAVAILABLE']??'تعذر التحقق'}</span></td>
+                      <td className="px-4 py-3"><Link aria-label={`تفاصيل ${names.primary}`} to={detailLink(major)} className="inline-flex items-center gap-1.5 rounded-lg bg-[#142B5F] px-3 py-2 font-semibold text-white"><Eye aria-hidden="true" className="h-3.5 w-3.5"/>عرض</Link></td>
                     </tr>;
                   })}</tbody>
                 </table>
@@ -516,7 +541,7 @@ export function MajorAdminPage() {
                       {/* Major Name (Arabic / Display Name) */}
                       <div className="mt-3.5">
                         <Link
-                          to={`/majors/${major.id}${major.profileId ? `?profileId=${major.profileId}` : ''}`}
+                          to={detailLink(major)}
                           className="major-catalog-name block font-bold text-[#142B5F] group-hover:text-[#0E7C86] transition-colors leading-snug line-clamp-2"
                         >
                           {majorDisplayNames(major).primary}
@@ -555,6 +580,7 @@ export function MajorAdminPage() {
                       </div>
                     </div>
 
+                    <span className="block text-[11px] text-[#0E7C86]">المحتوى: {({NO_CONTENT:'لا محتوى مستورد',INCOMPLETE:'غير مكتمل',NEEDS_REVIEW:'بحاجة لمراجعة',READY:'جاهز وفق حارس النشر',UNAVAILABLE:'تعذر التحقق'} as Record<string,string>)[major.contentReview?.state??'UNAVAILABLE']??'تعذر التحقق'}</span>
                     {/* Card Footer: Action Button */}
                     <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
                       <span className="text-[11px] text-slate-400 font-medium">
@@ -562,7 +588,7 @@ export function MajorAdminPage() {
                       </span>
 
                       <Link
-                        to={`/majors/${major.id}${major.profileId ? `?profileId=${major.profileId}` : ''}`}
+                        to={detailLink(major)}
                         className="inline-flex items-center gap-1.5 rounded-xl bg-[#142B5F] hover:bg-[#0E7C86] text-white px-3.5 py-2 text-xs font-bold transition shadow-xs cursor-pointer group-hover:shadow-sm"
                       >
                         <Eye className="h-3.5 w-3.5" />

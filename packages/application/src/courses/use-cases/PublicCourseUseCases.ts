@@ -1,4 +1,5 @@
 import {approvedOwnerDescriptions} from '../../localization/OwnerLocalizedDescription';
+import { normalizeCourseDeliveryPolicy, courseLessonAccess } from '@manaratak/domain';
 import {
   CourseAccessType,
   CourseImportCompletenessState,
@@ -73,13 +74,114 @@ export class PublicCourseUseCases {
     };
   }
 
+  private async previewDefinition(slug: string) {
+    const course = await this.repository.findPublishedBySlug(slug);
+    if (
+      !course || course.status !== CourseStatus.PUBLISHED || course.completenessStatus !== CourseImportCompletenessState.COMPLETE ||
+      course.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE ||
+      !this.curriculumRepository?.getLearningVersion
+    )
+      throw Error('Course not found');
+    const definition = await this.curriculumRepository.getLearningVersion(
+      course.id,
+      course.version,
+      course.updatedAt,
+    );
+    if (!definition) throw Error('Course not found');
+    return { course, definition };
+  }
+
+  public async preview(slug: string, locale: SupportedLocale = DEFAULT_LOCALE) {
+    const { course, definition } = await this.previewDefinition(slug);
+    const summary = this.mapToPublicDto(course, locale);
+    const curriculum = definition.curriculum,
+      policy = normalizeCourseDeliveryPolicy(definition.course.optionalFields?.deliveryPolicy);
+    const previewIds = new Set(
+      courseLessonAccess(curriculum, policy, [])
+        .filter((row) => row.previewAvailable)
+        .map((row) => row.lessonId),
+    );
+    const modules = curriculum.modules
+      .filter((row) => row.status !== CourseContentStatus.ARCHIVED)
+      .sort((a, b) => a.position - b.position);
+    const moduleIds = new Set(modules.map((row) => row.id));
+    return {
+      course: {
+        id: course.id,
+        slug,
+        displayName: summary.displayName,
+        description: summary.description,
+        learningOutcomes: summary.learningOutcomes,
+      },
+      curriculum: {
+        modules: modules.map(({ id, title, position }) => ({ id, title, position })),
+        lessons: curriculum.lessons
+          .filter(
+            (row) => row.status !== CourseContentStatus.ARCHIVED && moduleIds.has(row.moduleId),
+          )
+          .sort((a, b) => a.position - b.position)
+          .map(({ id, moduleId, title, summary, position, contentText }) => ({
+            id,
+            moduleId,
+            title,
+            summary,
+            position,
+            previewAvailable: previewIds.has(id),
+            contentText: previewIds.has(id) ? contentText : null,
+          })),
+        contentBlocks: (curriculum.contentBlocks ?? [])
+          .filter(
+            (row) =>
+              row.status !== 'ARCHIVED' && row.type !== 'QUIZ' && previewIds.has(row.lessonId),
+          )
+          .map(({ id, lessonId, type, payload, assetReferenceId, position, version }) => ({
+            id,
+            lessonId,
+            type,
+            payload,
+            assetReferenceId,
+            quizId: null,
+            position,
+            version,
+          })),
+        assets: curriculum.assets
+          .filter((row) => previewIds.has(row.lessonId))
+          .map(({ id, lessonId, title, assetType, position, isRequired }) => ({
+            id,
+            lessonId,
+            title,
+            assetType,
+            position,
+            isRequired,
+          })),
+      },
+    };
+  }
+
+  public async resolvePreviewAsset(slug: string, lessonId: string, referenceId: string) {
+    const { definition } = await this.previewDefinition(slug);
+    const policy = normalizeCourseDeliveryPolicy(definition.course.optionalFields?.deliveryPolicy);
+    if (
+      !courseLessonAccess(definition.curriculum, policy, []).some(
+        (row) => row.lessonId === lessonId && row.previewAvailable,
+      )
+    )
+      throw Error('Course preview not found');
+    const asset = definition.curriculum.assets.find(
+      (row) => row.id === referenceId && row.lessonId === lessonId,
+    );
+    if (!asset) throw Error('Course preview not found');
+    return asset.assetId;
+  }
+
   private mapToPublicDto(course: any, locale: SupportedLocale): PublicCourseDto {
-    const optional = course.optionalFields && typeof course.optionalFields === 'object' && !Array.isArray(course.optionalFields)
-      ? course.optionalFields as Record<string, unknown>
-      : {};
+    const optional =
+      course.optionalFields && typeof course.optionalFields === 'object' && !Array.isArray(course.optionalFields)
+        ? (course.optionalFields as Record<string, unknown>)
+        : {};
     const optionalPublic = this.pickOptionalPublicFields(optional);
-    const descriptions=approvedOwnerDescriptions('COURSE',course);
-    const pair=descriptions[locale];
+    const descriptions = approvedOwnerDescriptions('COURSE', course);
+    const pair = descriptions[locale];
     return {
       ownerId: course.id,
       publicId: course.publicId,
@@ -128,11 +230,13 @@ export class PublicCourseUseCases {
         localizedValues[candidateLocale] = value.trim();
       }
     }
-    return this.localeProjection.resolveValue<string>({
+    return (
+      this.localeProjection.resolveValue<string>({
       requestedLocale: locale,
       sourceValue,
       localizedValues,
-    }).value ?? sourceValue;
+    }).value ?? sourceValue
+    );
   }
 
   private pickOptionalPublicFields(optional: Record<string, unknown>): Partial<PublicCourseDto> {
@@ -146,7 +250,9 @@ export class PublicCourseUseCases {
 
   private publicEligible(course: any): boolean {
     if (course.originType !== CourseOriginType.EXTERNAL_LINKED_COURSE) return true;
-    return [CourseAccessType.FREE_STUDY, CourseAccessType.FREE_STUDY_AND_CERTIFICATE].includes(course.accessType)
-      && course.isStudyFree === true;
+    return (
+      [CourseAccessType.FREE_STUDY, CourseAccessType.FREE_STUDY_AND_CERTIFICATE].includes(course.accessType)
+      && course.isStudyFree === true
+    );
   }
 }

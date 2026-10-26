@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState,useEffect,useRef} from 'react';
 import type {MajorDto, MajorContentSectionDto} from '@manaratak/domain';
 import {adminApiClient} from '../api/client';
 import {canonicalPickerApi} from '../api/canonicalPickers';
@@ -6,10 +6,12 @@ import {CanonicalPicker} from './CanonicalPicker';
 import {useAdminAuthorization} from '../security/AdminAuthorizationContext';
 
 const labels:Record<string,string>={identity:'هوية الزمالة',overview:'ملف الزمالة',requirements:'متطلبات الدخول والإكمال',benefits:'المنافع الموثقة',academic_notice:'الحدود المهنية والأكاديمية',sources:'المصادر'};
-export function FellowshipAuthoringPanel({major,onSaved}:{major:Pick<MajorDto,'id'|'profiles'|'revision'>;onSaved:()=>Promise<void>}) {
+export function FellowshipAuthoringPanel({major,onSaved,onDirty}:{onDirty?:(dirty:boolean)=>void;major:Pick<MajorDto,'id'|'profiles'|'revision'>;onSaved:()=>Promise<void>}) {
   const {hasPermission}=useAdminAuthorization();
   const [degree,setDegree]=useState('');const [name,setName]=useState('');const [source,setSource]=useState('');const [hash,setHash]=useState('');const [reason,setReason]=useState('');
   const [sections,setSections]=useState<MajorContentSectionDto[]>([]);const [error,setError]=useState('');const [busy,setBusy]=useState(false);
+  const draftCallback=useRef(onDirty);draftCallback.current=onDirty;const dirty=Boolean(degree||name||source||hash||reason);
+  useEffect(()=>{draftCallback.current?.(dirty);return()=>draftCallback.current?.(false);},[dirty]);
   const profile=major.profiles?.find(row=>row.level==='FELLOWSHIP');
   if(!hasPermission('admin:majors:manage') || major.id.startsWith('cat-')) return null;
   const run=async(operation:()=>Promise<void>)=>{if(busy)return;setBusy(true);setError('');try{await operation();await onSaved();}catch(error){setError(error instanceof Error?error.message:'تعذر الحفظ');}finally{setBusy(false);}};

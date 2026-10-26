@@ -23,6 +23,12 @@ BEGIN
   LOOP
     EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE %I.%I TO %I', entry.nspname, entry.relname, '${applicationRole}');
   END LOOP;
+  -- Reviewed read-through views are explicitly read-only. Do not grant all
+  -- views, owner privileges, DDL, membership or migration-ledger access.
+  IF EXISTS (SELECT FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND c.relname='ReviewOwnerProjection' AND c.relkind='v') THEN
+    GRANT SELECT ON public."ReviewOwnerProjection" TO ${applicationRole};
+  END IF;
   IF to_regclass('public."_prisma_migrations"') IS NOT NULL THEN
     REVOKE ALL ON TABLE public."_prisma_migrations" FROM ${applicationRole}, PUBLIC;
     IF has_table_privilege('${applicationRole}', 'public._prisma_migrations', 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') THEN

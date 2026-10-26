@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 
 // Mirrors the schema-backed consumer inventory; source and PostgreSQL tests verify completeness.
 export const ASSET_REFERENCE_OWNER_GUARDS = [
+  { table: 'ServiceApplicationEvidence', fields: ['evidenceAssetId'], attachments: false, seo: false },
   { table: 'StudentApplicationDocumentBinding', fields: ['assetId'], attachments: false, seo: false },
   { table: 'AssetRenditionRecord', fields: ['assetId','generatedAssetId'], attachments: false, seo: false },
   { table: 'Course', fields: ['thumbnailAssetId'], attachments: false, seo: false },
@@ -42,7 +43,7 @@ export async function assertAssetReferenceIntegrityInstalled(prisma: Pick<Prisma
     FROM pg_trigger t JOIN pg_class c ON c.oid = t.tgrelid
       JOIN pg_namespace n ON n.oid = c.relnamespace JOIN pg_proc p ON p.oid = t.tgfoid
     WHERE n.nspname = current_schema() AND NOT t.tgisinternal
-      AND t.tgname IN ('eap_asset_reference_owner', 'eap_asset_reference_lifecycle', 'eap_asset_restore_barrier', 'eap_asset_archive_barrier', 'eap_asset_lifecycle_certificate_delegation', 'eap_asset_lifecycle_student_document')
+      AND t.tgname IN ('eap_asset_reference_owner', 'eap_asset_reference_lifecycle', 'eap_asset_restore_barrier', 'eap_asset_archive_barrier', 'eap_asset_lifecycle_certificate_delegation', 'eap_asset_lifecycle_student_document', 'eap_asset_lifecycle_service_application')
   `;
   const available = (table: string, name: string, type: number, fn: string, args: string, columns: readonly string[]) =>
     guards.some(guard => guard.tableName === table && guard.triggerName === name &&
@@ -51,6 +52,8 @@ export async function assertAssetReferenceIntegrityInstalled(prisma: Pick<Prisma
       JSON.stringify(guard.columns) === JSON.stringify([...columns].sort()));
   if (!available('AssetRecord', 'eap_asset_lifecycle_student_document', 27,
     'manaratak_guard_student_document_asset_lifecycle', '', ['id','lifecycleState'])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
+  if (!available('AssetRecord', 'eap_asset_lifecycle_service_application', 27,
+    'manaratak_guard_service_application_asset_lifecycle', '', ['id','lifecycleState'])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
   if (!available('AssetRecord', 'eap_asset_lifecycle_certificate_delegation', 27,
     'manaratak_guard_certificate_delegation_evidence_lifecycle', '', ['lifecycleState'])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
   if (!available('AssetRecord', 'eap_asset_reference_lifecycle', 27,

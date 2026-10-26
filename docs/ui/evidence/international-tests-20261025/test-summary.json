@@ -1,0 +1,21 @@
+{
+  "unit": {
+    "passed": 231,
+    "failed": 0,
+    "skipped": 0
+  },
+  "isolatedPostgresql": {
+    "passed": 7,
+    "failed": 0,
+    "scope": "ATTESTED_NATIVE_POSTGRES16_DB_T_ONLY"
+  },
+  "typecheck": true,
+  "adminBuild": true,
+  "apiBundle": true,
+  "eslint": {
+    "errors": 0,
+    "warnings": 108
+  },
+  "originalDatabaseWrites": 0,
+  "at": "2026-10-25T16:38:15.058Z"
+}

@@ -1,0 +1,80 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "canonicalMfa": true,
+  "checks": [
+    "Real native API: two internal courses, four enrollments, three unique students, two starts, one completion; no external or personal data",
+    {
+      "name": "desktop-native-table",
+      "width": 1440,
+      "scroll": 1440,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    {
+      "name": "desktop-native-cards",
+      "width": 1440,
+      "scroll": 1440,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    {
+      "name": "tablet-native-cards",
+      "width": 768,
+      "scroll": 768,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    {
+      "name": "mobile-native-cards",
+      "width": 360,
+      "scroll": 360,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    {
+      "name": "narrow-native-cards",
+      "width": 320,
+      "scroll": 320,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    "Actual cohort and has-enrollment filters preserve course counts and never mix lifetime completions with another cohort",
+    {
+      "name": "desktop-native-cohort-filters",
+      "width": 1440,
+      "scroll": 1440,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    "Read failures suppress all five numbers and allow a real retry; URL cohort persists across reload",
+    {
+      "name": "english-desktop-native",
+      "width": 1440,
+      "scroll": 1440,
+      "cairo": true,
+      "dir": "ltr"
+    },
+    {
+      "name": "english-mobile-native",
+      "width": 360,
+      "scroll": 360,
+      "cairo": true,
+      "dir": "ltr"
+    },
+    "Canonical server authorization rejects anonymous and non-course staff requests"
+  ],
+  "errors": [],
+  "screens": [
+    "desktop-native-table",
+    "desktop-native-cards",
+    "tablet-native-cards",
+    "mobile-native-cards",
+    "narrow-native-cards",
+    "mobile-native-learning-counts",
+    "desktop-native-cohort-filters",
+    "english-desktop-native",
+    "english-mobile-native"
+  ],
+  "passed": true
+}

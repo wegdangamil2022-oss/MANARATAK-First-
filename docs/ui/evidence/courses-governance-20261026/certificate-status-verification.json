@@ -1,0 +1,13 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "checks": [
+    "Actual completed student sees the canonical NOT_ELIGIBLE response, without a fabricated issuance/pending statement"
+  ],
+  "screens": [
+    "certificate-status-1440",
+    "certificate-status-360"
+  ],
+  "errors": [],
+  "passed": true
+}

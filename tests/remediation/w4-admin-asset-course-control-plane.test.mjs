@@ -74,17 +74,22 @@ test('MNT-AUD-0026 shared governed selection is wired to Course, CMS, Certificat
 });
 
 test('MNT-AUD-0027 canonical Admin can create a native course and hand off to authoritative editor', () => {
-  const ui = read('apps/admin/src/pages/CourseListPage.tsx');
+  const entry = read('apps/admin/src/pages/CourseListPage.tsx');
+  const catalog=read('apps/admin/src/features/courses/CourseCatalogPage.tsx');
+  const ui = read('apps/admin/src/features/courses/CreateNativeCourseDialog.tsx');
   const router = read('apps/api/src/presentation/api/router/CourseAdminRouter.ts');
   const app = read('apps/api/src/app.ts');
-  assert.match(ui, /Create native course/);
+  assert.match(entry,/CourseCatalogPage/);
+  assert.match(catalog,/CreateNativeCourseDialog/);
+  assert.match(ui, /Create a Manaratak course/);
   assert.match(ui, /request<\{ id: string \}>\('\/admin\/courses', \{\s*method: 'POST'/);
-  assert.match(ui, /navigate\(`\/courses\/\$\{created\.id\}`\)/);
+  assert.match(ui, /navigate\(`\/courses\/\$\{encodeURIComponent\(created\.id\)\}\/editor\?returnTo=/);
   for (const field of ['titleAr', 'accessType', 'learningLanguage', 'category', 'difficultyLevel']) assert.match(ui, new RegExp(field));
   assert.match(router, /nativeCreateBodySchema/);
   assert.match(router, /router\.post\('\/',/);
   assert.match(router, /nativeCourseUseCases\.create/);
-  assert.match(app, /admin\/courses'.*admin:courses:manage/s);
+  assert.match(app, /admin\/courses', createCourseAccessGuard\(container.resolve\('courseAccessService'\)\)/);
+  assert.match(read('apps/api/src/presentation/security/CourseAccessGuard.ts'),/access\.assert\(req.authUserId, id, courseRequestAction/);
   assert.match(app, /new MutationAuditMiddleware\(auditRecordRepository, 'ADMIN'\)/);
 });
 

@@ -1,7 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const security = vi.hoisted(() => ({ fetchWithCsrf: vi.fn(), clearToken: vi.fn() }));
-vi.mock('@manaratak/shared', () => ({ CsrfClientManager: { getInstance: () => security } }));
+vi.mock('@manaratak/shared', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@manaratak/shared')>(),
+  CsrfClientManager: { getInstance: () => security },
+}));
 
 beforeEach(() => {
   vi.resetModules(); security.fetchWithCsrf.mockReset(); security.clearToken.mockReset();

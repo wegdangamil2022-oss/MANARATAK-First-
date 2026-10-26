@@ -2,11 +2,12 @@ import { Router, type Request, type Response, type NextFunction } from 'express'
 import { z } from 'zod';
 import type { UniversityProgramWorkspaceUseCases } from '@manaratak/application';
 import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrincipal.js';
+import { readReviewReasonHeader } from '@manaratak/shared';
 const id = z.string().trim().min(1).max(240);
 const query = z
   .object({
-    academicProgramId:id.optional(),
-    locale:z.enum(['ar','en']).default('ar'),
+    academicProgramId: id.optional(),
+    locale: z.enum(['ar', 'en']).default('ar'),
     universityId: id.optional(),
     universityPublicId: id.optional(),
     majorId: id.optional(),
@@ -101,7 +102,17 @@ export class UniversityProgramWorkspaceRouter {
           if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 1)
             throw new Error('UNIVERSITY_EXPECTED_REVISION_REQUIRED');
           const principal = requireAuthenticatedPrincipal(req);
-          const reason = z.string().trim().min(3).max(2000).parse(req.get('X-Review-Reason'));
+          const reason = z
+            .string()
+            .trim()
+            .min(3)
+            .max(2000)
+            .parse(
+              readReviewReasonHeader(
+                req.get('X-Review-Reason'),
+                req.get('X-Review-Reason-Encoding'),
+              ),
+            );
           const input =
             kind === 'study'
               ? { study: study.parse(req.body) }

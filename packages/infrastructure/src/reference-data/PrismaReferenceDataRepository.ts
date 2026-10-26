@@ -358,6 +358,21 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
 
   public async getCountryById(id:string):Promise<ReferenceCountryDto|null>{const row=await this.prisma.referenceCountry.findUnique({where:{id},select:{iso2Code:true}});return row?this.getCountry(row.iso2Code):null;}
 
+  public async getReferenceRecord(type: GovernedReferenceEntityType, id: string) {
+    if (type === 'COUNTRY') return this.getCountryById(id);
+    if (type === 'REGION') return this.getRegionById(id);
+    if (type === 'CURRENCY') {
+      const row = await this.prisma.referenceCurrency.findUnique({ where: { id } });
+      return row ? this.mapToCurrencyDto(row as unknown as DbCurrency) : null;
+    }
+    if (type === 'LANGUAGE') {
+      const row = await this.prisma.referenceLanguage.findUnique({ where: { id } });
+      return row ? this.mapToLanguageDto(row as unknown as DbLanguage) : null;
+    }
+    const row = await this.prisma.referenceCity.findUnique({ where: { id }, include: { administrativeRegion: true } });
+    return row ? this.mapToCityDto(row as unknown as DbCity) : null;
+  }
+
   public async getCountry(iso2Code: string): Promise<ReferenceCountryDto | null> {
     const record = await this.prisma.referenceCountry.findUnique({
       where: { iso2Code },
@@ -1258,19 +1273,22 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     const page = query.page ?? 1;
     if (!Number.isSafeInteger(page) || page < 1 || page > 1000 || (query.countryIso2Code && !/^[A-Z]{2}$/.test(query.countryIso2Code)) || (query.kind && !REFERENCE_QUALITY_ISSUES.includes(query.kind)))
       throw new Error('REFERENCE_QUALITY_QUERY_INVALID');
+    if ((query.q !== undefined && (typeof query.q !== 'string' || query.q.length > 200)) ||
+      (query.entityType !== undefined && !['COUNTRY','CURRENCY','LANGUAGE','REGION','CITY'].includes(query.entityType)))
+      throw new Error('REFERENCE_QUALITY_QUERY_INVALID');
     // All CTE branches expose stable canonical IDs; paging and facets use the same snapshot.
     const aliases = (['COUNTRY', 'CURRENCY', 'LANGUAGE', 'REGION', 'CITY'] as const).map(type => {
       const table = this.referenceTable(type);
       const country = type === 'COUNTRY' ? Prisma.sql`o."iso2Code"` : ['CITY','REGION'].includes(type) ? Prisma.sql`o."countryIso2Code"` : Prisma.sql`NULL::text`;
       const scope = ['CITY','REGION'].includes(type) ? Prisma.sql`AND other."countryIso2Code"=o."countryIso2Code"` : Prisma.empty;
-      return Prisma.sql`SELECT o."id" AS "referenceId", ${type}::text AS "entityType", o."name", ${country} AS "countryIso2Code", 'AMBIGUOUS_ALIAS'::text AS kind
+      return Prisma.sql`SELECT o."id" AS "referenceId", ${type}::text AS "entityType", o."name", o."nameAr", ${country} AS "countryIso2Code", 'AMBIGUOUS_ALIAS'::text AS kind
         FROM ${table} o WHERE EXISTS (SELECT 1 FROM "ReferenceAliasRecord" a
           WHERE a."entityType"=${type} AND a."referenceId"=o."id" AND a."isActive"=TRUE
           AND EXISTS (SELECT 1 FROM "ReferenceAliasRecord" b JOIN ${table} other ON other."id"=b."referenceId"
             WHERE b."entityType"=${type} AND b."isActive"=TRUE AND b."referenceId"<>a."referenceId" AND b."normalizedAlias"=a."normalizedAlias" ${scope}))`;
     });
     const sql = Prisma.sql`WITH issues AS (
-      SELECT c."id" AS "referenceId", 'COUNTRY'::text AS "entityType", c."name", c."iso2Code" AS "countryIso2Code", problem.kind
+      SELECT c."id" AS "referenceId", 'COUNTRY'::text AS "entityType", c."name", c."nameAr", c."iso2Code" AS "countryIso2Code", problem.kind
       FROM "ReferenceCountry" c
       LEFT JOIN "ReferenceCurrency" currency ON currency."isoCode"=c."defaultCurrencyCode"
       LEFT JOIN "ReferenceLanguage" language ON language."isoCode"=c."defaultLanguageCode"
@@ -1281,7 +1299,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
         ('INVALID_LANGUAGE', c."defaultLanguageCode" IS NOT NULL AND BTRIM(c."defaultLanguageCode")<>'' AND (language."id" IS NULL OR NOT language."isActive" OR language."lifecycleState"<>'ACTIVE'))
       ) problem(kind, present) WHERE problem.present
       UNION ALL
-      SELECT c."id", 'CITY', c."name", c."countryIso2Code", problem.kind FROM "ReferenceCity" c
+      SELECT c."id", 'CITY', c."name", c."nameAr", c."countryIso2Code", problem.kind FROM "ReferenceCity" c
       LEFT JOIN "ReferenceCountry" country ON country."id"=c."countryReferenceId"
       LEFT JOIN "AdministrativeRegion" region ON region."id"=c."administrativeRegionId"
       CROSS JOIN LATERAL (VALUES
@@ -1291,7 +1309,9 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
         ('BROKEN_REGION', c."administrativeRegionId" IS NOT NULL AND (region."id" IS NULL OR region."countryIso2Code"<>c."countryIso2Code" OR region."countryReferenceId" IS DISTINCT FROM c."countryReferenceId"))
       ) problem(kind, present) WHERE problem.present
       UNION ALL ${Prisma.join(aliases, ' UNION ALL ')}
-    ), scoped AS (SELECT * FROM issues WHERE (${query.countryIso2Code ?? null}::text IS NULL OR "countryIso2Code"=${query.countryIso2Code ?? null})),
+    ), scoped AS (SELECT * FROM issues WHERE (${query.countryIso2Code ?? null}::text IS NULL OR "countryIso2Code"=${query.countryIso2Code ?? null})
+      AND (${query.entityType ?? null}::text IS NULL OR "entityType"=${query.entityType ?? null})
+      AND (${query.q?.trim() || null}::text IS NULL OR name ILIKE ${'%'+(query.q?.trim()??'')+'%'} OR "nameAr" ILIKE ${'%'+(query.q?.trim()??'')+'%'} OR "referenceId"=${query.q?.trim()??''})),
     filtered AS (SELECT * FROM scoped WHERE (${query.kind ?? null}::text IS NULL OR kind=${query.kind ?? null})),
     facets AS (SELECT kind, COUNT(*)::int AS total FROM scoped GROUP BY kind),
     paged AS (SELECT * FROM filtered ORDER BY kind,"entityType","referenceId" LIMIT 25 OFFSET ${(page-1)*25})

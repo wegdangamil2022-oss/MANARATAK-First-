@@ -1,0 +1,46 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "fixturePurpose": "SEEDED_PUBLISHED_READ_FIXTURE_NOT_PUBLICATION_GATE_ACCEPTANCE",
+  "originalDatabaseWrites": 0,
+  "checks": [
+    {
+      "name": "desktop-student-lesson-blocks",
+      "width": 1440,
+      "scroll": 1440,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    {
+      "name": "mobile-student-lesson-blocks",
+      "width": 360,
+      "scroll": 360,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    {
+      "name": "narrow-student-lesson-blocks",
+      "width": 320,
+      "scroll": 320,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    "Actual student enrolment -> ordered blocks -> explicit lesson completion -> persisted 50% after reload -> 100% -> authoritative course completion without a certificate claim",
+    {
+      "name": "mobile-student-pinned-completion",
+      "width": 360,
+      "scroll": 360,
+      "cairo": true,
+      "dir": "rtl"
+    },
+    "Published enrollment snapshot remains readable after actual admin unpublish and content replacement; new draft does not overwrite enrolled curriculum or completion",
+    "Student cannot use the admin curriculum API or another course enrollment; anonymous workspace rejected"
+  ],
+  "screens": [
+    "desktop-student-lesson-blocks",
+    "mobile-student-lesson-blocks",
+    "narrow-student-lesson-blocks",
+    "mobile-student-pinned-completion"
+  ],
+  "errors": [],
+  "passed": true
+}

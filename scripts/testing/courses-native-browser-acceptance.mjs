@@ -1,0 +1,78 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+const require = createRequire(path.resolve('package.json'));
+const { chromium } = require('playwright');
+const origin = 'http://127.0.0.2:3157';
+const fixture = await (await fetch(origin + '/__isolated/native-receipt')).json();
+assert.equal(fixture.scope, 'ISOLATED_LOCAL_POSTGRES16_ONLY');
+const evidence = path.resolve('docs/ui/evidence/courses-native-learning-20261025');
+fs.mkdirSync(evidence, { recursive: true });
+const result = { scope: fixture.scope, originalDatabaseWrites: 0, canonicalMfa: true, checks: [], errors: [], screens: [] };
+const browser = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true });
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } }), page = await ctx.newPage();
+page.on('pageerror', error => result.errors.push(error.message));
+const url = origin + '/admin/courses/native?q=' + encodeURIComponent(fixture.search);
+const ready = async () => { await page.waitForTimeout(250); await page.locator('.course-results[aria-busy=false]').waitFor({ timeout: 60000 }); };
+const read = async suffix => {
+  const response = await ctx.request.get(origin + '/api/v1/admin/courses/catalog/native?search=' + encodeURIComponent(fixture.search) + suffix);
+  assert.equal(response.status(), 200); return response.json();
+};
+const screen = async (name, width) => {
+  await page.setViewportSize({ width, height: 1000 }); await page.evaluate(() => document.fonts.ready);
+  const state = await page.evaluate(() => ({ width: innerWidth, scroll: document.documentElement.scrollWidth, cairo: document.fonts.check('700 13px Cairo'), dir: document.querySelector('.courses-workspace').getAttribute('dir') }));
+  assert.equal(state.width, state.scroll, name + ': document overflow'); assert.equal(state.cairo, true);
+  assert.equal(state.dir, name.startsWith('english') ? 'ltr' : 'rtl');
+  await page.screenshot({ path: path.join(evidence, name + '.png') }); result.screens.push(name); result.checks.push({ name, ...state });
+};
+try {
+  // Canonical MFA prevents replay of a previously used time counter.
+  await page.waitForTimeout(30500 - Date.now() % 30000);
+  await page.goto(origin + '/__isolated/sign-in'); await ready();
+  await page.goto(url); await ready();
+  const all = await read('');
+  assert.equal(all.total, 2); assert.equal(all.data.length, 2);
+  assert.ok(all.data.every(row => row.originType === 'NATIVE_MANARATAK_COURSE'));
+  for (const [key, value] of Object.entries(fixture.expected)) assert.equal(all.nativeLearning.totals[key], value, key);
+  assert.equal(all.nativeLearning.byCourse[fixture.ids[0]].started, 2);
+  assert.equal(all.nativeLearning.byCourse[fixture.ids[1]].started, 0);
+  assert.ok(!JSON.stringify(all).includes('studentReferenceId'));
+  result.checks.push('Real native API: two internal courses, four enrollments, three unique students, two starts, one completion; no external or personal data');
+  assert.equal(await page.locator('.course-native-metrics .course-metric').count(), 5);
+  const displayed = await page.locator('.course-native-metrics strong').allTextContents();
+  assert.deepEqual(displayed, [2, 0, 4, 2, 1].map(value => value.toLocaleString('ar')));
+  assert.equal(await page.locator('.course-table tbody tr').count(), 2);
+  await screen('desktop-native-table', 1440);
+  await page.getByRole('button', { name: 'بطاقات', exact: true }).click(); await ready();
+  assert.equal(await page.locator('.course-card').count(), 2);
+  assert.equal(await page.locator('.course-card .course-row-learning').count(), 2);
+  await screen('desktop-native-cards', 1440);
+  await screen('tablet-native-cards', 768); await screen('mobile-native-cards', 360); await screen('narrow-native-cards', 320);
+  await page.locator('.course-results').scrollIntoViewIfNeeded(); await page.screenshot({ path: path.join(evidence, 'mobile-native-learning-counts.png') }); result.screens.push('mobile-native-learning-counts');
+  const cohort = await read('&cohortFrom=2026-01-11&cohortTo=2026-02-01');
+  assert.equal(cohort.total, 2); assert.equal(cohort.nativeLearning.totals.enrollments, 0); assert.equal(cohort.nativeLearning.totals.completionRate, null);
+  assert.equal((await read('&hasEnrollments=false')).total, 0);
+  assert.equal((await read('&hasEnrollments=true')).total, 2);
+  result.checks.push('Actual cohort and has-enrollment filters preserve course counts and never mix lifetime completions with another cohort');
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto(url + '&cohortFrom=2026-01-11&cohortTo=2026-02-01&view=cards'); await ready();
+  assert.deepEqual(await page.locator('.course-native-metrics strong').allTextContents(), [2, 0, 0, 0, 0].map(value => value.toLocaleString('ar')));
+  await page.reload(); await ready(); assert.equal(new URL(page.url()).searchParams.get('cohortFrom'), '2026-01-11');
+  await page.locator('.course-extra-filters summary').click(); await screen('desktop-native-cohort-filters', 1440);
+  await page.route('**/api/v1/admin/courses/catalog/native?*', route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'ISOLATED_READ_FAILURE' }) }));
+  await page.getByRole('button', { name: 'تحديث', exact: true }).click(); await ready();
+  assert.deepEqual(await page.locator('.course-native-metrics strong').allTextContents(), ['—', '—', '—', '—', '—']);
+  assert.equal(await page.getByRole('heading', { name: 'تعذر تحميل الدورات', exact: true }).count(), 1);
+  await page.unroute('**/api/v1/admin/courses/catalog/native?*'); await page.getByRole('button', { name: 'إعادة المحاولة', exact: true }).click(); await ready();
+  result.checks.push('Read failures suppress all five numbers and allow a real retry; URL cohort persists across reload');
+  await page.evaluate(() => localStorage.setItem('manaratak_admin_lang', 'en')); await page.goto(url + '&view=cards'); await ready();
+  await screen('english-desktop-native', 1440); await screen('english-mobile-native', 360);
+  const anonymous = await browser.newContext(); assert.equal((await anonymous.request.get(origin + '/api/v1/admin/courses/catalog/native')).status(), 401); await anonymous.close();
+  const denied = await browser.newContext(); await denied.request.get(origin + '/__isolated/sign-in?account=denied');
+  assert.equal((await denied.request.get(origin + '/api/v1/admin/courses/catalog/native')).status(), 403); await denied.close();
+  result.checks.push('Canonical server authorization rejects anonymous and non-course staff requests');
+  assert.deepEqual(result.errors, []); result.passed = true;
+} catch (error) { result.failure = error.message; throw error; }
+finally { fs.writeFileSync(path.join(evidence, 'browser-verification.json'), JSON.stringify(result, null, 2)); await browser.close(); }
+console.log(JSON.stringify({ passed: result.passed, checks: result.checks.length, screens: result.screens }));

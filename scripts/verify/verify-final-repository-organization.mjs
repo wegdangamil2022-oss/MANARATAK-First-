@@ -4,7 +4,9 @@ import ts from 'typescript';
 import { createHash } from 'node:crypto';
 
 const root = process.cwd();
-const allowedRootDirectories = new Set(['.devcontainer', '.git', '.github', '.husky', 'apps', 'config', 'docs', 'packages', 'scripts', 'storage', 'tests', 'vendor', 'workspace']);
+// deploy contains the reviewed, inactive self-hosted media package; tasks keeps
+// the admin delivery plan. Neither directory is a runtime output location.
+const allowedRootDirectories = new Set(['.devcontainer', '.git', '.github', '.husky', 'apps', 'config', 'deploy', 'docs', 'packages', 'scripts', 'storage', 'tasks', 'tests', 'vendor', 'workspace']);
 const allowedRootFiles = new Set([
   '.git', '.dockerignore', '.editorconfig', '.env.example', '.env.runtime.example', '.env.compose.example',
   '.gitattributes', '.gitignore', '.npmrc', '.nvmrc', '.prettierrc',

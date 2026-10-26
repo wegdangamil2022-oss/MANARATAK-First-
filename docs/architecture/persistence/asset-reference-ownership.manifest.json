@@ -199,6 +199,12 @@
       "field": "assetId",
       "purpose": "STUDENT_APPLICATION_DOCUMENT",
       "authoring": "packages/application/src/students/use-cases/StudentApplicationTrackerUseCases.ts"
+    },
+    {
+      "model": "ServiceApplicationEvidence",
+      "field": "evidenceAssetId",
+      "purpose": "MANAGED_APPLICATION_EVIDENCE",
+      "authoring": "packages/application/src/dashboard/ExecutiveDashboardUseCases.ts"
     }
   ],
   "jsonReferences": [

@@ -1,0 +1,20 @@
+{
+  "pass": true,
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "checks": [
+    "dirty source-name draft survives cancelled tab navigation",
+    "real source-name review writes with Arabic reason, independent readback, all original source content unchanged",
+    "operational draft survives cancelled sidebar navigation",
+    "retained policy editor performs real save with visible Arabic reason and independent owner readback",
+    "provider selection is hydrated by canonical name after URL reload",
+    {
+      "name": "final mobile compact index and readable section title",
+      "viewport": 360,
+      "document": 360,
+      "indexHeight": 200,
+      "titleWidth": 198
+    }
+  ],
+  "network": [],
+  "originalDatabaseWrites": 0
+}

@@ -125,11 +125,15 @@ describe('B06 canonical filters', () => {
 describe('B06 shared relationship editor', () => {
   it('saves exact IDs, metadata and independent source labels with the loaded revision', async () => {
     const detail = { id: 's1', revision: 8, status: 'IMPORTED', displayName: 'Scholarship', studyLanguageReferenceId: 'lang-150', degreeTargets: [{ targetKey: 'degree', degreeLevelId: 'degree-1', sourceLabel: 'Official source degree' }], majorTargets: [{ targetKey: 'major', majorId: 'major-150', sourceLabel: 'Official source major', metadata: { degreeTargetKey: 'degree' } }] };
-    mocks.request.mockImplementation(async (path, options) => options?.method === 'PUT' ? { ...detail, revision: 9 } : path === '/admin/scholarships/s1' ? detail : { data: [] });
+    let revision=8;
+    mocks.request.mockImplementation(async (path, options) => {
+      if(options?.method==='PUT'){revision=9;return {...detail,revision};}
+      return path==='/admin/scholarships/s1'?{...detail,revision}:{data:[]};
+    });
     mocks.reference.mockResolvedValue({ data: [] });
     const saved = vi.fn();
     await mount(<MemoryRouter initialEntries={['/s1']}><Routes><Route path="/:id" element={<ScholarshipRelationshipEditorPage embedded onSaved={saved} />} /></Routes></MemoryRouter>);
-    const reason = tree.root.findAllByType('input').find(n => n.props.placeholder === 'Why are these relationships changing?')!;
+    const reason = tree.root.findAllByType('input').find(n => n.props.placeholder === 'وضح سبب تعديل العلاقات')!;
     await act(async () => reason.props.onChange({ target: { value: 'Reviewed official source' } }));
     await act(async () => button('Save all canonical relationships').props.onClick());
     const call = mocks.request.mock.calls.find(([, options]) => options?.method === 'PUT')!;

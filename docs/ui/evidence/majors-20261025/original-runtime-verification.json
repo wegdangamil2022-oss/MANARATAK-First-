@@ -1,0 +1,45 @@
+{
+  "pass": true,
+  "sourceSha": "4a25a59962f8beb3cee8e434967afa2eb5c688c0",
+  "scope": "ORIGINAL_NEON_DEVELOPMENT",
+  "url": "http://127.0.0.1:3000/admin/majors",
+  "restrictedApplicationRole": "manaratak_app",
+  "existingMfaPreserved": true,
+  "originalReadOnlyCounts": {
+    "users": 1,
+    "universities": 0,
+    "scholarships": 0,
+    "majorProfiles": 3
+  },
+  "responses": [
+    {
+      "path": "/admin/majors",
+      "status": 200
+    },
+    {
+      "path": "/admin/universities",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/majors",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/monitoring/health/liveness",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/monitoring/health/readiness",
+      "status": 200
+    },
+    {
+      "path": "real-browser-admin-major-auth-gate",
+      "status": "CANONICAL_LOGIN_REQUIRED_NO_AUTH_BYPASS"
+    }
+  ],
+  "workersStarted": false,
+  "publicAnalyticsCollection": false,
+  "originalAcceptanceWrites": 0,
+  "noSchemaChanges": true,
+  "at": "2026-10-25T15:25:57.750Z"
+}

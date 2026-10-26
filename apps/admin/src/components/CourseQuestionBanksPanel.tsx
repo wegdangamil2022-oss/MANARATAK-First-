@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { reviewReasonHeaders } from '@manaratak/shared';
 import { adminApiClient } from '../api/client';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 export function CourseQuestionBanksPanel({
@@ -43,7 +44,7 @@ export function CourseQuestionBanksPanel({
     try {
       await adminApiClient.request(`/admin/courses/${courseId}/${path}`, {
         method,
-        headers: { 'If-Match': String(version), 'X-Review-Reason': reason.trim() },
+        headers: { 'If-Match': String(version), ...reviewReasonHeaders(reason.trim()) },
         body: body ? JSON.stringify(body) : undefined,
       });
       await onSaved();

@@ -71,6 +71,9 @@ export * from './authorization/repositories/IEmergencyAccessRepository';
 export * from './authorization/repositories/IRoleRepository';
 export * from './authorization/services/AuthorizationEvaluatorService';
 export * from './authorization/services/IPolicyEvaluator';
+export * from './authorization/services/CourseScopePolicy';
+export * from './courses/CourseDeliveryPolicy';
+export * from './courses/CourseCertificateBinding';
 export * from './authorization/services/InheritanceValidatorService';
 export * from './authorization/value-objects/AccessDecision';
 export * from './authorization/value-objects/Action';
@@ -188,6 +191,8 @@ export * from './courses/provider-registry';
 export * from './courses/import-analysis';
 export * from './courses/relationships';
 export * from './courses/imported-operations';
+export * from './courses/bulk-publication';
+export * from './courses/content-blocks';
 export * from './courses/value-objects/CourseImportPayload';
 export * from './entities/Account';
 export * from './entities/ContactRegistry';
@@ -413,3 +418,6 @@ export * from './tests-platform/AdmissionScoreInterpretation';
 export * from './students/StudentDocumentAttestationPolicy';
 
 export * from './universities/UniversityProgramReadPort';
+export * from './universities/UniversityStageDefinitions';
+
+export * from './majors/MajorContentAuthoring';

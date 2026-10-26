@@ -1,0 +1,10 @@
+{
+  "pass": true,
+  "checks": [
+    "sidebar navigation cancelled preserves draft",
+    "native browser Back restores history and preserves draft on cancel",
+    "confirmed cancel clears dirty state and Back returns to filtered list",
+    "university final English 360px recheck passed"
+  ],
+  "originalDatabaseTouched": false
+}

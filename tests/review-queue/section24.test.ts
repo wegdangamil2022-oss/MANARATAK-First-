@@ -542,11 +542,15 @@ test('imported course owner states TRUE/FALSE/absent remain VERIFIED/NEEDS_VERIF
 test('source integration boundaries: owner guards remain, review has no mutation and health contract untouched', () => {
   const page = fs.readFileSync('apps/admin/src/pages/AdminReviewQueuePage.tsx', 'utf8');
   assert.ok(!/method:\s*['"](?:POST|PATCH|PUT|DELETE)/.test(page));
-  assert.ok(page.includes('AbortController'));
-  assert.ok(page.includes('visibilitychange'));
-  assert.ok(page.includes('noopener noreferrer'));
-  assert.ok(page.includes('aria-modal="true"'));
-  assert.ok(page.includes("timeZone: 'UTC'"));
+  assert.ok(page.includes('ReviewWorkspacePage'));
+  const workspace=fs.readFileSync('apps/admin/src/features/review-queue/ReviewWorkspacePage.tsx','utf8');
+  const preview=fs.readFileSync('apps/admin/src/features/review-queue/WorkspacePreview.tsx','utf8');
+  const text=fs.readFileSync('apps/admin/src/features/review-queue/WorkspaceText.ts','utf8');
+  assert.ok(workspace.includes('AbortController'));
+  assert.ok(workspace.includes('requestGeneration.current'));
+  assert.ok(preview.includes('noopener noreferrer'));
+  assert.ok(preview.includes('aria-modal="true"'));
+  assert.ok(text.includes("timeZone: 'UTC'"));
   const router = fs.readFileSync(
     'apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts',
     'utf8',
@@ -558,11 +562,12 @@ test('source integration boundaries: owner guards remain, review has no mutation
   for (const [path, permission] of [
     ['scholarships', 'scholarships'],
     ['careers', 'careers'],
-    ['courses', 'courses'],
   ])
     assert.ok(
       app.includes(`'/admin/${path}', requireAdminPermission('admin:${permission}:manage')`),
     );
+  assert.ok(app.includes("'/admin/courses', createCourseAccessGuard(container.resolve('courseAccessService'))"));
+  assert.ok(app.includes("'/admin/courses/imported', requireAdminPermission('admin:courses:manage')"));
 });
 
 

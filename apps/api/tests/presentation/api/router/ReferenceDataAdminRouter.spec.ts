@@ -5,6 +5,7 @@ import { ReferenceDataAdminRouter } from '../../../../src/presentation/api/route
 
 describe('ReferenceDataAdminRouter', () => {
   const createUseCases = () => ({
+    getReferenceRecord: vi.fn().mockResolvedValue({ id:'stable-record',name:'Duplicate name',versionNumber:4 }),
     upsertCountry: vi.fn(),
     upsertCurrency: vi.fn(),
     upsertLanguage: vi.fn(),
@@ -30,6 +31,16 @@ describe('ReferenceDataAdminRouter', () => {
     );
     return app;
   };
+
+  it('reads a precise immutable identity without a name search or inactive-record filtering',async()=>{
+    const useCases=createUseCases(),response=await request(createApp(useCases)).get('/admin/reference-data/records/CITY/stable-record');
+    expect(response.status).toBe(200);expect(response.body.id).toBe('stable-record');expect(response.headers['cache-control']).toBe('no-store');
+    expect(useCases.getReferenceRecord).toHaveBeenCalledWith('CITY','stable-record');expect(useCases.listPage).not.toHaveBeenCalled();
+  });
+  it('rejects an unsupported reference type before a detail read',async()=>{
+    const useCases=createUseCases();expect((await request(createApp(useCases)).get('/admin/reference-data/records/UNIVERSITY/stable-record')).status).toBe(400);
+    expect(useCases.getReferenceRecord).not.toHaveBeenCalled();
+  });
 
   it('accepts a UUID region scope only for cities and rejects malformed or foreign collection filters', async () => {
     const useCases = createUseCases(); const app = createApp(useCases);

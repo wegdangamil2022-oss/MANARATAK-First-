@@ -1,0 +1,28 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "productionMediaProviderTested": false,
+  "providerSecurity": "KNOWN_GENERATED_FIXTURE_MANIFEST_ONLY_NOT_PRODUCTION_ANTIVIRUS_OR_SANITIZATION",
+  "checks": [
+    "Failed direct upload recovered through UI using a renewed grant for the same EAP identity, without a second allocation",
+    "Real HTTPS transfer and byte verification -> fixture-fenced scanning/sanitization -> clean promotion -> ACTIVE -> versioned lecture linking for WebM/WAV/PNG/VTT/text/PDF; no raw media URLs in blocks",
+    "Positive native readiness and actual review -> approval -> publication, with real canonical relationships and media; not a seeded publication status",
+    "UI course/module/lecture duplication with independent IDs, caption remapping, no enrollment or certificate inheritance, and unchanged published source version",
+    "Actual video playback + VTT cues, audio playback, decoded PNG and byte-identical text/PDF downloads through enrolled-student grants; opening media alone does not record completion or a learning start",
+    "Real module quiz auto-grading and essay/short-answer assignment submission, pending human grade with null score/pass, completion blocked before grading, saved rubric grading through admin UI, then authoritative completion",
+    "Anonymous/student administration/cross-course enrollment boundaries remain enforced"
+  ],
+  "screens": [
+    "desktop-course-media-active",
+    "desktop-native-advanced-authoring",
+    "mobile-native-advanced-authoring",
+    "desktop-native-copy-curriculum",
+    "desktop-student-video-captions",
+    "mobile-student-video-captions",
+    "mobile-student-graded-completion"
+  ],
+  "errors": [],
+  "courseId": "06aa3afc-9ccf-4b3a-b528-bf3ffa3c117f",
+  "copyId": "03af4cd0-23e4-4a8a-8ec8-5183520f33ab",
+  "passed": true
+}

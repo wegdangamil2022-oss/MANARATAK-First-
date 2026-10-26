@@ -1,8 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { canonicalPickerApi, type CanonicalPickerOption } from '../api/canonicalPickers';
 import { useTranslation } from '../i18n/I18nProvider';
+import { reviewReasonHeaders } from '@manaratak/shared';
+import { Save } from 'lucide-react';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 interface Intake {
   id: string;
   intakeStart: string;
@@ -108,12 +111,15 @@ export function UniversityProgramWorkspace() {
       if (current === generation.current) setBusy(false);
     }
   };
+  const loader = useRef(load);
+  loader.current = load;
+  const invalidate = useCallback(() => {
+    generation.current++;
+  }, []);
   useEffect(() => {
-    void load();
-    return () => {
-      generation.current++;
-    };
-  }, [reload]);
+    void loader.current();
+    return invalidate;
+  }, [reload, invalidate]);
   const geo = async () => {
     const country = options.countryReferenceId?.find(
       (item) => item.id === filters.countryReferenceId,
@@ -315,16 +321,86 @@ export function UniversityProgramWorkspace() {
     </section>
   );
 }
+export function UniversityProgramStudyEditor({
+  universityId,
+  programId,
+  onDirtyChange,
+  onSaved,
+  onBusyChange,
+}: {
+  universityId: string;
+  programId: string;
+  onDirtyChange: (dirty: boolean) => void;
+  onSaved: () => void;
+  onBusyChange?: (busy: boolean) => void;
+}) {
+  const { language } = useTranslation();
+  const ar = language === 'ar';
+  const { hasPermission } = useAdminAuthorization();
+  const canReadLanguages = hasPermission('admin:reference-data:manage');
+  const [row, setRow] = useState<Program | null>(null),
+    [languages, setLanguages] = useState<CanonicalPickerOption[]>([]),
+    [error, setError] = useState('');
+  useEffect(() => {
+    let active = true;
+    void Promise.all([
+      adminApiClient.request<{ items: Program[] }>(
+        `/admin/university-programs?universityId=${encodeURIComponent(universityId)}&academicProgramId=${encodeURIComponent(programId)}&limit=1`,
+        { cache: 'no-store' },
+      ),
+      canReadLanguages ? canonicalPickerApi.languages() : Promise.resolve([]),
+    ])
+      .then(([result, choices]) => {
+        if (!active) return;
+        const exact = result.items.find(
+          (item) => item.id === programId && item.universityId === universityId,
+        );
+        if (!exact) throw Error('PROGRAM_OWNER_MISMATCH');
+        setRow(exact);
+        setLanguages(choices);
+      })
+      .catch(() => {
+        if (active)
+          setError(ar ? 'تعذر تحميل البرنامج ومراجعه.' : 'Program and references unavailable.');
+      });
+    return () => {
+      active = false;
+    };
+  }, [universityId, programId, ar, canReadLanguages]);
+  return error ? (
+    <p role="alert">{error}</p>
+  ) : row ? (
+    <div className="university-program-study">
+      <ProgramEditor
+        row={row}
+        languages={languages}
+        ar={ar}
+        onDirtyChange={onDirtyChange}
+        onBusyChange={onBusyChange}
+        onSaved={onSaved}
+        canReadLanguages={canReadLanguages}
+      />
+    </div>
+  ) : (
+    <p>{ar ? 'جارٍ تحميل الدراسة والنوافذ…' : 'Loading study and intakes…'}</p>
+  );
+}
 function ProgramEditor({
   row,
   languages,
   ar,
   onSaved,
+  onDirtyChange,
+  onBusyChange,
+  canReadLanguages = true,
 }: {
   row: Program;
   languages: CanonicalPickerOption[];
   ar: boolean;
   onSaved: () => void;
+  onDirtyChange?: (dirty: boolean) => void;
+  onBusyChange?: (busy: boolean) => void;
+  canReadLanguages?: boolean;
 }) {
   const [study, setStudy] = useState({
     languageReferenceIds: row.study?.languageReferenceIds ?? [],
@@ -349,14 +425,43 @@ function ProgramEditor({
   });
   const [intake, setIntake] = useState(emptyIntake);
   const [reason, setReason] = useState('');
+  const baselineStudy = JSON.stringify({
+    languageReferenceIds: row.study?.languageReferenceIds ?? [],
+    studyMode: row.study?.studyMode ?? 'UNKNOWN',
+    teachingDelivery: row.study?.teachingDelivery ?? 'UNKNOWN',
+    durationValue: row.study?.durationValue?.toString() ?? '',
+    durationUnit: row.study?.durationUnit ?? 'MONTHS',
+    entryEligibility: row.study?.entryEligibility ?? '',
+    officialSourceUrl: row.study?.officialSourceUrl ?? '',
+    verificationStatus: row.study?.verificationStatus ?? 'UNKNOWN',
+  });
+  const intakeChanged =
+    !!intake.intakeStart ||
+    !!intake.applicationOpen ||
+    !!intake.applicationClose ||
+    !!intake.applicantSegment ||
+    !!intake.officialSourceUrl;
+  useEffect(
+    () => onDirtyChange?.(JSON.stringify(study) !== baselineStudy || intakeChanged || !!reason),
+    [study, baselineStudy, intakeChanged, reason, onDirtyChange],
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const command = useRef<{ signature: string; key: string } | null>(null);
   const lock = useRef(false);
   const save = async (kind: 'study' | 'intake') => {
-    if (lock.current || reason.trim().length < 3) return;
+    if (lock.current) return;
+    if (reason.trim().length < 3) {
+      setError(
+        ar
+          ? 'اكتب سبب التغيير بثلاثة أحرف على الأقل.'
+          : 'Enter a change reason of at least three characters.',
+      );
+      return;
+    }
     lock.current = true;
     setBusy(true);
+    onBusyChange?.(true);
     setError('');
     try {
       const body =
@@ -384,9 +489,49 @@ function ProgramEditor({
           method: 'PUT',
           body: JSON.stringify(body),
           idempotencyKey: command.current.key,
-          headers: { 'If-Match': String(row.parentRevision), 'X-Review-Reason': reason },
+          headers: { 'If-Match': String(row.parentRevision), ...reviewReasonHeaders(reason) },
         },
       );
+      const readBack = await adminApiClient.request<{ items: Program[] }>(
+        `/admin/university-programs?universityId=${encodeURIComponent(row.universityId)}&academicProgramId=${encodeURIComponent(row.id)}&limit=1`,
+        { cache: 'no-store' },
+      );
+      const persisted = readBack.items.find(
+        (item) => item.id === row.id && item.universityId === row.universityId,
+      );
+      if (!persisted || persisted.parentRevision === row.parentRevision)
+        throw Error('UNIVERSITY_PROGRAM_READBACK_MISMATCH');
+      if (kind === 'study') {
+        const saved = persisted.study;
+        if (
+          !saved ||
+          JSON.stringify([...saved.languageReferenceIds].sort()) !==
+            JSON.stringify([...study.languageReferenceIds].sort()) ||
+          saved.studyMode !== study.studyMode ||
+          saved.teachingDelivery !== study.teachingDelivery ||
+          saved.verificationStatus !== study.verificationStatus ||
+          (saved.durationValue ?? null) !==
+            (study.durationValue ? Number(study.durationValue) : null) ||
+          (saved.durationUnit ?? null) !== (study.durationValue ? study.durationUnit : null) ||
+          (saved.entryEligibility ?? '') !== study.entryEligibility ||
+          (saved.officialSourceUrl ?? '') !== study.officialSourceUrl
+        )
+          throw Error('UNIVERSITY_STUDY_READBACK_MISMATCH');
+      } else {
+        const saved = persisted.intakes.find((item) => item.id === intake.id);
+        if (
+          !saved ||
+          Object.entries(intake).some(([key, value]) => {
+            const actual = saved[key as keyof Intake];
+            return ['intakeStart', 'applicationOpen', 'applicationClose'].includes(key)
+              ? new Date(actual).getTime() !== new Date(value).getTime()
+              : actual !== value;
+          })
+        )
+          throw Error('UNIVERSITY_INTAKE_READBACK_MISMATCH');
+      }
+      onDirtyChange?.(false);
+      onBusyChange?.(false);
       command.current = null;
       onSaved();
     } catch {
@@ -398,6 +543,7 @@ function ProgramEditor({
     } finally {
       lock.current = false;
       setBusy(false);
+      onBusyChange?.(false);
     }
   };
   const field = (name: keyof typeof intake, label: string) => {
@@ -443,6 +589,7 @@ function ProgramEditor({
         <label>
           {ar ? 'لغات مؤكدة من P7 (غيابها مجهول)' : 'P7 languages (missing means unknown)'}
           <select
+            disabled={!canReadLanguages}
             multiple
             value={study.languageReferenceIds}
             onChange={(e) =>
@@ -464,9 +611,22 @@ function ProgramEditor({
             ))}
           </select>
         </label>
+        {!canReadLanguages && (
+          <p role="status">
+            {ar
+              ? 'تعديل لغات الدراسة يتطلب صلاحية مرجع اللغات. الروابط الحالية محفوظة ويمكن تعديل بقية بيانات الدراسة والنوافذ.'
+              : 'Editing study languages requires reference-data permission. Existing links are preserved; other study and intake fields remain available.'}
+          </p>
+        )}
         {(['studyMode', 'teachingDelivery', 'verificationStatus'] as const).map((key) => (
           <label key={key}>
-            {key}
+            {ar
+              ? {
+                  studyMode: 'أسلوب الدراسة',
+                  teachingDelivery: 'طريقة التدريس',
+                  verificationStatus: 'حالة التحقق',
+                }[key]
+              : key}
             <select
               value={study[key]}
               onChange={(e) => setStudy((old) => ({ ...old, [key]: e.target.value }))}
@@ -477,7 +637,21 @@ function ProgramEditor({
                   ? ['UNKNOWN', 'ON_CAMPUS', 'ONLINE', 'HYBRID']
                   : ['UNKNOWN', 'VERIFIED']
               ).map((value) => (
-                <option key={value}>{value}</option>
+                <option key={value} value={value}>
+                  {ar
+                    ? (
+                        {
+                          UNKNOWN: 'غير موثق',
+                          FULL_TIME: 'دوام كامل',
+                          PART_TIME: 'دوام جزئي',
+                          ON_CAMPUS: 'حضوري',
+                          ONLINE: 'عن بُعد',
+                          HYBRID: 'مدمج',
+                          VERIFIED: 'موثق',
+                        } as Record<string, string>
+                      )[value]
+                    : value}
+                </option>
               ))}
             </select>
           </label>
@@ -495,8 +669,8 @@ function ProgramEditor({
             value={study.durationUnit}
             onChange={(e) => setStudy((old) => ({ ...old, durationUnit: e.target.value }))}
           >
-            <option>MONTHS</option>
-            <option>YEARS</option>
+            <option value="MONTHS">{ar ? 'أشهر' : 'Months'}</option>
+            <option value="YEARS">{ar ? 'سنوات' : 'Years'}</option>
           </select>
         </label>
         <label>
@@ -516,6 +690,7 @@ function ProgramEditor({
           />
         </label>
         <button type="button" onClick={() => void save('study')}>
+          <Save size={16} aria-hidden="true" />
           {ar ? 'حفظ الدراسة' : 'Save study profile'}
         </button>
         <h4>
@@ -564,8 +739,8 @@ function ProgramEditor({
             value={intake.verificationStatus}
             onChange={(e) => setIntake((old) => ({ ...old, verificationStatus: e.target.value }))}
           >
-            <option>UNKNOWN</option>
-            <option>VERIFIED</option>
+            <option value="UNKNOWN">{ar ? 'غير موثق' : 'Unknown'}</option>
+            <option value="VERIFIED">{ar ? 'موثق' : 'Verified'}</option>
           </select>
         </label>
         <label>
@@ -574,12 +749,13 @@ function ProgramEditor({
             value={intake.status}
             onChange={(e) => setIntake((old) => ({ ...old, status: e.target.value }))}
           >
-            <option>DRAFT</option>
-            <option>ACTIVE</option>
-            <option>ARCHIVED</option>
+            <option value="DRAFT">{ar ? 'مسودة' : 'Draft'}</option>
+            <option value="ACTIVE">{ar ? 'نشطة' : 'Active'}</option>
+            <option value="ARCHIVED">{ar ? 'مؤرشفة' : 'Archived'}</option>
           </select>
         </label>
         <button type="button" onClick={() => void save('intake')}>
+          <Save size={16} aria-hidden="true" />
           {ar ? 'حفظ النافذة' : 'Save intake'}
         </button>
       </fieldset>

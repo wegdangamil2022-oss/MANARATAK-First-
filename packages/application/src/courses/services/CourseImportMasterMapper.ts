@@ -317,6 +317,7 @@ export class CourseImportMasterMapper {
         sourceFilename: provenance.sourceFilename ?? null,
         sourceSheetName: provenance.sourceSheetName ?? null,
         sourceRowNumber: provenance.worksheetRowNumber ?? null,
+        sourceOrder: row.sourceOrder,
       },
     };
 

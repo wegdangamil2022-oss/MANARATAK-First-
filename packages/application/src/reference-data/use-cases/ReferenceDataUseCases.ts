@@ -75,6 +75,13 @@ export class ReferenceDataUseCases {
     return this.repository.listCountries({ activeOnly: true, ...filters });
   }
 
+  public async getReferenceRecord(type: GovernedReferenceEntityType, id: string) {
+    if (!this.repository.getReferenceRecord) throw new ReferenceDataInvariantError('REFERENCE_DETAIL_READ_UNAVAILABLE');
+    const record = await this.repository.getReferenceRecord(type, id);
+    if (!record) throw new ReferenceDataNotFoundError(type, id);
+    return record;
+  }
+
   public listCurrencies(filters: ReferenceDataFilters = {}): Promise<ReferenceCurrencyDto[]> {
     return this.repository.listCurrencies({ activeOnly: true, ...filters });
   }

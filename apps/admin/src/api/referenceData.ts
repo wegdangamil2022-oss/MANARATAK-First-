@@ -40,6 +40,9 @@ function mutate<T>(path: string, method: 'POST' | 'PUT', body: unknown, options:
 }
 
 export const referenceDataAdminApi = {
+  getRecord<T>(entityType: GovernedReferenceEntityType, referenceId: string) {
+    return adminApiClient.request<T>(`${base}/records/${encodeURIComponent(entityType)}/${encodeURIComponent(referenceId)}`, { cache: 'no-store' });
+  },
   screeningReviews(page = 1) {
     return adminApiClient.request<ReferenceImportScreeningReviewPage>(
       base + '/import-review?page=' + encodeURIComponent(String(page)) + '&pageSize=25');
@@ -53,6 +56,8 @@ export const referenceDataAdminApi = {
     const params = new URLSearchParams({ page: String(query.page ?? 1) });
     if (query.countryIso2Code) params.set('countryIso2Code', query.countryIso2Code);
     if (query.kind) params.set('kind', query.kind);
+    if (query.q) params.set('q', query.q);
+    if (query.entityType) params.set('entityType', query.entityType);
     return adminApiClient.request<ReferenceQualityReport>(`${base}/quality/issues?${params}`, { signal, cache: 'no-store' });
   },
   qualitySnapshot() {

@@ -1,5 +1,5 @@
 import {readCertificateArtifact} from '@manaratak/application';
-import type {StudentDocumentUploadUseCases,StudentDocumentReviewUseCases} from '@manaratak/application';
+import type {StudentDocumentUploadUseCases,StudentDocumentReviewUseCases,ManagedApplicationEvidenceUseCases} from '@manaratak/application';
 import { Router, Request, Response, NextFunction } from 'express';
 import { careerStudentRouter } from './CareerStudentRouter.js';
 import { CareerEngagementUseCases } from '@manaratak/application';
@@ -15,6 +15,7 @@ import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
 
 export class StudentWorkspaceRouter {
   public static create(cradle: {
+    managedApplicationEvidenceUseCases?: ManagedApplicationEvidenceUseCases;
     studentDocumentUploadUseCases?:StudentDocumentUploadUseCases;
     studentDocumentReviewUseCases?:StudentDocumentReviewUseCases;
     careerEngagementUseCases: CareerEngagementUseCases;
@@ -540,12 +541,19 @@ export class StudentWorkspaceRouter {
         res.json(await studentServiceRequestUseCases.listMyRequests(ownStudent(req), query));
       }),
     );
+    router.post('/direct-applications', asyncHandler(async (req: Request, res: Response) => {
+      const { opportunityId, acknowledgement } = z.object({ opportunityId: z.string().trim().min(1).max(240), acknowledgement: z.literal(true) }).strict().parse(req.body);
+      if (!cradle.managedApplicationEvidenceUseCases) return res.status(503).json({ error: 'APPLICATION_SOURCE_UNAVAILABLE' });
+      await cradle.managedApplicationEvidenceUseCases.selfReport(ownStudent(req), opportunityId, String(req.get('idempotency-key')));
+      res.status(201).json({ recorded: acknowledgement, verification: 'STUDENT_SELF_REPORTED_UNVERIFIED' });
+    }));
     router.post(
       '/services/requests',
       asyncHandler(async (req: Request, res: Response) => {
         const body = z
           .object({
             serviceId: z.string().min(1),
+            applicationOpportunityId: z.string().trim().min(1).max(240).optional(),
             consent: z.literal(true),
             requestParameters: z.record(z.string(), z.unknown()).optional(),
           })

@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { assertStudyDestinationTranslationUnchanged, studyDestinationEnglishFields } from './StudyDestinationTranslationPolicy';
 import { AtomicDomainMutationCoordinator } from '../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { AssetSecurityClassification } from '@manaratak/domain';
 import {
@@ -221,6 +222,14 @@ export class StudyDestinationUseCases {
       if (city?.countryReferenceId !== country.id) throw new Error('INVALID_STUDY_CITY_COUNTRY');
     }
     const existing = await this.repository.findByCountryReferenceId(country.id);
+    assertStudyDestinationTranslationUnchanged(existing, input);
+    // Retain exact legacy English values on unrelated Arabic card saves.
+    if (existing) for (const key of studyDestinationEnglishFields) {
+      if (JSON.stringify(input[key] ?? null) === JSON.stringify(existing[key] ?? null)) delete normalized[key];
+    }
+    if (normalized.officialLinks && input.officialLinks) normalized.officialLinks = normalized.officialLinks.map((link, index) => ({
+      ...link, labelEn: input.officialLinks![index].labelEn, noteEn: input.officialLinks![index].noteEn,
+    }));
     if (expectedUpdatedAt && (!existing || existing.updatedAt !== expectedUpdatedAt))
       throw new Error('STUDY_DESTINATION_VERSION_CONFLICT');
     let saved: StudyDestinationProfileDto;

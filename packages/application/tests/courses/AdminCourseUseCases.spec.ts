@@ -38,6 +38,20 @@ describe('AdminCourseUseCases', () => {
     expect(mockRepo.list).toHaveBeenCalledWith(filters);
   });
 
+  it('synchronizes native language edits with the governed language source so approval cannot remain stale', async () => {
+    mockRepo.findById = vi.fn().mockResolvedValue({ id: 'native-language', originType: CourseOriginType.NATIVE_MANARATAK_COURSE, status: CourseStatus.DRAFT, learningLanguage: 'ar' });
+    mockRepo.update = vi.fn().mockResolvedValue({ id: 'native-language', status: CourseStatus.DRAFT });
+    await useCases.updateCourse('native-language', { learningLanguage: 'en' });
+    expect(mockRepo.update).toHaveBeenCalledWith('native-language', expect.objectContaining({ learningLanguage: 'en', learningLanguageRaw: 'en' }));
+  });
+
+  it('rejects native learning filters outside native scope and rejects invalid cohort dates', async () => {
+    await expect(useCases.listCourses({ hasEnrollments: false })).rejects.toThrow('NATIVE_COURSE_SCOPE_REQUIRED');
+    await expect(useCases.listCourses({ originType: CourseOriginType.NATIVE_MANARATAK_COURSE, cohortFrom: '2026-02-30' })).rejects.toThrow('COURSE_COHORT_DATE_INVALID');
+    await expect(useCases.listCourses({ originType: CourseOriginType.NATIVE_MANARATAK_COURSE, cohortFrom: '2026-02-01', cohortTo: '2026-01-01' })).rejects.toThrow('COURSE_COHORT_RANGE_INVALID');
+    expect(mockRepo.list).not.toHaveBeenCalled();
+  });
+
   it('updateCourse updates fields and recomputes completeness', async () => {
     mockRepo.findById = vi.fn().mockResolvedValue({
       id: 'course-1',

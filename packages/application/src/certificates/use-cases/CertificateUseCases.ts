@@ -1,4 +1,8 @@
 import { createHash, randomUUID } from 'crypto';
+import {
+  normalizeCourseCertificateBinding,
+  type CourseCertificateBinding,
+} from '@manaratak/domain';
 import { APPROVED_CERTIFICATE_DESIGN, approvedCertificateCopy } from '@manaratak/shared';
 import {
   AssetId,
@@ -82,13 +86,70 @@ export class CertificateUseCases {
   }
 
   public list(query: CertificateListQuery) { return this.certificateRepository.list(query); }
-  public analytics() { return this.certificateRepository.analytics(); }
-  public listTemplates() { return this.certificateRepository.listTemplates(); }
+  public analytics() {
+    return this.certificateRepository.analytics();
+  }
+  public listTemplates() {
+    return this.certificateRepository.listTemplates();
+  }
+  public async validateCourseBinding(input: unknown): Promise<CourseCertificateBinding> {
+    const binding = normalizeCourseCertificateBinding(input);
+    const template = await this.requireActiveTemplate(binding.templateId);
+    if (
+      template.currentVersionId !== binding.templateVersionId ||
+      template.issuerId !== binding.issuerId ||
+      template.currentVersion.issuerId !== binding.issuerId
+    )
+      throw Error('COURSE_CERTIFICATE_BINDING_STALE');
+    await this.requireActiveIssuer(binding.issuerId);
+    return binding;
+  }
+  public async courseBindingChoices() {
+    const choices = [];
+    for (const template of (await this.certificateRepository.listTemplates()).slice(0, 200)) {
+      if (template.status !== CertificateTemplateStatus.ACTIVE) continue;
+      try {
+        const binding = await this.validateCourseBinding({
+          templateId: template.id,
+          templateVersionId: template.currentVersionId,
+          issuerId: template.issuerId,
+        });
+        choices.push({
+          ...binding,
+          name: template.name,
+          issuerName: template.issuerName,
+          version: template.templateVersion,
+        });
+      } catch {
+        /* Invalid or untrusted issuers are not selectable. */
+      }
+    }
+    return choices;
+  }
+
+  public async courseBindingStatus(input: unknown) {
+    try {
+      if (input != null) await this.validateCourseBinding(input);
+      else {
+        const template = await this.requireDefaultActiveTemplate();
+        await this.requireActiveIssuer(template.issuerId);
+      }
+      return { status: 'READY' as const, code: null };
+    } catch (error) {
+      const code =
+        error instanceof Error && /^[A-Z_]+$/.test(error.message)
+          ? error.message
+          : 'CERTIFICATE_BINDING_UNAVAILABLE';
+      return { status: 'UNAVAILABLE' as const, code };
+    }
+  }
   public templateReview(id:string) {
     if(!this.certificateRepository.templateReview)throw new Error('CERTIFICATE_TEMPLATE_REVIEW_UNAVAILABLE');
     return this.certificateRepository.templateReview(id);
   }
-  public listIssuers() { return this.certificateRepository.listIssuers(); }
+  public listIssuers() {
+    return this.certificateRepository.listIssuers();
+  }
   public issuerHistory(id: string, cursor?: string) {
     if (!this.certificateRepository.listIssuerHistory) throw new Error('CERTIFICATE_ISSUER_HISTORY_UNAVAILABLE');
     return this.certificateRepository.listIssuerHistory(id, cursor, 25);
@@ -115,7 +176,7 @@ export class CertificateUseCases {
     const activeIssuerIds = new Set(issuers.filter(item => item.status === 'ACTIVE').map(item => item.id));
     const activeTemplate = templates.some((item) => item.status === CertificateTemplateStatus.ACTIVE && item.currentVersion.status === CertificateTemplateStatus.ACTIVE && activeIssuerIds.has(item.issuerId) && item.currentVersion.issuerId === item.issuerId);
     const activeIssuer = issuers.some((item) => item.status === 'ACTIVE');
-    let defaultCompletionReady=false;
+    let defaultCompletionReady = false;
     try {
       const template=await this.requireDefaultActiveTemplate();
       const issuer=await this.requireActiveIssuer(template.issuerId);
@@ -133,7 +194,7 @@ export class CertificateUseCases {
       artifactRendererRuntimeReady: artifacts.status === 'READY' && Boolean('verifiedAt' in artifacts && artifacts.verifiedAt),
       artifactRendererStatus: artifacts.status,
       artifactRendererReason: artifacts.reason,
-      artifactRendererVerifiedAt: 'verifiedAt' in artifacts ? artifacts.verifiedAt ?? null : null,
+      artifactRendererVerifiedAt: 'verifiedAt' in artifacts ? (artifacts.verifiedAt ?? null) : null,
       ...runtime,
     };
   }
@@ -162,7 +223,12 @@ export class CertificateUseCases {
     return this.certificateRepository.updateIssuer(id, input, context);
   }
 
-  public async approveIssuer(id: string, evidenceAssetId: string, authorityReference: string, context: CertificateMutationContext) {
+  public async approveIssuer(
+    id: string,
+    evidenceAssetId: string,
+    authorityReference: string,
+    context: CertificateMutationContext,
+  ) {
     const issuer = await this.certificateRepository.findIssuerById(id);
     if (!issuer) throw new Error('CERTIFICATE_ISSUER_NOT_FOUND');
     if (!context.reason?.trim() || !authorityReference.trim()) throw new Error('CERTIFICATE_ISSUER_AUTHORITY_EVIDENCE_REQUIRED');
@@ -174,7 +240,11 @@ export class CertificateUseCases {
     if (!evidence || evidence.state !== AssetLifecycleState.ACTIVE || evidence.classification === AssetSecurityClassification.PUBLIC || evidence.owner.ownerType !== 'CertificateIssuer' || evidence.owner.ownerId !== id) throw new Error('CERTIFICATE_ISSUER_AUTHORITY_EVIDENCE_INVALID');
     if (issuer.issuerType === 'MANARATAK') {
       if (issuer.code !== 'MANARATAK' || issuer.universityId || issuer.organizationId) throw new Error('CERTIFICATE_OFFICIAL_ISSUER_BINDING_INVALID');
-    } else if (!this.authorityResolver || !evidence.checksum?.hash || !await this.authorityResolver.validate(issuer, {authorityReference,evidenceChecksum:evidence.checksum.hash,reviewerId:context.actorId})) {
+    } else if (
+      !this.authorityResolver ||
+      !evidence.checksum?.hash ||
+      !(await this.authorityResolver.validate(issuer, {authorityReference,evidenceChecksum:evidence.checksum.hash,reviewerId:context.actorId}))
+    ) {
       throw new Error('CERTIFICATE_ISSUER_CANONICAL_AUTHORITY_UNVERIFIED');
     }
     await this.trustPolicy.assertIssuerKeyAvailable(issuer.signingKeyReference,issuer.code);
@@ -281,32 +351,59 @@ export class CertificateUseCases {
     return this.certificateRepository.reissue({ certificateId: id, reason: reason.trim(), actorId, correlationId, replacement, eventType: 'CertificateRenewed' });
   }
 
-  public async reissue(id: string, reason: string, actorId = 'admin', recipientDisplayName?: string, templateId?: string, correlationId?: string) {
+  public async reissue(
+    id: string,
+    reason: string,
+    actorId = 'admin',
+    recipientDisplayName?: string,
+    templateId?: string,
+    correlationId?: string,
+  ) {
     if (reason.trim().length < 8) throw new Error('REISSUE_REASON_TOO_SHORT');
     const source = await this.requireCertificate(id);
     if (source.status !== CertificateStatus.REVOKED) throw new Error('CERTIFICATE_MUST_BE_REVOKED_BEFORE_REISSUE');
     const template = await this.requireActiveTemplate(templateId ?? source.templateId);
-    if (recipientDisplayName !== undefined && recipientDisplayName !== source.recipientDisplayName) {
+    if (
+      recipientDisplayName !== undefined && recipientDisplayName !== source.recipientDisplayName
+    ) {
       const correction = source.metadata?.recipientCorrection as {state?:string;name?:string;approvedBy?:string} | undefined;
-      if (correction?.state !== 'APPROVED' || correction.name !== recipientDisplayName || !correction.approvedBy || await this.resolveRecipientDisplayName(source.studentReferenceId) !== recipientDisplayName) throw new Error('CERTIFICATE_RECIPIENT_CORRECTION_APPROVAL_REQUIRED');
+      if (
+        correction?.state !== 'APPROVED' || correction.name !== recipientDisplayName || !correction.approvedBy ||
+        (await this.resolveRecipientDisplayName(source.studentReferenceId)) !== recipientDisplayName
+      )
+        throw new Error('CERTIFICATE_RECIPIENT_CORRECTION_APPROVAL_REQUIRED');
     }
     const replacement = await this.buildReplacement(source, template, actorId, recipientDisplayName ?? source.recipientDisplayName ?? undefined, `reissue:${source.id}:${randomUUID()}`);
     return this.certificateRepository.reissue({ certificateId: id, reason: reason.trim(), actorId, recipientDisplayName, templateId, correlationId, replacement, eventType: 'CertificateReissued' });
   }
 
-  public async reviewCertificate(id: string, kind: 'RECIPIENT_CORRECTION_REQUESTED' | 'RECIPIENT_CORRECTION_APPROVED' | 'REVALIDATION_APPROVED', input: {name?:string;evidenceAssetId:string;validUntil?:string;expectedUpdatedAt:string}, context: CertificateMutationContext) {
+  public async reviewCertificate(
+    id: string,
+    kind: 'RECIPIENT_CORRECTION_REQUESTED' | 'RECIPIENT_CORRECTION_APPROVED' | 'REVALIDATION_APPROVED',
+    input: {name?:string;evidenceAssetId:string;validUntil?:string;expectedUpdatedAt:string},
+    context: CertificateMutationContext,
+  ) {
     const certificate = await this.requireCertificate(id);
     if (!this.assetRepository) throw new Error('CERTIFICATE_ASSET_PLATFORM_NOT_CONFIGURED');
     const evidence = await this.assetRepository.findById(new AssetId(input.evidenceAssetId));
     if (!evidence || evidence.state !== AssetLifecycleState.ACTIVE || evidence.classification === AssetSecurityClassification.PUBLIC || evidence.owner.ownerType !== 'Certificate' || evidence.owner.ownerId !== id) throw new Error('CERTIFICATE_REVIEW_EVIDENCE_INVALID');
-    if (kind !== 'REVALIDATION_APPROVED' && (!input.name || await this.resolveRecipientDisplayName(certificate.studentReferenceId) !== input.name)) throw new Error('CERTIFICATE_CANONICAL_RECIPIENT_NAME_REQUIRED');
+    if (
+      kind !== 'REVALIDATION_APPROVED' &&
+      (!input.name ||
+        (await this.resolveRecipientDisplayName(certificate.studentReferenceId)) !== input.name)
+    )
+      throw new Error('CERTIFICATE_CANONICAL_RECIPIENT_NAME_REQUIRED');
     if (kind === 'REVALIDATION_APPROVED' && (!input.validUntil || !Number.isFinite(new Date(input.validUntil).getTime()))) throw new Error('CERTIFICATE_REVALIDATION_DATE_INVALID');
-    return this.certificateRepository.recordReview(id,kind,input,context);
+    return this.certificateRepository.recordReview(id, kind, input, context);
   }
 
   public async assertRenderable(certificate: CertificateDto): Promise<void> {
     const envelope = this.readSignedEnvelope(certificate.metadata?.signedEnvelope);
-    if (!envelope || this.digest(this.canonicalJson(envelope)) !== certificate.verificationHash || !this.persistedIdentityMatchesEnvelope(certificate, envelope) || !await this.trustPolicy.verifyHash(certificate.verificationHash, certificate.digitalSignature, envelope.issuer.signingKeyReference)) throw new Error('CERTIFICATE_INTEGRITY_INVALID');
+    if (
+      !envelope || this.digest(this.canonicalJson(envelope)) !== certificate.verificationHash || !this.persistedIdentityMatchesEnvelope(certificate, envelope) ||
+      !(await this.trustPolicy.verifyHash(certificate.verificationHash, certificate.digitalSignature, envelope.issuer.signingKeyReference))
+    )
+      throw new Error('CERTIFICATE_INTEGRITY_INVALID');
     if (certificate.status !== CertificateStatus.ACTIVE || (certificate.expiresAt && certificate.expiresAt <= new Date())) throw new Error('CERTIFICATE_ARTIFACT_STATE_INVALID');
     const review = certificate.metadata?.revalidation as {approvedBy?:string;validUntil?:string} | undefined;
     if (envelope.validity.requiresRevalidation && (!review?.approvedBy || !review.validUntil || !Number.isFinite(new Date(review.validUntil).getTime()) || new Date(review.validUntil)<=new Date())) throw new Error('CERTIFICATE_REVALIDATION_REQUIRED');
@@ -325,7 +422,10 @@ export class CertificateUseCases {
     return assetId;
   }
 
-  public async verifyByCode(code: string, recordAnalytics = true): Promise<CertificateVerificationDto> {
+  public async verifyByCode(
+    code: string,
+    recordAnalytics = true,
+  ): Promise<CertificateVerificationDto> {
     const certificate = await this.certificateRepository.findByVerificationCode(code.trim());
     if (!certificate) throw new Error('Certificate not found');
     const envelope = this.readSignedEnvelope(certificate.metadata?.signedEnvelope);
@@ -335,7 +435,7 @@ export class CertificateUseCases {
       canonical &&
       this.digest(canonical) === certificate.verificationHash &&
       this.persistedIdentityMatchesEnvelope(certificate, envelope) &&
-      await this.trustPolicy.verifyHash(certificate.verificationHash, certificate.digitalSignature, envelope.issuer.signingKeyReference),
+      (await this.trustPolicy.verifyHash(certificate.verificationHash, certificate.digitalSignature, envelope.issuer.signingKeyReference)),
     );
     const expiresAt = envelope?.validity.expiresAt ? new Date(envelope.validity.expiresAt) : null;
     const expired = Boolean(expiresAt && expiresAt <= new Date());
@@ -386,7 +486,9 @@ export class CertificateUseCases {
     };
   }
 
-  private async issueCourseCompletion(event: CertificateAuthoritativeEventEnvelope<CourseCompletedEventPayload>): Promise<CertificateDto> {
+  private async issueCourseCompletion(
+    event: CertificateAuthoritativeEventEnvelope<CourseCompletedEventPayload>,
+  ): Promise<CertificateDto> {
     const payload = event.payload;
     if (!payload.eligibleForCertificate) throw new Error('Course completion is not eligible (COURSE_COMPLETION_NOT_ELIGIBLE)');
     const existing = await this.certificateRepository.findBySourceCompletionId(payload.completionId);
@@ -408,7 +510,18 @@ export class CertificateUseCases {
       throw new Error('MANARATAK_CERTIFICATE_NATIVE_COURSE_REQUIRED');
     }
     if (!course.certificateAvailable) throw new Error('COURSE_CERTIFICATE_DISABLED');
-    const template = await this.requireDefaultActiveTemplate();
+    const rawBinding = course.optionalFields?.certificateBinding;
+    const template = rawBinding
+      ? await this.requireActiveTemplate((await this.validateCourseBinding(rawBinding)).templateId)
+      : await this.requireDefaultActiveTemplate();
+    if (rawBinding) {
+      const binding = normalizeCourseCertificateBinding(rawBinding);
+      if (
+        template.currentVersionId !== binding.templateVersionId ||
+        template.issuerId !== binding.issuerId
+      )
+        throw Error('COURSE_CERTIFICATE_BINDING_STALE');
+    }
     const recipientDisplayName = await this.resolveRecipientDisplayName(payload.studentReferenceId);
     return this.issueAchievement(event, template, {
       certificateType: 'COURSE',
@@ -658,14 +771,18 @@ export class CertificateUseCases {
     };
   }
 
-  private assertAuthoritativeCompletionEnvelope(event: CertificateAuthoritativeEventEnvelope<CourseCompletedEventPayload | LearningPathCompletedEventPayload>): void {
+  private assertAuthoritativeCompletionEnvelope(
+    event: CertificateAuthoritativeEventEnvelope<CourseCompletedEventPayload | LearningPathCompletedEventPayload>,
+  ): void {
     if (typeof event.eventId !== 'string' || !event.eventId.trim()) throw new Error('CERTIFICATE_SOURCE_EVENT_ID_REQUIRED');
     if (event.sourceDomain !== 'COURSES') throw new Error('CERTIFICATE_SOURCE_EVENT_DOMAIN_INVALID');
     if (event.eventVersion !== '1.0.0') throw new Error('CERTIFICATE_SOURCE_EVENT_VERSION_UNSUPPORTED');
     if (!['CourseCompleted', 'LearningPathCompleted'].includes(event.eventType)) throw new Error('CERTIFICATE_SOURCE_EVENT_TYPE_INVALID');
     if (!event.payload || typeof event.payload !== 'object') throw new Error('CERTIFICATE_SOURCE_EVENT_PAYLOAD_INVALID');
     if (event.payload.sourcePhase !== 'Phase 13 - Learning Platform' || event.payload.certificateOwnerPhase !== 'Phase 14 - Enterprise Certificates Platform') throw new Error('CERTIFICATE_SOURCE_EVENT_AUTHORITY_INVALID');
-    const validDate = (value: unknown) => (typeof value === 'string' && Boolean(value.trim()) || value instanceof Date) && Number.isFinite(new Date(value as Date).getTime());
+    const validDate = (value: unknown) =>
+      ((typeof value === 'string' && Boolean(value.trim())) || value instanceof Date) &&
+      Number.isFinite(new Date(value as Date).getTime());
     const payload = event.payload;
     if (!payload || typeof payload !== 'object' || typeof payload.studentReferenceId !== 'string' || !payload.studentReferenceId.trim() || typeof payload.eligibleForCertificate !== 'boolean' || !validDate(payload.completedAt)) throw new Error('CERTIFICATE_SOURCE_EVENT_PAYLOAD_INVALID');
     if (event.eventType === 'CourseCompleted') {
@@ -711,7 +828,11 @@ export class CertificateUseCases {
     if (issuer.issuerType !== 'MANARATAK') {
       const trust=issuer.metadata?.trust as {authorityReference?:string;evidenceAssetId?:string;evidenceChecksum?:string;approvedBy?:string} | undefined;
       const evidence=trust?.evidenceAssetId && this.assetRepository ? await this.assetRepository.findById(new AssetId(trust.evidenceAssetId)) : null;
-      if (!trust?.authorityReference || !trust.evidenceChecksum || !trust.approvedBy || !evidence || evidence.state!==AssetLifecycleState.ACTIVE || evidence.classification===AssetSecurityClassification.PUBLIC || evidence.owner.ownerType!=='CertificateIssuer' || evidence.owner.ownerId!==issuer.id || evidence.checksum?.hash!==trust.evidenceChecksum || !this.authorityResolver || !await this.authorityResolver.validate(issuer,{authorityReference:trust.authorityReference,evidenceChecksum:trust.evidenceChecksum,reviewerId:trust.approvedBy})) throw new Error('CERTIFICATE_ISSUER_CANONICAL_AUTHORITY_UNVERIFIED');
+      if (
+        !trust?.authorityReference || !trust.evidenceChecksum || !trust.approvedBy || !evidence || evidence.state!==AssetLifecycleState.ACTIVE || evidence.classification===AssetSecurityClassification.PUBLIC || evidence.owner.ownerType!=='CertificateIssuer' || evidence.owner.ownerId!==issuer.id || evidence.checksum?.hash!==trust.evidenceChecksum || !this.authorityResolver ||
+        !(await this.authorityResolver.validate(issuer,{authorityReference:trust.authorityReference,evidenceChecksum:trust.evidenceChecksum,reviewerId:trust.approvedBy}))
+      )
+        throw new Error('CERTIFICATE_ISSUER_CANONICAL_AUTHORITY_UNVERIFIED');
     }
     return issuer;
   }
@@ -787,9 +908,13 @@ export class CertificateUseCases {
     }
   }
 
-  private persistedIdentityMatchesEnvelope(certificate: CertificateDto, envelope: CertificateSignedEnvelopeV2): boolean {
+  private persistedIdentityMatchesEnvelope(
+    certificate: CertificateDto,
+    envelope: CertificateSignedEnvelopeV2,
+  ): boolean {
     const dateMatches = (stored: Date | string | null | undefined, sealed: string | null) => stored == null ? sealed === null : Number.isFinite(new Date(stored).getTime()) && new Date(stored).toISOString() === sealed;
-    return (envelope.serialNumber === undefined || certificate.serialNumber === envelope.serialNumber) &&
+    return (
+      (envelope.serialNumber === undefined || certificate.serialNumber === envelope.serialNumber) &&
       (envelope.verificationCode === undefined || certificate.verificationCode === envelope.verificationCode) &&
       (certificate.recipientDisplayName ?? null) === envelope.recipientDisplayName &&
       certificate.achievementDisplayName === envelope.achievement.displayName &&
@@ -808,7 +933,8 @@ export class CertificateUseCases {
       certificate.templateId === envelope.template.templateId &&
       certificate.templateVersionId === envelope.template.templateVersionId &&
       certificate.issuerId === envelope.issuer.issuerId &&
-      certificate.signingKeyReference === envelope.issuer.signingKeyReference;
+      certificate.signingKeyReference === envelope.issuer.signingKeyReference
+    );
   }
 
   private readSignedEnvelope(value: unknown): CertificateSignedEnvelopeV2 | null {
@@ -831,5 +957,4 @@ export class CertificateUseCases {
     const record = value as Record<string, unknown>;
     return `{${Object.keys(record).sort().filter(key => record[key] !== undefined).map(key => `${JSON.stringify(key)}:${this.canonicalJson(record[key])}`).join(',')}}`;
   }
-
 }

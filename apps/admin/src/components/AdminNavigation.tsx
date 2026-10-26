@@ -86,6 +86,9 @@ export const adminNavigationGroups: NavigationGroup[] = [
         requiredPermission: 'admin:international-tests:manage',
       },
       {
+        to: '/courses/assigned', labelKey:'admin_nav_assigned_courses',icon:BookOpen,requiredPermission:'admin:courses:workspace',
+      },
+      {
         to: '/courses',
         labelKey: 'admin_nav_courses',
         icon: BookOpen,
@@ -246,7 +249,7 @@ export function AdminNavigation() {
 
   const allItems = adminNavigationGroups.flatMap((group) =>
     group.items.filter(
-      (item) => !item.requiredPermission || hasPermission(item.requiredPermission),
+      (item) => (!item.requiredPermission || hasPermission(item.requiredPermission)) && (item.to !== '/courses/assigned' || !hasPermission('admin:courses:manage')),
     ),
   );
 
@@ -309,7 +312,7 @@ export function AdminNavigation() {
                 <div className="space-y-1">
                   {group.items
                     .filter(
-                      (item) => !item.requiredPermission || hasPermission(item.requiredPermission),
+                      (item) => (!item.requiredPermission || hasPermission(item.requiredPermission)) && (item.to !== '/courses/assigned' || !hasPermission('admin:courses:manage')),
                     )
                     .map((item) => {
                       const Icon = item.icon;

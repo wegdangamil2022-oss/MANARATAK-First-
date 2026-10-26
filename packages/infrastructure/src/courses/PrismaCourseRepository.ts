@@ -1,4 +1,6 @@
 import { currentPublicCourseEligibility } from './CoursePublicEligibility';
+import { nativeCourseLearningReport } from './CourseNativeLearningReport';
+import { courseCatalogOrder, courseCatalogWhere, courseLinkHealthWhere } from './CourseCatalogQuery';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   AtomicPersistenceContext,
@@ -21,6 +23,7 @@ interface CourseTransactionContext extends AtomicPersistenceContext {
 }
 
 interface CourseRecord {
+  externalProvider?: { displayName: string } | null;
   majorProjections?: Array<{major:{id:string;displayName:string}}> ;
   id: string;
   publicId: string;
@@ -266,6 +269,10 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
           isFreeCertificate: updates.isFreeCertificate,
           certificateType: updates.certificateType,
           learningLanguageRaw: updates.learningLanguageRaw,
+          ...(updates.learningLanguageRaw !== undefined && updates.learningLanguageRaw !== existing.learningLanguageRaw ? {
+            learningLanguageReferenceId: null, learningLanguageResolutionState: 'UNRESOLVED', learningLanguageResolutionMethod: null,
+            learningLanguageReviewedBy: null, learningLanguageAdminReviewedRaw: null,
+          } : {}),
           studyLevelRaw: updates.studyLevelRaw,
           studyDurationRaw: updates.studyDurationRaw,
           shortCourseTopicsRaw: updates.shortCourseTopicsRaw,
@@ -329,39 +336,56 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
   }
 
   public async list(filters: CourseFilters): Promise<PaginatedCourseResult<CourseDto>> {
+    const nativeMetrics = filters.includeStatistics && filters.originType === CourseOriginType.NATIVE_MANARATAK_COURSE;
+    if (filters.includeStatistics && !this.transactionBound) return this.prisma.$transaction(
+      tx => new PrismaCourseRepository(tx as unknown as PrismaClient, true).list(filters),
+      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+    );
     const page = Math.max(1, filters.page ?? 1);
     const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 20));
-    const where: Prisma.CourseWhereInput = {};
-
-    if (filters.status) where.status = filters.status;
-    if (filters.completenessStatus) where.completenessStatus = filters.completenessStatus;
-    if (filters.accessType) where.accessType = filters.accessType;
-    if (filters.originType) where.originType = filters.originType;
-    if (filters.platformName) where.platformName = {contains:filters.platformName,mode:"insensitive"};
-
-    if (filters.externalProviderId) where.externalProviderId = filters.externalProviderId;
-    if (filters.category) where.category = { contains: filters.category, mode: 'insensitive' };
-    if (filters.learningLanguage) where.learningLanguage = { contains: filters.learningLanguage, mode: 'insensitive' };
-    if (filters.difficultyLevel) where.difficultyLevel = { contains: filters.difficultyLevel, mode: 'insensitive' };
-    if (filters.isFreeCertificate !== undefined) where.OR = [
-      { originType: 'EXTERNAL_LINKED_COURSE', isFreeCertificate: filters.isFreeCertificate },
-      filters.isFreeCertificate
-        ? { originType: 'NATIVE_MANARATAK_COURSE', certificateAvailable: true, accessType: { in: ['FREE_CERTIFICATE', 'FREE_STUDY_AND_CERTIFICATE'] } }
-        : { originType: 'NATIVE_MANARATAK_COURSE', NOT: { certificateAvailable: true, accessType: { in: ['FREE_CERTIFICATE', 'FREE_STUDY_AND_CERTIFICATE'] } } },
-    ];
-    if (filters.majorId) where.majorProjections = { some: { majorId: filters.majorId, projectionState: 'APPROVED' } };
-    if (filters.search) where.AND = [{ OR: [
-      { displayName: { contains: filters.search, mode: 'insensitive' } },
-      { canonicalName: { contains: filters.search, mode: 'insensitive' } },
-      { publicId: { contains: filters.search, mode: 'insensitive' } },
-      { platformName: { contains: filters.search, mode: 'insensitive' } },
-      { providerName: { contains: filters.search, mode: 'insensitive' } },
-    ] }];
-    return this.listPage(where, page, pageSize);
+    const where = courseCatalogWhere(filters);
+    const result = await this.listPage(where, page, pageSize, filters.sort, filters.includeStatistics);
+    if (nativeMetrics) result.nativeLearning = await nativeCourseLearningReport(this.prisma, filters, result.data.map(row => row.id));
+    if (filters.includeStatistics) {
+      const groups = await this.prisma.course.groupBy({ by: ['status', 'completenessStatus', 'originType'], where, _count: { _all: true } });
+      const sum = (predicate: (row: typeof groups[number]) => boolean) => groups.reduce((count, row) => count + (predicate(row) ? row._count._all : 0), 0);
+      result.statistics = { scope: 'FILTERED', total: result.total,
+        published: sum(row => row.status === 'PUBLISHED'), drafts: sum(row => row.status === 'DRAFT'),
+        needsReview: sum(row => !['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(row.status) &&
+          (['IMPORTED', 'INCOMPLETE', 'READY_TO_REVIEW'].includes(row.status) || ['NEEDS_REVIEW', 'INCOMPLETE'].includes(row.completenessStatus))),
+        native: sum(row => row.originType === 'NATIVE_MANARATAK_COURSE'),
+        external: sum(row => row.originType === 'EXTERNAL_LINKED_COURSE'),
+        legacyPaidOrigin: sum(row => row.originType === 'PAID_COURSE'),
+      };
+      if (filters.originType === CourseOriginType.EXTERNAL_LINKED_COURSE) {
+        const broken = await this.prisma.course.count({ where: { AND: [where, courseLinkHealthWhere('BROKEN')] } });
+        const needsVerification = await this.prisma.course.count({ where: { AND: [where, { OR: [courseLinkHealthWhere('UNKNOWN'), courseLinkHealthWhere('NEEDS_REVIEW')] }] } });
+        result.externalOverview = { broken, needsVerification, incomplete: sum(row => row.completenessStatus === 'INCOMPLETE'),
+          ready: sum(row => row.status === 'READY_TO_PUBLISH'), archived: sum(row => row.status === 'ARCHIVED') };
+      }
+    }
+    return result;
   }
 
   private publishedWhere(scope: Prisma.CourseWhereInput = {}): Promise<Prisma.CourseWhereInput> {
     return currentPublicCourseEligibility(this.prisma, scope);
+  }
+
+  public async catalogOptions(input: { field: 'learningLanguage' | 'difficultyLevel'; originType?: CourseOriginType; search?: string; page: number }): Promise<{ data: string[]; hasMore: boolean }> {
+    if (!['learningLanguage', 'difficultyLevel'].includes(input.field)) throw new Error('COURSE_CATALOG_OPTION_FIELD_FORBIDDEN');
+    const column = input.field === 'learningLanguage'
+      ? Prisma.sql`COALESCE(NULLIF(btrim("learningLanguage"), ''), CASE WHEN "originType" = 'EXTERNAL_LINKED_COURSE' THEN NULLIF(btrim("learningLanguageRaw"), '') END)`
+      : Prisma.sql`COALESCE(NULLIF(btrim("difficultyLevel"), ''), CASE WHEN "originType" = 'EXTERNAL_LINKED_COURSE' THEN NULLIF(btrim("studyLevelRaw"), '') END)`;
+    const origin = input.originType ? Prisma.sql`AND "originType" = ${input.originType}` : Prisma.empty;
+    const search = input.search ? Prisma.sql`AND strpos(lower(${column}), lower(${input.search})) > 0` : Prisma.empty;
+    // DISTINCT must execute in PostgreSQL; Prisma's client-side distinct may otherwise
+    // materialize the catalog before applying the picker page boundary.
+    const data = await this.prisma.$queryRaw<Array<{ value: string }>>(Prisma.sql`
+      SELECT DISTINCT ${column} AS "value" FROM "Course"
+      WHERE ${column} IS NOT NULL AND btrim(${column}) <> '' ${origin} ${search}
+      ORDER BY "value" ASC LIMIT 26 OFFSET ${(Math.max(1, Math.min(input.page, 1000)) - 1) * 25}
+    `);
+    return { data: data.slice(0, 25).map(row => row.value), hasMore: data.length > 25 };
   }
 
   public async findPublishedBySlug(slug: string): Promise<CourseDto | null> {
@@ -400,13 +424,19 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
     where: Prisma.CourseWhereInput,
     page: number,
     pageSize: number,
+    sort?: CourseFilters['sort'],
+    catalog = false,
   ): Promise<PaginatedCourseResult<CourseDto>> {
     const [data, total] = await Promise.all([
       this.prisma.course.findMany({
         where,
         skip: (page - 1) * pageSize,
         take: pageSize,
-        orderBy: { createdAt: 'desc' },
+        orderBy: courseCatalogOrder(sort),
+        ...(catalog ? { include: {
+          externalProvider: { select: { displayName: true } },
+          majorProjections: { where: { projectionState: 'APPROVED' }, select: { major: { select: { id: true, displayName: true } } } },
+        } } : {}),
       }),
       this.prisma.course.count({ where }),
     ]);
@@ -433,15 +463,16 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
   }
 
   private async captureVersion(db: any, course: any, reason: string): Promise<void> {
-    const [modules, lessons, assets, quizzes, questionBanks, questions] = await Promise.all([
+    const [modules, lessons, assets, quizzes, questionBanks, questions, contentBlocks] = await Promise.all([
       db.courseModule.findMany({ where: { courseId: course.id }, orderBy: { position: 'asc' } }),
       db.courseLesson.findMany({ where: { courseId: course.id }, orderBy: [{ moduleId: 'asc' }, { position: 'asc' }] }),
       db.courseLessonAsset.findMany({ where: { courseId: course.id }, orderBy: [{ lessonId: 'asc' }, { position: 'asc' }] }),
       db.courseQuiz.findMany({ where: { courseId: course.id }, orderBy: { position: 'asc' } }),
       db.courseQuestionBank.findMany({ where: { courseId: course.id }, orderBy: { createdAt: 'asc' } }),
       db.courseQuestion.findMany({ where: { courseId: course.id }, orderBy: [{ quizId: 'asc' }, { position: 'asc' }] }),
+      db.courseLessonContentBlock.findMany({ where: { courseId: course.id, status: { not: 'ARCHIVED' } }, orderBy: [{ lessonId: 'asc' }, { position: 'asc' }] }),
     ]);
-    const snapshot = JSON.parse(JSON.stringify({ course, modules, lessons, assets, quizzes, questionBanks, questions }));
+    const snapshot = JSON.parse(JSON.stringify({ course, modules, lessons, assets, quizzes, questionBanks, questions, contentBlocks }));
     await db.courseVersion.create({
       data: { courseId: course.id, versionNumber: course.version, reason, snapshot },
     });
@@ -450,6 +481,7 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
   private mapToDto(record: CourseRecord): CourseDto {
     return {
       id: record.id,
+      providerDisplayName: record.externalProvider?.displayName,
       relatedMajors: [...new Map((record.majorProjections ?? []).map(row=>[row.major.id,{id:row.major.id,name:row.major.displayName}])).values()],
       publicId: record.publicId,
       slug: record.slug,

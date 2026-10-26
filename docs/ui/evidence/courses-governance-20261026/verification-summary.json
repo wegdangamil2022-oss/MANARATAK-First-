@@ -1,0 +1,69 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "branch": "feat/courses-admin-workspaces-20261025",
+  "recordedAt": "2026-10-26T14:14:05.696Z",
+  "originalDatabaseWrites": 0,
+  "externalMediaActivation": false,
+  "newDatabaseMigrations": false,
+  "unitContracts": {
+    "passed": 545,
+    "skipped": 5,
+    "failed": 0
+  },
+  "postgresql16": {
+    "passed": 37,
+    "failed": 0
+  },
+  "selfHostedMedia": {
+    "securityTestsPassed": 6,
+    "scannerTcpEmulator": true,
+    "realClamAVTested": false,
+    "containerBuildTested": false,
+    "composeYamlStructureValidated": true,
+    "nodeSyntaxPassed": true,
+    "requiresIsolatedOperatorAcceptance": true
+  },
+  "types": {
+    "api": "PASS",
+    "admin": "PASS",
+    "web": "PASS"
+  },
+  "builds": {
+    "api": "PASS",
+    "admin": "PASS",
+    "web": "PASS",
+    "existingChunkWarnings": true
+  },
+  "eslint": {
+    "errors": 0,
+    "warnings": 137
+  },
+  "browser": {
+    "roles": true,
+    "delivery": true,
+    "certificateStatus": true,
+    "screenshots": [
+      "course-role-edit",
+      "course-role-review",
+      "course-role-publish",
+      "course-role-grade",
+      "desktop-delivery-scheduling",
+      "mobile-delivery-scheduling",
+      "small-delivery-scheduling",
+      "desktop-certificate-binding",
+      "mobile-certificate-binding",
+      "desktop-public-course-preview",
+      "mobile-public-course-preview",
+      "english-public-course-preview",
+      "desktop-learner-resume-and-locks",
+      "mobile-learner-resume-and-locks",
+      "certificate-status-1440",
+      "certificate-status-360"
+    ],
+    "javascriptErrors": []
+  },
+  "operationalGaps": [
+    "Self-hosted Docker/ClamAV/Ghostscript/FFmpeg engine and failure acceptance on an isolated deployment host",
+    "Governed active certificate template/issuer and issuance worker availability are environment requirements; no production activation or issuance performed"
+  ]
+}

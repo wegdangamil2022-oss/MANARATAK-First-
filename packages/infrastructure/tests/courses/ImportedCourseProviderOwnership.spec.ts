@@ -5,6 +5,14 @@ const identity=(id:string,providerId:string)=>({id,providerId,currentUrl:url,sta
 const record=(sourceIdentities:unknown[])=>({id:'course',publicId:'course',slug:'course',externalProviderId:'owner',directCourseUrl:url,sourceIdentities,
  externalProvider:{id:'owner',status:'APPROVED',allowedDomains:[{normalizedDomain:'provider.example.invalid'}]}});
 describe('Imported Course source identity belongs to the canonical provider',()=>{
+ it('shows only the eleven source values and batch while preserving the current owner display',async()=>{
+  const original={sourceOrder:17,courseName:'Original imported title',languageRaw:'English',privateConnectorCredential:'must-not-leak'};
+  const db={course:{findFirst:vi.fn().mockResolvedValue({...record([identity('owned','owner')]),sourceImportRecordId:'import-record',displayName:'Reviewed owner display'})},courseImportAnalysis:{findUnique:vi.fn().mockResolvedValue({id:'analysis',normalizedPayload:{semanticRow:original}})},importRecord:{findUnique:vi.fn().mockResolvedValue({batchId:'original-batch'})}};
+  const detail=await new Repository(db as never).getImportedCourseById('course');
+  expect(detail?.displayName).toBe('Reviewed owner display');expect(detail?.sourceBatchId).toBe('original-batch');
+  expect(detail?.originalSourceRow).toMatchObject({sourceOrder:17,courseName:'Original imported title',languageRaw:'English'});
+  expect(detail?.originalSourceRow).not.toHaveProperty('privateConnectorCredential');expect(Object.keys(detail!.originalSourceRow!)).toHaveLength(11);
+ });
  it('ignores a newer source identity from a foreign provider when checking the canonical link',async()=>{
   const course=record([identity('foreign','other'),identity('owned','owner')]);const db={course:{findFirst:vi.fn().mockResolvedValue(course)}};
   const context=await new Repository(db as never).getVerificationContext('course');expect(context?.sourceIdentityId).toBe('owned');

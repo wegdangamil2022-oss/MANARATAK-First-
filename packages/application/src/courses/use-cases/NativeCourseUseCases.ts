@@ -3,8 +3,11 @@ import { randomUUID } from 'node:crypto';
 import { AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { CoursePublicationService } from '../services/CoursePublicationService';
 import { courseSourceRelationshipReviewRequired } from '../services/CourseSourceRelationshipReadiness';
+import { copyNativeCurriculum, type NativeCurriculumCopyOptions } from '../services/CopyNativeCurriculum';
 import {
   AssetId,
+  assetRightsStatus,
+  normalizeCourseBlock,
   AssetLifecycleState,
   CourseAccessType,
   CourseContentStatus,
@@ -79,6 +82,25 @@ export class NativeCourseUseCases {
     });
   }
 
+  public async duplicate(courseId: string, input: { titleAr: string } & Pick<NativeCurriculumCopyOptions, 'includeAssets' | 'acknowledgeAssetRights'>) {
+    const source = await this.requireNative(courseId);
+    if (input.includeAssets && source.thumbnailAssetId) {
+      if (!input.acknowledgeAssetRights) throw Error('COURSE_COPY_ASSET_RIGHTS_ACKNOWLEDGEMENT_REQUIRED');
+      const cover = await this.assetRepository?.findById(new AssetId(source.thumbnailAssetId));
+      if (!cover || !['PUBLIC', 'INTERNAL'].includes(cover.classification)) throw Error('COURSE_COPY_COVER_NOT_REUSABLE');
+      cover.assertCanDeliver();
+      if (assetRightsStatus(cover.metadata.extraMetadata?.rights) === 'EXPIRED') throw Error('COURSE_COPY_ASSET_RIGHTS_EXPIRED');
+    }
+    const created = await this.create({ titleAr: input.titleAr, accessType: source.accessType, learningLanguage: source.learningLanguage, difficultyLevel: source.difficultyLevel, category: source.category });
+    const fields: Record<string, unknown> = {};
+    for (const key of ['description','courseContent','prerequisites','targetAudience','learningOutcomes','acquiredSkills','instructor','titleEn','shortDescription']) if (source.optionalFields?.[key] !== undefined) fields[key] = source.optionalFields[key];
+    fields.titleAr = input.titleAr; fields.copiedFromCourseId = source.id;
+    fields.completionCriteria = { minimumProgress: 100, assessmentRequired: source.optionalFields?.completionCriteria && typeof source.optionalFields.completionCriteria === 'object' && 'assessmentRequired' in source.optionalFields.completionCriteria ? source.optionalFields.completionCriteria.assessmentRequired === true : false };
+    const summary = await copyNativeCurriculum(this.curriculumRepository, this.assetRepository, courseId, created.id, input);
+    const course = await this.courseRepository.update(created.id, { optionalFields: fields, certificateAvailable: false, isStudyFree: source.accessType === CourseAccessType.PAID ? false : source.isStudyFree, studyDuration: source.studyDuration, ...(input.includeAssets && source.thumbnailAssetId ? { thumbnailAssetId: source.thumbnailAssetId } : {}) });
+    return { ...course, copySummary: summary };
+  }
+
   public async getReadiness(courseId: string): Promise<NativeCourseReadinessDto> {
     const course = await this.requireNative(courseId);
     const curriculum = await this.curriculumRepository.getCurriculumSnapshot(courseId);
@@ -124,11 +146,24 @@ export class NativeCourseUseCases {
     const lessonQuizzes = new Set(
       curriculum.quizzes.filter((quiz) => quiz.lessonId && quiz.status !== CourseContentStatus.ARCHIVED).map((quiz) => quiz.lessonId as string),
     );
+    let invalidBlockCount = 0;
+    const contentLessonIds = new Set<string>();
+    for (const block of curriculum.contentBlocks ?? []) {
+      if (block.status === 'ARCHIVED') continue;
+      try {
+        normalizeCourseBlock(block);
+        if (block.type === 'VIDEO' && block.payload.subtitleReferenceId && !curriculum.assets.some(row => row.id === block.payload.subtitleReferenceId && row.lessonId === block.lessonId && row.assetType === 'SUBTITLE')) throw Error('COURSE_CONTENT_BLOCK_SUBTITLE_SCOPE_MISMATCH');
+        if (!lessons.some(lesson => lesson.id === block.lessonId) ||
+          (block.assetReferenceId && !curriculum.assets.some(asset => asset.id === block.assetReferenceId && asset.lessonId === block.lessonId && (block.type === 'FILE' || asset.assetType === block.type))) ||
+          (block.quizId && !curriculum.quizzes.some(quiz => quiz.id === block.quizId && quiz.lessonId === block.lessonId && quiz.status !== 'ARCHIVED'))) throw new Error('COURSE_CONTENT_BLOCK_REFERENCE_INVALID');
+        if (block.type !== 'HEADING') contentLessonIds.add(block.lessonId);
+      } catch { invalidBlockCount++; }
+    }
     const incompleteLessons = lessons.filter((lesson) => {
       const hasText = Boolean(lesson.contentText?.trim());
       const hasAsset = (lessonAssets.get(lesson.id) ?? 0) > 0;
       const hasQuiz = lessonQuizzes.has(lesson.id);
-      return !hasText && !hasAsset && !hasQuiz;
+      return !hasText && !hasAsset && !hasQuiz && !contentLessonIds.has(lesson.id);
     });
     const invalidAssets = curriculum.assets.filter(
       (asset) => !asset.assetId?.trim() || /^https?:\/\//i.test(asset.assetId),
@@ -243,7 +278,7 @@ export class NativeCourseUseCases {
       this.check(
         'lesson-content',
         'محتوى الدروس',
-        lessons.length > 0 && incompleteLessons.length === 0,
+        lessons.length > 0 && incompleteLessons.length === 0 && invalidBlockCount === 0,
         incompleteLessons.length
           ? `${incompleteLessons.length} درس/دروس بلا محتوى فعلي.`
           : undefined,

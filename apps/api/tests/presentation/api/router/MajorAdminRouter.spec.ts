@@ -22,6 +22,8 @@ describe('MajorAdminRouter', () => {
     unpublish: vi.fn(),
     reject: vi.fn(),
     archive: vi.fn(),
+    restore: vi.fn(),
+    correctDegreeReference: vi.fn(),
     listVersions: vi.fn(),
     listLevelProfiles: vi.fn(),
     listContentSections: vi.fn(),
@@ -45,6 +47,19 @@ describe('MajorAdminRouter', () => {
     );
     return app;
   };
+
+  it('requires reviewer permission for restore and reference correction',async()=>{
+    const useCases=createMockUseCases(),app=createApp(useCases);
+    container.register({authEvaluatorService:asValue({evaluatePermission:vi.fn().mockResolvedValue({isGranted:false})})});
+    expect((await request(app).post('/admin/majors/profile/restore').set('If-Match','2').send({reason:'Reviewed restore'})).status).toBe(403);
+    expect((await request(app).post('/admin/majors/profile/degree-reference').set('If-Match','2').send({degreeLevelId:'913e0a15-54f3-4af1-a771-1f0bfcdd0d78',sourceUri:'https://example.org/proof',reason:'Reviewed correction'})).status).toBe(403);
+    expect(useCases.restore).not.toHaveBeenCalled();expect(useCases.correctDegreeReference).not.toHaveBeenCalled();
+  });
+  it('passes exact reference proof and expected revision to the audited correction use case',async()=>{
+    const useCases=createMockUseCases(),app=createApp(useCases),body={degreeLevelId:'913e0a15-54f3-4af1-a771-1f0bfcdd0d78',sourceUri:'https://example.org/proof',reason:'Reviewed correction'};
+    expect((await request(app).post('/admin/majors/profile/degree-reference').set('If-Match','2').send(body)).status).toBe(200);
+    expect(useCases.correctDegreeReference).toHaveBeenCalledWith('profile',body,expect.objectContaining({actorId:'admin-X',expectedRevision:2,reason:body.reason}));
+  });
 
   it('parses explicit count-only mode without changing owner filters', async () => {
     const useCases=createMockUseCases();useCases.listMajors.mockResolvedValue({data:[],total:3,page:1,pageSize:1,totalPages:3});

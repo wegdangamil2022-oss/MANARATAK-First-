@@ -1,0 +1,11 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "productionSecurityValidation": false,
+  "checks": [
+    "Incorrect WebM signature rejected at actual provider verification; no curriculum link",
+    "EICAR marker rejected by fixture scanner; no sanitation, activation or curriculum link",
+    "Unknown media capabilities and unsigned provider commands rejected over HTTPS"
+  ],
+  "passed": true
+}

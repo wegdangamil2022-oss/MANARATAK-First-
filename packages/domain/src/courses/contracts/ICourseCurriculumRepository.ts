@@ -20,6 +20,7 @@ import {
 } from '../entities/CourseCurriculum';
 
 export interface CourseCurriculumSnapshotDto {
+  contentBlocks?: import('../content-blocks').CourseContentBlockDto[];
   modules: CourseModuleDto[];
   lessons: CourseLessonDto[];
   assets: LessonAssetReferenceDto[];
@@ -34,6 +35,7 @@ export interface CourseLearningVersionDto {
 }
 
 export interface ICourseCurriculumRepository {
+  replaceLessonBlocks?(courseId: string, lessonId: string, blocks: import('../content-blocks').CourseContentBlockInput[]): Promise<import('../content-blocks').CourseContentBlockDto[]>;
   /** Immutable published version. Legacy enrollment resolution uses only history before enrollment. */
   getLearningVersion?(courseId: string, version: number | undefined, enrolledAt: Date): Promise<CourseLearningVersionDto | null>;
   createModule(data: CreateCourseModuleDto): Promise<CourseModuleDto>;

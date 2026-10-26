@@ -1,0 +1,17 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16",
+  "canonicalAuthentication": true,
+  "canonicalMfa": true,
+  "workersStarted": false,
+  "originalDatabaseTouched": false,
+  "checks": [
+    "two canonical MFA sessions and actual CSRF token acquisition",
+    "unauthenticated 401 and missing-CSRF 403",
+    "content manager denied review, publish and source verification on real server",
+    "operational variant writer retained with one 200 winner and one 409 conflict, independent owner and Prisma readback",
+    "reviewer transition succeeds, incomplete source cannot bypass publication readiness",
+    "archive retains original operational records and remains private",
+    "real audit and atomic outbox persisted"
+  ],
+  "pass": true
+}

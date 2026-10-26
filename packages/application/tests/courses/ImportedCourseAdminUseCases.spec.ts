@@ -75,6 +75,7 @@ function createFixture() {
     upsertSeedProvider: vi.fn(),
   };
   const admin = {
+    getCourse: vi.fn().mockResolvedValue({ ...course, isStudyFree: true, isFreeCertificate: false, certificateAvailable: true }),
     updateCourse: vi.fn().mockResolvedValue(course),
     markReadyToPublish: vi.fn().mockResolvedValue(undefined),
     publish: vi.fn().mockResolvedValue(undefined),
@@ -101,6 +102,15 @@ function createFixture() {
 }
 
 describe('ImportedCourseAdminUseCases', () => {
+  it('keeps access type consistent with explicit study/certificate evidence and retains unknown facts', async () => {
+    const f = createFixture();
+    f.admin.getCourse.mockResolvedValue({ ...f.course, accessType: 'PAID', isStudyFree: false, isFreeCertificate: false, certificateAvailable: true });
+    await f.useCases.update('course-1', { isStudyFree: true });
+    expect(f.admin.updateCourse).toHaveBeenLastCalledWith('course-1', expect.objectContaining({ isStudyFree: true, accessType: 'FREE_STUDY' }));
+    await f.useCases.update('course-1', { isStudyFree: true, isFreeCertificate: true });
+    expect(f.admin.updateCourse).toHaveBeenLastCalledWith('course-1', expect.objectContaining({ accessType: 'FREE_STUDY_AND_CERTIFICATE' }));
+    await expect(f.useCases.update('course-1', { certificateAvailable: false, isFreeCertificate: true })).rejects.toThrow('CERTIFICATE_FACTS_CONFLICT');
+  });
   it('lists imported courses through the production operations repository', async () => {
     const f = createFixture();
     const result = await f.useCases.list({ page: 1 });

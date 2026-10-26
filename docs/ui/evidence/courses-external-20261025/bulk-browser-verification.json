@@ -1,0 +1,39 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "linkEvidence": "SEEDED_SYNTHETIC_POLICY_FIXTURE_NOT_NETWORK_CHECK",
+  "realApi": true,
+  "canonicalMfa": true,
+  "originalDatabaseWrites": 0,
+  "ids": [
+    "8782c0de-c051-4a01-98f9-7ea684cb6750",
+    "b5df5c2b-6da0-4c6c-9128-d2d0af3a74fb"
+  ],
+  "checks": [
+    "Actual canonical publication succeeds for one course, blocks one, and rejects the concurrent version; eligible-only consent and paginated report/CSV are functional",
+    "Retry creates a new preview containing only failed records at current versions; prior success is not republished; repeated completion is idempotent and canonical unpublish works",
+    "Individual drawer readiness is mandatory; actual publication/unpublication succeeds and published content/source mutation is blocked"
+  ],
+  "errors": [],
+  "batchId": "ba853df9-bc24-47c0-8d99-050697b9c440",
+  "firstCounts": {
+    "FAILED": 1,
+    "BLOCKED": 1,
+    "PENDING": 0,
+    "SUCCESS": 1,
+    "ELIGIBLE": 0,
+    "NOT_EXECUTED": 0
+  },
+  "retryId": "aa51294d-9ec7-48a1-9b04-0d519854e464",
+  "individualPublicationVersion": 7,
+  "finalVersions": [
+    {
+      "id": "8782c0de-c051-4a01-98f9-7ea684cb6750",
+      "version": 2
+    },
+    {
+      "id": "b5df5c2b-6da0-4c6c-9128-d2d0af3a74fb",
+      "version": 4
+    }
+  ],
+  "passed": true
+}

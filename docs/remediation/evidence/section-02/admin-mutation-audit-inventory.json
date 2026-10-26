@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 9,
   "baseline": "b1702289f43d0363d7bbf91f8eba465e4355c53c",
   "scope": "Mounted canonical admin mutations; candidate permission sets for conditional policies, with policy fingerprints; source checks, not runtime or owner atomicity proof",
   "routes": [
@@ -1665,6 +1665,7 @@
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
         "admin:authorization:manage",
+        "admin:courses",
         "admin:authorization"
       ],
       "conditionalPermissionReview": false,
@@ -2029,6 +2030,22 @@
     },
     {
       "method": "POST",
+      "path": "/admin/certificates/:id/render-retry",
+      "owner": "CertificateAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:certificates:lifecycle:manage"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
+    },
+    {
+      "method": "POST",
       "path": "/admin/certificates/:id/renew",
       "owner": "CertificateAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
@@ -2077,6 +2094,49 @@
     },
     {
       "method": "POST",
+      "path": "/admin/certificates/delegations/:id/evidence-delivery-grant",
+      "owner": "CertificateAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:certificates:issuers:approve",
+        "admin:certificates:issuers:manage"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "delegationReader",
+          "permissions": [
+            "admin:certificates:issuers:approve",
+            "admin:certificates:issuers:manage"
+          ],
+          "sourceFingerprint": "c1c6c2693423fa98c794fb7bd40b0b0888c47457cca46e1446db4fd1f8fe9ec5"
+        }
+      ],
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/certificates/delegations/:id/review",
+      "owner": "CertificateAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:certificates:issuers:approve"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
+    },
+    {
+      "method": "POST",
       "path": "/admin/certificates/issuers",
       "owner": "CertificateAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
@@ -2114,6 +2174,22 @@
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
         "admin:certificates:issuers:approve"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/certificates/issuers/:id/delegations",
+      "owner": "CertificateAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:certificates:issuers:manage"
       ],
       "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -3392,9 +3468,7 @@
       "path": "/admin/courses",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3408,9 +3482,7 @@
       "path": "/admin/courses/:id",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3424,9 +3496,7 @@
       "path": "/admin/courses/:id/archive",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3440,9 +3510,49 @@
       "path": "/admin/courses/:id/assessment-reviews/:attemptId/grade",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/admin/courses/:id/certificate-binding",
+      "owner": "CourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/admin/courses/:id/delivery-policy",
+      "owner": "CourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/courses/:id/duplicate",
+      "owner": "CourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3456,9 +3566,7 @@
       "path": "/admin/courses/:id/enrollment-policy",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3472,9 +3580,7 @@
       "path": "/admin/courses/:id/lessons/:lessonId",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "DELETE_SEMANTICS_OWNER_VERIFICATION_REQUIRED",
@@ -3488,9 +3594,7 @@
       "path": "/admin/courses/:id/lessons/:lessonId",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3504,9 +3608,7 @@
       "path": "/admin/courses/:id/lessons/:lessonId/assets",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3520,12 +3622,66 @@
       "path": "/admin/courses/:id/lessons/:lessonId/assets/:assetId",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "DELETE_SEMANTICS_OWNER_VERIFICATION_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/admin/courses/:id/lessons/:lessonId/content-blocks",
+      "owner": "CourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/courses/:id/lessons/:lessonId/convert-text",
+      "owner": "CourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/courses/:id/lessons/:lessonId/duplicate",
+      "owner": "CourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/courses/:id/localized-description",
+      "owner": "CourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -3536,9 +3692,7 @@
       "path": "/admin/courses/:id/mark-publishable",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3552,9 +3706,7 @@
       "path": "/admin/courses/:id/mark-ready",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3568,9 +3720,7 @@
       "path": "/admin/courses/:id/modules",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3584,9 +3734,7 @@
       "path": "/admin/courses/:id/modules/:moduleId",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "DELETE_SEMANTICS_OWNER_VERIFICATION_REQUIRED",
@@ -3600,9 +3748,21 @@
       "path": "/admin/courses/:id/modules/:moduleId",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/courses/:id/modules/:moduleId/duplicate",
+      "owner": "CourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3616,9 +3776,7 @@
       "path": "/admin/courses/:id/modules/:moduleId/lessons",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3632,9 +3790,7 @@
       "path": "/admin/courses/:id/modules/:moduleId/lessons/reorder",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3648,9 +3804,7 @@
       "path": "/admin/courses/:id/modules/reorder",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3664,9 +3818,7 @@
       "path": "/admin/courses/:id/publish",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3680,9 +3832,7 @@
       "path": "/admin/courses/:id/question-banks",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3696,9 +3846,7 @@
       "path": "/admin/courses/:id/question-banks/:bankId",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "DELETE_SEMANTICS_OWNER_VERIFICATION_REQUIRED",
@@ -3712,9 +3860,7 @@
       "path": "/admin/courses/:id/question-banks/:bankId",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3728,9 +3874,7 @@
       "path": "/admin/courses/:id/questions",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3744,9 +3888,7 @@
       "path": "/admin/courses/:id/questions/:questionId",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "DELETE_SEMANTICS_OWNER_VERIFICATION_REQUIRED",
@@ -3760,9 +3902,7 @@
       "path": "/admin/courses/:id/questions/:questionId",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3776,9 +3916,7 @@
       "path": "/admin/courses/:id/quizzes",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3792,9 +3930,7 @@
       "path": "/admin/courses/:id/quizzes/:quizId",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "DELETE_SEMANTICS_OWNER_VERIFICATION_REQUIRED",
@@ -3808,9 +3944,7 @@
       "path": "/admin/courses/:id/quizzes/:quizId",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3824,9 +3958,7 @@
       "path": "/admin/courses/:id/reject",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3840,9 +3972,7 @@
       "path": "/admin/courses/:id/relationships/analyze",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3856,9 +3986,7 @@
       "path": "/admin/courses/:id/relationships/language",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3872,9 +4000,7 @@
       "path": "/admin/courses/:id/relationships/majors",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3888,9 +4014,7 @@
       "path": "/admin/courses/:id/relationships/majors/:projectionId/approve",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3904,9 +4028,7 @@
       "path": "/admin/courses/:id/relationships/majors/:projectionId/reject",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3920,9 +4042,7 @@
       "path": "/admin/courses/:id/relationships/majors/project",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3936,9 +4056,7 @@
       "path": "/admin/courses/:id/relationships/taxonomy",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3952,9 +4070,7 @@
       "path": "/admin/courses/:id/relationships/taxonomy/:linkId/approve",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3968,9 +4084,7 @@
       "path": "/admin/courses/:id/relationships/taxonomy/:linkId/reject",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -3984,9 +4098,7 @@
       "path": "/admin/courses/:id/relationships/tests",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -4000,9 +4112,7 @@
       "path": "/admin/courses/:id/relationships/tests/:relationshipId/approve",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -4016,9 +4126,7 @@
       "path": "/admin/courses/:id/relationships/tests/:relationshipId/reject",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -4032,9 +4140,7 @@
       "path": "/admin/courses/:id/unpublish",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -4042,6 +4148,22 @@
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
       "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/courses/imported",
+      "owner": "ImportedCourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:courses:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ImportedCourseAdminRouter.ts"
     },
     {
       "method": "PATCH",
@@ -4189,12 +4311,104 @@
     },
     {
       "method": "POST",
-      "path": "/admin/courses/learning-paths",
-      "owner": "CourseAdminRouter",
+      "path": "/admin/courses/imported/bulk/:batchId/cancel",
+      "owner": "ImportedCourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
         "admin:courses:manage"
       ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ImportedCourseAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/courses/imported/bulk/:batchId/confirm",
+      "owner": "ImportedCourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:courses:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ImportedCourseAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/courses/imported/bulk/:batchId/retry",
+      "owner": "ImportedCourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:courses:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ImportedCourseAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/courses/imported/bulk/:batchId/step",
+      "owner": "ImportedCourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:courses:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ImportedCourseAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/courses/imported/bulk/preview",
+      "owner": "ImportedCourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:courses:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ImportedCourseAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/courses/learning-paths",
+      "owner": "CourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/courses/learning-paths/:pathId",
+      "owner": "CourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -4208,9 +4422,7 @@
       "path": "/admin/courses/learning-paths/:pathId/archive",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -4224,9 +4436,7 @@
       "path": "/admin/courses/learning-paths/:pathId/mark-publishable",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -4240,9 +4450,7 @@
       "path": "/admin/courses/learning-paths/:pathId/publish",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
+      "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -5833,6 +6041,22 @@
     },
     {
       "method": "POST",
+      "path": "/admin/international-tests/:id/localized-description",
+      "owner": "InternationalTestAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:international-tests:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts"
+    },
+    {
+      "method": "POST",
       "path": "/admin/international-tests/:id/manual-names",
       "owner": "InternationalTestAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
@@ -6209,6 +6433,22 @@
       "source": "apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts"
     },
     {
+      "method": "POST",
+      "path": "/admin/majors",
+      "owner": "MajorAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:majors:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+    },
+    {
       "method": "PATCH",
       "path": "/admin/majors/:id",
       "owner": "MajorAdminRouter",
@@ -6230,7 +6470,8 @@
       "owner": "MajorAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:majors:manage"
+        "admin:majors:manage",
+        "admin:majors:review"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -6260,6 +6501,40 @@
     {
       "method": "PUT",
       "path": "/admin/majors/:id/content-sections",
+      "owner": "MajorAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:majors:manage",
+        "admin:majors:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/majors/:id/degree-reference",
+      "owner": "MajorAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:majors:manage",
+        "admin:majors:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/majors/:id/fellowship-profiles",
       "owner": "MajorAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
@@ -6329,7 +6604,25 @@
       "owner": "MajorAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:majors:manage"
+        "admin:majors:manage",
+        "admin:majors:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/majors/:id/restore",
+      "owner": "MajorAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:majors:manage",
+        "admin:majors:review"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -6804,6 +7097,102 @@
     },
     {
       "method": "POST",
+      "path": "/admin/review-workspace/bulk",
+      "owner": "ReviewWorkspaceRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:platform:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "OWNER_COORDINATION_IDEMPOTENCY_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReviewWorkspaceRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/review-workspace/commands",
+      "owner": "ReviewWorkspaceRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:platform:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "OWNER_COORDINATION_IDEMPOTENCY_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReviewWorkspaceRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/review-workspace/policies",
+      "owner": "ReviewWorkspaceRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:platform:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "OWNER_COORDINATION_IDEMPOTENCY_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReviewWorkspaceRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/review-workspace/query",
+      "owner": "ReviewWorkspaceRouter",
+      "classification": "NO_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:platform:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "READ_ONLY_BODY_QUERY",
+      "auditEvidence": "REVIEWED_NON_MUTATING_POST_EXEMPTION",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReviewWorkspaceRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/review-workspace/synchronize",
+      "owner": "ReviewWorkspaceRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:platform:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "OWNER_COORDINATION_IDEMPOTENCY_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReviewWorkspaceRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/review-workspace/views",
+      "owner": "ReviewWorkspaceRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:platform:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "OWNER_COORDINATION_IDEMPOTENCY_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReviewWorkspaceRouter.ts"
+    },
+    {
+      "method": "POST",
       "path": "/admin/scholarships",
       "owner": "ScholarshipAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
@@ -6868,6 +7257,22 @@
     },
     {
       "method": "POST",
+      "path": "/admin/scholarships/:id/localized-description",
+      "owner": "ScholarshipAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:scholarships:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts"
+    },
+    {
+      "method": "POST",
       "path": "/admin/scholarships/:id/mark-publishable",
       "owner": "ScholarshipAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
@@ -6908,6 +7313,38 @@
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/scholarships/:id/reference-transitions",
+      "owner": "ScholarshipAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:scholarships:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/scholarships/:id/reference-transitions/:transitionId/approve",
+      "owner": "ScholarshipAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:scholarships:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
@@ -7524,6 +7961,25 @@
     },
     {
       "method": "POST",
+      "path": "/admin/services/requests/:requestId/application-evidence",
+      "owner": "ManagedApplicationEvidenceRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:requests:fulfill",
+        "admin:services:requests:all",
+        "admin:services:applications:verify"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ManagedApplicationEvidenceRouter.ts"
+    },
+    {
+      "method": "POST",
       "path": "/admin/services/requests/:requestId/claim",
       "owner": "ServiceAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
@@ -7730,6 +8186,38 @@
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
       "source": "apps/api/src/presentation/api/router/SettingsAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/student-document-reviews/:id/attest",
+      "owner": "StudentDocumentReviewRouter",
+      "classification": "STANDARD_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:students:documents:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/StudentDocumentReviewRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/student-document-reviews/:id/open",
+      "owner": "StudentDocumentReviewRouter",
+      "classification": "STANDARD_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:students:documents:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/StudentDocumentReviewRouter.ts"
     },
     {
       "method": "PATCH",
@@ -7988,6 +8476,39 @@
       "source": "apps/api/src/presentation/api/router/StudyDestinationAdminRouter.ts"
     },
     {
+      "method": "POST",
+      "path": "/admin/translations/owners/:domain/:publicId/:locale/publish",
+      "owner": "TranslationWorkspaceRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:universities:manage",
+        "admin:majors:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/TranslationWorkspaceRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/universities",
+      "owner": "UniversityAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:universities:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/UniversityAdminRouter.ts"
+    },
+    {
       "method": "PATCH",
       "path": "/admin/universities/:id",
       "owner": "UniversityAdminRouter",
@@ -8045,6 +8566,22 @@
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/UniversityAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/universities/:id/academic-programs/:programId/restore",
+      "owner": "UniversityAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:universities:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
@@ -8148,6 +8685,38 @@
       "source": "apps/api/src/presentation/api/router/UniversityAdminRouter.ts"
     },
     {
+      "method": "POST",
+      "path": "/admin/universities/:id/restore",
+      "owner": "UniversityAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:universities:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/UniversityAdminRouter.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/admin/universities/:id/stage-cards/:cardId",
+      "owner": "UniversityAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:universities:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/UniversityAdminRouter.ts"
+    },
+    {
       "method": "PUT",
       "path": "/admin/universities/:id/translations/:locale",
       "owner": "UniversityAdminRouter",
@@ -8210,274 +8779,6 @@
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
       "source": "apps/api/src/presentation/api/router/UniversityProgramWorkspaceRouter.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/admin/certificates/issuers/:id/delegations",
-      "owner": "CertificateAdminRouter",
-      "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:certificates:issuers:manage"
-      ],
-      "conditionalPermissionReview": true,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/admin/certificates/delegations/:id/review",
-      "owner": "CertificateAdminRouter",
-      "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:certificates:issuers:approve"
-      ],
-      "conditionalPermissionReview": true,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/admin/certificates/delegations/:id/evidence-delivery-grant",
-      "owner": "CertificateAdminRouter",
-      "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:certificates:issuers:approve",
-        "admin:certificates:issuers:manage"
-      ],
-      "conditionalPermissionReview": true,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "conditionalPermissionPolicies": [
-        {
-          "resolver": "delegationReader",
-          "permissions": [
-            "admin:certificates:issuers:approve",
-            "admin:certificates:issuers:manage"
-          ],
-          "sourceFingerprint": "c1c6c2693423fa98c794fb7bd40b0b0888c47457cca46e1446db4fd1f8fe9ec5"
-        }
-      ],
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/admin/certificates/:id/render-retry",
-      "owner": "CertificateAdminRouter",
-      "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:certificates:lifecycle:manage"
-      ],
-      "conditionalPermissionReview": true,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/admin/courses/:id/localized-description",
-      "owner": "CourseAdminRouter",
-      "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
-      "conditionalPermissionReview": false,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
-    },
-    {
-      "method": "PATCH",
-      "path": "/admin/courses/learning-paths/:pathId",
-      "owner": "CourseAdminRouter",
-      "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:courses:manage"
-      ],
-      "conditionalPermissionReview": false,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/admin/international-tests/:id/localized-description",
-      "owner": "InternationalTestAdminRouter",
-      "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:international-tests:manage"
-      ],
-      "conditionalPermissionReview": false,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/admin/majors",
-      "owner": "MajorAdminRouter",
-      "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:majors:manage"
-      ],
-      "conditionalPermissionReview": false,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/admin/majors/:id/fellowship-profiles",
-      "owner": "MajorAdminRouter",
-      "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:majors:manage"
-      ],
-      "conditionalPermissionReview": false,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/admin/scholarships/:id/localized-description",
-      "owner": "ScholarshipAdminRouter",
-      "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:scholarships:manage"
-      ],
-      "conditionalPermissionReview": false,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/admin/scholarships/:id/reference-transitions",
-      "owner": "ScholarshipAdminRouter",
-      "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:scholarships:manage"
-      ],
-      "conditionalPermissionReview": false,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/admin/scholarships/:id/reference-transitions/:transitionId/approve",
-      "owner": "ScholarshipAdminRouter",
-      "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:scholarships:manage"
-      ],
-      "conditionalPermissionReview": false,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/admin/student-document-reviews/:id/attest",
-      "owner": "StudentDocumentReviewRouter",
-      "classification": "STANDARD_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:students:documents:review"
-      ],
-      "conditionalPermissionReview": false,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/StudentDocumentReviewRouter.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/admin/student-document-reviews/:id/open",
-      "owner": "StudentDocumentReviewRouter",
-      "classification": "STANDARD_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:students:documents:review"
-      ],
-      "conditionalPermissionReview": false,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/StudentDocumentReviewRouter.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/admin/translations/owners/:domain/:publicId/:locale/publish",
-      "owner": "TranslationWorkspaceRouter",
-      "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:universities:manage",
-        "admin:majors:manage"
-      ],
-      "conditionalPermissionReview": false,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/TranslationWorkspaceRouter.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/admin/universities",
-      "owner": "UniversityAdminRouter",
-      "classification": "CRITICAL_AUDIT_REQUIRED",
-      "permissionEvidence": [
-        "admin:universities:manage"
-      ],
-      "conditionalPermissionReview": false,
-      "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
-      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
-      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
-      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
-      "source": "apps/api/src/presentation/api/router/UniversityAdminRouter.ts"
     }
   ],
   "knownRouteCollisions": [
@@ -8552,5 +8853,100 @@
     "removedHandlers": 0,
     "report": "docs/remediation/POST28_CI_PREFLIGHT_FIX_2026-10-16.md",
     "scope": "Source inventory review only; exact route permissions and named helper fingerprints retained. No owner transaction, runtime, release or production acceptance."
+  },
+  "reviewWorkspaceCoordinationReview": {
+    "date": "2026-10-24",
+    "scope": "New section 02 routes only; existing route contracts unchanged. Owner permissions remain independently checked. Search is read-only and excluded from audit payloads; commands replay only after current actor and recipient checks. Synchronization, deterministic saved views and version-guarded policies do not repeat their business effects.",
+    "added": [
+      "POST /admin/review-workspace/bulk @ReviewWorkspaceRouter",
+      "POST /admin/review-workspace/commands @ReviewWorkspaceRouter",
+      "POST /admin/review-workspace/policies @ReviewWorkspaceRouter",
+      "POST /admin/review-workspace/query @ReviewWorkspaceRouter",
+      "POST /admin/review-workspace/synchronize @ReviewWorkspaceRouter",
+      "POST /admin/review-workspace/views @ReviewWorkspaceRouter"
+    ],
+    "report": "docs/ui/REVIEW_WORKSPACE_EXECUTION_2026-10-24.md"
+  },
+  "cumulativeAdminReleaseSourceReview": {
+    "date": "2026-10-26",
+    "scope": "User-authorized cumulative admin merge; exact route/handler contracts reviewed against global strict auth, MFA, idempotency and request audit boundaries.",
+    "changedRoutes": [
+      "POST /admin/authorization/policies/test @AuthorizationAdminRouter",
+      "POST /admin/courses @CourseAdminRouter",
+      "PATCH /admin/courses/:id @CourseAdminRouter",
+      "POST /admin/courses/:id/archive @CourseAdminRouter",
+      "POST /admin/courses/:id/assessment-reviews/:attemptId/grade @CourseAdminRouter",
+      "PUT /admin/courses/:id/certificate-binding @CourseAdminRouter",
+      "PUT /admin/courses/:id/delivery-policy @CourseAdminRouter",
+      "POST /admin/courses/:id/duplicate @CourseAdminRouter",
+      "PUT /admin/courses/:id/enrollment-policy @CourseAdminRouter",
+      "DELETE /admin/courses/:id/lessons/:lessonId @CourseAdminRouter",
+      "PATCH /admin/courses/:id/lessons/:lessonId @CourseAdminRouter",
+      "POST /admin/courses/:id/lessons/:lessonId/assets @CourseAdminRouter",
+      "DELETE /admin/courses/:id/lessons/:lessonId/assets/:assetId @CourseAdminRouter",
+      "PUT /admin/courses/:id/lessons/:lessonId/content-blocks @CourseAdminRouter",
+      "POST /admin/courses/:id/lessons/:lessonId/convert-text @CourseAdminRouter",
+      "POST /admin/courses/:id/lessons/:lessonId/duplicate @CourseAdminRouter",
+      "POST /admin/courses/:id/localized-description @CourseAdminRouter",
+      "POST /admin/courses/:id/mark-publishable @CourseAdminRouter",
+      "POST /admin/courses/:id/mark-ready @CourseAdminRouter",
+      "POST /admin/courses/:id/modules @CourseAdminRouter",
+      "DELETE /admin/courses/:id/modules/:moduleId @CourseAdminRouter",
+      "PATCH /admin/courses/:id/modules/:moduleId @CourseAdminRouter",
+      "POST /admin/courses/:id/modules/:moduleId/duplicate @CourseAdminRouter",
+      "POST /admin/courses/:id/modules/:moduleId/lessons @CourseAdminRouter",
+      "PUT /admin/courses/:id/modules/:moduleId/lessons/reorder @CourseAdminRouter",
+      "PUT /admin/courses/:id/modules/reorder @CourseAdminRouter",
+      "POST /admin/courses/:id/publish @CourseAdminRouter",
+      "POST /admin/courses/:id/question-banks @CourseAdminRouter",
+      "DELETE /admin/courses/:id/question-banks/:bankId @CourseAdminRouter",
+      "PATCH /admin/courses/:id/question-banks/:bankId @CourseAdminRouter",
+      "POST /admin/courses/:id/questions @CourseAdminRouter",
+      "DELETE /admin/courses/:id/questions/:questionId @CourseAdminRouter",
+      "PATCH /admin/courses/:id/questions/:questionId @CourseAdminRouter",
+      "POST /admin/courses/:id/quizzes @CourseAdminRouter",
+      "DELETE /admin/courses/:id/quizzes/:quizId @CourseAdminRouter",
+      "PATCH /admin/courses/:id/quizzes/:quizId @CourseAdminRouter",
+      "POST /admin/courses/:id/reject @CourseAdminRouter",
+      "POST /admin/courses/:id/relationships/analyze @CourseAdminRouter",
+      "POST /admin/courses/:id/relationships/language @CourseAdminRouter",
+      "POST /admin/courses/:id/relationships/majors @CourseAdminRouter",
+      "POST /admin/courses/:id/relationships/majors/:projectionId/approve @CourseAdminRouter",
+      "POST /admin/courses/:id/relationships/majors/:projectionId/reject @CourseAdminRouter",
+      "POST /admin/courses/:id/relationships/majors/project @CourseAdminRouter",
+      "POST /admin/courses/:id/relationships/taxonomy @CourseAdminRouter",
+      "POST /admin/courses/:id/relationships/taxonomy/:linkId/approve @CourseAdminRouter",
+      "POST /admin/courses/:id/relationships/taxonomy/:linkId/reject @CourseAdminRouter",
+      "POST /admin/courses/:id/relationships/tests @CourseAdminRouter",
+      "POST /admin/courses/:id/relationships/tests/:relationshipId/approve @CourseAdminRouter",
+      "POST /admin/courses/:id/relationships/tests/:relationshipId/reject @CourseAdminRouter",
+      "POST /admin/courses/:id/unpublish @CourseAdminRouter",
+      "POST /admin/courses/imported @ImportedCourseAdminRouter",
+      "POST /admin/courses/imported/bulk/:batchId/cancel @ImportedCourseAdminRouter",
+      "POST /admin/courses/imported/bulk/:batchId/confirm @ImportedCourseAdminRouter",
+      "POST /admin/courses/imported/bulk/:batchId/retry @ImportedCourseAdminRouter",
+      "POST /admin/courses/imported/bulk/:batchId/step @ImportedCourseAdminRouter",
+      "POST /admin/courses/imported/bulk/preview @ImportedCourseAdminRouter",
+      "POST /admin/courses/learning-paths @CourseAdminRouter",
+      "PATCH /admin/courses/learning-paths/:pathId @CourseAdminRouter",
+      "POST /admin/courses/learning-paths/:pathId/archive @CourseAdminRouter",
+      "POST /admin/courses/learning-paths/:pathId/mark-publishable @CourseAdminRouter",
+      "POST /admin/courses/learning-paths/:pathId/publish @CourseAdminRouter",
+      "POST /admin/majors/:id/archive @MajorAdminRouter",
+      "PUT /admin/majors/:id/content-sections @MajorAdminRouter",
+      "POST /admin/majors/:id/degree-reference @MajorAdminRouter",
+      "POST /admin/majors/:id/reject @MajorAdminRouter",
+      "POST /admin/majors/:id/restore @MajorAdminRouter",
+      "POST /admin/universities/:id/academic-programs/:programId/restore @UniversityAdminRouter",
+      "POST /admin/universities/:id/restore @UniversityAdminRouter",
+      "PUT /admin/universities/:id/stage-cards/:cardId @UniversityAdminRouter"
+    ],
+    "evidence": [
+      "config/testing/admin-main-release.vitest.config.ts",
+      "docs/ui/COURSES_GOVERNANCE_EXECUTION_2026-10-26.md",
+      "docs/ui/UNIVERSITY_ADMIN_EXECUTION_2026-10-25.md",
+      "docs/ui/MAJOR_ADMIN_EXECUTION_2026-10-25.md"
+    ],
+    "limits": "Source contract inventory only. Atomic business audit and outbox continue to require owner evidence; no production deployment or independent source approval is inferred."
   }
 }

@@ -49,6 +49,11 @@ export class NotificationOutboxDeliveryGateway implements IOutboxDeliveryGateway
 
   private map(entry: TransactionalOutboxEntry): NotificationMapping | null {
     const payload = entry.payload as Record<string, unknown>;
+    if(entry.domain==='REVIEW_QUEUE'&&entry.eventType==='ReviewWorkAssigned.v1') return {
+      recipientReference:this.required(payload.recipientReference,'NOTIFICATION_REVIEW_RECIPIENT_REQUIRED'),
+      templateId:'system.ReviewWorkAssigned.v1',
+      variables:{eventType:entry.eventType,actionUrl:'/admin/review-queue'},
+    };
     if (
       entry.domain === 'COURSES' &&
       ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted'].includes(entry.eventType)

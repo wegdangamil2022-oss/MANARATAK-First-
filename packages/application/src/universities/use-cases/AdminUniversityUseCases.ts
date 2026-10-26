@@ -1,5 +1,9 @@
-import {randomUUID} from 'crypto';
-import { AssetReferencePolicy, assertAssetReferenceUsable } from '../../asset-platform/AssetReferencePolicy';
+import { randomUUID } from 'crypto';
+import { UNIVERSITY_STAGE_CARDS, type UniversityStageEvidenceReader } from '@manaratak/domain';
+import {
+  AssetReferencePolicy,
+  assertAssetReferenceUsable,
+} from '../../asset-platform/AssetReferencePolicy';
 import {
   IUniversityRepository,
   ITransactionalUniversityRepository,
@@ -20,7 +24,10 @@ import {
   PublicationReadinessResult,
   UniversityPublicationReadinessPolicy,
 } from '@manaratak/domain';
-import { assertNoTranslationPayloadFields, assertTranslationContentAuthoringEnabled } from '@manaratak/shared';
+import {
+  assertNoTranslationPayloadFields,
+  assertTranslationContentAuthoringEnabled,
+} from '@manaratak/shared';
 import {
   AtomicDomainMutationCoordinator,
   AtomicMutationRequestContext,
@@ -38,21 +45,72 @@ export class AdminUniversityUseCases {
     private readonly publicationReadiness = new PublicationReadinessEngine(),
     private readonly publicationPolicy = new UniversityPublicationReadinessPolicy(),
     private readonly assetReferences?: AssetReferencePolicy,
+    private readonly stageEvidence?: UniversityStageEvidenceReader,
   ) {}
 
-  public async createDraft(input:{displayName:string;officialWebsite:string;sourceUri:string;sourceHash:string;country?:string;countryReferenceId?:string},context?:UniversityMutationContext):Promise<UniversityDto> {
-    if(!this.atomicMutations || !context?.actorId || !context.reason?.trim()) throw new Error('UNIVERSITY_AUDITED_REVIEW_CONTEXT_REQUIRED');
-    if(!input.displayName.trim() || !/^[a-f0-9]{64}$/i.test(input.sourceHash)) throw new Error('UNIVERSITY_SOURCE_EVIDENCE_REQUIRED');
-    for(const value of [input.officialWebsite,input.sourceUri]) {const url=new URL(value);if(url.protocol!=='https:' || url.username || url.password) throw new Error('UNIVERSITY_HTTPS_SOURCE_REQUIRED');}
-    const repository=this.repository as Partial<ITransactionalUniversityRepository>;
-    if(!repository.withTransaction) throw new Error('UNIVERSITY_TRANSACTIONAL_PERSISTENCE_REQUIRED');
-    const id=randomUUID(); const name=input.displayName.trim();
-    const key=UniversityDeduplicationService.generateKey({universityName:name,officialWebsite:input.officialWebsite,country:input.country});
-    return this.atomicMutations.execute({domain:'UNIVERSITIES',aggregateType:'UNIVERSITY',aggregateId:id,action:'UNIVERSITY_DRAFT_CREATED',context,auditMetadata:{reason:context.reason,source:'ADMIN_ENTRY'}},async transaction=>{
-      const tx=repository.withTransaction!(transaction);
-      if(await tx.findByDedupKey(key)) throw new Error('UNIVERSITY_DUPLICATE_IDENTITY');
-      return tx.create({id,publicId:`INS-ADMIN-${id.toUpperCase()}`,slug:`university-${id}`,canonicalName:name,canonicalDedupKey:key,displayName:name,officialWebsite:input.officialWebsite,officialSourceUrl:input.sourceUri,country:input.country,countryReferenceId:input.countryReferenceId,status:UniversityStatus.READY_TO_REVIEW,completenessStatus:UniversityImportCompletenessState.NEEDS_REVIEW,optionalFields:{creationSource:'ADMIN_ENTRY',createdBy:context.actorId,sourceHash:input.sourceHash}});
+  public async createDraft(
+    input: {
+      displayName: string;
+      officialWebsite: string;
+      sourceUri: string;
+      sourceHash: string;
+      country?: string;
+      countryReferenceId?: string;
+    },
+    context?: UniversityMutationContext,
+  ): Promise<UniversityDto> {
+    if (!this.atomicMutations || !context?.actorId || !context.reason?.trim())
+      throw new Error('UNIVERSITY_AUDITED_REVIEW_CONTEXT_REQUIRED');
+    if (!input.displayName.trim() || !/^[a-f0-9]{64}$/i.test(input.sourceHash))
+      throw new Error('UNIVERSITY_SOURCE_EVIDENCE_REQUIRED');
+    for (const value of [input.officialWebsite, input.sourceUri]) {
+      const url = new URL(value);
+      if (url.protocol !== 'https:' || url.username || url.password)
+        throw new Error('UNIVERSITY_HTTPS_SOURCE_REQUIRED');
+    }
+    const repository = this.repository as Partial<ITransactionalUniversityRepository>;
+    if (!repository.withTransaction)
+      throw new Error('UNIVERSITY_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+    const id = randomUUID();
+    const name = input.displayName.trim();
+    const key = UniversityDeduplicationService.generateKey({
+      universityName: name,
+      officialWebsite: input.officialWebsite,
+      country: input.country,
     });
+    return this.atomicMutations.execute(
+      {
+        domain: 'UNIVERSITIES',
+        aggregateType: 'UNIVERSITY',
+        aggregateId: id,
+        action: 'UNIVERSITY_DRAFT_CREATED',
+        context,
+        auditMetadata: { reason: context.reason, source: 'ADMIN_ENTRY' },
+      },
+      async (transaction) => {
+        const tx = repository.withTransaction!(transaction);
+        if (await tx.findByDedupKey(key)) throw new Error('UNIVERSITY_DUPLICATE_IDENTITY');
+        return tx.create({
+          id,
+          publicId: `INS-ADMIN-${id.toUpperCase()}`,
+          slug: `university-${id}`,
+          canonicalName: name,
+          canonicalDedupKey: key,
+          displayName: name,
+          officialWebsite: input.officialWebsite,
+          officialSourceUrl: input.sourceUri,
+          country: input.country,
+          countryReferenceId: input.countryReferenceId,
+          status: UniversityStatus.READY_TO_REVIEW,
+          completenessStatus: UniversityImportCompletenessState.NEEDS_REVIEW,
+          optionalFields: {
+            creationSource: 'ADMIN_ENTRY',
+            createdBy: context.actorId,
+            sourceHash: input.sourceHash,
+          },
+        });
+      },
+    );
   }
 
   public async listUniversities(
@@ -78,6 +136,161 @@ export class AdminUniversityUseCases {
     return university;
   }
 
+  public async getSourceStages(id: string) {
+    const university = await this.getUniversity(id);
+    const geography = await this.repository.readStageGeography?.(id);
+    const stages = this.stageEvidence
+      ? await this.stageEvidence.read(
+          university.publicId,
+          university.sourceRecords ?? [],
+          geography,
+        )
+      : Array.from({ length: 5 }, (_, index) => ({
+          stage: index + 1,
+          sourceState: 'UNAVAILABLE',
+          importState: 'UNKNOWN',
+          continent: null,
+          fields: {},
+          issues: ['SOURCE_READER_UNAVAILABLE'],
+        }));
+    let publicHref: string | null = null;
+    if (university.status === UniversityStatus.PUBLISHED && university.slug) {
+      try {
+        const visible = await this.repository.findPublishedBySlug(university.slug);
+        if (visible?.id === id) publicHref = '/universities/' + encodeURIComponent(university.slug);
+      } catch {
+        /* An unavailable public read is not publication proof. */
+      }
+    }
+    return { university, stages, publicHref };
+  }
+
+  public async saveStageCard(
+    id: string,
+    cardId: string,
+    values: Record<string, unknown>,
+    proof: { sourceUrl: string; verifiedAt: string },
+    context?: UniversityMutationContext,
+  ) {
+    const definition = UNIVERSITY_STAGE_CARDS.find((card) => card.id === cardId);
+    const editable = definition?.fields.filter((field) => field.canonical) ?? [];
+    if (
+      !editable.length ||
+      !Object.keys(values).length ||
+      Object.keys(values).some((key) => !editable.some((f) => f.canonical === key))
+    )
+      throw Error('UNIVERSITY_STAGE_CARD_FIELDS_INVALID');
+    const url = new URL(proof.sourceUrl);
+    if (
+      url.protocol !== 'https:' ||
+      url.username ||
+      url.password ||
+      !Number.isFinite(Date.parse(proof.verifiedAt)) ||
+      Date.parse(proof.verifiedAt) > Date.now() + 60000
+    )
+      throw Error('UNIVERSITY_STAGE_CARD_EVIDENCE_INVALID');
+    const existing = await this.getUniversity(id),
+      optional: Record<string, unknown> = {},
+      updates: UpdateUniversityDto = {};
+    const admissions = {
+      ...(((existing as unknown as Record<string, unknown>).internationalAdmissions as Record<
+        string,
+        unknown
+      >) ?? {}),
+    };
+    for (const [key, value] of Object.entries(values)) {
+      const field = editable.find((f) => f.canonical === key)!;
+      if (
+        field.type === 'number'
+          ? value !== null &&
+            (!Number.isInteger(value) ||
+              Number(value) < 800 ||
+              Number(value) > new Date().getUTCFullYear())
+          : field.type === 'boolean'
+            ? value !== null && typeof value !== 'boolean'
+            : field.type === 'lines'
+              ? !Array.isArray(value) ||
+                value.length > 100 ||
+                value.some((v) => typeof v !== 'string' || v.length > 10000)
+              : typeof value !== 'string' || value.length > 20000
+      )
+        throw Error('UNIVERSITY_STAGE_CARD_VALUE_INVALID');
+      if (typeof value === 'string' && value && (/Url$/.test(key) || key === 'officialWebsite')) {
+        const link = new URL(value);
+        if (!['https:', 'http:'].includes(link.protocol) || link.username || link.password)
+          throw Error('UNIVERSITY_STAGE_CARD_URL_INVALID');
+      }
+      if (key === 'displayName' && !String(value).trim()) throw Error('UNIVERSITY_NAME_REQUIRED');
+      if (key.startsWith('internationalAdmissions.')) admissions[key.split('.')[1]] = value;
+      else if (
+        [
+          'displayName',
+          'institutionType',
+          'institutionalOwnership',
+          'officialWebsite',
+          'foundedYear',
+        ].includes(key)
+      )
+        (updates as Record<string, unknown>)[key] = value;
+      else optional[key] = value;
+    }
+    if (Object.keys(values).some((key) => key.startsWith('internationalAdmissions.')))
+      optional.internationalAdmissions = admissions;
+    const metadata = existing.metadata ?? {},
+      oldProof = (metadata.universityCardEvidence as Record<string, unknown>) ?? {};
+    optional.metadata = {
+      ...metadata,
+      universityCardEvidence: {
+        ...oldProof,
+        [cardId]: { ...proof, actorId: context?.actorId, fields: Object.keys(values) },
+      },
+    };
+    updates.optionalFields = optional;
+    return this.updateUniversity(id, updates, context);
+  }
+
+  public async restore(id: string, context?: UniversityMutationContext): Promise<void> {
+    const existing = await this.getUniversity(id);
+    if (![UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(existing.status))
+      throw Error('UNIVERSITY_RESTORE_STATE_INVALID');
+    await this.mutate(
+      'UNIVERSITY_RESTORED_TO_REVIEW',
+      id,
+      context,
+      (repository) => repository.updateStatus(id, UniversityStatus.READY_TO_REVIEW),
+      {},
+      true,
+    );
+  }
+
+  public async restoreAcademicProgram(
+    id: string,
+    programId: string,
+    context?: UniversityMutationContext,
+  ) {
+    const university = await this.getUniversity(id),
+      program = university.academicPrograms?.find((row) => row.id === programId);
+    if (!program || program.status !== 'ARCHIVED')
+      throw Error('UNIVERSITY_PROGRAM_RESTORE_STATE_INVALID');
+    if (!program.degreeLevelId) throw Error('UNIVERSITY_PROGRAM_DEGREE_LEVEL_REQUIRED');
+    if (
+      [UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(
+        university.status,
+      )
+    )
+      throw Error('UNIVERSITY_NON_EDITABLE_STATUS');
+    return this.mutate('UNIVERSITY_PROGRAM_RESTORED_TO_DRAFT', id, context, async (repository) => {
+      if (!repository.restoreAcademicProgram)
+        throw Error('UNIVERSITY_PROGRAM_RESTORE_PERSISTENCE_REQUIRED');
+      const result = await repository.restoreAcademicProgram(id, programId);
+      if (university.status === UniversityStatus.READY_TO_PUBLISH) {
+        await repository.updateStatus(id, UniversityStatus.READY_TO_REVIEW);
+        result.status = UniversityStatus.READY_TO_REVIEW;
+      }
+      return result;
+    });
+  }
+
   public async listTranslations(id: string): Promise<UniversityTranslationDto[]> {
     await this.getUniversity(id);
     if (!this.repository.listTranslations) {
@@ -88,10 +301,7 @@ export class AdminUniversityUseCases {
 
   public async upsertTranslation(
     id: string,
-    input: Omit<
-      UniversityTranslationDto,
-      'id' | 'universityId' | 'createdAt' | 'updatedAt'
-    >,
+    input: Omit<UniversityTranslationDto, 'id' | 'universityId' | 'createdAt' | 'updatedAt'>,
     context?: UniversityMutationContext,
   ): Promise<UniversityTranslationDto> {
     assertTranslationContentAuthoringEnabled('UNIVERSITY');
@@ -100,7 +310,8 @@ export class AdminUniversityUseCases {
       throw new Error(`UNSUPPORTED_TRANSLATION_LOCALE:${input.locale}`);
     }
 
-    if(input.reviewStatus && input.reviewStatus!=='NEEDS_REVIEW')throw new Error('TRANSLATION_OWNER_REVIEW_WORKFLOW_REQUIRED');
+    if (input.reviewStatus && input.reviewStatus !== 'NEEDS_REVIEW')
+      throw new Error('TRANSLATION_OWNER_REVIEW_WORKFLOW_REQUIRED');
 
     return this.mutate('UNIVERSITY_TRANSLATION_UPSERTED', id, context, async (repository) => {
       if (!repository.upsertTranslation) {
@@ -116,10 +327,16 @@ export class AdminUniversityUseCases {
     context?: UniversityMutationContext,
   ): Promise<UniversityDto> {
     assertNoTranslationPayloadFields('UNIVERSITY', updates.optionalFields, ['localizedNames']);
-    await assertAssetReferenceUsable(this.assetReferences, updates.logoAssetId, { purpose: 'UNIVERSITY_LOGO', publicPublication: true });
+    await assertAssetReferenceUsable(this.assetReferences, updates.logoAssetId, {
+      purpose: 'UNIVERSITY_LOGO',
+      publicPublication: true,
+    });
     const existing = await this.getUniversity(id);
-    if ([UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED]
-      .includes(existing.status)) {
+    if (
+      [UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(
+        existing.status,
+      )
+    ) {
       throw new Error('UNIVERSITY_NON_EDITABLE_STATUS');
     }
 
@@ -139,12 +356,25 @@ export class AdminUniversityUseCases {
 
     const classification = UniversityCompletenessClassifier.classify(payloadForClassification);
 
-    return this.mutate('UNIVERSITY_UPDATED', id, context, (repository) =>
-      repository.update(id, {
-        ...updates,
-        status: existing.status === UniversityStatus.READY_TO_PUBLISH ? UniversityStatus.READY_TO_REVIEW : existing.status,
-        completenessStatus: classification.state,
-      }),
+    return this.mutate(
+      'UNIVERSITY_UPDATED',
+      id,
+      context,
+      (repository) =>
+        repository.update(id, {
+          ...updates,
+          status:
+            existing.status === UniversityStatus.READY_TO_PUBLISH
+              ? UniversityStatus.READY_TO_REVIEW
+              : existing.status,
+          completenessStatus: classification.state,
+        }),
+      {
+        changedFields: [
+          ...Object.keys(updates).filter((key) => key !== 'optionalFields'),
+          ...Object.keys(updates.optionalFields ?? {}),
+        ],
+      },
     );
   }
 
@@ -155,7 +385,11 @@ export class AdminUniversityUseCases {
     context?: UniversityMutationContext,
   ): Promise<UniversityDto> {
     const university = await this.getUniversity(universityId);
-    if ([UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(university.status)) {
+    if (
+      [UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(
+        university.status,
+      )
+    ) {
       throw new Error('UNIVERSITY_NON_EDITABLE_STATUS');
     }
     if (!input.sourceProgramName.trim()) throw new Error('UNIVERSITY_PROGRAM_NAME_REQUIRED');
@@ -165,7 +399,8 @@ export class AdminUniversityUseCases {
       universityId,
       context,
       async (repository) => {
-        if (!repository.upsertAcademicProgram) throw new Error('UNIVERSITY_PROGRAM_PERSISTENCE_NOT_AVAILABLE');
+        if (!repository.upsertAcademicProgram)
+          throw new Error('UNIVERSITY_PROGRAM_PERSISTENCE_NOT_AVAILABLE');
         const result = await repository.upsertAcademicProgram(universityId, programId, input);
         if (university.status === UniversityStatus.READY_TO_PUBLISH) {
           await repository.updateStatus(universityId, UniversityStatus.READY_TO_REVIEW);
@@ -182,18 +417,28 @@ export class AdminUniversityUseCases {
     context?: UniversityMutationContext,
   ): Promise<UniversityDto> {
     const university = await this.getUniversity(universityId);
-    if ([UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(university.status)) {
+    if (
+      [UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(
+        university.status,
+      )
+    ) {
       throw new Error('UNIVERSITY_NON_EDITABLE_STATUS');
     }
-    return this.mutate('UNIVERSITY_ACADEMIC_PROGRAM_ARCHIVED', universityId, context, async (repository) => {
-      if (!repository.archiveAcademicProgram) throw new Error('UNIVERSITY_PROGRAM_PERSISTENCE_NOT_AVAILABLE');
-      const result = await repository.archiveAcademicProgram(universityId, programId);
-      if (university.status === UniversityStatus.READY_TO_PUBLISH) {
-        await repository.updateStatus(universityId, UniversityStatus.READY_TO_REVIEW);
-        result.status = UniversityStatus.READY_TO_REVIEW;
-      }
-      return result;
-    });
+    return this.mutate(
+      'UNIVERSITY_ACADEMIC_PROGRAM_ARCHIVED',
+      universityId,
+      context,
+      async (repository) => {
+        if (!repository.archiveAcademicProgram)
+          throw new Error('UNIVERSITY_PROGRAM_PERSISTENCE_NOT_AVAILABLE');
+        const result = await repository.archiveAcademicProgram(universityId, programId);
+        if (university.status === UniversityStatus.READY_TO_PUBLISH) {
+          await repository.updateStatus(universityId, UniversityStatus.READY_TO_REVIEW);
+          result.status = UniversityStatus.READY_TO_REVIEW;
+        }
+        return result;
+      },
+    );
   }
 
   public async replaceNormalizedDetails(
@@ -201,13 +446,15 @@ export class AdminUniversityUseCases {
     details: UniversityNormalizedDetailsUpdate,
     context?: UniversityMutationContext,
   ): Promise<UniversityDto> {
-    assertNoTranslationPayloadFields(
-      'UNIVERSITY',
-      details as unknown as Record<string, unknown>,
-      ['localizedNames'],
-    );
+    assertNoTranslationPayloadFields('UNIVERSITY', details as unknown as Record<string, unknown>, [
+      'localizedNames',
+    ]);
     const existing = await this.getUniversity(id);
-    if ([UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(existing.status)) {
+    if (
+      [UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(
+        existing.status,
+      )
+    ) {
       throw new Error('UNIVERSITY_NON_EDITABLE_STATUS');
     }
     return this.mutate(
@@ -219,7 +466,15 @@ export class AdminUniversityUseCases {
           throw new Error('UNIVERSITY_NORMALIZED_PERSISTENCE_NOT_AVAILABLE');
         }
         const current = await repository.findById(id);
-        if (!current || [UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(current.status)) throw new Error('UNIVERSITY_NON_EDITABLE_STATUS');
+        if (
+          !current ||
+          [
+            UniversityStatus.PUBLISHED,
+            UniversityStatus.ARCHIVED,
+            UniversityStatus.REJECTED,
+          ].includes(current.status)
+        )
+          throw new Error('UNIVERSITY_NON_EDITABLE_STATUS');
         const result = await repository.replaceNormalizedDetails(id, details);
         if (existing.status === UniversityStatus.READY_TO_PUBLISH) {
           await repository.updateStatus(id, UniversityStatus.READY_TO_REVIEW);
@@ -230,12 +485,12 @@ export class AdminUniversityUseCases {
     );
   }
 
-  public async markReadyToReview(
-    id: string,
-    context?: UniversityMutationContext,
-  ): Promise<void> {
+  public async markReadyToReview(id: string, context?: UniversityMutationContext): Promise<void> {
     const existing = await this.getUniversity(id);
-    if (existing.status !== UniversityStatus.IMPORTED && existing.status !== UniversityStatus.READY_TO_REVIEW)
+    if (
+      existing.status !== UniversityStatus.IMPORTED &&
+      existing.status !== UniversityStatus.READY_TO_REVIEW
+    )
       throw new Error('UNIVERSITY_INVALID_REVIEW_TRANSITION');
     if (existing.completenessStatus === UniversityImportCompletenessState.INCOMPLETE) {
       throw new Error('Cannot mark INCOMPLETE university as READY_TO_REVIEW');
@@ -247,10 +502,7 @@ export class AdminUniversityUseCases {
     }
   }
 
-  public async markReadyToPublish(
-    id: string,
-    context?: UniversityMutationContext,
-  ): Promise<void> {
+  public async markReadyToPublish(id: string, context?: UniversityMutationContext): Promise<void> {
     const existing = await this.getUniversity(id);
     if (existing.status !== UniversityStatus.READY_TO_REVIEW)
       throw new Error('UNIVERSITY_INVALID_PUBLISHABLE_TRANSITION');
@@ -281,7 +533,10 @@ export class AdminUniversityUseCases {
     if (existing.status !== UniversityStatus.READY_TO_PUBLISH) {
       throw new Error('Only READY_TO_PUBLISH universities can be PUBLISHED');
     }
-    await assertAssetReferenceUsable(this.assetReferences, existing.logoAssetId, { purpose:'UNIVERSITY_LOGO',publicPublication:true });
+    await assertAssetReferenceUsable(this.assetReferences, existing.logoAssetId, {
+      purpose: 'UNIVERSITY_LOGO',
+      publicPublication: true,
+    });
     this.publicationReadiness.assertReady(id, existing, this.publicationPolicy);
     await this.mutate('UNIVERSITY_PUBLISHED', id, context, (repository) =>
       repository.updateStatus(id, UniversityStatus.PUBLISHED),
@@ -323,21 +578,37 @@ export class AdminUniversityUseCases {
     id: string,
     context: UniversityMutationContext | undefined,
     mutation: (repository: IUniversityRepository) => Promise<T>,
+    auditDetails: Record<string, unknown> = {},
+    restoring = false,
   ): Promise<T> {
     if (!this.atomicMutations || !context?.actorId || !context.reason?.trim())
       throw new Error('UNIVERSITY_AUDITED_REVIEW_CONTEXT_REQUIRED');
     if (!Number.isSafeInteger(context.expectedRevision) || (context.expectedRevision ?? -1) < 0)
       throw new Error('UNIVERSITY_EXPECTED_REVISION_REQUIRED');
     const repository = this.repository as Partial<ITransactionalUniversityRepository>;
-    if (!repository.withTransaction) throw new Error('UNIVERSITY_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+    if (!repository.withTransaction)
+      throw new Error('UNIVERSITY_TRANSACTIONAL_PERSISTENCE_REQUIRED');
     return this.atomicMutations.execute(
-      { domain: 'UNIVERSITIES', aggregateType: 'UNIVERSITY', aggregateId: id, action, context,
-        auditMetadata: { reason: context.reason, expectedRevision: context.expectedRevision } },
+      {
+        domain: 'UNIVERSITIES',
+        aggregateType: 'UNIVERSITY',
+        aggregateId: id,
+        action,
+        context,
+        auditMetadata: {
+          ...auditDetails,
+          reason: context.reason,
+          expectedRevision: context.expectedRevision,
+        },
+      },
       async (transaction) => {
         const tx = repository.withTransaction!(transaction);
         if (!tx.lockForRevision || !tx.advanceRevision)
           throw new Error('UNIVERSITY_REVISION_PERSISTENCE_REQUIRED');
-        await tx.lockForRevision(id, context.expectedRevision!);
+        if (restoring) {
+          if (!tx.lockForRestoreRevision) throw Error('UNIVERSITY_RESTORE_PERSISTENCE_REQUIRED');
+          await tx.lockForRestoreRevision(id, context.expectedRevision!);
+        } else await tx.lockForRevision(id, context.expectedRevision!);
         const result = await mutation(tx);
         const revision = await tx.advanceRevision(id, context.expectedRevision!);
         if (result && typeof result === 'object' && 'id' in result)

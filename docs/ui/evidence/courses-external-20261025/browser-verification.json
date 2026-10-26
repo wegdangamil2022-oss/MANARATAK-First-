@@ -1,0 +1,109 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "realApi": true,
+  "canonicalMfa": true,
+  "originalDatabaseWrites": 0,
+  "checks": [
+    {
+      "name": "Arabic desktop create",
+      "viewport": 1440,
+      "width": 1440,
+      "dialogWidth": 1098,
+      "dialogScroll": 1098,
+      "cairo": true
+    },
+    "Canonical MFA/CSRF manual external draft with five sections, Arabic reason and independent unknown certificate; no fake import batch or automatic publication",
+    "Independent content edit, source identity protected, duplicate normalized URL rejected, and a real concurrent 409 retains unsaved input",
+    {
+      "name": "Arabic desktop read",
+      "viewport": 1440,
+      "width": 1440,
+      "dialogWidth": 1098,
+      "dialogScroll": 1098,
+      "cairo": true
+    },
+    {
+      "name": "Arabic details 768",
+      "viewport": 768,
+      "width": 768,
+      "dialogWidth": 720,
+      "dialogScroll": 720,
+      "cairo": true
+    },
+    {
+      "name": "Arabic details 360",
+      "viewport": 360,
+      "width": 360,
+      "dialogWidth": 358,
+      "dialogScroll": 358,
+      "cairo": true
+    },
+    {
+      "name": "Arabic details 320",
+      "viewport": 320,
+      "width": 320,
+      "dialogWidth": 318,
+      "dialogScroll": 318,
+      "cairo": true
+    },
+    {
+      "name": "Arabic desktop bulk blocked",
+      "viewport": 1440,
+      "width": 1440,
+      "dialogWidth": 1098,
+      "dialogScroll": 1098,
+      "cairo": true
+    },
+    {
+      "name": "Arabic mobile bulk blocked",
+      "viewport": 360,
+      "width": 360,
+      "dialogWidth": 358,
+      "dialogScroll": 358,
+      "cairo": true
+    },
+    "All-filter snapshot is stable, mandatory actual policy preview blocks incomplete publication, no fake success, batch resumes from server history after reload",
+    "Saving from a scrolled second page preserves its URL, page and background scroll position",
+    {
+      "name": "English mobile details",
+      "viewport": 360,
+      "width": 360,
+      "dialogWidth": 358,
+      "dialogScroll": 358,
+      "cairo": true
+    },
+    {
+      "name": "English desktop details",
+      "viewport": 1440,
+      "width": 1440,
+      "dialogWidth": 1098,
+      "dialogScroll": 1098,
+      "cairo": true
+    },
+    "Actual anonymous 401 and non-course staff 403; history remains course-scoped"
+  ],
+  "errors": [],
+  "screens": [
+    "desktop-create",
+    "desktop-version-conflict",
+    "desktop-details",
+    "mobile-details",
+    "desktop-bulk-preview",
+    "mobile-bulk-preview",
+    "english-mobile-details",
+    "english-desktop-details"
+  ],
+  "createdId": "22f7a344-065c-4f35-bdc5-2cc2e329f4d3",
+  "manualTitle": "External manual acceptance fea18b65-3059-4cd7-a366-43bdaf650626",
+  "batchId": "3a2439bd-f7f9-4030-bc34-f472d6a032bd",
+  "listContext": {
+    "before": 1381,
+    "after": {
+      "y": 1381,
+      "height": 1240.8125,
+      "pageHeight": 2381,
+      "viewport": 1000
+    }
+  },
+  "passed": true
+}

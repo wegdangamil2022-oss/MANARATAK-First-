@@ -52,6 +52,7 @@ export enum ServiceRequestStatus {
 }
 
 export interface ServiceCatalogItemDto {
+  managedApplication?: boolean;
   approvedPrice?: {
     amountMinorUnits: string;
     currencyCode: string;
@@ -165,6 +166,7 @@ export interface PaginatedServiceCatalogResult<T> {
 }
 
 export interface ServiceRequestDto {
+  applicationOpportunityId?: string | null;
   retentionUntil?: Date | string | null;
   assignedStaffId?: string | null;
   dueAt?: Date | string | null;
@@ -190,6 +192,7 @@ export interface ServiceRequestDto {
 }
 
 export interface CreateServiceRequestDto {
+  applicationOpportunityId?: string | null;
   retentionUntil?: Date | string | null;
   dueAt?: Date | string | null;
   payloadFingerprint?: string | null;

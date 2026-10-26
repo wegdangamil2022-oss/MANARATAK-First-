@@ -14,15 +14,16 @@ type PolicyRow = {
 const initial = {
   name: '',
   description: '',
-  ruleType: 'TIME' as 'TIME' | 'IP',
+  ruleType: 'TIME' as 'TIME' | 'IP' | 'COURSE_SCOPE',
   start: '09:00',
   end: '17:00',
   timezone: 'UTC',
   ips: '',
+  courseIds:'',
   days: [0, 1, 2, 3, 4, 5, 6] as number[],
 };
 export function AuthorizationPolicyPanel() {
-  const { t } = useTranslation();
+  const { t,language } = useTranslation();
   const [rows, setRows] = useState<PolicyRow[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [selected, setSelected] = useState<PolicyRow | null>(null);
@@ -125,7 +126,7 @@ export function AuthorizationPolicyPanel() {
         start?: string;
         end?: string;
         timezone?: string;
-        allowedIps?: string[];
+        allowedIps?: string[]; courseIds?:string[];
         daysOfWeek?: number[];
       } = {};
       if (row) {
@@ -142,18 +143,19 @@ export function AuthorizationPolicyPanel() {
           };
       }
       // Legacy configurations and weekday restrictions are preserved until the typed editor supports them.
-      if (row && !['TIME', 'IP', 'RETIRED'].includes(row.ruleType))
+      if (row && !['TIME', 'IP', 'COURSE_SCOPE', 'RETIRED'].includes(row.ruleType))
         throw new Error(t('iam_policy_legacy'));
       const next = row
         ? {
             ...initial,
             name: row.name,
             description: row.description,
-            ruleType: row.ruleType === 'IP' ? ('IP' as const) : ('TIME' as const),
+            ruleType: row.ruleType === 'COURSE_SCOPE' ? ('COURSE_SCOPE' as const) : row.ruleType === 'IP' ? ('IP' as const) : ('TIME' as const),
             start: config.start || '09:00',
             end: config.end || '17:00',
             timezone: config.timezone || 'UTC',
             ips: config.allowedIps?.join('\n') || '',
+            courseIds:config.courseIds?.join('\n')||'',
             days: config.daysOfWeek || initial.days,
           }
         : initial;
@@ -172,7 +174,7 @@ export function AuthorizationPolicyPanel() {
     description: form.description,
     ruleType: form.ruleType,
     configuration:
-      form.ruleType === 'TIME'
+      form.ruleType === 'COURSE_SCOPE' ? {courseIds:form.courseIds.split(/[\n,]/).map(value=>value.trim()).filter(Boolean)} : form.ruleType === 'TIME'
         ? { start: form.start, end: form.end, timezone: form.timezone, daysOfWeek: form.days }
         : {
             allowedIps: form.ips
@@ -196,6 +198,7 @@ export function AuthorizationPolicyPanel() {
         body: JSON.stringify({
           ...definition(),
           ...(testIp ? { testIp } : {}),
+          ...(form.ruleType==='COURSE_SCOPE'?{testCourseId:form.courseIds.split(/[\n,]/)[0]?.trim()}:{}),
           ...(testTime ? { testTime: new Date(testTime).toISOString() } : {}),
         }),
       });
@@ -319,13 +322,13 @@ export function AuthorizationPolicyPanel() {
           {t('iam_policy_type')}
           <select
             value={form.ruleType}
-            onChange={(e) => setForm({ ...form, ruleType: e.target.value as 'TIME' | 'IP' })}
+            onChange={(e) => setForm({ ...form, ruleType: e.target.value as 'TIME' | 'IP' | 'COURSE_SCOPE' })}
           >
             <option value="TIME">TIME</option>
-            <option value="IP">IP</option>
+            <option value="IP">IP</option><option value="COURSE_SCOPE">{language === "ar" ? "نطاق دورات محددة" : "Assigned course scope"}</option>
           </select>
         </label>
-        {form.ruleType === 'TIME' ? (
+        {form.ruleType === 'COURSE_SCOPE' ? <label className="block">{language === 'ar' ? 'معرفات الدورات — معرف لكل سطر، حد أقصى 100' : 'Course UUIDs — one per line, maximum 100'}<textarea className="w-full border p-2" value={form.courseIds} onChange={event=>setForm({...form,courseIds:event.target.value})}/></label> : form.ruleType === 'TIME' ? (
           <>
             <label>
               {t('iam_time_start')}

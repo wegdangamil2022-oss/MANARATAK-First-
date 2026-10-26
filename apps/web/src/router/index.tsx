@@ -1,4 +1,9 @@
 import React, { useEffect } from 'react';
+const CoursePublicPreviewPage = React.lazy(() =>
+  import('../features/learning/CoursePublicPreviewPage').then((module) => ({
+    default: module.CoursePublicPreviewPage,
+  })),
+);
 import {
   createBrowserRouter,
   RouterProvider,
@@ -36,7 +41,9 @@ const PageLoadingFallback = () => {
   );
 };
 
-const PasswordRecoveryPage = () => <StudentAuthPage onAuthenticated={() => { window.location.assign('/student'); }} />;
+const PasswordRecoveryPage = () => (
+  <StudentAuthPage onAuthenticated={() => { window.location.assign('/student'); }} />
+);
 
 // In the standalone design deployment, deep links to a student tool must show
 // its existing prototype details rather than calling the unavailable live API.
@@ -51,7 +58,6 @@ function StudentToolPreviewRoute() {
   }
   return <StudentToolPage />;
 }
-
 
 export const RootLayout = () => {
   const { language, setLanguage } = useTranslation();
@@ -176,6 +182,10 @@ const router = createBrowserRouter([
         element: <PublicTemplateApp />,
       },
       {
+        path: 'courses/:slug/preview',
+        element: <CoursePublicPreviewPage />,
+      },
+      {
         path: 'courses/:slug',
         element: <PublicTemplateApp />,
       },
@@ -288,7 +298,9 @@ function CanonicalAdminUnavailable() {
   return (
     <div className="mx-auto max-w-2xl py-12 text-center">
       <div className="mn-card rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-8">
-        <h1 className="text-xl font-bold text-[var(--mn-heading)]">{t('admin_unavailable_title')}</h1>
+        <h1 className="text-xl font-bold text-[var(--mn-heading)]">
+          {t('admin_unavailable_title')}
+        </h1>
         <p className="mt-3 text-sm text-[var(--mn-text-muted)]">{t('admin_unavailable_desc')}</p>
       </div>
     </div>

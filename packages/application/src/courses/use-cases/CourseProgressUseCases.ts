@@ -1,5 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import {
+  normalizeCourseDeliveryPolicy,
+  courseLessonAccess,
+  type CourseLearningVersionDto,
+} from '@manaratak/domain';
+import {
   COURSE_COMPLETED_EVENT_TYPE,
   COURSE_ENROLLED_EVENT_TYPE,
   COURSE_PROGRESS_UPDATED_EVENT_TYPE,
@@ -30,6 +35,94 @@ import {
 import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 
 export class CourseProgressUseCases {
+  private async assertAvailableLesson(
+    definition: CourseLearningVersionDto,
+    studentId: string,
+    lessonId: string,
+  ) {
+    const policy = normalizeCourseDeliveryPolicy(definition.course.optionalFields?.deliveryPolicy);
+    const progress =
+      policy.sequence === 'SEQUENTIAL'
+        ? await this.progressRepository.listLessonProgress(definition.course.id, studentId)
+        : [];
+    const attempts =
+      policy.sequence === 'SEQUENTIAL'
+        ? await this.progressRepository.listQuizAttempts(definition.course.id, studentId)
+        : [];
+    const access = courseLessonAccess(
+      definition.curriculum,
+      policy,
+      progress,
+      new Date(),
+      attempts,
+    ).find((row) => row.lessonId === lessonId);
+    if (!access?.accessible) throw Error('COURSE_LESSON_LOCKED');
+  }
+  private async assertAvailableQuiz(
+    definition: CourseLearningVersionDto,
+    studentId: string,
+    quizId: string,
+  ) {
+    const policy = normalizeCourseDeliveryPolicy(definition.course.optionalFields?.deliveryPolicy);
+    if (policy.sequence === 'FREE' && !Object.values(policy.lessons).some((row) => row.availableAt))
+      return;
+    const quiz = definition.curriculum.quizzes.find((row) => row.id === quizId);
+    if (!quiz) throw Error('COURSE_QUIZ_SCOPE_MISMATCH');
+    const access = courseLessonAccess(
+      definition.curriculum,
+      policy,
+      await this.progressRepository.listLessonProgress(definition.course.id, studentId),
+      new Date(),
+      await this.progressRepository.listQuizAttempts(definition.course.id, studentId),
+    );
+    const activeModules = new Set(
+      definition.curriculum.modules
+        .filter((row) => row.status !== CourseContentStatus.ARCHIVED)
+        .map((row) => row.id),
+    );
+    const targets = quiz.lessonId
+      ? [quiz.lessonId]
+      : definition.curriculum.lessons
+          .filter(
+            (row) =>
+              row.status !== CourseContentStatus.ARCHIVED &&
+              activeModules.has(row.moduleId) &&
+              (!quiz.moduleId || row.moduleId === quiz.moduleId),
+          )
+          .map((row) => row.id);
+    if (targets.some((id) => !access.find((row) => row.lessonId === id)?.accessible))
+      throw Error('COURSE_LESSON_LOCKED');
+  }
+  public async saveResumeLesson(courseId: string, studentId: string, lessonId: string) {
+    const enrollment = await this.requireLearningAccessEnrollment(courseId, studentId),
+      definition = await this.learningVersion(courseId, enrollment);
+    await this.assertAvailableLesson(definition, studentId, lessonId);
+    if (!this.progressRepository.saveResumeLesson)
+      throw Error('COURSE_RESUME_PERSISTENCE_REQUIRED');
+    await this.progressRepository.saveResumeLesson(
+      courseId,
+      studentId,
+      definition.course.version,
+      lessonId,
+    );
+    return { lessonId };
+  }
+  private async requireNativeAdminCourse(courseId: string) {
+    const course = await this.courseRepository.findById(courseId);
+    if (!course || course.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE) throw new Error('NATIVE_COURSE_REQUIRED');
+  }
+
+  public async listCourseLearners(courseId: string, input: { page: number; pageSize: number; status?: string; search?: string }) {
+    await this.requireNativeAdminCourse(courseId);
+    if (!this.progressRepository.listCourseLearners) throw new Error('COURSE_LEARNER_ADMIN_READ_NOT_CONFIGURED');
+    return this.progressRepository.listCourseLearners(courseId, input);
+  }
+
+  public async getCourseLearnerReview(courseId: string, enrollmentId: string, query: { lessonsPage: number; attemptsPage: number }) {
+    await this.requireNativeAdminCourse(courseId);
+    if (!this.progressRepository.getCourseLearnerReview) throw new Error('COURSE_LEARNER_ADMIN_READ_NOT_CONFIGURED');
+    return this.progressRepository.getCourseLearnerReview(courseId, enrollmentId, query);
+  }
   constructor(
     private readonly courseRepository: ICourseRepository,
     private readonly curriculumRepository: ICourseCurriculumRepository,
@@ -52,6 +145,14 @@ export class CourseProgressUseCases {
     if (!this.curriculumRepository.getLearningVersion) throw new Error('COURSE_LEARNING_VERSION_PERSISTENCE_REQUIRED');
     const definition = await this.curriculumRepository.getLearningVersion(courseId, rawVersion as number | undefined, enrollment.enrolledAt);
     if (!definition) throw new Error('COURSE_ENROLLMENT_VERSION_NOT_FOUND');
+    const financeRequired = enrollment.metadata?.requiresFinancialClearance === true || definition.course.accessType === 'PAID' || definition.course.originType === CourseOriginType.PAID_COURSE;
+    if (financeRequired) {
+      if (!this.financialClearance) throw new Error('COURSE_FINANCIAL_CLEARANCE_NOT_CONFIGURED');
+      if (
+        !(await this.financialClearance.hasCourseFinancialClearance(courseId, enrollment.studentReferenceId))
+      )
+        throw new Error('COURSE_FINANCIAL_CLEARANCE_REQUIRED');
+    }
     return definition;
   }
 
@@ -61,7 +162,8 @@ export class CourseProgressUseCases {
     if (course.originType === CourseOriginType.EXTERNAL_LINKED_COURSE) {
       throw new Error('External linked courses do not support MANARATAK enrollment or local progress tracking');
     }
-    if (course.status !== CourseStatus.PUBLISHED) throw new Error('COURSE_LEARNING_REQUIRES_PUBLISHED_COURSE');
+    // New enrollments still require PUBLISHED in enroll(). Existing learners
+    // use their verified published snapshot after unpublish/archival as well.
     return course;
   }
 
@@ -81,37 +183,56 @@ export class CourseProgressUseCases {
     return enrollment;
   }
 
-  public async resolveLearningAsset(courseId: string, lessonId: string, assetReferenceId: string, studentReferenceId: string): Promise<string> {
+  public async resolveLearningAsset(
+    courseId: string,
+    lessonId: string,
+    assetReferenceId: string,
+    studentReferenceId: string,
+  ): Promise<string> {
     await this.ensureTrackableCourse(courseId);
     const enrollment = await this.requireLearningAccessEnrollment(courseId, studentReferenceId);
-    const {curriculum} = await this.learningVersion(courseId, enrollment);
+    const definition = await this.learningVersion(courseId, enrollment),
+      { curriculum } = definition;
     const lesson = curriculum.lessons.find(row => row.id === lessonId && row.status !== CourseContentStatus.ARCHIVED);
     const module = lesson && curriculum.modules.find(row => row.id === lesson.moduleId && row.status !== CourseContentStatus.ARCHIVED);
     const asset = curriculum.assets.find(row => row.id === assetReferenceId && row.lessonId === lessonId);
     if (!lesson || !module || !asset) throw new Error('COURSE_LEARNING_ASSET_NOT_FOUND');
+    await this.assertAvailableLesson(definition, studentReferenceId, lessonId);
     return asset.assetId;
   }
 
-  public async getLearningWorkspace(courseId: string, studentReferenceId: string): Promise<CourseLearnerWorkspaceDto> {
+  public async getLearningWorkspace(
+    courseId: string,
+    studentReferenceId: string,
+  ): Promise<CourseLearnerWorkspaceDto> {
     await this.ensureTrackableCourse(courseId);
     const enrollment = await this.requireLearningAccessEnrollment(courseId, studentReferenceId);
     const [progress, definition] = await Promise.all([
       this.progressRepository.getStudentProgressSnapshot(courseId, studentReferenceId),
       this.learningVersion(courseId, enrollment),
     ]);
-    const {curriculum} = definition;
+    const { curriculum } = definition;
     if (!progress) throw new Error('COURSE_PROGRESS_SNAPSHOT_NOT_FOUND');
+    const access = courseLessonAccess(
+      curriculum,
+      normalizeCourseDeliveryPolicy(definition.course.optionalFields?.deliveryPolicy),
+      progress.lessons,
+      new Date(),
+      progress.quizAttempts,
+    );
+    const accessibleIds = new Set(
+      access.filter((row) => row.accessible).map((row) => row.lessonId),
+    );
 
     const modules = curriculum.modules
       .filter(item => item.status !== CourseContentStatus.ARCHIVED)
       .sort((a, b) => a.position - b.position);
-    const moduleIds = new Set(modules.map(item => item.id));
+    const moduleIds = new Set(modules.map((item) => item.id));
     const lessons = curriculum.lessons
       .filter(item => item.status !== CourseContentStatus.ARCHIVED && moduleIds.has(item.moduleId))
       .sort((a, b) => a.position - b.position);
-    const lessonIds = new Set(lessons.map(item => item.id));
     const assets = curriculum.assets
-      .filter(item => lessonIds.has(item.lessonId))
+      .filter((item) => accessibleIds.has(item.lessonId))
       .sort((a, b) => a.position - b.position)
       .map(item => ({
         id: item.id,
@@ -122,11 +243,21 @@ export class CourseProgressUseCases {
         isRequired: item.isRequired,
       }));
     const quizzes = curriculum.quizzes
-      .filter(item => item.status !== CourseContentStatus.ARCHIVED
-        && (!item.moduleId || moduleIds.has(item.moduleId))
-        && (!item.lessonId || lessonIds.has(item.lessonId)))
+      .filter(
+        (item) =>
+          item.status !== CourseContentStatus.ARCHIVED
+        && (!item.moduleId || moduleIds.has(item.moduleId)) &&
+          (!item.lessonId || accessibleIds.has(item.lessonId)) &&
+          (item.lessonId
+            ? true
+            : !lessons.some(
+                (lesson) =>
+                  (!item.moduleId || lesson.moduleId === item.moduleId) &&
+                  !accessibleIds.has(lesson.id),
+              )),
+      )
       .sort((a, b) => a.position - b.position);
-    const quizIds = new Set(quizzes.map(item => item.id));
+    const quizIds = new Set(quizzes.map((item) => item.id));
     const questions = curriculum.questions
       .filter(item => item.status !== CourseContentStatus.ARCHIVED && Boolean(item.quizId) && quizIds.has(item.quizId as string))
       .sort((a, b) => a.position - b.position)
@@ -141,11 +272,55 @@ export class CourseProgressUseCases {
       }));
 
     const publicModules = modules.map(({id,courseId,title,description,position,status}) => ({id,courseId,title,description,position,status}));
-    const publicLessons = lessons.map(({id,courseId,moduleId,title,summary,lessonType,position,estimatedDurationMinutes,contentText,status}) =>
-      ({id,courseId,moduleId,title,summary,lessonType,position,estimatedDurationMinutes,contentText,status}));
+    const publicLessons = lessons.map(
+      ({id,courseId,moduleId,title,summary,lessonType,position,estimatedDurationMinutes,contentText,status}) => ({
+        id,
+        courseId,
+        moduleId,
+        title,
+        summary,
+        lessonType,
+        position,
+        estimatedDurationMinutes,
+        contentText: accessibleIds.has(id) ? contentText : null,
+        status,
+        locked: !accessibleIds.has(id),
+        lockReason: access.find((row) => row.lessonId === id)?.lockReason ?? null,
+        availableAt: access.find((row) => row.lessonId === id)?.availableAt ?? null,
+      }),
+    );
     const publicQuizzes = quizzes.map(({id,courseId,moduleId,lessonId,title,instructions,position,passingScore,maxAttempts,assessmentType,status}) =>
       ({id,courseId,moduleId,lessonId,title,instructions,position,passingScore,maxAttempts,assessmentType,status}));
-    return { progress: this.learnerSnapshot(progress), curriculum: { modules:publicModules, lessons:publicLessons, assets, quizzes:publicQuizzes, questions } };
+    const assetIds = new Set(assets.map((asset) => asset.id));
+    const contentBlocks = (curriculum.contentBlocks ?? [])
+      .filter(
+        (block) =>
+          block.status !== 'ARCHIVED' &&
+          accessibleIds.has(block.lessonId) &&
+          (!block.quizId || quizIds.has(block.quizId)),
+      )
+      .sort((a, b) => a.position - b.position)
+      .map(({ id, lessonId, type, payload, assetReferenceId, quizId, position, version }) => {
+        if ((assetReferenceId && !assetIds.has(assetReferenceId)) || (quizId && !quizIds.has(quizId)) || (payload.subtitleReferenceId && !assetIds.has(String(payload.subtitleReferenceId)))) throw new Error('COURSE_LEARNING_BLOCK_REFERENCE_INVALID');
+        return { id, lessonId, type, payload: type === 'QUIZ' && !payload.title ? { ...payload, title: quizzes.find(quiz => quiz.id === quizId)?.title ?? '' } : payload, assetReferenceId, quizId, position, version };
+      });
+    const savedResume = progress.enrollment.metadata?.resume as { lessonId?: unknown } | undefined;
+    const resumeLessonId =
+      typeof savedResume?.lessonId === 'string' && accessibleIds.has(savedResume.lessonId)
+        ? savedResume.lessonId
+        : (lessons.find(
+            (row) =>
+              accessibleIds.has(row.id) &&
+              !progress.lessons.some((p) => p.lessonId === row.id && p.progressPercentage >= 100),
+          )?.id ??
+          lessons.find((row) => accessibleIds.has(row.id))?.id ??
+          null);
+    return {
+      resumeLessonId,
+      course: { id: definition.course.id, displayName: definition.course.displayName, version: definition.course.version },
+      progress: this.learnerSnapshot(progress),
+      curriculum: { modules:publicModules, lessons:publicLessons, assets, quizzes:publicQuizzes, questions, contentBlocks },
+    };
   }
 
   public async enroll(
@@ -162,7 +337,9 @@ export class CourseProgressUseCases {
       throw new Error('COURSE_ENROLLMENT_ELIGIBILITY_EVALUATOR_REQUIRED');
     }
     for (const prerequisiteCourseId of policy?.prerequisiteCourseIds ?? []) {
-      if (!await this.progressRepository.findCompletion(prerequisiteCourseId, studentReferenceId)) {
+      if (
+        !(await this.progressRepository.findCompletion(prerequisiteCourseId, studentReferenceId))
+      ) {
         throw new Error(`COURSE_PREREQUISITE_NOT_COMPLETED:${prerequisiteCourseId}`);
       }
     }
@@ -177,7 +354,9 @@ export class CourseProgressUseCases {
     const needsFinance = Boolean(policy?.requiresFinancialClearance || course.originType === CourseOriginType.PAID_COURSE || course.accessType === 'PAID');
     if (needsFinance) {
       if (!this.financialClearance) throw new Error('COURSE_FINANCIAL_CLEARANCE_NOT_CONFIGURED');
-      if (!await this.financialClearance.hasCourseFinancialClearance(courseId, studentReferenceId)) {
+      if (
+        !(await this.financialClearance.hasCourseFinancialClearance(courseId, studentReferenceId))
+      ) {
         throw new Error('COURSE_FINANCIAL_CLEARANCE_REQUIRED');
       }
     }
@@ -188,7 +367,8 @@ export class CourseProgressUseCases {
     }
     const occurredAt = new Date();
     const enrollmentPayload: Record<string, unknown> = { courseId, studentReferenceId, occurredAt: occurredAt.toISOString() };
-    await this.atomicMutations.execute({
+    await this.atomicMutations.execute(
+      {
       domain: 'COURSES', aggregateType: 'COURSE_ENROLLMENT', aggregateId: `${courseId}:${studentReferenceId}`,
       action: 'COURSE_ENROLLED', context: context ?? { actorId: studentReferenceId, actorType: 'STUDENT', source: 'learner-api' },
       outbox: {
@@ -197,19 +377,21 @@ export class CourseProgressUseCases {
         payload: enrollmentPayload,
         metadata: { eventVersion: '1.0.0', category: 'LearningPlatform' },
       },
-    }, async persistence => {
-      const tx = (this.progressRepository as ITransactionalCourseProgressRepository).withTransaction(persistence);
-      const enrollment = await tx.enrollWithCapacity(
-        { courseId, studentReferenceId, metadata: {courseVersion: course.version} },
-        policy?.isCapacityLimited ? policy.maximumSeats ?? null : null,
-        Boolean(policy?.waitlistEnabled),
-      );
-      enrollmentPayload.courseVersion = enrollment.metadata?.courseVersion;
-      enrollmentPayload.enrollmentId = enrollment.id;
-      enrollmentPayload.enrollmentStatus = enrollment.status;
-      enrollmentPayload.progressPercentage = enrollment.progressPercentage;
-      enrollmentPayload.enrolledAt = enrollment.enrolledAt.toISOString();
-    });
+    },
+      async (persistence) => {
+        const tx = (this.progressRepository as ITransactionalCourseProgressRepository).withTransaction(persistence);
+        const enrollment = await tx.enrollWithCapacity(
+          { courseId, studentReferenceId, metadata: {courseVersion: course.version, requiresFinancialClearance: needsFinance} },
+          policy?.isCapacityLimited ? (policy.maximumSeats ?? null) : null,
+          Boolean(policy?.waitlistEnabled),
+        );
+        enrollmentPayload.courseVersion = enrollment.metadata?.courseVersion;
+        enrollmentPayload.enrollmentId = enrollment.id;
+        enrollmentPayload.enrollmentStatus = enrollment.status;
+        enrollmentPayload.progressPercentage = enrollment.progressPercentage;
+        enrollmentPayload.enrolledAt = enrollment.enrolledAt.toISOString();
+      },
+    );
     const snapshot = await this.progressRepository.getStudentProgressSnapshot(courseId, studentReferenceId);
     if (!snapshot) throw new Error('Enrollment snapshot could not be created');
     return this.learnerSnapshot(snapshot);
@@ -221,11 +403,13 @@ export class CourseProgressUseCases {
   ): Promise<StudentCourseProgressSnapshotDto> {
     await this.ensureTrackableCourse(data.courseId);
     const enrollment = await this.requireActiveEnrollment(data.courseId, data.studentReferenceId);
-    const {curriculum} = await this.learningVersion(data.courseId, enrollment);
+    const definition = await this.learningVersion(data.courseId, enrollment),
+      { curriculum } = definition;
     if (!curriculum.lessons.some(lesson => lesson.id === data.lessonId && lesson.status !== CourseContentStatus.ARCHIVED)) {
       throw new Error('COURSE_LESSON_SCOPE_MISMATCH');
     }
     if (!Number.isFinite(data.progressPercentage)) throw new Error('COURSE_PROGRESS_PERCENTAGE_INVALID');
+    await this.assertAvailableLesson(definition, data.studentReferenceId, data.lessonId);
     const activeModules = new Set(curriculum.modules.filter(module => module.status !== CourseContentStatus.ARCHIVED).map(module => module.id));
     const targetLesson = curriculum.lessons.find(lesson => lesson.id === data.lessonId)!;
     if (!activeModules.has(targetLesson.moduleId) || targetLesson.lessonType === 'QUIZ') throw new Error('COURSE_LESSON_NOT_TRACKABLE');
@@ -278,9 +462,11 @@ export class CourseProgressUseCases {
   ): Promise<CourseQuizAttemptDto> {
     await this.ensureTrackableCourse(data.courseId);
     const enrollment = await this.requireActiveEnrollment(data.courseId, data.studentReferenceId);
-    const {curriculum} = await this.learningVersion(data.courseId, enrollment);
+    const definition = await this.learningVersion(data.courseId, enrollment),
+      { curriculum } = definition;
     const quiz = curriculum.quizzes.find(item => item.id === data.quizId && item.status !== CourseContentStatus.ARCHIVED);
     if (!quiz) throw new Error('COURSE_QUIZ_SCOPE_MISMATCH');
+    await this.assertAvailableQuiz(definition, data.studentReferenceId, quiz.id);
     const existing = (await this.progressRepository.listQuizAttempts(data.courseId, data.studentReferenceId))
       .find(attempt => attempt.quizId === quiz.id && attempt.status === CourseQuizAttemptStatus.IN_PROGRESS && !attempt.submittedAt);
     if (existing) return existing;
@@ -298,9 +484,11 @@ export class CourseProgressUseCases {
     }
     if (attempt.status !== CourseQuizAttemptStatus.IN_PROGRESS || attempt.submittedAt) throw new Error('COURSE_QUIZ_ATTEMPT_ALREADY_SUBMITTED');
 
-    const {curriculum} = await this.learningVersion(data.courseId, enrollment);
+    const definition = await this.learningVersion(data.courseId, enrollment),
+      { curriculum } = definition;
     const quiz = curriculum.quizzes.find(item => item.id === attempt.quizId && item.status !== CourseContentStatus.ARCHIVED);
     if (!quiz) throw new Error('COURSE_QUIZ_SCOPE_MISMATCH');
+    await this.assertAvailableQuiz(definition, data.studentReferenceId, quiz.id);
     if (quiz.passingScore == null) throw new Error('COURSE_QUIZ_PASSING_SCORE_REQUIRED');
     const questions = curriculum.questions.filter(q => q.quizId === quiz.id && q.status !== CourseContentStatus.ARCHIVED);
     if (questions.length === 0) throw new Error('COURSE_QUIZ_QUESTIONS_REQUIRED');
@@ -316,9 +504,9 @@ export class CourseProgressUseCases {
       const points = question.points;
       if (!Number.isFinite(points) || points <= 0) throw new Error('COURSE_ASSESSMENT_INVALID_POINTS');
       total += points;
-      if (question.questionType === CourseQuestionType.ESSAY || question.questionType === CourseQuestionType.SHORT_ANSWER) {
-        if (typeof answerMap[question.id] !== 'string' || !(answerMap[question.id] as string).trim()) throw new Error('COURSE_ASSESSMENT_WRITTEN_ANSWER_REQUIRED');
-        manualQuestions.push({id: question.id, prompt: question.prompt, maximumPoints: points});
+      if (question.questionType === CourseQuestionType.ESSAY || question.questionType === CourseQuestionType.SHORT_ANSWER || quiz.assessmentType === 'ASSIGNMENT') {
+        if (answerMap[question.id] == null || (typeof answerMap[question.id] === 'string' && !(answerMap[question.id] as string).trim()) || ([CourseQuestionType.ESSAY, CourseQuestionType.SHORT_ANSWER].includes(question.questionType) && typeof answerMap[question.id] !== 'string')) throw new Error('COURSE_ASSESSMENT_WRITTEN_ANSWER_REQUIRED');
+        manualQuestions.push({id: question.id, prompt: question.prompt, maximumPoints: points, ...(question.explanation ? {rubric: question.explanation} : {})});
         continue;
       }
       if (question.correctAnswer === undefined || question.correctAnswer === null) throw new Error('COURSE_ASSESSMENT_ANSWER_KEY_REQUIRED');
@@ -338,16 +526,25 @@ export class CourseProgressUseCases {
     });
   }
 
-  public async listPendingAssessments(courseId: string, page = 1, pageSize = 20): Promise<CourseQuizAttemptDto[]> {
-    if (!await this.courseRepository.findById(courseId)) throw new Error('COURSE_NOT_FOUND');
+  public async listPendingAssessments(
+    courseId: string,
+    page = 1,
+    pageSize = 20,
+  ): Promise<CourseQuizAttemptDto[]> {
+    if (!(await this.courseRepository.findById(courseId))) throw new Error('COURSE_NOT_FOUND');
     if (!Number.isSafeInteger(page) || page < 1 || !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 50) throw new Error('COURSE_REVIEW_PAGINATION_INVALID');
     if (!this.progressRepository.listPendingAssessments) throw new Error('COURSE_MANUAL_GRADING_PERSISTENCE_REQUIRED');
     return this.progressRepository.listPendingAssessments(courseId, page, pageSize);
   }
 
-  public async gradeAssessment(courseId: string, attemptId: string, input: {
+  public async gradeAssessment(
+    courseId: string,
+    attemptId: string,
+    input: {
     expectedSubmittedAt: string; questionScores: Record<string, number>; feedback: string; reason: string;
-  }, context: AtomicMutationRequestContext): Promise<CourseQuizAttemptDto> {
+  },
+    context: AtomicMutationRequestContext,
+  ): Promise<CourseQuizAttemptDto> {
     if (!context.actorId || !input.reason.trim() || input.reason.trim().length < 3 || input.reason.length > 2000 || input.feedback.length > 5000) throw new Error('COURSE_REVIEW_CONTEXT_REQUIRED');
     const attempt = await this.progressRepository.findQuizAttempt(attemptId);
     if (!attempt || attempt.courseId !== courseId) throw new Error('COURSE_QUIZ_ATTEMPT_SCOPE_MISMATCH');
@@ -363,7 +560,7 @@ export class CourseProgressUseCases {
       earned += points;
     }
     if (earned > review.totalPoints) throw new Error('COURSE_REVIEW_POINTS_OUT_OF_RANGE');
-    const score = Math.round(earned / review.totalPoints * 10000) / 100;
+    const score = Math.round((earned / review.totalPoints) * 10000) / 100;
     const transactional = this.progressRepository as Partial<ITransactionalCourseProgressRepository>;
     if (!this.atomicMutations || !transactional.withTransaction) throw new Error('COURSE_REVIEW_ATOMIC_PERSISTENCE_REQUIRED');
     return this.atomicMutations.execute({domain: 'COURSES', aggregateType: 'COURSE_QUIZ_ATTEMPT', aggregateId: attemptId,
@@ -391,10 +588,11 @@ export class CourseProgressUseCases {
       return this.learnerSnapshot(completedSnapshot);
     }
     const enrollment = await this.requireActiveEnrollment(courseId, studentReferenceId);
-    const {course, curriculum} = await this.learningVersion(courseId, enrollment);
-    const completionCriteria = course.optionalFields?.completionCriteria && typeof course.optionalFields.completionCriteria === 'object' && !Array.isArray(course.optionalFields.completionCriteria)
-      ? course.optionalFields.completionCriteria as Record<string, unknown>
-      : {};
+    const { course, curriculum } = await this.learningVersion(courseId, enrollment);
+    const completionCriteria =
+      course.optionalFields?.completionCriteria && typeof course.optionalFields.completionCriteria === 'object' && !Array.isArray(course.optionalFields.completionCriteria)
+        ? (course.optionalFields.completionCriteria as Record<string, unknown>)
+        : {};
     if (enrollment.progressPercentage < 100) throw new Error('Course progress must reach 100% before completion');
     const assessmentRequired = completionCriteria.assessmentRequired === true;
     if (assessmentRequired) {

@@ -134,6 +134,11 @@ export class ReferenceDataAdminRouter {
       reason: z.string().trim().min(3).max(1000),
       reconciliationId: z.string().uuid(),
     }).strict();
+    router.get('/records/:entityType/:referenceId', asyncHandler(async (req: Request, res: Response) => {
+      const { entityType, referenceId } = governanceParamSchema.parse(req.params);
+      res.setHeader('Cache-Control', 'no-store');
+      res.json(await referenceDataUseCases.getReferenceRecord(entityType, referenceId));
+    }));
     const lifecycleTransitionSchema = z.object({
       acknowledgeHistoricalReferences: z.boolean().optional(),
       toState: z.nativeEnum(ReferenceLifecycleState).refine((state) => state !== ReferenceLifecycleState.ACTIVE),
@@ -198,7 +203,7 @@ export class ReferenceDataAdminRouter {
       res.json({ data: await referenceDataUseCases.getCityQualityCounters(iso2Code), source: 'P7_OWNER_COUNTS', asOf: new Date().toISOString() });
     }));
     router.get('/quality/issues', asyncHandler(async (req: Request, res: Response) => {
-      const query = z.object({ countryIso2Code: z.string().regex(/^[A-Z]{2}$/).optional(), kind: z.enum(REFERENCE_QUALITY_ISSUES).optional(), page: z.coerce.number().int().min(1).max(1000).default(1) }).strict().parse(req.query);
+      const query = z.object({ countryIso2Code: z.string().regex(/^[A-Z]{2}$/).optional(), kind: z.enum(REFERENCE_QUALITY_ISSUES).optional(), page: z.coerce.number().int().min(1).max(1000).default(1), q:z.string().trim().max(200).optional(),entityType:z.enum(['COUNTRY','CURRENCY','LANGUAGE','REGION','CITY']).optional() }).strict().parse(req.query);
       res.json(await referenceDataUseCases.getQualityReport(query));
     }));
 

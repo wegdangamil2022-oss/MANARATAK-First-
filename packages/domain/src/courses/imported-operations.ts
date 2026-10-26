@@ -1,6 +1,25 @@
 import type { ExternalCourseProviderDto } from './provider-registry';
 import type { AtomicPersistenceContext } from '../event-foundation/outbox/TransactionalOutbox';
 import type { UpdateCourseDto } from './contracts/ICourseRepository';
+import type { CourseDto, CreateCourseDto } from './entities/Course';
+import type { EnsureCourseSourceIdentityInput } from './import-analysis';
+
+export interface ManualExternalCourseInput {
+  originalSourceTitle: string; displayName?: string; externalProviderId: string; directCourseUrl: string;
+  evidenceUrl: string; evidenceObservedAt: string; evidenceNote?: string;
+  platformName?: string; learningLanguageRaw?: string; studyLevelRaw?: string; studyDurationRaw?: string;
+  shortCourseTopicsRaw?: string; certificateType?: string; certificateConditions?: string;
+  isStudyFree?: boolean | null; isFreeCertificate?: boolean | null; certificateAvailable?: boolean | null;
+  description?: string; learningOutcomes?: string[]; prerequisites?: string[]; acquiredSkills?: string[];
+}
+export interface ManualExternalCoursePlan {
+  course: CreateCourseDto; identity: EnsureCourseSourceIdentityInput; normalizedUrl: string;
+}
+export interface ExternalCourseHistoryPage {
+  page: number; totalPages: number;
+  data: Array<{ id: string; action: string; actorId: string; occurredAt: string; reason?: string }>;
+  versions: Array<{ version: number; createdAt: string; reason: string }>;
+}
 
 export type ImportedCourseLinkHealth =
   | 'VERIFIED_DIRECT'
@@ -60,6 +79,8 @@ export interface ImportedCourseAdminRecord {
 }
 
 export interface ImportedCourseAdminDetail extends ImportedCourseAdminRecord {
+  sourceBatchId?: string | null;
+  originalSourceRow?: Record<string, string | number | null>;
   provider?: ExternalCourseProviderDto | null;
   sourceIdentity?: {
     id: string;
@@ -184,6 +205,8 @@ export interface ImportedCourseLinkCheckResult {
 }
 
 export interface IImportedCourseOperationsRepository {
+  history?(id: string, page: number): Promise<ExternalCourseHistoryPage>;
+  createManualCourse?(plan: ManualExternalCoursePlan): Promise<CourseDto>;
   withTransaction?(context: AtomicPersistenceContext): IImportedCourseOperationsRepository;
   listImportedCourses(filters: ImportedCourseAdminFilters): Promise<ImportedCoursePage>;
   getImportedCourseById(id: string): Promise<ImportedCourseAdminDetail | null>;

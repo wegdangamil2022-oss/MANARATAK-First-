@@ -49,7 +49,7 @@ test('organization allows active workspace configuration and generated dependenc
       '.env.compose.example': '',
       '.section16-vitest.config.ts': '',
     },
-    ['config', 'vendor', 'storage', 'node_modules', 'release-artifacts'],
+    ['config', 'deploy/media-selfhost', 'tasks', 'vendor', 'storage', 'node_modules', 'release-artifacts'],
   );
   assert.equal(result.status, 0);
   assert.deepEqual(result.report.unexpectedRootDirectories, []);

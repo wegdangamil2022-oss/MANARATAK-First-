@@ -5,6 +5,7 @@ import path from 'node:path';
 import {AssetStorageLocator,AssetStorageZone} from '@manaratak/domain';
 import {referenceSeedPlan,referenceSeedPayload} from '../../scripts/database/post28-reference-seed-plan';
 import {Post28SeedAssetSecurity,scannerImage} from '../../scripts/database/post28-seed-asset-security';
+import {PrismaReferenceOwnerReviewGateway} from '../../packages/infrastructure/src/reference-data/PrismaReferenceOwnerReviewGateway';
 describe('Post28 required seed source plan',()=>{
  it('validates reviewed source hashes, counts and currency/language dependencies before country apply',async()=>{
   const plan=await referenceSeedPlan(process.cwd());
@@ -37,7 +38,6 @@ describe('Post28 real scanner and bounded JSON sanitizer contract',()=>{
 
 describe('Prisma-compatible P7 advisory locks',()=>{
  it('casts the real owner lock return value without changing lock identity',async()=>{
-  const {PrismaReferenceOwnerReviewGateway}=await import('../../packages/infrastructure/src/reference-data/PrismaReferenceOwnerReviewGateway');
   const queries:string[]=[];
   const gateway=new PrismaReferenceOwnerReviewGateway({$queryRaw:async(strings:TemplateStringsArray)=>{queries.push(strings.join(''));return [];}} as never,true);
   await gateway.lock('review-id');

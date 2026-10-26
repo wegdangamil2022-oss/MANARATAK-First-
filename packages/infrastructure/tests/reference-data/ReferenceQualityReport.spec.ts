@@ -2,6 +2,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { PrismaReferenceDataRepository } from '../../src/reference-data/PrismaReferenceDataRepository';
 
 describe('Reference quality report', () => {
+  it('applies record type and search before facets and page extraction using bound SQL values',async()=>{
+    const db:any={$queryRaw:vi.fn(async()=>[{data:[],counts:{},total:'0',asOf:new Date()}])};
+    await new PrismaReferenceDataRepository(db).getQualityReport({entityType:'CITY',q:"Aden' OR 1=1",page:2});
+    const statement=db.$queryRaw.mock.calls[0][0];expect(statement.values).toContain('CITY');expect(statement.values).toContain("%Aden' OR 1=1%");
+    expect(statement.text).not.toContain("Aden' OR 1=1");expect(statement.text).toContain('FROM scoped GROUP BY kind');expect(statement.text).toContain('LIMIT 25');
+  });
   it('counts active cities with exactly the owner list predicate including the legacy isActive flag', async () => {
     const count = vi.fn(async () => 0);
     const db: any = { referenceCity: { count }, $queryRaw: vi.fn(async () => [{ count: 0n }]) };

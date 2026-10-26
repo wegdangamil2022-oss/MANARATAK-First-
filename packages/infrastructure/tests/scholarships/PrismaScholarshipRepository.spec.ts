@@ -220,12 +220,15 @@ describe('PrismaScholarshipRepository', () => {
   it('derives dashboard counters from unbounded database count queries', async () => {
     mockPrisma.scholarship.count
       .mockResolvedValueOnce(503).mockResolvedValueOnce(220).mockResolvedValueOnce(31).mockResolvedValueOnce(44)
-      .mockResolvedValueOnce(27).mockResolvedValueOnce(19).mockResolvedValueOnce(155).mockResolvedValueOnce(7);
+      .mockResolvedValueOnce(27).mockResolvedValueOnce(19).mockResolvedValueOnce(155).mockResolvedValueOnce(7)
+      .mockResolvedValueOnce(23).mockResolvedValueOnce(17);
     await expect(repository.getAdminSummary()).resolves.toEqual({
       all: 503, imported: 220, missingFields: 31, needsVerification: 44,
-      needsTranslation: 27, readyToPublish: 19, published: 155, archived: 7,
+      needsTranslation: 27, readyToPublish: 19, published: 155, archived: 7, inReview:23, incomplete:17,
     });
-    expect(mockPrisma.scholarship.count).toHaveBeenCalledTimes(8);
+    expect(mockPrisma.scholarship.count).toHaveBeenCalledTimes(10);
+    expect(mockPrisma.scholarship.count).toHaveBeenNthCalledWith(9,{where:{status:'READY_TO_REVIEW'}});
+    expect(mockPrisma.scholarship.count).toHaveBeenNthCalledWith(10,{where:{completenessStatus:'INCOMPLETE'}});
     expect(mockPrisma.scholarship.findMany).not.toHaveBeenCalled();
   });
 });

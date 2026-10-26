@@ -1,0 +1,34 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "units": {
+    "passed": 370,
+    "failed": 0,
+    "skipped": 5,
+    "total": 375
+  },
+  "isolatedPostgreSQL": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7
+  },
+  "fixtureScale": {
+    "factCombinations": 324,
+    "pagingRecords": 10005
+  },
+  "typeScript": {
+    "exitCode": 0
+  },
+  "builds": {
+    "admin": "PASS",
+    "api": "PASS",
+    "largeAdminChunkWarning": true
+  },
+  "eslint": {
+    "errors": 0,
+    "existingWarnings": 22
+  },
+  "browserProof": "browser-verification.json",
+  "auditProof": "creation-audit-verification.json",
+  "codeSha": "19494edbc93052188b68dc0e8cba2761e3fdd107"
+}

@@ -2,7 +2,7 @@ import {OwnerDescriptionTranslationPanel} from '../components/OwnerDescriptionTr
 import {CourseDraftStructurePanel} from '../components/CourseDraftStructurePanel';
 import {CourseQuestionBanksPanel} from '../components/CourseQuestionBanksPanel';
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { adminApiClient, setCourseReviewReason } from '../api/client';
 import {
   ArrowLeft,
@@ -140,6 +140,9 @@ export function CourseDetailPage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const requestedReturn = searchParams.get('returnTo') ?? '';
+  const returnTo = /^\/courses(?:\?(?:[^#]*)|\/(?:native|external)(?:\?[^#]*)?)?$/.test(requestedReturn) ? requestedReturn : '/courses';
   const [reviewReason,setReviewReason]=useState('');
   useEffect(()=>{
     if(!id) return;
@@ -585,7 +588,7 @@ export function CourseDetailPage() {
       </label>
       <div className="flex items-center justify-between gap-4">
         <button
-          onClick={() => navigate('/courses')}
+          onClick={() => navigate(returnTo)}
           className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900"
         >
           <ArrowLeft className="mr-1 h-4 w-4" /> {t('back_to_courses')}

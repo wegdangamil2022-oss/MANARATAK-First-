@@ -1,0 +1,26 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "checks": [
+    "Actual admin UTC scheduling/preview save, optimistic-lock refusal and Cairo layout at 1440/360/320",
+    "Certificate binding reads its actual governed availability; no fabricated template, issuer or student certificate",
+    "Anonymous preview shows only explicitly released content; unreleased text, quiz and direct asset grant are denied; RTL/LTR previews verified",
+    "Real student enrollment, sequential unlock after saved completion, future quiz/resume denial and server-persisted resume after reload without manufactured progress",
+    "No JavaScript page errors"
+  ],
+  "screens": [
+    "desktop-delivery-scheduling",
+    "mobile-delivery-scheduling",
+    "small-delivery-scheduling",
+    "desktop-certificate-binding",
+    "mobile-certificate-binding",
+    "desktop-public-course-preview",
+    "mobile-public-course-preview",
+    "english-public-course-preview",
+    "desktop-learner-resume-and-locks",
+    "mobile-learner-resume-and-locks"
+  ],
+  "errors": [],
+  "courseId": "f449e5d8-11a6-49e4-a0bc-399daccebc46",
+  "passed": true
+}

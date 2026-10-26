@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 424,
-  "reachableCount": 424,
+  "registrationCount": 442,
+  "reachableCount": 442,
   "unreachable": [],
   "registrations": [
     {
@@ -186,10 +186,12 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
         "apps/api/src/presentation/api/router/CourseAdminRouter.ts",
+        "apps/api/src/presentation/api/router/CourseMediaRouter.ts",
         "apps/api/src/presentation/api/router/ImportedCourseAdminRouter.ts"
       ],
       "reachableThroughRegistrations": [
         "courseAdminCommandUseCases",
+        "courseBulkPublicationUseCases",
         "importedCourseAdminUseCases"
       ],
       "dependencies": [
@@ -268,7 +270,8 @@
       "dependencies": [
         "assetReferencePolicy",
         "atomicDomainMutationCoordinator",
-        "universityRepository"
+        "universityRepository",
+        "universityStageEvidenceReader"
       ]
     },
     {
@@ -414,6 +417,18 @@
       ]
     },
     {
+      "name": "analyticsRetentionBackgroundJobHandler",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "backgroundJobHandlerRegistry"
+      ],
+      "dependencies": [
+        "managedApplicationEvidenceUseCases",
+        "publicAnalyticsUseCases"
+      ]
+    },
+    {
       "name": "apiExposureGateway",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -555,6 +570,8 @@
         "apps/api/src/app.ts",
         "apps/api/src/presentation/api/router/AssetPlatformRouter.ts",
         "apps/api/src/presentation/api/router/AssetReuseRouter.ts",
+        "apps/api/src/presentation/api/router/CourseAdminRouter.ts",
+        "apps/api/src/presentation/api/router/CourseMediaRouter.ts",
         "apps/api/src/presentation/api/router/ImportAdminRouter.ts",
         "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
       ],
@@ -583,6 +600,7 @@
       "name": "assetReferencePolicy",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/CoursePublicRouter.ts",
         "apps/api/src/presentation/media/PublishedCatalogImage.ts"
       ],
       "reachableThroughRegistrations": [
@@ -596,6 +614,7 @@
         "financePlatformUseCases",
         "importArtifactUseCase",
         "internationalTestAdminUseCases",
+        "managedApplicationEvidenceUseCases",
         "referenceDataUseCases",
         "serviceOperationsUseCases",
         "studentApplicationTrackerUseCases",
@@ -710,6 +729,7 @@
         "auditWorkspaceUseCases",
         "authorizationGovernanceUseCases",
         "courseAdminCommandUseCases",
+        "courseBulkPublicationUseCases",
         "courseImportCoordinator",
         "courseProgressUseCases",
         "coursePublicationService",
@@ -790,6 +810,7 @@
         "apps/api/src/presentation/api/router/AssetPlatformRouter.ts",
         "apps/api/src/presentation/api/router/AssetReuseRouter.ts",
         "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
+        "apps/api/src/presentation/api/router/CourseMediaRouter.ts",
         "apps/api/src/presentation/api/router/IdentityRouter.ts",
         "apps/api/src/presentation/api/router/ImportAdminRouter.ts",
         "apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts",
@@ -876,6 +897,7 @@
         "apps/api/src/presentation/api/router/CareerAdminRouter.ts",
         "apps/api/src/presentation/api/router/CertificateAdminRouter.ts",
         "apps/api/src/presentation/api/router/CmsAdminRouter.ts",
+        "apps/api/src/presentation/api/router/CourseAdminRouter.ts",
         "apps/api/src/presentation/api/router/CrossModuleIntegrityRouter.ts",
         "apps/api/src/presentation/api/router/FinanceAdminRouter.ts",
         "apps/api/src/presentation/api/router/NotificationRouter.ts",
@@ -888,10 +910,14 @@
         "apps/api/src/presentation/security/SecurityMiddlewareFactory.ts"
       ],
       "reachableThroughRegistrations": [
+        "courseAccessService",
         "disablePasswordCredentialUseCase",
         "evaluateAccessUseCase",
+        "executiveDashboardRouter",
         "importGovernanceUseCases",
-        "notificationRecipientGateway"
+        "managedApplicationEvidenceRouter",
+        "notificationRecipientGateway",
+        "reviewWorkspaceUseCases"
       ],
       "dependencies": [
         "authorizationDutyEvaluator",
@@ -997,6 +1023,7 @@
       ],
       "dependencies": [
         "aiAsyncBackgroundJobHandler",
+        "analyticsRetentionBackgroundJobHandler",
         "assetActivationRecoveryBackgroundJobHandler",
         "assetLifecycleRecoveryBackgroundJobHandler",
         "auditAlertEvaluationBackgroundJobHandler",
@@ -1437,6 +1464,7 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
         "apps/api/src/presentation/api/router/CertificatePublicRouter.ts",
+        "apps/api/src/presentation/api/router/CourseLearnerRouter.ts",
         "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
       ],
       "reachableThroughRegistrations": [
@@ -1514,7 +1542,8 @@
       "name": "certificateUseCases",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
-        "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
+        "apps/api/src/presentation/api/router/CertificateAdminRouter.ts",
+        "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
       ],
       "reachableThroughRegistrations": [
         "certificateArtifactRenderUseCase",
@@ -1674,6 +1703,22 @@
       "dependencies": []
     },
     {
+      "name": "courseAccessService",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts",
+        "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "authEvaluatorService",
+        "courseRepository",
+        "policyRepository",
+        "roleAssignmentRepository",
+        "roleRepository"
+      ]
+    },
+    {
       "name": "courseAdminCommandUseCases",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -1713,6 +1758,31 @@
       "dependencies": []
     },
     {
+      "name": "courseBulkPublicationRepository",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "courseBulkPublicationUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "courseBulkPublicationUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/ImportedCourseAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "adminCourseUseCases",
+        "atomicDomainMutationCoordinator",
+        "courseBulkPublicationRepository",
+        "importedCourseAdminUseCases"
+      ]
+    },
+    {
       "name": "courseCurriculumRepository",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -1732,7 +1802,8 @@
       "name": "courseCurriculumUseCases",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
-        "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+        "apps/api/src/presentation/api/router/CourseAdminRouter.ts",
+        "apps/api/src/presentation/api/router/CourseMediaRouter.ts"
       ],
       "reachableThroughRegistrations": [
         "courseAdminCommandUseCases"
@@ -2000,6 +2071,7 @@
       "reachableThroughRegistrations": [
         "adminCourseUseCases",
         "certificateUseCases",
+        "courseAccessService",
         "courseAdminCommandUseCases",
         "courseCurriculumUseCases",
         "courseEnrollmentPolicyUseCases",
@@ -2270,6 +2342,40 @@
       ],
       "dependencies": [
         "prisma"
+      ]
+    },
+    {
+      "name": "executiveDashboardGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "executiveDashboardUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "executiveDashboardRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "authEvaluatorService",
+        "executiveDashboardUseCases"
+      ]
+    },
+    {
+      "name": "executiveDashboardUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "executiveDashboardRouter"
+      ],
+      "dependencies": [
+        "executiveDashboardGateway"
       ]
     },
     {
@@ -2793,7 +2899,8 @@
         "apps/api/src/presentation/api/router/ImportedCourseAdminRouter.ts"
       ],
       "reachableThroughRegistrations": [
-        "courseAdminCommandUseCases"
+        "courseAdminCommandUseCases",
+        "courseBulkPublicationUseCases"
       ],
       "dependencies": [
         "adminCourseUseCases",
@@ -2834,7 +2941,8 @@
       "name": "ingestAssetUseCase",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
-        "apps/api/src/presentation/api/router/AssetPlatformRouter.ts"
+        "apps/api/src/presentation/api/router/AssetPlatformRouter.ts",
+        "apps/api/src/presentation/api/router/CourseMediaRouter.ts"
       ],
       "reachableThroughRegistrations": [
         "certificateArtifactStore",
@@ -3271,6 +3379,48 @@
       ]
     },
     {
+      "name": "managedApplicationEvidenceGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "managedApplicationEvidenceUseCases"
+      ],
+      "dependencies": [
+        "prisma",
+        "publishedApplicationResolver"
+      ]
+    },
+    {
+      "name": "managedApplicationEvidenceRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "authEvaluatorService",
+        "managedApplicationEvidenceUseCases",
+        "serviceRequestRepository"
+      ]
+    },
+    {
+      "name": "managedApplicationEvidenceUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "analyticsRetentionBackgroundJobHandler",
+        "managedApplicationEvidenceRouter"
+      ],
+      "dependencies": [
+        "assetReferencePolicy",
+        "managedApplicationEvidenceGateway",
+        "serviceFinanceGateway",
+        "serviceRequestRepository"
+      ]
+    },
+    {
       "name": "manualUploadSourceConnector",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -3591,6 +3741,7 @@
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "authEvaluatorService",
+        "courseAccessService",
         "managePoliciesUseCase"
       ],
       "dependencies": [
@@ -3674,6 +3825,7 @@
         "certificateAuthorityDirectory",
         "certificateRepository",
         "cmsRepository",
+        "courseBulkPublicationRepository",
         "courseCurriculumRepository",
         "courseEnrollmentPolicyRepository",
         "courseImportAnalysisRepository",
@@ -3687,6 +3839,7 @@
         "emergencyAccessRepository",
         "enterpriseEventRepo",
         "eventPublishingGateway",
+        "executiveDashboardGateway",
         "externalCourseProviderRepository",
         "financeCurrencyReferenceGateway",
         "financeRepository",
@@ -3706,6 +3859,7 @@
         "majorProgramUsageGateway",
         "majorRepository",
         "majorScholarshipUsageGateway",
+        "managedApplicationEvidenceGateway",
         "mfaGateway",
         "newMajorCandidateRepository",
         "notificationIntentRepo",
@@ -3715,12 +3869,14 @@
         "passwordResetTokenRepository",
         "phase10CatalogRepository",
         "policyRepository",
+        "publicAnalyticsGateway",
         "referenceDataRepository",
         "referenceOwnerReviewGateway",
         "registerUserUseCase",
         "renderingGateway",
         "resetPasswordUseCase",
         "retentionDecisionRepository",
+        "reviewWorkspaceGateway",
         "roleAssignmentRepository",
         "roleRepository",
         "scholarshipCanonicalLookupGateway",
@@ -3765,6 +3921,8 @@
         "apps/api/src/presentation/api/router/CareerAdminRouter.ts",
         "apps/api/src/presentation/api/router/CertificateAdminRouter.ts",
         "apps/api/src/presentation/api/router/CourseLearnerRouter.ts",
+        "apps/api/src/presentation/api/router/CourseMediaRouter.ts",
+        "apps/api/src/presentation/api/router/CoursePublicRouter.ts",
         "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts",
         "apps/api/src/presentation/media/PublishedCatalogImage.ts"
       ],
@@ -3799,6 +3957,41 @@
       ]
     },
     {
+      "name": "publicAnalyticsGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "publicAnalyticsUseCases"
+      ],
+      "dependencies": [
+        "prisma",
+        "publishedApplicationResolver"
+      ]
+    },
+    {
+      "name": "publicAnalyticsRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "publicAnalyticsUseCases"
+      ]
+    },
+    {
+      "name": "publicAnalyticsUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "analyticsRetentionBackgroundJobHandler",
+        "publicAnalyticsRouter"
+      ],
+      "dependencies": [
+        "publicAnalyticsGateway"
+      ]
+    },
+    {
       "name": "publicCmsUseCases",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -3830,7 +4023,9 @@
       "directRuntimeConsumers": [
         "apps/api/src/presentation/api/router/ScholarshipPublicRouter.ts"
       ],
-      "reachableThroughRegistrations": [],
+      "reachableThroughRegistrations": [
+        "publishedApplicationResolver"
+      ],
       "dependencies": [
         "scholarshipRepository"
       ]
@@ -3844,6 +4039,20 @@
       "reachableThroughRegistrations": [],
       "dependencies": [
         "serviceCatalogRepository"
+      ]
+    },
+    {
+      "name": "publishedApplicationResolver",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "managedApplicationEvidenceGateway",
+        "publicAnalyticsGateway",
+        "studentServiceRequestUseCases"
+      ],
+      "dependencies": [
+        "publicScholarshipUseCases",
+        "scholarshipRepository"
       ]
     },
     {
@@ -4108,6 +4317,40 @@
       ]
     },
     {
+      "name": "reviewWorkspaceGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "reviewWorkspaceUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "reviewWorkspaceRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "reviewWorkspaceUseCases"
+      ]
+    },
+    {
+      "name": "reviewWorkspaceUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "reviewWorkspaceRouter"
+      ],
+      "dependencies": [
+        "authEvaluatorService",
+        "reviewWorkspaceGateway"
+      ]
+    },
+    {
       "name": "roleAssignmentRepository",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -4119,6 +4362,7 @@
       "reachableThroughRegistrations": [
         "assignRoleUseCase",
         "authEvaluatorService",
+        "courseAccessService",
         "identityRepository",
         "listIdentitiesUseCase",
         "notificationRecipientGateway",
@@ -4139,6 +4383,7 @@
       "reachableThroughRegistrations": [
         "assignRoleUseCase",
         "authEvaluatorService",
+        "courseAccessService",
         "identityRepository",
         "listIdentitiesUseCase",
         "manageRolesUseCase",
@@ -4340,6 +4585,7 @@
         "crossDomainGraphReadService",
         "crossModuleIntegrityUseCase",
         "publicScholarshipUseCases",
+        "publishedApplicationResolver",
         "scholarshipDuplicateLookup",
         "scholarshipRecommendationGateway",
         "scholarshipStudentSavedItemHydrationGateway",
@@ -4453,6 +4699,7 @@
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "adminServiceFulfillmentUseCases",
+        "managedApplicationEvidenceUseCases",
         "serviceOperationsUseCases"
       ],
       "dependencies": [
@@ -4544,6 +4791,8 @@
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "adminServiceFulfillmentUseCases",
+        "managedApplicationEvidenceRouter",
+        "managedApplicationEvidenceUseCases",
         "serviceOperationsUseCases",
         "studentServiceRequestUseCases"
       ],
@@ -4982,6 +5231,7 @@
       ],
       "dependencies": [
         "assetReferencePolicy",
+        "publishedApplicationResolver",
         "serviceCatalogRepository",
         "serviceRequestRepository"
       ]
@@ -5547,6 +5797,15 @@
       "dependencies": [
         "prisma"
       ]
+    },
+    {
+      "name": "universityStageEvidenceReader",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "adminUniversityUseCases"
+      ],
+      "dependencies": []
     },
     {
       "name": "universityStudentSavedItemHydrationGateway",

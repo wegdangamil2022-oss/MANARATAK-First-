@@ -1,4 +1,5 @@
 import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory.js';
+import {readReviewReasonHeader} from '@manaratak/shared';
 import type { IAuditRecordRepository } from '@manaratak/domain';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
@@ -26,7 +27,7 @@ export class InternationalTestAdminRouter {
       if (req.params.id && expectedRevision === undefined) throw new Error('INTERNATIONAL_TEST_EXPECTED_REVISION_REQUIRED');
       if (expectedRevision !== undefined) resRevision(req,expectedRevision+1);
       return {
-      expectedRevision, reason: z.string().trim().min(3).max(2000).parse(req.get('X-Review-Reason') ?? z.object({ reason: z.string().optional() }).strip().parse(req.body ?? {}).reason),
+      expectedRevision, reason: z.string().trim().min(3).max(2000).parse(readReviewReasonHeader(req.get('X-Review-Reason'),req.get('X-Review-Reason-Encoding')) ?? z.object({ reason: z.string().optional() }).strip().parse(req.body ?? {}).reason),
       actorId: req.authUserId,
       actorType: 'IDENTITY',
       correlationId: (req.headers['x-correlation-id'] as string | undefined) || (req.headers['x-request-id'] as string | undefined),

@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {digest} from '../../scripts/database/post28-migration-inventory.mjs';
 import {prepareUpgradeCandidate} from '../../scripts/database/prepare-post28-upgrade.mjs';
+import {reviewedR06SourceFixture} from './post28-reviewed-source-fixture.mjs';
 const root=process.cwd();
 test('selected predecessor preserves the reviewed 110 prefix and exact 111 addition',()=>{
- const result=prepareUpgradeCandidate(root,'23897bda');
+ const fixture=reviewedR06SourceFixture(root);let result;try{result=prepareUpgradeCandidate(fixture.root,'23897bda');}finally{fixture.dispose();}
  assert.equal(result.before.sourceSha,'23897bdaa66d966eef15c85f44288589ecbcdf2b');
  assert.equal(result.before.migrations.length,109);assert.equal(result.after.migrations.length,111);
  assert.equal(result.prefixChecksumsMatched,109);assert.equal(result.pendingMigrations.length,2);
@@ -21,6 +22,9 @@ test('selected predecessor preserves the reviewed 110 prefix and exact 111 addit
  assert.equal(result.comparisonPlan.version,2);
  assert.equal(result.before.clientGeneration.generated,false);
  assert.match(result.fixturePolicy.newOrphanOn109Prefix,/still enforces new writes/);
+});
+test('current Dashboard model delta requires a new review instead of inheriting historical R05 approval',()=>{
+ assert.throws(()=>prepareUpgradeCandidate(root,'23897bda'),/MODEL_DELTA_REVIEW_REQUIRED/);
 });
 for(const value of ['HEAD','--help','main;anything','../other','',null])test('candidate refuses non-commit input '+value,()=>assert.throws(()=>prepareUpgradeCandidate(root,value),/PREDECESSOR_COMMIT_REQUIRED/));
 test('a commit cannot be its own predecessor',()=>{

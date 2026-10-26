@@ -5,16 +5,16 @@ import {AtomicAuditedOutboxMutationExecutor} from '../../src/event-foundation/us
 import {PrismaCourseProgressRepository} from '../../../infrastructure/src/courses/PrismaCourseProgressRepository';
 
 const submittedAt = new Date('2026-10-10T12:00:00.000Z');
-function harness() {
+function harness(assessmentType = 'QUIZ') {
   let failOutbox = false;
   const state = {attempt: {id:'a',courseId:'c',quizId:'q',studentReferenceId:'s',status:'IN_PROGRESS',submittedAt:null as Date|null,metadata:null as any,score:null as number|null,passed:null as boolean|null,answers:{} as any}, audits:0, events:0};
   const questions = [
     {id:'auto',quizId:'q',questionType:'TRUE_FALSE',correctAnswer:true,points:2,status:'PUBLISHED',prompt:'Automatic'},
-    {id:'essay',quizId:'q',questionType:'ESSAY',points:3,status:'PUBLISHED',prompt:'Explain'},
+    {id:'essay',quizId:'q',questionType:'ESSAY',points:3,status:'PUBLISHED',prompt:'Explain',explanation:'Use a concrete example'},
   ];
   const course:any = {id:'c',status:'PUBLISHED',originType:'NATIVE_MANARATAK_COURSE',optionalFields:{completionCriteria:{assessmentRequired:true}}};
   const courses:any = {findById:async()=>course};
-  const curriculum:any = {getCurriculumSnapshot:async()=>({quizzes:[{id:'q',passingScore:60,status:'PUBLISHED'}],questions,modules:[],lessons:[],assets:[]})};
+  const curriculum:any = {getCurriculumSnapshot:async()=>({quizzes:[{id:'q',passingScore:60,status:'PUBLISHED',assessmentType}],questions,modules:[],lessons:[],assets:[]})};
   curriculum.getLearningVersion = async()=>({course, curriculum: await curriculum.getCurriculumSnapshot()});
   const repository:any = {
     withTransaction:()=>repository, findEnrollment:async()=>({id:'e',status:'ACTIVE',progressPercentage:100}), findQuizAttempt:async()=>structuredClone(state.attempt),
@@ -33,8 +33,10 @@ function harness() {
 }
 
 describe('P13 assignments and manual grading',()=>{
+  it('freezes the authored grading rubric at submission time',async()=>{const h=harness();await h.submit();h.questions[1].explanation='Changed later';expect(h.state.attempt.metadata.assessmentReview.questions[0].rubric).toBe('Use a concrete example');});
+  it('requires human grading for assignments even when every question is objective', async()=>{const h=harness('ASSIGNMENT');h.questions.splice(1);const result=await h.uc.submitQuizAttempt({attemptId:'a',courseId:'c',studentReferenceId:'s',answers:{auto:false}});expect(result).toMatchObject({status:'SUBMITTED',passed:null,score:null});expect(result.metadata.assessmentReview).toMatchObject({automaticPoints:0,questions:[{id:'auto',maximumPoints:2}]});expect(h.repository.submitQuizAttempt).not.toHaveBeenCalled();});
   it('resumes an unfinished attempt without consuming another attempt',async()=>{const h=harness();const result=await h.uc.startQuizAttempt({courseId:'c',quizId:'q',studentReferenceId:'s'});expect(result.id).toBe('a');});
-  it('stores written submission pending, with no passing result or answer keys',async()=>{const h=harness();const result=await h.submit();expect(result).toMatchObject({status:'SUBMITTED',score:null,passed:null,answers:{essay:'Explanation'}});expect(result.metadata?.assessmentReview).toEqual({passingScore:60,totalPoints:5,automaticPoints:2,questions:[{id:'essay',prompt:'Explain',maximumPoints:3}]});expect(JSON.stringify(result.metadata)).not.toContain('correctAnswer');expect(h.repository.submitQuizAttempt).not.toHaveBeenCalled();});
+  it('stores written submission pending, with no passing result or answer keys',async()=>{const h=harness();const result=await h.submit();expect(result).toMatchObject({status:'SUBMITTED',score:null,passed:null,answers:{essay:'Explanation'}});expect(result.metadata?.assessmentReview).toEqual({passingScore:60,totalPoints:5,automaticPoints:2,questions:[{id:'essay',prompt:'Explain',maximumPoints:3,rubric:'Use a concrete example'}]});expect(JSON.stringify(result.metadata)).not.toContain('correctAnswer');expect(h.repository.submitQuizAttempt).not.toHaveBeenCalled();});
   it('still automatically grades objective-only quizzes',async()=>{const h=harness();h.questions.splice(1);const result=await h.uc.submitQuizAttempt({attemptId:'a',courseId:'c',studentReferenceId:'s',answers:{auto:true}});expect(result).toMatchObject({score:100,passed:true,status:'PASSED'});});
   it('rejects another student before persisting answers',async()=>{const h=harness();await expect(h.uc.submitQuizAttempt({attemptId:'a',courseId:'c',studentReferenceId:'intruder',answers:{}})).rejects.toThrow('SCOPE_MISMATCH');expect(h.repository.submitAssessmentForReview).not.toHaveBeenCalled();});
   it('requires a nonempty written answer',async()=>{const h=harness();await expect(h.uc.submitQuizAttempt({attemptId:'a',courseId:'c',studentReferenceId:'s',answers:{auto:true,essay:' '}})).rejects.toThrow('WRITTEN_ANSWER_REQUIRED');});

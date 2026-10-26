@@ -1,406 +1,562 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, RefreshCw, ListChecks, ChartNoAxesCombined, Info, Upload, ShieldCheck, ArrowUpLeft } from 'lucide-react';
-import { adminApiClient } from '../api/client';
+import {
+  Users,
+  GraduationCap,
+  School,
+  BookOpenCheck,
+  BookOpen,
+  ClipboardCheck,
+  BriefcaseBusiness,
+  Files,
+  RefreshCw,
+  Activity,
+  ArrowUpLeft,
+  ArrowUpRight,
+  TrendingUp,
+  TrendingDown,
+  Eye,
+  UserRoundPlus,
+  AlertTriangle,
+  Upload,
+  Wallet,
+  ListChecks,
+  Clock3,
+  Send,
+  type LucideIcon,
+} from 'lucide-react';
+import type {
+  DashboardDays,
+  UserDashboard,
+  TrafficDashboard,
+  ApplicationDashboard,
+} from '@manaratak/shared';
 import { useTranslation } from '../i18n/I18nProvider';
-import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
-import {
-  analyticsContract,
-  dashboardAllowed,
-  dashboardSources,
-  unmeasuredCoverage,
-} from '../features/dashboard/DashboardSources';
-import {
-  effectiveDashboardState,
-  initialDashboardReading,
-  type DashboardReading,
-} from '../features/dashboard/DashboardContract';
-import { loadDashboardSources } from '../features/dashboard/DashboardLoader';
-import { DashboardHealthPanel, DashboardMetricCard } from '../features/dashboard/DashboardCards';
-import { DashboardSectionDirectory } from '../features/dashboard/DashboardSectionDirectory';
+import { useExecutiveDashboard, primaryKeys } from '../features/dashboard/useExecutiveDashboard';
+import { ExecutiveChart } from '../features/dashboard/ExecutiveChart';
+import { ExecutiveKpi as Kpi } from '../features/dashboard/ExecutiveKpi';
+import { ExecutiveApplications } from '../features/dashboard/ExecutiveApplications';
 import { dashboardLabel, dashboardTime } from '../features/dashboard/dashboardText';
-import { dashboardInitialKeys } from '../features/dashboard/DashboardSchedule';
-import { AdminDisclosureHeading } from '../components/AdminDisclosureHeading';
+import { safeCount } from '../features/dashboard/DashboardContract';
+import type { ExecutiveReading } from '../features/dashboard/ExecutiveData';
+import '../features/dashboard/executive-dashboard.css';
 
 export function AdminDashboardPage() {
-  const { language, dir } = useTranslation();
-  const { hasPermission, permissions } = useAdminAuthorization();
-  const permissionKey = [...permissions].sort().join('|');
-  const allowed = useMemo(
-    () => dashboardSources.filter((source) => dashboardAllowed(source, hasPermission)),
-    [permissionKey],
-  );
-  const [readings, setReadings] = useState<DashboardReading[]>(() =>
-    dashboardSources.map((source) =>
-      initialDashboardReading(source, dashboardAllowed(source, hasPermission)),
-    ),
-  );
-  const currentReadings = useRef(readings);
-  currentReadings.current = readings;
-  const [busy, setBusy] = useState(false),
-    [clock, setClock] = useState(Date.now());
-  const [progress, setProgress] = useState({ completed: 0, total: 0 });
-  const controller = useRef<AbortController | null>(null),
-    generation = useRef(0),
-    lock = useRef(false);
-  const requested = useRef(new Set(dashboardInitialKeys));
-  const pendingGroups = useRef(new Set<string>());
-  const load = useCallback(
-    async (mode: 'all' | 'due' | 'source' | 'group' = 'all', key?: string) => {
-      if (mode === 'group') {
-        dashboardSources.filter(source => source.domain === key).forEach(source => requested.current.add(source.key));
-      }
-      if (lock.current) {
-        if (mode === 'group' && key) pendingGroups.current.add(key);
-        return;
-      }
-      const permitted = new Set(allowed.map((source) => source.key));
-      const candidates = dashboardSources
-        .filter((source) => permitted.has(source.key) && (requested.current.has(source.key) || mode === 'source'))
-        .map((source) => {
-          const previous = currentReadings.current.find(
-            (reading) => reading.source.key === source.key,
-          );
-          return !previous || previous.state === 'forbidden'
-            ? initialDashboardReading(source, true)
-            : previous;
-        })
-        .filter((reading) =>
-          mode === 'source'
-            ? reading.source.key === key
-            : mode === 'group'
-              ? reading.source.domain === key && (!reading.receivedAt || effectiveDashboardState(reading, Date.now()) !== 'available')
-            : mode === 'all' ||
-              ['loading', 'stale', 'unavailable', 'timed_out', 'network_error'].includes(
-                effectiveDashboardState(reading, Date.now()),
-              ),
-        );
-      if (!candidates.length) return;
-      lock.current = true;
-      setBusy(true);
-      const token = ++generation.current;
-      controller.current?.abort();
-      const abort = new AbortController();
-      controller.current = abort;
-      setProgress({ completed: 0, total: candidates.length });
-      setReadings((previous) =>
-        previous.map((reading) =>
-          !permitted.has(reading.source.key)
-            ? initialDashboardReading(reading.source, false)
-            : candidates.some((candidate) => candidate.source.key === reading.source.key)
-              ? { ...reading, state: reading.receivedAt ? 'stale' : 'loading' }
-              : reading,
-        ),
-      );
-      let completed = 0;
-      // Read health and permissioned activity first, without holding catalog cards behind them.
-      candidates.sort(
-        (a, b) =>
-          Number(b.source.key === 'health') - Number(a.source.key === 'health'),
-      );
-      try {
-        await loadDashboardSources(
-          candidates,
-          (url, options) => adminApiClient.request(url, options),
-          abort.signal,
-          (reading) => {
-            if (token !== generation.current) return;
-            setReadings((previous) =>
-              previous.map((prior) => (prior.source.key === reading.source.key ? reading : prior)),
-            );
-            setProgress({ completed: ++completed, total: candidates.length });
-          },
-        );
-      } finally {
-        if (token === generation.current) {
-          lock.current = false;
-          setBusy(false);
-          setClock(Date.now());
-          const next = pendingGroups.current.values().next().value;
-          if (next) {
-            pendingGroups.current.delete(next);
-            void load('group', next);
-          }
-        }
-      }
-    },
-    [allowed],
-  );
-  useEffect(() => {
-    setReadings((previous) =>
-      dashboardSources.map((source) => {
-        if (!allowed.some((candidate) => candidate.key === source.key))
-          return initialDashboardReading(source, false);
-        const prior = previous.find((reading) => reading.source.key === source.key);
-        return prior?.state !== 'forbidden' && prior
-          ? prior
-          : initialDashboardReading(source, true);
-      }),
-    );
-    void load();
-    const focus = () => {
-      if (document.visibilityState === 'visible') void load('due');
-    };
-    const visibility = () => {
-      if (document.visibilityState === 'visible') focus();
-      else {
-        ++generation.current;
-        controller.current?.abort();
-        lock.current = false;
-        setBusy(false);
-      }
-    };
-    window.addEventListener('focus', focus);
-    document.addEventListener('visibilitychange', visibility);
-    const timer = window.setInterval(() => {
-      if (document.visibilityState === 'visible') setClock(Date.now());
-    }, 10000);
-    return () => {
-      ++generation.current;
-      controller.current?.abort();
-      lock.current = false;
-      window.removeEventListener('focus', focus);
-      document.removeEventListener('visibilitychange', visibility);
-      window.clearInterval(timer);
-    };
-  }, [load, allowed]);
-  // Immediate render fencing also protects the frame before permission-change effects run.
-  const visible = readings.map((reading) =>
-    dashboardAllowed(reading.source, hasPermission)
-      ? reading
-      : initialDashboardReading(reading.source, false),
-  );
-  const health = visible.find((reading) => reading.source.key === 'health')!;
-  const activity = visible.find((reading) => reading.source.key === 'activity')!;
-  const activityState = effectiveDashboardState(activity, clock);
-  const finance = visible.find((reading) => reading.source.key === 'finance')!;
-  const financeState = effectiveDashboardState(finance, clock);
-  const label = (key: string) => dashboardLabel(key, language);
-  const tr = (ar: string, en: string) => (language === 'ar' ? ar : en);
-  const primaryKeys = [
-    'identities',
-    'universities:total',
-    'scholarships:total',
-    'majors:total',
-    'courses:total',
-    'tests:total',
-    'careers:total',
-    'cms:total',
-  ];
-  const primaryReadings = primaryKeys.flatMap((key) => {
-    const reading = visible.find((row) => row.source.key === key);
-    return reading && reading.state !== 'forbidden' ? [reading] : [];
-  });
-  const groups = [
-    ...new Set(
-      visible
-        .filter((reading) => reading.source.metrics.length && reading.state !== 'forbidden')
-        .map((reading) => reading.source.domain),
-    ),
-  ];
-  const attentionMetrics = new Set([
-    'review',
-    'needs_review',
-    'needsVerification',
-    'needsTranslation',
-    'imported_broken',
-    'NEEDS_REVIEW',
-    'FAILED',
-    'DLQ',
-    'pendingApprovals',
-  ]);
+  const { language, dir } = useTranslation(),
+    ar = language === 'ar';
+  const tr = (arabic: string, english: string) => (ar ? arabic : english);
+  const [days, setDays] = useState<DashboardDays>(30);
+  const { readings, resources, userHeadline, busy, refreshData, state, permits } =
+    useExecutiveDashboard(days);
+  const reading = (key: string) => readings.find((row) => row.source.key === key),
+    label = (key: string) => dashboardLabel(key, language);
+  const number = (value: number | null) =>
+    value === null ? '—' : new Intl.NumberFormat(language).format(value);
+  const status = (row?: ExecutiveReading) =>
+    !row
+      ? ''
+      : row.state === 'loading'
+        ? tr('جار التحميل', 'Loading')
+        : row.state === 'stale'
+          ? tr('بيانات قديمة — تعذّر التحديث', 'Stale — refresh failed')
+          : row.state === 'not_measured'
+            ? tr('لم يبدأ القياس بعد', 'Measurement has not started')
+            : row.state === 'partial'
+              ? tr('تغطية جزئية', 'Partial coverage')
+              : row.state === 'unavailable'
+                ? tr('تعذّر التحميل', 'Unavailable')
+                : row.state === 'forbidden'
+                  ? tr('مقيّد بالصلاحيات', 'Restricted by permissions')
+                  : '';
+  const users = resources.users?.data as UserDashboard | null | undefined,
+    traffic = resources.traffic?.data as TrafficDashboard | null | undefined,
+    applications = resources.applications?.data as ApplicationDashboard | null | undefined;
+  const headlineStatus =
+    userHeadline?.state === 'stale'
+      ? tr('بيانات قديمة — تعذّر التحديث', 'Stale — refresh failed')
+      : userHeadline
+        ? undefined
+        : status(resources.users);
+  const health = reading('health'),
+    activity = reading('activity'),
+    imports = reading('imports'),
+    finance = reading('finance'),
+    quality = reading('scholarships:quality');
+  const healthCurrent = health && ['available', 'partial'].includes(state(health)),
+    healthStatus = healthCurrent ? health.health?.runtimeStatus : null;
+  const healthText =
+    healthStatus === 'UP'
+      ? tr('تعمل', 'Operational')
+      : healthStatus && healthStatus !== 'UNKNOWN'
+        ? tr('تنبيه', 'Attention')
+        : tr('تعذّر التحقق', 'Not verified');
+  const availableCount = (key: string, metric: string) => {
+    const row = reading(key);
+    return row && ['available', 'partial', 'stale'].includes(state(row))
+      ? (row.metrics[metric] ?? null)
+      : null;
+  };
+  const checked = readings
+    .map((row) => row.receivedAt)
+    .filter((value): value is string => Boolean(value))
+    .sort()
+    .at(-1);
+  const icons = [
+      School,
+      GraduationCap,
+      BookOpenCheck,
+      BookOpen,
+      ClipboardCheck,
+      BriefcaseBusiness,
+      Files,
+    ],
+    Arrow = ar ? ArrowUpLeft : ArrowUpRight;
+  const actions: Array<{
+    title: string;
+    icon: LucideIcon;
+    href: string;
+    value: string;
+    tone: string;
+    stale?: boolean;
+  }> = [];
+  if (permits('admin:platform:manage'))
+    actions.push({
+      title: tr('سجلات تحتاج مراجعة', 'Records requiring review'),
+      icon: ListChecks,
+      href: '/review-queue',
+      value:
+        quality &&
+        ['needsVerification', 'needsTranslation', 'missingFields'].some(
+          (key) => (quality.metrics[key] ?? 0) > 0,
+        )
+          ? tr('توجد مراجعات', 'Reviews available')
+          : tr('الإجمالي غير متاح', 'Total unavailable'),
+      tone: 'indigo',
+    });
+  if (imports) {
+    const failed = availableCount('imports', 'FAILED'),
+      dlq = availableCount('imports', 'DLQ');
+    actions.push({
+      title: tr('أخطاء الاستيراد', 'Import errors'),
+      icon: Upload,
+      href: '/imports',
+      value: number(failed === null || dlq === null ? null : safeCount(failed + dlq)),
+      tone: 'gold',
+      stale: state(imports) === 'stale',
+    });
+  }
+  if (health && (!healthCurrent || healthStatus !== 'UP'))
+    actions.push({
+      title: tr('حالة المنصة', 'Platform health'),
+      icon: Activity,
+      href: '/health-readiness',
+      value: healthText,
+      tone: 'teal',
+    });
+  if (finance)
+    actions.push({
+      title: tr('اعتمادات مالية معلّقة', 'Pending financial approvals'),
+      icon: Wallet,
+      href: '/finance',
+      value: number(availableCount('finance', 'pendingApprovals')),
+      tone: 'indigo',
+      stale: state(finance) === 'stale',
+    });
+  if (
+    permits('admin:dashboard:applications:view') &&
+    permits('admin:services:manage') &&
+    permits('admin:services:requests:view')
+  )
+    actions.push({
+      title: tr('طلبات تقديم تحتاج تدخلًا', 'Application requests needing attention'),
+      icon: Send,
+      href: '/services?tab=requests',
+      value: number(applications?.attention ?? null),
+      tone: 'cyan',
+      stale: resources.applications?.state === 'stale',
+    });
+  const events = [...(activity?.activity ?? [])]
+    .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+    .slice(0, 5);
+  const actionName = (action: string) =>
+    /PUBLISH/.test(action)
+      ? tr('إجراء نشر', 'Publishing action')
+      : /CREAT|REGISTER/.test(action)
+        ? tr('إنشاء سجل', 'Record created')
+        : /APPROV|REVIEW/.test(action)
+          ? tr('مراجعة واعتماد', 'Review decision')
+          : /DELETE|ARCHIV/.test(action)
+            ? tr('أرشفة سجل', 'Record archived')
+            : /UPDATE|EDIT/.test(action)
+              ? tr('تحديث بيانات', 'Record updated')
+              : tr('إجراء إداري مسجّل', 'Recorded administrative action');
+  const resultName = (value: string) =>
+    value === 'SUCCESS'
+      ? tr('نجح', 'Succeeded')
+      : value === 'FAILURE'
+        ? tr('فشل', 'Failed')
+        : value === 'INTENT'
+          ? tr('بدء إجراء؛ النتيجة غير مثبتة', 'Intent; outcome not established')
+          : tr('النتيجة غير معروفة', 'Outcome unknown');
+  const canUsers = permits('admin:dashboard:users:view'),
+    canTraffic = permits('admin:dashboard:analytics:view'),
+    canApplications = permits('admin:dashboard:applications:view');
   return (
-    <div dir={dir} className="admin-command-center mx-auto max-w-7xl space-y-5 text-[#142B5F]">
-      <header className="admin-page-hero relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
+    <div dir={dir} className="executive-dashboard" data-dashboard-version="2.1">
+      <header className="executive-header">
         <div>
-          <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold text-cyan-100">
-            <Activity className="h-4 w-4" aria-hidden="true" />
-            {tr('مركز الإدارة والتشغيل', 'Administration & Operations Center')}
-          </span>
           <h1>{tr('لوحة التحكم', 'Dashboard')}</h1>
           <p>
             {tr(
-              'نظرة تنفيذية على البيانات الحقيقية، قوائم المراجعة، الاستيراد والعمليات الأساسية في منارتك.',
-              'An executive view of live catalog data, review queues, imports and core MANARATAK operations.',
+              'نظرة عامة على أداء منارتك وما يحتاج متابعتك',
+              'MANARATAK performance and the work that needs your attention',
             )}
           </p>
         </div>
-        <button
-          disabled={busy}
-          onClick={() => void load()}
-          className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-[#21A7B4] px-4 py-3 font-bold text-white disabled:opacity-50 focus-visible:outline focus-visible:outline-2"
-        >
-          <RefreshCw aria-hidden="true" className={`h-4 w-4 ${busy ? 'animate-spin' : ''}`} />
-          {label('refresh')}
-        </button>
+        <div className="executive-header-actions">
+          {health && (
+            <Link
+              to="/health-readiness"
+              className={`executive-health ${healthStatus === 'UP' ? 'healthy' : 'uncertain'}`}
+            >
+              <Activity aria-hidden="true" />
+              {healthText}
+            </Link>
+          )}
+          <button type="button" disabled={busy} onClick={refreshData}>
+            <RefreshCw aria-hidden="true" className={busy ? 'executive-spin' : ''} />
+            {tr('تحديث البيانات', 'Refresh data')}
+          </button>
+          <span role="status" aria-live="polite">
+            {busy
+              ? tr('جار تحديث المصادر…', 'Refreshing sources…')
+              : checked
+                ? `${tr('آخر قراءة ناجحة', 'Latest successful read')}: ${dashboardTime(checked, language)}`
+                : tr('لم تصل قراءة ناجحة بعد', 'No successful read yet')}
+          </span>
+        </div>
       </header>
-      <p role="status" aria-live="polite" className="text-xs text-[#203442]/70">
-        {busy ? label('loading') : label('completed')}:{' '}
-        {new Intl.NumberFormat(language).format(progress.completed)} /{' '}
-        {new Intl.NumberFormat(language).format(progress.total)}
-      </p>
-      <nav className="command-shortcuts" aria-label={tr('إجراءات الإدارة', 'Administration actions')}>
-        {[
-          { path: '/review-queue', ar: 'متابعة المراجعات', en: 'Review work', icon: ListChecks, allowed: hasPermission('admin:platform:manage') },
-          { path: '/imports', ar: 'مركز الاستيراد', en: 'Import center', icon: Upload, allowed: hasPermission('admin:imports:manage') },
-          { path: '/health-readiness', ar: 'صحة المنصة', en: 'Platform health', icon: ShieldCheck, allowed: hasPermission('admin:platform:manage') },
-        ].filter(action => action.allowed).map(action => <Link key={action.path} to={action.path}><action.icon aria-hidden="true" /><span>{tr(action.ar, action.en)}</span><ArrowUpLeft aria-hidden="true" /></Link>)}
-      </nav>
-      <DashboardHealthPanel reading={health} language={language} now={clock} />
-      <DashboardSectionDirectory />
-      <section aria-labelledby="dashboard-snapshot">
-        <p className="text-xs font-black text-[#0E7C86]">
-          {tr('المؤشرات الرئيسية', 'Key metrics')}
-        </p>
-        <h2 id="dashboard-snapshot" className="mb-4 mt-1 text-xl font-black">
-          <ChartNoAxesCombined aria-hidden="true" />{tr('بيانات المنصة', 'Platform records')}
-        </h2>
-        <div className="dashboard-snapshot-grid">
-          {primaryReadings.map((reading) => (
-            <DashboardMetricCard
-              key={reading.source.key}
-              reading={reading}
-              metric={reading.source.metrics[0]}
-              language={language}
-              now={clock}
-              compact
-            />
-          ))}
-        </div>
-      </section>
-        <section className="command-panel" aria-labelledby="dashboard-attention">
-          <h2 id="dashboard-attention" className="mb-3 text-lg font-bold">
-            <ListChecks aria-hidden="true" />{tr('ما يحتاج المتابعة', 'Needs attention')}
+      <section aria-labelledby="executive-platform">
+        <div className="executive-section-heading">
+          <h2 id="executive-platform">
+            <Files aria-hidden="true" />
+            {tr('إحصائيات المنصة', 'Platform statistics')}
           </h2>
-          <p className="command-caption">{label('attention')}</p>
-          <div className="dashboard-attention-grid">
-            {visible
-              .filter((reading) => reading.state !== 'forbidden' && (dashboardInitialKeys.has(reading.source.key) || reading.receivedAt))
-              .flatMap((reading) =>
-                reading.source.metrics
-                  .filter((metric) => attentionMetrics.has(metric))
-                  .map((metric) => (
-                    <DashboardMetricCard
-                      key={`${reading.source.key}:${metric}`}
-                      reading={reading}
-                      metric={metric}
-                      language={language}
-                      now={clock}
-                    />
-                  )),
-              )}
-          </div>
-        </section>
-      <details aria-labelledby="dashboard-section-metrics" className="command-panel dashboard-breakdowns admin-disclosure">
-        <AdminDisclosureHeading headingId="dashboard-section-metrics" icon={ChartNoAxesCombined} language={language} title={tr('تفاصيل مؤشرات الأقسام ومصادرها', 'Section metrics and source details')} description={tr('حالات النشر والمراجعة وتفاصيل قراءة كل قسم.', 'Publication, review and source readings by section.')} />
-        <div className="admin-disclosure-body space-y-6">
-          <p className="text-sm text-slate-600">
-            {label('scope')} {label('permission')}
+          <span>
+            {tr('إجماليات كل الوقت · قراءات مستقلة', 'All-time totals · independent readings')}
+          </span>
+        </div>
+        <div className="executive-kpi-grid" aria-busy={busy}>
+          {canUsers && (
+            <Kpi
+              title={tr('المستخدمون المسجلون', 'Registered users')}
+              value={userHeadline?.data.registeredUsers ?? null}
+              icon={Users}
+              tone="indigo"
+              href={permits('admin:identities:manage') ? '/identities?type=Human' : undefined}
+              status={headlineStatus}
+              language={language}
+            />
+          )}
+          {primaryKeys.map((key, index) => {
+            const row = reading(key);
+            if (!row) return null;
+            const current = state(row);
+            return (
+              <Kpi
+                key={key}
+                title={label(row.source.domain)}
+                value={row.metrics.total ?? null}
+                icon={icons[index]}
+                tone={['teal', 'gold', 'cyan', 'indigo'][index % 4]}
+                href={row.source.href}
+                status={current === 'available' ? undefined : label(current)}
+                language={language}
+              />
+            );
+          })}
+        </div>
+        {canUsers && (
+          <p className="executive-caption">
+            {tr(
+              'المستخدم المسجل: حساب بشري فريد ببريد متحقق؛ يشمل الموقوف، ويستبعد المحذوف والمؤرشف وحسابات الأنظمة.',
+              'Registered user: a unique verified human account, including suspended, excluding deleted/archived and system accounts.',
+            )}
           </p>
-          {groups.map((group) => (
-            <details key={group} className="admin-section-tools admin-disclosure admin-disclosure-nested" aria-labelledby={`dashboard-${group}`} onToggle={event => { if (event.currentTarget.open) void load('group', group); }}>
-              <AdminDisclosureHeading headingId={`dashboard-${group}`} icon={ChartNoAxesCombined} language={language} title={label(group)} />
-              <div className="admin-disclosure-body">
-              <div className="dashboard-breakdown-grid">
-                {visible
-                  .filter((reading) => reading.source.domain === group && reading.state !== 'forbidden')
-                  .flatMap((reading) =>
-                    reading.source.metrics.map((metric) => (
-                      <DashboardMetricCard
-                        key={`${reading.source.key}:${metric}`}
-                        reading={reading}
-                        metric={metric}
-                        language={language}
-                        now={clock}
-                      />
-                    )),
+        )}
+        {!readings.length && !canUsers && (
+          <p className="executive-empty">{tr('مقيّد بالصلاحيات', 'Restricted by permissions')}</p>
+        )}
+      </section>
+      {(canUsers || canTraffic || canApplications) && (
+        <section aria-labelledby="executive-analytics">
+          <div className="executive-section-heading">
+            <div>
+              <h2 id="executive-analytics">
+                <TrendingUp aria-hidden="true" />
+                {tr('نشاط المنصة والطلاب', 'Platform and student activity')}
+              </h2>
+              <p>
+                {tr(
+                  'نفس الفترة للمؤشرات الزمنية · التوقيت UTC',
+                  'One period for time-based metrics · UTC',
+                )}
+              </p>
+            </div>
+            <div
+              className="executive-period"
+              role="group"
+              aria-label={tr('الفترة الزمنية', 'Reporting period')}
+            >
+              {([7, 30, 90, 365] as const).map((value) => (
+                <button
+                  type="button"
+                  key={value}
+                  aria-pressed={days === value}
+                  onClick={() => setDays(value)}
+                >
+                  {value === 365 ? tr('سنة', 'Year') : `${number(value)} ${tr('يومًا', 'days')}`}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="executive-activity-grid">
+            {canUsers && (
+              <>
+                <Kpi
+                  title={tr('التسجيلات الجديدة', 'New registrations')}
+                  value={users?.newRegistrations ?? null}
+                  icon={UserRoundPlus}
+                  tone="teal"
+                  language={language}
+                  status={status(resources.users)}
+                />
+                <Kpi
+                  title={tr('الطلاب المسجلون', 'Registered students')}
+                  value={userHeadline?.data.registeredStudents ?? null}
+                  icon={GraduationCap}
+                  tone="gold"
+                  language={language}
+                  note={tr(
+                    'حسابات مؤهلة بدور الطالب؛ إجمالي كل الوقت.',
+                    'Eligible accounts with the student role; all-time total.',
                   )}
+                  status={headlineStatus}
+                />
+              </>
+            )}
+            {canTraffic && (
+              <>
+                <Kpi
+                  title={tr('معرّفات الزوار الفريدة', 'Unique visitor identifiers')}
+                  value={traffic?.visitors ?? null}
+                  icon={Users}
+                  tone="cyan"
+                  language={language}
+                  status={status(resources.traffic)}
+                />
+                <Kpi
+                  title={tr('مشاهدات الصفحات', 'Page views')}
+                  value={traffic?.pageViews ?? null}
+                  icon={Eye}
+                  tone="indigo"
+                  language={language}
+                  status={status(resources.traffic)}
+                />
+              </>
+            )}
+          </div>
+          <div className="executive-charts">
+            {canUsers && (
+              <div className="executive-panel">
+                <h2>
+                  <UserRoundPlus aria-hidden="true" />
+                  {tr('نمو التسجيلات', 'Registration growth')}
+                </h2>
+                {users && (
+                  <p className="executive-growth">
+                    {users.growthPercent !== null ? (
+                      <>
+                        {users.growthPercent < 0 ? (
+                          <TrendingDown aria-hidden="true" />
+                        ) : (
+                          <TrendingUp aria-hidden="true" />
+                        )}
+                        <bdi>{users.growthPercent}%</bdi>{' '}
+                        {tr('مقارنة بالفترة السابقة المماثلة', 'versus the equal previous period')}
+                      </>
+                    ) : users.growthState === 'started_from_zero' ? (
+                      tr('بدأ النمو من الصفر؛ لا نسبة مقارنة', 'Started from zero; no percentage')
+                    ) : (
+                      tr('لا أساس للمقارنة', 'No comparison baseline')
+                    )}
+                  </p>
+                )}
+                <p className="executive-state">{status(resources.users)}</p>
+                <ExecutiveChart
+                  title={tr('الحسابات الجديدة حسب اليوم', 'New accounts by day')}
+                  points={users?.registrations ?? []}
+                  language={language}
+                  firstLabel={tr('التسجيلات', 'Registrations')}
+                  empty={status(resources.users) || tr('لا توجد فترة متاحة', 'No available period')}
+                  caption={tr(
+                    'حسابات مؤهلة حاليًا حسب تاريخ إنشائها، وليست زيارات أو جلسات. المقارنة لفترتين متساويتين.',
+                    'Currently eligible accounts by creation date, not visits or sessions. Equal-length periods.',
+                  )}
+                />
+                {users && (
+                  <time className="executive-caption" dateTime={users.checkedAt}>
+                    {dashboardTime(users.checkedAt, language)}
+                  </time>
+                )}
               </div>
-              {visible
-                .filter(
-                  (reading) =>
-                    reading.source.domain === group &&
-                    reading.state !== 'forbidden' &&
-                    ['unavailable', 'timed_out', 'network_error', 'stale', 'partial'].includes(
-                      effectiveDashboardState(reading, clock),
-                    ),
-                )
-                .map((reading) => (
-                  <button
-                    key={reading.source.key}
-                    disabled={busy}
-                    onClick={() => void load('source', reading.source.key)}
-                    className="mt-2 me-2 rounded border p-2 text-sm disabled:opacity-50"
-                  >
-                    {label('retry')} · <bdi>{reading.source.key}</bdi>
-                  </button>
-                ))}
-              {group === 'finance' && (
-                <p>
-                  {label('reconciliation')}:{' '}
-                  {label(
-                    ['available', 'partial'].includes(financeState)
-                      ? (finance.reconciliation ?? 'unknown')
-                      : financeState,
+            )}
+            {canTraffic && (
+              <div className="executive-panel">
+                <h2>
+                  <Eye aria-hidden="true" />
+                  {tr('زيارات المنصة', 'Platform traffic')}
+                </h2>
+                <p className="executive-state">{status(resources.traffic)}</p>
+                <ExecutiveChart
+                  title={tr('الزوار والمشاهدات اليومية', 'Daily visitors and page views')}
+                  points={traffic?.visits ?? []}
+                  language={language}
+                  firstLabel={tr('معرّفات الزوار', 'Visitor identifiers')}
+                  secondLabel={tr('المشاهدات', 'Page views')}
+                  empty={
+                    status(resources.traffic) || tr('لا توجد بيانات تاريخية', 'No historical data')
+                  }
+                  caption={tr(
+                    'معرّفات متصفحات وافقت فقط؛ تُستبعد الروبوتات المعروفة. ليست عدد جميع الأشخاص، وقد يتكرر الشخص عند تغير معرّفه.',
+                    'Consenting browser identifiers only; known bots excluded. Not all people; a changed identifier may count a person again.',
                   )}
-                </p>
+                />
+                {traffic?.measurementStartedAt && (
+                  <p className="executive-caption">
+                    {tr('بدء القياس', 'Measurement began')}:{' '}
+                    {dashboardTime(traffic.measurementStartedAt, language)} ·{' '}
+                    {tr('الاحتفاظ', 'Retention')}: {number(traffic.retentionDays)}{' '}
+                    {tr('يومًا', 'days')}
+                  </p>
+                )}
+                {traffic && (
+                  <time className="executive-caption" dateTime={traffic.checkedAt}>
+                    {dashboardTime(traffic.checkedAt, language)}
+                  </time>
+                )}
+              </div>
+            )}
+          </div>
+          {(canApplications || canTraffic) && (
+            <ExecutiveApplications
+              applications={applications ?? null}
+              traffic={traffic ?? null}
+              language={language}
+              canManaged={canApplications}
+              canTraffic={canTraffic}
+              managedState={status(resources.applications)}
+              trafficState={status(resources.traffic)}
+            />
+          )}
+        </section>
+      )}
+      <div className="executive-bottom">
+        <section className="executive-panel" aria-labelledby="executive-attention">
+          <h2 id="executive-attention">
+            <AlertTriangle aria-hidden="true" />
+            {tr('يحتاج انتباهك', 'Needs your attention')}
+          </h2>
+          {actions.length ? (
+            <ul className="executive-action-list">
+              {actions.slice(0, 5).map(({ title, icon: Icon, href, value, tone, stale }) => (
+                <li key={href}>
+                  <Link to={href}>
+                    <span className={`executive-icon ${tone}`}>
+                      <Icon aria-hidden="true" />
+                    </span>
+                    <span>
+                      {title}
+                      {stale && (
+                        <small className="executive-caption">
+                          {' '}
+                          · {tr('بيانات قديمة', 'Stale data')}
+                        </small>
+                      )}
+                    </span>
+                    <strong>{value}</strong>
+                    <Arrow aria-hidden="true" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="executive-empty">
+              {tr(
+                'لا توجد مصادر متابعة متاحة ضمن صلاحياتك.',
+                'No attention sources available within your permissions.',
               )}
-              </div>
-            </details>
-          ))}
-        </div>
-      </details>
-      <details className="command-panel admin-disclosure" onToggle={event => { if(event.currentTarget.open) void load('group', 'audit'); }}>
-        <AdminDisclosureHeading headingId="dashboard-activity" icon={Activity} language={language} title={label('audit')} description={tr('آخر الأحداث الإدارية المصرح لك بعرضها.', 'Recent administrative events you may access.')} />
-        <div className="admin-disclosure-body">
-        <p role="status">{label(activityState)}</p>
-        <p className="text-sm">{label('activity_scope')}</p>
-        {activity.activityPartial || ['stale', 'partial'].includes(activityState) ? (
-          <p>{label('limited_activity')}</p>
-        ) : null}
-        {activityState !== 'forbidden' &&
-          activity.activity.map((event) => (
-            <article key={event.id} className="mt-3 border-t pt-2">
-              <p>
-                <bdi>{event.action}</bdi> · {label(event.owner)} · <bdi>{event.targetClass}</bdi>
-              </p>
-              <p>
-                {label(event.actorAlias)} · {label(event.result)} ·{' '}
-                {dashboardTime(event.timestamp, language)}
-              </p>
-              <Link
-                to="/audit"
-                className="rounded underline focus-visible:outline focus-visible:outline-2"
-              >
-                {label('owner')}
+            </p>
+          )}
+          <p className="executive-caption">
+            {tr(
+              'تعذّر المصدر لا يعني خلوّه من المشاكل. طلبات التدخل تشمل المتأخر والناقص من جميع الفترات.',
+              'Unavailable does not mean no issues. Attention includes overdue/incomplete requests from all periods.',
+            )}
+          </p>
+        </section>
+        <section className="executive-panel" aria-labelledby="executive-recent">
+          <div className="executive-section-heading">
+            <h2 id="executive-recent">
+              <Activity aria-hidden="true" />
+              {tr('آخر الأنشطة', 'Recent activity')}
+            </h2>
+            {activity && (
+              <Link to="/audit">
+                {tr('عرض جميع الأنشطة', 'View all activity')}
+                <Arrow aria-hidden="true" />
               </Link>
-            </article>
-          ))}
-        {activityState === 'available' && !activity.activity.length ? (
-          <p>{label('no_activity')}</p>
-        ) : null}
-        <p className="text-xs">
-          {label('checked')}: {dashboardTime(activity.capturedAt, language)}
-        </p>
-        </div>
-      </details>
-      <details className="admin-section-tools admin-disclosure" aria-labelledby="dashboard-coverage">
-        <AdminDisclosureHeading headingId="dashboard-coverage" icon={Info} language={language} title={label('coverage')} description={tr('المصادر المقاسة وحدود الأرقام والمؤشرات.', 'Measured sources and the limits of reported metrics.')} />
-        <div className="admin-disclosure-body">
-        <ul className="space-y-2">
-          {unmeasuredCoverage.map((metric) => (
-            <li key={metric}>
-              {label(metric)}: {label('not_measured')}
-            </li>
-          ))}
-        </ul>
-        <p className="mt-3">{label('analytics_limit')}</p>
-        <details>
-          <summary>{label('analytics_funnel')}</summary>
-          <bdi>{analyticsContract.requiredEvidence.join(', ')}</bdi>
-        </details>
-        </div>
-      </details>
+            )}
+          </div>
+          {activity && (
+            <p className="executive-state">
+              {state(activity) === 'available' ? '' : label(state(activity))}
+              {activity.activityPartial ? ` · ${tr('نطاق جزئي', 'Partial scope')}` : ''}
+            </p>
+          )}
+          {events.length ? (
+            <ol className="executive-event-list">
+              {events.map((event) => (
+                <li key={event.id}>
+                  <span className="executive-icon cyan">
+                    <Clock3 aria-hidden="true" />
+                  </span>
+                  <div>
+                    <h3>
+                      {actionName(event.action)} · {label(event.owner)}
+                    </h3>
+                    <p>{resultName(event.result)}</p>
+                    <time dateTime={event.timestamp}>
+                      {dashboardTime(event.timestamp, language)}
+                    </time>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="executive-empty">
+              {!activity
+                ? tr('مقيّد بالصلاحيات', 'Restricted by permissions')
+                : state(activity) === 'available' && !activity.activityPartial
+                  ? tr('لا توجد أحداث في النطاق المصرّح.', 'No events in the authorized scope.')
+                  : tr(
+                      'لم تصل أحداث مؤكدة؛ لا يعني ذلك عدم وجود نشاط.',
+                      'No confirmed events received; this does not establish absence of activity.',
+                    )}
+            </p>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

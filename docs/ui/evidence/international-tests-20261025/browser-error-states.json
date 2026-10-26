@@ -1,0 +1,11 @@
+{
+  "pass": true,
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "explicitFaultInjection": true,
+  "checks": [
+    "injected source 503 renders a retryable error, never fake content; retry returns to the actual API and 18 source sections",
+    "all four metrics remain unavailable while the genuine API request is pending",
+    "country draft waits for a complete ISO2 code before server filtering"
+  ],
+  "originalDatabaseWrites": 0
+}

@@ -31,13 +31,46 @@ export class AdminCourseUseCases {
   ) {}
 
   public async listCourses(filters: CourseFilters): Promise<PaginatedCourseResult<CourseDto>> {
+    if (filters.cohortFrom || filters.cohortTo || filters.instructor || filters.hasEnrollments !== undefined) {
+      if (filters.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE) throw new Error('NATIVE_COURSE_SCOPE_REQUIRED');
+      for (const value of [filters.cohortFrom, filters.cohortTo]) if (value && (!/^\d{4}-\d{2}-\d{2}$/.test(value) || !Number.isFinite(Date.parse(value)) || new Date(value).toISOString().slice(0, 10) !== value)) throw new Error('COURSE_COHORT_DATE_INVALID');
+      if (filters.cohortFrom && filters.cohortTo && filters.cohortFrom >= filters.cohortTo) throw new Error('COURSE_COHORT_RANGE_INVALID');
+    }
     return this.repository.list(filters);
+  }
+
+  public async catalogOptions(input: { field: 'learningLanguage' | 'difficultyLevel'; originType?: CourseOriginType; search?: string; page: number }): Promise<{ data: string[]; hasMore: boolean }> {
+    if (!this.repository.catalogOptions) throw new Error('COURSE_CATALOG_OPTIONS_NOT_CONFIGURED');
+    return this.repository.catalogOptions(input);
   }
 
   public async getCourse(id: string): Promise<CourseDto> {
     const course = await this.repository.findById(id);
     if (!course) throw new Error(`Course with id ${id} not found`);
     return course;
+  }
+
+  public async getNativeLearningReport(id: string, dates: { cohortFrom?: string; cohortTo?: string }) {
+    const course = await this.getCourse(id);
+    if (course.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE) throw new Error('NATIVE_COURSE_REQUIRED');
+    const result = await this.listCourses({ courseId: id, originType: CourseOriginType.NATIVE_MANARATAK_COURSE, ...dates, includeStatistics: true, page: 1, pageSize: 1 });
+    if (!result.nativeLearning) throw new Error('COURSE_LEARNING_REPORT_UNAVAILABLE');
+    return result.nativeLearning;
+  }
+
+  public async getExternalReadiness(id: string) {
+    const course = await this.getCourse(id);
+    if (course.originType !== CourseOriginType.EXTERNAL_LINKED_COURSE) throw new Error('EXTERNAL_COURSE_REQUIRED');
+    if (!this.publicationService) throw new Error('COURSE_PUBLICATION_POLICY_NOT_CONFIGURED');
+    const blockers: string[] = [];
+    if (course.status !== CourseStatus.READY_TO_PUBLISH) blockers.push('COURSE_READY_TO_PUBLISH_REQUIRED');
+    try { await this.publicationService.assertPublicationReady(course); }
+    catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      if (!/^(COURSE_|IMPORTED_COURSE_|OWNER_)/.test(message) && message !== 'TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED') throw error;
+      blockers.push(message);
+    }
+    return { courseId: course.id, version: course.version, eligible: blockers.length === 0, blockers };
   }
 
   public async saveLocalizedDescription(id:string,input:OwnerDescriptionInput):Promise<CourseDto> {
@@ -54,6 +87,9 @@ export class AdminCourseUseCases {
     assertNoForgedOwnerDescriptions(updates.optionalFields);
     const existing = await this.getCourse(id);
     if ([CourseStatus.ARCHIVED, CourseStatus.REJECTED].includes(existing.status)) throw new Error('COURSE_INACTIVE_IMMUTABLE');
+    if (existing.originType === CourseOriginType.NATIVE_MANARATAK_COURSE && updates.learningLanguage !== undefined && updates.learningLanguage !== existing.learningLanguage) {
+      updates = { ...updates, learningLanguageRaw: updates.learningLanguage };
+    }
     if (updates.originType && updates.originType !== existing.originType) {
       throw new Error('COURSE_ORIGIN_TYPE_MUTATION_FORBIDDEN');
     }

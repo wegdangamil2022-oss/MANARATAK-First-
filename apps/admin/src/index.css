@@ -554,3 +554,95 @@ textarea {
 :is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > :nth-child(3n + 1) svg { color: #D6A43B; }
 :is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > :nth-child(3n + 2) svg { color: #142B5F; }
 :is(.scholarship-filter-fields, .university-filter-fields, .major-filter-fields) > :nth-child(3n + 3) svg { color: #0E7C86; }
+
+/* Section 05 additions preserve the approved major cards and detail scale. */
+.major-admin,.major-discovery,.major-detail-publication {font-family:'Cairo',sans-serif}
+.major-admin *,.major-discovery *,.major-detail-publication * {font-family:inherit!important}
+.major-discovery-title {font-size:16px;font-weight:700;color:#142B5F}
+.major-discovery-title::after {content:'';display:block;width:42px;height:3px;margin-top:6px;border-radius:4px;background:#D6A43B}
+.major-discovery-list {display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:12px}
+@media(min-width:768px){.major-discovery-list {grid-template-columns:repeat(2,minmax(0,1fr))}}
+.major-detail-publication {font-size:13px;line-height:1.8}
+.major-detail-publication h2 {font-size:14px;font-weight:700}
+.major-detail-publication button {min-height:40px;border:1px solid #DDEFF2;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:700;color:#142B5F;background:#FAF7F0}
+.major-detail-publication button:disabled {opacity:.45;cursor:not-allowed}
+.major-detail-publication input,.major-detail-publication textarea,.major-detail-publication select,
+.major-content-grid form input,.major-content-grid form textarea,.major-content-grid form select,
+.major-content-grid label>input,.major-content-grid label>textarea,.major-content-grid label>select {display:block;width:100%;min-height:40px;margin-top:4px;padding:8px 10px;border:1px solid #DDEFF2;border-radius:10px;background:white;font:inherit;font-size:13px;color:#142B5F}
+.major-content-grid form {font-size:13px;min-width:0}
+.major-content-grid form button {font-size:12px;font-weight:700}
+.major-discovery :is(button,input,select,textarea):focus-visible,.major-detail-publication :is(button,input,select,textarea):focus-visible {outline:2px solid #0E7C86;outline-offset:3px}
+.major-discovery :is(button,input,select,textarea):disabled {opacity:.5}
+
+@media(max-width:640px){
+ body:has(:is(.major-admin,.major-detail)) #root header.sticky {flex-wrap:wrap;gap:10px}
+ body:has(:is(.major-admin,.major-detail)) #root header.sticky>div {min-width:0;max-width:100%}
+}
+.major-detail .major-governance {font-size:13px;line-height:1.8}
+.major-detail .major-governance h2 {font-size:14px;font-weight:700}
+.major-detail .major-governance :is(input,textarea,select) {display:block;width:100%;min-height:40px;border:1px solid #DDEFF2;border-radius:10px;padding:8px;font:inherit}
+.major-detail .major-governance :is(button,summary) {min-height:40px;font-size:12px;font-weight:700}
+
+/* Section 06: test catalog and source reader, scoped away from other owners. */
+:is(.international-tests-admin,.international-test-detail),:is(.international-tests-admin,.international-test-detail) * {font-family:'Cairo',sans-serif}
+:is(.international-tests-admin,.international-test-detail) {min-width:0;color:#142B5F;font-size:13px;line-height:1.8}
+:is(.international-tests-admin,.international-test-detail) :is(input,select,textarea) {max-width:100%;font:inherit;font-size:13px;min-height:44px;border:1px solid #DDEFF2;border-radius:12px;background:#fff;color:#142B5F;padding:9px 12px}
+:is(.international-tests-admin,.international-test-detail) input[type=checkbox] {width:18px;min-height:18px;height:18px;flex-shrink:0;accent-color:#0E7C86}
+:is(.international-tests-admin,.international-test-detail) :is(button,summary) {font-size:12px;font-weight:700;cursor:pointer}
+:is(.international-tests-admin,.international-test-detail) button {min-height:40px}
+:is(.international-tests-admin,.international-test-detail) button:disabled {opacity:.5;cursor:not-allowed}
+:is(.international-tests-admin,.international-test-detail) :is(button,input,select,textarea,a,summary):focus-visible {outline:2px solid #0E7C86;outline-offset:3px}
+:is(.international-tests-admin,.international-test-detail) svg {flex-shrink:0}
+.test-filters label>span {display:flex;align-items:center;gap:6px;min-height:22px;margin-bottom:6px;font-size:12px;font-weight:700}
+.test-filters :is(select,input:not([type=checkbox])) {width:100%}
+.test-filters label svg {color:#0E7C86}
+.test-filters label:nth-child(2) svg {color:#142B5F}
+.test-filters label:nth-child(5) svg {color:#D6A43B}
+.test-filters button,.test-view-button,.test-row-actions button,.test-source-viewer button:not(h3 button),.test-governance button,.test-admin-tools>button,.test-admin-tools label>select {border:1px solid #DDEFF2;border-radius:10px;padding:7px 12px;background:white;display:inline-flex;align-items:center;justify-content:center;gap:6px;max-width:100%}
+.test-view-button[aria-pressed=true] {background:#142B5F;color:white}
+.test-refresh {display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:1px solid #ffffff40;background:#ffffff18;border-radius:12px;padding:8px 14px;font-size:12px;font-weight:700}
+.test-directory-card {display:flex;flex-direction:column;gap:14px;min-width:0;padding:18px;border:1px solid #DDEFF2;border-radius:16px;background:white;box-shadow:0 2px 5px #142b5f08;overflow-wrap:anywhere}
+.test-card-title {font-size:15px;font-weight:700;color:#142B5F}
+.test-directory-card svg {color:#0E7C86}
+.test-directory-card .test-open-link svg {color:inherit}
+.test-directory-card .rounded-xl {font-size:11px;padding:3px 8px}
+.test-open-link {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;border-radius:10px;background:#142B5F;color:#fff;padding:7px 12px;font-size:12px;font-weight:700}
+.test-row-actions {min-width:0;font-size:12px;max-width:100%}
+.test-row-actions summary {display:flex;align-items:center;gap:5px;min-height:40px;color:#0E7C86;padding:6px}
+.test-source-badge,.test-review-badge {display:inline-flex;align-items:center;gap:4px;border:1px solid #DDEFF2;border-radius:10px;background:#eff8f9;color:#0E7C86;padding:3px 8px;font-size:11px;font-weight:700}
+.test-directory-table {width:100%;min-width:680px;font-size:12px;text-align:start}
+.test-directory-table th {background:#f1f8f9;font-size:12px}
+.test-directory-table :is(th,td) {padding:14px;text-align:start;border-bottom:1px solid #DDEFF2;vertical-align:top}
+.international-test-detail :is(h2,h3) {font-size:15px;font-weight:700}
+.international-test-detail :is(h4,h5) {font-size:13px;font-weight:700}
+.test-region-title {display:flex;align-items:center;gap:8px;position:relative;padding-bottom:10px;font-size:16px;font-weight:700;color:#142B5F}
+.test-region-title:after {content:'';position:absolute;inset-inline-start:0;bottom:2px;width:42px;height:3px;background:#D6A43B;border-radius:3px}
+.test-canonical-summary {padding:16px;border:1px solid #DDEFF2;border-radius:14px;background:#FAF7F0}
+.test-canonical-summary dt {font-size:11px;color:#64748b}
+.test-canonical-summary dd {font-size:13px;font-weight:700;overflow-wrap:anywhere}
+.test-source-viewer :is(input,select,textarea),.test-governance :is(input:not([type=checkbox]),select,textarea) {display:block;width:100%;margin-top:5px}
+.test-source-viewer label,.test-governance label {font-size:12px;font-weight:700}
+.test-source-section {min-width:0;scroll-margin-top:100px;border:1px solid #DDEFF2;border-radius:14px;background:white;overflow:hidden}
+.test-source-section h3>button {display:flex;align-items:center;gap:10px;width:100%;padding:14px;background:#fafcfc;font-size:14px;font-weight:700;color:#142B5F}
+.test-section-number {display:grid;place-items:center;width:30px;height:30px;flex-shrink:0;border-radius:9px;background:#0E7C86;color:white;font-size:12px}
+.test-source-content {padding:16px;border-top:1px solid #DDEFF2;font-size:13px;line-height:1.85;overflow-wrap:anywhere;min-width:0}
+.test-source-content p {font-size:13px;line-height:1.85}
+.test-source-content :is(table,pre) {font-size:12px}
+.test-source-content :is(th,td) {text-align:start}
+.test-source-content pre {max-width:100%;overflow:auto}
+.test-source-viewer>div,.test-source-content>div {min-width:0;max-width:100%}
+.test-source-viewer nav {max-height:240px;overflow-y:auto}
+.test-governance>details,.test-admin-tools {border:1px solid #DDEFF2;border-radius:12px;padding:14px;background:white}
+.test-governance>details>summary {border-inline-start:3px solid #D6A43B;padding-inline-start:10px;min-height:35px;font-size:13px}
+.test-governance :is(article,pre,p) {overflow-wrap:anywhere;font-size:12px}
+@media(max-width:640px){
+ body:has(:is(.international-tests-admin,.international-test-detail)) #root header.sticky {flex-wrap:wrap;gap:10px}
+ body:has(:is(.international-tests-admin,.international-test-detail)) #root header.sticky>div {min-width:0;max-width:100%}
+ .international-test-detail>.rounded-3xl {padding:16px}
+ .test-source-section h3>button {display:grid;grid-template-columns:30px minmax(0,1fr) 18px;gap:8px;align-items:start}
+ .test-source-section h3>button>.test-section-number {grid-column:1;grid-row:1}
+ .test-source-section h3>button>span:nth-child(2) {grid-column:2;grid-row:1}
+ .test-source-section h3>button>svg {grid-column:3;grid-row:1}
+ .test-source-section h3>button>.test-review-badge {grid-column:2 / 4;grid-row:2;justify-self:start;margin:0}
+ .test-source-viewer nav {max-height:200px}
+}

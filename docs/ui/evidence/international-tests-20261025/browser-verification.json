@@ -1,0 +1,62 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "canonicalMfa": true,
+  "realApi": true,
+  "originalDatabaseWrites": 0,
+  "checks": [
+    "18 actual imported sections, three initially open, no embedded content forms or inert global save",
+    {
+      "name": "desktop details",
+      "viewport": 1440,
+      "document": 1440,
+      "cairo": true
+    },
+    "source version 18→12→5, search, collapse during search, expand and actual Markdown tables",
+    "raw source retained in Sources, excluded from readable section count",
+    "explicit source variant metadata separates Academic 5 from General 12 without name inference",
+    "no source means honest empty state and no nine-editor fallback",
+    {
+      "name": "desktop list",
+      "viewport": 1440,
+      "document": 1440,
+      "cairo": true
+    },
+    "server 20+8 pagination, card/table scope preserved in URL",
+    "global provider search and status filter on server, reload restores controls and URL",
+    {
+      "name": "Arabic 360px list",
+      "viewport": 360,
+      "document": 360,
+      "cairo": true
+    },
+    {
+      "name": "Arabic 360px details",
+      "viewport": 360,
+      "document": 360,
+      "cairo": true
+    },
+    {
+      "name": "English 360px details",
+      "viewport": 360,
+      "document": 360,
+      "cairo": true
+    },
+    {
+      "name": "English 360px list",
+      "viewport": 360,
+      "document": 360,
+      "cairo": true
+    }
+  ],
+  "errors": [],
+  "networkFailures": [],
+  "screens": [
+    "desktop-details",
+    "desktop-list",
+    "mobile-list",
+    "mobile-details",
+    "mobile-english-details",
+    "mobile-english-list"
+  ],
+  "pass": true
+}

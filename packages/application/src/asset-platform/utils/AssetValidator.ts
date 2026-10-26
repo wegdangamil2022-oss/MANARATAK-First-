@@ -1,6 +1,16 @@
 import { AssetRetentionCategory } from '@manaratak/domain';
 
 export class AssetValidator {
+  /** Dedicated authoring policy. Does not widen student/general-document uploads. */
+  public static validateCourseMedia(input: { ownerType: string; ownerId: string; assetReference: string; originalFilename: string; mimeType: string; fileExtension: string; byteSize: number; classification: string; retentionCategory?: AssetRetentionCategory; expiresAt?: string | Date }): void {
+    if (input.ownerType !== 'COURSE' || !input.ownerId || !input.assetReference.startsWith('COURSE-LESSON-') || input.classification !== 'INTERNAL' || (input.retentionCategory && input.retentionCategory !== AssetRetentionCategory.PERMANENT) || input.expiresAt) throw Error('COURSE_MEDIA_UPLOAD_OWNER_POLICY_INVALID');
+    this.validatePath(input.originalFilename, 'originalFilename');
+    const types: Record<string, readonly string[]> = { mp4: ['video/mp4'], webm: ['video/webm'], mp3: ['audio/mpeg'], wav: ['audio/wav', 'audio/x-wav'], ogg: ['audio/ogg'], png: ['image/png'], jpg: ['image/jpeg'], jpeg: ['image/jpeg'], pdf: ['application/pdf'], txt: ['text/plain'], vtt: ['text/vtt'] };
+    const ext = input.fileExtension.toLowerCase(), mime = input.mimeType.toLowerCase();
+    if (!types[ext]?.includes(mime) || !input.originalFilename.toLowerCase().endsWith('.' + ext) || /[\\/]/.test(input.originalFilename)) throw Error('COURSE_MEDIA_EXTENSION_MIME_MISMATCH');
+    const max = ext === 'vtt' || ext === 'txt' ? 2 * 1024 * 1024 : 64 * 1024 * 1024;
+    if (!Number.isSafeInteger(input.byteSize) || input.byteSize < 1 || input.byteSize > max) throw Error('COURSE_MEDIA_UPLOAD_SIZE_INVALID');
+  }
   private static readonly ALLOWED_MIME_TYPES = new Set([
     'application/pdf',
     'image/jpeg',

@@ -219,6 +219,13 @@ function build(extra: Record<string, unknown> = {}) {
 }
 
 describe('Study destination governance and public contracts', () => {
+  it('retains exact hidden English values and literal pipes on an Arabic card save', async()=>{
+    const x=build({overviewEn:'  Original | English  ',costHighlightsEn:[{label:'rent | source',value:'100 | monthly'}]});
+    const before=structuredClone(x.get());
+    await x.service.upsertProfile('YE',{overviewAr:'تم تحديث العربية',overviewEn:before.overviewEn,costHighlightsEn:before.costHighlightsEn},undefined,x.ctx('author'));
+    expect(x.get().overviewEn).toBe(before.overviewEn);expect(x.get().costHighlightsEn).toEqual(before.costHighlightsEn);
+    expect(x.get().visaRequirementsEn).toEqual(before.visaRequirementsEn);expect(x.get().officialLinks).toEqual(before.officialLinks);
+  });
   it('requires actor/reason/revision and rejects independent-review violations and stale fingerprints', async () => {
     const x = build();
     await expect(x.service.verifySources('YE')).rejects.toThrow('ACTOR_REASON_REQUIRED');

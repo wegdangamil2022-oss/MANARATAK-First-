@@ -92,6 +92,7 @@ export class CoursePublicationService {
       aggregateId: course.id,
       action: 'COURSE_PUBLISHED',
       context,
+      auditMetadata: { reason: (context as (AtomicMutationRequestContext & { reason?: string }) | undefined)?.reason ?? null },
       outbox: {
         id: `course-published:${course.id}:v${publishedVersion}`,
         eventType: COURSE_PUBLISHED_EVENT_TYPE,

@@ -84,6 +84,8 @@ export class AcademicProgramExplorerUseCases {
       items,
       scope: {
         countryReferenceId: input.countryReferenceId,
+        universityId: input.universityId,
+        search: input.search,
         locale: input.locale ?? 'ar',
         visibility: publicOnly ? 'PUBLIC' : 'ADMIN_ALL',
         degreeLevelId: input.degreeLevelId,

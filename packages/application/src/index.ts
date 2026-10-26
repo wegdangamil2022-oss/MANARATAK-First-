@@ -255,3 +255,12 @@ export * from './students/use-cases/StudentDocumentReviewUseCases';
 export * from './integration/CatalogLifecycleReadPolicy';
 
 export * from './localization/OwnerLocalizedDescription';
+
+export * from './dashboard/ExecutiveDashboardUseCases';
+export * from './review-workspace/ReviewWorkspaceUseCases';
+export * from './review-workspace/ReviewNotificationRecipientGateway';
+export * from './dashboard/AnalyticsRetentionBackgroundJobHandler';
+export * from './courses/use-cases/CourseBulkPublicationUseCases';
+
+export * from './courses/services/CourseAccessService';
+export * from './read-models/CourseCertificateBindingOwner';

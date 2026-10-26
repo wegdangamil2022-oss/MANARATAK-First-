@@ -1,4 +1,5 @@
 import { ServiceRequestServiceFilter } from './ServiceRequestServiceFilter';
+import { ManagedApplicationEvidenceEditor } from './ManagedApplicationEvidenceEditor';
 import { serviceText } from '../i18n/serviceText';
 import { ServiceCaseQueue } from './ServiceCaseQueue';
 import { useTranslation } from '../i18n/I18nProvider';
@@ -580,6 +581,7 @@ export function ServiceRequestsWorkspace({
                 title={serviceText('بيانات التنفيذ', language)}
                 value={detail.fulfillmentMetadata}
               />
+              <ManagedApplicationEvidenceEditor key={`${detail.id}:${detail.version}`} request={detail} onBusy={setSaving} onSaved={async()=>{await inspect(detail.id);await load();}} />
               {!closed && (
                 <fieldset disabled={saving} className="space-y-4 border-t pt-4">
                   <label className="block text-xs font-bold">

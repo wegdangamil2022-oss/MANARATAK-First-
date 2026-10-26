@@ -1,0 +1,101 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "canonicalMfa": true,
+  "realApi": true,
+  "originalDatabaseWrites": 0,
+  "checks": [
+    {
+      "name": "Arabic desktop table",
+      "viewport": 1440,
+      "document": 1440,
+      "cairoLoaded": true,
+      "title": "24px",
+      "bodyFont": "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif"
+    },
+    "Real server pagination 20+20+6; stable distinct pages; full-scope metrics; view switch does not refetch; selection survives pages and views",
+    "External details use five read-only source groups; Escape restores focus and filter/page/card context",
+    {
+      "name": "Provider name survives reload; AND filters are server-wide; safe list DTO omits private source/content fields",
+      "total": 8
+    },
+    "Native scope removes stale external-only URL filters and enforces native origin on server",
+    {
+      "name": "Canonical CSRF/MFA native creation saves actual DRAFT, Arabic audit reason uses UTF8 header, unsaved close cancel retains input",
+      "createdId": "b516b8f9-a582-4a17-b661-ad19e65584a3"
+    },
+    "Paid static entry and bookmarked paid scope are preparation only; no catalog/payment or mutation requests",
+    {
+      "name": "Arabic 1024px catalog",
+      "viewport": 1024,
+      "document": 1024,
+      "cairoLoaded": true,
+      "title": "24px",
+      "bodyFont": "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif"
+    },
+    {
+      "name": "Arabic 768px catalog",
+      "viewport": 768,
+      "document": 768,
+      "cairoLoaded": true,
+      "title": "24px",
+      "bodyFont": "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif"
+    },
+    {
+      "name": "Arabic 360px catalog",
+      "viewport": 360,
+      "document": 360,
+      "cairoLoaded": true,
+      "title": "24px",
+      "bodyFont": "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif"
+    },
+    {
+      "name": "Arabic 320px catalog",
+      "viewport": 320,
+      "document": 320,
+      "cairoLoaded": true,
+      "title": "24px",
+      "bodyFont": "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif"
+    },
+    {
+      "name": "Arabic 360px table scroll is internal",
+      "viewport": 360,
+      "document": 360,
+      "cairoLoaded": true,
+      "title": "24px",
+      "bodyFont": "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif"
+    },
+    {
+      "name": "English 360px catalog",
+      "viewport": 360,
+      "document": 360,
+      "cairoLoaded": true,
+      "title": "24px",
+      "bodyFont": "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif"
+    },
+    {
+      "name": "English desktop catalog",
+      "viewport": 1440,
+      "document": 1440,
+      "cairoLoaded": true,
+      "title": "24px",
+      "bodyFont": "Cairo, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif"
+    },
+    "Intentional 503 is visible with unknown metrics and real retry; responsive RTL/LTR cards and source drawer",
+    "Full API rejects anonymous with 401 and authenticated non-course staff with 403",
+    "Out-of-range page on empty scope returns to page 1; true zero distinct from failed-read dash"
+  ],
+  "errors": [],
+  "unexpectedResponses": [],
+  "screens": [
+    "desktop-table",
+    "desktop-cards",
+    "desktop-external-details",
+    "mobile-arabic-cards",
+    "mobile-arabic-table",
+    "mobile-arabic-details",
+    "mobile-english-cards",
+    "desktop-english-cards",
+    "desktop-error"
+  ],
+  "pass": true
+}

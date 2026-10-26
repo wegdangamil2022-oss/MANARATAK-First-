@@ -14,7 +14,19 @@ export class PrismaIdentityRepository implements IIdentityRepository {
   }
 
   public async findById(id: string): Promise<Identity | null> {
-    const record = await this.delegate.findUnique({
+    // Prisma's relation includes issue three sequential network reads. Keep the
+    // same mapper and lifecycle policy, but fetch this aggregate in one snapshot.
+    const record = typeof this.prisma.$queryRaw === 'function'
+      ? ((await this.prisma.$queryRaw`
+          SELECT i.*, to_jsonb(u) AS "user",
+            CASE WHEN a."identityId" IS NULL THEN NULL
+              ELSE to_jsonb(a) || jsonb_build_object('storageQuotaBytes', a."storageQuotaBytes"::text)
+            END AS "account"
+          FROM "IdentityRecord" i
+          LEFT JOIN "UserRecord" u ON u."identityId"=i.id
+          LEFT JOIN "AccountRecord" a ON a."identityId"=i.id
+          WHERE i.id=${id}`) as any[])[0]
+      : await this.delegate.findUnique({
       where: { id },
       include: { user: true, account: true }
     });
