@@ -1,12 +1,12 @@
 {
   "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
   "branch": "feat/courses-admin-workspaces-20261025",
-  "recordedAt": "2026-10-26T01:03:06.414Z",
+  "recordedAt": "2026-10-26T14:14:05.696Z",
   "originalDatabaseWrites": 0,
   "externalMediaActivation": false,
   "newDatabaseMigrations": false,
   "unitContracts": {
-    "passed": 542,
+    "passed": 545,
     "skipped": 5,
     "failed": 0
   },

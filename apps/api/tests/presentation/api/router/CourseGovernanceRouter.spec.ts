@@ -18,6 +18,7 @@ function setup(allowed = true) {
     courseCurriculumUseCases: {
       setCertificateBinding: vi.fn().mockResolvedValue({ id: 'c' }),
       setDeliveryPolicy: vi.fn().mockResolvedValue({ id: 'c' }),
+      attachAssetToLesson: vi.fn().mockResolvedValue({ id: 'reference' }),
     },
   };
   const execute = vi.fn(
@@ -30,6 +31,10 @@ function setup(allowed = true) {
     ) => ({ value: await work(scope), version: 2 }),
   );
   const evaluator = { evaluatePermission: vi.fn().mockResolvedValue({ isGranted: allowed }) };
+  const access = { globalManager: vi.fn().mockResolvedValue(true) },
+    assets = {
+      findById: vi.fn().mockResolvedValue({ owner: { ownerType: 'COURSE', ownerId: 'c' } }),
+    };
   const app = express();
   app.use(express.json());
   app.use((req, _res, next) => {
@@ -40,6 +45,8 @@ function setup(allowed = true) {
     '/courses',
     CourseAdminRouter.create({
       ...scope,
+      courseAccessService: access,
+      assetRecordRepository: assets,
       certificateUseCases: certificate,
       authEvaluatorService: evaluator,
       courseAdminCommandUseCases: { execute },
@@ -52,9 +59,42 @@ function setup(allowed = true) {
       .send(body);
     return version ? agent.set('If-Match', '1') : agent;
   };
-  return { app, put, certificate, scope, execute, evaluator };
+  return { app, put, certificate, scope, execute, evaluator, access, assets };
 }
 describe('course certificate and release governance', () => {
+  it('allows a scoped editor to attach only assets owned by the assigned course', async () => {
+    const f = setup();
+    f.access.globalManager.mockResolvedValue(false);
+    const response = await request(f.app)
+      .post('/courses/c/lessons/lecture/assets')
+      .set('X-Review-Reason', 'Scoped own file')
+      .set('If-Match', '1')
+      .send({ assetId: binding.templateId, assetType: 'DOCUMENT', position: 1 });
+    expect(response.status).toBe(201);
+    expect(f.scope.courseCurriculumUseCases.attachAssetToLesson).toHaveBeenCalled();
+  });
+  it('rejects a foreign course file before attaching it, even with a known EAP identifier', async () => {
+    const f = setup();
+    f.access.globalManager.mockResolvedValue(false);
+    f.assets.findById.mockResolvedValue({ owner: { ownerType: 'COURSE', ownerId: 'foreign' } });
+    const response = await request(f.app)
+      .post('/courses/c/lessons/lecture/assets')
+      .set('X-Review-Reason', 'Scoped foreign file')
+      .set('If-Match', '1')
+      .send({ assetId: binding.templateId, assetType: 'DOCUMENT', position: 1 });
+    expect(response.status).toBe(403);
+    expect(f.scope.courseCurriculumUseCases.attachAssetToLesson).not.toHaveBeenCalled();
+  });
+  it('preserves the global course manager reuse contract', async () => {
+    const f = setup();
+    const response = await request(f.app)
+      .post('/courses/c/lessons/lecture/assets')
+      .set('X-Review-Reason', 'Manager file reuse')
+      .set('If-Match', '1')
+      .send({ assetId: binding.templateId, assetType: 'DOCUMENT', position: 1 });
+    expect(response.status).toBe(201);
+    expect(f.assets.findById).not.toHaveBeenCalled();
+  });
   it('requires certificate-owner approval in addition to the course route capability', async () => {
     const f = setup(false);
     expect((await f.put('certificate-binding', { binding })).status).toBe(403);

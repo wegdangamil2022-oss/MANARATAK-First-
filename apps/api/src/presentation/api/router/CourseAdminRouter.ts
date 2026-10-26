@@ -5,6 +5,7 @@ import { readReviewReasonHeader } from '@manaratak/shared';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import {
+  AssetId,
   CourseAccessType,
   courseBlockTypes,
   CourseContentStatus,
@@ -687,6 +688,13 @@ export class CourseAdminRouter {
     router.post('/:id/lessons/:lessonId/assets', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {courseCurriculumUseCases}=scope;
       const body = lessonAssetBodySchema.parse(req.body);
+      if (cradle.courseAccessService && !await cradle.courseAccessService.globalManager(req.authUserId!, { ip: req.ip, requestTime: new Date() })) {
+        const candidate = await cradle.assetRecordRepository?.findById(new AssetId(body.assetId));
+        if (!candidate || candidate.owner.ownerType !== 'COURSE' || candidate.owner.ownerId !== req.params.id) {
+          res.status(403).json({ error: 'COURSE_ASSET_OWNER_SCOPE_REQUIRED' });
+          return;
+        }
+      }
       const asset = await courseCurriculumUseCases.attachAssetToLesson(req.params.id, {
         lessonId: req.params.lessonId,
         assetId: body.assetId,
