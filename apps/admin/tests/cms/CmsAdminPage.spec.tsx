@@ -24,18 +24,21 @@ describe('CMS administration language and lazy reads', () => {
   it('uses English interface copy independently of the initial Arabic editing locale', () => {
     state.language = 'en';
     state.permissions = ['admin:cms:view'];
-    const html = renderToStaticMarkup(<MemoryRouter><CmsAdminPage /></MemoryRouter>);
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <CmsAdminPage />
+      </MemoryRouter>,
+    );
     expect(html).toContain('dir="ltr"');
     expect(html).toContain('Content and publication management');
     expect(html).toContain('Site operations and publishing');
-    expect(html).toContain('Failed publication recovery');
+    expect(html).not.toContain('Failed publication recovery');
     expect(html).not.toMatch(/[\u0600-\u06ff]/);
     // Read-only actors can inspect content, but cannot create a draft.
     const createButton = html
       .match(/<button[\s\S]*?<\/button>/g)
       ?.find((button) => button.includes('Create draft'));
-    expect(createButton).toBeDefined();
-    expect(createButton).toContain('disabled=""');
+    expect(createButton).toBeUndefined();
   });
   it('renders schema-declared fields rather than forcing every block into a title-only payload', () => {
     state.language = 'en';
@@ -84,7 +87,11 @@ describe('CMS administration language and lazy reads', () => {
 
   it('preserves Arabic UI and RTL', () => {
     state.language = 'ar';
-    const html = renderToStaticMarkup(<MemoryRouter><CmsAdminPage /></MemoryRouter>);
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <CmsAdminPage />
+      </MemoryRouter>,
+    );
     expect(html).toContain('dir="rtl"');
     expect(html).toContain('إدارة المحتوى والنشر');
   });

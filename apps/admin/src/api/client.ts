@@ -1,5 +1,6 @@
 import { CsrfClientManager, reviewReasonHeaders } from '@manaratak/shared';
 import { assertLocalReadOnlyRequestAllowed } from '../security/LocalAdminReadOnlyPolicy';
+import { preservesCmsDraftOnForbidden } from './CmsAuthorizationFailure';
 
 const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) || '/api/v1';
 const csrfManager = CsrfClientManager.getInstance(API_BASE_URL);
@@ -330,7 +331,10 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
   }
 
   if (!response.ok) {
-    if (response.status === 403 && endpoint.startsWith('/admin/') && Date.now() - lastPermissionRecheckAt > 1000) {
+    const cmsCommandDenial = response.status === 403 && endpoint.startsWith('/admin/cms')
+      ? preservesCmsDraftOnForbidden(endpoint, await response.clone().json().catch(() => null))
+      : false;
+    if (response.status === 403 && !cmsCommandDenial && endpoint.startsWith('/admin/') && Date.now() - lastPermissionRecheckAt > 1000) {
       lastPermissionRecheckAt = Date.now();
       window.dispatchEvent(new Event('manaratak-admin-permission-changed'));
     }

@@ -1,3 +1,6 @@
+vi.mock('../../src/features/reference-data/useAdministrationDraftGuard', () => ({
+  useAdministrationDraftGuard: vi.fn(),
+}));
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { act, create } from 'react-test-renderer';
@@ -14,6 +17,9 @@ vi.mock('../../src/i18n/I18nProvider', () => ({ useTranslation: () => ({ languag
 vi.mock('../../src/components/AssetPicker', () => ({ AssetPicker: () => null }));
 vi.mock('../../src/features/cms/CmsOperationsPanels', () => ({ CmsOperationsPanels: () => null }));
 vi.mock('@manaratak/ui', () => ({ CmsRichText: () => null }));
+vi.mock('../../src/features/cms/CmsActionDialog', () => ({
+  useCmsActionDialog: () => ({ requestAction: async () => ({}), actionDialog: null }),
+}));
 import { CmsAdminPage } from '../../src/pages/CmsAdminPage';
 let renderer: ReturnType<typeof create> | undefined;
 const text = (node: any): string =>
@@ -80,16 +86,10 @@ async function open(publishedLocales: string[]) {
   });
   await act(async () => {
     renderer = create(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={['/cms/content/content-1?section=preview']}>
         <CmsAdminPage />
       </MemoryRouter>,
     );
-  });
-  const item = renderer!.root
-    .findAllByType('button')
-    .find((node) => text(node).includes('Synthetic live content'))!;
-  await act(async () => {
-    item.props.onClick();
   });
   return renderer!.root.findAllByType('button').find((node) => text(node).trim() === 'Archive')!;
 }
@@ -113,11 +113,11 @@ describe('CMS content withdrawal with a replacement draft', () => {
     'does not infer a public Arabic snapshot from the root or another locale: $locales',
     async ({ locales }) => {
       const button = await open(locales);
-      expect(button.props.disabled).toBe(true);
+      expect(button).toBeUndefined();
     },
   );
   it('retains the publisher capability requirement', async () => {
     state.permissions = ['admin:cms:view'];
-    expect((await open(['ar'])).props.disabled).toBe(true);
+    expect(await open(['ar'])).toBeUndefined();
   });
 });

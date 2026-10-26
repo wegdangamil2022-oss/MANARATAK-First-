@@ -43,14 +43,21 @@ export async function exerciseR14AdminCms({ browser, origin, db, fixture, proof,
     page.on('response', response => { const url = new URL(response.url()); if (url.origin === origin) network.push({ path: url.pathname, status: response.status(), method: response.request().method() }); });
     return page;
   };
-  const open = async (page, locale) => {
-    await page.goto(origin + '/admin/cms'); await page.getByLabel('بحث المحتوى', { exact: true }).fill(fixture.slug);
-    await page.getByRole('button').filter({ hasText: '/' + fixture.slug }).first().click(); await page.getByLabel('العنوان', { exact: true }).waitFor();
-    await page.getByRole('button', { name: 'فتح محرر اللغة', exact: true }).nth(locale === 'ar' ? 0 : 1).click();
+  let materialId;
+  const open = async (page, locale, section = 'preview') => {
+    assert.equal(typeof materialId, 'string');
+    await page.goto(origin + '/admin/cms/content/' + encodeURIComponent(materialId) + '?locale=' + locale + '&section=' + section);
+    await page.getByRole('button', { name: 'المعاينة والجاهزية', exact: true }).waitFor();
+    if (section === 'content') {
+      const edit = page.getByRole('button', { name: 'تعديل', exact: true });
+      if (await edit.isVisible()) await edit.click();
+      await page.getByLabel('نص المحتوى', { exact: true }).waitFor();
+    }
   };
   const action = async (page, id, label, endpoint, method = 'POST') => {
     const response = wait(page, '/api/v1/admin/cms/content/' + id + '/' + endpoint, method);
     await page.getByRole('button', { name: label, exact: true }).click();
+    if (['publish','archive'].includes(endpoint)) await page.getByRole('dialog').getByRole('button', { name: 'تأكيد ومتابعة', exact: true }).click();
     const result = await response; assert.equal(result.status(), 200, 'R14_CMS_ACTION_' + endpoint); return result.json();
   };
   try {
@@ -75,24 +82,27 @@ export async function exerciseR14AdminCms({ browser, origin, db, fixture, proof,
       observations.push({ step: 'REAL_UI_MFA_ENROLL_CONFIRM_AND_NEW_LOGIN', actorKind: actor.kind, preconfirmedCredentialInserted: false });
     }
     const author = pages.author, reviewer = pages.reviewer, publisher = pages.publisher;
+    await author.goto(origin + '/admin/cms/taxonomy');
     await author.getByLabel('الرابط', { exact: true }).fill(fixture.slug + '-category');
     await author.getByLabel('الاسم العربي', { exact: true }).fill('تصنيف صناعي'); await author.getByLabel('الاسم الإنجليزي', { exact: true }).fill('Synthetic category');
     let response = wait(author, '/api/v1/admin/cms/categories'); await author.getByRole('button', { name: 'إضافة التصنيف', exact: true }).click(); let wire = await response; assert.equal(wire.status(), 201); const category = await unwrap(wire);
+    await author.goto(origin + '/admin/cms/content/new');
     await author.getByLabel('العنوان العربي', { exact: true }).fill('محتوى صناعي ' + fixture.slug); await author.getByLabel('الرابط الثابت بالإنجليزية', { exact: true }).fill(fixture.slug);
     await author.locator('form').filter({ has: author.getByLabel('العنوان العربي', { exact: true }) }).getByRole('combobox').nth(1).selectOption(category.id);
-    response = wait(author, '/api/v1/admin/cms/content'); await author.getByRole('button', { name: 'إنشاء المسودة', exact: true }).click(); wire = await response; assert.equal(wire.status(), 201); const content = await unwrap(wire); assert.equal(typeof content.id, 'string');
+    response = wait(author, '/api/v1/admin/cms/content'); await author.getByRole('button', { name: 'إنشاء المسودة', exact: true }).click(); wire = await response; assert.equal(wire.status(), 201); const content = await unwrap(wire); assert.equal(typeof content.id, 'string'); materialId = content.id;
     const publicPage = await newPage(), webPage = await newPage(), locales = [];
     for (const locale of ['ar', 'en']) {
       const title = (locale === 'ar' ? 'محتوى صناعي ' : 'Synthetic content ') + fixture.slug, body = 'R14_PUBLISHED_' + locale + '_' + fixture.slug;
-      await open(author, locale); await author.getByLabel('الرابط المحلي', { exact: true }).fill(fixture.slug); await author.getByLabel('العنوان', { exact: true }).fill(title); await author.getByLabel('الملخص', { exact: true }).fill('Synthetic ' + locale + ' summary');
-      await author.getByLabel('نص المحتوى').fill('<p>' + body + '</p>'); await author.getByLabel('عنوان SEO', { exact: true }).fill('Synthetic title'); await author.getByLabel('وصف SEO', { exact: true }).fill('Synthetic publishing and withdrawal diagnostic');
+      await open(author, locale, 'content'); await author.getByLabel('الرابط المحلي', { exact: true }).fill(fixture.slug); await author.getByLabel('العنوان', { exact: true }).fill(title); await author.getByLabel('الملخص', { exact: true }).fill('Synthetic ' + locale + ' summary');
+      await author.getByLabel('نص المحتوى').fill('<p>' + body + '</p>'); await author.getByRole('button', { name: 'الظهور وSEO', exact: true }).click(); await author.getByLabel('عنوان SEO', { exact: true }).fill('Synthetic title'); await author.getByLabel('وصف SEO', { exact: true }).fill('Synthetic publishing and withdrawal diagnostic');
       await action(author, content.id, 'حفظ النسخة على الخادم', 'localized', 'PUT');
       const publicUrl = origin + '/api/v1/public/cms/pages/http-resolve?path=' + encodeURIComponent('/' + locale + '/articles/' + fixture.slug);
       assert.equal((await publicPage.goto(publicUrl)).status(), 404);
-      await action(author, content.id, 'إرسال للمراجعة', 'submit-review'); assert.equal(await author.getByRole('button', { name: 'اعتماد كناشر', exact: true }).isDisabled(), true);
+      await author.getByRole('button', { name: 'المعاينة والجاهزية', exact: true }).click();
+      await action(author, content.id, 'إرسال للمراجعة', 'submit-review'); assert.equal(await author.getByRole('button', { name: 'اعتماد كناشر', exact: true }).count(), 0);
       const denied = await author.evaluate(async ({ id, locale }) => { const token = await fetch('/api/v1/auth/csrf-token', { credentials: 'include' }); return (await fetch('/api/v1/admin/cms/content/' + id + '/approve', { method: 'POST', credentials: 'include', headers: { 'content-type': 'application/json', 'idempotency-key': crypto.randomUUID(), 'x-csrf-token': token.headers.get('x-csrf-token') }, body: JSON.stringify({ locale, expectedVersion: 1 }) })).status; }, { id: content.id, locale });
       assert.equal(denied, 403);
-      await open(reviewer, locale); assert.equal(await reviewer.getByRole('button', { name: 'نشر الآن', exact: true }).isDisabled(), true); await action(reviewer, content.id, 'اعتماد كناشر', 'approve');
+      await open(reviewer, locale); assert.equal(await reviewer.getByRole('button', { name: 'نشر الآن', exact: true }).count(), 0); await action(reviewer, content.id, 'اعتماد كناشر', 'approve');
       await open(publisher, locale); await action(publisher, content.id, 'نشر الآن', 'publish');
       const delivered = await publicPage.goto(publicUrl);
       const publicLocaleEnabled = assertCmsDiagnosticLocale({ locale, enabledLocales: PUBLIC_TEMPLATE_LOCALES, status: delivered.status(), robots: delivered.headers()['x-robots-tag'] });
@@ -102,7 +112,7 @@ export async function exerciseR14AdminCms({ browser, origin, db, fixture, proof,
       await webPage.goto(origin + '/' + locale + '/articles/' + fixture.slug);
       if (publicLocaleEnabled) { await webPage.getByRole('heading', { name: title, exact: true }).waitFor(); assert((await webPage.locator('body').innerText()).includes(body)); }
       else { await webPage.waitForURL(origin + '/ar/articles/' + fixture.slug); assert(!(await webPage.locator('body').innerText()).includes(body)); }
-      await open(author, locale); await author.getByLabel('نص المحتوى').fill('<p>R14_UNPUBLISHED_' + locale + '</p>'); await action(author, content.id, 'حفظ النسخة على الخادم', 'localized', 'PUT');
+      await open(author, locale, 'content'); await author.getByLabel('نص المحتوى').fill('<p>R14_UNPUBLISHED_' + locale + '</p>'); await action(author, content.id, 'حفظ النسخة على الخادم', 'localized', 'PUT');
       const reloaded = await publicPage.reload(); assertCmsDiagnosticLocale({ locale, enabledLocales: PUBLIC_TEMPLATE_LOCALES, status: reloaded.status(), robots: reloaded.headers()['x-robots-tag'] });
       snapshot = await owner(); assert.equal(snapshot.status, 200); assert(snapshot.data.body.includes(body)); assert(!snapshot.data.body.includes('R14_UNPUBLISHED_' + locale));
       assert(!(await publicPage.locator('body').innerText()).includes('R14_UNPUBLISHED_' + locale));

@@ -1,0 +1,22 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "completedAt": "2026-10-26T23:27:31.163Z",
+  "originalDatabaseWrites": 0,
+  "observations": [
+    "two independent canonical MFA sessions",
+    "root classification saved with CAS",
+    "bilingual draft and readiness",
+    "unpublished draft not publicly delivered",
+    "stale locale version rejected",
+    "unauthenticated write rejected",
+    "maker checker rejects self approval",
+    "independent review and publish",
+    "approved Arabic snapshot delivered",
+    "editing retains approved public snapshot",
+    "SQL locale filter and total agree",
+    "other locale and metadata retained",
+    "archive withdraws public snapshot",
+    "menu preserves nodes and rejects stale save",
+    "announcement saves draft without publication"
+  ]
+}
