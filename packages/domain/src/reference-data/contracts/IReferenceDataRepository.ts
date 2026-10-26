@@ -17,6 +17,7 @@ import { AtomicPersistenceContext } from '../../event-foundation/outbox/Transact
 import { GovernedReferenceEntityType, ReferenceLifecycleTransitionCommand, ReferenceRelationshipDto, ReferenceVersionDto } from '../governance/ReferenceGovernance';
 
 export interface IReferenceDataRepository {
+  getReferenceRecord?(type: GovernedReferenceEntityType, id: string): Promise<ReferenceCountryDto | ReferenceCurrencyDto | ReferenceLanguageDto | ReferenceCityDto | AdministrativeRegionDto | null>;
   getCountryById?(id:string):Promise<ReferenceCountryDto|null>;
   getQualityReport?(query: ReferenceQualityQuery): Promise<ReferenceQualityReport>;
   countRecords(collection: ReferenceDataCollection, filters: ReferenceDataFilters): Promise<number>;

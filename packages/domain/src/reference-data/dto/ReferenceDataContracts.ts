@@ -220,10 +220,10 @@ export interface UpsertReferenceCityDto {
 
 export const REFERENCE_QUALITY_ISSUES = ['MISSING_CURRENCY', 'INVALID_CURRENCY', 'MISSING_LANGUAGE', 'INVALID_LANGUAGE', 'AMBIGUOUS_ALIAS', 'MISSING_REGION', 'MISSING_TIMEZONE', 'BROKEN_COUNTRY', 'BROKEN_REGION'] as const;
 export type ReferenceQualityIssueKind = typeof REFERENCE_QUALITY_ISSUES[number];
-export interface ReferenceQualityQuery { countryIso2Code?: string; kind?: ReferenceQualityIssueKind; page?: number; }
+export interface ReferenceQualityQuery { countryIso2Code?: string; kind?: ReferenceQualityIssueKind; page?: number; q?: string; entityType?: 'COUNTRY'|'CURRENCY'|'LANGUAGE'|'REGION'|'CITY'; }
 export interface ReferenceQualityReport {
   counts: Record<ReferenceQualityIssueKind, number>;
-  data: Array<{ referenceId: string; entityType: 'COUNTRY'|'CURRENCY'|'LANGUAGE'|'REGION'|'CITY'; name: string; countryIso2Code: string | null; kind: ReferenceQualityIssueKind }>;
+  data: Array<{ referenceId: string; entityType: 'COUNTRY'|'CURRENCY'|'LANGUAGE'|'REGION'|'CITY'; name: string; nameAr?: string | null; countryIso2Code: string | null; kind: ReferenceQualityIssueKind }>;
   total: number; page: number; pageSize: number; asOf: string;
   aliasScope: 'ACTIVE_STORED_NORMALIZED_ALIASES'; authoritativeCoverage: 'unknown';
 }

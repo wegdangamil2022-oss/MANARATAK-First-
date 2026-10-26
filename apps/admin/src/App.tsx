@@ -339,6 +339,7 @@ function AdminLayout() {
                   <Route path="/students" element={<RequireAdminPermission permission="admin:students:support"><StudentSupportAdminPage /></RequireAdminPermission>} />
                   <Route path="/settings" element={<RequireAdminPermission permission="admin:settings:manage"><SettingsAdminPage /></RequireAdminPermission>} />
                   <Route path="/settings/reference-data" element={<RequireAdminPermission permission="admin:reference-data:manage"><ReferenceDataAdminPage /></RequireAdminPermission>} />
+                  <Route path="/reference-data" element={<RequireAdminPermission permission="admin:reference-data:manage"><ReferenceDataAdminPage /></RequireAdminPermission>} />
                   <Route path="/academic-taxonomy" element={<RequireAdminPermission permission="admin:academic-taxonomy:manage"><AcademicTaxonomyAdminPage /></RequireAdminPermission>} />
                   <Route path="/academic-taxonomy/:nodeId" element={<RequireAdminPermission permission="admin:academic-taxonomy:manage"><AcademicTaxonomyDetailPage /></RequireAdminPermission>} />
                   <Route path="*" element={<Navigate to={firstAllowedAdminPath(adminPermissions) || '/dashboard'} replace />} />

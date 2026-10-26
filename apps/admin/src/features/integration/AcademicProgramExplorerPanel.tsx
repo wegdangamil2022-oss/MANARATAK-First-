@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { adminApiClient } from '../../api/client';
 import { useTranslation } from '../../i18n/I18nProvider';
 import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
+import { CanonicalPicker } from '../../components/CanonicalPicker';
 export type ProgramExplorerFilters = {
   countryReferenceId: string;
   locale: 'ar' | 'en';
@@ -12,6 +13,8 @@ export type ProgramExplorerFilters = {
   internationalTestId?: string;
   languageReferenceId?: string;
   academicProgramId?: string;
+  search?: string;
+  universityId?: string;
 };
 type ScholarshipPage = {
   state: 'AVAILABLE' | 'UNAVAILABLE';
@@ -101,6 +104,16 @@ export function AcademicProgramExplorerPanel({
     'admin:majors:manage',
     'admin:international-tests:manage',
   ].every((p) => hasPermission(p));
+  const [searchText, setSearchText] = useState(''),
+    [search, setSearch] = useState(''),
+    [universityId, setUniversityId] = useState<string | null>(null);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchText.trim());
+      setAfter(undefined);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchText]);
   const [selected, setSelected] = useState<
       Omit<ProgramExplorerFilters, 'countryReferenceId' | 'locale' | 'visibility'>
     >({}),
@@ -112,8 +125,15 @@ export function AcademicProgramExplorerPanel({
     [refresh, setRefresh] = useState(0);
   const generation = useRef(0);
   const scope = useMemo<ProgramExplorerFilters>(
-      () => ({ countryReferenceId, locale: en ? 'en' : 'ar', visibility, ...selected }),
-      [countryReferenceId, en, visibility, selected],
+      () => ({
+        countryReferenceId,
+        locale: en ? 'en' : 'ar',
+        visibility,
+        ...selected,
+        ...(search ? { search } : {}),
+        ...(universityId ? { universityId } : {}),
+      }),
+      [countryReferenceId, en, visibility, selected, search, universityId],
     ),
     scopeKey = JSON.stringify(scope);
   useEffect(() => {
@@ -184,6 +204,43 @@ export function AcademicProgramExplorerPanel({
   return (
     <section className="my-5 border rounded-xl p-4 space-y-4">
       <h3>{en ? 'Explore matching academic programs' : 'استكشاف البرامج الأكاديمية المطابقة'}</h3>
+      <div className="destination-field-grid">
+        <label>
+          {en ? 'Search program or university' : 'البحث باسم البرنامج أو الجامعة'}
+          <input
+            value={searchText}
+            maxLength={200}
+            onChange={(event) => setSearchText(event.target.value)}
+          />
+        </label>
+        <CanonicalPicker
+          paged
+          optional
+          label={en ? 'University in this country' : 'جامعة داخل هذه الدولة'}
+          value={universityId}
+          reloadKey={countryReferenceId}
+          load={async (query, page) => {
+            const params = new URLSearchParams({
+              countryReferenceId,
+              page: String(page),
+              pageSize: '50',
+            });
+            if (query) params.set('search', query);
+            const result = await adminApiClient.request<{
+              data: Array<{ id: string; displayName: string; status: string }>;
+            }>(`/admin/universities?${params}`);
+            return result.data.map((row) => ({
+              id: row.id,
+              label: row.displayName,
+              lifecycle: row.status,
+            }));
+          }}
+          onChange={(id) => {
+            setUniversityId(id);
+            setAfter(undefined);
+          }}
+        />
+      </div>
       <p>
         {en
           ? 'Every filter must match the same program. Scholarships below are linked to that exact program.'

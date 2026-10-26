@@ -1,0 +1,9 @@
+{
+  "pass": true,
+  "checks": [
+    "dirty dialog refuses Escape discard, source/governance tools load",
+    "quality results have exact ID repair links",
+    "English shell and LTR navigation",
+    "canonical MFA staff without owner permissions receives 403 from both APIs"
+  ]
+}

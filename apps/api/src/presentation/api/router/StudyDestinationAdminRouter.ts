@@ -24,7 +24,7 @@ const officialLinks = z
   .array(
     z.object({
       labelAr: z.string().trim().min(1).max(160),
-      labelEn: z.string().trim().max(160).optional(),
+      labelEn: z.string().max(160).optional(),
       url: z.string().url(),
       category: z.enum([
         'GOVERNMENT_STUDY',
@@ -36,7 +36,7 @@ const officialLinks = z
         'OTHER',
       ]),
       noteAr: z.string().trim().max(500).optional(),
-      noteEn: z.string().trim().max(500).optional(),
+      noteEn: z.string().max(500).optional(),
     }),
   )
   .max(50);
@@ -145,20 +145,20 @@ export class StudyDestinationAdminRouter {
         studySystemSummaryAr: z.string().max(12000).nullable().optional(),
         studySystemSummaryEn: z.string().max(12000).nullable().optional(),
         admissionHighlightsAr: stringList.optional(),
-        admissionHighlightsEn: stringList.optional(),
+        admissionHighlightsEn: z.array(z.string().min(1)).max(100).optional(),
         visaSummaryAr: z.string().max(12000).nullable().optional(),
         visaSummaryEn: z.string().max(12000).nullable().optional(),
         visaRequirementsAr: stringList.optional(),
-        visaRequirementsEn: stringList.optional(),
+        visaRequirementsEn: z.array(z.string().min(1)).max(100).optional(),
         visaOfficialUrl: z.string().url().nullable().optional(),
         livingCostTier: z.nativeEnum(StudyDestinationLivingCostTier).nullable().optional(),
         averageMonthlyLivingCostMin: z.number().nonnegative().nullable().optional(),
         averageMonthlyLivingCostMax: z.number().nonnegative().nullable().optional(),
         livingCostCurrencyReferenceId: z.string().uuid().nullable().optional(),
         costHighlightsAr: costHighlights.optional(),
-        costHighlightsEn: costHighlights.optional(),
+        costHighlightsEn: z.array(z.object({label:z.string().min(1).max(160),value:z.string().min(1).max(240)})).max(50).optional(),
         studentLifeHighlightsAr: stringList.optional(),
-        studentLifeHighlightsEn: stringList.optional(),
+        studentLifeHighlightsEn: z.array(z.string().min(1)).max(100).optional(),
         officialLinks: officialLinks.optional(),
         sourceAuditDate: z.string().datetime().nullable().optional(),
         evidenceSources: evidenceSources.optional(),
@@ -180,6 +180,17 @@ export class StudyDestinationAdminRouter {
       '/:iso2Code',
       guard('read'),
       asyncHandler(async (req: Request, res: Response) => {
+        res.json(await studyDestinationUseCases.getAdminByCountryIso2(req.params.iso2Code));
+      }),
+    );
+
+    router.get(
+      '/:iso2Code/preview',
+      guard('read'),
+      asyncHandler(async (req: Request, res: Response) => {
+        res.setHeader('Cache-Control', 'no-store');
+        res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+        // Same authorized owner aggregate; never expose a draft on public routes.
         res.json(await studyDestinationUseCases.getAdminByCountryIso2(req.params.iso2Code));
       }),
     );
@@ -270,6 +281,8 @@ export class StudyDestinationAdminRouter {
         return res.status(400).json({ error: 'Validation Error', details: validationError.issues });
       }
       if (err instanceof Error) {
+        if (err.message.startsWith('TRANSLATION_CONTENT_AUTHORING_DISABLED'))
+          return res.status(403).json({ error: 'TRANSLATION_CONTENT_AUTHORING_DISABLED' });
         if (err.message === 'STUDY_DESTINATION_PRECONDITION_REQUIRED')
           return res.status(428).json({ error: err.message });
         if (err.message.includes('INDEPENDENT_'))

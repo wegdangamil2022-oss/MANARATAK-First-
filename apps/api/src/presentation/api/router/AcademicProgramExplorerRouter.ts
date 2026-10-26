@@ -38,6 +38,8 @@ export class AcademicProgramExplorerRouter {
     const query = z
       .object({
         countryReferenceId: id.optional(),
+        universityId: id.optional(),
+        search: z.string().trim().max(200).optional(),
         degreeLevelId: id.optional(),
         majorId: id.optional(),
         internationalTestId: id.optional(),

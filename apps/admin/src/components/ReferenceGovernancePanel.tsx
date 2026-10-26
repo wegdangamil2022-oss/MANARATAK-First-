@@ -49,11 +49,15 @@ export function ReferenceGovernanceButton({
   );
 }
 
-function GovernanceDialog({ entityType, record, onClose, onChanged }: {
+export function GovernanceDialog({ entityType, record, onClose, onChanged, embedded = false, onDirtyChange, onBusyChange, view = 'all' }: {
   entityType: GovernedReferenceEntityType;
   record: GovernedRow;
   onClose: () => void;
   onChanged: () => void;
+  embedded?: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
+  onBusyChange?: (busy: boolean) => void;
+  view?: 'all' | 'sources' | 'governance';
 }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -72,6 +76,12 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
   const [retirementState, setRetirementState] = useState<ReferenceLifecycleState>(ReferenceLifecycleState.ARCHIVED);
   const [replacementId, setReplacementId] = useState<string | null>(null);
   const [acknowledgement, setAcknowledgement] = useState(false);
+  useEffect(()=>{onBusyChange?.(saving);return()=>onBusyChange?.(false);},[saving,onBusyChange]);
+  useEffect(() => {
+    onDirtyChange?.(Boolean(details && (JSON.stringify(aliases) !== JSON.stringify(details.aliases) ||
+      JSON.stringify(mappings) !== JSON.stringify(details.providerMappings) || reason.trim())));
+    return () => onDirtyChange?.(false);
+  }, [details, aliases, mappings, reason, onDirtyChange]);
 
   useEffect(() => {
     let live = true;
@@ -197,18 +207,19 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
   };
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Reference governance" dir="rtl"
-      className="fixed inset-0 z-[100] bg-black/50 flex items-start justify-center overflow-y-auto p-4 md:p-8">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-6 space-y-5">
+    <div role={embedded ? 'region' : 'dialog'} aria-modal={embedded ? undefined : true} aria-label="Reference governance" dir="rtl"
+      className={embedded ? 'reference-governance-content' : 'fixed inset-0 z-[100] bg-black/50 flex items-start justify-center overflow-y-auto p-4 md:p-8'}>
+      <div className={embedded ? 'space-y-5' : 'w-full max-w-4xl bg-white rounded-2xl shadow-xl p-6 space-y-5'}>
         <div className="flex justify-between gap-3 items-start">
           <div><h3 className="font-black text-lg">حوكمة {entityType}: {record.name || record.id}</h3>
             <p className="text-xs font-mono" dir="ltr">{record.id} · v{record.versionNumber} · {record.lifecycleState}</p>
           </div>
-          <button type="button" className="border rounded-lg px-3 py-2" onClick={onClose}>إغلاق ×</button>
+          {!embedded && <button type="button" className="border rounded-lg px-3 py-2" onClick={onClose}>إغلاق ×</button>}
         </div>
         {loading && <p role="status">جارٍ جلب الأسماء البديلة والربط والسجل التاريخي…</p>}
         {error && <p role="alert" className="border border-red-200 bg-red-50 text-red-800 p-3 rounded-lg">{error}</p>}
         {details && !loading && <>
+          {view !== 'governance' && <>
           <section className="space-y-3">
             <div className="flex justify-between"><h4 className="font-bold">الأسماء البديلة</h4>
               <button type="button" disabled={saving || record.lifecycleState !== 'ACTIVE' || aliases.length >= 100}
@@ -247,12 +258,17 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
           </section>}
           <button type="button" onClick={() => void save()} disabled={saving || record.lifecycleState !== 'ACTIVE'}
             className="bg-indigo-700 text-white rounded-lg px-4 py-2 disabled:opacity-50">حفظ الأسماء والربط (مع سجل تدقيق)</button>
+          </>}
+          {view !== 'sources' && <>
           {entityType === 'CITY' && !record.countryReferenceId && record.lifecycleState === 'ACTIVE' &&
             <CityCountryLinkRepair record={record} onChanged={onChanged} />}
+          </>}
+          {view !== 'governance' &&
           <section className="border-t pt-4 space-y-2">
             <h4 className="font-bold">المصدر والتحقق / Source provenance</h4>
             <ReferenceProvenanceReadOnly metadata={record.metadata} />
-          </section>
+          </section>}
+          {view !== 'sources' && <>
           <section className="border-t pt-4 space-y-2">
             <h4 className="font-bold">الإصدارات السابقة / History ({historyMeta?.total ?? 'unknown'})</h4>
             {historyLoading && <p role="status" className="text-xs">جارٍ تحميل الإصدارات…</p>}
@@ -289,7 +305,7 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
               {record.lifecycleState === 'DEPRECATED' && <>
                 <label>قرار التقاعد<select className="border p-2" value={retirementState} onChange={event => { setRetirementState(event.target.value as ReferenceLifecycleState); setReplacementId(null); }}>{['ARCHIVED','MERGED','SUPERSEDED'].map(state => <option key={state}>{state}</option>)}</select></label>
                 {['MERGED','SUPERSEDED'].includes(retirementState) && <CanonicalPicker paged label="السجل البديل النشط" value={replacementId} reloadKey={`replacement:${entityType}:${record.id}`} load={async (query,page) => {
-                  const values = entityType === 'COUNTRY' ? await canonicalPickerApi.countries(query,page) : entityType === 'CURRENCY' ? await canonicalPickerApi.currencies(query,page) : entityType === 'LANGUAGE' ? await canonicalPickerApi.languages(query,page) : await canonicalPickerApi.cities(record.countryIso2Code,undefined,query,page);
+                  const values = entityType === 'COUNTRY' ? await canonicalPickerApi.countries(query,page) : entityType === 'CURRENCY' ? await canonicalPickerApi.currencies(query,page) : entityType === 'LANGUAGE' ? await canonicalPickerApi.languages(query,page) : entityType === 'REGION' ? await canonicalPickerApi.regions(record.countryIso2Code,query,page) : await canonicalPickerApi.cities(record.countryIso2Code,undefined,query,page);
                   return values.filter(item => item.id !== record.id);
                 }} onChange={setReplacementId} />}
                 <label className="block"><input type="checkbox" checked={acknowledgement} onChange={event => setAcknowledgement(event.target.checked)} />راجعت الأثر؛ تبقى المراجع التاريخية والاستخدامات غير المرصودة محفوظة دون إعادة تعيين.</label>
@@ -298,6 +314,7 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
               <button type="button" className="border border-amber-500 text-amber-800 p-2 rounded-lg" disabled={saving || !impact || reason.trim().length < 3 || record.lifecycleState === 'DEPRECATED' && (!acknowledgement || ['MERGED','SUPERSEDED'].includes(retirementState) && !replacementId || retirementState === 'ARCHIVED' && impact.knownTotal > 0)} onClick={() => void deprecate()}>{record.lifecycleState === 'ACTIVE' ? 'DEPRECATED — منع الاختيار الجديد' : 'تسجيل قرار التقاعد'}</button>
             </div>}
           </section>
+          </>}
         </>}
       </div>
     </div>

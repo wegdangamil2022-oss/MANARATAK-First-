@@ -1,0 +1,32 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "checks": [
+    "six real reference entries and owner counts",
+    "protected uncached draft preview",
+    "real PostgreSQL save preserves hidden English and structured pipes",
+    "stale revision and English authoring rejected without overwrite",
+    "incomplete unverified destination cannot publish",
+    "duplicate city names resolve exact canonical IDs",
+    "versioned reference save, null coordinates and country immutability",
+    "PostgreSQL Arabic quality search filters before facets and paging",
+    "read-first single-card edit and confirmed save",
+    "card cancel restores saved content",
+    "English content remains read only",
+    "ten section navigation including lazy owner relationships",
+    "exact city dialog read first and field-group cancellation",
+    "Cairo and no document overflow at 360px",
+    "320px bounded reference table scroll",
+    "anonymous draft access denied"
+  ],
+  "errors": [],
+  "screens": [
+    "reference-home-desktop",
+    "destination-overview-desktop",
+    "reference-city-dialog-desktop",
+    "reference-home-mobile",
+    "destination-living-mobile",
+    "reference-cities-320px"
+  ],
+  "passed": true
+}

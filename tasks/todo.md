@@ -26,3 +26,16 @@
 - [x] External implementation and evidence committed at 3d0257be and remote head independently verified.
 - [x] Draft PR #45 created and attached: https://github.com/wegdangamil2022-oss/MANARATAK-First-/pull/45. Targets feat/international-tests-admin-20261025; no main merge.
 - [x] Report evidence and genuine remaining work, distinguish isolated fixtures from original data.
+
+
+## Destinations / section 08 (v1.16)
+- [x] Ten-section navigation, URL compatibility, list context and honest metrics.
+- [x] One-language read/edit cards; lossless full-profile save, source rows, conflict/dirty and published-change confirmation.
+- [x] Separate bounded owner relationships and protected preview/readiness/source actions.
+- [x] Contract/behavior/runtime/desktop/mobile evidence and commit.
+
+## Reference data / section 09 (v1.16)
+- [x] Six-entry shell, per-section state, table/card lists and hierarchical filters.
+- [x] Read-first record dialogs, immutable identity, versioned saves and all existing governance tools.
+- [x] Quality/source/import/standards workspace with precise record links.
+- [x] Focused owner/security/UI checks, build/types and delivery report/PR.

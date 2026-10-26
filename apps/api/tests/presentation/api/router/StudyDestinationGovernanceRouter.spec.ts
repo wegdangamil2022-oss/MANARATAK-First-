@@ -11,6 +11,7 @@ import { CANONICAL_API_REQUEST_HEADERS } from '../../../../src/presentation/secu
 function build(permissions: string[] = ['read', 'edit']) {
   const useCases = {
     upsertProfile: vi.fn().mockResolvedValue({ saved: true }),
+    getAdminByCountryIso2: vi.fn().mockResolvedValue({ country: { iso2Code: 'YE' }, profile: { status: 'DRAFT' } }),
     verifySources: vi.fn().mockResolvedValue({ verified: true }),
     publish: vi.fn(),
     listAdmin: vi.fn().mockResolvedValue({ data: [], total: 0 }),
@@ -52,6 +53,19 @@ const command = (x: ReturnType<typeof build>) =>
     .set('If-Match', '4')
     .set('X-Review-Reason', 'Corrected source details');
 describe('Study destination authenticated HTTP contracts', () => {
+  it('keeps draft preview authenticated, permission checked and uncached', async () => {
+    const x=build(['read']);
+    expect((await request(x.app).get('/admin/YE/preview')).status).toBe(401);
+    expect((await request(build([]).app).get('/admin/YE/preview').set('X-Test-Actor','reader')).status).toBe(403);
+    const response=await request(x.app).get('/admin/YE/preview').set('X-Test-Actor','reader');
+    expect(response.status).toBe(200);expect(response.headers['cache-control']).toBe('no-store');
+    expect(response.headers['x-robots-tag']).toContain('noindex');expect(response.body.profile.status).toBe('DRAFT');
+    expect(x.useCases.getAdminByCountryIso2).toHaveBeenCalledWith('YE');
+  });
+  it('maps forbidden translation writes to a real 403 without claiming a successful save', async()=>{
+    const x=build();x.useCases.upsertProfile.mockRejectedValue(new Error('TRANSLATION_CONTENT_AUTHORING_DISABLED'));
+    expect((await command(x).send({overviewEn:'unauthorized'})).status).toBe(403);
+  });
   it('denies anonymous commands and separates editor/reviewer/publisher capabilities', async () => {
     const x = build();
     expect((await request(x.app).put('/admin/YE/profile').send({})).status).toBe(401);

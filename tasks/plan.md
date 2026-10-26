@@ -23,3 +23,15 @@ The common read boundary establishes the meanings of origin versus access, certi
 - Keep old detail links valid until their replacements are verified. Do not delete existing useful functions.
 
 Task details and verification checkpoints: `tasks/todo.md`.
+
+
+# Destinations and reference administration — approved v1.16
+
+Baseline: latest main 10179ab97eddba9b236238714dea1d68859f469e inspected; relevant source files match the current branch baseline. Work branch: feat/destinations-reference-admin-20261026, stacked on completed courses branch. Preserve the earlier course work and its remaining operational notes above.
+
+1. Section 08: preserve list cards, fix URL/context and metric scope. Ten sections in four groups, one content language, readable/editable cards, lossless arrays, explicit translation guards, protected preview, source/readiness repair links. Reuse original versioned owner commands and read contracts; lazy owner relationships with server filters/pages.
+2. Verify section 08 contracts, permissions, EN preservation, conflicts, publication invalidation, old links, desktop/mobile/RTL/LTR using isolated fixtures. Deliver the two slices together after shared draft-guard and owner-integration acceptance; both remain isolated from main.
+3. Section 09: six-entry reference workspace, five paged table/card lists, per-section URL/filter state, canonical hierarchical choices, read-first detail dialogs and existing governance. Keep source previews, owner approvals, standards and nine quality issue types available in the sixth workspace.
+4. Verify reference identity/version/lifecycle/owner protections, conflict/empty/error states, UI keyboard/mobile. Build/typecheck and inspect current runtime without writing synthetic data to the original database. No production migration, seeding, merge or external activation authorized by this task.
+
+Data ownership: P7 canonical identity; StudyDestinationProfile current editorial owner (future CMS integration is not migrated here); universities/programs/majors/scholarships remain read-only owner links. Missing source/translation/metrics remain explicit. No new schema is assumed.
