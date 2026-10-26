@@ -53,3 +53,11 @@ Scope: approved v1.16 sections 08 and 09 only. Branch: `feat/destinations-refere
 - Real production publication, long-running load/latency benchmarks and exhaustive 200% text-zoom audits were not performed. No claim of production deployment or complete source coverage is made.
 
 Screenshots and acceptance records are suitable for review; the reference database and the editorial destination profile remain separate owners.
+
+## Delivery and original runtime status
+
+- Commit `8a0395dd4b7b9e5361c47459cdf573307b5e5ceb` was pushed and independently verified with `git ls-remote`.
+- Draft PR: https://github.com/wegdangamil2022-oss/MANARATAK-First-/pull/46 (base: completed courses branch; no main merge).
+- Secret scan passed across 9,596 tracked files; final TypeScript and admin production build passed. Additional screenshots were refreshed against the final admin build.
+- The proposed code-only local original-database runtime did **not** activate. Its existing approval guard rejected a source-baseline mismatch before API/database startup. Automatic approval review then rejected an attempted guard update with `blocked by policy`; the rejected update was not executed. No alternative bypass was attempted.
+- The existing original Neon development runtime remains on source `61cbde241a99e1b52ac96e960b47d6e0b822a5ef`; port 3000 was not stopped or replaced. Consequently, this PR must not be described as already visible on the original-database runtime. The tested new code remains available in the isolated preview and on the pushed branch.
