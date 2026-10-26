@@ -71,6 +71,7 @@ export * from './authorization/repositories/IEmergencyAccessRepository';
 export * from './authorization/repositories/IRoleRepository';
 export * from './authorization/services/AuthorizationEvaluatorService';
 export * from './authorization/services/IPolicyEvaluator';
+export * from './authorization/services/CourseScopePolicy';
 export * from './authorization/services/InheritanceValidatorService';
 export * from './authorization/value-objects/AccessDecision';
 export * from './authorization/value-objects/Action';

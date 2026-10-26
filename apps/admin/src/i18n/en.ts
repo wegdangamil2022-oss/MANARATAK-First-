@@ -1,4 +1,5 @@
 export const en = {
+  admin_nav_assigned_courses:'Assigned courses',
   "tools19_value_PLANNED": "Planned",
   "tools19_value_IN_DEVELOPMENT": "In development",
   "tools19_value_IMPLEMENTED": "Implemented",

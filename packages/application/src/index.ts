@@ -261,3 +261,5 @@ export * from './review-workspace/ReviewWorkspaceUseCases';
 export * from './review-workspace/ReviewNotificationRecipientGateway';
 export * from './dashboard/AnalyticsRetentionBackgroundJobHandler';
 export * from './courses/use-cases/CourseBulkPublicationUseCases';
+
+export * from './courses/services/CourseAccessService';

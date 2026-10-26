@@ -290,7 +290,7 @@ export function AuthorizationRoleEditor({
               {policies
                 .filter(
                   (policy) =>
-                    ['TIME', 'IP'].includes(policy.ruleType) || role.policyIds.includes(policy.id),
+                    ['TIME', 'IP', 'COURSE_SCOPE'].includes(policy.ruleType) || role.policyIds.includes(policy.id),
                 )
                 .map((policy) => (
                   <label key={policy.id} className="block">

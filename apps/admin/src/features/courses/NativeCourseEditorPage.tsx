@@ -40,7 +40,9 @@ type Readiness = {
   percentage: number;
   checks: Array<{ key: string; label: string; state: string; message?: string }>;
 };
+type CourseAccess=Record<'manage'|'read'|'edit'|'review'|'publish'|'grade'|'learners',boolean>;
 type EditorData = {
+  access:CourseAccess;
   course: CourseDto;
   curriculum: CourseCurriculumSnapshotDto;
   policy: CourseEnrollmentPolicyDto | null;
@@ -60,27 +62,30 @@ export function NativeCourseEditorPage() {
     [notice, setNotice] = useState('');
   const loadGeneration = useRef(0);
   const [copyOpen, setCopyOpen] = useState(false);
-  const tab = params.get('tab') ?? 'basics';
+  const requestedTab=params.get('tab')??'basics';
+  const allowedTab=(key:string)=>!data || data.access.manage || (key==='curriculum' && data.access.edit) || (key==='assessments' && (data.access.edit||data.access.grade)) || key==='publication' || (['students','reports'].includes(key)&&data.access.learners);
+  const tab=allowedTab(requestedTab)?requestedTab:data?.access.edit?'curriculum':data?.access.grade?'assessments':'publication';
   const returnTo =
     params.get('returnTo')?.startsWith('/courses') && !params.get('returnTo')?.startsWith('//')
       ? params.get('returnTo')!
-      : '/courses/native';
+      : data && !data.access.manage ? '/courses/assigned' : '/courses/native';
   const load = useCallback(async () => {
     const generation = ++loadGeneration.current;
     setLoading(true);
     setError('');
     try {
-      const [course, curriculum, policy, readiness] = await Promise.all([
+      const [course, curriculum, policy, readiness, access] = await Promise.all([
         adminApiClient.request<CourseDto>(`/admin/courses/${id}`),
         adminApiClient.request<CourseCurriculumSnapshotDto>(`/admin/courses/${id}/curriculum`),
         adminApiClient.request<CourseEnrollmentPolicyDto | null>(
           `/admin/courses/${id}/enrollment-policy`,
         ),
         adminApiClient.request<Readiness>(`/admin/courses/${id}/readiness`),
+        adminApiClient.request<CourseAccess>(`/admin/courses/${id}/access`),
       ]);
       if (generation !== loadGeneration.current) return;
       if (course.originType !== 'NATIVE_MANARATAK_COURSE') throw Error('NATIVE_COURSE_REQUIRED');
-      setData({ course, curriculum, policy, readiness });
+      setData({ course, curriculum, policy, readiness, access });
       setDirty(false);
     } catch (error) {
       if (generation === loadGeneration.current)
@@ -226,10 +231,10 @@ export function NativeCourseEditorPage() {
           <RefreshCw size={16} />
           {tr('قراءة النسخة الأحدث', 'Reload current version')}
         </button>
-        <Link to={`/courses/${id}?returnTo=${encodeURIComponent(returnTo)}`}>
+        {data?.access.manage && <Link to={`/courses/${id}?returnTo=${encodeURIComponent(returnTo)}`}>
           {tr('أدوات الإدارة المتقدمة الحالية', 'Existing advanced administration')}
-        </Link>
-        <button type="button" disabled={busy || loading || !data} onClick={() => { if (confirmDiscard()) setCopyOpen(true); }}>{tr('نسخ الدورة', 'Copy course')}</button>
+        </Link>}
+        {data?.access.manage && <button type="button" disabled={busy || loading || !data} onClick={() => { if (confirmDiscard()) setCopyOpen(true); }}>{tr('نسخ الدورة', 'Copy course')}</button>}
       </div>
       {copyOpen && data && <NativeCourseCopyDialog course={data.course} onClose={() => setCopyOpen(false)} onCreated={copyId => { setCopyOpen(false); setDirty(false); navigate(`/courses/${copyId}/editor`); }}/>}
       <label className="course-field course-reason-field">
@@ -255,7 +260,7 @@ export function NativeCourseEditorPage() {
         className="native-editor-tabs"
         aria-label={tr('أقسام محرر الدورة', 'Course editor sections')}
       >
-        {tabs.map(([key, label, Icon]) => (
+        {tabs.filter(([key])=>allowedTab(key)).map(([key, label, Icon]) => (
           <button
             key={key}
             type="button"
@@ -331,6 +336,7 @@ export function NativeCourseEditorPage() {
             )}
             {tab === 'curriculum' && (
               <NativeCourseCurriculumPanel
+                canEdit={data.access.edit}
                 id={id}
                 version={data.course.version}
                 status={data.course.status}
@@ -348,18 +354,18 @@ export function NativeCourseEditorPage() {
                 <NativeAssessments
                   snapshot={data.curriculum}
                   busy={busy}
-                  readonly={readonly}
+                  readonly={readonly || !data.access.edit}
                   command={command}
                   onDirty={changeDirty}
                 />
-                <div onChangeCapture={() => changeDirty(true)}><CourseQuestionBanksPanel
+                {data.access.manage && <div onChangeCapture={() => changeDirty(true)}><CourseQuestionBanksPanel
                   courseId={id}
                   version={data.course.version}
                   status={data.course.status}
                   snapshot={data.curriculum}
                   onSaved={load}
-                /></div>
-                <AssessmentReviewPanel courseId={id} onDirty={changeDirty}/>
+                /></div>}
+                {data.access.grade && <AssessmentReviewPanel courseId={id} onDirty={changeDirty}/>}
               </>
             )}
             {tab === 'completion' && (
@@ -448,7 +454,7 @@ export function NativeCourseEditorPage() {
                   ))}
                 </ul>
                 <div className="course-drawer-toolbar">
-                  {data.course.status !== 'PUBLISHED' && data.course.status !== 'ARCHIVED' && (
+                  {data.access.edit && data.course.status !== 'PUBLISHED' && data.course.status !== 'ARCHIVED' && (
                     <button
                       type="button"
                       disabled={busy}
@@ -457,7 +463,7 @@ export function NativeCourseEditorPage() {
                       {tr('إرسال للمراجعة', 'Submit for review')}
                     </button>
                   )}
-                  {data.course.status === 'READY_TO_REVIEW' && (
+                  {data.access.review && data.course.status === 'READY_TO_REVIEW' && (
                     <button
                       type="button"
                       disabled={busy || !data.readiness.ready}
@@ -466,7 +472,7 @@ export function NativeCourseEditorPage() {
                       {tr('اعتماد الجاهزية', 'Approve readiness')}
                     </button>
                   )}
-                  {data.course.status === 'READY_TO_PUBLISH' && (
+                  {data.access.publish && data.course.status === 'READY_TO_PUBLISH' && (
                     <button
                       type="button"
                       className="course-primary"
@@ -476,7 +482,7 @@ export function NativeCourseEditorPage() {
                       {tr('نشر الدورة', 'Publish course')}
                     </button>
                   )}
-                  {data.course.status === 'PUBLISHED' && (
+                  {data.access.publish && data.course.status === 'PUBLISHED' && (
                     <button
                       type="button"
                       disabled={busy}
@@ -495,7 +501,7 @@ export function NativeCourseEditorPage() {
                       {tr('إلغاء النشر', 'Unpublish')}
                     </button>
                   )}
-                  {!['ARCHIVED', 'REJECTED'].includes(data.course.status) && (
+                  {data.access.manage && !['ARCHIVED', 'REJECTED'].includes(data.course.status) && (
                     <button
                       type="button"
                       disabled={busy}

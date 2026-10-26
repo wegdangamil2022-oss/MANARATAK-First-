@@ -1,3 +1,4 @@
+import { createCourseAccessGuard } from './presentation/security/CourseAccessGuard.js';
 import { createTranslationWorkspaceRouter } from './presentation/api/router/TranslationWorkspaceRouter.js';
 import { PrismaTranslationWorkspaceReadGateway, PrismaTranslationImportGateway } from '@manaratak/infrastructure';
 import { freshWorkerEvidence, successfulPublicWebStatus } from './presentation/monitoring/RuntimeHealthPolicy.js';
@@ -1012,7 +1013,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     // Static /imported must be registered before /admin/courses/:id can match "imported".
     v1Router.use('/admin/courses/imported', requireAdminPermission('admin:courses:manage'), lazyRouter('importedCourseAdminRouter'));
     v1Router.use('/admin/courses/providers', requireAdminPermission('admin:courses:manage'), lazyRouter('courseProviderRegistryRouter'));
-    v1Router.use('/admin/courses', requireAdminPermission('admin:courses:manage'), lazyRouter('courseAdminRouter'));
+    v1Router.use('/admin/courses', createCourseAccessGuard(container.resolve('courseAccessService')), lazyRouter('courseAdminRouter'));
       v1Router.use('/public/courses', lazyRouter('coursePublicRouter'));
       v1Router.use('/public/graph', lazyRouter('crossDomainReadModelRouter'));
       v1Router.use('/public/analytics', lazyRouter('publicAnalyticsRouter'));

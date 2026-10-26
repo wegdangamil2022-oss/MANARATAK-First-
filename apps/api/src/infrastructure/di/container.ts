@@ -1,3 +1,4 @@
+import { CourseAccessService } from '@manaratak/application';
 import { PrismaUniversityProgramReadPort } from '@manaratak/infrastructure';
 import { PrismaCourseBulkPublicationRepository } from '@manaratak/infrastructure';
 import { CourseBulkPublicationUseCases } from '@manaratak/application';
@@ -1318,6 +1319,7 @@ export function registerDependencies(
     universityPublicRouter: asFunction((cradle) => UniversityPublicRouter.create(cradle)).singleton(),
     majorAdminRouter: asFunction((cradle) => MajorAdminRouter.create(cradle)).scoped(),
     majorPublicRouter: asFunction((cradle) => MajorPublicRouter.create(cradle)).singleton(),
+    courseAccessService: asFunction(({authEvaluatorService,courseRepository,roleAssignmentRepository,roleRepository,policyRepository}) => new CourseAccessService(authEvaluatorService,courseRepository,roleAssignmentRepository,roleRepository,policyRepository)).scoped(),
     courseAdminRouter: asFunction((cradle) => CourseAdminRouter.create(cradle)).singleton(),
     courseLearnerRouter: asFunction((cradle) => CourseLearnerRouter.create(cradle)).singleton(),
     importedCourseAdminRouter: asFunction((cradle) => ImportedCourseAdminRouter.create(cradle)).singleton(),

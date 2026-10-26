@@ -1,4 +1,5 @@
 export const ar = {
+  admin_nav_assigned_courses:'الدورات المسندة',
   "tools19_value_PLANNED": "مخططة",
   "tools19_value_IN_DEVELOPMENT": "قيد التطوير",
   "tools19_value_IMPLEMENTED": "منفذة",

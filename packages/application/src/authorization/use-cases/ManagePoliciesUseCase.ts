@@ -1,4 +1,4 @@
-import { IPolicyRepository, Policy } from '@manaratak/domain';
+import { IPolicyRepository, Policy, parseCourseScope } from '@manaratak/domain';
 import { isIP } from 'node:net';
 import {
   AtomicDomainMutationCoordinator,
@@ -9,13 +9,14 @@ export type PolicyDefinition = {
   id: string;
   name: string;
   description: string;
-  ruleType: 'TIME' | 'IP';
+  ruleType: 'TIME' | 'IP' | 'COURSE_SCOPE';
   configuration: {
     start?: string;
     end?: string;
     timezone?: string;
     daysOfWeek?: number[];
     allowedIps?: string[];
+    courseIds?: string[];
   };
 };
 /** Authoring never changes permission ownership. Retired policies deny access, preserving references. */
@@ -40,7 +41,10 @@ export class ManagePoliciesUseCase {
     )
       throw new Error('POLICY_DEFINITION_INVALID');
     const c = input.configuration;
-    if (input.ruleType === 'TIME') {
+    if (input.ruleType === 'COURSE_SCOPE') {
+      parseCourseScope(JSON.stringify(c));
+    } else if (c.courseIds !== undefined) throw Error('POLICY_DEFINITION_INVALID');
+    else if (input.ruleType === 'TIME') {
       if (
         !c.start ||
         !c.end ||

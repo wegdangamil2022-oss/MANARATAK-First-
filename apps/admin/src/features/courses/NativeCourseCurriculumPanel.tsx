@@ -20,6 +20,7 @@ export function NativeCourseCurriculumPanel({
   onDirty,
   command,
   reload,
+  canEdit=true,
 }: {
   id: string;
   version: number;
@@ -31,6 +32,7 @@ export function NativeCourseCurriculumPanel({
   onDirty: (value: boolean) => void;
   command: NativeCourseCommand;
   reload: () => Promise<void>;
+  canEdit?:boolean;
 }) {
   const { tr } = useCourseCopy();
   const [params, setParams] = useSearchParams();
@@ -55,7 +57,7 @@ export function NativeCourseCurriculumPanel({
     [duration, setDuration] = useState('');
   const [copy, setCopy] = useState<{kind: 'modules' | 'lessons'; id: string}>();
   const openCopy = (kind: 'modules' | 'lessons', target: string) => { if (dirty && !window.confirm(tr('تجاهل التعديلات غير المحفوظة؟', 'Discard unsaved changes?'))) return; onDirty(false); setCopy({kind, id: target}); };
-  const editable = !['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(status),
+  const editable = canEdit && !['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(status),
     lesson = lessons.find((lesson) => lesson.id === selected);
   const switchMode = (next: string, lessonId = selected) => {
     if (

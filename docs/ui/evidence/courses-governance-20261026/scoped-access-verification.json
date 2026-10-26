@@ -1,0 +1,18 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "checks": [
+    "edit: canonical MFA + IAM course scope, isolated tools, denied foreign/global/certificate/learner/archive access",
+    "review: canonical MFA + IAM course scope, isolated tools, denied foreign/global/certificate/learner/archive access",
+    "publish: canonical MFA + IAM course scope, isolated tools, denied foreign/global/certificate/learner/archive access",
+    "grade: canonical MFA + IAM course scope, isolated tools, denied foreign/global/certificate/learner/archive access"
+  ],
+  "screens": [
+    "course-role-edit",
+    "course-role-review",
+    "course-role-publish",
+    "course-role-grade"
+  ],
+  "errors": [],
+  "passed": true
+}

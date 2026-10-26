@@ -4,6 +4,7 @@ export const ADMIN_SECTIONS = [
   ['/universities', 'admin:universities:manage'],
   ['/majors', 'admin:majors:manage'],
   ['/international-tests', 'admin:international-tests:manage'],
+  ['/courses/assigned', 'admin:courses:workspace'],
   ['/courses', 'admin:courses:manage'],
   ['/study-destinations', 'admin:study-destinations:read'],
   ['/translations', 'admin:cms:manage'],

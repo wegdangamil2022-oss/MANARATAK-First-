@@ -1,3 +1,4 @@
+import type {CourseAccessService} from '@manaratak/application';
 import type {CourseAdminScope, CourseAdminContext, CourseAdminCommandUseCases} from '@manaratak/application';
 import { readReviewReasonHeader } from '@manaratak/shared';
 import { Router, Request, Response, NextFunction } from 'express';
@@ -19,8 +20,18 @@ import type {} from '../../middleware/AuthMiddleware.js';
 import { CourseMediaRouter, type CourseMediaCradle } from './CourseMediaRouter.js';
 
 export class CourseAdminRouter {
-  public static create(cradle: CourseAdminScope & CourseMediaCradle & {courseAdminCommandUseCases:CourseAdminCommandUseCases; courseProgressUseCases: CourseProgressUseCases}): Router {
+  public static create(cradle: CourseAdminScope & CourseMediaCradle & {courseAccessService?:CourseAccessService; courseAdminCommandUseCases:CourseAdminCommandUseCases; courseProgressUseCases: CourseProgressUseCases}): Router {
     const router = Router();
+    router.get('/assigned', (req,res,next) => {
+      if(!cradle.courseAccessService || !req.authUserId){res.status(503).json({error:'COURSE_ACCESS_NOT_CONFIGURED'});return;}
+      const offset=z.coerce.number().int().min(0).max(1000).safeParse(req.query.offset??0);
+      if(!offset.success){res.status(400).json({error:'INVALID_OFFSET'});return;}
+      void cradle.courseAccessService.assigned(req.authUserId,offset.data,{ip:req.ip,requestTime:new Date()}).then(value=>res.json(value)).catch(next);
+    });
+    router.get('/:id/access', (req,res,next) => {
+      if(!cradle.courseAccessService || !req.authUserId){res.status(503).json({error:'COURSE_ACCESS_NOT_CONFIGURED'});return;}
+      void cradle.courseAccessService.capabilities(req.authUserId,req.params.id,{ip:req.ip,requestTime:new Date()}).then(value=>{res.setHeader('Cache-Control','no-store');res.json(value);}).catch(next);
+    });
     router.use('/:id/media', CourseMediaRouter.create(cradle));
     const {learningPathUseCases} = cradle;
 

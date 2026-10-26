@@ -1,3 +1,4 @@
+import {AssignedCoursesPage,RequireCourseWorkspace} from './features/courses/AssignedCoursesPage';
 import {StudentDocumentReviewPanel} from './features/integration/StudentDocumentReviewPanel';
 import { CrossModuleIntegrityPage } from './pages/CrossModuleIntegrityPage';
 import {MfaRequirementBanner} from './components/MfaRequirementBanner';
@@ -295,7 +296,8 @@ function AdminLayout() {
                   <Route path="/courses/paid" element={<RequireAdminPermission permission="admin:courses:manage"><CoursePaidPreparationPage /></RequireAdminPermission>} />
                   <Route path="/courses/learning-paths" element={<RequireAdminPermission permission="admin:courses:manage"><CourseLearningPathsPage /></RequireAdminPermission>} />
                   <Route path="/courses/providers" element={<RequireAdminPermission permission="admin:courses:manage"><CourseProviderRegistryPage /></RequireAdminPermission>} />
-                  <Route path="/courses/:id/editor" element={<RequireAdminPermission permission="admin:courses:manage"><NativeCourseEditorPage /></RequireAdminPermission>} />
+                  <Route path="/courses/assigned" element={<RequireCourseWorkspace><AssignedCoursesPage /></RequireCourseWorkspace>} />
+                  <Route path="/courses/:id/editor" element={<RequireCourseWorkspace><NativeCourseEditorPage /></RequireCourseWorkspace>} />
                   <Route path="/courses/:id" element={<RequireAdminPermission permission="admin:courses:manage"><CourseDetailPage /></RequireAdminPermission>} />
                   <Route path="/certificates" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateAdminPage /></RequireAdminPermission>} />
                   <Route path="/certificates/:id" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateDetailPage /></RequireAdminPermission>} />
