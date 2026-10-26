@@ -1,0 +1,82 @@
+name: manaratak-media
+x-restrictions: &restrictions
+  restart: unless-stopped
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 96
+  logging:
+    driver: json-file
+    options: { max-size: 10m, max-file: '3' }
+services:
+  provider:
+    <<: *restrictions
+    build:
+      context: .
+      target: provider
+      args:
+        { NODE_IMAGE: '${NODE_IMAGE:?Set an audited node bookworm-slim image with sha256 digest}' }
+    user: '${MEDIA_UID:-10001}:${MEDIA_GID:-10001}'
+    ports: ['127.0.0.1:${MEDIA_PORT:-8443}:8443']
+    networks: [internal]
+    cpus: 1
+    mem_limit: 768m
+    environment:
+      MEDIA_PUBLIC_ORIGIN: '${MEDIA_PUBLIC_ORIGIN:?Set the public HTTPS origin}'
+      MEDIA_ALLOWED_ORIGINS: '${MEDIA_ALLOWED_ORIGINS:?Set exact HTTPS frontend origins}'
+      MEDIA_BUCKET: manaratak-media
+      MEDIA_INSTANCE_KIND: "${MEDIA_INSTANCE_KIND:-production}"
+    volumes:
+      - '${MEDIA_DATA_DIR:?Set a private absolute data directory}/storage:/storage'
+      - '${MEDIA_DATA_DIR}/jobs:/jobs'
+    tmpfs: ['/tmp:size=64m,mode=1777']
+    secrets: [provider_key, provider_signing, grant_signing, worker_token, tls_key, tls_certificate]
+    depends_on: [clamd, processor]
+  processor:
+    <<: *restrictions
+    build:
+      context: .
+      target: processor
+      args:
+        { NODE_IMAGE: '${NODE_IMAGE:?Set an audited node bookworm-slim image with sha256 digest}' }
+    user: '${MEDIA_UID:-10001}:${MEDIA_GID:-10001}'
+    networks: [internal]
+    cpus: 2
+    mem_limit: 1g
+    volumes: ['${MEDIA_DATA_DIR}/jobs:/jobs']
+    tmpfs: ['/tmp:size=128m,mode=1777']
+    secrets: [worker_token]
+  clamd:
+    <<: *restrictions
+    image: '${CLAMAV_IMAGE:?Set an audited clamav base image with sha256 digest}'
+    entrypoint: [clamd, --foreground=true, --config-file=/etc/clamav/clamd.conf]
+    user: '${MEDIA_UID:-10001}:${MEDIA_GID:-10001}'
+    networks: [internal]
+    mem_limit: 4g
+    cpus: 2
+    volumes:
+      - ./clamd.conf:/etc/clamav/clamd.conf:ro
+      - '${MEDIA_DATA_DIR}/signatures:/var/lib/clamav:ro'
+    tmpfs: ['/tmp:size=256m,mode=1777']
+  signatures:
+    <<: *restrictions
+    image: '${CLAMAV_IMAGE:?Set an audited clamav base image with sha256 digest}'
+    entrypoint: [freshclam, --daemon, --foreground=true, --config-file=/etc/clamav/freshclam.conf]
+    user: '${MEDIA_UID:-10001}:${MEDIA_GID:-10001}'
+    networks: [updates]
+    cpus: 1
+    mem_limit: 1g
+    volumes:
+      - ./freshclam.conf:/etc/clamav/freshclam.conf:ro
+      - '${MEDIA_DATA_DIR}/signatures:/var/lib/clamav'
+    tmpfs: ['/tmp:size=64m,mode=1777']
+networks:
+  internal: { internal: true }
+  updates: {}
+secrets:
+  provider_key: { file: '${MEDIA_SECRET_DIR:?Set a private secret directory}/provider_key' }
+  provider_signing: { file: '${MEDIA_SECRET_DIR}/provider_signing' }
+  grant_signing: { file: '${MEDIA_SECRET_DIR}/grant_signing' }
+  worker_token: { file: '${MEDIA_SECRET_DIR}/worker_token' }
+  tls_key: { file: '${MEDIA_SECRET_DIR}/tls_key' }
+  tls_certificate: { file: '${MEDIA_SECRET_DIR}/tls_certificate' }
