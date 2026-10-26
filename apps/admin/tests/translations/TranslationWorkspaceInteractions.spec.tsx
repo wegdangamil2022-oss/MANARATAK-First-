@@ -124,6 +124,9 @@ describe('Translation workspace lightweight component interactions', () => {
     await mount();
     await selectFirst();
     expect(saveButtons()).toHaveLength(0);
+    expect(
+      tree.root.findAllByType('strong').some((node) => text(node) === 'Tracking-only mode'),
+    ).toBe(true);
     expect(JSON.stringify(tree.toJSON())).toContain('Saved name');
     expect(controls.request.mock.calls.some(([_url, options]) => options?.method)).toBe(false);
   });

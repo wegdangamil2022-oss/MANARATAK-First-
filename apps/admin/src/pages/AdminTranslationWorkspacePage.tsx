@@ -34,7 +34,7 @@ import {
 import { TranslationRecordDialog } from '../features/translations/TranslationRecordDialog';
 import { useAdministrationDraftGuard } from '../features/reference-data/useAdministrationDraftGuard';
 import '../features/translations/translations.css';
-import { canAuthorDomainTranslations } from '@manaratak/shared';
+import { canAuthorDomainTranslations, TRANSLATION_CONTENT_MODE } from '@manaratak/shared';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 
@@ -507,6 +507,12 @@ export function AdminTranslationWorkspacePage() {
       <div className="translation-policy">
         <ShieldCheck aria-hidden="true" />
         <span>
+          <strong>
+            {TRANSLATION_CONTENT_MODE === 'INFRASTRUCTURE_ONLY'
+              ? tr('وضع المتابعة فقط', 'Tracking-only mode')
+              : tr('وضع إدارة المحتوى', 'Content management mode')}
+          </strong>{' '}
+          —{' '}
           {contentAuthoringEnabled
             ? tr(
                 'النشر والاعتماد يتبعان صلاحيات وسير عمل القسم الأصلي.',
