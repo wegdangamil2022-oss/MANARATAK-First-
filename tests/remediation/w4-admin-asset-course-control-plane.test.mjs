@@ -89,7 +89,7 @@ test('MNT-AUD-0027 canonical Admin can create a native course and hand off to au
   assert.match(router, /router\.post\('\/',/);
   assert.match(router, /nativeCourseUseCases\.create/);
   assert.match(app, /admin\/courses', createCourseAccessGuard\(container.resolve\('courseAccessService'\)\)/);
-  assert.match(read('apps/api/src/presentation/security/CourseAccessGuard.ts'),/access\.require\(/);
+  assert.match(read('apps/api/src/presentation/security/CourseAccessGuard.ts'),/access\.assert\(req.authUserId, id, courseRequestAction/);
   assert.match(app, /new MutationAuditMiddleware\(auditRecordRepository, 'ADMIN'\)/);
 });
 
