@@ -1,3 +1,4 @@
+import { TestProviderFilter } from '../features/international-tests/TestProviderFilter';
 import { useSearchParams } from 'react-router-dom';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { canonicalPickerApi } from '../api/canonicalPickers';
@@ -559,44 +560,7 @@ export function InternationalTestsAdminPage() {
               />
             </label>
           )}
-          <CanonicalPicker
-            compact
-            optional
-            paged
-            allowInactive
-            label={say('الجهة المنظمة', 'Provider')}
-            reloadKey={'test-provider:' + providerFilter}
-            value={providerFilter}
-            icon={<Building2 size={16} />}
-            load={async (q, p) => {
-              let rows = await adminApiClient.request<Array<{ id: string; displayName: string }>>(
-                '/admin/international-tests/providers?search=' +
-                  encodeURIComponent(q ?? '') +
-                  '&page=' +
-                  (p ?? 1),
-              );
-              if (
-                (p ?? 1) === 1 &&
-                providerFilter &&
-                !rows.some((row) => row.displayName === providerFilter)
-              ) {
-                const selected = await adminApiClient.request<
-                  Array<{ id: string; displayName: string }>
-                >(
-                  '/admin/international-tests/providers?search=' +
-                    encodeURIComponent(providerFilter) +
-                    '&page=1',
-                );
-                rows = [...selected.filter((row) => row.displayName === providerFilter), ...rows];
-              }
-              return rows.map((row) => ({
-                id: row.displayName,
-                label: row.displayName,
-                lifecycle: 'ACTIVE',
-              }));
-            }}
-            onChange={(id) => update('providerName', id ?? '')}
-          />
+          <TestProviderFilter ar={isRtl} value={providerFilter} onChange={value=>update('providerName',value)}/>
           <label>
             <span>
               <CheckCircle2 size={16} />

@@ -17,13 +17,19 @@ export default defineConfig({
     maxWorkers: 2,
     fileParallelism: true,
     testTimeout: 30000,
-    include: [...new Set([
-      ...[dashboard, scholarships, universities, majors, tests, courses, destinations]
-        .flatMap(config => config.test?.include ?? []),
-      'packages/application/tests/review-workspace/**/*.spec.ts',
-      'apps/api/tests/presentation/api/router/ReviewWorkspaceRouter.spec.ts',
-      'apps/admin/tests/review-queue/**/*.spec.tsx',
-    ])],
+    include: [
+      ...new Set([
+        ...[dashboard, scholarships, universities, majors, tests, courses, destinations].flatMap(
+          (config) => config.test?.include ?? [],
+        ),
+        'packages/application/tests/review-workspace/**/*.spec.ts',
+        'apps/api/tests/presentation/api/router/ReviewWorkspaceRouter.spec.ts',
+        'apps/admin/tests/review-queue/**/*.spec.tsx',
+        'apps/admin/src/api/client.spec.ts',
+        'apps/admin/tests/remediation/B06CanonicalAuthoring.spec.tsx',
+        'apps/admin/tests/remediation/B10dAuthoring.spec.tsx',
+      ]),
+    ],
     exclude: ['**/node_modules/**', '**/*.database.spec.ts', '**/*.integration.spec.ts'],
   },
 });

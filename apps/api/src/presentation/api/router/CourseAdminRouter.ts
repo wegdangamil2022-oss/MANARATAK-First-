@@ -1,4 +1,4 @@
-import type { CourseAccessService, CertificateUseCases } from '@manaratak/application';
+import type { CourseAccessService, CourseCertificateBindingOwner } from '@manaratak/application';
 import type { AuthorizationEvaluatorService } from '@manaratak/domain';
 import type {CourseAdminScope, CourseAdminContext, CourseAdminCommandUseCases} from '@manaratak/application';
 import { readReviewReasonHeader } from '@manaratak/shared';
@@ -25,7 +25,7 @@ export class CourseAdminRouter {
   public static create(
     cradle: CourseAdminScope &
       CourseMediaCradle & {
-        certificateUseCases?: CertificateUseCases;
+        certificateUseCases?: CourseCertificateBindingOwner;
         authEvaluatorService?: AuthorizationEvaluatorService;
         courseAccessService?: CourseAccessService;
         courseAdminCommandUseCases: CourseAdminCommandUseCases;

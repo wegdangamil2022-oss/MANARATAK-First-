@@ -263,3 +263,4 @@ export * from './dashboard/AnalyticsRetentionBackgroundJobHandler';
 export * from './courses/use-cases/CourseBulkPublicationUseCases';
 
 export * from './courses/services/CourseAccessService';
+export * from './read-models/CourseCertificateBindingOwner';
