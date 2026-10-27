@@ -1,5 +1,6 @@
 import { STUDENT_TOOL_SCHEMAS as SCHEMAS } from './handlers/StudentToolSchemas';
 import {
+  INTERNAL_STUDENT_TOOL_KEYS,
   StudentToolDefinition,
   StudentToolExecutionType,
   StudentToolImplementationPriority,
@@ -189,14 +190,14 @@ export const IMPLEMENTED_STUDENT_TOOL_KEYS = Object.freeze(Object.keys(ACTIVE));
 export const OFFICIAL_STUDENT_TOOLS: StudentToolDefinition[] = NAMES.map((name, index) => {
   const toolKey = slugify(name);
   const active = ACTIVE[toolKey];
-  const adminOnly = category(name) === 'ADMIN_DATA_QUALITY';
+  const adminOnly = INTERNAL_STUDENT_TOOL_KEYS.has(toolKey);
   return {
     toolKey,
     nameAr: active?.ar ?? name,
     nameEn: name,
     descriptionAr: active?.descriptionAr ?? `أداة ${name} ضمن خارطة تطوير أدوات الطلاب.`,
     descriptionEn: active
-      ? `Production-ready ${name} for the student platform.`
+      ? `${name} has an implemented handler; runtime verification and release approval are separate.`
       : `${name} is registered in the official product roadmap.`,
     category: category(name),
     executionType:

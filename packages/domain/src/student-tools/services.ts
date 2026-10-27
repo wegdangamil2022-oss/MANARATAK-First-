@@ -1,4 +1,5 @@
 import { IStudentToolHandler, IStudentToolDependencyHealthGateway, IStudentToolResultProtector } from './contracts';
+import { isInternalStudentTool } from './audience';
 import { StudentToolDefinition, StudentToolHealthStatus, StudentToolImplementationStatus, StudentToolLifecycleStatus, StudentToolVisibilityStatus } from './types';
 export class StudentToolHandlerRegistry {
   private readonly handlers = new Map<string, IStudentToolHandler>();
@@ -61,6 +62,7 @@ export class StudentToolHealthService { constructor(private readonly handlers: S
 export class StudentToolPublicAccessPolicy {
   static isDiscoverable(tool: StudentToolDefinition): boolean {
     return (
+      !isInternalStudentTool(tool) &&
       tool.implementationStatus === StudentToolImplementationStatus.IMPLEMENTED &&
       tool.lifecycle === StudentToolLifecycleStatus.ACTIVE &&
       tool.visibility === StudentToolVisibilityStatus.ACTIVE &&
