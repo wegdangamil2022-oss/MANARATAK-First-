@@ -161,27 +161,91 @@ describe('Services and Finance workspace interactions', () => {
     await act(async () => navButton('Review & publish').props.onClick());
     expect(state.request.mock.calls.some(([, options]) => options?.method)).toBe(false);
   });
-  it('preserves typed input schemas, other locales and SLA metadata while saving an edit', async () => {
-    state.permissions = ['admin:services:manage'];
-    state.request.mockImplementation(async (path: string, options?: any) =>
-      options?.method || path === '/admin/services/service-1'
-        ? service
-        : { data: [service], total: 1, page: 1, totalPages: 1 },
+  it.each([false, true])(
+    'preserves existing field types and metadata when extending requirements: %s',
+    async (extend) => {
+      state.permissions = ['admin:services:manage'];
+      state.request.mockImplementation(async (path: string, options?: any) =>
+        options?.method || path === '/admin/services/service-1'
+          ? service
+          : { data: [service], total: 1, page: 1, totalPages: 1 },
+      );
+      await mount('/services?tab=catalog');
+      await act(async () => button('edit')!.props.onClick());
+      const name = tree.root
+        .findAllByType('input')
+        .find((node) => node.props.value === 'Consultation')!;
+      await act(async () => name.props.onChange({ target: { value: 'Updated consultation' } }));
+      if (extend) {
+        await act(async () => navButton('Requirements').props.onClick());
+        const keys = tree.root.findAllByType('input').find((node) => node.props.value === 'grade')!;
+        await act(async () => keys.props.onChange({ target: { value: 'grade, note' } }));
+      }
+      await act(async () => tree.root.findByType('form').props.onSubmit({ preventDefault() {} }));
+      const write = state.request.mock.calls.find(([, options]) => options?.method === 'PATCH')!;
+      const body = JSON.parse(write[1].body);
+      expect(body.expectedVersion).toBe(2);
+      expect(body.inputSchema[0]).toEqual(service.inputSchema[0]);
+      expect(body.inputSchema).toHaveLength(extend ? 2 : 1);
+      if (extend)
+        expect(body.inputSchema[1]).toEqual({
+          key: 'note',
+          type: 'TEXT',
+          required: true,
+          sensitive: true,
+        });
+      expect(body.localizedContent.fr).toEqual(service.localizedContent.fr);
+      expect(body.slaPolicy.timezone).toBe('Asia/Aden');
+      expect(body.publicDisplayMetadata.custom).toBe('kept');
+    },
+  );
+  it('holds the invoice command while pricing loads and ignores a duplicate submit', async () => {
+    const normal = state.request.getMockImplementation()!;
+    let resolveQuote!: (quote: unknown) => void;
+    state.request.mockImplementation((path: string, options?: any) =>
+      path.endsWith('/quote')
+        ? new Promise((resolve) => {
+            resolveQuote = resolve;
+          })
+        : normal(path, options),
     );
-    await mount('/services?tab=catalog');
-    await act(async () => button('edit')!.props.onClick());
-    const name = tree.root
-      .findAllByType('input')
-      .find((node) => node.props.value === 'Consultation')!;
-    await act(async () => name.props.onChange({ target: { value: 'Updated consultation' } }));
+    await mount('/services/requests/SVC-1?tab=requests');
+    await act(async () => navButton('Quote & finance').props.onClick());
+    const form = tree.root.findByType('form');
+    let first!: Promise<void>;
+    await act(async () => {
+      first = form.props.onSubmit({ preventDefault() {} });
+      await form.props.onSubmit({ preventDefault() {} });
+    });
+    expect(state.request.mock.calls.filter(([path]) => path.endsWith('/quote'))).toHaveLength(1);
+    expect(button('Create linked draft invoice')!.props.disabled).toBe(true);
+    await act(async () => {
+      resolveQuote({ amountMinorUnits: '12500', currencyCode: 'USD', scale: 2 });
+      await first;
+    });
+    const writes = state.request.mock.calls.filter(
+      ([path, options]) => path.endsWith('/finance-invoice') && options?.method === 'POST',
+    );
+    expect(writes).toHaveLength(1);
+    expect(JSON.parse(writes[0][1].body)).toMatchObject({
+      expectedVersion: 1,
+      amountMinorUnits: '12500',
+      currencyCode: 'USD',
+    });
+  });
+  it('does not create an invoice when the approved price cannot be read', async () => {
+    const normal = state.request.getMockImplementation()!;
+    state.request.mockImplementation((path: string, options?: any) =>
+      path.endsWith('/quote')
+        ? Promise.reject(new Error('SERVICE_PRICE_QUOTE_REQUIRED'))
+        : normal(path, options),
+    );
+    await mount('/services/requests/SVC-1?tab=requests');
+    await act(async () => navButton('Quote & finance').props.onClick());
     await act(async () => tree.root.findByType('form').props.onSubmit({ preventDefault() {} }));
-    const write = state.request.mock.calls.find(([, options]) => options?.method === 'PATCH')!;
-    const body = JSON.parse(write[1].body);
-    expect(body.expectedVersion).toBe(2);
-    expect(body.inputSchema).toEqual(service.inputSchema);
-    expect(body.localizedContent.fr).toEqual(service.localizedContent.fr);
-    expect(body.slaPolicy.timezone).toBe('Asia/Aden');
-    expect(body.publicDisplayMetadata.custom).toBe('kept');
+    expect(state.request.mock.calls.some(([, options]) => options?.method === 'POST')).toBe(false);
+    expect(button('Create linked draft invoice')!.props.disabled).toBe(false);
+    expect(JSON.stringify(tree.toJSON())).toContain('SERVICE_PRICE_QUOTE_REQUIRED');
   });
   it('opens a request separately and restores its list filters on return', async () => {
     state.permissions = ['admin:services:requests:view', 'admin:services:requests:pii'];

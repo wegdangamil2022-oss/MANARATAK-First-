@@ -289,7 +289,12 @@ export function ServiceRequestsWorkspace({
     setNotice(null);
     setNote('');
   }
-  async function command(action: string, body: Record<string, unknown>, message: string) {
+  async function command(
+    action: string,
+    body: Record<string, unknown>,
+    message: string,
+    prepare?: (current: ServiceRequestDto) => Promise<Record<string, unknown>>,
+  ) {
     if (!detail || mutation.current) return;
     mutation.current = true;
     setSaving(true);
@@ -300,9 +305,14 @@ export function ServiceRequestsWorkspace({
     const draftNote = note;
     const draftProvider = provider;
     try {
+      const preparedBody = prepare ? await prepare(current) : body;
+      if (activeReference.current !== currentReference) return;
       await adminApiClient.request(
         `/admin/services/requests/${encodeURIComponent(current.id)}/${action}`,
-        { method: 'POST', body: JSON.stringify({ ...body, expectedVersion: current.version }) },
+        {
+          method: 'POST',
+          body: JSON.stringify({ ...preparedBody, expectedVersion: current.version }),
+        },
       );
       if (activeReference.current !== currentReference) return;
       const reloaded = await inspect(current.id);
@@ -353,29 +363,24 @@ export function ServiceRequestsWorkspace({
   }
   async function invoice(event: FormEvent) {
     event.preventDefault();
-    try {
-      const quote = await adminApiClient.request<{
-        amountMinorUnits: string;
-        currencyCode: string;
-        scale: number;
-        quantity: number;
-      }>(`/admin/services/requests/${encodeURIComponent(detail!.id)}/quote`);
-      await command(
-        'finance-invoice',
-        {
+    await command(
+      'finance-invoice',
+      {},
+      serviceText('تم إنشاء وربط مسودة الفاتورة؛ إصدارها وتحصيلها يتمان من قسم المالية.', language),
+      async (current) => {
+        const quote = await adminApiClient.request<{
+          amountMinorUnits: string;
+          currencyCode: string;
+          scale: number;
+        }>(`/admin/services/requests/${encodeURIComponent(current.id)}/quote`);
+        return {
           amountMinorUnits: quote.amountMinorUnits,
           currencyCode: quote.currencyCode,
           scale: quote.scale,
           quantity: 1,
-        },
-        serviceText(
-          'تم إنشاء وربط مسودة الفاتورة؛ إصدارها وتحصيلها يتمان من قسم المالية.',
-          language,
-        ),
-      );
-    } catch (cause) {
-      setDetailError(serviceText(errorText(cause), language));
-    }
+        };
+      },
+    );
   }
   const closed =
     (detail &&

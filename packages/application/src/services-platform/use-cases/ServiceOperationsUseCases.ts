@@ -216,9 +216,11 @@ export class ServiceOperationsUseCases {
       holdExpiresAt: result.holdExpiresAt,
     };
   }
-  listOperations(kind: string, page: number, assignedStaffId?: string) {
+  listOperations(kind: string, page: number, assignedStaffId?: string, search?: string) {
     if (!this.operations.listOperations) throw new Error('SERVICE_OPERATIONS_NOT_CONFIGURED');
-    return this.operations.listOperations(kind, page, assignedStaffId);
+    return search
+      ? this.operations.listOperations(kind, page, assignedStaffId, search)
+      : this.operations.listOperations(kind, page, assignedStaffId);
   }
   async registerProvider(input: {
     displayName: string;

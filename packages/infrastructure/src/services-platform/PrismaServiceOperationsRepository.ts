@@ -98,7 +98,7 @@ export class PrismaServiceOperationsRepository implements IServiceOperationsRepo
       nextCursor: rows.length > 50 ? encodeStableCursor(data[data.length - 1].id) : null,
     };
   }
-  async listOperations(kind: string, page: number, assignedStaffId?: string) {
+  async listOperations(kind: string, page: number, assignedStaffId?: string, search?: string) {
     const names: Record<string, string> = {
       providers: 'serviceProviderRecord',
       packages: 'servicePackageRecord',
@@ -112,15 +112,28 @@ export class PrismaServiceOperationsRepository implements IServiceOperationsRepo
       discounts: 'serviceDiscountRecord',
     };
     const model = names[kind];
+    const query = search?.trim();
     if (!model || !Number.isSafeInteger(page) || page < 1 || page > 10000)
       throw new Error('SERVICE_OPERATION_QUERY_INVALID');
-    const where = assignedStaffId
+    if (query && query.length > 120) throw new Error('SERVICE_OPERATION_QUERY_INVALID');
+    const scope = assignedStaffId
       ? kind === 'bookings'
         ? { request: { assignedStaffId } }
         : ['executions', 'deliveries'].includes(kind)
           ? { booking: { request: { assignedStaffId } } }
           : {}
       : {};
+    const searchFields = kind === 'deliveries'
+      ? ['id', 'artifactType']
+      : ['id', 'publicId', ...(
+        ['providers','packages'].includes(kind) ? ['displayName']
+        : ['workflows','promotions'].includes(kind) ? ['name']
+        : kind === 'discounts' ? ['code'] : []
+      )];
+    const where = {
+      ...scope,
+      ...(query && { OR: searchFields.map(field => ({[field]: {contains: query, mode: 'insensitive'}})) }),
+    };
     const [data, total] = await Promise.all([
       this.p()[model].findMany({ where, take: 20, skip: (page - 1) * 20, orderBy: { id: 'asc' } }),
       this.p()[model].count({ where }),

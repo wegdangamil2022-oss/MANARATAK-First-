@@ -3,6 +3,8 @@
 Baseline: 85f6d5b539b548c2fac9a1d090caa9d2fc352c2e.
 Scope: the approved first release reorganizes existing capabilities and closes service-role access gaps. It does not declare the full accounting expansion complete.
 
+Closeout corrections and verified release boundaries: [Arabic closeout record](services-finance-closeout-20261028.md). The closeout suite contains 200 passing tests; no image capture was run in that round at the user's request.
+
 ## Delivered structure
 
 - Services: Requests & fulfillment, Service catalog, Operations. The default is the first section allowed by the operator's existing permissions.

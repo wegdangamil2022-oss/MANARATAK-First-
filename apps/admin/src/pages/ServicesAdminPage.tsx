@@ -385,12 +385,15 @@ export function ServicesAdminPage() {
     inputSchema:
       selectedService && unchanged('inputFieldKeys')
         ? selectedService.inputSchema
-        : splitList(form.inputFieldKeys).map((key) => ({
-            key,
-            type: 'TEXT',
-            required: true,
-            sensitive: true,
-          })),
+        : splitList(form.inputFieldKeys).map(
+            (key) =>
+              selectedService?.inputSchema?.find((field) => field.key === key) ?? {
+                key,
+                type: 'TEXT',
+                required: true,
+                sensitive: true,
+              },
+          ),
     localizedContent: {
       ...selectedService?.localizedContent,
       ar: {

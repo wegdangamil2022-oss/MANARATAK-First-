@@ -129,4 +129,16 @@ describe('Services workspace role and data boundaries', () => {
     expect((await request(f.app).get('/services/operations/bookings')).status).toBe(403);
     expect(f.operations.listOperations).not.toHaveBeenCalled();
   });
+  it('passes a bounded search to the scoped operations owner', async () => {
+    const f = fixture(['admin:services:operations:manage']);
+    const response = await request(f.app).get('/services/operations/providers?search=Consultation&page=2');
+    expect(response.status).toBe(200);
+    expect(response.headers['cache-control']).toBe('no-store');
+    expect(f.operations.listOperations).toHaveBeenCalledWith('providers',2,'actor','Consultation');
+  });
+  it('does not allow a search to bypass the PII gate for bookings', async () => {
+    const f = fixture(['admin:services:operations:manage']);
+    expect((await request(f.app).get('/services/operations/bookings?search=private')).status).toBe(403);
+    expect(f.operations.listOperations).not.toHaveBeenCalled();
+  });
 });

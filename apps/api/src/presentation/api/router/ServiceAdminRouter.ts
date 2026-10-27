@@ -377,13 +377,15 @@ export class ServiceAdminRouter {
         await requirePermission(req, 'admin:services:operations:manage');
         if (['bookings', 'executions', 'deliveries'].includes(req.params.kind))
           await requirePermission(req, 'admin:services:requests:pii');
-        res.json(
-          await cradle.serviceOperationsUseCases.listOperations(
-            req.params.kind,
-            z.coerce.number().int().min(1).max(10000).default(1).parse(req.query.page),
-            (await mayReadAll(req)) ? undefined : req.authUserId,
-          ),
-        );
+        const query = z.object({
+          page: z.coerce.number().int().min(1).max(10000).default(1),
+          search: z.string().trim().max(120).optional(),
+        }).strict().parse(req.query);
+        const actorScope = (await mayReadAll(req)) ? undefined : req.authUserId;
+        res.setHeader('Cache-Control', 'no-store');
+        res.json(query.search
+          ? await cradle.serviceOperationsUseCases.listOperations(req.params.kind, query.page, actorScope, query.search)
+          : await cradle.serviceOperationsUseCases.listOperations(req.params.kind, query.page, actorScope));
       }),
     );
     const creators = {

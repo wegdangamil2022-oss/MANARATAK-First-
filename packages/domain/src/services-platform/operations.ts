@@ -293,6 +293,7 @@ export interface IServiceOperationsRepository {
     kind: string,
     page: number,
     assignedStaffId?: string,
+    search?: string,
   ): Promise<{ data: unknown[]; total: number; page: number }>;
   findWorkflowExecutionById?(id: string): Promise<ServiceWorkflowExecutionDto | null>;
   findWorkflowExecutionForBooking?(bookingId: string): Promise<ServiceWorkflowExecutionDto | null>;
