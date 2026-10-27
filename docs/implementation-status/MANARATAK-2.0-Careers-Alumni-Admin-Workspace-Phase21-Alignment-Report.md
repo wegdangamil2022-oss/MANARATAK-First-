@@ -1,5 +1,7 @@
 > Historical preview alignment report. Its COMPLETE/VERIFIED statements are not current runtime evidence. The real P21 source now uses apps/admin and StudentWorkspace routes; see [section 22 source report](../reviews/section-22-implementation.md). The expedited current revision has not been tested or deployed.
 
+> For the 2026-10-27 admin refinement and its actual validation limits, see [the current workspace report](MANARATAK-Careers-Workspace-Refinement-20261027.md).
+
 # MANARATAK 2.0 - Careers & Alumni Admin Workspace Phase 21 Alignment Report
 
 **Date:** July 28, 2026  

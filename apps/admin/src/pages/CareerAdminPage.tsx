@@ -1,146 +1,717 @@
-import { AssetPicker } from '../components/AssetPicker';
-import { reviewOwnerSearch } from '../features/review-queue/ReviewOwnerNavigation';
-import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import type { CareerJobPostingDto, CareerEmployerDto, CareerApplicationDto } from '@manaratak/domain';
-import { adminApiClient } from '../api/client';
+import {
+  BriefcaseBusiness,
+  Building2,
+  ClipboardList,
+  GraduationCap,
+  Plus,
+  RefreshCw,
+  Search,
+  FilterX,
+  Eye,
+  Pencil,
+  Inbox,
+  ListChecks,
+  Send,
+  Clock,
+  Layers,
+} from 'lucide-react';
+import type { CareerEmployerDto, CareerJobPostingDto } from '@manaratak/domain';
+import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { CanonicalPicker } from '../components/CanonicalPicker';
-import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalCityPicker } from '../components/CanonicalCityPicker';
-type Tab = 'jobs' | 'employers' | 'applications' | 'alumni';
-type Row = { id: string; publicId?: string; title?: string; displayName?: string; status?: string; verificationStatus?: string; visibility?: string; version: number; jobId?: string; };
-type Page = { data: Row[]; total: number; totalPages: number; };
-const jobStates = ['DRAFT','READY_TO_REVIEW','READY_TO_PUBLISH','PUBLISHED','EXPIRED','REJECTED','ARCHIVED'];
-const applicationStates = ['SUBMITTED','UNDER_REVIEW','SHORTLISTED','ACCEPTED','REJECTED','WITHDRAWN'];
-const fresh = () => ({ title: '', titleEn: '', description: '', descriptionEn: '', displayName: '', employerType: 'COMPANY', industry: '', websiteUrl: '', logoAssetId: '', countryReferenceId: '', cityReferenceId: '', employerId: '', jobCategory: '', opportunityType: 'JOB', employmentType: 'FULL_TIME', applicationDeadline: '', externalPostingUrl: '', sourceUrl: '', recruitmentCycle: '', applicationChannel: 'EXTERNAL', requiredSkills: '', salaryMin: '', salaryMax: '', currencyCode: 'USD', scale: '2', period: 'MONTH', basis: 'GROSS' });
+import { canonicalPickerApi } from '../api/canonicalPickers';
+import { useAdministrationDraftGuard } from '../features/reference-data/useAdministrationDraftGuard';
+import { reviewOwnerSearch } from '../features/review-queue/ReviewOwnerNavigation';
+import { CareerEditor } from '../features/careers/CareerEditor';
+import { CareerRecordPanel } from '../features/careers/CareerRecordPanel';
+import {
+  applicationStates,
+  careerEmployers,
+  careerErrorMessage,
+  careerJobs,
+  careerLabel,
+  careerTabs,
+  employmentTypes,
+  formatCareerDate,
+  jobStates,
+  opportunityTypes,
+  recordTitle,
+  type CareerDetail,
+  type CareerPage,
+  type CareerRow,
+  type CareerTab,
+  type CareerWrite,
+} from '../features/careers/careerWorkspace';
+import '../features/reference-data/reference-data.css';
+import '../features/careers/careers.css';
+
 export function CareerAdminPage() {
-  const { language, dir } = useTranslation(), { hasPermission } = useAdminAuthorization();
-  const c = (ar: string, en: string) => language === 'ar' ? ar : en;
+  const { language, dir } = useTranslation(),
+    { hasPermission } = useAdminAuthorization();
+  const ar = language === 'ar',
+    c = (arabic: string, english: string) => (ar ? arabic : english);
   const [params, setParams] = useSearchParams();
-  const tab = (['jobs','employers','applications','alumni'].includes(params.get('tab') || '') ? params.get('tab') : 'jobs') as Tab;
-  const page = Math.max(1, Number(params.get('page')) || 1);
-  const [search, setSearch] = useState(() => reviewOwnerSearch(params)), [status, setStatus] = useState(''), [type, setType] = useState('');
-  const [employerFilter, setEmployerFilter] = useState(''), [cityFilter, setCityFilter] = useState(''), [jobFilter, setJobFilter] = useState('');
-  const [filterCountry, setFilterCountry] = useState(''), [filterCountryCode, setFilterCountryCode] = useState('');
-  const [result, setResult] = useState<Page | null>(null), [loading, setLoading] = useState(false), [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState(''), [reload, setReload] = useState(0), [reason, setReason] = useState('');
-  const [form, setForm] = useState<Record<string, string>>(fresh()), [editing, setEditing] = useState<Row | null>(null), [editor, setEditor] = useState(false);
-  const [countryCode, setCountryCode] = useState(''), [applicationDetail, setApplicationDetail] = useState<CareerApplicationDto | null>(null);
-  const [studentMessage, setStudentMessage] = useState(''), [interviewAt, setInterviewAt] = useState('');
-  const [reviewChecked, setReviewChecked] = useState(false), [sourceEvidence, setSourceEvidence] = useState(''), [evidenceExpiry, setEvidenceExpiry] = useState('');
-  const detailSequence = useRef(0);
-  const sequence = useRef(0), mutation = useRef(false), intent = useRef<{ payload: string; key: string } | null>(null);
-  const navigatePage = (value: number) => setParams(previous => { const next = new URLSearchParams(previous); next.set('page', String(value)); return next; });
-  const load = useCallback(async () => {
-    const generation = ++sequence.current; setLoading(true); setNotice(''); setResult(null); setApplicationDetail(null);
-    try {
-      const query = new URLSearchParams({ page: String(page), pageSize: '20' });
-      if (search && ['jobs','employers'].includes(tab)) query.set('search', search);
-      if (status) query.set(tab === 'employers' ? 'verificationStatus' : 'status', status);
-      if (tab === 'jobs') { if (type) query.set('opportunityType',type); if (employerFilter) query.set('employerId',employerFilter); if (cityFilter) query.set('cityReferenceId',cityFilter); if (filterCountry) query.set('countryReferenceId',filterCountry); }
-      if (tab === 'applications' && jobFilter) query.set('jobId',jobFilter);
-      const response = await adminApiClient.request<Page>(`/admin/careers/${tab}?${query}`);
-      if (generation === sequence.current) setResult(response);
-    } catch { if (generation === sequence.current) setNotice(language === 'ar' ? 'تعذر التحميل؛ تحقق من صلاحية النطاق.' : 'Could not load this scope.'); }
-    finally { if (generation === sequence.current) setLoading(false); }
-  }, [tab, page, search, status, type, employerFilter, cityFilter, filterCountry, jobFilter, language]);
-  useEffect(() => { const timer = setTimeout(() => void load(),250); return () => { clearTimeout(timer); ++sequence.current; ++detailSequence.current; }; }, [load,reload]);
-  const inspectApplication = async(row: Row) => {
+  const tab = (
+    careerTabs.includes(params.get('tab') as CareerTab) ? params.get('tab') : 'jobs'
+  ) as CareerTab;
+  const page = Math.min(10000, Math.max(1, Math.floor(Number(params.get('page')) || 1)));
+  const allowed =
+    tab === 'applications'
+      ? hasPermission('admin:careers:applications:review')
+      : tab === 'alumni'
+        ? hasPermission('admin:careers:alumni:view')
+        : true;
+  const jobId = params.get('jobId') ?? '',
+    scopeRequired =
+      tab === 'applications' && !jobId && !hasPermission('admin:careers:applications:all');
+  const states =
+    tab === 'jobs'
+      ? jobStates
+      : tab === 'employers'
+        ? ['UNVERIFIED', 'VERIFIED', 'SUSPENDED']
+        : applicationStates;
+  const status = states.includes(params.get('status') ?? '') ? (params.get('status') ?? '') : '';
+  const search = (params.get('search') ?? params.get('q') ?? reviewOwnerSearch(params)).slice(
+    0,
+    120,
+  );
+  const query = new URLSearchParams({ page: String(page), pageSize: '20' });
+  if (status && tab !== 'alumni')
+    query.set(tab === 'employers' ? 'verificationStatus' : 'status', status);
+  if (search && ['jobs', 'employers'].includes(tab)) query.set('search', search.trim());
+  if (tab === 'jobs')
+    for (const key of [
+      'opportunityType',
+      'employmentType',
+      'employerId',
+      'countryReferenceId',
+      'cityReferenceId',
+    ]) {
+      const value = params.get(key);
+      if (value) query.set(key, value);
+    }
+  if (tab === 'applications' && jobId) query.set('jobId', jobId);
+  const endpoint = `/admin/careers/${tab}?${query}`,
+    scope = `${endpoint}:${language}:${allowed}:${scopeRequired}`;
+  const [list, setList] = useState<{ scope: string; result: CareerPage } | null>(null);
+  const [loadState, setLoadState] = useState<{ scope: string; error: boolean } | null>(null);
+  const [busy, setBusy] = useState(false),
+    [reload, setReload] = useState(0),
+    [notice, setNotice] = useState('');
+  const [dirty, setDirty] = useState(false);
+  const [selection, setSelection] = useState<{
+    scope: string;
+    row: CareerRow;
+    detail: CareerDetail | null;
+  } | null>(null);
+  const [editor, setEditor] = useState<{
+    scope: string;
+    record: CareerJobPostingDto | CareerEmployerDto | null;
+  } | null>(null);
+  const [opening, setOpening] = useState(false);
+  const detailSequence = useRef(0),
+    mutation = useRef(false);
+  const intent = useRef<{ identity: string; key: string } | null>(null);
+  const currentScope = useRef(scope);
+  currentScope.current = scope;
+  const result = list?.scope === scope ? list.result : null;
+  const failed = loadState?.scope === scope && loadState.error;
+  const loading = allowed && !scopeRequired && !result && !failed;
+  const activeEditor = editor?.scope === scope ? editor : null;
+  const activeSelection = selection?.scope === scope ? selection : null;
+  useAdministrationDraftGuard(dirty || busy, ar);
+  const discard = () =>
+    !dirty ||
+    window.confirm(
+      c(
+        'لديك تعديلات غير محفوظة. هل تريد المتابعة دون حفظ؟',
+        'You have unsaved changes. Continue without saving?',
+      ),
+    );
+  const clearPanels = () => {
+    ++detailSequence.current;
+    setSelection(null);
+    setEditor(null);
+    setDirty(false);
+    setOpening(false);
+  };
+  const change = (changes: Record<string, string>) => {
+    if (busy || !discard()) return;
+    clearPanels();
+    setNotice('');
+    setParams(
+      (previous) => {
+        const next = new URLSearchParams(previous);
+        if ('search' in changes) {
+          next.delete('q');
+          next.delete('reviewSearch');
+        }
+        next.set('page', '1');
+        for (const [key, value] of Object.entries(changes))
+          if (value) next.set(key, value);
+          else next.delete(key);
+        return next;
+      },
+      { replace: 'search' in changes },
+    );
+  };
+  const go = (nextTab: CareerTab, key?: string, value?: string) => {
+    if (busy || !discard()) return;
+    clearPanels();
+    setNotice('');
+    setParams({ tab: nextTab, page: '1', ...(key && value ? { [key]: value } : {}) });
+  };
+  const refresh = () => {
+    if (!busy && discard()) {
+      clearPanels();
+      setNotice('');
+      setReload((value) => value + 1);
+    }
+  };
+  const close = () => {
+    if (!busy && discard()) clearPanels();
+  };
+  useEffect(() => {
+    let active = true;
+    const details = detailSequence;
+    ++details.current;
+    setList(null);
+    setLoadState(null);
+    setSelection(null);
+    setEditor(null);
+    setDirty(false);
+    setOpening(false);
+    if (!allowed || scopeRequired) return;
+    const timer = setTimeout(() => {
+      void adminApiClient
+        .request<CareerPage>(endpoint)
+        .then((result) => {
+          if (active) {
+            setList({ scope, result });
+            setLoadState({ scope, error: false });
+          }
+        })
+        .catch(() => {
+          if (active) setLoadState({ scope, error: true });
+        });
+    }, 250);
+    return () => {
+      clearTimeout(timer);
+      active = false;
+      ++details.current;
+    };
+  }, [endpoint, scope, allowed, scopeRequired, reload]);
+  const open = async (row: CareerRow, edit = false) => {
+    if (busy || !discard()) return;
+    clearPanels();
+    setNotice('');
     const request = ++detailSequence.current;
-    setApplicationDetail(null);
+    const needsDetail =
+      tab === 'jobs' || (tab === 'applications' && hasPermission('admin:careers:applications:pii'));
+    setOpening(needsDetail);
     try {
-      const detail = await adminApiClient.request<CareerApplicationDto>(`/admin/careers/applications/${row.id}`);
-      if (request === detailSequence.current) setApplicationDetail(detail);
-    } catch { if (request === detailSequence.current) setNotice(c('تعذر فتح التفاصيل','Could not open details')); }
+      const detail: CareerDetail | null =
+        tab === 'employers'
+          ? (row as CareerEmployerDto)
+          : needsDetail
+            ? await adminApiClient.request<CareerDetail>(
+                `/admin/careers/${tab}/${encodeURIComponent(row.id)}`,
+              )
+            : null;
+      if (request !== detailSequence.current || currentScope.current !== scope) return;
+      if (edit && (tab === 'jobs' || tab === 'employers') && hasPermission('admin:careers:author'))
+        setEditor({ scope, record: detail as CareerJobPostingDto | CareerEmployerDto });
+      else setSelection({ scope, row: detail ?? row, detail });
+    } catch {
+      if (request === detailSequence.current)
+        setNotice(
+          c(
+            'تعذر فتح السجل؛ حدّث القائمة ثم أعد المحاولة.',
+            'Could not open the record. Refresh and retry.',
+          ),
+        );
+    } finally {
+      if (request === detailSequence.current) setOpening(false);
+    }
   };
-  const write = async(path: string, body: Record<string, unknown>, method = 'POST') => {
-    if (mutation.current || reason.trim().length < 3) return;
-    mutation.current = true; setBusy(true); setNotice('');
-    const payload = JSON.stringify({ ...body, reason }), identity = path + method + payload;
-    if (intent.current?.payload !== identity) intent.current = { payload: identity, key: crypto.randomUUID() };
+  const write: CareerWrite = async (path, body, reason, method = 'POST') => {
+    if (mutation.current || reason.trim().length < 3) return false;
+    mutation.current = true;
+    setBusy(true);
+    setNotice('');
+    const payload = JSON.stringify({ ...body, reason: reason.trim() }),
+      identity = path + method + payload;
+    if (intent.current?.identity !== identity)
+      intent.current = { identity, key: createAdminIdempotencyKey() };
     try {
-      await adminApiClient.request(`/admin/careers/${path}`, { method, body: payload, idempotencyKey: intent.current.key });
-      intent.current = null; setNotice(c('تم الحفظ','Saved')); setReload(value => value+1); setEditor(false); setEditing(null); setApplicationDetail(null); setReviewChecked(false);
-    } catch(error) { setNotice(error instanceof Error ? error.message : c('تعذر الحفظ','Could not save')); }
-    finally { mutation.current = false; setBusy(false); }
+      await adminApiClient.request(`/admin/careers/${path}`, {
+        method,
+        body: payload,
+        idempotencyKey: intent.current.key,
+      });
+      intent.current = null;
+      if (currentScope.current === scope) {
+        clearPanels();
+        setNotice(c('تم حفظ الإجراء وتحديث القائمة.', 'Action saved and list refreshed.'));
+        setReload((value) => value + 1);
+      }
+      return true;
+    } catch (error) {
+      if (currentScope.current === scope) setNotice(careerErrorMessage(error, ar));
+      return false;
+    } finally {
+      mutation.current = false;
+      setBusy(false);
+    }
   };
-  const employers = async(query = '', currentPage = 1) => {
-    const data = await adminApiClient.request<{ data: CareerEmployerDto[] }>(`/admin/careers/employers?${new URLSearchParams({ search: query, page: String(currentPage), pageSize: '20' })}`);
-    return data.data.map(row => ({ id: row.id, label: row.displayName, lifecycle: row.verificationStatus }));
+  const tabInfo = [
+    ['jobs', c('فرص التوظيف', 'Opportunities'), BriefcaseBusiness],
+    ['employers', c('جهات التوظيف', 'Employers'), Building2],
+    ['applications', c('طلبات التقديم', 'Applications'), ClipboardList],
+    ['alumni', c('خصوصية الخريجين', 'Alumni privacy'), GraduationCap],
+  ] as const;
+  const descriptions: Record<CareerTab, string> = {
+    jobs: c(
+      'إدارة الوظائف والتدريب وبرامج الخريجين، من المراجعة إلى النشر.',
+      'Manage jobs, internships and graduate programs from review to publication.',
+    ),
+    employers: c(
+      'بيانات جهات التوظيف ومراجعة أدلة التوثيق وصلاحيتها.',
+      'Manage employer information and independent verification evidence.',
+    ),
+    applications: c(
+      'مراجعة الطلبات واتخاذ القرارات ضمن نطاق الفرصة والصلاحيات.',
+      'Review applications and decisions within your permitted opportunity scope.',
+    ),
+    alumni: c(
+      'عرض نطاق ظهور ملفات الخريجين فقط. الموافقة وتغييرها من صلاحيات صاحب الملف.',
+      'View alumni visibility only. Consent and changes belong to the profile owner.',
+    ),
   };
-  const jobs = async(query = '', currentPage = 1) => {
-    const data = await adminApiClient.request<{ data: CareerJobPostingDto[] }>(`/admin/careers/jobs?${new URLSearchParams({ search: query, page: String(currentPage), pageSize: '20' })}`);
-    return data.data.map(row => ({ id: row.id, label: row.title, lifecycle: 'ACTIVE' }));
+  const setPage = (value: number) => change({ page: String(value) });
+  const newRecord = () => {
+    if (!busy && discard()) {
+      clearPanels();
+      setEditor({ scope, record: null });
+    }
   };
-  const edit = async(row: Row) => {
-    const generation = sequence.current;
-    try {
-    let data: any = row;
-    if (tab === 'jobs') data = await adminApiClient.request<CareerJobPostingDto>(`/admin/careers/jobs/${row.id}`);
-    if (generation !== sequence.current) return;
-    const meta = data.metadata || {}, salary = data.salaryRange || {};
-    setForm({ ...fresh(), ...Object.fromEntries(Object.entries(data).filter(([,v]) => typeof v === 'string')),
-      titleEn: meta.localizedContent?.en?.title || '', descriptionEn: meta.localizedContent?.en?.description || '',
-      sourceUrl: meta.sourceUrl || '', recruitmentCycle: meta.recruitmentCycle || '', applicationChannel: meta.applicationChannel || 'EXTERNAL',
-      applicationDeadline: data.applicationDeadline ? new Date(data.applicationDeadline).toISOString().slice(0,16) : '',
-      requiredSkills: (data.requiredSkills || []).join(','), salaryMin: salary.minMinorUnits || '', salaryMax: salary.maxMinorUnits || '',
-      currencyCode: salary.currencyCode || 'USD', scale: String(salary.scale ?? 2), period: salary.period || 'MONTH', basis: salary.basis || 'GROSS' });
-    setCountryCode(''); setEditing(data); setEditor(true);
-    } catch { if (generation === sequence.current) setNotice(c('تعذر تحميل السجل','Could not load the record')); }
+  const fieldSelect = (key: string, label: string, value: string, options: string[]) => (
+    <label>
+      {label}
+      <select value={value} onChange={(event) => change({ [key]: event.target.value })}>
+        <option value="">{c('الكل', 'All')}</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {careerLabel(option, ar)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+  const filtered = [...query.keys()].some((key) => !['page', 'pageSize'].includes(key));
+  const reset = () => {
+    if (!busy && discard()) {
+      clearPanels();
+      setParams({ tab, page: '1' });
+    }
   };
-  const save = (event: FormEvent) => {
-    event.preventDefault();
-    let body: Record<string, unknown>;
-    if (tab === 'employers') body = { displayName: form.displayName, employerType: form.employerType, industry: form.industry || null, description: form.description || null, countryReferenceId: form.countryReferenceId || null, cityReferenceId: form.cityReferenceId || null, websiteUrl: form.websiteUrl || null, logoAssetId: form.logoAssetId || null };
-    else body = { title: form.title, description: form.description, opportunityType: form.opportunityType, employmentType: form.employmentType, jobCategory: form.jobCategory,
-      countryReferenceId: form.countryReferenceId, cityReferenceId: form.cityReferenceId || null, ...(!editing ? { employerId: form.employerId } : {}),
-      applicationDeadline: form.applicationDeadline ? new Date(form.applicationDeadline).toISOString() : null, externalPostingUrl: form.externalPostingUrl || null,
-      requiredSkills: form.requiredSkills.split(',').map(value => value.trim()).filter(Boolean), remoteOption: form.employmentType === 'REMOTE',
-      salaryRange: form.salaryMin ? { minMinorUnits: form.salaryMin, maxMinorUnits: form.salaryMax, currencyCode: form.currencyCode, scale: Number(form.scale), period: form.period, basis: form.basis } : null,
-      metadata: { applicationChannel: form.applicationChannel, sourceUrl: form.sourceUrl || undefined, recruitmentCycle: form.recruitmentCycle || undefined,
-        localizedContent: { ar: { title: form.title, description: form.description }, ...(form.titleEn && form.descriptionEn ? { en: { title: form.titleEn, description: form.descriptionEn } } : {}) } } };
-    if (editing) body.expectedVersion = editing.version;
-    void write(editing ? `${tab}/${editing.id}` : tab, body, editing ? 'PATCH' : 'POST');
-  };
-  const labels: Record<string, [string,string]> = { title: ['العنوان العربي','Arabic title'], titleEn: ['العنوان الإنجليزي','English title'], description: ['الوصف','Description'], descriptionEn: ['الوصف الإنجليزي','English description'], displayName: ['اسم الجهة','Employer name'], employerType: ['نوع الجهة','Employer type'], industry: ['القطاع','Industry'], websiteUrl: ['موقع الجهة HTTPS','Employer HTTPS website'], logoAssetId: ['أصل الشعار','Logo asset'], jobCategory: ['التصنيف','Category'], applicationDeadline: ['آخر موعد للتقديم','Application deadline'], externalPostingUrl: ['رابط التقديم الخارجي','External application URL'], sourceUrl: ['المصدر الرسمي','Official source'], recruitmentCycle: ['دورة التوظيف','Recruitment cycle'], requiredSkills: ['المهارات بفواصل','Skills, comma separated'], salaryMin: ['أدنى راتب بالوحدات الصغرى','Minimum salary in minor units'], salaryMax: ['أعلى راتب بالوحدات الصغرى','Maximum salary in minor units'], scale: ['المنازل العشرية','Decimal scale'] };
-  const formKeys = tab === 'employers' ? ['displayName','employerType','industry','websiteUrl','description'] : ['title','titleEn','description','descriptionEn','jobCategory','applicationDeadline','externalPostingUrl','sourceUrl','recruitmentCycle','requiredSkills','salaryMin','salaryMax','scale'];
-  return <main dir={dir} className="admin-owner-workspace mx-auto max-w-7xl space-y-6 text-[#203442]">
-    <header className="admin-page-hero relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8"><h1 className="">{c('الوظائف والمسارات المهنية','Careers and alumni')}</h1></header>
-    <nav className="flex flex-wrap gap-3">{(['jobs','employers','applications','alumni'] as Tab[]).filter(value => value !== 'applications' || hasPermission('admin:careers:applications:review')).filter(value => value !== 'alumni' || hasPermission('admin:careers:alumni:view')).map((value) => <button key={value} type="button" disabled={busy} onClick={() => { setParams({ tab: value, page: '1' }); setStatus(''); setSearch(''); setEditor(false); setEditing(null); setApplicationDetail(null); }} className={tab===value?'font-bold underline':''}>{({ jobs: c('الوظائف','Jobs'), employers: c('الجهات','Employers'), applications: c('طلبات التقديم','Applications'), alumni: c('موافقات الخريجين','Alumni consent') })[value]}</button>)}</nav>
-    <label className="block">{c('سبب الإجراء','Action reason')}<input className="ml-3 rounded border p-2" value={reason} maxLength={1000} onChange={event => setReason(event.target.value)} /></label>
-    <div className="flex flex-wrap gap-3">
-      {['jobs','employers'].includes(tab) && <input type="search" aria-label={c('البحث','Search')} placeholder={c('ابحث بالعنوان أو المرجع','Search title or reference')} value={search} maxLength={120} onChange={event => { setSearch(event.target.value); navigatePage(1); }} className="rounded border p-2" />}
-      {tab !== 'alumni' && <select aria-label={c('الحالة','Status')} value={status} onChange={event => { setStatus(event.target.value); navigatePage(1); }}><option value="">{c('كل الحالات','All states')}</option>{(tab==='jobs'?jobStates:tab==='employers'?['UNVERIFIED','VERIFIED','SUSPENDED']:applicationStates).map(value=><option key={value}>{value}</option>)}</select>}
-      {tab==='jobs' && <><select aria-label={c('نوع الفرصة','Opportunity type')} value={type} onChange={event=>{setType(event.target.value);navigatePage(1);}}><option value="">{c('كل الأنواع','All types')}</option>{['JOB','INTERNSHIP','GRADUATE_PROGRAM','MENTORSHIP','CAREER_EVENT'].map(value=><option key={value}>{value}</option>)}</select><CanonicalPicker paged optional label={c('الجهة','Employer')} value={employerFilter} load={employers} onChange={id=>{setEmployerFilter(id||'');navigatePage(1);}} /><CanonicalPicker paged optional label={c('الدولة','Country')} value={filterCountry} load={canonicalPickerApi.countries} onChange={(id,option)=>{setFilterCountry(id||'');setFilterCountryCode(option?.code||'');setCityFilter('');navigatePage(1);}} /><CanonicalCityPicker regionId={null} countryIso2Code={filterCountryCode} value={cityFilter||null} onChange={id=>{setCityFilter(id||'');navigatePage(1);}} /></>}
-      {tab==='applications' && <CanonicalPicker paged optional label={c('الوظيفة','Job')} value={jobFilter} load={jobs} onChange={id=>{setJobFilter(id||'');navigatePage(1);}} />}
-      {['jobs','employers'].includes(tab) && hasPermission('admin:careers:author') && <button type="button" onClick={()=>{setEditing(null);setForm(fresh());setCountryCode('');setEditor(true);}}>{c('إضافة','Add')}</button>}
+  return (
+    <div dir={dir} className="reference-workspace career-workspace">
+      <header className="reference-hero">
+        <div>
+          <span>
+            <BriefcaseBusiness aria-hidden="true" />
+            {c('إدارة الفرص والمسارات المهنية', 'Career opportunity management')}
+          </span>
+          <h1>{c('الوظائف', 'Careers')}</h1>
+          <p>{descriptions[tab]}</p>
+        </div>
+      </header>
+      <nav className="career-main-nav" aria-label={c('أقسام الوظائف', 'Career sections')}>
+        {tabInfo
+          .filter(
+            ([value]) =>
+              value !== 'applications' || hasPermission('admin:careers:applications:review'),
+          )
+          .filter(([value]) => value !== 'alumni' || hasPermission('admin:careers:alumni:view'))
+          .map(([value, title, Icon]) => (
+            <button
+              key={value}
+              type="button"
+              aria-current={tab === value ? 'page' : undefined}
+              disabled={busy}
+              onClick={() => go(value)}
+            >
+              <Icon aria-hidden="true" />
+              {title}
+            </button>
+          ))}
+      </nav>
+      {notice ? (
+        <p role="status" className="career-notice">
+          {notice}
+        </p>
+      ) : null}
+      {!allowed ? (
+        <p role="alert" className="career-notice career-error">
+          {c('لا تملك صلاحية عرض هذا القسم.', 'You do not have permission to view this section.')}
+        </p>
+      ) : (
+        <>
+          {opening ? (
+            <p role="status" className="career-notice">
+              {c('جارٍ فتح السجل…', 'Opening record…')}
+            </p>
+          ) : null}
+          {activeEditor && hasPermission('admin:careers:author') ? (
+            <CareerEditor
+              key={`${tab}:${activeEditor.record?.id ?? 'new'}:${activeEditor.record?.version ?? 0}`}
+              tab={tab}
+              record={activeEditor.record}
+              ar={ar}
+              busy={busy}
+              write={write}
+              close={close}
+              onDirty={setDirty}
+            />
+          ) : null}
+          {activeSelection ? (
+            <CareerRecordPanel
+              key={`${tab}:${activeSelection.row.id}:${activeSelection.row.version}`}
+              tab={tab}
+              row={activeSelection.row}
+              detail={activeSelection.detail}
+              ar={ar}
+              busy={busy}
+              write={write}
+              close={close}
+              related={go}
+              hasPermission={hasPermission}
+              onDirty={setDirty}
+            />
+          ) : null}
+          <section
+            className="career-panel"
+            aria-label={c('السجلات والفلاتر', 'Records and filters')}
+            aria-busy={loading}
+          >
+            <header className="career-toolbar">
+              <div>
+                <h2>{tabInfo.find(([value]) => value === tab)?.[1]}</h2>
+                <small>
+                  {c('السجلات المطابقة', 'Matching records')}: {result?.total ?? '—'}
+                </small>
+              </div>
+              <div className="career-actions">
+                <button type="button" disabled={busy || loading} onClick={refresh}>
+                  <RefreshCw aria-hidden="true" />
+                  {c('تحديث', 'Refresh')}
+                </button>
+                {['jobs', 'employers'].includes(tab) && hasPermission('admin:careers:author') ? (
+                  <button
+                    type="button"
+                    className="career-primary"
+                    disabled={busy || opening}
+                    onClick={newRecord}
+                  >
+                    <Plus aria-hidden="true" />
+                    {tab === 'jobs'
+                      ? c('إضافة فرصة', 'Add opportunity')
+                      : c('إضافة جهة', 'Add employer')}
+                  </button>
+                ) : null}
+              </div>
+            </header>
+            {tab === 'jobs' ? (
+              <nav className="career-subnav" aria-label={c('مراحل الفرص', 'Opportunity stages')}>
+                {(
+                  [
+                    ['', c('كل الفرص', 'All opportunities'), Layers],
+                    ['READY_TO_REVIEW', c('المراجعة', 'Review'), ListChecks],
+                    ['READY_TO_PUBLISH', c('جاهزة للنشر', 'Ready to publish'), Send],
+                    ['PUBLISHED', c('المنشورة', 'Published'), BriefcaseBusiness],
+                    ['EXPIRED', c('المنتهية', 'Expired'), Clock],
+                  ] as const
+                ).map(([value, label, Icon]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={status === value}
+                    disabled={busy}
+                    onClick={() => change({ status: value })}
+                  >
+                    <Icon aria-hidden="true" />
+                    {label}
+                  </button>
+                ))}
+              </nav>
+            ) : null}
+            {tab !== 'alumni' ? (
+              <fieldset className="career-filters" disabled={busy}>
+                <legend className="sr-only">{c('تصفية السجلات', 'Filter records')}</legend>
+                {['jobs', 'employers'].includes(tab) ? (
+                  <label>
+                    <span>
+                      <Search aria-hidden="true" />
+                      {c('البحث', 'Search')}
+                    </span>
+                    <input
+                      type="search"
+                      value={search}
+                      maxLength={120}
+                      placeholder={c('العنوان أو المرجع', 'Title or reference')}
+                      onChange={(event) => change({ search: event.target.value })}
+                    />
+                  </label>
+                ) : null}
+                {fieldSelect('status', c('الحالة', 'Status'), status, states)}
+                {tab === 'jobs' ? (
+                  <>
+                    {fieldSelect(
+                      'opportunityType',
+                      c('نوع الفرصة', 'Opportunity type'),
+                      params.get('opportunityType') ?? '',
+                      opportunityTypes,
+                    )}
+                    {fieldSelect(
+                      'employmentType',
+                      c('نمط العمل', 'Employment type'),
+                      params.get('employmentType') ?? '',
+                      employmentTypes,
+                    )}
+                    <details
+                      className="career-filter-more"
+                      open={
+                        !!(
+                          params.get('employerId') ||
+                          params.get('countryReferenceId') ||
+                          params.get('cityReferenceId')
+                        )
+                      }
+                    >
+                      <summary>
+                        {c('تصفية حسب الجهة والموقع', 'Filter by employer and location')}
+                      </summary>
+                      <div className="career-location-filters">
+                        <CanonicalPicker
+                          paged
+                          optional
+                          allowInactive
+                          label={c('الجهة', 'Employer')}
+                          value={params.get('employerId')}
+                          load={careerEmployers}
+                          onChange={(id) => change({ employerId: id ?? '' })}
+                        />
+                        <CanonicalPicker
+                          paged
+                          optional
+                          allowInactive
+                          label={c('الدولة', 'Country')}
+                          value={params.get('countryReferenceId')}
+                          load={canonicalPickerApi.countries}
+                          onChange={(id, option) =>
+                            change({
+                              countryReferenceId: id ?? '',
+                              countryCode: option?.code ?? '',
+                              cityReferenceId: '',
+                            })
+                          }
+                        />
+                        <CanonicalCityPicker
+                          uiLanguage={language}
+                          regionId={null}
+                          countryIso2Code={params.get('countryCode') ?? ''}
+                          value={params.get('cityReferenceId')}
+                          onChange={(id) => change({ cityReferenceId: id ?? '' })}
+                        />
+                      </div>
+                    </details>
+                  </>
+                ) : null}
+                {tab === 'applications' ? (
+                  <CanonicalPicker
+                    paged
+                    optional={hasPermission('admin:careers:applications:all')}
+                    allowInactive
+                    label={c('الوظيفة', 'Job')}
+                    value={jobId}
+                    load={careerJobs}
+                    onChange={(id) => change({ jobId: id ?? '' })}
+                  />
+                ) : null}
+                {filtered ? (
+                  <div className="career-actions">
+                    <button type="button" onClick={reset}>
+                      <FilterX aria-hidden="true" />
+                      {c('مسح الفلاتر', 'Clear filters')}
+                    </button>
+                  </div>
+                ) : null}
+              </fieldset>
+            ) : null}
+            {scopeRequired ? (
+              <p role="status" className="career-notice">
+                {c(
+                  'اختر فرصة لعرض طلباتها ضمن صلاحياتك.',
+                  'Choose an opportunity to view applications within your scope.',
+                )}
+              </p>
+            ) : loading ? (
+              <p role="status" className="career-empty">
+                {c('جارٍ التحميل…', 'Loading…')}
+              </p>
+            ) : failed ? (
+              <div role="alert" className="career-notice career-error">
+                <p>{c('تعذر التحميل؛ تحقق من صلاحية النطاق.', 'Could not load this scope.')}</p>
+                <button type="button" onClick={refresh}>
+                  {c('إعادة المحاولة', 'Retry')}
+                </button>
+              </div>
+            ) : result && result.data.length === 0 ? (
+              <div className="career-empty" role="status">
+                <Inbox aria-hidden="true" />
+                <p>
+                  {filtered
+                    ? c(
+                        'لا توجد سجلات مطابقة للفلاتر الحالية.',
+                        'No records match the current filters.',
+                      )
+                    : c('لا توجد سجلات حتى الآن.', 'No records yet.')}
+                </p>
+              </div>
+            ) : result ? (
+              <div className="career-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">
+                        {tab === 'alumni'
+                          ? c('مرجع الملف', 'Profile reference')
+                          : c('السجل', 'Record')}
+                      </th>
+                      {tab === 'jobs' ? (
+                        <th scope="col">{c('الجهة والموقع', 'Employer and location')}</th>
+                      ) : null}
+                      <th scope="col">
+                        {tab === 'alumni' ? c('نطاق الظهور', 'Visibility') : c('الحالة', 'Status')}
+                      </th>
+                      {['jobs', 'applications'].includes(tab) ? (
+                        <th scope="col">
+                          {tab === 'jobs'
+                            ? c('آخر موعد للتقديم', 'Application deadline')
+                            : c('تاريخ التقديم', 'Submitted at')}
+                        </th>
+                      ) : null}
+                      {tab !== 'alumni' ? <th scope="col">{c('الإجراءات', 'Actions')}</th> : null}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {result.data.map((row) => (
+                      <tr key={row.id}>
+                        <td className="career-record">
+                          {recordTitle(row)}
+                          {tab === 'jobs' ? (
+                            <small>
+                              {careerLabel(row.opportunityType, ar)} ·{' '}
+                              {careerLabel(row.employmentType, ar)}
+                            </small>
+                          ) : tab === 'applications' ? (
+                            <small>
+                              {typeof row.jobSnapshot?.title === 'string'
+                                ? row.jobSnapshot.title
+                                : row.jobId}
+                            </small>
+                          ) : null}
+                        </td>
+                        {tab === 'jobs' ? (
+                          <td>
+                            {row.employer?.displayName ?? '—'}
+                            <small>
+                              {[row.country, row.city].filter(Boolean).join(' · ') || '—'}
+                            </small>
+                          </td>
+                        ) : null}
+                        <td>
+                          <span
+                            className="career-badge"
+                            data-state={row.status ?? row.verificationStatus ?? row.visibility}
+                          >
+                            {careerLabel(
+                              row.status ?? row.verificationStatus ?? row.visibility,
+                              ar,
+                            )}
+                          </span>
+                        </td>
+                        {['jobs', 'applications'].includes(tab) ? (
+                          <td>
+                            {formatCareerDate(
+                              tab === 'jobs' ? row.applicationDeadline : row.submittedAt,
+                              ar,
+                            )}
+                          </td>
+                        ) : null}
+                        {tab !== 'alumni' ? (
+                          <td>
+                            <div className="career-actions">
+                              <button
+                                type="button"
+                                disabled={busy || opening}
+                                onClick={() => void open(row)}
+                              >
+                                <Eye aria-hidden="true" />
+                                {c('التفاصيل', 'Details')}
+                              </button>
+                              {['jobs', 'employers'].includes(tab) &&
+                              hasPermission('admin:careers:author') ? (
+                                <button
+                                  type="button"
+                                  disabled={busy || opening}
+                                  onClick={() => void open(row, true)}
+                                >
+                                  <Pencil aria-hidden="true" />
+                                  {c('تعديل', 'Edit')}
+                                </button>
+                              ) : null}
+                            </div>
+                          </td>
+                        ) : null}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null}
+            {result ? (
+              <footer className="career-pagination">
+                <small>
+                  {c('الصفحة', 'Page')} {page} {c('من', 'of')} {Math.max(1, result.totalPages)} ·{' '}
+                  {c('حتى 20 سجلًا في الصفحة', 'Up to 20 records per page')}
+                </small>
+                <div className="career-actions">
+                  <button
+                    type="button"
+                    disabled={busy || loading || page <= 1}
+                    onClick={() => setPage(page - 1)}
+                  >
+                    {c('السابق', 'Previous')}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy || loading || page >= Math.max(1, result.totalPages)}
+                    onClick={() => setPage(page + 1)}
+                  >
+                    {c('التالي', 'Next')}
+                  </button>
+                </div>
+              </footer>
+            ) : null}
+          </section>
+        </>
+      )}
     </div>
-    {notice && <p role="status">{notice}</p>}{loading && <p>{c('جارٍ التحميل','Loading')}</p>}
-    {!loading && result && result.data.length === 0 && <p role="status">{c('لا توجد سجلات مطابقة للفلاتر الحالية', 'No matching records for the current filters')}</p>}
-    <p>{c('السجلات المطابقة','Matching records')}: {result?.total ?? '—'}</p>
-    <ul className="space-y-2">{!loading && result?.data.map(row=><li key={row.id} className="flex flex-wrap gap-3 rounded border p-3">
-      <span>{row.title || row.displayName || row.publicId || row.id}</span><span>{row.status || row.verificationStatus || row.visibility}</span>
-      {['jobs','employers'].includes(tab) && hasPermission('admin:careers:author') && <button type="button" disabled={busy} onClick={()=>void edit(row).catch(()=>setNotice(c('تعذر فتح السجل','Could not open record')))}>{c('تعديل','Edit')}</button>}
-      {tab==='jobs' && row.status==='READY_TO_REVIEW' && hasPermission('admin:careers:review') && <button disabled={busy||!reviewChecked} onClick={()=>void write(`jobs/${row.id}/mark-publishable`,{expectedVersion:row.version,checklist:{source:true,applicationLink:true,privacy:true,terms:true}})}>{c('اعتماد','Approve')}</button>}
-      {tab==='jobs' && hasPermission('admin:careers:publish') && <>{row.status==='READY_TO_PUBLISH' && <button disabled={busy} onClick={()=>void write(`jobs/${row.id}/publish`,{expectedVersion:row.version})}>{c('نشر','Publish')}</button>}{(row.status==='PUBLISHED') && <button disabled={busy} onClick={()=>void write(`jobs/${row.id}/unpublish`,{expectedVersion:row.version})}>{c('إلغاء النشر','Unpublish')}</button>}{row.status!=='ARCHIVED' && <button disabled={busy} onClick={()=>void write(`jobs/${row.id}/archive`,{expectedVersion:row.version})}>{c('أرشفة','Archive')}</button>}</>}
-      {tab==='jobs' && ['READY_TO_REVIEW','READY_TO_PUBLISH'].includes(row.status||'') && hasPermission('admin:careers:review') && <button disabled={busy} onClick={()=>void write(`jobs/${row.id}/reject`,{expectedVersion:row.version})}>{c('رفض','Reject')}</button>}
-      {tab==='employers' && hasPermission('admin:careers:employers:verify') && <><button disabled={busy||!reviewChecked||!sourceEvidence||!evidenceExpiry} onClick={()=>void write(`employers/${row.id}/verify`,{expectedVersion:row.version,sourceUrl:sourceEvidence,expiresAt:new Date(evidenceExpiry).toISOString()})}>{c('توثيق مستقل','Verify independently')}</button><button disabled={busy} onClick={()=>void write(`employers/${row.id}/suspend`,{expectedVersion:row.version})}>{c('تعليق','Suspend')}</button></>}
-      {tab==='applications' && <><button disabled={busy} onClick={()=>{if(hasPermission('admin:careers:applications:pii')) void inspectApplication(row);}}>{c('التفاصيل','Details')}</button>{(row.status==='SUBMITTED'?['UNDER_REVIEW']:row.status==='UNDER_REVIEW'?['SHORTLISTED','REJECTED']:row.status==='SHORTLISTED'?['ACCEPTED','REJECTED']:[]).map(next=><button key={next} disabled={busy} onClick={()=>void write(`applications/${row.id}/review`,{expectedVersion:row.version,nextStatus:next,studentMessage,interviewAt:interviewAt?new Date(interviewAt).toISOString():undefined})}>{next}</button>)}</>}
-    </li>)}</ul>
-    <div className="flex gap-4"><button disabled={loading||page<=1} onClick={()=>navigatePage(page-1)}>{c('السابق','Previous')}</button><span>{page}</span><button disabled={loading||page>=(result?.totalPages||1)} onClick={()=>navigatePage(page+1)}>{c('التالي','Next')}</button><button onClick={()=>setReload(value=>value+1)}>{c('تحديث','Refresh')}</button></div>
-    {tab==='jobs'||tab==='employers'?<label className="block"><input type="checkbox" checked={reviewChecked} onChange={event=>setReviewChecked(event.target.checked)} /> {c('راجعت المصدر والهوية ورابط التقديم والخصوصية والشروط','I reviewed source, identity, application destination, privacy and terms')}</label>:null}
-    {tab==='employers' && hasPermission('admin:careers:employers:verify') && <div className="flex gap-3"><input type="url" placeholder={c('المصدر الرسمي للتوثيق','Official verification source')} value={sourceEvidence} onChange={event=>setSourceEvidence(event.target.value)} /><input type="datetime-local" aria-label={c('انتهاء التوثيق','Verification expiry')} value={evidenceExpiry} onChange={event=>setEvidenceExpiry(event.target.value)} /></div>}
-    {tab==='applications' && <div className="space-y-2"><input placeholder={c('رسالة القرار للطالب','Decision message to student')} value={studentMessage} maxLength={2000} onChange={event=>setStudentMessage(event.target.value)} /><input type="datetime-local" aria-label={c('موعد المقابلة','Interview time')} value={interviewAt} onChange={event=>setInterviewAt(event.target.value)} />{applicationDetail && <div><p>{applicationDetail.coverLetter}</p><p>{JSON.stringify(applicationDetail.decisionMetadata)}</p><button disabled={busy} onClick={()=>void adminApiClient.request<{url:string}>(`/admin/careers/applications/${applicationDetail.id}/cv-grant`,{method:'POST',body:'{}'}).then(grant=>{window.open(grant.url,'_blank','noopener,noreferrer');}).catch(()=>setNotice(c('السيرة غير متاحة أو غير مصرح بها','CV unavailable or access denied')))}>{c('فتح السيرة بأمان','Open CV securely')}</button></div>}</div>}
-    {editor && <form onSubmit={save} className="grid gap-3 rounded border p-4 md:grid-cols-2">
-      <h2>{editing?c('تعديل السجل','Edit record'):c('سجل جديد','New record')}</h2>
-      {formKeys.map(key=><label key={key}>{labels[key]?.[language==='ar'?0:1]||key}<input className="block w-full rounded border p-2" value={form[key]||''} type={key==='applicationDeadline'?'datetime-local':/Url$/.test(key)?'url':'text'} maxLength={/description/.test(key)?20000:2048} onChange={event=>setForm(previous=>({...previous,[key]:event.target.value}))} /></label>)}
-      {tab === 'employers' && <AssetPicker label={c('شعار الجهة', 'Employer logo')} value={form.logoAssetId} mimeTypePrefix="image/" purpose="CAREER_EMPLOYER_LOGO" onChange={id => setForm(previous => ({ ...previous, logoAssetId: id }))} />}
-      <CanonicalPicker paged optional={tab==='employers'} label={c('الدولة','Country')} value={form.countryReferenceId} load={canonicalPickerApi.countries} onChange={(id,option)=>{setForm(previous=>({...previous,countryReferenceId:id||'',cityReferenceId:''}));setCountryCode(option?.code||'');}} />
-      <CanonicalCityPicker regionId={null} value={form.cityReferenceId||null} countryIso2Code={countryCode} onChange={id=>setForm(previous=>({...previous,cityReferenceId:id||''}))} />
-      {tab==='jobs' && <><CanonicalPicker paged label={c('الجهة','Employer')} disabled={!!editing} value={form.employerId} load={employers} onChange={id=>setForm(previous=>({...previous,employerId:id||''}))} />{(['opportunityType','employmentType','applicationChannel','period','basis'] as const).map(key=><label key={key}>{({opportunityType:c('نوع الفرصة','Opportunity type'),employmentType:c('نوع العمل','Employment type'),applicationChannel:c('مسار التقديم','Application channel'),period:c('فترة الراتب','Pay period'),basis:c('نوع الراتب','Pay basis')})[key]}<select value={form[key]} onChange={event=>setForm(previous=>({...previous,[key]:event.target.value}))}>{(key==='opportunityType'?['JOB','INTERNSHIP','GRADUATE_PROGRAM','MENTORSHIP','CAREER_EVENT']:key==='employmentType'?['FULL_TIME','PART_TIME','CONTRACT','INTERNSHIP','REMOTE','HYBRID']:key==='applicationChannel'?['INTERNAL','EXTERNAL']:key==='period'?['HOUR','MONTH','YEAR']:['GROSS','NET']).map(value=><option key={value}>{value}</option>)}</select></label>)}<CanonicalPicker paged optional label={c('عملة الراتب','Salary currency')} value={undefined} load={canonicalPickerApi.currencies} onChange={(_id,option)=>setForm(previous=>({...previous,currencyCode:option?.code||'USD'}))} /><span>{form.currencyCode}</span></>}
-      <button type="submit" disabled={busy||reason.trim().length<3}>{c('حفظ','Save')}</button><button type="button" disabled={busy} onClick={()=>setEditor(false)}>{c('إغلاق','Close')}</button>
-    </form>}
-  </main>;
+  );
 }
