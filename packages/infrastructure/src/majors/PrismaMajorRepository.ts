@@ -630,7 +630,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
       where: { taxonomyNodeId },
       include: {
         major: { select: { id: true, canonicalName: true } },
-        profile: { select: { id: true, displayName: true, level: true } },
+        profile: { select: { id: true, displayName: true, level: true, major: { select: { id: true, canonicalName: true } } } },
       },
       orderBy: [{ relationshipType: 'asc' }, { createdAt: 'asc' }],
     });
@@ -638,7 +638,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     return records.map((record) => ({
       id: record.id,
       relationshipType: record.relationshipType as TaxonomyMappedMajorDto['relationshipType'],
-      major: record.major ?? undefined,
+      major: record.major ?? record.profile?.major ?? undefined,
       profile: record.profile
         ? {
             id: record.profile.id,

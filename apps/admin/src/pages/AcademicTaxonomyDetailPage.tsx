@@ -1,5 +1,16 @@
-import { useState, useEffect } from 'react';
-import { TaxonomyPagination, useTaxonomyRead } from '../components/academic-taxonomy/AcademicTaxonomyOperationsWorkspace';
+import {
+  TaxonomyDialogFrame,
+  TaxonomyNavigation,
+  TaxonomyRefresh,
+} from '../components/academic-taxonomy/TaxonomyWorkspaceUI';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useAdministrationDraftGuard } from '../features/reference-data/useAdministrationDraftGuard';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  TaxonomyNodeLink,
+  TaxonomyPagination,
+  useTaxonomyRead,
+} from '../components/academic-taxonomy/AcademicTaxonomyOperationsWorkspace';
 import { CanonicalAcademicGovernancePanel } from '../components/academic-taxonomy/CanonicalAcademicGovernancePanel';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
@@ -80,6 +91,12 @@ type ValidationReport = AcademicTaxonomyCompletenessReport;
 
 export function AcademicTaxonomyDetailPage() {
   const { nodeId } = useParams<{ nodeId: string }>();
+  return <AcademicTaxonomyNodeWorkspace key={nodeId} nodeId={nodeId} />;
+}
+const ignoreDecision = () => {};
+const emptyDecision = { reason: '', acknowledgeHistoricalReferences: false };
+function AcademicTaxonomyNodeWorkspace({ nodeId }: { nodeId?: string }) {
+  const { hasPermission } = useAdminAuthorization();
   const { language } = useTranslation();
   const isAr = language === 'ar';
   const localReadOnly = import.meta.env.VITE_LOCAL_ADMIN_READ_ONLY === 'true';
@@ -87,12 +104,36 @@ export function AcademicTaxonomyDetailPage() {
   const [node, setNode] = useState<AcademicTaxonomyNode | null>(null);
   const [previewChildren, setChildren] = useState<AcademicTaxonomyNode[]>([]);
   const [previewParents, setParents] = useState<AcademicTaxonomyNode[]>([]);
-  const [parentPage, setParentPage] = useState(1); const [childPage, setChildPage] = useState(1);
-  const parentsRead = useTaxonomyRead<{ data: AcademicTaxonomyNode[]; total: number; links: Array<{ nodeId: string; isPrimary: boolean }> }>(!localReadOnly && nodeId ? `/admin/academic-taxonomy/nodes/${encodeURIComponent(nodeId)}/parents?page=${parentPage}&pageSize=25` : null);
-  const childrenRead = useTaxonomyRead<{ data: AcademicTaxonomyNode[]; total: number }>(!localReadOnly && nodeId ? `/admin/academic-taxonomy/nodes/${encodeURIComponent(nodeId)}/children?page=${childPage}&pageSize=25` : null);
-  const primaryPath = useTaxonomyRead<{ path: AcademicTaxonomyNode[]; alternativeTotal: number; termination: string }>(!localReadOnly && nodeId ? `/admin/academic-taxonomy/nodes/${encodeURIComponent(nodeId)}/paths` : null);
-  const parents = localReadOnly ? previewParents : parentsRead.data?.data ?? [];
-  const children = localReadOnly ? previewChildren : childrenRead.data?.data ?? [];
+  const [parentPage, setParentPage] = useState(1);
+  const [childPage, setChildPage] = useState(1);
+  const parentsRead = useTaxonomyRead<{
+    data: AcademicTaxonomyNode[];
+    total: number;
+    links: Array<{ nodeId: string; isPrimary: boolean }>;
+  }>(
+    !localReadOnly && nodeId
+      ? `/admin/academic-taxonomy/nodes/${encodeURIComponent(nodeId)}/parents?page=${parentPage}&pageSize=25`
+      : null,
+  );
+  const childrenRead = useTaxonomyRead<{ data: AcademicTaxonomyNode[]; total: number }>(
+    !localReadOnly && nodeId
+      ? `/admin/academic-taxonomy/nodes/${encodeURIComponent(nodeId)}/children?page=${childPage}&pageSize=25`
+      : null,
+  );
+  const primaryPath = useTaxonomyRead<{
+    path: AcademicTaxonomyNode[];
+    alternativeTotal: number;
+    termination: string;
+  }>(
+    !localReadOnly && nodeId
+      ? `/admin/academic-taxonomy/nodes/${encodeURIComponent(nodeId)}/paths`
+      : null,
+  );
+  const reloadParents = parentsRead.reload,
+    reloadChildren = childrenRead.reload,
+    reloadPath = primaryPath.reload;
+  const parents = localReadOnly ? previewParents : (parentsRead.data?.data ?? []);
+  const children = localReadOnly ? previewChildren : (childrenRead.data?.data ?? []);
   const [aliases, setAliases] = useState<AliasDto[]>([]);
   const [mappings, setMappings] = useState<MappingDto[]>([]);
   const [mappedMajors, setMappedMajors] = useState<MappedMajorDto[]>([]);
@@ -105,17 +146,34 @@ export function AcademicTaxonomyDetailPage() {
   const [pickerError, setPickerError] = useState(false);
   const [pickerHasNext, setPickerHasNext] = useState(false);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get('tab') ?? 'overview';
-  const activeTab = ['overview', 'hierarchy', 'aliases', 'mappings', 'majors', 'validation'].includes(requestedTab) ? requestedTab : 'overview';
-  const setActiveTab = (tab: string) => { const next = new URLSearchParams(searchParams); next.set('tab', tab); setSearchParams(next, { replace: true }); };
+  const activeTab = [
+    'overview',
+    'hierarchy',
+    'aliases',
+    'mappings',
+    'majors',
+    'usage',
+    'validation',
+  ].includes(requestedTab)
+    ? requestedTab
+    : 'overview';
+  const setActiveTab = (tab: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set('tab', tab);
+    setSearchParams(next, { replace: true });
+  };
 
   // --- Modal & Action States ---
   const [showEditNodeModal, setShowEditNodeModal] = useState(false);
   const [savingNode, setSavingNode] = useState(false);
-  const [lifecycleDecision, setLifecycleDecision] = useState({ reason: '', acknowledgeHistoricalReferences: false });
+  const [lifecycleDecision, setLifecycleDecision] = useState({
+    reason: '',
+    acknowledgeHistoricalReferences: false,
+  });
   const [usageReady, setUsageReady] = useState(false);
   const [nodeFormError, setNodeFormError] = useState<string | null>(null);
   const [nodeFormData, setNodeFormData] = useState({
@@ -154,17 +212,37 @@ export function AcademicTaxonomyDetailPage() {
     notes: '',
   });
 
-  const [mappingPreview, setMappingPreview] = useState<{ key: string; meaning: string; issues: Array<{ code: string; severity: string; message: string }> } | null>(null);
+  const [mappingPreview, setMappingPreview] = useState<{
+    key: string;
+    meaning: string;
+    issues: Array<{ code: string; severity: string; message: string }>;
+  } | null>(null);
   const [previewingMapping, setPreviewingMapping] = useState(false);
-  const mappingPayload = { sourceNodeId: node?.nodeId, targetNodeId: mappingFormData.targetNodeId, sourceStandard: mappingFormData.sourceStandard,
-    targetStandard: mappingFormData.targetStandard, strength: mappingFormData.strength, confidence: Number(mappingFormData.confidence), notes: mappingFormData.notes.trim() || undefined };
+  const mappingPayload = {
+    sourceNodeId: node?.nodeId,
+    targetNodeId: mappingFormData.targetNodeId,
+    sourceStandard: mappingFormData.sourceStandard,
+    targetStandard: mappingFormData.targetStandard,
+    strength: mappingFormData.strength,
+    confidence: Number(mappingFormData.confidence),
+    notes: mappingFormData.notes.trim() || undefined,
+  };
   const mappingKey = JSON.stringify(mappingPayload);
   const currentMappingPreview = mappingPreview?.key === mappingKey ? mappingPreview : null;
   const previewMapping = async () => {
-    setPreviewingMapping(true); setMappingError(null);
-    try { const result = await adminApiClient.request<Omit<NonNullable<typeof mappingPreview>, 'key'>>('/admin/academic-taxonomy/mappings/preview', { method: 'POST', body: mappingKey }); setMappingPreview({ ...result, key: mappingKey }); }
-    catch (cause) { setMappingError(cause instanceof Error ? cause.message : 'MAPPING_PREVIEW_FAILED'); }
-    finally { setPreviewingMapping(false); }
+    setPreviewingMapping(true);
+    setMappingError(null);
+    try {
+      const result = await adminApiClient.request<Omit<NonNullable<typeof mappingPreview>, 'key'>>(
+        '/admin/academic-taxonomy/mappings/preview',
+        { method: 'POST', body: mappingKey },
+      );
+      setMappingPreview({ ...result, key: mappingKey });
+    } catch (cause) {
+      setMappingError(cause instanceof Error ? cause.message : 'MAPPING_PREVIEW_FAILED');
+    } finally {
+      setPreviewingMapping(false);
+    }
   };
 
   // --- Validation State ---
@@ -175,121 +253,201 @@ export function AcademicTaxonomyDetailPage() {
   useEffect(() => {
     if (localReadOnly || (!showAddEdgeModal && !showAddMappingModal)) return;
     const abort = new AbortController();
-    setAllNodes([]); setPickerError(false); setPickerLoading(true);
-    setSelectedEdgeNodeId(''); setMappingFormData(value => ({ ...value, targetNodeId: '' }));
+    setAllNodes([]);
+    setPickerError(false);
+    setPickerLoading(true);
+    setSelectedEdgeNodeId('');
+    setMappingFormData((value) => ({ ...value, targetNodeId: '' }));
     const timer = setTimeout(() => {
       const query = new URLSearchParams({ page: String(pickerPage), pageSize: '25' });
       if (pickerQuery.trim()) query.set('q', pickerQuery.trim());
       if (pickerType) query.set('nodeType', pickerType);
       if (pickerStandard) query.set('standardType', pickerStandard);
-      adminApiClient.request<{ data: AcademicTaxonomyNode[]; hasNextPage: boolean }>(`/admin/academic-taxonomy/nodes?${query}`, { signal: abort.signal })
-        .then(value => { if (!abort.signal.aborted) { setAllNodes(value.data); setPickerHasNext(value.hasNextPage); } })
-        .catch(() => { if (!abort.signal.aborted) setPickerError(true); })
-        .finally(() => { if (!abort.signal.aborted) setPickerLoading(false); });
-    }, 200);
-    return () => { clearTimeout(timer); abort.abort(); };
-  }, [localReadOnly, showAddEdgeModal, showAddMappingModal, pickerQuery, pickerPage, pickerType, pickerStandard]);
-
-  const fetchDetails = async (refreshRelations = false) => {
-    setLoading(true);
-    setError(null);
-    try {
-      if (localReadOnly) {
-        const previewNodes: AcademicTaxonomyNode[] = iscedFBaselineNodes.map((item) => ({
-          ...item,
-          nodeId: AcademicTaxonomyDeterministicKey.create(item),
-        }));
-        const previewNode = previewNodes.find((item) => item.nodeId === nodeId);
-        if (!previewNode) throw new Error('Academic taxonomy node not found');
-        const byId = new Map(previewNodes.map((item) => [item.nodeId, item]));
-        setNode(previewNode);
-        setChildren(iscedFBaselineEdges.flatMap((edge) => edge.parent === nodeId && byId.has(edge.child) ? [byId.get(edge.child)!] : []));
-        setParents(iscedFBaselineEdges.flatMap((edge) => edge.child === nodeId && byId.has(edge.parent) ? [byId.get(edge.parent)!] : []));
-        setAliases([]);
-        setMappings([]);
-        setMappedMajors([]);
-        setAllNodes(previewNodes);
-        setNodeFormData({
-          canonicalName: previewNode.canonicalName,
-          description: previewNode.description || '',
-          status: previewNode.status,
-          standardType: previewNode.standardType || 'CUSTOM_NATIONAL',
-          standardCode: previewNode.standardCode || '',
-          nameAr: previewNode.localizedNames?.ar || '',
-          nameEn: previewNode.localizedNames?.en || '',
+      adminApiClient
+        .request<{ data: AcademicTaxonomyNode[]; hasNextPage: boolean }>(
+          `/admin/academic-taxonomy/nodes?${query}`,
+          { signal: abort.signal },
+        )
+        .then((value) => {
+          if (!abort.signal.aborted) {
+            setAllNodes(value.data);
+            setPickerHasNext(value.hasNextPage);
+          }
+        })
+        .catch(() => {
+          if (!abort.signal.aborted) setPickerError(true);
+        })
+        .finally(() => {
+          if (!abort.signal.aborted) setPickerLoading(false);
         });
-        return;
+    }, 200);
+    return () => {
+      clearTimeout(timer);
+      abort.abort();
+    };
+  }, [
+    localReadOnly,
+    showAddEdgeModal,
+    showAddMappingModal,
+    pickerQuery,
+    pickerPage,
+    pickerType,
+    pickerStandard,
+  ]);
+
+  const detailsAbort = useRef<AbortController | null>(null);
+  const mutationLock = useRef(false);
+  const [deleting, setDeleting] = useState(false);
+  const anySaving = savingNode || savingEdge || savingAlias || savingMapping || deleting;
+  useAdministrationDraftGuard(
+    showEditNodeModal ||
+      Boolean(showAddEdgeModal) ||
+      showAddMappingModal ||
+      Boolean(newAliasText.trim()) ||
+      anySaving,
+    isAr,
+  );
+  const fetchDetails = useCallback(
+    async (refreshRelations = false) => {
+      detailsAbort.current?.abort();
+      const abort = new AbortController();
+      detailsAbort.current = abort;
+      setLoading(true);
+      setError(null);
+      try {
+        if (localReadOnly) {
+          const previewNodes: AcademicTaxonomyNode[] = iscedFBaselineNodes.map((item) => ({
+            ...item,
+            nodeId: AcademicTaxonomyDeterministicKey.create(item),
+          }));
+          const previewNode = previewNodes.find((item) => item.nodeId === nodeId);
+          if (!previewNode) throw new Error('Academic taxonomy node not found');
+          const byId = new Map(previewNodes.map((item) => [item.nodeId, item]));
+          setNode(previewNode);
+          setChildren(
+            iscedFBaselineEdges.flatMap((edge) =>
+              edge.parent === nodeId && byId.has(edge.child) ? [byId.get(edge.child)!] : [],
+            ),
+          );
+          setParents(
+            iscedFBaselineEdges.flatMap((edge) =>
+              edge.child === nodeId && byId.has(edge.parent) ? [byId.get(edge.parent)!] : [],
+            ),
+          );
+          setAliases([]);
+          setMappings([]);
+          setMappedMajors([]);
+          setAllNodes(previewNodes);
+          setNodeFormData({
+            canonicalName: previewNode.canonicalName,
+            description: previewNode.description || '',
+            status: previewNode.status,
+            standardType: previewNode.standardType || 'CUSTOM_NATIONAL',
+            standardCode: previewNode.standardCode || '',
+            nameAr: previewNode.localizedNames?.ar || '',
+            nameEn: previewNode.localizedNames?.en || '',
+          });
+          return;
+        }
+        const basePath = localReadOnly ? '/academic-taxonomy' : '/admin/academic-taxonomy';
+        const nodeRes = await adminApiClient.request<AcademicTaxonomyNode>(
+          `${basePath}/nodes/${encodeURIComponent(nodeId!)}`,
+          { cache: 'no-store', signal: abort.signal },
+        );
+        const [aliasesRes, mappingsRes, majorsRes] = localReadOnly
+          ? [
+              { data: [] as AliasDto[] },
+              { data: [] as MappingDto[] },
+              { data: [] as MappedMajorDto[] },
+            ]
+          : await Promise.all([
+              adminApiClient.request<{ data: AliasDto[] }>(
+                `${basePath}/nodes/${encodeURIComponent(nodeId!)}/aliases`,
+                { signal: abort.signal },
+              ),
+              adminApiClient.request<{ data: MappingDto[] }>(
+                `${basePath}/nodes/${encodeURIComponent(nodeId!)}/mappings`,
+                { signal: abort.signal },
+              ),
+              adminApiClient.request<{ data: MappedMajorDto[] }>(
+                `${basePath}/nodes/${encodeURIComponent(nodeId!)}/mapped-majors`,
+              ),
+            ]);
+
+        if (abort.signal.aborted) return;
+        setNode(nodeRes);
+        if (refreshRelations) {
+          reloadParents();
+          reloadChildren();
+          reloadPath();
+        }
+        setAliases(aliasesRes.data || []);
+        setMappings(mappingsRes.data || []);
+        setMappedMajors(majorsRes.data || []);
+
+        // Pre-populate edit form
+        setNodeFormData({
+          canonicalName: nodeRes.canonicalName,
+          description: nodeRes.description || '',
+          status: nodeRes.status,
+          standardType: nodeRes.standardType || 'CUSTOM_NATIONAL',
+          standardCode: nodeRes.standardCode || '',
+          nameAr: nodeRes.localizedNames?.ar || '',
+          nameEn: nodeRes.localizedNames?.en || '',
+        });
+      } catch (err) {
+        if (abort.signal.aborted) return;
+        console.error(err);
+        setError(
+          isAr
+            ? 'تعذر تحميل بيانات العقدة من واجهة البيانات.'
+            : 'Unable to load node data from the API.',
+        );
+      } finally {
+        if (!abort.signal.aborted) setLoading(false);
       }
-      const basePath = localReadOnly ? '/academic-taxonomy' : '/admin/academic-taxonomy';
-      const nodeRes = await adminApiClient.request<AcademicTaxonomyNode>(`${basePath}/nodes/${nodeId}`, { cache: 'no-store' });
-      const [aliasesRes, mappingsRes, majorsRes] = localReadOnly
-        ? [
-            { data: [] as AliasDto[] },
-            { data: [] as MappingDto[] },
-            { data: [] as MappedMajorDto[] },
-          ]
-        : await Promise.all([
-            adminApiClient.request<{ data: AliasDto[] }>(`${basePath}/nodes/${nodeId}/aliases`),
-            adminApiClient.request<{ data: MappingDto[] }>(`${basePath}/nodes/${nodeId}/mappings`),
-            adminApiClient.request<{ data: MappedMajorDto[] }>(`${basePath}/nodes/${nodeId}/mapped-majors`),
-          ]);
-
-      setNode(nodeRes);
-      if (refreshRelations) { parentsRead.reload(); childrenRead.reload(); primaryPath.reload(); }
-      setAliases(aliasesRes.data || []);
-      setMappings(mappingsRes.data || []);
-      setMappedMajors(majorsRes.data || []);
-
-      // Pre-populate edit form
-      setNodeFormData({
-        canonicalName: nodeRes.canonicalName,
-        description: nodeRes.description || '',
-        status: nodeRes.status,
-        standardType: nodeRes.standardType || 'CUSTOM_NATIONAL',
-        standardCode: nodeRes.standardCode || '',
-        nameAr: nodeRes.localizedNames?.ar || '',
-        nameEn: nodeRes.localizedNames?.en || '',
-      });
-    } catch (err) {
-      console.error(err);
-      setError(isAr 
-        ? 'تعذر تحميل بيانات العقدة من واجهة البيانات.' 
-        : 'Unable to load node data from the API.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [nodeId, localReadOnly, isAr, reloadParents, reloadChildren, reloadPath],
+  );
 
   useEffect(() => {
     if (nodeId) {
-      setParentPage(1); setChildPage(1);
+      setParentPage(1);
+      setChildPage(1);
       fetchDetails();
     }
-  }, [nodeId]);
+    return () => detailsAbort.current?.abort();
+  }, [nodeId, fetchDetails]);
 
   // --- Run Validate Node ---
   const handleRunValidation = async () => {
-    if (!node) return;
+    if (!node || runningValidation) return;
     setRunningValidation(true);
     setValidationError(null);
     try {
-      const report = await adminApiClient.request<ValidationReport>('/admin/academic-taxonomy/nodes/validate', {
-        method: 'POST',
-        body: JSON.stringify({
-          nodeType: node.nodeType,
-          canonicalCode: node.canonicalCode,
-          canonicalName: node.canonicalName,
-          status: node.status,
-          standardType: node.standardType || 'CUSTOM_NATIONAL',
-          standardCode: node.standardCode || undefined,
-          localizedNames: node.localizedNames,
-          description: node.description,
-        }),
-      });
+      const report = await adminApiClient.request<ValidationReport>(
+        '/admin/academic-taxonomy/nodes/validate',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            nodeType: node.nodeType,
+            canonicalCode: node.canonicalCode,
+            canonicalName: node.canonicalName,
+            status: node.status,
+            standardType: node.standardType || 'CUSTOM_NATIONAL',
+            standardCode: node.standardCode || undefined,
+            localizedNames: node.localizedNames,
+            description: node.description,
+          }),
+        },
+      );
       setValidationReport(report);
-    } catch (err: any) {
+    } catch (cause) {
+      const err = cause instanceof Error ? cause : new Error('REQUEST_FAILED');
       console.error(err);
-      setValidationError(err.message || (isAr ? 'تعذر تشغيل التحقق.' : 'Unable to run validation.'));
+      setValidationError(
+        err.message || (isAr ? 'تعذر تشغيل التحقق.' : 'Unable to run validation.'),
+      );
     } finally {
       setRunningValidation(false);
     }
@@ -299,46 +457,67 @@ export function AcademicTaxonomyDetailPage() {
   const handleEditNodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!node) return;
-    if (nodeFormData.status !== node.status && !usageReady) { setNodeFormError(isAr ? 'انتظر تحميل أثر التغيير.' : 'Wait for the impact report.'); return; }
+    if (nodeFormData.status !== node.status && !usageReady) {
+      setNodeFormError(isAr ? 'انتظر تحميل أثر التغيير.' : 'Wait for the impact report.');
+      return;
+    }
+    if (localReadOnly || mutationLock.current) return;
     setSavingNode(true);
     setNodeFormError(null);
     if (!node.updatedAt) {
       setSavingNode(false);
-      setNodeFormError(isAr ? 'أعد تحميل العقدة للحصول على نسخة التعديل.' : 'Reload the node to obtain its edit version.');
+      setNodeFormError(
+        isAr
+          ? 'أعد تحميل العقدة للحصول على نسخة التعديل.'
+          : 'Reload the node to obtain its edit version.',
+      );
       return;
     }
 
-    const localizedNames: Record<string, string> = {};
-    if (nodeFormData.nameAr) localizedNames.ar = nodeFormData.nameAr;
-    if (nodeFormData.nameEn) localizedNames.en = nodeFormData.nameEn;
+    mutationLock.current = true;
+    const localizedNames: Record<string, string> = { ...node.localizedNames };
+    if (nodeFormData.nameAr.trim()) localizedNames.ar = nodeFormData.nameAr.trim();
+    else delete localizedNames.ar;
+    if (nodeFormData.nameEn.trim()) localizedNames.en = nodeFormData.nameEn.trim();
+    else delete localizedNames.en;
 
     try {
       const payload = {
         nodeType: node.nodeType,
         canonicalCode: node.canonicalCode, // Key is kept immutable in editing
         canonicalName: nodeFormData.canonicalName.trim(),
-        description: nodeFormData.description.trim() || undefined,
+        description: nodeFormData.description.trim(),
         status: nodeFormData.status,
         standardType: node.standardType || 'CUSTOM_NATIONAL',
         expectedUpdatedAt: node.updatedAt,
         lifecycle: nodeFormData.status !== node.status ? lifecycleDecision : undefined,
-        standardCode: nodeFormData.standardCode.trim() || undefined,
-        localizedNames: Object.keys(localizedNames).length > 0 ? localizedNames : undefined,
+        standardCode: nodeFormData.standardCode.trim(),
+        localizedNames,
       };
 
-      await adminApiClient.request(`/admin/academic-taxonomy/nodes/${encodeURIComponent(node.nodeId)}`, {
-        method: 'PUT',
-        body: JSON.stringify(payload),
-      });
+      await adminApiClient.request(
+        `/admin/academic-taxonomy/nodes/${encodeURIComponent(node.nodeId)}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(payload),
+        },
+      );
 
       setShowEditNodeModal(false);
       fetchDetails(true);
-    } catch (err: any) {
+    } catch (cause) {
+      const err = cause instanceof Error ? cause : new Error('REQUEST_FAILED');
       console.error(err);
-      setNodeFormError(String(err.message).includes('409')
-        ? (isAr ? 'تغيّرت العقدة أثناء التعديل. احفظ مدخلاتك ثم أعد تحميلها للمقارنة.' : 'The node changed while editing. Keep your inputs and reload to compare.')
-        : err.message || (isAr ? 'تعذر تحديث العقدة الأكاديمية.' : 'Unable to update academic node.'));
+      setNodeFormError(
+        String(err.message).includes('409')
+          ? isAr
+            ? 'تغيّرت العقدة أثناء التعديل. احفظ مدخلاتك ثم أعد تحميلها للمقارنة.'
+            : 'The node changed while editing. Keep your inputs and reload to compare.'
+          : err.message ||
+              (isAr ? 'تعذر تحديث العقدة الأكاديمية.' : 'Unable to update academic node.'),
+      );
     } finally {
+      mutationLock.current = false;
       setSavingNode(false);
     }
   };
@@ -347,6 +526,8 @@ export function AcademicTaxonomyDetailPage() {
   const handleAddEdgeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!node || !selectedEdgeNodeId) return;
+    if (localReadOnly || mutationLock.current) return;
+    mutationLock.current = true;
     setSavingEdge(true);
     setEdgeError(null);
 
@@ -366,10 +547,14 @@ export function AcademicTaxonomyDetailPage() {
       setShowAddEdgeModal(null);
       setSelectedEdgeNodeId('');
       fetchDetails(true);
-    } catch (err: any) {
+    } catch (cause) {
+      const err = cause instanceof Error ? cause : new Error('REQUEST_FAILED');
       console.error(err);
-      setEdgeError(err.message || (isAr ? 'فشل إنشاء العلاقة الهرمية.' : 'Failed to create hierarchy edge.'));
+      setEdgeError(
+        err.message || (isAr ? 'فشل إنشاء العلاقة الهرمية.' : 'Failed to create hierarchy edge.'),
+      );
     } finally {
+      mutationLock.current = false;
       setSavingEdge(false);
     }
   };
@@ -378,23 +563,32 @@ export function AcademicTaxonomyDetailPage() {
   const handleDeleteEdge = async (otherNodeId: string, direction: 'parent' | 'child') => {
     if (!node) return;
     const isConfirm = window.confirm(
-      isAr 
-        ? 'هل أنت متأكد من حذف هذه العلاقة الهرمية؟' 
-        : 'Are you sure you want to delete this hierarchical connection?'
+      isAr
+        ? 'هل أنت متأكد من حذف هذه العلاقة الهرمية؟'
+        : 'Are you sure you want to delete this hierarchical connection?',
     );
-    if (!isConfirm) return;
+    if (!isConfirm || localReadOnly || mutationLock.current) return;
+    mutationLock.current = true;
+    setDeleting(true);
 
     const parentNodeId = direction === 'parent' ? otherNodeId : node.nodeId;
     const childNodeId = direction === 'child' ? otherNodeId : node.nodeId;
 
     try {
-      await adminApiClient.request(`/admin/academic-taxonomy/edges/by-nodes?parentNodeId=${parentNodeId}&childNodeId=${childNodeId}`, {
-        method: 'DELETE',
-      });
+      await adminApiClient.request(
+        `/admin/academic-taxonomy/edges/by-nodes?parentNodeId=${encodeURIComponent(parentNodeId)}&childNodeId=${encodeURIComponent(childNodeId)}`,
+        {
+          method: 'DELETE',
+        },
+      );
       fetchDetails(true);
-    } catch (err: any) {
+    } catch (cause) {
+      const err = cause instanceof Error ? cause : new Error('REQUEST_FAILED');
       console.error(err);
       alert(err.message || (isAr ? 'فشل حذف العلاقة.' : 'Failed to delete relationship.'));
+    } finally {
+      mutationLock.current = false;
+      setDeleting(false);
     }
   };
 
@@ -402,6 +596,8 @@ export function AcademicTaxonomyDetailPage() {
   const handleAddAliasSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!node || !newAliasText.trim()) return;
+    if (localReadOnly || mutationLock.current) return;
+    mutationLock.current = true;
     setSavingAlias(true);
     setAliasError(null);
 
@@ -417,34 +613,57 @@ export function AcademicTaxonomyDetailPage() {
 
       setNewAliasText('');
       fetchDetails(true);
-    } catch (err: any) {
+    } catch (cause) {
+      const err = cause instanceof Error ? cause : new Error('REQUEST_FAILED');
       console.error(err);
-      setAliasError(err.message || (isAr ? 'فشل إضافة المرادف الأكاديمي.' : 'Failed to add academic alias.'));
+      setAliasError(
+        err.message || (isAr ? 'فشل إضافة المرادف الأكاديمي.' : 'Failed to add academic alias.'),
+      );
     } finally {
+      mutationLock.current = false;
       setSavingAlias(false);
     }
   };
 
   // --- Delete Alias ---
   const handleDeleteAlias = async (aliasId: string) => {
-    const isConfirm = window.confirm(isAr ? 'هل أنت متأكد من حذف هذا المرادف؟' : 'Are you sure you want to delete this alias?');
-    if (!isConfirm) return;
+    const isConfirm = window.confirm(
+      isAr ? 'هل أنت متأكد من حذف هذا المرادف؟' : 'Are you sure you want to delete this alias?',
+    );
+    if (!isConfirm || localReadOnly || mutationLock.current) return;
+    mutationLock.current = true;
+    setDeleting(true);
 
     try {
-      await adminApiClient.request(`/admin/academic-taxonomy/aliases/${aliasId}`, {
-        method: 'DELETE',
-      });
+      await adminApiClient.request(
+        `/admin/academic-taxonomy/aliases/${encodeURIComponent(aliasId)}`,
+        {
+          method: 'DELETE',
+        },
+      );
       fetchDetails(true);
-    } catch (err: any) {
+    } catch (cause) {
+      const err = cause instanceof Error ? cause : new Error('REQUEST_FAILED');
       console.error(err);
       alert(err.message || (isAr ? 'تعذر حذف المرادف.' : 'Failed to delete alias.'));
+    } finally {
+      mutationLock.current = false;
+      setDeleting(false);
     }
   };
 
   // --- Add Standard Mapping Submit ---
   const handleAddMappingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!node || !mappingFormData.targetNodeId || !currentMappingPreview || currentMappingPreview.issues.some(issue => issue.severity === 'ERROR')) return;
+    if (
+      !node ||
+      !mappingFormData.targetNodeId ||
+      !currentMappingPreview ||
+      currentMappingPreview.issues.some((issue) => issue.severity === 'ERROR')
+    )
+      return;
+    if (localReadOnly || mutationLock.current) return;
+    mutationLock.current = true;
     setSavingMapping(true);
     setMappingError(null);
 
@@ -472,27 +691,44 @@ export function AcademicTaxonomyDetailPage() {
         notes: '',
       });
       fetchDetails(true);
-    } catch (err: any) {
+    } catch (cause) {
+      const err = cause instanceof Error ? cause : new Error('REQUEST_FAILED');
       console.error(err);
-      setMappingError(err.message || (isAr ? 'فشل ربط المعيار.' : 'Failed to add standard mapping.'));
+      setMappingError(
+        err.message || (isAr ? 'فشل ربط المعيار.' : 'Failed to add standard mapping.'),
+      );
     } finally {
+      mutationLock.current = false;
       setSavingMapping(false);
     }
   };
 
   // --- Delete Mapping ---
   const handleDeleteMapping = async (mappingId: string) => {
-    const isConfirm = window.confirm(isAr ? 'هل تريد حذف هذا الربط المعياري؟' : 'Do you want to delete this standard mapping?');
-    if (!isConfirm) return;
+    const isConfirm = window.confirm(
+      isAr ? 'هل تريد حذف هذا الربط المعياري؟' : 'Do you want to delete this standard mapping?',
+    );
+    if (!isConfirm || localReadOnly || mutationLock.current) return;
+    mutationLock.current = true;
+    setDeleting(true);
 
     try {
-      await adminApiClient.request(`/admin/academic-taxonomy/mappings/${mappingId}`, {
-        method: 'DELETE',
-      });
+      await adminApiClient.request(
+        `/admin/academic-taxonomy/mappings/${encodeURIComponent(mappingId)}`,
+        {
+          method: 'DELETE',
+        },
+      );
       fetchDetails(true);
-    } catch (err: any) {
+    } catch (cause) {
+      const err = cause instanceof Error ? cause : new Error('REQUEST_FAILED');
       console.error(err);
-      alert(err.message || (isAr ? 'تعذر حذف الربط المعياري.' : 'Failed to delete standard mapping.'));
+      alert(
+        err.message || (isAr ? 'تعذر حذف الربط المعياري.' : 'Failed to delete standard mapping.'),
+      );
+    } finally {
+      mutationLock.current = false;
+      setDeleting(false);
     }
   };
 
@@ -507,12 +743,18 @@ export function AcademicTaxonomyDetailPage() {
   if (error || !node) {
     return (
       <div className="max-w-4xl mx-auto mt-8 px-4">
-        <Link to="/academic-taxonomy" className="text-sm font-bold text-slate-700 hover:underline mb-4 inline-flex items-center gap-1">
-          <ArrowLeft className="h-4 w-4" /> 
+        <Link
+          to="/academic-taxonomy"
+          className="text-sm font-bold text-slate-700 hover:underline mb-4 inline-flex items-center gap-1"
+        >
+          <ArrowLeft className="h-4 w-4" />
           {isAr ? 'العودة إلى التصنيف الأكاديمي' : 'Back to Academic Taxonomy'}
         </Link>
         <div className="bg-red-50 text-red-700 p-6 rounded-2xl border border-red-100 text-center font-bold text-sm">
-          {error || (isAr ? 'لم يتم العثور على عقدة التصنيف المطلوبة.' : 'Required taxonomy node not found.')}
+          {error ||
+            (isAr
+              ? 'لم يتم العثور على عقدة التصنيف المطلوبة.'
+              : 'Required taxonomy node not found.')}
         </div>
       </div>
     );
@@ -520,70 +762,145 @@ export function AcademicTaxonomyDetailPage() {
 
   const tabs = [
     { id: 'overview', label: isAr ? 'نظرة عامة والبيانات' : 'Overview & Metadata' },
-    { id: 'hierarchy', label: isAr ? 'الهيكل العلاقات' : 'Hierarchy / Edges' },
+    { id: 'hierarchy', label: isAr ? 'الشجرة والعلاقات' : 'Hierarchy' },
     { id: 'aliases', label: isAr ? 'المرادفات' : 'Aliases' },
     { id: 'mappings', label: isAr ? 'الربط بالمعايير العالمية' : 'Standard Mappings' },
     { id: 'majors', label: isAr ? 'التخصصات المرتبطة' : 'Mapped Majors' },
-    { id: 'validation', label: isAr ? 'فحص التحقق والنزاهة' : 'Validation Report' }
+    { id: 'usage', label: isAr ? 'الاستخدام وأثر التغيير' : 'Usage and impact' },
+    { id: 'validation', label: isAr ? 'فحص التحقق والنزاهة' : 'Validation Report' },
   ];
 
   const translateNodeType = (type: string) => {
     if (!isAr) return type.replace('_', ' ');
     switch (type) {
-      case 'ACADEMIC_FIELD': return 'مجال أكاديمي';
-      case 'DISCIPLINE': return 'فرع أكاديمي';
-      case 'PROGRAM_AREA': return 'مجال برنامج';
-      case 'SPECIALIZATION_CATEGORY': return 'فئة تخصص';
-      case 'STANDARD_CLASSIFICATION': return 'تصنيف معياري';
-      default: return type;
+      case 'ACADEMIC_FIELD':
+        return 'مجال أكاديمي';
+      case 'DISCIPLINE':
+        return 'فرع أكاديمي';
+      case 'PROGRAM_AREA':
+        return 'مجال برنامج';
+      case 'SPECIALIZATION_CATEGORY':
+        return 'فئة تخصص';
+      case 'STANDARD_CLASSIFICATION':
+        return 'تصنيف معياري';
+      default:
+        return type;
     }
   };
 
   const translateStatus = (status: string) => {
     if (!isAr) return status;
     switch (status) {
-      case 'DRAFT': return 'مسودة';
-      case 'READY_TO_REVIEW': return 'جاهز للمراجعة';
-      case 'ACTIVE': return 'نشط';
-      case 'ARCHIVED': return 'مؤرشف';
-      default: return status;
+      case 'DRAFT':
+        return 'مسودة';
+      case 'READY_TO_REVIEW':
+        return 'جاهز للمراجعة';
+      case 'ACTIVE':
+        return 'نشط';
+      case 'ARCHIVED':
+        return 'مؤرشف';
+      default:
+        return status;
     }
   };
 
   // Filter nodes that are not the current node to prevent self-loop edges
-  const potentialEdgeNodes = allNodes.filter(n => n.nodeId !== node.nodeId);
-  const pickerControls = <div className="space-y-2">
-    <label className="block text-xs">{isAr ? 'بحث عن عقدة' : 'Search nodes'}
-      <input value={pickerQuery} maxLength={200} onChange={event => { setPickerQuery(event.target.value); setPickerPage(1); }} className="w-full border rounded p-2" /></label>
-    <label className="block text-xs">{isAr ? 'نوع العقدة' : 'Node type'}
-      <select value={pickerType} onChange={event => { setPickerType(event.target.value); setPickerPage(1); }}>
-        <option value="">{isAr ? 'الكل' : 'All'}</option>{['ACADEMIC_FIELD','DISCIPLINE','PROGRAM_AREA','SPECIALIZATION_CATEGORY','STANDARD_CLASSIFICATION'].map(value => <option key={value}>{value}</option>)}
-      </select></label>
-    <label className="block text-xs">{isAr ? 'المعيار' : 'Standard'}
-      <select value={pickerStandard} onChange={event => { setPickerStandard(event.target.value); setPickerPage(1); }}>
-        <option value="">{isAr ? 'الكل' : 'All'}</option>{['ISCED','CIP','CUSTOM_NATIONAL'].map(value => <option key={value}>{value}</option>)}
-      </select></label>
-    {pickerError && <p role="alert">{isAr ? 'تعذر تحميل العقد.' : 'Nodes unavailable.'}</p>}
-    {pickerLoading && <p role="status">{isAr ? 'جار البحث…' : 'Searching…'}</p>}
-    <div className="flex gap-3"><button type="button" disabled={pickerPage === 1 || pickerLoading} onClick={() => setPickerPage(value => value - 1)}>{isAr ? 'السابق' : 'Previous'}</button>
-      <span>{pickerPage}</span><button type="button" disabled={!pickerHasNext || pickerLoading} onClick={() => setPickerPage(value => value + 1)}>{isAr ? 'التالي' : 'Next'}</button></div>
-  </div>;
-
+  const potentialEdgeNodes = allNodes.filter((n) => n.nodeId !== node.nodeId);
+  const pickerControls = (
+    <div className="space-y-2">
+      <label className="block text-xs">
+        {isAr ? 'بحث عن عقدة' : 'Search nodes'}
+        <input
+          value={pickerQuery}
+          maxLength={200}
+          onChange={(event) => {
+            setPickerQuery(event.target.value);
+            setPickerPage(1);
+          }}
+          className="w-full border rounded p-2"
+        />
+      </label>
+      <label className="block text-xs">
+        {isAr ? 'نوع العقدة' : 'Node type'}
+        <select
+          value={pickerType}
+          onChange={(event) => {
+            setPickerType(event.target.value);
+            setPickerPage(1);
+          }}
+        >
+          <option value="">{isAr ? 'الكل' : 'All'}</option>
+          {[
+            'ACADEMIC_FIELD',
+            'DISCIPLINE',
+            'PROGRAM_AREA',
+            'SPECIALIZATION_CATEGORY',
+            'STANDARD_CLASSIFICATION',
+          ].map((value) => (
+            <option key={value}>{value}</option>
+          ))}
+        </select>
+      </label>
+      <label className="block text-xs">
+        {isAr ? 'المعيار' : 'Standard'}
+        <select
+          value={pickerStandard}
+          onChange={(event) => {
+            setPickerStandard(event.target.value);
+            setPickerPage(1);
+          }}
+        >
+          <option value="">{isAr ? 'الكل' : 'All'}</option>
+          {['ISCED', 'CIP', 'CUSTOM_NATIONAL'].map((value) => (
+            <option key={value}>{value}</option>
+          ))}
+        </select>
+      </label>
+      {pickerError && <p role="alert">{isAr ? 'تعذر تحميل العقد.' : 'Nodes unavailable.'}</p>}
+      {pickerLoading && <p role="status">{isAr ? 'جار البحث…' : 'Searching…'}</p>}
+      <div className="flex gap-3">
+        <button
+          type="button"
+          disabled={pickerPage === 1 || pickerLoading}
+          onClick={() => setPickerPage((value) => value - 1)}
+        >
+          {isAr ? 'السابق' : 'Previous'}
+        </button>
+        <span>{pickerPage}</span>
+        <button
+          type="button"
+          disabled={!pickerHasNext || pickerLoading}
+          onClick={() => setPickerPage((value) => value + 1)}
+        >
+          {isAr ? 'التالي' : 'Next'}
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <div className={`max-w-5xl mx-auto space-y-6 pb-12 px-4 ${isAr ? 'rtl text-right' : 'ltr text-left'}`} dir={isAr ? 'rtl' : 'ltr'}>
+    <div
+      className={`reference-workspace taxonomy-workspace mx-auto space-y-6 pb-8 ${isAr ? 'rtl text-right' : 'ltr text-left'}`}
+      dir={isAr ? 'rtl' : 'ltr'}
+    >
       <div className="flex items-center gap-4">
-        <Link to="/academic-taxonomy" className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-600 flex items-center justify-center border border-slate-200">
+        <Link
+          to="/academic-taxonomy"
+          aria-label={isAr ? 'العودة إلى التصنيف الأكاديمي' : 'Back to academic classification'}
+          className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-600 flex items-center justify-center border border-slate-200"
+        >
           <ArrowLeft className={`h-4 w-4 ${isAr ? 'rotate-180' : ''}`} />
         </Link>
         <div>
-          <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">{isAr ? 'التصنيف الأكاديمي والدرجات' : 'Academic Taxonomy'}</span>
-          <h1 className="text-xs font-bold text-slate-500 leading-none">{node.canonicalCode}</h1>
+          <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">
+            {isAr ? 'التصنيف الأكاديمي والدرجات' : 'Academic Taxonomy'}
+          </span>
+          <span className="text-xs text-slate-500">{node.canonicalCode}</span>
         </div>
       </div>
 
       {/* Header Banner */}
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 text-white rounded-3xl p-6 shadow-sm border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="taxonomy-hero flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="bg-emerald-500/15 text-emerald-300 border border-emerald-500/20 text-[10px] font-mono font-bold px-2 py-0.5 rounded-md">
@@ -606,7 +923,12 @@ export function AcademicTaxonomyDetailPage() {
         </div>
 
         <button
-          onClick={() => { setLifecycleDecision({ reason: '', acknowledgeHistoricalReferences: false }); setUsageReady(false); setShowEditNodeModal(true); }}
+          disabled={localReadOnly || anySaving}
+          onClick={() => {
+            setLifecycleDecision({ reason: '', acknowledgeHistoricalReferences: false });
+            setUsageReady(false);
+            setShowEditNodeModal(true);
+          }}
           className="bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 border border-slate-200"
         >
           <Edit2 className="h-3.5 w-3.5" />
@@ -614,85 +936,124 @@ export function AcademicTaxonomyDetailPage() {
         </button>
       </div>
 
-      {/* Tab bar */}
-      <div className="flex border-b border-slate-200 gap-6 overflow-x-auto scrollbar-none pb-1">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`pb-3 text-xs font-bold whitespace-nowrap border-b-2 transition-all ${
-              activeTab === tab.id 
-                ? 'border-emerald-600 text-emerald-800' 
-                : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="taxonomy-toolbar">
+        <TaxonomyRefresh
+          isAr={isAr}
+          disabled={
+            anySaving ||
+            showEditNodeModal ||
+            Boolean(showAddEdgeModal) ||
+            showAddMappingModal ||
+            Boolean(newAliasText.trim())
+          }
+          onClick={() => fetchDetails(true)}
+        />
+        <span>
+          {isAr ? 'آخر تحديث: ' : 'Last updated: '}
+          {node.updatedAt ? new Date(node.updatedAt).toLocaleString(isAr ? 'ar' : 'en') : '—'}
+        </span>
       </div>
-
+      <TaxonomyNavigation
+        secondary
+        items={tabs}
+        active={activeTab}
+        onChange={setActiveTab}
+        disabled={anySaving}
+        label={isAr ? 'تفاصيل التصنيف' : 'Classification details'}
+      />
       {/* Tab Panels */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-xs">
-        
         {/* PANEL: OVERVIEW */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{isAr ? 'الاسم المعتمد الرئيسي' : 'Canonical Name'}</h3>
+                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  {isAr ? 'الاسم المعتمد الرئيسي' : 'Canonical Name'}
+                </h3>
                 <div className="text-sm font-bold text-slate-950">{node.canonicalName}</div>
               </div>
               <div>
-                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{isAr ? 'الرمز المعتمد' : 'Canonical Code'}</h3>
-                <div className="text-sm font-mono font-bold text-slate-900">{node.canonicalCode}</div>
+                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  {isAr ? 'الرمز المعتمد' : 'Canonical Code'}
+                </h3>
+                <div className="text-sm font-mono font-bold text-slate-900">
+                  {node.canonicalCode}
+                </div>
               </div>
               <div>
-                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{isAr ? 'نوع العقدة' : 'Node Type'}</h3>
+                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  {isAr ? 'نوع العقدة' : 'Node Type'}
+                </h3>
                 <span className="inline-block bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-200/60">
                   {translateNodeType(node.nodeType)}
                 </span>
               </div>
               <div>
-                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{isAr ? 'الحالة' : 'Status'}</h3>
-                <span className={`inline-block px-2.5 py-1 rounded-lg text-xs font-bold ${
-                  node.status === 'ACTIVE' ? 'bg-green-50 text-green-700 border border-green-200' :
-                  node.status === 'DRAFT' ? 'bg-slate-50 text-slate-600 border border-slate-200' :
-                  node.status === 'READY_TO_REVIEW' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                  'bg-red-50 text-red-700 border border-red-200'
-                }`}>
+                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  {isAr ? 'الحالة' : 'Status'}
+                </h3>
+                <span
+                  className={`inline-block px-2.5 py-1 rounded-lg text-xs font-bold ${
+                    node.status === 'ACTIVE'
+                      ? 'bg-green-50 text-green-700 border border-green-200'
+                      : node.status === 'DRAFT'
+                        ? 'bg-slate-50 text-slate-600 border border-slate-200'
+                        : node.status === 'READY_TO_REVIEW'
+                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          : 'bg-red-50 text-red-700 border border-red-200'
+                  }`}
+                >
                   {translateStatus(node.status)}
                 </span>
               </div>
               {node.standardType && (
                 <div>
-                  <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{isAr ? 'نوع المعيار المرجعي' : 'Standard Type'}</h3>
+                  <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                    {isAr ? 'نوع المعيار المرجعي' : 'Standard Type'}
+                  </h3>
                   <div className="text-sm font-semibold text-slate-900">{node.standardType}</div>
                 </div>
               )}
               {node.standardCode && (
                 <div>
-                  <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{isAr ? 'رمز المعيار المرجعي' : 'Standard Code'}</h3>
-                  <div className="text-sm font-mono font-bold text-slate-900">{node.standardCode}</div>
+                  <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                    {isAr ? 'رمز المعيار المرجعي' : 'Standard Code'}
+                  </h3>
+                  <div className="text-sm font-mono font-bold text-slate-900">
+                    {node.standardCode}
+                  </div>
                 </div>
               )}
             </div>
 
             {node.description && (
               <div>
-                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{isAr ? 'الوصف والتفاصيل' : 'Description'}</h3>
-                <p className="text-xs text-slate-700 bg-slate-50 p-4 rounded-xl leading-relaxed border border-slate-100">{node.description}</p>
+                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                  {isAr ? 'الوصف والتفاصيل' : 'Description'}
+                </h3>
+                <p className="text-xs text-slate-700 bg-slate-50 p-4 rounded-xl leading-relaxed border border-slate-100">
+                  {node.description}
+                </p>
               </div>
             )}
 
             <div>
-              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{isAr ? 'الترجمات والأسماء المحلية (localizedNames)' : 'Localized Translations'}</h3>
+              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                {isAr ? 'الترجمات والأسماء المحلية (localizedNames)' : 'Localized Translations'}
+              </h3>
               {node.localizedNames && Object.keys(node.localizedNames).length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {Object.entries(node.localizedNames).map(([locale, name]) => (
-                    <div key={locale} className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <div
+                      key={locale}
+                      className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100"
+                    >
                       <Globe className="h-4 w-4 text-slate-400 shrink-0" />
                       <div>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase block">{locale}</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase block">
+                          {locale}
+                        </span>
                         <span className="text-xs font-bold text-slate-900">{name}</span>
                       </div>
                     </div>
@@ -710,15 +1071,49 @@ export function AcademicTaxonomyDetailPage() {
         {/* PANEL: HIERARCHY / EDGES */}
         {activeTab === 'hierarchy' && (
           <div className="space-y-8">
-            {!localReadOnly && <div className="rounded border p-3 space-y-2 text-xs">
-              <h3 className="font-bold">{isAr ? 'المسار الرئيسي والآباء البديلون' : 'Primary path and alternative parents'}</h3>
-              {primaryPath.loading && <p role="status">{isAr ? 'جار تحميل المسار…' : 'Loading path…'}</p>}
-              {primaryPath.error && <p role="alert">{primaryPath.error}</p>}
-              <nav aria-label={isAr ? 'المسار الرئيسي' : 'Primary path'} className="flex flex-wrap gap-2">{primaryPath.data?.path.map((item, index) => <span key={item.nodeId}>{index > 0 && ' / '}<Link className="underline" to={`/academic-taxonomy/${encodeURIComponent(item.nodeId)}`}>{item.canonicalName}</Link></span>)}</nav>
-              <p>{isAr ? 'الآباء البديلون: ' : 'Alternative parents: '}{primaryPath.data?.alternativeTotal ?? '—'}</p>
-              {primaryPath.data?.termination === 'DEPTH_LIMIT' && <p role="status">{isAr ? 'المسار المعروض محدود بـ32 مستوى.' : 'Displayed path is bounded to 32 levels.'}</p>}
-              {(parentsRead.error || childrenRead.error) && <p role="alert">{parentsRead.error || childrenRead.error}</p>}
-            </div>}
+            {!localReadOnly && (
+              <div className="rounded border p-3 space-y-2 text-xs">
+                <h3 className="font-bold">
+                  {isAr
+                    ? 'المسار الرئيسي والآباء البديلون'
+                    : 'Primary path and alternative parents'}
+                </h3>
+                {primaryPath.loading && (
+                  <p role="status">{isAr ? 'جار تحميل المسار…' : 'Loading path…'}</p>
+                )}
+                {primaryPath.error && <p role="alert">{primaryPath.error}</p>}
+                <nav
+                  aria-label={isAr ? 'المسار الرئيسي' : 'Primary path'}
+                  className="flex flex-wrap gap-2"
+                >
+                  {primaryPath.data?.path.map((item, index) => (
+                    <span key={item.nodeId}>
+                      {index > 0 && ' / '}
+                      <Link
+                        className="underline"
+                        to={`/academic-taxonomy/${encodeURIComponent(item.nodeId)}`}
+                      >
+                        {item.canonicalName}
+                      </Link>
+                    </span>
+                  ))}
+                </nav>
+                <p>
+                  {isAr ? 'الآباء البديلون: ' : 'Alternative parents: '}
+                  {primaryPath.data?.alternativeTotal ?? '—'}
+                </p>
+                {primaryPath.data?.termination === 'DEPTH_LIMIT' && (
+                  <p role="status">
+                    {isAr
+                      ? 'المسار المعروض محدود بـ32 مستوى.'
+                      : 'Displayed path is bounded to 32 levels.'}
+                  </p>
+                )}
+                {(parentsRead.error || childrenRead.error) && (
+                  <p role="alert">{parentsRead.error || childrenRead.error}</p>
+                )}
+              </div>
+            )}
             {/* Parents Section */}
             <div>
               <div className="flex justify-between items-center mb-4">
@@ -741,15 +1136,31 @@ export function AcademicTaxonomyDetailPage() {
                 </div>
               ) : (
                 <div className="grid gap-3">
-                  {parents.map(parent => (
-                    <div key={parent.nodeId} className="flex items-center justify-between bg-white p-3.5 rounded-xl border border-slate-200">
+                  {parents.map((parent) => (
+                    <div
+                      key={parent.nodeId}
+                      className="flex items-center justify-between bg-white p-3.5 rounded-xl border border-slate-200"
+                    >
                       <div className="flex items-center gap-3">
                         <Box className="h-4 w-4 text-slate-400" />
                         <div>
-                          <Link to={`/academic-taxonomy/${parent.nodeId}`} className="font-bold text-slate-950 text-xs hover:underline">
+                          <Link
+                            to={`/academic-taxonomy/${parent.nodeId}`}
+                            className="font-bold text-slate-950 text-xs hover:underline"
+                          >
                             {parent.canonicalName}
                           </Link>
-                          <div className="text-[10px] text-slate-500 font-mono">{parent.canonicalCode} · {parentsRead.data?.links?.find(link => link.nodeId === parent.nodeId)?.isPrimary ? isAr ? 'رئيسي' : 'Primary' : isAr ? 'بديل' : 'Alternative'}</div>
+                          <div className="text-[10px] text-slate-500 font-mono">
+                            {parent.canonicalCode} ·{' '}
+                            {parentsRead.data?.links?.find((link) => link.nodeId === parent.nodeId)
+                              ?.isPrimary
+                              ? isAr
+                                ? 'رئيسي'
+                                : 'Primary'
+                              : isAr
+                                ? 'بديل'
+                                : 'Alternative'}
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -757,6 +1168,8 @@ export function AcademicTaxonomyDetailPage() {
                           {translateNodeType(parent.nodeType)}
                         </span>
                         <button
+                          aria-label={isAr ? 'إزالة رابط الأب' : 'Remove parent link'}
+                          disabled={localReadOnly || anySaving}
                           onClick={() => handleDeleteEdge(parent.nodeId, 'parent')}
                           className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition-colors border border-transparent hover:border-red-100"
                         >
@@ -769,7 +1182,15 @@ export function AcademicTaxonomyDetailPage() {
               )}
             </div>
 
-            {!localReadOnly && parentsRead.data && <TaxonomyPagination page={parentPage} total={parentsRead.data.total} loading={parentsRead.loading} onPage={setParentPage} isAr={isAr} />}
+            {!localReadOnly && parentsRead.data && (
+              <TaxonomyPagination
+                page={parentPage}
+                total={parentsRead.data.total}
+                loading={parentsRead.loading}
+                onPage={setParentPage}
+                isAr={isAr}
+              />
+            )}
             {/* Children Section */}
             <div>
               <div className="flex justify-between items-center mb-4">
@@ -792,15 +1213,23 @@ export function AcademicTaxonomyDetailPage() {
                 </div>
               ) : (
                 <div className="grid gap-3">
-                  {children.map(child => (
-                    <div key={child.nodeId} className="flex items-center justify-between bg-white p-3.5 rounded-xl border border-slate-200">
+                  {children.map((child) => (
+                    <div
+                      key={child.nodeId}
+                      className="flex items-center justify-between bg-white p-3.5 rounded-xl border border-slate-200"
+                    >
                       <div className="flex items-center gap-3">
                         <Box className="h-4 w-4 text-slate-400" />
                         <div>
-                          <Link to={`/academic-taxonomy/${child.nodeId}`} className="font-bold text-slate-950 text-xs hover:underline">
+                          <Link
+                            to={`/academic-taxonomy/${child.nodeId}`}
+                            className="font-bold text-slate-950 text-xs hover:underline"
+                          >
                             {child.canonicalName}
                           </Link>
-                          <div className="text-[10px] text-slate-500 font-mono">{child.canonicalCode}</div>
+                          <div className="text-[10px] text-slate-500 font-mono">
+                            {child.canonicalCode}
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -808,6 +1237,8 @@ export function AcademicTaxonomyDetailPage() {
                           {translateNodeType(child.nodeType)}
                         </span>
                         <button
+                          aria-label={isAr ? 'إزالة رابط الابن' : 'Remove child link'}
+                          disabled={localReadOnly || anySaving}
                           onClick={() => handleDeleteEdge(child.nodeId, 'child')}
                           className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition-colors border border-transparent hover:border-red-100"
                         >
@@ -819,7 +1250,15 @@ export function AcademicTaxonomyDetailPage() {
                 </div>
               )}
             </div>
-            {!localReadOnly && childrenRead.data && <TaxonomyPagination page={childPage} total={childrenRead.data.total} loading={childrenRead.loading} onPage={setChildPage} isAr={isAr} />}
+            {!localReadOnly && childrenRead.data && (
+              <TaxonomyPagination
+                page={childPage}
+                total={childrenRead.data.total}
+                loading={childrenRead.loading}
+                onPage={setChildPage}
+                isAr={isAr}
+              />
+            )}
           </div>
         )}
 
@@ -832,43 +1271,52 @@ export function AcademicTaxonomyDetailPage() {
             </h3>
 
             {/* Quick Add Alias */}
-            <form onSubmit={handleAddAliasSubmit} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row gap-3 items-end">
-              <div className="flex-1">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                  {isAr ? 'المرادف / المسمى البديل' : 'Alias Text'}
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder={isAr ? 'مثال: علم الحاسوب والتقنية' : 'e.g. CS & Technologies'}
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
-                  value={newAliasText}
-                  onChange={(e) => setNewAliasText(e.target.value)}
-                />
-              </div>
+            <form
+              onSubmit={handleAddAliasSubmit}
+              className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row gap-3 items-end"
+            >
+              <fieldset disabled={savingAlias} className="space-y-4 min-w-0">
+                <div className="flex-1">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                    {isAr ? 'المرادف / المسمى البديل' : 'Alias Text'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder={isAr ? 'مثال: علم الحاسوب والتقنية' : 'e.g. CS & Technologies'}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
+                    value={newAliasText}
+                    onChange={(e) => setNewAliasText(e.target.value)}
+                  />
+                </div>
 
-              <div className="w-full sm:w-32">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                  {isAr ? 'اللغة / الكود' : 'Locale'}
-                </label>
-                <select
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-white focus:outline-none"
-                  value={newAliasLocale}
-                  onChange={(e) => setNewAliasLocale(e.target.value)}
+                <div className="w-full sm:w-32">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                    {isAr ? 'اللغة / الكود' : 'Locale'}
+                  </label>
+                  <select
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-white focus:outline-none"
+                    value={newAliasLocale}
+                    onChange={(e) => setNewAliasLocale(e.target.value)}
+                  >
+                    <option value="ar">{isAr ? 'العربية' : 'Arabic'}</option>
+                    <option value="en">English</option>
+                  </select>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={savingAlias}
+                  className="bg-[#142B5F] hover:bg-[#0E7C86] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 shrink-0"
                 >
-                  <option value="ar">{isAr ? 'العربية' : 'Arabic'}</option>
-                  <option value="en">English</option>
-                </select>
-              </div>
-
-              <button
-                type="submit"
-                disabled={savingAlias}
-                className="bg-[#142B5F] hover:bg-[#0E7C86] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 shrink-0"
-              >
-                {savingAlias ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
-                {isAr ? 'إضافة مرادف' : 'Add Alias'}
-              </button>
+                  {savingAlias ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Plus className="h-3.5 w-3.5" />
+                  )}
+                  {isAr ? 'إضافة مرادف' : 'Add Alias'}
+                </button>
+              </fieldset>
             </form>
 
             {aliasError && (
@@ -880,12 +1328,17 @@ export function AcademicTaxonomyDetailPage() {
             {/* List */}
             {aliases.length === 0 ? (
               <div className="text-slate-500 text-xs bg-slate-50/50 p-6 rounded-xl border border-dashed text-center">
-                {isAr ? 'لم يتم إضافة مرادفات لهذه العقدة الأكاديمية حتى الآن.' : 'No aliases registered for this node.'}
+                {isAr
+                  ? 'لم يتم إضافة مرادفات لهذه العقدة الأكاديمية حتى الآن.'
+                  : 'No aliases registered for this node.'}
               </div>
             ) : (
               <div className="grid gap-3">
-                {aliases.map(alias => (
-                  <div key={alias.aliasId} className="flex justify-between items-center bg-white p-3 border border-slate-200 rounded-xl">
+                {aliases.map((alias) => (
+                  <div
+                    key={alias.aliasId}
+                    className="flex justify-between items-center bg-white p-3 border border-slate-200 rounded-xl"
+                  >
                     <div className="flex items-center gap-3">
                       <Tag className="h-4 w-4 text-slate-400" />
                       <span className="font-bold text-slate-900 text-xs">{alias.alias}</span>
@@ -895,6 +1348,8 @@ export function AcademicTaxonomyDetailPage() {
                         {alias.locale}
                       </span>
                       <button
+                        aria-label={isAr ? 'حذف المرادف' : 'Remove alias'}
+                        disabled={localReadOnly || anySaving}
                         onClick={() => handleDeleteAlias(alias.aliasId)}
                         className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition-colors border border-transparent hover:border-red-100"
                       >
@@ -917,7 +1372,15 @@ export function AcademicTaxonomyDetailPage() {
                 {isAr ? 'الربط بالمعايير العالمية (Standard Mappings)' : 'Standard Mappings'}
               </h3>
               <button
-                onClick={() => { setMappingPreview(null); setMappingFormData(value => ({ ...value, sourceStandard: node.standardType || 'CUSTOM_NATIONAL', targetNodeId: '' })); setShowAddMappingModal(true); }}
+                onClick={() => {
+                  setMappingPreview(null);
+                  setMappingFormData((value) => ({
+                    ...value,
+                    sourceStandard: node.standardType || 'CUSTOM_NATIONAL',
+                    targetNodeId: '',
+                  }));
+                  setShowAddMappingModal(true);
+                }}
                 className="bg-[#142B5F] hover:bg-[#0E7C86] text-white font-bold text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1"
               >
                 <Plus className="h-3 w-3" />
@@ -927,12 +1390,17 @@ export function AcademicTaxonomyDetailPage() {
 
             {mappings.length === 0 ? (
               <div className="text-slate-500 text-xs bg-slate-50 p-6 rounded-xl border border-dashed text-center">
-                {isAr ? 'لا يوجد روابط معايير مسجلة.' : 'No standard mappings registered for this node.'}
+                {isAr
+                  ? 'لا يوجد روابط معايير مسجلة.'
+                  : 'No standard mappings registered for this node.'}
               </div>
             ) : (
               <div className="grid gap-4">
-                {mappings.map(map => (
-                  <div key={map.mappingId} className="bg-white p-4 border border-slate-200 rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                {mappings.map((map) => (
+                  <div
+                    key={map.mappingId}
+                    className="bg-white p-4 border border-slate-200 rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center gap-4"
+                  >
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
                         <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold">
@@ -948,8 +1416,29 @@ export function AcademicTaxonomyDetailPage() {
                         )}
                       </div>
                       <div className="text-xs font-bold text-slate-900">
-                        {isAr ? 'الهدف المربوط به:' : 'Target Node:'}{' '}
-                        {map.targetNode ? `${map.targetNode.canonicalName} (${map.targetNode.canonicalCode})` : map.targetNodeId}
+                        {map.sourceNodeId === node.nodeId
+                          ? isAr
+                            ? 'مطابقة صادرة إلى: '
+                            : 'Outgoing mapping to: '
+                          : isAr
+                            ? 'مطابقة واردة من: '
+                            : 'Incoming mapping from: '}
+                        <TaxonomyNodeLink
+                          id={
+                            map.sourceNodeId === node.nodeId ? map.targetNodeId : map.sourceNodeId
+                          }
+                          tab="mappings"
+                          label={
+                            map.sourceNodeId === node.nodeId && map.targetNode
+                              ? map.targetNode.canonicalName +
+                                ' (' +
+                                map.targetNode.canonicalCode +
+                                ')'
+                              : map.sourceNodeId === node.nodeId
+                                ? map.targetNodeId
+                                : map.sourceNodeId
+                          }
+                        />
                       </div>
                       {map.notes && (
                         <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
@@ -959,6 +1448,8 @@ export function AcademicTaxonomyDetailPage() {
                     </div>
 
                     <button
+                      aria-label={isAr ? 'حذف المطابقة' : 'Remove mapping'}
+                      disabled={localReadOnly || anySaving}
                       onClick={() => handleDeleteMapping(map.mappingId)}
                       className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-xl transition-all border border-transparent hover:border-red-100 self-end sm:self-center"
                     >
@@ -979,14 +1470,45 @@ export function AcademicTaxonomyDetailPage() {
               {isAr ? 'التخصصات الجامعية المربوطة بهذه العقدة' : 'Mapped College Majors'}
             </h3>
 
+            <p>
+              {isAr
+                ? 'هذه القائمة تعرض المطابقات التصنيفية للتخصصات وملفات مستوياتها. تبويب الاستخدام يعرض أيضًا روابط الحقول والفروع وبقية الأقسام.'
+                : 'This list shows major and profile classification mappings. Usage also counts field and discipline links and other workspaces.'}
+            </p>
+            {hasPermission('admin:majors:manage') && (
+              <Link className="underline" to="/majors">
+                {isAr
+                  ? 'إدارة ارتباطات التخصصات من قسم التخصصات'
+                  : 'Manage major relationships in Majors'}
+              </Link>
+            )}
             {mappedMajors.length === 0 ? (
               <div className="text-slate-500 text-xs bg-slate-50 p-6 rounded-xl border border-dashed text-center">
-                {isAr ? 'لم يربط أي تخصص علمي أو بروفايل مستوى بهذه العقدة بعد.' : 'No college majors or profile levels are mapped to this node yet.'}
+                {isAr
+                  ? 'لم يربط أي تخصص علمي أو بروفايل مستوى بهذه العقدة بعد.'
+                  : 'No college majors or profile levels are mapped to this node yet.'}
               </div>
             ) : (
               <div className="grid gap-3">
-                {mappedMajors.map(mapping => (
-                  <div key={mapping.id} className="bg-white p-4 border border-slate-200 rounded-xl flex items-center justify-between">
+                {mappedMajors.map((mapping) => (
+                  <div
+                    key={mapping.id}
+                    className="bg-white p-4 border border-slate-200 rounded-xl flex items-center justify-between"
+                  >
+                    {mapping.major && hasPermission('admin:majors:manage') && (
+                      <Link
+                        className="underline"
+                        to={
+                          '/majors/' +
+                          encodeURIComponent(mapping.major.id) +
+                          (mapping.profile
+                            ? '?profileId=' + encodeURIComponent(mapping.profile.id)
+                            : '')
+                        }
+                      >
+                        {isAr ? 'فتح التخصص والملف المرتبط' : 'Open linked major and profile'}
+                      </Link>
+                    )}
                     <div className="space-y-1">
                       <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase">
                         {mapping.relationshipType}
@@ -1007,6 +1529,18 @@ export function AcademicTaxonomyDetailPage() {
           </div>
         )}
 
+        {activeTab === 'usage' && !localReadOnly && (
+          <CanonicalAcademicGovernancePanel
+            endpoint={
+              '/admin/academic-taxonomy/nodes/' + encodeURIComponent(node.nodeId) + '/usage'
+            }
+            isAr={isAr}
+            requiresDecision={false}
+            decision={emptyDecision}
+            onDecision={ignoreDecision}
+            onReady={ignoreDecision}
+          />
+        )}
         {/* PANEL: VALIDATION */}
         {activeTab === 'validation' && (
           <div className="space-y-6">
@@ -1033,19 +1567,21 @@ export function AcademicTaxonomyDetailPage() {
 
             {!validationReport && !runningValidation && (
               <div className="text-slate-500 text-xs bg-slate-50 p-6 rounded-xl border border-dashed text-center">
-                {isAr 
-                  ? 'هذا الفحص يتحقق من حقول العقدة واكتمالها. فحص دورات العلاقات يتم عند إضافة العلاقة.' 
+                {isAr
+                  ? 'هذا الفحص يتحقق من حقول العقدة واكتمالها. فحص دورات العلاقات يتم عند إضافة العلاقة.'
                   : 'Validate node fields and completeness. Relationship cycles are checked when adding an edge.'}
               </div>
             )}
 
             {validationReport && (
               <div className="space-y-4">
-                <div className={`p-4 rounded-2xl flex items-center gap-3 border ${
-                  validationReport.isComplete 
-                    ? 'bg-green-50/50 text-green-900 border-green-200' 
-                    : 'bg-red-50/50 text-red-900 border-red-200'
-                }`}>
+                <div
+                  className={`p-4 rounded-2xl flex items-center gap-3 border ${
+                    validationReport.isComplete
+                      ? 'bg-green-50/50 text-green-900 border-green-200'
+                      : 'bg-red-50/50 text-red-900 border-red-200'
+                  }`}
+                >
                   {validationReport.isComplete ? (
                     <CheckCircle className="h-6 w-6 text-green-600 shrink-0" />
                   ) : (
@@ -1054,36 +1590,63 @@ export function AcademicTaxonomyDetailPage() {
                   <div>
                     <h4 className="font-bold text-xs">
                       {isAr ? 'اكتمال العقدة:' : 'Node completeness:'}{' '}
-                      {validationReport.isComplete ? (isAr ? 'سليم ومتوافق' : 'PASSED') : (isAr ? 'يوجد ثغرات أو تحذيرات' : 'ISSUES DETECTED')}
+                      {validationReport.isComplete
+                        ? isAr
+                          ? 'سليم ومتوافق'
+                          : 'PASSED'
+                        : isAr
+                          ? 'يوجد ثغرات أو تحذيرات'
+                          : 'ISSUES DETECTED'}
                     </h4>
                     <p className="text-[10px] text-slate-500 font-medium">
-                      {isAr 
-                        ? `تم العثور على عدد ${validationReport.issues.length} ملاحظة.` 
+                      {isAr
+                        ? `تم العثور على عدد ${validationReport.issues.length} ملاحظة.`
                         : `Identified ${validationReport.issues.length} report signals.`}
                     </p>
                   </div>
                 </div>
 
-                <p className="text-xs">{validationReport.canBeReviewed ? (isAr ? 'جاهزة للمراجعة' : 'Can be reviewed') : (isAr ? 'غير جاهزة للمراجعة' : 'Cannot be reviewed')}</p>
+                <p className="text-xs">
+                  {validationReport.canBeReviewed
+                    ? isAr
+                      ? 'جاهزة للمراجعة'
+                      : 'Can be reviewed'
+                    : isAr
+                      ? 'غير جاهزة للمراجعة'
+                      : 'Cannot be reviewed'}
+                </p>
                 {validationReport.issues.length > 0 && (
                   <div className="border border-slate-200 rounded-2xl divide-y divide-slate-100 overflow-hidden">
                     {validationReport.issues.map((issue, idx) => (
-                      <div key={idx} className="p-4 flex gap-3 text-xs items-start bg-white hover:bg-slate-50/50 transition-all">
-                        <AlertTriangle className={`h-4.5 w-4.5 shrink-0 mt-0.5 ${
-                          issue.severity === 'ERROR' ? 'text-red-500' :
-                          issue.severity === 'WARNING' ? 'text-amber-500' :
-                          'text-blue-500'
-                        }`} />
+                      <div
+                        key={idx}
+                        className="p-4 flex gap-3 text-xs items-start bg-white hover:bg-slate-50/50 transition-all"
+                      >
+                        <AlertTriangle
+                          className={`h-4.5 w-4.5 shrink-0 mt-0.5 ${
+                            issue.severity === 'ERROR'
+                              ? 'text-red-500'
+                              : issue.severity === 'WARNING'
+                                ? 'text-amber-500'
+                                : 'text-blue-500'
+                          }`}
+                        />
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
-                              issue.severity === 'ERROR' ? 'bg-red-50 text-red-700' :
-                              issue.severity === 'WARNING' ? 'bg-amber-50 text-amber-750' :
-                              'bg-blue-50 text-blue-700'
-                            }`}>
+                            <span
+                              className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                                issue.severity === 'ERROR'
+                                  ? 'bg-red-50 text-red-700'
+                                  : issue.severity === 'WARNING'
+                                    ? 'bg-amber-50 text-amber-750'
+                                    : 'bg-blue-50 text-blue-700'
+                              }`}
+                            >
                               {issue.severity}
                             </span>
-                            <span className="font-mono text-[10px] text-slate-500 font-bold">{issue.code}</span>
+                            <span className="font-mono text-[10px] text-slate-500 font-bold">
+                              {issue.code}
+                            </span>
                           </div>
                           <p className="font-bold text-slate-900">{issue.message}</p>
                         </div>
@@ -1099,188 +1662,260 @@ export function AcademicTaxonomyDetailPage() {
 
       {/* --- MODAL: EDIT TAXONOMY NODE --- */}
       {showEditNodeModal && (
-        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+        <TaxonomyDialogFrame
+          isAr={isAr}
+          busy={savingNode}
+          title={isAr ? 'تعديل التصنيف' : 'Edit classification'}
+          close={() => {
+            if (
+              !mutationLock.current &&
+              window.confirm(isAr ? 'إغلاق دون حفظ؟' : 'Close without saving?')
+            )
+              setShowEditNodeModal(false);
+          }}
+        >
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             <div className="border-b border-slate-100 px-6 py-4 flex justify-between items-center bg-slate-50">
               <h2 className="text-sm font-bold text-slate-950">
                 {isAr ? 'تعديل بيانات عقدة التصنيف الأكاديمي' : 'Edit Academic Taxonomy Node'}
               </h2>
               <button
-                onClick={() => setShowEditNodeModal(false)}
+                disabled={savingNode}
+                onClick={() => {
+                  if (
+                    !mutationLock.current &&
+                    window.confirm(isAr ? 'إغلاق دون حفظ؟' : 'Close without saving?')
+                  )
+                    setShowEditNodeModal(false);
+                }}
                 className="p-1 rounded-lg hover:bg-slate-200 text-slate-500 transition-colors"
               >
                 <XCircle className="h-4 w-4 text-slate-400" />
               </button>
             </div>
 
-            <form onSubmit={handleEditNodeSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-              <CanonicalAcademicGovernancePanel endpoint={`/admin/academic-taxonomy/nodes/${encodeURIComponent(node.nodeId)}/usage`} isAr={isAr}
-                requiresDecision={nodeFormData.status !== node.status} decision={lifecycleDecision} onDecision={setLifecycleDecision} onReady={setUsageReady} />
-              <Link to={`/audit?targetId=${encodeURIComponent(node.nodeId)}`} className="text-xs underline">{isAr ? 'سجل التدقيق' : 'Audit history'}</Link>
-              {nodeFormError && (
-                <div className="p-3 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl">
-                  {nodeFormError}
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-500 mb-1 uppercase tracking-wider">
-                    {isAr ? 'نوع العقدة (غير قابل للتعديل)' : 'Node Type (Locked)'}
-                  </label>
-                  <input
-                    type="text"
-                    disabled
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-slate-100 text-slate-500 cursor-not-allowed"
-                    value={translateNodeType(node.nodeType)}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-500 mb-1 uppercase tracking-wider">
-                    {isAr ? 'الرمز المعتمد (غير قابل للتعديل)' : 'Canonical Code (Locked)'}
-                  </label>
-                  <input
-                    type="text"
-                    disabled
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold bg-slate-100 text-slate-500 cursor-not-allowed"
-                    value={node.canonicalCode}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                  {isAr ? 'الاسم المعتمد (الرئيسي)' : 'Canonical Name'} *
-                </label>
-                <input
-                  type="text"
-                  required
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
-                  value={nodeFormData.canonicalName}
-                  onChange={(e) => setNodeFormData(d => ({ ...d, canonicalName: e.target.value }))}
+            <form
+              onSubmit={handleEditNodeSubmit}
+              className="p-6 space-y-4 max-h-[80vh] overflow-y-auto"
+            >
+              <fieldset disabled={savingNode} className="space-y-4 min-w-0">
+                <CanonicalAcademicGovernancePanel
+                  endpoint={`/admin/academic-taxonomy/nodes/${encodeURIComponent(node.nodeId)}/usage`}
+                  isAr={isAr}
+                  requiresDecision={nodeFormData.status !== node.status}
+                  decision={lifecycleDecision}
+                  onDecision={setLifecycleDecision}
+                  onReady={setUsageReady}
                 />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    {isAr ? 'الاسم بالعربية' : 'Arabic Name'}
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
-                    value={nodeFormData.nameAr}
-                    onChange={(e) => setNodeFormData(d => ({ ...d, nameAr: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    {isAr ? 'الاسم بالإنجليزية' : 'English Name'}
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
-                    value={nodeFormData.nameEn}
-                    onChange={(e) => setNodeFormData(d => ({ ...d, nameEn: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    {isAr ? 'نوع المعيار' : 'Standard Type'}
-                  </label>
-                  <select
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
-                    value={nodeFormData.standardType}
-                    disabled
-                    aria-label={isAr ? 'نوع المعيار ثابت' : 'Immutable standard type'}
+                {hasPermission('admin:audit:manage') && (
+                  <Link
+                    to={`/audit?targetId=${encodeURIComponent(node.nodeId)}`}
+                    className="text-xs underline"
                   >
-                    <option value="CUSTOM_NATIONAL">CUSTOM_NATIONAL</option>
-                    <option value="ISCED">ISCED</option>
-                    <option value="CIP">CIP</option>
-                  </select>
+                    {isAr ? 'سجل التدقيق' : 'Audit history'}
+                  </Link>
+                )}
+                {nodeFormError && (
+                  <div className="p-3 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl">
+                    {nodeFormError}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 mb-1 uppercase tracking-wider">
+                      {isAr ? 'نوع العقدة (غير قابل للتعديل)' : 'Node Type (Locked)'}
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-slate-100 text-slate-500 cursor-not-allowed"
+                      value={translateNodeType(node.nodeType)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 mb-1 uppercase tracking-wider">
+                      {isAr ? 'الرمز المعتمد (غير قابل للتعديل)' : 'Canonical Code (Locked)'}
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold bg-slate-100 text-slate-500 cursor-not-allowed"
+                      value={node.canonicalCode}
+                    />
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    {isAr ? 'الرمز المعياري' : 'Standard Code'}
+                    {isAr ? 'الاسم المعتمد (الرئيسي)' : 'Canonical Name'} *
                   </label>
                   <input
                     type="text"
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
-                    value={nodeFormData.standardCode}
-                    onChange={(e) => setNodeFormData(d => ({ ...d, standardCode: e.target.value }))}
+                    required
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
+                    value={nodeFormData.canonicalName}
+                    onChange={(e) =>
+                      setNodeFormData((d) => ({ ...d, canonicalName: e.target.value }))
+                    }
                   />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      {isAr ? 'الاسم بالعربية' : 'Arabic Name'}
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
+                      value={nodeFormData.nameAr}
+                      onChange={(e) => setNodeFormData((d) => ({ ...d, nameAr: e.target.value }))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      {isAr ? 'الاسم بالإنجليزية' : 'English Name'}
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
+                      value={nodeFormData.nameEn}
+                      onChange={(e) => setNodeFormData((d) => ({ ...d, nameEn: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      {isAr ? 'نوع المعيار' : 'Standard Type'}
+                    </label>
+                    <select
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
+                      value={nodeFormData.standardType}
+                      disabled
+                      aria-label={isAr ? 'نوع المعيار ثابت' : 'Immutable standard type'}
+                    >
+                      <option value="CUSTOM_NATIONAL">CUSTOM_NATIONAL</option>
+                      <option value="ISCED">ISCED</option>
+                      <option value="CIP">CIP</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      {isAr ? 'الرمز المعياري' : 'Standard Code'}
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
+                      value={nodeFormData.standardCode}
+                      onChange={(e) =>
+                        setNodeFormData((d) => ({ ...d, standardCode: e.target.value }))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      {isAr ? 'الحالة' : 'Status'}
+                    </label>
+                    <select
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
+                      value={nodeFormData.status}
+                      onChange={(e) => setNodeFormData((d) => ({ ...d, status: e.target.value }))}
+                    >
+                      <option value="DRAFT">{isAr ? 'مسودة' : 'DRAFT'}</option>
+                      <option value="READY_TO_REVIEW">
+                        {isAr ? 'جاهز للمراجعة' : 'READY_TO_REVIEW'}
+                      </option>
+                      <option value="ACTIVE">{isAr ? 'نشط' : 'ACTIVE'}</option>
+                      <option value="ARCHIVED">{isAr ? 'مؤرشف' : 'ARCHIVED'}</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    {isAr ? 'الحالة' : 'Status'}
+                    {isAr ? 'الوصف' : 'Description'}
                   </label>
-                  <select
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
-                    value={nodeFormData.status}
-                    onChange={(e) => setNodeFormData(d => ({ ...d, status: e.target.value }))}
-                  >
-                    <option value="DRAFT">{isAr ? 'مسودة' : 'DRAFT'}</option>
-                    <option value="READY_TO_REVIEW">{isAr ? 'جاهز للمراجعة' : 'READY_TO_REVIEW'}</option>
-                    <option value="ACTIVE">{isAr ? 'نشط' : 'ACTIVE'}</option>
-                    <option value="ARCHIVED">{isAr ? 'مؤرشف' : 'ARCHIVED'}</option>
-                  </select>
+                  <textarea
+                    rows={2}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
+                    value={nodeFormData.description}
+                    onChange={(e) =>
+                      setNodeFormData((d) => ({ ...d, description: e.target.value }))
+                    }
+                  />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                  {isAr ? 'الوصف' : 'Description'}
-                </label>
-                <textarea
-                  rows={2}
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
-                  value={nodeFormData.description}
-                  onChange={(e) => setNodeFormData(d => ({ ...d, description: e.target.value }))}
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowEditNodeModal(false)}
-                  className="border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition-colors"
-                >
-                  {isAr ? 'إلغاء' : 'Cancel'}
-                </button>
-                <button
-                  type="submit"
-                  disabled={savingNode || (nodeFormData.status !== node.status && !usageReady)}
-                  className="bg-[#142B5F] hover:bg-[#0E7C86] text-white font-bold px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2"
-                >
-                  {savingNode ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {isAr ? 'تحديث البيانات' : 'Update Node'}
-                </button>
-              </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    disabled={savingNode}
+                    onClick={() => {
+                      if (
+                        !mutationLock.current &&
+                        window.confirm(isAr ? 'إغلاق دون حفظ؟' : 'Close without saving?')
+                      )
+                        setShowEditNodeModal(false);
+                    }}
+                    className="border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition-colors"
+                  >
+                    {isAr ? 'إلغاء' : 'Cancel'}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingNode || (nodeFormData.status !== node.status && !usageReady)}
+                    className="bg-[#142B5F] hover:bg-[#0E7C86] text-white font-bold px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2"
+                  >
+                    {savingNode ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                    {isAr ? 'تحديث البيانات' : 'Update Node'}
+                  </button>
+                </div>
+              </fieldset>
             </form>
           </div>
-        </div>
+        </TaxonomyDialogFrame>
       )}
 
       {/* --- MODAL: ADD parent/child EDGE --- */}
       {showAddEdgeModal && (
-        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+        <TaxonomyDialogFrame
+          isAr={isAr}
+          busy={savingEdge}
+          title={isAr ? 'إضافة علاقة هرمية' : 'Add hierarchy relationship'}
+          close={() => {
+            if (
+              !mutationLock.current &&
+              window.confirm(isAr ? 'إغلاق دون حفظ؟' : 'Close without saving?')
+            )
+              setShowAddEdgeModal(null);
+          }}
+        >
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             <div className="border-b border-slate-100 px-6 py-4 flex justify-between items-center bg-slate-50">
               <h2 className="text-sm font-bold text-slate-950">
-                {showAddEdgeModal === 'parent' 
-                  ? (isAr ? 'ربط عقدة أب جديدة' : 'Add New Parent Node')
-                  : (isAr ? 'ربط عقدة ابن جديدة' : 'Add New Child Node')
-                }
+                {showAddEdgeModal === 'parent'
+                  ? isAr
+                    ? 'ربط عقدة أب جديدة'
+                    : 'Add New Parent Node'
+                  : isAr
+                    ? 'ربط عقدة ابن جديدة'
+                    : 'Add New Child Node'}
               </h2>
               <button
-                onClick={() => setShowAddEdgeModal(null)}
+                disabled={savingEdge}
+                onClick={() => {
+                  if (
+                    !mutationLock.current &&
+                    window.confirm(isAr ? 'إغلاق دون حفظ؟' : 'Close without saving?')
+                  )
+                    setShowAddEdgeModal(null);
+                }}
                 className="p-1 rounded-lg hover:bg-slate-200 text-slate-500 transition-colors"
               >
                 <XCircle className="h-4 w-4 text-slate-400" />
@@ -1288,212 +1923,317 @@ export function AcademicTaxonomyDetailPage() {
             </div>
 
             <form onSubmit={handleAddEdgeSubmit} className="p-6 space-y-4">
-              {pickerControls}
-              {edgeError && (
-                <div className="p-3 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl">
-                  {edgeError}
-                </div>
-              )}
+              <fieldset disabled={savingEdge} className="space-y-4 min-w-0">
+                {pickerControls}
+                {edgeError && (
+                  <div className="p-3 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl">
+                    {edgeError}
+                  </div>
+                )}
 
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                  {isAr ? 'اختر عقدة للربط بها' : 'Select Target Node'} *
-                </label>
-                <select
-                  required
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
-                  value={selectedEdgeNodeId}
-                  onChange={(e) => setSelectedEdgeNodeId(e.target.value)}
-                >
-                  <option value="">{isAr ? '-- اختر العقدة من القائمة --' : '-- Select from list --'}</option>
-                  {potentialEdgeNodes.map(n => (
-                    <option key={n.nodeId} value={n.nodeId}>
-                      {n.canonicalName} ({n.canonicalCode} - {translateNodeType(n.nodeType)})
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    {isAr ? 'اختر عقدة للربط بها' : 'Select Target Node'} *
+                  </label>
+                  <select
+                    required
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
+                    value={selectedEdgeNodeId}
+                    onChange={(e) => setSelectedEdgeNodeId(e.target.value)}
+                  >
+                    <option value="">
+                      {isAr ? '-- اختر العقدة من القائمة --' : '-- Select from list --'}
                     </option>
-                  ))}
-                </select>
-              </div>
+                    {potentialEdgeNodes.map((n) => (
+                      <option key={n.nodeId} value={n.nodeId}>
+                        {n.canonicalName} ({n.canonicalCode} - {translateNodeType(n.nodeType)})
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="primaryEdgeChk"
-                  className="h-4 w-4 text-slate-900 border-slate-200 rounded-md focus:ring-[#0E7C86]"
-                  checked={isPrimaryEdge}
-                  onChange={(e) => setIsPrimaryEdge(e.target.checked)}
-                />
-                <label htmlFor="primaryEdgeChk" className="text-xs font-semibold text-slate-700">
-                  {isAr ? 'علاقة رئيسية هرمية (isPrimary)' : 'Primary Hierarchy Connection (isPrimary)'}
-                </label>
-              </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="primaryEdgeChk"
+                    className="h-4 w-4 text-slate-900 border-slate-200 rounded-md focus:ring-[#0E7C86]"
+                    checked={isPrimaryEdge}
+                    onChange={(e) => setIsPrimaryEdge(e.target.checked)}
+                  />
+                  <label htmlFor="primaryEdgeChk" className="text-xs font-semibold text-slate-700">
+                    {isAr
+                      ? 'علاقة رئيسية هرمية (isPrimary)'
+                      : 'Primary Hierarchy Connection (isPrimary)'}
+                  </label>
+                </div>
 
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddEdgeModal(null)}
-                  className="border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition-colors"
-                >
-                  {isAr ? 'إلغاء' : 'Cancel'}
-                </button>
-                <button
-                  type="submit"
-                  disabled={savingEdge}
-                  className="bg-[#142B5F] hover:bg-[#0E7C86] text-white font-bold px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2"
-                >
-                  {savingEdge ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {isAr ? 'إنشاء العلاقة' : 'Create Edge'}
-                </button>
-              </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    disabled={savingEdge}
+                    onClick={() => {
+                      if (
+                        !mutationLock.current &&
+                        window.confirm(isAr ? 'إغلاق دون حفظ؟' : 'Close without saving?')
+                      )
+                        setShowAddEdgeModal(null);
+                    }}
+                    className="border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition-colors"
+                  >
+                    {isAr ? 'إلغاء' : 'Cancel'}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingEdge}
+                    className="bg-[#142B5F] hover:bg-[#0E7C86] text-white font-bold px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2"
+                  >
+                    {savingEdge ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                    {isAr ? 'إنشاء العلاقة' : 'Create Edge'}
+                  </button>
+                </div>
+              </fieldset>
             </form>
           </div>
-        </div>
+        </TaxonomyDialogFrame>
       )}
 
       {/* --- MODAL: ADD STANDARD MAPPING --- */}
       {showAddMappingModal && (
-        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+        <TaxonomyDialogFrame
+          isAr={isAr}
+          busy={savingMapping || previewingMapping}
+          title={isAr ? 'إضافة مطابقة معيارية' : 'Add standard mapping'}
+          close={() => {
+            if (
+              !mutationLock.current &&
+              window.confirm(isAr ? 'إغلاق دون حفظ؟' : 'Close without saving?')
+            )
+              setShowAddMappingModal(false);
+          }}
+        >
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             <div className="border-b border-slate-100 px-6 py-4 flex justify-between items-center bg-slate-50">
               <h2 className="text-sm font-bold text-slate-950">
                 {isAr ? 'إضافة ربط معيار عالمي جديد' : 'Add Standard Mapping Connection'}
               </h2>
               <button
-                onClick={() => setShowAddMappingModal(false)}
+                disabled={savingMapping || previewingMapping}
+                onClick={() => {
+                  if (
+                    !mutationLock.current &&
+                    window.confirm(isAr ? 'إغلاق دون حفظ؟' : 'Close without saving?')
+                  )
+                    setShowAddMappingModal(false);
+                }}
                 className="p-1 rounded-lg hover:bg-slate-200 text-slate-500 transition-colors"
               >
                 <XCircle className="h-4 w-4 text-slate-400" />
               </button>
             </div>
 
-            <form onSubmit={handleAddMappingSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-              {pickerControls}
-              <p className="text-xs">{isAr ? 'الاتجاه من المصدر إلى الهدف: BROAD هدف أوسع، NARROW هدف أضيق، RELATED علاقة دون تكافؤ، UNKNOWN غير محسوم. لا تُنشر مطابقة تلقائيًا.' : 'Direction is source → target: BROAD means broader target, NARROW narrower target, RELATED has no equivalence and UNKNOWN is unresolved. No automatic publication.'}</p>
-              <button type="button" disabled={previewingMapping || !mappingFormData.targetNodeId} onClick={previewMapping}>{isAr ? 'معاينة الربط والتحقق من المعيارين' : 'Preview mapping and validate standards'}</button>
-              {currentMappingPreview && <div role="status" className="text-xs border p-3"><p>{node.canonicalName} → {allNodes.find(item => item.nodeId === mappingFormData.targetNodeId)?.canonicalName} · {currentMappingPreview.meaning}</p><ul>{currentMappingPreview.issues.map((issue, index) => <li key={index}>{issue.severity}: {issue.message}</li>)}</ul></div>}
-              {mappingError && (
-                <div className="p-3 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl">
-                  {mappingError}
-                </div>
-              )}
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                  {isAr ? 'عقدة الهدف المراد ربطها' : 'Target Taxonomy Node'} *
-                </label>
-                <select
-                  required
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
-                  value={mappingFormData.targetNodeId}
-                  onChange={(e) => { const selected = allNodes.find(item => item.nodeId === e.target.value); setMappingFormData(d => ({ ...d, targetNodeId: e.target.value, targetStandard: selected?.standardType || 'CUSTOM_NATIONAL' })); }}
-                >
-                  <option value="">{isAr ? '-- اختر العقدة من القائمة --' : '-- Select target node --'}</option>
-                  {potentialEdgeNodes.map(n => (
-                    <option key={n.nodeId} value={n.nodeId}>
-                      {n.canonicalName} ({n.canonicalCode} - {translateNodeType(n.nodeType)})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    {isAr ? 'معيار المصدر' : 'Source Standard'}
-                  </label>
-                  <select
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
-                    value={mappingFormData.sourceStandard}
-                    disabled
-                  >
-                    <option value="CUSTOM_NATIONAL">CUSTOM_NATIONAL</option>
-                    <option value="ISCED">ISCED</option>
-                    <option value="CIP">CIP</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    {isAr ? 'معيار الهدف' : 'Target Standard'}
-                  </label>
-                  <select
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
-                    value={mappingFormData.targetStandard}
-                    disabled
-                  >
-                    <option value="ISCED">ISCED</option>
-                    <option value="CIP">CIP</option>
-                    <option value="CUSTOM_NATIONAL">CUSTOM_NATIONAL</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    {isAr ? 'درجة مطابقة القوة (Strength)' : 'Strength'}
-                  </label>
-                  <select
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
-                    value={mappingFormData.strength}
-                    onChange={(e) => setMappingFormData(d => ({ ...d, strength: e.target.value }))}
-                  >
-                    <option value="EXACT">EXACT</option>
-                    <option value="BROAD">BROAD</option>
-                    <option value="NARROW">NARROW</option>
-                    <option value="RELATED">RELATED</option>
-                    <option value="UNKNOWN">UNKNOWN</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    {isAr ? 'معدل الثقة (Confidence 0.0 - 1.0)' : 'Confidence (0.0 - 1.0)'}
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="1"
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
-                    value={mappingFormData.confidence}
-                    onChange={(e) => setMappingFormData(d => ({ ...d, confidence: Number(e.target.value) }))}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                  {isAr ? 'ملاحظات الربط' : 'Notes'}
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder={isAr ? 'ملاحظات إضافية بخصوص الربط...' : 'Add context/reasons for mapping...'}
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
-                  value={mappingFormData.notes}
-                  onChange={(e) => setMappingFormData(d => ({ ...d, notes: e.target.value }))}
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
+            <form
+              onSubmit={handleAddMappingSubmit}
+              className="p-6 space-y-4 max-h-[80vh] overflow-y-auto"
+            >
+              <fieldset disabled={savingMapping || previewingMapping} className="space-y-4 min-w-0">
+                {pickerControls}
+                <p className="text-xs">
+                  {isAr
+                    ? 'الاتجاه من المصدر إلى الهدف: BROAD هدف أوسع، NARROW هدف أضيق، RELATED علاقة دون تكافؤ، UNKNOWN غير محسوم. لا تُنشر مطابقة تلقائيًا.'
+                    : 'Direction is source → target: BROAD means broader target, NARROW narrower target, RELATED has no equivalence and UNKNOWN is unresolved. No automatic publication.'}
+                </p>
                 <button
                   type="button"
-                  onClick={() => setShowAddMappingModal(false)}
-                  className="border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition-colors"
+                  disabled={previewingMapping || !mappingFormData.targetNodeId}
+                  onClick={previewMapping}
                 >
-                  {isAr ? 'إلغاء' : 'Cancel'}
+                  {isAr
+                    ? 'معاينة الربط والتحقق من المعيارين'
+                    : 'Preview mapping and validate standards'}
                 </button>
-                <button
-                  type="submit"
-                  disabled={savingMapping || previewingMapping || !currentMappingPreview || currentMappingPreview.issues.some(issue => issue.severity === 'ERROR')}
-                  className="bg-[#142B5F] hover:bg-[#0E7C86] text-white font-bold px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2"
-                >
-                  {savingMapping ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {isAr ? 'إضافة الربط' : 'Add Connection'}
-                </button>
-              </div>
+                {currentMappingPreview && (
+                  <div role="status" className="text-xs border p-3">
+                    <p>
+                      {node.canonicalName} →{' '}
+                      {
+                        allNodes.find((item) => item.nodeId === mappingFormData.targetNodeId)
+                          ?.canonicalName
+                      }{' '}
+                      · {currentMappingPreview.meaning}
+                    </p>
+                    <ul>
+                      {currentMappingPreview.issues.map((issue, index) => (
+                        <li key={index}>
+                          {issue.severity}: {issue.message}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {mappingError && (
+                  <div className="p-3 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl">
+                    {mappingError}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    {isAr ? 'عقدة الهدف المراد ربطها' : 'Target Taxonomy Node'} *
+                  </label>
+                  <select
+                    required
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
+                    value={mappingFormData.targetNodeId}
+                    onChange={(e) => {
+                      const selected = allNodes.find((item) => item.nodeId === e.target.value);
+                      setMappingFormData((d) => ({
+                        ...d,
+                        targetNodeId: e.target.value,
+                        targetStandard: selected?.standardType || 'CUSTOM_NATIONAL',
+                      }));
+                    }}
+                  >
+                    <option value="">
+                      {isAr ? '-- اختر العقدة من القائمة --' : '-- Select target node --'}
+                    </option>
+                    {potentialEdgeNodes.map((n) => (
+                      <option key={n.nodeId} value={n.nodeId}>
+                        {n.canonicalName} ({n.canonicalCode} - {translateNodeType(n.nodeType)})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      {isAr ? 'معيار المصدر' : 'Source Standard'}
+                    </label>
+                    <select
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
+                      value={mappingFormData.sourceStandard}
+                      disabled
+                    >
+                      <option value="CUSTOM_NATIONAL">CUSTOM_NATIONAL</option>
+                      <option value="ISCED">ISCED</option>
+                      <option value="CIP">CIP</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      {isAr ? 'معيار الهدف' : 'Target Standard'}
+                    </label>
+                    <select
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
+                      value={mappingFormData.targetStandard}
+                      disabled
+                    >
+                      <option value="ISCED">ISCED</option>
+                      <option value="CIP">CIP</option>
+                      <option value="CUSTOM_NATIONAL">CUSTOM_NATIONAL</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      {isAr ? 'درجة مطابقة القوة (Strength)' : 'Strength'}
+                    </label>
+                    <select
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
+                      value={mappingFormData.strength}
+                      onChange={(e) =>
+                        setMappingFormData((d) => ({ ...d, strength: e.target.value }))
+                      }
+                    >
+                      <option value="EXACT">
+                        {isAr ? 'تكافؤ مقترح — EXACT' : 'Proposed equivalence — EXACT'}
+                      </option>
+                      <option value="BROAD">
+                        {isAr ? 'الهدف أوسع — BROAD' : 'Target is broader — BROAD'}
+                      </option>
+                      <option value="NARROW">
+                        {isAr ? 'الهدف أضيق — NARROW' : 'Target is narrower — NARROW'}
+                      </option>
+                      <option value="RELATED">
+                        {isAr
+                          ? 'ذو صلة دون تكافؤ — RELATED'
+                          : 'Related without equivalence — RELATED'}
+                      </option>
+                      <option value="UNKNOWN">
+                        {isAr ? 'غير محسوم — UNKNOWN' : 'Unresolved — UNKNOWN'}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      {isAr ? 'معدل الثقة (Confidence 0.0 - 1.0)' : 'Confidence (0.0 - 1.0)'}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="1"
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
+                      value={mappingFormData.confidence}
+                      onChange={(e) =>
+                        setMappingFormData((d) => ({ ...d, confidence: Number(e.target.value) }))
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    {isAr ? 'ملاحظات الربط' : 'Notes'}
+                  </label>
+                  <textarea
+                    rows={2}
+                    placeholder={
+                      isAr ? 'ملاحظات إضافية بخصوص الربط...' : 'Add context/reasons for mapping...'
+                    }
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
+                    value={mappingFormData.notes}
+                    onChange={(e) => setMappingFormData((d) => ({ ...d, notes: e.target.value }))}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    disabled={savingMapping || previewingMapping}
+                    onClick={() => {
+                      if (
+                        !mutationLock.current &&
+                        window.confirm(isAr ? 'إغلاق دون حفظ؟' : 'Close without saving?')
+                      )
+                        setShowAddMappingModal(false);
+                    }}
+                    className="border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition-colors"
+                  >
+                    {isAr ? 'إلغاء' : 'Cancel'}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={
+                      savingMapping ||
+                      previewingMapping ||
+                      !currentMappingPreview ||
+                      currentMappingPreview.issues.some((issue) => issue.severity === 'ERROR')
+                    }
+                    className="bg-[#142B5F] hover:bg-[#0E7C86] text-white font-bold px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2"
+                  >
+                    {savingMapping ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                    {isAr ? 'إضافة الربط' : 'Add Connection'}
+                  </button>
+                </div>
+              </fieldset>
             </form>
           </div>
-        </div>
+        </TaxonomyDialogFrame>
       )}
     </div>
   );
