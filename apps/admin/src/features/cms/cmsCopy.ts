@@ -2,6 +2,20 @@ import { useCallback } from 'react';
 import { useTranslation } from '../../i18n/I18nProvider';
 
 export const cmsEnglish: Record<string, string> = {
+  'نوع العلاقة المستهدفة': 'Target owner type',
+  'دلالة العلاقة': 'Relationship meaning',
+  'تغيير الرابط بمراجعة جديدة': 'Change slug with new review',
+  'لا توجد نسخة': 'No version',
+  فعال: 'Active',
+  'جارٍ الحفظ…': 'Saving…',
+  'موعد النشر بالتوقيت المحلي': 'Publication time in your local time zone',
+  'تحقق من العنوان والنص والرابط المحلي.': 'Check the title, body and localized slug.',
+  'أكمل عنوان SEO ووصفه معًا أو اتركهما فارغين.':
+    'Complete both SEO title and description, or leave both empty.',
+  'الرابط يجب أن يستخدم حروفًا لاتينية صغيرة وأرقامًا وشرطات.':
+    'Use lowercase Latin letters, digits and hyphens in the slug.',
+  'اختر علاقات صحيحة دون تكرار وبحد أقصى 50 علاقة.':
+    'Choose valid relationships, with no duplicates and a maximum of 50.',
   'قائمة المحتوى': 'Content list',
   'إنشاء المحتوى': 'Create content',
   التحرير: 'Editing',

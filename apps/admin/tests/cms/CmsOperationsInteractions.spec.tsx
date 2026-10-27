@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const state = vi.hoisted(() => ({
   request: vi.fn(),
   language: 'en',
+  reason: 'Retire public notice' as string | null,
   permissions: ['admin:cms:publish'],
 }));
 vi.mock('../../src/api/client', () => ({ adminApiClient: { request: state.request } }));
@@ -14,6 +15,12 @@ vi.mock('../../src/i18n/I18nProvider', () => ({
   useTranslation: () => ({ language: state.language }),
 }));
 vi.mock('../../src/components/AssetPicker', () => ({ AssetPicker: () => null }));
+vi.mock('../../src/features/cms/CmsActionDialog', () => ({
+  useCmsActionDialog: () => ({
+    requestAction: async () => (state.reason === null ? null : { reason: state.reason }),
+    actionDialog: null,
+  }),
+}));
 import { CmsOperationsPanels } from '../../src/features/cms/CmsOperationsPanels';
 import { CmsBlockEditor } from '../../src/features/cms/CmsBlockEditor';
 let renderer: ReturnType<typeof create>;
@@ -58,20 +65,19 @@ function archive() {
 }
 async function mount(locale: 'ar' | 'en' = 'ar') {
   await act(async () => {
-    renderer = create(<CmsOperationsPanels contents={[]} locale={locale} />);
+    renderer = create(<CmsOperationsPanels area="announcements" locale={locale} />);
   });
 }
 beforeEach(() => {
   (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
   state.permissions = ['admin:cms:publish'];
   state.language = 'en';
-  state.request
-    .mockReset()
-    .mockImplementation(async (path: string) => ({
-      data: path.includes('/announcements?') ? [notice] : [],
-      total: 0,
-      totalPages: 1,
-    }));
+  state.reason = 'Retire public notice';
+  state.request.mockReset().mockImplementation(async (path: string) => ({
+    data: path.includes('/announcements?') ? [notice] : [],
+    total: 0,
+    totalPages: 1,
+  }));
   vi.stubGlobal('window', {
     prompt: vi.fn().mockReturnValue('Retire public notice'),
     confirm: vi.fn().mockReturnValue(true),
@@ -142,7 +148,7 @@ describe('Section 16 editor and live snapshot interactions', () => {
   it.each([null, 'short', 'x'.repeat(1001)])(
     'does not send a retirement without a valid reason',
     async (reason) => {
-      window.prompt = vi.fn().mockReturnValue(reason);
+      state.reason = reason;
       await mount();
       await act(async () => {
         archive().props.onClick();
@@ -162,9 +168,9 @@ describe('Section 16 editor and live snapshot interactions', () => {
     });
     await mount('ar');
     expect(text(renderer.toJSON())).toContain('Arabic notice');
-    expect(text(renderer.toJSON())).toContain('Could not load this panel. Retry.');
+    expect(state.request.mock.calls.some(([path]) => path.includes('/navigation?'))).toBe(false);
     await act(async () => {
-      renderer.update(<CmsOperationsPanels contents={[]} locale="en" />);
+      renderer.update(<CmsOperationsPanels area="announcements" locale="en" />);
     });
     expect(text(renderer.toJSON())).toContain('English notice');
     expect(text(renderer.toJSON())).not.toContain('Arabic notice');

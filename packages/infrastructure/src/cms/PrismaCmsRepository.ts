@@ -258,7 +258,7 @@ export class PrismaCmsRepository implements ICmsRepository {
     const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 20));
     const q = filters.q?.trim();
     const where: any = {
-      ...(filters.status ? { status: filters.status } : {}),
+      ...(filters.locale ? { localizedPayloads: { some: { locale: filters.locale, ...(filters.status ? { state: filters.status } : {}) } } } : filters.status ? { status: filters.status } : {}),
       ...(filters.contentType ? { contentType: filters.contentType } : {}),
       ...(filters.categorySlug ? { categorySlug: filters.categorySlug } : {}),
       ...(filters.siteIdentifier ? { siteIdentifier: filters.siteIdentifier } : {}),
