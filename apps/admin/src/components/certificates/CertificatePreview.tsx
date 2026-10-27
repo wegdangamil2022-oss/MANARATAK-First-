@@ -145,8 +145,8 @@ export function CertificatePreview({
             certificate?.metadata?.signedEnvelope as
               { achievement?: { displayNames?: { en?: string } } } | undefined
           )?.achievement?.displayNames?.en,
-          serial: certificate?.serialNumber || '',
-          issuedAt: certificate?.issuedAt ? issuedAt.toISOString().slice(0, 10) : '',
+          serial: certificate?.serialNumber || 'TEMPLATE-PREVIEW',
+          issuedAt: certificate?.issuedAt ? issuedAt.toISOString().slice(0, 10) : '—',
           verificationUrl,
           issuerName: certificate?.issuerName || template.issuerName || 'MANARATAK',
         }}

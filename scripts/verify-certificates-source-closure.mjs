@@ -15,8 +15,8 @@ const files = {
   adminRouter: read('apps/api/src/presentation/api/router/CertificateAdminRouter.ts'),
   publicRouter: read('apps/api/src/presentation/api/router/CertificatePublicRouter.ts'),
   container: read('apps/api/src/infrastructure/di/container.ts'),
-  adminPage: read('apps/admin/src/pages/CertificateAdminPage.tsx'),
-  detailPage: read('apps/admin/src/pages/CertificateDetailPage.tsx'),
+  adminPage: ['apps/admin/src/pages/CertificateAdminPage.tsx', ...['CertificateRegistry.tsx','CertificateTemplates.tsx','CertificateTemplateEditor.tsx','CertificateIssuers.tsx','CertificateIssuerEditor.tsx','CertificateReviews.tsx','CertificateTrust.tsx','certificateModels.ts','certificates.css'].map(name=>'apps/admin/src/features/certificates/'+name)].map(read).join('\n'),
+  detailPage: ['apps/admin/src/pages/CertificateDetailPage.tsx','apps/admin/src/features/certificates/CertificateLifecycle.tsx','apps/admin/src/features/certificates/CertificateFiles.tsx'].map(read).join('\n'),
   preview: read('apps/admin/src/components/certificates/CertificatePreview.tsx'),
   approvedDesign: read('packages/shared/src/certificates/approvedCertificateDesign.ts'),
   adminApp: read('apps/admin/src/App.tsx'),
@@ -105,8 +105,8 @@ check('CERT-TPL-012', all(files.adminRouter,['templates:author','templates:appro
 check('CERT-ADM-001', files.adminPage.includes('سجل الشهادات'), 'Actual Admin dashboard has a certificate registry workspace.');
 check('CERT-ADM-002', files.adminPage.includes('القوالب'), 'Actual Admin dashboard manages templates.');
 check('CERT-ADM-003', files.adminPage.includes('جهات الإصدار'), 'Actual Admin dashboard manages issuers.');
-check('CERT-ADM-004', files.adminPage.includes('الجاهزية والحوكمة'), 'Actual Admin dashboard exposes readiness/governance.');
-check('CERT-ADM-005', files.adminPage.includes('#142B5F') && files.adminPage.includes('#D6A43B'), 'Actual Admin dashboard uses MANARATAK brand colors.');
+check('CERT-ADM-004', files.adminPage.includes('الجاهزية والتحقق'), 'Actual Admin dashboard exposes readiness and verification.');
+check('CERT-ADM-005', files.adminPage.toLowerCase().includes('#142b5f') && files.adminPage.toLowerCase().includes('#d6a43b'), 'Actual Admin dashboard uses MANARATAK brand colors.');
 check('CERT-ADM-006', files.adminPage.includes('الإصدار الأولي لا يتم يدويًا'), 'Admin explicitly communicates trusted-event initial issuance.');
 check('CERT-ADM-007', files.detailPage.includes('إلغاء رسمي'), 'Certificate detail supports governed revocation.');
 check('CERT-ADM-008', files.detailPage.includes('إعادة إصدار'), 'Certificate detail supports governed reissue.');

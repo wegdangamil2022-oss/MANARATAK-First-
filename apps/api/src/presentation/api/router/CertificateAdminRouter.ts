@@ -2,6 +2,7 @@ import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
 import { CertificateUseCases, readCertificateArtifact, type ProcessAssetLifecycleUseCase } from '@manaratak/application';
 import { AuthorizationEvaluatorService, CertificateStatus, CertificateTemplateStatus, type ICertificateAuthorityDirectory } from '@manaratak/domain';
+import type { CertificateWorkspaceReadGateway } from '@manaratak/application';
 
 const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -13,7 +14,7 @@ const mutationContext = (req: Request, reason?: string | null) => ({
   actorId: actor(req),
   correlationId: req.header('x-correlation-id') ?? req.header('x-request-id') ?? undefined,
   reason: reason ?? null,
-  ...(/^\/templates\/[^/]+(?:\/transition)?$/.test(req.route?.path?.replace(':id', req.params.id ?? '')) && req.method !== 'GET' ? templateCondition(req) : {}),
+  ...((req.method === 'PATCH' && req.route?.path === '/templates/:id') || (req.method === 'POST' && req.route?.path === '/templates/:id/transition') ? templateCondition(req) : {}),
 });
 const templateCondition = (req: Request) => {
   const match = /^"([A-Za-z0-9_-]+):(DRAFT|PENDING_APPROVAL|APPROVED|ACTIVE|DEPRECATED|ARCHIVED|RETIRED)"$/.exec(req.get('If-Match') ?? '');
@@ -68,7 +69,7 @@ const issuerBody = z.object({
 
 const transitionSchema = z.object({ status: z.nativeEnum(CertificateTemplateStatus), reason: z.string().max(2000).optional() });
 export class CertificateAdminRouter {
-  public static create(cradle: { certificateUseCases: CertificateUseCases; processAssetLifecycleUseCase?: Pick<ProcessAssetLifecycleUseCase, 'readAuthenticatedDelivery'>; authEvaluatorService: AuthorizationEvaluatorService; certificateAuthorityDirectory?:ICertificateAuthorityDirectory; certificateVerificationPolicy?:{read():Promise<{retentionDays:number|null;ipPerMinute:number;codePerMinute:number}>} }): Router {
+  public static create(cradle: { certificateUseCases: CertificateUseCases; certificateWorkspaceReadGateway?:CertificateWorkspaceReadGateway; processAssetLifecycleUseCase?: Pick<ProcessAssetLifecycleUseCase, 'readAuthenticatedDelivery'>; authEvaluatorService: AuthorizationEvaluatorService; certificateAuthorityDirectory?:ICertificateAuthorityDirectory; certificateVerificationPolicy?:{read():Promise<{retentionDays:number|null;ipPerMinute:number;codePerMinute:number}>} }): Router {
     const router = Router();
     const useCases = cradle.certificateUseCases;
     const evaluator = cradle.authEvaluatorService;
@@ -104,6 +105,14 @@ export class CertificateAdminRouter {
     };
     const listQuery = z.object({issuerId: z.string().uuid().optional(), studentReferenceId: z.string().uuid().optional(), templateVersionId: z.string().uuid().optional(), issuedFrom: z.string().datetime().optional(), issuedTo: z.string().datetime().optional(), search: z.string().trim().max(200).optional(), status: z.nativeEnum(CertificateStatus).optional(), templateId: z.string().uuid().optional(),
       page: z.coerce.number().int().positive().max(100000).default(1), pageSize: z.coerce.number().int().min(1).max(100).default(25)}).strict().refine(q => !q.issuedFrom || !q.issuedTo || q.issuedFrom <= q.issuedTo, {message: 'Invalid date range'});
+    router.get('/workspace', permit('admin:certificates:view'), asyncHandler(async(req:Request,res:Response,next:NextFunction)=>{
+      const query=z.object({kind:z.enum(['templates','issuers','delegations','corrections','revalidation','recovery']),page:z.coerce.number().int().min(1).max(100000).default(1),pageSize:z.coerce.number().int().min(1).max(50).default(25)}).strict().parse(req.query);
+      const permission=query.kind==='templates'?'admin:certificates:templates:approve':query.kind==='issuers'||query.kind==='delegations'?'admin:certificates:issuers:approve':query.kind==='recovery'?'admin:certificates:lifecycle:manage':'admin:certificates:lifecycle:approve';
+      return permit(permission)(req,res,()=>{void (async()=>{
+        if(!cradle.certificateWorkspaceReadGateway)return void res.status(503).json({error:'CERTIFICATE_WORKSPACE_UNAVAILABLE'});
+        res.setHeader('Cache-Control','no-store');res.json(await cradle.certificateWorkspaceReadGateway.read(query));
+      })().catch(next);});
+    }));
     router.get('/', permit('admin:certificates:view'), asyncHandler(async (req: Request, res: Response) =>
       { const result=await useCases.list(listQuery.parse(req.query)),visible=await maySeeKey(req); res.setHeader('Cache-Control','no-store');res.json({...result,data:result.data.map(item=>redactCertificate(item,visible))}); },
     ));
@@ -173,6 +182,11 @@ export class CertificateAdminRouter {
       const version = await useCases.getTemplateVersion(req.params.id);
       if (!version) return res.status(404).json({error: 'CERTIFICATE_TEMPLATE_VERSION_NOT_FOUND'});
       res.json(version);
+    }));
+    router.get('/templates/:id/versions',permit('admin:certificates:view'),asyncHandler(async(req:Request,res:Response)=>{
+      const templateId=z.string().uuid().parse(req.params.id),query=z.object({page:z.coerce.number().int().min(1).max(100000).default(1),pageSize:z.coerce.number().int().min(1).max(50).default(25),search:z.string().trim().max(60).optional()}).strict().parse(req.query);
+      if(!cradle.certificateWorkspaceReadGateway?.templateVersions)return void res.status(503).json({error:'CERTIFICATE_WORKSPACE_UNAVAILABLE'});
+      res.setHeader('Cache-Control','no-store');res.json(await cradle.certificateWorkspaceReadGateway.templateVersions({...query,templateId}));
     }));
     router.get('/templates/:id/review',permit('admin:certificates:templates:approve'),asyncHandler(async(req:Request,res:Response)=>{res.setHeader('Cache-Control','no-store');res.json(await useCases.templateReview(z.string().uuid().parse(req.params.id)));}));
     router.get('/templates', permit('admin:certificates:view'), asyncHandler(async (_req: Request, res: Response) => res.json({ data: await useCases.listTemplates() })));

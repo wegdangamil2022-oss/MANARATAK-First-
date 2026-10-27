@@ -114,6 +114,7 @@ import {
   Phase19CourseFinancialClearanceGateway,
   PrismaLearningPathRepository,
   PrismaCertificateRepository,
+  PrismaCertificateWorkspaceReadGateway,
   ProviderNeutralCertificateRenderingService,
   EapCertificateArtifactStore,
   PrismaExternalCourseProviderRepository,
@@ -592,6 +593,7 @@ export function registerDependencies(
     certificateVerificationRateLimiter: asFunction(({redisClient})=>redisClient ? new RedisRateLimiter(redisClient,'manaratak:certificates:verification:') : null).singleton(),
     certificateVerificationDistributedRequired: asValue(productionLike),
     certificateRepository: asFunction(({ prisma,certificateVerificationPolicy }) => new PrismaCertificateRepository(prisma,certificateVerificationPolicy)).singleton(),
+    certificateWorkspaceReadGateway: asFunction(({prisma}) => new PrismaCertificateWorkspaceReadGateway(prisma)).scoped(),
     studentWorkspaceRepository: asFunction(
       ({ prisma }) =>
         new PrismaStudentWorkspaceRepository(
