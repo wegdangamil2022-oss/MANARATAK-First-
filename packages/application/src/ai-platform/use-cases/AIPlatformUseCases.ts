@@ -213,6 +213,31 @@ export class AIPlatformAdminUseCases {
   listConfigurationRevisions(resource: AIRegistryResource, key: string) {
     return this.repository.listConfigurationRevisions(resource, key);
   }
+  async disableRuntime(
+    input: { expectedUpdatedAt: string; reason: string },
+    actorReferenceId: string,
+  ) {
+    if (!actorReferenceId || input.reason.trim().length < 3)
+      throw new Error('AI_EMERGENCY_REASON_REQUIRED');
+    const current = await this.repository.find<Record<string, unknown>>(
+      'platformSettings',
+      'runtime',
+    );
+    if (!current) throw new Error('AI_RESOURCE_NOT_FOUND');
+    // One-way stop. Re-enabling still requires the repository's governed approval path.
+    return this.save(
+      'platformSettings',
+      {
+        ...current,
+        key: 'runtime',
+        globalEnabled: false,
+        status: String(current.status ?? 'ACTIVE'),
+        expectedUpdatedAt: input.expectedUpdatedAt,
+        emergencyStopReason: input.reason.trim(),
+      },
+      actorReferenceId,
+    );
+  }
   async reconciliationEvidence(publicId: string) {
     const record = await this.repository.findExecution(publicId);
     if (!record) throw new Error('AI_EXECUTION_NOT_FOUND');
@@ -2245,12 +2270,14 @@ export class AIKnowledgeUseCases {
       (source.readerScope === 'PUBLIC' && source.dataClassification !== 'PUBLIC') ||
       (source.readerScope !== 'PUBLIC' && source.readerScope !== requesterReferenceId)
     ) {
-      const withdrawnPublicCms = sourceType === 'CMS' && (!source || (
-        source.sourceType === sourceType &&
-        source.sourceReferenceId === sourceReferenceId &&
-        (locale == null || source.locale === locale) &&
-        !source.transferAllowed && source.readerScope === 'PUBLIC'
-      ));
+      const withdrawnPublicCms =
+        sourceType === 'CMS' &&
+        (!source ||
+          (source.sourceType === sourceType &&
+            source.sourceReferenceId === sourceReferenceId &&
+            (locale == null || source.locale === locale) &&
+            !source.transferAllowed &&
+            source.readerScope === 'PUBLIC'));
       if (withdrawnPublicCms)
         await this.repository.removeKnowledgeSource(
           indexKey,

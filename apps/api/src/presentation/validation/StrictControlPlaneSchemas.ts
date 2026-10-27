@@ -250,6 +250,8 @@ export const toolKeyParamSchema = z.object({
 
 export const studentToolAdminListQuerySchema = z
   .object({
+    audience: z.enum(['STUDENT', 'ADMIN_INTERNAL']).optional(),
+    aiCapabilityKey: z.string().trim().min(1).max(160).regex(/^[A-Za-z0-9_.:-]+$/).optional(),
     sort: z.enum(['LAUNCH_ORDER', 'UPDATED_DESC']).optional(),
     page: z.coerce.number().int().min(1).max(10000).default(1),
     pageSize: z.coerce.number().int().min(1).max(100).default(25),

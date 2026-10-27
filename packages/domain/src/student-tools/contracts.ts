@@ -11,6 +11,8 @@ import {
   ScholarshipCandidate,
 } from './types';
 export interface StudentToolFilters {
+  audience?: 'STUDENT' | 'ADMIN_INTERNAL';
+  aiCapabilityKey?: string;
   category?: string;
   visibility?: string;
   implementationStatus?: string;
@@ -50,8 +52,14 @@ export interface StudentToolTelemetry {
   unknownOutcome?: number;
 }
 export interface IStudentToolRegistryRepository {
-  workspaceExecutions?(query: StudentToolExecutionFilters & { toolKey?: string; page?: number; pageSize?: number }): Promise<{ data: StudentToolExecutionRecord[]; total: number }>;
-  versionHistory?(toolKey: string, page: number, pageSize: number): Promise<{ data: StudentToolVersion[]; total: number }>;
+  workspaceExecutions?(
+    query: StudentToolExecutionFilters & { toolKey?: string; page?: number; pageSize?: number },
+  ): Promise<{ data: StudentToolExecutionRecord[]; total: number }>;
+  versionHistory?(
+    toolKey: string,
+    page: number,
+    pageSize: number,
+  ): Promise<{ data: StudentToolVersion[]; total: number }>;
   release?(
     toolKey: string,
     action: 'PROPOSE' | 'APPROVE' | 'REJECT' | 'ACTIVATE',
@@ -96,7 +104,9 @@ export interface IStudentToolRegistryRepository {
     reason?: string,
   ): Promise<StudentToolDefinition>;
   recordExecution(record: StudentToolExecutionRecord): Promise<StudentToolExecutionRecord>;
-  recordExecutionOrReplay(record: StudentToolExecutionRecord): Promise<{ record: StudentToolExecutionRecord; created: boolean }>;
+  recordExecutionOrReplay(
+    record: StudentToolExecutionRecord,
+  ): Promise<{ record: StudentToolExecutionRecord; created: boolean }>;
   completeExecution(
     executionId: string,
     patch: Partial<StudentToolExecutionRecord>,
@@ -116,9 +126,7 @@ export interface IStudentToolRegistryRepository {
     filters?: StudentToolExecutionFilters,
   ): Promise<{ data: StudentToolExecutionRecord[]; total: number }>;
   telemetry(toolKey?: string): Promise<StudentToolTelemetry>;
-  audit(
-    toolKey: string,
-  ): Promise<
+  audit(toolKey: string): Promise<
     Array<{
       timestamp: Date | string;
       actor: string;
@@ -194,9 +202,7 @@ export interface IScholarshipRecommendationGateway {
   }): Promise<ScholarshipCandidate[]>;
 }
 export interface IStudentContextGateway {
-  getMinimalContext(
-    studentReference: string,
-  ): Promise<{
+  getMinimalContext(studentReference: string): Promise<{
     preferredLocale?: 'ar' | 'en';
     educationalLevel?: string;
     targetDegree?: string;

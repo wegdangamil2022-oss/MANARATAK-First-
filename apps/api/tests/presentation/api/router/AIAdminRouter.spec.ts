@@ -8,6 +8,7 @@ const createUseCases = () => ({
     overview: vi.fn().mockResolvedValue({ enabled: true }),
     approvePromptVersion: vi.fn().mockResolvedValue({ status: 'APPROVED' }),
     save: vi.fn(),
+    disableRuntime: vi.fn().mockResolvedValue({ key: 'runtime', globalEnabled: false }),
   },
   aiExecutionUseCases: { operateAsyncJob: vi.fn() },
   aiWorkflowUseCases: {},
@@ -38,6 +39,40 @@ function appFor(permissions: string[], authenticated = true) {
 }
 
 describe('P17 AI Admin per-operation authorization', () => {
+  it('allows only safety operators to stop runtime with a strict revision and reason', async () => {
+    const body = {
+      expectedUpdatedAt: '2026-10-27T12:00:00.000Z',
+      reason: 'Pause for investigation',
+    };
+    const reader = appFor(['admin:ai:view']);
+    expect(
+      (await request(reader.app).post('/admin/ai/runtime/emergency-disable').send(body)).status,
+    ).toBe(403);
+    expect(reader.deps.aiPlatformAdminUseCases.disableRuntime).not.toHaveBeenCalled();
+    const operator = appFor(['admin:ai:safety:manage']);
+    expect(
+      (
+        await request(operator.app)
+          .post('/admin/ai/runtime/emergency-disable')
+          .send({ ...body, globalEnabled: true })
+      ).status,
+    ).toBe(400);
+    expect(
+      (
+        await request(operator.app)
+          .post('/admin/ai/runtime/emergency-disable')
+          .send({ ...body, reason: '' })
+      ).status,
+    ).toBe(400);
+    expect(operator.deps.aiPlatformAdminUseCases.disableRuntime).not.toHaveBeenCalled();
+    expect(
+      (await request(operator.app).post('/admin/ai/runtime/emergency-disable').send(body)).status,
+    ).toBe(200);
+    expect(operator.deps.aiPlatformAdminUseCases.disableRuntime).toHaveBeenCalledWith(
+      body,
+      'ai-editor',
+    );
+  });
   it('permits view-only dashboards but not guardrail or monetary mutations', async () => {
     const { app, deps } = appFor(['admin:ai:view']);
     const overview = await request(app).get('/admin/ai/overview');

@@ -267,7 +267,17 @@ export interface IAIAsyncPayloadProtector {
   }): unknown;
 }
 
+export interface AIPlatformRuntimeSettings {
+  key: string;
+  status: string;
+  globalEnabled: boolean;
+  expectedUpdatedAt?: string;
+  emergencyStopReason?: string;
+  [setting: string]: unknown;
+}
+
 export type AIPlatformResourceValue =
+  | AIPlatformRuntimeSettings
   | AIProviderDefinition
   | AIModelDefinition
   | AIModelPrice

@@ -131,6 +131,7 @@ export class AIAdminRouter {
         return 'admin:ai:configure';
       }
       if (method !== 'POST') return null;
+      if (path === '/runtime/emergency-disable') return 'admin:ai:safety:manage';
       if (/^\/configuration\/[^/]+\/[^/]+\/(STAGE|ROLLBACK)$/.test(path)) {
         const resource = path.split('/')[2];
         return ['guardrails', 'platformSettings'].includes(resource)
@@ -207,6 +208,23 @@ export class AIAdminRouter {
       '/overview',
       asyncHandler(async (_req, res) => {
         res.json(await cradle.aiPlatformAdminUseCases.overview());
+      }),
+    );
+    router.post(
+      '/runtime/emergency-disable',
+      asyncHandler(async (req, res) => {
+        const body = z
+          .object({
+            expectedUpdatedAt: z.string().datetime(),
+            reason: z.string().trim().min(3).max(1000),
+          })
+          .strict()
+          .safeParse(req.body);
+        if (!body.success) {
+          res.status(400).json({ error: 'AI_EMERGENCY_INVALID_REQUEST' });
+          return;
+        }
+        res.json(await cradle.aiPlatformAdminUseCases.disableRuntime(body.data, actor(req)));
       }),
     );
     router.get(

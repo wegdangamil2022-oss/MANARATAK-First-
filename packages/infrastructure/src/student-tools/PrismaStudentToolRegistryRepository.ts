@@ -13,10 +13,22 @@ import {
   StudentToolPublicAccessPolicy,
   StudentToolTransientResultWrite,
   StudentToolVersionSnapshot,
+  INTERNAL_STUDENT_TOOL_KEYS,
 } from '@manaratak/domain';
 const json = (value: unknown): Prisma.InputJsonValue =>
   JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 type Db = Record<string, any>;
+function audienceWhere(audience: StudentToolFilters['audience']) {
+  if (!audience) return {};
+  const internal = {
+    OR: [
+      { toolKey: { in: Array.from(INTERNAL_STUDENT_TOOL_KEYS) } },
+      { executionType: 'ADMIN_INTERNAL' },
+      { availability: { path: ['adminOnly'], equals: true } },
+    ],
+  };
+  return { AND: [audience === 'ADMIN_INTERNAL' ? internal : { NOT: internal }] };
+}
 
 export class PrismaStudentToolRegistryRepository implements IStudentToolRegistryRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -27,6 +39,8 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
     const search = filters.search?.trim();
     const rows = await this.db.studentToolDefinitionRecord.findMany({
       where: {
+        ...audienceWhere(filters.audience),
+        ...(filters.aiCapabilityKey ? { aiCapabilityKey: filters.aiCapabilityKey } : {}),
         ...(filters.category ? { category: filters.category } : {}),
         ...(filters.visibility ? { visibility: filters.visibility } : {}),
         ...(filters.implementationStatus
@@ -53,8 +67,16 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
     const page = Math.max(1, Math.min(10000, filters.page ?? 1));
     const pageSize = Math.max(1, Math.min(100, filters.pageSize ?? 25));
     const where = {
+      ...audienceWhere(filters.audience),
       ...Object.fromEntries(
-        ['category', 'visibility', 'implementationStatus', 'lifecycle', 'executionType']
+        [
+          'category',
+          'visibility',
+          'implementationStatus',
+          'lifecycle',
+          'executionType',
+          'aiCapabilityKey',
+        ]
           .filter((key) => filters[key as keyof StudentToolFilters])
           .map((key) => [key, filters[key as keyof StudentToolFilters]]),
       ),
@@ -66,16 +88,22 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
           }
         : {}),
     };
-    const [rows, total] = await this.db.$transaction([
-      this.db.studentToolDefinitionRecord.findMany({
-        where,
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        include: { versions: { orderBy: { releaseDate: 'desc' } }, dependencies: true },
-        orderBy: filters.sort === 'UPDATED_DESC' ? [{ updatedAt: 'desc' }, { toolKey: 'asc' }] : [{ launchOrder: 'asc' }, { toolKey: 'asc' }],
-      }),
-      this.db.studentToolDefinitionRecord.count({ where }),
-    ], { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead });
+    const [rows, total] = await this.db.$transaction(
+      [
+        this.db.studentToolDefinitionRecord.findMany({
+          where,
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+          include: { versions: { orderBy: { releaseDate: 'desc' } }, dependencies: true },
+          orderBy:
+            filters.sort === 'UPDATED_DESC'
+              ? [{ updatedAt: 'desc' }, { toolKey: 'asc' }]
+              : [{ launchOrder: 'asc' }, { toolKey: 'asc' }],
+        }),
+        this.db.studentToolDefinitionRecord.count({ where }),
+      ],
+      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+    );
     return { data: rows.map(mapDefinition), total, page, pageSize };
   }
 
@@ -395,7 +423,11 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
         )
           throw new Error('TOOL_REVISION_CONFLICT');
         const created = await tx.studentToolExecutionRecord.create({
-          data: { ...executionData(record), definitionId: definition.id, versionId: version.id } as any,
+          data: {
+            ...executionData(record),
+            definitionId: definition.id,
+            versionId: version.id,
+          } as any,
         });
         await appendExecutionEvent(tx, 'STUDENT_TOOL_EXECUTION_STARTED', record.toolKey, record);
         return created;
@@ -491,7 +523,14 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
         resultExpiresAt: true,
       },
     });
-    if (!row?.resultDigest || !row.resultCiphertext || !row.resultIv || !row.resultAuthTag || !row.resultKeyVersion || !row.resultExpiresAt)
+    if (
+      !row?.resultDigest ||
+      !row.resultCiphertext ||
+      !row.resultIv ||
+      !row.resultAuthTag ||
+      !row.resultKeyVersion ||
+      !row.resultExpiresAt
+    )
       return null;
     if (new Date(row.resultExpiresAt).getTime() <= Date.now()) {
       await this.clearTransientResult(executionId);
@@ -562,16 +601,32 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
   }
   async versionHistory(toolKey: string, page: number, pageSize: number) {
     const where = { definition: { toolKey } };
-    const [data, total] = await this.db.$transaction([
-      this.db.studentToolVersionRecord.findMany({ where, skip: (page - 1) * pageSize, take: pageSize,
-        orderBy: [{ releaseDate: 'desc' }, { id: 'desc' }],
-        select: { semanticVersion: true, inputSchemaVersion: true, outputSchemaVersion: true, releaseDate: true, changeNote: true, status: true, snapshotHash: true },
-      }),
-      this.db.studentToolVersionRecord.count({ where }),
-    ], { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead });
+    const [data, total] = await this.db.$transaction(
+      [
+        this.db.studentToolVersionRecord.findMany({
+          where,
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+          orderBy: [{ releaseDate: 'desc' }, { id: 'desc' }],
+          select: {
+            semanticVersion: true,
+            inputSchemaVersion: true,
+            outputSchemaVersion: true,
+            releaseDate: true,
+            changeNote: true,
+            status: true,
+            snapshotHash: true,
+          },
+        }),
+        this.db.studentToolVersionRecord.count({ where }),
+      ],
+      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+    );
     return { data, total };
   }
-  async workspaceExecutions(query: StudentToolExecutionFilters & { toolKey?: string; page?: number; pageSize?: number }) {
+  async workspaceExecutions(
+    query: StudentToolExecutionFilters & { toolKey?: string; page?: number; pageSize?: number },
+  ) {
     const { toolKey, page = 1, pageSize = 25, ...filters } = query;
     const safePage = Math.max(1, page);
     const take = Math.min(100, Math.max(1, pageSize));
@@ -582,16 +637,19 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
       ...(filters.traceId ? { traceId: filters.traceId } : {}),
       ...(filters.correlationId ? { correlationId: filters.correlationId } : {}),
     };
-    const [rows, total] = await this.db.$transaction([
-      this.db.studentToolExecutionRecord.findMany({
-        where,
-        include: { definition: { select: { toolKey: true } } },
-        orderBy: [{ startedAt: 'desc' }, { executionId: 'desc' }],
-        skip: (safePage - 1) * take,
-        take,
-      }),
-      this.db.studentToolExecutionRecord.count({ where }),
-    ], { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead });
+    const [rows, total] = await this.db.$transaction(
+      [
+        this.db.studentToolExecutionRecord.findMany({
+          where,
+          include: { definition: { select: { toolKey: true } } },
+          orderBy: [{ startedAt: 'desc' }, { executionId: 'desc' }],
+          skip: (safePage - 1) * take,
+          take,
+        }),
+        this.db.studentToolExecutionRecord.count({ where }),
+      ],
+      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+    );
     return { data: rows.map((row: any) => mapExecution(row, row.definition.toolKey)), total };
   }
   async telemetry(toolKey?: string): Promise<StudentToolTelemetry> {
@@ -692,15 +750,18 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
       ...(filters.action ? { action: filters.action } : {}),
       ...(filters.correlationId ? { correlationReference: filters.correlationId } : {}),
     };
-    const [rows, total] = await this.db.$transaction([
-      this.db.auditRecord.findMany({
-        where,
-        orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-      }),
-      this.db.auditRecord.count({ where }),
-    ], { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead });
+    const [rows, total] = await this.db.$transaction(
+      [
+        this.db.auditRecord.findMany({
+          where,
+          orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+        }),
+        this.db.auditRecord.count({ where }),
+      ],
+      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+    );
     return {
       data: rows.map((row: any) => ({
         timestamp: row.timestamp,
@@ -806,7 +867,9 @@ function stableStringify(value: unknown): string {
   if (value === null || typeof value !== 'object') return JSON.stringify(value) ?? 'undefined';
   if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
   const record = value as Record<string, unknown>;
-  return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(record[key])}`)
+  return `{${Object.keys(record)
+    .sort()
+    .map((key) => `${JSON.stringify(key)}:${stableStringify(record[key])}`)
     .join(',')}}`;
 }
 function mapDefinition(row: any): StudentToolDefinition {
@@ -850,7 +913,10 @@ async function appendExecutionEvent(
         errorCode: record.errorCode ?? null,
         isTest: record.isTest === true,
       }),
-      metadata: json({ correlationId: record.correlationId ?? null, traceId: record.traceId ?? null }),
+      metadata: json({
+        correlationId: record.correlationId ?? null,
+        traceId: record.traceId ?? null,
+      }),
       correlationId: record.correlationId ?? record.executionId,
     },
   });

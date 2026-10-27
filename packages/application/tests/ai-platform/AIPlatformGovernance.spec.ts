@@ -10,6 +10,36 @@ import {
 import { AISafetyDecision } from '@manaratak/domain';
 
 describe('Phase 17 safety and resilience', () => {
+  it('emergency stop preserves runtime settings and passes the expected revision to audited storage', async () => {
+    const current = { key: 'runtime', status: 'ACTIVE', globalEnabled: true, dailyBudget: 25 };
+    const repository = {
+      find: vi.fn().mockResolvedValue(current),
+      upsert: vi.fn().mockImplementation(async (_resource, value) => value),
+    };
+    const service = new AIPlatformAdminUseCases(
+      repository as any,
+      { get: vi.fn(), list: vi.fn() } as any,
+    );
+    const result = await service.disableRuntime(
+      { expectedUpdatedAt: '2026-10-27T12:00:00.000Z', reason: ' investigate ' },
+      'operator',
+    );
+    expect(result).toMatchObject({
+      ...current,
+      globalEnabled: false,
+      emergencyStopReason: 'investigate',
+    });
+    expect(repository.upsert).toHaveBeenCalledWith(
+      'platformSettings',
+      expect.objectContaining({
+        dailyBudget: 25,
+        globalEnabled: false,
+        expectedUpdatedAt: '2026-10-27T12:00:00.000Z',
+      }),
+      'operator',
+    );
+    expect(current.globalEnabled).toBe(true);
+  });
   it('redacts PII and blocks prompt injection before provider routing', () => {
     const guardrails = new EnterpriseAIGuardrailEngine();
     expect(guardrails.evaluateInput('راسلني على student@example.com', []).decision).toBe(
