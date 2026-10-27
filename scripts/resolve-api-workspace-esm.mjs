@@ -27,7 +27,7 @@ function completeSpecifiers(file) {
         ? node.arguments[0]
         : ts.isImportTypeNode(node) && ts.isLiteralTypeNode(node.argument)
           ? node.argument.literal : undefined;
-    if (literal && ts.isStringLiteral(literal) && literal.text.startsWith('.')) {
+    if (literal && ts.isStringLiteral(literal) && (literal.text.startsWith('./') || literal.text.startsWith('../'))) {
       const target = path.resolve(path.dirname(file), literal.text);
       const suffix = fs.existsSync(target) && fs.statSync(target).isFile() ? ''
         : fs.existsSync(target + '.js') ? '.js'
