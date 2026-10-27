@@ -1,0 +1,81 @@
+.iam-workspace,
+.iam-workspace :is(button, input, select, textarea, summary) {
+  font-family: 'Cairo', sans-serif !important;
+}
+.iam-workspace :is(.sf-field, label) {
+  font-size: 13px;
+}
+.iam-workspace .sf-field {
+  display: grid;
+  gap: 5px;
+}
+.iam-workspace :is(.sf-field input, .sf-field select, .sf-field textarea) {
+  width: 100%;
+}
+.iam-workspace .sf-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+}
+.iam-workspace .sf-filter-row > label {
+  flex: 1 1 180px;
+}
+.iam-workspace .iam-steps {
+  list-style: decimal;
+  padding-inline-start: 24px;
+  display: grid;
+  gap: 8px;
+}
+.iam-workspace :is(.sf-empty, [role='status']) {
+  font-size: 13px;
+  font-weight: 500;
+}
+.iam-workspace .sf-reference {
+  font-size: 11px;
+  color: #64748b;
+  overflow-wrap: anywhere;
+}
+.iam-workspace :is(td, th) {
+  text-align: start;
+  vertical-align: top;
+  padding: 10px;
+}
+.iam-workspace .sf-table-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+  border: 1px solid #d8dfea;
+  border-radius: 12px;
+}
+.iam-workspace table {
+  width: 100%;
+}
+.iam-workspace .sf-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.iam-workspace details > summary {
+  cursor: pointer;
+  color: #142b5f;
+  font-weight: 700;
+}
+.iam-workspace :is(.iam-directory h2, .iam-directory h3) {
+  font-size: 15px;
+}
+.iam-workspace .iam-directory :is(input, textarea, select, button, a) {
+  font-size: 13px;
+}
+.iam-workspace .sf-notice {
+  font-size: 12px;
+  font-weight: 500;
+}
+.iam-workspace [hidden] {
+  display: none !important;
+}
+.iam-workspace .sf-actions > button[aria-pressed='true'] {
+  background: #142b5f;
+  color: white;
+  border-color: #142b5f;
+}

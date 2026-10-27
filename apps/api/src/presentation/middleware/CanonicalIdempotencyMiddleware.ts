@@ -1,4 +1,5 @@
 import { isNotificationPreviewRequest } from '../http/NotificationPreviewRequest.js';
+import { isAdministrativeReadQuery } from '../security/AdministrativeReadQuery.js';
 import { createHash } from 'node:crypto';
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
@@ -12,7 +13,10 @@ function stable(value: unknown): string {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`;
   const object = value as Record<string, unknown>;
-  return `{${Object.keys(object).sort().map(key => `${JSON.stringify(key)}:${stable(object[key])}`).join(',')}}`;
+  return `{${Object.keys(object)
+    .sort()
+    .map((key) => `${JSON.stringify(key)}:${stable(object[key])}`)
+    .join(',')}}`;
 }
 
 function normalizedRoute(req: Request): string {
@@ -35,38 +39,58 @@ export function createCanonicalIdempotencyMiddleware(input: {
   const leaseSeconds = input.leaseSeconds ?? 120;
 
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (!['POST', 'PUT', 'PATCH'].includes(req.method.toUpperCase()) || isNotificationPreviewRequest(req)) return next();
+    if (
+      !['POST', 'PUT', 'PATCH'].includes(req.method.toUpperCase()) ||
+      isNotificationPreviewRequest(req) ||
+      isAdministrativeReadQuery(req)
+    )
+      return next();
 
     const rawKey = req.header('Idempotency-Key')?.trim();
     if (!rawKey) {
       if (!input.requireKey) return next();
-      return void res.status(400).type('application/problem+json').json(problemDetails({
-        status: 400,
-        code: 'IDEMPOTENCY_KEY_REQUIRED',
-        detail: 'Idempotency-Key is required for this mutation.',
-        instance: req.originalUrl,
-        traceId: String((req as any).traceId || req.headers['x-correlation-id'] || 'unknown'),
-      }));
+      return void res
+        .status(400)
+        .type('application/problem+json')
+        .json(
+          problemDetails({
+            status: 400,
+            code: 'IDEMPOTENCY_KEY_REQUIRED',
+            detail: 'Idempotency-Key is required for this mutation.',
+            instance: req.originalUrl,
+            traceId: String((req as any).traceId || req.headers['x-correlation-id'] || 'unknown'),
+          }),
+        );
     }
     if (rawKey.length < 8 || rawKey.length > 200) {
-      return void res.status(400).type('application/problem+json').json(problemDetails({
-        status: 400,
-        code: 'IDEMPOTENCY_KEY_INVALID',
-        detail: 'Idempotency-Key must contain between 8 and 200 characters.',
-        instance: req.originalUrl,
-        traceId: String((req as any).traceId || req.headers['x-correlation-id'] || 'unknown'),
-      }));
+      return void res
+        .status(400)
+        .type('application/problem+json')
+        .json(
+          problemDetails({
+            status: 400,
+            code: 'IDEMPOTENCY_KEY_INVALID',
+            detail: 'Idempotency-Key must contain between 8 and 200 characters.',
+            instance: req.originalUrl,
+            traceId: String((req as any).traceId || req.headers['x-correlation-id'] || 'unknown'),
+          }),
+        );
     }
 
-    const resolvedPrincipal = input.principalResolver?.(req) || (req as any).authUserId || input.principalFallback;
+    const resolvedPrincipal =
+      input.principalResolver?.(req) || (req as any).authUserId || input.principalFallback;
     const principalId = String(resolvedPrincipal || 'ANONYMOUS');
     const routeKey = normalizedRoute(req);
     const keyHash = sha256(rawKey);
     // Keep concrete resource IDs in command identity even when the storage scope
     // groups routes by template. A key for one region must not replay on another.
     const resourcePath = (req.baseUrl || '') + (req.path || '');
-    const requestFingerprint = sha256(`${req.method.toUpperCase()}\n${routeKey}\n${resourcePath}\n${stable(req.body ?? null)}`);
-    const scopeHash = sha256(`${principalId}\n${req.method.toUpperCase()}\n${routeKey}\n${keyHash}`);
+    const requestFingerprint = sha256(
+      `${req.method.toUpperCase()}\n${routeKey}\n${resourcePath}\n${stable(req.body ?? null)}`,
+    );
+    const scopeHash = sha256(
+      `${principalId}\n${req.method.toUpperCase()}\n${routeKey}\n${keyHash}`,
+    );
 
     try {
       const decision = await input.store.begin({
@@ -84,23 +108,27 @@ export function createCanonicalIdempotencyMiddleware(input: {
         return void res.status(decision.statusCode).json(decision.responseBody);
       }
       if (decision.kind === 'CONFLICT') {
-        return void res.status(409).json(problemDetails({
-          status: 409,
-          code: 'IDEMPOTENCY_KEY_PAYLOAD_CONFLICT',
-          detail: 'This Idempotency-Key was already used with a different request payload.',
-          instance: req.originalUrl,
-          traceId: String((req as any).traceId || req.headers['x-correlation-id'] || 'unknown'),
-        }));
+        return void res.status(409).json(
+          problemDetails({
+            status: 409,
+            code: 'IDEMPOTENCY_KEY_PAYLOAD_CONFLICT',
+            detail: 'This Idempotency-Key was already used with a different request payload.',
+            instance: req.originalUrl,
+            traceId: String((req as any).traceId || req.headers['x-correlation-id'] || 'unknown'),
+          }),
+        );
       }
       if (decision.kind === 'IN_PROGRESS') {
         res.setHeader('Retry-After', '2');
-        return void res.status(409).json(problemDetails({
-          status: 409,
-          code: 'IDEMPOTENCY_REQUEST_IN_PROGRESS',
-          detail: 'An identical command is already being processed.',
-          instance: req.originalUrl,
-          traceId: String((req as any).traceId || req.headers['x-correlation-id'] || 'unknown'),
-        }));
+        return void res.status(409).json(
+          problemDetails({
+            status: 409,
+            code: 'IDEMPOTENCY_REQUEST_IN_PROGRESS',
+            detail: 'An identical command is already being processed.',
+            instance: req.originalUrl,
+            traceId: String((req as any).traceId || req.headers['x-correlation-id'] || 'unknown'),
+          }),
+        );
       }
 
       const originalJson = res.json.bind(res);
@@ -110,23 +138,29 @@ export function createCanonicalIdempotencyMiddleware(input: {
         if (finalized) return originalJson(body);
         finalized = true;
         // Persist the terminal semantic result before it becomes visible to the client.
-        void input.store.complete({
-          scopeHash: decision.scopeHash,
-          leaseToken: decision.leaseToken,
-          statusCode: res.statusCode,
-          responseBody: body,
-        }).then(() => originalJson(body)).catch(next);
+        void input.store
+          .complete({
+            scopeHash: decision.scopeHash,
+            leaseToken: decision.leaseToken,
+            statusCode: res.statusCode,
+            responseBody: body,
+          })
+          .then(() => originalJson(body))
+          .catch(next);
         return res;
       }) as Response['json'];
       res.send = ((body?: unknown) => {
         if (res.statusCode !== 204 || finalized) return originalSend(body);
         finalized = true;
-        void input.store.complete({
-          scopeHash: decision.scopeHash,
-          leaseToken: decision.leaseToken,
-          statusCode: 204,
-          responseBody: null,
-        }).then(() => originalSend(body)).catch(next);
+        void input.store
+          .complete({
+            scopeHash: decision.scopeHash,
+            leaseToken: decision.leaseToken,
+            statusCode: 204,
+            responseBody: null,
+          })
+          .then(() => originalSend(body))
+          .catch(next);
         return res;
       }) as Response['send'];
       next();

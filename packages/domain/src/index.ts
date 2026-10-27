@@ -421,3 +421,4 @@ export * from './universities/UniversityProgramReadPort';
 export * from './universities/UniversityStageDefinitions';
 
 export * from './majors/MajorContentAuthoring';
+export * from './identity/StaffWorkspace';

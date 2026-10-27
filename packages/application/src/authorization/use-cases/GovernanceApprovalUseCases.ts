@@ -4,7 +4,13 @@ import type {
   AtomicDomainMutationCoordinator,
   AtomicMutationRequestContext,
 } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
-export type GovernanceApprovalScope = 'DUTY_POLICY' | 'DUTY_EXCEPTION' | 'MFA_RESET' | 'TRANSLATION_TRANSFER' | 'TRANSLATION_PUBLICATION';
+export type GovernanceApprovalScope =
+  | 'DUTY_POLICY'
+  | 'DUTY_EXCEPTION'
+  | 'MFA_RESET'
+  | 'TRANSLATION_TRANSFER'
+  | 'TRANSLATION_PUBLICATION'
+  | 'AUTHORIZATION_CHANGE';
 export interface GovernanceApproval {
   id: string;
   scope: GovernanceApprovalScope;
@@ -17,6 +23,7 @@ export interface GovernanceApproval {
   usedAt: string | null;
 }
 export interface IGovernanceApprovalGateway {
+  get?(id: string): Promise<GovernanceApproval | null>;
   list(
     actorId: string,
     limit: number,
@@ -56,6 +63,31 @@ export class GovernanceApprovalUseCases {
   list(actorId: string, limit: number, cursor?: string) {
     return this.gateway.list(actorId, Math.min(100, Math.max(1, limit)), cursor);
   }
+  async assertApproved(id: string, payload: unknown, actorId: string, approverId: string) {
+    const approval = await this.gateway.get?.(id);
+    if (
+      !approval ||
+      approval.scope !== 'AUTHORIZATION_CHANGE' ||
+      !approval.approvedAt ||
+      approval.usedAt ||
+      approval.requestedBy !== actorId ||
+      approval.approverId !== approverId ||
+      actorId === approverId ||
+      !Number.isFinite(Date.parse(approval.expiresAt)) ||
+      Date.parse(approval.expiresAt) <= Date.now() ||
+      approval.digest !== governanceApprovalDigest('AUTHORIZATION_CHANGE', payload)
+    )
+      throw new Error('GOVERNANCE_APPROVAL_REQUIRED');
+  }
+  consumeChange(
+    id: string,
+    payload: unknown,
+    actorId: string,
+    approverId: string,
+    tx: AtomicPersistenceContext,
+  ) {
+    return this.gateway.consume(id, 'AUTHORIZATION_CHANGE', payload, actorId, approverId, tx);
+  }
   async request(
     input: { id: string; scope: GovernanceApprovalScope; approverId: string; payload: unknown },
     context: AtomicMutationRequestContext,
@@ -64,7 +96,14 @@ export class GovernanceApprovalUseCases {
       !input.id ||
       !input.approverId ||
       input.approverId === context.actorId ||
-      !['DUTY_POLICY', 'DUTY_EXCEPTION', 'MFA_RESET', 'TRANSLATION_TRANSFER', 'TRANSLATION_PUBLICATION'].includes(input.scope)
+      ![
+        'DUTY_POLICY',
+        'DUTY_EXCEPTION',
+        'MFA_RESET',
+        'TRANSLATION_TRANSFER',
+        'TRANSLATION_PUBLICATION',
+        'AUTHORIZATION_CHANGE',
+      ].includes(input.scope)
     )
       throw new Error('GOVERNANCE_APPROVAL_INVALID');
     const approval: GovernanceApproval = {

@@ -916,6 +916,12 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       // Review commands authorize current owners before their durable replay.
       if (/^\/review-workspace(?:\/|$)/i.test(req.path)) return next();
       const command = createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true });
+      if (/^\/staff(?:\/|$)/i.test(req.path)) {
+        return requireAdminPermission('admin:identities:manage')(req,res,()=>command(req,res,next));
+      }
+      if (/^\/authorization(?:\/|$)/i.test(req.path)) {
+        return requireAdminPermission('admin:authorization:manage')(req,res,()=>command(req,res,next));
+      }
       // Match the existing case-insensitive Scholarship mount before serving
       // receipts, which contain owner data subject to current permissions.
       if (/^\/scholarships(?:\/|$)/i.test(req.path)) {
@@ -935,6 +941,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
     // Core Admin Domain Routers (Identity & Audit)
     v1Router.use('/admin/identities', requireAdminPermission('admin:identities:manage'), container.resolve<Router>('identityRouter'));
+    v1Router.use('/admin/staff', requireAdminPermission('admin:identities:manage'), lazyRouter('staffAdminRouter'));
     v1Router.use('/admin/dashboard', lazyRouter('executiveDashboardRouter'));
     v1Router.use('/admin/review-workspace', requireAdminPermission('admin:platform:manage'), lazyRouter('reviewWorkspaceRouter'));
     v1Router.use('/admin/services', lazyRouter('managedApplicationEvidenceRouter')); // Matched evidence routes retain their management guard.

@@ -97,6 +97,11 @@ export function AuthorizationEffectiveAccess({
         {t('iam_effective_access')}
       </h2>
       <p>{t('iam_effective_help')}</p>
+      <p className="sf-notice">
+        {language === 'ar'
+          ? 'هذه نتيجة وقت الفحص وفي سياق اتصال المسؤول الحالي. لا تثبت جاهزية تسجيل دخول الموظف أو اكتمال MFA في جلسته.'
+          : 'This result uses the current administrator connection and evaluation time. It does not prove the employee can sign in or has completed MFA in their session.'}
+      </p>
       <AuthorizationIdentityPicker value={identity} onChange={select} />
       <label className="block">
         {t('iam_test_permission')}

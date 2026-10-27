@@ -69,7 +69,7 @@
   flex-shrink: 0;
 }
 .taxonomy-workspace .taxonomy-hero {
-  background: linear-gradient(120deg, #142b5f, #203a70);
+  background: linear-gradient(110deg, #142b5f 0%, #17446c 48%, #0e7c86 100%);
   border: 1px solid #284478;
   border-radius: 18px;
   padding: 20px;
@@ -83,10 +83,10 @@
   margin-top: 5px;
 }
 .taxonomy-workspace .taxonomy-hero button {
-  background: white;
-  color: #142b5f;
+  background: #0e7c86;
+  color: white;
   padding: 8px 14px;
-  border: 1px solid #dce2ee;
+  border: 1px solid #55b9bf;
 }
 .taxonomy-workspace .taxonomy-hero svg {
   color: #d6a43b;

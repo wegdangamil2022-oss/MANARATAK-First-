@@ -4,21 +4,62 @@ import request from 'supertest';
 import { Role, PermissionReference, LifeStatus } from '@manaratak/domain';
 import { AuthorizationAdminRouter } from '../../../../src/presentation/api/router/AuthorizationAdminRouter';
 
-function appFor({ verified = true, actorPermission = true, grantedPermission = 'admin:universities:manage' } = {}) {
-  const role = new Role({ id: 'section-editor', name: 'Section editor', description: 'Limited role',
-    permissions: [new PermissionReference(grantedPermission)], policyIds: [] });
-  const assignments = { execute: vi.fn(async (input: { id: string }) => ({ assignmentId: input.id, replayed: false })), listAssignments: vi.fn(async () => []), getAssignment: vi.fn(async () => null) };
+function appFor({
+  verified = true,
+  actorPermission = true,
+  grantedPermission = 'admin:universities:manage',
+} = {}) {
+  const role = new Role({
+    id: 'section-editor',
+    name: 'Section editor',
+    description: 'Limited role',
+    permissions: [new PermissionReference(grantedPermission)],
+    policyIds: [],
+  });
+  const assignments = {
+    execute: vi.fn(async (input: { id: string }) => ({ assignmentId: input.id, replayed: false })),
+    listAssignments: vi.fn(async () => []),
+    getAssignment: vi.fn(async () => null),
+  };
   const app = express();
   app.use(express.json());
-  app.use((req, _res, next) => { req.authUserId = 'manager-1'; next(); });
-  app.use('/admin/authorization', AuthorizationAdminRouter.create({
-    manageRolesUseCase: { getRole: vi.fn(async () => role), listRoles: vi.fn(async () => [role]) } as any,
-    assignRoleUseCase: assignments as any,
-    manageEmergencyAccessUseCase: {} as any,
-    getIdentityUseCase: { execute: vi.fn(async () => ({ isSuccess: true, getValue: () => ({ status: LifeStatus.ACTIVE,
-      account: { accessState: 'Active' }, user: { contactRegistry: { isEmailVerified: verified } } }) })) } as any,
-    authEvaluatorService: { evaluatePermission: vi.fn(async () => ({ isGranted: actorPermission })) } as any,
-  }));
+  app.use((req, _res, next) => {
+    req.authUserId = 'manager-1';
+    next();
+  });
+  app.use(
+    '/admin/authorization',
+    AuthorizationAdminRouter.create({
+      manageRolesUseCase: {
+        getRole: vi.fn(async () => role),
+        listRoles: vi.fn(async () => [role]),
+      } as any,
+      assignRoleUseCase: assignments as any,
+      manageEmergencyAccessUseCase: {} as any,
+      getIdentityUseCase: {
+        execute: vi.fn(async () => ({
+          isSuccess: true,
+          getValue: () => ({
+            status: LifeStatus.ACTIVE,
+            account: { accessState: 'Active' },
+            user: { contactRegistry: { isEmailVerified: verified } },
+          }),
+        })),
+      } as any,
+      authEvaluatorService: {
+        evaluatePermission: vi.fn(async () => ({ isGranted: actorPermission })),
+        describeIdentityAccess: vi.fn(async () => [
+          {
+            id: 'source',
+            missing: false,
+            sources: ['ASSIGNMENT'],
+            permissions: [grantedPermission],
+            policies: [],
+          },
+        ]),
+      } as any,
+    }),
+  );
   return { app, assignments };
 }
 
@@ -58,9 +99,15 @@ describe('delegated staff role assignment', () => {
 
   it('returns the persisted assignment ID when a duplicate grant is replayed', async () => {
     const { app, assignments } = appFor();
-    assignments.execute.mockResolvedValueOnce({ assignmentId: 'existing-assignment', replayed: true });
+    assignments.execute.mockResolvedValueOnce({
+      assignmentId: 'existing-assignment',
+      replayed: true,
+    });
     const response = await request(app).post('/admin/authorization/assignments').send(body);
     expect(response.status).toBe(201);
-    expect(response.body.data).toMatchObject({ assignmentId: 'existing-assignment', replayed: true });
+    expect(response.body.data).toMatchObject({
+      assignmentId: 'existing-assignment',
+      replayed: true,
+    });
   });
 });

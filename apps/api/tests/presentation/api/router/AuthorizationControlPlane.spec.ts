@@ -43,7 +43,7 @@ function fixture({
       {
         id: 'custom',
         sources: ['ASSIGNMENT'],
-        permissions: ['admin:universities:manage'],
+        permissions: ['admin:universities:manage', 'admin:finance:manage'],
         policies: [],
       },
     ]),

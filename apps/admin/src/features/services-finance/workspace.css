@@ -4,6 +4,7 @@
 }
 .sf-workspace {
   --sf-navy: #142b5f;
+  --sf-petrol: #0e7c86;
   --sf-gold: #f0ce7e;
   color: #203442;
   font-size: 13px;
@@ -70,7 +71,7 @@
   padding: 20px 24px;
   border: 1px solid #d8dfea;
   border-radius: 18px;
-  background: linear-gradient(110deg, #142b5f, #203e73);
+  background: linear-gradient(110deg, #142b5f 0%, #17446c 48%, #0e7c86 100%);
   color: white;
 }
 .sf-heading p {
@@ -96,7 +97,7 @@
   gap: 7px;
   padding: 8px 12px;
   border: 1px solid #ffffff45;
-  background: #ffffff12;
+  background: #0e7c86;
   color: white;
   font-size: 12px;
 }
@@ -329,10 +330,10 @@
   border-top: 1px solid #e2e8f0;
 }
 .sf-workspace .sf-secondary {
-  border: 1px solid #d8dfea;
+  border: 1px solid #0e7c8650;
   padding: 7px 12px;
-  background: white;
-  color: var(--sf-navy);
+  background: #edf8f8;
+  color: #09636c;
 }
 .sf-workspace details > summary {
   cursor: pointer;

@@ -3752,8 +3752,78 @@ model CmsScheduledJob {
 }
 
 // --- Identity Foundation ---
+// Staff draft/organization storage. Applying this schema requires a separate approved migration.
+// Staff administration is separate from Identity and Authorization.
+// Apply its reviewed migration only to an approved target; these tables grant no access.
+model StaffDepartmentRecord {
+  id String @id @default(uuid())
+  name String
+  parentId String?
+  status String @default("ACTIVE")
+  version Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  parent StaffDepartmentRecord? @relation("StaffDepartmentTree",fields:[parentId],references:[id],onDelete:Restrict)
+  children StaffDepartmentRecord[] @relation("StaffDepartmentTree")
+  jobTitles StaffJobTitleRecord[]
+  members StaffMembershipRecord[]
+  @@index([status,name,id])
+}
+model StaffJobTitleRecord {
+  id String @id @default(uuid())
+  name String
+  description String
+  departmentId String?
+  status String @default("ACTIVE")
+  version Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  department StaffDepartmentRecord? @relation(fields:[departmentId],references:[id],onDelete:Restrict)
+  members StaffMembershipRecord[]
+  @@index([departmentId,status,id])
+}
+model StaffMembershipRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  identityId String?
+  draftName String?
+  draftEmail String?
+  kind String
+  status String @default("DRAFT")
+  departmentId String?
+  jobTitleId String?
+  managerId String?
+  startsAt DateTime?
+  endsAt DateTime?
+  reason String
+  createdBy String
+  version Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  identity IdentityRecord? @relation(fields:[identityId],references:[id],onDelete:Restrict)
+  department StaffDepartmentRecord? @relation(fields:[departmentId],references:[id],onDelete:Restrict)
+  jobTitle StaffJobTitleRecord? @relation(fields:[jobTitleId],references:[id],onDelete:Restrict)
+  manager StaffMembershipRecord? @relation("StaffManager",fields:[managerId],references:[id],onDelete:Restrict)
+  reports StaffMembershipRecord[] @relation("StaffManager")
+  events StaffLifecycleEventRecord[]
+  @@index([status,departmentId,id])
+  @@index([identityId,status])
+  @@index([endsAt,status])
+}
+model StaffLifecycleEventRecord {
+  id String @id @default(uuid())
+  membershipId String
+  eventType String
+  actorId String
+  reason String
+  correlationId String?
+  createdAt DateTime @default(now())
+  membership StaffMembershipRecord @relation(fields:[membershipId],references:[id],onDelete:Restrict)
+  @@index([membershipId,createdAt,id])
+}
 
 model IdentityRecord {
+  staffMemberships StaffMembershipRecord[]
   reviewAssignments ReviewWorkCase[] @relation("ReviewAssignee")
   reviewEvents ReviewWorkEvent[] @relation("ReviewEventActor")
   reviewViews ReviewWorkView[] @relation("ReviewViewActor")

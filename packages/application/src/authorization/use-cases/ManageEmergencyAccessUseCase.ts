@@ -62,7 +62,10 @@ export class ManageEmergencyAccessUseCase {
       startsAt,
       expiresAt: new Date(startsAt.getTime() + input.durationMinutes * 60_000),
     };
-    if (!this.atomicMutations) return this.repository.grant(grant);
+    if (!this.atomicMutations) {
+      if (context?.assertInTransaction) throw Error('AUTHORIZATION_TRANSACTION_REQUIRED');
+      return this.repository.grant(grant);
+    }
     if (!this.repository.withTransaction)
       throw new Error('EMERGENCY_ACCESS_TRANSACTIONAL_PERSISTENCE_REQUIRED');
     if (!context?.actorId || context.actorId !== input.requestedBy)

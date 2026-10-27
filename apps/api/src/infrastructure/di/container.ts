@@ -1,4 +1,7 @@
 import { CourseAccessService } from '@manaratak/application';
+import { StaffWorkspaceUseCases } from '@manaratak/application';
+import { PrismaStaffWorkspaceRepository } from '@manaratak/infrastructure';
+import { StaffAdminRouter } from '../../presentation/api/router/StaffAdminRouter.js';
 import { PrismaUniversityProgramReadPort } from '@manaratak/infrastructure';
 import { PrismaCourseBulkPublicationRepository } from '@manaratak/infrastructure';
 import { CourseBulkPublicationUseCases } from '@manaratak/application';
@@ -1350,6 +1353,9 @@ export function registerDependencies(
     aiAdminRouter: asFunction((cradle) => AIAdminRouter.create(cradle)).singleton(),
     assetPlatformRouter: asFunction((cradle) => AssetPlatformRouter.create(cradle)).singleton(),
     identityRouter: asFunction((cradle) => IdentityRouter.create(cradle)).singleton(),
+    staffWorkspaceRepository: asFunction(({prisma})=>new PrismaStaffWorkspaceRepository(prisma)).singleton(),
+    staffWorkspaceUseCases: asFunction(({staffWorkspaceRepository,atomicDomainMutationCoordinator})=>new StaffWorkspaceUseCases(staffWorkspaceRepository,atomicDomainMutationCoordinator)).singleton(),
+    staffAdminRouter: asFunction((cradle)=>StaffAdminRouter.create(cradle)).singleton(),
     tokenProvider: asFunction(() => {
       const nodeEnv = readConfig<string>('NODE_ENV') || 'development';
       const activeKeyId = readConfig<string>('JWT_ACTIVE_KEY_ID') || 'dev-ephemeral';

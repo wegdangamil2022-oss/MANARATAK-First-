@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { AuthorizationIdentityPicker } from './AuthorizationIdentityPicker';
+import { submitAuthorizationChange } from '../api/authorizationChanges';
 
 type PolicyRow = {
   id: string;
@@ -19,11 +20,13 @@ const initial = {
   end: '17:00',
   timezone: 'UTC',
   ips: '',
-  courseIds:'',
+  courseIds: '',
   days: [0, 1, 2, 3, 4, 5, 6] as number[],
 };
-export function AuthorizationPolicyPanel() {
-  const { t,language } = useTranslation();
+export function AuthorizationPolicyPanel({
+  onDirtyChange,
+}: { onDirtyChange?: (dirty: boolean) => void } = {}) {
+  const { t, language } = useTranslation();
   const [rows, setRows] = useState<PolicyRow[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [selected, setSelected] = useState<PolicyRow | null>(null);
@@ -37,25 +40,62 @@ export function AuthorizationPolicyPanel() {
   const [testIp, setTestIp] = useState('');
   const [testTime, setTestTime] = useState('');
   const [confirming, setConfirming] = useState<'save' | 'retire' | null>(null);
-  const [usage,setUsage]=useState<{id:string;name:string}[]>([]);
-  const [usageCursor,setUsageCursor]=useState<string|null>(null);
-  const selectedId=selected?.id || '';
-  useEffect(()=>{
-    let active=true;setUsage([]);setUsageCursor(null);if(!selectedId)return;
-    adminApiClient.request<{data:{roles:{id:string;name:string}[];nextCursor:string|null}}>(`/admin/authorization/policies/${encodeURIComponent(selectedId)}/usage?limit=25`,{cache:'no-store'})
-      .then(result=>{if(active){setUsage(result.data.roles);setUsageCursor(result.data.nextCursor);}}).catch(failure=>{if(active)setError(String(failure));});
-    return()=>{active=false;};
-  },[selectedId]);
-  const moreUsage=async()=>{
-    if(!selectedId||!usageCursor||lock.current)return;lock.current=true;setBusy(true);setError('');
-    try{const result=await adminApiClient.request<{data:{roles:{id:string;name:string}[];nextCursor:string|null}}>(`/admin/authorization/policies/${encodeURIComponent(selectedId)}/usage?limit=25&cursor=${encodeURIComponent(usageCursor)}`);
-      setUsage(previous=>[...new Map([...previous,...result.data.roles].map(row=>[row.id,row])).values()]);setUsageCursor(result.data.nextCursor);
-    }catch(failure){setError(String(failure));}finally{lock.current=false;setBusy(false);}
+  const [usage, setUsage] = useState<{ id: string; name: string }[]>([]);
+  const [usageCursor, setUsageCursor] = useState<string | null>(null);
+  const selectedId = selected?.id || '';
+  useEffect(() => {
+    let active = true;
+    setUsage([]);
+    setUsageCursor(null);
+    if (!selectedId) return;
+    adminApiClient
+      .request<{ data: { roles: { id: string; name: string }[]; nextCursor: string | null } }>(
+        `/admin/authorization/policies/${encodeURIComponent(selectedId)}/usage?limit=25`,
+        { cache: 'no-store' },
+      )
+      .then((result) => {
+        if (active) {
+          setUsage(result.data.roles);
+          setUsageCursor(result.data.nextCursor);
+        }
+      })
+      .catch((failure) => {
+        if (active) setError(String(failure));
+      });
+    return () => {
+      active = false;
+    };
+  }, [selectedId]);
+  const moreUsage = async () => {
+    if (!selectedId || !usageCursor || lock.current) return;
+    lock.current = true;
+    setBusy(true);
+    setError('');
+    try {
+      const result = await adminApiClient.request<{
+        data: { roles: { id: string; name: string }[]; nextCursor: string | null };
+      }>(
+        `/admin/authorization/policies/${encodeURIComponent(selectedId)}/usage?limit=25&cursor=${encodeURIComponent(usageCursor)}`,
+      );
+      setUsage((previous) => [
+        ...new Map([...previous, ...result.data.roles].map((row) => [row.id, row])).values(),
+      ]);
+      setUsageCursor(result.data.nextCursor);
+    } catch (failure) {
+      setError(String(failure));
+    } finally {
+      lock.current = false;
+      setBusy(false);
+    }
   };
   const lock = useRef(false);
   const command = useRef<{ fingerprint: string; key: string; id: string } | null>(null);
   const baseline = useRef(JSON.stringify(initial));
   const dirty = JSON.stringify(form) !== baseline.current;
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+    return () => onDirtyChange?.(false);
+  }, [dirty, onDirtyChange]);
   useEffect(() => {
     if (!dirty) return;
     const guard = (event: BeforeUnloadEvent) => {
@@ -126,7 +166,8 @@ export function AuthorizationPolicyPanel() {
         start?: string;
         end?: string;
         timezone?: string;
-        allowedIps?: string[]; courseIds?:string[];
+        allowedIps?: string[];
+        courseIds?: string[];
         daysOfWeek?: number[];
       } = {};
       if (row) {
@@ -150,12 +191,17 @@ export function AuthorizationPolicyPanel() {
             ...initial,
             name: row.name,
             description: row.description,
-            ruleType: row.ruleType === 'COURSE_SCOPE' ? ('COURSE_SCOPE' as const) : row.ruleType === 'IP' ? ('IP' as const) : ('TIME' as const),
+            ruleType:
+              row.ruleType === 'COURSE_SCOPE'
+                ? ('COURSE_SCOPE' as const)
+                : row.ruleType === 'IP'
+                  ? ('IP' as const)
+                  : ('TIME' as const),
             start: config.start || '09:00',
             end: config.end || '17:00',
             timezone: config.timezone || 'UTC',
             ips: config.allowedIps?.join('\n') || '',
-            courseIds:config.courseIds?.join('\n')||'',
+            courseIds: config.courseIds?.join('\n') || '',
             days: config.daysOfWeek || initial.days,
           }
         : initial;
@@ -174,14 +220,21 @@ export function AuthorizationPolicyPanel() {
     description: form.description,
     ruleType: form.ruleType,
     configuration:
-      form.ruleType === 'COURSE_SCOPE' ? {courseIds:form.courseIds.split(/[\n,]/).map(value=>value.trim()).filter(Boolean)} : form.ruleType === 'TIME'
-        ? { start: form.start, end: form.end, timezone: form.timezone, daysOfWeek: form.days }
-        : {
-            allowedIps: form.ips
+      form.ruleType === 'COURSE_SCOPE'
+        ? {
+            courseIds: form.courseIds
               .split(/[\n,]/)
-              .map((ip) => ip.trim())
+              .map((value) => value.trim())
               .filter(Boolean),
-          },
+          }
+        : form.ruleType === 'TIME'
+          ? { start: form.start, end: form.end, timezone: form.timezone, daysOfWeek: form.days }
+          : {
+              allowedIps: form.ips
+                .split(/[\n,]/)
+                .map((ip) => ip.trim())
+                .filter(Boolean),
+            },
   });
   const simulate = async () => {
     if (lock.current) return;
@@ -198,7 +251,9 @@ export function AuthorizationPolicyPanel() {
         body: JSON.stringify({
           ...definition(),
           ...(testIp ? { testIp } : {}),
-          ...(form.ruleType==='COURSE_SCOPE'?{testCourseId:form.courseIds.split(/[\n,]/)[0]?.trim()}:{}),
+          ...(form.ruleType === 'COURSE_SCOPE'
+            ? { testCourseId: form.courseIds.split(/[\n,]/)[0]?.trim() }
+            : {}),
           ...(testTime ? { testTime: new Date(testTime).toISOString() } : {}),
         }),
       });
@@ -249,12 +304,15 @@ export function AuthorizationPolicyPanel() {
     setBusy(true);
     setError('');
     try {
-      await adminApiClient.request(endpoint, {
+      const result = await submitAuthorizationChange({
+        endpoint,
         method: selected && confirming === 'save' ? 'PATCH' : 'POST',
-        body: JSON.stringify(body),
-        idempotencyKey: command.current.key,
-        headers: { 'x-second-approver-id': approver, 'x-change-ticket': ticket.trim() },
+        body,
+        key: command.current.key,
+        approver,
+        ticket,
       });
+      if (result.pendingApproval) setPreview(t('iam_approval_requested'));
       command.current = null;
       setSelected(null);
       setForm(initial);
@@ -298,8 +356,22 @@ export function AuthorizationPolicyPanel() {
       <button type="button" disabled={busy} onClick={() => select(null)}>
         {t('iam_new_policy')}
       </button>
-      {selected && <section><h3>{t('iam_policy_usage')}</h3><ul>{usage.map(role=><li key={role.id}>{role.name} <code>{role.id}</code></li>)}</ul><button type="button" disabled={busy||!usageCursor} onClick={()=>void moreUsage()}>{t('iam_next')}</button></section>}
-    <fieldset disabled={busy} className="space-y-2">
+      {selected && (
+        <section>
+          <h3>{t('iam_policy_usage')}</h3>
+          <ul>
+            {usage.map((role) => (
+              <li key={role.id}>
+                {role.name} <code>{role.id}</code>
+              </li>
+            ))}
+          </ul>
+          <button type="button" disabled={busy || !usageCursor} onClick={() => void moreUsage()}>
+            {t('iam_next')}
+          </button>
+        </section>
+      )}
+      <fieldset disabled={busy} className="space-y-2">
         <label className="block">
           {t('iam_name')}
           <input
@@ -322,13 +394,29 @@ export function AuthorizationPolicyPanel() {
           {t('iam_policy_type')}
           <select
             value={form.ruleType}
-            onChange={(e) => setForm({ ...form, ruleType: e.target.value as 'TIME' | 'IP' | 'COURSE_SCOPE' })}
+            onChange={(e) =>
+              setForm({ ...form, ruleType: e.target.value as 'TIME' | 'IP' | 'COURSE_SCOPE' })
+            }
           >
             <option value="TIME">TIME</option>
-            <option value="IP">IP</option><option value="COURSE_SCOPE">{language === "ar" ? "نطاق دورات محددة" : "Assigned course scope"}</option>
+            <option value="IP">IP</option>
+            <option value="COURSE_SCOPE">
+              {language === 'ar' ? 'نطاق دورات محددة' : 'Assigned course scope'}
+            </option>
           </select>
         </label>
-        {form.ruleType === 'COURSE_SCOPE' ? <label className="block">{language === 'ar' ? 'معرفات الدورات — معرف لكل سطر، حد أقصى 100' : 'Course UUIDs — one per line, maximum 100'}<textarea className="w-full border p-2" value={form.courseIds} onChange={event=>setForm({...form,courseIds:event.target.value})}/></label> : form.ruleType === 'TIME' ? (
+        {form.ruleType === 'COURSE_SCOPE' ? (
+          <label className="block">
+            {language === 'ar'
+              ? 'معرفات الدورات — معرف لكل سطر، حد أقصى 100'
+              : 'Course UUIDs — one per line, maximum 100'}
+            <textarea
+              className="w-full border p-2"
+              value={form.courseIds}
+              onChange={(event) => setForm({ ...form, courseIds: event.target.value })}
+            />
+          </label>
+        ) : form.ruleType === 'TIME' ? (
           <>
             <label>
               {t('iam_time_start')}

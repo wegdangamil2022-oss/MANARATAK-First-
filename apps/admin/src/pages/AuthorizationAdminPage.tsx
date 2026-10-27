@@ -10,6 +10,11 @@ import { AuthorizationPermissionCatalog } from '../components/AuthorizationPermi
 import { AuthorizationPolicyPanel } from '../components/AuthorizationPolicyPanel';
 import { AuthorizationEffectiveAccess } from '../components/AuthorizationEffectiveAccess';
 import { AuthorizationRoleEditor } from '../components/AuthorizationRoleEditor';
+import { submitAuthorizationChange } from '../api/authorizationChanges';
+import { OwnerHeading, OwnerNavigation } from '../features/services-finance/WorkspaceUI';
+import { AuthorizationApprovalInbox } from '../features/identity-authorization/AuthorizationApprovalInbox';
+import '../features/identity-authorization/workspace.css';
+import { useSearchParams } from 'react-router-dom';
 import {
   KeyRound,
   ShieldAlert,
@@ -19,6 +24,9 @@ import {
   RefreshCw,
   Plus,
   Trash2,
+  BookOpen,
+  ClipboardCheck,
+  ScrollText,
 } from 'lucide-react';
 
 interface RoleDto {
@@ -66,8 +74,58 @@ type Envelope<T> = { data?: T };
 export function AuthorizationAdminPage() {
   const { t, language } = useTranslation();
   const { hasPermission } = useAdminAuthorization();
-  const [tab, setTab] = useState('roles');
+  const [params, setParams] = useSearchParams();
+  const groups = [
+    {
+      id: 'roles',
+      label: language === 'ar' ? 'الأدوار والقوالب' : 'Roles & templates',
+      icon: KeyRound,
+      tabs: ['roles'],
+    },
+    {
+      id: 'assignments',
+      label: language === 'ar' ? 'تعيينات الوصول' : 'Access assignments',
+      icon: UserCheck,
+      tabs: ['assignments'],
+    },
+    {
+      id: 'policies',
+      label: language === 'ar' ? 'الصلاحيات والسياسات' : 'Permissions & policies',
+      icon: BookOpen,
+      tabs: ['catalog', 'policies'],
+    },
+    {
+      id: 'reviews',
+      label: language === 'ar' ? 'التحقق والمراجعات' : 'Verification & reviews',
+      icon: ClipboardCheck,
+      tabs: ['effective', 'reviews'],
+    },
+    {
+      id: 'governance',
+      label: language === 'ar' ? 'الحوكمة والأمان' : 'Governance & security',
+      icon: ShieldAlert,
+      tabs: ['approvals', 'governance', 'emergency', 'audit'],
+    },
+  ];
+  const tab = groups.flatMap((group) => group.tabs).includes(params.get('tab') || '')
+    ? params.get('tab')!
+    : 'roles';
+  const activeGroup = groups.find((group) => group.tabs.includes(tab))!;
+  const setTab = (next: string) => {
+    if (
+      busyRef.current ||
+      ((draftsDirty || roleDirty || policyDirty) && !window.confirm(t('iam_discard_changes')))
+    )
+      return;
+    setParams((previous) => {
+      const result = new URLSearchParams(previous);
+      result.set('tab', next);
+      return result;
+    });
+  };
   const [roleDirty, setRoleDirty] = useState(false);
+  const [creatingRole, setCreatingRole] = useState(false);
+  const [policyDirty, setPolicyDirty] = useState(false);
   const [pageCursors, setPageCursors] = useState<Record<string, string | null>>({});
   const [pageBusy, setPageBusy] = useState(false);
   const [auditFilters, setAuditFilters] = useState({
@@ -91,7 +149,7 @@ export function AuthorizationAdminPage() {
   const [rolePolicyIds, setRolePolicyIds] = useState<string[]>([]);
   const [editingRoleId, setEditingRoleId] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
-  const [identityId, setIdentityId] = useState('');
+  const [identityId, setIdentityId] = useState(params.get('identityId') || '');
   const [roleId, setRoleId] = useState('');
   const [changeTicket, setChangeTicket] = useState('');
   const [secondApproverId, setSecondApproverId] = useState('');
@@ -398,14 +456,31 @@ export function AuthorizationAdminPage() {
         ...payload,
         ...(operation === 'role' || operation === 'role_assignment' ? { id: command.id } : {}),
       };
-      await adminApiClient.request(endpoint, {
-        method,
-        headers: { ...headers, 'Idempotency-Key': command.key },
-        body: JSON.stringify(body),
-      });
+      const result = approved
+        ? await submitAuthorizationChange({
+            endpoint,
+            method,
+            body,
+            key: command.key,
+            approver: secondApproverId,
+            ticket: changeTicket,
+          })
+        : await adminApiClient
+            .request(endpoint, {
+              method,
+              headers: { 'Idempotency-Key': command.key },
+              body: JSON.stringify(body),
+            })
+            .then(() => ({ pendingApproval: false }));
       commandKeys.current.delete(signature);
       complete();
-      setSuccess(t('iam_workspace_8'));
+      setSuccess(
+        result.pendingApproval
+          ? language === 'ar'
+            ? 'أُرسل طلب الموافقة؛ لم تُطبّق الصلاحيات بعد.'
+            : 'Approval requested; permissions have not been applied.'
+          : t('iam_workspace_8'),
+      );
       await load();
     } catch (cause) {
       setError(message(cause));
@@ -440,6 +515,7 @@ export function AuthorizationAdminPage() {
         setRoleDescription('');
         setRolePolicyIds([]);
         setSelectedPermissions([]);
+        setCreatingRole(false);
       },
       true,
     );
@@ -455,9 +531,23 @@ export function AuthorizationAdminPage() {
       return;
     }
     try {
-      const preview = await adminApiClient.request<{ data: { conflicts: Array<{ description: string }> } }>(`/admin/authorization/governance/duties/preview?${new URLSearchParams({ principalId: identityId, roleId })}`);
-      if (preview.data.conflicts.length) { setError(t('iam_duty_existing_conflict') + ' ' + preview.data.conflicts.map(pair => pair.description).join(', ')); return; }
-    } catch { setError(t('iam_governance_failed')); return; }
+      const preview = await adminApiClient.request<{
+        data: { conflicts: Array<{ description: string }> };
+      }>(
+        `/admin/authorization/governance/duties/preview?${new URLSearchParams({ principalId: identityId, roleId })}`,
+      );
+      if (preview.data.conflicts.length) {
+        setError(
+          t('iam_duty_existing_conflict') +
+            ' ' +
+            preview.data.conflicts.map((pair) => pair.description).join(', '),
+        );
+        return;
+      }
+    } catch {
+      setError(t('iam_governance_failed'));
+      return;
+    }
     await mutate(
       'role_assignment',
       { identityId, roleId },
@@ -542,66 +632,67 @@ export function AuthorizationAdminPage() {
   };
 
   return (
-    <div dir={language === 'ar' ? "rtl" : 'ltr'} className="mx-auto max-w-7xl space-y-6">
-      <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
-        <div className="pointer-events-none absolute -left-16 -top-28 h-64 w-64 rounded-full border border-cyan-400/20" />
-        <div className="pointer-events-none absolute bottom-0 right-0 h-1.5 w-48 bg-gradient-to-r from-transparent via-[#21A7B4] to-[#0E7C86] sm:w-80" />
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200 backdrop-blur-sm border border-white/15">
-              <KeyRound className="h-4 w-4 text-[#21A7B4]" />
-              <span>{t('iam_workspace_16')}</span>
-            </div>
-            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">
-              {t('iam_workspace_17')}
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-cyan-50/90">
-              {t('iam_workspace_18')}
-            </p>
-          </div>
-          <button
-            onClick={() => {
-              setError(null);
-              setSuccess('');
-              void load();
-            }}
-            disabled={refreshBlocked}
-            className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#21A7B4] px-5 text-sm font-black text-white shadow-md transition hover:bg-[#1A8D99] shrink-0"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />{' '}
-            {t('iam_workspace_19')}
-          </button>
-        </div>
-      </section>
-
+    <div
+      dir={language === 'ar' ? 'rtl' : 'ltr'}
+      className="sf-workspace iam-workspace mx-auto max-w-7xl"
+    >
+      <OwnerHeading
+        title={language === 'ar' ? 'الأدوار والصلاحيات' : 'Roles & authorization'}
+        description={
+          language === 'ar'
+            ? 'إدارة الأدوار والتعيينات والموافقات وفهم الوصول الفعلي.'
+            : 'Manage roles, assignments, approvals and explain effective access.'
+        }
+        actions={
+          <>
+            <button type="button" disabled={refreshBlocked} onClick={() => void load()}>
+              <RefreshCw size={15} />
+              {t('iam_workspace_19')}
+            </button>
+            {hasPermission('admin:identities:manage') && (
+              <Link to="/identities">{t('admin_nav_identities')}</Link>
+            )}
+            {hasPermission('admin:audit:manage') && (
+              <Link to="/audit?category=AUTHORIZATION_MUTATION">{t('admin_nav_audit')}</Link>
+            )}
+          </>
+        }
+      />
+      <OwnerNavigation
+        items={groups}
+        active={activeGroup.id}
+        onChange={(value) => setTab(groups.find((group) => group.id === value)!.tabs[0])}
+        label={language === 'ar' ? 'مجموعات الصلاحيات' : 'Authorization groups'}
+        disabled={busy}
+      />
+      {activeGroup.tabs.length > 1 && (
+        <OwnerNavigation
+          secondary
+          items={activeGroup.tabs.map((value) => ({
+            id: value,
+            label: (
+              {
+                catalog: t('iam_workspace_2'),
+                policies: t('iam_policies'),
+                effective: t('iam_effective_access'),
+                reviews: t('iam_access_reviews'),
+                approvals: language === 'ar' ? 'طلبات الاعتماد' : 'Approvals',
+                governance: t('iam_governance_title'),
+                emergency: t('iam_workspace_4'),
+                audit: t('iam_workspace_5'),
+              } as Record<string, string>
+            )[value],
+            icon: value === 'audit' ? ScrollText : ShieldPlus,
+          }))}
+          active={tab}
+          onChange={setTab}
+          label={language === 'ar' ? 'الأقسام الفرعية' : 'Sections'}
+          disabled={busy}
+        />
+      )}
       {tab === 'governance' && <AuthorizationGovernancePanel />}
-      <nav className="flex flex-wrap gap-2" aria-label={t('iam_workspace_17')}>
-        {(
-          [
-            ['roles', 'iam_workspace_0'],
-            ['catalog', 'iam_workspace_2'],
-            ['assignments', 'iam_workspace_1'],
-            ['policies', 'iam_policies'],
-            ['effective', 'iam_effective_access'],
-            ['emergency', 'iam_workspace_4'],
-            ['audit', 'iam_workspace_5'],
-            ['governance', 'iam_governance_title'],
-          ] as const
-        ).map(([value, key]) => (
-          <button
-            type="button"
-            key={value}
-            aria-pressed={tab === value}
-            className="rounded-xl border px-3 py-2"
-            onClick={() => setTab(value)}
-          >
-            {t(key)}
-          </button>
-        ))}
-        {hasPermission('admin:identities:manage') && (
-          <Link to="/identities">{t('iam_staff_title')}</Link>
-        )}
-      </nav>
+      {tab === 'reviews' && <AuthorizationGovernancePanel mode="reviews" />}
+      {tab === 'approvals' && <AuthorizationApprovalInbox />}
       {success && (
         <div
           role="status"
@@ -644,7 +735,8 @@ export function AuthorizationAdminPage() {
           tab !== 'emergency' &&
           !(
             tab === 'assignments' &&
-            roleMap.get(roleId)
+            roleMap
+              .get(roleId)
               ?.permissions.some((permission) =>
                 ADMIN_PERMISSION_CATALOG.some(
                   (entry) => entry.key === permission && entry.risk !== 'STANDARD',
@@ -726,6 +818,33 @@ export function AuthorizationAdminPage() {
           </select>
         </label>
       </section>
+      {tab === 'roles' && (
+        <div className="sf-actions">
+          <button
+            type="button"
+            className="sf-primary"
+            disabled={mutationBlocked}
+            onClick={() => {
+              if (!draftsDirty || window.confirm(t('iam_discard_changes'))) {
+                setCreatingRole((value) => !value);
+                setRoleName('');
+                setRoleDescription('');
+                setRolePolicyIds([]);
+                setSelectedPermissions([]);
+              }
+            }}
+          >
+            <Plus size={16} />
+            {creatingRole
+              ? language === 'ar'
+                ? 'إغلاق إنشاء الدور'
+                : 'Close role creation'
+              : language === 'ar'
+                ? 'إنشاء دور'
+                : 'Create role'}
+          </button>
+        </div>
+      )}
       <section hidden={tab !== 'roles'} className="rounded-2xl border bg-white p-4 space-y-3">
         <label>
           {t('iam_edit_role')}
@@ -757,30 +876,44 @@ export function AuthorizationAdminPage() {
               setRolePolicyIds(role.policyIds);
               setEditingRoleId('');
               setRoleDirty(false);
+              setCreatingRole(true);
             }}
-            onSaved={() => {
+            onSaved={(pendingApproval) => {
               setEditingRoleId('');
+              setSuccess(
+                pendingApproval
+                  ? language === 'ar'
+                    ? 'أُرسل طلب الموافقة؛ لم يتغير الدور بعد.'
+                    : 'Approval requested; the role has not changed.'
+                  : t('iam_workspace_8'),
+              );
               void load();
             }}
           />
         )}
       </section>
-      <div hidden={tab !== 'catalog'}>
-        <AuthorizationPermissionCatalog permissions={permissions} />
-      </div>
-      <div hidden={tab !== 'policies'}>
-        <AuthorizationPolicyPanel />
-      </div>
-      <div hidden={tab !== 'effective'}>
-        <AuthorizationEffectiveAccess />
-      </div>
+      {tab === 'catalog' && (
+        <div>
+          <AuthorizationPermissionCatalog permissions={permissions} />
+        </div>
+      )}
+      {tab === 'policies' && (
+        <div>
+          <AuthorizationPolicyPanel onDirtyChange={setPolicyDirty} />
+        </div>
+      )}
+      {tab === 'effective' && (
+        <div>
+          <AuthorizationEffectiveAccess initialIdentityId={params.get('identityId') || ''} />
+        </div>
+      )}
       <fieldset
         hidden={tab !== 'roles' && tab !== 'assignments'}
         disabled={mutationBlocked}
-        className={`${tab !== 'roles' && tab !== 'assignments' ? 'hidden' : 'grid'} min-w-0 gap-6 xl:grid-cols-2 disabled:opacity-60`}
+        className={`${tab !== 'roles' && tab !== 'assignments' ? 'hidden' : 'grid'} min-w-0 gap-4 disabled:opacity-60`}
       >
         <form
-          hidden={tab !== 'roles'}
+          hidden={tab !== 'roles' || !creatingRole}
           onSubmit={createRole}
           className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs"
         >

@@ -25,7 +25,11 @@ interface Review {
   nextReviewAt: string;
   reviewedAt: string;
 }
-export function AuthorizationGovernancePanel() {
+export function AuthorizationGovernancePanel({
+  mode = 'governance',
+}: {
+  mode?: 'governance' | 'reviews';
+}) {
   const { t, language } = useTranslation();
   const { hasPermission } = useAdminAuthorization();
   const exceptionAttempt = useRef<{ signature: string; id: string; startsAt: string } | null>(null);
@@ -52,6 +56,15 @@ export function AuthorizationGovernancePanel() {
   const command = useRef<{ signature: string; key: string } | null>(null);
   const errorText = t('iam_governance_failed');
   const refresh = async () => {
+    if (mode === 'reviews') {
+      const result = await adminApiClient.request<{
+        data: { items: Review[]; nextCursor: string | null };
+      }>('/admin/authorization/governance/access-reviews?limit=25');
+      setReviews(result.data.items);
+      setCursor(result.data.nextCursor);
+      setReady(true);
+      return;
+    }
     const [policy, review, exceptionPage] = await Promise.all([
       adminApiClient.request<{ data: { policy: { pairs: Pair[] }; revision: string | null } }>(
         '/admin/authorization/governance/duties',
@@ -79,7 +92,7 @@ export function AuthorizationGovernancePanel() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [mode]);
   const mutate = async (endpoint: string, payload: object, method = 'POST', approved = false) => {
     if (busy || !ready) return;
     setBusy(true);
@@ -142,12 +155,14 @@ export function AuthorizationGovernancePanel() {
       className="space-y-5 rounded-2xl border bg-white p-5"
       aria-label={t('iam_governance_title')}
     >
-      <h2 className="font-bold">{t('iam_governance_title')}</h2>
-      <p>{t('iam_duty_help')}</p>
+      <h2 className="font-bold">
+        {t(mode === 'reviews' ? 'iam_access_reviews' : 'iam_governance_title')}
+      </h2>
+      {mode !== 'reviews' && <p>{t('iam_duty_help')}</p>}
       {!ready && <p role="status">{t('iam_loading')}</p>}
       {error && <p role="alert">{error}</p>}
       {notice && <p role="status">{notice}</p>}
-      <fieldset disabled={!ready || busy} className="space-y-3">
+      <fieldset hidden={mode === 'reviews'} disabled={!ready || busy} className="space-y-3">
         <legend className="font-bold">{t('iam_duty_pairs')}</legend>
         <div className="grid gap-3 md:grid-cols-3">
           <label>
@@ -328,7 +343,7 @@ export function AuthorizationGovernancePanel() {
           {t('iam_exception_approve')}
         </button>
       </fieldset>
-      <section className="space-y-3">
+      <section hidden={mode === 'reviews'} className="space-y-3">
         <h3>{t('iam_duty_exception_history')}</h3>
         <ul>
           {exceptions.map((item) => (
@@ -381,8 +396,8 @@ export function AuthorizationGovernancePanel() {
           </button>
         )}
       </section>
-      <GovernanceApprovalsPanel key={notice} onApplied={refresh} />
-      {hasPermission('admin:credentials:manage') && (
+      {mode !== 'reviews' && <GovernanceApprovalsPanel key={notice} onApplied={refresh} />}
+      {mode !== 'reviews' && hasPermission('admin:credentials:manage') && (
         <section className="space-y-3">
           <h3>{t('iam_mfa_reset')}</h3>
           <p>{t('iam_mfa_reset_help')}</p>
@@ -409,7 +424,7 @@ export function AuthorizationGovernancePanel() {
           </button>
         </section>
       )}
-      <section className="space-y-3">
+      <section hidden={mode !== 'reviews'} className="space-y-3">
         <h3 className="font-bold">{t('iam_access_reviews')}</h3>
         <p>{t('iam_access_reviews_help')}</p>
         <AccessReviewForm onSaved={refresh} />

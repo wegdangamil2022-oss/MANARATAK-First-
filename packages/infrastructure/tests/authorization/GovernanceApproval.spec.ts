@@ -28,7 +28,9 @@ function setup(changes: Record<string, unknown> = {}) {
           ruleType: 'GOVERNANCE_APPROVAL',
           ruleConfiguration: JSON.stringify(approval),
         })),
-        update: vi.fn(),
+        update: vi.fn(async ({ data }: { data: { ruleConfiguration: string } }) => {
+          Object.assign(approval, JSON.parse(data.ruleConfiguration));
+        }),
         create: vi.fn(),
       },
     };
@@ -100,6 +102,9 @@ describe('independent approval must originate from the reviewer session', () => 
       JSON.parse(s.db.policyRecord.update.mock.calls[0][0].data.ruleConfiguration).usedAt,
     ).toBeTruthy();
     expect(s.db.$queryRaw).toHaveBeenCalledTimes(1);
+    await expect(
+      s.gateway.consume('approval', 'DUTY_POLICY', payload, 'maker', 'checker', s.context),
+    ).rejects.toThrow('GOVERNANCE_APPROVAL_REQUIRED');
     await expect(
       s.gateway.consume('approval', 'DUTY_POLICY', payload, 'maker', 'checker', {
         boundaryId: 'test',

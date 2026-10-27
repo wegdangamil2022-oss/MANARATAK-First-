@@ -7,6 +7,8 @@ export interface AtomicMutationRequestContext {
   actorType?: string;
   correlationId?: string;
   source?: string;
+  /** Server-owned transactional precondition; never populated from request JSON. */
+  assertInTransaction?: (context: AtomicPersistenceContext) => Promise<void>;
 }
 
 export interface AtomicDomainMutationDefinition {
@@ -27,7 +29,11 @@ export interface AtomicDomainMutationDefinition {
 export class AtomicDomainMutationCoordinator {
   public constructor(private readonly executor: AtomicAuditedOutboxMutationExecutor) {}
 
-  public execute<T>(definition: AtomicDomainMutationDefinition, mutation: (context: AtomicPersistenceContext) => Promise<T>, shouldRecord?: (result: T) => boolean): Promise<T> {
+  public execute<T>(
+    definition: AtomicDomainMutationDefinition,
+    mutation: (context: AtomicPersistenceContext) => Promise<T>,
+    shouldRecord?: (result: T) => boolean,
+  ): Promise<T> {
     const now = new Date();
     const auditId = randomUUID();
     const outboxId = definition.outbox?.id ?? randomUUID();
@@ -35,32 +41,56 @@ export class AtomicDomainMutationCoordinator {
     const source = definition.context?.source || 'admin-api';
     const correlationId = definition.context?.correlationId;
 
-    return this.executor.execute({
-      id: auditId,
-      reference: `AUD-${auditId}`,
-      action: definition.action,
-      category: `${definition.domain}_MUTATION`,
-      severity: 'INFO',
-      actorId,
-      actorType: definition.context?.actorType || 'IDENTITY',
-      targetId: definition.aggregateId,
-      targetType: definition.aggregateType,
-      source,
-      timestamp: now,
-      contextMetadata: { result: 'SUCCESS', atomicity: 'BUSINESS_AUDIT_OUTBOX', ...(definition.auditMetadata ?? {}) },
-      correlationReference: correlationId,
-    }, {
-      id: outboxId,
-      eventType: definition.outbox?.eventType ?? definition.action,
-      domain: definition.domain,
-      aggregate: { domain: definition.domain, aggregateType: definition.aggregateType, aggregateId: definition.aggregateId },
-      payload: definition.outbox?.payload ?? { entityType: definition.aggregateType, entityId: definition.aggregateId, operation: definition.action },
-      metadata: { actorId, atomicity: 'BUSINESS_AUDIT_OUTBOX', ...(definition.outbox?.metadata ?? {}) },
-      correlationId,
-      createdAt: now,
-      availableAt: now,
-      state: OutboxProcessingState.PENDING,
-      attempts: 0,
-    }, mutation, shouldRecord);
+    return this.executor.execute(
+      {
+        id: auditId,
+        reference: `AUD-${auditId}`,
+        action: definition.action,
+        category: `${definition.domain}_MUTATION`,
+        severity: 'INFO',
+        actorId,
+        actorType: definition.context?.actorType || 'IDENTITY',
+        targetId: definition.aggregateId,
+        targetType: definition.aggregateType,
+        source,
+        timestamp: now,
+        contextMetadata: {
+          result: 'SUCCESS',
+          atomicity: 'BUSINESS_AUDIT_OUTBOX',
+          ...(definition.auditMetadata ?? {}),
+        },
+        correlationReference: correlationId,
+      },
+      {
+        id: outboxId,
+        eventType: definition.outbox?.eventType ?? definition.action,
+        domain: definition.domain,
+        aggregate: {
+          domain: definition.domain,
+          aggregateType: definition.aggregateType,
+          aggregateId: definition.aggregateId,
+        },
+        payload: definition.outbox?.payload ?? {
+          entityType: definition.aggregateType,
+          entityId: definition.aggregateId,
+          operation: definition.action,
+        },
+        metadata: {
+          actorId,
+          atomicity: 'BUSINESS_AUDIT_OUTBOX',
+          ...(definition.outbox?.metadata ?? {}),
+        },
+        correlationId,
+        createdAt: now,
+        availableAt: now,
+        state: OutboxProcessingState.PENDING,
+        attempts: 0,
+      },
+      async (transaction) => {
+        await definition.context?.assertInTransaction?.(transaction);
+        return mutation(transaction);
+      },
+      shouldRecord,
+    );
   }
 }

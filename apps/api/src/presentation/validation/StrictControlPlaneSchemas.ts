@@ -212,8 +212,6 @@ export const identityProfileUpdateSchema = z.object({
 export const identityContactUpdateSchema = z.object({
   email: z.string().trim().email().max(320).optional(),
   phone: z.string().trim().min(3).max(40).optional(),
-  verifyEmail: z.boolean().optional(),
-  verifyPhone: z.boolean().optional(),
 }).strict().refine((value) => Object.keys(value).length > 0, 'At least one contact update is required');
 export const identityListQuerySchema = z.object({
     roleId: z.string().trim().min(1).max(240).optional(),

@@ -3,6 +3,7 @@ import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { AuthorizationIdentityPicker } from './AuthorizationIdentityPicker';
+import { submitAuthorizationChange } from '../api/authorizationChanges';
 
 interface RoleDetail {
   id: string;
@@ -24,7 +25,7 @@ export function AuthorizationRoleEditor({
 }: {
   roleId: string;
   availablePermissions: string[];
-  onSaved: () => void;
+  onSaved: (pendingApproval?: boolean) => void;
   onDirtyChange?: (dirty: boolean) => void;
   onDuplicate?: (role: RoleDetail) => void;
 }) {
@@ -181,19 +182,19 @@ export function AuthorizationRoleEditor({
     setBusy(true);
     setError('');
     try {
-      await adminApiClient.request(endpoint, {
+      const result = await submitAuthorizationChange({
+        endpoint,
         method: confirming === 'save' ? 'PATCH' : 'POST',
-        body: JSON.stringify(body),
-        idempotencyKey: command.current.key,
-        headers: needsApproval
-          ? { 'x-second-approver-id': approver, 'x-change-ticket': ticket.trim() }
-          : {},
+        body,
+        key: command.current.key,
+        approver,
+        ticket,
       });
       onDirtyChange?.(false);
       command.current = null;
       setConfirming(null);
       setRole(null);
-      onSaved();
+      onSaved(result.pendingApproval);
     } catch (failure) {
       setError(String(failure));
     } finally {
@@ -290,7 +291,8 @@ export function AuthorizationRoleEditor({
               {policies
                 .filter(
                   (policy) =>
-                    ['TIME', 'IP', 'COURSE_SCOPE'].includes(policy.ruleType) || role.policyIds.includes(policy.id),
+                    ['TIME', 'IP', 'COURSE_SCOPE'].includes(policy.ruleType) ||
+                    role.policyIds.includes(policy.id),
                 )
                 .map((policy) => (
                   <label key={policy.id} className="block">

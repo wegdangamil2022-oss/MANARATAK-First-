@@ -31,15 +31,15 @@ describe('authorization workspace source rendering', () => {
   it('renders Arabic views with RTL and independent identity visibility', () => {
     const html = render('ar');
     expect(html).toContain('dir="rtl"');
-    expect(html).toContain('سياسات الوصول');
+    expect(html).toContain('الصلاحيات والسياسات');
     expect(html).not.toContain('href="/identities"');
     expect(html).not.toContain('iam_workspace_');
   });
   it('renders English controls with LTR and no hardcoded Arabic page text', () => {
     const html = render('en');
     expect(html).toContain('dir="ltr"');
-    expect(html).toContain('Staff and permissions');
-    expect(html).toContain('Effective access');
+    expect(html).toContain('Roles &amp; authorization');
+    expect(html).toContain('Verification &amp; reviews');
     expect(html).not.toMatch(/[\u0600-\u06ff]/);
     expect(html).not.toContain('iam_workspace_');
   });

@@ -51,7 +51,10 @@ export class ManageRolesUseCase {
 
     const create = (repository: IRoleRepository) =>
       repository.createUnique ? repository.createUnique(role) : repository.save(role);
-    if (!this.atomicMutations) return create(this.roleRepository);
+    if (!this.atomicMutations) {
+      if (context?.assertInTransaction) throw Error('AUTHORIZATION_TRANSACTION_REQUIRED');
+      return create(this.roleRepository);
+    }
     const repository = this.roleRepository as Partial<ITransactionalRoleRepository>;
     if (!repository.withTransaction) throw new Error('ROLE_TRANSACTIONAL_PERSISTENCE_REQUIRED');
     await this.atomicMutations.execute(
@@ -168,7 +171,10 @@ export class ManageRolesUseCase {
     context: AtomicMutationRequestContext | undefined,
     mutation: (repository: IRoleRepository) => Promise<void>,
   ) {
-    if (!this.atomicMutations) return mutation(this.roleRepository);
+    if (!this.atomicMutations) {
+      if (context?.assertInTransaction) throw Error('AUTHORIZATION_TRANSACTION_REQUIRED');
+      return mutation(this.roleRepository);
+    }
     const repository = this.roleRepository as Partial<ITransactionalRoleRepository>;
     if (!repository.withTransaction) throw new Error('ROLE_TRANSACTIONAL_PERSISTENCE_REQUIRED');
     const metadata = (

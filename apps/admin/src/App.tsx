@@ -46,7 +46,7 @@ import { AcademicTaxonomyAdminPage } from './pages/AcademicTaxonomyAdminPage';
 import { AcademicTaxonomyDetailPage } from './pages/AcademicTaxonomyDetailPage';
 import { AdminTranslationWorkspacePage } from './pages/AdminTranslationWorkspacePage';
 import { AuthorizationAdminPage } from './pages/AuthorizationAdminPage';
-import { IdentityAdminPage } from './pages/IdentityAdminPage';
+import { StaffIdentityWorkspace } from './features/identity-authorization/StaffIdentityWorkspace';
 import { AuditCenterPage } from './pages/AuditCenterPage';
 import { AssetAdminPage } from './pages/AssetAdminPage';
 import { StudentSupportAdminPage } from './pages/StudentSupportAdminPage';
@@ -333,7 +333,8 @@ function AdminLayout() {
                   />
                   <Route path="/study-destinations" element={<RequireAdminPermission permission="admin:study-destinations:read"><StudyDestinationsAdminPage /></RequireAdminPermission>} />
                   <Route path="/study-destinations/:countryIso2Code" element={<RequireAdminPermission permission="admin:study-destinations:read"><StudyDestinationDetailPage /></RequireAdminPermission>} />
-                  <Route path="/identities" element={<RequireAdminPermission permission="admin:identities:manage"><IdentityAdminPage /></RequireAdminPermission>} />
+                  <Route path="/identities" element={<RequireAdminPermission permission="admin:identities:manage"><StaffIdentityWorkspace /></RequireAdminPermission>} />
+                  <Route path="/identities/:identityId" element={<RequireAdminPermission permission="admin:identities:manage"><StaffIdentityWorkspace /></RequireAdminPermission>} />
                   <Route path="/security" element={<AccountSecurityPage />} />
                   <Route path="/authorization" element={<RequireAdminPermission permission="admin:authorization:manage"><AuthorizationAdminPage /></RequireAdminPermission>} />
                   <Route path="/audit" element={<RequireAdminPermission permission="admin:audit:manage"><AuditCenterPage /></RequireAdminPermission>} />

@@ -17,6 +17,7 @@ export class MutationAuditPolicy {
   // These are explicitly non-mutating validation/preview commands even though
   // their transport method is POST. Any new exemption must be reviewed here.
   private static readonly ADMIN_EXEMPTIONS = [
+    /^\/(?:api\/v1\/)?admin\/authorization\/change-preview\/?$/, // Validates only; no persisted change or approval.
     /^\/(?:api\/v1\/)?admin\/review-workspace\/query\/?$/, // Read-only body search; never persist private query text.
     /^\/(?:api\/v1\/)?admin\/academic-taxonomy\/(?:mappings\/preview|nodes\/validate)\/?$/,
     /^\/(?:api\/v1\/)?admin\/imports\/(?:major-catalogs|major-detail-dossiers)\/(?:bulk\/)?preview\/?$/,
@@ -28,6 +29,7 @@ export class MutationAuditPolicy {
   private static readonly CRITICAL_ADMIN_AREAS = [
     '/admin/review-workspace',
     '/admin/identities',
+    '/admin/staff',
     '/admin/authorization',
     '/admin/audit/workspace',
     '/admin/settings',

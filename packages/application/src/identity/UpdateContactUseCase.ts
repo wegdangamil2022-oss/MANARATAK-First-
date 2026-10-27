@@ -8,6 +8,8 @@ export class UpdateContactUseCase implements UseCase<UpdateContactInput, Result<
 
   public async execute(input: UpdateContactInput): Promise<Result<IdentityDto>> {
     try {
+      if (input.verifyEmail || input.verifyPhone)
+        return ResultFactory.failure('CONTACT_VERIFICATION_REQUIRES_OWNERSHIP_PROOF');
       const identity = await this.identityRepository.findById(input.identityId);
       if (!identity) {
         return ResultFactory.failure(`Identity with ID ${input.identityId} not found.`);
@@ -31,14 +33,6 @@ export class UpdateContactUseCase implements UseCase<UpdateContactInput, Result<
           }
         }
         identity.updatePhone(input.phone);
-      }
-
-      if (input.verifyEmail && identity.user) {
-        identity.user.contactRegistry.verifyEmail();
-      }
-
-      if (input.verifyPhone && identity.user) {
-        identity.user.contactRegistry.verifyPhone();
       }
 
       await this.identityRepository.save(identity);

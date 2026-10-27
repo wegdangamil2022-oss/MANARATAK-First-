@@ -273,3 +273,4 @@ export * from './dashboard/PrismaExecutiveDashboardGateway';
 export * from './review-workspace/PrismaReviewWorkspaceGateway';
 export * from './dashboard/PrismaDashboardMeasurementGateway';
 export * from './courses/PrismaCourseBulkPublicationRepository';
+export * from './identity/PrismaStaffWorkspaceRepository';

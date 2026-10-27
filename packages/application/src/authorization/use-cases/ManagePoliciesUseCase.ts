@@ -81,7 +81,11 @@ export class ManagePoliciesUseCase {
       ruleConfiguration: JSON.stringify(c),
     });
   }
-  async create(input: PolicyDefinition, context?: AtomicMutationRequestContext, permittedPermissions: string[] = []) {
+  async create(
+    input: PolicyDefinition,
+    context?: AtomicMutationRequestContext,
+    permittedPermissions: string[] = [],
+  ) {
     const policy = this.definition(input);
     await this.mutate(policy.id, 'POLICY_CREATED', context, async (repo) => {
       if (!repo.create) throw new Error('POLICY_CREATION_UNAVAILABLE');
@@ -90,7 +94,12 @@ export class ManagePoliciesUseCase {
       await repo.create(policy);
     });
   }
-  async update(input: PolicyDefinition, revision: string, context?: AtomicMutationRequestContext, permittedPermissions: string[] = []) {
+  async update(
+    input: PolicyDefinition,
+    revision: string,
+    context?: AtomicMutationRequestContext,
+    permittedPermissions: string[] = [],
+  ) {
     const policy = this.definition(input);
     await this.mutate(policy.id, 'POLICY_UPDATED', context, async (repo) => {
       if (!repo.updateIfCurrent) throw new Error('POLICY_CONDITIONAL_UPDATE_REQUIRED');
@@ -99,7 +108,12 @@ export class ManagePoliciesUseCase {
       await repo.updateIfCurrent(policy, revision);
     });
   }
-  async retire(id: string, revision: string, context?: AtomicMutationRequestContext, permittedPermissions: string[] = []) {
+  async retire(
+    id: string,
+    revision: string,
+    context?: AtomicMutationRequestContext,
+    permittedPermissions: string[] = [],
+  ) {
     const existing = await this.get(id);
     if (!existing) throw new Error('POLICY_NOT_FOUND');
     const policy = new Policy({
@@ -122,7 +136,10 @@ export class ManagePoliciesUseCase {
     context: AtomicMutationRequestContext | undefined,
     write: (repo: IPolicyRepository) => Promise<void>,
   ) {
-    if (!this.atomic) return write(this.policies);
+    if (!this.atomic) {
+      if (context?.assertInTransaction) throw Error('AUTHORIZATION_TRANSACTION_REQUIRED');
+      return write(this.policies);
+    }
     if (!this.policies.withTransaction)
       throw new Error('POLICY_TRANSACTIONAL_PERSISTENCE_REQUIRED');
     const metadata = (

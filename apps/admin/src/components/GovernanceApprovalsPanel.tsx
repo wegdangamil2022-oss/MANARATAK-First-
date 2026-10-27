@@ -35,7 +35,10 @@ export function GovernanceApprovalsPanel({ onApplied }: { onApplied: () => Promi
         (next ? '&cursor=' + encodeURIComponent(next) : ''),
     );
     setActor(result.data.actorId);
-    setRows((old) => (next ? [...old, ...result.data.items] : result.data.items));
+    const supported = result.data.items.filter((row) =>
+      ['DUTY_POLICY', 'DUTY_EXCEPTION', 'MFA_RESET'].includes(row.scope),
+    );
+    setRows((old) => (next ? [...old, ...supported] : supported));
     setCursor(result.data.nextCursor);
   };
   useEffect(() => {
