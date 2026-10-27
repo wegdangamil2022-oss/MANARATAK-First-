@@ -335,7 +335,7 @@ export function AIRegistryFields({
   const references = { providers, models, capabilities };
   const targets = Array.isArray(value.targets) ? (value.targets as RecordValue[]) : [];
   return (
-    <div className="ai-form">
+    <div className="ai-form ai-registry-fields">
       {(fields[resource] ?? []).map((field) => {
         const current = value[field.key];
         const options = field.reference

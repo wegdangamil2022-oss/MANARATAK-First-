@@ -198,7 +198,7 @@ export function AIGovernancePage() {
   return (
     <GovernanceGuard.Provider value={report}>
       <div
-        className="reference-workspace certificate-workspace ai-tools-workspace"
+        className="reference-workspace certificate-workspace ai-tools-workspace ai-governance-workspace"
         dir={dir}
         onClickCapture={(event) => {
           const anchor = (event.target as HTMLElement).closest('a[href]');
@@ -226,7 +226,7 @@ export function AIGovernancePage() {
         </header>
         <nav
           className="certificate-main-nav"
-          aria-label={title('مساحات الذكاء الاصطناعي', 'AI workspaces')}
+          aria-label={title('أقسام الذكاء الاصطناعي', 'AI sections')}
         >
           {AI_WORKSPACES.map((item, index) => {
             const Icon = workspaceIcons[index];
@@ -243,10 +243,7 @@ export function AIGovernancePage() {
           })}
         </nav>
         {workspace.tabs.length > 1 && (
-          <nav
-            className="certificate-subnav"
-            aria-label={title('وظائف المساحة', 'Workspace functions')}
-          >
+          <nav className="certificate-subnav" aria-label={title('تبويبات القسم', 'Section tabs')}>
             {sections
               .filter((item) => (workspace.tabs as readonly string[]).includes(item.key))
               .map((item) => (
@@ -262,7 +259,6 @@ export function AIGovernancePage() {
           </nav>
         )}
         <main className="ai-content" key={active}>
-          <h2>{language === 'en' ? sectionNamesEn[selected.key] : selected.label}</h2>
           {active === 'overview' ? (
             <>
               <OverviewPanel />
@@ -411,7 +407,7 @@ function OverviewPanel() {
             ? `${data.costMonthToDate} ${data.currency}`
             : '—';
   return (
-    <div className="space-y-6">
+    <div className="ai-content">
       <button
         className="action-secondary"
         disabled={overview.loading || providers.loading}
@@ -712,7 +708,7 @@ function ExecutionsPanel() {
       setPage(Math.max(1, Math.ceil(list.data.total / 25)));
   }, [list.data, page]);
   return (
-    <div className="space-y-5">
+    <div className="ai-content">
       <Panel
         title={copy('التنفيذ والتتبّع')}
         subtitle={copy('البحث بالمعرف أو Trace ID أو المستهلك أو القدرة أو النموذج.')}
@@ -941,7 +937,7 @@ function AsyncQueuePanel() {
     }
   };
   return (
-    <div className="space-y-6">
+    <div className="ai-content">
       <Panel
         title={copy('طابور التنفيذ غير المتزامن')}
         subtitle={copy('الحمولة مشفرة ولا تُعرض في لوحة الإدارة.')}
@@ -1198,7 +1194,7 @@ function PromptsPanel() {
     setMessage('');
   };
   return (
-    <div className="space-y-6">
+    <div className="ai-content">
       <RegistryPanel resource="prompts" title={copy('سجل الموجّهات')} />
       <Panel
         title={copy('دورة حياة إصدار الموجّه')}
@@ -1947,7 +1943,7 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
     setPage((current) => Math.min(current, Math.max(1, Math.ceil(records.length / 20))));
   }, [records.length]);
   return (
-    <div className="grid gap-5 xl:grid-cols-[1fr_420px]">
+    <div className={'ai-registry-layout' + (editing ? ' ai-registry-layout-editing' : '')}>
       <Panel
         title={title}
         subtitle={
@@ -2003,7 +1999,8 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
                 <button
                   key={record.key}
                   onClick={() => choose(record)}
-                  className="flex items-center justify-between rounded-xl border bg-white p-4 text-right hover:border-[#21A7B4]"
+                  aria-pressed={editing?.key === record.key}
+                  className="ai-registry-record"
                 >
                   <div>
                     <strong>{displayName(record, copy.language)}</strong>
@@ -2021,19 +2018,21 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
           </>
         )}
       </Panel>
-      <RegistryEditor
-        key={editing?.id ?? editing?.key ?? 'empty'}
-        resource={resource}
-        value={editing}
-        canEdit={canEdit}
-        onState={setGuard}
-        onSaved={() => {
-          guard.current = { dirty: false, busy: false };
-          setEditing(null);
-          setMessage(copy('تم الحفظ وإعادة قراءة السجل من الخادم.'));
-          void list.load();
-        }}
-      />
+      {editing && (
+        <RegistryEditor
+          key={editing?.id ?? editing?.key ?? 'empty'}
+          resource={resource}
+          value={editing}
+          canEdit={canEdit}
+          onState={setGuard}
+          onSaved={() => {
+            guard.current = { dirty: false, busy: false };
+            setEditing(null);
+            setMessage(copy('تم الحفظ وإعادة قراءة السجل من الخادم.'));
+            void list.load();
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -2139,7 +2138,7 @@ function RegistryEditor({
       ? ['OPEN', 'INVESTIGATING', 'MITIGATED', 'RESOLVED']
       : ['DRAFT', 'REVIEW', 'ACTIVE', 'INACTIVE', 'ARCHIVED'];
   return (
-    <aside className="h-fit rounded-2xl border border-[#0E7C86]/15 bg-white p-5 shadow-sm">
+    <aside className="ai-registry-editor certificate-panel">
       <h4 className="font-black text-[#142B5F]">
         {value?.id ? copy('تعديل السجل') : copy('إنشاء سجل')}
       </h4>
@@ -2245,7 +2244,7 @@ function Panel({
 }) {
   return (
     <section className="certificate-panel">
-      <div className="mb-5">
+      <div className="ai-panel-heading">
         <h3>{title}</h3>
         <p className="mt-1 text-xs leading-6 text-slate-500">{subtitle}</p>
       </div>
@@ -2263,12 +2262,10 @@ function Metric({
   icon: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-[#0E7C86]/15 bg-white p-5 shadow-sm">
-      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#0E7C86]/10 text-[#142B5F] [&>svg]:h-5 [&>svg]:w-5">
-        {icon}
-      </div>
-      <div className="text-2xl font-black">{value}</div>
-      <div className="mt-1 text-xs text-slate-500">{label}</div>
+    <div className="ai-overview-metric">
+      <div className="ai-overview-metric-icon">{icon}</div>
+      <strong>{value}</strong>
+      <small>{label}</small>
     </div>
   );
 }
@@ -2304,17 +2301,13 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 function Loading() {
   return (
-    <div className="flex min-h-48 items-center justify-center text-[#142B5F]">
+    <div className="flex min-h-20 items-center justify-center text-[#142B5F]">
       <Loader2 className="h-7 w-7 animate-spin" />
     </div>
   );
 }
 function Empty({ text }: { text: string }) {
-  return (
-    <div className="rounded-xl border border-dashed border-slate-300 px-5 py-10 text-center text-sm text-slate-500">
-      {text}
-    </div>
-  );
+  return <div className="certificate-empty ai-empty">{text}</div>;
 }
 function ErrorBanner({ message }: { message: string }) {
   return (

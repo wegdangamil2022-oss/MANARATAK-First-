@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { isInternalStudentTool } from '@manaratak/domain';
+import {
+  ClipboardList,
+  FileText,
+  LayoutDashboard,
+  Rocket,
+  ShieldCheck,
+  TestTube2,
+} from 'lucide-react';
 import { adminApiClient } from '../../api/client';
 import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
 import { TestDiscoveryEditor } from '../integration/TestDiscoveryEditor';
@@ -22,6 +30,15 @@ import {
 } from './studentToolModel';
 import { ToolDependency, ToolExecutions } from './ToolOperations';
 import { ToolTestPanel } from './ToolTestPanel';
+
+const tabIcons = {
+  overview: LayoutDashboard,
+  content: FileText,
+  access: ShieldCheck,
+  release: Rocket,
+  quality: TestTube2,
+  executions: ClipboardList,
+};
 
 export function StudentToolDetails({
   toolKey,
@@ -176,15 +193,19 @@ export function StudentToolDetails({
       </WorkspacePanel>
       <nav className="certificate-subnav" aria-label={c('تفاصيل الأداة', 'Tool details')}>
         {TOOL_TABS.filter(([key]) => key !== 'executions' || can('view-executions')).map(
-          ([key, ar, en]) => (
-            <Link
-              key={key}
-              to={`/student-tools/${encodeURIComponent(toolKey)}?tab=${key}`}
-              aria-current={key === tab ? 'page' : undefined}
-            >
-              {c(ar, en)}
-            </Link>
-          ),
+          ([key, ar, en]) => {
+            const Icon = tabIcons[key];
+            return (
+              <Link
+                key={key}
+                to={`/student-tools/${encodeURIComponent(toolKey)}?tab=${key}`}
+                aria-current={key === tab ? 'page' : undefined}
+              >
+                <Icon aria-hidden="true" />
+                {c(ar, en)}
+              </Link>
+            );
+          },
         )}
       </nav>
       <ReadState state={read} />

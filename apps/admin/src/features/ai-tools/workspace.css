@@ -1,6 +1,170 @@
+.ai-tools-workspace {
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  line-height: 1.8;
+  gap: 12px;
+}
+.ai-tools-workspace *,
+.ai-tools-workspace :is(button, input, select, textarea, a) {
+  font-family: 'Cairo', sans-serif;
+}
+.ai-tools-workspace h1 {
+  font-size: 22px;
+  font-weight: 800;
+}
+.ai-tools-workspace h2 {
+  font-size: 16px;
+  font-weight: 700;
+}
+.ai-tools-workspace h3 {
+  font-size: 15px;
+  font-weight: 700;
+}
+.ai-tools-workspace :is(h4, h5, label, legend) {
+  font-size: 13px;
+}
+.ai-tools-workspace :is(p, small) {
+  line-height: 1.8;
+}
+.ai-tools-workspace .certificate-main-nav {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.student-tools-workspace .certificate-main-nav {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+}
+.ai-tools-workspace .certificate-main-nav a {
+  min-width: 0;
+  min-height: 44px;
+  padding: 9px 12px;
+  font-size: 14px;
+  line-height: 1.7;
+  text-align: center;
+}
+.ai-tools-workspace .certificate-subnav {
+  gap: 8px;
+}
+.ai-tools-workspace .certificate-subnav :is(a, button) {
+  flex: 1 1 150px;
+  font-size: 13px;
+  min-height: 38px;
+}
+.ai-tools-workspace
+  :is(.certificate-main-nav, .certificate-subnav)
+  :is(a[aria-current='page'], button[aria-pressed='true']) {
+  background: #142b5f;
+  color: #fff;
+  border-color: #142b5f;
+}
+.ai-tools-workspace
+  :is(.certificate-main-nav, .certificate-subnav)
+  :is(a[aria-current='page'], button[aria-pressed='true'])
+  svg {
+  color: #f0ce7e;
+}
+.ai-tools-workspace :is(.action-primary, .certificate-primary):hover {
+  background: #1c3975;
+  border-color: #d6a43b;
+}
+.ai-tools-workspace :is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 2px solid #d6a43b;
+  outline-offset: 3px;
+}
+.ai-tools-workspace input:is([type='checkbox'], [type='radio']) {
+  accent-color: #142b5f;
+}
+.ai-tools-workspace .certificate-panel {
+  padding: 16px;
+  gap: 12px;
+}
+.ai-tools-workspace .certificate-metric {
+  padding: 12px 16px;
+}
+.ai-tools-workspace .certificate-metric strong {
+  font-size: 22px;
+}
+.ai-tools-workspace .certificate-metric small {
+  font-size: 12px;
+}
+.ai-tools-workspace .ai-panel-heading {
+  display: grid;
+  gap: 4px;
+}
+.ai-tools-workspace .ai-registry-layout {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  align-items: start;
+}
+.ai-tools-workspace .ai-registry-record {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  min-width: 0;
+  text-align: start;
+  background: #fff;
+  border: 1px solid #ddeff2;
+  border-radius: 10px;
+}
+.ai-tools-workspace .ai-registry-record > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.ai-tools-workspace .ai-registry-record[aria-pressed='true'] {
+  background: #142b5f;
+  color: #fff;
+  border-color: #142b5f;
+}
+.ai-tools-workspace .ai-registry-record[aria-pressed='true'] strong {
+  color: #f0ce7e;
+}
+.ai-tools-workspace .ai-registry-record[aria-pressed='true'] > div > div {
+  color: #fff;
+}
+.ai-tools-workspace .ai-registry-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+.ai-tools-workspace .ai-registry-fields > :is(fieldset, p),
+.ai-tools-workspace .ai-registry-fields > label:has(textarea) {
+  grid-column: 1 / -1;
+}
+.ai-tools-workspace .ai-overview-metric {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 10px;
+  padding: 12px;
+  border: 1px solid #ddeff2;
+  border-radius: 14px;
+  background: #fff;
+}
+.ai-tools-workspace .ai-overview-metric-icon {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  height: 36px;
+  border-radius: 10px;
+  background: #142b5f;
+}
+.ai-tools-workspace .ai-overview-metric-icon svg {
+  color: #f0ce7e;
+}
+.ai-tools-workspace .ai-overview-metric strong {
+  font-size: 22px;
+  line-height: 1.5;
+  color: #142b5f;
+}
+.ai-tools-workspace .ai-overview-metric small {
+  font-size: 12px;
+  color: #64748b;
+}
 .ai-tools-workspace .ai-content {
   display: grid;
-  gap: 16px;
+  gap: 12px;
   min-width: 0;
 }
 .ai-tools-workspace .ai-content > div {
@@ -43,13 +207,13 @@
   overflow: auto;
   max-height: 320px;
   text-align: left;
-  font: 12px monospace;
+  font-size: 12px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 .ai-tools-workspace .ai-form {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 .ai-tools-workspace .ai-form fieldset {
   display: grid;
@@ -70,7 +234,7 @@
   color: white;
 }
 .ai-tools-workspace .ai-content .action-primary svg {
-  color: #d6a43b;
+  color: #f0ce7e;
 }
 .ai-tools-workspace .ai-content .input {
   font-family: Cairo, 'Noto Sans Arabic', sans-serif;
@@ -83,14 +247,34 @@
 .ai-tools-workspace .ai-content th,
 .ai-tools-workspace .ai-content td {
   text-align: start;
-  padding: 12px;
+  padding: 10px 12px;
   border-bottom: 1px solid #ddeff2;
 }
 .ai-tools-workspace .ai-content th {
   background: #f6fafb;
 }
+@media (min-width: 1100px) {
+  .ai-tools-workspace .ai-registry-layout-editing {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
+  }
+}
+@media (max-width: 900px) {
+  .ai-tools-workspace .certificate-main-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 @media (max-width: 620px) {
   .ai-tools-workspace .ai-definition {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .ai-tools-workspace .ai-registry-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ai-tools-workspace .certificate-main-nav a {
+    font-size: 13px;
+  }
+  .ai-tools-workspace .certificate-subnav :is(a, button) {
+    flex-basis: calc(50% - 8px);
+    font-size: 12px;
   }
 }

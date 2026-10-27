@@ -180,7 +180,7 @@ textarea {
 /* One typeface throughout the administration workspace, including legacy
    monospace utilities. SVG icons continue to use their vector paths. */
 .admin-workspace,
-.admin-workspace * { font-family: var(--font-cairo); }
+.admin-workspace * { font-family: 'Cairo', sans-serif !important; }
 .admin-workspace { font-size: 14px; line-height: 1.75; }
 .admin-workspace h1 { font-size: var(--admin-title-size); line-height: 1.5; font-weight: 800; }
 .admin-workspace h2 { font-size: var(--admin-section-size); line-height: 1.65; }

@@ -68,6 +68,15 @@
 .certificate-main-nav a[aria-current='page'] svg {
   color: #d6a43b;
 }
+.certificate-workspace
+  :is(
+    .certificate-subnav a[aria-current='page'],
+    .certificate-subnav button[aria-pressed='true'],
+    .certificate-primary
+  )
+  svg {
+  color: #f0ce7e;
+}
 .certificate-workspace .certificate-primary {
   background: #142b5f;
   color: white;
@@ -134,9 +143,15 @@
   color: #9f1239;
 }
 .certificate-empty {
-  padding: 28px;
+  padding: 18px 14px;
   text-align: center;
   color: #64748b;
+}
+.certificate-workspace .certificate-empty {
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.8;
 }
 .certificate-table-scroll {
   overflow-x: auto;

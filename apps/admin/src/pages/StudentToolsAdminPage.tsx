@@ -49,7 +49,7 @@ export function StudentToolsAdminPage() {
   return (
     <div
       ref={root}
-      className="reference-workspace certificate-workspace ai-tools-workspace"
+      className="reference-workspace certificate-workspace ai-tools-workspace student-tools-workspace"
       dir={dir}
       onClickCapture={(event) => {
         if (
@@ -85,7 +85,7 @@ export function StudentToolsAdminPage() {
       </header>
       <nav
         className="certificate-main-nav"
-        aria-label={c('مساحات أدوات الطلاب', 'Student tool workspaces')}
+        aria-label={c('أقسام أدوات الطلاب', 'Student tool sections')}
       >
         {TOOL_WORKSPACES.filter(
           ([key]) => key !== 'usage' || hasPermission('admin:student-tools:view-executions'),
