@@ -1,5 +1,13 @@
 import { Link, useSearchParams } from 'react-router-dom';
-import { Activity, RefreshCw } from 'lucide-react';
+import {
+  Activity,
+  AlertTriangle,
+  ChartNoAxesCombined,
+  LayoutDashboard,
+  RefreshCw,
+  Rocket,
+  Server,
+} from 'lucide-react';
 import { useHealthSnapshot } from '../features/health/useHealthSnapshot';
 import { healthView } from '../features/health/healthPresentation';
 import {
@@ -14,6 +22,7 @@ import { HealthSummary, HealthRelease } from '../features/health/HealthSummary';
 import { HealthServices } from '../features/health/HealthServices';
 import { HealthIssues } from '../features/health/HealthIssues';
 import { HealthReports, healthBrief } from '../features/health/HealthReports';
+import '../features/reference-data/reference-data.css';
 import '../features/health/health-workspace.css';
 export function AdminHealthReadinessPage() {
   const { c, t, dir, time, ar } = useHealthCopy(),
@@ -22,11 +31,11 @@ export function AdminHealthReadinessPage() {
   const view = healthView(params.get('view')),
     legacy = params.get('view')?.toLowerCase();
   const tabs = [
-    ['overview', c('الملخص', 'Overview')],
-    ['services', c('الخدمات والمكونات', 'Services')],
-    ['issues', c('المشكلات الحالية', 'Current issues')],
-    ['release', c('جاهزية الإطلاق', 'Release readiness')],
-    ['reports', c('المراقبة والتقارير', 'Monitoring and reports')],
+    ['overview', c('الملخص', 'Overview'), LayoutDashboard],
+    ['services', c('الخدمات والمكونات', 'Services'), Server],
+    ['issues', c('المشكلات الحالية', 'Current issues'), AlertTriangle],
+    ['release', c('جاهزية الإطلاق', 'Release readiness'), Rocket],
+    ['reports', c('المراقبة والتقارير', 'Monitoring and reports'), ChartNoAxesCombined],
   ] as const;
   const props = state.overview
     ? { overview: state.overview, freshness: state.freshness, now: state.now }
@@ -48,7 +57,12 @@ export function AdminHealthReadinessPage() {
           </p>
         </div>
         <div className="health-actions">
-          <button type="button" disabled={state.loading} onClick={() => void state.refresh()}>
+          <button
+            className="health-primary"
+            type="button"
+            disabled={state.loading}
+            onClick={() => void state.refresh()}
+          >
             <RefreshCw aria-hidden="true" className={state.loading ? 'health-spinning' : ''} />
             {t('refresh')}
           </button>
@@ -61,8 +75,9 @@ export function AdminHealthReadinessPage() {
         </div>
       </header>
       <nav className="health-navigation" aria-label={c('أقسام صحة المنصة', 'Health workspaces')}>
-        {tabs.map(([id, title]) => (
+        {tabs.map(([id, title, Icon]) => (
           <Link key={id} to={healthHref(id)} aria-current={view === id ? 'page' : undefined}>
+            <Icon aria-hidden="true" />
             {title}
           </Link>
         ))}
@@ -102,21 +117,29 @@ export function AdminHealthReadinessPage() {
             </small>
           </div>
           <FreshnessNote freshness={props.freshness} />
-          {view === 'overview' ? (
-            <HealthSummary {...props} />
-          ) : view === 'services' ? (
-            <HealthServices {...props} />
-          ) : view === 'issues' ? (
-            <HealthIssues {...props} />
-          ) : view === 'release' ? (
-            <HealthRelease {...props} />
-          ) : (
-            <HealthReports
-              {...props}
-              revoke={state.revoke}
-              legacy={['coverage', 'history', 'report'].includes(legacy ?? '') ? legacy : undefined}
-            />
-          )}
+          <section
+            className="health-content"
+            aria-label={tabs.find(([id]) => id === view)?.[1]}
+            aria-busy={state.loading}
+          >
+            {view === 'overview' ? (
+              <HealthSummary {...props} />
+            ) : view === 'services' ? (
+              <HealthServices {...props} />
+            ) : view === 'issues' ? (
+              <HealthIssues {...props} />
+            ) : view === 'release' ? (
+              <HealthRelease {...props} />
+            ) : (
+              <HealthReports
+                {...props}
+                revoke={state.revoke}
+                legacy={
+                  ['coverage', 'history', 'report'].includes(legacy ?? '') ? legacy : undefined
+                }
+              />
+            )}
+          </section>
         </>
       )}
       <footer className="health-footer">

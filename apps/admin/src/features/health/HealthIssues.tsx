@@ -132,6 +132,8 @@ export function HealthIssues({
     { hasPermission } = useAdminAuthorization(),
     [params, setParams] = useSearchParams();
   const severity = params.get('severity') ?? '',
+    source = params.get('source') ?? '',
+    search = params.get('q')?.trim().toLowerCase() ?? '',
     service = params.get('service') ?? '',
     owner = params.get('owner') ?? '',
     age = params.get('freshness') ?? '';
@@ -151,6 +153,11 @@ export function HealthIssues({
   };
   const filtered = all.filter(
     (i) =>
+      (!source || i.source === source) &&
+      (!search ||
+        `${issueTitle(i, label, c)} ${i.id} ${i.recommendation ?? ''}`
+          .toLowerCase()
+          .includes(search)) &&
       (!severity || i.severity === severity) &&
       (!service || i.componentId === service) &&
       (!age || healthFreshness(i.checkedAt, now, freshness !== 'FRESH') === age) &&
@@ -211,6 +218,23 @@ export function HealthIssues({
       {!selected && (
         <>
           <div className="health-filters">
+            <label>
+              {c('البحث في المشكلات', 'Search findings')}
+              <input
+                value={params.get('q') ?? ''}
+                onChange={(e) => update('q', e.target.value)}
+                placeholder={c('وصف المشكلة أو مرجعها', 'Finding description or reference')}
+              />
+            </label>
+            <label>
+              {c('مصدر المشكلة', 'Finding source')}
+              <select value={source} onChange={(e) => update('source', e.target.value)}>
+                <option value="">{c('كل المصادر', 'All sources')}</option>
+                <option value="production">{c('تهيئة الإطلاق', 'Release configuration')}</option>
+                <option value="component">{c('فحوص المكونات', 'Component probes')}</option>
+                <option value="coverage">{c('تغطية المراقبة', 'Monitoring coverage')}</option>
+              </select>
+            </label>
             <label>
               {c('الشدة', 'Severity')}
               <select value={severity} onChange={(e) => update('severity', e.target.value)}>

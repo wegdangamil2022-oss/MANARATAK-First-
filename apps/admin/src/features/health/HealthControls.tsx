@@ -44,6 +44,9 @@ export function healthHref(view: HealthView, fields: Record<string, string | und
         'window',
         'owner',
         'freshness',
+        'source',
+        'severity',
+        'service',
       ].includes(key)
     )
       params.set(key, value);
@@ -61,7 +64,7 @@ export function HealthPanel({
   id?: string;
 }) {
   return (
-    <section className="reference-content-card" id={id}>
+    <section className="reference-content-card health-panel" id={id}>
       <header>
         <h2>{title}</h2>
         {actions && <div className="health-actions">{actions}</div>}

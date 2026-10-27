@@ -254,7 +254,9 @@ export function HealthServices({
             <small>{time(s.checkedAt)}</small>
             <div className="health-actions">
               <HealthBadge status={healthFreshness(s.checkedAt, now, freshness !== 'FRESH')} />
-              <Link to={href(s.id)}>{c('عرض التفاصيل', 'View details')}</Link>
+              <Link className="health-button" to={href(s.id)}>
+                {c('عرض التفاصيل', 'View details')}
+              </Link>
             </div>
           </article>
         ))}

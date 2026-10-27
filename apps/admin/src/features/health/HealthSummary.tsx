@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { ArrowUpLeft } from 'lucide-react';
 import type { HealthOverview } from './HealthOverviewContract';
 import { healthIssues, type Freshness } from './healthPresentation';
 import {
@@ -60,7 +61,10 @@ export function HealthSummary({ overview: s, freshness, now }: Props) {
                     'Server aggregate based on the services required in this environment.',
                   )}
           </p>
-          <Link to={healthHref('services')}>{c('فحص الخدمات', 'Inspect services')}</Link>
+          <Link className="health-button" to={healthHref('services')}>
+            <ArrowUpLeft aria-hidden="true" />
+            {c('فحص الخدمات', 'Inspect services')}
+          </Link>
         </HealthPanel>
         <HealthPanel title={c('جاهزية الإطلاق', 'Release readiness')}>
           <HealthBadge
@@ -76,7 +80,8 @@ export function HealthSummary({ overview: s, freshness, now }: Props) {
                 ? c('اجتازت اللقطة بوابة التشخيص', 'Diagnostic gate passed')
                 : c('بوابة التشخيص غير مجتازة', 'Diagnostic gate blocked')}
           </p>
-          <Link to={healthHref('release')}>
+          <Link className="health-button" to={healthHref('release')}>
+            <ArrowUpLeft aria-hidden="true" />
             {c('مراجعة شروط الجاهزية', 'Review readiness gates')}
           </Link>
         </HealthPanel>
@@ -135,16 +140,25 @@ export function HealthRelease({ overview: s, freshness, now }: Props) {
       c('بيئة مؤهلة للإطلاق', 'Environment eligible'),
       s.releaseGate.environmentEligible,
       c('تحدد سياسة الخادم البيئة المؤهلة.', 'Eligibility is determined by server policy.'),
+      healthHref('reports', { section: 'report' }),
+      c('عرض سياق البيئة', 'Inspect environment context'),
+      s.runtimeMode,
     ],
     [
       c('تهيئة الإنتاج', 'Production configuration'),
       s.releaseGate.configurationReady,
       c('إعدادات وأمان واعتماديات الإطلاق.', 'Configuration, security and launch dependencies.'),
+      healthHref('issues', { source: 'production' }),
+      c('عرض ملاحظات التهيئة', 'Inspect configuration findings'),
+      `${s.productionReadiness.blockerCount} ${c('مانع', 'blockers')} · ${s.productionReadiness.warningCount} ${c('تحذير', 'warnings')}`,
     ],
     [
       c('التشغيل', 'Runtime readiness'),
       s.releaseGate.runtimeReady,
       c('نتيجة الخدمات المطلوبة والدليل التشغيلي.', 'Required services and operational evidence.'),
+      healthHref('services', { importance: 'required' }),
+      c('فحص الخدمات المطلوبة', 'Inspect required services'),
+      `${s.components.filter((service) => !service.optional).length} ${c('خدمة مطلوبة في اللقطة', 'required services in snapshot')}`,
     ],
     [
       c('اكتمال الفحوص', 'Monitoring completeness'),
@@ -153,11 +167,34 @@ export function HealthRelease({ overview: s, freshness, now }: Props) {
         'الفحوص المتوقعة والدليل التشغيلي المطلوب.',
         'Expected probes and required operational evidence.',
       ),
+      healthHref('reports', { section: 'coverage' }),
+      c('عرض تغطية الفحوص', 'Inspect probe coverage'),
+      `${new Set([...s.coverage.missingProbes, ...s.coverage.requiredUnverified]).size} ${c('فجوة تغطية أو إثبات', 'coverage or evidence gaps')}`,
     ],
   ] as const;
   return (
     <>
-      <HealthPanel title={c('شروط بوابة الإطلاق', 'Release gate conditions')}>
+      <HealthPanel
+        title={c('شروط بوابة الإطلاق', 'Release gate conditions')}
+        actions={
+          <HealthBadge
+            status={freshness !== 'FRESH' ? 'UNKNOWN' : s.releaseReady ? 'UP' : 'BLOCKER'}
+          />
+        }
+      >
+        <p>
+          {freshness !== 'FRESH'
+            ? c(
+                'جاهزية الإطلاق غير مؤكدة من هذه اللقطة السابقة.',
+                'Release readiness is unconfirmed from this previous snapshot.',
+              )
+            : s.releaseReady
+              ? c('اجتازت اللقطة بوابة التشخيص.', 'This snapshot passed the diagnostic gate.')
+              : c(
+                  'لم تجتز اللقطة بوابة التشخيص؛ راجع الشروط والمعوقات أدناه.',
+                  'This snapshot did not pass the diagnostic gate; inspect the conditions and findings below.',
+                )}
+        </p>
         <p>
           {c(
             'هذه نتيجة تشخيصية للقراءة فقط؛ لا تنفذ نشرًا ولا تمنح موافقة إطلاق.',
@@ -165,16 +202,21 @@ export function HealthRelease({ overview: s, freshness, now }: Props) {
           )}
         </p>
         <div className="health-gates">
-          {gates.map(([title, passed, description]) => (
+          {gates.map(([title, passed, description, href, action, detail]) => (
             <article key={title}>
               <HealthBadge status={passed ? 'UP' : 'BLOCKER'} historical={freshness !== 'FRESH'} />
               <h3>{title}</h3>
               <p>{description}</p>
+              <p className="health-gate-evidence">{detail}</p>
               <small>
                 {freshness === 'FRESH'
                   ? c('حسب اللقطة الحالية', 'From this snapshot')
                   : c('نتيجة سابقة', 'Previous result')}
               </small>
+              <Link className="health-button" to={href}>
+                <ArrowUpLeft aria-hidden="true" />
+                {action}
+              </Link>
             </article>
           ))}
         </div>
@@ -182,9 +224,6 @@ export function HealthRelease({ overview: s, freshness, now }: Props) {
           {c('وقت تقرير التهيئة', 'Configuration report time')}:{' '}
           {time(s.productionReadiness.checkedAt)}
         </p>
-        <Link to={healthHref('reports', { section: 'coverage' })}>
-          {c('مراجعة تغطية الفحوص', 'Review probe coverage')}
-        </Link>
       </HealthPanel>
       <HealthIssues overview={s} freshness={freshness} now={now} releaseOnly />
       <HealthPanel title={c('معلومات التشخيص', 'Diagnostic context')}>

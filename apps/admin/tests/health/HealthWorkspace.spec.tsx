@@ -232,7 +232,7 @@ describe('Health workspace truth and access', () => {
       },
     ];
     state.request.mockResolvedValue(s);
-    await mount('/health-readiness?view=issues&severity=WARNING');
+    await mount('/health-readiness?view=issues&severity=WARNING&source=production&q=fixture');
     const detail = tree!.root.findAllByType('a').find((n) => n.children.includes('Issue details'))!;
     expect(detail.props.href).toContain('severity=WARNING');
     const href = detail.props.href;
@@ -242,6 +242,113 @@ describe('Health workspace truth and access', () => {
     expect(
       tree!.root.findAllByType('a').find((n) => n.children.includes('Back to findings'))!.props
         .href,
-    ).toBe('/health-readiness?view=issues&severity=WARNING');
+    ).toBe('/health-readiness?view=issues&severity=WARNING&source=production&q=fixture');
+  });
+  it('links each release condition to the matching read-only evidence', async () => {
+    await mount('/health-readiness?view=release');
+    for (const [name, href] of [
+      ['Inspect environment context', '/health-readiness?view=reports&section=report'],
+      ['Inspect configuration findings', '/health-readiness?view=issues&source=production'],
+      ['Inspect required services', '/health-readiness?view=services&importance=required'],
+      ['Inspect probe coverage', '/health-readiness?view=reports&section=coverage'],
+    ]) {
+      expect(
+        tree!.root.findAllByType('a').find((node) => node.children.includes(name))?.props.href,
+      ).toBe(href);
+    }
+    expect(state.request).toHaveBeenCalledTimes(1);
+    expect(
+      state.request.mock.calls.every(([, options]) => !options?.method || options.method === 'GET'),
+    ).toBe(true);
+  });
+  it('searches source-filtered findings locally without hiding the filter on return', async () => {
+    const snapshot = healthSnapshot();
+    snapshot.productionReadiness.findings = [
+      {
+        id: 'lookup.fixture',
+        severity: 'WARNING',
+        area: 'Test',
+        message: 'Lookup finding',
+        recommendation: 'Inspect lookup owner',
+      },
+      {
+        id: 'other.fixture',
+        severity: 'WARNING',
+        area: 'Test',
+        message: 'Other finding',
+        recommendation: 'Inspect other owner',
+      },
+    ];
+    snapshot.productionReadiness.warningCount = snapshot.summary.productionWarnings = 2;
+    state.request.mockResolvedValue(snapshot);
+    await mount('/health-readiness?view=issues&source=production&q=lookup');
+    const findings = () =>
+      tree!.root.findAllByType('article').map((node) => node.findByType('h3').children.join(''));
+    expect(findings()).toHaveLength(1);
+    expect(findings()[0]).toContain('Lookup finding');
+    const input = tree!.root.findByType('input');
+    await act(async () => input.props.onChange({ target: { value: 'other' } }));
+    expect(findings()).toHaveLength(1);
+    expect(findings()[0]).toContain('Other finding');
+    expect(state.request).toHaveBeenCalledTimes(1);
+  });
+  it('selects observations for an unknown report section and keeps service/window context in report navigation', async () => {
+    const snapshot = healthSnapshot();
+    state.request.mockImplementation((url: string) =>
+      Promise.resolve(
+        url.includes('/history')
+          ? {
+              protocolVersion: 2,
+              availability: 'UNAVAILABLE',
+              scope: 'PROCESS_LOCAL_SESSION',
+              window: '24h',
+              total: 0,
+              nextCursor: null,
+              samples: [],
+            }
+          : snapshot,
+      ),
+    );
+    await mount('/health-readiness?view=reports&section=unknown&component=database&window=24h');
+    const nav = tree!.root.findByProps({ 'aria-label': 'Monitoring and reports' });
+    const active = nav.findAllByType('a').filter((node) => node.props['aria-current'] === 'page');
+    expect(active).toHaveLength(1);
+    expect(active[0].children).toContain('Observations');
+    for (const node of nav.findAllByType('a')) {
+      expect(node.props.href).toContain('component=database');
+      expect(node.props.href).toContain('window=24h');
+    }
+    expect(text()).not.toContain('Diagnostic response schema is incompatible');
+  });
+  it.each([false, true])(
+    'exposes coverage drill-downs with separately authorized integrity access: %s',
+    async (allowed) => {
+      state.permissions = allowed ? ['admin:platform:manage'] : [];
+      await mount('/health-readiness?view=reports&section=coverage');
+      const links = tree!.root.findAllByType('a');
+      expect(links.some((node) => node.props.href === '/cross-module-integrity')).toBe(allowed);
+      expect(
+        links.some(
+          (node) =>
+            node.props.href ===
+            '/health-readiness?view=services&importance=required&evidence=unverified',
+        ),
+      ).toBe(true);
+      expect(
+        links.some((node) => node.props.href === '/health-readiness?view=issues&source=coverage'),
+      ).toBe(true);
+      expect(state.request).toHaveBeenCalledTimes(1);
+    },
+  );
+  it('permits a student-tools owner link with the actual read permission', async () => {
+    const snapshot = healthSnapshot();
+    snapshot.components[0].id = 'student-tools-quota';
+    snapshot.coverage.expected = snapshot.coverage.monitored = ['student-tools-quota'];
+    state.permissions = ['admin:student-tools:view'];
+    state.request.mockResolvedValue(snapshot);
+    await mount('/health-readiness?view=services&component=student-tools-quota');
+    expect(tree!.root.findAllByType('a').some((node) => node.props.href === '/student-tools')).toBe(
+      true,
+    );
   });
 });

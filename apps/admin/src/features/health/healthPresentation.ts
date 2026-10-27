@@ -43,7 +43,7 @@ export const healthOwners: Record<string, { href: string; permission: string }> 
   'ai-providers': { href: '/ai', permission: 'admin:ai:view' },
   'payment-gateway': { href: '/finance', permission: 'admin:finance:manage' },
   notifications: { href: '/notifications', permission: 'admin:notifications:view' },
-  'student-tools-quota': { href: '/student-tools', permission: 'admin:student-tools:manage' },
+  'student-tools-quota': { href: '/student-tools', permission: 'admin:student-tools:view' },
 };
 function productionComponent(id: string): string | undefined {
   const prefix: Record<string, string> = {

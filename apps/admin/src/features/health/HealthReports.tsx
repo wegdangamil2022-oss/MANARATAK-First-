@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import {
+  ChartNoAxesCombined,
+  Download,
+  FileJson,
+  Files,
+  History as HistoryIcon,
+  ListChecks,
+  Network,
+} from 'lucide-react';
 import { adminApiClient } from '../../api/client';
+import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
 import type { HealthOverview } from './HealthOverviewContract';
 import { parseHistory, type History } from './HealthHistoryContract';
 import { healthExport, mergeHealthHistory, type Freshness } from './healthPresentation';
@@ -66,10 +76,12 @@ export function HealthDownloads({
         text={healthBrief(overview, freshness, ar, now)}
         label={c('نسخ الملخص', 'Copy summary')}
       />
-      <button type="button" onClick={() => download(false)}>
+      <button className="health-primary" type="button" onClick={() => download(false)}>
+        <Download aria-hidden="true" />
         {c('تنزيل التقرير', 'Download report')}
       </button>
       <button type="button" onClick={() => download(true)}>
+        <FileJson aria-hidden="true" />
         {c('تنزيل JSON', 'Download JSON')}
       </button>
       <small role="status">
@@ -305,9 +317,20 @@ function HealthHistory({ revoke, knownServices }: { revoke: () => void; knownSer
 }
 function HealthCoverage({ overview: s }: { overview: HealthOverview }) {
   const { c, label } = useHealthCopy(),
+    { hasPermission } = useAdminAuthorization(),
     ids = [...new Set([...s.coverage.expected, ...s.coverage.extraProbes])];
   return (
-    <HealthPanel title={c('تغطية الفحوص', 'Probe coverage')}>
+    <HealthPanel
+      title={c('تغطية الفحوص', 'Probe coverage')}
+      actions={
+        hasPermission('admin:platform:manage') ? (
+          <Link to="/cross-module-integrity">
+            <Network aria-hidden="true" />
+            {c('سلامة الربط بين الأقسام', 'Cross-module integrity')}
+          </Link>
+        ) : undefined
+      }
+    >
       <p>
         {c('الفحوص المطابقة / المتوقعة', 'Matched / expected probes')}: {s.coverage.matchedCount} /{' '}
         {s.coverage.expectedCount} · {c('دليل تشغيلي مثبت', 'Operationally evidenced')}:{' '}
@@ -319,6 +342,19 @@ function HealthCoverage({ overview: s }: { overview: HealthOverview }) {
           'Test coverage is not attested by this source. Probe-name completeness does not establish journey success or test coverage.',
         )}
       </HealthNotice>
+      <div className="health-actions">
+        <Link
+          className="health-button"
+          to={healthHref('services', { importance: 'required', evidence: 'unverified' })}
+        >
+          <ListChecks aria-hidden="true" />
+          {c('الخدمات المطلوبة غير المثبتة', 'Unverified required services')}
+        </Link>
+        <Link className="health-button" to={healthHref('issues', { source: 'coverage' })}>
+          <ChartNoAxesCombined aria-hidden="true" />
+          {c('مشكلات تغطية الفحوص', 'Probe coverage findings')}
+        </Link>
+      </div>
       <div className="health-coverage">
         {ids.map((id) => {
           const missing = s.coverage.missingProbes.includes(id),
@@ -340,7 +376,7 @@ function HealthCoverage({ overview: s }: { overview: HealthOverview }) {
                       ? c('فحص إضافي', 'Extra probe')
                       : c('فحص موصول', 'Probe connected')}
               </span>
-              <Link to={healthHref('services', { component: id })}>
+              <Link className="health-button" to={healthHref('services', { component: id })}>
                 {c('فحص الدليل', 'Inspect evidence')}
               </Link>
             </article>
@@ -365,23 +401,33 @@ export function HealthReports({
 }) {
   const { c } = useHealthCopy(),
     [params] = useSearchParams(),
-    section = params.get('section') ?? legacy ?? 'history';
+    requestedSection = params.get('section') ?? legacy ?? 'history',
+    section = ['history', 'coverage', 'report'].includes(requestedSection)
+      ? requestedSection
+      : 'history';
   return (
     <>
       <nav
         className="health-secondary"
         aria-label={c('المراقبة والتقارير', 'Monitoring and reports')}
       >
-        {[
-          ['history', c('المشاهدات', 'Observations')],
-          ['coverage', c('التغطية', 'Coverage')],
-          ['report', c('التقارير', 'Reports')],
-        ].map(([id, title]) => (
+        {(
+          [
+            ['history', c('المشاهدات', 'Observations'), HistoryIcon],
+            ['coverage', c('التغطية', 'Coverage'), ListChecks],
+            ['report', c('التقارير', 'Reports'), Files],
+          ] as const
+        ).map(([id, title, Icon]) => (
           <Link
             key={id}
             aria-current={section === id ? 'page' : undefined}
-            to={healthHref('reports', { section: id })}
+            to={healthHref('reports', {
+              section: id,
+              component: params.get('component') ?? undefined,
+              window: params.get('window') ?? undefined,
+            })}
           >
+            <Icon aria-hidden="true" />
             {title}
           </Link>
         ))}

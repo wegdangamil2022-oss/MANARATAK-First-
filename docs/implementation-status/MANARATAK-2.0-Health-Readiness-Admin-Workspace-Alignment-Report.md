@@ -1,6 +1,6 @@
 # MANARATAK 2.0 — Health & Readiness Admin Workspace Alignment
 
-**Current baseline:** 2026-09-05  
+**Current interface review:** 2026-10-27
 **Admin route:** `/health-readiness`  
 **Admin API:** `/api/v1/admin/monitoring/overview`  
 **Public monitoring:** `/api/v1/monitoring/health`, `/health/liveness`, `/health/readiness`  
@@ -16,11 +16,12 @@ The detailed diagnostic overview and production-readiness report are admin-only 
 
 ## Release gate
 
-`releaseReady` is deliberately stricter than configuration validation alone. It is true only when all three conditions hold:
+`releaseReady` is deliberately stricter than configuration validation alone. It is true only when all four server conditions hold:
 
-1. **Configuration Ready** — `ProductionReadinessValidator` has no blockers.
-2. **Runtime Ready** — required runtime health probes are UP.
-3. **Monitoring Complete** — every expected operational probe is registered.
+1. **Environment Eligible** — the server identifies an eligible production environment.
+2. **Configuration Ready** — `ProductionReadinessValidator` has no blockers.
+3. **Runtime Ready** — required dependencies meet the server's runtime evidence policy.
+4. **Monitoring Complete** — expected probes and required operational evidence satisfy the server policy.
 
 This prevents a green release signal when the database/runtime is down or a launch-critical probe is absent.
 
@@ -44,7 +45,17 @@ This prevents a green release signal when the database/runtime is down or a laun
 
 ## UI
 
-The workspace uses the current MANARATAK control-plane identity: dark green `#044A37`, secondary green `#235D4E`, gold `#E3B04B`, Cairo typography, and semantic green/amber/red health states. The shared Admin shell/navigation was aligned to the same palette during this closure.
+The workspace follows the reference-data/certificate identity: navy `#142B5F`, gold active icons `#F0CE7E`, Cairo typography, 22px page titles, 16px section titles, 14px primary navigation, and compact 12–13px supporting text. Green/amber/red still describe diagnostic states. Changes are scoped to health; other admin sections keep their existing presentation.
+
+Five primary destinations remain: overview, services, current issues, release readiness, and monitoring/reports. Monitoring/reports retains three secondary destinations: observations, coverage, and reports. Both navigation levels use equal grid cells, navy selected backgrounds, gold selected icons, visible keyboard focus, and responsive rows. The content has consistent spacing and action links use the same button shape as native buttons.
+
+Each of the four release conditions links to its actual evidence: environment report, configuration findings, required services, or probe coverage. Source filtering and local text search make configuration and coverage drill-downs usable without extra API calls. Finding filters survive entry into a detail and its return link. Reporting navigation keeps the service and observation window; unknown report sections safely select observations.
+
+Coverage links to unverified required services and coverage findings. The existing cross-module integrity section is linked only with `admin:platform:manage`. Student-tools ownership uses the actual `admin:student-tools:view` route permission instead of the obsolete manage permission. No operational writes, provider activation or database changes were added.
+
+## Validation
+
+The three health suites pass 30 tests, including source/search filtering, release evidence routes, report navigation context, independent owner permissions, stale evidence, incompatible contracts, pagination and access revocation. Admin TypeScript and lint checks pass. Authenticated browser inspection remains separate from component and HTTP asset verification; no visual acceptance or external monitoring readiness is implied by these tests.
 
 ## Runtime caveat
 
