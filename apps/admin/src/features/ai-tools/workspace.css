@@ -162,6 +162,11 @@
   font-size: 12px;
   color: #64748b;
 }
+.ai-tools-workspace :is(.ai-overview-metric, .certificate-metric) > strong.ai-metric-message {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.8;
+}
 .ai-tools-workspace .ai-content {
   display: grid;
   gap: 12px;

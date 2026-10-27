@@ -443,6 +443,9 @@ function OverviewPanel() {
               <Metric
                 label={copy('تكلفة الشهر حسب العملة')}
                 value={cost}
+                compact={
+                  !Object.keys(costs ?? {}).length && ['N/A', 'MULTI'].includes(data.currency)
+                }
                 icon={<CircleDollarSign />}
               />
             </div>
@@ -2256,15 +2259,17 @@ function Metric({
   label,
   value,
   icon,
+  compact = false,
 }: {
   label: string;
   value: string | number;
   icon: ReactNode;
+  compact?: boolean;
 }) {
   return (
     <div className="ai-overview-metric">
       <div className="ai-overview-metric-icon">{icon}</div>
-      <strong>{value}</strong>
+      <strong className={compact ? 'ai-metric-message' : undefined}>{value}</strong>
       <small>{label}</small>
     </div>
   );

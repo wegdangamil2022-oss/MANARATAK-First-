@@ -120,7 +120,7 @@ export function WorkspaceMetric({ label, value }: { label: string; value: unknow
   return (
     <div className="certificate-metric">
       <small>{label}</small>
-      <strong>
+      <strong className={typeof value === 'number' ? undefined : 'ai-metric-message'}>
         {typeof value === 'number' || typeof value === 'string' ? value : c('غير متاح', 'N/A')}
       </strong>
     </div>
