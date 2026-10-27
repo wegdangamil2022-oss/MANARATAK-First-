@@ -89,6 +89,16 @@ describe('Partial health history provenance', () => {
   });
   it('deduplicates same-session pages and bounds accumulated browser data', () => {
     expect(mergeHealthHistory(page('a'), page('a'), true).history.samples).toHaveLength(1);
+    const previous = page('a');
+    previous.samples = Array.from({ length: 1000 }, (_, i) => ({
+      checkedAt: new Date(Date.UTC(2026, 9, 27, 0, 0, i)).toISOString(),
+      components: [],
+    }));
+    const next = page('a');
+    next.samples = [{ checkedAt: '2026-10-27T12:00:00.000Z', components: [] }];
+    const merged = mergeHealthHistory(previous, next, true).history.samples;
+    expect(merged).toHaveLength(1000);
+    expect(merged[0].checkedAt).toBe(next.samples[0].checkedAt);
   });
 });
 it('exports only the approved diagnostic envelope and preserves observation time', () => {
