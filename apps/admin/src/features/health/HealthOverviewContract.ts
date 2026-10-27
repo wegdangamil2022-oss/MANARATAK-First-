@@ -166,29 +166,46 @@ export function parseHealthOverview(value: unknown): HealthOverview {
     )
   )
     return fail();
-  const expected = coverage.expected as string[], monitored = coverage.monitored as string[];
-  const missing = expected.filter(id => !monitored.includes(id));
-  const extra = monitored.filter(id => !expected.includes(id));
-  const sameIds = (a: string[], b: string[]) => a.length === b.length && a.every(id => b.includes(id));
+  const expected = coverage.expected as string[],
+    monitored = coverage.monitored as string[];
+  const missing = expected.filter((id) => !monitored.includes(id));
+  const extra = monitored.filter((id) => !expected.includes(id));
+  const sameIds = (a: string[], b: string[]) =>
+    a.length === b.length && a.every((id) => b.includes(id));
   if (
-    !['expected', 'monitored', 'missingProbes', 'extraProbes', 'requiredUnverified'].every(key => {
-      const ids = coverage[key] as string[]; return new Set(ids).size === ids.length;
-    }) ||
-    !sameIds(monitored, components.map(c => c.id)) ||
+    !['expected', 'monitored', 'missingProbes', 'extraProbes', 'requiredUnverified'].every(
+      (key) => {
+        const ids = coverage[key] as string[];
+        return new Set(ids).size === ids.length;
+      },
+    ) ||
+    !sameIds(
+      monitored,
+      components.map((c) => c.id),
+    ) ||
     !sameIds(coverage.missingProbes as string[], missing) ||
     !sameIds(coverage.extraProbes as string[], extra) ||
-    !sameIds(coverage.requiredUnverified as string[], components.filter(c => !c.optional && !c.operational).map(c => c.id)) ||
-    coverage.expectedCount !== expected.length || coverage.matchedCount !== monitored.length - extra.length ||
-    coverage.extraCount !== extra.length || coverage.missingCount !== missing.length ||
-    coverage.operationalCount !== components.filter(c => c.operational).length ||
-    summary.monitoredComponents !== coverage.matchedCount || summary.missingProbes !== missing.length
-  ) return fail();
+    !sameIds(
+      coverage.requiredUnverified as string[],
+      components.filter((c) => !c.optional && !c.operational).map((c) => c.id),
+    ) ||
+    coverage.expectedCount !== expected.length ||
+    coverage.matchedCount !== monitored.length - extra.length ||
+    coverage.extraCount !== extra.length ||
+    coverage.missingCount !== missing.length ||
+    coverage.operationalCount !== components.filter((c) => c.operational).length ||
+    summary.monitoredComponents !== coverage.matchedCount ||
+    summary.missingProbes !== missing.length
+  )
+    return fail();
   if (
     value.releaseReady &&
     (!Object.values(releaseGate).every((v) => v === true) ||
-      report.ready !== true || report.blockerCount !== 0 ||
+      report.ready !== true ||
+      report.blockerCount !== 0 ||
       report.findings.some((f) => f.severity === 'BLOCKER') ||
-      coverage.missingCount !== 0 || (coverage.missingProbes as string[]).length !== 0 ||
+      coverage.missingCount !== 0 ||
+      (coverage.missingProbes as string[]).length !== 0 ||
       (coverage.requiredUnverified as string[]).length !== 0 ||
       coverage.matchedCount !== coverage.expectedCount ||
       value.runtimeMode !== 'production' ||
