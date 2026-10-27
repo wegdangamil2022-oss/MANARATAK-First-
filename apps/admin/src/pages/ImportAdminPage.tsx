@@ -52,6 +52,12 @@ import {
 import { AssetPicker } from '../components/AssetPicker';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
+import { ImportGovernancePanel } from '../features/imports/ImportGovernancePanel';
+import { useImportActionDialog } from '../features/imports/ImportActionDialog';
+import { IMPORT_FIELD_TEMPLATES } from '../features/imports/ImportTemplates';
+import '../features/imports/importWorkspace.css';
+import { useImportDialog } from '../features/imports/useImportDialog';
+import { useAdministrationDraftGuard } from '../features/reference-data/useAdministrationDraftGuard';
 
 const BRAND = {
   primary: '#142B5F',
@@ -283,7 +289,7 @@ const DOMAIN_CONFIG: DomainConfig[] = [
     workspace: '/universities',
     importPath: '/imports/universities',
     icon: School,
-    template: 'name,country,city,institutionType,officialWebsite,foundedYear',
+    template: IMPORT_FIELD_TEMPLATES.UNIVERSITIES,
   },
   {
     key: 'MAJORS',
@@ -301,8 +307,7 @@ const DOMAIN_CONFIG: DomainConfig[] = [
     workspace: '/courses',
     importPath: '/imports/courses',
     icon: BookOpen,
-    template:
-      'name,directCourseUrl,providerName,learningLanguage,studyDuration,isStudyFree,isFreeCertificate,certificateType',
+    template: IMPORT_FIELD_TEMPLATES.COURSES,
   },
   {
     key: 'TESTS',
@@ -311,8 +316,7 @@ const DOMAIN_CONFIG: DomainConfig[] = [
     workspace: '/international-tests',
     importPath: '/imports/international-tests',
     icon: TestTube2,
-    template:
-      'testCode,name,nameAr,testCategory,providerName,officialSourceUrl,description,totalDurationMinutes,skillSections,scoringScale',
+    template: IMPORT_FIELD_TEMPLATES.TESTS,
   },
   {
     key: 'SERVICES',
@@ -369,6 +373,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
   const isArabic = language === 'ar';
   const txt = useCallback((ar: string, en: string) => (isArabic ? ar : en), [isArabic]);
 
+  const { ask, actionDialog } = useImportActionDialog(isArabic);
   const [overview, setOverview] = useState<ImportOverview | null>(null);
   const [overviewState, setOverviewState] = useState<LoadState>('idle');
   const [sources, setSources] = useState<ImportSource[]>([]);
@@ -388,6 +393,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
     pageSize: RECORD_PAGE_SIZE,
   });
   const [dataState, setDataState] = useState<LoadState>('idle');
+  const [batchesState, setBatchesState] = useState<LoadState>('idle');
 
   const [selectedDomain, setSelectedDomain] = useState<DomainKey>(fixedDomain ?? 'ALL');
   const [recordStatus, setRecordStatus] = useState('');
@@ -463,6 +469,9 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
     setPreflight(null);
     setShowImportModal(false);
   };
+  const importDialogRef = useImportDialog(showImportModal, closeImport, preflightLoading || importSubmitting || fileReading);
+  const recordDialogRef = useImportDialog(Boolean(selectedRecord), () => setSelectedRecord(null));
+  useAdministrationDraftGuard(showImportModal && Boolean(importText.trim() || fileReading || importSubmitting), isArabic);
 
   useEffect(() => {
     if (!fixedDomain) return;
@@ -529,6 +538,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
   const loadDomainData = useCallback(async () => {
     const request = ++domainRequest.current;
     setDataState('loading');
+    setBatchesState('loading');
     setOperationsState('loading');
     const domain = apiDomain(selectedDomain);
     const batchParams = new URLSearchParams();
@@ -556,8 +566,14 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
     ]);
 
     if (request !== domainRequest.current) return;
-    if (batchResult.status === 'fulfilled' && recordResult.status === 'fulfilled') {
+    if (batchResult.status === 'fulfilled') {
       setBatches(Array.isArray(batchResult.value) ? batchResult.value : []);
+      setBatchesState('ready');
+    } else {
+      setBatches([]);
+      setBatchesState('unavailable');
+    }
+    if (recordResult.status === 'fulfilled') {
       setRecords({
         data: Array.isArray(recordResult.value.data) ? recordResult.value.data : [],
         total: Number(recordResult.value.total ?? 0),
@@ -575,7 +591,6 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
       if (recordPage > pages) setRecordPage(pages);
       setDataState('ready');
     } else {
-      setBatches([]);
       setRecords({ data: [], total: 0, page: recordPage, pageSize: RECORD_PAGE_SIZE });
       setDataState('unavailable');
     }
@@ -610,9 +625,10 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
   }, [loadControlPlane]);
 
   useEffect(() => {
+    const requests = domainRequest;
     void loadDomainData();
     return () => {
-      ++domainRequest.current;
+      ++requests.current;
     };
   }, [loadDomainData]);
 
@@ -854,15 +870,8 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
       new Blob([importText]).size > INLINE_LIMIT_BYTES
     )
       return;
-    if (
-      !window.confirm(
-        txt(
-          `تجهيز ${preflight.newRows} سجلًا في قاعدة البيانات دون نشر؟`,
-          `Stage ${preflight.newRows} new record(s) in the database without publishing?`,
-        ),
-      )
-    )
-      return;
+    if (!await ask({ title: txt('تجهيز دفعة الاستيراد', 'Stage import batch'), description: txt(`تجهيز ${preflight.newRows} سجلًا دون نشرها؟`, `Stage ${preflight.newRows} records without publishing?`) })) return;
+
     mutation.current = true;
     setImportSubmitting(true);
     setNotice(null);
@@ -913,39 +922,12 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
     if (mutation.current) return;
     const key = `${batch.id}:${action}`;
     let reason: string | undefined;
-    if (action === 'cancel') {
-      if (
-        !window.confirm(
-          txt(
-            'إلغاء الدفعة يوقف معالجتها مع الاحتفاظ بسجل التدقيق. هل تريد المتابعة؟',
-            'Cancelling stops the batch while preserving its audit trail. Continue?',
-          ),
-        )
-      )
-        return;
-      const entered = window.prompt(
-        txt('سبب الإلغاء (اختياري):', 'Cancellation reason (optional):'),
-      );
-      if (entered === null) return;
-      reason = entered.trim() || undefined;
+    if (['cancel', 'pause', 'replay'].includes(action)) {
+      const answer = await ask({ title: action === 'cancel' ? txt('إلغاء الدفعة', 'Cancel batch') : action === 'pause' ? txt('إيقاف الدفعة مؤقتًا', 'Pause batch') : txt('إعادة جدولة الدفعة', 'Replay batch'),
+        description: txt('يُسجّل الإجراء مع الاحتفاظ بالأدلة، ويؤكد العامل حالة التوقف الفعلية.', 'The command retains evidence; actual stop state is confirmed by the worker.'), reason: action !== 'replay' });
+      if (!answer) return;
+      reason = answer.reason || undefined;
     }
-    if (action === 'pause') {
-      const entered = window.prompt(
-        txt('سبب الإيقاف المؤقت (اختياري):', 'Pause reason (optional):'),
-      );
-      if (entered === null) return;
-      reason = entered.trim() || undefined;
-    }
-    if (
-      action === 'replay' &&
-      !window.confirm(
-        txt(
-          'ستُعاد جدولة هذه الدفعة للمعالجة. هل تريد المتابعة؟',
-          'This batch will be queued for replay. Continue?',
-        ),
-      )
-    )
-      return;
 
     mutation.current = true;
     setActionLoading(key);
@@ -990,22 +972,11 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
 
   const changeSourceStatus = async (source: ImportSource, nextStatus: SourceStatus) => {
     if (mutation.current || source.status === nextStatus) return;
-    const risky = nextStatus === 'DISABLED' || nextStatus === 'BLOCKED';
-    if (
-      risky &&
-      !window.confirm(
-        txt(
-          `سيتم تغيير حالة المصدر «${source.displayName}» إلى ${sourceStatusLabel(nextStatus, isArabic)}. هل تريد المتابعة؟`,
-          `Change “${source.displayName}” to ${sourceStatusLabel(nextStatus, isArabic)}?`,
-        ),
-      )
-    )
-      return;
     if (!source.updatedAt) return;
-    const entered = window.prompt(txt('سبب تغيير الحالة:', 'Reason for status change:'));
-    if (entered === null) return;
-    const reason = entered.trim();
-    if (reason.length < 3) return;
+    const answer = await ask({ title: txt('تغيير حالة المصدر', 'Change source status'),
+      description: source.displayName + ' · ' + sourceStatusLabel(source.status, isArabic) + ' → ' + sourceStatusLabel(nextStatus, isArabic), reason: true, minimum: 3 });
+    if (!answer) return;
+    const reason = answer.reason;
     mutation.current = true;
     setSourceActionLoading(source.sourceId);
     try {
@@ -1137,9 +1108,9 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
   return (
     <main
       dir={isArabic ? 'rtl' : 'ltr'}
-      className="mx-auto min-h-screen max-w-7xl space-y-6 rounded-3xl p-1 sm:p-2"
+      className="import-workspace mx-auto min-h-screen max-w-7xl space-y-6 rounded-3xl p-1 sm:p-2"
     >
-      <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
+      <section className="import-hero relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -top-20 end-0 h-52 w-52 rounded-full bg-[#F2CD78] opacity-20" />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">
@@ -1205,7 +1176,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
             <button
               type="button"
               onClick={() => void refreshAll()}
-              disabled={overviewState === 'loading' || dataState === 'loading'}
+              disabled={overviewState === 'loading' || dataState === 'loading' || batchesState === 'loading'}
               className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-black text-white transition hover:bg-white/15 disabled:opacity-50"
             >
               <RefreshCw
@@ -1217,7 +1188,28 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         </div>
       </section>
 
+      <nav className="import-section-nav" aria-label={txt('التنقل داخل الاستيراد', 'Import section navigation')}>
+        {[
+          ['import-summary', txt('الملخص', 'Overview'), Layers3],
+          ['import-batches', txt('الدفعات', 'Batches'), ListChecks],
+          ['import-records', txt('السجلات', 'Records'), Database],
+          ['import-sources', txt('المصادر', 'Sources'), Globe2],
+          ['review-assignments', txt('المراجعة والاسترداد', 'Review and recovery'), ShieldCheck],
+          ['import-mapping', txt('مطابقة الحقول', 'Field mapping'), Wrench],
+          ['import-artifact', txt('رفع ملف معتمد', 'Approved file'), UploadCloud],
+        ].map(([id, label, Icon]) => {
+          const ItemIcon = Icon as typeof Database;
+          return <a key={String(id)} href={`#${id}`}><ItemIcon size={18} />{String(label)}</a>;
+        })}
+      </nav>
+
       {notice && <Notice tone={notice.tone}>{notice.content}</Notice>}
+      {[overviewState, sourcesState, capabilitiesState, activityState, dataState, batchesState, operationsState].includes('unavailable') && (
+        <div className="import-actions" role="status">
+          <AlertTriangle size={18} />{txt('تعذر تحميل بعض البيانات؛ النتائج المتاحة ظاهرة أدناه.', 'Some data could not be loaded; available results remain visible below.')}
+          <button type="button" onClick={() => void refreshAll()} disabled={dataState === 'loading' || batchesState === 'loading'}><RefreshCw size={17} />{txt('إعادة المحاولة', 'Retry loading')}</button>
+        </div>
+      )}
 
       <section className="grid gap-3 rounded-2xl border border-[#DDEFF2] bg-white p-4 shadow-sm lg:grid-cols-[1.2fr_1fr]">
         <div className="flex gap-3">
@@ -1316,7 +1308,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         </section>
       )}
 
-      <section>
+      <section id="import-summary">
         <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-lg font-black">{txt('ملخص العمليات', 'Operations Summary')}</h2>
@@ -1336,6 +1328,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
             <div className="flex flex-wrap gap-1.5 rounded-xl bg-[#DDEFF2]/45 p-1">
               <button
                 onClick={() => selectDomain('ALL')}
+                aria-pressed={selectedDomain === 'ALL'}
                 className={domainPillClass(selectedDomain === 'ALL')}
               >
                 {txt('الكل', 'All')}
@@ -1343,6 +1336,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
               {DOMAIN_CONFIG.map((domain) => (
                 <button
                   key={domain.key}
+                  aria-pressed={selectedDomain === domain.key}
                   onClick={() => selectDomain(domain.key)}
                   className={domainPillClass(selectedDomain === domain.key)}
                 >
@@ -1393,7 +1387,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         </div>
       </section>
 
-      <section className="rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
+      <section id="import-diagnostics" className="rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
         <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
@@ -1654,13 +1648,13 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         </section>
       )}
 
-      <section className="rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
+      <section id="import-sources" className="rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
               <Globe2 className="h-5 w-5 text-[#0E7C86]" />
               <h2 className="text-lg font-black">
-                {txt('سجل المصادر والموصلات', 'Source & Connector Registry')}
+              {txt('سجل المصادر والموصلات', 'Source & Connector Registry')}
               </h2>
             </div>
             <p className="mt-1 text-xs font-semibold text-slate-500">
@@ -1806,7 +1800,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         )}
       </section>
 
-      <section className="rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
+      <section id="import-batches" className="rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
@@ -1836,9 +1830,9 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
           )}
         </div>
 
-        {dataState === 'loading' ? (
+        {batchesState === 'loading' ? (
           <LoadingBlock label={txt('تحميل الدفعات...', 'Loading batches...')} />
-        ) : dataState === 'unavailable' ? (
+        ) : batchesState === 'unavailable' ? (
           <EmptyBlock
             icon={AlertTriangle}
             title={txt('تعذر تحميل الدفعات', 'Unable to load batches')}
@@ -1998,7 +1992,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         />
       )}
 
-      <section className="rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
+      <section id="import-records" className="rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
@@ -2016,6 +2010,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
             <div className="relative">
               <Filter className="pointer-events-none absolute start-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
               <select
+                aria-label={txt('حالة سجلات الاستيراد', 'Import record status')}
                 value={recordStatus}
                 onChange={(event) => {
                   setRecordStatus(event.target.value);
@@ -2033,7 +2028,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
               </select>
             </div>
             <span className="rounded-lg bg-[#DDEFF2]/45 px-3 py-2 text-[11px] font-black">
-              {txt('الإجمالي', 'Total')}: {records.total}
+              {txt('الإجمالي', 'Total')}: {dataState === 'ready' ? records.total : '—'}
             </span>
           </div>
         </div>
@@ -2080,7 +2075,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
                           {String(record.sourceRowNumber ?? payload._sourceRowNumber ?? '—')}
                         </td>
                         <td className="p-3">
-                          <div className="max-w-[300px] truncate font-black">
+                          <div className="max-w-[300px] break-words font-black">
                             {recordTitle(payload)}
                           </div>
                           <div className="mt-1 font-mono text-[9px] font-bold text-slate-400">
@@ -2170,6 +2165,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
               </span>
               <div className="flex gap-1.5">
                 <button
+                  aria-label={txt('صفحة السجلات السابقة', 'Previous records page')}
                   disabled={recordPage <= 1}
                   onClick={() => setRecordPage((value) => Math.max(1, value - 1))}
                   className="grid h-9 w-9 place-items-center rounded-lg border border-[#DDEFF2] bg-white disabled:opacity-30"
@@ -2181,6 +2177,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
                   )}
                 </button>
                 <button
+                  aria-label={txt('صفحة السجلات التالية', 'Next records page')}
                   disabled={recordPage >= totalRecordPages}
                   onClick={() => setRecordPage((value) => Math.min(totalRecordPages, value + 1))}
                   className="grid h-9 w-9 place-items-center rounded-lg border border-[#DDEFF2] bg-white disabled:opacity-30"
@@ -2276,21 +2273,10 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         )}
       </section>
 
-      <section className="rounded-2xl border border-[#D6A43B]/35 bg-[#F2CD78]/15 p-4">
-        <div className="flex gap-3">
-          <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#8A671C]" />
-          <div className="text-xs font-semibold leading-6 text-slate-700">
-            <span className="font-black">{txt('قواعد الحوكمة:', 'Governance rules:')}</span>{' '}
-            {txt(
-              'كل وظيفة ظاهرة مدعومة بمسار backend فعلي أو حالة فارغة صريحة. الجلب غير المصرح، النشر المباشر، الدمج الصامت، والأوامر الجماعية الخطرة لا تنفذ من مركز الاستيراد العام.',
-              'Every visible operation is backed by a real backend path or an explicit empty state. Unauthorized acquisition, direct publication, silent merge, and unsafe bulk commands are not executed from the generic import center.',
-            )}
-          </div>
-        </div>
-      </section>
+
 
       <ImportMappingPanel sources={sources} isArabic={isArabic} />
-      <ImportGovernancePanel records={records.data} batches={batches} sources={sources} isArabic={isArabic} />
+      <ImportGovernancePanel records={records.data} batches={batches} sources={sources} isArabic={isArabic} onChanged={() => refreshAll(false)} />
       <BatchComparisonPanel batches={batches} isArabic={isArabic} />
       <SourceAuthoringPanel sources={sources} isArabic={isArabic} onChanged={() => loadControlPlane()}
         onStaged={async batchId => { setSelectedBatchId(batchId); await refreshAll(false); }} />
@@ -2307,6 +2293,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
           }}
         >
           <section
+            ref={importDialogRef} role="dialog" aria-modal="true" aria-labelledby="import-create-title" tabIndex={-1}
             className="max-h-[94vh] w-full max-w-4xl overflow-y-auto rounded-3xl border border-[#DDEFF2] bg-white shadow-2xl"
             dir={isArabic ? 'rtl' : 'ltr'}
           >
@@ -2314,7 +2301,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
               <div>
                 <div className="flex items-center gap-2">
                   <UploadCloud className="h-5 w-5 text-[#0E7C86]" />
-                  <h2 className="text-lg font-black">
+                  <h2 id="import-create-title" className="text-lg font-black">
                     {txt('إنشاء دفعة استيراد', 'Create Import Batch')}
                   </h2>
                 </div>
@@ -2327,6 +2314,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
               </div>
               <button
                 disabled={preflightLoading || importSubmitting || fileReading}
+                aria-label={txt('إغلاق نافذة الاستيراد', 'Close import dialog')}
                 onClick={closeImport}
                 className="grid h-9 w-9 place-items-center rounded-full hover:bg-slate-100"
               >
@@ -2540,6 +2528,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
 
               {preflight && (
                 <section className="rounded-2xl border border-[#21A7B4] bg-[#DDEFF2]/20 p-4">
+                  <p className="import-hint">{txt('هذا فحص للتنسيق والتكرار، وليس اعتمادًا لمحتوى السجلات أو علاقاتها. يتحقق القسم المالك منها عند التسليم.', 'This checks format and duplicates, not content or relationship approval. The owning domain validates them during handoff.')}</p>
                   <div className="flex items-center gap-2">
                     <SearchCheck className="h-5 w-5 text-[#0E7C86]" />
                     <h3 className="text-sm font-black">
@@ -2648,23 +2637,35 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
           }}
         >
           <aside
+            ref={recordDialogRef} role="dialog" aria-modal="true" aria-labelledby="import-record-title" tabIndex={-1}
             className="h-full w-full max-w-2xl overflow-y-auto bg-[#FAF7F0] font-sans shadow-2xl"
             dir={isArabic ? 'rtl' : 'ltr'}
           >
             <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#DDEFF2] bg-white/95 px-5 py-4 backdrop-blur">
               <div>
-                <h2 className="text-lg font-black">
+                <h2 id="import-record-title" className="text-lg font-black">
                   {txt('تفاصيل سجل الاستيراد', 'Import Record Details')}
                 </h2>
                 <p className="font-mono text-[9px] font-bold text-slate-400">{selectedRecord.id}</p>
               </div>
               <button
+                aria-label={txt('إغلاق تفاصيل السجل', 'Close record details')}
                 onClick={() => setSelectedRecord(null)}
                 className="grid h-9 w-9 place-items-center rounded-full hover:bg-slate-100"
               >
                 <X className="h-4 w-4" />
               </button>
             </header>
+            <nav className="import-record-navigation" aria-label={txt('التنقل بين سجلات الصفحة', 'Navigate records on this page')}>
+              <button type="button" disabled={records.data.findIndex(item => item.id === selectedRecord.id) <= 0}
+                onClick={() => { const index = records.data.findIndex(item => item.id === selectedRecord.id); if (index > 0) setSelectedRecord(records.data[index - 1]); }}>
+                {isArabic ? <ChevronRight size={17} /> : <ChevronLeft size={17} />}{txt('السجل السابق', 'Previous record')}
+              </button>
+              <button type="button" disabled={records.data.findIndex(item => item.id === selectedRecord.id) < 0 || records.data.findIndex(item => item.id === selectedRecord.id) >= records.data.length - 1}
+                onClick={() => { const index = records.data.findIndex(item => item.id === selectedRecord.id); if (index >= 0 && index < records.data.length - 1) setSelectedRecord(records.data[index + 1]); }}>
+                {txt('السجل التالي', 'Next record')}{isArabic ? <ChevronLeft size={17} /> : <ChevronRight size={17} />}
+              </button>
+            </nav>
             <div className="space-y-4 p-5">
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 <DetailStat
@@ -2786,6 +2787,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
           </aside>
         </div>
       )}
+      {actionDialog}
     </main>
   );
 }
@@ -3331,8 +3333,8 @@ function VerifiedArtifactPanel({ ownerDomain, isArabic, onStaged }: {
       if (requestGeneration === generation.current) setBusy(false);
     }
   };
-  return <section className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3">
-    <h2 className="font-black">{isArabic ? 'استيراد ملف معتمد' : 'Import an approved file'}</h2>
+  return <section id="import-artifact" className="import-tools rounded-2xl border border-slate-200 bg-white p-5 space-y-3">
+    <h2 className="font-black"><UploadCloud size={19} />{isArabic ? 'استيراد ملف معتمد' : 'Import an approved file'}</h2>
     <p className="text-sm">{isArabic ? 'اختر ملف CSV أو NDJSON من أصولك المعتمدة، وافحصه قبل التجهيز. القبول والنشر يقررهما القسم المالك.'
       : 'Select your approved CSV or NDJSON asset and preflight before staging. The owner decides acceptance and publication.'}</p>
     <fieldset disabled={busy} className="space-y-3">
@@ -3420,8 +3422,8 @@ function SourceAuthoringPanel({ sources, isArabic, onChanged, onStaged }: {
     const { data } = await adminApiClient.request<{ data: ImportSource }>(`/admin/imports/sources/${encodeURIComponent(draft.sourceId)}`);
     if (mounted.current) { setRevision(data.updatedAt ?? null); setProbe(null); setMessage(isArabic ? 'تم الحفظ بحالة معطّل. راجع الإعدادات قبل التفعيل.' : 'Saved as disabled. Review before activating.'); }
   });
-  return <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-5">
-    <h2 className="font-black">{isArabic ? 'تعريفات المصادر وتشغيلها' : 'Source definitions and runs'}</h2>
+  return <section id="import-source-editor" className="import-tools space-y-3 rounded-2xl border border-slate-200 bg-white p-5">
+    <h2 className="font-black"><Globe2 size={19} />{isArabic ? 'تعريفات المصادر وتشغيلها' : 'Source definitions and runs'}</h2>
     <fieldset disabled={busy} className="space-y-3">
       <label>{isArabic ? 'مصدر محفوظ' : 'Saved source'} <select value={revision ? draft.sourceId : ''}
         onChange={event => { if (event.target.value) load(event.target.value); else { setDraft(empty); setRevision(null); setEditable(true); setProbe(null); setMessage(''); } }}>
@@ -3503,8 +3505,8 @@ function BatchComparisonPanel({ batches, isArabic }: { batches: ImportBatch[]; i
     ADDED: isArabic ? 'مضاف' : 'Added', MISSING_FROM_COMPARISON: isArabic ? 'غير موجود في المقارنة' : 'Missing in comparison',
     CHANGED: isArabic ? 'تغير' : 'Changed', UNKNOWN: isArabic ? 'غير محدد' : 'Unknown',
   })[value];
-  return <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-5">
-    <h2 className="font-black">{isArabic ? 'مقارنة دفعتين' : 'Compare two batches'}</h2>
+  return <section id="import-comparison" className="import-tools space-y-3 rounded-2xl border border-slate-200 bg-white p-5">
+    <h2 className="font-black"><Layers3 size={19} />{isArabic ? 'مقارنة دفعتين' : 'Compare two batches'}</h2>
     <p className="text-sm">{isArabic ? 'المقارنة تشمل السجلات المحفوظة بعد منع التكرار. غياب سجل ليس طلب حذف، ولا يمثل بالضرورة غيابه من المصدر.' : 'Compares persisted rows after deduplication. A missing row never requests deletion or proves absence from the source.'}</p>
     <fieldset disabled={busy} className="flex flex-wrap gap-3">
       <label>{isArabic ? 'الدفعة الأولى' : 'First batch'} <select value={left} onChange={event => { setLeft(event.target.value); clear(); }}><option value="">—</option>{batches.map(batch => <option key={batch.id} value={batch.id}>{batch.id}</option>)}</select></label>
@@ -3574,12 +3576,12 @@ function ImportMappingPanel({ sources, isArabic }: { sources: ImportSource[]; is
   const lock = useRef(false); const generation = useRef(0); const alive = useRef(true);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   useEffect(() => {
-    const current = ++generation.current; setProfiles([]); setPreview([]); setMessage('');
+    const requests = generation; const current = ++requests.current; setProfiles([]); setPreview([]); setMessage('');
     setFields([{ target: '', aliases: '', type: 'string', required: true, sample: '' }]); setReason('');
     void adminApiClient.request<{ data: MappingProfile[] }>(`/admin/imports/mapping-profiles?sourceId=${encodeURIComponent(sourceId)}&ownerDomain=${encodeURIComponent(domain)}`)
       .then(result => { if (current === generation.current) { setProfiles(result.data); if (result.data[0]) setFields(result.data[0].definition.fields.map(field => ({ ...field, aliases: field.aliases.join(', '), sample: '' }))); } })
       .catch(() => { if (current === generation.current) setMessage(isArabic ? 'تعذر تحميل المطابقة.' : 'Mapping unavailable.'); });
-    return () => { generation.current++; };
+    return () => { requests.current++; };
   }, [sourceId, domain, isArabic]);
   const perform = async (task: () => Promise<void>) => { if (lock.current) return; lock.current = true; setBusy(true); setMessage(''); const current = generation.current;
     try { await task(); } catch (error) { if (current === generation.current) setMessage(importCommandError(error, isArabic)); }
@@ -3593,8 +3595,8 @@ function ImportMappingPanel({ sources, isArabic }: { sources: ImportSource[]; is
     changed: latestFields.filter(field => previousFields.some(previous => previous.target === field.target &&
       JSON.stringify(previous) !== JSON.stringify(field))).map(field => field.target),
   } : null;
-  return <section className="space-y-3 rounded-2xl border bg-white p-5">
-    <h2 className="font-black">{isArabic ? 'مطابقة أعمدة المصدر' : 'Source field mapping'}</h2>
+  return <section id="import-mapping" className="import-tools space-y-3 rounded-2xl border bg-white p-5">
+    <h2 className="font-black"><Wrench size={19} />{isArabic ? 'مطابقة أعمدة المصدر' : 'Source field mapping'}</h2>
     <p>{isArabic ? 'احفظ نسخة ثم اخترها عند تجهيز الملف أو تشغيل المصدر. الحقول الإلزامية والأنواع تُفحص قبل التسليم للقسم.' : 'Save a version and select it when staging an artifact or running a source. Required fields and types are checked before delivery.'}</p>
     <fieldset disabled={busy} className="space-y-3">
       <label>{isArabic ? 'المصدر' : 'Source'} <select value={sourceId} onChange={event => setSourceId(event.target.value)}><option value="MANUAL_EAP_UPLOAD">{isArabic ? 'ملف مرفوع' : 'Uploaded artifact'}</option>{sources.filter(source => source.metadata?.ownerDomain === 'GENERIC').map(source => <option key={source.sourceId} value={source.sourceId}>{source.displayName}</option>)}</select></label>
@@ -3627,69 +3629,6 @@ function ImportMappingPanel({ sources, isArabic }: { sources: ImportSource[]; is
     {mappingDiff && <p>{isArabic ? 'تغيرات آخر نسخة مقارنة بالسابقة: ' : 'Latest version changes against previous: '}
       {isArabic ? 'مضافة' : 'Added'}: {mappingDiff.added.join(', ') || '—'} · {isArabic ? 'محذوفة' : 'Removed'}: {mappingDiff.removed.join(', ') || '—'} · {isArabic ? 'معدلة' : 'Changed'}: {mappingDiff.changed.join(', ') || '—'}</p>}
     {preview.map(row => <div key={row.sourceRowNumber}>{row.error ?? Object.entries(row.normalized ?? {}).map(([key, value]) => `${key}: ${String(value)}`).join(' · ')}{Boolean(row.unmappedFields?.length) && <p>{isArabic ? 'أعمدة دون مطابقة: ' : 'Unmapped fields: '}{row.unmappedFields?.join(', ')}</p>}</div>)}
-    {message && <p role="status">{message}</p>}
-  </section>;
-}
-function ImportGovernancePanel({ records, batches, sources, isArabic }: { records: ImportRecord[]; batches: ImportBatch[]; sources: ImportSource[]; isArabic: boolean }) {
-  type Assignment = { recordId: string; assigneeId: string; version: number; state: string; dueAt: string; ownerDomain: string };
-  type Observation = { sourceRevision: string; updatedAt: string; driftState: string; fallbackSourceId?: string };
-  const [recordId, setRecordId] = useState(''); const [batchId, setBatchId] = useState(''); const [sourceId, setSourceId] = useState('');
-  const [assignee, setAssignee] = useState(''); const [due, setDue] = useState(''); const [reason, setReason] = useState(''); const [fallback, setFallback] = useState('');
-  const [queue, setQueue] = useState<Assignment[]>([]); const [observation, setObservation] = useState<Observation | null>(null);
-  const [counts, setCounts] = useState<Record<string, unknown> | null>(null); const [message, setMessage] = useState(''); const [busy, setBusy] = useState(false);
-  const lock = useRef(false); const mounted = useRef(true);
-  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
-  const refresh = async () => { const result = await adminApiClient.request<{ data: Assignment[] }>('/admin/imports/review-queue'); if (mounted.current) setQueue(result.data); };
-  const perform = async (task: () => Promise<void>) => { if (lock.current) return; lock.current = true; setBusy(true); setMessage('');
-    try { await task(); if (mounted.current) setMessage(isArabic ? 'تم تنفيذ الطلب وتسجيله.' : 'Command completed and audited.'); }
-    catch (error) { if (mounted.current) setMessage(importCommandError(error, isArabic)); }
-    finally { lock.current = false; if (mounted.current) setBusy(false); } };
-  const record = records.find(item => item.id === recordId); const batch = batches.find(item => item.id === batchId);
-  const assignment = queue.find(item => item.recordId === recordId);
-  return <section id="review-assignments" className="space-y-3 rounded-2xl border bg-white p-5">
-    <h2 className="font-black">{isArabic ? 'المراجعة واسترداد الاستيراد' : 'Import review and recovery'}</h2>
-    <p>{isArabic ? 'التعيين والحجز ينظمان المراجعة. قرار قبول البيانات يبقى في مساحة القسم المالك.' : 'Assignments and claims organize review. Data acceptance remains in the owner workspace.'}</p>
-    <fieldset disabled={busy} className="space-y-3">
-      <label>{isArabic ? 'سبب الإجراء' : 'Action reason'}<input value={reason} onChange={event => setReason(event.target.value)} className="rounded border p-2" /></label>
-      <label>{isArabic ? 'السجل' : 'Record'} <select value={recordId} onChange={event => setRecordId(event.target.value)}><option value="">—</option>{records.map(item => <option key={item.id} value={item.id}>{item.id} ({item.status})</option>)}</select></label>
-      <label>{isArabic ? 'معرّف المراجع' : 'Reviewer identity ID'}<input value={assignee} onChange={event => setAssignee(event.target.value)} className="rounded border p-2" /></label>
-      <label>{isArabic ? 'موعد المراجعة' : 'Review due'}<input type="datetime-local" value={due} onChange={event => setDue(event.target.value)} /></label>
-      <button type="button" onClick={() => void perform(refresh)}>{isArabic ? 'تحميل طابور المراجعة' : 'Load review queue'}</button>
-      <button type="button" disabled={!record || !assignee || !due || reason.trim().length < 3} onClick={() => void perform(async () => {
-        await adminApiClient.request(`/admin/imports/records/${encodeURIComponent(recordId)}/assignment`, { method: 'POST', body: JSON.stringify({ assigneeId: assignee, dueAt: new Date(due).toISOString(), expectedVersion: assignment?.version ?? 0, reason }) }); await refresh();
-      })}>{isArabic ? 'تعيين المراجع' : 'Assign reviewer'}</button>
-      <button type="button" disabled={!assignment || reason.trim().length < 3} onClick={() => void perform(async () => {
-        await adminApiClient.request(`/admin/imports/records/${encodeURIComponent(recordId)}/claim`, { method: 'POST', body: JSON.stringify({ expectedVersion: assignment?.version, reason }) }); await refresh();
-      })}>{isArabic ? 'حجز المراجعة لي أو تجديدها' : 'Claim or renew my review'}</button>
-      <button type="button" disabled={!assignment || reason.trim().length < 3} onClick={() => void perform(async () => {
-        await adminApiClient.request(`/admin/imports/records/${encodeURIComponent(recordId)}/release`, { method: 'POST', body: JSON.stringify({ expectedVersion: assignment?.version, reason }) }); await refresh();
-      })}>{isArabic ? 'إخلاء حجز المراجعة' : 'Release my review claim'}</button>
-      <button type="button" disabled={!record?.updatedAt || reason.trim().length < 3} onClick={() => void perform(async () => {
-        await adminApiClient.request(`/admin/imports/records/${encodeURIComponent(recordId)}/reconcile-receipt`, { method: 'POST', body: JSON.stringify({ expectedUpdatedAt: record?.updatedAt, reason }) });
-      })}>{isArabic ? 'تسوية التسليم من الإيصال المحفوظ' : 'Reconcile delivery from saved receipt'}</button>
-      <ul>{queue.map(item => <li key={item.recordId}><button type="button" onClick={() => setRecordId(item.recordId)}>{item.recordId}</button> · {item.assigneeId} · {new Date(item.dueAt).toLocaleString()} · {item.state} · <AdminLink to={`/imports/${item.ownerDomain.toLowerCase()}?recordId=${encodeURIComponent(item.recordId)}`}>{isArabic ? 'فتح مساحة القسم' : 'Open owner workspace'}</AdminLink></li>)}</ul>
-      <label>{isArabic ? 'الدفعة' : 'Batch'} <select value={batchId} onChange={event => { setBatchId(event.target.value); setCounts(null); }}><option value="">—</option>{batches.map(item => <option key={item.id} value={item.id}>{item.id}</option>)}</select></label>
-      <button type="button" disabled={!batchId} onClick={() => void perform(async () => { const result = await adminApiClient.request<Record<string, unknown>>(`/admin/imports/batches/${encodeURIComponent(batchId)}/timeline`); if (mounted.current) setCounts(result); })}>{isArabic ? 'عرض سجل التشغيل' : 'Show execution history'}</button>
-      <button type="button" disabled={!batchId} onClick={() => void perform(async () => { const result = await adminApiClient.request<Record<string, unknown>>(`/admin/imports/batches/${encodeURIComponent(batchId)}/counters`); if (mounted.current) setCounts(result); })}>{isArabic ? 'عرض العدادات' : 'Show counters'}</button>
-      {(['QUEUE','REJECT'] as const).map(decision => <button key={decision} type="button" disabled={batch?.batchStatus !== 'CREATED' || !batch.updatedAt || reason.trim().length < 3} onClick={() => void perform(async () => {
-        await adminApiClient.request(`/admin/imports/batches/${encodeURIComponent(batchId)}/recover`, { method: 'POST', body: JSON.stringify({ expectedUpdatedAt: batch?.updatedAt, decision, reason }) });
-      })}>{decision === 'QUEUE' ? (isArabic ? 'استرداد دفعة قديمة للطابور' : 'Recover legacy batch to queue') : (isArabic ? 'رفض دفعة قديمة مع حفظ الأدلة' : 'Reject legacy batch and retain evidence')}</button>)}
-      <button type="button" disabled={!batch?.updatedAt || reason.trim().length < 3} onClick={() => void perform(async () => {
-        await adminApiClient.request(`/admin/imports/batches/${encodeURIComponent(batchId)}/retention-policy`, { method: 'POST', body: JSON.stringify({ expectedUpdatedAt: batch?.updatedAt, days: 365, reason }) });
-      })}>{isArabic ? 'تعيين الاحتفاظ سنة للسجلات القديمة' : 'Assign one year retention to legacy records'}</button>
-      <label>{isArabic ? 'المصدر' : 'Source'} <select value={sourceId} onChange={event => { setSourceId(event.target.value); setObservation(null); }}><option value="">—</option>{sources.filter(item => item.metadata?.ownerDomain === 'GENERIC').map(item => <option key={item.sourceId} value={item.sourceId}>{item.displayName}</option>)}</select></label>
-      <button type="button" disabled={!sourceId} onClick={() => void perform(async () => { const result = await adminApiClient.request<{ data: Observation | null }>(`/admin/imports/sources/${encodeURIComponent(sourceId)}/observation`); if (mounted.current) setObservation(result.data); })}>{isArabic ? 'فحص تغير المصدر والبديل' : 'Inspect source drift and fallback'}</button>
-      {observation && <p>{isArabic ? 'حالة بنية المصدر: ' : 'Source shape status: '}{observation.driftState}</p>}
-      {(['ACCEPT','REJECT'] as const).map(decision => <button key={decision} type="button" disabled={observation?.driftState !== 'REVIEW_REQUIRED' || reason.trim().length < 3} onClick={() => void perform(async () => {
-        await adminApiClient.request(`/admin/imports/sources/${encodeURIComponent(sourceId)}/drift-decision`, { method: 'POST', body: JSON.stringify({ expectedUpdatedAt: observation?.updatedAt, decision, reason }) }); if (mounted.current) setObservation(null);
-      })}>{decision === 'ACCEPT' ? (isArabic ? 'قبول البنية الجديدة' : 'Accept new shape') : (isArabic ? 'رفض البنية الجديدة' : 'Reject new shape')}</button>)}
-      <label>{isArabic ? 'المصدر البديل المعتمد' : 'Approved fallback source'} <select value={fallback} onChange={event => setFallback(event.target.value)}><option value="">{isArabic ? 'إلغاء البديل' : 'Remove fallback'}</option>{sources.filter(item => item.sourceId !== sourceId && item.metadata?.ownerDomain === 'GENERIC' && item.status === 'ACTIVE').map(item => <option key={item.sourceId} value={item.sourceId}>{item.displayName}</option>)}</select></label>
-      <button type="button" disabled={!observation || reason.trim().length < 3} onClick={() => void perform(async () => {
-        const target = fallback ? (await adminApiClient.request<{ data: ImportSource }>(`/admin/imports/sources/${encodeURIComponent(fallback)}`)).data : null;
-        await adminApiClient.request(`/admin/imports/sources/${encodeURIComponent(sourceId)}/fallback`, { method: 'POST', body: JSON.stringify({ fallbackSourceId: fallback || null, sourceRevision: observation?.sourceRevision, fallbackSourceRevision: target?.updatedAt, reason }) }); if (mounted.current) setObservation(null);
-      })}>{isArabic ? 'حفظ قرار البديل' : 'Save fallback decision'}</button>
-    </fieldset>
-    {counts && <dl className="flex flex-wrap gap-3">{['received','staged','skipped','invalid','processed','failed','review'].map(key => <div key={key}><dt>{({ received: 'مستلمة', staged: 'مجهزة', skipped: 'متكررة', invalid: 'غير صالحة', processed: 'معالجة', failed: 'فاشلة', review: 'للمراجعة' } as Record<string, string>)[key] && isArabic ? ({ received: 'مستلمة', staged: 'مجهزة', skipped: 'متكررة', invalid: 'غير صالحة', processed: 'معالجة', failed: 'فاشلة', review: 'للمراجعة' } as Record<string, string>)[key] : key}</dt><dd>{counts[key] === null ? (isArabic ? 'غير معروف تاريخيًا' : 'Historically unknown') : String(counts[key] ?? 0)}</dd></div>)}</dl>}
     {message && <p role="status">{message}</p>}
   </section>;
 }
