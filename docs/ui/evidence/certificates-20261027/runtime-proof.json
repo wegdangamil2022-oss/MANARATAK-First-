@@ -1,0 +1,27 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "externalDeliveryEnabled": false,
+  "newMigrations": 0,
+  "observations": [
+    "two independent canonical MFA sessions on attested disposable PostgreSQL16",
+    "official template remains a draft after canonical bootstrap",
+    "template writes require optimistic concurrency",
+    "new owner read returns exact server total and bounded template review rows",
+    "template creator cannot approve own version",
+    "canonical template review and independent approval",
+    "all six owner projections execute against real PostgreSQL and omit private source payloads",
+    "correction, failed-artifact and expired-revalidation projections find the correct synthetic owner rows",
+    "invalid synthetic signature cannot authorize PDF delivery",
+    "worklist page-size bound is enforced by the real API",
+    "historical template versions use bounded server search and exact count without private version payloads"
+  ],
+  "certificateIds": [
+    "e3de4e9b-be1e-4751-91fb-74a7881f8353",
+    "8b6b7006-c55e-438d-9675-63ae6c95a92e",
+    "fabb15ff-002d-4f14-ba8b-46c37f2c6ff0"
+  ],
+  "templateId": "115ec496-ed90-47e6-860c-33d91f15ee76",
+  "issuerId": "b38cb8be-0161-442e-b760-b80246662cd4",
+  "at": "2026-10-27T16:24:38.977Z"
+}
