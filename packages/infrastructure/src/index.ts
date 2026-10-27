@@ -38,6 +38,7 @@ export * from './audit/AuditSecretSanitizer';
 export * from './audit/PrismaAuditRecordRepository';
 export * from './audit/InMemoryAuditRecordRepository';
 export * from './certificates/PrismaCertificateRepository';
+export * from './certificates/PrismaCertificateWorkspaceReadGateway';
 export * from './courses/PrismaCourseRepository';
 export * from './courses/PrismaCourseRelationshipRepository';
 export * from './courses/PrismaExternalCourseProviderRepository';

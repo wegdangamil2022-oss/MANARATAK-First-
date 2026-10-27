@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 442,
-  "reachableCount": 442,
+  "registrationCount": 443,
+  "reachableCount": 443,
   "unreachable": [],
   "registrations": [
     {
@@ -1597,6 +1597,17 @@
       "reachableThroughRegistrations": [],
       "dependencies": [
         "redisClient"
+      ]
+    },
+    {
+      "name": "certificateWorkspaceReadGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "prisma"
       ]
     },
     {
@@ -3824,6 +3835,7 @@
         "careerRepository",
         "certificateAuthorityDirectory",
         "certificateRepository",
+        "certificateWorkspaceReadGateway",
         "cmsRepository",
         "courseBulkPublicationRepository",
         "courseCurriculumRepository",

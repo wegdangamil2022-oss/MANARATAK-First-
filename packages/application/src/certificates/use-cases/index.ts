@@ -1,4 +1,5 @@
 export * from './CertificateUseCases';
+export * from './CertificateWorkspaceReadGateway';
 
 export * from './CertificateCompletionEventConsumer';
 export * from './CertificateReadModelService';
