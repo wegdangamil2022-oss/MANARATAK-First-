@@ -6,6 +6,7 @@ import {
   StudentToolExecutionType,
   StudentToolInput,
   StudentToolOutput,
+  StudentToolVersion,
   UniversityComparisonItem,
   ScholarshipCandidate,
 } from './types';
@@ -49,6 +50,8 @@ export interface StudentToolTelemetry {
   unknownOutcome?: number;
 }
 export interface IStudentToolRegistryRepository {
+  workspaceExecutions?(query: StudentToolExecutionFilters & { toolKey?: string; page?: number; pageSize?: number }): Promise<{ data: StudentToolExecutionRecord[]; total: number }>;
+  versionHistory?(toolKey: string, page: number, pageSize: number): Promise<{ data: StudentToolVersion[]; total: number }>;
   release?(
     toolKey: string,
     action: 'PROPOSE' | 'APPROVE' | 'REJECT' | 'ACTIVATE',

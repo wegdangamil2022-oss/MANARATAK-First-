@@ -10,6 +10,7 @@ import {
   parseStrict,
   studentToolAdminListQuerySchema,
   studentToolAdminTestSchema,
+  studentToolAccessPolicySchema,
   studentToolAvailabilitySchema,
   studentToolFlagsSchema,
   studentToolLifecycleParamSchema,
@@ -29,7 +30,7 @@ export class StudentToolsAdminRouter {
       if (!req.authUserId) return void res.status(401).json({ error: 'TOOL_AUTH_REQUIRED' });
       const suffix =
         req.method === 'GET'
-          ? /\/(executions|audit)$/.test(req.path)
+          ? /\/(executions|audit)(\/[^/]+)?$/.test(req.path) || req.path === '/workspace/usage'
             ? 'view-executions'
             : 'view'
           : req.path.endsWith('/metadata')
@@ -105,6 +106,38 @@ export class StudentToolsAdminRouter {
       pageSize: z.coerce.number().int().min(1).max(100).default(25),
     };
     const trace = z.string().trim().min(1).max(200).optional();
+    router.get('/workspace/:section', safe(async (req, res) => {
+      const section = z.enum(['releases', 'quality', 'usage', 'executions']).parse(req.params.section);
+      if (section === 'usage') {
+        z.object({}).strict().parse(req.query);
+        return res.json({ data: await cradle.studentToolRegistryUseCases.telemetry(), observedAt: new Date().toISOString() });
+      }
+      if (section === 'executions') {
+        const query = z.object({ ...pageQuery, toolKey: trace, traceId: trace, correlationId: trace,
+          status: z.nativeEnum(StudentToolExecutionStatus).optional(),
+          isTest: z.enum(['true', 'false']).transform(value => value === 'true').optional(),
+        }).strict().parse(req.query);
+        return res.json(await cradle.studentToolRegistryUseCases.workspaceExecutions(query));
+      }
+      const query = z.object({ ...pageQuery, search: trace, status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'CONSUMED']).optional() }).strict().parse(req.query);
+      return res.json(await cradle.studentToolRegistryUseCases.workspace(section, query));
+    }));
+    router.get('/:toolKey/versions', safe(async (req, res) => {
+      const { toolKey } = parseStrict(toolKeyParamSchema, req.params);
+      const { page, pageSize } = z.object(pageQuery).strict().parse(req.query);
+      res.json(await cradle.studentToolRegistryUseCases.versions(toolKey, page, pageSize));
+    }));
+    router.get('/:toolKey/executions/:executionId', safe(async (req, res) => {
+      const { toolKey } = parseStrict(toolKeyParamSchema, { toolKey: req.params.toolKey });
+      const executionId = z.string().regex(/^[A-Za-z0-9_-]{1,200}$/).parse(req.params.executionId);
+      const data = await cradle.studentToolRegistryUseCases.executionDetail(toolKey, executionId);
+      res.status(data ? 200 : 404).json(data ? { data } : { error: 'TOOL_EXECUTION_NOT_FOUND' });
+    }));
+    router.patch('/:toolKey/access-policy', safe(async (req, res) => {
+      const { toolKey } = parseStrict(toolKeyParamSchema, req.params);
+      const { expectedRevision, semanticVersion, changeNote, ...patch } = parseStrict(studentToolAccessPolicySchema, req.body);
+      res.json({ data: await cradle.studentToolRegistryUseCases.updateVersionedConfiguration(toolKey, patch, { expectedRevision, semanticVersion, changeNote }, actor(req)) });
+    }));
     router.get(
       '/:toolKey/executions',
       safe(async (req, res) => {
@@ -190,13 +223,8 @@ export class StudentToolsAdminRouter {
         const { toolKey } = parseStrict(toolKeyParamSchema, req.params);
         const tool = await cradle.studentToolRegistryUseCases.findTool(toolKey);
         if (!tool) return void res.status(404).json({ error: 'TOOL_NOT_FOUND' });
-        const [telemetry, executions, audit, operations] = await Promise.all([
-          cradle.studentToolRegistryUseCases.telemetry(toolKey),
-          Promise.resolve({ data: [], total: 0 }),
-          Promise.resolve([]),
-          cradle.studentToolRegistryUseCases.operationalStatus(tool),
-        ]);
-        res.json({ data: { tool, telemetry, executions, audit, ...operations } });
+        const operations = await cradle.studentToolRegistryUseCases.operationalStatus(tool);
+        res.json({ data: { tool, ...operations } });
       }),
     );
     router.patch(

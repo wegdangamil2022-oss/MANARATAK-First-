@@ -331,6 +331,19 @@ export const studentToolLifecycleParamSchema = z.object({
   action: z.enum(['activate', 'testing', 'deprecate', 'retire']),
 }).strict();
 
+export const studentToolAccessPolicySchema = z.object({
+  expectedRevision: z.number().int().min(0),
+  semanticVersion: z.string().regex(/^\d+\.\d+\.\d+$/),
+  changeNote: z.string().trim().min(3).max(2000),
+  availability: z.object(studentToolAvailabilitySchema.shape).strict().omit({ expectedRevision: true, semanticVersion: true, changeNote: true }),
+  featureFlags: studentToolFlagsSchema.omit({ expectedRevision: true, semanticVersion: true, changeNote: true }),
+  rateLimitPolicy: z.object({
+    anonymousRequestsPerMinute: z.number().int().min(1).max(10000),
+    authenticatedRequestsPerMinute: z.number().int().min(1).max(10000),
+    adminTestRequestsPerMinute: z.number().int().min(1).max(1000),
+  }).strict().optional(),
+}).strict();
+
 export const studentToolAdminTestSchema = z
   .object({
     costApproved: z.boolean().default(false),

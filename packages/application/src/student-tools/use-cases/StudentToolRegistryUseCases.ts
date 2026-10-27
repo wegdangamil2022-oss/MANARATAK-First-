@@ -15,7 +15,10 @@ import {
   StudentToolLifecycleStatus,
   StudentToolVisibilityStatus,
   StudentToolPublicAccessPolicy,
+  isInternalStudentTool,
+  INTERNAL_STUDENT_TOOL_KEYS,
 } from '@manaratak/domain';
+import { studentToolAdminExecution } from '../StudentToolAdminProjection';
 import { STUDENT_TOOL_SCHEMAS } from '../handlers/StudentToolSchemas';
 import { OFFICIAL_STUDENT_TOOLS } from '../OfficialStudentToolRegistry';
 export class StudentToolRegistryUseCases {
@@ -32,6 +35,35 @@ export class StudentToolRegistryUseCases {
   async listAdminPage(filters: StudentToolFilters & { page?: number; pageSize?: number }) {
     if (!this.repository.listPage) throw new Error('TOOL_PAGING_NOT_CONFIGURED');
     return this.repository.listPage(filters);
+  }
+  async workspace(kind: 'releases' | 'quality', query: { page: number; pageSize: number; search?: string; status?: string }) {
+    const tools = await this.repository.list({ search: query.search });
+    const candidates = kind === 'releases'
+      ? tools.filter(tool => tool.releaseApproval && (!query.status || tool.releaseApproval.status === query.status))
+      : tools;
+    const start = (query.page - 1) * query.pageSize;
+    const data = await Promise.all(candidates.slice(start, start + query.pageSize).map(async tool => ({
+      toolKey: tool.toolKey, nameAr: tool.nameAr, nameEn: tool.nameEn,
+      implementationStatus: tool.implementationStatus, lifecycle: tool.lifecycle,
+      audience: isInternalStudentTool(tool) ? 'ADMIN_INTERNAL' : 'STUDENT',
+      version: tool.currentVersion.semanticVersion, revision: tool.revision,
+      releaseApproval: tool.releaseApproval ?? null,
+      ...(kind === 'quality' ? await this.operationalStatus(tool) : {}),
+    })));
+    return { data, total: candidates.length, page: query.page, pageSize: query.pageSize, observedAt: new Date().toISOString(), evidence: 'CONFIGURATION_CHECK' };
+  }
+  async workspaceExecutions(query: StudentToolExecutionFilters & { toolKey?: string; page?: number; pageSize?: number }) {
+    if (!this.repository.workspaceExecutions) throw new Error('TOOL_WORKSPACE_NOT_CONFIGURED');
+    const result = await this.repository.workspaceExecutions(query);
+    return { ...result, data: result.data.map(studentToolAdminExecution), page: query.page ?? 1, pageSize: query.pageSize ?? 25 };
+  }
+  async executionDetail(toolKey: string, executionId: string) {
+    const record = await this.repository.findExecution(executionId);
+    return record?.toolKey === toolKey ? studentToolAdminExecution(record) : null;
+  }
+  async versions(toolKey: string, page: number, pageSize: number) {
+    if (!this.repository.versionHistory) throw new Error('TOOL_VERSION_HISTORY_NOT_CONFIGURED');
+    return { ...(await this.repository.versionHistory(toolKey, page, pageSize)), page, pageSize };
   }
   async release(
     toolKey: string,
@@ -101,13 +133,14 @@ export class StudentToolRegistryUseCases {
   telemetry(toolKey?: string) {
     return this.repository.telemetry(toolKey);
   }
-  executions(
+  async executions(
     toolKey: string,
     page?: number,
     pageSize?: number,
     filters?: StudentToolExecutionFilters,
   ) {
-    return this.repository.listExecutions(toolKey, page, pageSize, filters);
+    const result = await this.repository.listExecutions(toolKey, page, pageSize, filters);
+    return { ...result, data: result.data.map(studentToolAdminExecution) };
   }
   auditPage(toolKey: string, page: number, pageSize: number, filters?: StudentToolAuditFilters) {
     if (!this.repository.auditPage) throw new Error('TOOL_PAGING_NOT_CONFIGURED');
@@ -196,6 +229,8 @@ export class StudentToolRegistryUseCases {
     const inputSchema = contract?.inputSchema ?? current.inputSchema;
     const outputSchema = contract?.outputSchema ?? current.outputSchema;
     const availability = patch.availability ?? current.availability;
+    if ((INTERNAL_STUDENT_TOOL_KEYS.has(current.toolKey) || current.executionType === 'ADMIN_INTERNAL') && (!availability.adminOnly || availability.publicEnabled))
+      throw new Error('TOOL_INTERNAL_AUDIENCE_IMMUTABLE');
     if (availability.allowedRegions.length) throw new Error('TOOL_REGION_POLICY_UNAVAILABLE');
     if (availability.adminOnly && availability.publicEnabled)
       throw new Error('CONFLICTING_AVAILABILITY_FLAGS');

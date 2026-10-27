@@ -558,10 +558,25 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
     pageSize = 25,
     filters: StudentToolExecutionFilters = {},
   ) {
+    return this.workspaceExecutions({ ...filters, toolKey, page, pageSize });
+  }
+  async versionHistory(toolKey: string, page: number, pageSize: number) {
+    const where = { definition: { toolKey } };
+    const [data, total] = await this.db.$transaction([
+      this.db.studentToolVersionRecord.findMany({ where, skip: (page - 1) * pageSize, take: pageSize,
+        orderBy: [{ releaseDate: 'desc' }, { id: 'desc' }],
+        select: { semanticVersion: true, inputSchemaVersion: true, outputSchemaVersion: true, releaseDate: true, changeNote: true, status: true, snapshotHash: true },
+      }),
+      this.db.studentToolVersionRecord.count({ where }),
+    ], { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead });
+    return { data, total };
+  }
+  async workspaceExecutions(query: StudentToolExecutionFilters & { toolKey?: string; page?: number; pageSize?: number }) {
+    const { toolKey, page = 1, pageSize = 25, ...filters } = query;
     const safePage = Math.max(1, page);
     const take = Math.min(100, Math.max(1, pageSize));
     const where = {
-      definition: { toolKey },
+      ...(toolKey ? { definition: { toolKey } } : {}),
       ...(filters.status ? { status: filters.status } : {}),
       ...(filters.isTest !== undefined ? { isTest: filters.isTest } : {}),
       ...(filters.traceId ? { traceId: filters.traceId } : {}),
