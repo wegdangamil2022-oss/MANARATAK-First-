@@ -300,6 +300,8 @@ function AdminLayout() {
                   <Route path="/courses/:id/editor" element={<RequireCourseWorkspace><NativeCourseEditorPage /></RequireCourseWorkspace>} />
                   <Route path="/courses/:id" element={<RequireAdminPermission permission="admin:courses:manage"><CourseDetailPage /></RequireAdminPermission>} />
                   <Route path="/certificates" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateAdminPage /></RequireAdminPermission>} />
+                  <Route path="/certificates/templates/*" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateAdminPage /></RequireAdminPermission>} />
+                  <Route path="/certificates/issuers/*" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateAdminPage /></RequireAdminPermission>} />
                   <Route path="/certificates/:id" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateDetailPage /></RequireAdminPermission>} />
                   <Route path="/cms/*" element={<RequireAdminPermission permission="admin:cms:view"><CmsAdminPage /></RequireAdminPermission>} />
                   <Route path="/services" element={<RequireAdminPermission permission="admin:services:manage"><ServicesAdminPage /></RequireAdminPermission>} />

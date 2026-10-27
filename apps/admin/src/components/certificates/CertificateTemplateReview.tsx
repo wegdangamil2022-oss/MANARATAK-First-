@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { certificateCopy, certificateStatusCopy } from '@manaratak/shared';
 import { useTranslation } from '../../i18n/I18nProvider';
+import {useAdministrationDraftGuard} from '../../features/reference-data/useAdministrationDraftGuard';
 import {
   CertificatePreview,
   type CertificateTemplatePreviewModel,
@@ -67,6 +68,7 @@ export function CertificateTemplateReview({
   const { language } = useTranslation(),
     copy = (value: string) => certificateCopy(language, value);
   const [reason, setReason] = useState('');
+  useAdministrationDraftGuard(Boolean(reason)||busy,language==='ar');
   const changed = fields.filter(
     (key) =>
       canonical(snapshot.current[key]) !== canonical(snapshot.previous?.[key]),
