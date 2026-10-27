@@ -1,3 +1,12 @@
+import { AI_WORKSPACES, resolveAIWorkspace } from '../features/ai-tools/aiNavigation';
+import { AIRegistryFields } from '../features/ai-tools/AIRegistryFields';
+import { AIEmergencyControl } from '../features/ai-tools/AIEmergencyControl';
+import {
+  AIExecutionSummary,
+  AIRecordContext,
+  AIKnowledgeSourceSummary,
+} from '../features/ai-tools/AIRecordContext';
+import '../features/ai-tools/Workspace';
 import { useAICopy, aiStatusLabel } from './AIGovernanceCopy';
 import {
   FormEvent,
@@ -18,7 +27,6 @@ import {
   Bot,
   Boxes,
   BrainCircuit,
-  ChevronLeft,
   CircleDollarSign,
   Database,
   FileCode2,
@@ -136,16 +144,6 @@ const sectionNamesEn: Record<SectionKey, string> = {
   incidents: 'Incidents',
   platformSettings: 'Platform settings',
 };
-const groupNamesEn: Record<string, string> = {
-  المراقبة: 'Monitoring',
-  السجلات: 'Registry',
-  التشغيل: 'Operations',
-  الحوكمة: 'Governance',
-  الأتمتة: 'Automation',
-  الجودة: 'Quality',
-  المعرفة: 'Knowledge',
-};
-
 const sections: Array<{ key: SectionKey; label: string; group: string; icon: ReactNode }> = [
   { key: 'overview', label: 'نظرة عامة', group: 'المراقبة', icon: <Gauge /> },
   { key: 'executions', label: 'التنفيذ والتتبّع', group: 'المراقبة', icon: <Activity /> },
@@ -191,13 +189,17 @@ export function AIGovernancePage() {
     return () => window.removeEventListener('beforeunload', listener);
   }, [dirty, busy]);
   const params = useParams<{ section?: string }>();
-  const active = sections.some((item) => item.key === params.section)
-    ? (params.section as SectionKey)
-    : 'overview';
+  const [query] = useSearchParams();
+  const { workspace, active: resolved } = resolveAIWorkspace(params.section, query.get('tab'));
+  const active = resolved as SectionKey;
   const selected = sections.find((item) => item.key === active) ?? sections[0];
+  const title = (ar: string, en: string) => (language === 'en' ? en : ar);
+  const workspaceIcons = [Gauge, Activity, Bot, Sparkles, Database, ShieldCheck];
   return (
     <GovernanceGuard.Provider value={report}>
       <div
+        className="reference-workspace certificate-workspace ai-tools-workspace"
+        dir={dir}
         onClickCapture={(event) => {
           const anchor = (event.target as HTMLElement).closest('a[href]');
           if (!anchor || (!busy && !dirty)) return;
@@ -206,134 +208,105 @@ export function AIGovernancePage() {
             event.stopPropagation();
           }
         }}
-        dir={dir}
-        className="mx-auto max-w-[1600px] space-y-6"
       >
-        <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
-          <div className="pointer-events-none absolute -left-16 -top-28 h-64 w-64 rounded-full border border-cyan-400/20" />
-          <div className="pointer-events-none absolute bottom-0 right-0 h-1.5 w-48 bg-gradient-to-r from-transparent via-[#21A7B4] to-[#0E7C86] sm:w-80" />
-          <div className="relative z-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
-            <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200 backdrop-blur-sm border border-white/15">
-                <BrainCircuit className="h-4 w-4 text-[#21A7B4]" />
-                <span>
-                  {language === 'en'
-                    ? 'Enterprise AI governance ·'
-                    : copy('مركز الذكاء الاصطناعي والحوكمة ·')}
-                </span>
-              </div>
-              <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">
-                {language === 'en' ? 'MANARATAK AI Center' : copy('مركز منارتك للذكاء الاصطناعي')}
-              </h1>
-              <p className="mt-3 max-w-3xl text-sm font-medium leading-7 text-cyan-50/90">
-                {language === 'en'
-                  ? 'Centralized provider, model, routing, prompt, safety, cost and evaluation governance. Provider secrets are not stored here.'
-                  : copy(
-                      'حوكمة مركزية للمزوّدين والنماذج والتوجيه والموجّهات والسلامة والتكلفة والتقييم، دون تخزين أي مفاتيح سرية.',
-                    )}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-xs leading-6 backdrop-blur-md shadow-xs shrink-0">
-              <div className="font-bold text-cyan-100">
-                {language === 'en' ? 'Current execution state' : copy('وضع التنفيذ الحالي')}
-              </div>
-              <div className="text-white/80">
-                {language === 'en'
-                  ? 'An unconfigured provider reports NOT_CONFIGURED, not a failed execution.'
-                  : copy('المزوّد غير المهيأ يظهر NOT_CONFIGURED — ولا يُعد فشلًا')}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs">
-          <div className="grid min-h-[720px] lg:grid-cols-[275px_1fr]">
-            <aside className="border-l border-slate-100 bg-slate-50/60 p-4">
-              {[...new Set(sections.map((item) => item.group))].map((group) => (
-                <div key={group} className="mb-5">
-                  <div className="mb-2 px-3 text-[11px] font-bold text-[#142B5F]/70">
-                    {language === 'en' ? (groupNamesEn[group] ?? group) : group}
-                  </div>
-                  <nav className="space-y-1">
-                    {sections
-                      .filter((item) => item.group === group)
-                      .map((item) => (
-                        <Link
-                          key={item.key}
-                          to={`/ai/${item.key}`}
-                          className={`flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-bold transition ${
-                            active === item.key
-                              ? 'bg-[#142B5F] text-white shadow-sm'
-                              : 'text-slate-600 hover:bg-slate-100/80 hover:text-[#0E7C86]'
-                          }`}
-                        >
-                          <span
-                            className={`[&>svg]:h-4 [&>svg]:w-4 ${active === item.key ? 'text-[#21A7B4]' : 'text-slate-400'}`}
-                          >
-                            {item.icon}
-                          </span>
-                          <span>{language === 'en' ? sectionNamesEn[item.key] : item.label}</span>
-                        </Link>
-                      ))}
-                  </nav>
-                </div>
-              ))}
-            </aside>
-            <main className="min-w-0 bg-white p-5 lg:p-8">
-              <div className="mb-6 flex items-center gap-2 text-slate-500">
-                <span className="text-xs font-bold">
-                  {language === 'en' ? 'AI Center' : copy('مركز الذكاء الاصطناعي')}
-                </span>
-                <ChevronLeft className="h-3.5 w-3.5 text-slate-400" />
-                <h3 className="text-base font-black text-[#142B5F]">
-                  {language === 'en' ? sectionNamesEn[selected.key] : selected.label}
-                </h3>
-              </div>
-              {active === 'overview' ? (
-                <OverviewPanel />
-              ) : active === 'executions' ? (
-                <ExecutionsPanel />
-              ) : active === 'playground' ? (
-                <PlaygroundPanel />
-              ) : active === 'async-queue' ? (
-                <AsyncQueuePanel />
-              ) : active === 'workflows' ? (
-                <div className="space-y-6">
-                  <RegistryPanel resource="workflows" title={copy('سير العمل')} />
-                  <GovernedRunPanel kind="workflows" />
-                </div>
-              ) : active === 'evaluations' ? (
-                <div className="space-y-6">
-                  <RegistryPanel resource="evaluations" title={copy('تعريفات التقييم')} />
-                  <GovernedRunPanel kind="evaluations" />
-                </div>
-              ) : active === 'knowledgeSources' ? (
-                <div className="space-y-6">
-                  <RegistryPanel resource="knowledgeSources" title={copy('مصادر المعرفة')} />
-                  <KnowledgeIndexingPanel />
-                </div>
-              ) : active === 'incidents' ? (
-                <div className="space-y-6">
-                  <RegistryPanel resource="incidents" title={copy('الحوادث')} />
-                  <IncidentEventPanel />
-                </div>
-              ) : active === 'prompts' ? (
-                <PromptsPanel />
-              ) : (
-                <RegistryPanel
-                  key={active}
-                  resource={active as ResourceKey}
-                  title={language === 'en' ? sectionNamesEn[selected.key] : selected.label}
-                />
+        <header className="reference-hero">
+          <div>
+            <span>
+              <BrainCircuit />
+              {title('مركز منارتك للذكاء الاصطناعي', 'MANARATAK AI center')}
+            </span>
+            <h1>{title('الذكاء الاصطناعي', 'Artificial intelligence')}</h1>
+            <p>
+              {title(
+                'إدارة التشغيل والنماذج والقدرات والمعرفة والجودة.',
+                'Manage operations, models, capabilities, knowledge and quality.',
               )}
-            </main>
+            </p>
           </div>
-        </div>
+        </header>
+        <nav
+          className="certificate-main-nav"
+          aria-label={title('مساحات الذكاء الاصطناعي', 'AI workspaces')}
+        >
+          {AI_WORKSPACES.map((item, index) => {
+            const Icon = workspaceIcons[index];
+            return (
+              <Link
+                key={item.key}
+                to={`/ai/${item.key}`}
+                aria-current={workspace.key === item.key ? 'page' : undefined}
+              >
+                <Icon />
+                {title(item.ar, item.en)}
+              </Link>
+            );
+          })}
+        </nav>
+        {workspace.tabs.length > 1 && (
+          <nav
+            className="certificate-subnav"
+            aria-label={title('وظائف المساحة', 'Workspace functions')}
+          >
+            {sections
+              .filter((item) => (workspace.tabs as readonly string[]).includes(item.key))
+              .map((item) => (
+                <Link
+                  key={item.key}
+                  to={`/ai/${workspace.key}?tab=${item.key}`}
+                  aria-current={active === item.key ? 'page' : undefined}
+                >
+                  {item.icon}
+                  {language === 'en' ? sectionNamesEn[item.key] : item.label}
+                </Link>
+              ))}
+          </nav>
+        )}
+        <main className="ai-content" key={active}>
+          <h2>{language === 'en' ? sectionNamesEn[selected.key] : selected.label}</h2>
+          {active === 'overview' ? (
+            <>
+              <OverviewPanel />
+              <AIEmergencyControl />
+            </>
+          ) : active === 'executions' ? (
+            <ExecutionsPanel />
+          ) : active === 'playground' ? (
+            <PlaygroundPanel />
+          ) : active === 'async-queue' ? (
+            <AsyncQueuePanel />
+          ) : active === 'workflows' ? (
+            <>
+              <RegistryPanel resource="workflows" title={copy('سير العمل')} />
+              <GovernedRunPanel kind="workflows" />
+            </>
+          ) : active === 'evaluations' ? (
+            <>
+              <RegistryPanel resource="evaluations" title={copy('تعريفات التقييم')} />
+              <GovernedRunPanel kind="evaluations" />
+            </>
+          ) : active === 'knowledgeSources' ? (
+            <>
+              <RegistryPanel resource="knowledgeSources" title={copy('مصادر المعرفة')} />
+              <KnowledgeIndexingPanel />
+            </>
+          ) : active === 'incidents' ? (
+            <>
+              <RegistryPanel resource="incidents" title={copy('الحوادث')} />
+              <IncidentEventPanel />
+            </>
+          ) : active === 'prompts' ? (
+            <PromptsPanel />
+          ) : (
+            <RegistryPanel
+              resource={active as ResourceKey}
+              title={language === 'en' ? sectionNamesEn[selected.key] : selected.label}
+            />
+          )}
+        </main>
       </div>
     </GovernanceGuard.Provider>
   );
 }
-
 function useAIData<T>(path: string | null) {
   const { language } = useTranslation();
   const [data, setData] = useState<T | null>(null);
@@ -912,9 +885,18 @@ function ExecutionDetails({ publicId, onClose }: { publicId: string; onClose: ()
         {copy('إغلاق')}
       </button>
       {record.error && <ErrorBanner message={record.error} />}
-      {record.loading ? <Loading /> : record.data && <JsonView value={record.data} />}
+      {record.loading ? <Loading /> : record.data && <AIExecutionSummary record={record.data} />}
       {trace.error && <ErrorBanner message={trace.error} />}
-      {trace.data && <JsonView value={trace.data.data} />}
+      {trace.data && (
+        <div className="ai-form">
+          {trace.data.data.map((event, index) => (
+            <div key={index} className="ai-dependency">
+              <strong>{String(event.stage ?? event.eventType ?? event.status ?? index + 1)}</strong>
+              <span>{String(event.createdAt ?? event.timestamp ?? '')}</span>
+            </div>
+          ))}
+        </div>
+      )}
       <AICostReconciliation publicId={publicId} />
     </Panel>
   );
@@ -1914,7 +1896,8 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
   const canEdit = hasPermission(aiRegistryWritePermission(resource));
   const list = useAIData<{ data: RegistryRecord[] }>(`/admin/ai/${resource}`);
   const [editing, setEditing] = useState<RegistryRecord | null>(null);
-  const [search, setSearch] = useState('');
+  const [query] = useSearchParams();
+  const [search, setSearch] = useState(query.get('search') ?? '');
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
   const [message, setMessage] = useState('');
@@ -2162,7 +2145,7 @@ function RegistryEditor({
       </h4>
       {value ? (
         resource === 'knowledgeSources' ? (
-          <JsonView value={value} />
+          <AIKnowledgeSourceSummary record={value} />
         ) : (
           <form onSubmit={submit} className="mt-5 space-y-4">
             <fieldset disabled={!canEdit || saving || uncertain} className="space-y-4">
@@ -2189,15 +2172,23 @@ function RegistryEditor({
                   ))}
                 </select>
               </Field>
-              <Field label={copy('الإعدادات والأسماء الأصلية (JSON)')}>
-                <textarea
-                  value={json}
-                  onChange={(e) => setJson(e.target.value)}
-                  rows={18}
-                  className="input font-mono text-xs"
-                  dir="ltr"
-                />
-              </Field>
+              <AIRegistryFields resource={resource} json={json} onChange={setJson} />
+              <details>
+                <summary>
+                  {copy.language === 'en'
+                    ? 'Advanced technical settings (JSON)'
+                    : 'إعدادات تقنية متقدمة (JSON)'}
+                </summary>
+                <Field label={copy('الإعدادات والأسماء الأصلية (JSON)')}>
+                  <textarea
+                    value={json}
+                    onChange={(e) => setJson(e.target.value)}
+                    rows={18}
+                    className="input font-mono text-xs"
+                    dir="ltr"
+                  />
+                </Field>
+              </details>
               <p className="text-xs leading-6 text-slate-500">
                 {copy(
                   'الأسماء العربية والإنجليزية محفوظة بحقولها. لا تدخل الأسرار؛ استخدم secretReference للمزوّد. نشر الموجّهات من دورة الإصدارات فقط.',
@@ -2218,6 +2209,7 @@ function RegistryEditor({
       ) : (
         <Empty text={copy('اختر سجلاً أو أنشئ سجلاً جديداً.')} />
       )}
+      {value && <AIRecordContext resource={resource} record={value} />}
       {value && <AIConfigurationOperations resource={resource} record={value} candidate={json} />}
     </aside>
   );
@@ -2252,9 +2244,9 @@ function Panel({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="certificate-panel">
       <div className="mb-5">
-        <h4 className="text-lg font-black text-[#142B5F]">{title}</h4>
+        <h3>{title}</h3>
         <p className="mt-1 text-xs leading-6 text-slate-500">{subtitle}</p>
       </div>
       {children}

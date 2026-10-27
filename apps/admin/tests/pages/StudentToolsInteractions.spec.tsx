@@ -51,8 +51,9 @@ beforeEach(() => {
   (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
   state.request.mockReset().mockImplementation(async (path: string) => {
     if (path.endsWith('/overview')) return { data: { marker: 'old-summary' } };
-    if (path.includes('/executions?')) return page([{ traceId: 'old-trace' }]);
-    if (path.includes('/audit?')) return page([{ event: 'old-audit' }]);
+    if (path.includes('/executions?'))
+      return page([{ executionId: 'old-trace', toolKey: tool.toolKey, status: 'COMPLETED' }]);
+    if (path.includes('/audit?')) return page([{ action: 'old-audit' }]);
     if (path.includes('?')) return page([tool], 70);
     return { data: detail };
   });
@@ -69,18 +70,18 @@ describe('Section 19 operator request boundaries', () => {
     await act(async () => search.props.onChange({ target: { value: 'changed' } }));
     expect(content()).not.toContain('GPA');
     expect(content()).not.toContain('old-summary');
-    expect(content()).toContain('tools19_load_failed');
-    expect(button('tools19_next').props.disabled).toBe(true);
+    expect(content()).toContain('Could not load data.');
+    expect(button('Next').props.disabled).toBe(true);
   });
   it('removes execution/audit records when the requested trace cannot load', async () => {
-    await mount('/student-tools/gpa-calculator');
+    await mount('/student-tools/gpa-calculator?tab=executions');
     expect(content()).toContain('old-trace');
     state.request.mockRejectedValue(new Error('offline'));
-    const trace = tree.root.findAllByType('input').find((n) => n.props.maxLength === 200 && n.parent?.children.includes('tools19_trace_filter'))!;
+    const trace = tree.root.findAllByType('input').find((n) => n.props.maxLength === 200)!;
     await act(async () => trace.props.onChange({ target: { value: 'new-trace' } }));
     expect(content()).not.toContain('old-trace');
     expect(content()).not.toContain('old-audit');
-    expect(content()).toContain('tools19_load_failed');
+    expect(content()).toContain('Could not load data.');
   });
   it('discards late eligibility for the previous consumer and fences repeat clicks', async () => {
     await mount('/student-tools/gpa-calculator');
@@ -91,7 +92,7 @@ describe('Section 19 operator request boundaries', () => {
           resolve = done;
         }),
     );
-    const evaluate = button('tools19_evaluate');
+    const evaluate = button('Check access');
     await act(async () => {
       evaluate.props.onClick();
       evaluate.props.onClick();
@@ -99,17 +100,21 @@ describe('Section 19 operator request boundaries', () => {
     expect(state.request.mock.calls.filter(([path]) => path.endsWith('/eligibility'))).toHaveLength(
       1,
     );
-    expect(button('tools19_evaluate').props.disabled).toBe(true);
+    expect(button('Check access').props.disabled).toBe(true);
     const consumer = tree.root.findAllByType('select').find((n) => n.props.value === 'ANONYMOUS')!;
     await act(async () => consumer.props.onChange({ target: { value: 'AUTHENTICATED_STUDENT' } }));
-    await act(async () => resolve({ data: { marker: 'obsolete-eligibility' } }));
+    await act(async () =>
+      resolve({ data: { status: 'BLOCKED', reasons: ['obsolete-eligibility'] } }),
+    );
     expect(content()).not.toContain('obsolete-eligibility');
-    expect(button('tools19_evaluate').props.disabled).toBe(false);
+    expect(button('Check access').props.disabled).toBe(false);
   });
   it('invalidates displayed eligibility when the consumer changes', async () => {
     await mount('/student-tools/gpa-calculator');
-    state.request.mockResolvedValue({ data: { marker: 'anonymous-eligibility' } });
-    await act(async () => button('tools19_evaluate').props.onClick());
+    state.request.mockResolvedValue({
+      data: { status: 'BLOCKED', reasons: ['anonymous-eligibility'] },
+    });
+    await act(async () => button('Check access').props.onClick());
     expect(content()).toContain('anonymous-eligibility');
     const consumer = tree.root.findAllByType('select').find((n) => n.props.value === 'ANONYMOUS')!;
     await act(async () => consumer.props.onChange({ target: { value: 'AUTHENTICATED_STUDENT' } }));

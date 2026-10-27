@@ -67,7 +67,7 @@ describe('B07 basename and production permission matrix', () => {
     expect(routes.some(route => route.path.startsWith('/admin/'))).toBe(false);
     for (const target of Object.values(adminTargets)) {
       expect(adminPathPermission(target.path)).toBe(target.permission);
-      expect(routes.some(route => route.path === target.path && route.permission === target.permission)).toBe(true);
+      expect(routes.some(route => (route.path === target.path || route.path === `${target.path}/*`) && route.permission === target.permission)).toBe(true);
       if (target.idKind === 'OWNER_ID') {
         const prefix = 'detailPath' in target ? target.detailPath : target.path;
         expect(routes.some(route => route.path === `${prefix}/:id` && route.permission === target.permission)).toBe(true);
