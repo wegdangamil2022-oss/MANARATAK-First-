@@ -39,6 +39,16 @@ export class NotificationRouter {
       );
       if (!decision.isGranted) throw new Error('NOTIFICATION_ACCESS_DENIED');
     };
+    const permitted = async (req: Request, action: string) =>
+      Boolean(
+        req.authUserId &&
+        (
+          await authEvaluatorService.evaluatePermission(
+            req.authUserId,
+            `admin:notifications:${action}`,
+          )
+        ).isGranted,
+      );
     router.use(async (req, _res, next) => {
       try {
         await requirePermission(req, 'view');
@@ -102,6 +112,30 @@ export class NotificationRouter {
         next(error);
       }
     });
+    router.get('/intents/:id', async (req, res, next) => {
+      try {
+        const id = z.string().trim().min(1).max(160).parse(req.params.id);
+        const detail = await intentsUseCase.detail(id);
+        res.json(
+          (await permitted(req, 'recipients:pii'))
+            ? detail
+            : { ...detail, recipientReference: '[REDACTED]', reference: '[REDACTED]' },
+        );
+      } catch (error) {
+        next(error);
+      }
+    });
+    router.get('/templates/:id', async (req, res, next) => {
+      try {
+        const detail = await templatesUseCase.detail(
+          z.string().trim().min(1).max(160).parse(req.params.id),
+        );
+        const { contents, ...metadata } = detail;
+        res.json((await permitted(req, 'templates:author')) ? detail : metadata);
+      } catch (error) {
+        next(error);
+      }
+    });
 
     router.post('/templates/:id/clone', async (req, res, next) => {
       try {
@@ -131,7 +165,15 @@ export class NotificationRouter {
     });
     router.post('/templates/:id/preview', async (req, res, next) => {
       try {
-        await requirePermission(req, 'templates:author');
+        if (!(await permitted(req, 'templates:author'))) {
+          await requirePermission(req, 'intents:create');
+          await requirePermission(req, 'recipients:pii');
+          if (
+            req.params.id.startsWith('system.') ||
+            req.params.id.startsWith('student-application-')
+          )
+            throw new Error('NOTIFICATION_OWNER_TEMPLATE_RESERVED');
+        }
         const input = z
           .object({
             locale: z.enum(['ar', 'en']),
@@ -146,9 +188,49 @@ export class NotificationRouter {
     });
     router.get('/templates', async (req, res, next) => {
       try {
-        const rawLimit = Number(req.query.limit ?? 100);
-        const limit = Number.isInteger(rawLimit) ? rawLimit : 100;
-        res.json({ items: await templatesUseCase.listTemplates(limit) });
+        const query = z
+          .object({
+            limit: z.coerce.number().int().min(1).max(500).default(100),
+            search: z.string().trim().max(120).optional(),
+            active: z.enum(['true', 'false']).optional(),
+            channel: z.enum(['IN_APP', 'EMAIL', 'PUSH']).optional(),
+            locale: z.enum(['ar', 'en']).optional(),
+            cursor: z.string().max(2048).optional(),
+          })
+          .strict()
+          .parse(req.query);
+        let after: { id: string; updatedAt: Date } | undefined;
+        if (query.cursor) {
+          let decoded: unknown;
+          try {
+            decoded = JSON.parse(Buffer.from(query.cursor, 'base64url').toString());
+          } catch {
+            throw new Error('NOTIFICATION_CURSOR_INVALID');
+          }
+          const parsed = z
+            .object({ id: z.string().min(1).max(160), updatedAt: z.string().datetime() })
+            .strict()
+            .parse(decoded);
+          after = { id: parsed.id, updatedAt: new Date(parsed.updatedAt) };
+        }
+        const page = await templatesUseCase.listTemplates(query.limit + 1, {
+          search: query.search,
+          active: query.active === undefined ? undefined : query.active === 'true',
+          channel: query.channel,
+          locale: query.locale,
+          after,
+        });
+        const items = page.slice(0, query.limit),
+          last = items.at(-1);
+        res.json({
+          items,
+          nextCursor:
+            page.length > query.limit && last?.updatedAt
+              ? Buffer.from(JSON.stringify({ id: last.id, updatedAt: last.updatedAt })).toString(
+                  'base64url',
+                )
+              : null,
+        });
       } catch (error: any) {
         next(error);
       }
@@ -294,7 +376,7 @@ export class NotificationRouter {
           scheduledAt: parsed.scheduledAt ? new Date(parsed.scheduledAt) : undefined,
           expiresAt: parsed.expiresAt ? new Date(parsed.expiresAt) : undefined,
         });
-        res.status(201).json({ message: 'Intent created successfully' });
+        res.status(201).json({ message: 'Intent created successfully', id: parsed.id });
       } catch (error: any) {
         next(error);
       }
@@ -324,9 +406,11 @@ export class NotificationRouter {
           ? 403
           : code === 'NOTIFICATION_AUTHENTICATION_REQUIRED'
             ? 401
-            : /NOT_RETRYABLE|NOT_CANCELLABLE|CONFLICT/.test(code)
-              ? 409
-              : 422;
+            : /_NOT_FOUND$/.test(code)
+              ? 404
+              : /NOT_RETRYABLE|NOT_CANCELLABLE|CONFLICT/.test(code)
+                ? 409
+                : 422;
       res.status(status).json({ code });
     });
     return router;

@@ -104,6 +104,11 @@ export class ManageNotificationIntentsUseCase {
   public summary(from: Date, to: Date) {
     return this.intentRepository.summary(from, to);
   }
+  public async detail(id: string) {
+    const detail = await this.intentRepository.detail(id);
+    if (!detail) throw new Error('NOTIFICATION_INTENT_NOT_FOUND');
+    return detail;
+  }
 
   public receipts(id: string) {
     return this.intentRepository.receipts(id);
