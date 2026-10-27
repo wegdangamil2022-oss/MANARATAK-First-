@@ -14,6 +14,7 @@ export function createManagedApplicationEvidenceRouter(
     '/requests/:requestId/application-evidence/assets',
     run(async (req, res) => {
       const requestId = z.string().uuid().parse(req.params.requestId);
+      await permit(req, evaluator, 'admin:services:manage', requestId);
       await permit(req, evaluator, 'admin:services:applications:verify', requestId);
       const request = await requests.findRequestById(requestId);
       const all = (
@@ -33,6 +34,7 @@ export function createManagedApplicationEvidenceRouter(
     '/requests/:requestId/application-evidence',
     run(async (req, res) => {
       const requestId = z.string().uuid().parse(req.params.requestId);
+      await permit(req, evaluator, 'admin:services:manage', requestId);
       await permit(req, evaluator, 'admin:services:requests:fulfill', requestId);
       const request = await requests.findRequestById(requestId);
       const all = (

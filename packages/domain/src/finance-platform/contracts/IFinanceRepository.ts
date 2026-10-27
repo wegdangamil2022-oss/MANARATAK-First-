@@ -13,6 +13,8 @@ import {
   CreditNoteDto,
   ExchangeRateDto,
   FinanceOverviewDto,
+  FinancialTransactionFilters,
+  FinancialTransactionSummaryDto,
   FinancialAccountDto,
   FinancialAccountFilters,
   FinancialApprovalDto,
@@ -69,6 +71,7 @@ export interface FinanceListFilters {
   to?: Date;
 }
 export interface IFinanceRepository {
+  listLedgerTransactions(filters: FinancialTransactionFilters): Promise<PaginatedFinanceResult<FinancialTransactionSummaryDto>>;
   listFinancialAccounts(filters: FinancialAccountFilters): Promise<PaginatedFinanceResult<FinancialAccountDto>>;
   createAdjustmentCase(
     input: { publicId: string; reasonCode: string; supportingDocumentId: string; makerId: string },

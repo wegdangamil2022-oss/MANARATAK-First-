@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const state = vi.hoisted(() => ({ request: vi.fn(), t: (key: string) => key }));
 vi.mock('../../src/api/client', () => ({ adminApiClient: { request: state.request } }));
 vi.mock('../../src/security/AdminAuthorizationContext', () => ({
-  useAdminAuthorization: () => ({ hasPermission: () => false }),
+  useAdminAuthorization: () => ({ hasPermission: (permission:string) => permission === 'admin:services:manage' }),
 }));
 vi.mock('../../src/i18n/I18nProvider', () => ({
   useTranslation: () => ({ t: state.t, language: 'en', dir: 'ltr' }),

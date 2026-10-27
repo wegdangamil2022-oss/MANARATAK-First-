@@ -278,7 +278,7 @@ export class SecurityMiddlewareFactory {
     };
   }
 
-  public static createAdminPermissionGuard(requiredPermission: string, evaluatorOverride?: AuthorizationEvaluatorService) {
+  public static createAdminPermissionGuard(requiredPermission: string | readonly string[], evaluatorOverride?: AuthorizationEvaluatorService) {
     return async (req: Request, res: Response, next: NextFunction) => {
       const principalId = req.authUserId;
       if (!principalId) {
@@ -314,12 +314,16 @@ export class SecurityMiddlewareFactory {
           return;
         }
 
-        const decision = await evaluator.evaluatePermission(principalId, requiredPermission, {
-          ip: req.ip || req.socket?.remoteAddress || undefined,
-          requestTime: new Date(),
-          userAgent: req.headers['user-agent'],
-          correlationId: req.headers['x-correlation-id'],
-        });
+        let decision = { isGranted: false };
+        const required = typeof requiredPermission === 'string' ? [requiredPermission] : requiredPermission;
+        for (const permission of required) {
+          const candidate = await evaluator.evaluatePermission(principalId, permission, {
+            ip: req.ip || req.socket?.remoteAddress || undefined,
+            requestTime: new Date(), userAgent: req.headers['user-agent'],
+            correlationId: req.headers['x-correlation-id'],
+          });
+          if (candidate.isGranted) { decision = candidate; break; }
+        }
 
         const correlationId = (req.headers['x-correlation-id'] as string) || (req as any).id || 'N/A';
         if (process.env.NODE_ENV !== 'test') {
@@ -340,7 +344,7 @@ export class SecurityMiddlewareFactory {
           return;
         }
 
-        res.setHeader('X-Admin-Required-Permission', requiredPermission);
+        res.setHeader('X-Admin-Required-Permission', typeof requiredPermission === 'string' ? requiredPermission : requiredPermission.join(' | '));
         next();
       } catch (err: any) {
         res.status(403).json({

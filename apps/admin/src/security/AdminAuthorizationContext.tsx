@@ -32,10 +32,10 @@ export function useAdminAuthorization() {
   return useContext(AdminAuthorizationContext);
 }
 
-export function RequireAdminPermission({ permission, children }: { permission: string; children: React.ReactNode }) {
+export function RequireAdminPermission({ permission, children }: { permission: string | readonly string[]; children: React.ReactNode }) {
   const { hasPermission, permissions } = useAdminAuthorization();
   const location = useLocation();
-  if (!hasPermission(permission)) {
+  if (!(typeof permission === 'string' ? hasPermission(permission) : permission.some(hasPermission))) {
     return <Navigate to={firstAllowedAdminPath(permissions) || '/'} replace state={{ deniedPermission: permission, deniedPath: location.pathname }} />;
   }
   return <>{children}</>;

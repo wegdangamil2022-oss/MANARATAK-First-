@@ -2,6 +2,12 @@ import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
+import { Plus, Users, Tags, CalendarDays, Workflow, ListChecks } from 'lucide-react';
+import { OwnerNavigation, useOwnerCopy } from '../features/services-finance/WorkspaceUI';
+import { operationGroups } from '../features/services-finance/workspaceModel';
+import { CanonicalPicker } from './CanonicalPicker';
+import { canonicalPickerApi } from '../api/canonicalPickers';
+import { serviceOperationOptions } from '../api/serviceOperationPickers';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 
 type Kind =
@@ -94,12 +100,22 @@ const fieldLabels: Record<string, [string, string]> = {
   discountId: ['الخصم المعتمد', 'Approved discount'],
 };
 
-export function ServiceOperationsWorkspace() {
+export function ServiceOperationsWorkspace({
+  onBusyChange,
+  onDirtyChange,
+}: {
+  onBusyChange: (busy: boolean) => void;
+  onDirtyChange: (dirty: boolean) => void;
+}) {
   const { t, language, dir } = useTranslation();
   const { hasPermission } = useAdminAuthorization();
   const [params, setParams] = useSearchParams();
-  const selected = params.get('operation') as Kind;
+  const { c } = useOwnerCopy();
+  const selected = (params.get('operation') || params.get('kind')) as Kind;
   const kind = kinds.includes(selected) ? selected : 'providers';
+  const group = operationGroups.find((group) => (group.kinds as readonly string[]).includes(kind))!;
+  const [creating, setCreating] = useState(false);
+  const [loadError, setLoadError] = useState('');
   const page = Math.max(1, Number(params.get('operationPage')) || 1);
   const [result, setResult] = useState<{ data: RecordRow[]; total: number } | null>(null);
   const [form, setForm] = useState<Record<string, string>>({});
@@ -107,22 +123,43 @@ export function ServiceOperationsWorkspace() {
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(false);
+  const dirty = Object.values(form).some((value) => value.trim() !== '');
+  useEffect(() => {
+    onBusyChange(busy);
+    return () => onBusyChange(false);
+  }, [busy, onBusyChange]);
+  useEffect(() => {
+    onDirtyChange(dirty);
+    return () => onDirtyChange(false);
+  }, [dirty, onDirtyChange]);
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [dirty]);
   const sequence = useRef(0);
   const mutation = useRef(false);
+  const loadFailure = t('svc_error');
   const load = useCallback(async () => {
     const generation = ++sequence.current;
     setLoading(true);
+    setLoadError('');
+    setResult(null);
     try {
       const next = await adminApiClient.request<{ data: RecordRow[]; total: number }>(
         `/admin/services/operations/${kind}?page=${page}`,
       );
       if (generation === sequence.current) setResult(next);
     } catch {
-      if (generation === sequence.current) setNotice(t('svc_error'));
+      if (generation === sequence.current) setLoadError(loadFailure);
     } finally {
       if (generation === sequence.current) setLoading(false);
     }
-  }, [kind, page, t]);
+  }, [kind, page, loadFailure]);
   useEffect(() => {
     setResult(null);
     void load();
@@ -131,10 +168,21 @@ export function ServiceOperationsWorkspace() {
     };
   }, [load]);
   const navigate = (next: Kind, nextPage = 1) => {
-    if (busy) return;
+    if (
+      busy ||
+      (dirty &&
+        !window.confirm(
+          c('ترك تعديلات العملية غير المحفوظة؟', 'Discard unsaved operation changes?'),
+        ))
+    )
+      return;
     setForm({});
+    setCreating(false);
+    setNotice('');
     setParams((previous) => {
       const copy = new URLSearchParams(previous);
+      copy.set('tab', 'operations');
+      copy.delete('kind');
       copy.set('operation', next);
       copy.set('operationPage', String(nextPage));
       return copy;
@@ -152,6 +200,8 @@ export function ServiceOperationsWorkspace() {
       });
       setNotice(t('svc_saved'));
       setForm({});
+      setReason('');
+      setCreating(false);
       await load();
     } catch {
       setNotice(t('svc_error'));
@@ -162,13 +212,21 @@ export function ServiceOperationsWorkspace() {
   }
   function create(event: FormEvent) {
     event.preventDefault();
-    let body: Record<string, unknown> = Object.fromEntries(
+    const body: Record<string, unknown> = Object.fromEntries(
       Object.entries(form).filter(([, value]) => value.trim() !== ''),
     );
     for (const key of ['capacity', 'scale', 'slaMinutes'])
       if (key in body) body[key] = Number(body[key]);
-    for (const key of ['effectiveFrom', 'effectiveTo', 'startsAt', 'endsAt', 'expiresAt'])
-      if (body[key]) body[key] = new Date(String(body[key])).toISOString();
+    for (const key of ['effectiveFrom', 'effectiveTo', 'startsAt', 'endsAt', 'expiresAt']) {
+      if (body[key]) {
+        const date = new Date(String(body[key]));
+        if (!Number.isFinite(date.getTime())) {
+          setNotice(c('أدخل تاريخًا صحيحًا.', 'Enter a valid date.'));
+          return;
+        }
+        body[key] = date.toISOString();
+      }
+    }
     if (kind === 'providers') {
       body.supportedServiceIds = [form.serviceId];
       delete body.serviceId;
@@ -177,7 +235,7 @@ export function ServiceOperationsWorkspace() {
       delete body.expiresAt;
     }
     if (kind === 'packages') {
-      body.items = form.serviceIds
+      body.items = (form.serviceIds || '')
         .split(',')
         .map((value) => value.trim())
         .filter(Boolean)
@@ -207,21 +265,47 @@ export function ServiceOperationsWorkspace() {
   }
   return (
     <section dir={dir} className="space-y-4 rounded-2xl border bg-white p-4">
-      <p role="status">{t('svc_runtime_pending')}</p>
-      <nav aria-label={t('svc_operations')} className="flex flex-wrap gap-2">
-        {kinds.map((value) => (
-          <button
-            type="button"
-            key={value}
-            disabled={busy}
-            aria-pressed={kind === value}
-            onClick={() => navigate(value)}
-            className="rounded-xl border p-3"
-          >
-            {t(`svc_${value}`)}
+      <OwnerNavigation
+        active={group.id}
+        disabled={busy}
+        label={c('مجموعات العمليات', 'Operation groups')}
+        items={operationGroups.map((item, index) => ({
+          id: item.id,
+          label: c(item.ar, item.en),
+          icon: [Users, Tags, CalendarDays, Workflow][index],
+        }))}
+        onChange={(id) => {
+          const next = operationGroups.find((item) => item.id === id);
+          if (next) navigate(next.kinds[0]);
+        }}
+      />
+      <OwnerNavigation
+        secondary
+        active={kind}
+        disabled={busy}
+        label={c('وحدات العمليات', 'Operation units')}
+        items={group.kinds
+          .filter(
+            (value) =>
+              !['bookings', 'executions', 'deliveries'].includes(value) ||
+              hasPermission('admin:services:requests:pii'),
+          )
+          .map((value) => ({
+            id: value,
+            label: t(`svc_${value}` as Parameters<typeof t>[0]),
+            icon: ListChecks,
+          }))}
+        onChange={(value) => navigate(value as Kind)}
+      />
+      <div className="sf-panel-heading">
+        <h2>{t(`svc_${kind}` as Parameters<typeof t>[0])}</h2>
+        {!creating && fields[kind].length > 0 && (
+          <button className="sf-primary" disabled={busy} onClick={() => setCreating(true)}>
+            <Plus size={15} />
+            {t('svc_create')}
           </button>
-        ))}
-      </nav>
+        )}
+      </div>
       <label>
         {t('svc_reason')}
         <input
@@ -232,14 +316,23 @@ export function ServiceOperationsWorkspace() {
         />
       </label>
       {notice && <p role="status">{notice}</p>}
+      {loadError && (
+        <p role="alert" className="sf-notice text-red-700">
+          {loadError}
+        </p>
+      )}
       {loading && <p role="status">{t('loading')}</p>}
+      {!loading && !loadError && result && !result.data.length && (
+        <p className="sf-empty">{c('لا توجد سجلات.', 'No records.')}</p>
+      )}
       <ul className="space-y-2">
         {result?.data.map((row) => (
           <li key={row.id} className="flex flex-wrap items-center gap-3 rounded-xl border p-3">
             <span>{row.displayName || row.name || row.publicId || row.artifactType || row.id}</span>
             <span>{row.status}</span>
             <code>{row.id}</code>
-            {(['DRAFT'].includes(row.status) || (kind === 'promotions' && row.status === 'PAUSED')) &&
+            {(['DRAFT'].includes(row.status) ||
+              (kind === 'promotions' && row.status === 'PAUSED')) &&
               ['providers', 'packages', 'pricing', 'promotions', 'workflows'].includes(kind) &&
               hasPermission('admin:services:operations:manage') &&
               hasPermission(
@@ -322,34 +415,36 @@ export function ServiceOperationsWorkspace() {
                     : 'Review deliverables and advance'}
                 </button>
               )}
-            {kind === 'bookings' && hasPermission('admin:services:requests:fulfill') && (
-              <>
-                <button
-                  type="button"
-                  disabled={busy || reason.trim().length < 3}
-                  onClick={() =>
-                    void write(`bookings/${row.id}/transition`, {
-                      status:
-                        row.status === 'PENDING'
-                          ? 'CONFIRMED'
-                          : row.status === 'CONFIRMED'
-                            ? 'IN_PROGRESS'
-                            : 'COMPLETED',
-                      expectedVersion: row.version,
-                    })
-                  }
-                >
-                  {language === 'ar' ? 'المرحلة التالية' : 'Next stage'}
-                </button>
-                <button
-                  type="button"
-                  disabled={busy || reason.trim().length < 3}
-                  onClick={() => void write(`bookings/${row.id}/start-workflow`, {})}
-                >
-                  {language === 'ar' ? 'بدء التنفيذ' : 'Start workflow'}
-                </button>
-              </>
-            )}
+            {kind === 'bookings' &&
+              ['PENDING', 'CONFIRMED', 'IN_PROGRESS'].includes(row.status) &&
+              hasPermission('admin:services:requests:fulfill') && (
+                <>
+                  <button
+                    type="button"
+                    disabled={busy || reason.trim().length < 3}
+                    onClick={() =>
+                      void write(`bookings/${row.id}/transition`, {
+                        status:
+                          row.status === 'PENDING'
+                            ? 'CONFIRMED'
+                            : row.status === 'CONFIRMED'
+                              ? 'IN_PROGRESS'
+                              : 'COMPLETED',
+                        expectedVersion: row.version,
+                      })
+                    }
+                  >
+                    {language === 'ar' ? 'المرحلة التالية' : 'Next stage'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy || reason.trim().length < 3}
+                    onClick={() => void write(`bookings/${row.id}/start-workflow`, {})}
+                  >
+                    {language === 'ar' ? 'بدء التنفيذ' : 'Start workflow'}
+                  </button>
+                </>
+              )}
           </li>
         ))}
       </ul>
@@ -373,31 +468,106 @@ export function ServiceOperationsWorkspace() {
           {t('svc_refresh')}
         </button>
       </div>
-      {fields[kind].length > 0 && (
-        <form onSubmit={create} className="grid gap-3 sm:grid-cols-2">
-          {fields[kind].map((key) => (
-            <label key={key}>
-              {fieldLabels[key]?.[language === 'ar' ? 0 : 1] ?? key}
-              <input
-                required={
-                  key !== 'effectiveTo' &&
-                  key !== 'countryReferenceId' &&
-                  !['serviceId', 'packageId'].includes(key)
-                }
-                className="block w-full rounded-xl border p-3"
-                type={
-                  /At$|^effective/.test(key)
-                    ? 'datetime-local'
-                    : ['capacity', 'scale', 'slaMinutes'].includes(key)
-                      ? 'number'
-                      : 'text'
-                }
-                value={form[key] ?? ''}
-                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-              />
-            </label>
-          ))}
-          <button disabled={busy || reason.trim().length < 3} className="rounded-xl border p-3">
+      {creating && fields[kind].length > 0 && (
+        <form onSubmit={create} className="sf-form-grid sf-form-section">
+          {fields[kind].map((key) => {
+            const label = fieldLabels[key]?.[language === 'ar' ? 0 : 1] ?? key;
+            if (
+              [
+                'providerId',
+                'packageId',
+                'discountId',
+                'bookingId',
+                'workflowExecutionId',
+              ].includes(key)
+            ) {
+              const related: Record<string, string> = {
+                providerId: 'providers',
+                packageId: 'packages',
+                discountId: 'discounts',
+                bookingId: 'bookings',
+                workflowExecutionId: 'executions',
+              };
+              return (
+                <CanonicalPicker
+                  key={key}
+                  label={label}
+                  value={form[key] || ''}
+                  onChange={(id) => setForm({ ...form, [key]: id ?? '' })}
+                  paged
+                  load={(query, page) => serviceOperationOptions(related[key], query, page)}
+                  reloadKey={kind + ':' + key}
+                />
+              );
+            }
+            if (key === 'countryReferenceId')
+              return (
+                <CanonicalPicker
+                  key={key}
+                  label={label}
+                  value={form[key] || ''}
+                  onChange={(id) => setForm({ ...form, [key]: id ?? '' })}
+                  paged
+                  load={(query, page) => canonicalPickerApi.countries(query, page)}
+                  reloadKey="operation-country"
+                />
+              );
+            if (key === 'currencyCode')
+              return (
+                <CanonicalPicker
+                  key={key}
+                  label={label}
+                  value={form[key] || ''}
+                  onChange={(id) => setForm({ ...form, [key]: id || '' })}
+                  paged
+                  load={async (query, page) =>
+                    (await canonicalPickerApi.currencies(query, page)).map((option) => ({
+                      ...option,
+                      id: option.code || option.id,
+                    }))
+                  }
+                  reloadKey="operation-currency"
+                />
+              );
+            return (
+              <label key={key}>
+                {label}
+                <input
+                  disabled={busy}
+                  required={
+                    !['effectiveTo', 'countryReferenceId', 'serviceId', 'packageId'].includes(key)
+                  }
+                  className="mt-1 block w-full"
+                  type={
+                    /At$|^effective/.test(key)
+                      ? 'datetime-local'
+                      : ['capacity', 'scale', 'slaMinutes'].includes(key)
+                        ? 'number'
+                        : 'text'
+                  }
+                  value={form[key] ?? ''}
+                  onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                />
+              </label>
+            );
+          })}
+          <button
+            type="button"
+            className="sf-secondary"
+            disabled={busy}
+            onClick={() => {
+              if (
+                !dirty ||
+                window.confirm(c('ترك التعديلات غير المحفوظة؟', 'Discard unsaved changes?'))
+              ) {
+                setForm({});
+                setCreating(false);
+              }
+            }}
+          >
+            {c('إلغاء', 'Cancel')}
+          </button>
+          <button disabled={busy || reason.trim().length < 3} className="sf-primary">
             {t('svc_create')}
           </button>
         </form>

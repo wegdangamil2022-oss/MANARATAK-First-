@@ -2,6 +2,30 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
+import {
+  LayoutDashboard,
+  ArrowLeftRight,
+  ReceiptText,
+  ShoppingBag,
+  Landmark,
+  BookOpen,
+  ShieldCheck,
+  RefreshCw,
+  ListChecks,
+} from 'lucide-react';
+import {
+  OwnerHeading,
+  OwnerNavigation,
+  useOwnerCopy,
+} from '../features/services-finance/WorkspaceUI';
+import {
+  financeGroups,
+  resolveFinanceView,
+  type FinanceTab,
+} from '../features/services-finance/workspaceModel';
+import { FinanceTransactionsPanel } from '../features/services-finance/FinanceTransactionsPanel';
+import { FinanceCapabilityPanel } from '../features/services-finance/FinanceCapabilityPanel';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { financeMoney } from './financePresentation';
 import { FinanceLedgerPanel } from './FinanceLedgerPanel';
 import { FinanceWalletPanel } from './FinanceWalletPanel';
@@ -9,23 +33,7 @@ import { FinanceAccountsPanel } from './FinanceAccountsPanel';
 
 type Row = Record<string, any>;
 type Page = { data: Row[]; page: number; total: number; totalPages: number };
-const tabs = [
-  'overview',
-  'accounts',
-  'wallets',
-  'ledger',
-  'invoices',
-  'payments',
-  'refunds',
-  'transfers',
-  'rates',
-  'approvals',
-  'commissions',
-  'reconciliation',
-  'reports',
-  'runtime',
-] as const;
-type Tab = (typeof tabs)[number];
+type Tab = FinanceTab;
 const listTabs = new Set<Tab>([
   'invoices',
   'payments',
@@ -35,7 +43,7 @@ const listTabs = new Set<Tab>([
   'approvals',
   'commissions',
 ]);
-const endpoints: Record<Tab, string> = {
+const endpoints: Partial<Record<Tab, string>> = {
   overview: 'overview',
   accounts: 'accounts',
   wallets: 'wallets',
@@ -72,7 +80,15 @@ const states: Partial<Record<Tab, string[]>> = {
 export function FinanceAdminPage() {
   const { t, dir, language } = useTranslation();
   const [params, setParams] = useSearchParams();
-  const tab = tabs.includes(params.get('tab') as Tab) ? (params.get('tab') as Tab) : 'overview';
+  const { c } = useOwnerCopy();
+  const { hasPermission } = useAdminAuthorization();
+  const { group, tab } = resolveFinanceView(params, true);
+  const [observedAt, setObservedAt] = useState<string | null>(null);
+  const navigateTab = (next: Tab) => {
+    if (busy) return;
+    setSearch('');
+    setParams(next === 'overview' ? {} : { tab: next });
+  };
   const [data, setData] = useState<any>(null),
     [loading, setLoading] = useState(true),
     [error, setError] = useState('');
@@ -94,7 +110,9 @@ export function FinanceAdminPage() {
     [setParams],
   );
   const searchFilter = params.get('search') || '';
-  useEffect(() => { setSearch(searchFilter); }, [searchFilter]);
+  useEffect(() => {
+    setSearch(searchFilter);
+  }, [searchFilter]);
   useEffect(() => {
     const timer = window.setTimeout(() => {
       if (search !== searchFilter) update('search', search.trim());
@@ -107,7 +125,8 @@ export function FinanceAdminPage() {
     setLoading(true);
     setError('');
     setData(null);
-    if (tab === 'accounts' || tab === 'wallets' || tab === 'ledger') {
+    setObservedAt(null);
+    if (['accounts', 'wallets', 'ledger', 'transactions', 'expenses', 'cash'].includes(tab)) {
       setLoading(false);
       return;
     }
@@ -117,7 +136,10 @@ export function FinanceAdminPage() {
     void adminApiClient
       .request(`/admin/finance/${endpoints[tab]}${listTabs.has(tab) ? `?${query}` : ''}`)
       .then((result) => {
-        if (request === sequence.current && !cancelled) setData(result);
+        if (request === sequence.current && !cancelled) {
+          setData(result);
+          setObservedAt(new Date().toISOString());
+        }
       })
       .catch((cause) => {
         if (request === sequence.current && !cancelled)
@@ -159,39 +181,102 @@ export function FinanceAdminPage() {
   };
   const page: Page | null = listTabs.has(tab) ? data : null;
   return (
-    <div dir={dir} className="admin-owner-workspace mx-auto max-w-7xl space-y-6 text-[#203442]">
-      <header className="admin-page-hero relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
-        <div><h1 className="text-2xl font-black">{t('finance_title')}</h1>
-        <p className="mt-2 text-sm">{t('finance_owner_notice')}</p>
-        </div>
-        <button
-          className="mt-4 rounded-xl bg-[#21A7B4] px-4 py-2 disabled:opacity-50"
-          disabled={loading || busy}
-          onClick={() => setRefresh((n) => n + 1)}
-        >
-          {t('finance_refresh')}
-        </button>
-      </header>
-      <section className="grid gap-4 rounded-3xl border bg-white p-4 lg:grid-cols-[230px_minmax(0,1fr)]">
-        <nav aria-label={t('finance_sections')} className="flex flex-wrap gap-2 lg:flex-col">
-          {tabs.map((item) => (
-            <button
-              key={item}
-              aria-current={tab === item ? 'page' : undefined}
-              className={`rounded-xl px-4 py-3 text-start ${tab === item ? 'bg-[#142B5F] text-white' : 'bg-slate-50'}`}
-              onClick={() => {
-                setSearch('');
-                setParams(item === 'overview' ? {} : { tab: item });
-              }}
-            >
-              {t(`finance_tab_${item}`)}
+    <div dir={dir} className="sf-workspace mx-auto max-w-7xl">
+      <OwnerHeading
+        title={t('finance_title')}
+        description={c(
+          'متابعة الفواتير والتحصيل والحركات والالتزامات والرقابة المالية.',
+          'Track invoices, collection, transactions, liabilities and financial controls.',
+        )}
+        actions={
+          <>
+            <button type="button" disabled={busy} onClick={() => navigateTab('transactions')}>
+              <ListChecks size={15} />
+              {c('سجل الحركات', 'Transaction register')}
             </button>
-          ))}
-        </nav>
+            <button
+              type="button"
+              disabled={loading || busy}
+              onClick={() => setRefresh((value) => value + 1)}
+            >
+              <RefreshCw size={15} />
+              {t('finance_refresh')}
+            </button>
+          </>
+        }
+      />
+      <div className="sf-finance-nav">
+        <OwnerNavigation
+          items={financeGroups.map((item, index) => ({
+            id: item.id,
+            label: c(item.ar, item.en),
+            icon: [
+              LayoutDashboard,
+              ArrowLeftRight,
+              ReceiptText,
+              ShoppingBag,
+              Landmark,
+              BookOpen,
+              ShieldCheck,
+            ][index],
+          }))}
+          active={group.id}
+          onChange={(id) => {
+            const next = financeGroups.find((item) => item.id === id);
+            if (next) navigateTab(next.tabs[0]);
+          }}
+          disabled={busy}
+          label={t('finance_sections')}
+        />
+      </div>
+      <section className="sf-panel">
+        {group.tabs.length > 1 && (
+          <OwnerNavigation
+            secondary
+            active={tab}
+            disabled={busy}
+            label={c('مساحات المالية', 'Finance workspaces')}
+            items={group.tabs.map((item) => ({
+              id: item,
+              label:
+                item === 'cash'
+                  ? c('الصناديق والبنوك', 'Cash & bank accounts')
+                  : t(`finance_tab_${item}` as Parameters<typeof t>[0]),
+              icon: ListChecks,
+            }))}
+            onChange={(value) => navigateTab(value as Tab)}
+          />
+        )}
         <div className="min-w-0 space-y-4">
-          <h2 className="border-b border-[#D6A43B] pb-2 text-xl font-bold">
-            {t(`finance_tab_${tab}`)}
-          </h2>
+          <div className="sf-panel-heading">
+            <h2>
+              {tab === 'transactions'
+                ? c('الحركات اليومية', 'Daily transactions')
+                : tab === 'expenses'
+                  ? c('المشتريات والمصروفات', 'Purchases & expenses')
+                  : tab === 'cash'
+                    ? c('الصناديق والبنوك', 'Cash & bank accounts')
+                    : t(`finance_tab_${tab}` as Parameters<typeof t>[0])}
+            </h2>
+            {observedAt && (
+              <small>
+                {c('آخر قراءة', 'Last read')}: {new Date(observedAt).toLocaleString(language)}
+              </small>
+            )}
+          </div>
+          {tab === 'transactions' && (
+            <>
+              <FinanceTransactionsPanel refreshToken={refresh} />
+              <FinanceCapabilityPanel />
+            </>
+          )}
+          {tab === 'expenses' && (
+            <>
+              <FinanceCapabilityPanel />
+              <FinanceTransactionsPanel refreshToken={refresh} expenses />
+            </>
+          )}
+          {tab === 'cash' && <FinanceCapabilityPanel cash />}
           {listTabs.has(tab) && (
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               <input
@@ -330,14 +415,14 @@ export function FinanceAdminPage() {
                           <td className="p-3">
                             {tab === 'invoices' ? (
                               <Link
-                                className="text-[#0E7C86] underline"
+                                className="text-[#142B5F] underline"
                                 to={`/finance/invoices/${encodeURIComponent(row.id)}`}
                               >
                                 {t('finance_details')}
                               </Link>
                             ) : tab !== 'rates' ? (
                               <Link
-                                className="text-[#0E7C86] underline"
+                                className="text-[#142B5F] underline"
                                 to={`/finance/records/${tab}/${encodeURIComponent(row.id)}`}
                               >
                                 {t('finance_details')}
@@ -386,23 +471,54 @@ export function FinanceAdminPage() {
             </>
           ) : data && tab === 'overview' ? (
             <>
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="sf-metrics">
                 {['pendingPayments', 'pendingTransfers', 'pendingApprovals'].map((key) => (
-                  <article key={key} className="rounded-xl border p-4">
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() =>
+                      setParams({
+                        tab:
+                          key === 'pendingPayments'
+                            ? 'payments'
+                            : key === 'pendingTransfers'
+                              ? 'transfers'
+                              : 'approvals',
+                        ...(key === 'pendingTransfers' ? {} : { status: 'PENDING' }),
+                        page: '1',
+                      })
+                    }
+                  >
                     <p>{t(`finance_${key}` as Parameters<typeof t>[0])}</p>
-                    <strong>{data[key] ?? '—'}</strong>
-                  </article>
+                    <strong
+                      className={typeof data[key] === 'number' ? undefined : 'sf-metric-message'}
+                    >
+                      {typeof data[key] === 'number' ? data[key] : c('غير متاح', 'Unavailable')}
+                    </strong>
+                    <small>{c('فتح السجلات', 'Open records')}</small>
+                  </button>
                 ))}
               </div>
               <p>
                 {t('finance_scan_state')}: {data.reconciliationHealth}
               </p>
-              <p>{t('finance_runtime_pending')}</p>
+              <p className="sf-notice">
+                {c(
+                  'هذه مؤشرات متابعة للحالات المتاحة، وليست قائمة أرباح أو رصيدًا بنكيًا.',
+                  'These are available operational counters, not a profit statement or bank balance.',
+                )}
+              </p>
               <Issues rows={data.attention} />
             </>
           ) : data && tab === 'reports' ? (
             <>
-              <p>{t('finance_report_units')}</p>
+              <p className="sf-notice">
+                {t('finance_report_units')} ·{' '}
+                {c(
+                  'النطاق: السجلات المتاحة؛ لا تجمع عملات مختلفة.',
+                  'Scope: available records; currencies are not combined.',
+                )}
+              </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 {[
                   'grossCollectionsByCurrency',
@@ -432,7 +548,12 @@ export function FinanceAdminPage() {
             </>
           ) : data && tab === 'runtime' ? (
             <>
-              <p>{t('finance_runtime_pending')}</p>
+              <p className="sf-notice">
+                {c(
+                  'حالة إعداد مزودي الدفع والتسوية حسب آخر قراءة؛ لا يتم تفعيل أي مزود من هنا.',
+                  'Provider configuration and reconciliation state from the last read. No provider is activated here.',
+                )}
+              </p>
               <p>{data.overall}</p>
               {[
                 ...(data.paymentProviders || []),
@@ -467,14 +588,14 @@ export function FinanceAdminPage() {
               <p>{t('finance_scan_notice')}</p>
               <div className="flex flex-wrap gap-3">
                 <button
-                  disabled={busy}
+                  disabled={busy || !hasPermission('admin:finance:reconciliation:run')}
                   onClick={() => void run(false)}
                   className="rounded-xl border p-3"
                 >
                   {t('finance_run_local_scan')}
                 </button>
                 <button
-                  disabled={busy}
+                  disabled={busy || !hasPermission('admin:finance:reconciliation:providers')}
                   onClick={() => void run(true)}
                   className="rounded-xl border p-3"
                 >

@@ -937,7 +937,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     v1Router.use('/admin/identities', requireAdminPermission('admin:identities:manage'), container.resolve<Router>('identityRouter'));
     v1Router.use('/admin/dashboard', lazyRouter('executiveDashboardRouter'));
     v1Router.use('/admin/review-workspace', requireAdminPermission('admin:platform:manage'), lazyRouter('reviewWorkspaceRouter'));
-    v1Router.use('/admin/services', requireAdminPermission('admin:services:manage'), lazyRouter('managedApplicationEvidenceRouter'));
+    v1Router.use('/admin/services', lazyRouter('managedApplicationEvidenceRouter')); // Matched evidence routes retain their management guard.
     v1Router.use('/identities', SecurityMiddlewareFactory.createAdminGuard({ mfaUseCases: container.resolve('mfaUseCases'), mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator }), createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }), new MutationAuditMiddleware(auditRecordRepository, 'IDENTITY').generate(), requireAdminPermission('admin:identities:manage'), container.resolve<Router>('identityRouter'));
 
     v1Router.use('/admin/audit/workspace', requireAdminPermission('admin:audit:manage'), container.resolve<Router>('auditWorkspaceRouter'));
@@ -1033,7 +1033,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     );
       v1Router.use('/admin/cms', lazyRouter('cmsAdminRouter')); // CMS router enforces fine-grained permissions.
     v1Router.use('/public/cms', lazyRouter('cmsPublicRouter'));
-    v1Router.use('/admin/services', requireAdminPermission('admin:services:manage'), lazyRouter('serviceAdminRouter'));
+    v1Router.use('/admin/services', requireAdminPermission(['admin:services:manage', 'admin:services:requests:view', 'admin:services:operations:manage']), lazyRouter('serviceAdminRouter'));
       v1Router.use('/public/services', lazyRouter('servicePublicRouter'));
     v1Router.use('/admin/finance', requireAdminPermission('admin:finance:manage'), lazyRouter('financeAdminRouter'));
     v1Router.use('/admin/careers', requireAdminPermission('admin:careers:manage'), lazyRouter('careerAdminRouter'));

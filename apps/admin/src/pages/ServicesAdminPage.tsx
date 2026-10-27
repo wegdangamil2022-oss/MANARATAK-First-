@@ -1,16 +1,19 @@
-import {TestDiscoveryEditor} from '../features/integration/TestDiscoveryEditor';
+import { CanonicalPicker } from '../components/CanonicalPicker';
+import { canonicalPickerApi } from '../api/canonicalPickers';
 import { reviewOwnerSearch } from '../features/review-queue/ReviewOwnerNavigation';
 import { serviceText } from '../i18n/serviceText';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
-import { Archive, CheckCircle2, Edit3, Filter, Loader2, Plus, Send, XCircle } from 'lucide-react';
+import { Edit3, Loader2, Plus, ClipboardList, BookOpen, Workflow } from 'lucide-react';
 import { useTranslation } from '../i18n/I18nProvider';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { OwnerHeading, OwnerNavigation } from '../features/services-finance/WorkspaceUI';
+import { serviceSection, type ServiceSection } from '../features/services-finance/workspaceModel';
+import { ServiceCatalogEditor } from '../features/services-finance/ServiceCatalogEditor';
 import { ServiceOperationsWorkspace } from '../components/ServiceOperationsWorkspace';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { ServiceRequestsWorkspace } from '../components/ServiceRequestsWorkspace';
-import { CanonicalPicker, CanonicalMultiPicker } from '../components/CanonicalPicker';
-import { canonicalPickerApi } from '../api/canonicalPickers';
+
 import {
   ServiceAvailabilityStatus,
   ServiceCategory,
@@ -32,7 +35,6 @@ interface ServiceListResponse {
 }
 
 const serviceCategories = Object.values(ServiceCategory);
-const fulfillmentTypes = Object.values(ServiceFulfillmentType);
 const deliveryModes = Object.values(ServiceDeliveryMode);
 const availabilityStatuses = Object.values(ServiceAvailabilityStatus);
 
@@ -69,17 +71,16 @@ const emptyForm = {
   deliveryArtifactTypes: '',
 };
 
+export type ServiceCatalogDraft = typeof emptyForm;
+
 export function ServicesAdminPage() {
   const { t, language } = useTranslation();
   const { hasPermission } = useAdminAuthorization();
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get('request')
-    ? 'REQUESTS'
-    : searchParams.get('tab') === 'requests'
-      ? 'REQUESTS'
-      : searchParams.get('tab') === 'operations'
-        ? 'OPERATIONS'
-        : 'CATALOG';
+  const route = useParams();
+  const navigate = useNavigate();
+  const activeTab = serviceSection(searchParams, hasPermission, Boolean(route.requestReference));
+  const [editorOpen, setEditorOpen] = useState(false);
   const countryFilter = searchParams.get('supportedCountryReferenceId') || '';
   const languageFilter = searchParams.get('supportedLanguageReferenceId') || '';
   const [query, setQuery] = useState(() => reviewOwnerSearch(searchParams));
@@ -151,13 +152,14 @@ export function ServicesAdminPage() {
     completenessFilter,
     countryFilter,
     languageFilter,
+    language,
   ]);
   useEffect(() => {
-    void loadServices();
+    if (activeTab === 'CATALOG') void loadServices();
     return () => {
       ++listSequence.current;
     };
-  }, [loadServices]);
+  }, [loadServices, activeTab]);
   useEffect(() => {
     if (!dirty) return;
     const warn = (event: BeforeUnloadEvent) => {
@@ -179,13 +181,17 @@ export function ServicesAdminPage() {
     setDirty(false);
     setSelectedService(null);
     setForm(emptyForm);
+    setEditorOpen(false);
     const next = new URLSearchParams(searchParams);
     next.delete('request');
     next.set(
       'tab',
       tab === 'REQUESTS' ? 'requests' : tab === 'OPERATIONS' ? 'operations' : 'catalog',
     );
-    setSearchParams(next);
+    next.delete('operation');
+    next.delete('kind');
+    if (route.requestReference) navigate('/services?' + next.toString());
+    else setSearchParams(next);
   }
 
   const createService = async (event: FormEvent) => {
@@ -279,7 +285,25 @@ export function ServicesAdminPage() {
     try {
       const updated = await adminApiClient.request<ServiceCatalogItem>(
         `/admin/services/${service.id}/${action}`,
-        { method: 'POST', body: JSON.stringify({ expectedVersion: service.version, ...(action === 'mark-publishable' ? {reason:reviewReason,checklist:{legal:true,provider:true,price:true,privacy:true,availability:true,language:true}} : {}) }) },
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            expectedVersion: service.version,
+            ...(action === 'mark-publishable'
+              ? {
+                  reason: reviewReason,
+                  checklist: {
+                    legal: true,
+                    provider: true,
+                    price: true,
+                    privacy: true,
+                    availability: true,
+                    language: true,
+                  },
+                }
+              : {}),
+          }),
+        },
       );
       if (selectedService?.id === service.id) selectService(updated, true);
       setMessage(`تم تنفيذ: ${serviceText(formatLabel(action), language)}`);
@@ -303,6 +327,7 @@ export function ServicesAdminPage() {
       return;
     setDirty(false);
     setSelectedService(service);
+    setEditorOpen(true);
     const nextForm = {
       managedApplication: service.managedApplication === true,
       fulfillmentPolicy: service.fulfillmentPolicy ?? 'QUOTE_REQUIRED',
@@ -367,10 +392,19 @@ export function ServicesAdminPage() {
             sensitive: true,
           })),
     localizedContent: {
-      ar: { displayName: form.displayName, serviceDescription: form.serviceDescription },
-      en: { displayName: form.displayNameEn, serviceDescription: form.descriptionEn },
+      ...selectedService?.localizedContent,
+      ar: {
+        ...selectedService?.localizedContent?.ar,
+        displayName: form.displayName,
+        serviceDescription: form.serviceDescription,
+      },
+      en: {
+        ...selectedService?.localizedContent?.en,
+        displayName: form.displayNameEn,
+        serviceDescription: form.descriptionEn,
+      },
     },
-    slaPolicy: { minutes: Number(form.slaMinutes) },
+    slaPolicy: { ...selectedService?.slaPolicy, minutes: Number(form.slaMinutes) },
     responsibleServiceOwnerType: form.responsibleServiceOwnerType.trim(),
     providerName: form.providerName.trim() || null,
     estimatedDeliveryTime: form.estimatedDeliveryTime.trim() || null,
@@ -408,209 +442,253 @@ export function ServicesAdminPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
-        <div className="pointer-events-none absolute -left-16 -top-28 h-64 w-64 rounded-full border border-cyan-400/20" />
-        <div className="pointer-events-none absolute bottom-0 right-0 h-1.5 w-48 bg-gradient-to-r from-transparent via-[#21A7B4] to-[#0E7C86] sm:w-80" />
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200 backdrop-blur-sm border border-white/15">
-              <Plus className="h-4 w-4 text-[#21A7B4]" />
-              <span>{serviceText('منظومة خدمات الطلاب والمؤسسات', language)}</span>
-            </div>
-            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">
-              {t('enterprise_services')}
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-cyan-50/90">
-              {t('manage_service_catalog_items_readiness_publication')}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3 shrink-0">
-            <div className="relative">
-              <select
-                value={statusFilter}
-                onChange={(event) => {
-                  setStatusFilter(event.target.value);
-                  setPage(1);
-                }}
-                className="appearance-none bg-white/10 border border-white/20 rounded-xl py-2.5 pl-3 pr-10 text-sm focus:outline-none text-white focus:ring-1 focus:ring-[#21A7B4]"
-              >
-                <option value="" className="text-slate-900">
-                  {t('all_statuses')}
-                </option>
-                {Object.values(ServiceStatus).map((status) => (
-                  <option key={status} value={status} className="text-slate-900">
-                    {serviceText(formatLabel(status), language)}
-                  </option>
-                ))}
-              </select>
-              <Filter className="absolute right-3 top-3 h-4 w-4 text-cyan-200 pointer-events-none" />
-            </div>
-
-            <div className="relative">
-              <select
-                value={categoryFilter}
-                onChange={(event) => {
-                  setCategoryFilter(event.target.value);
-                  setPage(1);
-                }}
-                className="appearance-none bg-white/10 border border-white/20 rounded-xl py-2.5 pl-3 pr-10 text-sm focus:outline-none text-white focus:ring-1 focus:ring-[#21A7B4]"
-              >
-                <option value="" className="text-slate-900">
-                  {t('all_categories')}
-                </option>
-                {serviceCategories.map((category) => (
-                  <option key={category} value={category} className="text-slate-900">
-                    {serviceText(formatLabel(category), language)}
-                  </option>
-                ))}
-              </select>
-              <Filter className="absolute right-3 top-3 h-4 w-4 text-cyan-200 pointer-events-none" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="flex gap-2 rounded-2xl border bg-white p-2">
-        <button
-          type="button"
-          disabled={saving || requestBusy}
-          onClick={() => switchTab('CATALOG')}
-          aria-pressed={activeTab === 'CATALOG'}
-          className={`rounded-xl px-4 py-3 text-sm font-bold ${activeTab === 'CATALOG' ? 'bg-[#142B5F] text-white' : 'text-slate-700'}`}
-        >
-          {serviceText('كتالوج الخدمات', language)}
-        </button>
-        <button
-          type="button"
-          disabled={saving || requestBusy}
-          onClick={() => switchTab('REQUESTS')}
-          aria-pressed={activeTab === 'REQUESTS'}
-          className={`rounded-xl px-4 py-3 text-sm font-bold ${activeTab === 'REQUESTS' ? 'bg-[#142B5F] text-white' : 'text-slate-700'}`}
-        >
-          {serviceText('طلبات الطلاب', language)}
-        </button>
-        {hasPermission('admin:services:operations:manage') && (
-          <button
-            type="button"
-            onClick={() => switchTab('OPERATIONS')}
-            className="rounded-xl px-4 py-3 text-sm font-bold"
-          >
-            {t('svc_operations')}
-          </button>
-        )}
-      </div>
-      {activeTab === 'OPERATIONS' && <ServiceOperationsWorkspace />}
+    <div className="sf-workspace mx-auto max-w-7xl" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+      <OwnerHeading
+        title={t('enterprise_services')}
+        description={
+          language === 'ar'
+            ? 'إدارة طلبات الطلاب والخدمات والمواعيد والتنفيذ من مساحة واحدة.'
+            : 'Manage student requests, catalog, scheduling and fulfillment.'
+        }
+        actions={
+          activeTab === 'CATALOG' &&
+          !editorOpen && (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => {
+                formBaseline.current = JSON.stringify(emptyForm);
+                setForm(emptyForm);
+                setSelectedService(null);
+                setDirty(false);
+                setEditorOpen(true);
+              }}
+            >
+              <Plus size={16} />
+              {language === 'ar' ? 'إضافة خدمة' : 'Add service'}
+            </button>
+          )
+        }
+      />
+      <OwnerNavigation
+        items={[
+          ...(hasPermission('admin:services:requests:view')
+            ? [
+                {
+                  id: 'REQUESTS',
+                  label: language === 'ar' ? 'الطلبات والتنفيذ' : 'Requests & fulfillment',
+                  description:
+                    language === 'ar' ? 'متابعة الحالات وتسليم النتائج' : 'Cases and delivery',
+                  icon: ClipboardList,
+                },
+              ]
+            : []),
+          ...(hasPermission('admin:services:manage')
+            ? [
+                {
+                  id: 'CATALOG',
+                  label: language === 'ar' ? 'كتالوج الخدمات' : 'Service catalog',
+                  description:
+                    language === 'ar'
+                      ? 'التعريف والمتطلبات والنشر'
+                      : 'Definitions, requirements and publishing',
+                  icon: BookOpen,
+                },
+              ]
+            : []),
+          ...(hasPermission('admin:services:operations:manage')
+            ? [
+                {
+                  id: 'OPERATIONS',
+                  label: language === 'ar' ? 'العمليات' : 'Operations',
+                  description:
+                    language === 'ar'
+                      ? 'المزودون والتسعير والمواعيد'
+                      : 'Providers, pricing and scheduling',
+                  icon: Workflow,
+                },
+              ]
+            : []),
+        ]}
+        active={activeTab ?? ''}
+        onChange={(tab) => switchTab(tab as ServiceSection)}
+        disabled={saving || requestBusy}
+        label={language === 'ar' ? 'أقسام الخدمات' : 'Service sections'}
+      />
+      {!activeTab && (
+        <p role="alert" className="sf-notice">
+          {language === 'ar'
+            ? 'ليس لديك صلاحية لعرض هذا الجزء من الخدمات.'
+            : 'You do not have permission to view this service section.'}
+        </p>
+      )}
+      {activeTab === 'OPERATIONS' && (
+        <ServiceOperationsWorkspace onBusyChange={setRequestBusy} onDirtyChange={setRequestDirty} />
+      )}
       {activeTab === 'REQUESTS' && hasPermission('admin:services:requests:view') && (
         <ServiceRequestsWorkspace onBusyChange={setRequestBusy} onDirtyChange={setRequestDirty} />
       )}
       {activeTab === 'CATALOG' && (
         <>
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              setPage(1);
-              query.trim() === search ? void loadServices() : setSearch(query.trim());
-            }}
-            className="flex flex-wrap items-end gap-3 rounded-2xl border bg-white p-4"
-          >
-            <label>
-              {t('svc_fulfillment')}
-              <select
-                value={fulfillmentFilter}
-                onChange={(e) => {
-                  setFulfillmentFilter(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">{t('all')}</option>
-                {Object.values(ServiceFulfillmentType).map((value) => (
-                  <option key={value}>{value}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              {t('svc_completeness')}
-              <select
-                value={completenessFilter}
-                onChange={(e) => {
-                  setCompletenessFilter(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">{t('all')}</option>
-                {Object.values(ServiceCompletenessStatus).map((value) => (
-                  <option key={value}>{value}</option>
-                ))}
-              </select>
-            </label>
-            <CanonicalPicker
-              label={t('supported_countries')}
-              value={countryFilter || null}
-              load={canonicalPickerApi.countries}
-              paged optional
-              onChange={(value) => {
+          {!editorOpen && (
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
                 setPage(1);
-                setSearchParams((current) => {
-                  const next = new URLSearchParams(current);
-                  value ? next.set('supportedCountryReferenceId', value) : next.delete('supportedCountryReferenceId');
-                  return next;
-                });
+                query.trim() === search ? void loadServices() : setSearch(query.trim());
               }}
-            />
-            <CanonicalPicker
-              label={t('supported_languages')}
-              value={languageFilter || null}
-              load={canonicalPickerApi.languages}
-              paged optional
-              onChange={(value) => {
-                setPage(1);
-                setSearchParams((current) => {
-                  const next = new URLSearchParams(current);
-                  value ? next.set('supportedLanguageReferenceId', value) : next.delete('supportedLanguageReferenceId');
-                  return next;
-                });
-              }}
-            />
-            <label className="flex-1 text-xs font-bold">
-              {serviceText('بحث بالاسم أو الرمز أو المزود', language)}
-              <input
-                maxLength={120}
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                className="mt-2 w-full rounded-xl border p-3"
-              />
-            </label>
-            <SelectField
-              label={serviceText('التوفر', language)}
-              value={availabilityFilter}
-              values={['', ...availabilityStatuses]}
-              onChange={(value) => {
-                setAvailabilityFilter(value);
-                setPage(1);
-              }}
-            />
-            <SelectField
-              label={serviceText('طريقة التنفيذ', language)}
-              value={deliveryFilter}
-              values={['', ...deliveryModes]}
-              onChange={(value) => {
-                setDeliveryFilter(value);
-                setPage(1);
-              }}
-            />
-            <button className="rounded-xl bg-[#142B5F] px-4 py-3 text-sm font-bold text-white">
-              {serviceText('بحث', language)}
-            </button>
-            <button
-              type="button"
-              disabled={loading}
-              onClick={() => void loadServices()}
-              className="rounded-xl border px-4 py-3 text-sm"
+              className="sf-toolbar sf-filter-panel"
             >
-              {serviceText('تحديث', language)}
-            </button>
-          </form>
+              <label className="flex-1 text-xs font-bold">
+                {serviceText('بحث بالاسم أو الرمز أو المزود', language)}
+                <input
+                  maxLength={120}
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                />
+              </label>
+              <label>
+                {t('status')}
+                <select
+                  value={statusFilter}
+                  onChange={(event) => {
+                    setStatusFilter(event.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="">{t('all_statuses')}</option>
+                  {Object.values(ServiceStatus).map((value) => (
+                    <option key={value} value={value}>
+                      {serviceText(formatLabel(value), language)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                {t('category')}
+                <select
+                  value={categoryFilter}
+                  onChange={(event) => {
+                    setCategoryFilter(event.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="">{t('all_categories')}</option>
+                  {serviceCategories.map((value) => (
+                    <option key={value} value={value}>
+                      {serviceText(formatLabel(value), language)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <details
+                className="sf-advanced-filters"
+                open={Boolean(
+                  fulfillmentFilter ||
+                  completenessFilter ||
+                  countryFilter ||
+                  languageFilter ||
+                  availabilityFilter ||
+                  deliveryFilter,
+                )}
+              >
+                <summary>{language === 'ar' ? 'فلاتر إضافية' : 'More filters'}</summary>
+                <div className="sf-form-grid">
+                  <label>
+                    {t('svc_fulfillment')}
+                    <select
+                      value={fulfillmentFilter}
+                      onChange={(e) => {
+                        setFulfillmentFilter(e.target.value);
+                        setPage(1);
+                      }}
+                    >
+                      <option value="">{t('all')}</option>
+                      {Object.values(ServiceFulfillmentType).map((value) => (
+                        <option key={value}>{value}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    {t('svc_completeness')}
+                    <select
+                      value={completenessFilter}
+                      onChange={(e) => {
+                        setCompletenessFilter(e.target.value);
+                        setPage(1);
+                      }}
+                    >
+                      <option value="">{t('all')}</option>
+                      {Object.values(ServiceCompletenessStatus).map((value) => (
+                        <option key={value}>{value}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <CanonicalPicker
+                    label={t('supported_countries')}
+                    value={countryFilter || null}
+                    load={canonicalPickerApi.countries}
+                    paged
+                    optional
+                    onChange={(value) => {
+                      setPage(1);
+                      setSearchParams((current) => {
+                        const next = new URLSearchParams(current);
+                        value
+                          ? next.set('supportedCountryReferenceId', value)
+                          : next.delete('supportedCountryReferenceId');
+                        return next;
+                      });
+                    }}
+                  />
+                  <CanonicalPicker
+                    label={t('supported_languages')}
+                    value={languageFilter || null}
+                    load={canonicalPickerApi.languages}
+                    paged
+                    optional
+                    onChange={(value) => {
+                      setPage(1);
+                      setSearchParams((current) => {
+                        const next = new URLSearchParams(current);
+                        value
+                          ? next.set('supportedLanguageReferenceId', value)
+                          : next.delete('supportedLanguageReferenceId');
+                        return next;
+                      });
+                    }}
+                  />
+                  <SelectField
+                    label={serviceText('التوفر', language)}
+                    value={availabilityFilter}
+                    values={['', ...availabilityStatuses]}
+                    onChange={(value) => {
+                      setAvailabilityFilter(value);
+                      setPage(1);
+                    }}
+                  />
+                  <SelectField
+                    label={serviceText('طريقة التنفيذ', language)}
+                    value={deliveryFilter}
+                    values={['', ...deliveryModes]}
+                    onChange={(value) => {
+                      setDeliveryFilter(value);
+                      setPage(1);
+                    }}
+                  />
+                </div>
+              </details>
+              <button className="sf-primary">{serviceText('بحث', language)}</button>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => void loadServices()}
+                className="rounded-xl border px-4 py-3 text-sm"
+              >
+                {serviceText('تحديث', language)}
+              </button>
+            </form>
+          )}
           {message && (
             <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-2xl text-xs font-bold">
               {message}
@@ -622,500 +700,152 @@ export function ServicesAdminPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div className="xl:col-span-2 bg-white border border-slate-200/90 rounded-3xl shadow-xs overflow-hidden">
-              <div className="border-b border-slate-100 px-6 py-4 flex items-center justify-between">
-                <h2 className="font-black text-[#142B5F]">
-                  {serviceText('سجل كتالوج الخدمات (', language)}
-                  {services?.total ?? 0})
-                </h2>
-                <span className="text-xs font-bold text-slate-500">
-                  {loading
-                    ? serviceText('جارٍ التحديث…', language)
-                    : serviceText('البيانات المحملة من الخادم', language)}
-                </span>
-              </div>
-              {loading ? (
-                <div className="flex justify-center items-center h-64">
-                  <Loader2 className="h-8 w-8 animate-spin text-[#0E7C86]" />
+          <div className="space-y-4">
+            {!editorOpen && (
+              <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden">
+                <div className="border-b border-slate-100 px-6 py-4 flex items-center justify-between">
+                  <h2 className="font-black text-[#142B5F]">
+                    {serviceText('سجل كتالوج الخدمات (', language)}
+                    {services?.total ?? 0})
+                  </h2>
+                  <span className="text-xs font-bold text-slate-500">
+                    {loading
+                      ? serviceText('جارٍ التحديث…', language)
+                      : serviceText('البيانات المحملة من الخادم', language)}
+                  </span>
                 </div>
-              ) : listError ? (
-                <p role="alert" className="p-6 text-sm text-red-700">
-                  {listError}
-                </p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-right border-collapse text-xs">
-                    <thead>
-                      <tr className="bg-[#FAF7F0] border-b border-slate-100 font-black text-[#142B5F]">
-                        <th className="px-5 py-3.5">{t('service')}</th>
-                        <th className="px-4 py-3.5">{t('category')}</th>
-                        <th className="px-4 py-3.5">{t('delivery')}</th>
-                        <th className="px-4 py-3.5">{t('status')}</th>
-                        <th className="px-4 py-3.5">{t('updated')}</th>
-                        <th className="px-5 py-3.5 text-left">{t('actions')}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {services?.data.length ? (
-                        services.data.map((service) => (
-                          <tr
-                            key={service.id}
-                            className="hover:bg-slate-50/70 transition align-top"
-                          >
-                            <td className="px-5 py-4">
-                              <div className="font-bold text-[#142B5F] text-sm">
-                                {service.displayName}
-                              </div>
-                              <div className="text-[11px] font-mono text-slate-400">
-                                /{service.slug}
-                              </div>
-                              <div className="text-xs text-slate-600 mt-1 line-clamp-2">
-                                {service.serviceDescription}
-                              </div>
-                            </td>
-                            <td className="px-4 py-4 font-semibold text-slate-700">
-                              {serviceText(formatLabel(service.serviceCategory), language)}
-                            </td>
-                            <td className="px-4 py-4 text-slate-600">
-                              <div className="font-bold text-[#0E7C86]">
-                                {serviceText(formatLabel(service.deliveryMode), language)}
-                              </div>
-                              <div className="text-[11px] text-slate-400">
-                                {serviceText(formatLabel(service.fulfillmentType), language)}
-                              </div>
-                            </td>
-                            <td className="px-4 py-4 space-y-1.5">
-                              <StatusBadge status={service.status} />
-                              <div>
-                                <CompletenessBadge status={service.completenessStatus} />
-                              </div>
-                            </td>
-                            <td className="px-4 py-4 text-slate-500 font-medium">
-                              {formatDate(service.updatedAt)}
-                            </td>
-                            <td className="px-5 py-4 text-left">
-                              <div className="flex flex-wrap justify-end gap-1.5">
-                                <button
-                                  disabled={saving}
-                                  onClick={() => selectService(service)}
-                                  className="rounded-xl border border-slate-200 px-2.5 py-1 text-xs font-bold text-[#142B5F] hover:bg-slate-50 inline-flex items-center gap-1 transition"
-                                >
-                                  <Edit3 className="h-3.5 w-3.5 text-[#0E7C86]" /> {t('edit')}
-                                </button>
-                                <button
-                                  onClick={() => transitionService(service, 'mark-publishable')}
-                                  disabled={
-                                    saving ||
-                                    service.completenessStatus !== 'COMPLETE' ||
-                                    service.status === 'PUBLISHED' ||
-                                    service.status === 'ARCHIVED' ||
-                                    service.status === 'READY_TO_PUBLISH'
-                                  }
-                                  className="rounded-xl border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-40 inline-flex items-center gap-1 transition"
-                                >
-                                  <CheckCircle2 className="h-3.5 w-3.5" /> {t('ready')}
-                                </button>
-                                <button
-                                  onClick={() => transitionService(service, 'publish')}
-                                  disabled={
-                                    saving ||
-                                    service.status !== 'READY_TO_PUBLISH' ||
-                                    (selectedService?.id === service.id && dirty)
-                                  }
-                                  className="rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-40 inline-flex items-center gap-1 transition"
-                                >
-                                  <Send className="h-3.5 w-3.5" /> {t('publish')}
-                                </button>
-                                {service.status === 'PUBLISHED' && (
+                {loading ? (
+                  <div className="flex justify-center items-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin text-[#142B5F]" />
+                  </div>
+                ) : listError ? (
+                  <p role="alert" className="p-6 text-sm text-red-700">
+                    {listError}
+                  </p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-right border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-[#FAF7F0] border-b border-slate-100 font-black text-[#142B5F]">
+                          <th className="px-5 py-3.5">{t('service')}</th>
+                          <th className="px-4 py-3.5">{t('category')}</th>
+                          <th className="px-4 py-3.5">{t('delivery')}</th>
+                          <th className="px-4 py-3.5">{t('status')}</th>
+                          <th className="px-4 py-3.5">{t('updated')}</th>
+                          <th className="px-5 py-3.5 text-left">{t('actions')}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {services?.data.length ? (
+                          services.data.map((service) => (
+                            <tr
+                              key={service.id}
+                              className="hover:bg-slate-50/70 transition align-top"
+                            >
+                              <td className="px-5 py-4">
+                                <div className="font-bold text-[#142B5F] text-sm">
+                                  {service.displayName}
+                                </div>
+                                <div className="text-[11px] font-mono text-slate-400">
+                                  /{service.slug}
+                                </div>
+                                <div className="text-xs text-slate-600 mt-1 line-clamp-2">
+                                  {service.serviceDescription}
+                                </div>
+                              </td>
+                              <td className="px-4 py-4 font-semibold text-slate-700">
+                                {serviceText(formatLabel(service.serviceCategory), language)}
+                              </td>
+                              <td className="px-4 py-4 text-slate-600">
+                                <div className="font-bold text-[#142B5F]">
+                                  {serviceText(formatLabel(service.deliveryMode), language)}
+                                </div>
+                                <div className="text-[11px] text-slate-400">
+                                  {serviceText(formatLabel(service.fulfillmentType), language)}
+                                </div>
+                              </td>
+                              <td className="px-4 py-4 space-y-1.5">
+                                <StatusBadge status={service.status} />
+                                <div>
+                                  <CompletenessBadge status={service.completenessStatus} />
+                                </div>
+                              </td>
+                              <td className="px-4 py-4 text-slate-500 font-medium">
+                                {formatDate(service.updatedAt)}
+                              </td>
+                              <td className="px-5 py-4 text-left">
+                                <div className="flex flex-wrap justify-end gap-1.5">
                                   <button
                                     disabled={saving}
-                                    onClick={() => transitionService(service, 'unpublish')}
-                                    className="rounded-xl border px-2.5 py-1 text-xs font-bold"
+                                    onClick={() => selectService(service)}
+                                    className="rounded-xl border border-slate-200 px-2.5 py-1 text-xs font-bold text-[#142B5F] hover:bg-slate-50 inline-flex items-center gap-1 transition"
                                   >
-                                    {serviceText('إلغاء النشر', language)}
+                                    <Edit3 className="h-3.5 w-3.5 text-[#142B5F]" /> {t('edit')}
                                   </button>
-                                )}
-                                {service.status === 'PUBLISHED' && (
-                                  <a
-                                    href={`${(import.meta.env.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '')}/services/${encodeURIComponent(service.slug)}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="rounded-xl border px-2.5 py-1 text-xs font-bold text-teal-700"
-                                  >
-                                    {serviceText('عرض للعامة', language)}
-                                  </a>
-                                )}
-                                <button
-                                  onClick={() => transitionService(service, 'reject')}
-                                  disabled={saving || service.status === 'PUBLISHED'}
-                                  className="rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 hover:bg-rose-100 disabled:opacity-40 inline-flex items-center gap-1 transition"
-                                >
-                                  <XCircle className="h-3.5 w-3.5" /> {t('reject')}
-                                </button>
-                                {['ARCHIVED', 'REJECTED'].includes(service.status) && (
-                                  <button
-                                    disabled={saving}
-                                    onClick={() => transitionService(service, 'mark-ready')}
-                                    className="rounded-xl border px-2.5 py-1 text-xs font-bold text-teal-700"
-                                  >
-                                    {serviceText('إعادة للمراجعة', language)}
-                                  </button>
-                                )}
-                                <button
-                                  onClick={() => transitionService(service, 'archive')}
-                                  disabled={saving || service.status === 'ARCHIVED'}
-                                  className="rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-40 inline-flex items-center gap-1 transition"
-                                >
-                                  <Archive className="h-3.5 w-3.5" /> {t('archive')}
-                                </button>
-                              </div>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td
+                              colSpan={6}
+                              className="px-6 py-12 text-center text-slate-400 font-bold"
+                            >
+                              {t('no_services_found')}
                             </td>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan={6}
-                            className="px-6 py-12 text-center text-slate-400 font-bold"
-                          >
-                            {t('no_services_found')}
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-
-            <form
-              onChange={() => setDirty(true)}
-              onSubmit={selectedService ? updateService : createService}
-              className="bg-white border border-slate-200/90 rounded-3xl shadow-xs p-6 space-y-4"
-            >
-              <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-                <Plus className="h-5 w-5 text-[#0E7C86]" />
-                <h3 className="font-black text-[#142B5F] text-base">
-                  {selectedService
-                    ? serviceText('تعديل الخدمة', language)
-                    : serviceText('إضافة خدمة جديدة', language)}
-                </h3>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label>
-                  {t('svc_policy')}
-                  <select
-                    className="block w-full rounded-xl border p-2"
-                    value={form.fulfillmentPolicy}
-                    onChange={(e) => setForm({ ...form, fulfillmentPolicy: e.target.value })}
-                  >
-                    {['FREE', 'CHARGEABLE', 'QUOTE_REQUIRED'].map((value) => (
-                      <option key={value}>{value}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  {t('svc_provider')}
-                  <input
-                    className="block w-full rounded-xl border p-2"
-                    value={form.providerReferenceId}
-                    onChange={(e) => setForm({ ...form, providerReferenceId: e.target.value })}
-                  />
-                </label>
-                <label>
-                  {t('svc_input_fields')}
-                  <input
-                    className="block w-full rounded-xl border p-2"
-                    value={form.inputFieldKeys}
-                    onChange={(e) => setForm({ ...form, inputFieldKeys: e.target.value })}
-                  />
-                </label>
-                <label>
-                  {t('svc_sla')}
-                  <input
-                    className="block w-full rounded-xl border p-2"
-                    type="number"
-                    min="1"
-                    value={form.slaMinutes}
-                    onChange={(e) => setForm({ ...form, slaMinutes: e.target.value })}
-                  />
-                </label>
-                <label>
-                  {t('svc_name_en')}
-                  <input
-                    className="block w-full rounded-xl border p-2"
-                    value={form.displayNameEn}
-                    onChange={(e) => setForm({ ...form, displayNameEn: e.target.value })}
-                  />
-                </label>
-                <label>
-                  {t('svc_description_en')}
-                  <textarea
-                    className="block w-full rounded-xl border p-2"
-                    value={form.descriptionEn}
-                    onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })}
-                  />
-                </label>
-              </div>
-              {selectedService && (
-                <div className="space-y-2">
-                  <p className="text-xs font-mono text-[#0E7C86] font-bold">
-                    {t('editing')}: {selectedService.publicId}
-                  </p>
-                  <button
-                    type="button"
-                    disabled={saving}
-                    onClick={async () => {
-                      if (
-                        dirty &&
-                        !window.confirm(
-                          serviceText(
-                            'استبدال التعديلات غير المحفوظة بالنسخة الحالية من الخادم؟',
-                            language,
-                          ),
-                        )
-                      )
-                        return;
-                      try {
-                        selectService(
-                          await adminApiClient.request<ServiceCatalogItem>(
-                            `/admin/services/${encodeURIComponent(selectedService.id)}`,
-                          ),
-                          true,
-                        );
-                      } catch (cause) {
-                        setError(
-                          cause instanceof Error
-                            ? cause.message
-                            : serviceText('تعذر تحديث البيانات.', language),
-                        );
-                      }
-                    }}
-                    className="text-xs font-bold text-teal-700 underline"
-                  >
-                    {serviceText('إعادة تحميل النسخة المحفوظة', language)}
-                  </button>
-                </div>
-              )}
-
-              <fieldset disabled={saving} className="space-y-4 min-w-0">
-                {dirty && (
-                  <p className="rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
-                    {serviceText('تعديلات غير محفوظة', language)}
-                  </p>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
-                <Field
-                  label={t('service_name')}
-                  value={form.displayName}
-                  onChange={(value) => setForm({ ...form, displayName: value })}
-                  placeholder={serviceText('مثال: استشارة قبول جامعي متخصص', language)}
-                />
-                <TextArea
-                  label={t('service_description')}
-                  value={form.serviceDescription}
-                  onChange={(value) => setForm({ ...form, serviceDescription: value })}
-                  rows={3}
-                  placeholder={serviceText('وصف تفصيلي للخدمة ومخرجاتها...', language)}
-                />
-                <SelectField
-                  label={t('category')}
-                  value={form.serviceCategory}
-                  values={serviceCategories}
-                  onChange={(value) =>
-                    setForm({ ...form, serviceCategory: value as ServiceCategory })
-                  }
-                />
-                <SelectField
-                  label={t('fulfillment_type')}
-                  value={form.fulfillmentType}
-                  values={fulfillmentTypes}
-                  onChange={(value) =>
-                    setForm({ ...form, fulfillmentType: value as ServiceFulfillmentType })
-                  }
-                />
-                <SelectField
-                  label={t('delivery_mode')}
-                  value={form.deliveryMode}
-                  values={deliveryModes}
-                  onChange={(value) =>
-                    setForm({ ...form, deliveryMode: value as ServiceDeliveryMode })
-                  }
-                />
-                {form.fulfillmentType === ServiceFulfillmentType.APPLICATION_SUPPORT && <label className="flex items-center gap-2 text-xs font-bold"><input type="checkbox" checked={form.managedApplication} onChange={event=>setForm({...form,managedApplication:event.target.checked})}/>{language==='ar'?'خدمة تتولى فيها منارتك التقديم للجامعة نيابة عن الطالب (تخضع للمراجعة والنشر)':'MANARATAK applies to universities on the student’s behalf (requires review and publication)'}</label>}
-                <SelectField
-                  label={t('availability')}
-                  value={form.serviceAvailabilityStatus}
-                  values={availabilityStatuses}
-                  onChange={(value) =>
-                    setForm({
-                      ...form,
-                      serviceAvailabilityStatus: value as ServiceAvailabilityStatus,
-                    })
-                  }
-                />
-                <Field
-                  label={t('required_inputs_documents')}
-                  value={form.requiredInputsOrDocuments}
-                  onChange={(value) => setForm({ ...form, requiredInputsOrDocuments: value })}
-                  placeholder={serviceText('جواز السفر، كشف الدرجات، السيرة الذاتية', language)}
-                />
-                <Field
-                  label={t('responsible_owner_type')}
-                  value={form.responsibleServiceOwnerType}
-                  onChange={(value) => setForm({ ...form, responsibleServiceOwnerType: value })}
-                  placeholder="MANARATAK_TEAM"
-                />
-                <Field
-                  label={t('estimated_delivery_time')}
-                  value={form.estimatedDeliveryTime}
-                  onChange={(value) => setForm({ ...form, estimatedDeliveryTime: value })}
-                  optional
-                  placeholder={serviceText('مثال: 3-5 أيام عمل', language)}
-                />
-                <Field
-                  label={t('provider_name')}
-                  value={form.providerName}
-                  onChange={(value) => setForm({ ...form, providerName: value })}
-                  optional
-                  placeholder={serviceText('اسم المزود إن وجد', language)}
-                />
-                <CanonicalMultiPicker
-                  label={t('supported_countries')}
-                  values={form.supportedCountryReferenceIds}
-                  onChange={(values) => setForm({ ...form, supportedCountryReferenceIds: values })}
-                  load={() => canonicalPickerApi.countries()}
-                  reloadKey="service-countries"
-                />
-                <CanonicalMultiPicker
-                  label={t('supported_languages')}
-                  values={form.supportedLanguageReferenceIds}
-                  onChange={(values) => setForm({ ...form, supportedLanguageReferenceIds: values })}
-                  load={() => canonicalPickerApi.languages()}
-                  reloadKey="service-languages"
-                />
-                <Field
-                  label={t('pricing_reference_id')}
-                  value={form.pricingReferenceId}
-                  onChange={(value) => setForm({ ...form, pricingReferenceId: value })}
-                  optional
-                  placeholder={serviceText('معرف التسعيرة المرجعية', language)}
-                />
-                <Field
-                  label={t('thumbnail_asset_id')}
-                  value={form.thumbnailAssetId}
-                  onChange={(value) => setForm({ ...form, thumbnailAssetId: value })}
-                  optional
-                  placeholder={serviceText('معرف أصل الصورة المميزة', language)}
-                />
+              </div>
+            )}
 
-                <h4 className="border-t pt-4 text-sm font-bold text-[#142B5F]">
-                  {serviceText('تفاصيل الصفحة العامة', language)}
-                </h4>
-                <TextArea
-                  label={serviceText('ما تشمل الخدمة (كل عنصر في سطر)', language)}
-                  value={form.includes}
-                  onChange={(value) => setForm({ ...form, includes: value })}
-                  rows={3}
-                />
-                <TextArea
-                  label={serviceText('ما لا تشمل الخدمة', language)}
-                  value={form.excludes}
-                  onChange={(value) => setForm({ ...form, excludes: value })}
-                  rows={3}
-                />
-                <TextArea
-                  label={serviceText('الأسئلة الشائعة (سؤال | إجابة في كل سطر)', language)}
-                  value={form.faqs}
-                  onChange={(value) => setForm({ ...form, faqs: value })}
-                  rows={4}
-                />
-                <TextArea
-                  label={serviceText('سياسة الإلغاء', language)}
-                  value={form.cancellationPolicy}
-                  onChange={(value) => setForm({ ...form, cancellationPolicy: value })}
-                  rows={3}
-                />
-                <Field
-                  label={serviceText('وسم البطاقة', language)}
-                  value={form.badge}
-                  onChange={(value) => setForm({ ...form, badge: value })}
-                  optional
-                />
-                <Field
-                  label={serviceText('وصف السعر المعروض', language)}
-                  value={form.priceLabel}
-                  onChange={(value) => setForm({ ...form, priceLabel: value })}
-                  optional
-                />
-                <TextArea
-                  label={serviceText('البيانات المطلوب إدخالها عند طلب الخدمة', language)}
-                  value={form.servicePrerequisites}
-                  onChange={(value) => setForm({ ...form, servicePrerequisites: value })}
-                  rows={3}
-                />
-                <TextArea
-                  label={serviceText('مخرجات التسليم', language)}
-                  value={form.deliveryArtifactTypes}
-                  onChange={(value) => setForm({ ...form, deliveryArtifactTypes: value })}
-                  rows={3}
-                />
-                <label className="flex items-center justify-between gap-3 text-xs font-bold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <span>{t('appointment_required')}</span>
-                  <input
-                    type="checkbox"
-                    checked={form.appointmentRequired}
-                    onChange={(event) =>
-                      setForm({ ...form, appointmentRequired: event.target.checked })
-                    }
-                    className="h-4 w-4 rounded border-slate-300 text-[#0E7C86] focus:ring-[#0E7C86]"
-                  />
-                </label>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
-                  <button
-                    type="submit"
-                    disabled={
-                      saving ||
-                      !form.displayName ||
-                      !form.serviceDescription ||
-                      !form.requiredInputsOrDocuments
-                    }
-                    className="inline-flex items-center justify-center gap-2 bg-[#0E7C86] hover:bg-[#142B5F] text-white rounded-2xl px-4 py-2.5 text-xs font-black shadow-md transition disabled:opacity-50"
-                  >
-                    {saving ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <CheckCircle2 className="h-4 w-4" />
-                    )}
-                    {selectedService
-                      ? serviceText('حفظ التعديلات', language)
-                      : serviceText('إنشاء الخدمة', language)}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={saving}
-                    onClick={() => {
-                      if (
-                        dirty &&
-                        !window.confirm(serviceText('ترك التعديلات غير المحفوظة؟', language))
-                      )
-                        return;
-                      formBaseline.current = JSON.stringify(emptyForm);
-                      setSelectedService(null);
-                      setForm(emptyForm);
-                      setDirty(false);
-                    }}
-                    className="inline-flex items-center justify-center gap-2 border border-slate-200 rounded-2xl px-4 py-2.5 text-xs font-bold bg-white text-slate-700 hover:bg-slate-50 transition"
-                  >
-                    {t('clear')}
-                  </button>
-                </div>
-              </fieldset>
-            </form>
-            {selectedService&&<TestDiscoveryEditor key={`${selectedService.id}:${selectedService.version}`} ownerType="SERVICES" ownerKey={selectedService.id}/>}
+            {editorOpen && (
+              <ServiceCatalogEditor
+                draft={form}
+                onChange={setForm}
+                service={selectedService}
+                busy={saving}
+                dirty={dirty}
+                onSubmit={selectedService ? updateService : createService}
+                onTransition={(service, action) => void transitionService(service, action)}
+                onClose={() => {
+                  if (
+                    saving ||
+                    (dirty && !window.confirm(serviceText('ترك التعديلات غير المحفوظة؟', language)))
+                  )
+                    return;
+                  formBaseline.current = JSON.stringify(emptyForm);
+                  setDirty(false);
+                  setSelectedService(null);
+                  setForm(emptyForm);
+                  setEditorOpen(false);
+                }}
+                onReload={async () => {
+                  if (
+                    !selectedService ||
+                    (dirty &&
+                      !window.confirm(serviceText('استبدال التعديلات بالنسخة المحفوظة؟', language)))
+                  )
+                    return;
+                  try {
+                    selectService(
+                      await adminApiClient.request<ServiceCatalogItem>(
+                        '/admin/services/' + encodeURIComponent(selectedService.id),
+                      ),
+                      true,
+                    );
+                  } catch (cause) {
+                    setError(cause instanceof Error ? cause.message : 'SERVICE_RELOAD_FAILED');
+                  }
+                }}
+              />
+            )}
           </div>
-          {services && (
+          {services && !editorOpen && (
             <div className="flex justify-between rounded-xl border bg-white p-4 text-sm">
               <button disabled={loading || page <= 1} onClick={() => setPage((value) => value - 1)}>
                 {serviceText('السابق', language)}
@@ -1134,91 +864,6 @@ export function ServicesAdminPage() {
         </>
       )}
     </div>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  optional,
-  placeholder,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  optional?: boolean;
-  placeholder?: string;
-}) {
-  return (
-    <label className="block">
-      <span className="text-xs font-bold text-slate-700">
-        {label}
-        {optional ? ' (اختياري)' : ''}
-      </span>
-      <input
-        value={value}
-        placeholder={placeholder}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-1 w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium outline-none focus:border-[#21A7B4] transition"
-      />
-    </label>
-  );
-}
-
-function TextArea({
-  label,
-  value,
-  onChange,
-  rows,
-  placeholder,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  rows: number;
-  placeholder?: string;
-}) {
-  return (
-    <label className="block">
-      <span className="text-xs font-bold text-slate-700">{label}</span>
-      <textarea
-        value={value}
-        rows={rows}
-        placeholder={placeholder}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-1 w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium outline-none focus:border-[#21A7B4] transition"
-      />
-    </label>
-  );
-}
-
-function SelectField({
-  label,
-  value,
-  values,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  values: string[];
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label className="block">
-      <span className="text-xs font-bold text-slate-700">{label}</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-1 w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-[#21A7B4] bg-white transition"
-      >
-        {values.map((item) => (
-          <option key={item} value={item}>
-            {formatLabel(item)}
-          </option>
-        ))}
-      </select>
-    </label>
   );
 }
 
@@ -1346,4 +991,33 @@ function parseFaqs(value: string): Array<{ question: string; answer: string }> {
         throw new Error('اكتب كل سؤال بصيغة: سؤال | إجابة.');
       return { question: line.slice(0, index).trim(), answer: line.slice(index + 1).trim() };
     });
+}
+
+function SelectField({
+  label,
+  value,
+  values,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  values: string[];
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="text-xs font-bold text-slate-700">{label}</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-1 w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-[#21A7B4] bg-white transition"
+      >
+        {values.map((item) => (
+          <option key={item} value={item}>
+            {formatLabel(item)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
 }

@@ -331,6 +331,24 @@ export class FinanceAdminRouter {
       }),
     );
     router.get(
+      '/ledger/transactions',
+      asyncHandler(async (req: Request, res: Response) => {
+        await requireFinancePermission(req, 'admin:finance:manage');
+        const filters = z.object({
+          page:z.coerce.number().int().min(1).max(10000).default(1),
+          pageSize:z.coerce.number().int().min(1).max(50).default(20),
+          search:z.string().trim().max(120).optional(),
+          currencyCode:z.string().regex(/^[A-Z]{3}$/).optional(),
+          accountType:z.enum(['ASSET','LIABILITY','REVENUE','EXPENSE','EQUITY']).optional(),
+          accountId:z.string().trim().min(1).max(160).optional(),
+          businessReferenceType:z.string().trim().min(1).max(80).optional(),
+          from:z.coerce.date().optional(),to:z.coerce.date().optional(),
+        }).strict().refine(filters => !filters.from || !filters.to || filters.from <= filters.to, { message: 'Invalid date range', path: ['to'] }).parse(req.query);
+        res.setHeader('Cache-Control','no-store');
+        res.json(await financeAdminUseCases.listLedgerTransactions(filters));
+      }),
+    );
+    router.get(
       '/ledger/transactions/:id',
       asyncHandler(async (req: Request, res: Response) => {
         res.setHeader('Cache-Control', 'no-store');

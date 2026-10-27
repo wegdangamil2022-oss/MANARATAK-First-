@@ -26,6 +26,8 @@ import {
   TransferStatus,
   validateBalancedPostings,
   validateInstallmentPlan,
+  FinancialTransactionFilters,
+  FinancialTransactionSummaryDto,
   FinancialAccountFilters,
   FinancialAccountDto,
   WalletOperationsDto,
@@ -53,6 +55,50 @@ const money = (units: string, currencyCode: string, scale: number): MoneyAmount 
 
 export class PrismaFinanceRepository implements IFinanceRepository {
   constructor(private readonly db: Db) {}
+
+  async listLedgerTransactions(filters: FinancialTransactionFilters): Promise<PaginatedFinanceResult<FinancialTransactionSummaryDto>> {
+    const page = Math.min(10000, Math.max(1, Math.trunc(filters.page || 1)));
+    const pageSize = Math.min(50, Math.max(1, Math.trunc(filters.pageSize || 20)));
+    const search = filters.search?.trim();
+    const where = {
+      ...(filters.currencyCode && { currencyCode: filters.currencyCode }),
+      ...(filters.businessReferenceType && { businessReferenceType: filters.businessReferenceType }),
+      ...((filters.from || filters.to) && { createdAt: { ...(filters.from && { gte: filters.from }), ...(filters.to && { lte: filters.to }) } }),
+      ...((filters.accountType || filters.accountId) && { entries: { some: {
+        ...(filters.accountId && { accountId: filters.accountId }),
+        ...(filters.accountType && { account: { type: filters.accountType } }),
+      } } }),
+      ...(search && { OR: ['publicId','businessReferenceType','businessReferenceId'].map(key=>({[key]:{contains:search,mode:'insensitive'}})) }),
+    };
+    return this.db.$transaction(async (tx: Db) => {
+      const [rows,total] = await Promise.all([
+        tx.financialTransactionRecord.findMany({ where, skip:(page-1)*pageSize, take:pageSize,
+          orderBy:[{createdAt:'desc'},{id:'desc'}],
+          select:{id:true,publicId:true,businessReferenceType:true,businessReferenceId:true,
+            createdAt:true,reversalOfId:true,currencyCode:true,scale:true,
+            reversal:{select:{id:true}},entries:{select:{direction:true,amountMinorUnits:true,currencyCode:true,scale:true}}},
+        }),
+        tx.financialTransactionRecord.count({where}),
+      ]);
+      const data = rows.map((row:any):FinancialTransactionSummaryDto => {
+        let debit=0n,credit=0n;
+        for(const entry of row.entries){
+          if(entry.currencyCode!==row.currencyCode || entry.scale!==row.scale ||
+              !/^(?:0|[1-9]\d*)$/.test(entry.amountMinorUnits))
+            throw new Error('FINANCE_LEDGER_INTEGRITY_ERROR');
+          if(entry.direction==='DEBIT') debit+=BigInt(entry.amountMinorUnits);
+          else if(entry.direction==='CREDIT') credit+=BigInt(entry.amountMinorUnits);
+          else throw new Error('FINANCE_LEDGER_INTEGRITY_ERROR');
+        }
+        if(debit!==credit || row.entries.length<2) throw new Error('FINANCE_LEDGER_INTEGRITY_ERROR');
+        return {id:row.id,publicId:row.publicId,businessReferenceType:row.businessReferenceType,
+          businessReferenceId:row.businessReferenceId,createdAt:row.createdAt,
+          reversalOfId:row.reversalOfId??null,reversalId:row.reversal?.id??null,
+          debit:money(String(debit),row.currencyCode,row.scale),credit:money(String(credit),row.currencyCode,row.scale)};
+      });
+      return {data,total,page,pageSize,totalPages:Math.ceil(total/pageSize)};
+    },{isolationLevel:'RepeatableRead'});
+  }
 
   async listFinancialAccounts(filters: FinancialAccountFilters): Promise<PaginatedFinanceResult<FinancialAccountDto>> {
     const {page, pageSize, ...fields} = normalizeFinancialAccountFilters(filters);

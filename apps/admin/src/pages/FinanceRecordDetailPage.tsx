@@ -1,3 +1,4 @@
+import '../features/services-finance/workspace.css';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
@@ -49,7 +50,7 @@ export function FinanceRecordDetailPage() {
         ? 'refunds'
         : null;
   return (
-    <section dir={dir} className="mx-auto max-w-4xl space-y-4 rounded-3xl border bg-white p-6">
+    <section dir={dir} className="sf-workspace mx-auto max-w-4xl space-y-4 rounded-3xl border bg-white p-6">
       <Link to={`/finance?tab=${encodeURIComponent(kind)}`} className="underline">
         {t('finance_back')}
       </Link>

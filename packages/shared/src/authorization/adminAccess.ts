@@ -43,9 +43,15 @@ export function grantsAdminPermission(
   );
 }
 
+export function grantsAdminSection(permissions: readonly string[], section: string, required: string): boolean {
+  return section === '/services'
+    ? ['admin:services:manage','admin:services:requests:view','admin:services:operations:manage'].some(permission => grantsAdminPermission(permissions, permission))
+    : grantsAdminPermission(permissions, required);
+}
+
 export function firstAllowedAdminPath(permissions: readonly string[] = []): string | null {
   return (
-    ADMIN_SECTIONS.find(([, permission]) => grantsAdminPermission(permissions, permission))?.[0] ??
+    ADMIN_SECTIONS.find(([section, permission]) => grantsAdminSection(permissions, section, permission))?.[0] ??
     null
   );
 }
@@ -69,5 +75,5 @@ export function canAccessAdminPath(path: string, permissions: readonly string[] 
   const match = [...ADMIN_SECTIONS]
     .sort(([a], [b]) => b.length - a.length)
     .find(([section]) => pathname === section || pathname.startsWith(`${section}/`));
-  return !!match && grantsAdminPermission(permissions, match[1]);
+  return !!match && grantsAdminSection(permissions, match[0], match[1]);
 }

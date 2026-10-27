@@ -1,4 +1,5 @@
 import {
+  FinancialTransactionFilters,
   FinanceInvoiceDto,
   FinanceInvoiceFilters,
   FinancePaymentDto,
@@ -12,6 +13,10 @@ import {
 /** Read-only compatibility facade. All financial commands use FinancePlatformUseCases. */
 export class FinanceAdminUseCases {
   constructor(private readonly repository: IFinanceRepository) {}
+  listLedgerTransactions(filters: FinancialTransactionFilters) {
+    if (filters.from && filters.to && filters.from > filters.to) throw new Error('FINANCE_INVALID_DATE_RANGE');
+    return this.repository.listLedgerTransactions(filters);
+  }
   listFinancialAccounts(filters: FinancialAccountFilters) {
     return this.repository.listFinancialAccounts(normalizeFinancialAccountFilters(filters));
   }

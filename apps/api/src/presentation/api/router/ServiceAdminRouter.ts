@@ -145,6 +145,7 @@ export class ServiceAdminRouter {
         .enum(['true', 'false'])
         .transform((value) => value === 'true')
         .optional(),
+      mine: z.enum(['true','false']).transform(value=>value==='true').optional(),
       providerReferenceId: z.string().min(1).optional(),
       studentReferenceId: z.string().min(1).optional(),
       serviceId: z.string().min(1).optional(),
@@ -175,22 +176,27 @@ export class ServiceAdminRouter {
 
     router.use(
       asyncHandler(async (req: Request, _res: Response, next: NextFunction) => {
-        const requests = req.path.startsWith('/requests');
+        // Express matches routes case-insensitively and permits a trailing slash.
+        const policyPath = req.path.replace(/\/+$/, '').toLowerCase();
+        const requests = policyPath.startsWith('/requests');
         await requirePermission(
           req,
           requests
             ? req.method === 'GET'
               ? 'admin:services:requests:view'
               : 'admin:services:requests:fulfill'
-            : req.path.endsWith('/mark-publishable')
+            : policyPath.startsWith('/operations')
+              ? req.method !== 'GET' && /^\/operations\/(?:bookings|executions|deliveries)(?:\/|$)/.test(policyPath)
+                ? 'admin:services:requests:fulfill' : 'admin:services:operations:manage'
+              : policyPath.endsWith('/mark-publishable')
               ? 'admin:services:review'
-              : req.path.endsWith('/publish') || req.path.endsWith('/unpublish')
+              : policyPath.endsWith('/publish') || policyPath.endsWith('/unpublish')
                 ? 'admin:services:publish'
                 : 'admin:services:manage',
         );
-        if (req.path.endsWith('/finance-invoice'))
+        if (policyPath.endsWith('/finance-invoice'))
           await requirePermission(req, 'admin:finance:invoice:manage');
-        if (requests && req.method === 'GET' && req.path !== '/requests/unassigned')
+        if (requests && req.method === 'GET' && !['/requests/unassigned','/requests'].includes(policyPath))
           await requirePermission(req, 'admin:services:requests:pii');
         next();
       }),
@@ -562,12 +568,23 @@ export class ServiceAdminRouter {
     router.get(
       '/requests',
       asyncHandler(async (req: Request, res: Response) => {
-        res.json(
-          await adminServiceFulfillmentUseCases.listRequests({
-            ...requestListQuerySchema.parse(req.query),
-            ...((await mayReadAll(req)) ? {} : { assignedStaffId: req.authUserId! }),
-          }),
-        );
+        res.setHeader('Cache-Control', 'no-store');
+        const { mine, ...filters } = requestListQuerySchema.parse(req.query);
+        const pii = (await cradle.authEvaluatorService.evaluatePermission(req.authUserId!, 'admin:services:requests:pii', {
+          resourceId: 'requests', requestTime: new Date(), ip: req.ip, userAgent: req.headers['user-agent'],
+        })).isGranted;
+        // PII-derived filters and searches can themselves disclose identities through counts.
+        if (!pii && (filters.studentReferenceId || filters.providerReferenceId || filters.search))
+          throw new Error('SERVICE_ACCESS_DENIED');
+        const result = await adminServiceFulfillmentUseCases.listRequests({
+          ...filters,
+          ...(mine || !(await mayReadAll(req)) ? { assignedStaffId: req.authUserId! } : {}),
+        });
+        res.json({ ...result, data: pii ? result.data : result.data.map(row => ({
+          id: row.id, publicId: row.publicId, serviceId: row.serviceId,
+          status: row.status, version: row.version, dueAt: row.dueAt,
+          createdAt: row.createdAt, updatedAt: row.updatedAt,
+        })) });
       }),
     );
 

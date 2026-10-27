@@ -95,6 +95,29 @@ export interface LedgerEntryDto extends LedgerPostingInput {
   sequence: number;
   createdAt: Date | string;
 }
+export interface FinancialTransactionFilters {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  currencyCode?: string;
+  accountType?: 'ASSET'|'LIABILITY'|'REVENUE'|'EXPENSE'|'EQUITY';
+  accountId?: string;
+  businessReferenceType?: string;
+  from?: Date;
+  to?: Date;
+}
+export interface FinancialTransactionSummaryDto {
+  id: string;
+  publicId: string;
+  businessReferenceType: string;
+  businessReferenceId: string;
+  createdAt: Date|string;
+  reversalOfId: string|null;
+  reversalId: string|null;
+  debit: MoneyAmount;
+  credit: MoneyAmount;
+}
+
 export interface FinancialTransactionDto {
   id: string;
   publicId: string;

@@ -249,7 +249,7 @@ export function AdminNavigation() {
 
   const allItems = adminNavigationGroups.flatMap((group) =>
     group.items.filter(
-      (item) => (!item.requiredPermission || hasPermission(item.requiredPermission)) && (item.to !== '/courses/assigned' || !hasPermission('admin:courses:manage')),
+      (item) => (item.to === '/services' ? ['admin:services:manage','admin:services:requests:view','admin:services:operations:manage'].some(hasPermission) : (!item.requiredPermission || hasPermission(item.requiredPermission))) && (item.to !== '/courses/assigned' || !hasPermission('admin:courses:manage')),
     ),
   );
 
@@ -312,7 +312,7 @@ export function AdminNavigation() {
                 <div className="space-y-1">
                   {group.items
                     .filter(
-                      (item) => (!item.requiredPermission || hasPermission(item.requiredPermission)) && (item.to !== '/courses/assigned' || !hasPermission('admin:courses:manage')),
+                      (item) => (item.to === '/services' ? ['admin:services:manage','admin:services:requests:view','admin:services:operations:manage'].some(hasPermission) : (!item.requiredPermission || hasPermission(item.requiredPermission))) && (item.to !== '/courses/assigned' || !hasPermission('admin:courses:manage')),
                     )
                     .map((item) => {
                       const Icon = item.icon;

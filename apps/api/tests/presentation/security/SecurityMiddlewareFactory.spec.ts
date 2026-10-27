@@ -48,6 +48,21 @@ describe('SecurityMiddlewareFactory production headers', () => {
 });
 
 describe('SecurityMiddlewareFactory admin guard', () => {
+  it.each([
+    { grants: ['admin:services:requests:view'], required: ['admin:services:manage', 'admin:services:requests:view'], allowed: true },
+    { grants: [], required: ['admin:services:manage', 'admin:services:requests:view'], allowed: false },
+    { grants: ['admin:services:manage'], required: [], allowed: false },
+  ])('checks alternate entry permissions and fails closed: $allowed / $required', async ({ grants, required, allowed }) => {
+    const evaluatePermission = vi.fn(async (_principal: string, permission: string) => ({
+      isGranted: grants.includes(permission),
+    }));
+    const guard = SecurityMiddlewareFactory.createAdminPermissionGuard(required, { evaluatePermission } as any);
+    const response = createResponse();
+    const next = vi.fn();
+    await guard({ authUserId: 'admin-requests', headers: {} } as any, response as any, next);
+    expect(next.mock.calls.length).toBe(allowed ? 1 : 0);
+    expect(response.statusCode).toBe(allowed ? 200 : 403);
+  });
   const activeSessionManager = {
     isSessionActive: vi.fn().mockResolvedValue(true),
     revokeAllSessions: vi.fn().mockResolvedValue(undefined),

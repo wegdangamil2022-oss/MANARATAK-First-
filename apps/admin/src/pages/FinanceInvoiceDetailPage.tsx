@@ -1,3 +1,4 @@
+import '../features/services-finance/workspace.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
@@ -186,7 +187,7 @@ export function FinanceInvoiceDetailPage() {
     }
   };
   return (
-    <section dir={dir} className="mx-auto max-w-5xl space-y-5 rounded-3xl border bg-white p-6">
+    <section dir={dir} className="sf-workspace mx-auto max-w-5xl space-y-5 rounded-3xl border bg-white p-6">
       <Link
         to="/finance?tab=invoices"
         onClick={(event) => {
