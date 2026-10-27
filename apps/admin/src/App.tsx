@@ -281,7 +281,7 @@ function AdminLayout() {
                   <Route path="/imports/:domainKey" element={<RequireAdminPermission permission="admin:imports:manage"><DomainImportCenterPage /></RequireAdminPermission>} />
                   <Route path="/cross-module-integrity" element={<RequireAdminPermission permission="admin:platform:manage"><CrossModuleIntegrityPage /></RequireAdminPermission>} />
                   <Route path="/health-readiness" element={<RequireAdminPermission permission="admin:platform:manage"><AdminHealthReadinessPage /></RequireAdminPermission>} />
-                  <Route path="/notifications" element={<RequireAdminPermission permission="admin:platform:manage"><NotificationOperationsPage /></RequireAdminPermission>} />
+          <Route path="/notifications/*" element={<RequireAdminPermission permission="admin:platform:manage"><NotificationOperationsPage /></RequireAdminPermission>} />
                   <Route path="/scholarships" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipListPage /></RequireAdminPermission>} />
                   <Route path="/scholarships/:id" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipDetailPage /></RequireAdminPermission>} />
                   <Route path="/scholarships/:id/relationships" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipRelationshipEditorPage /></RequireAdminPermission>} />

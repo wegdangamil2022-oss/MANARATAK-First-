@@ -191,6 +191,23 @@ export interface NotificationIntentSummary {
   createdAt?: Date;
   updatedAt?: Date;
 }
+/** Administrative projection: message variables, ciphertext and provider payloads are never exposed. */
+export interface NotificationIntentDetail extends NotificationIntentSummary {
+  scheduledAt?: Date | null;
+  expiresAt?: Date | null;
+  channels: string[];
+  payloadErasedAt?: Date | null;
+}
+export interface NotificationTemplateDetail extends NotificationTemplateSummary {
+  contents?: NotificationContents;
+}
+export interface NotificationTemplateQuery {
+  search?: string;
+  active?: boolean;
+  channel?: string;
+  locale?: string;
+  after?: { id: string; updatedAt: Date };
+}
 
 export interface NotificationDeliveryCandidate {
   id: string;
@@ -228,6 +245,7 @@ export interface NotificationIntentQuery {
 export interface INotificationIntentRepository {
   save(intent: NotificationIntent): Promise<void>;
   list(limit?: number, query?: NotificationIntentQuery): Promise<NotificationIntentSummary[]>;
+  detail(id: string): Promise<NotificationIntentDetail | null>;
   retry(id: string): Promise<void>;
   cancel(id: string): Promise<void>;
   receipts(id: string): Promise<NotificationChannelReceipt[]>;
@@ -237,7 +255,8 @@ export interface INotificationTemplateRepository {
   save(template: NotificationTemplate, options?: { createOnly?: boolean }): Promise<void>;
   findById(id: TemplateId): Promise<NotificationTemplate | null>;
   deactivate(id: string, expectedVersion: number): Promise<void>;
-  list(limit?: number): Promise<NotificationTemplateSummary[]>;
+  list(limit?: number, query?: NotificationTemplateQuery): Promise<NotificationTemplateSummary[]>;
+  detail(id: string): Promise<NotificationTemplateDetail | null>;
 }
 export interface INotificationRecipientGateway {
   assertEligible(recipientReference: string): Promise<{ locale: string }>;

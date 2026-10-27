@@ -19,6 +19,9 @@ import {
   NotificationRecipientReference,
   NotificationTemplate,
   NotificationTemplateSummary,
+  NotificationIntentDetail,
+  NotificationTemplateDetail,
+  NotificationTemplateQuery,
   TemplateId,
 } from '@manaratak/domain';
 
@@ -182,7 +185,7 @@ export class PrismaNotificationIntentRepository
       manualRetryCount: row.manualRetryCount,
       nextAttemptAt: row.nextAttemptAt,
       deliveredAt: row.deliveredAt,
-      lastErrorCode: row.lastErrorCode,
+      lastErrorCode: safeNotificationErrorCode(row.lastErrorCode),
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     }));
@@ -200,6 +203,37 @@ export class PrismaNotificationIntentRepository
       },
     });
     if (result.count !== 1) throw new Error('NOTIFICATION_INTENT_NOT_CANCELLABLE');
+  }
+  public async detail(id: string): Promise<NotificationIntentDetail | null> {
+    const row = await this.db.notificationIntentRecord.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        reference: true,
+        templateId: true,
+        recipientReference: true,
+        state: true,
+        deliveryState: true,
+        attempts: true,
+        manualRetryCount: true,
+        nextAttemptAt: true,
+        deliveredAt: true,
+        lastErrorCode: true,
+        createdAt: true,
+        updatedAt: true,
+        scheduledAt: true,
+        expiresAt: true,
+        channelsSnapshot: true,
+        payloadErasedAt: true,
+      },
+    });
+    if (!row) return null;
+    const { channelsSnapshot, ...detail } = row;
+    return {
+      ...detail,
+      lastErrorCode: safeNotificationErrorCode(row.lastErrorCode),
+      channels: Array.isArray(channelsSnapshot) ? channelsSnapshot : [],
+    };
   }
 
   public async retry(id: string): Promise<void> {
@@ -279,13 +313,14 @@ export class PrismaNotificationIntentRepository
         attempts: row.attempts,
         // Provider message identifiers/metadata are intentionally not disclosed.
         updatedAt: row.updatedAt,
+        errorCode: safeNotificationErrorCode(row.errorCode),
       })),
       ...attempts.map((row: any) => ({
         channel: 'ATTEMPT',
         status: row.status,
         attempts: row.attempt,
         updatedAt: row.createdAt,
-        errorCode: row.errorCode,
+        errorCode: safeNotificationErrorCode(row.errorCode),
       })),
     ];
   }
@@ -823,10 +858,50 @@ export class PrismaNotificationTemplateRepository implements INotificationTempla
       row.contents ?? undefined,
     );
   }
-  public async list(limit = 100): Promise<NotificationTemplateSummary[]> {
+  public async detail(id: string): Promise<NotificationTemplateDetail | null> {
+    const row = await this.db.notificationTemplateRecord.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        channels: true,
+        requiredVariables: true,
+        localizations: true,
+        active: true,
+        version: true,
+        updatedAt: true,
+        contents: true,
+        _count: { select: { intents: true } },
+      },
+    });
+    if (!row) return null;
+    const { _count, ...detail } = row;
+    return { ...detail, usageCount: _count.intents };
+  }
+  public async list(
+    limit = 100,
+    query: NotificationTemplateQuery = {},
+  ): Promise<NotificationTemplateSummary[]> {
     return (
       await this.db.notificationTemplateRecord.findMany({
-        orderBy: { updatedAt: 'desc' },
+        where: {
+          AND: [
+            ...(query.search ? [{ id: { contains: query.search, mode: 'insensitive' } }] : []),
+            ...(query.active === undefined ? [] : [{ active: query.active }]),
+            ...(query.channel ? [{ channels: { array_contains: [query.channel] } }] : []),
+            ...(query.locale ? [{ localizations: { array_contains: [query.locale] } }] : []),
+            ...(query.after
+              ? [
+                  {
+                    OR: [
+                      { updatedAt: { lt: query.after.updatedAt } },
+                      { updatedAt: query.after.updatedAt, id: { lt: query.after.id } },
+                    ],
+                  },
+                ]
+              : []),
+          ],
+        },
+        orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
         include: { _count: { select: { intents: true } } },
         take: limit,
       })
@@ -841,6 +916,13 @@ export class PrismaNotificationTemplateRepository implements INotificationTempla
       updatedAt: row.updatedAt,
     }));
   }
+}
+function safeNotificationErrorCode(value: unknown): string | null {
+  return typeof value === 'string'
+    ? /^[A-Z][A-Z0-9_]{0,100}$/.test(value)
+      ? value
+      : 'UNCLASSIFIED_ERROR'
+    : null;
 }
 
 export class PrismaStudentNotificationPreferenceGateway implements INotificationPreferenceGateway {

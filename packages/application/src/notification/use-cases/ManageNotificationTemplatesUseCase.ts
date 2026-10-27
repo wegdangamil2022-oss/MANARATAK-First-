@@ -1,4 +1,8 @@
-import { INotificationTemplateRepository, NotificationTemplateSummary } from '@manaratak/domain';
+import {
+  INotificationTemplateRepository,
+  NotificationTemplateSummary,
+  NotificationTemplateQuery,
+} from '@manaratak/domain';
 import { NotificationTemplate } from '@manaratak/domain';
 import { TemplateId } from '@manaratak/domain';
 import { NotificationChannel } from '@manaratak/domain';
@@ -117,12 +121,20 @@ export class ManageNotificationTemplatesUseCase {
       fallback: selected !== locale,
     };
   }
+  public async detail(id: string) {
+    const detail = await this.templateRepository.detail(id);
+    if (!detail) throw new Error('NOTIFICATION_TEMPLATE_NOT_FOUND');
+    return detail;
+  }
 
   public async ensureTemplate(dto: CreateTemplateDto): Promise<void> {
     await this.createTemplate(dto);
   }
 
-  public listTemplates(limit = 100): Promise<NotificationTemplateSummary[]> {
-    return this.templateRepository.list(Math.max(1, Math.min(limit, 500)));
+  public listTemplates(
+    limit = 100,
+    query?: NotificationTemplateQuery,
+  ): Promise<NotificationTemplateSummary[]> {
+    return this.templateRepository.list(Math.max(1, Math.min(limit, 501)), query);
   }
 }
