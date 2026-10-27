@@ -1,0 +1,17 @@
+{
+  "scope": "ISOLATED_LOCAL_POSTGRES16_ONLY",
+  "originalDatabaseWrites": 0,
+  "completedAt": "2026-10-27T00:44:42.920Z",
+  "observations": [
+    "canonical MFA and CSRF sessions",
+    "canonical imports permission and overview",
+    "real preflight before staging",
+    "isolated batch staged without publication",
+    "canonical server record page and total",
+    "actual timeline contract and partial-history bounds",
+    "real counters are independent of execution history",
+    "canonical duplicate detection",
+    "real paged review contract",
+    "anonymous read denied"
+  ]
+}
