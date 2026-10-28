@@ -6,6 +6,7 @@ import {MajorUnassignedContent} from '../features/majors/MajorUnassignedContent'
 import {MajorDegreeReferenceForm} from '../features/majors/MajorDegreeReferenceForm';
 import {FellowshipAuthoringPanel} from '../components/FellowshipAuthoringPanel';
 import {useAdminAuthorization} from '../security/AdminAuthorizationContext';
+import {useOwnerOperationScope} from '../security/useOwnerOperationScope';
 import {MajorConsumerUsagePanel} from '../components/MajorConsumerUsagePanel';
 import {MajorGovernanceWorkspace} from '../components/MajorGovernanceWorkspace';
 /// <reference types="vite/client" />
@@ -431,6 +432,9 @@ export function MajorDetailPage() {
   const [relationships, setRelationships] = useState<MajorRelationship[]>([]);
   const [mappings, setMappings] = useState<MajorClassificationMapping[]>([]);
   const {hasPermission}=useAdminAuthorization();
+  const permissionKey=['admin:majors:manage','admin:majors:review','admin:majors:publish','admin:academic-taxonomy:manage'].map(p=>String(hasPermission(p))).join(':');
+  const rootScope=useOwnerOperationScope(`${id}:${permissionKey}`);
+  const operationScope=useOwnerOperationScope(`${id}:${selectedProfileId}:${permissionKey}`);
 
   const [technicalVisited,setTechnicalVisited]=useState(false);
   const [activeTab, setActiveTab] = useState<DetailTab>('basic');
@@ -503,7 +507,7 @@ export function MajorDetailPage() {
   };
   // 1. Initial Load of Major and Profiles
   const loadMajorAndProfiles = async () => {
-    if (!id) return;
+    if (!id || !rootScope.isCurrent()) return;
     const generation=++rootReads.current;++profileReads.current;
     setLoading(true);
     setRelatedState('loading');
@@ -521,8 +525,9 @@ export function MajorDetailPage() {
       const [profileResult]=related.map(result=>result.status==='fulfilled'?result.value:undefined) as Array<{data:unknown[]}|undefined>;
       const failures=related.flatMap((result,index)=>result.status==='rejected'?[['ملفات المستويات','الأسماء البديلة','العلاقات','التصنيف'][index]]:[]);
       if(failures.length)setError(`تعذر تحميل ${failures.join('، ')}؛ هذه البيانات غير معروفة. استخدم إعادة تحميل التفاصيل للمحاولة مجددًا.`);
-      setMajor(majorResult);
       const profList = (profileResult?.data ?? []) as MajorProfile[];
+      if(majorResult.id!==id&&!profList.some(profile=>profile.id===id||profile.code===id))throw Error('MAJOR_OWNER_READ_MISMATCH');
+      setMajor(majorResult);
       setProfiles(profList);
 
       // Determine initial active profile
@@ -569,10 +574,12 @@ export function MajorDetailPage() {
 
   // 2. Load Profile Data specifically for activeProfile
   const loadProfileData = async (majorId: string, profileId: string) => {
+    if(!rootScope.isCurrent())return;
     const generation=++profileReads.current;
     const sameScope=loadedProfile.current===`${majorId}:${profileId}`;
     setLoadingSections(true);
     setContentError(null);
+    if(!sameScope){setSections([]);setVersions([]);setEditedBlocks({});setDirtyBlockKeys(new Set());setEditingBlockKey(null);}
     try {
       const versionResult=await adminApiClient.request<{data:MajorVersion[]}>(`/admin/majors/${majorId}/versions?profileId=${profileId}`,{cache:'no-store'});
       const target=selectMajorWorkingVersion(versionResult.data)??[...versionResult.data].sort((a,b)=>(b.versionNumber??0)-(a.versionNumber??0))[0];
@@ -605,8 +612,10 @@ export function MajorDetailPage() {
   useEffect(() => {
     setMajor(null);loadedProfile.current='';setDirtyBlockKeys(new Set());setEditedBlocks({});
     setAliases([]);setRelationships([]);setMappings([]);setProfiles([]);setSections([]);setVersions([]);
+    mutationLock.current=false;setSaving(false);setSavingBlockKey(null);setSuccess(null);setShowEditModal(false);setChildDrafts({});setConfirmModal(previous=>({...previous,isOpen:false}));
     void loadMajorAndProfiles();
-  }, [id]);
+    return()=>{rootReads.current++;profileReads.current++;};
+  }, [id,rootScope]);
 
   const activeProfile = useMemo(() => {
     if (!selectedProfileId) return profiles[0] || null;
@@ -617,6 +626,17 @@ export function MajorDetailPage() {
   const workingVersion=selectMajorWorkingVersion(versions);
   const canEditContent=hasPermission('admin:majors:manage')&&Boolean(workingVersion?.id)&&!['PUBLISHED','ARCHIVED','REJECTED'].includes(activeProfile?.status??'')&&!major?.id.startsWith('cat-');
   const hasUnsaved=dirtyBlockKeys.size>0||Object.values(childDrafts).some(Boolean)||showEditModal;
+  const requestedProfile=searchParams.get('profileId');
+  useEffect(()=>{
+    if(loading||!major||!requestedProfile)return;
+    const target=profiles.find(profile=>profile.id===requestedProfile||profile.code===requestedProfile);
+    if(!target||target.id===selectedProfileId)return;
+    if(saving||mutationLock.current||(hasUnsaved&&!window.confirm('لديك تعديلات غير محفوظة. الانتقال دون حفظ؟'))){
+      setSearchParams(previous=>{const next=new URLSearchParams(previous);if(selectedProfileId)next.set('profileId',selectedProfileId);return next;},{replace:true});return;
+    }
+    setChildDrafts({});setShowEditModal(false);setSelectedProfileId(target.id);
+    void loadProfileData(major.id,target.id);
+  },[requestedProfile,profiles,selectedProfileId,loading]);
   useMajorDraftGuard(hasUnsaved);
   const markChildDraft=(key:string,value:boolean)=>setChildDrafts(previous=>previous[key]===value?previous:{...previous,[key]:value});
   const returnParam=searchParams.get('returnTo');
@@ -624,6 +644,7 @@ export function MajorDetailPage() {
 
   // Handle Level Switch
   const handleSelectLevel = async (profile: MajorProfile) => {
+    if(mutationLock.current||saving)return;
     if (hasUnsaved) {
       const confirmLeave = window.confirm('لديك تعديلات غير محفوظة على هذا المستوى. هل تود الانتقال دون حفظ؟');
       if (!confirmLeave) return;
@@ -681,7 +702,7 @@ export function MajorDetailPage() {
   };
 
   const saveContentKeys=async(keys:string[])=>{
-    if(!major||!activeProfile||!workingVersion?.id||!canEditContent||mutationLock.current)return;
+    if(!major||!activeProfile||!workingVersion?.id||!canEditContent||mutationLock.current||!operationScope.isCurrent())return;
     if(!blockEditReason.trim()){setError('اكتب مبرر تعديل المحتوى في الحقل الظاهر قبل الحفظ.');return;}
     const original=keys.map(key=>sections.find(section=>sectionEditKey(section)===key));
     if(original.some(section=>!section||section.versionId!==workingVersion.id)){setError('تغير سياق النسخة. بقيت مسودتك محفوظة.');return;}
@@ -689,36 +710,45 @@ export function MajorDetailPage() {
     try {
       const payload=original.map((section,index)=>({id:section!.id,sectionKey:section!.sectionKey,locale:section!.locale??'ar',...editedBlocks[keys[index]]}));
       const readback=await saveMajorContent({majorId:major.id,profileId:activeProfile.id,versionId:workingVersion.id,revision:major.revision!,reason:blockEditReason,sections:payload});
+      if(!operationScope.isCurrent())return;
       const owner=await adminApiClient.request<MajorDetail>('/admin/majors/'+encodeURIComponent(major.id),{cache:'no-store'});
+      if(!operationScope.isCurrent())return;
+      if(owner.id!==major.id)throw Error('MAJOR_OWNER_READ_MISMATCH');
       setMajor(owner);setSections(readback as MajorContentSection[]);setVersions(previous=>previous.map(row=>row.id===workingVersion.id?{...row,status:'NEEDS_REVIEW',approvedBy:undefined}:row));
       setDirtyBlockKeys(previous=>new Set([...previous].filter(key=>!keys.includes(key))));setEditingBlockKey(null);
       setSuccess('تم حفظ المحتوى والتحقق من مطابقته في الملف والنسخة المحددين.');
-    } catch(error){setError(error instanceof Error?error.message:'تعذر الحفظ؛ بقيت مسودتك محفوظة.');}
-    finally{mutationLock.current=false;setSaving(false);setSavingBlockKey(null);}
+    } catch(error){if(operationScope.isCurrent())setError(error instanceof Error?error.message:'تعذر الحفظ؛ بقيت مسودتك محفوظة.');}
+    finally{if(operationScope.isCurrent()){mutationLock.current=false;setSaving(false);setSavingBlockKey(null);}}
   };
   const handleSaveBlock=(key:string)=>saveContentKeys([key]);
   const handleSaveAllDirtyBlocks=()=>saveContentKeys([...dirtyBlockKeys]);
 
   // Preserve the reviewed publication command boundary when relocating controls.
   const executeActionWithFlow = async (action: string, successMessage: string) => {
-    if (!id || !major) return;
+    if (!id || !major || mutationLock.current || !operationScope.isCurrent() || !hasPermission(action==='publish'||action==='unpublish'?'admin:majors:publish':action==='archive'?'admin:majors:manage':'admin:majors:review')) return;
     setSaving(true);
     setError(null);
     setSuccess(null);
     if(!actionReason.trim()){setError('مبرر القرار مطلوب.');setSaving(false);return;}
+    mutationLock.current=true;
     setConfirmModal((prev) => ({ ...prev, isOpen: false }));
 
     try {
-      if (dirtyBlockKeys.size > 0) throw new Error('احفظ تعديلات المحتوى قبل تغيير حالة النشر.');
+      if (hasUnsaved) throw new Error('احفظ تعديلات المحتوى قبل تغيير حالة النشر.');
       const targetId = activeProfile?.id || major.id;
       await adminApiClient.request(`/admin/majors/${targetId}/${action}`, { method: 'POST',body:JSON.stringify({reason:actionReason}) });
 
-      setSuccess(successMessage);
+      if(!operationScope.isCurrent())return;
+      const checked=await adminApiClient.request<{data:MajorProfile[]}>(`/admin/majors/${encodeURIComponent(major.id)}/profiles`,{cache:'no-store'});
+      if(!operationScope.isCurrent())return;
+      const expected:Record<string,string>={publish:'PUBLISHED',unpublish:'READY_TO_REVIEW',archive:'ARCHIVED','mark-ready':'READY_TO_REVIEW','mark-publishable':'READY_TO_PUBLISH'};
+      if(!checked.data.some(profile=>profile.id===targetId&&profile.status===expected[action]))throw Error('تعذر التحقق من حالة ملف الدرجة بعد القرار؛ أعد تحميل التفاصيل.');
       await loadMajorAndProfiles();
+      if(operationScope.isCurrent())setSuccess(successMessage);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'تعذر تنفيذ الإجراء المطلوب.');
+      if(operationScope.isCurrent())setError(err instanceof Error ? err.message : 'تعذر تنفيذ الإجراء المطلوب.');
     } finally {
-      setSaving(false);
+      if(operationScope.isCurrent()){mutationLock.current=false;setSaving(false);}
     }
   };
 
@@ -1378,22 +1408,26 @@ export function MajorDetailPage() {
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
-                if(!basicEditReason.trim()||saving)return;
+                if(!basicEditReason.trim()||saving||mutationLock.current||!rootScope.isCurrent()||!hasPermission('admin:majors:manage'))return;
+                mutationLock.current=true;
                 setSaving(true);
                 try {
                   await adminApiClient.request(`/admin/majors/${major.id}`, {
                     method: 'PATCH',headers:{'If-Match':String(major.revision)},
                     body: JSON.stringify({displayName:editFormData.displayName,collegeOrFaculty:editFormData.collegeOrFaculty,academicFieldOrDiscipline:editFormData.academicFieldOrDiscipline,officialSourceUrl:editFormData.officialSourceUrl,description:editFormData.description,studentFriendlySummary:editFormData.studentFriendlySummary,reason:basicEditReason}),
                   });
+                  if(!rootScope.isCurrent())return;
                   const checked=await adminApiClient.request<MajorDetail>('/admin/majors/'+major.id,{cache:'no-store'});
+                  if(!rootScope.isCurrent())return;
+                  if(checked.id!==major.id)throw Error('MAJOR_OWNER_READ_MISMATCH');
                   if((['displayName','collegeOrFaculty','academicFieldOrDiscipline','officialSourceUrl','description','studentFriendlySummary'] as const).some(key=>(checked[key]??'')!==(editFormData[key]??'')))throw Error('تعذر التحقق من حفظ الهوية. بقي النموذج مفتوحًا.');
                   setSuccess('تم تحديث البيانات الأساسية والتحقق منها.');
                   setShowEditModal(false);
                   await loadMajorAndProfiles();
                 } catch (err: unknown) {
-                  setError(err instanceof Error ? err.message : 'تعذر تحديث البيانات الأساسية.');
+                  if(rootScope.isCurrent())setError(err instanceof Error ? err.message : 'تعذر تحديث البيانات الأساسية.');
                 } finally {
-                  setSaving(false);
+                  if(rootScope.isCurrent()){mutationLock.current=false;setSaving(false);}
                 }
               }}
               className="space-y-3"

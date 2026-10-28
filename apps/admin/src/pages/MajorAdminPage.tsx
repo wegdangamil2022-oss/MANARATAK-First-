@@ -200,6 +200,7 @@ export function MajorAdminPage() {
     const fetchMajors = async () => {
       setLoading(true);
       setError(null);
+      setData(null);
       try {
         const params = new URLSearchParams({ page: page.toString(), pageSize: '24',catalog:view==='catalog'?'true':'false' });
         if (statusFilter) params.append('status', statusFilter);
@@ -213,7 +214,7 @@ export function MajorAdminPage() {
         params.set('sort',sort);
         const response = await adminApiClient.request<PaginatedResponse>(`/admin/majors?${params.toString()}`, { signal: controller.signal });
         if (controller.signal.aborted) return;
-        if (response.total > 0 && page > response.totalPages) { setPage(Math.max(1, response.totalPages)); return; }
+        if (page > Math.max(1, response.totalPages)) { setPage(Math.max(1, response.totalPages)); return; }
         setData(response);
       } catch (err: unknown) {
         if (controller.signal.aborted) return;
@@ -231,9 +232,9 @@ export function MajorAdminPage() {
   const visibleMajors = useMemo(() => data?.data ?? [], [data?.data]);
   const stats = useMemo(() => ({
     total: error?null:data?.total ?? null,
-    published: error?null:data?.stats?.published ?? (data?visibleMajors.filter((major) => major.status === 'PUBLISHED').length:null),
-    needsReview: error?null:data?.stats?.needsReview ?? (data?visibleMajors.filter((major) => major.completenessStatus === 'NEEDS_REVIEW' || major.status === 'READY_TO_REVIEW').length:null),
-    complete: error?null:data?.stats?.complete ?? (data?visibleMajors.filter((major) => major.completenessStatus === 'COMPLETE').length:null),
+    published: error?null:data?.stats?.published ?? null,
+    needsReview: error?null:data?.stats?.needsReview ?? null,
+    complete: error?null:data?.stats?.complete ?? null,
   }), [data,visibleMajors,error]);
 
   const hasActiveFilters = Boolean(search || degreeFilter || statusFilter || completenessFilter || taxonomyIdFilter || academicFieldFilter || disciplineFilter || collegeFilter);

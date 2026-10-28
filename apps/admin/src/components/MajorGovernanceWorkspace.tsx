@@ -5,11 +5,13 @@ import {adminApiClient} from '../api/client';
 import {canonicalPickerApi} from '../api/canonicalPickers';
 import {CanonicalPicker} from './CanonicalPicker';
 import {useAdminAuthorization} from '../security/AdminAuthorizationContext';
+import {useOwnerOperationScope} from '../security/useOwnerOperationScope';
 
 const readinessLabels:Record<string,string>={MAJOR_CANONICAL_TAXONOMY_REFERENCE_MISSING:'لم يحدد مرجع التصنيف',MAJOR_PROFILE_SCOPED_PUBLICATION_REFERENCE_MISSING:'يحتاج ملف الدرجة مراجع معتمدة للدرجة والتصنيف',MAJOR_REVIEWED_WORKING_VERSION_REQUIRED:'لم تعتمد مراجعة جميع أقسام نسخة العمل',MAJOR_CANONICAL_DEGREE_REFERENCE_MISSING:'لم يحدد مرجع الدرجة',MAJOR_INCOMPLETE:'هوية التخصص غير مكتملة',MAJOR_SOURCE_IDENTITY_MISSING:'يلزم توثيق المصدر',MAJOR_INVALID_PUBLICATION_STATUS:'حالة الملف غير جاهزة للنشر',MAJOR_CANONICAL_IDENTITY_MISSING:'هوية التخصص المرجعية ناقصة',MAJOR_CANONICAL_REFERENCE_SERVICE_REQUIRED:'تعذر التحقق من المراجع المعيارية'};
 const labels:Record<string,string>={requirements:'متطلبات الزمالة',benefits:'المنافع الموثقة',identity:'الهوية والدرجة والمصدر',overview:'نبذة التخصص',study_content:'ماذا يدرس الطالب',foundation_courses:'المواد التأسيسية',core_courses:'المواد الأساسية',practical_training:'التدريب العملي',skills:'المهارات',tracks:'المسارات الدقيقة',career_links:'مجالات العمل',postgraduate_paths:'الدراسات العليا',related_majors:'التخصصات المشابهة',academic_notice:'التنبيه الأكاديمي والمهني',sources:'المصادر وتاريخ التحقق',entry_backgrounds:'الخلفيات الأكاديمية والمتطلبات',curriculum:'المقررات ومناهج البحث',completion_requirements:'الرسالة أو المشروع ومتطلبات الإكمال',advanced_skills:'المهارات المتقدمة',doctoral_paths:'الدكتوراه والزمالات',bachelor_links:'روابط تخصصات البكالوريوس',entry_paths:'مسارات دخول الدكتوراه',program_stages:'مراحل البرنامج',research_fields:'المجالات البحثية',research_methods:'مناهج البحث',milestones:'الاختبارات والمراحل المطلوبة',dissertation:'الأطروحة',research_skills:'المهارات البحثية'};
 export function MajorGovernanceWorkspace({majorId,profileId,onSaved,mode='all',hasUnsaved=false}:{majorId:string;profileId?:string;onSaved:()=>void|Promise<void>;mode?:'all'|'publication'|'relations'|'versions';hasUnsaved?:boolean}) {
   const {hasPermission}=useAdminAuthorization();
+  const operation=useOwnerOperationScope(`${majorId}:${profileId}:${hasPermission('admin:majors:review')}:${hasPermission('admin:majors:publish')}`);
   const [major,setMajor]=useState<MajorDto>();const [versions,setVersions]=useState<MajorVersionDto[]>([]);
   const [sections,setSections]=useState<MajorContentSectionDto[]>([]);const [compare,setCompare]=useState<MajorContentSectionDto[]>([]);
   const [coverage,setCoverage]=useState<Record<string,string>>({});const [reason,setReason]=useState('');const [reference,setReference]=useState('');
@@ -26,7 +28,7 @@ export function MajorGovernanceWorkspace({majorId,profileId,onSaved,mode='all',h
   const canReadAudit=hasPermission('admin:audit:manage');
   const path=`/admin/majors/${encodeURIComponent(majorId)}`;
   useEffect(()=>{
-    const controller=new AbortController();setError('');setCoverage({});setCompareId('');setHistoryPage(1);
+    const controller=new AbortController();setError('');setMajor(undefined);setVersions([]);setSections([]);setCoverage({});setCompareId('');setHistoryPage(1);
     const scope=profileId?`?profileId=${encodeURIComponent(profileId)}`:'';
     Promise.all([adminApiClient.request<MajorDto>(path,{signal:controller.signal}),adminApiClient.request<{data:MajorVersionDto[]}>(`${path}/versions${scope}`,{signal:controller.signal})]).then(async([owner,history])=>{const target=selectMajorWorkingVersion(history.data)??history.data[0];const params=new URLSearchParams();if(profileId)params.set('profileId',profileId);if(target?.id)params.set('versionId',target.id);const content=await adminApiClient.request<{data:MajorContentSectionDto[]}>(`${path}/content-sections?${params}`,{signal:controller.signal});if(!controller.signal.aborted){setMajor(owner);setVersions(history.data);setSections(content.data);}}).catch(error=>{if(!controller.signal.aborted)setError(error.message);});
     return ()=>controller.abort();
@@ -53,11 +55,21 @@ export function MajorGovernanceWorkspace({majorId,profileId,onSaved,mode='all',h
   },[majorId,profileId,refresh,publication]);
   const required=MAJOR_REVIEW_TEMPLATE[profile?.level ?? ''] ?? [];
   const command=async(action:string,body:Record<string,unknown>,scoped=true)=>{
-    if(saving.current)return;if(!Number.isSafeInteger(major?.revision)){setError('لم تكتمل قراءة السجل؛ حدّث البيانات قبل تنفيذ القرار.');return;}if(hasUnsaved){setError('احفظ التعديلات المفتوحة قبل تنفيذ قرار إداري.');return;}if(!reason.trim()){setError('اكتب سبب القرار قبل التنفيذ.');return;}
+    if(saving.current||!operation.isCurrent()||!hasPermission(action==='publish'||action==='unpublish'?'admin:majors:publish':'admin:majors:review'))return;if(!Number.isSafeInteger(major?.revision)){setError('لم تكتمل قراءة السجل؛ حدّث البيانات قبل تنفيذ القرار.');return;}if(hasUnsaved){setError('احفظ التعديلات المفتوحة قبل تنفيذ قرار إداري.');return;}if(!reason.trim()){setError('اكتب سبب القرار قبل التنفيذ.');return;}
     if(['archive','reject','restore','unpublish','publish'].includes(action)&&!window.confirm(action==='restore'?'استعادة الملف للمراجعة دون نشره؟':'تنفيذ القرار على ملف الدرجة المحدد؟ تبقى العلاقات والنسخ التاريخية محفوظة.'))return;
     saving.current=true;setBusy(true);setError('');setNotice('');
-    try {await adminApiClient.request(`/admin/majors/${encodeURIComponent(scoped?(profileId ?? majorId):majorId)}/${action}`,{method:'POST',headers:{'If-Match':String(major?.revision)},body:JSON.stringify({...body,reason:reason.trim()})});setNotice('تم حفظ القرار وسجل التعديل.');setRefresh(value=>value+1);await onSaved();}
-    catch(error){setError(error instanceof Error?error.message:'تعذر حفظ القرار.');}finally{saving.current=false;setBusy(false);}
+    let accepted=false;
+    try {
+      await adminApiClient.request(`/admin/majors/${encodeURIComponent(scoped?(profileId ?? majorId):majorId)}/${action}`,{method:'POST',headers:{'If-Match':String(major?.revision)},body:JSON.stringify({...body,reason:reason.trim()})});accepted=true;
+      if(!operation.isCurrent())return;
+      const checked=await adminApiClient.request<MajorDto>(path,{cache:'no-store'});
+      if(!operation.isCurrent())return;
+      const expected:Record<string,string>={publish:'PUBLISHED',unpublish:'READY_TO_REVIEW',archive:'ARCHIVED',reject:'REJECTED',restore:'READY_TO_REVIEW','mark-publishable':'READY_TO_PUBLISH'};
+      if(checked.id!==majorId||!Number.isSafeInteger(checked.revision)||checked.revision!<=major!.revision!||(expected[action]&&!checked.profiles?.some(row=>row.id===profileId&&row.status===expected[action])))throw Error('تعذر التحقق من آخر حالة للملف؛ أعد تحميل البيانات قبل تكرار القرار.');
+      setMajor(checked);setRefresh(value=>value+1);await onSaved();
+      if(operation.isCurrent())setNotice('تم حفظ القرار والتحقق من الحالة المحفوظة.');
+    }
+    catch(error){if(operation.isCurrent()){if(accepted){setMajor(undefined);setReadiness(null);}setError(error instanceof Error?error.message:'تعذر حفظ القرار.');}}finally{if(operation.isCurrent()){saving.current=false;setBusy(false);}}
   };
   if(majorId.startsWith('cat-')) return null;
   const reviewed=hasPermission('admin:majors:review');const publishes=hasPermission('admin:majors:publish');
@@ -65,7 +77,7 @@ export function MajorGovernanceWorkspace({majorId,profileId,onSaved,mode='all',h
     <h2 className="font-black text-[#142B5F]">{publication?'مراجعة النسخة والنشر':history?'مقارنة النسخ وسجل القرارات':'مراجعة الأسماء والعلاقات'}</h2>
     {publication&&<p className="text-sm">المحتوى المنشور يبقى ثابتًا أثناء تحرير نسخة العمل. الاعتماد يحتاج اكتمال الأقسام ومصدرًا محفوظًا، وأي تعديل لاحق يستلزم مراجعة جديدة.</p>}
     {history && major?.publicId && profileId && working?.id && <MajorTranslationPublicationPanel key={`${profileId}:${working!.id}`} publicId={major.publicId} profileId={profileId} versionId={working!.id} sectionKeys={[...new Set(sections.map(section=>section.sectionKey))]} onSaved={async()=>{setRefresh(value=>value+1);await onSaved();}}/>}
-    {error && <p role="alert" className="text-red-700">{error}</p>}{notice && <p role="status" className="text-emerald-700">{notice}</p>}
+    {error && <div role="alert" className="text-red-700"><p>{error}</p><button type="button" disabled={busy} onClick={()=>setRefresh(value=>value+1)}>إعادة تحميل بيانات القرار</button></div>}{notice && <p role="status" className="text-emerald-700">{notice}</p>}
     {(publication||graph)&&<label className="block">سبب القرار<textarea className="block w-full rounded border p-2" value={reason} onChange={event=>setReason(event.target.value)} maxLength={2000}/></label>}
     {publication&&<p role="status" className="rounded-xl bg-[#FAF7F0] p-3 text-[12px]">{!readiness?'تعذر التحقق من الجاهزية؛ حدّث البيانات.':readiness.ready?'جاهز وفق حارس النشر':'النشر محجوب: '+readiness.blockingIssues.map(issue=>readinessLabels[issue.code]??issue.message).join(' · ')}</p>}
     {publication&&profile&&<button type="button" onClick={()=>setCoverageOpen(value=>!value)} aria-expanded={coverageOpen} className="min-h-10 rounded-lg border px-3">مراجعة تغطية بنود الاعتماد ({required.length})</button>}
