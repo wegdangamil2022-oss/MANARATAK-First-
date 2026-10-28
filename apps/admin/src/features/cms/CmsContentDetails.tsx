@@ -158,7 +158,10 @@ export function CmsContentDetails({ workspace }: { workspace: CmsWorkspace }) {
             {tr('عرض المادة المنشورة في الصفحة العامة ↗')}
           </a>
         )}
-      <nav className="cms-area-tabs admin-section-navigation" aria-label={ar ? 'أقسام المادة' : 'Content sections'}>
+      <nav
+        className="cms-area-tabs admin-section-navigation"
+        aria-label={ar ? 'أقسام المادة' : 'Content sections'}
+      >
         {areas.map(([value, label, Icon]) => (
           <button
             key={value}
@@ -554,7 +557,9 @@ export function CmsContentDetails({ workspace }: { workspace: CmsWorkspace }) {
             locale={locale}
             version={currentEditor.version}
             disabled={busy || dirty}
-            onRestore={() => openContent(selected.id)}
+            onRestore={async () => {
+              await openContent(selected.id);
+            }}
           />
         </Panel>
       )}

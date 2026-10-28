@@ -176,6 +176,15 @@ export function splitValues(value: string): string[] {
   ];
 }
 export function messageOf(reason: unknown, language: string = 'ar'): string {
+  const readbackMessage = reason instanceof Error ? reason.message : '';
+  if (readbackMessage.includes('CMS_ACCEPTED_READBACK_UNAVAILABLE'))
+    return language === 'ar'
+      ? 'تم قبول العملية لكن تعذر التحقق من الحالة المحفوظة. أعد تحميل المادة قبل أي إجراء آخر.'
+      : 'The operation was accepted but its saved state could not be verified. Reload the material before another action.';
+  if (/CMS_\w*READBACK_MISMATCH/.test(readbackMessage))
+    return language === 'ar'
+      ? 'البيانات المقروءة لا تطابق المادة أو النسخة المطلوبة. أعد التحميل.'
+      : 'The returned data does not match the requested material or version. Reload it.';
   const tr = (text: string) => translateCms(text, language);
   const message = reason instanceof Error ? reason.message : tr('تعذر إكمال العملية.');
   const explanations: Record<string, string> = {

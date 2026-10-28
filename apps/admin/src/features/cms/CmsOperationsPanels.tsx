@@ -3,6 +3,7 @@ import { messageOf } from './cmsModels';
 import { CmsBlockEditor, EditableBlockSchema, EditableBlock } from './CmsBlockEditor';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../../security/useOwnerOperationScope';
 import { useTranslation } from '../../i18n/I18nProvider';
 import { adminApiClient } from '../../api/client';
 import { useCmsCopy } from './cmsCopy';
@@ -108,6 +109,9 @@ export function CmsOperationsPanels({
   const { language: uiLanguage } = useTranslation();
   const { hasPermission } = useAdminAuthorization();
   const canPublish = hasPermission('admin:cms:publish');
+  const scope = useOwnerOperationScope(
+    `${area}:${locale}:${canPublish}:${hasPermission('admin:cms:operations:run')}`,
+  );
   useAdministrationDraftGuard(dirty, uiLanguage === 'ar');
   const sequence = useRef<Record<Panel, number>>({
     redirects: 0,
@@ -135,9 +139,11 @@ export function CmsOperationsPanels({
   const [redirectPage, setRedirectPage] = useState(1);
   const [redirectTotal, setRedirectTotal] = useState(0);
   const [redirectTotalPages, setRedirectTotalPages] = useState(1);
+  useEffect(()=>{mutation.current=false;setBusy(false);setError(null);setNotice(null);setDirty(false);setCreateOpen(false);setRedirectEditing(null);},[scope]);
 
   const load = useCallback(
     async (only?: Panel) => {
+      if (!scope.isCurrent()) return false;
       const suffix = `siteIdentifier=manaratak&locale=${locale}`;
       const query = new URLSearchParams({
         siteIdentifier: 'manaratak',
@@ -165,7 +171,7 @@ export function CmsOperationsPanels({
         if (panel === 'blocks') setBlocks([]);
         if (panel === 'announcements') setAnnouncements([]);
       };
-      await Promise.allSettled(
+      const results = await Promise.allSettled(
         (only
           ? [only]
           : area === 'blocks'
@@ -181,7 +187,7 @@ export function CmsOperationsPanels({
             const result = await adminApiClient.request<
               List<unknown> & { totalPages?: number; total?: number }
             >(urls[panel]);
-            if (current !== sequence.current[panel]) return;
+            if (current !== sequence.current[panel] || !scope.isCurrent()) return false;
             if (panel === 'redirects') {
               setRedirects(result.data as Redirect[]);
               setRedirectTotal(result.total ?? 0);
@@ -192,16 +198,19 @@ export function CmsOperationsPanels({
             if (panel === 'blocks') setBlocks(result.data as ContentBlock[]);
             if (panel === 'announcements') setAnnouncements(result.data as Announcement[]);
             setPanelState((previous) => ({ ...previous, [panel]: 'ready' }));
+            return true;
           } catch {
             if (current === sequence.current[panel]) {
               clear(panel);
               setPanelState((previous) => ({ ...previous, [panel]: 'error' }));
             }
+            return false;
           }
         }),
       );
+      return results.every((result) => result.status === 'fulfilled' && result.value === true);
     },
-    [locale, area, redirectPage, redirectSearch, redirectStatus],
+    [locale, area, redirectPage, redirectSearch, redirectStatus, scope],
   );
 
   const invalidateRequests = useCallback(() => {
@@ -241,23 +250,28 @@ export function CmsOperationsPanels({
   );
 
   const submit = async (operation: () => Promise<unknown>, success: string) => {
-    if (mutation.current) return;
+    if (mutation.current || !scope.isCurrent()) return;
     mutation.current = true;
     setBusy(true);
     setError(null);
     setNotice(null);
     try {
       await operation();
+      if (!scope.isCurrent()) return;
+      const readback = await load();
+      if (!scope.isCurrent()) return;
+      if (!readback) throw Error('CMS_ACCEPTED_READBACK_UNAVAILABLE');
       setDirty(false);
       setCreateOpen(false);
       setRedirectEditing(null);
       setNotice(success);
-      await load();
     } catch (reason) {
-      setError(messageOf(reason, uiLanguage));
+      if (scope.isCurrent()) setError(messageOf(reason, uiLanguage));
     } finally {
-      mutation.current = false;
-      setBusy(false);
+      if (scope.isCurrent()) {
+        mutation.current = false;
+        setBusy(false);
+      }
     }
   };
 

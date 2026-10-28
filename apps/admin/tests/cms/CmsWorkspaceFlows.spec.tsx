@@ -103,6 +103,69 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 describe('CMS workspace flows', () => {
+  it('preserves the draft and blocks another write after an accepted but stale readback', async () => {
+    await mount();
+    await act(async () => current.updateEditor({ body: 'Submitted body' }));
+    await act(async () => current.saveLocale({ preventDefault() {} } as any));
+    expect(current.notice).toBeNull();
+    expect(current.error).toContain('operation was accepted');
+    expect(current.editors.ar.body).toBe('Submitted body');
+    expect(current.canAuthor).toBe(false);
+    await act(async () => current.saveLocale({ preventDefault() {} } as any));
+    expect(
+      state.request.mock.calls.filter(([, options]) => options?.method === 'PUT'),
+    ).toHaveLength(1);
+    await act(async () => current.openContent('one'));
+    expect(current.canAuthor).toBe(true);
+  });
+  it('announces publication only after the exact locale has a newer published version', async () => {
+    await mount();
+    state.request.mockImplementation(async (path: string, options?: any) =>
+      options?.method
+        ? {}
+        : path.endsWith('/one')
+          ? {
+              ...record,
+              localizedPayloads: [
+                { ...locale('ar'), version: 6, state: 'PUBLISHED' },
+                locale('en'),
+              ],
+            }
+          : { data: [] },
+    );
+    await act(async () => current.runWorkflow('publish'));
+    expect(current.localizedState).toBe('PUBLISHED');
+    expect(current.notice).toBeTruthy();
+    expect(current.error).toBeNull();
+  });
+  it('does not read or announce a previous owner after an accepted late save', async () => {
+    await mount();
+    let finish!: (value: unknown) => void;
+    state.request.mockImplementation(async (path: string, options?: any) =>
+      options?.method
+        ? new Promise((resolve) => {
+            finish = resolve;
+          })
+        : path.endsWith('/two')
+          ? { ...record, id: 'two' }
+          : { data: [] },
+    );
+    await act(async () => {
+      void current.saveLocale({ preventDefault() {} } as any);
+    });
+    await act(async () => move('/cms/content/two'));
+    const calls = state.request.mock.calls.length;
+    await act(async () => finish({}));
+    expect(state.request.mock.calls).toHaveLength(calls);
+    expect(current.selected?.id).toBe('two');
+    expect(current.notice).toBeNull();
+  });
+  it('rejects a wrong owner returned by the detail endpoint', async () => {
+    state.request.mockResolvedValue({ ...record, id: 'other' });
+    await mount();
+    expect(current.selected).toBeNull();
+    expect(current.error).toContain('does not match');
+  });
   it('opens a deep-linked material without fetching the library or operational panels', async () => {
     await mount();
     expect(current.selected?.id).toBe('one');

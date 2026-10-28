@@ -5,6 +5,8 @@ import { useAdministrationDraftGuard } from '../reference-data/useAdministration
 import { adminApiClient } from '../../api/client';
 import { useTranslation } from '../../i18n/I18nProvider';
 import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../../security/useOwnerOperationScope';
+import { jsonEqual } from '../../utils/jsonEqual';
 import { useCmsCopy } from './cmsCopy';
 import { useCmsActionDialog } from './CmsActionDialog';
 import {
@@ -82,9 +84,13 @@ export function useCmsWorkspace() {
     [setParams],
   );
   const { hasPermission } = useAdminAuthorization();
-  const canAuthor = hasPermission('admin:cms:author');
-  const canReview = hasPermission('admin:cms:review');
-  const canPublish = hasPermission('admin:cms:publish');
+  const scope = useOwnerOperationScope(
+    `${screen}:${contentId}:${['view', 'author', 'review', 'publish'].map((action) => String(hasPermission('admin:cms:' + action))).join(':')}`,
+  );
+  const [verificationPending, setVerificationPending] = useState(false);
+  const canAuthor = !verificationPending && hasPermission('admin:cms:author');
+  const canReview = !verificationPending && hasPermission('admin:cms:review');
+  const canPublish = !verificationPending && hasPermission('admin:cms:publish');
   const [list, setList] = useState<ListResponse | null>(null);
   const [listError, setListError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -142,11 +148,12 @@ export function useCmsWorkspace() {
   });
 
   const loadDashboard = useCallback(async () => {
-    if (screen !== 'list') return;
+    if (screen !== 'list' || !scope.isCurrent()) return;
     const sequence = ++listSequence.current;
     setListError(null);
     setLoading(true);
     setError(null);
+    setList(null);
     try {
       const params = new URLSearchParams({
         page: String(page),
@@ -167,6 +174,7 @@ export function useCmsWorkspace() {
       }
       setList(contentResult);
     } catch (reason) {
+      if (!scope.isCurrent()) return;
       if (sequence === listSequence.current) {
         setListError(messageOf(reason, uiLanguage));
         setList(null);
@@ -174,7 +182,7 @@ export function useCmsWorkspace() {
     } finally {
       if (sequence === listSequence.current) setLoading(false);
     }
-  }, [query, status, page, typeFilter, categoryFilter, uiLanguage, screen, setPage]);
+  }, [query, status, page, typeFilter, categoryFilter, uiLanguage, screen, setPage, scope]);
 
   useEffect(() => {
     const requests = listSequence;
@@ -189,13 +197,14 @@ export function useCmsWorkspace() {
       adminApiClient.request<{ data: Category[] }>('/admin/cms/categories'),
       adminApiClient.request<{ data: Tag[] }>('/admin/cms/tags'),
     ]);
+    if (!scope.isCurrent()) return;
     if (results[0].status === 'fulfilled') setCategories(results[0].value.data);
     if (results[1].status === 'fulfilled') setTags(results[1].value.data);
     if (results.some((result) => result.status === 'rejected'))
       setCatalogError(
         tr('تعذر تحميل بعض التصنيفات أو الوسوم. قائمة المحتوى متاحة؛ أعد التحميل قبل استخدامها.'),
       );
-  }, [tr]);
+  }, [tr, scope]);
   useEffect(() => {
     void loadCatalogs();
   }, [loadCatalogs]);
@@ -221,13 +230,20 @@ export function useCmsWorkspace() {
     id: string,
     preservedLocale?: Locale,
     savedRoot?: 'links' | 'classification',
+    verify?: (detail: Detail) => void,
   ) => {
+    if (!scope.isCurrent()) return;
     const sequence = ++detailSequence.current;
     setBusy(true);
     setError(null);
     try {
-      const detail = await adminApiClient.request<Detail>(`/admin/cms/content/${id}`);
-      if (sequence !== detailSequence.current) return;
+      const detail = await adminApiClient.request<Detail>(
+        `/admin/cms/content/${encodeURIComponent(id)}`,
+        { cache: 'no-store' },
+      );
+      if (sequence !== detailSequence.current || !scope.isCurrent()) return;
+      if (detail.id !== id) throw Error('CMS_OWNER_READBACK_MISMATCH');
+      verify?.(detail);
       const next = {
         ar: toEditor(
           detail.localizedPayloads.find((entry) => entry.locale === 'ar'),
@@ -261,11 +277,39 @@ export function useCmsWorkspace() {
         ar: keep('ar') ? previous.ar : next.ar,
         en: keep('en') ? previous.en : next.en,
       }));
+      setVerificationPending(false);
+      return detail;
     } catch (reason) {
+      if (!scope.isCurrent()) return;
       if (sequence === detailSequence.current) setError(messageOf(reason, uiLanguage));
     } finally {
       if (sequence === detailSequence.current) setBusy(false);
     }
+  };
+  const readAfterWrite = async (
+    verify: (detail: Detail) => void,
+    preservedLocale?: Locale,
+    savedRoot?: 'links' | 'classification',
+  ) => {
+    if (!scope.isCurrent() || !selected) return false;
+    const detail = await openContent(selected.id, preservedLocale, savedRoot, verify);
+    if (!scope.isCurrent()) return false;
+    if (!detail) {
+      setVerificationPending(true);
+      throw Error('CMS_ACCEPTED_READBACK_UNAVAILABLE');
+    }
+    return true;
+  };
+  const verifyLocale = (detail: Detail, state?: string) => {
+    const saved = detail.localizedPayloads.find((item) => item.locale === locale);
+    if (
+      !saved ||
+      !Number.isSafeInteger(saved.version) ||
+      saved.version <= (currentEditor.version ?? 0) ||
+      (state && saved.state !== state)
+    )
+      throw Error('CMS_LOCALE_READBACK_MISMATCH');
+    return saved;
   };
   const chooseContent = (id: string) =>
     go('/cms/content/' + encodeURIComponent(id) + '?return=' + encodeURIComponent(listSearch));
@@ -273,16 +317,21 @@ export function useCmsWorkspace() {
   openLatest.current = openContent;
   useEffect(() => {
     const requests = detailSequence;
+    mutationLock.current = false;
+    setBusy(false);
+    setNotice(null);
+    setError(null);
+    setVerificationPending(false);
     setSelected(null);
     setEditing(false);
     if (contentId) void openLatest.current(contentId);
     return () => {
       requests.current++;
     };
-  }, [contentId]);
+  }, [contentId, scope]);
   const createContent = async (event: FormEvent) => {
     event.preventDefault();
-    if (mutationLock.current || !canAuthor) return;
+    if (!scope.isCurrent() || mutationLock.current || !canAuthor) return;
     mutationLock.current = true;
     setBusy(true);
     setError(null);
@@ -300,6 +349,8 @@ export function useCmsWorkspace() {
           featuredAssetId: create.featuredAssetId.trim() || null,
         }),
       });
+      if (!scope.isCurrent()) return;
+      if (!created.id || created.status !== 'DRAFT') throw Error('CMS_CREATE_READBACK_MISMATCH');
       setCreate({
         title: '',
         slug: '',
@@ -318,16 +369,20 @@ export function useCmsWorkspace() {
       );
       setEditing(true);
     } catch (reason) {
+      if (!scope.isCurrent()) return;
       setError(messageOf(reason, uiLanguage));
       setBusy(false);
     } finally {
-      mutationLock.current = false;
-      setBusy(false);
+      if (scope.isCurrent()) {
+        mutationLock.current = false;
+        setBusy(false);
+      }
     }
   };
 
   const changeSlug = async () => {
-    if (!selected || dirty || busy || mutationLock.current || !canAuthor) return;
+    if (!scope.isCurrent() || !selected || dirty || busy || mutationLock.current || !canAuthor)
+      return;
     const current = selected.localizedPayloads.find((item) => item.locale === locale);
     if (!current) return;
     const answer = await requestAction({
@@ -339,6 +394,7 @@ export function useCmsWorkspace() {
       ],
     });
     if (!answer) return;
+    if (!scope.isCurrent() || mutationLock.current) return;
     const newSlug = answer.slug.trim(),
       reason = answer.reason.trim();
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(newSlug)) {
@@ -353,17 +409,29 @@ export function useCmsWorkspace() {
         method: 'POST',
         body: JSON.stringify({ locale, expectedVersion: current.version, newSlug, reason }),
       });
-      await openContent(selected.id, locale === 'ar' ? 'en' : 'ar');
+      if (
+        !(await readAfterWrite(
+          (detail) => {
+            if (verifyLocale(detail).localizedSlug !== newSlug)
+              throw Error('CMS_SLUG_READBACK_MISMATCH');
+          },
+          locale === 'ar' ? 'en' : 'ar',
+        ))
+      )
+        return;
       setNotice(
         uiLanguage === 'ar'
           ? 'حُفظ الرابط في المسودة؛ النسخة العامة مستمرة حتى النشر الجديد.'
           : 'Draft slug saved; the current publication remains available until republishing.',
       );
     } catch (reason) {
+      if (!scope.isCurrent()) return;
       setError(messageOf(reason, uiLanguage));
     } finally {
-      mutationLock.current = false;
-      setBusy(false);
+      if (scope.isCurrent()) {
+        mutationLock.current = false;
+        setBusy(false);
+      }
     }
   };
 
@@ -372,7 +440,7 @@ export function useCmsWorkspace() {
     setEditors((value) => ({ ...value, [locale]: { ...value[locale], ...change } }));
   const saveLocale = async (event: FormEvent) => {
     event.preventDefault();
-    if (!selected || mutationLock.current || !canAuthor) return;
+    if (!scope.isCurrent() || !selected || mutationLock.current || !canAuthor) return;
     if (
       !currentEditor.title.trim() ||
       !currentEditor.body.trim() ||
@@ -427,26 +495,43 @@ export function useCmsWorkspace() {
               : null,
         }),
       });
+      if (
+        !(await readAfterWrite(
+          (detail) => {
+            const saved = verifyLocale(detail);
+            if (
+              saved.title !== currentEditor.title.trim() ||
+              saved.body !== currentEditor.body ||
+              saved.localizedSlug !== currentEditor.localizedSlug.trim()
+            )
+              throw Error('CMS_SAVE_READBACK_MISMATCH');
+          },
+          locale === 'ar' ? 'en' : 'ar',
+        ))
+      )
+        return;
       setNotice(
         uiLanguage === 'ar'
           ? `حُفظت النسخة ${locale === 'ar' ? 'العربية' : 'الإنجليزية'}.`
           : `Saved the ${locale === 'ar' ? 'Arabic' : 'English'} version.`,
       );
-      await openContent(selected.id, locale === 'ar' ? 'en' : 'ar');
       await loadDashboard();
     } catch (reason) {
+      if (!scope.isCurrent()) return;
       setError(messageOf(reason, uiLanguage));
       setBusy(false);
     } finally {
-      mutationLock.current = false;
-      setBusy(false);
+      if (scope.isCurrent()) {
+        mutationLock.current = false;
+        setBusy(false);
+      }
     }
   };
 
   const runWorkflow = async (
     action: 'submit-review' | 'approve' | 'publish' | 'archive' | 'reject',
   ) => {
-    if (!selected || mutationLock.current) return;
+    if (!scope.isCurrent() || !selected || mutationLock.current) return;
     if (
       (action === 'submit-review' && !canAuthor) ||
       (['approve', 'reject'].includes(action) && !canReview) ||
@@ -471,6 +556,7 @@ export function useCmsWorkspace() {
             : [],
       });
       if (!answer) return;
+      if (!scope.isCurrent() || mutationLock.current) return;
       comments = answer.reason?.trim() ?? null;
     }
     mutationLock.current = true;
@@ -482,6 +568,19 @@ export function useCmsWorkspace() {
         method: 'POST',
         body: JSON.stringify({ locale, expectedVersion: currentEditor.version, comments }),
       });
+      const states = {
+        'submit-review': 'IN_REVIEW',
+        approve: 'READY_TO_PUBLISH',
+        publish: 'PUBLISHED',
+        archive: 'ARCHIVED',
+        reject: 'DRAFT',
+      };
+      if (
+        !(await readAfterWrite((detail) => {
+          verifyLocale(detail, states[action]);
+        }))
+      )
+        return;
       setNotice(
         action === 'submit-review'
           ? tr('أُرسلت النسخة للمراجعة.')
@@ -493,18 +592,21 @@ export function useCmsWorkspace() {
                 ? tr('أُرشفت النسخة.')
                 : tr('أُعيدت للمحرر مع سبب الرفض.'),
       );
-      await Promise.all([openContent(selected.id), loadDashboard()]);
+      await loadDashboard();
     } catch (reason) {
+      if (!scope.isCurrent()) return;
       setError(messageOf(reason, uiLanguage));
       setBusy(false);
     } finally {
-      mutationLock.current = false;
-      setBusy(false);
+      if (scope.isCurrent()) {
+        mutationLock.current = false;
+        setBusy(false);
+      }
     }
   };
 
   const schedule = async () => {
-    if (!selected || mutationLock.current) return;
+    if (!scope.isCurrent() || !selected || mutationLock.current || !canPublish) return;
     if (dirty) {
       setError(tr('احفظ التعديلات قبل جدولة النشر.'));
       return;
@@ -522,6 +624,7 @@ export function useCmsWorkspace() {
       ],
     });
     if (!answer) return;
+    if (!scope.isCurrent() || mutationLock.current) return;
     const value = answer.scheduledAt;
     if (!Number.isFinite(Date.parse(value)) || Date.parse(value) <= Date.now()) {
       setError(tr('اختر موعد نشر صالحًا في المستقبل.'));
@@ -539,19 +642,30 @@ export function useCmsWorkspace() {
           scheduledAt: new Date(value).toISOString(),
         }),
       });
+      if (
+        !(await readAfterWrite((detail) => {
+          const saved = verifyLocale(detail, 'SCHEDULED');
+          if (new Date(saved.scheduledAt ?? '').getTime() !== new Date(value).getTime())
+            throw Error('CMS_SCHEDULE_READBACK_MISMATCH');
+        }))
+      )
+        return;
       setNotice(tr('تمت الجدولة دون نشر تلقائي من الواجهة؛ عامل الجدولة ينفذها في بيئة التشغيل.'));
-      await Promise.all([openContent(selected.id), loadDashboard()]);
+      await loadDashboard();
     } catch (reason) {
+      if (!scope.isCurrent()) return;
       setError(messageOf(reason, uiLanguage));
       setBusy(false);
     } finally {
-      mutationLock.current = false;
-      setBusy(false);
+      if (scope.isCurrent()) {
+        mutationLock.current = false;
+        setBusy(false);
+      }
     }
   };
 
   const cancelSchedule = async () => {
-    if (!selected || mutationLock.current || dirty || !canPublish) return;
+    if (!scope.isCurrent() || !selected || mutationLock.current || dirty || !canPublish) return;
     mutationLock.current = true;
     setBusy(true);
     setError(null);
@@ -560,18 +674,28 @@ export function useCmsWorkspace() {
         method: 'POST',
         body: JSON.stringify({ locale, expectedVersion: currentEditor.version }),
       });
-      await Promise.all([openContent(selected.id), loadDashboard()]);
+      if (
+        !(await readAfterWrite((detail) => {
+          const saved = verifyLocale(detail, 'DRAFT');
+          if (saved.scheduledAt) throw Error('CMS_SCHEDULE_READBACK_MISMATCH');
+        }))
+      )
+        return;
+      await loadDashboard();
       setNotice(tr('أُلغيت الجدولة وأُعيدت النسخة إلى المسودة.'));
     } catch (reason) {
+      if (!scope.isCurrent()) return;
       setError(messageOf(reason, uiLanguage));
     } finally {
-      mutationLock.current = false;
-      setBusy(false);
+      if (scope.isCurrent()) {
+        mutationLock.current = false;
+        setBusy(false);
+      }
     }
   };
 
   const saveDomainLinks = async () => {
-    if (!selected || mutationLock.current || !canAuthor) return;
+    if (!scope.isCurrent() || !selected || mutationLock.current || !canAuthor) return;
     const keys = domainLinks.map((link) =>
       [link.targetType, link.targetId, link.relationType].join(':'),
     );
@@ -598,18 +722,45 @@ export function useCmsWorkspace() {
           links: domainLinks.map((link, index) => ({ ...link, sortOrder: index })),
         }),
       });
+      if (
+        !(await readAfterWrite(
+          (detail) => {
+            const canonical = (links: DomainLink[]) =>
+              links.map(({ targetType, targetId, relationType, sortOrder }) => ({
+                targetType,
+                targetId,
+                relationType,
+                sortOrder,
+              }));
+            if (
+              detail.version <= selected.version ||
+              !jsonEqual(
+                canonical(detail.domainLinks),
+                canonical(domainLinks.map((link, index) => ({ ...link, sortOrder: index }))),
+              )
+            )
+              throw Error('CMS_LINKS_READBACK_MISMATCH');
+          },
+          undefined,
+          'links',
+        ))
+      )
+        return;
       setNotice(tr('تم حفظ روابط المحتوى مع أقسام المنصة باستخدام المعرّفات Canonical.'));
-      await openContent(selected.id, undefined, 'links');
     } catch (reason) {
+      if (!scope.isCurrent()) return;
       setError(messageOf(reason, uiLanguage));
     } finally {
-      mutationLock.current = false;
-      setBusy(false);
+      if (scope.isCurrent()) {
+        mutationLock.current = false;
+        setBusy(false);
+      }
     }
   };
 
   const saveClassification = async () => {
-    if (!selected || mutationLock.current || !canAuthor || catalogError) return;
+    if (!scope.isCurrent() || !selected || mutationLock.current || !canAuthor || catalogError)
+      return;
     mutationLock.current = true;
     setBusy(true);
     setError(null);
@@ -619,17 +770,30 @@ export function useCmsWorkspace() {
         method: 'PATCH',
         body: JSON.stringify({ expectedVersion: selected.version, categoryId: categoryId || null }),
       });
-      await openContent(selected.id, undefined, 'classification');
+      if (
+        !(await readAfterWrite(
+          (detail) => {
+            if (detail.version <= selected.version || (detail.categoryId ?? '') !== categoryId)
+              throw Error('CMS_CLASSIFICATION_READBACK_MISMATCH');
+          },
+          undefined,
+          'classification',
+        ))
+      )
+        return;
       setNotice(
         uiLanguage === 'ar'
           ? 'حُفظ تصنيف المادة بصورة مستقلة عن نسخة اللغة.'
           : 'Content classification saved separately from the locale draft.',
       );
     } catch (reason) {
+      if (!scope.isCurrent()) return;
       setError(messageOf(reason, uiLanguage));
     } finally {
-      mutationLock.current = false;
-      setBusy(false);
+      if (scope.isCurrent()) {
+        mutationLock.current = false;
+        setBusy(false);
+      }
     }
   };
   const createTaxonomy = async (kind: 'category' | 'tag') => {
@@ -657,6 +821,7 @@ export function useCmsWorkspace() {
             labelEn: taxonomy.tagEn,
           }),
         });
+      if (!scope.isCurrent()) return;
       setNotice(kind === 'category' ? tr('تم إنشاء التصنيف.') : tr('تم إنشاء الوسم.'));
       setTaxonomy((previous) =>
         kind === 'category'
@@ -665,10 +830,13 @@ export function useCmsWorkspace() {
       );
       await loadCatalogs();
     } catch (reason) {
+      if (!scope.isCurrent()) return;
       setError(messageOf(reason, uiLanguage));
     } finally {
-      mutationLock.current = false;
-      setBusy(false);
+      if (scope.isCurrent()) {
+        mutationLock.current = false;
+        setBusy(false);
+      }
     }
   };
 

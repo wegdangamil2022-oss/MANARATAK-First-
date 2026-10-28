@@ -88,6 +88,35 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 describe('Section 16 editor and live snapshot interactions', () => {
+  it('reports an accepted site action separately from a failed panel reload', async () => {
+    await mount();
+    state.request.mockImplementation(async (_path: string, options?: any) => {
+      if (options?.method) return {};
+      throw Error('Synthetic reload failure');
+    });
+    await act(async () => archive().props.onClick());
+    expect(text(renderer.toJSON())).toContain('operation was accepted');
+    expect(text(renderer.toJSON())).not.toContain('Announcement archived.');
+  });
+  it('ignores a site command that returns after its panel unmounts', async () => {
+    await mount();
+    const original = state.request.getMockImplementation()!;
+    let finish!: (value: unknown) => void;
+    state.request.mockImplementation((path: string, options?: any) =>
+      options?.method
+        ? new Promise((resolve) => {
+            finish = resolve;
+          })
+        : original(path, options),
+    );
+    await act(async () => {
+      void archive().props.onClick();
+    });
+    await act(async () => renderer.unmount());
+    const calls = state.request.mock.calls.length;
+    await act(async () => finish({}));
+    expect(state.request.mock.calls).toHaveLength(calls);
+  });
   it('locks an existing block to its original schema and permits schema selection only for a new block', async () => {
     const save = vi.fn();
     await act(async () => {
