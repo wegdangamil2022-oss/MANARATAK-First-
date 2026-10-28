@@ -56,7 +56,8 @@ describe('audit source, correlation and evidence semantics', () => {
 describe('bounded integrity API and honest result projection', () => {
   const appFor = (repository: InMemoryAuditRecordRepository) => {
     const app = express();
-    app.use('/audit', AuditRouter.create({ manageAuditRecordsUseCase: new ManageAuditRecordsUseCase(repository) }));
+    app.use((req, _res, next) => { req.authUserId = 'operator'; next(); });
+  app.use('/audit', AuditRouter.create({ manageAuditRecordsUseCase: new ManageAuditRecordsUseCase(repository), auditRecordRepo: repository }));
     app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
       res.status(error instanceof ZodError ? 400 : 500).json({ code: 'INVALID_QUERY' });
     });
@@ -78,7 +79,7 @@ describe('bounded integrity API and honest result projection', () => {
     expect(response.body.items[0]).toMatchObject({ result: 'INTENT', evidenceLevel: 'INTENT_OBSERVED' });
     const report = await request(appFor(repository)).get('/audit/integrity');
     expect(report.body).toMatchObject({ scope: 'REFERENCE_LINKAGE_AND_TIMESTAMPS', cryptographicVerification: false,
-      checkedRecords: 1, hasMore: false, nextCursor: null });
+      checkedRecords: 2, hasMore: false, nextCursor: null });
   });
 
   it('round-trips the verification cursor through the HTTP contract', async () => {

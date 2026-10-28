@@ -17,6 +17,7 @@ import {
   AssetRecordDto
 } from '@manaratak/application';
 import { AuditHelper } from '../../audit/AuditHelper.js';
+import { isSharedAdminAsset, isSharedAssetOwner } from '@manaratak/shared';
 
 export interface AssetPlatformRouterCradle {
   assetGovernanceUseCases?: AssetGovernanceUseCases;
@@ -31,6 +32,23 @@ export class AssetPlatformRouter {
   public static create(cradle: AssetPlatformRouterCradle): Router {
     const router = Router();
     const { assetGovernanceUseCases, ingestAssetUseCase, processAssetLifecycleUseCase, auditRecordRepo, assetRecordRepository, assetUsageRegistryGateway } = cradle;
+    router.use((_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
+    router.param('assetId', (req, res, next, assetId: string) => {
+      void (async () => {
+        if (/^https?:\/\//i.test(assetId.trim())) {
+          res.status(400).json({ error: 'ASSET_HANDLE_REQUIRED' });
+          return;
+        }
+        if (!assetRecordRepository) throw Error('ASSET_ADMIN_READ_MODEL_UNAVAILABLE');
+        const { AssetId } = await import('@manaratak/domain');
+        const asset = await assetRecordRepository.findById(new AssetId(assetId));
+        if (!asset || !isSharedAdminAsset(asset)) {
+          res.status(404).json({ error: 'ASSET_NOT_FOUND' });
+          return;
+        }
+        next();
+      })().catch(next);
+    });
 
     const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) =>
       (req: Request, res: Response, next: NextFunction) => {
@@ -218,6 +236,9 @@ export class AssetPlatformRouter {
     router.post('/upload-locator', asyncHandler(async (req: Request, res: Response) => {
       try {
         const payload = requestUploadLocatorSchema.parse(req.body);
+        if (!isSharedAssetOwner(payload.ownerType) || !['PUBLIC', 'INTERNAL'].includes(payload.classification)) {
+          return void res.status(403).json({ error: 'ASSET_PRIVATE_OWNER_WORKFLOW_REQUIRED' });
+        }
         const result = await ingestAssetUseCase.requestUploadLocator(payload as RequestAssetUploadLocatorDto);
         await AuditHelper.recordMutation(auditRecordRepo, req, {
           action: 'REQUEST_ASSET_UPLOAD',
@@ -249,6 +270,9 @@ export class AssetPlatformRouter {
     router.post('/register-quarantined', asyncHandler(async (req: Request, res: Response) => {
       try {
         const payload = registerQuarantinedSchema.parse(req.body);
+        if (!isSharedAssetOwner(payload.ownerType) || !['PUBLIC', 'INTERNAL'].includes(payload.classification)) {
+          return void res.status(403).json({ error: 'ASSET_PRIVATE_OWNER_WORKFLOW_REQUIRED' });
+        }
         const result = await ingestAssetUseCase.registerQuarantinedAsset(payload as RegisterQuarantinedAssetDto);
         await AuditHelper.recordMutation(auditRecordRepo, req, {
           action: 'REGISTER_QUARANTINED_ASSET',

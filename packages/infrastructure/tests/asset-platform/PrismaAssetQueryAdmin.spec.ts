@@ -9,7 +9,7 @@ describe('EAP Admin pagination and filter integrity', () => {
     const cursor = Buffer.from('2026-10-01T00:00:00.000Z|asset-99', 'utf8').toString('base64url');
     await repo.queryAdmin({ q: 'scholarship', cursor, limit: 10 });
     const query = findMany.mock.calls[0]?.[0] as any;
-    expect(query.where.AND).toHaveLength(2);
+    expect(query.where.AND).toHaveLength(4);
     expect(query.where.AND[0].OR).toEqual(expect.arrayContaining([
       { reference: { contains: 'scholarship', mode: 'insensitive' } },
     ]));
@@ -36,7 +36,7 @@ describe('EAP Admin pagination and filter integrity', () => {
     });
     const query = findMany.mock.calls[0][0] as any;
     expect(query.where.metadata).toEqual({ path: ['mimeType'], string_starts_with: 'application/' });
-    expect(query.where.AND).toHaveLength(4);
+    expect(query.where.AND).toHaveLength(6);
     expect(query.where.AND[0]).toEqual({ retentionCategory: 'TEMPORARY' });
     expect(query.where.AND[1]).toEqual(checksumPresence === 'PRESENT' ? { AND: [
       { checksumAlgorithm: { not: null } }, { checksumAlgorithm: { not: '' } },

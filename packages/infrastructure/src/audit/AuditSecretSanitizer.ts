@@ -62,7 +62,8 @@ export class AuditSecretSanitizer {
 
     if (typeof input === 'string') {
       const lower = input.toLowerCase();
-      if (lower.startsWith('bearer ') || lower.startsWith('basic ') || (input.startsWith('eyJ') && input.length > 20)) {
+      if (lower.startsWith('bearer ') || lower.startsWith('basic ') || (input.startsWith('eyJ') && input.length > 20) ||
+          /(?:[?&](?:x-amz-[^=&#]+|signature|sig|token|access_token|grant|key|credential)=|\b(?:postgres(?:ql)?|redis):\/\/[^\s]+@)/i.test(input)) {
         return '[REDACTED]' as unknown as T;
       }
       return input;
@@ -92,6 +93,21 @@ export class AuditSecretSanitizer {
     }
 
     return sanitizedObj as T;
+  }
+
+  /** Legacy rows are untrusted too; never disclose message/document payloads on read. */
+  public static forRead(input: unknown): unknown {
+    const sanitized = AuditSecretSanitizer.sanitize(input);
+    const project = (value: unknown, depth = 0): unknown => {
+      if (depth > 12) return '[REDACTED]';
+      if (Array.isArray(value)) return value.slice(0, 200).map(item => project(item, depth + 1));
+      if (!value || typeof value !== 'object' || value instanceof Date) return value;
+      return Object.fromEntries(Object.entries(value).map(([key, child]) => [key,
+        /^(?:body|messageBody|messageText|text|note|notes|internalNote|internalNotes|documentName|originalFilename|filename|requestIp|ipAddress|userAgent|privacyPreferences|beforePreferences|afterPreferences)$/i.test(key)
+          ? '[REDACTED]' : project(child, depth + 1),
+      ]));
+    };
+    return project(sanitized);
   }
 }
 

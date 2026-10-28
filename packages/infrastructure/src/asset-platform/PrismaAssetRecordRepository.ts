@@ -1,4 +1,5 @@
 import { findUsedAssetIds } from './AssetUsageBatchQuery';
+import { SHARED_ASSET_OWNER_TYPES } from '@manaratak/shared';
 import { randomUUID } from 'node:crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
 import type { AtomicPersistenceContext } from '@manaratak/domain';
@@ -409,6 +410,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     limit?: number;
     cursor?: string;
     reuseOnly?: boolean;
+    privateOwnerScope?: boolean;
   }): Promise<{ items: any[]; nextCursor: string | null; hasMore: boolean }> {
     const limit = Math.min(100, Math.max(1, Math.trunc(input.limit ?? 30)));
     let cursorCreatedAt: string | undefined;
@@ -485,6 +487,12 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       { createdAt: { lt: new Date(cursorCreatedAt) } },
       { createdAt: new Date(cursorCreatedAt), id: { lt: cursorId } },
     ] });
+    // Private owner APIs opt in only after checking the authenticated student.
+    // A client-provided owner filter cannot broaden shared-library visibility.
+    if (!input.privateOwnerScope) andFilters.push(
+      { ownerType: { in: [...SHARED_ASSET_OWNER_TYPES], mode: 'insensitive' } },
+      { securityClassification: { in: ['PUBLIC', 'INTERNAL'] } },
+    );
     if (andFilters.length) where.AND = andFilters;
     const rows = await (this.prisma as any).assetRecord.findMany({
       where,

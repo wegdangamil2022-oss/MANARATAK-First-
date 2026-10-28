@@ -20,7 +20,8 @@ async function setup() {
     await repository.save(createAuditRecordFromDto({ ...common, id, reference: `AUD-${id}`, action, contextMetadata: metadata }));
   }
   const app = express();
-  app.use('/audit', AuditRouter.create({ manageAuditRecordsUseCase: new ManageAuditRecordsUseCase(repository) }));
+  app.use((req, _res, next) => { req.authUserId = 'operator'; next(); });
+  app.use('/audit', AuditRouter.create({ manageAuditRecordsUseCase: new ManageAuditRecordsUseCase(repository), auditRecordRepo: repository }));
   // Use the real global error boundary so query errors cannot be hidden by a test-only mapper.
   app.use(new GlobalExceptionHandler({ error: () => {}, warn: () => {} } as never, new AsyncLogContext(), new DefaultErrorSerializer()).generate());
   return { app, repository };

@@ -10,10 +10,11 @@ import {
 } from '@manaratak/domain';
 import { ProcessAssetLifecycleUseCase } from '@manaratak/application';
 import { AuditHelper } from '../../audit/AuditHelper.js';
+import { isSharedAdminAsset } from '@manaratak/shared';
 
 type ReuseAsset = Pick<
   AssetRecord,
-  'id' | 'state' | 'classification' | 'metadata' | 'reference' | 'assertCanDeliver'
+  'id' | 'state' | 'classification' | 'metadata' | 'reference' | 'assertCanDeliver' | 'owner'
 >;
 
 export interface AssetReuseRouterCradle {
@@ -39,6 +40,7 @@ const allowedClassification = new Set<AssetSecurityClassification>([
 export function isAssetReusable(asset: ReuseAsset): boolean {
   if (
     asset.state !== AssetLifecycleState.ACTIVE ||
+    !isSharedAdminAsset(asset) ||
     !allowedClassification.has(asset.classification)
   )
     return false;

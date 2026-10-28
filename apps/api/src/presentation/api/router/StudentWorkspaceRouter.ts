@@ -186,6 +186,7 @@ export class StudentWorkspaceRouter {
         const result = await assetRecordRepository.queryAdmin({
           lifecycleState: AssetLifecycleState.ACTIVE,
           ownerType: 'STUDENT',
+          privateOwnerScope: true,
           ownerId,
           mimeTypePrefix: typeof req.query.mimeTypePrefix === 'string' ? req.query.mimeTypePrefix : 'image/',
           limit,

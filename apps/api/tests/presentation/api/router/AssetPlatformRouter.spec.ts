@@ -4,16 +4,18 @@ import { describe, expect, it, vi } from 'vitest';
 import { AssetPlatformRouter } from '../../../../src/presentation/api/router/AssetPlatformRouter';
 import { SecurityMiddlewareFactory } from '../../../../src/presentation/security/SecurityMiddlewareFactory';
 
+const sharedRepository = () => ({ findById: vi.fn(async () => ({ owner: { ownerType: 'COURSE' }, classification: 'INTERNAL' })) });
+
 describe('AssetPlatformRouter', () => {
   it('projects recovery state without provider coordinates or proof payloads', async () => {
     const operation = { operationId: 'safe-operation', phase: 'RECOVERY_REQUIRED', preparedAt: '2026-10-09', updatedAt: '2026-10-09',
       sourceLocator: 'clean://private/recovery-path.pdf', expectedSha256: 'private-proof-hash', expectedByteSize: 64 };
-    const asset = { id: { value: 'pending' }, reference: { value: 'ref-pending' }, owner: { ownerId: 'owner', ownerType: 'STUDENT' },
+    const asset = { id: { value: 'pending' }, reference: { value: 'ref-pending' }, owner: { ownerId: 'owner', ownerType: 'COURSE' },
       state: 'DELETED', classification: 'INTERNAL', retention: { category: 'SOFT_DELETED' },
       metadata: { originalFilename: 'test.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 64 }, restoreOperation: operation, archiveOperation: { ...operation, phase: 'RECOVERY_REQUIRED' } };
     const app = express();
     app.use('/assets', AssetPlatformRouter.create({ ingestAssetUseCase: {} as any, processAssetLifecycleUseCase: {} as any,
-      assetRecordRepository: { findAdminDetails: vi.fn(async () => ({ asset, governance: {updatedAt:new Date('2026-10-09T00:00:00Z')} })) } as any }));
+      assetRecordRepository: { ...sharedRepository(), findAdminDetails: vi.fn(async () => ({ asset, governance: {updatedAt:new Date('2026-10-09T00:00:00Z')} })) } as any }));
     const response = await request(app).get('/assets/pending');
     expect(response.status).toBe(200); expect(response.body.securityEvidence.restorePhase).toBe('RECOVERY_REQUIRED');
     expect(response.body.securityEvidence.archivePhase).toBe('RECOVERY_REQUIRED');
@@ -47,6 +49,7 @@ describe('AssetPlatformRouter', () => {
     app.use(express.json());
     app.use('/assets', AssetPlatformRouter.create({
       ingestAssetUseCase: ingestUseCase as any,
+      assetRecordRepository: sharedRepository() as never,
       processAssetLifecycleUseCase: processLifecycleUseCase as any
     }));
     return app;
@@ -55,7 +58,7 @@ describe('AssetPlatformRouter', () => {
   it('returns an audited migration response for blocked certificate capabilities', async () => {
     const lifecycle=createMockProcessLifecycleUseCase(),save=vi.fn(async()=>{});
     lifecycle.requestDeliveryGrant.mockRejectedValue(new Error('CERTIFICATE_AUTHENTICATED_DELIVERY_REQUIRED'));
-    const app=express();app.use(express.json());app.use('/assets',AssetPlatformRouter.create({ingestAssetUseCase:createMockIngestUseCase() as never,processAssetLifecycleUseCase:lifecycle as never,auditRecordRepo:{save} as never}));
+    const app=express();app.use(express.json());app.use('/assets',AssetPlatformRouter.create({ingestAssetUseCase:createMockIngestUseCase() as never,processAssetLifecycleUseCase:lifecycle as never,assetRecordRepository:sharedRepository() as never,auditRecordRepo:{save} as never}));
     const response=await request(app).post('/assets/private-certificate/delivery-grant').send({});
     expect(response.status).toBe(410);expect(response.body).toEqual({error:'CERTIFICATE_AUTHENTICATED_DELIVERY_REQUIRED'});expect(save).toHaveBeenCalledTimes(1);
   });
@@ -79,7 +82,7 @@ describe('AssetPlatformRouter', () => {
         assetId: 'ast_01',
         assetReference: 'ref_01',
         ownerId: 'owner_01',
-        ownerType: 'STUDENT',
+        ownerType: 'COURSE',
         originalFilename: 'document.pdf',
         mimeType: 'application/pdf',
         fileExtension: 'pdf',
@@ -111,7 +114,7 @@ describe('AssetPlatformRouter', () => {
         assetId: 'https://cdn.example.com/file.pdf',
         assetReference: 'ref_01',
         ownerId: 'owner_01',
-        ownerType: 'STUDENT',
+        ownerType: 'COURSE',
         originalFilename: 'document.pdf',
         mimeType: 'application/pdf',
         fileExtension: 'pdf',
@@ -138,7 +141,7 @@ describe('AssetPlatformRouter', () => {
         assetId: 'ast_02',
         assetReference: 'ref_02',
         ownerId: 'owner_02',
-        ownerType: 'STUDENT',
+        ownerType: 'COURSE',
         originalFilename: 'photo.png',
         mimeType: 'image/png',
         fileExtension: 'png',
@@ -163,7 +166,7 @@ describe('AssetPlatformRouter', () => {
         assetId: 'ast_02',
         assetReference: 'http://example.com/photo.png',
         ownerId: 'owner_02',
-        ownerType: 'STUDENT',
+        ownerType: 'COURSE',
         originalFilename: 'photo.png',
         mimeType: 'image/png',
         fileExtension: 'png',
@@ -425,7 +428,7 @@ describe('AssetPlatformRouter', () => {
           assetId: 'ast_01',
           assetReference: 'ref_01',
           ownerId: 'owner_01',
-          ownerType: 'STUDENT',
+          ownerType: 'COURSE',
           originalFilename: 'doc.pdf',
           mimeType: 'application/pdf',
           fileExtension: 'pdf',
@@ -478,7 +481,7 @@ describe('AssetPlatformRouter', () => {
     app.use('/assets', AssetPlatformRouter.create({
       ingestAssetUseCase: createMockIngestUseCase() as any,
       processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
-      assetRecordRepository: { queryAdmin: vi.fn(), findById: vi.fn(), findAdminDetails },
+      assetRecordRepository: { queryAdmin: vi.fn(), ...sharedRepository(), findAdminDetails },
     }));
     const res = await request(app).get('/assets/detail-a');
     expect(res.status).toBe(200);

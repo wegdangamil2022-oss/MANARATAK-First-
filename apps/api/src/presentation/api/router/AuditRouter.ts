@@ -1,6 +1,9 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { AuditRecord, type AuthorizationEvaluatorService } from '@manaratak/domain';
+import { AuditRecord, type AuthorizationEvaluatorService, type IAuditRecordRepository } from '@manaratak/domain';
+import { AuditSecretSanitizer } from '@manaratak/infrastructure';
+import { AuditHelper } from '../../audit/AuditHelper.js';
+import { auditExportManifest } from '../../audit/AuditExportManifest.js';
 import { dashboardActivityProjection } from '../../dashboard/DashboardActivityProjection.js';
 import { ManageAuditRecordsUseCase } from '@manaratak/application';
 import { problemDetails } from '../../http/ProblemDetails.js';
@@ -68,7 +71,7 @@ function dto(record: AuditRecord) {
     },
     source: record.getSource().getValue(),
     timestamp: record.getTimestamp().getValue().toISOString(),
-    contextMetadata: record.getContextMetadata().getData(),
+    contextMetadata: AuditSecretSanitizer.forRead(record.getContextMetadata().getData()),
     lifecycleState: record.getLifecycleState(),
     complianceMetadata: record.getComplianceMetadata()?.getRegulatoryTags(),
     correlationReference: record.getCorrelationReference()?.getValue(),
@@ -88,11 +91,18 @@ export class AuditRouter {
   public static create({
     manageAuditRecordsUseCase,
     authEvaluatorService,
+    auditRecordRepo,
   }: {
     manageAuditRecordsUseCase: ManageAuditRecordsUseCase;
     authEvaluatorService?: AuthorizationEvaluatorService;
+    auditRecordRepo: IAuditRecordRepository;
   }): Router {
     const router = Router();
+    const recordRead = (req: Request, action: string, targetId = 'audit-query') =>
+      AuditHelper.recordMutation(auditRecordRepo, req, {
+        action, category: 'AUDIT_ACCESS', targetType: 'AUDIT_ACCESS', targetId,
+        result: 'SUCCESS', metadata: { filterKeys: Object.keys(req.query).filter(key => key !== 'cursor'), scope: 'BOUNDED' },
+      }, { reliability: 'REQUIRED', principal: 'REQUIRED' });
     router.use((_req, res, next) => {
       res.setHeader('Cache-Control', 'no-store');
       next();
@@ -142,6 +152,7 @@ export class AuditRouter {
           cursor: cursor ? { timestamp: new Date(cursor[0]), id: cursor[1] } : null,
         });
         const items = page.items.map(dto);
+        await recordRead(req, 'AUDIT_SEARCH_READ');
         res
           .status(200)
           .json({
@@ -164,6 +175,7 @@ export class AuditRouter {
           ...dateRange(query), limit: query.limit,
           cursor: cursor ? { timestamp: new Date(cursor[0]), id: cursor[1] } : null,
         });
+        await recordRead(req, 'AUDIT_INTEGRITY_READ');
         // A failed integrity check is a valid report, separate from transport failure.
         res.status(200).json({ ...report, nextCursor: report.nextCursor
           ? encodeCursor(report.nextCursor.timestamp.toISOString(), report.nextCursor.id) : null });
@@ -174,6 +186,7 @@ export class AuditRouter {
 
     router.get('/export', async (req, res, next) => {
       try {
+        const startedAt = new Date().toISOString();
         const query = querySchema
           .extend({ format: z.enum(['json', 'csv']).default('json') })
           .parse(req.query);
@@ -185,6 +198,8 @@ export class AuditRouter {
           cursor: cursor ? { timestamp: new Date(cursor[0]), id: cursor[1] } : null,
         });
         const items = page.items.map(dto);
+        const manifest = auditExportManifest({ actorId: req.authUserId ?? 'unknown', filters: query, items, hasMore: page.hasMore, startedAt });
+        await recordRead(req, 'AUDIT_EXPORT_READ');
         res.setHeader('Cache-Control', 'no-store');
         res.setHeader(
           'Content-Disposition',
@@ -192,6 +207,9 @@ export class AuditRouter {
         );
         if (query.format === 'csv') {
           res.setHeader('X-Audit-Export-Scope', 'BOUNDED_PAGE');
+          res.setHeader('X-Audit-Export-Coverage', manifest.coverage);
+          res.setHeader('X-Audit-Filter-Hash', manifest.filterHash);
+          res.setHeader('X-Audit-Snapshot', manifest.snapshot);
           res.setHeader('X-Audit-Export-Count', String(items.length));
           res.setHeader('X-Audit-Has-More', String(page.hasMore));
           if (page.nextCursor) res.setHeader('X-Audit-Next-Cursor', encodeCursor(page.nextCursor.timestamp.toISOString(), page.nextCursor.id));
@@ -237,6 +255,7 @@ export class AuditRouter {
           .send(
             JSON.stringify({
               exportedAt: new Date().toISOString(),
+              manifest,
               bounded: true,
               items,
               hasMore: page.hasMore,
@@ -255,6 +274,7 @@ export class AuditRouter {
         const id = z.string().trim().min(1).max(240).parse(req.params.id);
         const record = await manageAuditRecordsUseCase.getAuditRecord(id);
         if (!record) return void res.status(404).json({ error: 'AUDIT_RECORD_NOT_FOUND' });
+        await recordRead(req, 'AUDIT_RECORD_READ', id);
         res.status(200).json(dto(record));
       } catch (error) {
         next(error);
