@@ -8,6 +8,7 @@ export default defineConfig({
     fileParallelism: false,
     testTimeout: 30000,
     hookTimeout: 60000,
+    server: { deps: { external: [/post28-preflight\.mjs$/] } },
     include: ['packages/infrastructure/tests/scholarships/ScholarshipAdmin.database.spec.ts'],
   },
 });

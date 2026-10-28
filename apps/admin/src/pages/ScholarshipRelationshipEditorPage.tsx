@@ -187,6 +187,8 @@ export function ScholarshipRelationshipEditorPage({
         cache: 'no-store',
       })
       .then((detail) => {
+        if (!active) return;
+        if (detail.id !== id) throw new Error('SCHOLARSHIP_READBACK_TARGET_MISMATCH');
         if (active) hydrate(detail);
       })
       .catch((err) => {
@@ -202,7 +204,15 @@ export function ScholarshipRelationshipEditorPage({
   }, [id]);
 
   const save = async () => {
-    if (disabled || saving || scholarship?.publicationStatus === 'PUBLISHED') return;
+    if (
+      disabled ||
+      saving ||
+      !scholarship ||
+      scholarship.id !== id ||
+      scholarship.publicationStatus !== 'DRAFT' ||
+      ['ARCHIVED', 'REJECTED'].includes(scholarship.status)
+    )
+      return;
     if (reviewReason.trim().length < 3) {
       setError(tr('Enter a review reason before saving.'));
       return;
@@ -239,7 +249,7 @@ export function ScholarshipRelationshipEditorPage({
         { cache: 'no-store' },
       );
       if (current !== generation.current) return;
-      if (verified.id !== saved.id || verified.revision !== saved.revision)
+      if (saved.id !== id || verified.id !== id || verified.revision !== saved.revision)
         throw new Error('SCHOLARSHIP_READBACK_MISMATCH');
       hydrate(verified);
       await onSaved?.();
@@ -263,7 +273,9 @@ export function ScholarshipRelationshipEditorPage({
         {error || tr('Loading scholarship relationships…')}
       </div>
     );
-  const immutable = scholarship.publicationStatus === 'PUBLISHED';
+  const immutable =
+    scholarship.publicationStatus !== 'DRAFT' ||
+    ['ARCHIVED', 'REJECTED'].includes(scholarship.status);
 
   return (
     <div dir={dir} className="mx-auto max-w-6xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
@@ -288,9 +300,13 @@ export function ScholarshipRelationshipEditorPage({
       </div>
       {immutable ? (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-          {tr(
-            'Published scholarship structure is immutable. Unpublish before changing relationships.',
-          )}
+          {scholarship.publicationStatus === 'PUBLISHED'
+            ? tr(
+                'Published scholarship structure is immutable. Unpublish before changing relationships.',
+              )
+            : language === 'ar'
+              ? 'السجل مؤرشف أو مرفوض؛ علاقاته للقراءة فقط.'
+              : 'Archived or rejected records have read-only relationships.'}
         </div>
       ) : null}
       {disabled && <p role="status">احفظ التعديلات الوصفية أولاً قبل تحرير العلاقات.</p>}

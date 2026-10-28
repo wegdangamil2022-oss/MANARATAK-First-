@@ -224,10 +224,22 @@ export function ScholarshipDetailPage() {
   const [translationOpen, setTranslationOpen] = useState(false);
   const [decisionReason, setDecisionReason] = useState('');
   const [pendingLeave, setPendingLeave] = useState<null | (() => void)>(null);
-  const { hasPermission } = useAdminAuthorization();
+  const { hasPermission, permissions = [] } = useAdminAuthorization();
   const ArrowIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const canManage = hasPermission('admin:scholarships:manage');
+  const scope = JSON.stringify([id, [...permissions].sort(), canManage]);
+  const currentScope = useRef({ key: scope });
+  if (currentScope.current.key !== scope) currentScope.current = { key: scope };
+  const ownerEpoch = currentScope.current;
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const [activeTab, setActiveTab] = useState<TabKey>('identity');
   const [detail, setDetail] = useState<ScholarshipCatalogDetailResponse | null>(null);
@@ -235,6 +247,7 @@ export function ScholarshipDetailPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [readbackUncertain, setReadbackUncertain] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [reviewReason, setReviewReason] = useState('');
@@ -293,14 +306,23 @@ export function ScholarshipDetailPage() {
   }, [confirmModal.isOpen, pendingLeave]);
   const loadRequest = useRef(0);
   const load = useCallback(
-    async (expected?: ScholarshipDto) => {
+    async (
+      expected?: ScholarshipDto,
+      decision?: { status: string; publicationStatus?: string },
+    ) => {
+      if (!mounted.current || currentScope.current !== ownerEpoch || !canManage) return false;
       const request = ++loadRequest.current;
       if (!id) return;
       setLoading(true);
       setError(null);
       try {
         const response = await scholarshipCatalogApi.detail(id);
-        if (request !== loadRequest.current) return;
+        if (
+          request !== loadRequest.current ||
+          !mounted.current ||
+          currentScope.current !== ownerEpoch
+        )
+          return false;
         if (response && response.scholarship) {
           if (response.scholarship.id !== id)
             throw new Error('SCHOLARSHIP_READBACK_TARGET_MISMATCH');
@@ -311,7 +333,15 @@ export function ScholarshipDetailPage() {
               JSON.stringify(toUpdate(response.scholarship)) !== JSON.stringify(toUpdate(expected)))
           )
             throw new Error('SCHOLARSHIP_READBACK_MISMATCH');
+          if (
+            decision &&
+            (response.scholarship.status !== decision.status ||
+              (decision.publicationStatus &&
+                response.scholarship.publicationStatus !== decision.publicationStatus))
+          )
+            throw new Error('SCHOLARSHIP_DECISION_READBACK_MISMATCH');
           setDetail(response);
+          setReadbackUncertain(false);
           const nextForm = toUpdate(response.scholarship);
           savedForm.current = JSON.stringify(nextForm);
           setForm(nextForm);
@@ -320,17 +350,41 @@ export function ScholarshipDetailPage() {
           setError('تعذر العثور على بيانات المنحة المطلوبة.');
         }
       } catch (err: unknown) {
-        if (request === loadRequest.current)
+        if (
+          request === loadRequest.current &&
+          mounted.current &&
+          currentScope.current === ownerEpoch
+        )
           setError(err instanceof Error ? err.message : 'تعذر تحميل بيانات المنحة الدراسية.');
       } finally {
-        if (request === loadRequest.current) setLoading(false);
+        if (
+          request === loadRequest.current &&
+          mounted.current &&
+          currentScope.current === ownerEpoch
+        )
+          setLoading(false);
       }
       return false;
     },
-    [id],
+    [id, ownerEpoch, canManage],
   );
 
   useEffect(() => {
+    setDetail(null);
+    setForm({});
+    savedForm.current = '';
+    setEditing(false);
+    setRelationshipEditing(false);
+    setRelationshipDirty(false);
+    setTranslationOpen(false);
+    setReviewReason('');
+    setDecisionReason('');
+    setPendingLeave(null);
+    setSaving(false);
+    setActionLoading(false);
+    setReadbackUncertain(false);
+    setMessage(null);
+    setConfirmModal((previous) => ({ ...previous, isOpen: false, type: null }));
     void load();
     return () => {
       loadRequest.current += 1;
@@ -425,7 +479,17 @@ export function ScholarshipDetailPage() {
   );
 
   const save = async () => {
-    if (!id || detail?.scholarship.id !== id || loading || saving || relationshipDirty)
+    const active = () => mounted.current && currentScope.current === ownerEpoch;
+    if (
+      !active() ||
+      !canManage ||
+      !id ||
+      detail?.scholarship.id !== id ||
+      loading ||
+      saving ||
+      readbackUncertain ||
+      relationshipDirty
+    )
       return false;
     if (reviewReason.trim().length < 3) {
       setError(
@@ -446,6 +510,8 @@ export function ScholarshipDetailPage() {
         reviewReason.trim(),
         detail!.scholarship.revision,
       );
+      if (!active()) return false;
+      setReadbackUncertain(true);
       if (!(await load(updated)))
         throw new Error(
           tr(
@@ -453,6 +519,7 @@ export function ScholarshipDetailPage() {
             'Save accepted but readback failed; verify the record before retrying.',
           ),
         );
+      if (!active()) return false;
       setMessage(
         tr(
           'تم حفظ بيانات المنحة. العلاقات المرجعية تُحفظ بصورة مستقلة داخل تبويب العلاقات.',
@@ -461,10 +528,10 @@ export function ScholarshipDetailPage() {
       );
       return true;
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'تعذر حفظ تعديلات المنحة.');
+      if (active()) setError(err instanceof Error ? err.message : 'تعذر حفظ تعديلات المنحة.');
       return false;
     } finally {
-      setSaving(false);
+      if (active()) setSaving(false);
     }
   };
 
@@ -486,7 +553,18 @@ export function ScholarshipDetailPage() {
   };
 
   const executeConfirmedAction = async () => {
-    if (!id || detail?.scholarship.id !== id || loading || actionLoading || !confirmModal.type)
+    const active = () => mounted.current && currentScope.current === ownerEpoch;
+    if (
+      !active() ||
+      !canManage ||
+      !id ||
+      detail?.scholarship.id !== id ||
+      loading ||
+      saving ||
+      readbackUncertain ||
+      actionLoading ||
+      !confirmModal.type
+    )
       return;
     if (decisionReason.trim().length < 3) {
       setError(
@@ -515,12 +593,30 @@ export function ScholarshipDetailPage() {
         decisionReason.trim(),
         detail!.scholarship.revision,
       );
+      if (!active()) return;
+      const decisions = {
+        'mark-ready': { status: 'READY_TO_REVIEW' },
+        'mark-publishable': { status: 'READY_TO_PUBLISH' },
+        publish: { status: 'PUBLISHED', publicationStatus: 'PUBLISHED' },
+        unpublish: { status: 'READY_TO_REVIEW', publicationStatus: 'DRAFT' },
+        archive: { status: 'ARCHIVED', publicationStatus: 'ARCHIVED' },
+      };
+      if (!(await load(undefined, decisions[command]))) {
+        if (!active()) return;
+        setDetail(null);
+        throw new Error(
+          tr(
+            'قُبل طلب القرار وتعذرت إعادة قراءة حالته؛ أعد التحميل قبل تكراره.',
+            'Decision accepted but readback failed; reload before retrying the decision.',
+          ),
+        );
+      }
+      if (!active()) return;
       setMessage(tr('تم تنفيذ القرار بنجاح.', 'The owner decision completed successfully.'));
-      await load();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'تعذر تنفيذ إجراء المنحة.');
+      if (active()) setError(err instanceof Error ? err.message : 'تعذر تنفيذ إجراء المنحة.');
     } finally {
-      setActionLoading(false);
+      if (active()) setActionLoading(false);
     }
   };
 
@@ -535,7 +631,7 @@ export function ScholarshipDetailPage() {
     );
   }
 
-  if (!detail || !scholarship) {
+  if (!canManage || !detail || !scholarship || scholarship.id !== id) {
     return (
       <div className="rounded-3xl border border-rose-200 bg-rose-50 p-6 text-rose-700 font-['Cairo']">
         <div className="flex items-center gap-3">
@@ -551,13 +647,22 @@ export function ScholarshipDetailPage() {
           <ArrowIcon className="h-4 w-4" />
           <span>{lt('العودة لقائمة المنح الدراسية')}</span>
         </button>
+        {canManage && (
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="m-2 rounded-xl bg-[#0E7C86] px-4 py-2 text-xs text-white"
+          >
+            {tr('إعادة التحميل', 'Reload scholarship')}
+          </button>
+        )}
       </div>
     );
   }
 
-  const canManage = hasPermission('admin:scholarships:manage');
   const canEdit =
     canManage &&
+    !readbackUncertain &&
     scholarship.publicationStatus === 'DRAFT' &&
     !['ARCHIVED', 'REJECTED'].includes(scholarship.status);
   const officialUrl = scholarshipHttpUrl(scholarship.officialSourceUrl);
@@ -1802,7 +1907,10 @@ export function ScholarshipDetailPage() {
       <section id="scholarship-decisions" className="scholarship-read-card">
         <h2>{tr('المراجعة والنشر', 'Review and publication')}</h2>
         <p>{publicationIssues.join(' · ')}</p>
-        <div className="scholarship-detail-actions">
+        <fieldset
+          disabled={loading || saving || readbackUncertain}
+          className="scholarship-detail-actions"
+        >
           {canManage && (
             <>
               <button
@@ -1904,7 +2012,7 @@ export function ScholarshipDetailPage() {
               </button>
             </>
           )}
-        </div>
+        </fieldset>
         {unsaved && (
           <p>
             {tr(

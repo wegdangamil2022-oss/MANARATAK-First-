@@ -1,14 +1,19 @@
 import React from 'react';
 import { act, create } from 'react-test-renderer';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-const state = vi.hoisted(() => ({ detail: vi.fn(), update: vi.fn(), command: vi.fn() }));
+const state = vi.hoisted(() => ({
+  detail: vi.fn(),
+  update: vi.fn(),
+  command: vi.fn(),
+  permissions: ['admin:scholarships:manage'],
+}));
 vi.mock('../../src/api/scholarshipCatalog', () => ({ scholarshipCatalogApi: state }));
 vi.mock('../../src/i18n/I18nProvider', () => ({
   useTranslation: () => ({ language: 'en', dir: 'ltr', t: (key: string) => key }),
 }));
 vi.mock('../../src/security/AdminAuthorizationContext', () => ({
-  useAdminAuthorization: () => ({ hasPermission: () => true }),
+  useAdminAuthorization: () => ({ hasPermission: () => true, permissions: state.permissions }),
 }));
 vi.mock('../../src/features/integration/ScholarshipReferenceLifecycleEditor', () => ({
   ScholarshipReferenceLifecycleEditor: () => null,
@@ -61,12 +66,18 @@ const detail = () => ({
   historyAvailable: false,
 });
 let tree: ReturnType<typeof create>;
+let navigate: ReturnType<typeof useNavigate>;
+function NavigationProbe() {
+  navigate = useNavigate();
+  return null;
+}
 const button = (text: string) =>
   tree.root.findAllByType('button').find((node) => node.children.includes(text))!;
 async function mount() {
   await act(async () => {
     tree = create(
       <MemoryRouter initialEntries={['/scholarships/sch-1']}>
+        <NavigationProbe />
         <Routes>
           <Route path="/scholarships/:id" element={<ScholarshipDetailPage />} />
         </Routes>
@@ -85,12 +96,88 @@ beforeEach(() => {
     return saved;
   });
   state.command.mockReset();
+  state.permissions = ['admin:scholarships:manage'];
 });
 afterEach(async () => {
   if (tree) await act(async () => tree.unmount());
   vi.unstubAllGlobals();
 });
 describe('Scholarship detail template and editing boundaries', () => {
+  it('does not display the previous owner after navigation to an unavailable record', async () => {
+    await mount();
+    state.detail.mockRejectedValue(new Error('New record unavailable'));
+    await act(async () => navigate('/scholarships/sch-2'));
+    expect(JSON.stringify(tree.toJSON())).not.toContain('Verified source title');
+    expect(JSON.stringify(tree.toJSON())).toContain('New record unavailable');
+    expect(button('Reload scholarship')).toBeDefined();
+  });
+  it.each([false, true])(
+    'discards a late save after navigation, including returning to the original owner: %s',
+    async (returnToOwner) => {
+      await mount();
+      await act(async () => button('Edit data').props.onClick());
+      await act(async () => button('Overview').props.onClick());
+      const form = tree.root.findByType('form');
+      await act(async () =>
+        form.findByType('input').props.onChange({ target: { value: 'Verified correction' } }),
+      );
+      let resolveSave!: (value: unknown) => void;
+      state.update.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveSave = resolve;
+          }),
+      );
+      await act(async () => {
+        void form.props.onSubmit({ preventDefault: vi.fn() });
+      });
+      state.detail.mockImplementation(async (id: string) => ({
+        ...detail(),
+        scholarship: { ...scholarship, id, displayName: 'Second owner' },
+      }));
+      await act(async () => navigate('/scholarships/sch-2'));
+      if (returnToOwner) await act(async () => navigate('/scholarships/sch-1'));
+      const calls = state.detail.mock.calls.length;
+      await act(async () => resolveSave({ ...scholarship, revision: 8 }));
+      expect(state.detail).toHaveBeenCalledTimes(calls);
+      expect(JSON.stringify(tree.toJSON())).toContain('Second owner');
+      expect(JSON.stringify(tree.toJSON())).not.toContain('Scholarship data saved.');
+    },
+  );
+  it('does not announce success or retain actionable old state after decision readback fails', async () => {
+    await mount();
+    await act(async () => button('Archive').props.onClick());
+    let dialog = tree.root.findByProps({ role: 'dialog' });
+    await act(async () =>
+      dialog.findByType('input').props.onChange({ target: { value: 'Reviewed archival' } }),
+    );
+    state.command.mockResolvedValue({ success: true });
+    state.detail.mockRejectedValue(new Error('Readback unavailable'));
+    dialog = tree.root.findByProps({ role: 'dialog' });
+    await act(async () => dialog.findAllByType('button').at(-1)!.props.onClick());
+    expect(JSON.stringify(tree.toJSON())).toContain('Decision accepted but readback failed');
+    expect(JSON.stringify(tree.toJSON())).not.toContain(
+      'The owner decision completed successfully.',
+    );
+    expect(button('Reload scholarship')).toBeDefined();
+    expect(state.command).toHaveBeenCalledWith('sch-1', 'archive', 'Reviewed archival', 7);
+  });
+  it('requires the decision state to agree with the acknowledged command', async () => {
+    await mount();
+    await act(async () => button('Archive').props.onClick());
+    const dialog = tree.root.findByProps({ role: 'dialog' });
+    await act(async () =>
+      dialog.findByType('input').props.onChange({ target: { value: 'Reviewed archival' } }),
+    );
+    state.command.mockResolvedValue({ success: true });
+    await act(async () =>
+      tree.root.findByProps({ role: 'dialog' }).findAllByType('button').at(-1)!.props.onClick(),
+    );
+    expect(JSON.stringify(tree.toJSON())).toContain('Decision accepted but readback failed');
+    expect(JSON.stringify(tree.toJSON())).not.toContain(
+      'The owner decision completed successfully.',
+    );
+  });
   it('shows a verified public link and unpublish action but prevents editing a published owner', async () => {
     state.detail.mockResolvedValue({
       ...detail(),
@@ -125,6 +212,7 @@ describe('Scholarship detail template and editing boundaries', () => {
     await act(async () => form.props.onSubmit({ preventDefault: vi.fn() }));
     expect(JSON.stringify(tree.toJSON())).toContain('Save accepted but readback failed');
     expect(tree.root.findByType('textarea').props.value).toBe('Pending correction');
+    expect(tree.root.findByProps({ type: 'submit' }).props.disabled).toBe(true);
   });
   it('localizes the legacy editing panels and health labels into English', async () => {
     await mount();
@@ -170,7 +258,7 @@ describe('Scholarship detail template and editing boundaries', () => {
     expect(tree.root.findAllByProps({ role: 'tab' })).toHaveLength(9);
     expect(tree.root.findAllByType('input')).toHaveLength(0);
     expect(tree.root.findAllByType('textarea')).toHaveLength(0);
-    expect(tree.root.findByProps({ role: 'tablist' }).props.className).toBe(
+    expect(tree.root.findByProps({ role: 'tablist' }).props.className.split(' ')).toContain(
       'scholarship-detail-tabs',
     );
     expect(JSON.stringify(tree.toJSON())).toContain('Verified source title');

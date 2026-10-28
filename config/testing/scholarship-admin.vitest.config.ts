@@ -10,6 +10,8 @@ export default defineConfig({
       'apps/admin/tests/scholarships/**/*.spec.tsx',
       'packages/infrastructure/tests/scholarships/PrismaScholarshipRepository.spec.ts',
       'packages/application/tests/scholarships/ScholarshipCatalogDetailUseCases.spec.ts',
+      'packages/application/tests/scholarships/AdminScholarshipUseCases.spec.ts',
+      'packages/application/tests/scholarships/ScholarshipCanonicalAuthoringUseCases.spec.ts',
       'apps/api/tests/presentation/api/router/ScholarshipCatalogDetailRouter.spec.ts',
       'apps/api/tests/presentation/api/router/ScholarshipAdminRouter.spec.ts',
       'apps/admin/tests/remediation/B11OwnerDescriptionPanel.spec.tsx',
