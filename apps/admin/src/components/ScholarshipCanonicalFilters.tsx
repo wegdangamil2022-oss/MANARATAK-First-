@@ -57,6 +57,7 @@ export function ScholarshipCanonicalFilters({
     async (after?: string) => {
       const current = generation.current;
       setProgramsBusy(true);
+      setError('');
       const params = new URLSearchParams({ limit: '25' });
       if (value.universityId) params.set('universityId', value.universityId);
       if (value.majorId) params.set('majorId', value.majorId);
@@ -109,7 +110,7 @@ export function ScholarshipCanonicalFilters({
     });
   return (
     <div className="space-y-4">
-      {error && <p role="status">{error}</p>}
+      {error && <div role="status"><p>{error}</p><button type="button" disabled={programsBusy} onClick={() => void loadPrograms(cursor ?? undefined)} className="rounded-xl bg-[#0E7C86] px-3 py-2 text-xs text-white">{ar ? 'إعادة تحميل البرامج' : 'Retry programs'}</button></div>}
       <div className="scholarship-filter-fields grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {children}
         {(

@@ -1,7 +1,8 @@
 import {OwnerDraftCreateForm} from '../components/OwnerDraftCreateForm';
 import { adminPaths } from '../navigation/AdminRoutes';
 import { AdminLink } from '../components/AdminLink';
-import {ScholarshipCanonicalFilters,emptyScholarshipCanonicalFilters,type ScholarshipCanonicalFilterState} from '../components/ScholarshipCanonicalFilters';
+import {ScholarshipCanonicalFilters} from '../components/ScholarshipCanonicalFilters';
+import { useScholarshipListQuery } from '../features/scholarships/useScholarshipListQuery';
 import {
 AlertTriangle,
 ArrowLeft,
@@ -77,22 +78,15 @@ interface ScholarshipSummary {
 }
 
 function getCountryEmojiFlag(countryName?: string): string {
-  if (!countryName) return '🌐';
-  const c = countryName.toLowerCase();
-  if (c.includes('تركيا') || c.includes('turkey') || c.includes('turk')) return '🇹🇷';
-  if (c.includes('بريطانيا') || c.includes('المملكة المتحدة') || c.includes('uk') || c.includes('britain')) return '🇬🇧';
-  if (c.includes('ألمانيا') || c.includes('المانيا') || c.includes('germany')) return '🇩🇪';
-  if (c.includes('السعودية') || c.includes('saudi') || c.includes('ksa')) return '🇸🇦';
-  if (c.includes('أمريكا') || c.includes('الولايات المتحدة') || c.includes('usa') || c.includes('us')) return '🇺🇸';
-  if (c.includes('كندا') || c.includes('canada')) return '🇨🇦';
-  if (c.includes('فرنسا') || c.includes('france')) return '🇫🇷';
-  if (c.includes('اليابان') || c.includes('japan')) return '🇯🇵';
-  if (c.includes('أستراليا') || c.includes('australia')) return '🇦🇺';
-  if (c.includes('ماليزيا') || c.includes('malaysia')) return '🇲🇾';
-  if (c.includes('قطر') || c.includes('qatar')) return '🇶🇦';
-  if (c.includes('الإمارات') || c.includes('emirates') || c.includes('uae')) return '🇦🇪';
-  if (c.includes('الصين') || c.includes('china')) return '🇨🇳';
-  return '🌐';
+  const flags: Record<string, string> = {
+    turkey: '🇹🇷', 'تركيا': '🇹🇷', 'united kingdom': '🇬🇧', uk: '🇬🇧', 'المملكة المتحدة': '🇬🇧',
+    germany: '🇩🇪', 'ألمانيا': '🇩🇪', 'saudi arabia': '🇸🇦', 'السعودية': '🇸🇦',
+    'united states': '🇺🇸', usa: '🇺🇸', 'الولايات المتحدة': '🇺🇸', canada: '🇨🇦', 'كندا': '🇨🇦',
+    france: '🇫🇷', 'فرنسا': '🇫🇷', japan: '🇯🇵', 'اليابان': '🇯🇵', australia: '🇦🇺', 'أستراليا': '🇦🇺',
+    malaysia: '🇲🇾', 'ماليزيا': '🇲🇾', qatar: '🇶🇦', 'قطر': '🇶🇦',
+    'united arab emirates': '🇦🇪', 'الإمارات': '🇦🇪', china: '🇨🇳', 'الصين': '🇨🇳',
+  };
+  return flags[countryName?.trim().toLowerCase() ?? ''] ?? '🌐';
 }
 
 export function ScholarshipListPage() {
@@ -106,98 +100,60 @@ export function ScholarshipListPage() {
   const [loading, setLoading] = useState(true);
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [summaryError, setSummaryError] = useState(false);
+  const [refresh, setRefresh] = useState(0);
 
-  // Filters State
-  const [canonical,setCanonical]=useState<ScholarshipCanonicalFilterState>(()=>{const params=new URLSearchParams(typeof window==='undefined'?'':window.location.search);return {...emptyScholarshipCanonicalFilters,...Object.fromEntries(Object.keys(emptyScholarshipCanonicalFilters).map(key=>[key,params.get(key)?.slice(0,240)??emptyScholarshipCanonicalFilters[key as keyof ScholarshipCanonicalFilterState]]))};});
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [completenessFilter, setCompletenessFilter] = useState('');
-  const [fundingFilter, setFundingFilter] = useState('');
-  const [deadlineFilter, setDeadlineFilter] = useState('');
-  const [page, setPage] = useState(1);
+  const { canonical, searchTerm, statusFilter, completenessFilter, fundingFilter, deadlineFilter,
+    page, queryKey, hasActiveFilters, setCanonical, setSearchTerm, setStatusFilter,
+    setCompletenessFilter, setFundingFilter, setDeadlineFilter, setPage, handleResetFilters,
+  } = useScholarshipListQuery();
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [showCreate, setShowCreate] = useState(false);
 
   const numberFormatter = useMemo(() => new Intl.NumberFormat(isArabic ? 'ar' : 'en-US'), [isArabic]);
   const formatNumber = (value: number | null | undefined) => (value == null ? '—' : numberFormatter.format(value));
 
-  const fetchSummary = async () => {
+  useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
     setSummaryLoading(true);
-    try {
-      const res = await adminApiClient.request<ScholarshipSummary>('/admin/scholarships/summary');
-      setSummary(res);
-    } catch {
-      setSummary(null);
-      setError(isArabic?'تعذر تحميل الإحصاءات؛ القيم غير متاحة وليست أصفارًا.':'Summary unavailable; missing counts are not zero.');
-    } finally {
-      setSummaryLoading(false);
-    }
-  };
+    setSummary(null);
+    setSummaryError(false);
+    void adminApiClient.request<ScholarshipSummary>('/admin/scholarships/summary', { signal: controller.signal, cache: 'no-store' })
+      .then(res => { if (active) setSummary(res); })
+      .catch(() => { if (active) setSummaryError(true); })
+      .finally(() => { if (active) setSummaryLoading(false); });
+    return () => { active = false; controller.abort(); };
+  }, [refresh]);
 
   const listRequest = useRef(0);
-  const fetchScholarships = async () => {
+  const [loadedQuery, setLoadedQuery] = useState('');
+  useEffect(() => {
     const request = ++listRequest.current;
+    const controller = new AbortController();
     setLoading(true);
+    setData(null);
     setError(null);
-    try {
-      const params = new URLSearchParams({ page: page.toString(), pageSize: '24' });
-      for(const[key,value]of Object.entries(canonical))if(value)params.set(key,value);
-      if (statusFilter) params.append('status', statusFilter);
-      if (completenessFilter) params.append('completenessStatus', completenessFilter);
-      if (searchTerm.trim()) params.append('query', searchTerm.trim());
-      for (const [key, value] of Object.entries({ fundingType: fundingFilter, deadlineStatus: deadlineFilter })) if (value) params.set(key, value);
-
-      const res = await adminApiClient.request<PaginatedResponse>(`/admin/scholarships?${params.toString()}`,
-      );
+    setLoadedQuery(queryKey);
+    void adminApiClient.request<PaginatedResponse>(`/admin/scholarships?${queryKey}`, { signal: controller.signal, cache: 'no-store' }).then(res => {
       if (request !== listRequest.current) return;
-      if (res.total > 0 && page > res.totalPages) {
+      if (!res || !Array.isArray(res.data)) throw new Error('SCHOLARSHIP_LIST_RESPONSE_INVALID');
+      if (page > Math.max(1, res.totalPages)) {
         setPage(Math.max(1, res.totalPages));
         return;
       }
-      setData(res ?? { data: [], total: 0, page: 1, pageSize: 24, totalPages: 0 });
-    } catch (err) {
+      setData(res);
+    }).catch((err: unknown) => {
       if (request !== listRequest.current) return;
       setError(err instanceof Error ? err.message : 'تعذر تحميل المنح الدراسية.');
-    } finally {
+    }).finally(() => {
       if (request === listRequest.current) setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchSummary();
-  }, []);
-
-  useEffect(() => {
-    fetchScholarships();
-    return () => {
-      listRequest.current += 1;
-    };
-  }, [
-    page,
-    statusFilter,
-    completenessFilter,
-    searchTerm,
-    fundingFilter,
-    deadlineFilter,
-    canonical,
-  ]);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    for (const [key, value] of Object.entries(canonical)) {
-      if (value) params.set(key, value);
-      else params.delete(key);
-    }
-    window.history.replaceState(
-      null,
-      '',
-      `${window.location.pathname}${params.size?'?'+params:''}`,
-    );
-  }, [canonical]);
-  const handleRefresh = () => {
-    fetchSummary();
-    fetchScholarships();
-  };
+    });
+    return () => { listRequest.current += 1; controller.abort(); };
+  // queryKey contains the complete validated filter/page scope.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryKey, refresh]);
+  const handleRefresh = () => setRefresh(value => value + 1);
 
   const handleStatusCardClick = (status: string) => {
     if (statusFilter === status) {
@@ -205,29 +161,11 @@ export function ScholarshipListPage() {
     } else {
       setStatusFilter(status);
     }
-    setPage(1);
   };
 
   // Filtering happens before pagination in the owner API.
-  const filteredItems = data?.data ?? [];
-
-  const hasActiveFilters = Boolean(
-    searchTerm ||
-    statusFilter ||
-    completenessFilter ||
-    fundingFilter ||
-    deadlineFilter || Object.entries(canonical).some(([key, value]) => value !== emptyScholarshipCanonicalFilters[key as keyof ScholarshipCanonicalFilterState]),
-  );
-
-  const handleResetFilters = () => {
-    setSearchTerm('');
-    setStatusFilter('');
-    setCompletenessFilter('');
-    setFundingFilter('');
-    setCanonical({ ...emptyScholarshipCanonicalFilters });
-    setDeadlineFilter('');
-    setPage(1);
-  };
+  const pending = loading || loadedQuery !== queryKey;
+  const filteredItems = loadedQuery === queryKey ? data?.data ?? [] : [];
 
   return (
     <div dir={dir} className="scholarship-workspace mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
@@ -307,7 +245,7 @@ export function ScholarshipListPage() {
             </div>
           </div>
           <div className="mt-2.5 text-2xl font-black text-[#142B5F]">
-            {summaryLoading ? <Loader2 className="h-6 w-6 animate-spin text-slate-300" /> : formatNumber(summary?.all ?? data?.total)}
+            {summaryLoading ? <Loader2 className="h-6 w-6 animate-spin text-slate-300" /> : formatNumber(summary?.all)}
           </div>
           <div className="mt-1 text-[11px] font-bold text-slate-400">
             <span>{statusFilter === '' ? tr('● محدد حالياً (الكل)', '● Selected') : tr('عرض جميع المنح', 'View all')}</span>
@@ -414,19 +352,21 @@ export function ScholarshipListPage() {
         <h2 id="scholarship-filters" className="mb-4 flex items-center gap-2 text-lg font-black text-[#142B5F]"><Filter className="h-5 w-5 text-[#0E7C86]" aria-hidden="true" />{tr('البحث والتصفية', 'Search and filters')}</h2>
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="relative flex-1">
+            <div className="relative min-w-0 flex-1">
               <Search className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0E7C86]" />
               <input
                 type="text"
                 value={searchTerm}
-                onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                aria-label={tr('البحث في المنح', 'Search scholarships')}
+                maxLength={200}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={tr('البحث بالاسم، الجهة المانحة، بلد الدراسة، أو الرمز...', 'Search by name, sponsor, country, or code...')}
                 className="h-11 w-full rounded-2xl border border-slate-200 bg-[#FAF7F0]/50 pr-10 pl-10 text-xs sm:text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#0E7C86] focus:bg-white focus:ring-2 focus:ring-[#0E7C86]/15 font-['Cairo']"
               />
               {searchTerm && (
                 <button
                   type="button"
-                  onClick={() => { setSearchTerm(''); setPage(1); }}
+                  onClick={() => setSearchTerm('')}
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
                   title="مسح البحث"
                 >
@@ -435,7 +375,7 @@ export function ScholarshipListPage() {
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 p-1">
                 <button
                   type="button"
@@ -474,7 +414,7 @@ export function ScholarshipListPage() {
             </div>
           </div>
 
-          <ScholarshipCanonicalFilters value={canonical} onChange={value => { setCanonical(value); setPage(1); }} ar={isArabic}>
+          <ScholarshipCanonicalFilters value={canonical} onChange={setCanonical} ar={isArabic}>
 
 
             <div>
@@ -484,7 +424,8 @@ export function ScholarshipListPage() {
               </label>
               <select
                 value={fundingFilter}
-                onChange={(e) => { setFundingFilter(e.target.value); setPage(1); }}
+                aria-label={tr('نوع التمويل والتغطية', 'Funding type')}
+                onChange={(e) => setFundingFilter(e.target.value)}
                 className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 cursor-pointer font-['Cairo']"
               >
                 <option value="">كل أنواع التمويل</option>
@@ -506,7 +447,8 @@ export function ScholarshipListPage() {
               </label>
               <select
                 value={deadlineFilter}
-                onChange={(e) => { setDeadlineFilter(e.target.value); setPage(1); }}
+                aria-label={tr('الموعد النهائي', 'Deadline status')}
+                onChange={(e) => setDeadlineFilter(e.target.value)}
                 className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 cursor-pointer font-['Cairo']"
               >
                 <option value="">كل المواعيد</option>
@@ -531,19 +473,22 @@ export function ScholarshipListPage() {
         </div>
       </section>
 
-      {error && (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-bold text-rose-700 shadow-xs flex items-center gap-2">
+      {summaryError && <p role="status" className="text-xs text-amber-800">{tr('تعذر تحميل الإحصاءات؛ القيم غير متاحة وليست أصفارًا.', 'Summary unavailable; missing counts are not zero.')}</p>}
+      {error && loadedQuery === queryKey && (
+        <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-bold text-rose-700 shadow-xs flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 shrink-0 text-rose-600" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Scholarships Content: Stretched Public-Style Cards Stack or Table */}
-      {loading && !data ? (
+      {pending ? (
         <div className="flex h-72 flex-col items-center justify-center gap-3 rounded-3xl border border-[#DDEFF2] bg-white p-8">
           <Loader2 className="h-9 w-9 animate-spin text-[#0E7C86]" />
           <p className="text-xs font-bold text-slate-500">{tr('جارٍ تحميل المنح الدراسية...', 'Loading scholarships...')}</p>
         </div>
+      ) : error ? (
+        <button type="button" onClick={handleRefresh} className="rounded-xl bg-[#0E7C86] px-4 py-2 text-xs font-bold text-white">{tr('إعادة المحاولة', 'Retry loading scholarships')}</button>
       ) : filteredItems.length === 0 ? (
         <div className="flex min-h-72 flex-col items-center justify-center gap-3 rounded-3xl border border-[#DDEFF2] bg-white p-8 text-center shadow-xs">
           <div className="h-14 w-14 rounded-2xl bg-slate-100 grid place-items-center text-slate-400">
@@ -738,7 +683,7 @@ export function ScholarshipListPage() {
                         </span>
                       ) : (
                         <span className="inline-flex items-center rounded-lg bg-slate-100 text-slate-700 px-2 py-0.5 text-[11px] font-bold">
-                          تمويل جزئي
+                          {['PARTIAL', 'PARTIALLY_FUNDED'].includes(item.fundingTypeCode ?? '') ? tr('تمويل جزئي', 'Partially funded') : tr('التمويل غير محدد', 'Funding unspecified')}
                         </span>
                       )}
                     </td>
@@ -748,7 +693,7 @@ export function ScholarshipListPage() {
                     <td className="whitespace-nowrap px-6 py-4 font-mono text-[11px] text-slate-500">
                       {item.applicationDeadline
                         ? new Date(item.applicationDeadline).toLocaleDateString(isArabic ? 'ar' : 'en-US')
-                        : 'مفتوحة طوال العام'}
+                        : item.deadlineType === 'OPEN_ALL_YEAR' ? tr('مفتوحة طوال العام', 'Open all year') : tr('الموعد غير محدد', 'Deadline unspecified')}
                     </td>
                     <td className="px-6 py-4 text-end">
                       <AdminLink
@@ -765,8 +710,10 @@ export function ScholarshipListPage() {
             </table>
           </div>
 
-          {data && data.totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-slate-200/90 bg-[#FAF7F0] px-6 py-3.5 text-xs font-bold text-slate-600">
+        </div>
+      )}
+          {!pending && !error && loadedQuery === queryKey && data && data.totalPages > 1 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/90 bg-[#FAF7F0] px-6 py-3.5 text-xs font-bold text-slate-600">
               <div>
                 <span>{tr('الصفحة', 'Page')} </span>
                 <span className="font-black text-[#142B5F]">{data.page}</span>
@@ -792,8 +739,6 @@ export function ScholarshipListPage() {
               </div>
             </div>
           )}
-        </div>
-      )}
     </div>
   );
 }
