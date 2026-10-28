@@ -13,9 +13,11 @@ import { CertificateTemplates } from '../features/certificates/CertificateTempla
 import { CertificateIssuers } from '../features/certificates/CertificateIssuers';
 import { CertificateReviews } from '../features/certificates/CertificateReviews';
 import { CertificateTrust } from '../features/certificates/CertificateTrust';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import '../features/reference-data/reference-data.css';
 import '../features/certificates/certificates.css';
 export function CertificateAdminPage() {
+  const { permissions = [] } = useAdminAuthorization();
   const { c, dir } = useCertificateCopy(),
     location = useLocation(),
     [params] = useSearchParams();
@@ -67,7 +69,7 @@ export function CertificateAdminPage() {
           </Link>
         ))}
       </nav>
-      <div className="certificate-tab-content">
+      <div className="certificate-tab-content" key={[...permissions].sort().join('|')}>
         {section === 'registry' ? (
           <CertificateRegistry />
         ) : section === 'templates' ? (

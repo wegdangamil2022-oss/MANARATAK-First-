@@ -115,6 +115,19 @@ afterEach(async () => {
   vi.useRealTimers();
 });
 describe('Certificate workspace behavior', () => {
+  it('shows a missing clone source instead of an unrelated blank template', async () => {
+    await mount('/certificates/templates/new?clone=missing');
+    expect(text()).toContain('source template is missing');
+    expect(text()).not.toContain('Create template');
+  });
+  it('returns an empty last registry page to the last available server page', async () => {
+    await mount('/certificates?page=5');
+    expect(
+      state.request.mock.calls.some(
+        ([path]) => path.startsWith('/admin/certificates?') && path.includes('page=1'),
+      ),
+    ).toBe(true);
+  });
   it('offers five stable workspace links and loads no templates or readiness on registry entry', async () => {
     await mount();
     const nav = tree.root
@@ -236,6 +249,8 @@ describe('Certificate state and request provenance', () => {
     expect(query.get('pageSize')).toBe('25');
     expect(query.get('issuedTo')).toBe('2026-10-27T23:59:59.999Z');
     expect(query.has('section')).toBe(false);
+    for (const page of ['1.5', 'Infinity', 'NaN', '-1', '9007199254740992'])
+      expect(certificateRegistryQuery(new URLSearchParams({ page })).get('page')).toBe('1');
   });
   it('restricts return links to the certificate registry', () => {
     expect(safeCertificateReturn('https://untrusted.invalid')).toBe('/certificates');

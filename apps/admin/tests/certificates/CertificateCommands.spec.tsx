@@ -30,6 +30,28 @@ afterEach(async () => {
   if (tree) await act(async () => tree.unmount());
 });
 describe('Certificate asynchronous provenance', () => {
+  it('does not return a late result to a caller that already left the certificate editor', async () => {
+    let finish!: (value: unknown) => void;
+    state.request.mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+    await act(async () => {
+      tree = create(<Command />);
+    });
+    let pending!: Promise<unknown>;
+    await act(async () => {
+      pending = command.execute('/admin/certificates/c/renew', { reason: 'Verified renewal' });
+    });
+    await act(async () => tree.unmount());
+    let result: unknown;
+    await act(async () => {
+      finish({ id: 'replacement' });
+      result = await pending;
+    });
+    expect(result).toBeUndefined();
+  });
   it('keeps the same idempotency identity after an uncertain command and blocks a changed payload', async () => {
     await act(async () => {
       tree = create(<Command />);

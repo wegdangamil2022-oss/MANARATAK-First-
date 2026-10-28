@@ -62,6 +62,15 @@ export function CertificateTemplates({ id, editing = false }: { id?: string; edi
       );
     const source =
       id === 'new' ? rows.data?.data.find((item) => item.id === params.get('clone')) : template;
+    if (id === 'new' && params.get('clone') && !source)
+      return (
+        <CertificateNotice error>
+          {c(
+            'القالب المطلوب نسخه غير موجود أو لم يعد متاحًا. ارجع إلى مكتبة القوالب.',
+            'The source template is missing or no longer available. Return to the template library.',
+          )}
+        </CertificateNotice>
+      );
     return (
       <CertificateTemplateEditor
         key={id + ':' + (source?.currentVersionId ?? 'new')}
@@ -284,7 +293,10 @@ function TemplateDetails({
   }
   return (
     <>
-      <CertificatePanel title={ar?item.nameAr:item.nameEn} actions={<StatusBadge status={item.status} />}>
+      <CertificatePanel
+        title={ar ? item.nameAr : item.nameEn}
+        actions={<StatusBadge status={item.status} />}
+      >
         <div className="certificate-actions">
           {hasPermission('admin:certificates:templates:author') ? (
             <>

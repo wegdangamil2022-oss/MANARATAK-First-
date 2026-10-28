@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, X, RefreshCw } from 'lucide-react';
 import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
@@ -23,8 +23,9 @@ import type {
   Analytics,
 } from './certificateModels';
 export function certificateRegistryQuery(params: URLSearchParams) {
+  const page = Number(params.get('page'));
   const query = new URLSearchParams({
-    page: String(Math.min(100000, Math.max(1, Number(params.get('page')) || 1))),
+    page: String(Number.isSafeInteger(page) && page > 0 ? Math.min(100000, page) : 1),
     pageSize: ['25', '50'].includes(params.get('pageSize') ?? '') ? params.get('pageSize')! : '25',
   });
   for (const key of [
@@ -82,6 +83,16 @@ export function CertificateRegistry() {
     revision,
   );
   const metrics = useCertificateRead<Analytics>('/admin/certificates/analytics', revision);
+  const requestedPage = Number(query.get('page'));
+  useEffect(() => {
+    if (!registry.data) return;
+    const lastPage = Math.max(1, Math.ceil(registry.data.total / registry.data.pageSize));
+    if (requestedPage > lastPage) {
+      const next = new URLSearchParams(params);
+      next.set('page', String(lastPage));
+      setParams(next, { replace: true });
+    }
+  }, [registry.data, requestedPage, params, setParams]);
   function filter(key: string, value: string) {
     const next = new URLSearchParams(params);
     if (key === 'templateId') next.delete('templateVersionId');

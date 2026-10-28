@@ -53,7 +53,14 @@ export function useCertificateRead<T>(endpoint: string | null, revision = 0) {
 }
 export function useCertificateCommand() {
   const frozen = useRef<{ endpoint: string; signature: string; key: string } | null>(null),
-    lock = useRef(false);
+    lock = useRef(false),
+    alive = useRef(true);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
     [uncertain, setUncertain] = useState(false);
@@ -63,7 +70,7 @@ export function useCertificateCommand() {
     body: unknown,
     options: AdminRequestOptions = {},
   ): Promise<T | undefined> {
-    if (lock.current) return;
+    if (lock.current || !alive.current) return;
     const signature = JSON.stringify([body, options]);
     if (
       frozen.current &&
@@ -88,10 +95,12 @@ export function useCertificateCommand() {
         body: JSON.stringify(body),
         idempotencyKey: frozen.current.key,
       });
+      if (!alive.current) return undefined;
       frozen.current = null;
       setUncertain(false);
       return result;
     } catch (e) {
+      if (!alive.current) return undefined;
       const message = e instanceof Error ? e.message : '';
       const status = Number(message.match(/^\[(\d{3})\]/)?.[1]);
       const unknown = !status || status >= 500 || [408, 425, 429].includes(status);
@@ -121,7 +130,7 @@ export function useCertificateCommand() {
       return undefined;
     } finally {
       lock.current = false;
-      setBusy(false);
+      if (alive.current) setBusy(false);
     }
   }
   return { execute, busy, error, uncertain };
