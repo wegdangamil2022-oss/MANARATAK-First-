@@ -4,6 +4,8 @@ export default defineConfig({
   ...baseline,
   test: {
     ...baseline.test,
+    // Execute the CLI module natively: Vite's SSR transform can move its hashbang.
+    server: { deps: { external: [/post28-preflight\.mjs$/] } },
     maxWorkers: 1,
     fileParallelism: false,
     testTimeout: 30000,
