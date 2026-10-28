@@ -28,6 +28,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 import { useTranslation } from '../i18n/I18nProvider';
 
 type InternationalTestCompletenessStatus = 'INCOMPLETE' | 'COMPLETE' | 'NEEDS_REVIEW';
@@ -187,6 +188,7 @@ export function InternationalTestsAdminPage() {
     categoryFilter = params.get('testCategory') ?? '',
     completenessFilter = params.get('completenessStatus') ?? '',
     staleOnly = params.get('staleOnly') === 'true';
+  const scope=useOwnerOperationScope(`${query}:${['manage','review','publish'].map(action=>String(hasPermission('admin:international-tests:'+action))).join(':')}`);
   const page = Math.min(1000, Math.max(1, Math.floor(Number(params.get('page')) || 1))),
     pageSize = 20,
     viewMode = params.get('view') === 'table' ? 'table' : 'cards';
@@ -203,6 +205,7 @@ export function InternationalTestsAdminPage() {
   const requestSequence = useRef(0),
     submitting = useRef(false);
   const [countryDraft, setCountryDraft] = useState(countryFilter);
+  useEffect(()=>{submitting.current=false;setSaving(false);setAction(null);setActionError('');setMessage('');},[scope]);
   useEffect(() => setCountryDraft(countryFilter), [countryFilter]);
   const update = useCallback(
     (key: string, value: string) => {
@@ -226,6 +229,7 @@ export function InternationalTestsAdminPage() {
       sequence = ++requestSequence.current;
     setLoading(true);
     setError('');
+    setTests(null);
     const request = new URLSearchParams(query);
     request.delete('view');
     request.set('page', String(page));
@@ -236,8 +240,8 @@ export function InternationalTestsAdminPage() {
       })
       .then((data) => {
         if (controller.signal.aborted || sequence !== requestSequence.current) return;
-        if (data.total > 0 && !data.data.length && page > 1) {
-          update('page', String(Math.ceil(data.total / pageSize)));
+        if (page > Math.max(1, Math.ceil(data.total / pageSize))) {
+          update('page', String(Math.max(1,Math.ceil(data.total / pageSize))));
           return;
         }
         setTests(data);
@@ -250,7 +254,7 @@ export function InternationalTestsAdminPage() {
         if (!controller.signal.aborted && sequence === requestSequence.current) setLoading(false);
       });
     return () => controller.abort();
-  }, [query, page, refresh, update]);
+  }, [query, page, refresh, update, scope]);
   const activeFilters = Boolean(
     searchQuery ||
     countryFilter ||
@@ -281,10 +285,11 @@ export function InternationalTestsAdminPage() {
     setAction({ test, kind });
   };
   const perform = async () => {
-    if (!action || submitting.current || !allowed(action.kind) || reason.trim().length < 3) return;
+    if (!action || submitting.current || !scope.isCurrent() || !allowed(action.kind) || reason.trim().length < 3) return;
     submitting.current = true;
     setSaving(true);
     setActionError('');
+    let accepted=false;
     try {
       if (!Number.isSafeInteger(action.test.revision))
         throw Error(
@@ -298,6 +303,12 @@ export function InternationalTestsAdminPage() {
           body: JSON.stringify({ reason: reason.trim() }),
         },
       );
+      accepted=true;
+      if(!scope.isCurrent())return;
+      const checked=await adminApiClient.request<InternationalTest>('/admin/international-tests/'+encodeURIComponent(action.test.id),{cache:'no-store'});
+      if(!scope.isCurrent())return;
+      const expected:Record<TestAction,string>={publish:'PUBLISHED',unpublish:'READY_TO_PUBLISH',archive:'ARCHIVED','mark-publishable':'READY_TO_PUBLISH'};
+      if(checked.id!==action.test.id||!Number.isSafeInteger(checked.revision)||checked.revision!<=action.test.revision!||checked.status!==expected[action.kind])throw Error(say('تعذر التحقق من الحالة المحفوظة؛ حدّث القائمة قبل تكرار القرار.','Saved state could not be verified; reload before repeating the decision.'));
       setAction(null);
       setMessage(
         say(
@@ -307,10 +318,11 @@ export function InternationalTestsAdminPage() {
       );
       setRefresh((n) => n + 1);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Unable to save');
+      if(!scope.isCurrent())return;
+      if(accepted){setAction(null);setTests(null);setError(err instanceof Error?err.message:'Unable to verify saved decision');}
+      else setActionError(err instanceof Error ? err.message : 'Unable to save');
     } finally {
-      submitting.current = false;
-      setSaving(false);
+      if(scope.isCurrent()){submitting.current = false;setSaving(false);}
     }
   };
   const actions = (test: InternationalTest) => (

@@ -1,4 +1,5 @@
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 import { useTestDraftGuard } from '../features/international-tests/useTestDraftGuard';
 import { OwnerDescriptionTranslationPanel } from '../components/OwnerDescriptionTranslationPanel';
 import { TestAdmissionScoreEditor } from '../features/integration/TestAdmissionScoreEditor';
@@ -191,6 +192,7 @@ export function InternationalTestDetailPage() {
   const { language } = useTranslation();
   const { hasPermission } = useAdminAuthorization();
   const canManage = hasPermission('admin:international-tests:manage');
+  const scope=useOwnerOperationScope(`${id}:${['manage','review','verify','publish'].map(action=>String(hasPermission('admin:international-tests:'+action))).join(':')}`);
   const [editorGroup, setEditorGroup] = useState('overview');
   const [editorReason, setEditorReason] = useState('');
   useEffect(() => {
@@ -239,37 +241,44 @@ export function InternationalTestDetailPage() {
   const loadedTestId = useRef('');
   const fetchDetail = useCallback(
     async (force = false) => {
-      if (savingBatch.current && !force) return;
-      if (!id) return;
+      if (savingBatch.current && !force) return false;
+      if (!id || !scope.isCurrent()) return false;
       const requestId = ++detailRequest.current;
       if (loadedTestId.current !== id) setLoading(true);
       setError(null);
       try {
         const data = await adminApiClient.getInternationalTest<InternationalTestDetail>(id);
-        if (requestId !== detailRequest.current) return;
+        if (requestId !== detailRequest.current || !scope.isCurrent()) return false;
+        if(data.id!==id)throw Error('INTERNATIONAL_TEST_OWNER_READ_MISMATCH');
         loadedTestId.current = id;
         setTest(data);
         if (data?.updatedAt) {
           setLastSavedAt(data.updatedAt);
         }
+        return true;
       } catch (err: any) {
-        if (requestId !== detailRequest.current) return;
+        if (requestId !== detailRequest.current || !scope.isCurrent()) return false;
         setError(
           err.message ||
             (isRtl
               ? 'تعذر تحميل تفاصيل الاختبار الدولي'
               : 'Failed to load international test details.'),
         );
+        return false;
       } finally {
         if (requestId === detailRequest.current) setLoading(false);
       }
     },
-    [id, isRtl],
+    [id, isRtl, scope],
   );
+
+  const reloadDetail = useCallback(async () => { await fetchDetail(); }, [fetchDetail]);
 
   useEffect(() => {
     setLoading(true);
+    setTest(null);setLastSavedAt(null);setEditorReason('');setShowEditors(false);setGovernanceDirty(false);setHasUnsavedChanges(false);editors.current.clear();savingBatch.current=false;setActionLoading(false);setActionMessage(null);setActionError(null);
     void fetchDetail();
+    return()=>{detailRequest.current++;};
   }, [fetchDetail]);
 
   const tabs: { id: TabType; labelAr: string; labelEn: string; icon: any }[] = [
@@ -295,6 +304,7 @@ export function InternationalTestDetailPage() {
   ];
 
   const handleSaveChanges = async (): Promise<boolean> => {
+    if(!canManage||savingBatch.current||!scope.isCurrent())return false;
     const pending = [...editors.current.values()].filter((entry) => entry.dirty);
     if (!pending.length) {
       setActionMessage(isRtl ? 'لا توجد تعديلات غير محفوظة.' : 'No unsaved changes.');
@@ -306,7 +316,9 @@ export function InternationalTestDetailPage() {
     try {
       savingBatch.current = true;
       for (const entry of pending) {
-        if (!(await entry.save())) {
+        const saved=await entry.save();
+        if(!scope.isCurrent())return false;
+        if (!saved) {
           setActionError(
             isRtl
               ? 'تعذر حفظ أحد النماذج. راجع الحقول ورسالة الخطأ؛ لم يتم النشر.'
@@ -323,21 +335,21 @@ export function InternationalTestDetailPage() {
         );
         return false;
       }
-      await fetchDetail(true);
+      if(!await fetchDetail(true)||!scope.isCurrent())return false;
       setActionMessage(
         isRtl ? 'تم حفظ التعديلات وإعادة تحميل البيانات المحفوظة.' : 'Changes saved and reloaded.',
       );
       return true;
     } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : 'Save failed');
+      if(scope.isCurrent())setActionError(err instanceof Error ? err.message : 'Save failed');
       return false;
     } finally {
-      savingBatch.current = false;
-      setActionLoading(false);
+      if(scope.isCurrent()){savingBatch.current = false;setActionLoading(false);}
     }
   };
 
   const switchTab = (tab: TabType) => {
+    if(actionLoading)return;
     if (tab === activeTab) return;
     if (
       (hasUnsavedChanges || governanceDirty) &&
@@ -365,7 +377,7 @@ export function InternationalTestDetailPage() {
           </div>
           <DescriptionTab
             test={test}
-            onRefresh={fetchDetail}
+            onRefresh={reloadDetail}
             isRtl={isRtl}
             reviewReason={editorReason}
           />
@@ -387,7 +399,7 @@ export function InternationalTestDetailPage() {
           <VariantsTab
             testId={test.id}
             initialVariants={test.variants || []}
-            onRefresh={fetchDetail}
+            onRefresh={reloadDetail}
             isRtl={isRtl}
           />
         </div>
@@ -408,7 +420,7 @@ export function InternationalTestDetailPage() {
           <AvailabilityTab
             testId={test.id}
             initialAvailability={test.availability}
-            onRefresh={fetchDetail}
+            onRefresh={reloadDetail}
             isRtl={isRtl}
           />
         </div>
@@ -432,7 +444,7 @@ export function InternationalTestDetailPage() {
           <SectionsTab
             testId={test.id}
             initialSections={test.sections || []}
-            onRefresh={fetchDetail}
+            onRefresh={reloadDetail}
             isRtl={isRtl}
           />
         </div>
@@ -453,7 +465,7 @@ export function InternationalTestDetailPage() {
           <ScoringTab
             testId={test.id}
             initialScoreScale={test.scoreScale}
-            onRefresh={fetchDetail}
+            onRefresh={reloadDetail}
             isRtl={isRtl}
           />
           <TestAdmissionScoreEditor owner={test} onChanged={() => void fetchDetail()} />
@@ -470,7 +482,7 @@ export function InternationalTestDetailPage() {
               {isRtl ? 'متطلبات التسجيل والهوية والسياسات' : 'Registration & Policy Requirements'}
             </span>
           </div>
-          <RequirementsTab test={test} onRefresh={fetchDetail} isRtl={isRtl} />
+          <RequirementsTab test={test} onRefresh={reloadDetail} isRtl={isRtl} />
         </div>
       );
     }
@@ -487,7 +499,7 @@ export function InternationalTestDetailPage() {
           <FeesTab
             testId={test.id}
             initialFees={test.fees || []}
-            onRefresh={fetchDetail}
+            onRefresh={reloadDetail}
             isRtl={isRtl}
           />
         </div>
@@ -506,7 +518,7 @@ export function InternationalTestDetailPage() {
           <PreparationMaterialsTab
             testId={test.id}
             initialMaterials={test.preparationMaterials || []}
-            onRefresh={fetchDetail}
+            onRefresh={reloadDetail}
             isRtl={isRtl}
           />
         </div>
@@ -525,7 +537,7 @@ export function InternationalTestDetailPage() {
           <OfficialLinksTab
             testId={test.id}
             initialLinks={test.officialLinks || []}
-            onRefresh={fetchDetail}
+            onRefresh={reloadDetail}
             isRtl={isRtl}
           />
         </div>
@@ -577,6 +589,7 @@ export function InternationalTestDetailPage() {
   return (
     <TestEditorSaveContext.Provider value={saveRegistry}>
       <div
+        key={scope.epoch}
         className="international-test-detail max-w-7xl mx-auto space-y-6"
         dir={isRtl ? 'rtl' : 'ltr'}
       >
@@ -822,7 +835,7 @@ export function InternationalTestDetailPage() {
                     ownerStatus={test.status}
                     domain="TEST"
                     isRtl={isRtl}
-                    onSaved={() => fetchDetail()}
+                    onSaved={reloadDetail}
                   />
                 )}
               <CrossPhaseTab testId={test.id} isRtl={isRtl} />
@@ -835,7 +848,7 @@ export function InternationalTestDetailPage() {
                 key={test.id}
                 testId={test.id}
                 isRtl={isRtl}
-                onSaved={fetchDetail}
+                onSaved={reloadDetail}
                 mode="readiness"
                 onDirtyChange={setGovernanceDirty}
                 externalDirty={hasUnsavedChanges}
@@ -937,7 +950,7 @@ export function InternationalTestDetailPage() {
                 testId={test.id}
                 isRtl={isRtl}
                 mode="sources"
-                onNamesReviewed={fetchDetail}
+                onNamesReviewed={reloadDetail}
                 canChangeVersion={() => {
                   if (!hasUnsavedChanges) return true;
                   setActionError(
@@ -951,7 +964,7 @@ export function InternationalTestDetailPage() {
               <InternationalTestGovernanceWorkspace
                 testId={test.id}
                 isRtl={isRtl}
-                onSaved={fetchDetail}
+                onSaved={reloadDetail}
                 mode="sources"
                 onDirtyChange={setGovernanceDirty}
                 externalDirty={hasUnsavedChanges}
@@ -962,7 +975,7 @@ export function InternationalTestDetailPage() {
                   <EvidenceTab
                     testId={test.id}
                     initialEvidence={test.importEvidence}
-                    onRefresh={fetchDetail}
+                    onRefresh={reloadDetail}
                     isRtl={isRtl}
                   />
                 </details>
@@ -978,7 +991,7 @@ export function InternationalTestDetailPage() {
                     endpoint="/admin/international-tests"
                     optionalFields={test.optionalFields}
                     status={test.status}
-                    onSaved={() => fetchDetail()}
+                    onSaved={reloadDetail}
                   />
                 </details>
               )}

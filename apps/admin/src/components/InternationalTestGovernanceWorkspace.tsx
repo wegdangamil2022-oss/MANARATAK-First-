@@ -1,4 +1,5 @@
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
@@ -83,6 +84,7 @@ export function InternationalTestGovernanceWorkspace({
   externalDirty?: boolean;
 }) {
   const { hasPermission } = useAdminAuthorization();
+  const scope=useOwnerOperationScope(`${testId}:${['manage','review','verify','publish'].map(action=>String(hasPermission('admin:international-tests:'+action))).join(':')}`);
   const [readiness, setReadiness] = useState<{ ready: boolean } | null>(null);
   const [page, setPage] = useState(1);
   const [refresh, setRefresh] = useState(0);
@@ -108,6 +110,7 @@ export function InternationalTestGovernanceWorkspace({
     reason || evidenceReference || nameAr || nameEn || Object.keys(profile).length,
   );
   const dirtyCallback = useRef(onDirtyChange);
+  useEffect(()=>{submitting.current=false;setBusy(false);setNotice('');},[scope]);
   dirtyCallback.current = onDirtyChange;
   useEffect(() => {
     dirtyCallback.current?.(dirty);
@@ -116,6 +119,7 @@ export function InternationalTestGovernanceWorkspace({
   useEffect(() => {
     const controller = new AbortController();
     setError('');
+    setTest(undefined);setReadiness(null);
     void adminApiClient
       .getInternationalTestReadiness<{ ready: boolean }>(testId)
       .then((value) => {
@@ -148,9 +152,10 @@ export function InternationalTestGovernanceWorkspace({
         if (!controller.signal.aborted) setError(err.message);
       });
     return () => controller.abort();
-  }, [testId, page, refresh]);
+  }, [testId, page, refresh, scope]);
   const command = async (path: string, body: object) => {
-    if (submitting.current) return;
+    const required=path==='verify-source'||path==='revoke-source'?'verify':path==='publish'||path==='unpublish'?'publish':['archive','profile','remove-relationship'].includes(path)?'manage':'review';
+    if (submitting.current || !scope.isCurrent() || !hasPermission('admin:international-tests:'+required)) return;
     if (externalDirty) {
       setError(
         isRtl
@@ -167,6 +172,7 @@ export function InternationalTestGovernanceWorkspace({
     setBusy(true);
     setError('');
     setNotice('');
+    let accepted=false;
     try {
       const revision = Number((test as InternationalTestDto & { revision?: number })?.revision);
       if (!Number.isSafeInteger(revision))
@@ -185,19 +191,27 @@ export function InternationalTestGovernanceWorkspace({
         headers: { 'If-Match': String(revision) },
         body: JSON.stringify({ ...body, reason }),
       });
+      accepted=true;
+      if(!scope.isCurrent())return;
+      const checked=await adminApiClient.request<InternationalTestDto>(`/admin/international-tests/${testId}`,{cache:'no-store'});
+      if(!scope.isCurrent())return;
+      const expected:Record<string,string>={publish:'PUBLISHED',unpublish:'READY_TO_PUBLISH',archive:'ARCHIVED','mark-publishable':'READY_TO_PUBLISH','revoke-source':'NEEDS_REVIEW',...(path==='review-transition'?{'review-transition':String((body as {status?:string}).status)}:{})};
+      const checkedRevision=Number(checked.revision);
+      if(checked.id!==testId||!Number.isSafeInteger(checkedRevision)||checkedRevision<=revision||(expected[path]&&checked.status!==expected[path])||(path==='verify-source'&&!checked.isSourceVerified)||(path==='revoke-source'&&checked.isSourceVerified))throw Error(isRtl?'تعذر التحقق من الحالة المحفوظة؛ أعد تحميل السجل.':'Saved state could not be verified; reload the record.');
+      setTest(checked);
       setReason('');
       setEvidenceReference('');
       setProfile({});
       setNameAr('');
       setNameEn('');
-      setNotice(isRtl ? 'تم حفظ القرار.' : 'Decision saved.');
       await onSaved();
+      if(!scope.isCurrent())return;
+      setNotice(isRtl ? 'تم حفظ القرار والتحقق منه.' : 'Decision saved and verified.');
       setRefresh((n) => n + 1);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to save');
+      if(scope.isCurrent()){if(accepted){setTest(undefined);setReadiness(null);}setError(err instanceof Error ? err.message : 'Unable to save');}
     } finally {
-      submitting.current = false;
-      setBusy(false);
+      if(scope.isCurrent()){submitting.current = false;setBusy(false);}
     }
   };
   useEffect(() => {
@@ -261,7 +275,7 @@ export function InternationalTestGovernanceWorkspace({
           </label>
           {error && (
             <p role="alert" className="text-red-700">
-              {error}
+              {error}<button type="button" disabled={busy} onClick={()=>setRefresh(value=>value+1)}>{isRtl?'إعادة القراءة':'Reload record'}</button>
             </p>
           )}
           {notice && <p role="status">{notice}</p>}
