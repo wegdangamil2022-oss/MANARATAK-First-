@@ -12,19 +12,23 @@ import { auditTargetLink } from '../../src/pages/audit/AuditViewModel';
 
 // Read the production route declarations, including their actual guards, instead of a second route fixture.
 const app = ts.createSourceFile('App.tsx', readFileSync('apps/admin/src/App.tsx', 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-const routes: Array<{ path: string; permission: string; component: string }> = [];
+const routes: Array<{ path: string; permission: string | string[]; component: string }> = [];
 function collect(node: ts.Node) {
   if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && node.tagName.getText(app) === 'Route') {
     const attribute = (name: string) => node.attributes.properties.find(p => ts.isJsxAttribute(p) && p.name.getText(app) === name) as ts.JsxAttribute | undefined;
     const path = attribute('path')?.initializer;
     const element = attribute('element')?.initializer?.getText(app) ?? '';
-    const permission = /permission="([^"]+)"/.exec(element)?.[1];
+    const permissions = /permission=\{\[([^\]]+)\]\}/.exec(element)?.[1];
+    const permission = /permission="([^"]+)"/.exec(element)?.[1]
+      ?? (permissions ? Array.from(permissions.matchAll(/['"]([^'"]+)['"]/g), match => match[1]) : undefined);
     const component = /<RequireAdminPermission[^>]*>\s*<([A-Za-z0-9]+)/.exec(element)?.[1];
     if (path && ts.isStringLiteral(path) && permission && component) routes.push({ path: path.text, permission, component });
   }
   ts.forEachChild(node, collect);
 }
 collect(app);
+const includesPermission = (route: typeof routes[number], permission: string) =>
+  typeof route.permission === 'string' ? route.permission === permission : route.permission.includes(permission);
 let tree: ReturnType<typeof create>;
 beforeEach(() => { (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true; });
 afterEach(async () => { if (tree) await act(async () => tree.unmount()); });
@@ -41,6 +45,11 @@ async function mount(path: string, permissions: string[], initial = '/admin/scho
 }
 
 describe('B07 basename and production permission matrix', () => {
+  it.each(['admin:services:manage', 'admin:services:requests:view', 'admin:services:operations:manage'])('keeps the services route accessible for %s', async permission => {
+    await mount('/services', [permission], '/admin/services');
+    expect(JSON.stringify(tree.toJSON())).toContain('ServicesAdminPage');
+    expect(JSON.stringify(tree.toJSON())).not.toContain('FALLBACK');
+  });
   it.each([
     [adminPaths.referenceData, 'ReferenceDataAdminPage'],
     [adminPaths.universityImport, 'DomainImportCenterPage'],
@@ -67,10 +76,10 @@ describe('B07 basename and production permission matrix', () => {
     expect(routes.some(route => route.path.startsWith('/admin/'))).toBe(false);
     for (const target of Object.values(adminTargets)) {
       expect(adminPathPermission(target.path)).toBe(target.permission);
-      expect(routes.some(route => (route.path === target.path || route.path === `${target.path}/*`) && route.permission === target.permission)).toBe(true);
+      expect(routes.some(route => (route.path === target.path || route.path === `${target.path}/*`) && includesPermission(route, target.permission))).toBe(true);
       if (target.idKind === 'OWNER_ID') {
         const prefix = 'detailPath' in target ? target.detailPath : target.path;
-        expect(routes.some(route => route.path === `${prefix}/:id` && route.permission === target.permission)).toBe(true);
+        expect(routes.some(route => route.path === `${prefix}/:id` && includesPermission(route, target.permission))).toBe(true);
       }
     }
     expect(adminPathPermission('/admin/scholarships')).toBeNull();
