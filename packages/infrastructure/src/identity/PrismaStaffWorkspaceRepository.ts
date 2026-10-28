@@ -137,7 +137,7 @@ export class PrismaStaffWorkspaceRepository implements IStaffWorkspaceRepository
   async organization(context?: AtomicPersistenceContext) {
     const db = context ? this.tx(context) : this.db;
     // Serialize hierarchy changes and draft validation, including absent-parent races.
-    if (context) await db.$queryRaw(Prisma.sql`SELECT pg_advisory_xact_lock(748103,1)`);
+    if (context) await db.$queryRaw(Prisma.sql`SELECT pg_advisory_xact_lock(748103,1)::text`);
     const [departments, titles] = await Promise.all([
       db.staffDepartmentRecord.findMany({ orderBy: { name: 'asc' }, take: 1001 }),
       db.staffJobTitleRecord.findMany({ orderBy: { name: 'asc' }, take: 1001 }),
