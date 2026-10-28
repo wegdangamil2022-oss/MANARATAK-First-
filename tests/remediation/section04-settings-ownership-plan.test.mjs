@@ -11,7 +11,7 @@ const sourceOnlyUrl = 'postgresql://source_only:source_only@127.0.0.1:1/source_o
 const normalize = sql => sql.replace(/--[^\n]*/g, '').replace(/\s+/g, ' ').trim();
 
 test('reviewed deferred ownership plan matches the ORM composite relation; no database execution', { timeout: 30000 }, () => {
-  const schema = readFileSync(schemaPath, 'utf8');
+  const schema = readFileSync(schemaPath, 'utf8').replaceAll('\r\n', '\n');
   const sql = readFileSync(migrationPath, 'utf8');
   // Derive just the prior pointer-less model; all unrelated schema remains identical.
   const baseline = schema.replace(/model SettingAssignmentRecord \{[\s\S]*?\n\}/, model => model
@@ -21,6 +21,7 @@ test('reviewed deferred ownership plan matches the ORM composite relation; no da
       .replace(/^  currentForAssignment SettingAssignmentRecord[^\n]*\n/m, '')
       .replace(/^  @@unique\(\[assignmentId, id\]\)\n/m, ''));
   assert.notEqual(schema, baseline);
+  assert.doesNotMatch(baseline, /@@unique\(\[(?:id, currentVersionId|assignmentId, id)\]\)/);
   const folder = mkdtempSync(join(tmpdir(), 'settings-ownership-source-'));
   try {
     const prior = join(folder, 'prior.prisma'); writeFileSync(prior, baseline);

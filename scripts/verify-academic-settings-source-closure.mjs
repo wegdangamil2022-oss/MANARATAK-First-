@@ -22,6 +22,8 @@ const settingsAdminRouter = read('apps/api/src/presentation/api/router/SettingsA
 const settingsRuntimeRouter = read('apps/api/src/presentation/api/router/SettingsRuntimeRouter.ts');
 const settingsReader = read('packages/domain/src/settings/services/IResolvedSettingsReader.ts');
 const settingsAdminPage = read('apps/admin/src/pages/SettingsAdminPage.tsx');
+const settingsWorkspace = read('apps/admin/src/features/settings/SettingsWorkspace.tsx');
+const settingsStyles = read('apps/admin/src/features/settings/settings.css');
 const settingsLegacyPreviewPath = 'apps/web/src/features/admin-preview/AdminSettingsPreviewPage.tsx';
 const settingsLegacyPreview = exists(settingsLegacyPreviewPath) ? read(settingsLegacyPreviewPath) : '';
 const webRouter = read('apps/web/src/router/index.tsx');
@@ -100,10 +102,12 @@ const checks = {
   settings_admin_mutations_audited: /CREATE_SETTING_DEFINITION/.test(settingsAdminRouter) && /ASSIGN_SETTING_VALUE/.test(settingsAdminRouter) && /ROLLBACK_SETTING_VALUE/.test(settingsAdminRouter),
   settings_ui_api_backed: /\/admin\/settings\/definitions/.test(settingsAdminPage) && /\/admin\/settings\/assignments/.test(settingsAdminPage),
   settings_ui_has_real_history: /selectedHistory/.test(settingsAdminPage) && /rollback\(selectedHistory, version\)/.test(settingsAdminPage),
-  settings_ui_rbac_boundary_visible: /IAM\/Authorization/.test(settingsAdminPage),
-  settings_ui_secret_boundary_visible: /Secret Provider\/Environment/.test(settingsAdminPage),
+  settings_ui_rbac_boundary_visible: /hasPermission\('admin:authorization:manage'\)/.test(settingsAdminPage) && /to="\/authorization"/.test(settingsAdminPage),
+  settings_ui_secret_boundary_visible: /Secret requirement metadata does not confirm provider readiness/.test(settingsWorkspace),
   settings_ui_reference_data_deep_link: /to="\/settings\/reference-data"/.test(settingsAdminPage) && /path="\/settings\/reference-data"/.test(adminRoutes),
-  settings_ui_brand: /#142B5F/.test(settingsAdminPage) && /#0E7C86/.test(settingsAdminPage) && /#D6A43B/.test(settingsAdminPage),
+  settings_ui_brand: /#142b5f/i.test(settingsStyles) && /#0e7c86/i.test(settingsStyles) && /#d6a43b/i.test(settingsStyles) && /Cairo/.test(settingsStyles),
+  settings_ui_distinct_workspaces: ['overview','catalog','assignments','flags','governance','resolution'].every(view=>new RegExp("id: '"+view+"'").test(settingsWorkspace)),
+  settings_replay_authorizes_current_permission: /settings\(\?:.*[\s\S]{0,200}requireAdminPermission\('admin:settings:manage'\)/.test(app),
   settings_ui_error_state: /role="alert"/.test(settingsAdminPage),
   settings_legacy_preview_redirect_only: (!exists(settingsLegacyPreviewPath) && /path: 'admin\/\*'/.test(webRouter) && /CanonicalAdminRedirect/.test(webRouter)) || (/window\.location\.replace/.test(settingsLegacyPreview) && !/Active admin users|Root Super Admin|Pending invitations|Security compliance/.test(settingsLegacyPreview)),
   settings_docs_superseded_old_preview: /HISTORICAL \/ SUPERSEDED/.test(settingsHistoryDoc),

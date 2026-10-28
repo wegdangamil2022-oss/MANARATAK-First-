@@ -921,6 +921,9 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       if (/^\/staff\/lifecycle(?:\/|$)/i.test(req.path)) return next();
       if (/^\/assets\/(?:upload-locator|register-quarantined)\/?$/i.test(req.path)) return next();
       const command = createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true });
+      if (/^\/settings(?:\/|$)/i.test(req.path)) {
+        return requireAdminPermission('admin:settings:manage')(req,res,()=>command(req,res,next));
+      }
       if (/^\/staff(?:\/|$)/i.test(req.path)) {
         return requireAdminPermission('admin:identities:manage')(req,res,()=>command(req,res,next));
       }

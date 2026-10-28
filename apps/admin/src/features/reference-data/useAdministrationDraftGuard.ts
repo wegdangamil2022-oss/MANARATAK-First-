@@ -1,8 +1,15 @@
 import { useEffect, useRef } from 'react';
 import { registerAdministrationHistoryGuard } from './AdministrationHistoryGuard';
-export function useAdministrationDraftGuard(dirty: boolean, isAr: boolean, onDiscard?: () => void) {
+export function useAdministrationDraftGuard(
+  dirty: boolean,
+  isAr: boolean,
+  onDiscard?: () => void,
+  mayLeave?: () => boolean,
+) {
   const discard = useRef(onDiscard);
   discard.current = onDiscard;
+  const allowed = useRef(mayLeave);
+  allowed.current = mayLeave;
   useEffect(() => {
     if (!dirty) return;
     const index = window.history.state?.idx;
@@ -10,6 +17,7 @@ export function useAdministrationDraftGuard(dirty: boolean, isAr: boolean, onDis
       approved = false,
       delta = 0;
     const confirm = () =>
+      (allowed.current?.() ?? true) &&
       window.confirm(
         isAr
           ? 'لديك تعديلات غير محفوظة. هل تريد المغادرة دون حفظ؟'

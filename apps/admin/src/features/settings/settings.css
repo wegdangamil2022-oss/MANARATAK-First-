@@ -1,0 +1,287 @@
+.settings-workspace,
+.settings-workspace * {
+  font-family: 'Cairo', sans-serif !important;
+}
+.settings-workspace {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  color: #203442;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.settings-workspace :is(p, label, button, a, input, select, textarea, td) {
+  font-size: 13px;
+}
+.settings-workspace :is(h2, h3) {
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.7;
+}
+.settings-workspace :is(button, input, select, textarea, a, summary):focus-visible {
+  outline: 2px solid #d6a43b;
+  outline-offset: 3px;
+}
+.settings-workspace button {
+  min-height: 36px;
+  border: 1px solid #d8dfea;
+  border-radius: 9px;
+  padding: 7px 12px;
+  font-weight: 650;
+  background-color: white;
+  color: #142b5f;
+}
+.settings-workspace button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.settings-workspace button.settings-primary,
+.settings-workspace button[type='submit'] {
+  background: #0e7c86;
+  border-color: #0e7c86;
+  color: white;
+}
+.settings-workspace :is(input:not([type='checkbox']):not([type='radio']), select, textarea) {
+  width: 100%;
+  border: 1px solid #d8dfea;
+  border-radius: 9px;
+  padding: 8px 10px;
+  background: white;
+  color: #203442;
+  min-width: 0;
+}
+.settings-workspace input[type='checkbox'] {
+  accent-color: #142b5f;
+}
+.settings-workspace label {
+  display: grid;
+  gap: 4px;
+}
+.settings-workspace label:has(input[type='checkbox']) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.settings-workspace :is(fieldset, form) {
+  min-width: 0;
+}
+.settings-workspace .sf-navigation {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.settings-workspace .sf-navigation button {
+  display: flex;
+  align-items: center;
+  text-align: start;
+  background: white;
+  padding: 12px;
+  gap: 10px;
+}
+.settings-workspace .sf-navigation button[aria-pressed='true'] {
+  background: #142b5f;
+  border-color: #142b5f;
+  color: white;
+}
+.settings-workspace .sf-navigation button[aria-pressed='true'] :is(svg, strong) {
+  color: #f0ce7e;
+}
+.settings-workspace .sf-navigation strong {
+  font-size: 14px;
+}
+.settings-workspace .sf-navigation small {
+  font-size: 12px;
+  display: block;
+}
+.settings-panel {
+  padding: 18px;
+  border: 1px solid #dce3ec;
+  border-radius: 14px;
+  background: white;
+  min-width: 0;
+}
+.settings-overview {
+  display: grid;
+  gap: 14px;
+}
+.settings-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+  gap: 12px;
+}
+.settings-steps li {
+  border-inline-start: 3px solid #d6a43b;
+  padding-inline-start: 12px;
+}
+.settings-steps strong,
+.settings-steps span {
+  display: block;
+}
+.settings-steps span {
+  color: #586c7a;
+  font-size: 12px;
+}
+.settings-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.settings-workspace .settings-actions button[aria-pressed='true'] {
+  background: #142b5f;
+  border-color: #142b5f;
+  color: #f0ce7e;
+}
+.settings-owner-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-block: 12px;
+}
+.settings-owner-links a {
+  color: #0e7c86;
+  border: 1px solid #dce3ec;
+  border-radius: 9px;
+  padding: 7px 12px;
+}
+.settings-workspace .settings-filters {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 2fr 1fr auto;
+  align-items: end;
+}
+.settings-workspace table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.settings-workspace :is(th, td) {
+  padding: 11px 14px;
+  text-align: start;
+  vertical-align: top;
+}
+.settings-workspace th {
+  font-size: 12px;
+  color: #586c7a;
+  background: #f5f7fa;
+}
+.settings-workspace td {
+  border-block-end: 1px solid #edf0f4;
+}
+.settings-workspace td button {
+  margin: 3px;
+  white-space: nowrap;
+}
+.settings-workspace code {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+.settings-workspace .settings-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: #0f172a77;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+.settings-workspace .settings-dialog {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  width: min(760px, 100%);
+  max-height: 88vh;
+  overflow: auto;
+  box-shadow: 0 20px 60px #142b5f33;
+  display: grid;
+  gap: 14px;
+}
+.settings-dialog > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.settings-dialog > form {
+  display: grid;
+  gap: 12px;
+}
+.settings-review {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  background: #f5f7fa;
+  border-radius: 10px;
+  padding: 12px;
+}
+.settings-review p {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.settings-workspace .settings-list-layout {
+  display: block;
+}
+.settings-workspace .settings-empty {
+  padding: 25px 12px;
+  text-align: center;
+  color: #586c7a;
+  font-size: 13px;
+  font-weight: 400;
+}
+.settings-workspace .settings-badge {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: 7px;
+  background: #eff3f8;
+  color: #142b5f;
+  font-size: 12px;
+}
+.settings-workspace .settings-pagination {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+.settings-workspace .settings-help {
+  color: #586c7a;
+  font-size: 12px;
+}
+.settings-workspace .settings-governance {
+  display: grid;
+  gap: 12px;
+}
+.settings-workspace .settings-governance fieldset {
+  display: grid;
+  gap: 12px;
+}
+.settings-workspace .settings-governance article {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #dce3ec;
+}
+@media (max-width: 900px) {
+  .settings-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .settings-workspace .sf-navigation {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .settings-workspace .sf-navigation {
+    grid-template-columns: 1fr;
+  }
+  .settings-steps,
+  .settings-review,
+  .settings-workspace .settings-filters {
+    grid-template-columns: 1fr;
+  }
+  .settings-workspace .settings-dialog {
+    padding: 14px;
+  }
+  .settings-workspace .settings-dialog-backdrop {
+    padding: 8px;
+  }
+}

@@ -50,11 +50,11 @@ export function SettingsIdentityScopePicker({
 
   return (
     <div className="space-y-2">
-      <input value={search} disabled={disabled} maxLength={240}
+      <input value={search} disabled={disabled} maxLength={240} aria-label={isAr?'البحث في دليل الهويات':'Search identity directory'}
         placeholder={isAr ? 'ابحث عن هوية في دليل IAM' : 'Search IAM identity directory'}
         onChange={event => { setSearch(event.target.value); onChange(''); }}
         className="input" />
-      <select required value={value} disabled={disabled || busy || !!error}
+      <select required value={value} disabled={disabled || busy || !!error} aria-label={isAr?'الهوية المعتمدة للنطاق':'Canonical scope identity'}
         onChange={event => onChange(event.target.value)} className="input" dir="ltr">
         <option value="">{isAr ? 'اختر هوية معتمدة' : 'Select a verified identity'}</option>
         {value && !items.some(item => item.id === value) && (

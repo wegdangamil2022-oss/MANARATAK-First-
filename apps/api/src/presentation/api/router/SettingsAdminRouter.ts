@@ -9,7 +9,7 @@ import { AuditHelper } from '../../audit/AuditHelper.js';
 export class SettingsAdminRouter {
   public static create({
     manageSettingsUseCase,
-    auditRecordRepo, settingsGovernanceUseCases, getIdentityUseCase, authEvaluatorService, principalAccessValidator, listIdentitiesUseCase,
+    auditRecordRepo, settingsGovernanceUseCases, getIdentityUseCase, authEvaluatorService, principalAccessValidator, listIdentitiesUseCase, staffLifecycleRepository,
   }: {
     manageSettingsUseCase: ManageSettingsUseCase;
     auditRecordRepo?: IAuditRecordRepository;
@@ -18,6 +18,7 @@ export class SettingsAdminRouter {
     getIdentityUseCase?: { execute(id:string):Promise<any> };
     authEvaluatorService?: { evaluatePermission(id:string,permission:string,context:Record<string,unknown>):Promise<{isGranted:boolean}> };
     principalAccessValidator?: {isAuthenticationAllowed(id:string):Promise<boolean>};
+    staffLifecycleRepository?: {adminAccessAllowed(id:string):Promise<boolean>};
   }): Router {
     const router = Router();
     const responseFormatter = new ResponseFormatter('v1');
@@ -116,10 +117,11 @@ export class SettingsAdminRouter {
 
     const governance = () => { if (!settingsGovernanceUseCases) throw new Error('SETTINGS_GOVERNANCE_UNAVAILABLE'); return settingsGovernanceUseCases; };
     const reviewer = async (req: Request, id:string) => {
-      if (!getIdentityUseCase || !authEvaluatorService || !principalAccessValidator) throw new Error('SETTINGS_GOVERNANCE_UNAVAILABLE');
+      if (!getIdentityUseCase || !authEvaluatorService || !principalAccessValidator || !staffLifecycleRepository) throw new Error('SETTINGS_GOVERNANCE_UNAVAILABLE');
       const result=await getIdentityUseCase.execute(id);
       if (!result.isSuccess || !result.getValue().user?.contactRegistry.isEmailVerified ||
           !await principalAccessValidator.isAuthenticationAllowed(id) ||
+          !await staffLifecycleRepository.adminAccessAllowed(id) ||
           !(await authEvaluatorService.evaluatePermission(id,'admin:settings:manage',{ip:req.ip,requestTime:new Date()})).isGranted)
         throw new Error('SETTINGS_APPROVER_FORBIDDEN');
     };
@@ -133,11 +135,12 @@ export class SettingsAdminRouter {
     ]);
     router.get('/governance/approvers',asyncHandler(async (req,res)=>{
       const query=z.object({search:z.string().trim().max(240).optional(),cursor:z.string().max(2048).optional()}).strict().parse(req.query);
-      if (!listIdentitiesUseCase || !authEvaluatorService) throw new Error('SETTINGS_GOVERNANCE_UNAVAILABLE');
+      if (!listIdentitiesUseCase || !authEvaluatorService || !principalAccessValidator || !staffLifecycleRepository) throw new Error('SETTINGS_GOVERNANCE_UNAVAILABLE');
       const result=await listIdentitiesUseCase.execute({...query,status:'ACTIVE',verified:true,limit:20});
       if (!result.isSuccess) throw new Error('SETTINGS_GOVERNANCE_UNAVAILABLE');
       const page=result.getValue();const items:Array<{id:string;name:string}>=[];
       for (const identity of page.items) if (identity.id!==actor(req) && identity.user?.contactRegistry.isEmailVerified && identity.account.accessState==='Active' &&
+        await principalAccessValidator.isAuthenticationAllowed(identity.id) && await staffLifecycleRepository.adminAccessAllowed(identity.id) &&
         (await authEvaluatorService.evaluatePermission(identity.id,'admin:settings:manage',{ip:req.ip,requestTime:new Date()})).isGranted)
         items.push({id:identity.id,name:identity.user?.profile.displayName??identity.id});
       res.setHeader('Cache-Control','no-store');res.json(responseFormatter.success({items,nextCursor:page.nextCursor??null}));
