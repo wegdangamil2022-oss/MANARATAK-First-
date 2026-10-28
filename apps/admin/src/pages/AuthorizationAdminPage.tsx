@@ -151,6 +151,7 @@ export function AuthorizationAdminPage() {
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [identityId, setIdentityId] = useState(params.get('identityId') || '');
   const [roleId, setRoleId] = useState('');
+  const [staffMembershipId, setStaffMembershipId] = useState(params.get('staffMembershipId') || '');
   const [changeTicket, setChangeTicket] = useState('');
   const [secondApproverId, setSecondApproverId] = useState('');
   const [emergencyPrincipalId, setEmergencyPrincipalId] = useState('');
@@ -550,7 +551,7 @@ export function AuthorizationAdminPage() {
     }
     await mutate(
       'role_assignment',
-      { identityId, roleId },
+      { identityId, roleId, ...(staffMembershipId ? { staffMembershipId } : {}) },
       '/admin/authorization/assignments',
       'POST',
       () => {
@@ -1011,7 +1012,25 @@ export function AuthorizationAdminPage() {
             <UserCheck className="h-4 w-4 text-[#0E7C86]" />
             <h3 className="font-black text-[#142B5F]">{t('iam_workspace_46')}</h3>
           </div>
-          <AuthorizationIdentityPicker value={identityId} onChange={setIdentityId} />
+          <AuthorizationIdentityPicker
+            value={identityId}
+            onChange={(value) => {
+              setIdentityId(value);
+              setStaffMembershipId('');
+            }}
+          />
+          {staffMembershipId && (
+            <p className="sf-notice">
+              {language === 'ar'
+                ? 'سيُسجّل هذا الإسناد الجديد كمصدر وظيفي للعضوية المحددة. لا نربط الإسنادات القديمة تلقائيًا.'
+                : 'This new assignment will retain its staff membership provenance. Existing assignments are never adopted.'}{' '}
+              <button type="button" onClick={() => setStaffMembershipId('')}>
+                {language === 'ar'
+                  ? 'إسناد مستقل بدلًا من الوظيفي'
+                  : 'Use an independent assignment'}
+              </button>
+            </p>
+          )}
           <select
             required
             value={roleId}

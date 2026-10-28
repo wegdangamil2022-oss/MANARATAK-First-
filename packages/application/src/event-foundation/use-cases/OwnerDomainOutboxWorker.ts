@@ -18,13 +18,28 @@ export class OwnerDomainOutboxWorker {
     private readonly projectionDispatcher: ITransactionalOutboxDispatcher,
     private readonly servicesDispatcher: ITransactionalOutboxDispatcher,
     private readonly options: OwnerDomainOutboxWorkerOptions = {},
+    private readonly supportDispatcher?: ITransactionalOutboxDispatcher,
   ) {}
 
-  public runSettingsOnce(workerId: string): Promise<OutboxDispatchResult> { return this.run(this.projectionDispatcher, workerId, 'SETTINGS'); }
-  public runCareerOnce(workerId: string): Promise<OutboxDispatchResult> { return this.run(this.projectionDispatcher, workerId, 'CAREER'); }
-  public runServicesOnce(workerId: string): Promise<OutboxDispatchResult> { return this.run(this.servicesDispatcher, workerId, 'SERVICES'); }
+  public runSettingsOnce(workerId: string): Promise<OutboxDispatchResult> {
+    return this.run(this.projectionDispatcher, workerId, 'SETTINGS');
+  }
+  public runCareerOnce(workerId: string): Promise<OutboxDispatchResult> {
+    return this.run(this.projectionDispatcher, workerId, 'CAREER');
+  }
+  public runServicesOnce(workerId: string): Promise<OutboxDispatchResult> {
+    return this.run(this.servicesDispatcher, workerId, 'SERVICES');
+  }
+  public runSupportOnce(workerId: string): Promise<OutboxDispatchResult> {
+    if (!this.supportDispatcher) throw Error('SUPPORT_NOTIFICATION_DISPATCHER_UNAVAILABLE');
+    return this.run(this.supportDispatcher, workerId, 'STUDENT_SUPPORT');
+  }
 
-  private run(dispatcher: ITransactionalOutboxDispatcher, workerId: string, domain: string): Promise<OutboxDispatchResult> {
+  private run(
+    dispatcher: ITransactionalOutboxDispatcher,
+    workerId: string,
+    domain: string,
+  ): Promise<OutboxDispatchResult> {
     if (!workerId.trim()) throw new Error('OWNER_DOMAIN_OUTBOX_WORKER_ID_REQUIRED');
     return dispatcher.dispatchBatch({
       workerId: workerId.trim(),

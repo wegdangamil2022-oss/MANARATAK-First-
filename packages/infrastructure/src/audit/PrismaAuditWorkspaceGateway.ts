@@ -11,6 +11,7 @@ export class PrismaAuditWorkspaceGateway implements IAuditWorkspaceGateway {
   constructor(
     private readonly db: PrismaClient,
     private readonly recipientCheck: (identityId: string, templateId: string) => Promise<void>,
+    private readonly assigneeCheck?: (identityId: string) => Promise<boolean>,
   ) {}
   private tx(context: AtomicPersistenceContext) {
     const client = (
@@ -107,6 +108,8 @@ export class PrismaAuditWorkspaceGateway implements IAuditWorkspaceGateway {
     });
     if (!row || row.status !== 'ACTIVE' || row.type !== 'Human')
       throw new Error('AUDIT_CASE_ASSIGNEE_INVALID');
+    if (!this.assigneeCheck || !(await this.assigneeCheck(identityId)))
+      throw Error('AUDIT_CASE_ASSIGNEE_INVALID');
   }
   assertRecipient(identityId: string, templateId: string) {
     return this.recipientCheck(identityId, templateId);

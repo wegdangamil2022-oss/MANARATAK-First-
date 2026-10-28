@@ -18,17 +18,18 @@ import { isSupportedLocale } from '@manaratak/shared';
 import { useTranslation } from '../i18n/I18nProvider';
 import { localizeLocation, resolveLegacyPublicLocale } from '../i18n/localeRouting';
 import PublicTemplateApp from '../features/public-template/PublicTemplateApp';
+import { StaffInvitationPage } from '../features/students/StaffInvitationPage';
 import { StudentAuthPage } from '../features/students/StudentAuthPage';
 import { canonicalAdminTarget } from './adminRedirect';
 
 const CertificateVerificationPage = React.lazy(() =>
-  import('../features/certificates').then((m) => ({ default: m.CertificateVerificationPage }))
+  import('../features/certificates').then((m) => ({ default: m.CertificateVerificationPage })),
 );
 const StudentToolPage = React.lazy(() =>
-  import('../features/student-tools').then((m) => ({ default: m.StudentToolPage }))
+  import('../features/student-tools').then((m) => ({ default: m.StudentToolPage })),
 );
 const CourseLearnerPage = React.lazy(() =>
-  import('../features/learning').then((m) => ({ default: m.CourseLearnerPage }))
+  import('../features/learning').then((m) => ({ default: m.CourseLearnerPage })),
 );
 
 const PageLoadingFallback = () => {
@@ -42,7 +43,11 @@ const PageLoadingFallback = () => {
 };
 
 const PasswordRecoveryPage = () => (
-  <StudentAuthPage onAuthenticated={() => { window.location.assign('/student'); }} />
+  <StudentAuthPage
+    onAuthenticated={() => {
+      window.location.assign('/student');
+    }}
+  />
 );
 
 // In the standalone design deployment, deep links to a student tool must show
@@ -66,7 +71,8 @@ export const RootLayout = () => {
   const routeLocale = isSupportedLocale(locale) ? locale : null;
 
   useEffect(() => {
-    if (routeLocale && isPublicTemplateLocaleEnabled(routeLocale) && routeLocale !== language) setLanguage(routeLocale);
+    if (routeLocale && isPublicTemplateLocaleEnabled(routeLocale) && routeLocale !== language)
+      setLanguage(routeLocale);
   }, [language, routeLocale, setLanguage]);
 
   if (routeLocale && !isPublicTemplateLocaleEnabled(routeLocale)) {
@@ -238,6 +244,10 @@ const router = createBrowserRouter([
       {
         path: 'tools/:toolKey',
         element: <StudentToolPreviewRoute />,
+      },
+      {
+        path: 'staff-invitation',
+        element: <StaffInvitationPage />,
       },
       {
         path: 'certificates/verify',

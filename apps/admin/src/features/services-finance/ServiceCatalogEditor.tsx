@@ -18,7 +18,7 @@ import {
   ServiceFulfillmentType,
   type ServiceCatalogItemDto,
 } from '@manaratak/domain';
-import type { ServiceCatalogDraft } from '../../pages/ServicesAdminPage';
+import type { ServiceCatalogDraft } from './ServiceCatalogModel';
 import { CanonicalMultiPicker, CanonicalPicker } from '../../components/CanonicalPicker';
 import { canonicalPickerApi } from '../../api/canonicalPickers';
 import { TestDiscoveryEditor } from '../integration/TestDiscoveryEditor';

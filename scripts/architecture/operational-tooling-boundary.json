@@ -117,17 +117,41 @@
     "scripts/university-screening-preview.ts": {
       "purpose": "Read persisted university screening receipts and active source assets through the owning-domain preview gateway; no canonical writes or approval",
       "access": "isolated-read-write",
-      "environment": ["Node22", "NODE_ENV development or test", "Explicit DATABASE_URL and verified operator with imports and universities permissions"],
+      "environment": [
+        "Node22",
+        "NODE_ENV development or test",
+        "Explicit DATABASE_URL and verified operator with imports and universities permissions"
+      ],
       "gate": "Gateway uses RepeatableRead and SET TRANSACTION READ ONLY; result stays OWNER_REVIEW_REQUIRED with databaseWrites zero; this classification grants no database mutation authority",
-      "requiredSourceMarkers": ["UNIVERSITY_SCREENING_PREVIEW_INPUT_REQUIRED", "UNIVERSITY_SCREENING_PREVIEW_INPUT_TOO_LARGE", "previewScreenedSources", "readyToWrite: false", "databaseWrites: 0", "flag: 'wx'", "UNIVERSITY_SCREENING_PREVIEW_FAILED_REDACTED"],
+      "requiredSourceMarkers": [
+        "UNIVERSITY_SCREENING_PREVIEW_INPUT_REQUIRED",
+        "UNIVERSITY_SCREENING_PREVIEW_INPUT_TOO_LARGE",
+        "previewScreenedSources",
+        "readyToWrite: false",
+        "databaseWrites: 0",
+        "flag: 'wx'",
+        "UNIVERSITY_SCREENING_PREVIEW_FAILED_REDACTED"
+      ],
       "review": "P10a source-bound preview implementation review 2026-10-23; policy access category denotes database-connected operational tooling, while the gateway enforces read-only execution"
     },
     "scripts/database/remediate-post28-known-source.mjs": {
       "purpose": "Repair one new synthetic known-source R05 incident through real providers and canonical Asset plus append-only Audit persistence",
       "access": "isolated-read-write",
-      "environment": ["Node22; clean SHA/run-bound new native PostgreSQL16 U/V lab; ordinary post28_app with INSERT only on Asset and Audit"],
+      "environment": [
+        "Node22; clean SHA/run-bound new native PostgreSQL16 U/V lab; ordinary post28_app with INSERT only on Asset and Audit"
+      ],
       "gate": "Local U/V preflight, native lab marker, verified backup and preserved negative audit; fixed expiry, historical owner and consent preservation; no migration or production authorization",
-      "requiredSourceMarkers": ["preflightTargets", "requirePost28LocalExecution", "requireDatabaseMutationGate", "LIMITED_APPLICATION_IDENTITY_REQUIRED", "APPLICATION_PRIVILEGES_EXCESSIVE", "requireKnownSourceTrust", "INJECTED_COMPLETION_FAILURE", "upgradeExecuted:false", "R05Accepted:false"],
+      "requiredSourceMarkers": [
+        "preflightTargets",
+        "requirePost28LocalExecution",
+        "requireDatabaseMutationGate",
+        "LIMITED_APPLICATION_IDENTITY_REQUIRED",
+        "APPLICATION_PRIVILEGES_EXCESSIVE",
+        "requireKnownSourceTrust",
+        "INJECTED_COMPLETION_FAILURE",
+        "upgradeExecuted:false",
+        "R05Accepted:false"
+      ],
       "review": "Delegated technical decision 2026-10-19; independent implementation review remains required before upgrade"
     },
     "scripts/certificates/verify-isolated-runtime.mjs": {
@@ -148,9 +172,22 @@
     "scripts/release/post28-linux-artifact-runtime.mjs": {
       "purpose": "Exercise reviewed non-root Linux image and HTTPS browser against a newly created synthetic PostgreSQL16 lab",
       "access": "isolated-read-write",
-      "environment": ["Linux x64 / Node22", "POST28_LINUX_RUNTIME_REVIEW=YES", "New labelled internal-network tmpfs PG16 only", "Exact clean artifact/source SHA"],
+      "environment": [
+        "Linux x64 / Node22",
+        "POST28_LINUX_RUNTIME_REVIEW=YES",
+        "New labelled internal-network tmpfs PG16 only",
+        "Exact clean artifact/source SHA"
+      ],
       "gate": "Existing target preflight and reviewed migration initializer before synthetic fixtures; application role has no elevated flags, DDL or ledger writes; external egress disabled; cleanup verifies exact resource labels",
-      "requiredSourceMarkers": ["POST28_LINUX_RUNTIME_REVIEW_NOT_AUTHORIZED", "POST28_CLEAN_SOURCE_REQUIRED", "preflightTargets", "requireValidatedCatalog:true", "initialize-post28-transactions.mjs", "assert.equal(roles[0].role,'post28_app')", "assert.equal(identity.Config.Labels['codex.post28.run'],state.runId)"],
+      "requiredSourceMarkers": [
+        "POST28_LINUX_RUNTIME_REVIEW_NOT_AUTHORIZED",
+        "POST28_CLEAN_SOURCE_REQUIRED",
+        "preflightTargets",
+        "requireValidatedCatalog:true",
+        "initialize-post28-transactions.mjs",
+        "assert.equal(roles[0].role,'post28_app')",
+        "assert.equal(identity.Config.Labels['codex.post28.run'],state.runId)"
+      ],
       "review": "R07 isolated Linux review authorized by project owner; diagnostic execution only, no production or promotion"
     },
     "scripts/release/build-immutable-artifacts.mjs": {
@@ -169,9 +206,14 @@
     "scripts/release/lib/RuntimeModules.mjs": {
       "purpose": "Read esbuild metadata to enumerate required external modules, without loading Prisma or accessing a database",
       "access": "reference-only",
-      "environment": ["Filesystem build metadata only; no database credentials"],
+      "environment": [
+        "Filesystem build metadata only; no database credentials"
+      ],
       "gate": "Must not import/instantiate Prisma or query a database",
-      "requiredSourceMarkers": ["modules.includes('@prisma/client')", "!isBuiltin(row.path)"],
+      "requiredSourceMarkers": [
+        "modules.includes('@prisma/client')",
+        "!isBuiltin(row.path)"
+      ],
       "review": "R07 2026-10-17; static import metadata enumeration only"
     },
     "scripts/release/lib/ReleaseContracts.mjs": {
@@ -209,9 +251,24 @@
     "scripts/database/managed-reference-seed.ts": {
       "purpose": "Restricted independent development currency/language/country bootstrap via existing Assets/P6/P7/Audit/Outbox; no production or legacy apply",
       "access": "isolated-read-write",
-      "environment": ["Node22", "NODE_ENV=development", "Private source/schema/manifest/target-bound delegated-owner authorization", "Strict TLS and non-DDL application role", "Real signed native scanner and retained unchanged-schema proof"],
+      "environment": [
+        "Node22",
+        "NODE_ENV=development",
+        "Private source/schema/manifest/target-bound delegated-owner authorization",
+        "Strict TLS and non-DDL application role",
+        "Real signed native scanner and retained unchanged-schema proof"
+      ],
       "gate": "Development target and private ACL verified before client creation; actual scanner and direct certificate-verified TLS plus read-only live identity; seed mutation gate; initially empty reference targets; existing/partial state fails closed for review",
-      "requiredSourceMarkers": ["validateManagedReferenceSeed", "validateManagedSeedIdentity", "privateSeedDirectory", "verifyManagedPostgresTls", "requireDatabaseMutationGate", "ReferenceOwnerReviewUseCases", "MANAGED_SEED_NONEMPTY_REFERENCE_TARGET", "MANAGED_SEED_PROTECTED_ROWS_CHANGED"],
+      "requiredSourceMarkers": [
+        "validateManagedReferenceSeed",
+        "validateManagedSeedIdentity",
+        "privateSeedDirectory",
+        "verifyManagedPostgresTls",
+        "requireDatabaseMutationGate",
+        "ReferenceOwnerReviewUseCases",
+        "MANAGED_SEED_NONEMPTY_REFERENCE_TARGET",
+        "MANAGED_SEED_PROTECTED_ROWS_CHANGED"
+      ],
       "review": "Delegated project-owner development preparation 2026-10-22; source implementation self-review; no independent human review or production approval claimed"
     },
     "scripts/database/post28-required-seed.ts": {
@@ -327,6 +384,54 @@
         "requireTlsRoot: true"
       ],
       "review": "POST28 R10 independent source and local execution review 2026-10-20"
+    },
+    "scripts/database/verify-staff-draft-storage.mjs": {
+      "purpose": "Transactional owner acceptance with mandatory rollback in an attested disposable native PostgreSQL laboratory only",
+      "access": "isolated-read-write",
+      "environment": [
+        "ATTESTED_DISPOSABLE_LOCAL_POSTGRESQL"
+      ],
+      "gate": "assertNativeLabState and preflightTargets validate exact database/server identity before mutation",
+      "review": "2026-10-28 admin operations and staff lifecycle storage review; original database forbidden",
+      "requiredSourceMarkers": [
+        "assertNativeLabState",
+        "preflightTargets",
+        "'127.0.0.1'",
+        "transaction",
+        "ROLLBACK"
+      ]
+    },
+    "scripts/database/verify-support-storage.mjs": {
+      "purpose": "Transactional owner acceptance with mandatory rollback in an attested disposable native PostgreSQL laboratory only",
+      "access": "isolated-read-write",
+      "environment": [
+        "ATTESTED_DISPOSABLE_LOCAL_POSTGRESQL"
+      ],
+      "gate": "assertNativeLabState and preflightTargets validate exact database/server identity before mutation",
+      "review": "2026-10-28 admin operations and staff lifecycle storage review; original database forbidden",
+      "requiredSourceMarkers": [
+        "assertNativeLabState",
+        "preflightTargets",
+        "'127.0.0.1'",
+        "transaction",
+        "ROLLBACK"
+      ]
+    },
+    "scripts/database/verify-staff-lifecycle-storage.mjs": {
+      "purpose": "Transactional owner acceptance with mandatory rollback in an attested disposable native PostgreSQL laboratory only",
+      "access": "isolated-read-write",
+      "environment": [
+        "ATTESTED_DISPOSABLE_LOCAL_POSTGRESQL"
+      ],
+      "gate": "assertNativeLabState and preflightTargets validate exact database/server identity before mutation",
+      "review": "2026-10-28 admin operations and staff lifecycle storage review; original database forbidden",
+      "requiredSourceMarkers": [
+        "assertNativeLabState",
+        "preflightTargets",
+        "'127.0.0.1'",
+        "transaction",
+        "ROLLBACK"
+      ]
     }
   }
 }

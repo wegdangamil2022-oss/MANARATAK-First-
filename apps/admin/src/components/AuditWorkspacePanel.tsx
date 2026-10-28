@@ -8,7 +8,9 @@ interface Row {
   version: number;
   data: Record<string, unknown>;
 }
-export function AuditWorkspacePanel() {
+export function AuditWorkspacePanel({
+  kind,
+}: { kind?: 'CASE' | 'ALERT_RULE' | 'RETENTION_POLICY' } = {}) {
   const { hasPermission } = useAdminAuthorization();
   const { t } = useTranslation();
   const [tab, setTab] = useState('CASE');
@@ -18,22 +20,28 @@ export function AuditWorkspacePanel() {
     ['RETENTION_POLICY', 'admin:audit:retention:manage', 'audit_ws_retention'],
   ];
   const visible = tabs.filter(([, permission]) => hasPermission(permission));
-  const active = visible.some(([kind]) => kind === tab) ? tab : visible[0]?.[0];
+  const active = kind
+    ? visible.find(([candidate]) => candidate === kind)?.[0]
+    : visible.some(([candidate]) => candidate === tab)
+      ? tab
+      : visible[0]?.[0];
   if (!active) return null;
   return (
-    <section className="rounded-xl border bg-white p-4 space-y-4">
-      <nav className="flex gap-3">
-        {visible.map(([kind, , label]) => (
-          <button
-            key={kind}
-            type="button"
-            aria-pressed={active === kind}
-            onClick={() => setTab(kind)}
-          >
-            {t(label as Parameters<typeof t>[0])}
-          </button>
-        ))}
-      </nav>
+    <section className="operations-panel">
+      {!kind && (
+        <nav className="flex gap-3">
+          {visible.map(([kind, , label]) => (
+            <button
+              key={kind}
+              type="button"
+              aria-pressed={active === kind}
+              onClick={() => setTab(kind)}
+            >
+              {t(label as Parameters<typeof t>[0])}
+            </button>
+          ))}
+        </nav>
+      )}
       <WorkspaceForm
         key={active}
         kind={active}
@@ -44,6 +52,35 @@ export function AuditWorkspacePanel() {
 }
 function WorkspaceForm({ kind, canManage }: { kind: string; canManage: boolean }) {
   const { t, language } = useTranslation();
+  const { hasPermission } = useAdminAuthorization();
+  const [choices, setChoices] = useState<{
+    agents: Array<{ id: string; label: string }>;
+    templates: Array<{ id: string; label: string }>;
+  }>({ agents: [], templates: [] });
+  const [preview, setPreview] = useState<{
+    matchedCount: number;
+    hasMore: boolean;
+    thresholdReached: boolean;
+    from: string;
+    until: string;
+  } | null>(null);
+  useEffect(() => {
+    if (!canManage || kind === 'RETENTION_POLICY') return;
+    let live = true;
+    void adminApiClient
+      .request<typeof choices>(
+        '/admin/audit/workspace/' + (kind === 'CASE' ? 'choices' : 'alert-choices'),
+      )
+      .then((result) => {
+        if (live) setChoices(result);
+      })
+      .catch(() => {
+        if (live) setChoices({ agents: [], templates: [] });
+      });
+    return () => {
+      live = false;
+    };
+  }, [kind, canManage]);
   const [rows, setRows] = useState<Row[]>([]),
     [cursor, setCursor] = useState<string | null>(null),
     [selected, setSelected] = useState<Row | null>(null);
@@ -295,7 +332,22 @@ function WorkspaceForm({ kind, canManage }: { kind: string; canManage: boolean }
         {kind !== 'RETENTION_POLICY' && input('audit_ws_title', title, setTitle)}
         {kind === 'CASE' && (
           <>
-            {input('audit_ws_assignee', assignee, setAssignee)}
+            <label className="block">
+              {t('audit_ws_assignee')}
+              <select value={assignee} onChange={(e) => setAssignee(e.target.value)}>
+                <option value="">{language === 'ar' ? 'غير مسندة' : 'Unassigned'}</option>
+                {assignee && !choices.agents.some((a) => a.id === assignee) && (
+                  <option value={assignee}>
+                    {language === 'ar' ? 'الموظف المسند حاليًا' : 'Current assignee'}
+                  </option>
+                )}
+                {choices.agents.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.label}
+                  </option>
+                ))}
+              </select>
+            </label>
             <label className="block">
               {t('audit_ws_references')}
               <textarea
@@ -339,7 +391,7 @@ function WorkspaceForm({ kind, canManage }: { kind: string; canManage: boolean }
                 <option value="">{t('audit_ws_all')}</option>
                 {AUDIT_QUERY_CATALOG.actions.map((value) => (
                   <option key={value} value={value}>
-                    {auditCodeLabel(value,language)}
+                    {auditCodeLabel(value, language)}
                   </option>
                 ))}
               </select>
@@ -349,7 +401,9 @@ function WorkspaceForm({ kind, canManage }: { kind: string; canManage: boolean }
               <select value={severity} onChange={(event) => setSeverity(event.target.value)}>
                 <option value="">{t('audit_ws_all')}</option>
                 {['INFO', 'WARNING', 'ERROR', 'CRITICAL'].map((value) => (
-                  <option key={value} value={value}>{auditCodeLabel(value,language)}</option>
+                  <option key={value} value={value}>
+                    {auditCodeLabel(value, language)}
+                  </option>
                 ))}
               </select>
             </label>
@@ -358,7 +412,9 @@ function WorkspaceForm({ kind, canManage }: { kind: string; canManage: boolean }
               <select value={category} onChange={(event) => setCategory(event.target.value)}>
                 <option value="">{t('audit_ws_all')}</option>
                 {AUDIT_QUERY_CATALOG.categories.map((value) => (
-                  <option key={value} value={value}>{auditCodeLabel(value,language)}</option>
+                  <option key={value} value={value}>
+                    {auditCodeLabel(value, language)}
+                  </option>
                 ))}
               </select>
             </label>
@@ -389,8 +445,72 @@ function WorkspaceForm({ kind, canManage }: { kind: string; canManage: boolean }
             )}
             {input('audit_ws_window', String(window), (v) => setWindow(Number(v)), 'number')}
             {input('audit_ws_cooldown', String(cooldown), (v) => setCooldown(Number(v)), 'number')}
-            {input('audit_ws_recipient', recipient, setRecipient)}
-            {input('audit_ws_template', template, setTemplate)}
+            <label className="block">
+              {t('audit_ws_recipient')}
+              <select required value={recipient} onChange={(e) => setRecipient(e.target.value)}>
+                <option value="">
+                  {language === 'ar' ? 'اختر موظفًا مؤهلًا' : 'Choose an eligible agent'}
+                </option>
+                {choices.agents.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              {t('audit_ws_template')}
+              <select required value={template} onChange={(e) => setTemplate(e.target.value)}>
+                <option value="">
+                  {language === 'ar' ? 'اختر قالبًا متوافقًا' : 'Choose a compatible template'}
+                </option>
+                {choices.templates.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {selected && hasPermission('admin:audit:manage') && (
+              <>
+                <button
+                  type="button"
+                  className="operations-button"
+                  disabled={busy}
+                  onClick={async () => {
+                    setBusy(true);
+                    setError('');
+                    try {
+                      setPreview(
+                        await adminApiClient.request(
+                          base + '/alerts/' + encodeURIComponent(selected.id) + '/preview',
+                        ),
+                      );
+                    } catch {
+                      setError(t('audit_ws_failed'));
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                >
+                  {language === 'ar'
+                    ? 'اختبار مطابقة القاعدة المحفوظة دون إرسال'
+                    : 'Preview saved rule matches without sending'}
+                </button>
+                {preview && (
+                  <p role="status">
+                    {language === 'ar'
+                      ? 'أحداث مطابقة ضمن صفحة محدودة'
+                      : 'Matches in a bounded page'}
+                    : {preview.matchedCount}
+                    {preview.hasMore ? ' +' : ''} ·{' '}
+                    {language === 'ar'
+                      ? 'لا يفحص التهدئة ولا ينشئ إشعارًا'
+                      : 'Cooldown not evaluated; no notification created'}
+                  </p>
+                )}
+              </>
+            )}
             <label>
               <input
                 type="checkbox"

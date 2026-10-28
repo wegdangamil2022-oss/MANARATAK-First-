@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { IdentityType } from '@manaratak/domain';
-import { InMemoryIdentityRepository } from '@manaratak/infrastructure';
+import { IdentityType, type Identity, type IIdentityRepository } from '@manaratak/domain';
+
 import { ProvisionIdentityUseCase } from '../../src/identity/ProvisionIdentityUseCase';
 import { UpdateContactUseCase } from '../../src/identity/UpdateContactUseCase';
 import { identityContactUpdateSchema } from '../../../../apps/api/src/presentation/validation/StrictControlPlaneSchemas';
@@ -11,8 +11,19 @@ describe('contact ownership verification boundary', () => {
     ).toBe(false);
   });
   it('never verifies email or phone through the normal contact use case', async () => {
-    const repository = new InMemoryIdentityRepository(),
-      provision = new ProvisionIdentityUseCase(repository);
+    const records = new Map<string, Identity>();
+    const repository = {
+      findById: async (id: string) => records.get(id) ?? null,
+      save: async (record: Identity) => {
+        records.set(String(record.id), record);
+      },
+      isEmailUnique: async (email: string) =>
+        ![...records.values()].some(
+          (record) => record.user?.contactRegistry.primaryEmail === email,
+        ),
+      isPhoneUnique: async () => true,
+    } as IIdentityRepository;
+    const provision = new ProvisionIdentityUseCase(repository);
     const created = await provision.execute({
       type: IdentityType.Human,
       displayName: 'Example',

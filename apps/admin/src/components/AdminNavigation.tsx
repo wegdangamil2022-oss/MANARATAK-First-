@@ -27,6 +27,7 @@ import {
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { grantsAdminSection } from '@manaratak/shared';
 
 interface NavigationItem {
   to: string;
@@ -86,7 +87,10 @@ export const adminNavigationGroups: NavigationGroup[] = [
         requiredPermission: 'admin:international-tests:manage',
       },
       {
-        to: '/courses/assigned', labelKey:'admin_nav_assigned_courses',icon:BookOpen,requiredPermission:'admin:courses:workspace',
+        to: '/courses/assigned',
+        labelKey: 'admin_nav_assigned_courses',
+        icon: BookOpen,
+        requiredPermission: 'admin:courses:workspace',
       },
       {
         to: '/courses',
@@ -245,11 +249,20 @@ function itemClass(active: boolean) {
 
 export function AdminNavigation() {
   const { t } = useTranslation();
-  const { hasPermission } = useAdminAuthorization();
+  const { hasPermission, permissions } = useAdminAuthorization();
 
   const allItems = adminNavigationGroups.flatMap((group) =>
     group.items.filter(
-      (item) => (item.to === '/services' ? ['admin:services:manage','admin:services:requests:view','admin:services:operations:manage'].some(hasPermission) : (!item.requiredPermission || hasPermission(item.requiredPermission))) && (item.to !== '/courses/assigned' || !hasPermission('admin:courses:manage')),
+      (item) =>
+        (item.to === '/services'
+          ? [
+              'admin:services:manage',
+              'admin:services:requests:view',
+              'admin:services:operations:manage',
+            ].some(hasPermission)
+          : !item.requiredPermission ||
+            grantsAdminSection(permissions, item.to, item.requiredPermission)) &&
+        (item.to !== '/courses/assigned' || !hasPermission('admin:courses:manage')),
     ),
   );
 
@@ -312,7 +325,16 @@ export function AdminNavigation() {
                 <div className="space-y-1">
                   {group.items
                     .filter(
-                      (item) => (item.to === '/services' ? ['admin:services:manage','admin:services:requests:view','admin:services:operations:manage'].some(hasPermission) : (!item.requiredPermission || hasPermission(item.requiredPermission))) && (item.to !== '/courses/assigned' || !hasPermission('admin:courses:manage')),
+                      (item) =>
+                        (item.to === '/services'
+                          ? [
+                              'admin:services:manage',
+                              'admin:services:requests:view',
+                              'admin:services:operations:manage',
+                            ].some(hasPermission)
+                          : !item.requiredPermission ||
+                            grantsAdminSection(permissions, item.to, item.requiredPermission)) &&
+                        (item.to !== '/courses/assigned' || !hasPermission('admin:courses:manage')),
                     )
                     .map((item) => {
                       const Icon = item.icon;

@@ -163,6 +163,7 @@ export const authorizationRoleCreateSchema = z.object({
   policyIds: z.array(shortId).max(500),
 }).strict();
 export const authorizationRoleAssignmentSchema = z.object({
+  staffMembershipId: z.string().uuid().optional(),
   id: shortId,
   identityId: shortId,
   roleId: shortId,

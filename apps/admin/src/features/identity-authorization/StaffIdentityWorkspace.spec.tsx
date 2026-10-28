@@ -42,12 +42,13 @@ describe('Staff and identity workspace source rendering', () => {
     expect(html).toContain('إنشاء هوية');
     expect(html).not.toContain('<input type="email"');
   });
-  it('states onboarding and offboarding blockers without fake send/activate actions', () => {
+  it('waits for owner readiness before exposing invitation or offboarding commands', () => {
     const invitation = render('/identities?tab=invitations');
-    expect(invitation).toContain('غير مفعّل');
+    expect(invitation).toContain('جارٍ فحص الجاهزية');
     expect(invitation).not.toContain('إرسال الدعوة</button>');
     const changes = render('/identities?tab=changes');
-    expect(changes).toContain('حساب طالب');
+    expect(changes).toContain('جارٍ فحص الجاهزية');
+    expect(changes).not.toContain('تنفيذ النسخة المعتمدة</button>');
   });
   it('renders English without hardcoded Arabic and with LTR', () => {
     const html = render('/identities?tab=invitations', 'en');

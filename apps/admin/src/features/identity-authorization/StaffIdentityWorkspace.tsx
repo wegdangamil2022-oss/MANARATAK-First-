@@ -1,3 +1,4 @@
+import { StaffLifecycleWorkspace } from './StaffLifecycleWorkspace';
 import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
@@ -214,45 +215,12 @@ export function StaffIdentityWorkspace() {
             </OwnerPanel>
           )}
           {tab === 'organization' && ready && <StaffOrganization onDirtyChange={setDirty} />}
-          {tab === 'invitations' && (
-            <OwnerPanel title={c('الدعوات وجاهزية الانضمام', 'Invitations & onboarding readiness')}>
-              <p className="sf-notice">
-                {c(
-                  'إرسال الدعوات وقبولها وتفعيل العضوية غير مفعّل. يلزم اعتماد تخزين الدعوة الآمن، وإثبات ملكية البريد، ومنع ربط حساب قائم تلقائيًا. لم يُشغّل مزود إرسال خارجي.',
-                  'Invitation delivery, acceptance and membership activation are disabled pending secure invitation storage, email ownership proof and existing-account protection. External delivery remains disabled.',
-                )}
-              </p>
-              <ol className="iam-steps">
-                {[
-                  c('حفظ مسودة موظف', 'Save a staff draft'),
-                  c(
-                    'دعوة آمنة وقبول صريح من صاحب الحساب',
-                    'Secure invitation and explicit account-holder acceptance',
-                  ),
-                  c(
-                    'اعتماد إسناد الوصول والتحقق من MFA',
-                    'Approve access assignments and verify MFA',
-                  ),
-                  c(
-                    'تفعيل العضوية بعد اجتياز متطلبات المالك',
-                    'Activate membership after owner prerequisites pass',
-                  ),
-                ].map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ol>
-            </OwnerPanel>
-          )}
+          {tab === 'invitations' && <StaffLifecycleWorkspace mode="invitations" />}
           {tab === 'changes' && (
-            <OwnerPanel title={c('التغييرات والمغادرة', 'Changes & offboarding')}>
-              <p className="sf-notice">
-                {c(
-                  'المغادرة والنقل غير مفعّلين حتى اعتماد مصادر منح الأدوار وحاجز منع الإدارة المستقل. لا نستخدم تعليق الهوية لإيقاف العمل؛ فقد يحتفظ الشخص بحساب طالب.',
-                  'Offboarding and transfers are disabled pending role-grant provenance and an independent admin-access fence. Global identity suspension is not staff offboarding; the person may retain student access.',
-                )}
-              </p>
+            <>
+              <StaffLifecycleWorkspace mode="changes" />
               {ready && <StaffHistory />}
-            </OwnerPanel>
+            </>
           )}
         </>
       )}
@@ -337,8 +305,8 @@ function StaffDirectory() {
             )}
             <p className="sf-notice">
               {c(
-                'الخطوة التالية: اعتماد مخطط الدعوة والقبول ومصادر الوصول قبل التفعيل. لم يُمنح أي دور بحفظ هذه المسودة.',
-                'Next: approve invitation, acceptance and grant-provenance contracts before activation. Saving this draft granted no roles.',
+                'تدار الدعوة والقبول والتفعيل والمغادرة من تبويباتها، ويعاد فحص الجاهزية عند التنفيذ. حفظ المسودة لا يمنح دورًا.',
+                'Use lifecycle tabs for invitations, acceptance, activation and offboarding. Readiness is rechecked at execution; saving a draft grants no roles.',
               )}
             </p>
             {detail.value.status === 'DRAFT' && (
@@ -378,6 +346,27 @@ function StaffDirectory() {
                 {command.error && <p role="alert">{command.error}</p>}
               </form>
             )}
+            <div className="sf-filter-row">
+              <Link className="sf-secondary" to="/identities?tab=invitations">
+                {c('الدعوات والانضمام', 'Invitations & onboarding')}
+              </Link>
+              <Link className="sf-secondary" to="/identities?tab=changes">
+                {c('التغييرات والمغادرة', 'Changes & offboarding')}
+              </Link>
+              {detail.value.status === 'ACTIVE' && (
+                <Link
+                  className="sf-secondary"
+                  to={
+                    '/authorization?tab=assignments&identityId=' +
+                    encodeURIComponent(detail.value.identityId ?? '') +
+                    '&staffMembershipId=' +
+                    encodeURIComponent(detail.value.id)
+                  }
+                >
+                  {c('إسناد وصول موثق المصدر', 'Assign access with staff provenance')}
+                </Link>
+              )}
+            </div>
             <StaffHistory membershipId={detail.value.id} />
           </>
         )}
@@ -411,6 +400,9 @@ function StaffDirectory() {
           <select value={status} onChange={(event) => setStatus(event.target.value)}>
             <option value="">{c('الكل', 'All')}</option>
             <option value="DRAFT">{c('مسودة', 'Draft')}</option>
+            <option value="ACTIVE">{c('نشط', 'Active')}</option>
+            <option value="SUSPENDED">{c('موقوف وظيفيًا', 'Staff suspended')}</option>
+            <option value="ENDED">{c('انتهت عضويته', 'Ended')}</option>
             <option value="CANCELLED">{c('ملغاة', 'Cancelled')}</option>
           </select>
         </label>

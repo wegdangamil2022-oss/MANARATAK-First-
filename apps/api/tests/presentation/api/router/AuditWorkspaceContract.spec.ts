@@ -27,6 +27,7 @@ function setup(allowed = true) {
     AuditWorkspaceRouter.create({
       auditWorkspaceUseCases: operations as any,
       authEvaluatorService: evaluator as any,
+      auditRecordRepo: { save: vi.fn(async () => {}) } as never,
     }),
   );
   return { app, operations, evaluator };

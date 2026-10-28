@@ -3015,6 +3015,7 @@ model AssetRecord {
 }
 
 model StudentWorkspace {
+  supportCases StudentSupportCaseRecord[]
   id                 String  @id @default(uuid())
   studentReferenceId String  @unique
   status             String
@@ -3783,6 +3784,10 @@ model StaffJobTitleRecord {
   @@index([departmentId,status,id])
 }
 model StaffMembershipRecord {
+  invitations StaffInvitationRecord[]
+  changes StaffChangeRequestRecord[]
+  accessFences StaffAdminAccessRecord[]
+  grantSources StaffGrantSourceRecord[]
   id String @id @default(uuid())
   publicId String @unique
   identityId String?
@@ -3823,6 +3828,17 @@ model StaffLifecycleEventRecord {
 }
 
 model IdentityRecord {
+  receivedStaffInvitations StaffInvitationRecord[] @relation("StaffInviteIdentity")
+  issuedStaffInvitations StaffInvitationRecord[] @relation("StaffInviteIssuer")
+  acceptedStaffInvitations StaffInvitationRecord[] @relation("StaffInviteAcceptor")
+  requestedStaffChanges StaffChangeRequestRecord[] @relation("StaffChangeRequester")
+  approvedStaffChanges StaffChangeRequestRecord[] @relation("StaffChangeApprover")
+  staffAdminFence StaffAdminAccessRecord?
+  staffGrantSources StaffGrantSourceRecord[]
+  assignedSupportCases StudentSupportCaseRecord[] @relation("SupportAssignee")
+  supportMessages StudentSupportMessageRecord[]
+  supportEvents StudentSupportEventRecord[]
+  supportTeamMemberships StudentSupportTeamMemberRecord[]
   staffMemberships StaffMembershipRecord[]
   reviewAssignments ReviewWorkCase[] @relation("ReviewAssignee")
   reviewEvents ReviewWorkEvent[] @relation("ReviewEventActor")
@@ -6436,4 +6452,189 @@ model ScholarshipReferenceTransition {
   @@unique([sourceOwnerId, sourceRevision],map:"ScholarshipReference_source_revision_key")
   @@index([sourceOwnerId, status, sourceRevision],map:"ScholarshipReference_source_revision_idx")
   @@index([sourceSlug, status],map:"ScholarshipReference_source_slug_idx")
+}
+
+// Support owns conversations only. Other domains retain their records and documents.
+model StudentSupportCaseRecord {
+  id String @id
+  publicId String @unique
+  studentId String
+  title String
+  category String
+  status String @default("NEW")
+  priority String @default("NORMAL")
+  origin String
+  teamId String?
+  assigneeId String?
+  version Int @default(1)
+  lastStudentMessageAt DateTime
+  lastPublicReplyAt DateTime?
+  firstPublicReplyAt DateTime?
+  firstReplyDueAt DateTime?
+  resolutionDueAt DateTime?
+  slaPausedAt DateTime?
+  slaRemainingMinutes Float?
+  slaBreached Boolean @default(false)
+  slaSnapshot Json?
+  resolvedAt DateTime?
+  closedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  student StudentWorkspace @relation(fields:[studentId], references:[studentReferenceId], onDelete:Restrict, onUpdate:Restrict)
+  assignee IdentityRecord? @relation("SupportAssignee", fields:[assigneeId], references:[id], onDelete:Restrict, onUpdate:Restrict)
+  team StudentSupportTeamRecord? @relation(fields:[teamId], references:[id], onDelete:Restrict)
+  messages StudentSupportMessageRecord[]
+  events StudentSupportEventRecord[]
+  links StudentSupportCaseLinkRecord[] @relation("SupportLinkSource")
+  linkedBy StudentSupportCaseLinkRecord[] @relation("SupportLinkTarget")
+  @@index([studentId,createdAt,id])
+  @@index([status,assigneeId,updatedAt,id])
+  @@index([teamId,updatedAt,id])
+  @@index([firstReplyDueAt,id])
+  @@index([resolutionDueAt,id])
+}
+
+model StudentSupportMessageRecord {
+  id String @id
+  caseId String
+  authorId String
+  authorKind String
+  visibility String
+  body String
+  createdAt DateTime @default(now())
+  supportCase StudentSupportCaseRecord @relation(fields:[caseId],references:[id],onDelete:Restrict)
+  author IdentityRecord @relation(fields:[authorId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  @@index([caseId,visibility,createdAt,id])
+}
+
+model StudentSupportEventRecord {
+  id String @id
+  caseId String
+  actorId String
+  type String
+  data Json
+  commandKey String
+  commandHash String
+  createdAt DateTime @default(now())
+  supportCase StudentSupportCaseRecord @relation(fields:[caseId],references:[id],onDelete:Restrict)
+  actor IdentityRecord @relation(fields:[actorId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  @@unique([actorId,commandKey])
+  @@index([caseId,createdAt,id])
+}
+
+model StudentSupportTeamRecord {
+  id String @id
+  name String
+  active Boolean @default(true)
+  version Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  members StudentSupportTeamMemberRecord[]
+  cases StudentSupportCaseRecord[]
+}
+
+model StudentSupportTeamMemberRecord {
+  teamId String
+  identityId String
+  active Boolean @default(true)
+  team StudentSupportTeamRecord @relation(fields:[teamId],references:[id],onDelete:Restrict)
+  identity IdentityRecord @relation(fields:[identityId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  @@id([teamId,identityId])
+  @@index([identityId,active])
+}
+
+model StudentSupportPolicyRecord {
+  id String @id
+  name String
+  active Boolean @default(false)
+  version Int @default(1)
+  data Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StudentSupportMacroRecord {
+  id String @id
+  title String
+  locale String
+  body String
+  status String @default("DRAFT")
+  version Int @default(1)
+  reviewedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([status,locale,id])
+}
+
+model StudentSupportCaseLinkRecord {
+  caseId String
+  relatedCaseId String
+  linkedBy String
+  createdAt DateTime @default(now())
+  source StudentSupportCaseRecord @relation("SupportLinkSource",fields:[caseId],references:[id],onDelete:Restrict)
+  target StudentSupportCaseRecord @relation("SupportLinkTarget",fields:[relatedCaseId],references:[id],onDelete:Restrict)
+  @@id([caseId,relatedCaseId])
+  @@index([relatedCaseId])
+}
+
+model StaffInvitationRecord {
+ id String @id
+ membershipId String
+ memberVersion Int
+ identityId String?
+ email String
+ tokenHash String @unique
+ issuedBy String
+ commandHash String
+ expiresAt DateTime
+ acceptedAt DateTime?
+ acceptedBy String?
+ revokedAt DateTime?
+ version Int @default(1)
+ createdAt DateTime @default(now())
+ membership StaffMembershipRecord @relation(fields:[membershipId],references:[id],onDelete:Restrict,onUpdate:NoAction)
+ identity IdentityRecord? @relation("StaffInviteIdentity",fields:[identityId],references:[id],onDelete:Restrict,onUpdate:NoAction)
+ issuer IdentityRecord @relation("StaffInviteIssuer",fields:[issuedBy],references:[id],onDelete:Restrict,onUpdate:NoAction)
+ acceptor IdentityRecord? @relation("StaffInviteAcceptor",fields:[acceptedBy],references:[id],onDelete:Restrict,onUpdate:NoAction)
+ @@index([membershipId,createdAt,id],map:"StaffInvitation_membership_idx")
+}
+model StaffChangeRequestRecord {
+ id String @id
+ membershipId String
+ memberVersion Int
+ action String
+ payload Json
+ snapshotHash String
+ reason String
+ requestedBy String
+ approvedBy String?
+ approvedAt DateTime?
+ usedAt DateTime?
+ expiresAt DateTime
+ version Int @default(1)
+ membership StaffMembershipRecord @relation(fields:[membershipId],references:[id],onDelete:Restrict,onUpdate:NoAction)
+ requester IdentityRecord @relation("StaffChangeRequester",fields:[requestedBy],references:[id],onDelete:Restrict,onUpdate:NoAction)
+ approver IdentityRecord? @relation("StaffChangeApprover",fields:[approvedBy],references:[id],onDelete:Restrict,onUpdate:NoAction)
+ @@index([requestedBy,id],map:"StaffChange_requested_idx")
+ @@index([membershipId,id],map:"StaffChange_membership_idx")
+}
+model StaffAdminAccessRecord {
+ identityId String @id
+ membershipId String
+ allowed Boolean
+ version Int @default(1)
+ updatedAt DateTime @default(now())
+ identity IdentityRecord @relation(fields:[identityId],references:[id],onDelete:Restrict,onUpdate:NoAction)
+ membership StaffMembershipRecord @relation(fields:[membershipId],references:[id],onDelete:Restrict,onUpdate:NoAction)
+}
+model StaffGrantSourceRecord {
+ assignmentId String @id
+ membershipId String
+ identityId String
+ roleId String
+ assignedAt DateTime
+ revokedAt DateTime?
+ membership StaffMembershipRecord @relation(fields:[membershipId],references:[id],onDelete:Restrict,onUpdate:NoAction)
+ identity IdentityRecord @relation(fields:[identityId],references:[id],onDelete:Restrict,onUpdate:NoAction)
+ @@index([membershipId,revokedAt],map:"StaffGrant_membership_idx")
 }

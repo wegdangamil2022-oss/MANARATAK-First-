@@ -1,6 +1,6 @@
 import { Router, type Request } from 'express';
 import { z } from 'zod';
-import type { StaffWorkspaceUseCases } from '@manaratak/application';
+import type { StaffWorkspaceUseCases, StaffLifecycleUseCases } from '@manaratak/application';
 import { ResponseFormatter } from '../response/ResponseFormatter.js';
 
 const id = z.string().uuid();
@@ -13,8 +13,10 @@ const paging = {
 export class StaffAdminRouter {
   static create({
     staffWorkspaceUseCases: owner,
+    staffLifecycleUseCases: lifecycle,
   }: {
     staffWorkspaceUseCases: StaffWorkspaceUseCases;
+    staffLifecycleUseCases?: StaffLifecycleUseCases;
   }): Router {
     const router = Router(),
       formatter = new ResponseFormatter('v1');
@@ -29,7 +31,20 @@ export class StaffAdminRouter {
     router.get('/readiness', async (_req, res, next) => {
       try {
         res.setHeader('Cache-Control', 'no-store');
-        res.json(formatter.success(await owner.readiness()));
+        const base = await owner.readiness(),
+          advanced = lifecycle ? await lifecycle.readiness() : null;
+        const enabled = base.ready && advanced?.ready === true && advanced.tokenService;
+        res.json(
+          formatter.success({
+            ...base,
+            capabilities: {
+              ...base.capabilities,
+              invitations: !!enabled,
+              activation: !!enabled,
+              offboarding: !!enabled,
+            },
+          }),
+        );
       } catch (error) {
         next(error);
       }

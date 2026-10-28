@@ -337,10 +337,10 @@ function AdminLayout() {
                   <Route path="/identities/:identityId" element={<RequireAdminPermission permission="admin:identities:manage"><StaffIdentityWorkspace /></RequireAdminPermission>} />
                   <Route path="/security" element={<AccountSecurityPage />} />
                   <Route path="/authorization" element={<RequireAdminPermission permission="admin:authorization:manage"><AuthorizationAdminPage /></RequireAdminPermission>} />
-                  <Route path="/audit" element={<RequireAdminPermission permission="admin:audit:manage"><AuditCenterPage /></RequireAdminPermission>} />
+                  <Route path="/audit" element={<RequireAdminPermission permission={["admin:audit:manage", "admin:audit:cases:view", "admin:audit:alerts:manage", "admin:audit:retention:manage"]}><AuditCenterPage /></RequireAdminPermission>} />
                   <Route path="/assets" element={<RequireAdminPermission permission="admin:assets:manage"><AssetAdminPage /></RequireAdminPermission>} />
                   <Route path="/student-document-reviews" element={<RequireAdminPermission permission="admin:students:documents:review"><StudentDocumentReviewPanel/></RequireAdminPermission>}/>
-                  <Route path="/students" element={<RequireAdminPermission permission="admin:students:support"><StudentSupportAdminPage /></RequireAdminPermission>} />
+                  <Route path="/students" element={<RequireAdminPermission permission={["admin:students:support", "admin:students:support:cases:view", "admin:students:support:settings", "admin:students:support:metrics"]}><StudentSupportAdminPage /></RequireAdminPermission>} />
                   <Route path="/settings" element={<RequireAdminPermission permission="admin:settings:manage"><SettingsAdminPage /></RequireAdminPermission>} />
                   <Route path="/settings/reference-data" element={<RequireAdminPermission permission="admin:reference-data:manage"><ReferenceDataAdminPage /></RequireAdminPermission>} />
                   <Route path="/reference-data" element={<RequireAdminPermission permission="admin:reference-data:manage"><ReferenceDataAdminPage /></RequireAdminPermission>} />

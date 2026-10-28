@@ -7,6 +7,7 @@ export interface CreateRoleInput {
 }
 
 export interface AssignRoleInput {
+  staffMembershipId?: string;
   id: string;
   identityId: string;
   roleId: string;

@@ -1,3 +1,6 @@
+import { StaffLifecycleRouter } from '../../presentation/api/router/StaffLifecycleRouter.js';
+import { StaffLifecycleUseCases } from '@manaratak/application';
+import { PrismaStaffLifecycleRepository } from '@manaratak/infrastructure';
 import { CourseAccessService } from '@manaratak/application';
 import { StaffWorkspaceUseCases } from '@manaratak/application';
 import { PrismaStaffWorkspaceRepository } from '@manaratak/infrastructure';
@@ -462,6 +465,9 @@ import { CertificateAdminRouter } from '../../presentation/api/router/Certificat
 import { CertificatePublicRouter } from '../../presentation/api/router/CertificatePublicRouter.js';
 import { StudentWorkspaceRouter } from '../../presentation/api/router/StudentWorkspaceRouter.js';
 import { StudentSupportAdminRouter } from '../../presentation/api/router/StudentSupportAdminRouter.js';
+import { SupportCaseRouter } from '../../presentation/api/router/SupportCaseRouter.js';
+import { SupportCaseUseCases,SupportNotificationGateway } from '@manaratak/application';
+import { PrismaSupportCaseRepository } from '@manaratak/infrastructure';
 import { CmsAdminRouter } from '../../presentation/api/router/CmsAdminRouter.js';
 import { CmsPublicRouter } from '../../presentation/api/router/CmsPublicRouter.js';
 import { StudentToolsAdminRouter } from '../../presentation/api/router/StudentToolsAdminRouter.js';
@@ -480,6 +486,7 @@ import { InternationalTestPublicRouter } from '../../presentation/api/router/Int
 import { AIGatewayRouter } from '../../presentation/api/router/AIGatewayRouter.js';
 import { AIAdminRouter } from '../../presentation/api/router/AIAdminRouter.js';
 import { AssetPlatformRouter } from '../../presentation/api/router/AssetPlatformRouter.js';
+import { AssetOwnerChoices } from '@manaratak/infrastructure';
 import { AcademicTaxonomyPublicRouter } from '../../presentation/api/router/AcademicTaxonomyPublicRouter.js';
 import { AcademicTaxonomyAdminRouter } from '../../presentation/api/router/AcademicTaxonomyAdminRouter.js';
 
@@ -1114,7 +1121,18 @@ export function registerDependencies(
     ownerDomainProjectionDispatcher: asFunction(({ transactionalOutboxStore, enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway }) => new TransactionalOutboxDispatcher(transactionalOutboxStore, new FanoutOutboxDeliveryGateway([enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway]))).scoped(),
     ownerDomainServicesDeliveryGateway: asFunction(({ enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway }) => new FanoutOutboxDeliveryGateway([enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway])).scoped(),
     ownerDomainServicesDispatcher: asFunction(({ transactionalOutboxStore, ownerDomainServicesDeliveryGateway }) => new TransactionalOutboxDispatcher(transactionalOutboxStore, ownerDomainServicesDeliveryGateway)).scoped(),
-    ownerDomainOutboxWorker: asFunction(({ ownerDomainProjectionDispatcher, ownerDomainServicesDispatcher }) => new OwnerDomainOutboxWorker(ownerDomainProjectionDispatcher, ownerDomainServicesDispatcher)).scoped(),
+    supportNotificationGateway: asFunction(({intentsUseCase,notificationTemplateRepo,prisma,authEvaluatorService,principalAccessValidator, staffLifecycleRepository})=>new SupportNotificationGateway(intentsUseCase,notificationTemplateRepo,async(caseId,audience)=>{
+      const row=await prisma.studentSupportCaseRecord.findUnique({where:{id:caseId},select:{studentId:true,assigneeId:true,team:{select:{active:true,members:{where:{active:true},select:{identityId:true},take:100}}}}});
+      if(!row)throw Error('SUPPORT_CASE_NOT_FOUND');
+      if(audience==='STUDENT')return [row.studentId];
+      const candidates=[...(row.assigneeId?[row.assigneeId]:[]),...(row.team?.active?row.team.members.map((m:{identityId:string})=>m.identityId):[])];
+      const recipients:string[]=[];for(const id of candidates){if(!(await principalAccessValidator.isAuthenticationAllowed(id))||!(await staffLifecycleRepository.adminAccessAllowed(id)))continue;
+        const [view,reply]=await Promise.all(['view','reply'].map(action=>authEvaluatorService.evaluatePermission(id,'admin:students:support:cases:'+action,{requestTime:new Date()})));
+        if(view.isGranted&&reply.isGranted){recipients.push(id);if(id===row.assigneeId)break;}
+      }return recipients;
+    })).scoped(),
+    supportNotificationDispatcher: asFunction(({transactionalOutboxStore,supportNotificationGateway})=>new TransactionalOutboxDispatcher(transactionalOutboxStore,supportNotificationGateway)).scoped(),
+    ownerDomainOutboxWorker: asFunction(({ ownerDomainProjectionDispatcher, ownerDomainServicesDispatcher,supportNotificationDispatcher }) => new OwnerDomainOutboxWorker(ownerDomainProjectionDispatcher, ownerDomainServicesDispatcher,{},supportNotificationDispatcher)).scoped(),
     pollingWorkerRuntimeRegistry: asFunction(({ workerHealthObservation }) => new PollingWorkerRuntimeRegistry(
       (name, snapshot) => workerHealthObservation.publish(name, snapshot),
     )).singleton(),
@@ -1270,8 +1288,8 @@ export function registerDependencies(
     ).scoped(),
     manageRolesUseCase: asFunction(({ roleRepository, atomicDomainMutationCoordinator }) =>
       new ManageRolesUseCase(roleRepository, atomicDomainMutationCoordinator)).scoped(),
-    assignRoleUseCase: asFunction(({ roleAssignmentRepository, atomicDomainMutationCoordinator, identityRepository, roleRepository }) =>
-      new AssignRoleUseCase(roleAssignmentRepository, atomicDomainMutationCoordinator, identityRepository, roleRepository)).scoped(),
+    assignRoleUseCase: asFunction(({ roleAssignmentRepository, atomicDomainMutationCoordinator, identityRepository, roleRepository, staffLifecycleRepository }) =>
+      new AssignRoleUseCase(roleAssignmentRepository, atomicDomainMutationCoordinator, identityRepository, roleRepository,staffLifecycleRepository)).scoped(),
     manageEmergencyAccessUseCase: asFunction(({ emergencyAccessRepository, atomicDomainMutationCoordinator }) =>
       new ManageEmergencyAccessUseCase(emergencyAccessRepository, atomicDomainMutationCoordinator)).scoped(),
     evaluateAccessUseCase: asFunction(({ authEvaluatorService }) => new EvaluateAccessUseCase(authEvaluatorService)).scoped(),
@@ -1291,12 +1309,20 @@ export function registerDependencies(
     intentsUseCase: asFunction(({ notificationIntentRepo, notificationPrefGateway, notificationTemplateRepo, notificationRecipientGateway }) => new ManageNotificationIntentsUseCase(notificationIntentRepo, notificationPrefGateway, notificationTemplateRepo, notificationRecipientGateway)).scoped(),
 
     // Others
-    auditWorkspaceGateway: asFunction(({ prisma, notificationRecipientGateway, notificationTemplateRepo }) => new PrismaAuditWorkspaceGateway(prisma, async (identityId, templateId) => {
+    auditWorkspaceGateway: asFunction(({ prisma, notificationRecipientGateway, notificationTemplateRepo,authEvaluatorService,principalAccessValidator , staffLifecycleRepository}) => new PrismaAuditWorkspaceGateway(prisma, async (identityId, templateId) => {
       await notificationRecipientGateway.assertEligible(identityId);
       const { TemplateId } = await import('@manaratak/domain');
       const template = await notificationTemplateRepo.findById(TemplateId.create(templateId));
       if (!template || template.requiredVariables.some((name: string) => !['ruleName','matchedCount','actionUrl'].includes(name))) throw new Error('AUDIT_ALERT_TEMPLATE_INVALID');
-    })).scoped(),
+    },async id=>(await principalAccessValidator.isAuthenticationAllowed(id))&&(await staffLifecycleRepository.adminAccessAllowed(id))&&(await authEvaluatorService.evaluatePermission(id,'admin:audit:cases:view',{requestTime:new Date()})).isGranted)).scoped(),
+    auditWorkspaceChoices:asFunction(({prisma,authEvaluatorService,principalAccessValidator,staffLifecycleRepository})=>async()=>{
+      const rows=await prisma.identityRecord.findMany({where:{type:'Human',status:'ACTIVE'},select:{id:true,user:{select:{displayName:true}}},orderBy:{id:'asc'},take:100});
+      const agents:Array<{id:string;label:string}>=[];
+      for(const row of rows){if(await principalAccessValidator.isAuthenticationAllowed(row.id)&&(await staffLifecycleRepository.adminAccessAllowed(row.id))&&(await authEvaluatorService.evaluatePermission(row.id,'admin:audit:cases:view',{requestTime:new Date()})).isGranted)agents.push({id:row.id,label:row.user?.displayName||row.id});}
+      const rowsTemplates=await prisma.notificationTemplateRecord.findMany({where:{active:true},select:{id:true,requiredVariables:true},orderBy:{id:'asc'},take:100});
+      const templates=rowsTemplates.filter((row:{requiredVariables:unknown})=>Array.isArray(row.requiredVariables)&&row.requiredVariables.every((v:unknown)=>typeof v==='string'&&['ruleName','matchedCount','actionUrl'].includes(v))).map((row:{id:string})=>({id:row.id,label:row.id}));
+      return {agents,templates};
+    }).scoped(),
     auditWorkspaceUseCases: asFunction(({ auditWorkspaceGateway, atomicDomainMutationCoordinator }) => new AuditWorkspaceUseCases(auditWorkspaceGateway,atomicDomainMutationCoordinator)).scoped(),
     auditAlertEvaluationGateway: asFunction(({ prisma, auditWorkspaceGateway, intentsUseCase }) => new PrismaAuditAlertEvaluationGateway(prisma,auditWorkspaceGateway,intentsUseCase)).scoped(),
     auditAlertEvaluation: asFunction(({ auditAlertEvaluationGateway }) => new AuditAlertEvaluation(auditAlertEvaluationGateway)).scoped(),
@@ -1334,6 +1360,26 @@ export function registerDependencies(
     certificatePublicRouter: asFunction((cradle) => CertificatePublicRouter.create(cradle)).singleton(),
     studentWorkspaceRouter: asFunction((cradle) => StudentWorkspaceRouter.create(cradle)).singleton(),
     studentSupportAdminRouter: asFunction((cradle) => StudentSupportAdminRouter.create(cradle)).singleton(),
+    supportCaseRepository: asFunction(({ prisma, authEvaluatorService, principalAccessValidator , staffLifecycleRepository}) => {
+      const secret = readConfig<string>('STUDENT_SUPPORT_CURSOR_SECRET') ?? readConfig<string>('JWT_PRIVATE_KEY_PEM');
+      if (!secret) throw new Error('SUPPORT_CURSOR_SECRET_REQUIRED');
+      return new PrismaSupportCaseRepository(prisma, secret, async id =>
+        (await principalAccessValidator.isAuthenticationAllowed(id)) && (await staffLifecycleRepository.adminAccessAllowed(id)) && (await authEvaluatorService.evaluatePermission(id, 'admin:students:support:cases:view', { requestTime: new Date() })).isGranted && (await authEvaluatorService.evaluatePermission(id, 'admin:students:support:cases:reply', { requestTime: new Date() })).isGranted);
+    }).singleton(),
+    supportCaseUseCases: asFunction(({supportCaseRepository,atomicDomainMutationCoordinator}) => new SupportCaseUseCases(supportCaseRepository,atomicDomainMutationCoordinator)).singleton(),
+    supportAgentChoices: asFunction(({prisma,authEvaluatorService,principalAccessValidator, staffLifecycleRepository}) => async (query: string) => {
+      const rows = await prisma.identityRecord.findMany({ where: { status: 'ACTIVE', type: 'Human', ...(query ? { OR: [{ id: { contains: query, mode: 'insensitive' } }, { user: { displayName: { contains: query, mode: 'insensitive' } } }] } : {}) },
+        select: { id: true, user: { select: { displayName: true } }, staffMemberships: { select: { status: true, endsAt: true } } }, orderBy: { id: 'asc' }, take: 100 });
+      const choices: Array<{id:string;label:string}> = [];
+      for (const row of rows) {
+        if (row.staffMemberships.length && !row.staffMemberships.some((member: {status:string;endsAt:Date|null}) => member.status === 'ACTIVE' && (!member.endsAt || member.endsAt > new Date()))) continue;
+        if (await principalAccessValidator.isAuthenticationAllowed(row.id) && (await staffLifecycleRepository.adminAccessAllowed(row.id)) && (await authEvaluatorService.evaluatePermission(row.id,'admin:students:support:cases:view',{requestTime:new Date()})).isGranted && (await authEvaluatorService.evaluatePermission(row.id,'admin:students:support:cases:reply',{requestTime:new Date()})).isGranted)
+          choices.push({id:row.id,label:row.user?.displayName || row.id});
+      }
+      return choices.slice(0,50);
+    }).singleton(),
+    supportCaseAdminRouter: asFunction(cradle => SupportCaseRouter.create(cradle)).singleton(),
+    supportCaseStudentRouter: asFunction(cradle => SupportCaseRouter.create(cradle,true)).singleton(),
     cmsAdminRouter: asFunction((cradle) => CmsAdminRouter.create(cradle)).singleton(),
     cmsPublicRouter: asFunction((cradle) => CmsPublicRouter.create(cradle)).singleton(),
     studentToolsAdminRouter: asFunction((cradle) => StudentToolsAdminRouter.create(cradle)).singleton(),
@@ -1352,7 +1398,15 @@ export function registerDependencies(
     aiGatewayRouter: asFunction((cradle) => AIGatewayRouter.create(cradle)).singleton(),
     aiAdminRouter: asFunction((cradle) => AIAdminRouter.create(cradle)).singleton(),
     assetPlatformRouter: asFunction((cradle) => AssetPlatformRouter.create(cradle)).singleton(),
+    assetOwnerChoices: asFunction(({prisma,authEvaluatorService})=>new AssetOwnerChoices(prisma,authEvaluatorService)).singleton(),
+    assetRuntimeCapabilities: asFunction(()=>{
+      const configured=Boolean(assetProviderRuntimeEnvironment.MANARATAK_ASSET_PROVIDER_BASE_URL&&assetProviderRuntimeEnvironment.MANARATAK_ASSET_PROVIDER_API_KEY&&assetProviderRuntimeEnvironment.MANARATAK_ASSET_PROVIDER_SIGNING_SECRET);
+      return {upload:configured,scanner:configured?'CONFIGURED_UNVERIFIED':'UNAVAILABLE',sanitizer:configured?'CONFIGURED_UNVERIFIED':'UNAVAILABLE',delivery:configured,verifiedAt:null};
+    }).singleton(),
     identityRouter: asFunction((cradle) => IdentityRouter.create(cradle)).singleton(),
+    staffLifecycleRepository: asFunction(({prisma,principalAccessValidator,authEvaluatorService})=>new PrismaStaffLifecycleRepository(prisma,async(id:string)=>(await principalAccessValidator.isAuthenticationAllowed(id))&&(await authEvaluatorService.evaluatePermission(id,'admin:identities:manage',{requestTime:new Date()})).isGranted)).singleton(),
+    staffLifecycleUseCases: asFunction(({staffLifecycleRepository,atomicDomainMutationCoordinator})=>new StaffLifecycleUseCases(staffLifecycleRepository,atomicDomainMutationCoordinator,readConfig<string>('JWT_PRIVATE_KEY_PEM'))).singleton(),
+    staffLifecycleRouter: asFunction(cradle=>StaffLifecycleRouter.create(cradle)).singleton(),
     staffWorkspaceRepository: asFunction(({prisma})=>new PrismaStaffWorkspaceRepository(prisma)).singleton(),
     staffWorkspaceUseCases: asFunction(({staffWorkspaceRepository,atomicDomainMutationCoordinator})=>new StaffWorkspaceUseCases(staffWorkspaceRepository,atomicDomainMutationCoordinator)).singleton(),
     staffAdminRouter: asFunction((cradle)=>StaffAdminRouter.create(cradle)).singleton(),

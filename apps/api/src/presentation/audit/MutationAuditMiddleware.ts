@@ -30,6 +30,7 @@ export class MutationAuditPolicy {
     '/admin/review-workspace',
     '/admin/identities',
     '/admin/staff',
+    '/admin/support',
     '/admin/authorization',
     '/admin/audit/workspace',
     '/admin/settings',

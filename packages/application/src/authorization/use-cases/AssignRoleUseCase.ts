@@ -4,6 +4,7 @@ import {
   IRoleRepository,
   ITransactionalRoleAssignmentRepository,
   RoleAssignment,
+  type IStaffLifecycleRepository,
 } from '@manaratak/domain';
 import { AssignRoleInput } from '../dtos/AuthorizationDtos';
 import {
@@ -17,6 +18,7 @@ export class AssignRoleUseCase {
     private readonly atomicMutations: AtomicDomainMutationCoordinator | undefined,
     private readonly identities: IIdentityRepository,
     private readonly roles: IRoleRepository,
+    private readonly staffLifecycle?: IStaffLifecycleRepository,
   ) {}
 
   public page(input: { limit: number; cursor?: string; roleId?: string; search?: string }) {
@@ -81,9 +83,12 @@ export class AssignRoleUseCase {
       (item) => item.roleId === input.roleId,
     );
     if (assigned) {
+      if (input.staffMembershipId) throw Error('STAFF_GRANT_ALREADY_EXISTS');
       if (context?.assertInTransaction) throw Error('ROLE_ASSIGNMENT_ALREADY_EXISTS');
       return { assignmentId: assigned.id, replayed: true };
     }
+    if (input.staffMembershipId && (!this.atomicMutations || !this.staffLifecycle))
+      throw Error('STAFF_GRANT_SOURCE_NOT_READY');
     const assignment = new RoleAssignment({
       id: input.id,
       identityId: input.identityId,
@@ -125,8 +130,15 @@ export class AssignRoleUseCase {
         const writer = repository.withTransaction!(transaction);
         if (!writer.saveIfUnassigned) throw new Error('ROLE_ASSIGNMENT_ATOMIC_REPLAY_REQUIRED');
         const result = await writer.saveIfUnassigned(assignment);
+        if (result.replayed && input.staffMembershipId) throw Error('STAFF_GRANT_ALREADY_EXISTS');
         if (result.replayed && context?.assertInTransaction)
           throw Error('ROLE_ASSIGNMENT_ALREADY_EXISTS');
+        if (input.staffMembershipId && !result.replayed)
+          await this.staffLifecycle!.recordGrant(
+            result.assignmentId,
+            input.staffMembershipId,
+            transaction,
+          );
         return result;
       },
       (result) => !result.replayed,

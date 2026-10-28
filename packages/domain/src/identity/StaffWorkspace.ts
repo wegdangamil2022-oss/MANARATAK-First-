@@ -8,9 +8,9 @@ export type StaffReadiness = {
   capabilities: {
     drafts: boolean;
     organization: boolean;
-    invitations: false;
-    activation: false;
-    offboarding: false;
+    invitations: boolean;
+    activation: boolean;
+    offboarding: boolean;
   };
 };
 export type StaffDepartment = {

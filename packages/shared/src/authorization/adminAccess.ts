@@ -25,7 +25,7 @@ export const ADMIN_SECTIONS = [
   ['/audit', 'admin:audit:manage'],
   ['/assets', 'admin:assets:manage'],
   ['/students', 'admin:students:support'],
-  ['/student-document-reviews','admin:students:documents:review'],
+  ['/student-document-reviews', 'admin:students:documents:review'],
   ['/settings/reference-data', 'admin:reference-data:manage'],
   ['/settings', 'admin:settings:manage'],
 ] as const;
@@ -43,16 +43,46 @@ export function grantsAdminPermission(
   );
 }
 
-export function grantsAdminSection(permissions: readonly string[], section: string, required: string): boolean {
+export function grantsAdminSection(
+  permissions: readonly string[],
+  section: string,
+  required: string,
+): boolean {
+  if (section === '/audit')
+    return AUDIT_WORKSPACE_PERMISSIONS.some((permission) =>
+      grantsAdminPermission(permissions, permission),
+    );
+  if (section === '/students')
+    return SUPPORT_WORKSPACE_PERMISSIONS.some((permission) =>
+      grantsAdminPermission(permissions, permission),
+    );
   return section === '/services'
-    ? ['admin:services:manage','admin:services:requests:view','admin:services:operations:manage'].some(permission => grantsAdminPermission(permissions, permission))
+    ? [
+        'admin:services:manage',
+        'admin:services:requests:view',
+        'admin:services:operations:manage',
+      ].some((permission) => grantsAdminPermission(permissions, permission))
     : grantsAdminPermission(permissions, required);
 }
 
+export const AUDIT_WORKSPACE_PERMISSIONS = [
+  'admin:audit:manage',
+  'admin:audit:cases:view',
+  'admin:audit:alerts:manage',
+  'admin:audit:retention:manage',
+] as const;
+export const SUPPORT_WORKSPACE_PERMISSIONS = [
+  'admin:students:support',
+  'admin:students:support:cases:view',
+  'admin:students:support:settings',
+  'admin:students:support:metrics',
+] as const;
+
 export function firstAllowedAdminPath(permissions: readonly string[] = []): string | null {
   return (
-    ADMIN_SECTIONS.find(([section, permission]) => grantsAdminSection(permissions, section, permission))?.[0] ??
-    null
+    ADMIN_SECTIONS.find(([section, permission]) =>
+      grantsAdminSection(permissions, section, permission),
+    )?.[0] ?? null
   );
 }
 

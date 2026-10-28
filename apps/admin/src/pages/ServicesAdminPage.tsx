@@ -1,3 +1,4 @@
+import { emptyForm } from '../features/services-finance/ServiceCatalogModel';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { reviewOwnerSearch } from '../features/review-queue/ReviewOwnerNavigation';
@@ -37,41 +38,6 @@ interface ServiceListResponse {
 const serviceCategories = Object.values(ServiceCategory);
 const deliveryModes = Object.values(ServiceDeliveryMode);
 const availabilityStatuses = Object.values(ServiceAvailabilityStatus);
-
-const emptyForm = {
-  managedApplication: false,
-  fulfillmentPolicy: 'QUOTE_REQUIRED',
-  providerReferenceId: '',
-  inputFieldKeys: '',
-  displayNameEn: '',
-  descriptionEn: '',
-  slaMinutes: '1440',
-  displayName: '',
-  serviceCategory: ServiceCategory.STUDENT_SERVICES,
-  fulfillmentType: ServiceFulfillmentType.CONSULTATION,
-  serviceDescription: '',
-  serviceAvailabilityStatus: ServiceAvailabilityStatus.AVAILABLE,
-  requiredInputsOrDocuments: '',
-  deliveryMode: ServiceDeliveryMode.ONLINE,
-  responsibleServiceOwnerType: 'MANARATAK_TEAM',
-  providerName: '',
-  estimatedDeliveryTime: '',
-  appointmentRequired: false,
-  supportedCountryReferenceIds: [] as string[],
-  supportedLanguageReferenceIds: [] as string[],
-  pricingReferenceId: '',
-  thumbnailAssetId: '',
-  includes: '',
-  excludes: '',
-  faqs: '',
-  cancellationPolicy: '',
-  badge: '',
-  priceLabel: '',
-  servicePrerequisites: '',
-  deliveryArtifactTypes: '',
-};
-
-export type ServiceCatalogDraft = typeof emptyForm;
 
 export function ServicesAdminPage() {
   const { t, language } = useTranslation();

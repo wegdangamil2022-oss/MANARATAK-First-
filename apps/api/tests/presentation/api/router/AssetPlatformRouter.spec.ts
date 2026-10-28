@@ -4,29 +4,84 @@ import { describe, expect, it, vi } from 'vitest';
 import { AssetPlatformRouter } from '../../../../src/presentation/api/router/AssetPlatformRouter';
 import { SecurityMiddlewareFactory } from '../../../../src/presentation/security/SecurityMiddlewareFactory';
 
-const sharedRepository = () => ({ findById: vi.fn(async () => ({ owner: { ownerType: 'COURSE' }, classification: 'INTERNAL' })) });
+const uploadDependencies = () => ({
+  assetOwnerChoices: {
+    assert: vi.fn(async () => {}),
+    types: vi.fn(async () => ['COURSE']),
+    search: vi.fn(async () => []),
+  } as never,
+  apiIdempotencyStore: {
+    begin: vi.fn(async () => ({
+      kind: 'STARTED',
+      scopeHash: 'upload-test',
+      leaseToken: 'test-lease',
+    })),
+    complete: vi.fn(async () => {}),
+  } as never,
+});
+const sharedRepository = () => ({
+  findById: vi.fn(async () => ({ owner: { ownerType: 'COURSE' }, classification: 'INTERNAL' })),
+});
 
 describe('AssetPlatformRouter', () => {
   it('projects recovery state without provider coordinates or proof payloads', async () => {
-    const operation = { operationId: 'safe-operation', phase: 'RECOVERY_REQUIRED', preparedAt: '2026-10-09', updatedAt: '2026-10-09',
-      sourceLocator: 'clean://private/recovery-path.pdf', expectedSha256: 'private-proof-hash', expectedByteSize: 64 };
-    const asset = { id: { value: 'pending' }, reference: { value: 'ref-pending' }, owner: { ownerId: 'owner', ownerType: 'COURSE' },
-      state: 'DELETED', classification: 'INTERNAL', retention: { category: 'SOFT_DELETED' },
-      metadata: { originalFilename: 'test.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 64 }, restoreOperation: operation, archiveOperation: { ...operation, phase: 'RECOVERY_REQUIRED' } };
+    const operation = {
+      operationId: 'safe-operation',
+      phase: 'RECOVERY_REQUIRED',
+      preparedAt: '2026-10-09',
+      updatedAt: '2026-10-09',
+      sourceLocator: 'clean://private/recovery-path.pdf',
+      expectedSha256: 'private-proof-hash',
+      expectedByteSize: 64,
+    };
+    const asset = {
+      id: { value: 'pending' },
+      reference: { value: 'ref-pending' },
+      owner: { ownerId: 'owner', ownerType: 'COURSE' },
+      state: 'DELETED',
+      classification: 'INTERNAL',
+      retention: { category: 'SOFT_DELETED' },
+      metadata: {
+        originalFilename: 'test.pdf',
+        mimeType: 'application/pdf',
+        fileExtension: 'pdf',
+        byteSize: 64,
+      },
+      restoreOperation: operation,
+      archiveOperation: { ...operation, phase: 'RECOVERY_REQUIRED' },
+    };
     const app = express();
-    app.use('/assets', AssetPlatformRouter.create({ ingestAssetUseCase: {} as any, processAssetLifecycleUseCase: {} as any,
-      assetRecordRepository: { ...sharedRepository(), findAdminDetails: vi.fn(async () => ({ asset, governance: {updatedAt:new Date('2026-10-09T00:00:00Z')} })) } as any }));
+    app.use(
+      '/assets',
+      AssetPlatformRouter.create({
+        ...uploadDependencies(),
+        ingestAssetUseCase: {} as any,
+        processAssetLifecycleUseCase: {} as any,
+        assetRecordRepository: {
+          ...sharedRepository(),
+          findAdminDetails: vi.fn(async () => ({
+            asset,
+            governance: { updatedAt: new Date('2026-10-09T00:00:00Z') },
+          })),
+        } as any,
+      }),
+    );
     const response = await request(app).get('/assets/pending');
-    expect(response.status).toBe(200); expect(response.body.securityEvidence.restorePhase).toBe('RECOVERY_REQUIRED');
+    expect(response.status).toBe(200);
+    expect(response.body.securityEvidence.restorePhase).toBe('RECOVERY_REQUIRED');
     expect(response.body.securityEvidence.archivePhase).toBe('RECOVERY_REQUIRED');
-    expect(response.body.restoreOperation).toEqual({ operationId: operation.operationId, phase: operation.phase,
-      preparedAt: operation.preparedAt, updatedAt: operation.updatedAt });
+    expect(response.body.restoreOperation).toEqual({
+      operationId: operation.operationId,
+      phase: operation.phase,
+      preparedAt: operation.preparedAt,
+      updatedAt: operation.updatedAt,
+    });
     expect(JSON.stringify(response.body)).not.toContain(operation.sourceLocator);
     expect(JSON.stringify(response.body)).not.toContain(operation.expectedSha256);
   });
   const createMockIngestUseCase = () => ({
     requestUploadLocator: vi.fn(),
-    registerQuarantinedAsset: vi.fn()
+    registerQuarantinedAsset: vi.fn(),
   });
 
   const createMockProcessLifecycleUseCase = () => ({
@@ -38,29 +93,53 @@ describe('AssetPlatformRouter', () => {
     archiveAsset: vi.fn(),
     softDeleteAsset: vi.fn(),
     restoreAsset: vi.fn(),
-    purgeAsset: vi.fn()
+    purgeAsset: vi.fn(),
   });
 
   const createApp = (
     ingestUseCase = createMockIngestUseCase(),
-    processLifecycleUseCase = createMockProcessLifecycleUseCase()
+    processLifecycleUseCase = createMockProcessLifecycleUseCase(),
   ) => {
     const app = express();
     app.use(express.json());
-    app.use('/assets', AssetPlatformRouter.create({
-      ingestAssetUseCase: ingestUseCase as any,
-      assetRecordRepository: sharedRepository() as never,
-      processAssetLifecycleUseCase: processLifecycleUseCase as any
-    }));
+    app.use((req, _res, next) => {
+      req.authUserId = 'asset-operator';
+      next();
+    });
+    app.use(
+      '/assets',
+      AssetPlatformRouter.create({
+        ...uploadDependencies(),
+        ingestAssetUseCase: ingestUseCase as any,
+        assetRecordRepository: sharedRepository() as never,
+        processAssetLifecycleUseCase: processLifecycleUseCase as any,
+      }),
+    );
     return app;
   };
 
   it('returns an audited migration response for blocked certificate capabilities', async () => {
-    const lifecycle=createMockProcessLifecycleUseCase(),save=vi.fn(async()=>{});
-    lifecycle.requestDeliveryGrant.mockRejectedValue(new Error('CERTIFICATE_AUTHENTICATED_DELIVERY_REQUIRED'));
-    const app=express();app.use(express.json());app.use('/assets',AssetPlatformRouter.create({ingestAssetUseCase:createMockIngestUseCase() as never,processAssetLifecycleUseCase:lifecycle as never,assetRecordRepository:sharedRepository() as never,auditRecordRepo:{save} as never}));
-    const response=await request(app).post('/assets/private-certificate/delivery-grant').send({});
-    expect(response.status).toBe(410);expect(response.body).toEqual({error:'CERTIFICATE_AUTHENTICATED_DELIVERY_REQUIRED'});expect(save).toHaveBeenCalledTimes(1);
+    const lifecycle = createMockProcessLifecycleUseCase(),
+      save = vi.fn(async () => {});
+    lifecycle.requestDeliveryGrant.mockRejectedValue(
+      new Error('CERTIFICATE_AUTHENTICATED_DELIVERY_REQUIRED'),
+    );
+    const app = express();
+    app.use(express.json());
+    app.use(
+      '/assets',
+      AssetPlatformRouter.create({
+        ...uploadDependencies(),
+        ingestAssetUseCase: createMockIngestUseCase() as never,
+        processAssetLifecycleUseCase: lifecycle as never,
+        assetRecordRepository: sharedRepository() as never,
+        auditRecordRepo: { save } as never,
+      }),
+    );
+    const response = await request(app).post('/assets/private-certificate/delivery-grant').send({});
+    expect(response.status).toBe(410);
+    expect(response.body).toEqual({ error: 'CERTIFICATE_AUTHENTICATED_DELIVERY_REQUIRED' });
+    expect(save).toHaveBeenCalledTimes(1);
   });
 
   it('POST /assets/upload-locator requests upload locator', async () => {
@@ -72,12 +151,13 @@ describe('AssetPlatformRouter', () => {
       storageZone: 'QUARANTINE',
       bucketName: 'quarantine-bucket',
       pathKey: 'quarantine/ast_01.pdf',
-      lifecycleState: 'QUARANTINED'
+      lifecycleState: 'QUARANTINED',
     });
     const app = createApp(ingestUseCase);
 
     const res = await request(app)
       .post('/assets/upload-locator')
+      .set('Idempotency-Key', 'upload-test-key')
       .send({
         assetId: 'ast_01',
         assetReference: 'ref_01',
@@ -87,7 +167,7 @@ describe('AssetPlatformRouter', () => {
         mimeType: 'application/pdf',
         fileExtension: 'pdf',
         byteSize: 1024,
-        classification: 'INTERNAL'
+        classification: 'INTERNAL',
       });
 
     expect(res.status).toBe(201);
@@ -96,12 +176,14 @@ describe('AssetPlatformRouter', () => {
     expect(res.body).not.toHaveProperty('bucketName');
     expect(res.body).not.toHaveProperty('pathKey');
     expect(res.body).not.toHaveProperty('storageZone');
-    expect(ingestUseCase.requestUploadLocator).toHaveBeenCalledWith(expect.objectContaining({
-      assetId: 'ast_01',
-      assetReference: 'ref_01',
-      ownerId: 'owner_01',
-      classification: 'INTERNAL'
-    }));
+    expect(ingestUseCase.requestUploadLocator).toHaveBeenCalledWith(
+      expect.objectContaining({
+        assetId: 'ast_01',
+        assetReference: 'ref_01',
+        ownerId: 'owner_01',
+        classification: 'INTERNAL',
+      }),
+    );
   });
 
   it('POST /assets/upload-locator rejects raw URL for assetId or assetReference', async () => {
@@ -110,6 +192,7 @@ describe('AssetPlatformRouter', () => {
 
     const res = await request(app)
       .post('/assets/upload-locator')
+      .set('Idempotency-Key', 'upload-test-key')
       .send({
         assetId: 'https://cdn.example.com/file.pdf',
         assetReference: 'ref_01',
@@ -119,7 +202,7 @@ describe('AssetPlatformRouter', () => {
         mimeType: 'application/pdf',
         fileExtension: 'pdf',
         byteSize: 1024,
-        classification: 'INTERNAL'
+        classification: 'INTERNAL',
       });
 
     expect(res.status).toBe(400);
@@ -131,12 +214,13 @@ describe('AssetPlatformRouter', () => {
     ingestUseCase.registerQuarantinedAsset.mockResolvedValue({
       id: 'ast_02',
       reference: 'ref_02',
-      state: 'QUARANTINED'
+      state: 'QUARANTINED',
     });
     const app = createApp(ingestUseCase);
 
     const res = await request(app)
       .post('/assets/register-quarantined')
+      .set('Idempotency-Key', 'upload-test-key')
       .send({
         assetId: 'ast_02',
         assetReference: 'ref_02',
@@ -146,14 +230,16 @@ describe('AssetPlatformRouter', () => {
         mimeType: 'image/png',
         fileExtension: 'png',
         byteSize: 2048,
-        classification: 'PUBLIC'
+        classification: 'PUBLIC',
       });
 
     expect(res.status).toBe(201);
-    expect(ingestUseCase.registerQuarantinedAsset).toHaveBeenCalledWith(expect.objectContaining({
-      assetId: 'ast_02',
-      assetReference: 'ref_02'
-    }));
+    expect(ingestUseCase.registerQuarantinedAsset).toHaveBeenCalledWith(
+      expect.objectContaining({
+        assetId: 'ast_02',
+        assetReference: 'ref_02',
+      }),
+    );
   });
 
   it('POST /assets/register-quarantined rejects raw URL AssetReference', async () => {
@@ -162,6 +248,7 @@ describe('AssetPlatformRouter', () => {
 
     const res = await request(app)
       .post('/assets/register-quarantined')
+      .set('Idempotency-Key', 'upload-test-key')
       .send({
         assetId: 'ast_02',
         assetReference: 'http://example.com/photo.png',
@@ -171,7 +258,7 @@ describe('AssetPlatformRouter', () => {
         mimeType: 'image/png',
         fileExtension: 'png',
         byteSize: 2048,
-        classification: 'PUBLIC'
+        classification: 'PUBLIC',
       });
 
     expect(res.status).toBe(400);
@@ -201,7 +288,10 @@ describe('AssetPlatformRouter', () => {
 
   it('POST /assets/:assetId/malware-failed marks malware scan failed', async () => {
     const processUseCase = createMockProcessLifecycleUseCase();
-    processUseCase.markMalwareScanFailed.mockResolvedValue({ id: 'ast_01', state: 'MALWARE_DETECTED' });
+    processUseCase.markMalwareScanFailed.mockResolvedValue({
+      id: 'ast_01',
+      state: 'MALWARE_DETECTED',
+    });
     const app = createApp(undefined, processUseCase);
 
     const res = await request(app)
@@ -211,7 +301,7 @@ describe('AssetPlatformRouter', () => {
     expect(res.status).toBe(200);
     expect(processUseCase.markMalwareScanFailed).toHaveBeenCalledWith({
       assetId: 'ast_01',
-      reason: 'EICAR test string detected'
+      reason: 'EICAR test string detected',
     });
   });
 
@@ -220,9 +310,7 @@ describe('AssetPlatformRouter', () => {
     processUseCase.sanitizeAsset.mockResolvedValue({ id: 'ast_01', state: 'SANITIZED' });
     const app = createApp(undefined, processUseCase);
 
-    const res = await request(app)
-      .post('/assets/ast_01/sanitize')
-      .send({});
+    const res = await request(app).post('/assets/ast_01/sanitize').send({});
 
     expect(res.status).toBe(200);
     expect(processUseCase.sanitizeAsset).toHaveBeenCalledWith({ assetId: 'ast_01' });
@@ -233,9 +321,7 @@ describe('AssetPlatformRouter', () => {
     processUseCase.activateAsset.mockResolvedValue({ id: 'ast_01', state: 'ACTIVE' });
     const app = createApp(undefined, processUseCase);
 
-    const res = await request(app)
-      .post('/assets/ast_01/activate')
-      .send({});
+    const res = await request(app).post('/assets/ast_01/activate').send({});
 
     expect(res.status).toBe(200);
     expect(processUseCase.activateAsset).toHaveBeenCalledWith({ assetId: 'ast_01' });
@@ -244,8 +330,12 @@ describe('AssetPlatformRouter', () => {
   it('rejects client-controlled sanitizer metadata and clean storage locators', async () => {
     const processUseCase = createMockProcessLifecycleUseCase();
     const app = createApp(undefined, processUseCase);
-    const sanitize = await request(app).post('/assets/ast_01/sanitize').send({ exifStripped: true });
-    const activate = await request(app).post('/assets/ast_01/activate').send({ cleanBucketName: 'attacker-bucket' });
+    const sanitize = await request(app)
+      .post('/assets/ast_01/sanitize')
+      .send({ exifStripped: true });
+    const activate = await request(app)
+      .post('/assets/ast_01/activate')
+      .send({ cleanBucketName: 'attacker-bucket' });
     expect(sanitize.status).toBe(400);
     expect(activate.status).toBe(400);
     expect(processUseCase.sanitizeAsset).not.toHaveBeenCalled();
@@ -261,9 +351,14 @@ describe('AssetPlatformRouter', () => {
       expiresAt: '2099-01-01T00:00:00.000Z',
     });
     const app = createApp(undefined, processUseCase);
-    const res = await request(app).post('/assets/ast_01/delivery-grant').send({ expiresInSeconds: 300 });
+    const res = await request(app)
+      .post('/assets/ast_01/delivery-grant')
+      .send({ expiresInSeconds: 300 });
     expect(res.status).toBe(200);
-    expect(processUseCase.requestDeliveryGrant).toHaveBeenCalledWith({ assetId: 'ast_01', expiresInSeconds: 300 });
+    expect(processUseCase.requestDeliveryGrant).toHaveBeenCalledWith({
+      assetId: 'ast_01',
+      expiresInSeconds: 300,
+    });
   });
 
   it('POST /assets/:assetId/archive archives asset', async () => {
@@ -313,7 +408,9 @@ describe('AssetPlatformRouter', () => {
 
   it('returns safe 409 Problem Details for an in-use lifecycle conflict', async () => {
     const processUseCase = createMockProcessLifecycleUseCase();
-    processUseCase.purgeAsset.mockRejectedValue(new Error('Cannot purge asset ast_01 because it is currently in use'));
+    processUseCase.purgeAsset.mockRejectedValue(
+      new Error('Cannot purge asset ast_01 because it is currently in use'),
+    );
     const app = createApp(undefined, processUseCase);
 
     const res = await request(app).delete('/assets/ast_01/purge');
@@ -346,39 +443,66 @@ describe('AssetPlatformRouter', () => {
       ['delete', '/admin/assets/ast_01/purge'],
     ] as const;
 
-    it.each(mutations)('%s %s rejects unauthenticated requests before reaching the router', async (method, path) => {
-      const app = express();
-      app.use(express.json());
-      app.use('/admin/assets', SecurityMiddlewareFactory.createAdminGuard({ mode: 'strict' }));
-      app.use('/admin/assets', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:assets:manage'));
-      app.use('/admin/assets', AssetPlatformRouter.create({
-        ingestAssetUseCase: createMockIngestUseCase() as any,
-        processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any
-      }));
+    it.each(mutations)(
+      '%s %s rejects unauthenticated requests before reaching the router',
+      async (method, path) => {
+        const app = express();
+        app.use(express.json());
+        app.use('/admin/assets', SecurityMiddlewareFactory.createAdminGuard({ mode: 'strict' }));
+        app.use(
+          '/admin/assets',
+          SecurityMiddlewareFactory.createAdminPermissionGuard('admin:assets:manage'),
+        );
+        app.use(
+          '/admin/assets',
+          AssetPlatformRouter.create({
+            ...uploadDependencies(),
+            ingestAssetUseCase: createMockIngestUseCase() as any,
+            processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
+          }),
+        );
 
-      const res = await (request(app) as any)[method](path).send({});
-      expect(res.status).toBe(401);
-      expect(res.body.error.code).toBe('ADMIN_AUTH_REQUIRED');
-    });
+        const res = await (request(app) as any)[method](path).send({});
+        expect(res.status).toBe(401);
+        expect(res.body.error.code).toBe('ADMIN_AUTH_REQUIRED');
+      },
+    );
 
     it.each(mutations)('%s %s requires admin:assets:manage', async (method, path) => {
       const app = express();
       app.use(express.json());
-      app.use('/admin/assets', SecurityMiddlewareFactory.createAdminGuard({
-        mode: 'strict',
-        tokenProvider: { verifyAccessToken: vi.fn().mockResolvedValue({ userId: 'owner-01', sessionId: 'session-01' }) } as any,
-        sessionManager: activeSessionManager,
-        principalAccessValidator: activePrincipalAccessValidator,
-      }));
-      app.use('/admin/assets', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:assets:manage', {
-        evaluatePermission: vi.fn().mockResolvedValue({ isGranted: false }),
-      } as any));
-      app.use('/admin/assets', AssetPlatformRouter.create({
-        ingestAssetUseCase: createMockIngestUseCase() as any,
-        processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
-      }));
+      app.use(
+        '/admin/assets',
+        SecurityMiddlewareFactory.createAdminGuard({
+          mode: 'strict',
+          tokenProvider: {
+            verifyAccessToken: vi
+              .fn()
+              .mockResolvedValue({ userId: 'owner-01', sessionId: 'session-01' }),
+          } as any,
+          sessionManager: activeSessionManager,
+          principalAccessValidator: activePrincipalAccessValidator,
+        }),
+      );
+      app.use(
+        '/admin/assets',
+        SecurityMiddlewareFactory.createAdminPermissionGuard('admin:assets:manage', {
+          evaluatePermission: vi.fn().mockResolvedValue({ isGranted: false }),
+        } as any),
+      );
+      app.use(
+        '/admin/assets',
+        AssetPlatformRouter.create({
+          ...uploadDependencies(),
+          ingestAssetUseCase: createMockIngestUseCase() as any,
+          processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
+        }),
+      );
 
-      const res = await (request(app) as any)[method](path).set('Authorization', 'Bearer signed-token').send({});
+      const res = await (request(app) as any)
+        [method](path)
+        .set('Authorization', 'Bearer signed-token')
+        .send({});
       expect(res.status).toBe(403);
       expect(res.body.error.code).toBe('ADMIN_PERMISSION_DENIED');
     });
@@ -386,13 +510,23 @@ describe('AssetPlatformRouter', () => {
     it('rejects requests when unauthenticated with 401', async () => {
       const app = express();
       app.use(express.json());
-      app.use('/admin/assets', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:assets:manage'));
-      app.use('/admin/assets', AssetPlatformRouter.create({
-        ingestAssetUseCase: createMockIngestUseCase() as any,
-        processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any
-      }));
+      app.use(
+        '/admin/assets',
+        SecurityMiddlewareFactory.createAdminPermissionGuard('admin:assets:manage'),
+      );
+      app.use(
+        '/admin/assets',
+        AssetPlatformRouter.create({
+          ...uploadDependencies(),
+          ingestAssetUseCase: createMockIngestUseCase() as any,
+          processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
+        }),
+      );
 
-      const res = await request(app).post('/admin/assets/upload-locator').send({});
+      const res = await request(app)
+        .post('/admin/assets/upload-locator')
+        .set('Idempotency-Key', 'upload-test-key')
+        .send({});
       expect(res.status).toBe(401);
       expect(res.body.error.code).toBe('ADMIN_AUTH_REQUIRED');
     });
@@ -407,22 +541,35 @@ describe('AssetPlatformRouter', () => {
 
       const app = express();
       app.use(express.json());
-      app.use('/admin/assets', SecurityMiddlewareFactory.createAdminGuard({
-        mode: 'strict',
-        tokenProvider: {
-          verifyAccessToken: vi.fn().mockResolvedValue({ userId: 'owner-01', sessionId: 'session-01' }),
-        } as any,
-        sessionManager: activeSessionManager,
-        principalAccessValidator: activePrincipalAccessValidator,
-      }));
-      app.use('/admin/assets', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:assets:manage', mockEvaluator));
-      app.use('/admin/assets', AssetPlatformRouter.create({
-        ingestAssetUseCase: ingestUseCase as any,
-        processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any
-      }));
+      app.use(
+        '/admin/assets',
+        SecurityMiddlewareFactory.createAdminGuard({
+          mode: 'strict',
+          tokenProvider: {
+            verifyAccessToken: vi
+              .fn()
+              .mockResolvedValue({ userId: 'owner-01', sessionId: 'session-01' }),
+          } as any,
+          sessionManager: activeSessionManager,
+          principalAccessValidator: activePrincipalAccessValidator,
+        }),
+      );
+      app.use(
+        '/admin/assets',
+        SecurityMiddlewareFactory.createAdminPermissionGuard('admin:assets:manage', mockEvaluator),
+      );
+      app.use(
+        '/admin/assets',
+        AssetPlatformRouter.create({
+          ...uploadDependencies(),
+          ingestAssetUseCase: ingestUseCase as any,
+          processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
+        }),
+      );
 
       const res = await request(app)
         .post('/admin/assets/upload-locator')
+        .set('Idempotency-Key', 'upload-test-key')
         .set('Authorization', 'Bearer signed-access-token')
         .send({
           assetId: 'ast_01',
@@ -433,7 +580,7 @@ describe('AssetPlatformRouter', () => {
           mimeType: 'application/pdf',
           fileExtension: 'pdf',
           byteSize: 1024,
-          classification: 'INTERNAL'
+          classification: 'INTERNAL',
         });
 
       expect(res.status).toBe(201);
@@ -444,19 +591,36 @@ describe('AssetPlatformRouter', () => {
   it('GET /assets validates canonical facets before calling the read model', async () => {
     const queryAdmin = vi.fn(async () => ({ items: [], hasMore: false, nextCursor: null }));
     const app = express();
-    app.use('/assets', AssetPlatformRouter.create({
-      ingestAssetUseCase: createMockIngestUseCase() as any,
-      processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
-      assetRecordRepository: { queryAdmin, findById: vi.fn() },
-    }));
-    const result = await request(app).get('/assets').query({ retentionCategory: 'TEMPORARY', checksumPresence: 'MISSING', usageStatus: 'UNUSED', q: 'pdf' });
+    app.use(
+      '/assets',
+      AssetPlatformRouter.create({
+        ...uploadDependencies(),
+        ingestAssetUseCase: createMockIngestUseCase() as any,
+        processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
+        assetRecordRepository: { queryAdmin, findById: vi.fn() },
+      }),
+    );
+    const result = await request(app).get('/assets').query({
+      retentionCategory: 'TEMPORARY',
+      checksumPresence: 'MISSING',
+      usageStatus: 'UNUSED',
+      q: 'pdf',
+    });
     expect(result.status).toBe(200);
-    expect(queryAdmin).toHaveBeenCalledWith({ retentionCategory: 'TEMPORARY', checksumPresence: 'MISSING', usageStatus: 'UNUSED', q: 'pdf' });
+    expect(queryAdmin).toHaveBeenCalledWith({
+      retentionCategory: 'TEMPORARY',
+      checksumPresence: 'MISSING',
+      usageStatus: 'UNUSED',
+      q: 'pdf',
+    });
     queryAdmin.mockClear();
     for (const query of [
-      { checksumPresence: 'false' }, { checksumPresence: ['PRESENT', 'MISSING'] },
-      { retentionCategory: 'unknown' }, { checksumPresence: 'VERIFIED' },
-      { usageStatus: 'ALL' }, { usageStatus: ['IN_USE', 'UNUSED'] },
+      { checksumPresence: 'false' },
+      { checksumPresence: ['PRESENT', 'MISSING'] },
+      { retentionCategory: 'unknown' },
+      { checksumPresence: 'VERIFIED' },
+      { usageStatus: 'ALL' },
+      { usageStatus: ['IN_USE', 'UNUSED'] },
     ]) {
       expect((await request(app).get('/assets').query(query)).status).toBe(400);
     }
@@ -465,24 +629,60 @@ describe('AssetPlatformRouter', () => {
 
   it('GET detail projects governance, persisted versions and operation identity without storage coordinates', async () => {
     const findAdminDetails = vi.fn(async () => ({
-      asset: { id: { value: 'detail-a' }, reference: { value: 'detail-ref' },
-        owner: { ownerId: 'course-a', ownerType: 'COURSE' }, state: 'SANITIZING', classification: 'INTERNAL',
+      asset: {
+        id: { value: 'detail-a' },
+        reference: { value: 'detail-ref' },
+        owner: { ownerId: 'course-a', ownerType: 'COURSE' },
+        state: 'SANITIZING',
+        classification: 'INTERNAL',
         retention: { category: 'PERMANENT', expiresAt: null },
-        metadata: { originalFilename: 'a.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 64 },
-        versionChain: { allVersions: [{ versionNumber: 1, createdAt: new Date('2026-10-01'),
-          storageLocator: 'clean://secret-version/path', checksum: { algorithm: 'sha256', hash: 'a'.repeat(64) } }] },
-        uploadVerification: { signatureVerified: true, verifiedAt: '2026-10-02T00:00:00.000Z', locator: 'secret-upload' },
-        activationOperation: { operationId: 'operation-a', phase: 'PREPARED', preparedAt: '2026-10-09T00:00:00.000Z', sourceLocator: 'secret-source' },
+        metadata: {
+          originalFilename: 'a.pdf',
+          mimeType: 'application/pdf',
+          fileExtension: 'pdf',
+          byteSize: 64,
+        },
+        versionChain: {
+          allVersions: [
+            {
+              versionNumber: 1,
+              createdAt: new Date('2026-10-01'),
+              storageLocator: 'clean://secret-version/path',
+              checksum: { algorithm: 'sha256', hash: 'a'.repeat(64) },
+            },
+          ],
+        },
+        uploadVerification: {
+          signatureVerified: true,
+          verifiedAt: '2026-10-02T00:00:00.000Z',
+          locator: 'secret-upload',
+        },
+        activationOperation: {
+          operationId: 'operation-a',
+          phase: 'PREPARED',
+          preparedAt: '2026-10-09T00:00:00.000Z',
+          sourceLocator: 'secret-source',
+        },
       },
-      governance: { createdAt: new Date('2026-10-01'), updatedAt: new Date('2026-10-09'),
-        legalHoldUntil: new Date('2027-01-01'), archivedAt: null, deletedAt: null, purgedAt: null },
+      governance: {
+        createdAt: new Date('2026-10-01'),
+        updatedAt: new Date('2026-10-09'),
+        legalHoldUntil: new Date('2027-01-01'),
+        archivedAt: null,
+        deletedAt: null,
+        purgedAt: null,
+      },
     }));
     const app = express();
-    app.use('/assets', AssetPlatformRouter.create({
-      ingestAssetUseCase: createMockIngestUseCase() as any,
-      processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
-      assetRecordRepository: { queryAdmin: vi.fn(), ...sharedRepository(), findAdminDetails },
-    }));
+    app.use(
+      '/assets',
+      AssetPlatformRouter.create({
+        ...uploadDependencies(),
+        ingestAssetUseCase: createMockIngestUseCase() as any,
+        processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
+        assetRecordRepository: { queryAdmin: vi.fn(), ...sharedRepository(), findAdminDetails },
+      }),
+    );
     const res = await request(app).get('/assets/detail-a');
     expect(res.status).toBe(200);
     expect(res.body.versions[0].versionNumber).toBe(1);
@@ -495,15 +695,22 @@ describe('AssetPlatformRouter', () => {
   it('rejects unrecognized workspace facets before repository execution', async () => {
     const queryAdmin = vi.fn();
     const app = express();
-    app.use('/assets', AssetPlatformRouter.create({
-      ingestAssetUseCase: createMockIngestUseCase() as any,
-      processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
-      assetRecordRepository: { queryAdmin, findById: vi.fn() },
-    }));
-    for (const query of [{ fileFamily: 'EXECUTABLE' }, { malwareStatus: 'CLEAN' }, { processingQueue: 'ALL' }]) {
+    app.use(
+      '/assets',
+      AssetPlatformRouter.create({
+        ...uploadDependencies(),
+        ingestAssetUseCase: createMockIngestUseCase() as any,
+        processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
+        assetRecordRepository: { queryAdmin, findById: vi.fn() },
+      }),
+    );
+    for (const query of [
+      { fileFamily: 'EXECUTABLE' },
+      { malwareStatus: 'CLEAN' },
+      { processingQueue: 'ALL' },
+    ]) {
       expect((await request(app).get('/assets').query(query)).status).toBe(400);
     }
     expect(queryAdmin).not.toHaveBeenCalled();
   });
-
 });

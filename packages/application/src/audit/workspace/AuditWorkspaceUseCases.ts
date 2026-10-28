@@ -131,7 +131,10 @@ export class AuditWorkspaceUseCases {
       { id: 'audit-case:' + input.id, kind: 'CASE', version: 1, data },
       0,
       context,
-      async (tx) => this.gateway.assertReferences(data.references, tx),
+      async (tx) => {
+        await this.gateway.assertReferences(data.references, tx);
+        if (data.assigneeId) await this.gateway.assertAssignee(data.assigneeId, tx);
+      },
     );
   }
   async updateCase(

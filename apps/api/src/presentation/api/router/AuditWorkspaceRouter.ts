@@ -1,7 +1,12 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { z } from 'zod';
-import type { AuthorizationEvaluatorService } from '@manaratak/domain';
-import type { AuditWorkspaceUseCases } from '@manaratak/application';
+import type { AuthorizationEvaluatorService, IAuditRecordRepository } from '@manaratak/domain';
+import type {
+  AuditWorkspaceUseCases,
+  ManageAuditRecordsUseCase,
+  AuditAlertRule,
+} from '@manaratak/application';
+import { AuditHelper } from '../../audit/AuditHelper.js';
 import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrincipal.js';
 import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory.js';
 
@@ -14,9 +19,18 @@ export class AuditWorkspaceRouter {
   static create({
     auditWorkspaceUseCases,
     authEvaluatorService,
+    auditRecordRepo,
+    manageAuditRecordsUseCase,
+    auditWorkspaceChoices,
   }: {
     auditWorkspaceUseCases: AuditWorkspaceUseCases;
     authEvaluatorService?: AuthorizationEvaluatorService;
+    auditRecordRepo?: IAuditRecordRepository;
+    manageAuditRecordsUseCase?: ManageAuditRecordsUseCase;
+    auditWorkspaceChoices?: () => Promise<{
+      agents: Array<{ id: string; label: string }>;
+      templates: Array<{ id: string; label: string }>;
+    }>;
   }): Router {
     const router = Router();
     const requireAdminPermission = (permission: string) =>
@@ -30,6 +44,86 @@ export class AuditWorkspaceRouter {
       source: 'admin-audit-workspace',
       correlationId: req.header('x-correlation-id'),
     });
+    router.use((req, res, next) => {
+      if (req.method !== 'GET') return next();
+      void AuditHelper.recordMutation(
+        auditRecordRepo,
+        req,
+        {
+          action: 'AUDIT_WORKSPACE_READ',
+          category: 'AUDIT_ACCESS',
+          targetType: 'AUDIT_WORKSPACE',
+          targetId: req.path,
+          result: 'SUCCESS',
+          metadata: { operation: 'READ' },
+        },
+        { reliability: 'REQUIRED', principal: 'REQUIRED' },
+      )
+        .then(() => next())
+        .catch(next);
+    });
+    router.get(
+      '/choices',
+      requireAdminPermission('admin:audit:cases:manage'),
+      async (_req, res, next) => {
+        try {
+          if (!auditWorkspaceChoices) throw Error('AUDIT_CHOICES_NOT_CONFIGURED');
+          res.json(await auditWorkspaceChoices());
+        } catch (e) {
+          next(e);
+        }
+      },
+    );
+    router.get(
+      '/alert-choices',
+      requireAdminPermission('admin:audit:alerts:manage'),
+      async (_req, res, next) => {
+        try {
+          if (!auditWorkspaceChoices) throw Error('AUDIT_CHOICES_NOT_CONFIGURED');
+          res.json(await auditWorkspaceChoices());
+        } catch (e) {
+          next(e);
+        }
+      },
+    );
+    router.get(
+      '/alerts/:id/preview',
+      requireAdminPermission('admin:audit:alerts:manage'),
+      requireAdminPermission('admin:audit:manage'),
+      async (req, res, next) => {
+        try {
+          if (!manageAuditRecordsUseCase) throw Error('AUDIT_PREVIEW_NOT_CONFIGURED');
+          const row = await auditWorkspaceUseCases.get(id.parse(req.params.id), 'ALERT_RULE');
+          if (!row) return void res.status(404).json({ code: 'AUDIT_WORKSPACE_NOT_FOUND' });
+          const rule = row.data as AuditAlertRule,
+            until = new Date(),
+            from = new Date(until.getTime() - rule.windowMinutes * 60000);
+          const page = await manageAuditRecordsUseCase.queryAuditPage({
+            action: rule.action,
+            category: rule.category,
+            severity: rule.severity,
+            result: rule.outcome,
+            from,
+            until,
+            limit: 100,
+          });
+          res.json({
+            ruleVersion: row.version,
+            from: from.toISOString(),
+            until: until.toISOString(),
+            matchedCount: page.items.length,
+            hasMore: page.hasMore,
+            threshold: rule.threshold,
+            thresholdReached: page.items.length >= rule.threshold,
+            evaluated: 'BOUNDED_MATCHING_ONLY',
+            cooldownEvaluated: false,
+            notificationCreated: false,
+          });
+        } catch (e) {
+          next(e);
+        }
+      },
+    );
     router.get(
       '/cases',
       requireAdminPermission('admin:audit:cases:view'),

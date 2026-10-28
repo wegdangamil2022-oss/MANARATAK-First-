@@ -265,3 +265,7 @@ export * from './courses/use-cases/CourseBulkPublicationUseCases';
 export * from './courses/services/CourseAccessService';
 export * from './read-models/CourseCertificateBindingOwner';
 export * from './identity/StaffWorkspaceUseCases';
+export * from './student-support/SupportCaseUseCases';
+export * from './student-support/SupportNotificationGateway';
+
+export * from './identity/StaffLifecycleUseCases';

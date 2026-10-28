@@ -11,14 +11,20 @@ let activeWorkerHandle: PollingWorkerHandle | null = null;
 async function requireSuccessfulDelivery<T>(result: Promise<T>): Promise<T> {
   const value = await result;
   if (value && typeof value === 'object') {
-    if ('exhausted' in value && typeof value.exhausted === 'number' && value.exhausted > 0) throw new Error('OUTBOX_DELIVERY_EXHAUSTED');
-    if ('failed' in value && typeof value.failed === 'number' && value.failed > 0) throw new Error('OUTBOX_DELIVERY_FAILED');
-    if ('leaseLost' in value && typeof value.leaseLost === 'number' && value.leaseLost > 0) throw new Error('OUTBOX_LEASE_LOST');
+    if ('exhausted' in value && typeof value.exhausted === 'number' && value.exhausted > 0)
+      throw new Error('OUTBOX_DELIVERY_EXHAUSTED');
+    if ('failed' in value && typeof value.failed === 'number' && value.failed > 0)
+      throw new Error('OUTBOX_DELIVERY_FAILED');
+    if ('leaseLost' in value && typeof value.leaseLost === 'number' && value.leaseLost > 0)
+      throw new Error('OUTBOX_LEASE_LOST');
   }
   return value;
 }
 
-export async function startPollingWorkers(container: AwilixContainer, config: IConfigurationService): Promise<PollingWorkerHandle> {
+export async function startPollingWorkers(
+  container: AwilixContainer,
+  config: IConfigurationService,
+): Promise<PollingWorkerHandle> {
   if (activeWorkerHandle) {
     return activeWorkerHandle;
   }
@@ -27,7 +33,10 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
   const operationalMonitoring = container.resolve<any>('monitoringService');
   const operationalMetrics = operationalMonitoring.getMetrics();
 
-  const observeWorkerIteration = async <T>(worker: string, action: () => Promise<T>): Promise<T> => {
+  const observeWorkerIteration = async <T>(
+    worker: string,
+    action: () => Promise<T>,
+  ): Promise<T> => {
     const started = performance.now();
     const span = operationalMonitoring.startSpan?.('worker.iteration', { worker });
     operationalMetrics.incrementCounter('worker.iterations', 1, { worker });
@@ -42,7 +51,11 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
       span?.end('ERROR');
       throw error;
     } finally {
-      operationalMetrics.recordHistogram('worker.iteration.duration_ms', performance.now() - started, { worker });
+      operationalMetrics.recordHistogram(
+        'worker.iteration.duration_ms',
+        performance.now() - started,
+        { worker },
+      );
     }
   };
 
@@ -55,18 +68,21 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
   // Resolve and validate all routes before creating any timer or invoking a worker.
   const routes: Array<{ name: string; intervalMs: number; action: () => Promise<unknown> }> = [];
   const register = (name: string, intervalMs: number, action: () => Promise<unknown>): void => {
-    if (!Number.isSafeInteger(intervalMs) || intervalMs < 1) throw new Error(`POLLING_INTERVAL_INVALID:${name}`);
+    if (!Number.isSafeInteger(intervalMs) || intervalMs < 1)
+      throw new Error(`POLLING_INTERVAL_INVALID:${name}`);
     routes.push({ name, intervalMs, action });
   };
 
   if (config.getOptional<boolean>('CERTIFICATE_COMPLETION_WORKER_ENABLED') === true) {
-    const intervalMs = config.getOptional<number>('CERTIFICATE_COMPLETION_WORKER_INTERVAL_MS') ?? 5_000;
+    const intervalMs =
+      config.getOptional<number>('CERTIFICATE_COMPLETION_WORKER_INTERVAL_MS') ?? 5_000;
     const worker = container.resolve<any>('certificateCompletionOutboxWorker');
     const workerId = `certificate-completion-${runtimeId}`;
     register('certificate-completion', intervalMs, () => worker.runOnce(workerId));
   }
   if (config.getOptional<boolean>('STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED') === true) {
-    const intervalMs = config.getOptional<number>('STUDENT_WORKSPACE_OUTBOX_WORKER_INTERVAL_MS') ?? 2_000;
+    const intervalMs =
+      config.getOptional<number>('STUDENT_WORKSPACE_OUTBOX_WORKER_INTERVAL_MS') ?? 2_000;
     const worker = container.resolve<any>('studentWorkspaceOutboxWorker');
     const workerId = `student-workspace-${runtimeId}`;
     register('student-workspace-outbox', intervalMs, async () => {
@@ -88,7 +104,8 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
     });
   }
   if (config.getOptional<boolean>('OWNER_DOMAIN_OUTBOX_WORKER_ENABLED') === true) {
-    const intervalMs = config.getOptional<number>('OWNER_DOMAIN_OUTBOX_WORKER_INTERVAL_MS') ?? 2_000;
+    const intervalMs =
+      config.getOptional<number>('OWNER_DOMAIN_OUTBOX_WORKER_INTERVAL_MS') ?? 2_000;
     const worker = container.resolve<any>('ownerDomainOutboxWorker');
     const workerId = `owner-domain-${runtimeId}`;
     register('owner-domain-outbox', intervalMs, async () => {
@@ -97,6 +114,9 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
       await requireSuccessfulDelivery(worker.runCareerOnce(`${workerId}-career`));
       if (stopping) return;
       await requireSuccessfulDelivery(worker.runServicesOnce(`${workerId}-services`));
+      if (stopping) return;
+      if (config.getOptional<boolean>('STUDENT_SUPPORT_OUTBOX_WORKER_ENABLED') === true)
+        await requireSuccessfulDelivery(worker.runSupportOnce(`${workerId}-support`));
     });
   }
   if (config.getOptional<boolean>('BACKGROUND_WORKER_ENABLED') === true) {
@@ -104,9 +124,12 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
     const intervalMs = config.getOptional<number>('BACKGROUND_WORKER_INTERVAL_MS') ?? 2_000;
     const batchSize = config.getOptional<number>('BACKGROUND_WORKER_BATCH_SIZE') ?? 10;
     const leaseDurationMs = config.getOptional<number>('BACKGROUND_WORKER_LEASE_MS') ?? 60_000;
-    const heartbeatIntervalMs = config.getOptional<number>('BACKGROUND_WORKER_HEARTBEAT_MS') ?? 15_000;
+    const heartbeatIntervalMs =
+      config.getOptional<number>('BACKGROUND_WORKER_HEARTBEAT_MS') ?? 15_000;
     const workerId = `background-${runtimeId}`;
-    register('durable-background-jobs', intervalMs, () => backgroundWorker.runOnce({ workerId, batchSize, leaseDurationMs, heartbeatIntervalMs }));
+    register('durable-background-jobs', intervalMs, () =>
+      backgroundWorker.runOnce({ workerId, batchSize, leaseDurationMs, heartbeatIntervalMs }),
+    );
   }
   const handle: PollingWorkerHandle = {
     stop: () => {
@@ -142,13 +165,16 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
       });
       const current = task;
       inFlightTasks.add(current);
-      void current.then(() => {
-        inFlightTasks.delete(current);
-        task = null;
-      }, () => {
-        inFlightTasks.delete(current);
-        task = null;
-      });
+      void current.then(
+        () => {
+          inFlightTasks.delete(current);
+          task = null;
+        },
+        () => {
+          inFlightTasks.delete(current);
+          task = null;
+        },
+      );
     };
     tick();
     const timer = setInterval(tick, intervalMs);

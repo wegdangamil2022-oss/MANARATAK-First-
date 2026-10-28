@@ -422,3 +422,8 @@ export * from './universities/UniversityStageDefinitions';
 
 export * from './majors/MajorContentAuthoring';
 export * from './identity/StaffWorkspace';
+export * from './student-support/SupportCase';
+export * from './student-support/SupportCalendar';
+export * from './student-support/ISupportCaseRepository';
+
+export * from './identity/StaffLifecycle';

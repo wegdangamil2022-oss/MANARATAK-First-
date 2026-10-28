@@ -35,6 +35,7 @@ export * from './runtime/UnavailableCapability';
 export * from './students/PrismaStudentWorkspaceRepository';
 
 export * from './audit/AuditSecretSanitizer';
+export * from './student-support/PrismaSupportCaseRepository';
 export * from './audit/PrismaAuditRecordRepository';
 export * from './audit/InMemoryAuditRecordRepository';
 export * from './certificates/PrismaCertificateRepository';
@@ -274,3 +275,7 @@ export * from './review-workspace/PrismaReviewWorkspaceGateway';
 export * from './dashboard/PrismaDashboardMeasurementGateway';
 export * from './courses/PrismaCourseBulkPublicationRepository';
 export * from './identity/PrismaStaffWorkspaceRepository';
+
+export * from './identity/PrismaStaffLifecycleRepository';
+
+export * from './assets/AssetOwnerChoices';
