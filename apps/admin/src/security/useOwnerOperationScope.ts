@@ -8,10 +8,15 @@ export function useOwnerOperationScope(key: string) {
   const owner = current.current;
   useEffect(() => {
     mounted.current = true;
-    return () => { mounted.current = false; };
+    return () => {
+      mounted.current = false;
+    };
   }, []);
-  return useMemo(() => ({
-    epoch: owner.epoch,
-    isCurrent: () => mounted.current && current.current === owner,
-  }), [owner]);
+  return useMemo(
+    () => ({
+      epoch: owner.epoch,
+      isCurrent: () => mounted.current && current.current === owner,
+    }),
+    [owner],
+  );
 }

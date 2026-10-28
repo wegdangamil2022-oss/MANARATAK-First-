@@ -33,6 +33,8 @@ import {
 } from 'lucide-react';
 import { CanonicalCityPicker } from '../components/CanonicalCityPicker';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
+import { jsonEqual } from '../utils/jsonEqual';
 import { AssetPicker } from '../components/AssetPicker';
 import {
   studyDestinationFieldLabels,
@@ -293,7 +295,9 @@ export function StudyDestinationDetailPage() {
   const [editingCard, setEditingCard] = useState('');
   const [preview, setPreview] = useState<Aggregate | null>(null);
   const { hasPermission, permissions } = useAdminAuthorization();
-  const canEdit = hasPermission('admin:study-destinations:edit');
+  const scope = useOwnerOperationScope(`${iso2}:${[...permissions].sort().join('|')}`);
+  const [verificationPending, setVerificationPending] = useState(false);
+  const canEdit = !verificationPending && hasPermission('admin:study-destinations:edit');
   const [reason, setReason] = useState('');
   const [authorities, setAuthorities] = useState<AuthorityDecision[]>([]);
   const { language } = useTranslation();
@@ -375,7 +379,7 @@ export function StudyDestinationDetailPage() {
   }, []);
 
   const load = useCallback(async () => {
-    if (!iso2) return;
+    if (!iso2 || !scope.isCurrent()) return;
     const request = ++sequence.current;
     setLoading(true);
     setError(null);
@@ -383,9 +387,12 @@ export function StudyDestinationDetailPage() {
       const detail = await adminApiClient.request<Aggregate>(
         `/admin/study-destinations/${encodeURIComponent(iso2)}`,
       );
-      if (request !== sequence.current) return;
+      if (request !== sequence.current || !scope.isCurrent()) return;
+      if (detail.country.iso2Code !== iso2) throw Error('STUDY_DESTINATION_OWNER_READ_MISMATCH');
       setAggregate(detail);
       hydrateForm(detail.profile);
+      setVerificationPending(false);
+      setEditingCard('');
     } catch (cause) {
       if (request === sequence.current) {
         setAggregate(null);
@@ -394,14 +401,27 @@ export function StudyDestinationDetailPage() {
     } finally {
       if (request === sequence.current) setLoading(false);
     }
-  }, [hydrateForm, iso2]);
+  }, [hydrateForm, iso2, scope]);
 
   useEffect(() => {
     setEdgeParams({});
     setEdgeHistory({});
     setReason('');
     setAuthorities([]);
+    mutation.current = false;
+    setSaving(false);
+    setAction(null);
+    setNotice(null);
+    setPreview(null);
+    setAggregate(null);
+    setGraph(null);
+    setEditingCard('');
+    hydrateForm(null);
+    setVerificationPending(false);
     void load();
+    return () => {
+      sequence.current++;
+    };
   }, [load, permissions.join('|')]);
   useEffect(() => {
     if (tab !== 'supporting') return;
@@ -496,15 +516,26 @@ export function StudyDestinationDetailPage() {
     isFeatured: form.isFeatured,
   });
 
-  const readSaved = async () => {
+  const readSaved = async (verify: (next: Aggregate) => void) => {
     const next = await adminApiClient.request<Aggregate>(
       `/admin/study-destinations/${encodeURIComponent(iso2)}`,
+      { cache: 'no-store' },
     );
+    if (!scope.isCurrent()) return false;
+    if (
+      next.country.iso2Code !== iso2 ||
+      !next.profile ||
+      !Number.isSafeInteger(next.profile.revision) ||
+      next.profile.revision <= (aggregate?.profile?.revision ?? 0)
+    )
+      throw Error('STUDY_DESTINATION_SAVE_READBACK_MISMATCH');
+    verify(next);
     setAggregate(next);
     hydrateForm(next.profile);
+    return true;
   };
   const save = async () => {
-    if (mutation.current || !canEdit) return;
+    if (mutation.current || !canEdit || !scope.isCurrent()) return;
     if (!reason.trim()) {
       setError(isAr ? 'اكتب سبب التعديل أو الإجراء.' : 'Enter a reason for the change.');
       return;
@@ -545,7 +576,30 @@ export function StudyDestinationDetailPage() {
         },
       );
       saved = true;
-      await readSaved();
+      if (!scope.isCurrent()) return;
+      if (
+        !(await readSaved((next) => {
+          for (const [key, value] of Object.entries(payload)) {
+            if (key === 'expectedUpdatedAt') continue;
+            let actual = (next.profile as unknown as Record<string, unknown>)[key];
+            if (key === 'evidenceSources')
+              actual = next.profile!.evidenceSources.map(({ label, url, sourceType }) => ({
+                label,
+                url,
+                sourceType,
+              }));
+            if (['studyLanguageReferenceIds', 'cityReferenceIds'].includes(key)) {
+              if (
+                JSON.stringify([...((actual as string[]) ?? [])].sort()) !==
+                JSON.stringify([...(value as string[])].sort())
+              )
+                throw Error('STUDY_DESTINATION_SAVE_READBACK_MISMATCH');
+            } else if (!jsonEqual(actual ?? null, value ?? null))
+              throw Error('STUDY_DESTINATION_SAVE_READBACK_MISMATCH');
+          }
+        }))
+      )
+        return;
       setEditingCard('');
       setNotice(
         isAr
@@ -553,6 +607,8 @@ export function StudyDestinationDetailPage() {
           : 'Saved and reloaded from the server. Source-sensitive changes require verification before publication.',
       );
     } catch (cause) {
+      if (!scope.isCurrent()) return;
+      if (saved) setVerificationPending(true);
       setError(
         (saved ? 'تم قبول الحفظ لكن تعذرت إعادة القراءة. أعد التحميل: ' : '') +
           (cause instanceof Error
@@ -562,13 +618,15 @@ export function StudyDestinationDetailPage() {
             : 'SAVE_FAILED'),
       );
     } finally {
-      mutation.current = false;
-      setSaving(false);
+      if (scope.isCurrent()) {
+        mutation.current = false;
+        setSaving(false);
+      }
     }
   };
 
   const execute = async (name: 'submit-review' | 'verify-source' | 'publish' | 'archive') => {
-    if (mutation.current) return;
+    if (mutation.current || verificationPending || !scope.isCurrent()) return;
     const capability =
       name === 'verify-source'
         ? 'verify'
@@ -627,20 +685,38 @@ export function StudyDestinationDetailPage() {
         },
       );
       applied = true;
-      await readSaved();
+      if (!scope.isCurrent()) return;
+      if (
+        !(await readSaved((next) => {
+          const expected: Record<string, string> = {
+            'submit-review': 'IN_REVIEW',
+            publish: 'PUBLISHED',
+            archive: 'ARCHIVED',
+          };
+          if (expected[name] && next.profile?.status !== expected[name])
+            throw Error('STUDY_DESTINATION_COMMAND_READBACK_MISMATCH');
+          if (name === 'verify-source' && next.profile?.sourceVerificationStatus !== 'VERIFIED')
+            throw Error('STUDY_DESTINATION_COMMAND_READBACK_MISMATCH');
+        }))
+      )
+        return;
       setNotice(
         isAr
           ? 'تم تنفيذ الإجراء وإعادة تحميل الحالة من الخادم.'
           : 'Action completed and state reloaded.',
       );
     } catch (cause) {
+      if (!scope.isCurrent()) return;
+      if (applied) setVerificationPending(true);
       setError(
         (applied ? 'تم قبول الإجراء لكن تعذرت إعادة القراءة. أعد التحميل: ' : '') +
           (cause instanceof Error ? cause.message : 'ACTION_FAILED'),
       );
     } finally {
-      mutation.current = false;
-      setAction(null);
+      if (scope.isCurrent()) {
+        mutation.current = false;
+        setAction(null);
+      }
     }
   };
 
@@ -654,6 +730,9 @@ export function StudyDestinationDetailPage() {
     return (
       <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-red-800">
         {error || 'STUDY_DESTINATION_NOT_FOUND'}
+        <button type="button" onClick={() => void load()}>
+          {isAr ? 'إعادة المحاولة' : 'Retry'}
+        </button>
       </div>
     );
   const { country, profile, readiness } = aggregate;
@@ -685,7 +764,7 @@ export function StudyDestinationDetailPage() {
       value={{
         active: editingCard,
         canEdit,
-        busy: saving || Boolean(action),
+        busy: saving || Boolean(action) || verificationPending,
         isAr,
         locale: contentLocale,
         reason,
@@ -752,9 +831,13 @@ export function StudyDestinationDetailPage() {
                     const result = await adminApiClient.request<Aggregate>(
                       `/admin/study-destinations/${iso2}/preview`,
                     );
+                    if (!scope.isCurrent()) return;
+                    if (result.country.iso2Code !== iso2)
+                      throw Error('STUDY_DESTINATION_OWNER_READ_MISMATCH');
                     setPreview(result);
                   } catch (cause) {
-                    setError(cause instanceof Error ? cause.message : 'PREVIEW_UNAVAILABLE');
+                    if (scope.isCurrent())
+                      setError(cause instanceof Error ? cause.message : 'PREVIEW_UNAVAILABLE');
                   }
                 }}
               >
@@ -902,7 +985,10 @@ export function StudyDestinationDetailPage() {
               </section>
             ))}
           </nav>
-          <fieldset disabled={saving || Boolean(action)} className="destination-section">
+          <fieldset
+            disabled={saving || Boolean(action) || verificationPending}
+            className="destination-section"
+          >
             {tab === 'supporting' && (
               <DestinationCard
                 id="cities"
@@ -1009,7 +1095,16 @@ export function StudyDestinationDetailPage() {
                 profile={profile}
                 readiness={readiness}
                 blocking={blocking}
-                action={action || (saving ? 'saving' : dirty ? 'unsaved' : null)}
+                action={
+                  action ||
+                  (verificationPending
+                    ? 'unverified'
+                    : saving
+                      ? 'saving'
+                      : dirty
+                        ? 'unsaved'
+                        : null)
+                }
                 execute={execute}
                 isAr={isAr}
                 hasPermission={hasPermission}
@@ -1618,7 +1713,13 @@ function SourcesPanel({ form, setForm, profile, isAr }: PanelProps & { profile: 
               />
               <span> · {categories[row.category]?.[isAr ? 0 : 1] ?? row.category}</span>
               <p>{locale === 'ar' ? row.noteAr : row.noteEn}</p>
-              {locale === 'en' && !row.labelEn && <small>{isAr ? 'العنوان العربي معروض لعدم توفر ترجمة إنجليزية؛ لا يُعد ترجمة مكتملة.' : 'Arabic label shown because English is unavailable; this does not satisfy translation readiness.'}</small>}
+              {locale === 'en' && !row.labelEn && (
+                <small>
+                  {isAr
+                    ? 'العنوان العربي معروض لعدم توفر ترجمة إنجليزية؛ لا يُعد ترجمة مكتملة.'
+                    : 'Arabic label shown because English is unavailable; this does not satisfy translation readiness.'}
+                </small>
+              )}
             </li>
           ))}
         </ul>

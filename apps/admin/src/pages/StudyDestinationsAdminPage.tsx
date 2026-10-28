@@ -1,7 +1,8 @@
 import { destinationRepairTarget } from '../features/destinations/destinationNavigation';
 import '../features/destinations/destinations.css';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useDestinationListQuery } from '../features/destinations/useDestinationListQuery';
 import {
   AlertCircle,
   CheckCircle2,
@@ -99,7 +100,21 @@ function flagEmoji(code: string): string {
 }
 
 export function StudyDestinationsAdminPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const {
+    searchParams,
+    page,
+    setPage,
+    query,
+    setQuery,
+    region,
+    setRegion,
+    status,
+    setStatus,
+    completeness,
+    setCompleteness,
+    missingCheck,
+    setMissingCheck,
+  } = useDestinationListQuery();
   const { language } = useTranslation();
   const isAr = language === 'ar';
   const [result, setResult] = useState<PageResult>({
@@ -112,78 +127,55 @@ export function StudyDestinationsAdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const sequence = useRef(0);
-  const [page, setPage] = useState(() => Math.max(1, Number(searchParams.get('page')) || 1));
-  const [query, setQuery] = useState(() => searchParams.get('q') ?? '');
-  const [region, setRegion] = useState(() => searchParams.get('region') ?? '');
-  const [status, setStatus] = useState(() => searchParams.get('status') ?? '');
-  const [completeness, setCompleteness] = useState(
-    () => searchParams.get('completenessStatus') ?? '',
-  );
-  const [missingCheck, setMissingCheck] = useState(() => searchParams.get('missingCheck') ?? '');
   const [cooldown, setCooldown] = useState<number | null>(null);
+  const load = useCallback(
+    async (signal?: AbortSignal) => {
+      const request = ++sequence.current;
+      setLoading(true);
+      setError(null);
+      setResult({ data: [], total: 0, page, pageSize: 24, totalPages: 0 });
+      try {
+        const params = new URLSearchParams({ page: String(page), pageSize: '24' });
+        if (query.trim()) params.set('q', query.trim());
+        if (region) params.set('region', region);
+        if (status) params.set('status', status);
+        if (missingCheck) params.set('missingCheck', missingCheck);
+        if (completeness) params.set('completenessStatus', completeness);
+        const next = await adminApiClient.request<PageResult>(
+          `/admin/study-destinations?${params}`,
+          { signal, cache: 'no-store' },
+        );
+        if (request !== sequence.current || signal?.aborted) return;
+        if (page > Math.max(1, next.totalPages)) {
+          setPage(Math.max(1, next.totalPages));
+          return;
+        }
+        setResult(next);
+        setCooldown(null);
+      } catch (cause: unknown) {
+        if (request !== sequence.current) return;
+        const msg = cause instanceof Error ? cause.message : 'STUDY_DESTINATIONS_LOAD_FAILED';
+        setError(msg);
+        if (msg.includes('[429]')) {
+          const parts = msg.split('|');
+          const seconds = parts[1] ? parseInt(parts[1], 10) : 60;
+          setCooldown(seconds);
+        }
+      } finally {
+        if (request === sequence.current) setLoading(false);
+      }
+    },
+    [query, region, status, completeness, missingCheck, page, setPage],
+  );
+
   useEffect(() => {
-    const restore = () => {
-      const params = new URLSearchParams(location.search);
-      setPage(Math.max(1, Number(params.get('page')) || 1));
-      setQuery(params.get('q') ?? '');
-      setRegion(params.get('region') ?? '');
-      setStatus(params.get('status') ?? '');
-      setCompleteness(params.get('completenessStatus') ?? '');
-      setMissingCheck(params.get('missingCheck') ?? '');
+    const abort = new AbortController();
+    const id = window.setTimeout(() => void load(abort.signal), 220);
+    return () => {
+      window.clearTimeout(id);
+      abort.abort();
+      sequence.current++;
     };
-    window.addEventListener('popstate', restore);
-    return () => window.removeEventListener('popstate', restore);
-  }, []);
-
-  useEffect(() => {
-    const next = new URLSearchParams();
-    for (const [key, value] of Object.entries({
-      page: String(page),
-      q: query,
-      region,
-      status,
-      completenessStatus: completeness,
-      missingCheck,
-    }))
-      if (value) next.set(key, value);
-    setSearchParams(next, { replace: true });
-  }, [page, query, region, status, completeness, missingCheck, setSearchParams]);
-  const load = useCallback(async () => {
-    const request = ++sequence.current;
-    setLoading(true);
-    setError(null);
-    try {
-      const params = new URLSearchParams({ page: String(page), pageSize: '24' });
-      if (query.trim()) params.set('q', query.trim());
-      if (region) params.set('region', region);
-      if (status) params.set('status', status);
-      if (missingCheck) params.set('missingCheck', missingCheck);
-      if (completeness) params.set('completenessStatus', completeness);
-      const next = await adminApiClient.request<PageResult>(`/admin/study-destinations?${params}`);
-      if (request !== sequence.current) return;
-      if (page > Math.max(1, next.totalPages)) {
-        setPage(Math.max(1, next.totalPages));
-        return;
-      }
-      setResult(next);
-      setCooldown(null);
-    } catch (cause: unknown) {
-      if (request !== sequence.current) return;
-      const msg = cause instanceof Error ? cause.message : 'STUDY_DESTINATIONS_LOAD_FAILED';
-      setError(msg);
-      if (msg.includes('[429]')) {
-        const parts = msg.split('|');
-        const seconds = parts[1] ? parseInt(parts[1], 10) : 60;
-        setCooldown(seconds);
-      }
-    } finally {
-      if (request === sequence.current) setLoading(false);
-    }
-  }, [query, region, status, completeness, missingCheck, page]);
-
-  useEffect(() => {
-    const id = window.setTimeout(load, 220);
-    return () => window.clearTimeout(id);
   }, [load]);
 
   useEffect(() => {
@@ -229,7 +221,7 @@ export function StudyDestinationsAdminPage() {
           </div>
           <button
             disabled={loading || (cooldown !== null && cooldown > 0)}
-            onClick={load}
+            onClick={() => void load()}
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
