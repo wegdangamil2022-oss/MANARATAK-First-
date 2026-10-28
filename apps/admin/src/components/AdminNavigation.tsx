@@ -240,9 +240,9 @@ export const adminNavigationGroups: NavigationGroup[] = [
 
 function itemClass(active: boolean) {
   return [
-    'group flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-xs font-extrabold transition',
+    "group flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 font-['Cairo',sans-serif] text-[12px] font-extrabold transition",
     active
-      ? 'bg-[#DDEFF2]/80 text-[#142B5F] shadow-sm ring-1 ring-[#21A7B4]/15'
+      ? 'bg-[#142B5F] text-[#F0CE7E] shadow-sm'
       : 'text-[#203442]/68 hover:bg-[#FAF7F0] hover:text-[#0E7C86]',
   ].join(' ');
 }
@@ -272,7 +272,7 @@ export function AdminNavigation() {
       <div className="block lg:hidden w-full bg-white/95 backdrop-blur sticky top-[73px] z-30 border-b border-[#DDEFF2] shadow-xs">
         <nav
           aria-label={t('admin_navigation')}
-          className="flex flex-row items-center gap-2 overflow-x-auto no-scrollbar px-4 py-2.5 touch-pan-x snap-x scroll-smooth"
+          className="admin-global-navigation flex flex-row items-center gap-2 overflow-x-auto no-scrollbar px-4 py-2.5 touch-pan-x snap-x scroll-smooth"
         >
           {allItems.map((item) => {
             const Icon = item.icon;
@@ -282,9 +282,9 @@ export function AdminNavigation() {
                 to={item.to}
                 end={item.to === '/dashboard' || item.to === '/imports' || item.to === '/settings'}
                 className={({ isActive }) =>
-                  `snap-start shrink-0 inline-flex min-h-10 items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition whitespace-nowrap border ${
+                  `snap-start shrink-0 inline-flex min-h-10 items-center gap-2 rounded-xl px-3.5 py-2 font-['Cairo',sans-serif] text-[12px] font-bold transition whitespace-nowrap border ${
                     isActive
-                      ? 'bg-[#142B5F] text-white border-[#142B5F] shadow-sm'
+                      ? 'bg-[#142B5F] text-[#F0CE7E] border-[#142B5F] shadow-sm'
                       : 'bg-[#FAF7F0] text-[#203442]/75 border-[#DDEFF2] hover:bg-[#DDEFF2]/40 hover:text-[#0E7C86]'
                   }`
                 }
@@ -292,7 +292,7 @@ export function AdminNavigation() {
                 {({ isActive }) => (
                   <>
                     <Icon
-                      className={`h-4 w-4 shrink-0 ${isActive ? 'text-[#21A7B4]' : 'text-[#0E7C86]'}`}
+                      className={`h-4 w-4 shrink-0 ${isActive ? 'text-[#F0CE7E]' : 'text-[#0E7C86]'}`}
                     />
                     <span>{t(item.labelKey)}</span>
                   </>
@@ -316,7 +316,7 @@ export function AdminNavigation() {
             </p>
           </div>
 
-          <nav aria-label={t('admin_navigation')} className="space-y-5">
+          <nav aria-label={t('admin_navigation')} className="admin-global-navigation space-y-5">
             {adminNavigationGroups.map((group) => (
               <section key={group.labelKey}>
                 <h2 className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.16em] text-[#203442]/38">

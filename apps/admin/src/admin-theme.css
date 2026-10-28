@@ -1,3 +1,20 @@
+/* Global section navigation sits outside the page workspace on desktop and mobile. */
+.admin-global-navigation :is(a, h2) {
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+}
+.admin-global-navigation a[aria-current='page'] {
+  background: #142b5f;
+  color: #f0ce7e;
+}
+.admin-global-navigation a[aria-current='page'] :is(svg, span) {
+  color: #f0ce7e;
+}
+.admin-global-navigation a:focus-visible {
+  outline: 2px solid #d6a43b;
+  outline-offset: 3px;
+}
+
 /* Shared admin presentation. Keep domain layouts and semantic status colours in their owners. */
 .admin-workspace.admin-theme {
   --admin-title-size: 22px;
