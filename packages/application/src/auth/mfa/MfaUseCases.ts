@@ -18,6 +18,8 @@ export interface IMfaGateway {
   disable(identityId: string, context: AtomicPersistenceContext): Promise<void>;
   markProof(identityId: string, sessionId: string, proof: MfaProof): Promise<void>;
   sessionProofValid(identityId: string, sessionId: string): Promise<boolean>;
+  /** Optional atomic read of enrollment and the proof for this session. */
+  sessionAuthenticationAllowed?(identityId: string, sessionId: string): Promise<boolean>;
   proofIsFresh(identityId: string, sessionId: string): Promise<boolean>;
   copyProof(identityId: string, fromSessionId: string, toSessionId: string): Promise<void>;
 }
@@ -85,6 +87,8 @@ export class MfaUseCases implements IMfaAuthenticationPolicy {
     return this.gateway.copyProof(identityId, from, to);
   }
   async sessionAuthenticated(identityId: string, sessionId: string) {
+    if (this.gateway.sessionAuthenticationAllowed)
+      return this.gateway.sessionAuthenticationAllowed(identityId, sessionId);
     return (
       !(await this.gateway.enabled(identityId)) ||
       (await this.gateway.sessionProofValid(identityId, sessionId))

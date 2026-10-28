@@ -197,6 +197,23 @@ export class PrismaMfaGateway implements IMfaGateway {
   async sessionProofValid(identityId: string, sessionId: string) {
     return this.checkProof(identityId, sessionId, false);
   }
+  async sessionAuthenticationAllowed(identityId: string, sessionId: string) {
+    const type = this.proofType(sessionId);
+    // One snapshot per request; no cross-request cache of enrollment or session proof.
+    const rows = await this.db.credentialRecord.findMany({
+      where: { identityId, type: { in: ['TOTP', type] } },
+      select: { type: true, passwordHash: true, disabled: true },
+      take: 2,
+    });
+    const enrolled = rows.find((row) => row.type === 'TOTP');
+    if (!enrolled || enrolled.disabled) return true;
+    const enrollment = this.parse(enrolled.passwordHash);
+    if (!enrollment.confirmed) return true;
+    const proof = rows.find((row) => row.type === type);
+    return (
+      !!proof && !proof.disabled && this.validProof(proof.passwordHash, enrollment, type, false)
+    );
+  }
   async proofIsFresh(identityId: string, sessionId: string) {
     return this.checkProof(identityId, sessionId, true);
   }
@@ -210,12 +227,19 @@ export class PrismaMfaGateway implements IMfaGateway {
       }),
     ]);
     if (!proof || proof.disabled || !enrolled || enrolled.disabled) return false;
-    const p = JSON.parse(proof.passwordHash) as Proof,
-      enrollment = this.parse(enrolled.passwordHash);
+    return this.validProof(
+      proof.passwordHash,
+      this.parse(enrolled.passwordHash),
+      this.proofType(sessionId),
+      fresh,
+    );
+  }
+  private validProof(value: string, enrollment: Envelope, type: string, fresh: boolean) {
+    const p = JSON.parse(value) as Proof;
     return (
       enrollment.confirmed &&
       p.enrollmentId === enrollment.enrollmentId &&
-      p.sessionHash === this.proofType(sessionId).slice(10) &&
+      p.sessionHash === type.slice(10) &&
       Date.parse(p.verifiedAt) <= Date.now() &&
       (!fresh || Date.parse(p.verifiedAt) > Date.now() - 10 * 60_000)
     );

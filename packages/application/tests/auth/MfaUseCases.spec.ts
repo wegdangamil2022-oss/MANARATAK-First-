@@ -38,6 +38,29 @@ function setup() {
   };
 }
 describe('MFA owner policy', () => {
+  it.each([true, false])(
+    'uses an atomic authentication decision without fallback: %s',
+    async (allowed) => {
+      const s = setup();
+      const read = vi.fn(async () => allowed);
+      Object.assign(s.gateway, { sessionAuthenticationAllowed: read });
+      expect(await s.uc.sessionAuthenticated('p', 'session')).toBe(allowed);
+      expect(read).toHaveBeenCalledWith('p', 'session');
+      expect(s.gateway.enabled).not.toHaveBeenCalled();
+      expect(s.gateway.sessionProofValid).not.toHaveBeenCalled();
+    },
+  );
+  it('does not fall back to allowing a session when the atomic read fails', async () => {
+    const s = setup();
+    Object.assign(s.gateway, {
+      sessionAuthenticationAllowed: vi.fn(async () => {
+        throw new Error('STORAGE_UNAVAILABLE');
+      }),
+    });
+    await expect(s.uc.sessionAuthenticated('p', 'session')).rejects.toThrow('STORAGE_UNAVAILABLE');
+    expect(s.gateway.enabled).not.toHaveBeenCalled();
+    expect(s.gateway.sessionProofValid).not.toHaveBeenCalled();
+  });
   it('requires a second factor before a login session can be created', async () => {
     const s = setup();
     await expect(s.uc.assertLogin('p')).rejects.toThrow('MFA_REQUIRED');
