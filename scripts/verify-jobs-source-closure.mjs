@@ -27,6 +27,8 @@ const publicPage = read('apps/web/src/features/public-template/components/Career
 const types = read('apps/web/src/features/public-template/types.ts');
 const prototype = read('apps/web/src/features/public-template/publicPrototypeDataSource.ts');
 const adminPage = read('apps/admin/src/pages/CareerAdminPage.tsx');
+const recordPanel = read('apps/admin/src/features/careers/CareerRecordPanel.tsx');
+const referenceStyles = read('apps/admin/src/features/reference-data/reference-data.css').toLowerCase();
 const webRouter = read('apps/web/src/router/index.tsx');
 const schema = read('packages/infrastructure/prisma/schema.prisma');
 const ar = read('apps/admin/src/i18n/ar.ts');
@@ -65,7 +67,7 @@ check('JOBS-EMP-002 verify endpoint', adminRouter.includes("'/employers/:id/veri
 check('JOBS-EMP-003 suspend endpoint', adminRouter.includes("'/employers/:id/suspend'"));
 check('JOBS-EMP-004 status change use case', adminUse.includes('setEmployerStatus'));
 check('JOBS-EMP-005 cannot reset review to unverified', adminUse.includes('status === CareerEmployerStatus.UNVERIFIED') && adminUse.includes('CAREER_TRANSITION_INVALID'));
-check('JOBS-EMP-006 admin exposes verification controls', hasAll(adminPage, ["/verify", "/suspend", "admin:careers:employers:verify", "sourceEvidence", "evidenceExpiry"]));
+check('JOBS-EMP-006 admin exposes verification controls', adminPage.includes('<CareerRecordPanel') && hasAll(recordPanel, ["'verify'", "'suspend'", "admin:careers:employers:verify", 'body.sourceUrl = source', 'body.expiresAt = new Date(expiry).toISOString()', 'Date.parse(expiry) > Date.now()']));
 
 // API/RBAC
 check('JOBS-API-001 admin RBAC boundary', app.includes("'/admin/careers', requireAdminPermission('admin:careers:manage')"));
@@ -99,11 +101,11 @@ check('JOBS-WEB-015 legacy careers routes redirect to canonical admin', webRoute
 // Admin UX + identity
 check('JOBS-ADM-001 canonical country picker', adminPage.includes('load={canonicalPickerApi.countries}'));
 check('JOBS-ADM-002 canonical city picker', adminPage.includes('<CanonicalCityPicker') && cityPicker.includes('canonicalPickerApi.cities('));
-check('JOBS-ADM-003 list/filter state', hasAll(adminPage, ["query.set(tab === 'employers' ? 'verificationStatus' : 'status'", 'filterCountry', 'const load = useCallback']));
-check('JOBS-ADM-004 loading state', adminPage.includes('loading && <p'));
-check('JOBS-ADM-005 error state', adminPage.includes('notice && <p role="status"') && adminPage.includes('Could not load this scope.'));
-check('JOBS-ADM-006 empty state', adminPage.includes('result.data.length === 0') && adminPage.includes('No matching records'));
-check('JOBS-ADM-007 MANARATAK primary color', adminPage.includes('#142B5F'));
+check('JOBS-ADM-003 list/filter state', hasAll(adminPage, ["query.set(tab === 'employers' ? 'verificationStatus' : 'status'", "'countryReferenceId'", 'currentScope.current = scope', 'list?.scope === scope']));
+check('JOBS-ADM-004 loading state', /loading\s*\?\s*\(\s*<p role="status"/.test(adminPage) && adminPage.includes('aria-busy={loading}'));
+check('JOBS-ADM-005 error state', adminPage.includes('role="alert"') && adminPage.includes('Could not load this scope.') && adminPage.includes('onClick={refresh}'));
+check('JOBS-ADM-006 empty state', adminPage.includes('result.data.length === 0') && hasAll(adminPage, ['No records match the current filters.', 'No records yet.']));
+check('JOBS-ADM-007 MANARATAK primary color', adminPage.includes("import '../features/reference-data/reference-data.css'") && referenceStyles.includes('#142b5f'));
 check('JOBS-ADM-008 Arabic copy no mixed recruitment phrase', !ar.includes('إدارة recruitment employer metadata'));
 
 // Persistence truth

@@ -40,6 +40,8 @@ const scholarshipTest = 'packages/application/tests/scholarships/ScholarshipCano
 const coursePage = 'apps/admin/src/pages/CourseDetailPage.tsx';
 const servicePage = 'apps/admin/src/pages/ServicesAdminPage.tsx';
 const careerPage = 'apps/admin/src/pages/CareerAdminPage.tsx';
+const serviceEditor = 'apps/admin/src/features/services-finance/ServiceCatalogEditor.tsx';
+const careerEditor = 'apps/admin/src/features/careers/CareerEditor.tsx';
 const di = 'apps/api/src/infrastructure/di/container.ts';
 const matrix = 'docs/remediation/CROSS_PHASE_RELATIONSHIP_CLOSURE_MATRIX.md';
 const closureDoc = 'docs/remediation/p9/P9_ADMIN_RELATIONSHIP_AUTHORING_CLOSURE_2026-09-03.md';
@@ -109,14 +111,14 @@ check('P9-COURSE-003 taxonomy proposal approval/rejection remains owner-API driv
 // P20 Services: no comma-separated relationship truth.
 check('P9-SVC-001 Service Admin writes canonical country IDs', has(servicePage, 'supportedCountryReferenceIds: form.supportedCountryReferenceIds'));
 check('P9-SVC-001 Service Admin writes canonical language IDs', has(servicePage, 'supportedLanguageReferenceIds: form.supportedLanguageReferenceIds'));
-check('P9-SVC-002 Service Admin uses canonical multi picker for country/language', has(servicePage, 'CanonicalMultiPicker') && has(servicePage, 'canonicalPickerApi.countries()') && has(servicePage, 'canonicalPickerApi.languages()'));
+check('P9-SVC-002 Service Admin uses canonical multi picker for country/language', has(servicePage, '<ServiceCatalogEditor') && has(serviceEditor, 'CanonicalMultiPicker') && has(serviceEditor, 'canonicalPickerApi.countries()') && has(serviceEditor, 'canonicalPickerApi.languages()'));
 check('P9-SVC-002 old text relationship form fields are absent', notHas(servicePage, 'supportedCountries: string') && notHas(servicePage, 'supportedLanguages: string'));
 
 // P21 Career: canonical geography only for authoring.
 check('P9-CAREER-001 employer/job forms carry countryReferenceId', has(careerPage, 'countryReferenceId'));
 check('P9-CAREER-001 employer/job forms carry cityReferenceId', has(careerPage, 'cityReferenceId'));
 check('P9-CAREER-002 Career Admin uses P7 country/city canonical pickers', has(careerPage, 'load={canonicalPickerApi.countries}') && has(careerPage, '<CanonicalCityPicker') && has('apps/admin/src/components/CanonicalCityPicker.tsx', 'canonicalPickerApi.cities('));
-check('P9-CAREER-002 Career owner API receives canonical geography', has(careerPage, 'countryReferenceId: form.countryReferenceId') && has(careerPage, 'cityReferenceId: form.cityReferenceId'));
+check('P9-CAREER-002 Career owner API receives canonical geography', has(careerPage, '<CareerEditor') && has(careerEditor, 'countryReferenceId: form.countryReferenceId') && has(careerEditor, 'cityReferenceId: form.cityReferenceId'));
 check('P9-CAREER-003 text geography is not the create-job relationship payload', !/country:\s*jobForm\./u.test(read(careerPage)) && !/city:\s*jobForm\./u.test(read(careerPage)));
 
 // Existing P14/P16/P17/P18/P19 owner control planes remain present.

@@ -40,6 +40,8 @@ const files = {
   financeTest: read('packages/application/tests/finance-platform/FinancePlatformUseCases.spec.ts'),
   serviceTest: read('packages/application/tests/services-platform/ServiceRequestUseCases.spec.ts'),
 };
+const workspaceStyle = read('apps/admin/src/features/services-finance/workspace.css').toLowerCase();
+const workspaceUi = read('apps/admin/src/features/services-finance/WorkspaceUI.tsx');
 
 // Domain + money + state machines
 check('FIN-DOM-001 exact minor-unit money', files.invoice.includes('MoneyAmount') && files.useCases.includes('amountMinorUnits'));
@@ -103,7 +105,7 @@ check('FIN-BND-011 no arbitrary invoice creation in Finance Admin API', !files.a
 check('FIN-BND-012 no arbitrary invoice creation UI', hasNone(files.admin, ['CreateInvoiceForm', 'فاتورة جديدة', 'originDomain" label']));
 
 // Authenticated learner finance flow
-check('FIN-STU-001 student finance route authenticated globally', files.studentRouter.includes('router.use(new AuthMiddleware'));
+check('FIN-STU-001 student finance route authenticated globally', /router\.use\(\s*new AuthMiddleware\(tokenProvider, sessionManager, principalAccessValidator\)\.generate\(\)/.test(files.studentRouter));
 check('FIN-STU-002 path ownership helper', files.studentRouter.includes('STUDENT_ROUTE_OWNERSHIP_MISMATCH'));
 check('FIN-STU-003 invoice list uses authenticated owner', files.studentRouter.includes('listStudentInvoices(ownStudentPath(req), pagination)'));
 check('FIN-STU-004 overview uses authenticated owner', files.studentRouter.includes('getStudentFinancialOverview(ownStudentPath(req))'));
@@ -140,8 +142,8 @@ check('FIN-ADM-011 idempotency conflict 409 mapping', hasAll(files.adminRouter, 
 
 // Admin UX / identity / no fake surfaces
 check('FIN-UX-001 official navy', files.admin.includes('#142B5F'));
-check('FIN-UX-002 official teal', files.admin.includes('#0E7C86'));
-check('FIN-UX-003 official gold', files.admin.includes('#D6A43B'));
+check('FIN-UX-002 official teal', files.admin.includes('OwnerNavigation') && workspaceUi.includes("import './workspace.css'") && workspaceStyle.includes('#0e7c86'));
+check('FIN-UX-003 official gold', files.admin.includes('OwnerNavigation') && workspaceUi.includes("import './workspace.css'") && workspaceStyle.includes('#d6a43b'));
 check('FIN-UX-004 Cairo', read('apps/admin/src/index.css').includes('font-family: "Cairo"') && read('apps/admin/src/main.tsx').includes("'./index.css'"));
 check('FIN-UX-005 RTL', files.admin.includes('dir={dir}') && files.admin.includes('useTranslation'));
 check('FIN-UX-006 semantic red danger', files.admin.includes('bg-red-50'));
@@ -163,7 +165,7 @@ check('FIN-UX-021 shadow Admin preview is removed', !exists('apps/web/src/featur
 check('FIN-UX-022 legacy finance redirects canonical admin', files.webRouter.includes("path: 'admin/*'") && files.webRouter.includes('<CanonicalAdminRedirect'));
 check('FIN-UX-023 no local fake success mutation copy', hasNone(files.admin, ['mockPayments', 'demoInvoices', 'setStatus(\'PAID\')']));
 check('FIN-UX-024 accessibility alert semantics', files.admin.includes('role="alert"'));
-check('FIN-UX-025 navigation aria label', files.admin.includes("aria-label={t('finance_sections')}"));
+check('FIN-UX-025 navigation aria label', files.admin.includes("label={t('finance_sections')}") && workspaceUi.includes('aria-label={label}'));
 
 // Reconciliation / refunds / maker-checker
 check('FIN-RCN-001 reconciliation ledger imbalance', files.repo.includes('LEDGER_IMBALANCE'));

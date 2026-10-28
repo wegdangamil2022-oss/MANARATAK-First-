@@ -25,6 +25,10 @@ function setup(allowed = true) {
       ingestAssetUseCase: {} as any,
       processAssetLifecycleUseCase: {} as any,
       assetGovernanceUseCases: uc as any,
+      assetRecordRepository: {
+        findById: vi.fn(async () => ({ owner: { ownerType: 'CMS' }, classification: 'INTERNAL' })),
+        queryAdmin: vi.fn(async () => ({ items: [], nextCursor: null, hasMore: false })),
+      },
     }),
   );
   return { app, uc };

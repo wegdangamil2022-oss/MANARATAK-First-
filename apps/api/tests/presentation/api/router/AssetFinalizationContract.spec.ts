@@ -16,6 +16,10 @@ function fixture(failure?: Error) {
   app.use('/admin/assets', AssetPlatformRouter.create({
     ingestAssetUseCase: {} as any,
     processAssetLifecycleUseCase: { finalizeUploadedAsset, validateAsset } as any,
+    assetRecordRepository: {
+      findById: vi.fn(async () => ({ owner: { ownerType: 'COURSE' }, classification: 'INTERNAL' })),
+      queryAdmin: vi.fn(async () => ({ items: [], nextCursor: null, hasMore: false })),
+    },
   }));
   return { app, finalizeUploadedAsset, validateAsset };
 }

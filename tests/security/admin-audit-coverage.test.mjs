@@ -2,6 +2,31 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { buildAuditInventory, checkAuditInventory, checkGlobalAuditBoundaries, checkAuditRouteCollisions } from '../../scripts/architecture/verify-admin-audit-coverage.mjs';
 
+test('inline permission middleware remains fingerprinted when permission names are dynamic', () => {
+  const router = permission => `const router = Router(); router.use(async (req,res,next) => {
+    const permission = \`admin:tools:\${req.method === 'GET' ? 'view' : '${permission}'}\`;
+    const result = await evaluator.evaluatePermission(req.authUserId, permission);
+    if (!result.isGranted) return res.status(403).end(); next();
+  }); router.post('/run', handler);`;
+  const first = buildAuditInventory({ ...fixture, routerSources: { 'TestRouter.ts': router('execute') } });
+  const changed = buildAuditInventory({ ...fixture, routerSources: { 'TestRouter.ts': router('manage') } });
+  assert.equal(first[0].conditionalPermissionReview, true);
+  assert.equal(first[0].conditionalPermissionPolicies[0].resolver, 'inline-middleware');
+  assert.notEqual(first[0].conditionalPermissionPolicies[0].sourceFingerprint, changed[0].conditionalPermissionPolicies[0].sourceFingerprint);
+});
+
+test('wrapped middleware fingerprints invoked local evaluator helpers but not unused helpers', () => {
+  const source = permission => `const router = Router();
+    const requirePermission = async (req,permission) => {const result = await evaluator.evaluatePermission(req.authUserId,permission); if (!result.isGranted) throw Error('DENIED');};
+    const unused = async () => evaluator.evaluatePermission('unused','admin:unused:manage');
+    router.use(asyncHandler(async (req,res,next) => {await requirePermission(req, '${permission}');next();}));
+    router.post('/run', handler);`;
+  const rows = buildAuditInventory({ ...fixture, routerSources: { 'TestRouter.ts': source('admin:test:execute') } });
+  assert.deepEqual(rows[0].conditionalPermissionPolicies[0].permissions, ['admin:test:execute']);
+  const changed = buildAuditInventory({ ...fixture, routerSources: { 'TestRouter.ts': source('admin:test:manage') } });
+  assert.equal(checkAuditInventory(changed, rows).length, 1);
+});
+
 const fixture = {
   appSource: "v1Router.use('/admin/test', requireAdminPermission('admin:settings:manage'), lazyRouter('testRouter'));",
   containerSource: 'const bindings = {testRouter: asFunction(() => TestRouter.create())};',

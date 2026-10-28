@@ -159,6 +159,19 @@ export function buildAuditInventory({ appSource, containerSource, routerSources,
         initializer: node.initializer, position: node.pos, block: node.parent.parent.parent,
       });
     });
+    const evaluatorHelpers = new Map();
+    visit(ast, node => {
+      if (!ts.isVariableDeclaration(node) || !ts.isIdentifier(node.name) || !node.initializer
+        || !(ts.isArrowFunction(node.initializer) || ts.isFunctionExpression(node.initializer))) return;
+      let evaluates = false;
+      visit(node.initializer, child => {
+        if (ts.isCallExpression(child) && ts.isPropertyAccessExpression(child.expression)
+          && child.expression.name.text === 'evaluatePermission') evaluates = true;
+      });
+      if (evaluates) evaluatorHelpers.set(node.name.text, {
+        source: node.initializer.getText(ast), position: node.pos, block: node.parent.parent.parent,
+      });
+    });
     const conditionalGuards = [];
     visit(ast, node => {
       if (!ts.isCallExpression(node) || !ts.isPropertyAccessExpression(node.expression)
@@ -182,6 +195,29 @@ export function buildAuditInventory({ appSource, containerSource, routerSources,
           resolver, permissions: policy.permissions,
           sourceFingerprint: createHash('sha256').update(`${policy.source}\n${node.getText(ast)}`).digest('hex') });
       });
+      // Inline policies (including an async error wrapper) and invoked local
+      // evaluator helpers must remain visible when they replace a mount guard.
+      // These are candidate policies requiring review, not proof that every
+      // branch grants the same permission or that owner writes are atomic.
+      if (conditionalGuards.some(guard => guard.position === node.pos)) return;
+      let directEvaluator = false;
+      const invokedHelpers = new Map();
+      visit(node.arguments[0], child => {
+        if (!ts.isCallExpression(child)) return;
+        if (ts.isPropertyAccessExpression(child.expression) && child.expression.name.text === 'evaluatePermission'
+          && child.arguments[1] && (ts.isIdentifier(child.arguments[1])
+            || literal(child.arguments[1])?.startsWith('admin:'))) directEvaluator = true;
+        if (!ts.isIdentifier(child.expression)) return;
+        const helper = evaluatorHelpers.get(child.expression.text);
+        if (helper && helper.position < node.pos && helper.block === node.parent.parent)
+          invokedHelpers.set(child.expression.text, helper.source);
+      });
+      if (!directEvaluator && !invokedHelpers.size) return;
+      const policySource = [...invokedHelpers.values(), node.getText(ast)].join('\n');
+      const permissions = [...new Set([...policySource.matchAll(/['"](admin:[a-z0-9:*_-]+)['"]/g)].map(match => match[1]))].sort();
+      conditionalGuards.push({ position: node.pos, router: node.expression.expression.getText(ast),
+        resolver: directEvaluator ? 'inline-middleware' : [...invokedHelpers.keys()].sort().join(','),
+        permissions, sourceFingerprint: createHash('sha256').update(policySource).digest('hex') });
     });
     visit(ast, node => {
       if (!ts.isCallExpression(node) || !ts.isPropertyAccessExpression(node.expression)
