@@ -191,8 +191,8 @@ export function UniversityAdminPage() {
   const filteredItems = data?.data ?? [];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
-      <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-xl sm:p-8">
+    <div className="university-workspace mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
+      <section className="admin-section-hero relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-xl sm:p-8">
         <div className="relative z-10 flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
           <div className="min-w-0 flex-1 space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-md">
@@ -210,7 +210,7 @@ export function UniversityAdminPage() {
             </p>
           </div>
 
-          <div className="flex max-w-full flex-wrap items-center gap-3 xl:max-w-sm">
+          <div className="admin-section-actions flex max-w-full flex-wrap items-center gap-3 xl:max-w-sm">
             <button type="button" aria-expanded={showCreate} aria-controls="university-create" onClick={()=>setShowCreate(value=>!value)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-xs font-bold text-[#142B5F]"><Plus className="h-4 w-4" aria-hidden="true" />{tr('إنشاء جامعة جديدة','Create university')}</button>
             <button type="button" aria-expanded={showPrograms} aria-controls="university-program-workspace" onClick={()=>setShowPrograms(value=>!value)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-xs font-bold"><School className="h-4 w-4" aria-hidden="true" />{tr('إدارة البرامج الأكاديمية','Academic programs')}</button>
             <button

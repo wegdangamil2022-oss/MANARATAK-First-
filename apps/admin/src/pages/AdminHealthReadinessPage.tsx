@@ -74,7 +74,7 @@ export function AdminHealthReadinessPage() {
           )}
         </div>
       </header>
-      <nav className="health-navigation" aria-label={c('أقسام صحة المنصة', 'Health workspaces')}>
+      <nav className="health-navigation admin-section-navigation" aria-label={c('أقسام صحة المنصة', 'Health workspaces')}>
         {tabs.map(([id, title, Icon]) => (
           <Link key={id} to={healthHref(id)} aria-current={view === id ? 'page' : undefined}>
             <Icon aria-hidden="true" />

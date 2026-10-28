@@ -158,7 +158,7 @@ export function CmsContentDetails({ workspace }: { workspace: CmsWorkspace }) {
             {tr('عرض المادة المنشورة في الصفحة العامة ↗')}
           </a>
         )}
-      <nav className="cms-area-tabs" aria-label={ar ? 'أقسام المادة' : 'Content sections'}>
+      <nav className="cms-area-tabs admin-section-navigation" aria-label={ar ? 'أقسام المادة' : 'Content sections'}>
         {areas.map(([value, label, Icon]) => (
           <button
             key={value}

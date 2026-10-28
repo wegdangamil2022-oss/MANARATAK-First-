@@ -112,7 +112,7 @@ export function NotificationOperationsPage() {
           )}
         </div>
       </header>
-      <nav className="notification-tabs" aria-label={c('مساحات الإشعارات', 'Notification areas')}>
+      <nav className="notification-tabs admin-section-navigation" aria-label={c('مساحات الإشعارات', 'Notification areas')}>
         {[
           ['log', c('سجل الإشعارات', 'Notification log'), Bell],
           ['templates', c('قوالب الإشعارات', 'Templates'), FileText],

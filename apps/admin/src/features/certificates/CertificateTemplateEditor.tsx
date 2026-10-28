@@ -139,7 +139,7 @@ export function CertificateTemplateEditor({
             )}
           </CertificateNotice>
         ) : null}
-        <nav className="certificate-subnav" aria-label={c('أقسام المحرر', 'Editor sections')}>
+        <nav className="certificate-subnav admin-section-navigation" aria-label={c('أقسام المحرر', 'Editor sections')}>
           {[
             ['basics', c('الأساسيات', 'Basics')],
             ['content', c('المحتوى', 'Content')],

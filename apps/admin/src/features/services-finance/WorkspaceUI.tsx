@@ -20,7 +20,7 @@ export function OwnerNavigation({
   disabled?: boolean;
 }) {
   return (
-    <nav className={secondary ? 'sf-subnav' : 'sf-navigation'} aria-label={label}>
+    <nav className={secondary ? 'sf-subnav admin-section-navigation' : 'sf-navigation admin-section-navigation'} aria-label={label}>
       {items.map(({ id, label, description, icon: Icon }) => (
         <button
           key={id}

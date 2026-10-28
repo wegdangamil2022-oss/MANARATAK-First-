@@ -275,7 +275,7 @@ export function NativeCourseEditorPage() {
         </p>
       )}
       <nav
-        className="native-editor-tabs"
+        className="native-editor-tabs admin-section-navigation"
         aria-label={tr('أقسام محرر الدورة', 'Course editor sections')}
       >
         {tabs

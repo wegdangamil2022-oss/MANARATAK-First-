@@ -30,7 +30,7 @@ export function CmsAdminPage() {
           </span>
         </div>
       </header>
-      <nav className="cms-main-tabs" aria-label={ar ? 'مساحات إدارة المحتوى' : 'CMS workspaces'}>
+      <nav className="cms-main-tabs admin-section-navigation" aria-label={ar ? 'مساحات إدارة المحتوى' : 'CMS workspaces'}>
         <NavLink
           to="/cms/content"
           aria-current={!site ? 'page' : undefined}
@@ -52,7 +52,7 @@ export function CmsAdminPage() {
         <CmsSiteWorkspace />
       ) : (
         <>
-          <nav className="cms-sub-tabs" aria-label={ar ? 'مكتبة المحتوى' : 'Content library'}>
+          <nav className="cms-sub-tabs admin-section-navigation" aria-label={ar ? 'مكتبة المحتوى' : 'Content library'}>
             <NavLink to="/cms/content" end>
               <Files size={17} />
               {ar ? 'جميع المواد' : 'All content'}

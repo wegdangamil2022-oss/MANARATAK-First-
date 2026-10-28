@@ -24,7 +24,7 @@ export function CmsSiteWorkspace() {
   };
   return (
     <>
-      <nav className="cms-area-tabs" aria-label={ar ? 'عمليات الموقع' : 'Site operations'}>
+      <nav className="cms-area-tabs admin-section-navigation" aria-label={ar ? 'عمليات الموقع' : 'Site operations'}>
         {tabs.map(([value, label, Icon]) => (
           <a
             key={value}

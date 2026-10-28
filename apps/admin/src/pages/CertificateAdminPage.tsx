@@ -53,7 +53,7 @@ export function CertificateAdminPage() {
         </div>
       </header>
       <nav
-        className="certificate-main-nav"
+        className="certificate-main-nav admin-section-navigation"
         aria-label={c('مساحات الشهادات', 'Certificate workspaces')}
       >
         {tabs.map(([key, label, Icon]) => (

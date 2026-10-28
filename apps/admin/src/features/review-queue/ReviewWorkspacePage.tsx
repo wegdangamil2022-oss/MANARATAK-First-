@@ -400,7 +400,7 @@ export function ReviewWorkspacePage() {
         </div>
       </header>
       <div
-        className="rw-tabs"
+        className="rw-tabs admin-section-navigation"
         role="tablist"
         aria-label={tr('مساحات المراجعة', 'Review workspaces')}
       >

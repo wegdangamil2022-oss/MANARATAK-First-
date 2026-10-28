@@ -191,7 +191,7 @@ export function StudentToolDetails({
         </div>
         <EvidenceTime at={read.observedAt} />
       </WorkspacePanel>
-      <nav className="certificate-subnav" aria-label={c('تفاصيل الأداة', 'Tool details')}>
+      <nav className="certificate-subnav admin-section-navigation" aria-label={c('تفاصيل الأداة', 'Tool details')}>
         {TOOL_TABS.filter(([key]) => key !== 'executions' || can('view-executions')).map(
           ([key, ar, en]) => {
             const Icon = tabIcons[key];

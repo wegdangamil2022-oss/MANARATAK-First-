@@ -714,7 +714,7 @@ export function ReferenceRecordWorkspace({
               </button>
             </div>
           )}
-          <nav className="reference-detail-tabs">
+          <nav className="reference-detail-tabs admin-section-navigation">
             {[
               ['basic', 'البيانات الأساسية', 'Basic information'],
               ['relationships', 'العلاقات والمطابقة', 'Relationships'],

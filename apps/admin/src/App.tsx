@@ -269,7 +269,7 @@ function AdminLayout() {
           <AdminAuthorizationProvider permissions={adminPermissions}>
             <div className="flex flex-1 flex-col lg:flex-row">
             <AdminNavigation />
-            <main className="admin-workspace min-w-0 flex-1 p-4 sm:p-6">
+            <main className="admin-workspace admin-theme min-w-0 flex-1 p-4 sm:p-6">
                 <AdminPermissionNotice />
                 <MfaRequirementBanner/>
                 <Routes>

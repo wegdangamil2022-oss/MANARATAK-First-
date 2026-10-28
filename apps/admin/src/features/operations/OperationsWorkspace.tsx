@@ -38,7 +38,7 @@ export function OperationsNavigation({
   label: string;
 }) {
   return (
-    <nav className="operations-navigation" aria-label={label}>
+    <nav className="operations-navigation admin-section-navigation" aria-label={label}>
       {items.map(({ id, label, description, to, icon: Icon }) => (
         <Link key={id} to={to} aria-current={active === id ? 'page' : undefined}>
           <Icon aria-hidden="true" />

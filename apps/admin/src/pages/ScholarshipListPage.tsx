@@ -230,8 +230,8 @@ export function ScholarshipListPage() {
   };
 
   return (
-    <div dir={dir} className="mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
-      <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
+    <div dir={dir} className="scholarship-workspace mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
+      <section className="admin-section-hero relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -top-20 end-0 h-56 w-56 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none blur-2xl" />
         <div className="absolute -bottom-20 start-0 h-56 w-56 rounded-full bg-cyan-300 opacity-15 pointer-events-none blur-2xl" />
 
@@ -257,7 +257,7 @@ export function ScholarshipListPage() {
             </p>
           </div>
 
-          <div className="flex max-w-full flex-wrap items-center gap-2.5 xl:max-w-sm">
+          <div className="admin-section-actions flex max-w-full flex-wrap items-center gap-2.5 xl:max-w-sm">
             <button type="button" aria-expanded={showCreate} aria-controls="scholarship-create" onClick={() => setShowCreate(value => !value)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-xs font-bold text-[#142B5F] shadow-sm">
               <Plus className="h-4 w-4" aria-hidden="true" />{tr('إنشاء منحة جديدة', 'Create scholarship')}
             </button>

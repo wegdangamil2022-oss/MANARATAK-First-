@@ -122,7 +122,7 @@ export function ReferenceDataAdminPage() {
         </div>
       </header>
       <nav
-        className="reference-main-nav"
+        className="reference-main-nav admin-section-navigation"
         aria-label={isAr ? 'مساحات البيانات المرجعية' : 'Reference workspaces'}
       >
         <button
@@ -245,7 +245,7 @@ export function ReferenceDataAdminPage() {
           <header className="reference-subheader">
             <h2>{isAr ? 'الجودة والمصادر والحوكمة' : 'Quality, sources and governance'}</h2>
           </header>
-          <nav className="reference-detail-tabs">
+          <nav className="reference-detail-tabs admin-section-navigation">
             {[
               ['report', 'تقارير الجودة', 'Quality issues'],
               ['imports', 'فحص الاستيراد P6 → P7', 'P6 → P7 screening'],

@@ -49,7 +49,7 @@ export function ExecutiveApplications({
         {tr('أداء قناتَي التقديم', 'Application channel performance')}
       </h2>
       <div
-        className="executive-channel-tabs"
+        className="executive-channel-tabs admin-section-navigation"
         role="tablist"
         aria-label={tr('قنوات التقديم', 'Application channels')}
       >

@@ -878,11 +878,11 @@ export function StudyDestinationDetailPage() {
         )}
         <div className="destination-layout">
           <nav
-            className="destination-navigation"
+            className="destination-navigation admin-section-navigation"
             aria-label={isAr ? 'أقسام ملف الدولة' : 'Destination sections'}
           >
             {destinationGroups.map((group, i) => (
-              <section key={i}>
+              <section key={i} className="admin-section-navigation">
                 <h2>{group.label[isAr ? 0 : 1]}</h2>
                 {group.sections.map((key) => {
                   const item = tabs.find((x) => x.key === key)!;

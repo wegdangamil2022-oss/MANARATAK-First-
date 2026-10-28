@@ -213,7 +213,7 @@ function IssuerDetails({ item, onRefresh }: { item: CertificateIssuer; onRefresh
   return (
     <>
       <CertificatePanel title={item.name} actions={<StatusBadge status={item.status} />}>
-        <nav className="certificate-subnav" aria-label={c('تفاصيل الجهة', 'Issuer details')}>
+        <nav className="certificate-subnav admin-section-navigation" aria-label={c('تفاصيل الجهة', 'Issuer details')}>
           {(['overview', 'delegations', 'history'] as const)
             .filter((key) =>
               key === 'overview' || key === 'history'

@@ -100,7 +100,7 @@ export function CertificateReviews({ recovery = false }: { recovery?: boolean })
               'A direct certificate-owner projection, separate from the general review workspace coverage. Decisions remain on canonical item details.',
             )}
           </CertificateNotice>
-          <div className="certificate-subnav">
+          <div className="certificate-subnav admin-section-navigation">
             {kinds.map((kind) => (
               <button
                 key={kind.key}

@@ -141,7 +141,7 @@ export function CertificateDetailPage() {
           </div>
           {copyMessage ? <CertificateNotice>{copyMessage}</CertificateNotice> : null}
           <nav
-            className="certificate-subnav"
+            className="certificate-subnav admin-section-navigation"
             aria-label={c('تفاصيل الشهادة', 'Certificate detail sections')}
           >
             {(['overview', 'files', 'lifecycle', 'history'] as const).map((key) => (

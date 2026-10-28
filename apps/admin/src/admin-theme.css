@@ -1,0 +1,283 @@
+/* Shared admin presentation. Keep domain layouts and semantic status colours in their owners. */
+.admin-workspace.admin-theme {
+  --admin-title-size: 22px;
+  --admin-section-size: 15px;
+  --admin-nav-size: 14px;
+  --admin-description-size: 12px;
+  --admin-navy: #142b5f;
+  --admin-petrol: #0e7c86;
+  --admin-gold: #f0ce7e;
+  --admin-gold-line: #d6a43b;
+  --admin-gold-on-white: #946711;
+  font-family: 'Cairo', sans-serif;
+}
+
+.admin-workspace.admin-theme :is(button, input, select, textarea, a, summary, h1, h2, h3) {
+  font-family: 'Cairo', sans-serif;
+}
+.admin-workspace.admin-theme h1 {
+  font-size: var(--admin-title-size);
+  font-weight: 800;
+  line-height: 1.6;
+}
+.admin-workspace.admin-theme h2 {
+  font-size: var(--admin-section-size);
+  line-height: 1.7;
+}
+.admin-workspace.admin-theme h3 {
+  font-size: var(--admin-nav-size);
+  line-height: 1.7;
+}
+.admin-workspace.admin-theme .admin-primary-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  border: 1px solid;
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+/* Explicit navigation owners: pagination, record actions and status filters stay independent. */
+.admin-workspace.admin-theme .admin-section-navigation > :is(a, button) {
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  gap: 8px;
+  border: 1px solid #dce3ec;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--admin-navy);
+  font-family: 'Cairo', sans-serif;
+  font-size: var(--admin-nav-size);
+  font-weight: 700;
+  line-height: 1.7;
+  text-decoration: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.admin-workspace.admin-theme
+  .admin-section-navigation
+  > :is(a, button)
+  :is(strong, h2, h3, span:not([class])) {
+  font-size: inherit;
+}
+.admin-workspace.admin-theme .admin-section-navigation > :is(a, button) small {
+  display: block;
+  font-size: var(--admin-description-size);
+  font-weight: 500;
+  line-height: 1.7;
+  color: #59687d;
+}
+.admin-workspace.admin-theme .admin-section-navigation > :is(a, button) svg {
+  color: var(--admin-petrol);
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.admin-workspace.admin-theme .admin-section-navigation > :is(a, button):nth-child(even) svg {
+  color: var(--admin-gold-on-white);
+}
+.admin-workspace.admin-theme
+  .admin-section-navigation
+  > :is(a, button):is(
+    [aria-current='page'],
+    [aria-pressed='true'],
+    [aria-selected='true'],
+    .selected,
+    .active
+  ) {
+  background: var(--admin-navy);
+  border-color: var(--admin-navy);
+  color: var(--admin-gold);
+  box-shadow: inset 0 -2px 0 var(--admin-gold-line);
+}
+.admin-workspace.admin-theme
+  .admin-section-navigation
+  > :is(a, button):is(
+    [aria-current='page'],
+    [aria-pressed='true'],
+    [aria-selected='true'],
+    .selected,
+    .active
+  )
+  :is(svg, strong, small, span, h2, h3) {
+  color: var(--admin-gold);
+}
+.admin-workspace.admin-theme .admin-section-navigation > :is(a, button):not(:disabled):hover {
+  border-color: var(--admin-gold-line);
+}
+
+/* Use the same action colour as the Settings catalogue action. */
+.admin-workspace.admin-theme
+  :is(
+    .settings-primary,
+    .sf-primary,
+    .certificate-primary,
+    .health-primary,
+    .career-primary,
+    .cms-primary,
+    .reference-primary,
+    .course-primary,
+    .action-primary,
+    .operations-button.primary,
+    .admin-primary-action
+  ) {
+  background: var(--admin-petrol);
+  border-color: var(--admin-petrol);
+  color: #fff;
+  font-size: 13px;
+}
+.admin-workspace.admin-theme
+  :is(
+    .settings-primary,
+    .sf-primary,
+    .certificate-primary,
+    .health-primary,
+    .career-primary,
+    .cms-primary,
+    .reference-primary,
+    .course-primary,
+    .action-primary,
+    .operations-button.primary,
+    .admin-primary-action
+  ):not(:disabled):hover {
+  background: #096771;
+  border-color: var(--admin-gold-line);
+  color: #fff;
+}
+.admin-workspace.admin-theme
+  :is(
+    .settings-primary,
+    .sf-primary,
+    .certificate-primary,
+    .health-primary,
+    .career-primary,
+    .cms-primary,
+    .reference-primary,
+    .course-primary,
+    .action-primary,
+    .operations-button.primary,
+    .admin-primary-action
+  )
+  svg {
+  color: var(--admin-gold);
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Small gold rules accent panel titles, including AI provider readiness. */
+.admin-workspace.admin-theme
+  :is(
+    .sf-panel-heading,
+    .ai-panel-heading,
+    .certificate-panel-heading,
+    .notification-region-heading,
+    .executive-section-heading,
+    .translation-section-heading,
+    .rw-region-heading,
+    .course-section-heading,
+    .course-results-header
+  )
+  > :is(h2, h3),
+.admin-workspace.admin-theme :is(.settings-panel, .reference-subheader, .taxonomy-panel) > h2,
+.admin-workspace.admin-theme .health-panel > header > :is(h2, h3),
+.admin-workspace.admin-theme .operations-panel > header > :is(h2, h3),
+.admin-workspace.admin-theme .admin-accent-heading {
+  padding-bottom: 7px;
+  background-image: linear-gradient(var(--admin-gold-line), var(--admin-gold-line));
+  background-repeat: no-repeat;
+  background-size: 38px 2px;
+  background-position: var(--admin-rule-position, left) bottom;
+}
+.admin-workspace.admin-theme:dir(rtl) {
+  --admin-rule-position: right;
+}
+.admin-workspace.admin-theme :dir(rtl) {
+  --admin-rule-position: right;
+}
+
+.admin-workspace.admin-theme
+  :is(
+    .admin-section-hero,
+    .reference-hero,
+    .sf-heading,
+    .operations-heading,
+    .translation-header,
+    .notification-header,
+    .cms-hero,
+    .course-hero,
+    .rw-header,
+    .executive-header,
+    .taxonomy-hero,
+    .import-hero,
+    .test-hero
+  ) {
+  box-shadow: inset 0 -2px 0 #d6a43b80;
+}
+.admin-workspace.admin-theme
+  :is(
+    .admin-section-actions,
+    .sf-heading .sf-actions,
+    .reference-hero .reference-actions,
+    .operations-heading .operations-actions,
+    .notification-header .notification-actions,
+    .executive-header-actions
+  )
+  > :is(button, a):not(.executive-health),
+.admin-workspace.admin-theme .translation-header > button {
+  background: var(--admin-petrol);
+  border-color: #55b9bf;
+  color: #fff;
+  font-size: 13px;
+}
+.admin-workspace.admin-theme .admin-section-actions > button[aria-pressed='true'] {
+  background: var(--admin-navy);
+  border-color: var(--admin-gold-line);
+  color: var(--admin-gold);
+}
+.admin-workspace.admin-theme .admin-section-actions > button[aria-pressed='true'] :is(svg, span) {
+  color: var(--admin-gold);
+}
+.admin-workspace.admin-theme .admin-section-actions > :is(a, button) svg {
+  color: var(--admin-gold);
+}
+
+.admin-workspace.admin-theme
+  :is(.settings-owner-links, .translation-related, .admin-related-links)
+  a {
+  background: linear-gradient(110deg, var(--admin-navy), #164969 65%, var(--admin-petrol));
+  color: #fff;
+  border-color: #216678;
+  border-radius: 10px;
+  font-size: 14px;
+  text-decoration: none;
+}
+.admin-workspace.admin-theme
+  :is(.settings-owner-links, .translation-related, .admin-related-links)
+  a
+  svg {
+  color: var(--admin-gold);
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.admin-workspace.admin-theme
+  :is(.settings-owner-links, .translation-related, .admin-related-links)
+  a:hover {
+  border-color: var(--admin-gold-line);
+  box-shadow: inset 0 -2px 0 var(--admin-gold-line);
+}
+.admin-workspace.admin-theme :is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--admin-gold-line);
+  outline-offset: 3px;
+}
+
+@media (forced-colors: active) {
+  .admin-workspace.admin-theme
+    :is(a, button):is([aria-current='page'], [aria-pressed='true'], [aria-selected='true']) {
+    outline: 2px solid Highlight;
+  }
+}

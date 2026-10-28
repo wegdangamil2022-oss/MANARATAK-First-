@@ -121,7 +121,7 @@ export function TaxonomyNavigation({
   disabled?: boolean;
 }) {
   return (
-    <nav className={secondary ? 'taxonomy-subnav' : 'taxonomy-nav'} aria-label={label}>
+    <nav className={secondary ? 'taxonomy-subnav admin-section-navigation' : 'taxonomy-nav admin-section-navigation'} aria-label={label}>
       {items.map((item) => {
         const Icon = icons[item.id] ?? BookOpen;
         return (

@@ -737,13 +737,14 @@ export function InternationalTestDetailPage() {
 
         {/* Four Primary Tabs Navigation */}
         <div className="border-b border-slate-200 overflow-x-auto">
-          <nav className="flex space-x-2 sm:space-x-4 rtl:space-x-reverse min-w-max pb-1">
+          <nav className="admin-section-navigation flex space-x-2 sm:space-x-4 rtl:space-x-reverse min-w-max pb-1">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               const TabIcon = tab.icon;
               return (
                 <button
                   key={tab.id}
+                  aria-current={isActive ? 'page' : undefined}
                   onClick={() => switchTab(tab.id)}
                   className={`flex items-center gap-2 py-3 px-4 text-xs font-black rounded-xl transition-all cursor-pointer ${
                     isActive

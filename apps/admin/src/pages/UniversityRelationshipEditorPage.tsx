@@ -555,7 +555,7 @@ export function UniversityRelationshipEditorPage() {
         </p>
       )}
       <nav
-        className="university-stage-tabs"
+        className="university-stage-tabs admin-section-navigation"
         role="tablist"
         aria-label={ar ? 'مراحل مصادر الجامعة' : 'University source stages'}
         onKeyDown={(event) => {

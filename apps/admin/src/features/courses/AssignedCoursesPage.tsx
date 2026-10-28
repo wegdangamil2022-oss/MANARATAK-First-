@@ -49,7 +49,7 @@ export function AssignedCoursesPage() {
           )}
         </p>
       </header>
-      <button type="button" onClick={() => setRefresh((value) => value + 1)}>
+      <button type="button" className="admin-primary-action" onClick={() => setRefresh((value) => value + 1)}>
         <RefreshCw size={18} />
         {tr('تحديث', 'Refresh')}
       </button>
@@ -65,6 +65,7 @@ export function AssignedCoursesPage() {
                 <h2>{row.displayName}</h2>
                 <p>{status(row.status)}</p>
                 <Link
+                  className="admin-primary-action"
                   to={`/courses/${row.id}/editor?returnTo=${encodeURIComponent('/courses/assigned')}`}
                 >
                   {tr('فتح مساحة الدورة', 'Open course workspace')}

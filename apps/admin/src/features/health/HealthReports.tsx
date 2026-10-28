@@ -408,7 +408,7 @@ export function HealthReports({
   return (
     <>
       <nav
-        className="health-secondary"
+        className="health-secondary admin-section-navigation"
         aria-label={c('المراقبة والتقارير', 'Monitoring and reports')}
       >
         {(

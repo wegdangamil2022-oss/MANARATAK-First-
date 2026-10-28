@@ -331,7 +331,7 @@ export function CareerAdminPage() {
           <p>{descriptions[tab]}</p>
         </div>
       </header>
-      <nav className="career-main-nav" aria-label={c('أقسام الوظائف', 'Career sections')}>
+      <nav className="career-main-nav admin-section-navigation" aria-label={c('أقسام الوظائف', 'Career sections')}>
         {tabInfo
           .filter(
             ([value]) =>
@@ -427,7 +427,7 @@ export function CareerAdminPage() {
               </div>
             </header>
             {tab === 'jobs' ? (
-              <nav className="career-subnav" aria-label={c('مراحل الفرص', 'Opportunity stages')}>
+              <nav className="career-subnav admin-section-navigation" aria-label={c('مراحل الفرص', 'Opportunity stages')}>
                 {(
                   [
                     ['', c('كل الفرص', 'All opportunities'), Layers],

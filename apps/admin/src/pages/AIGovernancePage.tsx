@@ -225,7 +225,7 @@ export function AIGovernancePage() {
           </div>
         </header>
         <nav
-          className="certificate-main-nav"
+          className="certificate-main-nav admin-section-navigation"
           aria-label={title('أقسام الذكاء الاصطناعي', 'AI sections')}
         >
           {AI_WORKSPACES.map((item, index) => {
@@ -243,7 +243,7 @@ export function AIGovernancePage() {
           })}
         </nav>
         {workspace.tabs.length > 1 && (
-          <nav className="certificate-subnav" aria-label={title('تبويبات القسم', 'Section tabs')}>
+          <nav className="certificate-subnav admin-section-navigation" aria-label={title('تبويبات القسم', 'Section tabs')}>
             {sections
               .filter((item) => (workspace.tabs as readonly string[]).includes(item.key))
               .map((item) => (

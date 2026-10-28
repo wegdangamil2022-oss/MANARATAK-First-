@@ -1966,11 +1966,12 @@ export function ScholarshipImportCenterPage() {
             ) : null}
           </header>
 
-          <nav className="flex gap-2 overflow-x-auto rounded-2xl border bg-white p-2 shadow-sm">
+          <nav className="admin-section-navigation flex gap-2 overflow-x-auto rounded-2xl border bg-white p-2 shadow-sm">
             {tabs.map((item) => (
               <button
                 key={item}
                 type="button"
+                aria-pressed={tab === item}
                 disabled={mutationBusy}
                 onClick={() => setTab(item)}
                 className={`whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold ${tab === item ? 'bg-emerald-800 text-white' : 'text-slate-600 hover:bg-slate-100'}`}

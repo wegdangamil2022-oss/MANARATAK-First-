@@ -250,7 +250,7 @@ export function MajorAdminPage() {
 
   return (
     <div dir="rtl" className="major-admin mx-auto max-w-7xl space-y-6 font-['Cairo']">
-      <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
+      <section className="admin-section-hero relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -top-20 end-0 h-52 w-52 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none blur-2xl" />
         <div className="absolute -bottom-20 start-0 h-52 w-52 rounded-full bg-cyan-300 opacity-15 pointer-events-none blur-2xl" />
         <div className="relative z-10 flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
@@ -266,11 +266,12 @@ export function MajorAdminPage() {
               استعراض وإدارة بطاقات التخصصات، الكليات، الدرجات العلمية، وربطها بالتصنيفات المعيارية والبرامج.
             </p>
           </div>
-          <div className="flex max-w-full flex-wrap gap-2.5 xl:max-w-sm">
+          <div className="admin-section-actions flex max-w-full flex-wrap gap-2.5 xl:max-w-sm">
             <button type="button" aria-expanded={showCreate} aria-controls="major-create" onClick={()=>setShowCreate(value=>!value)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-xs font-bold text-[#142B5F]"><Plus aria-hidden="true" className="h-4 w-4" />إنشاء تخصص جديد</button>
             <button
               type="button"
               onClick={() => {setPage(1);setQuery('view','');}}
+              aria-pressed={view === 'all'}
               className={`inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-xs sm:text-sm font-bold transition shadow-xs cursor-pointer ${
                 view === 'all'
                   ? 'bg-[#21A7B4] text-white shadow-md hover:bg-[#1A8D99]'
@@ -279,10 +280,11 @@ export function MajorAdminPage() {
             >
               كل التخصصات
             </button>
-            <button type="button" onClick={()=>{setPage(1);setSearchParams({view:'catalog'});}} className="rounded-xl border border-white/30 px-4 py-2 text-sm">كتالوجات المصدر للمراجعة</button>
+            <button type="button" aria-pressed={view === 'catalog'} onClick={()=>{setPage(1);setSearchParams({view:'catalog'});}} className="rounded-xl border border-white/30 px-4 py-2 text-sm">كتالوجات المصدر للمراجعة</button>
             <button
               type="button"
               onClick={() => {setPage(1);setQuery('view','new');}}
+              aria-pressed={view === 'new'}
               className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-xs sm:text-sm font-bold transition shadow-xs cursor-pointer ${
                 view === 'new'
                   ? 'bg-[#21A7B4] text-white shadow-md hover:bg-[#1A8D99]'

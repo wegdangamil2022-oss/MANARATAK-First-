@@ -484,7 +484,7 @@ export function AdminTranslationWorkspacePage() {
         </button>
       </header>
       <nav
-        className="translation-tabs"
+        className="translation-tabs admin-section-navigation"
         aria-label={tr('مساحات مركز الترجمة', 'Translation workspaces')}
       >
         <button
@@ -608,7 +608,7 @@ export function AdminTranslationWorkspacePage() {
           )}
           {!!allowedDomains.length && (
             <>
-              <nav className="translation-domains" aria-label={tr('القسم المالك', 'Owner section')}>
+              <nav className="translation-domains admin-section-navigation" aria-label={tr('القسم المالك', 'Owner section')}>
                 {allowedDomains.map((item) => {
                   const Icon = item.icon;
                   return (
@@ -1045,7 +1045,7 @@ export function AdminTranslationWorkspacePage() {
                     )}
                   </p>
                 )}
-                <nav className="translation-tabs" aria-label={tr('تفاصيل السجل', 'Record details')}>
+                <nav className="translation-tabs admin-section-navigation" aria-label={tr('تفاصيل السجل', 'Record details')}>
                   <button
                     type="button"
                     aria-current={detailArea === 'content' ? 'page' : undefined}

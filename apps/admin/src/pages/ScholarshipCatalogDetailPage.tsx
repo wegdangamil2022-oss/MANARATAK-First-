@@ -831,7 +831,7 @@ export function ScholarshipDetailPage() {
       )}
 
       <nav
-        className="scholarship-detail-tabs"
+        className="scholarship-detail-tabs admin-section-navigation"
         role="tablist"
         aria-label={tr('تفاصيل المنحة', 'Scholarship sections')}
       >

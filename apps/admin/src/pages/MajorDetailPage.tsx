@@ -851,7 +851,7 @@ export function MajorDetailPage() {
       </section>}
 
       {/* Tab Navigation */}
-      <nav aria-label="أقسام تفاصيل التخصص" className="major-detail-tabs grid grid-cols-2 gap-2 rounded-2xl border border-[#DDEFF2] bg-white p-2 shadow-sm sm:grid-cols-3 xl:grid-cols-5">
+      <nav aria-label="أقسام تفاصيل التخصص" className="major-detail-tabs grid grid-cols-2 gap-2 rounded-2xl border border-[#DDEFF2] bg-white p-2 shadow-sm sm:grid-cols-3 xl:grid-cols-5 admin-section-navigation">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;

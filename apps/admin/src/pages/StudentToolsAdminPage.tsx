@@ -84,7 +84,7 @@ export function StudentToolsAdminPage() {
         </div>
       </header>
       <nav
-        className="certificate-main-nav"
+        className="certificate-main-nav admin-section-navigation"
         aria-label={c('أقسام أدوات الطلاب', 'Student tool sections')}
       >
         {TOOL_WORKSPACES.filter(

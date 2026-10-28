@@ -1188,7 +1188,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         </div>
       </section>
 
-      <nav className="import-section-nav" aria-label={txt('التنقل داخل الاستيراد', 'Import section navigation')}>
+      <nav className="import-section-nav admin-section-navigation" aria-label={txt('التنقل داخل الاستيراد', 'Import section navigation')}>
         {[
           ['import-summary', txt('الملخص', 'Overview'), Layers3],
           ['import-batches', txt('الدفعات', 'Batches'), ListChecks],
