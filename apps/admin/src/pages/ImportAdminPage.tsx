@@ -51,6 +51,7 @@ import {
 } from 'lucide-react';
 import { AssetPicker } from '../components/AssetPicker';
 import { adminApiClient } from '../api/client';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 import { useTranslation } from '../i18n/I18nProvider';
 import { ImportGovernancePanel } from '../features/imports/ImportGovernancePanel';
 import { useImportActionDialog } from '../features/imports/ImportActionDialog';
@@ -400,6 +401,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
   const [selectedBatchId, setSelectedBatchId] = useState('');
   const [recordPage, setRecordPage] = useState(1);
   const [selectedRecord, setSelectedRecord] = useState<ImportRecord | null>(null);
+  const scope=useOwnerOperationScope(`${fixedDomain??''}:${selectedDomain}:${selectedBatchId}:${recordStatus}:${recordPage}`);
 
   const [showImportModal, setShowImportModal] = useState(false);
   const [modalDomain, setModalDomain] = useState<Exclude<DomainKey, 'ALL'>>(
@@ -435,6 +437,10 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
   const payloadKey = JSON.stringify(payload);
   const currentPayload = useRef(payloadKey);
   currentPayload.current = payloadKey;
+  useEffect(()=>{
+    setSelectedRecord(null);setNotice(null);setErrorExportLoading(false);
+    mutation.current=false;setActionLoading('');setSourceActionLoading('');setImportSubmitting(false);setPreflightLoading(false);
+  },[scope]);
   useEffect(() => {
     preflightProof.current = null;
     setPreflight(null);
@@ -540,6 +546,8 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
     setDataState('loading');
     setBatchesState('loading');
     setOperationsState('loading');
+    setRecords({data:[],total:0,page:recordPage,pageSize:RECORD_PAGE_SIZE});
+    setBatches([]);setOperations(null);
     const domain = apiDomain(selectedDomain);
     const batchParams = new URLSearchParams();
     if (domain) batchParams.set('dataType', domain);
@@ -839,12 +847,12 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
           dataType: modalDomain,
         }),
       });
-      if (request === preflightRequest.current && snapshot === currentPayload.current) {
+      if (scope.isCurrent() && request === preflightRequest.current && snapshot === currentPayload.current) {
         preflightProof.current = snapshot;
         setPreflight(result);
       }
     } catch (error) {
-      if (request !== preflightRequest.current || snapshot !== currentPayload.current) return;
+      if (!scope.isCurrent() || request !== preflightRequest.current || snapshot !== currentPayload.current) return;
       setPreflight(null);
       setNotice({
         tone: 'error',
@@ -854,8 +862,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
             : txt('فشل فحص ما قبل الاستيراد.', 'Import preflight failed.'),
       });
     } finally {
-      mutation.current = false;
-      setPreflightLoading(false);
+      if(scope.isCurrent()){mutation.current = false;setPreflightLoading(false);}
     }
   };
 
@@ -884,6 +891,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
           dataType: modalDomain,
         }),
       });
+      if(!scope.isCurrent())return;
       const staged = result.summary?.stagedRecords ?? result.records?.length ?? 0;
       const skipped = result.summary?.skippedDuplicates ?? 0;
       setShowImportModal(false);
@@ -904,14 +912,14 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
       });
       await refreshAll(false);
     } catch (error) {
+      if(!scope.isCurrent())return;
       setNotice({
         tone: 'error',
         content:
           error instanceof Error ? error.message : txt('فشلت عملية التجهيز.', 'Staging failed.'),
       });
     } finally {
-      mutation.current = false;
-      setImportSubmitting(false);
+      if(scope.isCurrent()){mutation.current = false;setImportSubmitting(false);}
     }
   };
 
@@ -919,13 +927,14 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
     batch: ImportBatch,
     action: 'pause' | 'resume' | 'cancel' | 'replay',
   ) => {
-    if (mutation.current) return;
+    if (mutation.current || !scope.isCurrent()) return;
     const key = `${batch.id}:${action}`;
     let reason: string | undefined;
     if (['cancel', 'pause', 'replay'].includes(action)) {
       const answer = await ask({ title: action === 'cancel' ? txt('إلغاء الدفعة', 'Cancel batch') : action === 'pause' ? txt('إيقاف الدفعة مؤقتًا', 'Pause batch') : txt('إعادة جدولة الدفعة', 'Replay batch'),
         description: txt('يُسجّل الإجراء مع الاحتفاظ بالأدلة، ويؤكد العامل حالة التوقف الفعلية.', 'The command retains evidence; actual stop state is confirmed by the worker.'), reason: action !== 'replay' });
       if (!answer) return;
+      if(!scope.isCurrent() || mutation.current)return;
       reason = answer.reason || undefined;
     }
 
@@ -939,15 +948,19 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
           reason ? { reason } : action === 'replay' ? { fromCheckpoint: true } : {},
         ),
       });
+      if(!scope.isCurrent())return;
       let pendingStop = false;
       if (action === 'pause' || action === 'cancel') {
         // The command may have been accepted while a domain call is still running.
         // Never claim that cancellation or pause has finished before owner exit.
-        const latest = await adminApiClient.request<{ status: string }>(
+        const latest = await adminApiClient.request<{ batchId:string;status: string }>(
           `/admin/imports/queue/jobs/${encodeURIComponent(batch.id)}`,
         );
+        if(!scope.isCurrent())return;
+        if(latest.batchId!==batch.id || !(action==='pause'?['PAUSED','PAUSING']:['CANCELLED','CANCELLING']).includes(latest.status))throw Error(txt('تم قبول الطلب لكن حالة المهمة المطلوبة لم تتأكد. حدّث بيانات الدفعة قبل المحاولة مجددًا.','The request was accepted but the requested job state was not confirmed. Refresh the batch before retrying.'));
         pendingStop = latest.status === 'PAUSING' || latest.status === 'CANCELLING';
       }
+      if(!scope.isCurrent())return;
       setNotice({
         tone: pendingStop ? 'warning' : 'success',
         content: pendingStop
@@ -957,6 +970,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
       });
       await refreshAll(false);
     } catch (error) {
+      if(!scope.isCurrent())return;
       setNotice({
         tone: 'error',
         content:
@@ -965,8 +979,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
             : txt('تعذر تنفيذ الإجراء.', 'Unable to execute batch action.'),
       });
     } finally {
-      mutation.current = false;
-      setActionLoading('');
+      if(scope.isCurrent()){mutation.current = false;setActionLoading('');}
     }
   };
 
@@ -976,6 +989,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
     const answer = await ask({ title: txt('تغيير حالة المصدر', 'Change source status'),
       description: source.displayName + ' · ' + sourceStatusLabel(source.status, isArabic) + ' → ' + sourceStatusLabel(nextStatus, isArabic), reason: true, minimum: 3 });
     if (!answer) return;
+    if(!scope.isCurrent() || mutation.current)return;
     const reason = answer.reason;
     mutation.current = true;
     setSourceActionLoading(source.sourceId);
@@ -987,12 +1001,17 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
           body: JSON.stringify({ status: nextStatus, reason, expectedUpdatedAt: source.updatedAt }),
         },
       );
+      if(!scope.isCurrent())return;
+      const latest=await adminApiClient.request<{data:ImportSource}>(`/admin/imports/sources/${encodeURIComponent(source.sourceId)}`,{cache:'no-store'});
+      if(!scope.isCurrent())return;
+      if(latest.data.sourceId!==source.sourceId || latest.data.status!==nextStatus || latest.data.updatedAt===source.updatedAt)throw Error(txt('قُبل الطلب لكن تعذر تأكيد حالة المصدر المحفوظة. أعد تحميل المصدر.','The request was accepted but the saved source state was not confirmed. Reload the source.'));
       setNotice({
         tone: 'success',
         content: txt('تم تحديث حالة المصدر.', 'Source status updated.'),
       });
       await loadControlPlane();
     } catch (error) {
+      if(!scope.isCurrent())return;
       setNotice({
         tone: 'error',
         content:
@@ -1001,8 +1020,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
             : txt('تعذر تحديث المصدر.', 'Unable to update source.'),
       });
     } finally {
-      mutation.current = false;
-      setSourceActionLoading('');
+      if(scope.isCurrent()){mutation.current = false;setSourceActionLoading('');}
     }
   };
 
@@ -1015,6 +1033,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
       const report = await adminApiClient.request<ErrorReport>(
         `/admin/imports/error-report?${params}`,
       );
+      if(!scope.isCurrent())return;
       if ((!Array.isArray(report.rows) || report.rows.length === 0) && !report.batchFailures?.length && !report.workerFailures?.length) {
         setNotice({
           tone: 'warning',
@@ -1091,6 +1110,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         });
       }
     } catch (error) {
+      if(!scope.isCurrent())return;
       setNotice({
         tone: 'error',
         content:
@@ -1099,7 +1119,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
             : txt('تعذر تصدير تقرير الأخطاء.', 'Unable to export the error report.'),
       });
     } finally {
-      setErrorExportLoading(false);
+      if(scope.isCurrent())setErrorExportLoading(false);
     }
   };
 
@@ -1528,13 +1548,13 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
               <h2 className="text-lg font-black">{txt('مجالات الاستيراد', 'Import Domains')}</h2>
               <p className="text-xs font-semibold text-slate-500">
                 {txt(
-                  'سبعة مجالات تشغيلية. كل مجال يملك قواعده وقراراته بعد التجهيز.',
-                  'Seven operational domains. Each owns its rules and decisions after staging.',
+                  `${DOMAIN_CONFIG.length} مجالات تشغيلية. كل مجال يملك قواعده وقراراته بعد التجهيز.`,
+                  `${DOMAIN_CONFIG.length} operational domains. Each owns its rules and decisions after staging.`,
                 )}
               </p>
             </div>
           </div>
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
             {DOMAIN_CONFIG.map((domain) => {
               const stat = mergedDomainOverview(domain.key);
               const capability = capabilityFor(domain.key);
@@ -1542,9 +1562,9 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
               return (
                 <article
                   key={domain.key}
-                  className={`rounded-2xl border p-4 transition hover:-translate-y-0.5 hover:shadow-md ${selectedDomain === domain.key ? 'border-[#21A7B4] bg-[#DDEFF2]/30' : 'border-[#DDEFF2] bg-white'}`}
+                  className={`min-w-0 rounded-2xl border p-4 transition hover:-translate-y-0.5 hover:shadow-md ${selectedDomain === domain.key ? 'border-[#21A7B4] bg-[#DDEFF2]/30' : 'border-[#DDEFF2] bg-white'}`}
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-3">
                       <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#142B5F] text-white">
                         <Icon className="h-5 w-5" />
