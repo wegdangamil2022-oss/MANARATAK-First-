@@ -551,6 +551,28 @@ describe('Section 02 on a new attested isolated PostgreSQL 16 database', () => {
     await expect(
       gateway.history({ ...access, imports: false }, importPage.records[0].key),
     ).rejects.toThrow('REVIEW_FORBIDDEN');
+    const withoutImports = { ...access, imports: false };
+    for (const days of [7, 30, 90, 365]) {
+      const measured = await gateway.analytics(withoutImports, days);
+      const [expected] = await db.$queryRaw<
+        Array<{ entered: bigint; completed: bigint; measured: Date | null }>
+      >`
+        SELECT count(*) FILTER(WHERE e.action IN ('OBSERVED_ENTERED','OBSERVED_REOPENED') AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days}::int)) entered,
+        count(*) FILTER(WHERE e.action='OBSERVED_COMPLETED' AND e."createdAt">=CURRENT_TIMESTAMP-make_interval(days=>${days}::int)) completed,
+        min(e."createdAt") measured FROM "ReviewWorkEvent" e JOIN "ReviewWorkCase" c ON c."key"=e."caseKey"
+        WHERE c."profileId" IS DISTINCT FROM 'import'`;
+      expect(measured.newCases).toBe(Number(expected.entered));
+      expect(measured.completed).toBe(Number(expected.completed));
+      expect(measured.measuredFrom).toBe(expected.measured?.toISOString() ?? null);
+      expect(measured.series.reduce((sum, day) => sum + day.entered, 0)).toBe(
+        Number(expected.entered),
+      );
+      expect(measured.series.reduce((sum, day) => sum + day.completed, 0)).toBe(
+        Number(expected.completed),
+      );
+      const withImports = await gateway.analytics(access, days);
+      expect(withImports.newCases).toBeGreaterThan(measured.newCases!);
+    }
     evidence.cases.allOwnerCoverage = reviewDomains;
   });
   it('does not leak owner records or history outside explicitly permitted domains', async () => {

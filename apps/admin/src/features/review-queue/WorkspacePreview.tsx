@@ -70,6 +70,7 @@ export function WorkspacePreview({
     [diffState, setDiffState] = useState(''),
     [auditReload, setAuditReload] = useState(0);
   const commandKeys = useRef(new Map<string, string>());
+  const auditAbort = useRef<AbortController | null>(null);
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     dialog.current?.focus();
@@ -168,6 +169,7 @@ export function WorkspacePreview({
     const abort = new AbortController(),
       item = ownerEvidenceItem(row),
       query = auditQuery(item, hasPermission('admin:audit:manage'));
+    auditAbort.current = abort;
     setAudit({ items: [], nextCursor: null, hasMore: false });
     setAuditState(query ? 'loading' : 'forbidden');
     setDiff([]);
@@ -262,6 +264,8 @@ export function WorkspacePreview({
     else setMessage(label(typeof ok === 'string' ? ok : 'REVIEW_UNAVAILABLE'));
   };
   const loadMoreAudit = async () => {
+    const controller = auditAbort.current;
+    if (!controller || controller.signal.aborted) return;
     const query = auditQuery(
       ownerEvidenceItem(row),
       hasPermission('admin:audit:manage'),
@@ -271,12 +275,14 @@ export function WorkspacePreview({
     setAuditState('loading');
     try {
       const next = parseAuditPreview(
-        await adminApiClient.request(query, { cache: 'no-store' }),
+        await adminApiClient.request(query, { cache: 'no-store', signal: controller.signal }),
         ownerEvidenceItem(row),
       );
+      if (controller.signal.aborted || controller !== auditAbort.current) return;
       setAudit((previous) => ({ ...next, items: [...previous.items, ...next.items].slice(-120) }));
       setAuditState('ready');
     } catch (error) {
+      if (controller.signal.aborted || controller !== auditAbort.current) return;
       setAudit({ items: [], nextCursor: null, hasMore: false });
       setAuditState(/\[(401|403)\]/.test(String(error)) ? 'forbidden' : 'unavailable');
     }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import {
   ClipboardCheck,
   RefreshCw,
@@ -32,26 +32,32 @@ import { WorkspaceFilters } from './WorkspaceFilters';
 import { WorkspaceAnalytics } from './WorkspaceAnalytics';
 import { WorkspaceSources } from './WorkspaceSources';
 import { WorkspacePreview } from './WorkspacePreview';
-import { workRequest, parseWorkspacePage, cleanWorkspaceFilters } from './WorkspaceData';
+import {
+  workRequest,
+  parseWorkspacePage,
+  cleanWorkspaceFilters,
+  workspaceUrlFilters,
+  workspaceNavigationSearch,
+  reviewCoordinationPermission,
+} from './WorkspaceData';
 import { displayDate, labelFor, textFor, workspaceError } from './WorkspaceText';
 import './review-workspace.css';
 
 export function ReviewWorkspacePage() {
   const { language, dir } = useTranslation(),
     { permissions, hasPermission } = useAdminAuthorization(),
-    [params, setParams] = useSearchParams();
+    [params, setParams] = useSearchParams(),
+    location = useLocation();
   const tr = textFor(language),
     label = labelFor(language),
     permissionKey = [...permissions].sort().join('|');
   const [tab, setTab] = useState('records'),
     [query, setQuery] = useState<ReviewQuery>(() => ({
-      domain: (params.get('domain') as ReviewOwner) || undefined,
-      reason: params.get('reason') || undefined,
-      view: params.get('view') || undefined,
+      ...workspaceUrlFilters(params),
       pageSize: 25,
     })),
-    [search, setSearch] = useState(''),
-    [debounced, setDebounced] = useState('');
+    [search, setSearch] = useState(() => workspaceNavigationSearch(location.state)),
+    [debounced, setDebounced] = useState(() => workspaceNavigationSearch(location.state));
   const [data, setData] = useState<ReviewPage | null>(null),
     [loading, setLoading] = useState(false),
     [error, setError] = useState(''),
@@ -62,6 +68,9 @@ export function ReviewWorkspacePage() {
     [selectedKey, setSelectedKey] = useState<string | null>(null),
     [selectedKeys, setSelectedKeys] = useState<string[]>([]),
     [views, setViews] = useState<ReviewSavedView[]>([]),
+    [traversalScope, setTraversalScope] = useState(permissionKey),
+    [reviewerState, setReviewerState] = useState('loading'),
+    [reviewerReload, setReviewerReload] = useState(0),
     [reviewers, setReviewers] = useState<Array<{ id: string; label: string; kind: string }>>([]),
     [cursors, setCursors] = useState<Array<string | undefined>>([undefined]),
     [page, setPage] = useState(0),
@@ -74,34 +83,36 @@ export function ReviewWorkspacePage() {
   const snapshot = useRef<string | undefined>(undefined),
     requestGeneration = useRef(0),
     pendingSelection = useRef<'first' | 'last' | null>(null),
-    syncBusy = useRef(false);
+    syncBusy = useRef(false),
+    lastUrl = useRef(params.toString()),
+    pendingUrl = useRef<string | null>(null);
+  const externalUrlChange =
+    params.toString() !== lastUrl.current && params.toString() !== pendingUrl.current;
   const canCoordinate = hasPermission('admin:platform:manage');
   useEffect(() => {
     const abort = new AbortController();
     setReviewers([]);
+    setReviewerState('loading');
     void workRequest<typeof reviewers>(
       '/reviewers' + (query.domain ? '?domain=' + query.domain : ''),
       undefined,
       abort.signal,
     )
       .then((value) => {
-        if (!abort.signal.aborted) setReviewers(value);
+        if (!abort.signal.aborted) {
+          setReviewers(value);
+          setReviewerState('ready');
+        }
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!abort.signal.aborted) setReviewerState('unavailable');
+      });
     return () => abort.abort();
-  }, [query.domain, permissionKey]);
+  }, [query.domain, permissionKey, reviewerReload]);
   const canWork = (row: ReviewRecord) =>
     row.profileId !== 'import' &&
     canCoordinate &&
-    hasPermission(
-      row.domain === 'cms'
-        ? 'admin:cms:review'
-        : row.domain === 'study-destinations'
-          ? 'admin:study-destinations:edit'
-          : row.domain === 'tests'
-            ? 'admin:international-tests:manage'
-            : 'admin:' + row.domain + ':manage',
-    );
+    hasPermission(reviewCoordinationPermission(row.domain));
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(search.trim()), 300);
     return () => clearTimeout(timer);
@@ -112,26 +123,54 @@ export function ReviewWorkspacePage() {
     setSelectedKeys([]);
     setViews([]);
     snapshot.current = undefined;
+    pendingSelection.current = null;
+    setPage(0);
+    setCursors((prior) => (prior.length === 1 && prior[0] === undefined ? prior : [undefined]));
+    setBulkResults([]);
+    setBulkReason('');
+    setBulkAssignee('');
+    setBulkPriority('');
+    setTraversalScope(permissionKey);
   }, [permissionKey]);
   useEffect(() => {
     const abort = new AbortController();
     void workRequest<ReviewSavedView[]>('/views', undefined, abort.signal)
-      .then(setViews)
+      .then((value) => {
+        if (!abort.signal.aborted) setViews(value);
+      })
       .catch(() => {});
     return () => abort.abort();
   }, [permissionKey]);
-  useEffect(() => {
-    const safe = new URLSearchParams();
-    for (const key of ['domain', 'reason', 'view'] as const)
-      if (query[key] && query[key] !== 'all') safe.set(key, String(query[key]));
-    if (params.toString() !== safe.toString()) setParams(safe, { replace: true });
-  }, [query, params, setParams]);
   const resetTraversal = useCallback(() => {
     snapshot.current = undefined;
     setPage(0);
     setCursors((prior) => (prior.length === 1 && prior[0] === undefined ? prior : [undefined]));
     setSelectedKeys([]);
   }, []);
+  useEffect(() => {
+    const current = params.toString();
+    if (current === pendingUrl.current) {
+      lastUrl.current = current;
+      pendingUrl.current = null;
+    }
+    if (current !== lastUrl.current) {
+      lastUrl.current = current;
+      pendingUrl.current = null;
+      resetTraversal();
+      const contextSearch = workspaceNavigationSearch(location.state);
+      setSearch(contextSearch);
+      setDebounced(contextSearch);
+      setQuery({ pageSize: 25, ...workspaceUrlFilters(params) });
+      return;
+    }
+    const safe = new URLSearchParams();
+    for (const key of ['domain', 'reason', 'view'] as const)
+      if (query[key] && query[key] !== 'all') safe.set(key, String(query[key]));
+    if (current !== safe.toString() && pendingUrl.current !== safe.toString()) {
+      pendingUrl.current = safe.toString();
+      setParams(safe, { replace: true });
+    }
+  }, [query, params, setParams, resetTraversal, location.state]);
   const change = useCallback(
     (key: keyof ReviewQuery, value: string) => {
       resetTraversal();
@@ -151,6 +190,7 @@ export function ReviewWorkspacePage() {
     resetTraversal();
   }, [debounced, resetTraversal]);
   useEffect(() => {
+    if (traversalScope !== permissionKey || externalUrlChange) return;
     const abort = new AbortController(),
       generation = ++requestGeneration.current;
     setLoading(true);
@@ -189,7 +229,7 @@ export function ReviewWorkspacePage() {
         if (!abort.signal.aborted && generation === requestGeneration.current) setLoading(false);
       });
     return () => abort.abort();
-  }, [query, debounced, page, refresh, permissionKey, cursors]);
+  }, [query, debounced, page, refresh, permissionKey, cursors, traversalScope, externalUrlChange]);
   const synchronize = useCallback(
     async (domain?: ReviewOwner) => {
       if (syncBusy.current) return;
@@ -283,12 +323,21 @@ export function ReviewWorkspacePage() {
   };
   const closePreview = useCallback(() => setSelectedKey(null), []);
   const bulk = async (action: 'priority' | 'assign') => {
-    if (!selectedKeys.length || bulkReason.trim().length < 5) return;
+    if (loading || syncing || mutating || !selectedKeys.length || bulkReason.trim().length < 5)
+      return;
+    if (
+      action === 'assign' &&
+      (reviewerState !== 'ready' ||
+        !bulkAssignee ||
+        (bulkAssignee !== 'unassigned' &&
+          !reviewers.some((person) => person.kind + ':' + person.id === bulkAssignee)))
+    )
+      return;
     setMutating(true);
     setBulkResults([]);
     try {
       const commands = records
-        .filter((row) => selectedKeys.includes(row.key))
+        .filter((row) => selectedKeys.includes(row.key) && canWork(row) && row.version > 0)
         .map((row) => ({
           key: row.key,
           version: row.version,
@@ -308,6 +357,12 @@ export function ReviewWorkspacePage() {
       reload();
     } catch (cause) {
       setError(workspaceError(cause));
+      if (/\[(401|403)\]/.test(String(cause))) {
+        setData(null);
+        setSelectedKey(null);
+        setSelectedKeys([]);
+        setBulkResults([]);
+      }
     } finally {
       setMutating(false);
     }
@@ -493,6 +548,19 @@ export function ReviewWorkspacePage() {
             canCoordinate={canCoordinate}
             reviewers={reviewers}
           />
+          {reviewerState === 'unavailable' ? (
+            <div className="rw-alert" role="alert">
+              <p>
+                {tr(
+                  'تعذرت قراءة المراجعين. الإسناد الجماعي متوقف حتى إعادة المحاولة.',
+                  'Reviewers could not be loaded. Bulk assignment is disabled until retry succeeds.',
+                )}
+              </p>
+              <button onClick={() => setReviewerReload((value) => value + 1)}>
+                {tr('إعادة تحميل قائمة المراجعين', 'Retry reviewer list')}
+              </button>
+            </div>
+          ) : null}
           {data?.coverage === 'partial' ? (
             <p className="rw-coverage">
               <AlertTriangle aria-hidden="true" />
@@ -557,7 +625,9 @@ export function ReviewWorkspacePage() {
                   </select>
                 </label>
                 <button
-                  disabled={mutating || !bulkPriority || bulkReason.trim().length < 5}
+                  disabled={
+                    loading || syncing || mutating || !bulkPriority || bulkReason.trim().length < 5
+                  }
                   onClick={() => void bulk('priority')}
                 >
                   {tr('تطبيق الأولوية', 'Apply priority')}
@@ -568,7 +638,8 @@ export function ReviewWorkspacePage() {
                     value={bulkAssignee}
                     onChange={(event) => setBulkAssignee(event.target.value)}
                   >
-                    <option value="">{tr('غير مسندة', 'Unassigned')}</option>
+                    <option value="">{tr('اختر الإسناد', 'Choose assignment')}</option>
+                    <option value="unassigned">{tr('إزالة الإسناد', 'Remove assignment')}</option>
                     {reviewers.map((person) => (
                       <option key={person.kind + person.id} value={person.kind + ':' + person.id}>
                         {person.label}
@@ -578,7 +649,14 @@ export function ReviewWorkspacePage() {
                   </select>
                 </label>
                 <button
-                  disabled={mutating || bulkReason.trim().length < 5}
+                  disabled={
+                    loading ||
+                    syncing ||
+                    mutating ||
+                    reviewerState !== 'ready' ||
+                    !bulkAssignee ||
+                    bulkReason.trim().length < 5
+                  }
                   onClick={() => void bulk('assign')}
                 >
                   {tr('تطبيق الإسناد', 'Apply assignment')}
@@ -743,6 +821,7 @@ export function ReviewWorkspacePage() {
       {tab === 'analytics' ? (
         <section id="rw-content-analytics" role="tabpanel" aria-labelledby="rw-tab-analytics">
           <WorkspaceAnalytics
+            key={permissionKey}
             language={language}
             refresh={refresh}
             filter={(value) => {
@@ -756,11 +835,13 @@ export function ReviewWorkspacePage() {
       {tab === 'sources' ? (
         <section id="rw-content-sources" role="tabpanel" aria-labelledby="rw-tab-sources">
           <WorkspaceSources
+            key={permissionKey}
             language={language}
             sources={data?.sources ?? []}
             synchronize={synchronize}
             busy={syncing}
             canCoordinate={canCoordinate}
+            canApprove={(domain) => hasPermission(reviewCoordinationPermission(domain))}
           />
         </section>
       ) : null}

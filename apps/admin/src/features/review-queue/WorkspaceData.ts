@@ -1,5 +1,45 @@
-import type { ReviewPage, ReviewQuery, ReviewRecord } from '@manaratak/shared';
+import type { ReviewPage, ReviewQuery, ReviewRecord, ReviewOwner } from '@manaratak/shared';
 import { adminApiClient, createAdminIdempotencyKey } from '../../api/client';
+import { reviewDomains, reviewReasons } from '@manaratak/shared';
+export function reviewCoordinationPermission(domain: ReviewOwner): string {
+  return domain === 'cms'
+    ? 'admin:cms:review'
+    : domain === 'study-destinations'
+      ? 'admin:study-destinations:edit'
+      : domain === 'tests'
+        ? 'admin:international-tests:manage'
+        : 'admin:' + domain + ':manage';
+}
+export function workspaceUrlFilters(params: URLSearchParams): ReviewQuery {
+  const domain = params.get('domain'),
+    reason = params.get('reason'),
+    view = params.get('view');
+  return {
+    domain: reviewDomains.find((value) => value === domain),
+    reason: reviewReasons.find((value) => value === reason),
+    view: [
+      'all',
+      'mine',
+      'unassigned',
+      'urgent',
+      'overdue',
+      'near_due',
+      'ready',
+      'translation',
+      'source',
+    ].find((value) => value === view),
+  };
+}
+export function workspaceNavigationSearch(state: unknown): string {
+  const value =
+    state && typeof state === 'object' && 'reviewSearch' in state ? state.reviewSearch : undefined;
+  return typeof value === 'string'
+    ? value
+        .replace(/[\u0000-\u001f\u007f]/g, '')
+        .trim()
+        .slice(0, 200)
+    : '';
+}
 export const workRequest = <T>(path: string, body?: unknown, signal?: AbortSignal) =>
   adminApiClient.request<T>('/admin/review-workspace' + path, {
     cache: 'no-store',

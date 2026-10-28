@@ -635,7 +635,7 @@ export function UniversityRelationshipEditorPage() {
             {ar ? (universityIssueLabels[code] ?? code) : code}
           </p>
         ))}
-        <Link to={'/review-queue?search=' + encodeURIComponent(u.publicId)}>
+        <Link to="/review-queue?domain=universities" state={{ reviewSearch: u.publicId }}>
           {ar ? 'فتح سجل المراجعة' : 'Open review workspace'}
         </Link>{' '}
         ·{' '}

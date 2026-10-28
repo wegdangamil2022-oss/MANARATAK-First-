@@ -9,12 +9,14 @@ export function WorkspaceSources({
   synchronize,
   busy,
   canCoordinate,
+  canApprove,
 }: {
   language: string;
   sources: ReviewSourceStatus[];
   synchronize: (domain?: ReviewOwner) => Promise<void>;
   busy: boolean;
   canCoordinate: boolean;
+  canApprove: (domain: ReviewOwner) => boolean;
 }) {
   const tr = textFor(language),
     label = labelFor(language),
@@ -28,9 +30,10 @@ export function WorkspaceSources({
     [policyReload, setPolicyReload] = useState(0),
     [message, setMessage] = useState('');
   const allowedSources = sources.filter((source) => source.state !== 'forbidden');
-  const selectedDomain = allowedSources.some((source) => source.domain === domain)
+  const policySources = allowedSources.filter((source) => canApprove(source.domain));
+  const selectedDomain = policySources.some((source) => source.domain === domain)
     ? domain
-    : allowedSources[0]?.domain;
+    : policySources[0]?.domain;
   useEffect(() => {
     const abort = new AbortController();
     setPolicyState('loading');
@@ -61,7 +64,7 @@ export function WorkspaceSources({
         warningHours: Number(warning),
         reason,
       });
-      setPolicies((prior) => [...prior.filter((p) => p.domain !== domain), policy]);
+      setPolicies((prior) => [...prior.filter((p) => p.domain !== policy.domain), policy]);
       setMessage(
         tr(
           'اعتمدت السياسة للدورات الجديدة فقط. المهل القديمة محفوظة.',
@@ -193,7 +196,7 @@ export function WorkspaceSources({
                 value={selectedDomain}
                 onChange={(event) => setDomain(event.target.value as ReviewOwner)}
               >
-                {allowedSources.map((source) => (
+                {policySources.map((source) => (
                   <option key={source.domain} value={source.domain}>
                     {label(source.domain)}
                   </option>
