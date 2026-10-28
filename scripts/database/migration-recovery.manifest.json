@@ -572,6 +572,21 @@
       "recoveryClass": "FORWARD_FIX_ONLY",
       "artifact": "docs/operations/COURSE_CONTENT_BLOCKS_MIGRATION_RECOVERY.md",
       "decision": "Additive course lecture blocks and indexes. Retain blocks, references and audit on application rollback; never drop populated teaching content. Restore the pre-activation backup only under an explicit recovery decision. Shared-target execution requires explicit owner authorization, backup, exact target/role verification and the existing mutation gate."
+    },
+    "20261028000100_staff_draft_organization": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Preserve organization drafts, employee bindings and revision history; do not drop populated organization storage. Source classification only, not execution approval. Shared targets require a verified compatible pre-mutation backup, reconciliation of subsequent writes and separate restore or forward-fix authorization. Fresh attested disposable targets may be reprovisioned under the existing policy. No destructive down SQL is authorized."
+    },
+    "20261028000200_student_support_cases": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Preserve private support cases, participants, messages, attachments, audit and outbox receipts; do not delete conversation evidence. Source classification only, not execution approval. Shared targets require a verified compatible pre-mutation backup, reconciliation of subsequent writes and separate restore or forward-fix authorization. Fresh attested disposable targets may be reprovisioned under the existing policy. No destructive down SQL is authorized."
+    },
+    "20261028000300_staff_lifecycle": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Preserve invitation token hashes, activation and departure decisions, approvals and lifecycle history; never reactivate a departed identity or reset MFA as recovery. Source classification only, not execution approval. Shared targets require a verified compatible pre-mutation backup, reconciliation of subsequent writes and separate restore or forward-fix authorization. Fresh attested disposable targets may be reprovisioned under the existing policy. No destructive down SQL is authorized."
     }
   }
 }
