@@ -1,32 +1,34 @@
 import { useEffect, useRef, useState } from 'react';
 import { adminApiClient, createAdminIdempotencyKey } from '../../api/client';
-export function useNotificationRead<T>(endpoint: string | null) {
-  const [data, setData] = useState<T | null>(null),
-    [error, setError] = useState<unknown>(null),
-    [loading, setLoading] = useState(Boolean(endpoint)),
-    [revision, setRevision] = useState(0);
+export function useNotificationRead<T>(endpoint: string | null, revision = 0) {
+  const [reload, setReload] = useState(0);
+  const key = `${endpoint ?? ''}:${revision}:${reload}`;
+  const [state, setState] = useState<{
+    key: string;
+    data: T | null;
+    error: unknown;
+    loading: boolean;
+  }>({ key, data: null, error: null, loading: Boolean(endpoint) });
   useEffect(() => {
-    let active = true;
-    setData(null);
-    setError(null);
-    setLoading(Boolean(endpoint));
+    const abort = new AbortController();
+    setState({ key, data: null, error: null, loading: Boolean(endpoint) });
     if (endpoint)
       void adminApiClient
-        .request<T>(endpoint)
+        .request<T>(endpoint, { signal: abort.signal, cache: 'no-store' })
         .then((value) => {
-          if (active) setData(value);
+          if (!abort.signal.aborted) setState({ key, data: value, error: null, loading: false });
         })
         .catch((reason) => {
-          if (active) setError(reason);
-        })
-        .finally(() => {
-          if (active) setLoading(false);
+          if (!abort.signal.aborted) setState({ key, data: null, error: reason, loading: false });
         });
     return () => {
-      active = false;
+      abort.abort();
     };
-  }, [endpoint, revision]);
-  return { data, error, loading, refresh: () => setRevision((value) => value + 1) };
+  }, [endpoint, key]);
+  return {
+    ...(state.key === key ? state : { data: null, error: null, loading: Boolean(endpoint) }),
+    refresh: () => setReload((value) => value + 1),
+  };
 }
 export function useDebounced(value: string, delay = 400) {
   const [current, setCurrent] = useState(value);
@@ -68,6 +70,7 @@ export function useNotificationCommand() {
         body: pending.current.body,
         headers: { 'Idempotency-Key': pending.current.key },
       });
+      if (!alive.current) return undefined;
       pending.current = null;
       if (alive.current) setUncertain(false);
       return result;

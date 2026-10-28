@@ -60,6 +60,20 @@ afterEach(async () => {
   vi.useRealTimers();
 });
 describe('Notification read and preview request provenance', () => {
+  it('refreshes both list and summary for an unchanged custom date interval', async () => {
+    await mount('/notifications?period=custom&from=2026-10-20&to=2026-10-21');
+    const lists = () =>
+      state.request.mock.calls.filter(([path]) => path.startsWith('/notifications/intents?'));
+    const summaries = () =>
+      state.request.mock.calls.filter(([path]) => path.startsWith('/notifications/summary?'));
+    const oldList = lists().length,
+      oldSummary = summaries().length;
+    expect(oldList).toBeGreaterThan(0);
+    await act(async () => buttons('Refresh data')[0].props.onClick());
+    expect(lists()).toHaveLength(oldList + 1);
+    expect(summaries()).toHaveLength(oldSummary + 1);
+    expect(lists().at(-1)![0]).toBe(lists().at(-2)![0]);
+  });
   it('discards a late preview when structured sample values change', async () => {
     let resolve!: (v: unknown) => void;
     state.request.mockReturnValue(
@@ -199,6 +213,32 @@ describe('Notification workspace navigation and independence', () => {
   });
 });
 describe('Notification mutation idempotency', () => {
+  it('does not return an accepted result after its owning editor has unmounted', async () => {
+    let command!: ReturnType<typeof useNotificationCommand>, finish!: (value: unknown) => void;
+    function Probe() {
+      command = useNotificationCommand();
+      return null;
+    }
+    await act(async () => {
+      tree = create(<Probe />);
+    });
+    state.request.mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+    let pending!: Promise<unknown>;
+    await act(async () => {
+      pending = command.execute('/notifications/templates', { id: 'manual.new' });
+    });
+    await act(async () => tree.unmount());
+    let result: unknown;
+    await act(async () => {
+      finish({ id: 'manual.new' });
+      result = await pending;
+    });
+    expect(result).toBeUndefined();
+  });
   it('locks an uncertain body and retries with exactly the same key, without automatic resend', async () => {
     let command!: ReturnType<typeof useNotificationCommand>;
     function Probe() {

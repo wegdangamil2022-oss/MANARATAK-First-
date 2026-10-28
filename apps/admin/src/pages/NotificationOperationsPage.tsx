@@ -28,6 +28,15 @@ export function NotificationOperationsPage() {
     create =
       hasPermission('admin:notifications:intents:create') &&
       hasPermission('admin:notifications:recipients:pii');
+  const permissionScope = [
+    'templates:author',
+    'intents:create',
+    'recipients:pii',
+    'delivery:retry',
+    'intents:cancel',
+  ]
+    .map((action) => String(hasPermission('admin:notifications:' + action)))
+    .join(':');
   const tab = path.includes('/templates/')
     ? 'templates'
     : params.get('tab') === 'templates'
@@ -51,7 +60,7 @@ export function NotificationOperationsPage() {
       );
   else if (path === '/notifications/new')
     content = create ? (
-      <NotificationIntentCreate ar={ar} />
+      <NotificationIntentCreate key={permissionScope} ar={ar} />
     ) : (
       <p role="alert">
         {c(
@@ -62,17 +71,25 @@ export function NotificationOperationsPage() {
     );
   else if (path === '/notifications/templates/new')
     content = author ? (
-      <NotificationTemplateEditor ar={ar} />
+      <NotificationTemplateEditor key={`${params.get('from') ?? ''}:${permissionScope}`} ar={ar} />
     ) : (
       <p role="alert">{c('يلزم إذن تأليف القوالب.', 'Template author permission is required.')}</p>
     );
   else if (intent)
     content = (
-      <NotificationIntentDetails key={intent[1]} id={decodeURIComponent(intent[1])} ar={ar} />
+      <NotificationIntentDetails
+        key={intent[1] + permissionScope}
+        id={decodeURIComponent(intent[1])}
+        ar={ar}
+      />
     );
   else if (template)
     content = (
-      <NotificationTemplateDetails key={template[1]} id={decodeURIComponent(template[1])} ar={ar} />
+      <NotificationTemplateDetails
+        key={template[1] + permissionScope}
+        id={decodeURIComponent(template[1])}
+        ar={ar}
+      />
     );
   else
     content = (
@@ -112,7 +129,10 @@ export function NotificationOperationsPage() {
           )}
         </div>
       </header>
-      <nav className="notification-tabs admin-section-navigation" aria-label={c('مساحات الإشعارات', 'Notification areas')}>
+      <nav
+        className="notification-tabs admin-section-navigation"
+        aria-label={c('مساحات الإشعارات', 'Notification areas')}
+      >
         {[
           ['log', c('سجل الإشعارات', 'Notification log'), Bell],
           ['templates', c('قوالب الإشعارات', 'Templates'), FileText],

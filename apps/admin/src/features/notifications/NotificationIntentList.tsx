@@ -56,10 +56,14 @@ export function NotificationIntentList({
     ...(recipient ? { recipientReference: recipient } : {}),
     ...(window ?? {}),
   });
-  const list = useNotificationRead<Page<Intent>>(window ? '/notifications/intents?' + query : null);
-  // Endpoint refresh is represented in component identity by the shell, never sent as an API filter.
+  const list = useNotificationRead<Page<Intent>>(
+    window ? '/notifications/intents?' + query : null,
+    revision,
+  );
+  // Refresh fixed date ranges without adding a synthetic API filter.
   const summary = useNotificationRead<Summary>(
     window ? '/notifications/summary?' + new URLSearchParams(window) : null,
+    revision,
   );
   const set = (key: string, value: string) =>
     setParams(
