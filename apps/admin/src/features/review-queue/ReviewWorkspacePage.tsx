@@ -84,6 +84,7 @@ export function ReviewWorkspacePage() {
     requestGeneration = useRef(0),
     pendingSelection = useRef<'first' | 'last' | null>(null),
     syncBusy = useRef(false),
+    mutationGeneration = useRef(0),
     lastUrl = useRef(params.toString()),
     pendingUrl = useRef<string | null>(null);
   const externalUrlChange =
@@ -118,6 +119,8 @@ export function ReviewWorkspacePage() {
     return () => clearTimeout(timer);
   }, [search]);
   useEffect(() => {
+    const generation = mutationGeneration.current + 1;
+    mutationGeneration.current = generation;
     setData(null);
     setSelectedKey(null);
     setSelectedKeys([]);
@@ -131,6 +134,7 @@ export function ReviewWorkspacePage() {
     setBulkAssignee('');
     setBulkPriority('');
     setTraversalScope(permissionKey);
+    return () => { mutationGeneration.current = generation + 1; };
   }, [permissionKey]);
   useEffect(() => {
     const abort = new AbortController();
@@ -234,13 +238,16 @@ export function ReviewWorkspacePage() {
     async (domain?: ReviewOwner) => {
       if (syncBusy.current) return;
       syncBusy.current = true;
+      const generation = mutationGeneration.current;
       setSyncing(true);
       setError('');
       try {
         await workRequest('/synchronize', domain ? { domain } : {});
+        if (generation !== mutationGeneration.current) return;
         resetTraversal();
         setRefresh((value) => value + 1);
       } catch (cause) {
+        if (generation !== mutationGeneration.current) return;
         setError(workspaceError(cause));
         if (/\[(401|403)\]/.test(String(cause))) {
           setData(null);
@@ -267,14 +274,17 @@ export function ReviewWorkspacePage() {
     return () => window.removeEventListener('focus', focus);
   }, [resetTraversal]);
   const runCommand = async (command: ReviewCommand) => {
+    const generation = mutationGeneration.current;
     setMutating(true);
     setStatus('');
     try {
       await workRequest('/commands', command);
+      if (generation !== mutationGeneration.current) return false;
       setStatus(tr('حُفظ التغيير بنجاح.', 'Change saved.'));
       reload();
       return true;
     } catch (cause) {
+      if (generation !== mutationGeneration.current) return false;
       setError(workspaceError(cause));
       if (/\[(401|403)\]/.test(String(cause))) {
         setData(null);
@@ -287,15 +297,20 @@ export function ReviewWorkspacePage() {
     }
   };
   const saveView = async (name: string, shared: boolean) => {
+    const generation = mutationGeneration.current;
     try {
       await workRequest('/views', {
         name,
         shared,
         filters: cleanWorkspaceFilters({ ...query, search: undefined }),
       });
-      setViews(await workRequest('/views'));
+      if (generation !== mutationGeneration.current) return;
+      const currentViews = await workRequest<ReviewSavedView[]>('/views');
+      if (generation !== mutationGeneration.current) return;
+      setViews(currentViews);
       setStatus(tr('حُفظ العرض دون نص البحث.', 'View saved without search text.'));
     } catch (cause) {
+      if (generation !== mutationGeneration.current) return;
       setError(workspaceError(cause));
     }
   };
@@ -335,6 +350,7 @@ export function ReviewWorkspacePage() {
       return;
     setMutating(true);
     setBulkResults([]);
+    const generation = mutationGeneration.current;
     try {
       const commands = records
         .filter((row) => selectedKeys.includes(row.key) && canWork(row) && row.version > 0)
@@ -353,9 +369,11 @@ export function ReviewWorkspacePage() {
               }),
         }));
       const result = await workRequest<{ results: typeof bulkResults }>('/bulk', { commands });
+      if (generation !== mutationGeneration.current) return;
       setBulkResults(result.results);
       reload();
     } catch (cause) {
+      if (generation !== mutationGeneration.current) return;
       setError(workspaceError(cause));
       if (/\[(401|403)\]/.test(String(cause))) {
         setData(null);

@@ -22,6 +22,7 @@ vi.mock('../../src/security/AdminAuthorizationContext', () => ({
   }),
 }));
 import { AdminReviewQueuePage } from '../../src/pages/AdminReviewQueuePage';
+import { WorkspaceFilters } from '../../src/features/review-queue/WorkspaceFilters';
 import {
   parseWorkspacePage,
   workspaceUrlFilters,
@@ -235,6 +236,44 @@ describe('Server-wide review queue interaction and session safety', () => {
     );
     await act(async () => button('More filters').props.onClick());
     expect(JSON.stringify(tree.toJSON())).not.toContain('OLD-SCOPE-VIEW');
+  });
+  it('ignores a late bulk result after the owner permission scope changes', async () => {
+    let finish!: (value: unknown) => void;
+    state.request.mockImplementation(async (path: string) => {
+      if (path.endsWith('/query')) return page();
+      if (path.endsWith('/bulk')) return new Promise(resolve => { finish = resolve; });
+      return [];
+    });
+    await mount();
+    await act(async () => tree.root.findAllByType('input').find(node => node.props.type === 'checkbox')!.props.onChange({target:{checked:true}}));
+    const bulk = tree.root.findByProps({className:'rw-bulk'});
+    await act(async () => {
+      bulk.findByType('input').props.onChange({target:{value:'Explicit isolated change'}});
+      bulk.findAllByType('select')[0].props.onChange({target:{value:'high'}});
+    });
+    await act(async () => { void button('Apply priority').props.onClick(); });
+    state.permissions = ['admin:platform:manage','admin:courses:manage'];
+    await act(async () => tree.update(<MemoryRouter><AdminReviewQueuePage /></MemoryRouter>));
+    state.request.mockClear();
+    await act(async () => finish({results:[{key:'OLD-PRIVATE-CASE',ok:true}]}));
+    expect(JSON.stringify(tree.toJSON())).not.toContain('OLD-PRIVATE-CASE');
+    expect(queries()).toHaveLength(0);
+  });
+  it('ignores saved-view readback completed under a previous permission scope', async () => {
+    let finish!: (value: unknown) => void, readback = false;
+    state.request.mockImplementation(async (path: string, options: {method?:string}) => {
+      if (path.endsWith('/query')) return page();
+      if (path.endsWith('/views') && options.method === 'POST') { readback = true; return {}; }
+      if (path.endsWith('/views') && readback) { readback = false; return new Promise(resolve => { finish = resolve; }); }
+      return [];
+    });
+    await mount();
+    await act(async () => { void tree.root.findByType(WorkspaceFilters).props.saveView('Private old view',false); });
+    state.permissions = ['admin:platform:manage','admin:courses:manage'];
+    await act(async () => tree.update(<MemoryRouter><AdminReviewQueuePage /></MemoryRouter>));
+    await act(async () => finish([{id:'private',name:'OLD-PRIVATE-VIEW',shared:false,filters:{domain:'scholarships'}}]));
+    await act(async () => button('More filters').props.onClick());
+    expect(JSON.stringify(tree.toJSON())).not.toContain('OLD-PRIVATE-VIEW');
   });
   it('cannot mix a late audit continuation into another record preview', async () => {
     let resolveOld!: (value: unknown) => void;
