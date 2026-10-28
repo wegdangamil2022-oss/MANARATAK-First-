@@ -149,6 +149,10 @@ describe('Translation workspace lightweight component interactions', () => {
     await act(async () => {
       tree.root
         .findAllByType('input')
+        .find((node) => node.props.dir === 'rtl')!
+        .props.onChange({ target: { value: 'محفوظ' } });
+      tree.root
+        .findAllByType('input')
         .find((node) => node.props.dir === 'ltr')!
         .props.onChange({ target: { value: 'Unsaved English' } });
     });
@@ -185,6 +189,49 @@ describe('Translation workspace lightweight component interactions', () => {
     expect(
       controls.request.mock.calls.filter(([_url, options]) => options?.method === 'PATCH'),
     ).toHaveLength(1);
+  });
+  it('rejects an accepted save whose readback still has the old submitted name', async () => {
+    controls.canWrite = true;
+    controls.request.mockImplementation(async (url: string, options?: any) =>
+      url.includes('/workspace?') ? page([row]) : options?.method ? {} : row,
+    );
+    await mount();
+    await selectFirst();
+    await act(async () =>
+      tree.root
+        .findAllByType('input')
+        .find((node) => node.props.dir === 'rtl')!
+        .props.onChange({ target: { value: 'اسم جديد' } }),
+    );
+    await act(async () => saveButtons()[0].props.onClick());
+    expect(JSON.stringify(tree.toJSON())).toContain('TRANSLATION_SAVE_READBACK_MISMATCH');
+    expect(
+      tree.root.findAllByType('input').find((node) => node.props.dir === 'rtl')!.props.value,
+    ).toBe('اسم جديد');
+    await act(async () => saveButtons()[0].props.onClick());
+    expect(controls.request.mock.calls.filter(([, options]) => options?.method)).toHaveLength(1);
+  });
+  it('ignores a successful command after its translation workspace unmounts', async () => {
+    controls.canWrite = true;
+    let finish!: (value: unknown) => void;
+    controls.request.mockImplementation(async (url: string, options?: any) =>
+      options?.method
+        ? new Promise((resolve) => {
+            finish = resolve;
+          })
+        : url.includes('/workspace?')
+          ? page([row])
+          : row,
+    );
+    await mount();
+    await selectFirst();
+    await act(async () => {
+      void saveButtons()[0].props.onClick();
+    });
+    const count = controls.request.mock.calls.length;
+    await act(async () => tree.unmount());
+    await act(async () => finish({}));
+    expect(controls.request.mock.calls).toHaveLength(count);
   });
   it('uses server-wide totals and server name coverage instead of a loaded-page fallback', async () => {
     controls.request.mockResolvedValue({

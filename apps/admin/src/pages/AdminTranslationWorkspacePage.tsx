@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 import { useTranslationOwnerCapabilities } from '../features/translations/useTranslationOwnerCapabilities';
 import {
   translationWorkspaceState,
@@ -77,6 +78,9 @@ export function AdminTranslationWorkspacePage() {
   const domain =
     !params.has('domain') && allowedDomains.length ? allowedDomains[0].key : queryState.domain;
   const canReadSelected = allowedDomains.some((item) => item.key === domain);
+  const scope = useOwnerOperationScope(
+    `${domain}:${params.toString()}:${canReadSelected}:${capabilities.data?.map((item) => `${item.key}:${hasPermission(item.permission)}`).join('|')}`,
+  );
   const {
     coverage: coverageFilter,
     search,
@@ -154,6 +158,9 @@ export function AdminTranslationWorkspacePage() {
   const contentAuthoringEnabled = canAuthorDomainTranslations(domain);
 
   const load = useCallback(async () => {
+    if (!scope.isCurrent()) return;
+    mutationBusy.current = false;
+    setSaving(null);
     const generation = ++listGeneration.current;
     listAbort.current?.abort();
     detailAbort.current?.abort();
@@ -245,6 +252,7 @@ export function AdminTranslationWorkspacePage() {
     activeTab,
     language,
     setPage,
+    scope,
   ]);
 
   useEffect(() => {
@@ -368,7 +376,15 @@ export function AdminTranslationWorkspacePage() {
   };
 
   const saveLocale = async (locale: SupportedLocale) => {
-    if (!selected || !draft || mutationBusy.current || detailLoading || loading || readbackFailed)
+    if (
+      !scope.isCurrent() ||
+      !selected ||
+      !draft ||
+      mutationBusy.current ||
+      detailLoading ||
+      loading ||
+      readbackFailed
+    )
       return;
     if (!contentAuthoringEnabled) {
       setSaveError(t('translation_content_writes_blocked'));
@@ -379,6 +395,8 @@ export function AdminTranslationWorkspacePage() {
     setSaveError(null);
     setNotice(null);
     let written = false;
+    const generation = detailGeneration.current;
+    const isCurrent = () => scope.isCurrent() && generation === detailGeneration.current;
     const submittedDraft = draft;
     try {
       const localizedName = (locale === 'ar' ? draft.arName : draft.enName).trim() || null;
@@ -411,12 +429,23 @@ export function AdminTranslationWorkspacePage() {
         );
       }
       written = true;
+      if (!isCurrent()) return;
       const updated = await adminApiClient.request<WorkspaceEntity>(
         `${config.endpoint}/${encodeURIComponent(selected.id)}`,
+        { cache: 'no-store' },
       );
+      if (!isCurrent()) return;
       if (updated.id !== selected.id) throw new Error('Translation record identity mismatch');
-      updateSelectedRecord({ ...updated, profileId: selected.profileId });
       const savedDraft = makeDraft(domain, updated);
+      const prefix = locale === 'ar' ? 'ar' : 'en';
+      if (
+        savedDraft[`${prefix}Name`] !== submittedDraft[`${prefix}Name`].trim() ||
+        (domain === 'UNIVERSITY' &&
+          (savedDraft[`${prefix}Description`] !== submittedDraft[`${prefix}Description`].trim() ||
+            savedDraft[`${prefix}Status`] !== submittedDraft[`${prefix}Status`]))
+      )
+        throw new Error('TRANSLATION_SAVE_READBACK_MISMATCH');
+      updateSelectedRecord({ ...updated, profileId: selected.profileId });
       setDraft(
         locale === 'ar'
           ? {
@@ -438,6 +467,7 @@ export function AdminTranslationWorkspacePage() {
           : 'Saved and reloaded. Publish from the original content page.',
       );
     } catch (err: unknown) {
+      if (!isCurrent()) return;
       if (written) setReadbackFailed(true);
       const message = err instanceof Error ? err.message : t('translation_save_error');
       setSaveError(
@@ -448,8 +478,10 @@ export function AdminTranslationWorkspacePage() {
           : message,
       );
     } finally {
-      mutationBusy.current = false;
-      setSaving(null);
+      if (isCurrent()) {
+        mutationBusy.current = false;
+        setSaving(null);
+      }
     }
   };
 
@@ -608,7 +640,10 @@ export function AdminTranslationWorkspacePage() {
           )}
           {!!allowedDomains.length && (
             <>
-              <nav className="translation-domains admin-section-navigation" aria-label={tr('القسم المالك', 'Owner section')}>
+              <nav
+                className="translation-domains admin-section-navigation"
+                aria-label={tr('القسم المالك', 'Owner section')}
+              >
                 {allowedDomains.map((item) => {
                   const Icon = item.icon;
                   return (
@@ -1045,7 +1080,10 @@ export function AdminTranslationWorkspacePage() {
                     )}
                   </p>
                 )}
-                <nav className="translation-tabs admin-section-navigation" aria-label={tr('تفاصيل السجل', 'Record details')}>
+                <nav
+                  className="translation-tabs admin-section-navigation"
+                  aria-label={tr('تفاصيل السجل', 'Record details')}
+                >
                   <button
                     type="button"
                     aria-current={detailArea === 'content' ? 'page' : undefined}
