@@ -24,7 +24,30 @@ export type ExecutiveReading<K extends ExecutiveKey = ExecutiveKey> = {
   data: ExecutivePayload[K] | null;
   days: DashboardDays;
   permissionKey: string;
+  receivedAt: number | null;
 };
+export const EXECUTIVE_FRESHNESS_MS = 60000;
+export function executiveEvidenceExpired(
+  data: { checkedAt: string },
+  receivedAt: number,
+  now: number,
+) {
+  const capturedAt = Date.parse(data.checkedAt);
+  return (
+    !Number.isFinite(capturedAt) ||
+    capturedAt > now + 5000 ||
+    receivedAt > now + 5000 ||
+    now - Math.min(capturedAt, receivedAt) > EXECUTIVE_FRESHNESS_MS
+  );
+}
+export function effectiveExecutiveState(row: ExecutiveReading, now: number): ExecutiveReading['state'] {
+  return row.data &&
+    row.receivedAt !== null &&
+    ['available', 'partial', 'not_measured'].includes(row.state) &&
+    executiveEvidenceExpired(row.data, row.receivedAt, now)
+    ? 'stale'
+    : row.state;
+}
 const isObject = (value: unknown): value is Record<string, unknown> =>
   Boolean(value && typeof value === 'object' && !Array.isArray(value));
 export function parseExecutiveData<K extends ExecutiveKey>(
@@ -52,17 +75,24 @@ export function parseExecutiveData<K extends ExecutiveKey>(
     if (!Array.isArray(value[field]) || value[field].length > days + 1)
       throw new Error('SCHEMA_MISMATCH');
     const seen = new Set<string>();
+    let previousDate = '';
     for (const point of value[field]) {
       if (
         !isObject(point) ||
         typeof point.date !== 'string' ||
         !/^\d{4}-\d{2}-\d{2}$/.test(point.date) ||
+        !Number.isFinite(Date.parse(point.date + 'T00:00:00Z')) ||
+        new Date(point.date + 'T00:00:00Z').toISOString().slice(0, 10) !== point.date ||
+        point.date < (value.period as { from: string }).from.slice(0, 10) ||
+        point.date > (value.period as { until: string }).until.slice(0, 10) ||
+        point.date < previousDate ||
         seen.has(point.date) ||
         (point.value !== null && safeCount(point.value) === null) ||
         (secondary && point.secondary !== null && safeCount(point.secondary) === null)
       )
         throw new Error('SCHEMA_MISMATCH');
       seen.add(point.date);
+      previousDate = point.date;
     }
   };
   if (key === 'users') {

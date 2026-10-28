@@ -58,7 +58,7 @@ export function AdminDashboardPage() {
       : row.state === 'loading'
         ? tr('جار التحميل', 'Loading')
         : row.state === 'stale'
-          ? tr('بيانات قديمة — تعذّر التحديث', 'Stale — refresh failed')
+          ? tr('بيانات قديمة — أعد التحديث', 'Stale — refresh required')
           : row.state === 'not_measured'
             ? tr('لم يبدأ القياس بعد', 'Measurement has not started')
             : row.state === 'partial'
@@ -73,7 +73,7 @@ export function AdminDashboardPage() {
     applications = resources.applications?.data as ApplicationDashboard | null | undefined;
   const headlineStatus =
     userHeadline?.state === 'stale'
-      ? tr('بيانات قديمة — تعذّر التحديث', 'Stale — refresh failed')
+      ? tr('بيانات قديمة — أعد التحديث', 'Stale — refresh required')
       : userHeadline
         ? undefined
         : status(resources.users);
@@ -96,8 +96,10 @@ export function AdminDashboardPage() {
       ? (row.metrics[metric] ?? null)
       : null;
   };
-  const checked = readings
-    .map((row) => row.receivedAt)
+  const checked = [
+    ...readings.map((row) => row.receivedAt),
+    ...Object.values(resources).map((row) => row?.data?.checkedAt),
+  ]
     .filter((value): value is string => Boolean(value))
     .sort()
     .at(-1);
@@ -164,7 +166,6 @@ export function AdminDashboardPage() {
     });
   if (
     permits('admin:dashboard:applications:view') &&
-    permits('admin:services:manage') &&
     permits('admin:services:requests:view')
   )
     actions.push({

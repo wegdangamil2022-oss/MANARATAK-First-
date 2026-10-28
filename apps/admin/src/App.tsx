@@ -199,8 +199,8 @@ function AdminLayout() {
     <BrowserRouter basename={adminBasename}>
       <div className="min-h-screen bg-slate-50 text-[#142B5F] flex flex-col font-sans">
         {adminAccess === 'authorized' && (
-          <header className="admin-shell-header sticky top-0 z-40 flex min-h-[73px] items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3 shadow-xs backdrop-blur sm:px-6">
-            <div className="flex items-center gap-3">
+          <header className="admin-shell-header sticky top-0 z-40 flex min-h-[73px] items-center justify-between gap-2 border-b border-slate-200/80 bg-white/95 px-4 py-3 shadow-xs backdrop-blur sm:px-6">
+            <div className="flex min-w-0 items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#142B5F] text-white shadow-sm overflow-hidden p-1 border border-[#21A7B4]/20 shrink-0">
                 <img
                   src="/brand/manaratak-logo.png"
@@ -219,18 +219,19 @@ function AdminLayout() {
                   }}
                 />
               </div>
-              <div>
-                <h1 className="text-base font-black tracking-tight text-[#142B5F] sm:text-lg">
+              <div className="min-w-0">
+                <h1 className="truncate text-base font-black tracking-tight text-[#142B5F] sm:text-lg">
                   {t('admin_title')}
                 </h1>
-                <p className="text-[10px] font-bold text-[#0E7C86]">{t('admin_control_plane')}</p>
+                <p className="truncate text-[10px] font-bold text-[#0E7C86]">{t('admin_control_plane')}</p>
               </div>
             </div>
             {adminAccess === 'authorized' && (
-              <div className="flex items-center gap-2">
+              <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                 <a
                   href={(import.meta.env.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '') || '/'}
-                  className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-[#0E7C86] transition hover:border-[#21A7B4] hover:bg-slate-50 shadow-xs"
+                  aria-label={language === 'ar' ? 'العودة للموقع الرئيسي' : 'Back to main site'}
+                  className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 text-xs font-bold text-[#0E7C86] transition hover:border-[#21A7B4] hover:bg-slate-50 shadow-xs sm:px-3.5"
                 >
                   <ArrowLeftRight className="h-4 w-4" />
                   <span className="hidden sm:inline">
@@ -240,16 +241,18 @@ function AdminLayout() {
                 <button
                   type="button"
                   onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-                  className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-[#142B5F] transition hover:border-[#21A7B4] hover:bg-slate-50 shadow-xs"
+                  aria-label={t('admin_lang_switch')}
+                  className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 text-xs font-bold text-[#142B5F] transition hover:border-[#21A7B4] hover:bg-slate-50 shadow-xs sm:px-3.5"
                 >
                   <Languages className="h-4 w-4 text-[#0E7C86]" />
-                  {t('admin_lang_switch')}
+                  <span className="hidden sm:inline">{t('admin_lang_switch')}</span>
                 </button>
                 {!localReadOnly && (
                   <button
                     type="button"
                     onClick={() => void lockAdmin()}
-                    className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 text-xs font-bold text-rose-700 transition hover:bg-rose-100 shadow-xs"
+                    aria-label={t('lock')}
+                    className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-2 text-xs font-bold text-rose-700 transition hover:bg-rose-100 shadow-xs sm:px-3.5"
                   >
                     <LockKeyhole className="h-4 w-4" />
                     <span className="hidden sm:inline">{t('lock')}</span>

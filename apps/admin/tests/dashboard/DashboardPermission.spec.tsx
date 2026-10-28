@@ -7,12 +7,42 @@ vi.mock('../../src/api/client',()=>({adminApiClient:{request:state.request}}));
 vi.mock('../../src/i18n/I18nProvider',()=>({useTranslation:()=>({language:'en',dir:'ltr',t:(key:string)=>key})}));
 vi.mock('../../src/security/AdminAuthorizationContext',()=>({useAdminAuthorization:()=>({permissions:state.permissions,hasPermission:(p:string)=>state.permissions.includes(p)})}));
 import {AdminDashboardPage} from '../../src/pages/AdminDashboardPage';
+import {dashboardPeriod} from '@manaratak/application';
 let tree:ReturnType<typeof create>;
 const view=()=> <MemoryRouter><AdminDashboardPage/></MemoryRouter>;
 async function mount(){await act(async()=>{tree=create(view());});}
 beforeEach(()=>{(globalThis as any).IS_REACT_ACT_ENVIRONMENT=true;state.permissions=['admin:scholarships:manage'];vi.stubGlobal('window',{setInterval,clearInterval,addEventListener:vi.fn(),removeEventListener:vi.fn()});vi.stubGlobal('document',{visibilityState:'visible',addEventListener:vi.fn(),removeEventListener:vi.fn()});state.request.mockReset().mockResolvedValue({total:2741,imported:0,missingFields:0,needsVerification:0,needsTranslation:0});});
 afterEach(async()=>{if(tree)await act(async()=>tree.unmount());vi.useRealTimers();vi.unstubAllGlobals();});
 describe('Dashboard owner permissions and last-good evidence',()=>{
+ it('expires executive-only evidence without polling, reports its successful read and renews on focus',async()=>{
+   vi.useFakeTimers();Object.assign(window,{setInterval,clearInterval});
+   state.permissions=['admin:dashboard:users:view'];
+   state.request.mockImplementation(()=>Promise.resolve({period:dashboardPeriod(30),checkedAt:new Date().toISOString(),
+     registeredUsers:3,registeredStudents:2,newRegistrations:0,previousRegistrations:0,growthPercent:null,growthState:'no_baseline',
+     registrations:[],definition:'VERIFIED_HUMAN_ACCOUNTS_CURRENT_NON_DELETED_ACTIVE_OR_SUSPENDED_CREATION_COHORTS'}));
+   await mount();
+   expect(JSON.stringify(tree.toJSON())).toContain('Latest successful read');
+   expect(JSON.stringify(tree.toJSON())).not.toContain('Stale — refresh required');
+   await act(async()=>vi.advanceTimersByTime(65000));
+   expect(state.request).toHaveBeenCalledTimes(1);
+   expect(JSON.stringify(tree.toJSON())).toContain('Stale — refresh required');
+   const focus=vi.mocked(window.addEventListener).mock.calls.find(([name])=>name==='focus')![1] as ()=>void;
+   await act(async()=>focus());
+   expect(state.request).toHaveBeenCalledTimes(2);
+   expect(JSON.stringify(tree.toJSON())).not.toContain('Stale — refresh required');
+ });
+ it('keeps the service-request attention link for request readers without requiring catalog management',async()=>{
+   state.permissions=['admin:platform:manage','admin:dashboard:applications:view','admin:services:requests:view'];
+   state.request.mockImplementation((url:string)=>url.startsWith('/admin/dashboard/applications')?Promise.resolve({
+     period:dashboardPeriod(30),checkedAt:new Date().toISOString(),status:'available',measurementStartedAt:new Date().toISOString(),coverageFrom:new Date().toISOString(),
+     managedServiceRequests:1,processing:1,needsInformation:0,attention:1,managedUniversitySubmissions:0,officialAccepted:0,officialRejected:0,
+     directSelfReportedApplications:0,definition:'SERVICE_RECEIPT_IS_NOT_UNIVERSITY_SUBMISSION'}):Promise.reject(new Error('[403]')));
+   await mount();
+   expect(tree.root.findAllByType('a').some(link=>link.props.href==='/services?tab=requests')).toBe(true);
+   state.permissions=['admin:platform:manage','admin:dashboard:applications:view'];
+   await act(async()=>tree.update(view()));
+   expect(tree.root.findAllByType('a').some(link=>link.props.href==='/services?tab=requests')).toBe(false);
+ });
  it('reads only visible headlines and attention evidence, with no hidden publication breakdowns', async()=>{
  await mount();
  expect(state.request.mock.calls.some(([path])=>path.includes('status='))).toBe(false);

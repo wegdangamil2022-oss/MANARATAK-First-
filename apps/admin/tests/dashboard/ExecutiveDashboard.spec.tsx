@@ -90,6 +90,11 @@ describe('Executive dashboard data and independent periods', () => {
     expect(state.request).not.toHaveBeenCalled();
   });
   it('rejects fake negative counts and mismatched chart totals rather than coercing them to zero', () => {
+    for (const date of ['2026-99-99','2026-09-31','2020-10-24','2030-10-24'])
+      expect(()=>parseExecutiveData('users',{...users(),registrations:[{date,value:30}]},30)).toThrow('SCHEMA_MISMATCH');
+    expect(()=>parseExecutiveData('users',{...users(),registrations:[
+      {date:'2026-10-24',value:15},{date:'2026-10-23',value:15},
+    ]},30)).toThrow('SCHEMA_MISMATCH');
     expect(() => parseExecutiveData('users', { ...users(), registeredUsers: -1 }, 30)).toThrow(
       'SCHEMA_MISMATCH',
     );
@@ -151,6 +156,6 @@ describe('Executive dashboard data and independent periods', () => {
         .props.onClick(),
     );
     expect(JSON.stringify(tree.toJSON())).toContain('99');
-    expect(JSON.stringify(tree.toJSON())).toContain('Stale — refresh failed');
+    expect(JSON.stringify(tree.toJSON())).toContain('Stale — refresh required');
   });
 });

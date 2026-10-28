@@ -12,6 +12,8 @@ import { loadDashboardSources, dashboardRefreshNeeded } from './DashboardLoader'
 import {
   executivePermissions,
   readExecutive,
+  effectiveExecutiveState,
+  executiveEvidenceExpired,
   type ExecutiveKey,
   type ExecutiveReading,
 } from './ExecutiveData';
@@ -57,6 +59,7 @@ export function useExecutiveDashboard(days: DashboardDays) {
     data: UserDashboard;
     permissionKey: string;
     state: 'available' | 'stale';
+    receivedAt: number;
   } | null>(null);
   const latestExecutive = useRef(executive);
   latestExecutive.current = executive;
@@ -80,7 +83,14 @@ export function useExecutiveDashboard(days: DashboardDays) {
     };
     const resume = () => {
       observe();
-      if (document.visibilityState !== 'hidden' && dashboardRefreshNeeded(latest.current))
+      const executiveExpired = Object.values(latestExecutive.current).some(
+        (row) => row &&
+          (effectiveExecutiveState(row, Date.now()) === 'stale' || row.state === 'unavailable'),
+      );
+      if (
+        document.visibilityState !== 'hidden' &&
+        (dashboardRefreshNeeded(latest.current) || executiveExpired)
+      )
         refreshData();
     };
     const timer = window.setInterval(observe, 5000);
@@ -143,7 +153,10 @@ export function useExecutiveDashboard(days: DashboardDays) {
           const prior = latestExecutive.current[key];
           const data =
             prior?.days === days && prior.permissionKey === permissionKey ? prior.data : null;
-          return [key, { state: data ? 'stale' : 'loading', data, days, permissionKey }];
+          return [key, {
+            state: data ? 'stale' : 'loading', data, days, permissionKey,
+            receivedAt: data ? (prior?.receivedAt ?? null) : null,
+          }];
         }),
       ),
     );
@@ -153,9 +166,10 @@ export function useExecutiveDashboard(days: DashboardDays) {
           const data = await readExecutive(key, days, controller.signal);
           if (generation !== periodGeneration.current || controller.signal.aborted) return;
           const state = 'status' in data ? data.status : 'available';
-          setExecutive((rows) => ({ ...rows, [key]: { state, data, days, permissionKey } }));
+          const receivedAt = Date.now();
+          setExecutive((rows) => ({ ...rows, [key]: { state, data, days, permissionKey, receivedAt } }));
           if (key === 'users')
-            setHeadline({ data: data as UserDashboard, permissionKey, state: 'available' });
+            setHeadline({ data: data as UserDashboard, permissionKey, state: 'available', receivedAt });
         } catch (error) {
           if (generation !== periodGeneration.current || controller.signal.aborted) return;
           const forbidden =
@@ -173,6 +187,7 @@ export function useExecutiveDashboard(days: DashboardDays) {
                 permissionKey,
                 state: forbidden ? 'forbidden' : prior?.data ? 'stale' : 'unavailable',
                 data: forbidden ? null : (prior?.data ?? null),
+                receivedAt: forbidden ? null : (prior?.receivedAt ?? null),
               },
             };
           });
@@ -195,7 +210,7 @@ export function useExecutiveDashboard(days: DashboardDays) {
         row.permissionKey === permissionKey &&
         row.days === days &&
         permits(executivePermissions[key])
-        ? [[key, row]]
+        ? [[key, { ...row, state: effectiveExecutiveState(row, Math.max(clock, Date.now())) }]]
         : [];
     }),
   ) as Partial<Record<ExecutiveKey, ExecutiveReading>>;
@@ -203,7 +218,12 @@ export function useExecutiveDashboard(days: DashboardDays) {
     reading ? effectiveDashboardState(reading, Math.max(clock, Date.now())) : 'loading';
   const userHeadline =
     permits(executivePermissions.users) && headline?.permissionKey === permissionKey
-      ? headline
+      ? {
+          ...headline,
+          state: executiveEvidenceExpired(headline.data, headline.receivedAt, Math.max(clock, Date.now()))
+            ? 'stale' as const
+            : headline.state,
+        }
       : null;
   return {
     readings: visible,
