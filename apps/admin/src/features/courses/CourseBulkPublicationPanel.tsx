@@ -3,6 +3,8 @@ import { ClipboardCheck, Send, RefreshCw, Pause, Play, Download, XCircle, Histor
 import type { CourseBulkPage, CourseBulkState, CourseBulkSummary } from '@manaratak/domain';
 import { reviewReasonHeaders } from '@manaratak/shared';
 import { adminApiClient } from '../../api/client';
+import { useOwnerOperationScope } from '../../security/useOwnerOperationScope';
+import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
 import { CourseDialog } from './CourseDialog';
 import { useCourseCopy } from './useCourseCopy';
 import { externalIssue } from './externalCourseFields';
@@ -13,6 +15,9 @@ export function CourseBulkPublicationPanel({ id, selection, onBatch, onClose, on
   id?: string; selection?: BulkSelection; onBatch: (id: string) => void; onClose: () => void; onChanged: () => void;
 }) {
   const { tr, ar, number, date } = useCourseCopy();
+  const {hasPermission}=useAdminAuthorization();
+  const scope=useOwnerOperationScope(`${id??'new'}:${JSON.stringify(selection)}:${hasPermission('admin:courses:manage')}`);
+  const mutation=useRef(false);
   const [result, setResult] = useState<CourseBulkPage>();
   const [history, setHistory] = useState<{ data: CourseBulkSummary[]; page: number; totalPages: number }>();
   const [reason, setReason] = useState('');
@@ -22,15 +27,14 @@ export function CourseBulkPublicationPanel({ id, selection, onBatch, onClose, on
   const [state, setState] = useState<CourseBulkState | ''>('');
   const [reload, setReload] = useState(0), [historyPage, setHistoryPage] = useState(1);
   const requestKey = useRef(crypto.randomUUID());
-  const mounted = useRef(true);
-  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  useEffect(()=>{mutation.current=false;setBusy(false);setAuto(false);setReason('');requestKey.current=crypto.randomUUID();},[scope]);
   const changeCallback = useRef(onChanged); changeCallback.current = onChanged;
   useEffect(() => {
     const controller = new AbortController(); setError(''); setAuto(false); setResult(undefined); setEligibleOnly(false);
     if (!id) return () => controller.abort();
     adminApiClient.request<CourseBulkPage>(`/admin/courses/imported/bulk/${encodeURIComponent(id)}`, { signal: controller.signal }).then(value => { if (!controller.signal.aborted) setResult(value); }).catch(error => { if (!controller.signal.aborted) setError(error.message); });
     return () => controller.abort();
-  }, [id, reload]);
+  }, [id, reload,scope]);
   useEffect(() => {
     if (id || selection) return;
     const controller = new AbortController();
@@ -43,35 +47,36 @@ export function CourseBulkPublicationPanel({ id, selection, onBatch, onClose, on
     if (!auto || !id || !running || busy) return;
     const controller = new AbortController();
     const timer = setTimeout(async () => {
+      if(mutation.current||!scope.isCurrent())return;mutation.current=true;
       setBusy(true);
       try {
         const next = await adminApiClient.request<CourseBulkPage>(`/admin/courses/imported/bulk/${encodeURIComponent(id)}/step`, { method: 'POST', body: '{}', signal: controller.signal });
-        if (mounted.current) { setResult(next); setState(''); if (next.summary.phase === 'COMPLETE') changeCallback.current(); }
-      } catch (error) { if (mounted.current) { setError(error instanceof Error ? error.message : 'COURSE_BULK_SERVICE_UNAVAILABLE'); setAuto(false); } }
-      finally { if (mounted.current) setBusy(false); }
+        if (scope.isCurrent()) { setResult(next); setState(''); if (next.summary.phase === 'COMPLETE') changeCallback.current(); }
+      } catch (error) { if (scope.isCurrent()) { setError(error instanceof Error ? error.message : 'COURSE_BULK_SERVICE_UNAVAILABLE'); setAuto(false); } }
+      finally { if (scope.isCurrent()){mutation.current=false;setBusy(false);} }
     }, 250);
     // A submitted server step completes under its lease even if this view closes.
     return () => { clearTimeout(timer); };
-  }, [auto, id, running, busy, result]);
+  }, [auto, id, running, busy, result,scope]);
   const command = async (action: 'preview' | 'confirm' | 'cancel' | 'retry') => {
-    if (busy || reason.trim().length < 3) return;
+    if (busy || mutation.current || !scope.isCurrent() || !hasPermission('admin:courses:manage') || reason.trim().length < 3) return;
     if (action === 'confirm' && !window.confirm(tr('نشر الدورات المؤهلة في المعاينة فقط؟ سيعيد الخادم فحص نسخها وشروطها.', 'Publish only eligible courses from this preview? The server rechecks their versions and policies.'))) return;
-    setBusy(true); setAuto(false); setError('');
+    mutation.current=true;setBusy(true); setAuto(false); setError('');
     try {
       const path = action === 'preview' ? '/preview' : `/${encodeURIComponent(id!)}/${action}`;
       const body = action === 'preview' ? selection : action === 'confirm' ? { digest: result!.summary.digest, eligibleOnly } : {};
       const next = await adminApiClient.request<CourseBulkPage>('/admin/courses/imported/bulk' + path, { method: 'POST', headers: { ...reviewReasonHeaders(reason.trim()), 'Idempotency-Key': requestKey.current }, body: JSON.stringify(body) });
-      if (!mounted.current) return;
+      if (!scope.isCurrent()) return;
       setResult(next); setState(''); setEligibleOnly(false);
       if (next.summary.id !== id) { onBatch(next.summary.id); requestKey.current = crypto.randomUUID(); }
-    } catch (error) { setError(error instanceof Error ? error.message : 'COURSE_BULK_SERVICE_UNAVAILABLE'); }
-    finally { setBusy(false); }
+    } catch (error) { if(scope.isCurrent())setError(error instanceof Error ? error.message : 'COURSE_BULK_SERVICE_UNAVAILABLE'); }
+    finally { if(scope.isCurrent()){mutation.current=false;setBusy(false);} }
   };
   const page = async (next: number, filter = state) => {
-    if (!id || busy) return; setBusy(true); setAuto(false); setError('');
-    try { setResult(await adminApiClient.request<CourseBulkPage>(`/admin/courses/imported/bulk/${encodeURIComponent(id)}?page=${next}${filter ? '&state=' + filter : ''}`)); setState(filter); }
-    catch (error) { setError(error instanceof Error ? error.message : 'COURSE_BULK_SERVICE_UNAVAILABLE'); }
-    finally { setBusy(false); }
+    if (!id || busy || mutation.current || !scope.isCurrent()) return; mutation.current=true;setBusy(true); setAuto(false); setError('');
+    try { const result=await adminApiClient.request<CourseBulkPage>(`/admin/courses/imported/bulk/${encodeURIComponent(id)}?page=${next}${filter ? '&state=' + filter : ''}`);if(scope.isCurrent()){if(result.summary.id!==id)throw Error('COURSE_BULK_OWNER_MISMATCH');setResult(result);setState(filter);} }
+    catch (error) { if(scope.isCurrent())setError(error instanceof Error ? error.message : 'COURSE_BULK_SERVICE_UNAVAILABLE'); }
+    finally { if(scope.isCurrent()){mutation.current=false;setBusy(false);} }
   };
   const csv = () => {
     if (!result) return;

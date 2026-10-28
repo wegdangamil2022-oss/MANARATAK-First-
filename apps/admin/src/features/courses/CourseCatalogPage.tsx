@@ -53,7 +53,7 @@ export function CourseCatalogPage({ fixedScope }: { fixedScope?: CourseScope }) 
   useEffect(() => {
     if (paidEntry) return;
     const controller = new AbortController(); const request = ++generation.current;
-    setLoading(true); setError('');
+    setLoading(true); setError(''); setData(undefined);
     const suffix = fixedScope && fixedScope !== 'all' ? `/${fixedScope}` : '';
     const timer = setTimeout(() => adminApiClient.request<CatalogResult>(`/admin/courses/catalog${suffix}?${query}`, { signal: controller.signal }).then(result => {
       if (controller.signal.aborted || generation.current !== request) return;
@@ -135,7 +135,7 @@ export function CourseCatalogPage({ fixedScope }: { fixedScope?: CourseScope }) 
     </section>
     {!loading && !error && data && !data.statistics && <p role="status" className="course-error">{tr('لم تُرجع الخدمة مؤشرات موثوقة؛ لم تُعرض أرقام بديلة.', 'The service returned no trusted metrics; no substitute values are shown.')}</p>}
     {create && <CreateNativeCourseDialog onClose={() => setCreate(false)} returnTo={returnTo}/>}
-    {!bulkOpen && !params.get('batch') && (externalCreate || params.get('course')) && <ExternalCourseDrawer id={externalCreate ? undefined : params.get('course')!} returnTo={returnTo.replace(/([?&])course=[^&]*&?/, '$1').replace(/[?&]$/, '')} onSaved={id => { setExternalCreate(false); if (externalCreate) presentation('course', id); setRefresh(value => value + 1); }} onClose={() => { setExternalCreate(false); setParams(previous => { const next = new URLSearchParams(previous); next.delete('course'); return next; }, { replace: true }); }} />}
+    {!bulkOpen && !params.get('batch') && (externalCreate || params.get('course')) && <ExternalCourseDrawer key={externalCreate?'create':params.get('course')!} id={externalCreate ? undefined : params.get('course')!} returnTo={returnTo.replace(/([?&])course=[^&]*&?/, '$1').replace(/[?&]$/, '')} onSaved={id => { setExternalCreate(false); if (externalCreate) presentation('course', id); setRefresh(value => value + 1); }} onClose={() => { setExternalCreate(false); setParams(previous => { const next = new URLSearchParams(previous); next.delete('course'); return next; }, { replace: true }); }} />}
     {(bulkOpen || params.get('batch')) && <CourseBulkPublicationPanel id={params.get('batch') ?? undefined} selection={bulkSelection} onBatch={id => presentation('batch', id)} onChanged={() => setRefresh(value => value + 1)} onClose={() => { setBulkOpen(false); setBulkSelection(undefined); setParams(previous => { const next = new URLSearchParams(previous); next.delete('batch'); return next; }, { replace: true }); }}/>}
   </main>;
 }

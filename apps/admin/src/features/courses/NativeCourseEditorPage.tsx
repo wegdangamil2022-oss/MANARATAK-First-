@@ -22,6 +22,8 @@ import {
   FileQuestion,
 } from 'lucide-react';
 import { adminApiClient } from '../../api/client';
+import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../../security/useOwnerOperationScope';
 import { CourseQuestionBanksPanel } from '../../components/CourseQuestionBanksPanel';
 import { AssessmentReviewPanel } from '../../components/AssessmentReviewPanel';
 import { OwnerDescriptionTranslationPanel } from '../../components/OwnerDescriptionTranslationPanel';
@@ -55,6 +57,9 @@ export function NativeCourseEditorPage() {
     [params, setParams] = useSearchParams(),
     navigate = useNavigate();
   const { tr, ar, status: statusLabel, number } = useCourseCopy();
+  const {permissions}=useAdminAuthorization();
+  const scope=useOwnerOperationScope(`${id}:${[...(permissions??[])].sort().join('|')}`);
+  const mutation=useRef(false);
   const [data, setData] = useState<EditorData>(),
     [busy, setBusy] = useState(false),
     [loading, setLoading] = useState(true),
@@ -78,6 +83,7 @@ export function NativeCourseEditorPage() {
       ? params.get('returnTo')!
       : data && !data.access.manage ? '/courses/assigned' : '/courses/native';
   const load = useCallback(async () => {
+    if(!scope.isCurrent())return;
     const generation = ++loadGeneration.current;
     setLoading(true);
     setError('');
@@ -91,21 +97,25 @@ export function NativeCourseEditorPage() {
         adminApiClient.request<Readiness>(`/admin/courses/${id}/readiness`),
         adminApiClient.request<CourseAccess>(`/admin/courses/${id}/access`),
       ]);
-      if (generation !== loadGeneration.current) return;
+      if (generation !== loadGeneration.current || !scope.isCurrent()) return;
+      if(course.id!==id)throw Error('COURSE_OWNER_READ_MISMATCH');
       if (course.originType !== 'NATIVE_MANARATAK_COURSE') throw Error('NATIVE_COURSE_REQUIRED');
       setData({ course, curriculum, policy, readiness, access });
       setDirty(false);
+      return {course,curriculum,policy,readiness,access};
     } catch (error) {
-      if (generation === loadGeneration.current)
+      if (generation === loadGeneration.current && scope.isCurrent())
         setError(error instanceof Error ? error.message : 'COURSE_READ_FAILED');
       throw error;
     } finally {
       if (generation === loadGeneration.current) setLoading(false);
     }
-  }, [id]);
+  }, [id,scope]);
+  const reload=useCallback(async()=>{await load();},[load]);
   useEffect(() => {
     const requests = loadGeneration;
     setData(undefined);
+    setBusy(false);mutation.current=false;setDirty(false);setReason('');setNotice('');setCopyOpen(false);
     void load().catch(() => undefined);
     return () => {
       ++requests.current;
@@ -152,12 +162,13 @@ export function NativeCourseEditorPage() {
   const confirmDiscard = () =>
     !dirty || window.confirm(tr('تجاهل التعديلات غير المحفوظة؟', 'Discard unsaved changes?'));
   const command: NativeCourseCommand = async (path, body, method = 'POST') => {
-    if (!data || data.course.id !== id || busy || loading) throw Error('COURSE_COMMAND_BUSY');
+    if (!data || data.course.id !== id || mutation.current || !scope.isCurrent() || busy || loading) throw Error('COURSE_COMMAND_BUSY');
     if (reason.trim().length < 3) {
       setError(tr('اكتب مبرر الإجراء قبل الحفظ.', 'Enter a reason before saving.'));
       throw Error('COURSE_REASON_REQUIRED');
     }
     setBusy(true);
+    mutation.current=true;
     setError('');
     setNotice('');
     let committed = false;
@@ -168,10 +179,16 @@ export function NativeCourseEditorPage() {
         body: JSON.stringify(body ?? {}),
       });
       committed = true;
-      await load();
+      if(!scope.isCurrent())return result;
+      const checked=await load();
+      if(!scope.isCurrent())return result;
+      const expected:Record<string,string>={publish:'PUBLISHED',unpublish:'READY_TO_REVIEW',archive:'ARCHIVED','mark-ready':'READY_TO_REVIEW','mark-publishable':'READY_TO_PUBLISH'};
+      if(!checked||checked.course.version<=data.course.version||(expected[path]&&checked.course.status!==expected[path]))throw Error('COURSE_COMMAND_READBACK_MISMATCH');
       setNotice(tr('حُفظت التغييرات في نسخة جديدة.', 'Changes saved in a new version.'));
       return result;
     } catch (error) {
+      if(!scope.isCurrent())throw error;
+      if(committed)setData(undefined);
       const message = error instanceof Error ? error.message : '';
       setError(
         committed
@@ -188,7 +205,7 @@ export function NativeCourseEditorPage() {
       );
       throw error;
     } finally {
-      setBusy(false);
+      if(scope.isCurrent()){mutation.current=false;setBusy(false);}
     }
   };
   const tabs = [
@@ -205,7 +222,7 @@ export function NativeCourseEditorPage() {
   ] as const;
   const readonly = !data || ['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(data.course.status);
   return (
-    <main className="courses-workspace native-editor" dir={ar ? 'rtl' : 'ltr'}>
+    <main key={scope.epoch} className="courses-workspace native-editor" dir={ar ? 'rtl' : 'ltr'}>
       <section className="course-hero">
         <span>
           <BookOpen size={18} />
@@ -335,7 +352,7 @@ export function NativeCourseEditorPage() {
                   endpoint="/admin/courses"
                   optionalFields={data.course.optionalFields}
                   status={data.course.status}
-                  onSaved={load}
+                  onSaved={reload}
                 />
                 </div>
                 <ExternalCourseRelationships
@@ -368,7 +385,7 @@ export function NativeCourseEditorPage() {
                 dirty={dirty}
                 onDirty={changeDirty}
                 command={command}
-                reload={load}
+                reload={reload}
               />
             )}
             {tab === 'delivery' && (
@@ -397,7 +414,7 @@ export function NativeCourseEditorPage() {
                   version={data.course.version}
                   status={data.course.status}
                   snapshot={data.curriculum}
-                  onSaved={load}
+                  onSaved={reload}
                 />
                   </div>
                 )}

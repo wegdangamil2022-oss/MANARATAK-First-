@@ -2,6 +2,8 @@ import {OwnerDescriptionTranslationPanel} from '../components/OwnerDescriptionTr
 import {CourseDraftStructurePanel} from '../components/CourseDraftStructurePanel';
 import {CourseQuestionBanksPanel} from '../components/CourseQuestionBanksPanel';
 import { useEffect, useMemo, useState } from 'react';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { adminApiClient, setCourseReviewReason } from '../api/client';
 import {
@@ -137,8 +139,14 @@ interface CurriculumSnapshot {
 }
 
 export function CourseDetailPage() {
+  const {id}=useParams();
+  const {permissions}=useAdminAuthorization();
+  return <CourseDetailWorkspace key={`${id}:${[...(permissions??[])].sort().join('|')}`} />;
+}
+function CourseDetailWorkspace() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
+  const scope=useOwnerOperationScope(id??'');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const requestedReturn = searchParams.get('returnTo') ?? '';
@@ -242,11 +250,16 @@ export function CourseDetailPage() {
   }, [snapshot]);
 
   const fetchCourse = async () => {
-    if (!id) return;
+    if (!id || !scope.isCurrent()) return;
     setLoading(true);
     setError(null);
     try {
       const courseResponse = await adminApiClient.request<CourseDetail>(`/admin/courses/${id}`);
+      if(!scope.isCurrent())return;
+      if(courseResponse.id!==id)throw Error('COURSE_OWNER_READ_MISMATCH');
+      if(courseResponse.originType==='NATIVE_MANARATAK_COURSE'){
+        navigate(`/courses/${encodeURIComponent(id)}/editor?returnTo=${encodeURIComponent(returnTo)}`,{replace:true});return;
+      }
       const optional = courseResponse.optionalFields ?? {};
       for (const key of ['description', 'courseContent', 'instructor'] as const)
         if (typeof optional[key] === 'string') courseResponse[key] = optional[key];

@@ -29,7 +29,7 @@ export function AssignedCoursesPage() {
     setError('');
     void adminApiClient
       .request<typeof data>('/admin/courses/assigned?offset=' + offset, { signal: abort.signal })
-      .then(setData)
+      .then(value=>{if(!abort.signal.aborted)setData(value);})
       .catch((error) => {
         if (!abort.signal.aborted) setError(error.message);
       });

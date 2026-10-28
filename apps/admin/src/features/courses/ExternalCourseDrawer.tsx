@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState, type FormEvent } from 'react';
+import { Fragment, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Building2, GraduationCap, FileText, ShieldCheck, ExternalLink, Pencil, RefreshCw, Save, X, CheckCircle2, Send, Archive, Undo2, XCircle, History } from 'lucide-react';
 import { reviewReasonHeaders } from '@manaratak/shared';
@@ -6,6 +6,7 @@ import type { CourseDto, ImportedCourseAdminDetail, ExternalCourseHistoryPage } 
 import { adminApiClient } from '../../api/client';
 import { courseProviderRegistryApi } from '../../api/courseProviders';
 import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../../security/useOwnerOperationScope';
 import { CourseDialog } from './CourseDialog';
 import { CourseLookup } from './CourseLookup';
 import { ExternalCourseRelationships } from './ExternalCourseRelationships';
@@ -18,6 +19,9 @@ const icons = { identity: Building2, learning: GraduationCap, certificate: Shiel
 export function ExternalCourseDrawer({ id, returnTo, onClose, onSaved }: { id?: string; returnTo: string; onClose: () => void; onSaved?: (id: string) => void }) {
   const { tr, ar, date, status } = useCourseCopy();
   const { hasPermission } = useAdminAuthorization();
+  const scope=useOwnerOperationScope(`${id??'create'}:${hasPermission('admin:courses:manage')}`);
+  const mutation=useRef(false);
+  const [unverifiedId,setUnverifiedId]=useState('');
   const creating = !id;
   const [course, setCourse] = useState<CourseDto>();
   const [source, setSource] = useState<ImportedCourseAdminDetail>();
@@ -37,20 +41,21 @@ export function ExternalCourseDrawer({ id, returnTo, onClose, onSaved }: { id?: 
   const [history, setHistory] = useState<ExternalCourseHistoryPage>();
   const [historyPage, setHistoryPage] = useState(1), [historyError, setHistoryError] = useState(false);
   const dirty = !busy && (creating || edit !== null) && (JSON.stringify(form) !== initial || Boolean(reason));
-  const editable = hasPermission('admin:courses:manage') && course && !['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(course.status);
+  const editable = !unverifiedId && hasPermission('admin:courses:manage') && course && !['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(course.status);
+  useEffect(()=>{mutation.current=false;setBusy(false);setEdit(null);setError('');setNotice('');setReason('');setUnverifiedId('');setHistoryPage(1);},[scope]);
   useEffect(() => {
     if (!id) return;
     const controller = new AbortController(); setLoadError(''); setSourceError(false); setCourse(undefined); setSource(undefined); setReadiness(undefined);
     adminApiClient.request<CourseDto>(`/admin/courses/${encodeURIComponent(id)}`, { signal: controller.signal }).then(result => {
       if (controller.signal.aborted) return;
-      if (result.originType !== 'EXTERNAL_LINKED_COURSE') throw new Error('EXTERNAL_COURSE_REQUIRED');
-      setCourse(result);
+      if (result.id!==id || result.originType !== 'EXTERNAL_LINKED_COURSE') throw new Error('EXTERNAL_COURSE_REQUIRED');
+      setCourse(result);setUnverifiedId('');
     }).catch(error => { if (!controller.signal.aborted) setLoadError(error.message); });
     adminApiClient.request<ImportedCourseAdminDetail>(`/admin/courses/imported/${encodeURIComponent(id)}`, { signal: controller.signal }).then(result => {
       if (!controller.signal.aborted) setSource(result);
     }).catch(() => { if (!controller.signal.aborted) setSourceError(true); });
     return () => controller.abort();
-  }, [id, refresh]);
+  }, [id, refresh, scope]);
   useEffect(() => {
     if (!id) return;
     const controller = new AbortController(); setHistoryError(false); setHistory(undefined);
@@ -65,35 +70,49 @@ export function ExternalCourseDrawer({ id, returnTo, onClose, onSaved }: { id?: 
   const cancel = () => { if (!dirty || window.confirm(tr('تجاهل التعديلات غير المحفوظة؟', 'Discard unsaved changes?'))) { setEdit(null); setError(''); setRefresh(value => value + 1); } };
   const afterChange = () => { setReadiness(undefined); setRefresh(value => value + 1); if (id) onSaved?.(id); };
   const save = async (event: FormEvent) => {
-    event.preventDefault(); if (busy || reason.trim().length < 3) return;
+    event.preventDefault(); if (busy || mutation.current || unverifiedId || !scope.isCurrent() || !hasPermission('admin:courses:manage') || reason.trim().length < 3) return;
+    mutation.current=true;
     setBusy(true); setError(''); setNotice('');
+    let acceptedId='';
     try {
       const result = await adminApiClient.request<CourseDto | ImportedCourseAdminDetail>(creating ? '/admin/courses/imported' : `/admin/courses/imported/${encodeURIComponent(id!)}`, {
         method: creating ? 'POST' : 'PATCH', headers: { ...reviewReasonHeaders(reason.trim()), ...(!creating ? { 'If-Match': String(expectedVersion) } : {}) },
         body: JSON.stringify(creating ? manualExternalPayload(form) : externalSectionPayload(form, edit!)),
       });
+      acceptedId=result.id;
+      if(!scope.isCurrent())return;
+      const checked=await adminApiClient.request<CourseDto>(`/admin/courses/${encodeURIComponent(result.id)}`,{cache:'no-store'});
+      if(!scope.isCurrent())return;
+      if(checked.id!==result.id||(!creating&&checked.id!==id)||checked.originType!=='EXTERNAL_LINKED_COURSE'||!Number.isSafeInteger(checked.version)||checked.version<=(creating?0:expectedVersion??0))throw Error('COURSE_SAVE_READBACK_MISMATCH');
+      if(!creating&&edit){const expected=externalSectionPayload(form,edit),actual=externalSectionPayload(externalForm(checked),edit);if(JSON.stringify(expected)!==JSON.stringify(actual))throw Error('COURSE_SAVE_READBACK_MISMATCH');}
       setEdit(null); setInitial(JSON.stringify(form)); setReason(''); setNotice(tr('حُفظت البيانات. لم تُنشر الدورة تلقائيًا.', 'Saved. The course was not automatically published.'));
       if (creating) onSaved?.(result.id); else afterChange();
-    } catch (error) { setError(error instanceof Error ? error.message : 'COURSE_SAVE_FAILED'); }
-    finally { setBusy(false); }
+    } catch (error) { if(scope.isCurrent()){if(acceptedId)setUnverifiedId(acceptedId);setError(error instanceof Error ? error.message : 'COURSE_SAVE_FAILED');} }
+    finally { if(scope.isCurrent()){mutation.current=false;setBusy(false);} }
   };
   const command = async (action: string, base = 'imported/', body?: object) => {
-    if (!id || !course || busy) return;
+    if (!id || !course || busy || mutation.current || unverifiedId || !scope.isCurrent()) return;
     if (edit) { setError('COURSE_FINISH_EDIT_FIRST'); return; }
     if (reason.trim().length < 3) { setError('COURSE_REVIEW_REASON_REQUIRED'); return; }
     if (['publish', 'unpublish', 'archive', 'reject'].includes(action) && !window.confirm(tr('تأكيد تنفيذ الإجراء على هذه الدورة فقط؟', 'Confirm this operation on this course only?'))) return;
     setBusy(true); setError(''); setNotice('');
+    mutation.current=true;let accepted=false;
     try {
       await adminApiClient.request(`/admin/courses/${base}${encodeURIComponent(id)}/${action}`, { method: 'POST', headers: { ...reviewReasonHeaders(reason.trim()), 'If-Match': String(course.version) }, ...(body ? { body: JSON.stringify(body) } : {}) });
+      accepted=true;if(!scope.isCurrent())return;
+      const checked=await adminApiClient.request<CourseDto>(`/admin/courses/${encodeURIComponent(id)}`,{cache:'no-store'});
+      if(!scope.isCurrent())return;
+      const expected:Record<string,string>={publish:'PUBLISHED',unpublish:'READY_TO_REVIEW',archive:'ARCHIVED',reject:'REJECTED','mark-ready':base===''?'READY_TO_REVIEW':'READY_TO_PUBLISH'};
+      if(checked.id!==id||checked.version<=course.version||(expected[action]&&checked.status!==expected[action]))throw Error('COURSE_COMMAND_READBACK_MISMATCH');
       setNotice(tr('نُفذ الإجراء وسُجل في سجل التغييرات.', 'Operation completed and recorded in the change history.')); afterChange();
-    } catch (error) { setError(error instanceof Error ? error.message : 'COURSE_COMMAND_FAILED'); }
-    finally { setBusy(false); }
+    } catch (error) { if(scope.isCurrent()){if(accepted)setUnverifiedId(id);setError(error instanceof Error ? error.message : 'COURSE_COMMAND_FAILED');} }
+    finally { if(scope.isCurrent()){mutation.current=false;setBusy(false);} }
   };
   const checkReadiness = async () => {
     if (!id || busy) return; setBusy(true); setError('');
-    try { setReadiness(await adminApiClient.request<Readiness>(`/admin/courses/imported/${encodeURIComponent(id)}/readiness`)); }
-    catch (error) { setError(error instanceof Error ? error.message : 'READINESS_FAILED'); }
-    finally { setBusy(false); }
+    try { const next=await adminApiClient.request<Readiness>(`/admin/courses/imported/${encodeURIComponent(id)}/readiness`);if(scope.isCurrent()){if(next.version!==course?.version)throw Error('COURSE_READINESS_VERSION_MISMATCH');setReadiness(next);} }
+    catch (error) { if(scope.isCurrent())setError(error instanceof Error ? error.message : 'READINESS_FAILED'); }
+    finally { if(scope.isCurrent())setBusy(false); }
   };
   const absent = tr('غير متوفر', 'Unavailable');
   const value = (label: string, content: unknown) => <div className="course-detail-value"><dt>{label}</dt><dd dir="auto">{typeof content === 'string' && content.trim() ? content : typeof content === 'number' ? content : absent}</dd></div>;
@@ -152,6 +171,7 @@ export function ExternalCourseDrawer({ id, returnTo, onClose, onSaved }: { id?: 
     {loadError ? <div className="course-error" role="alert">{externalIssue(loadError, tr)}<button type="button" onClick={() => setRefresh(value => value + 1)}><RefreshCw size={16}/>{tr('إعادة المحاولة', 'Retry')}</button></div> : !creating && !course ? <p role="status">{tr('جارٍ تحميل تفاصيل الدورة…', 'Loading course details…')}</p> : <>
       {notice && <p className="course-success" role="status"><CheckCircle2 size={17}/>{notice}</p>}
       {error && <p className="course-error" role="alert" title={error}>{error === 'COURSE_REVIEW_REASON_REQUIRED' ? tr('اكتب مبررًا من ثلاثة أحرف على الأقل.', 'Enter a reason of at least three characters.') : externalIssue(error, tr)}</p>}
+      {unverifiedId&&<div role="alert" className="course-error">{tr('قُبل الطلب وتعذر التحقق من آخر نسخة. أعد القراءة قبل أي إجراء آخر.','The request was accepted but its latest version could not be verified. Reload before another operation.')}<button type="button" disabled={busy} onClick={()=>{if(creating)onSaved?.(unverifiedId);else setRefresh(value=>value+1);}}>{tr('إعادة قراءة السجل المحفوظ','Reload saved record')}</button></div>}
       {creating ? <form className="course-create-form" onSubmit={save}>{groups}{reasonField}<button className="course-primary" type="submit" disabled={busy || !form.externalProviderId || reason.trim().length < 3}><Save size={16}/>{busy ? tr('جارٍ الحفظ…', 'Saving…') : tr('حفظ مسودة خارجية', 'Save external draft')}</button></form> : <>
         <div className="course-drawer-toolbar"><span className="course-badge">{status(course!.status)}</span>{directUrl && <a href={directUrl} target="_blank" rel="noopener noreferrer"><ExternalLink size={16}/>{tr('صفحة الدورة لدى المصدر', 'Official course page')}</a>}<Link to={`/courses/${encodeURIComponent(id!)}?returnTo=${encodeURIComponent(returnTo)}`}><Pencil size={16}/>{tr('أدوات العلاقات والنسخ', 'Relationship and version tools')}</Link><button type="button" onClick={() => setActions(!actions)} aria-expanded={actions}><ShieldCheck size={16}/>{tr('إجراءات المصدر والمراجعة', 'Source and review operations')}</button></div>
         {!edit && reasonField}{actions && <section className="course-panel course-operations"><h3><ShieldCheck size={18}/>{tr('التحقق والجاهزية والنشر', 'Verification, readiness and publication')}</h3><div className="course-drawer-toolbar">
