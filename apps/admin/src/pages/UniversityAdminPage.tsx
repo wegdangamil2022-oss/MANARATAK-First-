@@ -3,9 +3,8 @@ import { adminPaths } from '../navigation/AdminRoutes';
 import { AdminLink } from '../components/AdminLink';
 import {UniversityLocationFilters} from '../components/UniversityLocationFilters';
 import { UniversityProgramWorkspace } from '../components/UniversityProgramWorkspace';
-import { reviewOwnerSearch } from '../features/review-queue/ReviewOwnerNavigation';
+import { useUniversityListQuery } from '../features/universities/useUniversityListQuery';
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { 
   School, 
@@ -67,8 +66,9 @@ export function UniversityAdminPage() {
   const ArrowIcon = dir === 'rtl' ? ArrowLeft : ArrowRight;
   const tr = (ar: string, en: string) => (isArabic ? ar : en);
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const countryReferenceId = searchParams.get('countryReferenceId')?.trim() || '';
+  const { searchParams, setSearchParams, countryReferenceId, searchTerm, setSearchTerm,
+    statusFilter, setStatusFilter, completenessFilter, setCompletenessFilter,
+    page, setPage, queryKey } = useUniversityListQuery();
 
   const [data, setData] = useState<PaginatedResponse | null>(null);
   const [stats, setStats] = useState<UniversityStats>({
@@ -81,20 +81,18 @@ export function UniversityAdminPage() {
   const [statsLoading, setStatsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState(() => reviewOwnerSearch(searchParams));
-  const [statusFilter, setStatusFilter] = useState('');
-  const [completenessFilter, setCompletenessFilter] = useState('');
-  const [page, setPage] = useState(1);
   const [showCreate,setShowCreate]=useState(false);
   const [showPrograms,setShowPrograms]=useState(false);
   const [viewMode,setViewMode]=useState<'cards'|'table'>('cards');
   const listRequest = useRef(0);
+  const statsRequest = useRef(0);
   const [cooldown, setCooldown] = useState<number | null>(null);
 
   const numberFormatter = useMemo(() => new Intl.NumberFormat(isArabic ? 'ar' : 'en-US'), [isArabic]);
   const formatNumber = (value: number | null | undefined) => (value == null ? '—' : numberFormatter.format(value));
 
   const fetchStats = async () => {
+    const request = ++statsRequest.current;
     setStatsLoading(true);
     try {
       const [totalRes, pubRes, revRes, compRes, incompRes] = await Promise.allSettled([
@@ -105,6 +103,7 @@ export function UniversityAdminPage() {
         adminApiClient.request<PaginatedResponse>('/admin/universities?page=1&pageSize=1&completenessStatus=INCOMPLETE'),
       ]);
 
+      if (request !== statsRequest.current) return;
       setStats({
         total: totalRes.status === 'fulfilled' ? totalRes.value.total : null,
         published: pubRes.status === 'fulfilled' ? pubRes.value.total : null,
@@ -115,7 +114,7 @@ export function UniversityAdminPage() {
     } catch {
       // transient fail safe
     } finally {
-      setStatsLoading(false);
+      if (request === statsRequest.current) setStatsLoading(false);
     }
   };
 
@@ -123,6 +122,7 @@ export function UniversityAdminPage() {
     const request = ++listRequest.current;
     setLoading(true);
     setError(null);
+    setData(null);
     try {
       const params = new URLSearchParams({ page: page.toString(), pageSize: '20' });
       if (searchTerm.trim()) params.set('search', searchTerm.trim());
@@ -133,7 +133,7 @@ export function UniversityAdminPage() {
 
       const response = await adminApiClient.request<PaginatedResponse>(`/admin/universities?${params.toString()}`,{signal,cache:'no-store'});
       if (request !== listRequest.current) return;
-      if (response.total > 0 && page > Math.ceil(response.total / 20)) { setPage(Math.ceil(response.total / 20)); return; }
+      if (page > Math.max(1, Math.ceil(response.total / 20))) { setPage(Math.max(1, Math.ceil(response.total / 20))); return; }
       setData(response);
       setCooldown(null);
     } catch (err: unknown) {
@@ -153,12 +153,13 @@ export function UniversityAdminPage() {
 
   useEffect(() => {
     fetchStats();
+    return () => { statsRequest.current++; };
   }, []);
 
   useEffect(() => {
     const abort=new AbortController();const timer=window.setTimeout(()=>{void fetchUniversities(abort.signal);},300);
     return()=>{window.clearTimeout(timer);abort.abort();listRequest.current++;};
-  }, [page, statusFilter, completenessFilter, countryReferenceId, searchTerm, searchParams.toString()]);
+  }, [queryKey]);
 
   useEffect(() => {
     if (cooldown === null || cooldown <= 0) return;
@@ -260,7 +261,7 @@ export function UniversityAdminPage() {
             </div>
           </div>
           <div className="mt-3 text-2xl font-black text-[#142B5F]">
-            {statsLoading ? <Loader2 className="h-6 w-6 animate-spin text-slate-300" /> : formatNumber(stats.total ?? data?.total)}
+            {statsLoading ? <Loader2 className="h-6 w-6 animate-spin text-slate-300" /> : formatNumber(stats.total)}
           </div>
           <div className="mt-1 text-[10px] font-bold text-slate-400">
             <span>{statusFilter === '' ? tr('● محدد حالياً (الكل)', '● Selected (All)') : tr('عرض جميع الجامعات', 'View all')}</span>
@@ -536,7 +537,7 @@ export function UniversityAdminPage() {
 
               {/* Pagination */}
               {data && data.totalPages > 1 && (
-                <div className="flex items-center justify-between border-t border-slate-200/90 bg-[#FAF7F0] px-6 py-3.5 text-xs font-bold text-slate-600">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/90 bg-[#FAF7F0] px-6 py-3.5 text-xs font-bold text-slate-600">
                   <div>
                     <span>{tr('الصفحة', 'Page')} </span>
                     <span className="font-black text-[#142B5F]">{data.page}</span>

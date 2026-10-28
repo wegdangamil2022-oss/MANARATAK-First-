@@ -1,6 +1,6 @@
 import React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
 const state = vi.hoisted(() => ({ request: vi.fn(), language: 'en' }));
 vi.mock('../../src/api/client', () => ({
@@ -29,6 +29,8 @@ import {
   universityValue,
 } from '../../src/features/universities/UniversityStageCard';
 let tree: ReactTestRenderer;
+let navigate: ReturnType<typeof useNavigate>;
+function NavigationProbe() { navigate = useNavigate(); return null; }
 let record: Record<string, unknown>;
 const snapshot = () => ({
   university: { ...record },
@@ -58,6 +60,7 @@ async function mount() {
   await act(async () => {
     tree = create(
       <MemoryRouter initialEntries={['/universities/u1']}>
+        <NavigationProbe />
         <Routes>
           <Route path="/universities/:id" element={<UniversityRelationshipEditorPage />} />
         </Routes>
@@ -114,6 +117,31 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 describe('University source stages and independent card editing', () => {
+  it('discards a late saved card after changing owners and returning to the original owner', async () => {
+    await mount();
+    await editName();
+    const inputs = card().findAllByType('input');
+    await act(async () => {
+      inputs.find(i => i.props.type === 'url')!.props.onChange({ target: { value: 'https://example.org/source' } });
+      inputs.find(i => i.props.type === 'date')!.props.onChange({ target: { value: '2026-10-24' } });
+      inputs.find(i => i.props.maxLength === 2000)!.props.onChange({ target: { value: 'Verified identity' } });
+    });
+    let release!: (value: unknown) => void;
+    const pending = new Promise(resolve => { release = resolve; });
+    state.request.mockImplementation(async (path: string, options?: { method?: string }) => {
+      if (options?.method) return pending;
+      if (path.endsWith('/publication-readiness')) return { ready: false, blockingIssues: [], warnings: [] };
+      return snapshot();
+    });
+    await act(async () => { void button('Save this section').props.onClick(); });
+    await act(async () => { record = { ...record, id: 'u2', displayName: 'Second owner' }; navigate('/universities/u2'); });
+    await act(async () => { record = { ...record, id: 'u1', displayName: 'Current original owner', revision: 3 }; navigate('/universities/u1'); });
+    const readsBeforeRelease = state.request.mock.calls.length;
+    await act(async () => release({ id: 'u1', revision: 2 }));
+    expect(state.request.mock.calls).toHaveLength(readsBeforeRelease);
+    expect(text(tree.toJSON())).toContain('Current original owner');
+    expect(tree.root.findAllByProps({ role: 'status' })).toHaveLength(0);
+  });
   it('opens the exact program and study editor through the visible actions', async () => {
     record.academicPrograms = [
       {

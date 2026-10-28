@@ -23,6 +23,7 @@ import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { reviewReasonHeaders } from '@manaratak/shared';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 import {
   UniversityStageCard,
   universityField,
@@ -76,6 +77,8 @@ export function UniversityRelationshipEditorPage() {
     { language, dir } = useTranslation(),
     { hasPermission } = useAdminAuthorization();
   const ar = language === 'ar';
+  const scope = useOwnerOperationScope(`${id}:${hasPermission('admin:universities:manage')}:${hasPermission('admin:universities:publish')}`);
+  const [verificationPending, setVerificationPending] = useState(false);
   const requested = Number(params.get('stage') ?? 1),
     stage = Number.isInteger(requested) && requested >= 1 && requested <= 5 ? requested : 1;
   const [data, setData] = useState<Snapshot | null>(null),
@@ -113,6 +116,7 @@ export function UniversityRelationshipEditorPage() {
     return snapshot;
   }, [id]);
   const refresh = useCallback(async () => {
+    if (!scope.isCurrent()) return;
     const current = ++generation.current;
     setLoading(true);
     setError('');
@@ -126,15 +130,16 @@ export function UniversityRelationshipEditorPage() {
           )
           .catch(() => null),
       ]);
-      if (current !== generation.current) return;
+      if (current !== generation.current || !scope.isCurrent()) return;
       setData(snapshot);
       setReadiness(gate);
+      setVerificationPending(false);
     } catch (e) {
-      if (current === generation.current) setError(e instanceof Error ? e.message : String(e));
+      if (current === generation.current && scope.isCurrent()) { setData(null); setReadiness(null); setError(e instanceof Error ? e.message : String(e)); }
     } finally {
       if (current === generation.current) setLoading(false);
     }
-  }, [id, read]);
+  }, [id, read, scope]);
   const cancelReads = useCallback(() => {
     generation.current++;
   }, []);
@@ -142,10 +147,14 @@ export function UniversityRelationshipEditorPage() {
     setData(null);
     setEditingId(null);
     setDirty(false);
+    setBusy(false); savingLock.current = false; externalBusy.current = false;
+    setConfirmation(null); setPending(null); setMessage(''); setReadiness(null); setTool(null);
+    setVerificationPending(false);
     void refresh();
     return cancelReads;
   }, [refresh, setDirty, cancelReads]);
   const transition = (action: () => void) => {
+    if (!scope.isCurrent()) return;
     if (externalBusy.current || savingLock.current) return;
     if (dirtyRef.current) setPending(() => action);
     else action();
@@ -175,13 +184,14 @@ export function UniversityRelationshipEditorPage() {
     else open();
   };
   const commit: Commit = async (path, method, body, reason) => {
-    if (!data || savingLock.current || !hasPermission('admin:universities:manage'))
+    if (!data || verificationPending || !scope.isCurrent() || savingLock.current || !hasPermission('admin:universities:manage'))
       throw Error('UNIVERSITY_OPERATION_UNAVAILABLE');
     const revision = data.university.revision;
     if (!Number.isSafeInteger(revision)) throw Error('UNIVERSITY_EXPECTED_REVISION_REQUIRED');
     savingLock.current = true;
     setBusy(true);
     setMessage('');
+    let accepted = false;
     try {
       const saved = await adminApiClient.request<Partial<UniversityData>>(
         `/admin/universities/${encodeURIComponent(id)}${path}`,
@@ -192,7 +202,10 @@ export function UniversityRelationshipEditorPage() {
           ...(body === undefined ? {} : { body: JSON.stringify(body) }),
         },
       );
+      accepted = true;
+      if (!scope.isCurrent()) return;
       const snapshot = await read();
+      if (!scope.isCurrent()) return;
       if (
         snapshot.university.revision === revision ||
         (saved.revision !== undefined && snapshot.university.revision !== saved.revision)
@@ -208,6 +221,8 @@ export function UniversityRelationshipEditorPage() {
         ))
           if (JSON.stringify(universityField(snapshot.university, key)) !== JSON.stringify(value))
             throw Error('UNIVERSITY_CARD_READBACK_MISMATCH');
+      const expectedStatus: Record<string, string> = { '/publish': 'PUBLISHED', '/unpublish': 'READY_TO_REVIEW', '/mark-ready': 'READY_TO_REVIEW', '/mark-publishable': 'READY_TO_PUBLISH', '/archive': 'ARCHIVED', '/reject': 'REJECTED', '/restore': 'READY_TO_REVIEW' };
+      if (expectedStatus[path] && snapshot.university.status !== expectedStatus[path]) throw Error('UNIVERSITY_COMMAND_READBACK_MISMATCH');
       setData(snapshot);
       setDirty(false);
       setEditingId(null);
@@ -216,17 +231,19 @@ export function UniversityRelationshipEditorPage() {
           ? 'تم حفظ الوحدة وإعادة قراءتها؛ لم تُحفظ بطاقات أخرى ولم يحدث نشر تلقائي.'
           : 'Unit saved and read back; other cards were not saved and publication was not automatic.',
       );
-      setReadiness(
-        await adminApiClient
+      const gate = await adminApiClient
           .request<Readiness>(
             `/admin/universities/${encodeURIComponent(id)}/publication-readiness`,
             { cache: 'no-store' },
           )
-          .catch(() => null),
-      );
+          .catch(() => null);
+      if (scope.isCurrent()) setReadiness(gate);
+    } catch (e) {
+      if (!scope.isCurrent()) return;
+      if (accepted) { setVerificationPending(true); setReadiness(null); setError(ar ? 'تعذر التحقق من الحفظ؛ أعد قراءة الجامعة قبل أي تعديل أو نشر.' : 'Save could not be verified; reload the university before editing or publishing.'); }
+      throw e;
     } finally {
-      savingLock.current = false;
-      setBusy(false);
+      if (scope.isCurrent()) { savingLock.current = false; setBusy(false); }
     }
   };
   useEffect(() => {
@@ -342,7 +359,7 @@ export function UniversityRelationshipEditorPage() {
     );
   const u = data.university,
     immutable = ['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(u.status),
-    disabled = immutable || !hasPermission('admin:universities:manage'),
+    disabled = immutable || verificationPending || !hasPermission('admin:universities:manage'),
     evidence = data.stages.find((s) => s.stage === stage);
   const sourceLabel = (item?: UniversityStageEvidence) =>
     !item
@@ -363,7 +380,7 @@ export function UniversityRelationshipEditorPage() {
   const common = (key: string) => ({
     university: u,
     ar,
-    busy,
+    busy: busy || verificationPending,
     disabled,
     editing: editingId === key,
     onEdit: () => requestEdit(key),
@@ -378,7 +395,7 @@ export function UniversityRelationshipEditorPage() {
     options: Partial<React.ComponentProps<typeof UniversityNormalizedCard>> = {},
   ) => (
     <UniversityNormalizedCard
-      key={key}
+      key={`${scope.epoch}:${key}`}
       {...common(key)}
       kind={kind}
       title={title}
@@ -397,7 +414,7 @@ export function UniversityRelationshipEditorPage() {
       true,
     );
   return (
-    <main className="university-stages" dir={dir}>
+    <main key={scope.epoch} className="university-stages" dir={dir}>
       <div className="university-links">
         <Link to="/universities">
           <ArrowRight size={16} /> {ar ? 'العودة إلى الجامعات' : 'Back to universities'}
@@ -433,7 +450,7 @@ export function UniversityRelationshipEditorPage() {
         <div className="university-actions">
           {u.status === 'IMPORTED' && (
             <button
-              disabled={busy || dirty || u.completenessStatus === 'INCOMPLETE'}
+              disabled={busy || verificationPending || dirty || u.completenessStatus === 'INCOMPLETE'}
               onClick={() => action('mark-ready', ar ? 'جاهزة للمراجعة' : 'Ready for review')}
             >
               <ShieldCheck />
@@ -442,7 +459,7 @@ export function UniversityRelationshipEditorPage() {
           )}
           {u.status === 'READY_TO_REVIEW' && (
             <button
-              disabled={busy || dirty || u.completenessStatus !== 'COMPLETE'}
+              disabled={busy || verificationPending || dirty || u.completenessStatus !== 'COMPLETE'}
               onClick={() => action('mark-publishable', ar ? 'جاهزة للنشر' : 'Ready to publish')}
             >
               <ShieldCheck />
@@ -451,7 +468,7 @@ export function UniversityRelationshipEditorPage() {
           )}
           {u.status === 'READY_TO_PUBLISH' && (
             <button
-              disabled={busy || dirty || readiness?.ready !== true}
+              disabled={busy || verificationPending || dirty || readiness?.ready !== true}
               onClick={() => action('publish', ar ? 'نشر الجامعة' : 'Publish university')}
             >
               <Globe />

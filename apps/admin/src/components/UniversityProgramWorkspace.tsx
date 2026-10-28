@@ -203,7 +203,8 @@ export function UniversityProgramWorkspace() {
               {label}
               <select
                 value={filters[key as keyof typeof filters]}
-                onChange={(e) => setFilters((old) => ({ ...old, [key]: e.target.value }))}
+                onChange={(e) => setFilters((old) => ({ ...old, [key]: e.target.value,
+                  ...(key === 'countryReferenceId' ? { regionReferenceId: '', cityReferenceId: '' } : key === 'regionReferenceId' ? { cityReferenceId: '' } : {}) }))}
               >
                 <option value="">—</option>
                 {options[key]?.map((item) => (
