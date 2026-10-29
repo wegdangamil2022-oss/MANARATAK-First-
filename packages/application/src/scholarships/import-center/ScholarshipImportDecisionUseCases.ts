@@ -37,6 +37,10 @@ export class ScholarshipImportDecisionUseCases {
     if (input.resolutionType === 'RESOLVED') {
       const result = await this.resolver.resolve({ target: input.canonicalEntityType as never, rawValue: input.rawValue, canonicalId: input.canonicalId });
       if (result.state !== 'RESOLVED') throw new Error('SCHOLARSHIP_CANONICAL_RESOLUTION_NOT_EXISTING_OR_AMBIGUOUS');
+      // A reviewed INS-* / MJR-* public identity is lookup evidence. The
+      // durable decision is consumed as an owning-table foreign key.
+      if (!result.canonicalReferenceId?.trim()) throw new Error('SCHOLARSHIP_CANONICAL_REFERENCE_REQUIRED');
+      return this.canonical.record({ ...input, canonicalId: result.canonicalReferenceId });
     }
     return this.canonical.record(input);
   }
