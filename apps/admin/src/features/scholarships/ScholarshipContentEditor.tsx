@@ -2,6 +2,7 @@ import { useId, useRef, type Dispatch, type ReactNode, type SetStateAction } fro
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import type { ScholarshipDto } from '@manaratak/domain';
 import type { ScholarshipCatalogUpdate } from '../../api/scholarshipCatalog';
+import { ScholarshipEligibilityCriteria } from './ScholarshipEligibilityCriteria';
 import {
   benefitText,
   moveScholarshipBenefit,
@@ -375,49 +376,13 @@ export function ScholarshipContentEditor({
     );
   }
   if (tab === 'eligibility') {
-    const rows = form.eligibilityItems ?? [];
     return (
-      <section className="scholarship-read-card">
-        <h2>{tr('شروط الأهلية', 'Eligibility')}</h2>
-        <div className="scholarship-card-grid">
-          {rows.map((item) => (
-            <div key={item.itemKey}>
-              <TextCard
-                title={tr('شرط الأهلية', 'Eligibility condition')}
-                multiline
-                focus={focusField === item.itemKey}
-                value={item.valueText}
-                onChange={(value) =>
-                  set(
-                    'eligibilityItems',
-                    rows.map((row) =>
-                      row.itemKey === item.itemKey ? { ...row, valueText: value } : row,
-                    ),
-                  )
-                }
-              />
-              {remove(tr('حذف الشرط', 'Remove condition'), () =>
-                set(
-                  'eligibilityItems',
-                  rows.filter((row) => row.itemKey !== item.itemKey),
-                ),
-              )}
-            </div>
-          ))}
-        </div>
-        {add(tr('إضافة شرط', 'Add condition'), () =>
-          set('eligibilityItems', [
-            ...rows,
-            {
-              itemKey: scholarshipCardKey('condition'),
-              itemTypeCode: 'GENERAL',
-              valueText: '',
-              isRequired: true,
-              priorityOrder: rows.length + 1,
-            },
-          ]),
-        )}
-      </section>
+      <ScholarshipEligibilityCriteria
+        items={form.eligibilityItems ?? []}
+        language={language}
+        focusField={focusField}
+        onChange={(items) => set('eligibilityItems', items)}
+      />
     );
   }
   if (tab === 'documents') {

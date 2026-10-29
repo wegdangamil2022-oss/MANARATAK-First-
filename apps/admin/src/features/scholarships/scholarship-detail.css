@@ -139,6 +139,105 @@
   gap: 12px;
   margin-bottom: 12px;
 }
+.scholarship-criteria-panel {
+  padding: 16px;
+}
+.scholarship-criteria-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.scholarship-criteria-heading h2 {
+  margin: 0;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #d6a43b;
+  font-size: 14px !important;
+}
+.scholarship-criteria-heading h2 svg {
+  background: #142b5f;
+  color: #e9bd61;
+  border-radius: 50%;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+}
+.scholarship-criteria-section h3 {
+  margin: 12px 0 8px;
+  font-size: 12px !important;
+  color: #0e7c86;
+}
+.scholarship-criteria-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 0;
+}
+.scholarship-criterion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border: 1px solid #e0e6ec;
+  border-radius: 12px;
+  background: #f7f7f5;
+  color: #142b5f;
+  min-width: 0;
+}
+.scholarship-criterion-dot {
+  width: 13px;
+  height: 13px;
+  padding: 3px;
+  border: 1px solid #d6a43b;
+  border-radius: 50%;
+  background: #d6a43b;
+  background-clip: content-box;
+  flex: 0 0 13px;
+}
+.scholarship-criterion p,
+.scholarship-criterion textarea {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  text-align: start;
+}
+.scholarship-criterion textarea {
+  border: 1px solid #d8e4e7;
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: white;
+  color: #142b5f;
+  min-height: 40px;
+  field-sizing: content;
+  resize: vertical;
+}
+.scholarship-criterion .scholarship-criterion-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 36px;
+  min-height: 40px;
+  width: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #0e7c86;
+  padding: 4px;
+}
+.scholarship-criterion .scholarship-criterion-action:hover {
+  background: #142b5f;
+  color: #e9bd61;
+}
 .scholarship-card-heading,
 .scholarship-group-heading {
   display: flex;

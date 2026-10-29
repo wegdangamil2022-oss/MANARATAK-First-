@@ -1,4 +1,5 @@
 import type { ScholarshipDto } from '@manaratak/domain';
+import { ScholarshipEligibilityCriteria } from './ScholarshipEligibilityCriteria';
 import { ExternalLink, FileText, Pencil } from 'lucide-react';
 import {
   benefitText,
@@ -329,15 +330,12 @@ export function ScholarshipDetailReadView({
       </>
     );
   if (tab === 'eligibility')
-    return textCards(
-      (scholarship.eligibilityItems ?? []).map((item) => ({
-        key: item.itemKey,
-        title: tr('شرط الأهلية', 'Eligibility condition'),
-        text:
-          item.valueText ||
-          tr('شرط محفوظ يحتاج إلى صياغة واضحة.', 'Saved condition needs a clear description.'),
-      })),
-      tr('شروط الأهلية', 'Eligibility'),
+    return (
+      <ScholarshipEligibilityCriteria
+        items={scholarship.eligibilityItems ?? []}
+        language={language}
+        onEdit={onEdit}
+      />
     );
   if (tab === 'documents')
     return textCards(
