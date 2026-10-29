@@ -1,3 +1,5 @@
+import { ScholarshipContentEditor } from '../features/scholarships/ScholarshipContentEditor';
+import { scholarshipEditorValidation } from '../features/scholarships/ScholarshipEditorValidation';
 import { scholarshipDetailText } from '../features/scholarships/ScholarshipDetailText';
 import { registerScholarshipHistoryGuard } from '../features/scholarships/ScholarshipHistoryGuard';
 import {
@@ -27,17 +29,13 @@ import {
   GraduationCap,
   History,
   Info,
-  Landmark,
-  Layers3,
   Lightbulb,
   Loader2,
-  Plus,
   Save,
   ShieldCheck,
   Sparkles,
-  Trash2,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   scholarshipCatalogApi,
@@ -71,26 +69,9 @@ function asText(value: unknown): string {
   return value === null || value === undefined ? '' : String(value);
 }
 
-function display(value: unknown): string {
-  const text = asText(value);
-  return text.trim() ? text : '—';
-}
-
-function dateInput(value: unknown): string {
-  if (!value) return '';
-  const date = new Date(String(value));
-  return Number.isNaN(date.getTime()) ? '' : date.toISOString().slice(0, 10);
-}
-
-function nextKey<T, K extends keyof T>(prefix: string, rows: T[], keyName: K): string {
-  const used = new Set(rows.map((row) => String(row[keyName] ?? '')));
-  let index = rows.length + 1;
-  while (used.has(`${prefix}-${index}`)) index += 1;
-  return `${prefix}-${index}`;
-}
-
 function toUpdate(s: ScholarshipDto): ScholarshipCatalogUpdate {
   return {
+    metadata: s.metadata ? structuredClone(s.metadata) : undefined,
     displayName: s.displayName,
     providerName: s.providerName ?? null,
     amountMinorUnits: s.amountMinorUnits ?? null,
@@ -163,35 +144,6 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
   );
 }
 
-function Input({
-  value,
-  onChange,
-  type = 'text',
-  readOnly = false,
-  placeholder,
-}: {
-  value: unknown;
-  onChange?: (value: string) => void;
-  type?: string;
-  readOnly?: boolean;
-  placeholder?: string;
-}) {
-  return (
-    <input
-      type={type}
-      value={asText(value)}
-      readOnly={readOnly}
-      placeholder={placeholder}
-      onChange={(event) => onChange?.(event.target.value)}
-      className={`w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs sm:text-sm font-medium text-[#203442] outline-none transition font-['Cairo'] ${
-        readOnly
-          ? 'bg-[#FAF7F0] text-slate-500 cursor-not-allowed border-slate-200/70'
-          : 'bg-white focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 hover:border-slate-300'
-      }`}
-    />
-  );
-}
-
 function Textarea({
   value,
   onChange,
@@ -219,6 +171,7 @@ export function ScholarshipDetailPage() {
   const tr = (ar: string, en: string) => (language === 'ar' ? ar : en);
   const lt = (value: string) => scholarshipDetailText(language, value);
   const [editing, setEditing] = useState(false);
+  const [focusField, setFocusField] = useState<string>();
   const [relationshipEditing, setRelationshipEditing] = useState(false);
   const [relationshipDirty, setRelationshipDirty] = useState(false);
   const [translationOpen, setTranslationOpen] = useState(false);
@@ -462,22 +415,6 @@ export function ScholarshipDetailPage() {
     };
   }, [unsaved]);
   const scholarship = detail?.scholarship;
-  const benefits = form.benefits ?? [];
-  const eligibility = useMemo(
-    () =>
-      [...(form.eligibilityItems ?? [])].sort(
-        (a, b) => Number(a.priorityOrder ?? 0) - Number(b.priorityOrder ?? 0),
-      ),
-    [form.eligibilityItems],
-  );
-  const documents = useMemo(
-    () =>
-      [...(form.requiredDocumentItems ?? [])].sort(
-        (a, b) => Number(a.displayOrder ?? 0) - Number(b.displayOrder ?? 0),
-      ),
-    [form.requiredDocumentItems],
-  );
-
   const save = async () => {
     const active = () => mounted.current && currentScope.current === ownerEpoch;
     if (
@@ -499,6 +436,11 @@ export function ScholarshipDetailPage() {
         ),
       );
       return;
+    }
+    const validationError = scholarshipEditorValidation(form, language === 'ar');
+    if (validationError) {
+      setError(validationError);
+      return false;
     }
     setSaving(true);
     setError(null);
@@ -749,11 +691,6 @@ export function ScholarshipDetailPage() {
     officialSourceUrl: tr('المصدر الرسمي', 'Official source'),
     description: tr('النبذة', 'Overview'),
   };
-  const isFullFunding =
-    form.isFullyFunded ||
-    form.fundingTypeCode === 'FULLY_FUNDED' ||
-    form.fundingTypeCode === 'FULL';
-
   const navTabs = [
     {
       key: 'identity' as TabKey,
@@ -864,8 +801,8 @@ export function ScholarshipDetailPage() {
                   : undefined
               }
               onClick={() => {
-                setRelationshipEditing(false);
-                setEditing(true);
+                setRelationshipEditing(activeTab === 'degrees_majors');
+                setEditing(activeTab !== 'degrees_majors');
               }}
             >
               <FileText />
@@ -1021,6 +958,7 @@ export function ScholarshipDetailPage() {
             <ScholarshipRelationshipEditorPage
               key={scholarship.id + ':' + scholarship.revision}
               embedded
+              degreeOnly
               disabled={saving || dirty || !canEdit}
               onDirtyChange={setRelationshipDirty}
               onSaved={async () => {
@@ -1030,670 +968,47 @@ export function ScholarshipDetailPage() {
             />
           </div>
         )}
-        {!editing &&
+        {(!editing || activeTab === 'degrees_majors') &&
           activeTab !== 'health_audit' &&
           !(relationshipEditing && activeTab === 'degrees_majors') && (
             <ScholarshipDetailReadView
               scholarship={scholarship}
               tab={activeTab}
               language={language}
+              onEdit={
+                canEdit && !saving && !relationshipDirty && !dirty
+                  ? (field) => {
+                      if (field === 'educationalDegree' || activeTab === 'degrees_majors') {
+                        setActiveTab('degrees_majors');
+                        setRelationshipEditing(true);
+                      } else {
+                        setFocusField(field);
+                        setEditing(true);
+                      }
+                    }
+                  : undefined
+              }
             />
           )}
         {/* Active Tab Content */}
         <main className="space-y-5">
           {(editing || activeTab === 'health_audit') && (
             <fieldset disabled={saving || actionLoading || !canEdit} className="contents">
-              <p className="rounded-xl bg-teal-50 p-3 text-xs">
-                {lt(
-                  'الدرجات والتخصصات الجديدة تُحفظ للمراجعة. استخدم «إدارة العلاقات» لاختيار المراجع الفعلية؛ الروابط القائمة محفوظة دون تغيير.',
-                )}
-              </p>
-              {(form.majorTargets ?? []).filter((item) => !item.metadata?.degreeTargetKey).length >
-                0 && (
-                <div className="rounded-xl border p-3 text-xs">
-                  <p className="mb-2 font-bold">{lt('التخصصات المشتركة المحفوظة للمنحة')}</p>
-                  {(form.majorTargets ?? [])
-                    .filter((item) => !item.metadata?.degreeTargetKey)
-                    .map((item) => (
-                      <span
-                        key={item.targetKey}
-                        className="inline-block m-1 rounded-lg bg-slate-50 px-2 py-1"
-                      >
-                        {item.sourceLabel || item.targetKey}
-                      </span>
-                    ))}
-                </div>
-              )}
-              {/* Tab 1: Identity & Basics */}
-              {activeTab === 'identity' && (
-                <div className="space-y-6">
-                  <Card
-                    title={lt('البيانات التعريفية وهوية المنحة')}
-                    subtitle={lt(
-                      'اسم المنحة الرسمي، الجهة المانحة، العام الأكاديمي، والموقع الجغرافي',
-                    )}
-                    icon={<Building2 className="h-5 w-5" />}
-                  >
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="sm:col-span-2">
-                        <Field label={lt('اسم المنحة الرسمي للعرض (Display Name)')}>
-                          <Input
-                            value={form.displayName}
-                            onChange={(val) => setForm((x) => ({ ...x, displayName: val }))}
-                            placeholder={lt('مثال: منحة الحكومة التركية الممولة بالكامل')}
-                          />
-                        </Field>
-                      </div>
-
-                      <Field label={lt('الجهة المانحة / الراعية (Provider / Sponsor)')}>
-                        <Input
-                          value={form.providerName}
-                          onChange={(val) => setForm((x) => ({ ...x, providerName: val }))}
-                          placeholder={lt('مثال: رئاسة أتراك المهجر (YTB)')}
-                        />
-                      </Field>
-
-                      <Field label={lt('الدولة / بلد الدراسة (Study Country)')}>
-                        <Input
-                          value={form.countrySourceLabel}
-                          onChange={(val) => setForm((x) => ({ ...x, countrySourceLabel: val }))}
-                          placeholder={lt('مثال: تركيا، المملكة المتحدة، ألمانيا')}
-                        />
-                      </Field>
-
-                      <Field label={lt('العام الأكاديمي (Academic Year)')}>
-                        <Input
-                          value={form.academicYear}
-                          onChange={(val) => setForm((x) => ({ ...x, academicYear: val }))}
-                          placeholder="2026/2027"
-                        />
-                      </Field>
-
-                      <Field label={lt('الدورة / المرحلة (Cycle Name)')}>
-                        <Input
-                          value={form.cycleName}
-                          onChange={(val) => setForm((x) => ({ ...x, cycleName: val }))}
-                          placeholder={lt('دورة الخريف 2027')}
-                        />
-                      </Field>
-
-                      <Field label={lt('لغة الدراسة (Study Language)')}>
-                        <Input
-                          value={form.studyLanguageSourceLabel}
-                          onChange={(val) =>
-                            setForm((x) => ({ ...x, studyLanguageSourceLabel: val }))
-                          }
-                          placeholder={lt('الإنجليزية / التركية / الألمانية')}
-                        />
-                      </Field>
-
-                      <Field label={lt('الموعد النهائي للتقديم (Application Deadline)')}>
-                        <Input
-                          type="date"
-                          value={dateInput(form.applicationDeadline)}
-                          onChange={(val) =>
-                            setForm((x) => ({
-                              ...x,
-                              applicationDeadline: val
-                                ? new Date(`${val}T23:59:59.000Z`).toISOString()
-                                : null,
-                            }))
-                          }
-                        />
-                      </Field>
-
-                      <Field label={lt('نوع الموعد النهائي (Deadline Type)')}>
-                        <select
-                          value={asText(form.deadlineType)}
-                          onChange={(e) => setForm((x) => ({ ...x, deadlineType: e.target.value }))}
-                          className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-[#203442] outline-none transition focus:border-[#0E7C86] font-['Cairo']"
-                        >
-                          <option value="HARD_DEADLINE">
-                            {lt('موعد نهائي صارم (Hard Deadline)')}
-                          </option>
-                          <option value="ROLLING">{lt('تقديم مستمر طوال العام (Rolling)')}</option>
-                          <option value="STAGED">{lt('مراحل متعددة (Staged)')}</option>
-                        </select>
-                      </Field>
-
-                      <Field label={lt('طريقة وآلية التقديم (Application Method)')}>
-                        <Input
-                          value={form.applicationMethod}
-                          onChange={(val) => setForm((x) => ({ ...x, applicationMethod: val }))}
-                          placeholder={lt('بوابة التقديم الإلكترونية الرسمية')}
-                        />
-                      </Field>
-                    </div>
-                  </Card>
-
-                  <Card
-                    title={lt('المعرفات القانونية والضبط')}
-                    subtitle={lt('بيانات النظام والربط المعياري (للقراءة فقط)')}
-                    icon={<Layers3 className="h-5 w-5" />}
-                  >
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                      <Field label={lt('المعرف العام (Public ID)')}>
-                        <Input value={scholarship.publicId} readOnly />
-                      </Field>
-                      <Field label={lt('الاسم القانوني المعياري')}>
-                        <Input value={scholarship.canonicalName} readOnly />
-                      </Field>
-                      <Field label={lt('مفتاح منع التكرار (Dedupe Key)')}>
-                        <Input value={scholarship.canonicalDedupKey} readOnly />
-                      </Field>
-                    </div>
-                  </Card>
-                </div>
-              )}
-
-              {/* Tab 2: Overview & Summary */}
-              {activeTab === 'overview' && (
-                <div className="space-y-6">
-                  <Card
-                    title={lt('نبذة تعريفية شاملة عن المنحة (Scholarship Overview)')}
-                    subtitle={lt('الوصف التعريفي الكامل، أهداف المنحة، ورسالة البرنامج الأكاديمي')}
-                    icon={<Info className="h-5 w-5" />}
-                  >
-                    <div className="space-y-4">
-                      <Field label={lt('الوصف العام والشامل للمنحة (Description)')}>
-                        <Textarea
-                          rows={6}
-                          value={form.description}
-                          onChange={(val) => setForm((x) => ({ ...x, description: val }))}
-                          placeholder={lt(
-                            'اكتب هنا نبذة مفصلة عن المنحة وتاريخها وأهم ما يميزها والجامعات التي تشملها...',
-                          )}
-                        />
-                      </Field>
-
-                      <div className="rounded-2xl bg-teal-50/60 border border-teal-200/80 p-4 text-xs space-y-2 text-[#142B5F]">
-                        <div className="flex items-center gap-2 font-black text-[#0E7C86]">
-                          <Sparkles className="h-4 w-4" />
-                          <span>{lt('إرشادات صياغة النبذة:')}</span>
-                        </div>
-                        <ul className="list-disc list-inside space-y-1 text-slate-600 font-medium">
-                          <li>
-                            {lt('وضّح أهمية المنحة والدولة المستضيفة والمستوى الأكاديمي للجامعات.')}
-                          </li>
-                          <li>
-                            {lt(
-                              'بيّن ما إذا كانت المنحة تشمل سنة تحضيرية لتعلم اللغة أو تتيح الدراسة باللغة الإنجليزية.',
-                            )}
-                          </li>
-                          <li>
-                            {lt(
-                              'اذكر الفئات الأكثر حظاً في القبول والهدف التنموي أو الأكاديمي للمنحة.',
-                            )}
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-              )}
-
-              {/* Tab 3: Funding & Benefits */}
-              {activeTab === 'funding' && (
-                <div className="space-y-6">
-                  <Card
-                    title={lt('الحزمة المالية ونوع التغطية')}
-                    subtitle={lt('تحديد نوع التمويل (كامل أو جزئي)، البدلات والرواتب')}
-                    icon={<Coins className="h-5 w-5" />}
-                  >
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                      <Field label={lt('نوع التمويل والتغطية')}>
-                        <select
-                          value={asText(form.fundingTypeCode)}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setForm((x) => ({
-                              ...x,
-                              fundingTypeCode: val,
-                              isFullyFunded: val === 'FULLY_FUNDED' || val === 'FULL',
-                            }));
-                          }}
-                          className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-[#142B5F] outline-none transition focus:border-[#0E7C86] font-['Cairo']"
-                        >
-                          <option value="FULLY_FUNDED">
-                            {lt('تمويل كامل وفق الحقل (Fully Funded)')}
-                          </option>
-                          <option value="PARTIALLY_FUNDED">
-                            {lt('تمويل جزئي (Partially Funded)')}
-                          </option>
-                          <option value="TUITION_ONLY">{lt('إعفاء من الرسوم الدراسية فقط')}</option>
-                        </select>
-                      </Field>
-
-                      <Field label={lt('هل المنحة ممولة بالكامل؟')}>
-                        <div
-                          className={`flex h-11 items-center rounded-xl border px-3.5 text-xs font-black ${
-                            isFullFunding
-                              ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                              : 'border-amber-200 bg-amber-50 text-amber-700'
-                          }`}
-                        >
-                          {isFullFunding ? lt('✓ نعم - تمويل كامل وشامل') : lt('✗ لا - تمويل جزئي')}
-                        </div>
-                      </Field>
-
-                      <Field label={lt('المبلغ التقديري أو الراتب (بالوحدات)')}>
-                        <Input
-                          value={form.amountMinorUnits}
-                          onChange={(val) => setForm((x) => ({ ...x, amountMinorUnits: val }))}
-                          placeholder={lt('مثال: 3500')}
-                        />
-                      </Field>
-
-                      <Field label={lt('رمز العملة (Currency Code)')}>
-                        <Input
-                          value={form.amountCurrencyCode}
-                          onChange={(val) => setForm((x) => ({ ...x, amountCurrencyCode: val }))}
-                          placeholder="TRY, USD, EUR, GBP, SAR"
-                        />
-                      </Field>
-                    </div>
-                  </Card>
-
-                  <Card
-                    title={lt('قائمة المزايا والبدلات المغطاة (Benefits & Allowances)')}
-                    subtitle={lt(
-                      'الرسوم، السكن، التذاكر، التأمين الصحي، الراتب المعيشي، وتأشيرة السفر',
-                    )}
-                    icon={<Sparkles className="h-5 w-5" />}
-                  >
-                    <div className="space-y-3.5">
-                      {benefits.map((item, index) => (
-                        <div
-                          key={item.benefitKey || index}
-                          className="rounded-2xl border border-slate-200 bg-[#FAF7F0]/40 p-4 transition hover:border-[#0E7C86]/40 hover:bg-white"
-                        >
-                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                            <div className="flex-1">
-                              <Field label={lt('الميزة المالية المغطاة (اكتب نص الميزة مباشرة)')}>
-                                <Input
-                                  value={item.valueText}
-                                  onChange={(val) => {
-                                    const updated = benefits.map((b, i) =>
-                                      i === index ? { ...b, valueText: val } : b,
-                                    );
-                                    setForm((x) => ({ ...x, benefits: updated }));
-                                  }}
-                                  placeholder={lt(
-                                    'مثال: إعفاء كامل 100% من جميع الرسوم الدراسية / راتب شهري 1500 ليرة / سكن جامعي مجاني',
-                                  )}
-                                />
-                              </Field>
-                            </div>
-
-                            <div className="flex items-center justify-end pt-1 sm:pt-4">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const updated = benefits.filter((_, i) => i !== index);
-                                  setForm((x) => ({ ...x, benefits: updated }));
-                                }}
-                                className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-800 p-2.5 rounded-xl hover:bg-rose-50 border border-transparent hover:border-rose-200 transition cursor-pointer"
-                                title={lt('حذف الميزة')}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                <span>{lt('حذف')}</span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const benefitKey = nextKey('BENEFIT', benefits, 'benefitKey');
-                          setForm((x) => ({
-                            ...x,
-                            benefits: [
-                              ...benefits,
-                              {
-                                benefitKey,
-                                benefitTypeCode: 'OTHER',
-                                coverageTypeCode: 'FULL',
-                                valueText: '',
-                                displayOrder: benefits.length + 1,
-                              },
-                            ],
-                          }));
-                        }}
-                        className="inline-flex items-center gap-2 rounded-2xl border border-dashed border-[#0E7C86] bg-teal-50/50 hover:bg-teal-50 px-5 py-3 text-xs font-black text-[#0E7C86] transition cursor-pointer"
-                      >
-                        <Plus className="h-4 w-4" />
-                        <span>{lt('+ إضافة ميزة مالية جديدة (مربع نصي)')}</span>
-                      </button>
-                    </div>
-                  </Card>
-                </div>
-              )}
-
-              {/* One canonical editor serves the catalog and the existing relationship route. */}
-              {/* Tab 5: Eligibility Criteria */}
-              {activeTab === 'eligibility' && (
-                <div className="space-y-6">
-                  <Card
-                    title={lt('معايير وشروط الأهلية والقبول (Eligibility Criteria)')}
-                    subtitle={lt('المعدل الأكاديمي الأدنى، شروط السن، اختبارات اللغة، والجنسيات')}
-                    icon={<CheckCheck className="h-5 w-5" />}
-                  >
-                    <div className="space-y-3.5">
-                      {eligibility
-                        .filter((item) => item.internationalTestId)
-                        .map((item) => (
-                          <p key={item.itemKey} className="text-xs text-slate-500">
-                            {lt('مرجع الاختبار المعتمد:')}
-                            {item.internationalTestId}
-                          </p>
-                        ))}
-                      {eligibility.map((item, index) => (
-                        <div
-                          key={item.itemKey || index}
-                          className="rounded-2xl border border-slate-200 bg-[#FAF7F0]/40 p-4 transition hover:border-[#0E7C86]/40 hover:bg-white"
-                        >
-                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                            <div className="flex-1">
-                              <Field label={lt('نص الشرط والمعيار بالأهلية (يكتب نصاً مباشرة)')}>
-                                <Input
-                                  value={item.valueText}
-                                  onChange={(val) => {
-                                    const updated = eligibility.map((row, i) =>
-                                      i === index ? { ...row, valueText: val } : row,
-                                    );
-                                    setForm((x) => ({ ...x, eligibilityItems: updated }));
-                                  }}
-                                  placeholder={lt(
-                                    'مثال: معدل تراكمي لا يقل عن 70% للبكالوريوس أو 75% للدراسات العليا / السن أقل من 21 سنة للبكالوريوس',
-                                  )}
-                                />
-                              </Field>
-                            </div>
-
-                            <div className="flex items-center justify-between sm:justify-end gap-3 pt-1 sm:pt-4">
-                              <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={item.isRequired !== false}
-                                  onChange={(e) => {
-                                    const updated = eligibility.map((row, i) =>
-                                      i === index ? { ...row, isRequired: e.target.checked } : row,
-                                    );
-                                    setForm((x) => ({ ...x, eligibilityItems: updated }));
-                                  }}
-                                  className="rounded text-[#0E7C86] focus:ring-[#0E7C86]"
-                                />
-                                <span>{lt('شرط إلزامي')}</span>
-                              </label>
-
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const updated = eligibility.filter((_, i) => i !== index);
-                                  setForm((x) => ({ ...x, eligibilityItems: updated }));
-                                }}
-                                className="text-rose-500 hover:text-rose-700 p-2 rounded-xl hover:bg-rose-50 border border-transparent hover:border-rose-200 cursor-pointer"
-                                title={lt('حذف الشرط')}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const itemKey = nextKey('ELIGIBILITY', eligibility, 'itemKey');
-                          setForm((x) => ({
-                            ...x,
-                            eligibilityItems: [
-                              ...eligibility,
-                              {
-                                itemKey,
-                                itemTypeCode: 'GENERAL',
-                                isRequired: true,
-                                priorityOrder: eligibility.length + 1,
-                                resolutionStatus: 'RESOLVED',
-                                valueText: '',
-                              },
-                            ],
-                          }));
-                        }}
-                        className="inline-flex items-center gap-2 rounded-2xl border border-dashed border-[#0E7C86] bg-teal-50/50 hover:bg-teal-50 px-5 py-3 text-xs font-black text-[#0E7C86] transition cursor-pointer"
-                      >
-                        <Plus className="h-4 w-4" />
-                        <span>{lt('+ إضافة معيار أهلية جديد (مربع نصي)')}</span>
-                      </button>
-                    </div>
-                  </Card>
-                </div>
-              )}
-
-              {/* Tab 6: Required Documents */}
-              {activeTab === 'identity' && !dirty && !relationshipDirty && (
-                <ScholarshipReferenceLifecycleEditor
-                  ownerId={scholarship.id}
-                  onChanged={() => void load()}
-                />
-              )}
-              {activeTab === 'documents' && (
-                <div className="space-y-6">
-                  <Card
-                    title={lt('المستندات والوثائق المطلوبة للتقديم (Required Documents)')}
-                    subtitle={lt('جواز السفر، الشهادات، خطابات التوصية، وخطاب الحافز')}
-                    icon={<FileText className="h-5 w-5" />}
-                  >
-                    <div className="space-y-3.5">
-                      {documents.map((item, index) => (
-                        <div
-                          key={item.documentKey || index}
-                          className="rounded-2xl border border-slate-200 bg-[#FAF7F0]/40 p-4 transition hover:border-[#0E7C86]/40 hover:bg-white"
-                        >
-                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                            <div className="flex-1">
-                              <Field label={lt('اسم المستند والوثيقة المطلوبة (يكتب نصاً مباشرة)')}>
-                                <Input
-                                  value={item.displayName}
-                                  onChange={(val) => {
-                                    const updated = documents.map((doc, i) =>
-                                      i === index ? { ...doc, displayName: val } : doc,
-                                    );
-                                    setForm((x) => ({ ...x, requiredDocumentItems: updated }));
-                                  }}
-                                  placeholder={lt(
-                                    'مثال: جواز السفر ساري المفعول / شهادة الثانوية العامة وكشف الدرجات مترجم ومصدق',
-                                  )}
-                                />
-                              </Field>
-                            </div>
-
-                            <div className="flex items-center justify-between sm:justify-end gap-3 pt-1 sm:pt-4">
-                              <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={item.isRequired !== false}
-                                  onChange={(e) => {
-                                    const updated = documents.map((doc, i) =>
-                                      i === index ? { ...doc, isRequired: e.target.checked } : doc,
-                                    );
-                                    setForm((x) => ({ ...x, requiredDocumentItems: updated }));
-                                  }}
-                                  className="rounded text-[#0E7C86] focus:ring-[#0E7C86]"
-                                />
-                                <span>{lt('مستند إلزامي')}</span>
-                              </label>
-
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const updated = documents.filter((_, i) => i !== index);
-                                  setForm((x) => ({ ...x, requiredDocumentItems: updated }));
-                                }}
-                                className="text-rose-500 hover:text-rose-700 p-2 rounded-xl hover:bg-rose-50 border border-transparent hover:border-rose-200 cursor-pointer"
-                                title={lt('حذف المستند')}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const documentKey = nextKey('DOC', documents, 'documentKey');
-                          setForm((x) => ({
-                            ...x,
-                            requiredDocumentItems: [
-                              ...documents,
-                              {
-                                documentKey,
-                                displayName: '',
-                                documentTypeCode: 'OTHER',
-                                isRequired: true,
-                                displayOrder: documents.length + 1,
-                                resolutionStatus: 'RESOLVED',
-                              },
-                            ],
-                          }));
-                        }}
-                        className="inline-flex items-center gap-2 rounded-2xl border border-dashed border-[#0E7C86] bg-teal-50/50 hover:bg-teal-50 px-5 py-3 text-xs font-black text-[#0E7C86] transition cursor-pointer"
-                      >
-                        <Plus className="h-4 w-4" />
-                        <span>{lt('+ إضافة وثيقة ومستند جديد (مربع نصي)')}</span>
-                      </button>
-                    </div>
-                  </Card>
-                </div>
-              )}
-
-              {/* Tab 7: Links & Universities */}
-              {activeTab === 'links_unis' && (
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <Card
-                    title={lt('روابط التقديم والمصادر الرسمية')}
-                    subtitle={lt('بوابة التسجيل الإلكترونية والموقع الرسمي للجهة المانحة')}
-                    icon={<ExternalLink className="h-5 w-5" />}
-                  >
-                    <div className="space-y-4">
-                      <Field label={lt('رابط بوابة التقديم المباشرة (Application URL)')}>
-                        <Input
-                          value={form.applicationUrl}
-                          onChange={(val) => setForm((x) => ({ ...x, applicationUrl: val }))}
-                          placeholder="https://apply.scholarship.gov/portal"
-                        />
-                      </Field>
-
-                      <Field label={lt('الموقع الرسمي للمنحة (Official Website)')}>
-                        <Input
-                          value={form.officialWebsite}
-                          onChange={(val) => setForm((x) => ({ ...x, officialWebsite: val }))}
-                          placeholder="https://www.scholarship.gov"
-                        />
-                      </Field>
-
-                      <Field label={lt('رابط المصدر والإعلان المرجعي (Official Source URL)')}>
-                        <Input
-                          value={form.officialSourceUrl}
-                          onChange={(val) => setForm((x) => ({ ...x, officialSourceUrl: val }))}
-                          placeholder="https://www.scholarship.gov/announcements/2027"
-                        />
-                      </Field>
-
-                      {scholarshipHttpUrl(form.applicationUrl) ? (
-                        <div className="pt-2">
-                          <a
-                            href={scholarshipHttpUrl(form.applicationUrl) ?? undefined}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 rounded-xl bg-[#142B5F] hover:bg-[#0E7C86] px-4 py-2.5 text-xs font-bold text-white transition shadow-xs"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                            <span>{lt('زيارة بوابة التقديم الرسمية الآن')}</span>
-                          </a>
-                        </div>
-                      ) : (
-                        <p>
-                          {tr(
-                            'لا توجد بوابة تقديم صالحة محفوظة.',
-                            'No valid application portal saved.',
-                          )}
-                        </p>
-                      )}
-                    </div>
-                  </Card>
-
-                  <Card
-                    title={lt('أدلة المصدر')}
-                    subtitle={lt('سجل المصادر والتحقق المحفوظ للمنحة')}
-                    icon={<ExternalLink className="h-5 w-5" />}
-                  >
-                    <div className="space-y-3">
-                      {(scholarship.sourceEvidence ?? []).map((evidence) => (
-                        <div
-                          key={evidence.evidenceKey}
-                          className="rounded-2xl border border-slate-200 p-4 text-sm"
-                        >
-                          <p className="font-bold">
-                            {evidence.sourceName || evidence.sourceTypeCode}
-                          </p>
-                          <p className="break-all text-xs text-slate-600" dir="ltr">
-                            {evidence.sourceUrl}
-                          </p>
-                          <p className="mt-2 text-xs">
-                            {lt('الثقة:')}
-                            {display(evidence.trustLevel)}
-                            {lt('· التحقق:')} {display(evidence.verifiedAt)}
-                          </p>
-                        </div>
-                      ))}
-                      {!scholarship.sourceEvidence?.length && (
-                        <p className="text-sm text-slate-500">
-                          {lt('لا توجد أدلة مصدر محفوظة لهذه المنحة.')}
-                        </p>
-                      )}
-                    </div>
-                  </Card>
-
-                  <Card
-                    title={lt('الجامعات والبرامج الشريكة (University Links)')}
-                    subtitle={lt('الجامعات التي تستضيف المنحة والبرامج الأكاديمية المتاحة')}
-                    icon={<Landmark className="h-5 w-5" />}
-                  >
-                    <div className="space-y-3">
-                      {(scholarship.universityLinks ?? []).map((item) => (
-                        <div
-                          key={item.linkKey}
-                          className="rounded-2xl border border-slate-200 bg-[#FAF7F0]/40 p-4 shadow-xs"
-                        >
-                          <div className="flex items-center gap-2 font-black text-[#142B5F] text-sm">
-                            <Landmark className="h-4 w-4 text-[#0E7C86]" />
-                            <span>{item.sourceLabel || item.linkKey}</span>
-                          </div>
-                          <div className="mt-2 text-xs text-slate-500">
-                            {lt('معرف الجامعة:')}
-                            {display(item.universityId)}
-                            {lt('· البرنامج:')} {display(item.academicProgramId)}
-                          </div>
-                        </div>
-                      ))}
-
-                      {(!scholarship.universityLinks ||
-                        scholarship.universityLinks.length === 0) && (
-                        <div className="rounded-2xl bg-slate-50 p-6 text-center text-xs text-slate-500 font-bold">
-                          {lt('لا توجد جامعات أو برامج موثقة مرتبطة بهذه المنحة.')}
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                </div>
-              )}
-
+              <ScholarshipContentEditor
+                scholarship={scholarship}
+                form={form}
+                setForm={setForm}
+                tab={activeTab}
+                language={language}
+                focusField={focusField}
+                onRelationships={() =>
+                  guard(() => {
+                    setEditing(false);
+                    setActiveTab('degrees_majors');
+                    setRelationshipEditing(true);
+                  })
+                }
+              />
               {/* Tab 8: Important Notes & Tips */}
               {activeTab === 'notes' && (
                 <div className="space-y-6">
@@ -1721,6 +1036,12 @@ export function ScholarshipDetailPage() {
               )}
 
               {/* Tab 9: Data Health & Audit */}
+              {activeTab === 'health_audit' && !dirty && !relationshipDirty && (
+                <ScholarshipReferenceLifecycleEditor
+                  ownerId={scholarship.id}
+                  onChanged={() => void load()}
+                />
+              )}
               {activeTab === 'health_audit' && (
                 <div className="grid gap-6 lg:grid-cols-2">
                   <Card

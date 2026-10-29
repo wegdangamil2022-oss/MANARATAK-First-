@@ -55,6 +55,7 @@ export interface ScholarshipCatalogDetailResponse {
 }
 
 export interface ScholarshipCatalogUpdate {
+  metadata?: Record<string, unknown>;
   displayName?: string;
   providerName?: string | null;
   amountMinorUnits?: string | null;

@@ -1,23 +1,15 @@
 import type { ScholarshipDto } from '@manaratak/domain';
-import { ExternalLink, FileText } from 'lucide-react';
+import { ExternalLink, FileText, Pencil } from 'lucide-react';
+import {
+  benefitText,
+  scholarshipPresentation,
+  scholarshipHttpUrl,
+} from './ScholarshipPresentation';
+export { scholarshipHttpUrl } from './ScholarshipPresentation';
 
-export function scholarshipHttpUrl(value: unknown): string | null {
-  if (typeof value !== 'string' || !value.trim() || /[\u0000-\u0020\u007f\\]/.test(value))
-    return null;
-  try {
-    const url = new URL(value);
-    return ['https:', 'http:'].includes(url.protocol) &&
-      !url.username &&
-      !url.password &&
-      !!url.hostname
-      ? url.href
-      : null;
-  } catch {
-    return null;
-  }
-}
 const labels: Record<string, [string, string]> = {
   displayName: ['اسم المنحة', 'Scholarship name'],
+  educationalDegree: ['الدرجة التعليمية', 'Educational degree'],
   providerName: ['الجهة المانحة', 'Provider'],
   countrySourceLabel: ['بلد الدراسة', 'Study country'],
   countryScope: ['نطاق الدول', 'Country scope'],
@@ -82,10 +74,12 @@ export function ScholarshipDetailReadView({
   scholarship,
   tab,
   language,
+  onEdit,
 }: {
   scholarship: ScholarshipDto;
   tab: string;
   language: string;
+  onEdit?: (field?: string) => void;
 }) {
   const tr = (ar: string, en: string) => (language === 'ar' ? ar : en);
   const label = (key: string) => labels[key]?.[language === 'ar' ? 0 : 1] ?? key;
@@ -98,6 +92,44 @@ export function ScholarshipDetailReadView({
           ? JSON.stringify(value)
           : String(value);
   const data = scholarship as unknown as Record<string, unknown>;
+  const presentation = scholarshipPresentation(scholarship, language === 'ar');
+  const edit = (field: string, title: string) =>
+    onEdit ? (
+      <button
+        type="button"
+        className="scholarship-card-edit"
+        aria-label={`${tr('تعديل', 'Edit')} ${title}`}
+        onClick={() => onEdit(field)}
+      >
+        <Pencil aria-hidden="true" />
+        {tr('تعديل', 'Edit')}
+      </button>
+    ) : null;
+  const textCards = (
+    rows: Array<{ key: string; title: string; text: string }>,
+    section: string,
+  ) => (
+    <section className="scholarship-read-card">
+      <div className="scholarship-group-heading">
+        <h2>{section}</h2>
+        {edit('collection', section)}
+      </div>
+      <div className="scholarship-card-grid">
+        {rows.map((row) => (
+          <article key={row.key} className="scholarship-editor-card">
+            <div className="scholarship-card-heading">
+              <h3>{row.title}</h3>
+              {edit(row.key, row.title)}
+            </div>
+            <p className="scholarship-long-text">{row.text || tr('غير محدد', 'Not specified')}</p>
+          </article>
+        ))}
+      </div>
+      {!rows.length && (
+        <p>{tr('لا توجد بيانات محفوظة في هذا القسم.', 'No saved data in this section.')}</p>
+      )}
+    </section>
+  );
   const fieldValue = (key: string, value: unknown) => {
     if (
       ['applicationDeadline', 'accessedAt', 'retrievedAt', 'capturedAt', 'verifiedAt'].includes(
@@ -117,12 +149,13 @@ export function ScholarshipDetailReadView({
     }
     return scalar(value);
   };
-  const fields = (row: Record<string, unknown>, keys: string[]) => (
+  const fields = (row: Record<string, unknown>, keys: string[], editable = true) => (
     <dl className="scholarship-read-grid">
       {keys.map((key) => (
         <div key={key}>
           <dt>{label(key)}</dt>
           <dd>{fieldValue(key, row[key])}</dd>
+          {editable && edit(key, label(key))}
         </div>
       ))}
     </dl>
@@ -148,7 +181,7 @@ export function ScholarshipDetailReadView({
                     index,
                 )}
               >
-                {fields(row, columns)}
+                {fields(row, columns, false)}
               </article>
             ))}
           </div>
@@ -162,23 +195,32 @@ export function ScholarshipDetailReadView({
     return (
       <section className="scholarship-read-card">
         <h2>{tr('المعلومات الأساسية', 'Basic information')}</h2>
-        {fields(data, [
-          'displayName',
-          'providerName',
-          'countrySourceLabel',
-          'countryScope',
-          'academicYear',
-          'cycleName',
-          'studyLanguageSourceLabel',
-          'applicationDeadline',
-          'deadlineType',
-          'applicationMethod',
-          'sourceLocale',
-        ])}
-        <details>
-          <summary>{tr('المعرّفات التقنية', 'Technical identifiers')}</summary>
-          {fields(data, ['publicId', 'id', 'canonicalName', 'canonicalDedupKey'])}
-        </details>
+        {fields(
+          {
+            ...data,
+            educationalDegree: (scholarship.degreeTargets ?? [])
+              .map((item) => item.sourceLabel || item.degreeLevelId)
+              .filter(Boolean)
+              .join('، '),
+            fundingTypeCode: ['FULL', 'FULLY_FUNDED'].includes(scholarship.fundingTypeCode ?? '')
+              ? tr('تمويل كامل', 'Full funding')
+              : ['PARTIAL', 'PARTIALLY_FUNDED'].includes(scholarship.fundingTypeCode ?? '')
+                ? tr('تمويل جزئي', 'Partial funding')
+                : scholarship.fundingTypeCode,
+          },
+          [
+            'displayName',
+            'providerName',
+            'countrySourceLabel',
+            ...(scholarship.academicYear ? ['academicYear'] : []),
+            'studyLanguageSourceLabel',
+            'applicationDeadline',
+            'educationalDegree',
+            'fundingTypeCode',
+          ],
+        )}
+        {!scholarship.academicYear &&
+          edit('academicYear', tr('إضافة السنة الدراسية', 'Add academic year'))}
       </section>
     );
   if (tab === 'overview' || tab === 'notes')
@@ -190,6 +232,13 @@ export function ScholarshipDetailReadView({
             tab === 'overview' ? 'Overview' : 'Notes',
           )}
         </h2>
+        {edit(
+          tab === 'overview' ? 'description' : 'notes',
+          tr(
+            tab === 'overview' ? 'نبذة المنحة' : 'الملاحظات',
+            tab === 'overview' ? 'Overview' : 'Notes',
+          ),
+        )}
         <p className="scholarship-long-text">
           {scalar(data[tab === 'overview' ? 'description' : 'notes'])}
         </p>
@@ -207,31 +256,69 @@ export function ScholarshipDetailReadView({
             'isFullyFunded',
           ])}
         </section>
-        {group('benefits', tr('المزايا المحفوظة', 'Saved benefits'), [
-          'benefitTypeCode',
-          'coverageTypeCode',
-          'amount',
-          'currencyReferenceId',
-          'valueText',
-          'durationText',
-          'frequencyCode',
-          'isCovered',
-          'isOptional',
-          'notes',
-        ])}
+        {presentation.fundingGroups.map((funding) => (
+          <div key={funding.id}>
+            {textCards(
+              funding.benefitKeys.map((key) => {
+                const item = scholarship.benefits!.find((row) => row.benefitKey === key)!;
+                return {
+                  key,
+                  title: item.valueText?.split('\n')[0] || tr('ميزة المنحة', 'Scholarship benefit'),
+                  text: benefitText(item, language === 'ar'),
+                };
+              }),
+              funding.title || tr('مجموعة تمويل', 'Funding group'),
+            )}
+          </div>
+        ))}
+        {edit('funding-groups', tr('إضافة مجموعة تمويل', 'Add funding group'))}
       </>
     );
   if (tab === 'degrees_majors')
     return (
       <>
-        {group('degreeTargets', tr('الدرجات المشمولة', 'Degree targets'), [
-          'sourceLabel',
-          'degreeLevelId',
-        ])}
-        {group('majorTargets', tr('التخصصات المشمولة', 'Major targets'), [
-          'sourceLabel',
-          'majorId',
-        ])}
+        {(scholarship.degreeTargets ?? []).map((degree) => (
+          <div key={degree.targetKey}>
+            {textCards(
+              (scholarship.majorTargets ?? [])
+                .filter((major) => major.metadata?.degreeTargetKey === degree.targetKey)
+                .map((major) => ({
+                  key: major.targetKey,
+                  title: major.sourceLabel || tr('تخصص', 'Major'),
+                  text: major.sourceLabel || '',
+                })),
+              degree.sourceLabel ||
+                degree.degreeLevelId ||
+                tr('درجة تعليمية', 'Educational degree'),
+            )}
+          </div>
+        ))}
+        {!!scholarship.majorTargets?.filter(
+          (major) =>
+            !major.metadata?.degreeTargetKey ||
+            !scholarship.degreeTargets?.some(
+              (degree) => degree.targetKey === major.metadata?.degreeTargetKey,
+            ),
+        ).length &&
+          textCards(
+            scholarship.majorTargets
+              .filter(
+                (major) =>
+                  !major.metadata?.degreeTargetKey ||
+                  !scholarship.degreeTargets?.some(
+                    (degree) => degree.targetKey === major.metadata?.degreeTargetKey,
+                  ),
+              )
+              .map((major) => ({
+                key: major.targetKey,
+                title: major.sourceLabel || tr('تخصص', 'Major'),
+                text: major.sourceLabel || '',
+              })),
+            tr('تخصصات مشتركة أو غير موزعة', 'Shared or unassigned majors'),
+          )}
+        {!scholarship.degreeTargets?.length && (
+          <p>{tr('لم تُحدّد الدرجات بعد.', 'No degrees specified yet.')}</p>
+        )}
         {group('fundedProgramPairs', tr('البرامج الممولة الموثقة', 'Evidenced funded programs'), [
           'degreeLabel',
           'majorLabel',
@@ -240,68 +327,78 @@ export function ScholarshipDetailReadView({
       </>
     );
   if (tab === 'eligibility')
-    return group('eligibilityItems', tr('شروط الأهلية', 'Eligibility'), [
-      'itemTypeCode',
-      'operatorCode',
-      'valueText',
-      'minimumValue',
-      'maximumValue',
-      'countryReferenceId',
-      'degreeLevelId',
-      'majorId',
-      'internationalTestId',
-      'isRequired',
-      'priorityOrder',
-    ]);
+    return textCards(
+      (scholarship.eligibilityItems ?? []).map((item) => ({
+        key: item.itemKey,
+        title: tr('شرط الأهلية', 'Eligibility condition'),
+        text:
+          item.valueText ||
+          tr('شرط محفوظ يحتاج إلى صياغة واضحة.', 'Saved condition needs a clear description.'),
+      })),
+      tr('شروط الأهلية', 'Eligibility'),
+    );
   if (tab === 'documents')
-    return group('requiredDocumentItems', tr('المستندات المطلوبة', 'Required documents'), [
-      'displayName',
-      'documentTypeCode',
-      'description',
-      'internationalTestId',
-      'sourceLabel',
-      'isRequired',
-      'displayOrder',
-    ]);
+    return textCards(
+      (scholarship.requiredDocumentItems ?? []).map((item) => ({
+        key: item.documentKey,
+        title: item.displayName,
+        text: item.description || item.displayName,
+      })),
+      tr('المستندات المطلوبة', 'Required documents'),
+    );
   if (tab === 'links_unis')
     return (
       <>
-        <section className="scholarship-read-card">
-          <h2>{tr('الروابط والمصادر', 'Links and sources')}</h2>
-          {['applicationUrl', 'officialWebsite', 'officialSourceUrl', 'sourceUrl'].map((key) => {
-            const url = scholarshipHttpUrl(data[key]);
-            return (
-              <div className="scholarship-source-link" key={key}>
-                <strong>{label(key)}</strong>
-                {url ? (
-                  <a href={url} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink aria-hidden="true" />
-                    {url}
-                  </a>
-                ) : (
-                  <span>{tr('لا يوجد رابط صالح محفوظ.', 'No valid saved link.')}</span>
-                )}
-                {url?.startsWith('http:') ? (
-                  <p>
-                    {tr(
-                      'اتصال غير مشفر؛ لا تدخل بيانات حساسة.',
-                      'Unencrypted connection; do not enter sensitive data.',
+        {presentation.sourceGroups.map((sourceGroup) => (
+          <section className="scholarship-read-card" key={sourceGroup.id}>
+            <div className="scholarship-group-heading">
+              <h2>{sourceGroup.title || tr('الروابط والمصادر', 'Links and sources')}</h2>
+              {edit(sourceGroup.id, tr('قسم الروابط', 'Link section'))}
+            </div>
+            <div className="scholarship-card-grid">
+              {sourceGroup.links.map((link) => {
+                const url = scholarshipHttpUrl(link.url);
+                return (
+                  <div className="scholarship-source-link scholarship-editor-card" key={link.id}>
+                    <strong>{link.title}</strong>
+                    {edit(link.id, link.title)}
+                    {url ? (
+                      <a href={url} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink aria-hidden="true" />
+                        {url}
+                      </a>
+                    ) : (
+                      <span>{tr('لا يوجد رابط صالح محفوظ.', 'No valid saved link.')}</span>
                     )}
-                  </p>
-                ) : null}
-              </div>
-            );
-          })}
-        </section>
-        {group('sourceEvidence', tr('أدلة المصدر', 'Source evidence'), [
-          'sourceName',
-          'sourceUrl',
-          'sourceTypeCode',
-          'trustLevel',
-          'isOfficial',
-          'capturedAt',
-          'verifiedAt',
-        ])}
+                    {url?.startsWith('http:') ? (
+                      <p>
+                        {tr(
+                          'اتصال غير مشفر؛ لا تدخل بيانات حساسة.',
+                          'Unencrypted connection; do not enter sensitive data.',
+                        )}
+                      </p>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        ))}
+        {edit('source-groups', tr('إضافة قسم روابط', 'Add link section'))}
+        {!!scholarship.sourceEvidence?.length && (
+          <details className="scholarship-read-card">
+            <summary>{tr('أدلة الاستيراد الأصلية', 'Original source evidence')}</summary>
+            {group('sourceEvidence', tr('أدلة المصدر', 'Source evidence'), [
+              'sourceName',
+              'sourceUrl',
+              'sourceTypeCode',
+              'trustLevel',
+              'isOfficial',
+              'capturedAt',
+              'verifiedAt',
+            ])}
+          </details>
+        )}
         {group(
           'universityLinks',
           tr('الجامعات والبرامج المرتبطة', 'Linked universities and programs'),

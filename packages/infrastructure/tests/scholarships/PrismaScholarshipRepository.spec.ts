@@ -154,6 +154,22 @@ describe('PrismaScholarshipRepository', () => {
     expect(result?.optionalFields).toHaveProperty('arbitraryExperimentalKey', 'must-not-leak');
   });
 
+  it('round trips editable funding/source groups through existing metadata storage without replacing import evidence', async () => {
+    const evidence = { sourceReview: { digest: 'source-digest' }, secondYearFunding: 'Conditional further application' };
+    let stored: any = { id: 'sch-1', revision: 7, displayName: 'Scholarship', status: 'IMPORTED', publicationStatus: 'DRAFT', optionalFields: { retainedOriginalField: 'keep', metadata: evidence }, benefits: [], degreeTargets: [], majorTargets: [], eligibilityItems: [], requiredDocuments: [], sourceEvidence: [{ evidenceKey: 'source', sourceUrl: 'https://example.edu/original' }], universityLinks: [] };
+    mockPrisma.$queryRaw = vi.fn().mockResolvedValue([]);
+    mockPrisma.scholarship.findUnique.mockImplementation(async () => stored);
+    mockPrisma.scholarship.update.mockImplementation(async ({ data }: any) => { stored = { ...stored, optionalFields: data.optionalFields, revision: stored.revision + 1 }; return stored; });
+    const bound = new PrismaScholarshipRepository(mockPrisma, true, programReads);
+    const metadata = { ...evidence, adminPresentation: { fundingGroups: [{ id: 'university-a', title: 'University A', benefitKeys: [] }], sourceGroups: [{ id: 's', title: 'Sources', links: [{ id: 'l', title: 'Admissions', url: 'https://example.edu/admissions' }] }] } };
+    await bound.update('sch-1', { metadata });
+    const reread = await bound.findById('sch-1');
+    expect(reread?.metadata).toEqual(metadata);
+    expect(reread?.optionalFields?.retainedOriginalField).toBe('keep');
+    expect(reread?.sourceEvidence).toEqual([{ evidenceKey: 'source', sourceUrl: 'https://example.edu/original' }]);
+    expect(mockPrisma.scholarship.update.mock.calls[0][0].data.sourceEvidence).toBeUndefined();
+  });
+
   it('listPublished requests only PUBLISHED scholarships and includes normalized children', async () => {
     mockPrisma.scholarship.findMany.mockResolvedValue([]);
     mockPrisma.scholarship.count.mockResolvedValue(0);

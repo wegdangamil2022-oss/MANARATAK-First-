@@ -124,6 +124,97 @@
   color: #142b5f;
   font-size: 12px;
 }
+.scholarship-read-grid > div,
+.scholarship-editor-card {
+  padding: 12px;
+  border: 1px solid #ddeff2;
+  border-top: 2px solid #d6a43b;
+  border-radius: 12px;
+  background: #fff;
+  min-width: 0;
+}
+.scholarship-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.scholarship-card-heading,
+.scholarship-group-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.scholarship-group-heading > .scholarship-editor-card {
+  flex: 1;
+}
+.scholarship-card-heading label,
+.scholarship-card-heading span,
+.scholarship-card-heading h3 {
+  color: #142b5f;
+  font-size: 12px !important;
+  font-weight: 700;
+  margin: 0;
+}
+.scholarship-editor-card input,
+.scholarship-editor-card textarea,
+.scholarship-editor-card select,
+.scholarship-card-grid select,
+.scholarship-degree-groups input,
+.scholarship-degree-groups select {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #ddeff2;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #fff;
+  color: #203442;
+  font: inherit;
+  font-size: 12px;
+}
+.scholarship-editor-card input[type='url'] {
+  direction: ltr;
+}
+.scholarship-card-edit,
+.scholarship-editor-card button,
+.scholarship-card-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: #0e7c86;
+  border: 1px solid #ddeff2;
+  background: #f1f8f8;
+}
+.scholarship-card-add {
+  background: #0e7c86;
+  color: #fff;
+  margin-top: 8px;
+}
+.scholarship-card-delete {
+  color: #a52b3a !important;
+  padding: 6px 10px;
+}
+.scholarship-card-details {
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+.scholarship-card-edit:hover,
+.scholarship-editor-card button:hover {
+  background: #142b5f;
+  color: #e9bd61;
+}
+@media (max-width: 600px) {
+  .scholarship-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
 .scholarship-read-grid dd {
   margin: 4px 0 0;
   overflow-wrap: anywhere;
