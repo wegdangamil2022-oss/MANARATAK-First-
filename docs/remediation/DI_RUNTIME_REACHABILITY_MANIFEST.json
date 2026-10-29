@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 443,
-  "reachableCount": 443,
+  "registrationCount": 459,
+  "reachableCount": 459,
   "unreachable": [],
   "registrations": [
     {
@@ -173,7 +173,8 @@
         "apps/api/src/presentation/api/router/CmsAdminRouter.ts"
       ],
       "reachableThroughRegistrations": [
-        "cmsScheduledPublishingBackgroundJobHandler"
+        "cmsScheduledPublishingBackgroundJobHandler",
+        "executiveDashboardRouter"
       ],
       "dependencies": [
         "assetReferencePolicy",
@@ -192,6 +193,7 @@
       "reachableThroughRegistrations": [
         "courseAdminCommandUseCases",
         "courseBulkPublicationUseCases",
+        "executiveDashboardRouter",
         "importedCourseAdminUseCases"
       ],
       "dependencies": [
@@ -207,7 +209,9 @@
         "apps/api/src/presentation/api/router/AcademicTaxonomyAdminRouter.ts",
         "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
       ],
-      "reachableThroughRegistrations": [],
+      "reachableThroughRegistrations": [
+        "executiveDashboardRouter"
+      ],
       "dependencies": [
         "atomicDomainMutationCoordinator",
         "canonicalMajorReferenceService",
@@ -222,7 +226,9 @@
       "directRuntimeConsumers": [
         "apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts"
       ],
-      "reachableThroughRegistrations": [],
+      "reachableThroughRegistrations": [
+        "executiveDashboardRouter"
+      ],
       "dependencies": [
         "atomicDomainMutationCoordinator",
         "scholarshipCanonicalLookupGateway",
@@ -266,7 +272,9 @@
       "directRuntimeConsumers": [
         "apps/api/src/presentation/api/router/UniversityAdminRouter.ts"
       ],
-      "reachableThroughRegistrations": [],
+      "reachableThroughRegistrations": [
+        "executiveDashboardRouter"
+      ],
       "dependencies": [
         "assetReferencePolicy",
         "atomicDomainMutationCoordinator",
@@ -453,6 +461,7 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
         "apps/api/src/app.ts",
+        "apps/api/src/presentation/api/router/AssetPlatformRouter.ts",
         "apps/api/src/presentation/api/router/CourseLearnerRouter.ts",
         "apps/api/src/presentation/api/router/StudentToolsPublicRouter.ts",
         "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
@@ -555,6 +564,18 @@
       "dependencies": []
     },
     {
+      "name": "assetOwnerChoices",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AssetPlatformRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "authEvaluatorService",
+        "prisma"
+      ]
+    },
+    {
       "name": "assetPlatformRouter",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -641,6 +662,15 @@
       ]
     },
     {
+      "name": "assetRuntimeCapabilities",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AssetPlatformRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
       "name": "assetSanitizationGateway",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -694,7 +724,8 @@
         "atomicDomainMutationCoordinator",
         "identityRepository",
         "roleAssignmentRepository",
-        "roleRepository"
+        "roleRepository",
+        "staffLifecycleRepository"
       ]
     },
     {
@@ -748,7 +779,10 @@
         "recoverAssetLifecycleUseCase",
         "referenceOwnerReviewUseCases",
         "settingsGovernanceUseCases",
+        "staffLifecycleUseCases",
+        "staffWorkspaceUseCases",
         "studyDestinationUseCases",
+        "supportCaseUseCases",
         "universityProgramWorkspaceUseCases"
       ],
       "dependencies": [
@@ -809,6 +843,8 @@
         "apps/api/src/presentation/api/router/AcademicTaxonomyAdminRouter.ts",
         "apps/api/src/presentation/api/router/AssetPlatformRouter.ts",
         "apps/api/src/presentation/api/router/AssetReuseRouter.ts",
+        "apps/api/src/presentation/api/router/AuditRouter.ts",
+        "apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts",
         "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
         "apps/api/src/presentation/api/router/CourseMediaRouter.ts",
         "apps/api/src/presentation/api/router/IdentityRouter.ts",
@@ -816,7 +852,9 @@
         "apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts",
         "apps/api/src/presentation/api/router/MajorAdminRouter.ts",
         "apps/api/src/presentation/api/router/SettingsAdminRouter.ts",
-        "apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts"
+        "apps/api/src/presentation/api/router/StaffLifecycleRouter.ts",
+        "apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts",
+        "apps/api/src/presentation/api/router/SupportCaseRouter.ts"
       ],
       "reachableThroughRegistrations": [
         "atomicAuditedOutboxMutationExecutor",
@@ -849,6 +887,20 @@
       "dependencies": []
     },
     {
+      "name": "auditWorkspaceChoices",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "authEvaluatorService",
+        "principalAccessValidator",
+        "prisma",
+        "staffLifecycleRepository"
+      ]
+    },
+    {
       "name": "auditWorkspaceGateway",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -857,9 +909,12 @@
         "auditWorkspaceUseCases"
       ],
       "dependencies": [
+        "authEvaluatorService",
         "notificationRecipientGateway",
         "notificationTemplateRepo",
-        "prisma"
+        "principalAccessValidator",
+        "prisma",
+        "staffLifecycleRepository"
       ]
     },
     {
@@ -907,9 +962,13 @@
         "apps/api/src/presentation/api/router/StudentDocumentReviewRouter.ts",
         "apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts",
         "apps/api/src/presentation/api/router/StudentToolsAdminRouter.ts",
+        "apps/api/src/presentation/api/router/SupportCaseRouter.ts",
         "apps/api/src/presentation/security/SecurityMiddlewareFactory.ts"
       ],
       "reachableThroughRegistrations": [
+        "assetOwnerChoices",
+        "auditWorkspaceChoices",
+        "auditWorkspaceGateway",
         "courseAccessService",
         "disablePasswordCredentialUseCase",
         "evaluateAccessUseCase",
@@ -917,7 +976,11 @@
         "importGovernanceUseCases",
         "managedApplicationEvidenceRouter",
         "notificationRecipientGateway",
-        "reviewWorkspaceUseCases"
+        "reviewWorkspaceUseCases",
+        "staffLifecycleRepository",
+        "supportAgentChoices",
+        "supportCaseRepository",
+        "supportNotificationGateway"
       ],
       "dependencies": [
         "authorizationDutyEvaluator",
@@ -1153,7 +1216,8 @@
         "apps/api/src/presentation/api/router/CareerAdminRouter.ts"
       ],
       "reachableThroughRegistrations": [
-        "careerMaintenanceBackgroundJobHandler"
+        "careerMaintenanceBackgroundJobHandler",
+        "executiveDashboardRouter"
       ],
       "dependencies": [
         "assetReferencePolicy",
@@ -2374,8 +2438,15 @@
       ],
       "reachableThroughRegistrations": [],
       "dependencies": [
+        "adminCmsUseCases",
+        "adminCourseUseCases",
+        "adminMajorUseCases",
+        "adminScholarshipUseCases",
+        "adminUniversityUseCases",
         "authEvaluatorService",
-        "executiveDashboardUseCases"
+        "careerAdminUseCases",
+        "executiveDashboardUseCases",
+        "internationalTestAdminUseCases"
       ]
     },
     {
@@ -2973,7 +3044,8 @@
       "reachableThroughRegistrations": [
         "auditAlertEvaluationGateway",
         "notificationOutboxDeliveryGateway",
-        "studentApplicationReminderGateway"
+        "studentApplicationReminderGateway",
+        "supportNotificationGateway"
       ],
       "dependencies": [
         "notificationIntentRepo",
@@ -2997,7 +3069,9 @@
       "directRuntimeConsumers": [
         "apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts"
       ],
-      "reachableThroughRegistrations": [],
+      "reachableThroughRegistrations": [
+        "executiveDashboardRouter"
+      ],
       "dependencies": [
         "academicTaxonomyRepository",
         "assetReferencePolicy",
@@ -3245,6 +3319,7 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
         "apps/api/src/presentation/api/router/AuditRouter.ts",
+        "apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts",
         "apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts"
       ],
       "reachableThroughRegistrations": [],
@@ -3620,6 +3695,7 @@
         "auditWorkspaceGateway",
         "intentsUseCase",
         "notificationOutboxDeliveryGateway",
+        "supportNotificationGateway",
         "templatesUseCase"
       ],
       "dependencies": [
@@ -3659,7 +3735,8 @@
       "reachableThroughRegistrations": [],
       "dependencies": [
         "ownerDomainProjectionDispatcher",
-        "ownerDomainServicesDispatcher"
+        "ownerDomainServicesDispatcher",
+        "supportNotificationDispatcher"
       ]
     },
     {
@@ -3791,10 +3868,16 @@
         "apps/api/src/presentation/security/SecurityMiddlewareFactory.ts"
       ],
       "reachableThroughRegistrations": [
+        "auditWorkspaceChoices",
+        "auditWorkspaceGateway",
         "authService",
         "changePasswordUseCase",
         "disablePasswordCredentialUseCase",
-        "notificationRecipientGateway"
+        "notificationRecipientGateway",
+        "staffLifecycleRepository",
+        "supportAgentChoices",
+        "supportCaseRepository",
+        "supportNotificationGateway"
       ],
       "dependencies": [
         "identityRepository",
@@ -3818,6 +3901,7 @@
         "apiServiceRepo",
         "assetGovernanceGateway",
         "assetLifecycleRecoveryGateway",
+        "assetOwnerChoices",
         "assetRecordRepository",
         "assetRetentionGateway",
         "assetUsageRegistryGateway",
@@ -3825,6 +3909,7 @@
         "auditAlertEvaluationGateway",
         "auditRecordRepo",
         "auditRetentionGateway",
+        "auditWorkspaceChoices",
         "auditWorkspaceGateway",
         "authorizationDutyEvaluator",
         "authorizationGovernanceGateway",
@@ -3907,6 +3992,8 @@
         "sharedComponentRepo",
         "sourceAcquisitionLimiter",
         "sourceRegistryGateway",
+        "staffLifecycleRepository",
+        "staffWorkspaceRepository",
         "studentApplicationTrackerRepository",
         "studentOwnerCatchupContinuationQueue",
         "studentPrivateResultRetentionGateway",
@@ -3914,6 +4001,9 @@
         "studentToolTestDiscovery",
         "studentWorkspaceRepository",
         "studyDestinationRepository",
+        "supportAgentChoices",
+        "supportCaseRepository",
+        "supportNotificationGateway",
         "transactionalOutboxStore",
         "universityProgramReadPort",
         "universityProgramWorkspaceUseCases",
@@ -5013,6 +5103,83 @@
       ]
     },
     {
+      "name": "staffAdminRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "staffLifecycleRepository",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts",
+        "apps/api/src/presentation/api/router/SettingsAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "assignRoleUseCase",
+        "auditWorkspaceChoices",
+        "auditWorkspaceGateway",
+        "staffLifecycleUseCases",
+        "supportAgentChoices",
+        "supportCaseRepository",
+        "supportNotificationGateway"
+      ],
+      "dependencies": [
+        "authEvaluatorService",
+        "principalAccessValidator",
+        "prisma"
+      ]
+    },
+    {
+      "name": "staffLifecycleRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "staffLifecycleUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthRouter.ts",
+        "apps/api/src/presentation/api/router/StaffAdminRouter.ts",
+        "apps/api/src/presentation/api/router/StaffLifecycleRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "atomicDomainMutationCoordinator",
+        "staffLifecycleRepository"
+      ]
+    },
+    {
+      "name": "staffWorkspaceRepository",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "staffWorkspaceUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "staffWorkspaceUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/StaffAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "atomicDomainMutationCoordinator",
+        "staffWorkspaceRepository"
+      ]
+    },
+    {
       "name": "staticHtmlSourceConnector",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -5643,6 +5810,92 @@
       ]
     },
     {
+      "name": "supportAgentChoices",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/SupportCaseRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "authEvaluatorService",
+        "principalAccessValidator",
+        "prisma",
+        "staffLifecycleRepository"
+      ]
+    },
+    {
+      "name": "supportCaseAdminRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "supportCaseRepository",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "supportCaseUseCases"
+      ],
+      "dependencies": [
+        "authEvaluatorService",
+        "principalAccessValidator",
+        "prisma",
+        "staffLifecycleRepository"
+      ]
+    },
+    {
+      "name": "supportCaseStudentRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "supportCaseUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/SupportCaseRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "atomicDomainMutationCoordinator",
+        "supportCaseRepository"
+      ]
+    },
+    {
+      "name": "supportNotificationDispatcher",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "ownerDomainOutboxWorker"
+      ],
+      "dependencies": [
+        "supportNotificationGateway",
+        "transactionalOutboxStore"
+      ]
+    },
+    {
+      "name": "supportNotificationGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "supportNotificationDispatcher"
+      ],
+      "dependencies": [
+        "authEvaluatorService",
+        "intentsUseCase",
+        "notificationTemplateRepo",
+        "principalAccessValidator",
+        "prisma",
+        "staffLifecycleRepository"
+      ]
+    },
+    {
       "name": "suspendIdentityUseCase",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -5696,7 +5949,8 @@
         "ownerDomainProjectionDispatcher",
         "ownerDomainServicesDispatcher",
         "studentApplicationReminderOutboxDispatcher",
-        "studentWorkspaceOutboxDispatcher"
+        "studentWorkspaceOutboxDispatcher",
+        "supportNotificationDispatcher"
       ],
       "dependencies": [
         "prisma"
