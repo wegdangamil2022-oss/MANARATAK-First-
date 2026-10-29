@@ -1,0 +1,303 @@
+{
+  "schemaVersion": 1,
+  "status": "BOUNDED_PILOT_DRAFT_TRANSFER_VERIFIED_NOT_RELEASE_ACCEPTANCE",
+  "implementationSha": "eaab6d431135b8883c0a8c39a1565467183481cf",
+  "planHash": "472b87ac3794e1d0d49af80c4741812defc3d4ca77318721e09eb4dbc1a7d5c2",
+  "backup": {
+    "pass": true,
+    "sourceSha": "eaab6d431135b8883c0a8c39a1565467183481cf",
+    "scope": "ORIGINAL_NEON_READ_ONLY_BACKUP",
+    "sha256": "eff0c0480a22e08acc79978ef3cb30781e7c33b11d694c49be027cb0175b5760",
+    "bytes": 2154490,
+    "tableCount": 309,
+    "snapshotMechanism": "EXPORTED_REPEATABLE_READ_SNAPSHOT_SHARED_BY_DUMP_AND_FINGERPRINTS",
+    "fullArchiveDecodeVerified": true,
+    "originalWrites": 0,
+    "at": "2026-10-29T14:25:36.550Z"
+  },
+  "restore": {
+    "pass": true,
+    "sourceSha": "eaab6d431135b8883c0a8c39a1565467183481cf",
+    "scope": "NEW_LOCAL_DISPOSABLE_RECOVERY_DATABASE",
+    "database": "completion_restore_20261029",
+    "serverIdentity": "7701906482581832908",
+    "backupSha256": "eff0c0480a22e08acc79978ef3cb30781e7c33b11d694c49be027cb0175b5760",
+    "tableCount": 309,
+    "allRowsMatched": true,
+    "comparison": "TABLE_NAME_KEYED_SORTED_ROW_HASHES",
+    "originalWrites": 0,
+    "at": "2026-10-29T14:26:19.372Z"
+  },
+  "rehearsal": {
+    "pass": true,
+    "sourceSha": "eaab6d431135b8883c0a8c39a1565467183481cf",
+    "planHash": "472b87ac3794e1d0d49af80c4741812defc3d4ca77318721e09eb4dbc1a7d5c2",
+    "scope": "rehearsal",
+    "recordId": "rec-6adf957c-54bc-43e2-920e-db4a3922b4b4",
+    "scholarshipId": "33c909ba-463f-4780-8f7f-d6eb05568704",
+    "publicId": "schol-ceda716f",
+    "slug": "yenching-academy-of-peking-university-scholarship-2027-cohort-716f",
+    "publicationStatus": "DRAFT",
+    "programId": "00e05718-9892-40af-aef4-81057aff7d91",
+    "programStatus": "DRAFT",
+    "counts": {
+      "universities": 4,
+      "programs": 1,
+      "internationalTests": 2,
+      "scholarships": 1
+    },
+    "sourceUnchanged": true,
+    "majorRestrictions": 0,
+    "researchAreas": 6,
+    "conditionalLanguageItems": 1,
+    "allAlternativesRetained": true,
+    "testForeignKeys": 0,
+    "conditionalSecondYearFunding": true,
+    "replayCounts": {
+      "scholarships": 1,
+      "audit": 1,
+      "outbox": 1
+    },
+    "replayWrites": 0,
+    "protectedTablesUnchanged": 290,
+    "changedTables": [
+      "ImportBatch",
+      "ImportRecord",
+      "Scholarship",
+      "ScholarshipEligibilityItem",
+      "ScholarshipBenefit",
+      "ScholarshipSourceEvidence",
+      "ScholarshipRequiredDocument",
+      "ScholarshipImportCanonicalResolutionDecision",
+      "ScholarshipUniversityLink",
+      "ScholarshipApplicationCycle",
+      "ScholarshipSponsorContext",
+      "ScholarshipDegreeTarget",
+      "ScholarshipImportVerificationDecision",
+      "ImportReviewAssignment",
+      "ScholarshipVersion",
+      "ScholarshipEligibilityRuleVersion",
+      "ScholarshipAwardPackageVersion",
+      "AuditRecord",
+      "TransactionalOutboxRecord"
+    ],
+    "activeReviewLease": false,
+    "publiclyVisible": false,
+    "at": "2026-10-29T14:21:09.416Z"
+  },
+  "original": {
+    "pass": true,
+    "sourceSha": "eaab6d431135b8883c0a8c39a1565467183481cf",
+    "planHash": "472b87ac3794e1d0d49af80c4741812defc3d4ca77318721e09eb4dbc1a7d5c2",
+    "scope": "original",
+    "recordId": "rec-afb2c8eb-d798-4d87-ac7e-8cedd906dc8c",
+    "scholarshipId": "7f644bf6-3e92-441f-854d-eaa1c19408d3",
+    "publicId": "schol-09471f5b",
+    "slug": "yenching-academy-of-peking-university-scholarship-2027-cohort-1f5b",
+    "publicationStatus": "DRAFT",
+    "programId": "d5b93d07-d7bb-401b-a0ab-c36f3d2440f3",
+    "programStatus": "DRAFT",
+    "counts": {
+      "universities": 4,
+      "programs": 1,
+      "internationalTests": 2,
+      "scholarships": 1
+    },
+    "sourceUnchanged": true,
+    "majorRestrictions": 0,
+    "researchAreas": 6,
+    "conditionalLanguageItems": 1,
+    "allAlternativesRetained": true,
+    "testForeignKeys": 0,
+    "conditionalSecondYearFunding": true,
+    "replayCounts": {
+      "scholarships": 1,
+      "audit": 1,
+      "outbox": 1
+    },
+    "replayWrites": 0,
+    "protectedTablesUnchanged": 290,
+    "changedTables": [
+      "Scholarship",
+      "ScholarshipEligibilityItem",
+      "ScholarshipBenefit",
+      "ImportRecord",
+      "ScholarshipSourceEvidence",
+      "ScholarshipRequiredDocument",
+      "ScholarshipImportCanonicalResolutionDecision",
+      "ScholarshipUniversityLink",
+      "ScholarshipApplicationCycle",
+      "ImportBatch",
+      "ScholarshipSponsorContext",
+      "ScholarshipDegreeTarget",
+      "ScholarshipImportVerificationDecision",
+      "ImportReviewAssignment",
+      "ScholarshipVersion",
+      "ScholarshipEligibilityRuleVersion",
+      "ScholarshipAwardPackageVersion",
+      "AuditRecord",
+      "TransactionalOutboxRecord"
+    ],
+    "activeReviewLease": false,
+    "publiclyVisible": false,
+    "at": "2026-10-29T14:28:38.988Z"
+  },
+  "finalRead": {
+    "pass": true,
+    "sourceSha": "eaab6d431135b8883c0a8c39a1565467183481cf",
+    "recordId": "rec-afb2c8eb-d798-4d87-ac7e-8cedd906dc8c",
+    "scholarshipId": "7f644bf6-3e92-441f-854d-eaa1c19408d3",
+    "transferred": true,
+    "verification": "VERIFIED",
+    "canonical": "CLEAR",
+    "publicationStatus": "DRAFT",
+    "sourceUnchanged": true,
+    "protectedTablesUnchanged": [
+      "IdentityRecord",
+      "UserRecord",
+      "AccountRecord",
+      "RoleRecord",
+      "RoleAssignmentRecord",
+      "PolicyRecord"
+    ],
+    "activeReviewLease": false,
+    "runtime": {
+      "scope": "ORIGINAL_NEON_DEVELOPMENT",
+      "sourceSha": "eaab6d431135b8883c0a8c39a1565467183481cf",
+      "workerScope": [],
+      "analytics": false,
+      "contentWrites": "CANONICAL_API_AUTHORIZATION_AND_MFA"
+    },
+    "probes": [
+      {
+        "path": "/admin/scholarships/7f644bf6-3e92-441f-854d-eaa1c19408d3",
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8"
+      },
+      {
+        "path": "/api/v1/admin/scholarships/7f644bf6-3e92-441f-854d-eaa1c19408d3",
+        "status": 401,
+        "contentType": "application/problem+json; charset=utf-8"
+      },
+      {
+        "path": "/api/v1/public/scholarships/yenching-academy-of-peking-university-scholarship-2027-cohort-1f5b",
+        "status": 404,
+        "contentType": "application/problem+json; charset=utf-8"
+      }
+    ],
+    "browserVerification": "NOT_VERIFIED_PROTECTED_USER_SESSION",
+    "openInCodex": "QUEUED",
+    "adminUrl": "http://127.0.0.1:3000/admin/scholarships/7f644bf6-3e92-441f-854d-eaa1c19408d3",
+    "at": "2026-10-29T14:35:52.020Z"
+  },
+  "validation": {
+    "targetedTests": {
+      "passed": 319,
+      "files": 39
+    },
+    "sourcePreflightTests": 40,
+    "applicationTypeScript": "PASS",
+    "apiTypeScript": "PASS",
+    "changedTypeScriptESLint": {
+      "errors": 0,
+      "warnings": 48
+    },
+    "sourceQuality": {
+      "packageCycles": 0,
+      "fileCycles": 0,
+      "accessibilityFindings": 0
+    },
+    "sourcePreflight": {
+      "diRegistered": 459,
+      "diResolved": 459,
+      "auditEntries": 487,
+      "handlers": 486,
+      "uniqueHandlers": true,
+      "environmentInventory": 364
+    },
+    "secretScan": "PASS_BEFORE_CODE_COMMIT"
+  },
+  "runtime": {
+    "apiRebuilt": true,
+    "sealedFiles": 77,
+    "frontendSourceParityFrom": "bca159d4d2cedc0ffdc74ec7339cbcee2881f3c6",
+    "frontendSourceParityTo": "eaab6d431135b8883c0a8c39a1565467183481cf",
+    "listeners": [
+      {
+        "LocalPort": 3000,
+        "OwningProcess": 14276
+      }
+    ],
+    "labStopped": true,
+    "stagingPortStopped": true
+  },
+  "ci": {
+    "sourceSha": "eaab6d431135b8883c0a8c39a1565467183481cf",
+    "at": "2026-10-29T14:41:47.590Z",
+    "total": 4,
+    "runs": [
+      {
+        "id": 40891393552,
+        "name": "Immutable Release Promotion",
+        "status": "completed",
+        "conclusion": "skipped",
+        "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/40891393552",
+        "event": "workflow_run",
+        "headSha": "eaab6d431135b8883c0a8c39a1565467183481cf"
+      },
+      {
+        "id": 40891056447,
+        "name": "Source Architecture Guards",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/40891056447",
+        "event": "push",
+        "headSha": "eaab6d431135b8883c0a8c39a1565467183481cf"
+      },
+      {
+        "id": 40891056332,
+        "name": "Enterprise CI Pipeline",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/40891056332",
+        "event": "push",
+        "headSha": "eaab6d431135b8883c0a8c39a1565467183481cf"
+      },
+      {
+        "id": 40891056326,
+        "name": "Security Gates",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/40891056326",
+        "event": "push",
+        "headSha": "eaab6d431135b8883c0a8c39a1565467183481cf"
+      }
+    ],
+    "enterpriseFailureStep": "Authoritative registered source-closure manifest",
+    "fullWorkspaceBuildAndTestsReached": false,
+    "knownManifestFailures": [
+      "STUDENT_SUPPORT_OUTBOX_WORKER_ENABLED absent from two environment examples",
+      "Admin guard session/lifecycle source contract",
+      "Authorization strict-body source contract",
+      "Frontend CSP source contracts"
+    ],
+    "releaseAcceptance": false
+  },
+  "boundaries": {
+    "originalMigrations": 0,
+    "originalSeeds": 0,
+    "originalDeletes": 0,
+    "originalPrivilegeChanges": 0,
+    "accountRoleMfaChanges": 0,
+    "externalSendingEnabled": false,
+    "workersEnabled": false,
+    "publicationEnabled": false,
+    "bulkImportEnabled": false
+  },
+  "remaining": [
+    "General Enterprise CI manifest blockers",
+    "Authenticated interactive admin verification",
+    "Other import batches and publication review"
+  ],
+  "at": "2026-10-29T14:42:19.361Z"
+}
