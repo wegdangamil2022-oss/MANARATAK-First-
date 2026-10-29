@@ -1,7 +1,16 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { container } from '../src/infrastructure/di/container';
 
 describe('CLI Scripts', () => {
+  beforeEach(() => {
+    vi.stubEnv('DATABASE_URL', '');
+    vi.stubEnv('DIRECT_URL', '');
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+    process.exitCode = undefined;
+  });
   it('runs final-validation-all successfully', async () => {
     const mockPrisma = {
       majorLevelProfile: { findMany: vi.fn().mockResolvedValue([]) },
