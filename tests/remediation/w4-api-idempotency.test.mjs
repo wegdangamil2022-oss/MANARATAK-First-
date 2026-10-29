@@ -61,6 +61,10 @@ test('only exact student-tool test routes bypass generic plaintext replay custod
     compilerOptions: { target: ts.ScriptTarget.ES2022 },
   }).outputText, {
     apiIdempotencyStore: store,
+    requireAdminPermission(permission) {
+      assert.equal(permission, 'admin:settings:manage');
+      return (_req, _res, next) => next();
+    },
     createCanonicalIdempotencyMiddleware(input) {
       assert.equal(input.store, store);
       assert.equal(input.requireKey, true);

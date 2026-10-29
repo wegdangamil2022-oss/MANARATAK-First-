@@ -372,7 +372,7 @@ test('timeout is bounded and distinct from runtime failure', async (t) => {
   assert.equal(result.state, 'timed_out');
   assert.equal(result.health, null);
 });
-test('three concurrent sources progress independently despite one failure', async () => {
+test('a catalog batch and up to three independent sources progress despite one failure', async () => {
   let active = 0,
     peak = 0;
   const completed: string[] = [];
@@ -390,7 +390,7 @@ test('three concurrent sources progress independently despite one failure', asyn
     (result) => completed.push(result.source.key),
   );
   assert.equal(completed.length, 7);
-  assert.ok(peak <= 3);
+  assert.ok(peak <= 4);
 });
 test('replacement/unmount abort suppresses late updates', async () => {
   const abort = new AbortController();

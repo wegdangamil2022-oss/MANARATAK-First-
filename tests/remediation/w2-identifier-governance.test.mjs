@@ -33,7 +33,7 @@ test('MNT-AUD-0057 persisted/public identifier sources no longer use Math.random
 test('MNT-AUD-0057 Math.random remains only in non-identifier retry jitter among runtime packages',()=>{
   const hits=[];
   const roots=['packages','apps'];
-  const walk=(dir)=>{for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name); if(e.isDirectory()){if(['node_modules','dist','coverage'].includes(e.name))continue;walk(p);}else if(/\.(ts|tsx|js|mjs)$/.test(e.name)&&!e.name.includes('.test.')&&!e.name.includes('.spec.')){const s=fs.readFileSync(p,'utf8');if(s.includes('Math.random('))hits.push(path.relative(root,p));}}};
+  const walk=(dir)=>{for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name); if(e.isDirectory()){if(['node_modules','dist','coverage'].includes(e.name))continue;walk(p);}else if(/\.(ts|tsx|js|mjs)$/.test(e.name)&&!e.name.includes('.test.')&&!e.name.includes('.spec.')){const s=fs.readFileSync(p,'utf8');if(s.includes('Math.random('))hits.push(path.relative(root,p).split(path.sep).join('/') );}}};
   roots.forEach(r=>walk(path.join(root,r)));
   assert.deepEqual(hits,['packages/application/src/ai-platform/use-cases/AIPlatformUseCases.ts']);
   assert.match(read(hits[0]),/jitteredBackoffMs/);

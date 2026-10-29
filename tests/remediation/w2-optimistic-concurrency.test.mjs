@@ -94,6 +94,8 @@ test('MNT-AUD-0096 HTTP/Admin boundaries require expectedVersion and display cur
   assert.match(careerRouter,/expectedVersion: careerExpected/);
   assert.match(read('apps/api/src/presentation/api/router/CareerHttp.ts'),/careerExpected = z\.number\(\)\.int\(\)\.positive\(\)/);
   assert.match(servicePage,/expectedVersion: service\.version/);
-  assert.match(careerPage,/body.expectedVersion = editing\.version/);
-  assert.match(careerPage,/expectedVersion:row\.version/);
+  assert.match(careerPage,/CareerEditor/);
+  assert.match(careerPage,/CareerRecordPanel/);
+  assert.match(read('apps/admin/src/features/careers/CareerEditor.tsx'),/body.expectedVersion = record\.version/);
+  assert.match(read('apps/admin/src/features/careers/CareerRecordPanel.tsx'),/expectedVersion: version/);
 });

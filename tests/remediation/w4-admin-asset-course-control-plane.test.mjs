@@ -45,8 +45,8 @@ test('MNT-AUD-0026 Admin Asset Center exposes governed query/detail/picker/previ
   const picker = read('apps/admin/src/components/AssetPicker.tsx');
   const app = read('apps/api/src/app.ts');
   for (const token of ['securityClassification', 'createdFrom', 'createdTo', 'mimeTypePrefix', 'q', 'cursor']) assert.match(repo, new RegExp(token));
-  assert.match(router, /router\.get\('\/'/);
-  assert.match(router, /router\.get\('\/:assetId'/);
+  assert.match(router, /router\.get\(\s*'\/'/);
+  assert.match(router, /router\.get\(\s*'\/:assetId'/);
   assert.match(router, /delivery-grant/);
   assert.match(router, /selection-audit/);
   assert.match(picker, /const BASE = '\/admin\/asset-reuse'/);
@@ -61,12 +61,12 @@ test('MNT-AUD-0026 Admin Asset Center exposes governed query/detail/picker/previ
 
 test('MNT-AUD-0026 shared governed selection is wired to Course, CMS, Certificate and Student avatar workflows', () => {
   const course = read('apps/admin/src/pages/CourseDetailPage.tsx');
-  const cms = read('apps/admin/src/pages/CmsAdminPage.tsx');
-  const certificate = read('apps/admin/src/pages/CertificateAdminPage.tsx');
+  const cms = read('apps/admin/src/features/cms/CmsContentDetails.tsx');
+  const certificate = read('apps/admin/src/features/certificates/CertificateTemplateEditor.tsx');
   const student = read('apps/web/src/features/students/StudentWorkspacePage.tsx');
   assert.match(course, /AssetPicker[^>]+COURSE_LESSON_MEDIA/);
   assert.match(course, /mimeTypePrefix=\{courseAssetMimePrefix\[assetDraft\.assetType\]\}/);
-  assert.match(cms, /AssetPicker[^>]+CMS_FEATURED_ASSET/);
+  assert.match(cms, /AssetPicker[^>]+CMS_LOCALIZED_FEATURED_ASSET/);
   assert.match(cms, /AssetPicker[^>]+CMS_ATTACHMENT_ASSET/);
   assert.match(certificate, /AssetPicker[^>]+CERTIFICATE_TEMPLATE_LOGO/);
   assert.match(student, /StudentAvatarAssetPicker/);

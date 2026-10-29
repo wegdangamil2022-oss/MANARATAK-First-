@@ -27,6 +27,9 @@ This file is the navigation entrypoint for the current `docs/` tree. It does not
 | `operations/` | Database, CI/CD, recovery, keys/tokens, observability and runtime procedures. |
 | `remediation/` | Ordered remediation evidence, cross-phase traceability and wave closure records. |
 | `reviews/` | Section reviews, executable source-check evidence and explicitly deferred runtime closure gates. |
+| `admin/` | Admin workspace and section operation references. |
+| `proposals/` | Reviewable bounded change proposals and storage plans. |
+| `reports/` | Scoped implementation and validation reports. |
 | `implementation-status/` | Current implementation-status evidence. |
 | `imports/` | Import-domain documentation and source/data evidence. |
 | `plans/` | Bounded execution plans, import source registers and progress tracking; [current import plan](./plans/imports/plan.md). |
