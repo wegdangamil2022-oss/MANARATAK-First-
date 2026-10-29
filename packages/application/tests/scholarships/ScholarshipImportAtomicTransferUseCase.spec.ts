@@ -160,6 +160,31 @@ function existingScholarship(status: ScholarshipStatus = ScholarshipStatus.IMPOR
 }
 
 describe('WP12-10 ScholarshipImportAtomicTransferUseCase', () => {
+  it('transfers conditional evidence as one visible language policy, never as all mandatory tests', async () => {
+    const env = setup();
+    const source = payload();
+    const conditional = { ...source, metadata: { ...source.metadata, internationalTests: ['IELTS Academic', 'TOEFL iBT'],
+      conditionalLanguageEvidence: { policy: 'ALTERNATIVE_EVIDENCE_WITH_EXEMPTIONS_NOT_ALL_REQUIRED',
+        officialSourceUrl: source.officialSourceUrl, summary: 'One accepted result unless exempt.', scoreConversion: false,
+        alternatives: [{ sourceLabel: 'IELTS Academic', minimumOverall: 7 }, { sourceLabel: 'TOEFL iBT', minimumOverall: 100 }],
+        exemptions: 'Native English speakers; regional exceptions still apply.', testDateMustBeAfter: '2025-09-01',
+        excludedModes: ['Home Edition'], delivery: 'Direct organizational delivery.',
+      } } };
+    await env.importGateway.updateRecord('rec-1', { rawPayload: conditional });
+    await env.service.transfer({ recordId: 'rec-1', actorId: 'reviewer' });
+    const items = env.create.mock.calls[0][0].eligibilityItems ?? [];
+    expect(items.filter(item => item.itemTypeCode === 'INTERNATIONAL_TEST')).toHaveLength(0);
+    expect(items.find(item => item.itemTypeCode === 'LANGUAGE_PROFICIENCY')).toMatchObject({ operatorCode: 'ANY_OF_WITH_EXEMPTIONS' });
+    expect(items.find(item => item.itemTypeCode === 'LANGUAGE_PROFICIENCY')?.valueText).toContain('regional exceptions');
+  });
+  it('rejects incomplete conditional language rules before any canonical mutation', async () => {
+    const env = setup(); const source = payload();
+    await env.importGateway.updateRecord('rec-1', { rawPayload: { ...source, metadata: { ...source.metadata,
+      internationalTests: ['IELTS'], conditionalLanguageEvidence: { policy: 'ALTERNATIVE_EVIDENCE_WITH_EXEMPTIONS_NOT_ALL_REQUIRED' } } } });
+    await expect(env.service.transfer({ recordId: 'rec-1', actorId: 'reviewer' })).rejects.toThrow('SCHOLARSHIP_IMPORT_LANGUAGE_POLICY_REVIEW_REQUIRED');
+    expect(env.create).not.toHaveBeenCalled(); expect(env.update).not.toHaveBeenCalled();
+    expect(env.getRecord().promotedEntityId).toBeNull();
+  });
   it('creates a genuinely new canonical Scholarship as non-published and links the ImportRecord', async () => {
     const env = setup();
     const result = await env.service.transfer({ recordId: 'rec-1', actorId: 'admin-1' });

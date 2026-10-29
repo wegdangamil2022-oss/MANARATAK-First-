@@ -91,6 +91,33 @@ describe('immutable mappings and delegated review', () => {
     await expect(new PrismaImportGovernanceGateway(tx as any, true).claim({ recordId: 'r', actorId: 'actor', expectedVersion: 2 })).rejects.toThrow('REVIEW_CONFLICT');
     expect(tx.importReviewAssignment.updateMany.mock.calls[0][0]).toMatchObject({ where: { assigneeId: 'actor', version: 2, OR: [{ claimUntil: null }, { claimUntil: { lte: expect.any(Date) } }, { claimedBy: 'actor' }] }, data: { state: 'CLAIMED', claimUntil: expect.any(Date) } });
   });
+  it('allows structural COMPLETE scholarship review without changing its source status', async () => {
+    const record = { batchId: 'b', status: 'COMPLETE', promotedEntityId: null, retentionProcessedAt: null,
+      batch: { dataType: 'SCHOLARSHIPS', batchStatus: 'COMPLETED', updatedAt: revision } };
+    const tx = { $queryRaw: vi.fn(), importRecord: { findUnique: vi.fn(async () => record) },
+      importBatch: { updateMany: vi.fn(async () => ({ count: 1 })) }, importReviewAssignment: {
+        findUnique: vi.fn(async () => null), create: vi.fn(async ({ data }) => data),
+        updateMany: vi.fn(async () => ({ count: 1 })),
+      } };
+    const gateway = new PrismaImportGovernanceGateway(tx as never, true);
+    await gateway.assign({ recordId: 'r', assigneeId: 'actor', actorId: 'actor', expectedVersion: 0, dueAt: new Date(Date.now() + 60_000).toISOString() });
+    expect(tx.importReviewAssignment.create).toHaveBeenCalledOnce();
+    await gateway.claim({ recordId: 'r', actorId: 'actor', expectedVersion: 1 });
+    expect(tx.importReviewAssignment.updateMany).toHaveBeenCalledOnce();
+    expect(record.status).toBe('COMPLETE');
+  });
+  it.each([
+    { domain: 'COURSES', promotedEntityId: null, retentionProcessedAt: null, batchStatus: 'COMPLETED' },
+    { domain: 'SCHOLARSHIPS', promotedEntityId: 'scholarship-id', retentionProcessedAt: null, batchStatus: 'COMPLETED' },
+    { domain: 'SCHOLARSHIPS', promotedEntityId: null, retentionProcessedAt: revision, batchStatus: 'COMPLETED' },
+    { domain: 'SCHOLARSHIPS', promotedEntityId: null, retentionProcessedAt: null, batchStatus: 'PROCESSING' },
+  ])('keeps complete non-scholarship, transferred, retained, and active-worker records closed: %j', async (input) => {
+    const tx = { $queryRaw: vi.fn(), importRecord: { findUnique: async () => ({ status: 'COMPLETE', ...input,
+      batch: { dataType: input.domain, batchStatus: input.batchStatus } }) } };
+    const gateway = new PrismaImportGovernanceGateway(tx as never, true);
+    await expect(gateway.assign({ recordId: 'r', assigneeId: 'actor', actorId: 'actor', expectedVersion: 0, dueAt: revision.toISOString() })).rejects.toThrow('IMPORT_REVIEW_RECORD_NOT_READY');
+    await expect(gateway.claim({ recordId: 'r', actorId: 'actor', expectedVersion: 0 })).rejects.toThrow('IMPORT_REVIEW_RECORD_NOT_READY');
+  });
 });
 describe('server signed approvals and robots', () => {
   const pair = generateKeyPairSync('ed25519'); const key = pair.publicKey.export({ type: 'spki', format: 'pem' }).toString();

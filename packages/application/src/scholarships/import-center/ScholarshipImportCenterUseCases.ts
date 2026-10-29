@@ -29,6 +29,7 @@ import type {
 } from './ScholarshipImportCenterContracts';
 import { readScholarshipImportReviewDecision, readScholarshipImportTransferReceipt } from './ScholarshipImportReviewDecisionCodec';
 import { ScholarshipImportScreeningReader } from './ScholarshipImportScreeningReader';
+import { scholarshipImportLanguagePolicy } from './ScholarshipImportLanguagePolicy';
 import type { ScholarshipSourceRegistryService } from '../source-registry/ScholarshipSourceRegistryService';
 
 const OWNER_DOMAIN = 'SCHOLARSHIPS';
@@ -482,6 +483,8 @@ export class ScholarshipImportCenterUseCases {
     );
     const reviewReasons = this.reviewReasons(completeness, dedupe, verification, canonical)
       .filter((reason) => !(mergeDecisionMatches && reason === `DEDUPE:${dedupe.state}`));
+    const languagePolicyValid = scholarshipImportLanguagePolicy(parsed.data).valid;
+    if (!languagePolicyValid) reviewReasons.push('LANGUAGE_POLICY:REVIEW_REQUIRED');
     const dedupeReady = dedupe.state === 'NEW' || (
       (dedupe.state === 'DUPLICATE' || dedupe.state === 'UPDATE') && mergeDecisionMatches
     );
@@ -492,6 +495,7 @@ export class ScholarshipImportCenterUseCases {
       !dedupe.requiresReview &&
       verification.state === 'VERIFIED' &&
       canonical.state === 'CLEAR' &&
+      languagePolicyValid &&
       !base.transferred;
 
     return {
@@ -543,27 +547,17 @@ export class ScholarshipImportCenterUseCases {
     return [...reasons];
   }
 
-  private canonicalSummary(rawPayload: Record<string, unknown>, decisions: Array<{ fieldOrRequirementKey: string; resolutionType: string; recordedAt?: string }> = []): ScholarshipImportCenterCanonicalSummary {
-    const raw = ScholarshipImportScreeningReader.rawEntries(rawPayload);
-    if (raw.length === 0) {
+  private canonicalSummary(rawPayload: Record<string, unknown>, decisions: Parameters<typeof ScholarshipImportScreeningReader.resolve>[1] = []): ScholarshipImportCenterCanonicalSummary {
+    const raw = ScholarshipImportScreeningReader.resolve(rawPayload, decisions).entries;
+    const originalCount = ScholarshipImportScreeningReader.rawEntries(rawPayload).length;
+    if (originalCount === 0) {
       return { state: 'NOT_EXECUTED', unresolvedCount: 0, ambiguousCount: 0, reviewRequiredCount: 0 };
-    }
-    // This is an append-only decision ledger: only the newest decision for a
-    // screening key is effective; an older approval cannot hide a later reject.
-    const effective = new Map<string, { resolutionType: string; recordedAt?: string }>();
-    for (const decision of decisions) {
-      const current = effective.get(decision.fieldOrRequirementKey);
-      if (!current || String(decision.recordedAt ?? '') >= String(current.recordedAt ?? '')) effective.set(decision.fieldOrRequirementKey, decision);
     }
     let unresolvedCount = 0;
     let ambiguousCount = 0;
-    let reviewRequiredCount = 0;
+    let reviewRequiredCount = originalCount - new Set(raw.map(item => item.requirementKey)).size;
     for (const item of raw) {
-      const entry = this.object(item); const key = this.stringValue(entry.requirementKey) ?? this.stringValue(entry.fieldOrRequirementKey) ?? this.stringValue(entry.target);
-      const latest = key ? effective.get(key) : undefined;
-      const overridden = latest?.resolutionType === 'RESOLVED' || latest?.resolutionType === 'NOT_APPLICABLE';
-      if (overridden) continue;
-      const state = this.stringValue(entry.state)?.toUpperCase();
+      const state = item.state;
       if (state === 'UNRESOLVED') unresolvedCount += 1;
       if (state === 'AMBIGUOUS') ambiguousCount += 1;
       if (state === 'REVIEW_REQUIRED') reviewRequiredCount += 1;

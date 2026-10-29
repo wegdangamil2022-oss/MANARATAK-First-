@@ -16,6 +16,7 @@ import {
 } from '@manaratak/domain';
 import { AtomicDomainMutationCoordinator } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { ScholarshipImportScreeningReader } from './ScholarshipImportScreeningReader';
+import { scholarshipImportLanguagePolicy } from './ScholarshipImportLanguagePolicy';
 import type {
   IScholarshipImportAtomicGateway,
   IScholarshipImportReviewDecisionPort,
@@ -296,6 +297,9 @@ export class ScholarshipImportAtomicTransferUseCase
     }
 
     if (requireTransferReadiness) {
+      if (!scholarshipImportLanguagePolicy(payload).valid) {
+        throw new Error('SCHOLARSHIP_IMPORT_LANGUAGE_POLICY_REVIEW_REQUIRED');
+      }
       if (decisionSnapshot.verificationState !== 'VERIFIED') {
         throw new Error('SCHOLARSHIP_IMPORT_SOURCE_NOT_VERIFIED');
       }
@@ -632,6 +636,12 @@ export class ScholarshipImportAtomicTransferUseCase
         resolutionStatus: 'SOURCE_ONLY',
       });
     }
+    const language = scholarshipImportLanguagePolicy(plan.payload);
+    if (language.present) {
+      if (!language.valid || !language.item) throw new Error('SCHOLARSHIP_IMPORT_LANGUAGE_POLICY_REVIEW_REQUIRED');
+      items.push(language.item);
+      return items;
+    }
     const tests = this.uniqueStrings(this.strings(this.object(plan.payload.metadata).internationalTests));
     tests.forEach((label, index) => {
       const resolved = this.resolutionFor(plan.canonical, 'INTERNATIONAL_TEST', label);
@@ -795,6 +805,10 @@ export class ScholarshipImportAtomicTransferUseCase
     const decisions = this.canonicalDecisions ? await this.canonicalDecisions.list(record.id) : [];
     const resolved = ScholarshipImportScreeningReader.resolve(record.rawPayload, decisions);
     const canonical = resolved.entries as CanonicalScreeningRecord[];
+    if (canonical.length !== ScholarshipImportScreeningReader.rawEntries(record.rawPayload).length ||
+        new Set(resolved.entries.map(item => item.requirementKey)).size !== canonical.length) {
+      throw new Error('SCHOLARSHIP_IMPORT_CANONICAL_SCREENING_INVALID');
+    }
     const canonicalDecisionIds = resolved.decisionIds;
     const verificationState = verification?.state ?? this.verificationState(record.rawPayload);
     const verificationDecisionId = verification?.decisionId ?? null;

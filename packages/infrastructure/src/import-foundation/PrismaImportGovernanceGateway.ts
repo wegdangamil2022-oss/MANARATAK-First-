@@ -6,6 +6,11 @@ import { screeningReceiptIdentity } from './PrismaImportScreeningReceiptStore';
 
 const terminal = ['COMPLETED','PARTIALLY_COMPLETED','FAILED_PERMANENT','DLQ','CANCELLED','PAUSED'];
 const auxiliary = ['CHECKPOINT','DLQ','WORKER_FAILURE','STAGING_REJECTED'];
+// COMPLETE describes structural validation, not Scholarship owner approval.
+const reviewable = (record: { status: string; promotedEntityId?: string | null; retentionProcessedAt?: Date | null; batch: { dataType?: string; batchStatus: string } } | null) =>
+  Boolean(record && !record.promotedEntityId && !record.retentionProcessedAt && terminal.includes(record.batch.batchStatus) &&
+    (['NEEDS_REVIEW','INCOMPLETE'].includes(record.status) ||
+      (record.status === 'COMPLETE' && record.batch.dataType?.toUpperCase() === 'SCHOLARSHIPS')));
 const profileDto = (row: { id: string; sourceId: string; ownerDomain: string; version: number; sourceRevision: Date;
   definition: Prisma.JsonValue; definitionHash: string }): ImportMappingProfileDto => ({ ...row, definition: row.definition as unknown as ImportMappingDefinition });
 export class PrismaImportGovernanceGateway implements IImportGovernanceGateway {
@@ -57,7 +62,7 @@ export class PrismaImportGovernanceGateway implements IImportGovernanceGateway {
   async assign(input: { recordId: string; assigneeId: string; dueAt: string; expectedVersion: number; actorId: string }) {
     await this.lock(`review:${input.recordId}`);
     const record = await this.prisma.importRecord.findUnique({ where: { id: input.recordId }, include: { batch: true } });
-    if (!record || !['NEEDS_REVIEW','INCOMPLETE'].includes(record.status) || !terminal.includes(record.batch.batchStatus)) throw new Error('IMPORT_REVIEW_RECORD_NOT_READY');
+    if (!record || !reviewable(record)) throw new Error('IMPORT_REVIEW_RECORD_NOT_READY');
     const parent = await this.prisma.importBatch.updateMany({ where: { id: record.batchId, batchStatus: record.batch.batchStatus,
       updatedAt: record.batch.updatedAt, claimedBy: null, claimUntil: null }, data: { batchStatus: record.batch.batchStatus } });
     if (!parent.count) throw new Error('IMPORT_REVIEW_CONFLICT');
@@ -71,7 +76,7 @@ export class PrismaImportGovernanceGateway implements IImportGovernanceGateway {
   async claim(input: { recordId: string; expectedVersion: number; actorId: string }) {
     await this.lock(`review:${input.recordId}`);
     const record = await this.prisma.importRecord.findUnique({ where: { id: input.recordId }, include: { batch: true } });
-    if (!record || !['NEEDS_REVIEW','INCOMPLETE'].includes(record.status) || !terminal.includes(record.batch.batchStatus)) throw new Error('IMPORT_REVIEW_RECORD_NOT_READY');
+    if (!record || !reviewable(record)) throw new Error('IMPORT_REVIEW_RECORD_NOT_READY');
     const parent = await this.prisma.importBatch.updateMany({ where: { id: record.batchId, batchStatus: record.batch.batchStatus,
       updatedAt: record.batch.updatedAt, claimedBy: null, claimUntil: null }, data: { batchStatus: record.batch.batchStatus } });
     if (!parent.count) throw new Error('IMPORT_REVIEW_CONFLICT');

@@ -43,18 +43,28 @@ export interface ScholarshipResolvedScreeningSnapshot {
  */
 export class ScholarshipImportScreeningReader {
   static entries(rawPayload: unknown): ScholarshipCanonicalScreeningRecord[] {
-    return this.rawEntries(rawPayload).flatMap((item) => {
+    const raw = this.rawEntries(rawPayload);
+    return raw.flatMap((item) => {
       const target = this.target(item.target ?? item.canonicalEntityType);
       const state = this.string(item.state)?.toUpperCase();
       if (!target || !state) return [];
-      const requirementKey = this.string(
+      const legacyKey = this.string(
         item.requirementKey ?? item.fieldOrRequirementKey ?? item.target ?? item.canonicalEntityType,
       ) ?? target;
+      // Historical handoffs used only the target as a key. A single MAJOR or
+      // TEST decision must never approve the other requirements of that type.
+      const repeated = raw.filter((candidate) =>
+        (this.string(candidate.requirementKey ?? candidate.fieldOrRequirementKey ?? candidate.target ?? candidate.canonicalEntityType) ?? '') === legacyKey,
+      ).length > 1;
+      const rawValue = this.string(item.rawValue ?? item.requestedCanonicalId ?? item.canonicalId) ?? null;
+      const requirementKey = repeated
+        ? `${legacyKey}:${encodeURIComponent(rawValue ?? '')}`
+        : legacyKey;
       return [{
         requirementKey,
         target,
         state,
-        rawValue: this.string(item.rawValue ?? item.requestedCanonicalId ?? item.canonicalId) ?? null,
+        rawValue,
         canonicalReferenceId: this.string(item.canonicalReferenceId ?? item.canonicalId) ?? null,
         canonicalPublicId: this.string(item.canonicalPublicId) ?? null,
         canonicalStandardCode: this.string(item.canonicalStandardCode) ?? null,
@@ -71,6 +81,11 @@ export class ScholarshipImportScreeningReader {
     for (const decision of decisions) {
       const key = this.string(decision.fieldOrRequirementKey);
       if (!key) continue;
+      const matches = entries.filter((item) => item.requirementKey === key);
+      const requirement = matches.length === 1 ? matches[0] : undefined;
+      // Stale, ambiguous legacy, or substituted decisions are not effective.
+      if (!requirement || requirement.target !== decision.canonicalEntityType ||
+          requirement.rawValue !== this.string(decision.rawValue)) continue;
       const current = effective.get(key);
       if (!current || this.decisionOrder(decision) >= this.decisionOrder(current)) effective.set(key, decision);
     }
@@ -128,9 +143,8 @@ export class ScholarshipImportScreeningReader {
   }
 
   static findRequirement(rawPayload: unknown, key: string): Record<string, unknown> | null {
-    return this.rawEntries(rawPayload).find((entry) =>
-      (this.string(entry.requirementKey ?? entry.fieldOrRequirementKey ?? entry.target ?? entry.canonicalEntityType) ?? '') === key
-    ) ?? null;
+    const matches = this.entries(rawPayload).filter((entry) => entry.requirementKey === key);
+    return matches.length === 1 ? { ...matches[0] } : null;
   }
 
   private static decisionOrder(decision: ScholarshipCanonicalDecisionLike): string {
