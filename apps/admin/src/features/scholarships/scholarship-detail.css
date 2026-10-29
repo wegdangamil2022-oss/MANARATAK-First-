@@ -177,6 +177,25 @@
   margin: 0 0 8px;
   padding: 0;
 }
+.scholarship-funding-text-group h3 {
+  margin: 12px 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #d6a43b;
+  font-size: 12px !important;
+  color: #0e7c86;
+}
+.scholarship-funding-editor,
+.scholarship-funding-editor .scholarship-funding-text-group,
+.scholarship-funding-editor .scholarship-card-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.scholarship-funding-original p {
+  font-size: 12px;
+  color: #142b5f;
+}
 .scholarship-criterion {
   display: flex;
   align-items: center;

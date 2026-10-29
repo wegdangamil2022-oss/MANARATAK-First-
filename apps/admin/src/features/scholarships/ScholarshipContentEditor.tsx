@@ -3,7 +3,13 @@ import { Pencil, Plus, Trash2 } from 'lucide-react';
 import type { ScholarshipDto } from '@manaratak/domain';
 import type { ScholarshipCatalogUpdate } from '../../api/scholarshipCatalog';
 import {
-  benefitText,
+  fundingTextGroups,
+  withFundingTextGroups,
+  fundingGroupTitle,
+  fundingGroupContext,
+} from './ScholarshipFundingCards';
+import { ScholarshipFundingOriginal } from './ScholarshipFundingReadCards';
+import {
   moveScholarshipBenefit,
   scholarshipCardKey,
   scholarshipPresentation,
@@ -253,25 +259,74 @@ export function ScholarshipContentEditor({
                 () => updateGroups(presentation.fundingGroups.filter((row) => row.id !== group.id)),
               )}
             </div>
-            <div className="scholarship-card-grid">
+            <div className="scholarship-funding-editor">
               {group.benefitKeys.map((key) => {
                 const item = benefits.find((row) => row.benefitKey === key)!;
                 return (
                   <div key={key}>
-                    <TextCard
-                      title={tr('الميزة', 'Benefit')}
-                      multiline
-                      focus={focusField === key}
-                      value={item.valueText ?? benefitText(item, ar)}
-                      onChange={(value) =>
-                        set(
-                          'benefits',
-                          benefits.map((row) =>
-                            row.benefitKey === key ? { ...row, valueText: value } : row,
-                          ),
-                        )
-                      }
-                    />
+                    {fundingTextGroups(item).map((textGroup, groupIndex) => (
+                      <div className="scholarship-funding-text-group" key={textGroup.id}>
+                        {textGroup.prefix && (
+                          <TextCard
+                            title={
+                              fundingGroupContext(textGroup)
+                                ? tr('شروط مجموعة التمويل', 'Funding group conditions')
+                                : fundingGroupTitle(textGroup, ar)
+                            }
+                            multiline
+                            focus={focusField === `${textGroup.id}-context`}
+                            value={textGroup.prefix}
+                            onChange={(value) =>
+                              set(
+                                'benefits',
+                                benefits.map((row) =>
+                                  row.benefitKey === key
+                                    ? withFundingTextGroups(
+                                        row,
+                                        fundingTextGroups(row).map((group) =>
+                                          group.id === textGroup.id
+                                            ? { ...group, prefix: value }
+                                            : group,
+                                        ),
+                                      )
+                                    : row,
+                                ),
+                              )
+                            }
+                          />
+                        )}
+                        {textGroup.cards.map((card, cardIndex) => (
+                          <TextCard
+                            key={card.id}
+                            title={tr('الميزة', 'Benefit')}
+                            multiline
+                            focus={
+                              focusField === card.id ||
+                              (focusField === key && groupIndex === 0 && cardIndex === 0)
+                            }
+                            value={card.text}
+                            onChange={(value) =>
+                              set(
+                                'benefits',
+                                benefits.map((row) =>
+                                  row.benefitKey === key
+                                    ? withFundingTextGroups(
+                                        row,
+                                        fundingTextGroups(row).map((group) => ({
+                                          ...group,
+                                          cards: group.cards.map((part) =>
+                                            part.id === card.id ? { ...part, text: value } : part,
+                                          ),
+                                        })),
+                                      )
+                                    : row,
+                                ),
+                              )
+                            }
+                          />
+                        ))}
+                      </div>
+                    ))}
                     {presentation.fundingGroups.length > 1 && (
                       <label>
                         {tr('مجموعة التمويل', 'Funding group')}
@@ -297,25 +352,40 @@ export function ScholarshipContentEditor({
                       </label>
                     )}
                     <div className="scholarship-card-details">
-                      {item.durationText && (
-                        <TextCard
-                          title={tr('مدة الميزة', 'Benefit duration')}
-                          value={item.durationText}
-                          onChange={(value) =>
-                            set(
-                              'benefits',
-                              benefits.map((row) =>
-                                row.benefitKey === key
-                                  ? { ...row, durationText: value || null }
-                                  : row,
-                              ),
-                            )
-                          }
-                        />
-                      )}
+                      {item.durationText &&
+                        fundingTextGroups(item, 'durationText').flatMap((textGroup) =>
+                          textGroup.cards.map((card) => (
+                            <TextCard
+                              key={card.id}
+                              title={tr('مدة الميزة', 'Benefit duration')}
+                              focus={focusField === card.id}
+                              value={card.text}
+                              onChange={(value) =>
+                                set(
+                                  'benefits',
+                                  benefits.map((row) =>
+                                    row.benefitKey === key
+                                      ? withFundingTextGroups(
+                                          row,
+                                          fundingTextGroups(row, 'durationText').map((group) => ({
+                                            ...group,
+                                            cards: group.cards.map((part) =>
+                                              part.id === card.id ? { ...part, text: value } : part,
+                                            ),
+                                          })),
+                                          'durationText',
+                                        )
+                                      : row,
+                                  ),
+                                )
+                              }
+                            />
+                          )),
+                        )}
                       {item.notes && (
                         <TextCard
                           title={tr('شروط الميزة', 'Benefit conditions')}
+                          focus={focusField === `${key}-notes`}
                           multiline
                           value={item.notes}
                           onChange={(value) =>
@@ -371,6 +441,7 @@ export function ScholarshipContentEditor({
             { id: scholarshipCardKey('funding'), title: '', benefitKeys: [] },
           ]),
         )}
+        <ScholarshipFundingOriginal metadata={form.metadata} language={language} />
       </>
     );
   }

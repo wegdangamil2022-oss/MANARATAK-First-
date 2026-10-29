@@ -1,5 +1,6 @@
 import type { ScholarshipCatalogUpdate } from '../../api/scholarshipCatalog';
 import { scholarshipHttpUrl } from './ScholarshipPresentation';
+import { fundingTextGroups } from './ScholarshipFundingCards';
 
 export function scholarshipEditorValidation(
   input: ScholarshipCatalogUpdate,
@@ -9,7 +10,11 @@ export function scholarshipEditorValidation(
   if (!input.displayName?.trim())
     return fail('اكتب اسم المنحة قبل الحفظ.', 'Enter the scholarship name before saving.');
   if (
-    input.benefits?.some((item) => item.valueText === '') ||
+    input.benefits?.some(
+      (item) =>
+        item.valueText != null &&
+        fundingTextGroups(item).some((group) => group.cards.some((card) => !card.text.trim())),
+    ) ||
     input.requiredDocumentItems?.some((item) => !item.displayName.trim())
   )
     return fail(

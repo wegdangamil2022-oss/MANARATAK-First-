@@ -1,11 +1,11 @@
 import type { ScholarshipDto } from '@manaratak/domain';
 import { ScholarshipEligibilityCriteria } from './ScholarshipEligibilityCriteria';
-import { ExternalLink, FileText, Pencil } from 'lucide-react';
 import {
-  benefitText,
-  scholarshipPresentation,
-  scholarshipHttpUrl,
-} from './ScholarshipPresentation';
+  ScholarshipFundingReadCards,
+  ScholarshipFundingOriginal,
+} from './ScholarshipFundingReadCards';
+import { ExternalLink, FileText, Pencil } from 'lucide-react';
+import { scholarshipPresentation, scholarshipHttpUrl } from './ScholarshipPresentation';
 export { scholarshipHttpUrl } from './ScholarshipPresentation';
 
 const labels: Record<string, [string, string]> = {
@@ -264,21 +264,28 @@ export function ScholarshipDetailReadView({
           ])}
         </section>
         {presentation.fundingGroups.map((funding) => (
-          <div key={funding.id}>
-            {textCards(
-              funding.benefitKeys.map((key) => {
-                const item = scholarship.benefits!.find((row) => row.benefitKey === key)!;
-                return {
-                  key,
-                  title: item.valueText?.split('\n')[0] || tr('ميزة المنحة', 'Scholarship benefit'),
-                  text: benefitText(item, language === 'ar'),
-                };
-              }),
-              funding.title || tr('مجموعة تمويل', 'Funding group'),
+          <section className="scholarship-read-card" key={funding.id}>
+            <div className="scholarship-group-heading">
+              <h2>{funding.title || tr('مجموعة تمويل', 'Funding group')}</h2>
+              {edit('funding-groups', funding.title)}
+            </div>
+            {funding.benefitKeys.map((key) => (
+              <ScholarshipFundingReadCards
+                key={key}
+                benefit={scholarship.benefits!.find((row) => row.benefitKey === key)!}
+                language={language}
+                onEdit={onEdit}
+              />
+            ))}
+            {!funding.benefitKeys.length && (
+              <p>
+                {tr('لم تُضف مزايا لهذه المجموعة بعد.', 'No benefits added to this group yet.')}
+              </p>
             )}
-          </div>
+          </section>
         ))}
         {edit('funding-groups', tr('إضافة مجموعة تمويل', 'Add funding group'))}
+        <ScholarshipFundingOriginal metadata={scholarship.metadata} language={language} />
       </>
     );
   if (tab === 'degrees_majors')

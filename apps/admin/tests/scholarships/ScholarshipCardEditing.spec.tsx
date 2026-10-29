@@ -107,12 +107,9 @@ describe('Scholarship card authoring', () => {
     );
     const paragraphs = tree.root.findAllByType('p').map((node) => node.children.join(''));
     expect(
-      paragraphs.some(
-        (text) =>
-          text.includes(valueText.trim()) &&
-          text.includes('Second year requires a separate application.'),
-      ),
-    ).toBe(true);
+      paragraphs.filter((text) => text.trim() === valueText.trim().split('. ')[0] + '.'),
+    ).toHaveLength(3);
+    expect(paragraphs).toContain('Second year requires a separate application.');
     expect(scholarship.benefits[0].valueText).toBe(valueText);
   });
   it('rejects empty group headings and unsafe custom links before saving', () => {
