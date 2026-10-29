@@ -115,13 +115,15 @@ export function ScholarshipDetailReadView({
         {edit('collection', section)}
       </div>
       <div className="scholarship-card-grid">
-        {rows.map((row) => (
+        {rows.map((row, index) => (
           <article key={row.key} className="scholarship-editor-card">
             <div className="scholarship-card-heading">
-              <h3>{row.title}</h3>
-              {edit(row.key, row.title)}
+              <h3>{row.title.length > 80 ? `${section} · ${index + 1}` : row.title}</h3>
+              {edit(row.key, row.title.length > 80 ? `${section} · ${index + 1}` : row.title)}
             </div>
-            <p className="scholarship-long-text">{row.text || tr('غير محدد', 'Not specified')}</p>
+            {row.text !== row.title || row.title.length > 80 ? (
+              <p className="scholarship-long-text">{row.text || tr('غير محدد', 'Not specified')}</p>
+            ) : null}
           </article>
         ))}
       </div>

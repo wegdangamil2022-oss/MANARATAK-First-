@@ -690,7 +690,7 @@ export function ScholarshipRelationshipEditorPage({
             disabled={disabled || saving || immutable}
             className="inline-flex items-center gap-2 rounded-xl bg-[#0E7C86] px-5 py-3 text-sm font-bold text-white shadow-lg transition-colors hover:bg-[#142B5F] disabled:opacity-50"
           >
-            <Save className="h-4 w-4" /> Save all canonical relationships
+            <Save className="h-4 w-4" /> {tr('Save all canonical relationships')}
           </button>
         </div>
       </fieldset>

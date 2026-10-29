@@ -79,6 +79,42 @@ afterEach(async () => {
 });
 
 describe('Scholarship card authoring', () => {
+  it('keeps imported benefit conditions intact without repeating them as a long card heading', async () => {
+    const valueText =
+      'First year tuition, accommodation, insurance and travel contribution. '.repeat(3);
+    const scholarship = {
+      ...source,
+      benefits: [
+        {
+          ...source.benefits![0],
+          valueText,
+          notes: 'Second year requires a separate application.',
+        },
+      ],
+    };
+    await act(async () => {
+      tree = create(
+        <ScholarshipDetailReadView
+          scholarship={scholarship}
+          tab="funding"
+          language="en"
+          onEdit={vi.fn()}
+        />,
+      );
+    });
+    expect(tree.root.findAllByType('h3').map((node) => node.children.join(''))).not.toContain(
+      valueText,
+    );
+    const paragraphs = tree.root.findAllByType('p').map((node) => node.children.join(''));
+    expect(
+      paragraphs.some(
+        (text) =>
+          text.includes(valueText.trim()) &&
+          text.includes('Second year requires a separate application.'),
+      ),
+    ).toBe(true);
+    expect(scholarship.benefits[0].valueText).toBe(valueText);
+  });
   it('rejects empty group headings and unsafe custom links before saving', () => {
     expect(
       scholarshipEditorValidation(
