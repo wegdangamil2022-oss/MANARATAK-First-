@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../../api/client';
 import { useTranslation } from '../../i18n/I18nProvider';
 import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../../security/useOwnerOperationScope';
 import { AUDIT_QUERY_CATALOG, auditCodeLabel } from '@manaratak/shared';
 import { Link } from 'react-router-dom';
 import {
@@ -111,6 +112,7 @@ export function AuditRecordsWorkspace({
   view?: 'activities' | 'integrity';
 }) {
   const { t, dir, language } = useTranslation();
+  const owner = useOwnerOperationScope(view);
   const c = (ar: string, en: string) => (language === 'ar' ? ar : en);
 
   const { hasPermission } = useAdminAuthorization();
@@ -371,7 +373,8 @@ export function AuditRecordsWorkspace({
     }
   };
   const exportLoaded = async () => {
-    if (exportBusy.current || loading || pendingFilters) return;
+    if (!owner.isCurrent() || exportBusy.current || loading || pendingFilters) return;
+    const generation = listGeneration.current;
     exportBusy.current = true;
     setExporting(true);
     setError('');
@@ -382,6 +385,7 @@ export function AuditRecordsWorkspace({
       const blob = await adminApiClient.request<Blob>('/admin/audit/export?' + q, {
         responseType: 'blob',
       });
+      if (!owner.isCurrent() || generation !== listGeneration.current) return;
       const url = URL.createObjectURL(blob),
         link = document.createElement('a');
       link.href = url;
@@ -396,14 +400,17 @@ export function AuditRecordsWorkspace({
           : 'Exported one audited CSV page, up to 100 results; this is not the complete log.',
       );
     } catch {
-      setError(t('audit_export_failed'));
+      if (owner.isCurrent() && generation === listGeneration.current)
+        setError(t('audit_export_failed'));
     } finally {
-      exportBusy.current = false;
-      setExporting(false);
+      if (owner.isCurrent()) {
+        exportBusy.current = false;
+        setExporting(false);
+      }
     }
   };
   const exportFiltered = async (nextCursor?: string) => {
-    if (exportBusy.current || loading || pendingFilters) return;
+    if (!owner.isCurrent() || exportBusy.current || loading || pendingFilters) return;
     exportBusy.current = true;
     setExporting(true);
     setNotice('');
@@ -416,7 +423,7 @@ export function AuditRecordsWorkspace({
       const result = await adminApiClient.request<
         AuditPage & { bounded: boolean; exportedAt: string }
       >(`/admin/audit/export?${params}`, { cache: 'no-store' });
-      if (generation !== listGeneration.current) return;
+      if (!owner.isCurrent() || generation !== listGeneration.current) return;
       if (
         !result?.bounded ||
         !Array.isArray(result.items) ||
@@ -443,10 +450,13 @@ export function AuditRecordsWorkspace({
         ),
       );
     } catch {
-      if (generation === listGeneration.current) setError(t('audit_export_failed'));
+      if (owner.isCurrent() && generation === listGeneration.current)
+        setError(t('audit_export_failed'));
     } finally {
-      exportBusy.current = false;
-      setExporting(false);
+      if (owner.isCurrent()) {
+        exportBusy.current = false;
+        setExporting(false);
+      }
     }
   };
   const friendly = (code: string) => {

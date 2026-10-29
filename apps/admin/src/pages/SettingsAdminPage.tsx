@@ -14,6 +14,7 @@ import {
 } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 import { useAdministrationDraftGuard } from '../features/reference-data/useAdministrationDraftGuard';
 import { OperationsHeading } from '../features/operations/OperationsWorkspace';
 import {
@@ -98,6 +99,7 @@ export function SettingsAdminPage() {
   const { language } = useTranslation();
   const isAr = language === 'ar';
   const { hasPermission } = useAdminAuthorization();
+  const owner = useOwnerOperationScope('settings-workspace');
   const [params, setParams] = useSearchParams();
   const view = settingsView(params.get('view'));
   const activeTab = view === 'assignments' ? 'assignments' : 'definitions';
@@ -335,6 +337,7 @@ export function SettingsAdminPage() {
   const historyPanel = useRef<HTMLDivElement>(null);
 
   const refresh = useCallback(async () => {
+    if (!owner.isCurrent()) return;
     const request = ++generation.current;
     refreshing.current = true;
     setLoading(true);
@@ -358,7 +361,7 @@ export function SettingsAdminPage() {
         { cache: 'no-store' },
       ),
     ]);
-    if (request !== generation.current) return;
+    if (!owner.isCurrent() || request !== generation.current) return;
     const failures: string[] = [];
     const [definitionResult, assignmentResult] = results;
     if (
@@ -405,6 +408,7 @@ export function SettingsAdminPage() {
     assignmentCursors,
     isAr,
     listSignature,
+    owner,
   ]);
 
   useEffect(() => {
@@ -507,7 +511,14 @@ export function SettingsAdminPage() {
     payload: Record<string, unknown>,
     complete: () => void,
   ) => {
-    if (busy.current || refreshing.current || !ready || pendingCommand.current) return;
+    if (
+      !owner.isCurrent() ||
+      busy.current ||
+      refreshing.current ||
+      !ready ||
+      pendingCommand.current
+    )
+      return;
     const signature = JSON.stringify([operation, payload]);
     let command = commands.current.get(signature);
     if (!command) {
@@ -560,6 +571,7 @@ export function SettingsAdminPage() {
         idempotencyKey: frozen.key,
         body: frozen.body,
       });
+      if (!owner.isCurrent()) return;
       pendingCommand.current = null;
       setUnconfirmed(false);
       commands.current.delete(signature);
@@ -579,13 +591,16 @@ export function SettingsAdminPage() {
       }
       await refresh();
     } catch (cause) {
+      if (!owner.isCurrent()) return;
       const message = cause instanceof Error ? cause.message : '';
       if (/^\[(400|401|403|404|409|422|429)\]/.test(message)) pendingCommand.current = null;
       else if (pendingCommand.current) setUnconfirmed(true);
       setError(settingsOperationError(cause, isAr));
     } finally {
-      busy.current = false;
-      setSaving(false);
+      if (owner.isCurrent()) {
+        busy.current = false;
+        setSaving(false);
+      }
     }
   };
   const createDefinition = async (event: FormEvent) => {
@@ -861,7 +876,7 @@ export function SettingsAdminPage() {
   };
   const retryPending = async () => {
     const frozen = pendingCommand.current;
-    if (!frozen || busy.current) return;
+    if (!frozen || busy.current || !owner.isCurrent()) return;
     busy.current = true;
     setSaving(true);
     setError(null);
@@ -871,6 +886,7 @@ export function SettingsAdminPage() {
         idempotencyKey: frozen.key,
         body: frozen.body,
       });
+      if (!owner.isCurrent()) return;
       pendingCommand.current = null;
       setUnconfirmed(false);
       frozen.complete();
@@ -879,18 +895,21 @@ export function SettingsAdminPage() {
       setContextEpoch((value) => value + 1);
       setMetadataEpoch((value) => value + 1);
       setNotice(
-        isAr ? 'تأكد حفظ الطلب؛ جرى تحديث البيانات.' : 'Request confirmed; data refreshed.',
+        isAr ? 'تأكد حفظ الطلب؛ جارٍ إعادة قراءة البيانات.' : 'Request confirmed; refreshing data.',
       );
       await refresh();
     } catch (cause) {
+      if (!owner.isCurrent()) return;
       if (/^\[(400|401|403|404|409|422|429)\]/.test(cause instanceof Error ? cause.message : '')) {
         pendingCommand.current = null;
         setUnconfirmed(false);
       }
       setError(settingsOperationError(cause, isAr));
     } finally {
-      busy.current = false;
-      setSaving(false);
+      if (owner.isCurrent()) {
+        busy.current = false;
+        setSaving(false);
+      }
     }
   };
   const submitReview = async (event: FormEvent) => {

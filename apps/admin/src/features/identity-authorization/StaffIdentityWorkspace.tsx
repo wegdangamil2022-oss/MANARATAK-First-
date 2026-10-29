@@ -251,7 +251,7 @@ function StaffDirectory() {
   const command = useStaffCommand(() => {
       detail.reload();
       read.reload();
-    }),
+    }, selected ?? ''),
     [reason, setReason] = useState('');
   const update = (key: string, value: string) =>
     setParams((previous) => {

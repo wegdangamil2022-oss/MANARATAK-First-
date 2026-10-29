@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { adminApiClient, createAdminIdempotencyKey } from '../../api/client';
 import { useTranslation } from '../../i18n/I18nProvider';
 import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../../security/useOwnerOperationScope';
 import { OperationsNotice } from '../../features/operations/OperationsWorkspace';
 import {
   supportError,
@@ -29,6 +30,8 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
   const { language } = useTranslation(),
     { hasPermission } = useAdminAuthorization(),
     c = (ar: string, en: string) => (language === 'ar' ? ar : en);
+  const scope = useOwnerOperationScope(id);
+  const locked = useRef(false);
   const [record, setRecord] = useState<SupportTicket | null>(null),
     [messages, setMessages] = useState<SupportMessageDto[]>([]),
     [cursor, setCursor] = useState<string | null>(null),
@@ -61,6 +64,7 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
     generation = useRef(0);
   const base = '/admin/support/cases/' + encodeURIComponent(id);
   const load = useCallback(async () => {
+    if (!scope.isCurrent()) return;
     const current = ++generation.current;
     setLoading(true);
     setError('');
@@ -69,7 +73,8 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
         adminApiClient.request<SupportTicket>(base),
         adminApiClient.request<SupportPage<SupportMessageDto>>(base + '/messages?limit=30'),
       ]);
-      if (current !== generation.current) return;
+      if (!scope.isCurrent() || current !== generation.current) return;
+      if (r.id !== id) throw Error('SUPPORT_CASE_IDENTITY_MISMATCH');
       setRecord(r);
       setMessages(m.items);
       setCursor(m.nextCursor);
@@ -78,12 +83,21 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
       setTeam(r.teamId ?? '');
       setAssignee(r.assigneeId ?? '');
     } catch (e) {
-      if (current === generation.current) setError(supportError(e, language));
+      if (scope.isCurrent() && current === generation.current) setError(supportError(e, language));
     } finally {
-      if (current === generation.current) setLoading(false);
+      if (scope.isCurrent() && current === generation.current) setLoading(false);
     }
-  }, [base, language]);
+  }, [base, language, id, scope]);
   useEffect(() => {
+    locked.current = false;
+    setBusy(false);
+    setRecord(null);
+    setMessages([]);
+    setCursor(null);
+    setEventsCursor(null);
+    setNotice('');
+    setReason('');
+    setRelated('');
     setBody('');
     pending.current = null;
     setUncertain(false);
@@ -91,9 +105,10 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
     setEvents([]);
   }, [id]);
   useEffect(() => {
+    const pendingGeneration = generation;
     void load();
     return () => {
-      ++generation.current;
+      ++pendingGeneration.current;
     };
   }, [load]);
   useEffect(() => {
@@ -112,7 +127,7 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
   }, [id]);
   const send = async (event: FormEvent) => {
     event.preventDefault();
-    if (!record) return;
+    if (!record || record.id !== id || locked.current || !scope.isCurrent()) return;
     const payload = {
         body,
         expectedVersion: record.version,
@@ -120,13 +135,20 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
         requestInformation: !internal && requestInformation,
       },
       signature = JSON.stringify(payload);
-    if (!pending.current || pending.current.signature !== signature)
-      pending.current = {
-        signature,
-        key: createAdminIdempotencyKey(),
-        path: base + '/messages',
-        method: 'POST',
-      };
+    if (
+      pending.current &&
+      (pending.current.signature !== signature || pending.current.path !== base + '/messages')
+    ) {
+      setUncertain(true);
+      return;
+    }
+    pending.current ??= {
+      signature,
+      key: createAdminIdempotencyKey(),
+      path: base + '/messages',
+      method: 'POST',
+    };
+    locked.current = true;
     setBusy(true);
     setError('');
     setNotice('');
@@ -136,6 +158,7 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
         body: signature,
         idempotencyKey: pending.current.key,
       });
+      if (!scope.isCurrent()) return;
       setBody('');
       pending.current = null;
       setNotice(
@@ -145,8 +168,9 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
         ),
       );
       await load();
-      onChanged();
+      if (scope.isCurrent()) onChanged();
     } catch (e) {
+      if (!scope.isCurrent()) return;
       setError(supportError(e, language));
       if (pending.current) {
         if (e instanceof Error && /^\[4(?:00|01|03|04|09|22)\]/.test(e.message))
@@ -154,12 +178,15 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
         else setUncertain(true);
       }
     } finally {
-      setBusy(false);
+      if (scope.isCurrent()) {
+        locked.current = false;
+        setBusy(false);
+      }
     }
   };
   const change = async (event: FormEvent) => {
     event.preventDefault();
-    if (!record) return;
+    if (!record || record.id !== id || locked.current || !scope.isCurrent()) return;
     const payload = {
       expectedVersion: record.version,
       reason,
@@ -170,13 +197,20 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
       ...(related ? { relatedCaseId: related } : {}),
     };
     const signature = JSON.stringify(payload);
-    if (!pending.current || pending.current.signature !== signature)
-      pending.current = {
-        signature,
-        key: createAdminIdempotencyKey(),
-        path: base,
-        method: 'PATCH',
-      };
+    if (
+      pending.current &&
+      (pending.current.signature !== signature || pending.current.path !== base)
+    ) {
+      setUncertain(true);
+      return;
+    }
+    pending.current ??= {
+      signature,
+      key: createAdminIdempotencyKey(),
+      path: base,
+      method: 'PATCH',
+    };
+    locked.current = true;
     setBusy(true);
     setError('');
     try {
@@ -185,12 +219,14 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
         body: signature,
         idempotencyKey: pending.current.key,
       });
+      if (!scope.isCurrent()) return;
       pending.current = null;
       setReason('');
       setRelated('');
       await load();
-      onChanged();
+      if (scope.isCurrent()) onChanged();
     } catch (e) {
+      if (!scope.isCurrent()) return;
       setError(supportError(e, language));
       if (pending.current) {
         if (e instanceof Error && /^\[4(?:00|01|03|04|09|22)\]/.test(e.message))
@@ -198,12 +234,16 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
         else setUncertain(true);
       }
     } finally {
-      setBusy(false);
+      if (scope.isCurrent()) {
+        locked.current = false;
+        setBusy(false);
+      }
     }
   };
   const recover = async () => {
     const attempt = pending.current;
-    if (!attempt) return;
+    if (!attempt || locked.current || !scope.isCurrent()) return;
+    locked.current = true;
     setBusy(true);
     setError('');
     try {
@@ -211,6 +251,9 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
         '/admin/support/command-status',
         { headers: { 'Idempotency-Key': attempt.key } },
       );
+      if (!scope.isCurrent()) return;
+      if (!['SAVED', 'UNKNOWN'].includes(result.state) || (result.caseId && result.caseId !== id))
+        throw Error('SUPPORT_COMMAND_IDENTITY_MISMATCH');
       if (result.state === 'UNKNOWN') {
         // Replay the exact frozen command and key, even if another refresh changed the visible version.
         await adminApiClient.request(attempt.path, {
@@ -219,6 +262,7 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
           idempotencyKey: attempt.key,
         });
       }
+      if (!scope.isCurrent()) return;
       if (attempt.method === 'POST') setBody('');
       pending.current = null;
       setUncertain(false);
@@ -229,23 +273,30 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
         ),
       );
       await load();
-      onChanged();
+      if (scope.isCurrent()) onChanged();
     } catch (e) {
+      if (!scope.isCurrent()) return;
       setError(supportError(e, language));
       if (e instanceof Error && /^\[4(?:00|01|03|04|09|22)\]/.test(e.message)) {
         pending.current = null;
         setUncertain(false);
       }
     } finally {
-      setBusy(false);
+      if (scope.isCurrent()) {
+        locked.current = false;
+        setBusy(false);
+      }
     }
   };
   const inspectDelivery = async (messageId: string) => {
+    if (!scope.isCurrent() || locked.current) return;
+    locked.current = true;
     setBusy(true);
     try {
       const r = await adminApiClient.request<{ saved: boolean; notification: string }>(
         base + '/messages/' + encodeURIComponent(messageId) + '/status',
       );
+      if (!scope.isCurrent()) return;
       const labels: Record<string, string> = {
         NOT_REQUESTED: c('محفوظة داخليًا؛ لا إشعار', 'Saved internally; no notification'),
         QUEUED: c('محفوظة؛ بانتظار معالجة الإشعار', 'Saved; notification queued'),
@@ -257,12 +308,17 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
       };
       setDelivery((old) => ({ ...old, [messageId]: labels[r.notification] ?? labels.UNKNOWN }));
     } catch (e) {
-      setError(supportError(e, language));
+      if (scope.isCurrent()) setError(supportError(e, language));
     } finally {
-      setBusy(false);
+      if (scope.isCurrent()) {
+        locked.current = false;
+        setBusy(false);
+      }
     }
   };
   const history = async (next?: string) => {
+    if (!scope.isCurrent() || locked.current) return;
+    locked.current = true;
     setBusy(true);
     try {
       const r = await adminApiClient.request<
@@ -270,17 +326,16 @@ export function SupportTicketDetail({ id, onChanged }: { id: string; onChanged: 
       >(
         base + '/events?' + new URLSearchParams({ limit: '25', ...(next ? { cursor: next } : {}) }),
       );
+      if (!scope.isCurrent()) return;
       setEvents((old) => (next ? [...old, ...r.items] : r.items));
       setEventsCursor(r.nextCursor);
     } catch (e) {
-      setError(supportError(e, language));
-      if (pending.current) {
-        if (e instanceof Error && /^\[4(?:00|01|03|04|09|22)\]/.test(e.message))
-          pending.current = null;
-        else setUncertain(true);
-      }
+      if (scope.isCurrent()) setError(supportError(e, language));
     } finally {
-      setBusy(false);
+      if (scope.isCurrent()) {
+        locked.current = false;
+        setBusy(false);
+      }
     }
   };
   return (

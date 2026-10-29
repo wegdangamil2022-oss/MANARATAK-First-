@@ -13,6 +13,7 @@ import { serviceSection, type ServiceSection } from '../features/services-financ
 import { ServiceCatalogEditor } from '../features/services-finance/ServiceCatalogEditor';
 import { ServiceOperationsWorkspace } from '../components/ServiceOperationsWorkspace';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 import { ServiceRequestsWorkspace } from '../components/ServiceRequestsWorkspace';
 
 import {
@@ -46,6 +47,7 @@ export function ServicesAdminPage() {
   const route = useParams();
   const navigate = useNavigate();
   const activeTab = serviceSection(searchParams, hasPermission, Boolean(route.requestReference));
+  const owner = useOwnerOperationScope(`${activeTab}:${route.requestReference ?? ''}`);
   const [editorOpen, setEditorOpen] = useState(false);
   const countryFilter = searchParams.get('supportedCountryReferenceId') || '';
   const languageFilter = searchParams.get('supportedLanguageReferenceId') || '';
@@ -72,11 +74,17 @@ export function ServicesAdminPage() {
   const [listError, setListError] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const formBaseline = useRef(JSON.stringify(emptyForm));
+  const acceptedSave = useRef<string | null>(null);
+  useEffect(() => {
+    mutation.current = false;
+    setSaving(false);
+  }, [owner]);
   useEffect(() => {
     setDirty(JSON.stringify(form) !== formBaseline.current);
   }, [form]);
 
   const loadServices = useCallback(async () => {
+    if (!owner.isCurrent()) return;
     const request = ++listSequence.current;
     setLoading(true);
     setListError(null);
@@ -95,17 +103,17 @@ export function ServicesAdminPage() {
       const response = await adminApiClient.request<ServiceListResponse>(
         `/admin/services?${params}`,
       );
-      if (request === listSequence.current) {
-        if (response.totalPages > 0 && page > response.totalPages) setPage(response.totalPages);
+      if (owner.isCurrent() && request === listSequence.current) {
+        if (page > Math.max(1, response.totalPages)) setPage(Math.max(1, response.totalPages));
         else setServices(response);
       }
     } catch (cause) {
-      if (request === listSequence.current)
+      if (owner.isCurrent() && request === listSequence.current)
         setListError(
           cause instanceof Error ? cause.message : serviceText('تعذر تحميل الخدمات.', language),
         );
     } finally {
-      if (request === listSequence.current) setLoading(false);
+      if (owner.isCurrent() && request === listSequence.current) setLoading(false);
     }
   }, [
     statusFilter,
@@ -119,6 +127,7 @@ export function ServicesAdminPage() {
     countryFilter,
     languageFilter,
     language,
+    owner,
   ]);
   useEffect(() => {
     if (activeTab === 'CATALOG') void loadServices();
@@ -143,6 +152,7 @@ export function ServicesAdminPage() {
         !window.confirm(serviceText('لديك تعديلات غير محفوظة للخدمة. الانتقال دون حفظ؟', language)))
     )
       return;
+    acceptedSave.current = null;
     formBaseline.current = JSON.stringify(emptyForm);
     setDirty(false);
     setSelectedService(null);
@@ -172,7 +182,7 @@ export function ServicesAdminPage() {
   };
 
   const saveService = async (mode: 'create' | 'update') => {
-    if (mutation.current) return;
+    if (mutation.current || !owner.isCurrent()) return;
     mutation.current = true;
     setSaving(true);
     setMessage(null);
@@ -185,19 +195,35 @@ export function ServicesAdminPage() {
       const endpoint =
         mode === 'create' ? '/admin/services' : `/admin/services/${selectedService?.id}`;
       const method = mode === 'create' ? 'POST' : 'PATCH';
-      const saved = await adminApiClient.request<ServiceCatalogItem>(endpoint, {
-        method,
-        body: JSON.stringify(payload),
-      });
-      setSelectedService(saved);
-      setDirty(false);
+      const savedId = acceptedSave.current;
+      const saved = savedId
+        ? null
+        : await adminApiClient.request<ServiceCatalogItem>(endpoint, {
+            method,
+            body: JSON.stringify(payload),
+          });
+      if (!owner.isCurrent()) return;
+      const id = savedId ?? saved?.id;
+      if (!id || (mode === 'update' && selectedService && id !== selectedService.id))
+        throw Error('SERVICE_IDENTITY_MISMATCH');
+      acceptedSave.current = id;
       const persisted = await adminApiClient.request<ServiceCatalogItem>(
-        `/admin/services/${encodeURIComponent(saved.id)}`,
+        `/admin/services/${encodeURIComponent(id)}`,
+        { cache: 'no-store' },
       );
+      if (!owner.isCurrent()) return;
+      if (
+        persisted.id !== id ||
+        !Number.isInteger(persisted.version) ||
+        (saved && persisted.version < saved.version)
+      )
+        throw Error('SERVICE_READBACK_MISMATCH');
+      acceptedSave.current = null;
       selectService(persisted, true);
       setMessage(`حُفظت الخدمة وأُعيد تحميل بياناتها: ${persisted.displayName}`);
       await loadServices();
     } catch (cause) {
+      if (!owner.isCurrent()) return;
       const message =
         cause instanceof Error
           ? cause.message
@@ -208,11 +234,20 @@ export function ServicesAdminPage() {
               'تغيّرت الخدمة في جلسة أخرى. أعد تحميل النسخة المحفوظة ثم راجع تعديلاتك.',
               language,
             )
-          : message,
+          : acceptedSave.current
+            ? serviceText(
+                'قُبل الحفظ، لكن تعذرت إعادة القراءة. بقيت المسودة؛ أعد الحفظ للتحقق دون إرسال تغيير جديد.',
+                language,
+              ) +
+              ' ' +
+              message
+            : message,
       );
     } finally {
-      mutation.current = false;
-      setSaving(false);
+      if (owner.isCurrent()) {
+        mutation.current = false;
+        setSaving(false);
+      }
     }
   };
 
@@ -220,7 +255,7 @@ export function ServicesAdminPage() {
     service: ServiceCatalogItem,
     action: 'mark-ready' | 'mark-publishable' | 'publish' | 'unpublish' | 'reject' | 'archive',
   ) => {
-    if (mutation.current) return;
+    if (mutation.current || !owner.isCurrent() || acceptedSave.current) return;
     if (selectedService?.id === service.id && dirty) {
       setError(serviceText('احفظ تعديلات الخدمة قبل تغيير حالتها.', language));
       return;
@@ -271,16 +306,26 @@ export function ServicesAdminPage() {
           }),
         },
       );
+      if (!owner.isCurrent()) return;
+      if (
+        updated.id !== service.id ||
+        !Number.isInteger(updated.version) ||
+        updated.version <= service.version
+      )
+        throw Error('SERVICE_TRANSITION_MISMATCH');
       if (selectedService?.id === service.id) selectService(updated, true);
       setMessage(`تم تنفيذ: ${serviceText(formatLabel(action), language)}`);
       await loadServices();
     } catch (cause) {
+      if (!owner.isCurrent()) return;
       setError(
         cause instanceof Error ? cause.message : serviceText('تعذر تحديث حالة الخدمة.', language),
       );
     } finally {
-      mutation.current = false;
-      setSaving(false);
+      if (owner.isCurrent()) {
+        mutation.current = false;
+        setSaving(false);
+      }
     }
   };
 
@@ -291,6 +336,7 @@ export function ServicesAdminPage() {
         (dirty && !window.confirm(serviceText('ترك تعديلات الخدمة غير المحفوظة؟', language))))
     )
       return;
+    acceptedSave.current = null;
     setDirty(false);
     setSelectedService(service);
     setEditorOpen(true);
@@ -426,6 +472,7 @@ export function ServicesAdminPage() {
               type="button"
               disabled={saving}
               onClick={() => {
+                acceptedSave.current = null;
                 formBaseline.current = JSON.stringify(emptyForm);
                 setForm(emptyForm);
                 setSelectedService(null);
@@ -778,6 +825,7 @@ export function ServicesAdminPage() {
                 onChange={setForm}
                 service={selectedService}
                 busy={saving}
+                verificationPending={Boolean(acceptedSave.current)}
                 dirty={dirty}
                 onSubmit={selectedService ? updateService : createService}
                 onTransition={(service, action) => void transitionService(service, action)}
@@ -790,6 +838,7 @@ export function ServicesAdminPage() {
                   formBaseline.current = JSON.stringify(emptyForm);
                   setDirty(false);
                   setSelectedService(null);
+                  acceptedSave.current = null;
                   setForm(emptyForm);
                   setEditorOpen(false);
                 }}

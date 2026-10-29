@@ -10,6 +10,7 @@
   font-size: 13px;
   line-height: 1.8;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   min-width: 0;
 }
@@ -79,6 +80,13 @@
   margin-top: 4px;
   max-width: 720px;
   font-size: 12px;
+}
+.sf-workspace > *,
+.sf-heading > *,
+.sf-workspace .sf-toolbar > label {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .sf-actions,
 .sf-panel-heading {

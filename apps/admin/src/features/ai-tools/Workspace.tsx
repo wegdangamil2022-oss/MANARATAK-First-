@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { RefreshCw, Loader2 } from 'lucide-react';
 import { adminApiClient } from '../../api/client';
 import { useTranslation } from '../../i18n/I18nProvider';
+import { useOwnerOperationScope } from '../../security/useOwnerOperationScope';
 import '../reference-data/reference-data.css';
 import '../certificates/certificates.css';
 import './workspace.css';
@@ -11,37 +12,50 @@ export function useWorkspaceCopy() {
   return { language, dir, c: (ar: string, en: string) => (language === 'en' ? en : ar) };
 }
 export function useWorkspaceRead<T>(path: string | null) {
+  const scope = useOwnerOperationScope(path ?? '');
+  const [resolvedPath, setResolvedPath] = useState(path);
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(Boolean(path));
   const [error, setError] = useState(false);
+  const [failure, setFailure] = useState<unknown>(null);
   const [observedAt, setObservedAt] = useState<string | null>(null);
   const sequence = useRef(0);
   const load = useCallback(async () => {
+    if (!scope.isCurrent()) return;
     const id = ++sequence.current;
+    setResolvedPath(path);
     setData(null);
     setError(false);
+    setFailure(null);
     setLoading(Boolean(path));
     setObservedAt(null);
     if (!path) return;
     try {
       const value = await adminApiClient.request<T>(path);
-      if (id === sequence.current) {
+      if (id === sequence.current && scope.isCurrent()) {
+        setResolvedPath(path);
         setData(value);
         setObservedAt(new Date().toISOString());
       }
-    } catch {
-      if (id === sequence.current) setError(true);
+    } catch (cause) {
+      if (scope.isCurrent() && id === sequence.current) {
+        setError(true);
+        setFailure(cause);
+      }
     } finally {
-      if (id === sequence.current) setLoading(false);
+      if (scope.isCurrent() && id === sequence.current) setLoading(false);
     }
-  }, [path]);
+  }, [path, scope]);
   useEffect(() => {
+    const pendingSequence = sequence;
     void load();
     return () => {
-      ++sequence.current;
+      ++pendingSequence.current;
     };
   }, [load]);
-  return { data, loading, error, observedAt, load };
+  return resolvedPath === path
+    ? { data, loading, error, failure, observedAt, load }
+    : { data: null, loading: !!path, error: false, failure: null, observedAt: null, load };
 }
 export function WorkspacePanel({
   title,

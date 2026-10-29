@@ -5,6 +5,7 @@ import {
   TaxonomyRefresh,
 } from '../components/academic-taxonomy/TaxonomyWorkspaceUI';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 import { useAdministrationDraftGuard } from '../features/reference-data/useAdministrationDraftGuard';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { AcademicTaxonomyOperationsWorkspace } from '../components/academic-taxonomy/AcademicTaxonomyOperationsWorkspace';
@@ -53,6 +54,7 @@ export function AcademicTaxonomyAdminPage() {
   )
     ? (requestedView as MainTab)
     : 'taxonomy';
+  const owner = useOwnerOperationScope(activeMainTab);
   const setActiveMainTab = (view: MainTab) => {
     const next = new URLSearchParams(viewParams);
     next.set('view', view);
@@ -115,6 +117,11 @@ export function AcademicTaxonomyAdminPage() {
   });
 
   const mutationLock = useRef(false);
+  useEffect(() => {
+    mutationLock.current = false;
+    setSavingNode(false);
+    setSavingDegree(false);
+  }, [owner]);
   useAdministrationDraftGuard(showAddNodeModal || Boolean(editingDegree), isAr);
   const visibleDegrees = degreeLevels
     .filter(
@@ -133,6 +140,7 @@ export function AcademicTaxonomyAdminPage() {
 
   // --- Fetch Taxonomy Nodes ---
   const fetchNodes = useCallback(async () => {
+    if (!owner.isCurrent()) return;
     nodeReadAbort.current?.abort();
     const abort = new AbortController();
     nodeReadAbort.current = abort;
@@ -199,10 +207,11 @@ export function AcademicTaxonomyAdminPage() {
     } finally {
       if (!abort.signal.aborted) setLoadingNodes(false);
     }
-  }, [filters, page, searchQuery, localReadOnly, isAr]);
+  }, [filters, page, searchQuery, localReadOnly, isAr, owner]);
 
   // --- Fetch Degree Levels ---
   const fetchDegreeLevels = useCallback(async () => {
+    if (!owner.isCurrent()) return;
     degreeReadAbort.current?.abort();
     const abort = new AbortController();
     degreeReadAbort.current = abort;
@@ -232,7 +241,7 @@ export function AcademicTaxonomyAdminPage() {
     } finally {
       if (!abort.signal.aborted) setLoadingDegrees(false);
     }
-  }, [localReadOnly, isAr]);
+  }, [localReadOnly, isAr, owner]);
 
   useEffect(() => {
     if (activeMainTab === 'taxonomy') {
@@ -274,6 +283,7 @@ export function AcademicTaxonomyAdminPage() {
         method: 'PUT',
         body: JSON.stringify(payload),
       });
+      if (!owner.isCurrent()) return;
 
       setShowAddNodeModal(false);
       // Reset form
@@ -290,6 +300,7 @@ export function AcademicTaxonomyAdminPage() {
       });
       fetchNodes();
     } catch (cause) {
+      if (!owner.isCurrent()) return;
       const err = cause instanceof Error ? cause : new Error('REQUEST_FAILED');
       console.error(err);
       setNodeFormError(
@@ -297,8 +308,10 @@ export function AcademicTaxonomyAdminPage() {
           (isAr ? 'حدث خطأ أثناء حفظ العقدة.' : 'An error occurred while saving the node.'),
       );
     } finally {
-      mutationLock.current = false;
-      setSavingNode(false);
+      if (owner.isCurrent()) {
+        mutationLock.current = false;
+        setSavingNode(false);
+      }
     }
   };
 
@@ -339,10 +352,12 @@ export function AcademicTaxonomyAdminPage() {
           }),
         },
       );
+      if (!owner.isCurrent()) return;
 
       setEditingDegree(null);
       fetchDegreeLevels();
     } catch (cause) {
+      if (!owner.isCurrent()) return;
       const err = cause instanceof Error ? cause : new Error('REQUEST_FAILED');
       console.error(err);
       setDegreeFormError(
@@ -356,8 +371,10 @@ export function AcademicTaxonomyAdminPage() {
                 : 'An error occurred while updating the degree level.'),
       );
     } finally {
-      mutationLock.current = false;
-      setSavingDegree(false);
+      if (owner.isCurrent()) {
+        mutationLock.current = false;
+        setSavingDegree(false);
+      }
     }
   };
 

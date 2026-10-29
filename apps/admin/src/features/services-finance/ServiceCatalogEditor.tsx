@@ -42,6 +42,7 @@ export function ServiceCatalogEditor({
   onChange,
   service,
   busy,
+  verificationPending = false,
   dirty,
   onSubmit,
   onClose,
@@ -52,6 +53,7 @@ export function ServiceCatalogEditor({
   onChange: (draft: ServiceCatalogDraft) => void;
   service: ServiceCatalogItemDto | null;
   busy: boolean;
+  verificationPending?: boolean;
   dirty: boolean;
   onSubmit: (event: FormEvent) => void;
   onClose: () => void;
@@ -161,7 +163,7 @@ export function ServiceCatalogEditor({
             {validation}
           </p>
         )}
-        <fieldset disabled={busy} className="min-w-0">
+        <fieldset disabled={busy || verificationPending} className="min-w-0">
           {section === 'basic' && (
             <div className="sf-form-grid">
               {text('displayName', c('اسم الخدمة بالعربية', 'Arabic service name'))}
@@ -470,7 +472,11 @@ export function ServiceCatalogEditor({
           </button>
           <button type="submit" disabled={busy} className="sf-primary">
             <Save size={15} />
-            {busy ? c('جارٍ الحفظ…', 'Saving…') : c('حفظ المسودة', 'Save draft')}
+            {busy
+              ? c('جارٍ الحفظ…', 'Saving…')
+              : verificationPending
+                ? c('التحقق من الحفظ', 'Verify saved data')
+                : c('حفظ المسودة', 'Save draft')}
           </button>
         </footer>
       </form>

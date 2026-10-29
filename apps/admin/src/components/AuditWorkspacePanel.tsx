@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 interface Row {
   id: string;
   version: number;
@@ -51,6 +52,8 @@ export function AuditWorkspacePanel({
   );
 }
 function WorkspaceForm({ kind, canManage }: { kind: string; canManage: boolean }) {
+  const owner = useOwnerOperationScope(`${kind}:${canManage}`);
+  const locked = useRef(false);
   const { t, language } = useTranslation();
   const { hasPermission } = useAdminAuthorization();
   const [choices, setChoices] = useState<{
@@ -110,6 +113,7 @@ function WorkspaceForm({ kind, canManage }: { kind: string; canManage: boolean }
   const endpoint =
     kind === 'CASE' ? '/cases' : kind === 'ALERT_RULE' ? '/alerts' : '/retention-policy';
   const load = async (next?: string) => {
+    if (!owner.isCurrent()) return;
     const response = await adminApiClient.request<{
       data: Row | null | { items: Row[]; nextCursor: string | null };
     }>(
@@ -119,6 +123,7 @@ function WorkspaceForm({ kind, canManage }: { kind: string; canManage: boolean }
           ? '?limit=25' + (next ? '&cursor=' + encodeURIComponent(next) : '')
           : ''),
     );
+    if (!owner.isCurrent()) return;
     if (kind === 'RETENTION_POLICY') {
       const row = response.data as Row | null;
       setSelected(row);
@@ -167,7 +172,8 @@ function WorkspaceForm({ kind, canManage }: { kind: string; canManage: boolean }
     }
   };
   const save = async () => {
-    if (busy) return;
+    if (locked.current || !owner.isCurrent() || !canManage) return;
+    locked.current = true;
     setBusy(true);
     setError('');
     const signature = JSON.stringify([
@@ -191,13 +197,18 @@ function WorkspaceForm({ kind, canManage }: { kind: string; canManage: boolean }
       enabled,
       durations,
     ]);
-    if (pending.current?.signature !== signature)
-      pending.current = {
-        signature,
-        key: createAdminIdempotencyKey(),
-        id: createAdminIdempotencyKey(),
-        noteId: createAdminIdempotencyKey(),
-      };
+    if (pending.current && pending.current.signature !== signature) {
+      locked.current = false;
+      setBusy(false);
+      setError(t('audit_ws_failed'));
+      return;
+    }
+    pending.current ??= {
+      signature,
+      key: createAdminIdempotencyKey(),
+      id: createAdminIdempotencyKey(),
+      noteId: createAdminIdempotencyKey(),
+    };
     const attempt = pending.current;
     try {
       const refs = references
@@ -257,13 +268,22 @@ function WorkspaceForm({ kind, canManage }: { kind: string; canManage: boolean }
         idempotencyKey: attempt.key,
         body: JSON.stringify(data),
       });
+      if (!owner.isCurrent()) return;
+      if (!result.data || (selected && result.data.id !== selected.id))
+        throw Error('AUDIT_WORKSPACE_IDENTITY_MISMATCH');
       pending.current = null;
       select(result.data);
       await load();
-    } catch {
+    } catch (cause) {
+      if (!owner.isCurrent()) return;
+      if (cause instanceof Error && /^\[(400|401|403|404|409|422|428)\]/.test(cause.message))
+        pending.current = null;
       setError(t('audit_ws_failed'));
     } finally {
-      setBusy(false);
+      if (owner.isCurrent()) {
+        locked.current = false;
+        setBusy(false);
+      }
     }
   };
   const input = (

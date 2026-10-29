@@ -21,6 +21,7 @@ import type { CareerEmployerDto, CareerJobPostingDto } from '@manaratak/domain';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { CanonicalCityPicker } from '../components/CanonicalCityPicker';
 import { canonicalPickerApi } from '../api/canonicalPickers';
@@ -97,6 +98,7 @@ export function CareerAdminPage() {
   if (tab === 'applications' && jobId) query.set('jobId', jobId);
   const endpoint = `/admin/careers/${tab}?${query}`,
     scope = `${endpoint}:${language}:${allowed}:${scopeRequired}`;
+  const owner = useOwnerOperationScope(scope);
   const [list, setList] = useState<{ scope: string; result: CareerPage } | null>(null);
   const [loadState, setLoadState] = useState<{ scope: string; error: boolean } | null>(null);
   const [busy, setBusy] = useState(false),
@@ -176,6 +178,11 @@ export function CareerAdminPage() {
     if (!busy && discard()) clearPanels();
   };
   useEffect(() => {
+    mutation.current = false;
+    intent.current = null;
+    setBusy(false);
+  }, [owner]);
+  useEffect(() => {
     let active = true;
     const details = detailSequence;
     ++details.current;
@@ -190,7 +197,19 @@ export function CareerAdminPage() {
       void adminApiClient
         .request<CareerPage>(endpoint)
         .then((result) => {
-          if (active) {
+          if (active && owner.isCurrent()) {
+            const lastPage = Math.max(1, result.totalPages);
+            if (page > lastPage) {
+              setParams(
+                (previous) => {
+                  const next = new URLSearchParams(previous);
+                  next.set('page', String(lastPage));
+                  return next;
+                },
+                { replace: true },
+              );
+              return;
+            }
             setList({ scope, result });
             setLoadState({ scope, error: false });
           }
@@ -204,7 +223,7 @@ export function CareerAdminPage() {
       active = false;
       ++details.current;
     };
-  }, [endpoint, scope, allowed, scopeRequired, reload]);
+  }, [endpoint, scope, allowed, scopeRequired, reload, owner, page, setParams]);
   const open = async (row: CareerRow, edit = false) => {
     if (busy || !discard()) return;
     clearPanels();
@@ -222,7 +241,13 @@ export function CareerAdminPage() {
                 `/admin/careers/${tab}/${encodeURIComponent(row.id)}`,
               )
             : null;
-      if (request !== detailSequence.current || currentScope.current !== scope) return;
+      if (
+        !owner.isCurrent() ||
+        request !== detailSequence.current ||
+        currentScope.current !== scope
+      )
+        return;
+      if (detail && detail.id !== row.id) throw Error('CAREER_DETAIL_IDENTITY_MISMATCH');
       if (edit && (tab === 'jobs' || tab === 'employers') && hasPermission('admin:careers:author'))
         setEditor({ scope, record: detail as CareerJobPostingDto | CareerEmployerDto });
       else setSelection({ scope, row: detail ?? row, detail });
@@ -239,33 +264,51 @@ export function CareerAdminPage() {
     }
   };
   const write: CareerWrite = async (path, body, reason, method = 'POST') => {
-    if (mutation.current || reason.trim().length < 3) return false;
+    if (!owner.isCurrent() || mutation.current || reason.trim().length < 3) return false;
     mutation.current = true;
     setBusy(true);
     setNotice('');
     const payload = JSON.stringify({ ...body, reason: reason.trim() }),
       identity = path + method + payload;
-    if (intent.current?.identity !== identity)
-      intent.current = { identity, key: createAdminIdempotencyKey() };
+    if (intent.current && intent.current.identity !== identity) {
+      mutation.current = false;
+      setBusy(false);
+      setNotice(
+        c(
+          'نتيجة المحاولة السابقة غير مؤكدة. أعد الطلب نفسه قبل تغييره.',
+          'The previous attempt is uncertain. Retry the same command before editing it.',
+        ),
+      );
+      return false;
+    }
+    intent.current ??= { identity, key: createAdminIdempotencyKey() };
     try {
       await adminApiClient.request(`/admin/careers/${path}`, {
         method,
         body: payload,
         idempotencyKey: intent.current.key,
       });
+      if (!owner.isCurrent()) return false;
       intent.current = null;
       if (currentScope.current === scope) {
         clearPanels();
-        setNotice(c('تم حفظ الإجراء وتحديث القائمة.', 'Action saved and list refreshed.'));
+        setNotice(
+          c('حُفظ الإجراء؛ جارٍ إعادة قراءة القائمة.', 'Action saved; refreshing the list.'),
+        );
         setReload((value) => value + 1);
       }
       return true;
     } catch (error) {
+      if (!owner.isCurrent()) return false;
+      if (error instanceof Error && /^\[(400|401|403|404|409|422|428)\]/.test(error.message))
+        intent.current = null;
       if (currentScope.current === scope) setNotice(careerErrorMessage(error, ar));
       return false;
     } finally {
-      mutation.current = false;
-      setBusy(false);
+      if (owner.isCurrent()) {
+        mutation.current = false;
+        setBusy(false);
+      }
     }
   };
   const tabInfo = [
@@ -331,7 +374,10 @@ export function CareerAdminPage() {
           <p>{descriptions[tab]}</p>
         </div>
       </header>
-      <nav className="career-main-nav admin-section-navigation" aria-label={c('أقسام الوظائف', 'Career sections')}>
+      <nav
+        className="career-main-nav admin-section-navigation"
+        aria-label={c('أقسام الوظائف', 'Career sections')}
+      >
         {tabInfo
           .filter(
             ([value]) =>
@@ -427,7 +473,10 @@ export function CareerAdminPage() {
               </div>
             </header>
             {tab === 'jobs' ? (
-              <nav className="career-subnav admin-section-navigation" aria-label={c('مراحل الفرص', 'Opportunity stages')}>
+              <nav
+                className="career-subnav admin-section-navigation"
+                aria-label={c('مراحل الفرص', 'Opportunity stages')}
+              >
                 {(
                   [
                     ['', c('كل الفرص', 'All opportunities'), Layers],

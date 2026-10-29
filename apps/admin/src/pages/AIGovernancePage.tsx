@@ -6,7 +6,7 @@ import {
   AIRecordContext,
   AIKnowledgeSourceSummary,
 } from '../features/ai-tools/AIRecordContext';
-import '../features/ai-tools/Workspace';
+import { useWorkspaceRead } from '../features/ai-tools/Workspace';
 import { useAICopy, aiStatusLabel } from './AIGovernanceCopy';
 import {
   FormEvent,
@@ -243,7 +243,10 @@ export function AIGovernancePage() {
           })}
         </nav>
         {workspace.tabs.length > 1 && (
-          <nav className="certificate-subnav admin-section-navigation" aria-label={title('تبويبات القسم', 'Section tabs')}>
+          <nav
+            className="certificate-subnav admin-section-navigation"
+            aria-label={title('تبويبات القسم', 'Section tabs')}
+          >
             {sections
               .filter((item) => (workspace.tabs as readonly string[]).includes(item.key))
               .map((item) => (
@@ -305,37 +308,8 @@ export function AIGovernancePage() {
 }
 function useAIData<T>(path: string | null) {
   const { language } = useTranslation();
-  const [data, setData] = useState<T | null>(null);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
-  const sequence = useRef(0);
-  const load = useCallback(async () => {
-    const generation = ++sequence.current;
-    if (!path) {
-      setData(null);
-      setError('');
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setError('');
-    setData(null);
-    try {
-      const value = await adminApiClient.request<T>(path);
-      if (generation === sequence.current) setData(value);
-    } catch (cause) {
-      if (generation === sequence.current) setError(errorMessage(cause, language));
-    } finally {
-      if (generation === sequence.current) setLoading(false);
-    }
-  }, [path, language]);
-  useEffect(() => {
-    void load();
-    return () => {
-      sequence.current += 1;
-    };
-  }, [load]);
-  return { data, error, loading, load };
+  const read = useWorkspaceRead<T>(path);
+  return { ...read, error: read.error ? errorMessage(read.failure, language) : '' };
 }
 const GovernanceGuard = createContext<
   (key: string, state: { dirty: boolean; busy: boolean } | null) => void

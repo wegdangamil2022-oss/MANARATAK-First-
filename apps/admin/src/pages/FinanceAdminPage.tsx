@@ -26,6 +26,7 @@ import {
 import { FinanceTransactionsPanel } from '../features/services-finance/FinanceTransactionsPanel';
 import { FinanceCapabilityPanel } from '../features/services-finance/FinanceCapabilityPanel';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 import { financeMoney } from './financePresentation';
 import { FinanceLedgerPanel } from './FinanceLedgerPanel';
 import { FinanceWalletPanel } from './FinanceWalletPanel';
@@ -98,6 +99,11 @@ export function FinanceAdminPage() {
     mutation = useRef(false);
   const [search, setSearch] = useState(params.get('search') || '');
   const currentQuery = params.toString();
+  const owner = useOwnerOperationScope(`${tab}:${currentQuery}`);
+  useEffect(() => {
+    mutation.current = false;
+    setBusy(false);
+  }, [owner]);
   const commandKey = useRef<{ path: string; key: string } | null>(null);
   const update = useCallback(
     (key: string, value: string) =>
@@ -154,6 +160,7 @@ export function FinanceAdminPage() {
   }, [tab, currentQuery, refresh]);
   const run = async (providers: boolean) => {
     if (
+      !owner.isCurrent() ||
       mutation.current ||
       !window.confirm(t(providers ? 'finance_confirm_provider_scan' : 'finance_confirm_local_scan'))
     )
@@ -170,13 +177,17 @@ export function FinanceAdminPage() {
         idempotencyKey: commandKey.current.key,
         body: JSON.stringify(providers ? { limit: 20 } : {}),
       });
+      if (!owner.isCurrent()) return;
       commandKey.current = null;
       setRefresh((n) => n + 1);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t('finance_load_failed'));
+      if (owner.isCurrent())
+        setError(cause instanceof Error ? cause.message : t('finance_load_failed'));
     } finally {
-      mutation.current = false;
-      setBusy(false);
+      if (owner.isCurrent()) {
+        mutation.current = false;
+        setBusy(false);
+      }
     }
   };
   const page: Page | null = listTabs.has(tab) ? data : null;

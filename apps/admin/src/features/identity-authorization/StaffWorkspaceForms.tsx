@@ -68,7 +68,7 @@ export function StaffDraftForm({
             new URLSearchParams({ type: 'Human', limit: '20', search: appliedSearch })
         : null,
     );
-  const command = useStaffCommand(() => onSaved(id)),
+  const command = useStaffCommand(() => onSaved(id), id),
     dirty =
       !!(name || email || department || title || starts || ends || reason || identity) ||
       kind !== 'EMPLOYEE';
@@ -329,10 +329,13 @@ export function StaffOrganization({ onDirtyChange }: { onDirtyChange: (dirty: bo
     setReason('');
     setId(createAdminIdempotencyKey());
   };
-  const command = useStaffCommand(() => {
-    reset();
-    structure.reload();
-  });
+  const command = useStaffCommand(
+    () => {
+      reset();
+      structure.reload();
+    },
+    section + ':' + id,
+  );
   const discard = () => !dirty || window.confirm(c('ترك التغييرات؟', 'Discard changes?'));
   return (
     <OwnerPanel

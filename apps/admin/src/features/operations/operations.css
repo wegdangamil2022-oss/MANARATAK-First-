@@ -4,11 +4,19 @@
 }
 .operations-workspace {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   min-width: 0;
   color: #203442;
   font-size: 13px;
   line-height: 1.8;
+}
+.operations-workspace > *,
+.operations-heading > *,
+.operations-actions > * {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .operations-workspace :is(button, input, textarea, select, a, label, td, p) {
   font-size: 13px;

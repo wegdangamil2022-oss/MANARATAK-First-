@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 
 export function AIConfigurationOperations({
   resource,
@@ -22,6 +23,16 @@ export function AIConfigurationOperations({
   const [result, setResult] = useState<unknown>(null);
   const [error, setError] = useState('');
   const lock = useRef(false);
+  const owner = useOwnerOperationScope(`${resource}:${record.key}`);
+  useEffect(() => {
+    lock.current = false;
+    setBusy(false);
+    setResult(null);
+    setRevision('');
+    setError('');
+    setReason('');
+    setIncident('');
+  }, [owner]);
   if (
     !['guardrails', 'routingPolicies', 'consumers', 'evaluations', 'platformSettings'].includes(
       resource,
@@ -35,7 +46,7 @@ export function AIConfigurationOperations({
         ? 'admin:ai:cost:manage'
         : 'admin:ai:configure';
   async function act(action: 'STAGE' | 'APPROVE' | 'ACTIVATE' | 'ROLLBACK') {
-    if (lock.current || !reason.trim()) return;
+    if (lock.current || !owner.isCurrent() || !reason.trim()) return;
     const permission =
       action === 'APPROVE'
         ? 'admin:ai:prompt:review'
@@ -61,39 +72,45 @@ export function AIConfigurationOperations({
           }),
         },
       );
+      if (!owner.isCurrent()) return;
       setResult(response);
       setRevision(String(response.revisionKey));
     } catch (cause) {
+      if (!owner.isCurrent()) return;
       setError(
         cause instanceof Error
           ? cause.message
           : text('تعذر إكمال العملية.', 'The operation failed.'),
       );
     } finally {
-      lock.current = false;
-      setBusy(false);
+      if (owner.isCurrent()) {
+        lock.current = false;
+        setBusy(false);
+      }
     }
   }
   async function load() {
-    if (lock.current) return;
+    if (lock.current || !owner.isCurrent()) return;
     lock.current = true;
     setBusy(true);
     setError('');
     try {
-      setResult(
-        await adminApiClient.request(
-          `/admin/ai/configuration/${resource}/${encodeURIComponent(record.key)}/revisions`,
-        ),
+      const result = await adminApiClient.request(
+        `/admin/ai/configuration/${resource}/${encodeURIComponent(record.key)}/revisions`,
       );
+      if (owner.isCurrent()) setResult(result);
     } catch (cause) {
+      if (!owner.isCurrent()) return;
       setError(
         cause instanceof Error
           ? cause.message
           : text('تعذر تحميل المراجعات.', 'Could not load revisions.'),
       );
     } finally {
-      lock.current = false;
-      setBusy(false);
+      if (owner.isCurrent()) {
+        lock.current = false;
+        setBusy(false);
+      }
     }
   }
   return (

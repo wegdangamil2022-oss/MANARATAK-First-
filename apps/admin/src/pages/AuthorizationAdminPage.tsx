@@ -5,6 +5,7 @@ import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
 import { useTranslation } from '../i18n/I18nProvider';
 import { Link } from 'react-router-dom';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 import { AuthorizationIdentityPicker } from '../components/AuthorizationIdentityPicker';
 import { AuthorizationPermissionCatalog } from '../components/AuthorizationPermissionCatalog';
 import { AuthorizationPolicyPanel } from '../components/AuthorizationPolicyPanel';
@@ -72,6 +73,7 @@ interface EmergencyGrantDto {
 type Envelope<T> = { data?: T };
 
 export function AuthorizationAdminPage() {
+  const owner = useOwnerOperationScope('authorization-workspace');
   const { t, language } = useTranslation();
   const { hasPermission } = useAdminAuthorization();
   const [params, setParams] = useSearchParams();
@@ -259,6 +261,7 @@ export function AuthorizationAdminPage() {
     }
   };
   const load = async () => {
+    if (!owner.isCurrent()) return;
     const request = ++generation.current;
     loadRef.current = true;
     setLoading(true);
@@ -437,7 +440,7 @@ export function AuthorizationAdminPage() {
     complete: () => void,
     approved = false,
   ) => {
-    if (busyRef.current || loadRef.current || !permissionsReady) return;
+    if (!owner.isCurrent() || busyRef.current || loadRef.current || !permissionsReady) return;
     const headers = approved ? approvalHeaders() : {};
     const signature = JSON.stringify([operation, payload, headers]);
     let command = commandKeys.current.get(signature);
@@ -473,6 +476,7 @@ export function AuthorizationAdminPage() {
               body: JSON.stringify(body),
             })
             .then(() => ({ pendingApproval: false }));
+      if (!owner.isCurrent()) return;
       commandKeys.current.delete(signature);
       complete();
       setSuccess(
@@ -484,10 +488,12 @@ export function AuthorizationAdminPage() {
       );
       await load();
     } catch (cause) {
-      setError(message(cause));
+      if (owner.isCurrent()) setError(message(cause));
     } finally {
-      busyRef.current = false;
-      setBusy(false);
+      if (owner.isCurrent()) {
+        busyRef.current = false;
+        setBusy(false);
+      }
     }
   };
   const createRole = async (event: FormEvent) => {

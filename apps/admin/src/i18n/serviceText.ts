@@ -1,5 +1,7 @@
 const english: Record<string, string> = {
-  "تُحفظ ضمن سجل التنفيذ الداخلي للحالة.":"Saved to the internal fulfillment record.",
+  'قُبل الحفظ، لكن تعذرت إعادة القراءة. بقيت المسودة؛ أعد الحفظ للتحقق دون إرسال تغيير جديد.':
+    'Save accepted, but readback failed. Your draft is kept; save again to verify without submitting another change.',
+  'تُحفظ ضمن سجل التنفيذ الداخلي للحالة.': 'Saved to the internal fulfillment record.',
   'طلب جديد': 'New request',
   مقبول: 'Accepted',
   'قيد التنفيذ': 'In progress',

@@ -1,5 +1,5 @@
 export const AI_WORKSPACES = [
-  { key: 'overview', ar: 'الملخص', en: 'Overview', tabs: ['overview'] },
+  { key: 'overview', ar: 'نظرة عامة', en: 'Overview', tabs: ['overview'] },
   {
     key: 'operations',
     ar: 'التنفيذ والمراقبة',

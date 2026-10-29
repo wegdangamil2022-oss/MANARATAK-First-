@@ -27,6 +27,7 @@ import { canonicalPickerApi } from '../../api/canonicalPickers';
 import { CanonicalPicker } from '../../components/CanonicalPicker';
 import { GovernanceDialog } from '../../components/ReferenceGovernancePanel';
 import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../../security/useOwnerOperationScope';
 import { ReferenceDialog } from './ReferenceDialog';
 import {
   referenceDefinitions,
@@ -62,6 +63,8 @@ export function ReferenceRecordWorkspace({
   const definition = referenceDefinitions[collection],
     { hasPermission } = useAdminAuthorization(),
     canManage = hasPermission('admin:reference-data:manage');
+  const owner = useOwnerOperationScope(`${collection}:${canManage}`);
+  const acceptedSave = useRef<string | null>(null);
   const [params, setParams] = useSearchParams(),
     [state, setState] = useState(() => referenceState(params)),
     [view, setView] = useState<'table' | 'cards'>('table');
@@ -192,6 +195,7 @@ export function ReferenceRecordWorkspace({
     [],
   );
   const close = () => {
+    acceptedSave.current = null;
     generation.current++;
     setOpen(false);
     setSelected(null);
@@ -202,35 +206,44 @@ export function ReferenceRecordWorkspace({
     setParams(next, { replace: true });
   };
   const loadRecord = useCallback(
-    async (id: string) => {
+    async (id: string, preserveDraft = false) => {
+      if (!owner.isCurrent()) return null;
       const request = ++generation.current;
       setOpen(true);
-      setCreating(false);
+      if (!preserveDraft) setCreating(false);
       setBusy(true);
       setError('');
       setNotice('');
-      setSelected(null);
-      setForm(referenceForm(null, collection));
-      setGovernanceDirty(false);
-      setEditingGroup('');
+      if (!preserveDraft) {
+        acceptedSave.current = null;
+        setSelected(null);
+        setForm(referenceForm(null, collection));
+        setGovernanceDirty(false);
+        setEditingGroup('');
+      }
       try {
         const row = await referenceDataAdminApi.getRecord<ReferenceRow>(definition.type, id);
-        if (request !== generation.current) return;
+        if (!owner.isCurrent() || request !== generation.current) return null;
         if (row.id !== id) throw Error('REFERENCE_IDENTITY_MISMATCH');
         setSelected(row);
+        setCreating(false);
         setForm(referenceForm(row, collection));
+        setEditingGroup('');
+        acceptedSave.current = null;
         setCountryId(typeof row.countryReferenceId === 'string' ? row.countryReferenceId : null);
         const next = new URLSearchParams(window.location.search);
         next.set('recordId', id);
         setParams(next, { replace: true });
+        return row;
       } catch (cause) {
-        if (request === generation.current)
+        if (owner.isCurrent() && request === generation.current)
           setError(cause instanceof Error ? cause.message : 'REFERENCE_DETAIL_UNAVAILABLE');
+        return null;
       } finally {
-        if (request === generation.current) setBusy(false);
+        if (owner.isCurrent() && request === generation.current) setBusy(false);
       }
     },
-    [collection, definition.type, setParams],
+    [collection, definition.type, setParams, owner],
   );
   useEffect(() => {
     if (initialRecord.current) {
@@ -240,6 +253,7 @@ export function ReferenceRecordWorkspace({
     }
   }, [loadRecord]);
   const add = () => {
+    acceptedSave.current = null;
     setCreating(true);
     setSelected(null);
     setForm(referenceForm(null, collection));
@@ -261,7 +275,12 @@ export function ReferenceRecordWorkspace({
     void loadRecord(selected.id);
   };
   const save = async () => {
-    if (mutation.current || !canManage || (selected && selected.lifecycleState !== 'ACTIVE'))
+    if (
+      !owner.isCurrent() ||
+      mutation.current ||
+      !canManage ||
+      (selected && selected.lifecycleState !== 'ACTIVE')
+    )
       return;
     mutation.current = true;
     setBusy(true);
@@ -271,37 +290,64 @@ export function ReferenceRecordWorkspace({
       const body = referencePayload(collection, form, selected);
       if (supportsCountry && !form.countryIso2Code)
         throw Error(isAr ? 'اختر دولة معتمدة.' : 'Choose a canonical country.');
-      if (collection === 'countries')
-        await referenceDataAdminApi.saveCountry(body as unknown as UpsertReferenceCountryDto);
-      else if (collection === 'currencies')
-        await referenceDataAdminApi.saveCurrency(body as unknown as UpsertReferenceCurrencyDto);
-      else if (collection === 'languages')
-        await referenceDataAdminApi.saveLanguage(body as unknown as UpsertReferenceLanguageDto);
-      else if (collection === 'regions')
-        await referenceDataAdminApi.saveRegion(body as unknown as UpsertAdministrativeRegionDto);
-      else await referenceDataAdminApi.saveCity(body as unknown as UpsertReferenceCityDto);
+      if (!acceptedSave.current) {
+        const saved =
+          collection === 'countries'
+            ? await referenceDataAdminApi.saveCountry(body as unknown as UpsertReferenceCountryDto)
+            : collection === 'currencies'
+              ? await referenceDataAdminApi.saveCurrency(
+                  body as unknown as UpsertReferenceCurrencyDto,
+                )
+              : collection === 'languages'
+                ? await referenceDataAdminApi.saveLanguage(
+                    body as unknown as UpsertReferenceLanguageDto,
+                  )
+                : collection === 'regions'
+                  ? await referenceDataAdminApi.saveRegion(
+                      body as unknown as UpsertAdministrativeRegionDto,
+                    )
+                  : await referenceDataAdminApi.saveCity(body as unknown as UpsertReferenceCityDto);
+        if (!owner.isCurrent()) return;
+        const id =
+          saved && typeof saved === 'object' && 'id' in saved && typeof saved.id === 'string'
+            ? saved.id
+            : null;
+        if (!id || (selected && selected.id !== id))
+          throw Error('REFERENCE_SAVE_IDENTITY_MISMATCH');
+        acceptedSave.current = id;
+      }
+      const persisted = await loadRecord(acceptedSave.current, true);
+      if (!owner.isCurrent()) return;
+      if (!persisted)
+        throw Error(
+          isAr
+            ? 'قُبل الحفظ، لكن إعادة القراءة لم تنجح. أعد التحقق دون إنشاء تغيير جديد.'
+            : 'Save accepted, but readback failed. Retry verification without another change.',
+        );
       setRevision((x) => x + 1);
       setEditingGroup('');
-      if (selected) await loadRecord(selected.id);
-      else {
-        setForm(referenceForm(null, collection));
-        setOpen(false);
-      }
       setNotice(
         isAr
           ? 'تم تأكيد الحفظ من خادم البيانات المرجعية.'
           : 'Save confirmed by the reference owner.',
       );
     } catch (cause) {
+      if (!owner.isCurrent()) return;
       setError(
-        (isAr
-          ? 'لم يتم تأكيد الحفظ؛ بقيت تعديلاتك محفوظة في النموذج. '
-          : 'Save not confirmed; your changes remain in the form. ') +
+        (acceptedSave.current
+          ? isAr
+            ? 'قُبل الحفظ؛ لم تُتحقق القراءة. المسودة محفوظة. '
+            : 'Save accepted; readback unverified. Your draft is kept. '
+          : isAr
+            ? 'لم يتم تأكيد الحفظ؛ بقيت تعديلاتك محفوظة في النموذج. '
+            : 'Save not confirmed; your changes remain in the form. ') +
           (cause instanceof Error ? cause.message : 'SAVE_FAILED'),
       );
     } finally {
-      mutation.current = false;
-      setBusy(false);
+      if (owner.isCurrent()) {
+        mutation.current = false;
+        setBusy(false);
+      }
     }
   };
   const label = (key: string) =>
@@ -316,6 +362,7 @@ export function ReferenceRecordWorkspace({
     const enabled =
       canManage &&
       !busy &&
+      !acceptedSave.current &&
       (!selected || selected.lifecycleState === 'ACTIVE') &&
       (editingGroup === 'all' || editingGroup === f.group) &&
       !(f.immutable && selected);

@@ -18,7 +18,7 @@ const handover: Record<string, { to: string; ar: string; en: string }> = {
   directReports: { to: '/identities?tab=employees', ar: 'المرؤوسون', en: 'Direct reports' },
   review: { to: '/review-queue', ar: 'المراجعات', en: 'Reviews' },
   imports: { to: '/imports', ar: 'الاستيراد', en: 'Imports' },
-  audit: { to: '/audit?tab=cases', ar: 'قضايا التدقيق', en: 'Audit cases' },
+  audit: { to: '/audit?tab=investigations', ar: 'قضايا التدقيق', en: 'Audit cases' },
   support: { to: '/students/support?tab=inbox', ar: 'تذاكر الدعم', en: 'Support cases' },
 };
 const actions: Record<StaffChangeAction, [string, string]> = {
@@ -96,12 +96,15 @@ function LifecycleContent({ mode }: { mode: 'invitations' | 'changes' }) {
       '?limit=20' +
       (cursor ? '&cursor=' + encodeURIComponent(cursor) : ''),
   );
-  const command = useStaffCommand(() => {
-      list.reload();
-      health.reload();
-      members.reload();
-      setReason('');
-    }),
+  const command = useStaffCommand(
+      () => {
+        list.reload();
+        health.reload();
+        members.reload();
+        setReason('');
+      },
+      mode + ':' + memberId,
+    ),
     attempt = useRef<{ id: string; signature: string } | null>(null);
   useEffect(() => {
     const m = health.value?.member;

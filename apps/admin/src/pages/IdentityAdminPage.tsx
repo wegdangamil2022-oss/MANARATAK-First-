@@ -5,6 +5,7 @@ import { IdentityRoleFilter } from '../components/IdentityRoleFilter';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 
 interface IdentityView {
   assignedRoles?: { id: string; name: string }[];
@@ -38,6 +39,7 @@ export function IdentityAdminPage({
   const { t, dir } = useTranslation();
   const { hasPermission } = useAdminAuthorization();
   const { identityId: detailId } = useParams<{ identityId: string }>();
+  const owner = useOwnerOperationScope(detailId ?? 'identity-directory');
   const [urlParams, setUrlParams] = useSearchParams();
   const [creating, setCreating] = useState(false);
   const loadFailed = t('iam_load_failed');
@@ -94,6 +96,11 @@ export function IdentityAdminPage({
   const [reason, setReason] = useState('');
   const command = useRef<{ signature: string; key: string } | null>(null);
   const mutationLock = useRef(false);
+  useEffect(() => {
+    mutationLock.current = false;
+    command.current = null;
+    setBusy(false);
+  }, [owner]);
   const dirty =
     !!selected?.user &&
     (JSON.stringify(profile) !== JSON.stringify(selected.user.profile) ||
@@ -197,11 +204,15 @@ export function IdentityAdminPage({
   }, [detailId, loadFailed]);
 
   const mutate = async (endpoint: string, body: object, method = 'POST') => {
-    if (busy || mutationLock.current) return;
+    if (busy || mutationLock.current || !owner.isCurrent()) return;
     mutationLock.current = true;
     const signature = JSON.stringify([endpoint, method, body]);
-    if (command.current?.signature !== signature)
-      command.current = { signature, key: createAdminIdempotencyKey() };
+    if (command.current && command.current.signature !== signature) {
+      mutationLock.current = false;
+      setError(t('iam_save_failed'));
+      return;
+    }
+    command.current ??= { signature, key: createAdminIdempotencyKey() };
     setBusy(true);
     setError('');
     setNotice('');
@@ -211,6 +222,7 @@ export function IdentityAdminPage({
         body: JSON.stringify(body),
         idempotencyKey: command.current.key,
       });
+      if (!owner.isCurrent()) return;
       command.current = null;
       if (result.data) {
         setSelected(result.data);
@@ -230,10 +242,15 @@ export function IdentityAdminPage({
       setNotice(t('iam_saved'));
       setRefresh((value) => value + 1);
     } catch (failure) {
+      if (!owner.isCurrent()) return;
+      if (failure instanceof Error && /^\[(400|401|403|404|409|422|428)\]/.test(failure.message))
+        command.current = null;
       setError(failure instanceof Error ? failure.message : t('iam_save_failed'));
     } finally {
-      mutationLock.current = false;
-      setBusy(false);
+      if (owner.isCurrent()) {
+        mutationLock.current = false;
+        setBusy(false);
+      }
     }
   };
 

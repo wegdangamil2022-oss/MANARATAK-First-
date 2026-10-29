@@ -1,8 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 export function AccountSecurityPage() {
-  const { t, dir } = useTranslation();
+  const { t, dir, language } = useTranslation();
+  const scope = useOwnerOperationScope('account-security');
+  const lock = useRef(false),
+    readSequence = useRef(0);
+  const [reading, setReading] = useState(true);
   const [state, setState] = useState<{ enabled: boolean; stepUpFresh: boolean } | null>(null);
   const [password, setPassword] = useState(''),
     [code, setCode] = useState(''),
@@ -11,38 +16,76 @@ export function AccountSecurityPage() {
     [error, setError] = useState(''),
     [notice, setNotice] = useState('');
   const command = useRef<{ signature: string; key: string } | null>(null);
-  useEffect(() => {
-    let active = true;
-    adminApiClient
-      .request<{ data: { enabled: boolean; stepUpFresh: boolean } }>('/auth/mfa')
+  const read = useCallback(async () => {
+    const current = ++readSequence.current;
+    setReading(true);
+    setError('');
+    await adminApiClient
+      .request<{ data: { enabled: boolean; stepUpFresh: boolean } }>('/auth/mfa', {
+        cache: 'no-store',
+      })
       .then((result) => {
-        if (active) setState(result.data);
+        if (scope.isCurrent() && current === readSequence.current) {
+          if (
+            typeof result.data?.enabled !== 'boolean' ||
+            typeof result.data?.stepUpFresh !== 'boolean'
+          )
+            throw Error('INVALID_MFA_READ');
+          setState(result.data);
+        }
       })
       .catch(() => {
-        if (active) setError(t('mfa_failed'));
+        if (scope.isCurrent() && current === readSequence.current) {
+          setState(null);
+          setError(t('mfa_failed'));
+        }
+      })
+      .finally(() => {
+        if (scope.isCurrent() && current === readSequence.current) setReading(false);
       });
+  }, [scope, t]);
+  useEffect(() => {
+    const pendingSequence = readSequence;
+    void read();
     return () => {
-      active = false;
+      pendingSequence.current++;
     };
-  }, []);
+  }, [read]);
   const act = async (action: 'enroll' | 'confirm' | 'step-up' | 'disable') => {
-    if (busy || !state) return;
+    if (lock.current || !scope.isCurrent() || !state) return;
+    lock.current = true;
     setBusy(true);
     setError('');
     setNotice('');
     const body =
       action === 'confirm' ? { code } : action === 'enroll' ? { password } : { password, code };
     const signature = JSON.stringify([action, body]);
-    if (command.current?.signature !== signature)
-      command.current = { signature, key: createAdminIdempotencyKey() };
+    if (command.current && command.current.signature !== signature) {
+      lock.current = false;
+      setBusy(false);
+      setError(
+        language === 'ar'
+          ? 'نتيجة المحاولة السابقة غير مؤكدة. أعد المحاولة بالبيانات نفسها أو تحقق من حالة الحساب.'
+          : 'The previous attempt is uncertain. Retry the same request or verify the account state.',
+      );
+      return;
+    }
+    command.current ??= { signature, key: createAdminIdempotencyKey() };
     try {
       const result = await adminApiClient.request<{
-        data: { secret?: string; provisioningUri?: string; loginRequired?: boolean };
+        data: {
+          secret?: string;
+          provisioningUri?: string;
+          loginRequired?: boolean;
+          stepUpFresh?: boolean;
+        };
       }>(`/auth/mfa/${action}`, {
         method: 'POST',
         body: JSON.stringify(body),
         idempotencyKey: command.current.key,
       });
+      if (!scope.isCurrent()) return;
+      if (action === 'step-up' && result.data.stepUpFresh !== true) throw Error('INVALID_MFA_ACK');
       command.current = null;
       setPassword('');
       setCode('');
@@ -57,20 +100,32 @@ export function AccountSecurityPage() {
         setState({ enabled: true, stepUpFresh: true });
         setNotice(t('mfa_fresh'));
       }
-    } catch {
+    } catch (cause) {
+      if (!scope.isCurrent()) return;
+      if (cause instanceof Error && /^\[(400|401|403|404|409|422|428)\]/.test(cause.message))
+        command.current = null;
       setError(t('mfa_failed'));
     } finally {
-      setBusy(false);
+      if (scope.isCurrent()) {
+        lock.current = false;
+        setBusy(false);
+      }
     }
   };
   return (
     <section dir={dir} className="mx-auto max-w-2xl space-y-5 rounded-2xl border bg-white p-6">
-      <header className="admin-page-hero"><h1 className="">{t('mfa_title')}</h1></header>
+      <header className="admin-page-hero">
+        <h1 className="">{t('mfa_title')}</h1>
+      </header>
       <p>{t('mfa_help')}</p>
       {state ? (
         <p>{state.enabled ? t('mfa_enabled') : t('mfa_disabled')}</p>
-      ) : (
+      ) : reading ? (
         <p role="status">{t('iam_loading')}</p>
+      ) : (
+        <button type="button" disabled={busy} onClick={() => void read()}>
+          {language === 'ar' ? 'إعادة تحميل حالة الأمان' : 'Reload security state'}
+        </button>
       )}
       {error && <p role="alert">{error}</p>}
       {notice && <p role="status">{notice}</p>}
@@ -123,7 +178,7 @@ export function AccountSecurityPage() {
         </div>
       )}
       {state?.enabled && (
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-4">
           <button
             type="button"
             disabled={busy || !password || !/^\d{6}$/.test(code)}

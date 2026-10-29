@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from '../../i18n/I18nProvider';
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../../api/client';
+import { useOwnerOperationScope } from '../../security/useOwnerOperationScope';
 import { AssetLifecycleActions } from '../../components/AssetLifecycleActions';
 import {
   AssetLifecycleState,
@@ -60,6 +61,7 @@ export function AssetLibraryWorkspace({
   view?: 'library' | 'processing' | 'relationships' | 'rights' | 'security';
 }) {
   const [params, setParams] = useSearchParams();
+  const scope = useOwnerOperationScope(`${view}:${params.toString()}`);
   const { t, dir } = useTranslation();
   const [items, setItems] = useState<AssetDto[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -77,7 +79,7 @@ export function AssetLibraryWorkspace({
   const detailsGenerationRef = useRef(0);
 
   const inspectDetails = async (assetId: string) => {
-    if (detailsLoadingId) return;
+    if (detailsLoadingId || !scope.isCurrent()) return;
     const generation = ++detailsGenerationRef.current;
     setDetailsLoadingId(assetId);
     setError(null);
@@ -86,18 +88,22 @@ export function AssetLibraryWorkspace({
         `/admin/assets/${encodeURIComponent(assetId)}`,
         { cache: 'no-store' },
       );
-      if (generation === detailsGenerationRef.current) setSelectedAsset(details);
+      if (!scope.isCurrent() || generation !== detailsGenerationRef.current) return;
+      if (details.id !== assetId) throw Error('ASSET_IDENTITY_MISMATCH');
+      setSelectedAsset(details);
     } catch (cause) {
-      if (generation === detailsGenerationRef.current) {
+      if (scope.isCurrent() && generation === detailsGenerationRef.current) {
         setSelectedAsset(null);
         setError(cause instanceof Error ? cause.message : t('asset_text_000'));
       }
     } finally {
-      if (generation === detailsGenerationRef.current) setDetailsLoadingId(null);
+      if (scope.isCurrent() && generation === detailsGenerationRef.current)
+        setDetailsLoadingId(null);
     }
   };
 
   const previewAsset = async (assetId: string, mimeType: string) => {
+    if (!scope.isCurrent()) return;
     if (!['application/pdf', 'image/png', 'image/jpeg', 'image/webp'].includes(mimeType)) {
       setError(t('asset_text_001'));
       return;
@@ -108,6 +114,7 @@ export function AssetLibraryWorkspace({
         `/admin/assets/${encodeURIComponent(assetId)}/delivery-grant`,
         { method: 'POST', body: JSON.stringify({ expiresInSeconds: 120 }) },
       );
+      if (!scope.isCurrent()) return;
       if (grant.headers && Object.keys(grant.headers).length > 0) {
         throw new Error('ASSET_PREVIEW_REQUIRES_SECURE_PROXY');
       }
@@ -126,12 +133,12 @@ export function AssetLibraryWorkspace({
       }
       window.open(link.toString(), '_blank', 'noopener,noreferrer');
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t('asset_text_002'));
+      if (scope.isCurrent()) setError(cause instanceof Error ? cause.message : t('asset_text_002'));
     }
   };
 
   const inspectUsages = async (assetId: string) => {
-    if (usageLoadingId) return;
+    if (usageLoadingId || !scope.isCurrent()) return;
     setUsageLoadingId(assetId);
     setError(null);
     try {
@@ -140,12 +147,15 @@ export function AssetLibraryWorkspace({
         inUse: boolean;
         usages: Array<{ consumer: string; field: string }>;
       }>(`/admin/assets/${encodeURIComponent(assetId)}/usages`, { cache: 'no-store' });
+      if (!scope.isCurrent()) return;
+      if (result.assetId !== assetId) throw Error('ASSET_USAGE_IDENTITY_MISMATCH');
       setUsagePreview(result);
     } catch (cause) {
+      if (!scope.isCurrent()) return;
       setUsagePreview(null);
       setError(cause instanceof Error ? cause.message : t('asset_text_003'));
     } finally {
-      setUsageLoadingId(null);
+      if (scope.isCurrent()) setUsageLoadingId(null);
     }
   };
   const emptyFilters = {
@@ -183,6 +193,7 @@ export function AssetLibraryWorkspace({
   );
 
   const load = async (reset = true, selected = appliedRef.current) => {
+    if (!scope.isCurrent()) return;
     if (!reset && (pagingRef.current || pendingFilters || !cursor || !hasMore)) return;
     const generation = ++generationRef.current;
     pagingRef.current = !reset;
@@ -203,7 +214,7 @@ export function AssetLibraryWorkspace({
       const r = await adminApiClient.request<AssetPage>(`/admin/assets?${p}`, {
         cache: 'no-store',
       });
-      if (generation !== generationRef.current) return;
+      if (!scope.isCurrent() || generation !== generationRef.current) return;
       setItems((prev) => {
         if (reset) return r.items;
         const existing = new Set(prev.map((asset) => asset.id));
@@ -219,10 +230,10 @@ export function AssetLibraryWorkspace({
       setCursor(r.nextCursor);
       setHasMore(r.hasMore);
     } catch (e) {
-      if (generation === generationRef.current)
+      if (scope.isCurrent() && generation === generationRef.current)
         setError(e instanceof Error ? e.message : t('asset_text_004'));
     } finally {
-      if (generation === generationRef.current) {
+      if (scope.isCurrent() && generation === generationRef.current) {
         pagingRef.current = false;
         setLoading(false);
       }
@@ -230,6 +241,10 @@ export function AssetLibraryWorkspace({
   };
 
   useEffect(() => {
+    setSelectedAsset(null);
+    setUsagePreview(null);
+    setDetailsLoadingId(null);
+    setUsageLoadingId(null);
     const next = readFilters();
     setFilters(next);
     setAppliedFilters(next);
