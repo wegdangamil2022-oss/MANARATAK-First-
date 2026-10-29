@@ -10,6 +10,31 @@ import {
 import { isAdministrativeReadQuery } from '../../../../apps/api/src/presentation/security/AdministrativeReadQuery';
 import { reviewWorkspaceQuery } from '../../../../apps/api/src/presentation/api/router/ReviewWorkspaceRouter';
 describe('Review workbench authorization and search contracts', () => {
+  it('batches reviewer eligibility while retaining platform and owner requirements', async () => {
+    const candidates = [{ id: 'owner-only', label: 'Owner', kind: 'person' }, { id: 'platform-only', label: 'Platform', kind: 'person' }, { id: 'both', label: 'Both', kind: 'person' }];
+    const evaluatePermissions = vi.fn(async (actor: string, permissions: readonly string[]) => permissions.map(permission => ({
+      isGranted: actor === 'actor' || actor === 'both' ||
+        (actor === 'owner-only' && permission === 'admin:cms:view') ||
+        (actor === 'platform-only' && permission === 'admin:platform:manage'),
+    })));
+    const uc = new ReviewWorkspaceUseCases({ reviewers: async () => candidates } as unknown as ReviewWorkspaceGateway, { evaluatePermission: vi.fn(), evaluatePermissions } as never);
+    expect(await uc.reviewers('actor', 'cms')).toEqual([candidates[2]]);
+    expect(evaluatePermissions).toHaveBeenCalledTimes(4);
+  });
+  it('uses one fresh permission batch without deriving owner access from platform access', async () => {
+    const list = vi.fn(async () => ({}));
+    const evaluatePermission = vi.fn();
+    const evaluatePermissions = vi.fn(async (_actor: string, permissions: readonly string[]) =>
+      permissions.map(permission => ({ isGranted: ['admin:platform:manage', 'admin:cms:view'].includes(permission) })),
+    );
+    const uc = new ReviewWorkspaceUseCases({ list } as unknown as ReviewWorkspaceGateway, { evaluatePermission, evaluatePermissions } as never);
+    await uc.list('staff', {});
+    expect(list.mock.calls[0][0]).toMatchObject({ domains: ['cms'], imports: false });
+    expect(evaluatePermissions).toHaveBeenCalledTimes(1); expect(evaluatePermission).not.toHaveBeenCalled();
+    evaluatePermissions.mockImplementation(async (_actor, permissions) => permissions.map(() => ({ isGranted: false })));
+    await expect(uc.list('staff', {})).rejects.toThrow('REVIEW_FORBIDDEN');
+    expect(list).toHaveBeenCalledTimes(1);
+  });
   it('normalizes Arabic hamza/diacritics without changing other letters or deleting words', () => {
     expect(normalizeReviewSearch('  إِدارةُ الـمِنَح  ')).toBe('ادارة المنح');
     expect(normalizeReviewSearch('ى أآإ')).toBe('ي ااا');

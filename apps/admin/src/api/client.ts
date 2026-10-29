@@ -1,6 +1,7 @@
 import { CsrfClientManager, reviewReasonHeaders } from '@manaratak/shared';
 import { assertLocalReadOnlyRequestAllowed } from '../security/LocalAdminReadOnlyPolicy';
 import { preservesCmsDraftOnForbidden } from './CmsAuthorizationFailure';
+import { AdminRequestQueue } from './AdminRequestQueue';
 
 const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) || '/api/v1';
 const csrfManager = CsrfClientManager.getInstance(API_BASE_URL);
@@ -100,11 +101,7 @@ export function abortAllPendingAdminRequests(): void {
   globalAbortController = new AbortController();
   inFlightRequests.clear();
   getCache.clear();
-  while (requestQueue.length > 0) {
-    const cancel = requestQueue.shift();
-    if (cancel) cancel(new Error('REQUEST_ABORTED: Admin session invalid or aborted.'));
-  }
-  activeRequestCount = 0;
+  requestSlots.reset();
 }
 
 function waitForAdminAuth(): Promise<boolean> {
@@ -115,34 +112,7 @@ function waitForAdminAuth(): Promise<boolean> {
   });
 }
 
-const MAX_CONCURRENT_REQUESTS = 3;
-let activeRequestCount = 0;
-const requestQueue: Array<(err?: Error) => void> = [];
-
-function acquireRequestSlot(): Promise<void> {
-  if (activeRequestCount < MAX_CONCURRENT_REQUESTS) {
-    activeRequestCount++;
-    return Promise.resolve();
-  }
-  return new Promise<void>((resolve, reject) => {
-    requestQueue.push((err?: Error) => {
-      if (err) {
-        reject(err);
-      } else {
-        activeRequestCount++;
-        resolve();
-      }
-    });
-  });
-}
-
-function releaseRequestSlot(): void {
-  activeRequestCount = Math.max(0, activeRequestCount - 1);
-  if (requestQueue.length > 0) {
-    const next = requestQueue.shift();
-    if (next) next();
-  }
-}
+const requestSlots = new AdminRequestQueue(3);
 
 const inFlightRequests = new Map<string, Promise<any>>();
 const getCache = new Map<string, { data: any; expiresAt: number }>();
@@ -178,7 +148,7 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
       endpoint,
     );
   const coalesce =
-    method === 'GET' && !freshRead && (!isPublicAuthRoute || endpoint.includes('/auth/me'));
+    method === 'GET' && !freshRead && !options.signal && (!isPublicAuthRoute || endpoint.includes('/auth/me'));
 
   if (method === 'GET' && !isPublicAuthRoute) {
     if (rateLimitResetTime > Date.now()) {
@@ -201,11 +171,15 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
     getCache.clear();
   }
 
+  const requestGeneration = sessionGeneration;
+  const signal = options.signal
+    ? AbortSignal.any([options.signal, globalAbortController.signal])
+    : globalAbortController.signal;
   const promise = (async () => {
-    await acquireRequestSlot();
-    const requestGeneration = sessionGeneration;
+    const release = await requestSlots.acquire(signal);
     try {
-      const responseData = await executeRequest<T>(endpoint, options);
+      if (signal.aborted || requestGeneration !== sessionGeneration) throw new Error('REQUEST_ABORTED');
+      const responseData = await executeRequest<T>(endpoint, { ...options, signal });
       if (!isPublicAuthRoute && requestGeneration !== sessionGeneration)
         throw new Error('REQUEST_ABORTED: Admin session changed.');
       if (method === 'GET' && !isPublicAuthRoute && !freshRead) {
@@ -222,15 +196,16 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
       }
       throw error;
     } finally {
-      releaseRequestSlot();
-      if (coalesce) {
-        inFlightRequests.delete(cacheKey);
-      }
+      release();
     }
   })();
 
   if (coalesce) {
     inFlightRequests.set(cacheKey, promise);
+    const remove = () => {
+      if (inFlightRequests.get(cacheKey) === promise) inFlightRequests.delete(cacheKey);
+    };
+    void promise.then(remove, remove);
   }
 
   return promise;

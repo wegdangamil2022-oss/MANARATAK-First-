@@ -62,7 +62,8 @@ export interface ReviewWorkspaceGateway {
 export class ReviewWorkspaceUseCases {
   constructor(
     private readonly gateway: ReviewWorkspaceGateway,
-    private readonly authorization: Pick<AuthorizationEvaluatorService, 'evaluatePermission'>,
+    private readonly authorization: Pick<AuthorizationEvaluatorService, 'evaluatePermission'> &
+      Partial<Pick<AuthorizationEvaluatorService, 'evaluatePermissions'>>,
   ) {}
   private async granted(actorId: string, permission: string, resourceId?: string) {
     return (
@@ -75,6 +76,24 @@ export class ReviewWorkspaceUseCases {
   }
   async access(actorId: string): Promise<ReviewAccess> {
     if (!actorId) throw new Error('REVIEW_AUTH_REQUIRED');
+    if (this.authorization.evaluatePermissions) {
+      const decisions = await this.authorization.evaluatePermissions(
+        actorId,
+        [
+          'admin:platform:manage',
+          ...reviewDomains.map((domain) => reviewOwnerPermissions[domain]),
+          'admin:imports:manage',
+        ],
+        { requestTime: new Date() },
+      );
+      if (!decisions[0]?.isGranted) throw new Error('REVIEW_FORBIDDEN');
+      return {
+        actorId,
+        coordinate: true,
+        domains: reviewDomains.filter((_domain, index) => decisions[index + 1]?.isGranted),
+        imports: decisions[reviewDomains.length + 1]?.isGranted === true,
+      };
+    }
     // Platform access admits the workbench, never grants access to its owners.
     if (!(await this.granted(actorId, 'admin:platform:manage')))
       throw new Error('REVIEW_FORBIDDEN');
@@ -107,19 +126,32 @@ export class ReviewWorkspaceUseCases {
     if (domain && !access.domains.includes(domain)) throw new Error('REVIEW_FORBIDDEN');
     const candidates = await this.gateway.reviewers(access, domain);
     const eligible = await Promise.all(
-      candidates.map(async (candidate) =>
-        candidate.kind === 'team' ||
-        ((await this.granted(candidate.id, 'admin:platform:manage')) &&
+      candidates.map(async (candidate) => {
+        if (candidate.kind === 'team') return candidate;
+        if (this.authorization.evaluatePermissions) {
+          const decisions = await this.authorization.evaluatePermissions(
+            candidate.id,
+            [
+              'admin:platform:manage',
+              ...(domain ? [domain] : access.domains).map((owner) => reviewOwnerPermissions[owner]),
+            ],
+            { requestTime: new Date() },
+          );
+          return decisions[0]?.isGranted && decisions.slice(1).some((row) => row.isGranted)
+            ? candidate
+            : null;
+        }
+        return (await this.granted(candidate.id, 'admin:platform:manage')) &&
           (
             await Promise.all(
               (domain ? [domain] : access.domains).map((owner) =>
                 this.granted(candidate.id, reviewOwnerPermissions[owner]),
               ),
             )
-          ).some(Boolean))
+          ).some(Boolean)
           ? candidate
-          : null,
-      ),
+          : null;
+      }),
     );
     return eligible.filter(
       (candidate): candidate is NonNullable<typeof candidate> => candidate !== null,

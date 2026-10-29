@@ -18,6 +18,47 @@ export class AuthorizationEvaluatorService {
     private readonly dutyEvaluator?: { isAllowed(identityId: string): Promise<boolean> }
   ) {}
 
+  private readers() {
+    return {
+      duty: (id: string) => this.dutyEvaluator?.isAllowed(id) ?? Promise.resolve(true),
+      assignments: (id: string) => this.roleAssignmentRepository.findByIdentityId(id),
+      emergency: (id: string) => this.emergencyAccessRepository?.listActiveRoleIds(id) ?? Promise.resolve([]),
+      role: (id: string) => this.roleRepository.findById(id),
+      policy: (id: string) => this.policyRepository.findById(id),
+    };
+  }
+
+  /** Reuse storage reads only inside this batch; every later call rechecks revocation. */
+  public async evaluatePermissions(
+    identityId: string,
+    permissions: readonly string[],
+    contextAttributes: Record<string, unknown> = {},
+  ): Promise<AccessDecision[]> {
+    const once = <T>(read: (id: string) => Promise<T>) => {
+      const pending = new Map<string, Promise<T>>();
+      return (id: string) => {
+        let value = pending.get(id);
+        if (!value) { value = read(id); pending.set(id, value); }
+        return value;
+      };
+    };
+    const source = this.readers();
+    const reads = {
+      duty: once(source.duty), assignments: once(source.assignments),
+      emergency: once(source.emergency), role: once(source.role), policy: once(source.policy),
+    };
+    return Promise.all(permissions.map((permission) => {
+      const colon = permission.lastIndexOf(':');
+      return this.evaluateWithReads(
+        identityId,
+        new ResourceUrn(colon > 0 ? permission.slice(0, colon) : permission),
+        new Action(colon > 0 ? permission.slice(colon + 1) : '*'),
+        contextAttributes,
+        reads,
+      );
+    }));
+  }
+
   public async describeIdentityAccess(identityId: string, contextAttributes: Record<string, unknown> = {}) {
     const assignments = await this.roleAssignmentRepository.findByIdentityId(identityId);
     const emergencyRoleIds =
@@ -92,14 +133,24 @@ export class AuthorizationEvaluatorService {
     action: Action,
     contextAttributes: Record<string, unknown> = {},
   ): Promise<AccessDecision> {
-    if (this.dutyEvaluator && !await this.dutyEvaluator.isAllowed(identityId))
+    return this.evaluateWithReads(identityId, resourceUrn, action, contextAttributes, this.readers());
+  }
+
+  private async evaluateWithReads(
+    identityId: string,
+    resourceUrn: ResourceUrn,
+    action: Action,
+    contextAttributes: Record<string, unknown>,
+    reads: ReturnType<AuthorizationEvaluatorService['readers']>,
+  ): Promise<AccessDecision> {
+    if (!await reads.duty(identityId))
       return AccessDecision.denied('Separation-of-duties policy denies this access');
     const requiredPermission = new PermissionReference(`${resourceUrn.value}:${action.value}`);
 
     // Fetch all role assignments for identity
-    const assignments = await this.roleAssignmentRepository.findByIdentityId(identityId);
-    const emergencyRoleIds =
-      (await this.emergencyAccessRepository?.listActiveRoleIds(identityId)) ?? [];
+    const [assignments, emergencyRoleIds] = await Promise.all([
+      reads.assignments(identityId), reads.emergency(identityId),
+    ]);
     const roleIds = Array.from(new Set([...assignments.map(assignment => assignment.roleId), ...emergencyRoleIds]));
 
     if (roleIds.length === 0) {
@@ -116,7 +167,7 @@ export class AuthorizationEvaluatorService {
     let failedPolicyReasons: string[] = [];
 
     for (const roleId of roleIds) {
-      const role = await this.roleRepository.findById(roleId);
+      const role = await reads.role(roleId);
       if (!role) continue;
 
       // Check if role has the requested permission
@@ -128,7 +179,7 @@ export class AuthorizationEvaluatorService {
       // If role has permission, check policies attached to role
       let allPoliciesPassed = true;
       for (const policyId of role.policyIds) {
-        const policy = await this.policyRepository.findById(policyId);
+        const policy = await reads.policy(policyId);
         if (!policy) {
           allPoliciesPassed = false;
           failedPolicyReasons.push(`Referenced policy not found: ${policyId}`);

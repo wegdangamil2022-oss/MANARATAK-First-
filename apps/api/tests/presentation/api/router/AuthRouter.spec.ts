@@ -70,6 +70,29 @@ describe('AuthRouter API endpoints', () => {
   });
 
   describe('GET /api/v1/auth/me', () => {
+    it('batches conditional wildcard permissions and applies each policy decision independently', async () => {
+      const evaluatePermission = vi.fn();
+      const evaluatePermissions = vi.fn(async (_actor: string, permissions: string[]) =>
+        permissions.map(permission => ({ isGranted: permission === 'admin:universities:manage' })),
+      );
+      const policyApp = express();
+      policyApp.use('/api/v1/auth', AuthRouter.create({
+        forgotPasswordUseCase: { execute: vi.fn() } as never,
+        resetPasswordUseCase: { execute: vi.fn() } as never,
+        authRateLimitKey: (value: string) => `synthetic-${value.length}`,
+        authService: mockAuthService, identityRepository: mockIdentityRepository,
+        securityService: mockSecurityService, tokenProvider: mockTokenProvider,
+        sessionManager: mockSessionManager, principalAccessValidator: mockPrincipalAccessValidator,
+        roleAssignmentRepository: { findByIdentityId: async () => [{ roleId: 'conditional' }] } as never,
+        roleRepository: { findById: async () => ({ name: 'Conditional admin', permissions: [{ value: 'admin:*' }], policyIds: ['office'] }) } as never,
+        authEvaluatorService: { evaluatePermission, evaluatePermissions } as never,
+      }));
+      const response = await supertest(policyApp).get('/api/v1/auth/me').set('Cookie', 'manaratak_access=access-token');
+      expect(response.status).toBe(200);
+      expect(response.body.data.effectivePermissions).toEqual(['admin:universities:manage']);
+      expect(evaluatePermissions).toHaveBeenCalledTimes(1);
+      expect(evaluatePermission).not.toHaveBeenCalled();
+    });
     it('accepts a protected access cookie tied to an active server session', async () => {
       const response = await supertest(app)
         .get('/api/v1/auth/me')

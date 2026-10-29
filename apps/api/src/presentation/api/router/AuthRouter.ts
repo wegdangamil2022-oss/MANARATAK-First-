@@ -552,6 +552,7 @@ export class AuthRouter {
         const roles: string[] = [];
         const roleNames: string[] = [];
         const effectivePermissions = new Set<string>();
+        const conditionalPermissions = new Set<string>();
 
         if (roleAssignmentRepository && roleRepository) {
           const assignments = await roleAssignmentRepository.findByIdentityId(principalId);
@@ -578,19 +579,29 @@ export class AuthRouter {
                     ? [permVal]
                     : KNOWN_ADMIN_PERMISSIONS.filter((value) => value.startsWith(prefix));
                 for (const candidate of candidates) {
-                  const decision = await cradle.authEvaluatorService.evaluatePermission(
-                    principalId,
-                    candidate,
-                    {
-                      ip: req.ip || req.socket?.remoteAddress || undefined,
-                      requestTime: new Date(),
-                      userAgent: req.headers['user-agent'],
-                      correlationId: req.headers['x-correlation-id'],
-                    },
-                  );
-                  if (decision.isGranted) effectivePermissions.add(candidate);
+                  conditionalPermissions.add(candidate);
                 }
               }
+            }
+          }
+          const candidates = [...conditionalPermissions];
+          const context = {
+            ip: req.ip || req.socket?.remoteAddress || undefined,
+            requestTime: new Date(),
+            userAgent: req.headers['user-agent'],
+            correlationId: req.headers['x-correlation-id'],
+          };
+          if (candidates.length && cradle.authEvaluatorService?.evaluatePermissions) {
+            const decisions = await cradle.authEvaluatorService.evaluatePermissions(principalId, candidates, context);
+            candidates.forEach((candidate, index) => {
+              if (decisions[index]?.isGranted) effectivePermissions.add(candidate);
+            });
+          } else if (cradle.authEvaluatorService) {
+            for (const candidate of candidates) {
+              const decision = await cradle.authEvaluatorService.evaluatePermission(
+                principalId, candidate, context,
+              );
+              if (decision.isGranted) effectivePermissions.add(candidate);
             }
           }
         }
