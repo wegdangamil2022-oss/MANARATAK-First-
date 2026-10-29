@@ -14,6 +14,8 @@ export interface UniversityProgramReferenceV1 {
   studyLanguages?: Array<{id:string;name:string}>;
   status: string;
   publiclyEligible: boolean;
+  /** Owner lifecycle proof for explicit administrative draft linking. */
+  universityStatus?: string;
 }
 /** Every supplied dimension must match the same owner program. */
 export interface PublishedUniversityProgramQueryV1 {

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { ScholarshipImportPayload, ScholarshipEligibilityItemDto } from '@manaratak/domain';
 
-const evidenceSchema = z.object({
+export const scholarshipLanguageEvidenceSchema = z.object({
   policy: z.literal('ALTERNATIVE_EVIDENCE_WITH_EXEMPTIONS_NOT_ALL_REQUIRED'),
   officialSourceUrl: z.string().url(),
   summary: z.string().trim().min(1),
@@ -32,7 +32,7 @@ export function scholarshipImportLanguagePolicy(payload: ScholarshipImportPayloa
 } {
   const evidence = payload.metadata?.conditionalLanguageEvidence;
   if (evidence === undefined) return { present: false, valid: true };
-  const parsed = evidenceSchema.safeParse(evidence);
+  const parsed = scholarshipLanguageEvidenceSchema.safeParse(evidence);
   if (!parsed.success) return { present: true, valid: false };
   const policy = parsed.data;
   const labels = policy.alternatives.map(item => item.sourceLabel);

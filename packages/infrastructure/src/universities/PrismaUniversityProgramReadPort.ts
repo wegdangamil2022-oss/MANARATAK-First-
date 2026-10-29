@@ -56,6 +56,7 @@ export class PrismaUniversityProgramReadPort implements IUniversityProgramReadPo
       contractVersion: 1,
       id: row.id,
       universityId: row.universityId,
+      universityStatus: row.university.status,
       degreeLevelId: row.degreeLevelId,
       majorId: row.majorId,
       canonicalName: row.normalizedName || row.sourceProgramName,

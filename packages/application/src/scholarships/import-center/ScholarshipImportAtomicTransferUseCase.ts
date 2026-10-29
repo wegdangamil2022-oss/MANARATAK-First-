@@ -17,6 +17,7 @@ import {
 import { AtomicDomainMutationCoordinator } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { ScholarshipImportScreeningReader } from './ScholarshipImportScreeningReader';
 import { scholarshipImportLanguagePolicy } from './ScholarshipImportLanguagePolicy';
+import { scholarshipImportSourceReview } from './ScholarshipImportSourceReview';
 import type {
   IScholarshipImportAtomicGateway,
   IScholarshipImportReviewDecisionPort,
@@ -64,6 +65,8 @@ interface CanonicalScreeningRecord {
 }
 
 interface ResolvedDecisionSnapshot {
+  reviewedPayload: ScholarshipImportPayload;
+  sourceReviewValid: boolean;
   verificationState: string;
   verificationDecisionId: string | null;
   verificationRecordedAt: string | null;
@@ -172,7 +175,7 @@ export class ScholarshipImportAtomicTransferUseCase
   async transfer(input: ScholarshipImportTransferRequest): Promise<ScholarshipImportTransferResult> {
     const repository = this.transactionalScholarshipRepository();
 
-    return this.atomicMutations.execute({
+    const outcome = await this.atomicMutations.execute({
       domain: 'SCHOLARSHIPS',
       aggregateType: 'SCHOLARSHIP_IMPORT_RECORD',
       aggregateId: input.recordId,
@@ -196,12 +199,12 @@ export class ScholarshipImportAtomicTransferUseCase
         if (!receipt || receipt.recordId !== record.id || receipt.scholarshipId !== linked.id) {
           throw new Error('SCHOLARSHIP_IMPORT_PROMOTION_LINK_CORRUPT');
         }
-        return {
+        return { replayed: true, value: {
           recordId: record.id,
           scholarshipId: linked.id,
           transferredAt: receipt.transferredAt,
           publicationStatus: linked.publicationStatus ?? ScholarshipPublicationStatus.DRAFT,
-        };
+        } };
       }
 
       const plan = await this.buildPlan(record, batch, scholarshipTx, true);
@@ -255,13 +258,14 @@ export class ScholarshipImportAtomicTransferUseCase
         }),
       });
 
-      return {
+      return { replayed: false, value: {
         recordId: record.id,
         scholarshipId: scholarship.id,
         transferredAt,
         publicationStatus: scholarship.publicationStatus ?? ScholarshipPublicationStatus.DRAFT,
-      };
-    });
+      } };
+    }, result => !result.replayed);
+    return outcome.value;
   }
 
   private async buildPlan(
@@ -270,13 +274,13 @@ export class ScholarshipImportAtomicTransferUseCase
     repository: IScholarshipRepository,
     requireTransferReadiness: boolean,
   ): Promise<TransferPlan> {
-    const parsed = ScholarshipImportPayloadSchema.safeParse(record.rawPayload);
+    const decisionSnapshot = await this.resolvedDecisionSnapshot(record);
+    const parsed = ScholarshipImportPayloadSchema.safeParse(decisionSnapshot.reviewedPayload);
     if (!parsed.success) throw new Error('SCHOLARSHIP_IMPORT_PAYLOAD_INVALID');
     const payload = parsed.data;
     const metadata = this.object(payload.metadata);
     const aliases = this.strings(metadata.sourceAliases);
     const cleanedName = ScholarshipNamingService.clean(payload.scholarshipName, aliases);
-    const decisionSnapshot = await this.resolvedDecisionSnapshot(record);
     const canonical = decisionSnapshot.canonical;
     const providerCanonicalPublicId = this.stringValue(metadata.providerCanonicalPublicId)
       ?? canonical.find((item) =>
@@ -297,6 +301,7 @@ export class ScholarshipImportAtomicTransferUseCase
     }
 
     if (requireTransferReadiness) {
+      if (!decisionSnapshot.sourceReviewValid) throw new Error('SCHOLARSHIP_IMPORT_SOURCE_REVIEW_INVALID');
       if (!scholarshipImportLanguagePolicy(payload).valid) {
         throw new Error('SCHOLARSHIP_IMPORT_LANGUAGE_POLICY_REVIEW_REQUIRED');
       }
@@ -336,6 +341,7 @@ export class ScholarshipImportAtomicTransferUseCase
     }
     const reviewFingerprint = scholarshipImportReviewFingerprint({
       rawPayload: record.rawPayload,
+      decisionSnapshotFingerprint: decisionSnapshot.fingerprint,
       duplicateKey,
       targetScholarshipId: existing?.id ?? null,
     });
@@ -804,7 +810,8 @@ export class ScholarshipImportAtomicTransferUseCase
     const verification = this.verificationDecisions ? await this.verificationDecisions.latest(record.id) : null;
     const decisions = this.canonicalDecisions ? await this.canonicalDecisions.list(record.id) : [];
     const resolved = ScholarshipImportScreeningReader.resolve(record.rawPayload, decisions);
-    const canonical = resolved.entries as CanonicalScreeningRecord[];
+    const sourceReview = scholarshipImportSourceReview(record.rawPayload, verification);
+    const canonical = sourceReview.contextualize(resolved.entries) as CanonicalScreeningRecord[];
     if (canonical.length !== ScholarshipImportScreeningReader.rawEntries(record.rawPayload).length ||
         new Set(resolved.entries.map(item => item.requirementKey)).size !== canonical.length) {
       throw new Error('SCHOLARSHIP_IMPORT_CANONICAL_SCREENING_INVALID');
@@ -815,8 +822,10 @@ export class ScholarshipImportAtomicTransferUseCase
     const verificationRecordedAt = verification?.recordedAt ?? null;
     const fingerprint = scholarshipImportReviewFingerprint({
       verificationState, verificationDecisionId, verificationRecordedAt, canonical, canonicalDecisionIds,
+      reviewedPayload: sourceReview.payload, sourceReviewValid: sourceReview.valid,
     });
-    return { verificationState, verificationDecisionId, verificationRecordedAt, canonical, canonicalDecisionIds, fingerprint };
+    return { verificationState, verificationDecisionId, verificationRecordedAt, canonical, canonicalDecisionIds, fingerprint,
+      reviewedPayload: sourceReview.payload, sourceReviewValid: sourceReview.valid };
   }
 
   private firstResolved(

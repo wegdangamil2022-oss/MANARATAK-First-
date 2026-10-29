@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { IScholarshipRepository, ScholarshipDto } from '@manaratak/domain';
+import { scholarshipImportReviewFingerprint } from '../../src/scholarships/import-center/ScholarshipImportReviewDecisionCodec';
 import {
   ScholarshipImportCenterUseCases,
   appendScholarshipImportReviewDecision,
@@ -116,6 +117,23 @@ function scholarshipRepository(existing: ScholarshipDto | null = null): IScholar
 }
 
 describe('WP12-7 ScholarshipImportCenterUseCases', () => {
+  it('uses the same source-bound reviewed semantics as transfer and rejects a stale source review', async () => {
+    const raw = completePayload({ eligibleMajorsOrFields: ['History'], metadata: { verificationState: 'PENDING', canonicalScreening: [
+      { target: 'COUNTRY', state: 'RESOLVED', rawValue: 'Qatar', canonicalReferenceId: 'country-qa' },
+      { target: 'MAJOR', state: 'UNRESOLVED', rawValue: 'History' },
+    ] } });
+    const local = gateway();
+    local.getRecordById = async () => ({ ...records[0], rawPayload: raw });
+    const decision = { state: 'VERIFIED' as const, decisionId: 'v', recordId: records[0].id, actorId: 'reviewer', reason: 'Official review', recordedAt: '2026-10-29T00:00:00Z', evidence: { sourceReview: {
+      version: 1, rawPayloadFingerprint: scholarshipImportReviewFingerprint(raw), officialSourceUrls: [raw.officialSourceUrl], reason: 'Research context; admission permits any prior degree field.',
+      researchAreas: { classification: 'PROGRAM_RESEARCH_AREAS_NOT_PRIOR_DEGREE_RESTRICTIONS', sourceLabels: ['History'] },
+    } } };
+    const verification = { latest: vi.fn(async () => decision), record: vi.fn(), list: vi.fn() };
+    const service = new ScholarshipImportCenterUseCases(local, scholarshipRepository(), undefined, undefined, undefined, verification);
+    expect(await service.getRecord(records[0].id)).toMatchObject({ readyToTransfer: true, canonical: { state: 'CLEAR' } });
+    raw.coverageDetails = 'Changed after review';
+    expect(await service.getRecord(records[0].id)).toMatchObject({ readyToTransfer: false, reviewReasons: expect.arrayContaining(['SOURCE_REVIEW:INVALID']) });
+  });
   it('separates REAL and TEST records in operational overview counts', async () => {
     const service = new ScholarshipImportCenterUseCases(gateway(), scholarshipRepository());
     const overview = await service.getOverview('REAL');

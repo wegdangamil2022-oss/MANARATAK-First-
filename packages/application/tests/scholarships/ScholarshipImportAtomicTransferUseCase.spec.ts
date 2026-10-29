@@ -12,6 +12,7 @@ import {
   type UpdateScholarshipDto,
 } from '@manaratak/domain';
 import { AtomicDomainMutationCoordinator } from '../../src/event-foundation/use-cases/AtomicDomainMutationCoordinator';
+import { scholarshipImportReviewFingerprint } from '../../src/scholarships/import-center/ScholarshipImportReviewDecisionCodec';
 import {
   ScholarshipImportAtomicTransferUseCase,
   type IScholarshipImportAtomicGateway,
@@ -113,9 +114,11 @@ function setup(existing: ScholarshipDto | null = null) {
       mutation({ boundaryId: 'tx-1', transactionClient: {} } as AtomicPersistenceContext)),
   } as unknown as AtomicDomainMutationCoordinator;
 
-  const service = new ScholarshipImportAtomicTransferUseCase(importGateway, repository, atomicMutations);
+  const verification = { latest: vi.fn(async (): Promise<any> => null), list: vi.fn(), record: vi.fn() };
+  const service = new ScholarshipImportAtomicTransferUseCase(importGateway, repository, atomicMutations, verification);
   return {
     service,
+    verification,
     importGateway,
     repository,
     atomicMutations,
@@ -160,6 +163,29 @@ function existingScholarship(status: ScholarshipStatus = ScholarshipStatus.IMPOR
 }
 
 describe('WP12-10 ScholarshipImportAtomicTransferUseCase', () => {
+  it('transfers a source-bound reviewed research interpretation as draft context, with raw evidence unchanged', async () => {
+    const env = setup();
+    const raw = { ...payload(), eligibleMajorsOrFields: ['History'], metadata: { ...payload().metadata,
+      canonicalScreening: [...payload().metadata.canonicalScreening, { target: 'MAJOR', state: 'UNRESOLVED', rawValue: 'History' }] } };
+    env.getRecord().rawPayload = raw;
+    const original = JSON.stringify(raw);
+    env.verification.latest.mockResolvedValue({ state: 'VERIFIED', decisionId: 'verified-review', recordedAt: '2026-10-29T00:00:00Z', evidence: { sourceReview: {
+      version: 1, rawPayloadFingerprint: scholarshipImportReviewFingerprint(raw), officialSourceUrls: [raw.officialSourceUrl], reason: 'Official prior degree admission permits any field; History is a research area.',
+      researchAreas: { classification: 'PROGRAM_RESEARCH_AREAS_NOT_PRIOR_DEGREE_RESTRICTIONS', sourceLabels: ['History'] }, corrections: { coverageDetails: 'Year two funding requires a further approved application.' },
+    } } });
+    const result = await env.service.transfer({ recordId: 'rec-1', actorId: 'reviewer' });
+    expect(result.publicationStatus).toBe('DRAFT');
+    expect(env.create.mock.calls[0][0]).toMatchObject({ majorTargets: [], metadata: { researchAreas: ['History'], priorDegreeFieldRestriction: false }, coverageDetails: 'Year two funding requires a further approved application.' });
+    expect(JSON.stringify(env.getRecord().rawPayload)).toBe(original);
+    expect(env.getRecord().processingNotes).toContain('verified-review');
+  });
+
+  it('rejects stale reviewed semantics before creating a scholarship', async () => {
+    const env = setup();
+    env.verification.latest.mockResolvedValue({ state: 'VERIFIED', evidence: { sourceReview: { version: 1, rawPayloadFingerprint: '0'.repeat(64), officialSourceUrls: [payload().officialSourceUrl], reason: 'Stale review' } } });
+    await expect(env.service.transfer({ recordId: 'rec-1', actorId: 'reviewer' })).rejects.toThrow('SCHOLARSHIP_IMPORT_SOURCE_REVIEW_INVALID');
+    expect(env.create).not.toHaveBeenCalled();
+  });
   it('transfers conditional evidence as one visible language policy, never as all mandatory tests', async () => {
     const env = setup();
     const source = payload();
@@ -249,6 +275,9 @@ describe('WP12-10 ScholarshipImportAtomicTransferUseCase', () => {
     const first = await env.service.transfer({ recordId: 'rec-1', actorId: 'admin-1' });
     const second = await env.service.transfer({ recordId: 'rec-1', actorId: 'admin-2' });
     expect(second).toEqual(first);
+    const execute = vi.mocked(env.atomicMutations.execute);
+    expect(execute.mock.calls[0][2]?.(await execute.mock.results[0].value)).toBe(true);
+    expect(execute.mock.calls[1][2]?.(await execute.mock.results[1].value)).toBe(false);
     expect(env.create).toHaveBeenCalledTimes(1);
     expect(env.update).not.toHaveBeenCalled();
     env.getScholarship()!.publicationStatus = ScholarshipPublicationStatus.PUBLISHED;

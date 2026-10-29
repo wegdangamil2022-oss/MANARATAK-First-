@@ -38,19 +38,31 @@ describe('PrismaScholarshipCanonicalLookupGateway', () => {
     const results = await new PrismaScholarshipCanonicalLookupGateway(prisma as any).findCandidates('ACADEMIC_PROGRAM', { target: 'ACADEMIC_PROGRAM', canonicalId: 'program-1' });
     expect(prisma.universityAcademicProgram.findMany).toHaveBeenCalledWith(expect.objectContaining({
       where: expect.objectContaining({
-        id: 'program-1',
-        university: { is: {
-          status: 'PUBLISHED',
-          countryReference: { is: { isActive: true, lifecycleState: 'ACTIVE' } },
-          AND: [
-            { OR: [{ regionReferenceId: null }, { regionReference: { is: { isActive: true, lifecycleState: 'ACTIVE' } } }] },
-            { OR: [{ cityReferenceId: null }, { cityReference: { is: { isActive: true, lifecycleState: 'ACTIVE' } } }] },
-          ],
-        } },
+        id: { in: ['program-1'] },
       }),
       take: 501,
     }));
     expect(results[0]).toMatchObject({ id: 'program-1', method: 'EXACT_CANONICAL_ID' });
+  });
+
+  it('allows an explicit draft only in its exact university and degree scope', async () => {
+    const row = { contractVersion: 1 as const, id: 'p', universityId: 'u', universityStatus: 'READY_TO_REVIEW', degreeLevelId: 'master', majorId: null, canonicalName: 'China Studies', displayName: 'China Studies', status: 'DRAFT', publiclyEligible: false };
+    const reads = { findByIds: vi.fn(async () => [row]), findPublished: vi.fn(), withTransaction: vi.fn() };
+    const gateway = new PrismaScholarshipCanonicalLookupGateway(createPrismaMock() as any, reads);
+    const request = { target: 'ACADEMIC_PROGRAM' as const, canonicalId: 'p', universityId: 'u', degreeLevelId: 'master' };
+    expect(await gateway.findCandidates('ACADEMIC_PROGRAM', request)).toMatchObject([{ id: 'p', lifecycle: 'DRAFT', ownerId: 'u' }]);
+    for (const scope of [{ universityId: 'other' }, { degreeLevelId: 'bachelor' }, { universityId: undefined }, { degreeLevelId: undefined }]) {
+      expect(await gateway.findCandidates('ACADEMIC_PROGRAM', { ...request, ...scope })).toEqual([]);
+    }
+    for (const status of ['ARCHIVED', 'REJECTED', 'INACTIVE']) {
+      row.status = status;
+      expect(await gateway.findCandidates('ACADEMIC_PROGRAM', request)).toEqual([]);
+    }
+    row.status = 'DRAFT';
+    row.universityStatus = 'ARCHIVED';
+    expect(await gateway.findCandidates('ACADEMIC_PROGRAM', request)).toEqual([]);
+    expect(reads.findPublished).not.toHaveBeenCalled();
+    expect(row.publiclyEligible).toBe(false);
   });
 
   it('does not resolve AcademicProgram from a free-text name', async () => {

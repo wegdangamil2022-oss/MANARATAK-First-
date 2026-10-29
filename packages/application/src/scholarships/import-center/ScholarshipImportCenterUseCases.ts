@@ -30,6 +30,7 @@ import type {
 import { readScholarshipImportReviewDecision, readScholarshipImportTransferReceipt } from './ScholarshipImportReviewDecisionCodec';
 import { ScholarshipImportScreeningReader } from './ScholarshipImportScreeningReader';
 import { scholarshipImportLanguagePolicy } from './ScholarshipImportLanguagePolicy';
+import { scholarshipImportSourceReview } from './ScholarshipImportSourceReview';
 import type { ScholarshipSourceRegistryService } from '../source-registry/ScholarshipSourceRegistryService';
 
 const OWNER_DOMAIN = 'SCHOLARSHIPS';
@@ -359,7 +360,9 @@ export class ScholarshipImportCenterUseCases {
   ): Promise<ScholarshipImportCenterRecordView> {
     const operationalClass = this.operationalClass(record.rawPayload, batch.sourceSystem);
     const raw = this.object(record.rawPayload);
-    const parsed = ScholarshipImportPayloadSchema.safeParse(raw);
+    const persistedVerification = this.verificationDecisionPort ? await this.verificationDecisionPort.latest(record.id) : null;
+    const sourceReview = scholarshipImportSourceReview(raw, persistedVerification);
+    const parsed = ScholarshipImportPayloadSchema.safeParse(sourceReview.payload);
     const base = {
       id: record.id,
       batchId: record.batchId,
@@ -410,7 +413,7 @@ export class ScholarshipImportCenterUseCases {
     const canonicalDecisions = this.canonicalResolutionDecisionPort
       ? await this.canonicalResolutionDecisionPort.list(record.id)
       : [];
-    const effectiveCanonical = ScholarshipImportScreeningReader.resolve(raw, canonicalDecisions).entries;
+    const effectiveCanonical = sourceReview.contextualize(ScholarshipImportScreeningReader.resolve(raw, canonicalDecisions).entries);
     const providerCanonicalPublicId = this.stringValue(metadata.providerCanonicalPublicId)
       ?? effectiveCanonical.find((item) => item.target === 'PROVIDER_UNIVERSITY' && item.state === 'RESOLVED')?.canonicalPublicId
       ?? null;
@@ -467,12 +470,11 @@ export class ScholarshipImportCenterUseCases {
     const dedupe = Object.keys(persistedDedupe).length && persistedDedupeCurrent
       ? { ...calculatedDedupe, state: (this.stringValue(persistedDedupe.state) as typeof calculatedDedupe.state) ?? calculatedDedupe.state, matches: Array.isArray(persistedDedupe.matches) ? persistedDedupe.matches as typeof calculatedDedupe.matches : calculatedDedupe.matches, requiresReview: typeof persistedDedupe.requiresReview === 'boolean' ? persistedDedupe.requiresReview : calculatedDedupe.requiresReview }
       : calculatedDedupe;
-    const persistedVerification = this.verificationDecisionPort ? await this.verificationDecisionPort.latest(record.id) : null;
     const verification = {
       state: persistedVerification?.state ?? this.verificationState(raw),
       sourceTraceable,
     };
-    const canonical = this.canonicalSummary(raw, canonicalDecisions);
+    const canonical = this.canonicalSummary(raw, canonicalDecisions, persistedVerification);
     const decision = readScholarshipImportReviewDecision(record.processingNotes);
     const mergeDecisionMatches = Boolean(
       existing &&
@@ -485,6 +487,7 @@ export class ScholarshipImportCenterUseCases {
       .filter((reason) => !(mergeDecisionMatches && reason === `DEDUPE:${dedupe.state}`));
     const languagePolicyValid = scholarshipImportLanguagePolicy(parsed.data).valid;
     if (!languagePolicyValid) reviewReasons.push('LANGUAGE_POLICY:REVIEW_REQUIRED');
+    if (!sourceReview.valid) reviewReasons.push('SOURCE_REVIEW:INVALID');
     const dedupeReady = dedupe.state === 'NEW' || (
       (dedupe.state === 'DUPLICATE' || dedupe.state === 'UPDATE') && mergeDecisionMatches
     );
@@ -496,6 +499,7 @@ export class ScholarshipImportCenterUseCases {
       verification.state === 'VERIFIED' &&
       canonical.state === 'CLEAR' &&
       languagePolicyValid &&
+      sourceReview.valid &&
       !base.transferred;
 
     return {
@@ -547,8 +551,8 @@ export class ScholarshipImportCenterUseCases {
     return [...reasons];
   }
 
-  private canonicalSummary(rawPayload: Record<string, unknown>, decisions: Parameters<typeof ScholarshipImportScreeningReader.resolve>[1] = []): ScholarshipImportCenterCanonicalSummary {
-    const raw = ScholarshipImportScreeningReader.resolve(rawPayload, decisions).entries;
+  private canonicalSummary(rawPayload: Record<string, unknown>, decisions: Parameters<typeof ScholarshipImportScreeningReader.resolve>[1] = [], verification?: Parameters<typeof scholarshipImportSourceReview>[1]): ScholarshipImportCenterCanonicalSummary {
+    const raw = scholarshipImportSourceReview(rawPayload, verification).contextualize(ScholarshipImportScreeningReader.resolve(rawPayload, decisions).entries);
     const originalCount = ScholarshipImportScreeningReader.rawEntries(rawPayload).length;
     if (originalCount === 0) {
       return { state: 'NOT_EXECUTED', unresolvedCount: 0, ambiguousCount: 0, reviewRequiredCount: 0 };

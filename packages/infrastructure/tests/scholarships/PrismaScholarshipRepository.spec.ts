@@ -105,6 +105,23 @@ describe('PrismaScholarshipRepository', () => {
     expect(result.benefits?.[0].benefitKey).toBe('tuition');
   });
 
+  it('links a reviewed owner draft only in an atomic draft with a matching resolved degree', async () => {
+    const program = { contractVersion: 1, id: 'p1', universityId: 'u1', universityStatus: 'READY_TO_REVIEW', degreeLevelId: 'master', majorId: null, status: 'DRAFT', publiclyEligible: false };
+    programReads.findByIds.mockResolvedValue([program]);
+    const input: any = { publicId: 's', slug: 'draft', canonicalName: 'Draft', displayName: 'Draft', canonicalDedupKey: 'draft', status: 'IMPORTED', publicationStatus: 'DRAFT',
+      degreeTargets: [{ targetKey: 'degree', degreeLevelId: 'master', resolutionStatus: 'RESOLVED' }], universityLinks: [{ linkKey: 'program', academicProgramId: 'p1', resolutionStatus: 'RESOLVED' }] };
+    mockPrisma.scholarship.create.mockImplementation(async ({ data }: any) => ({ ...data, id: 's1', universityLinks: data.universityLinks.create, degreeTargets: [] }));
+    await expect(repository.create(input)).rejects.toThrow('SCHOLARSHIP_ACADEMIC_PROGRAM_NOT_PUBLISHED');
+    const bound = new PrismaScholarshipRepository(mockPrisma, true, programReads);
+    await bound.create(input);
+    expect(mockPrisma.scholarship.create.mock.calls[0][0].data.universityLinks.create[0]).toMatchObject({ academicProgramId: 'p1', universityId: 'u1' });
+    for (const change of [{ publicationStatus: 'PUBLISHED' }, { degreeTargets: [] }, { universityLinks: [{ linkKey: 'program', academicProgramId: 'p1', universityId: 'wrong' }] }]) {
+      await expect(bound.create({ ...input, ...change })).rejects.toThrow();
+    }
+    program.universityStatus = 'ARCHIVED';
+    await expect(bound.create(input)).rejects.toThrow('SCHOLARSHIP_ACADEMIC_PROGRAM_NOT_PUBLISHED');
+  });
+
   it('does not flatten arbitrary optionalFields keys into the domain DTO root', async () => {
     mockPrisma.scholarship.findUnique.mockResolvedValue({
       id: 'db-id-123',

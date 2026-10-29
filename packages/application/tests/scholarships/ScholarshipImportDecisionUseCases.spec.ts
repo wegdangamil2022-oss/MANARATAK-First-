@@ -13,6 +13,25 @@ function setup(record: any = scholarshipRecord, dataType = 'SCHOLARSHIPS') {
 describe('ScholarshipImportDecisionUseCases', () => {
   it('rejects unknown and non-Scholarship records before verification persistence', async () => { const missing = setup(null); await expect(missing.useCases.recordVerification({ recordId: 'missing', state: 'VERIFIED', actorId: 'a', reason: 'r' })).rejects.toThrow('SCHOLARSHIP_IMPORT_RECORD_NOT_FOUND'); expect(missing.verification.record).not.toHaveBeenCalled(); const wrong = setup(scholarshipRecord, 'COURSES'); await expect(wrong.useCases.recordVerification({ recordId: 'record-1', state: 'VERIFIED', actorId: 'a', reason: 'r' })).rejects.toThrow('SCHOLARSHIP_IMPORT_RECORD_NOT_IN_SCHOLARSHIP_BATCH'); });
   it('writes a verified Scholarship decision', async () => { const env = setup(); await env.useCases.recordVerification({ recordId: 'record-1', state: 'VERIFIED', actorId: 'a', reason: 'official' }); expect(env.verification.record).toHaveBeenCalledOnce(); });
+  it('rejects malformed source interpretation before durable verification', async () => {
+    const env = setup();
+    await expect(env.useCases.recordVerification({ recordId: 'record-1', state: 'VERIFIED', actorId: 'a', reason: 'official', evidence: { sourceReview: { version: 1 } } })).rejects.toThrow('SCHOLARSHIP_IMPORT_SOURCE_REVIEW_INVALID');
+    expect(env.verification.record).not.toHaveBeenCalled();
+  });
+  it('binds a program review to the one reviewed university and degree', async () => {
+    const record = { ...scholarshipRecord, rawPayload: { _domainHandoff: { canonicalScreening: [
+      { target: 'UNIVERSITY', state: 'RESOLVED', rawValue: 'University', canonicalReferenceId: 'u1' },
+      { target: 'DEGREE_LEVEL', state: 'RESOLVED', rawValue: 'MASTER', canonicalReferenceId: 'master' },
+      { target: 'ACADEMIC_PROGRAM', state: 'UNRESOLVED', rawValue: 'China Studies' },
+    ] } } };
+    const env = setup(record); env.canonical.list.mockResolvedValue([]);
+    env.resolver.resolve.mockResolvedValue({ state: 'RESOLVED', canonicalReferenceId: 'p1' });
+    const input = { recordId: record.id, fieldOrRequirementKey: 'ACADEMIC_PROGRAM', canonicalEntityType: 'ACADEMIC_PROGRAM', canonicalId: 'p1', rawValue: 'China Studies', resolutionType: 'RESOLVED' as const, actorId: 'reviewer' };
+    await env.useCases.recordCanonical(input);
+    expect(env.resolver.resolve).toHaveBeenCalledWith({ target: 'ACADEMIC_PROGRAM', canonicalId: 'p1', rawValue: 'China Studies', universityId: 'u1', degreeLevelId: 'master' });
+    record.rawPayload._domainHandoff.canonicalScreening[0].state = 'UNRESOLVED';
+    await expect(env.useCases.recordCanonical(input)).rejects.toThrow('SCHOLARSHIP_CANONICAL_PROGRAM_OWNER_SCOPE_REQUIRED');
+  });
   it('persists the resolved owning-table id when a public university identity was reviewed', async () => {
     const record = { ...scholarshipRecord, rawPayload: { _domainHandoff: { canonicalScreening: [{ target: 'PROVIDER_UNIVERSITY', rawValue: 'Yenching Academy of Peking University', state: 'REVIEW_REQUIRED' }] } } };
     const env = setup(record);

@@ -81,7 +81,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       universityId?: string | null;
       resolutionStatus?: string;
     },
-  >(links: T[]): Promise<T[]> {
+  >(links: T[], draftDegreeIds?: string[]): Promise<T[]> {
     const ids = [
       ...new Set(
         links.map((link) => link.academicProgramId).filter((id): id is string => Boolean(id)),
@@ -93,7 +93,10 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       if (!link.academicProgramId) return link;
       const program = rows.find((row) => row.id === link.academicProgramId);
       if (!program) throw new Error('SCHOLARSHIP_ACADEMIC_PROGRAM_NOT_FOUND');
-      if (program.contractVersion !== 1 || !program.publiclyEligible) throw new Error('SCHOLARSHIP_ACADEMIC_PROGRAM_NOT_PUBLISHED');
+      const draftAllowed = this.transactionBound && draftDegreeIds?.includes(program.degreeLevelId ?? '') &&
+        ['DRAFT', 'ACTIVE'].includes(program.status) &&
+        ['IMPORTED', 'READY_TO_REVIEW', 'NEEDS_REVIEW', 'READY_TO_PUBLISH', 'PUBLISHED'].includes(program.universityStatus ?? '');
+      if (program.contractVersion !== 1 || (!program.publiclyEligible && !draftAllowed)) throw new Error('SCHOLARSHIP_ACADEMIC_PROGRAM_NOT_PUBLISHED');
       const universityId = assertUniversityProgramParent(link.universityId, {
         id: program.id,
         ownerId: program.universityId,
@@ -161,7 +164,10 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
 
   async create(data: CreateScholarshipDto): Promise<ScholarshipDto> {
     if (data.universityLinks)
-      data = { ...data, universityLinks: await this.normalizeProgramParents(data.universityLinks) };
+      data = { ...data, universityLinks: await this.normalizeProgramParents(data.universityLinks,
+        (data.publicationStatus ?? ScholarshipPublicationStatus.DRAFT) === ScholarshipPublicationStatus.DRAFT &&
+        ![ScholarshipStatus.ARCHIVED, ScholarshipStatus.REJECTED, ScholarshipStatus.PUBLISHED].includes(data.status)
+          ? (data.degreeTargets ?? []).filter(target => target.resolutionStatus === 'RESOLVED').map(target => target.degreeLevelId ?? '') : undefined) };
     const legacyCompatibility = this.buildLegacyCompatibility(data.optionalFields, data);
     const createData = {
       publicId: data.publicId,
@@ -226,19 +232,19 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   }
 
   async update(id: string, updates: ScholarshipRepositoryUpdateDto): Promise<ScholarshipDto> {
-    if (updates.universityLinks)
-      updates = {
-        ...updates,
-        universityLinks: await this.normalizeProgramParents(updates.universityLinks),
-      };
     const structural = this.hasStructuralChanges(updates);
     if (!this.transactionBound) throw new Error('SCHOLARSHIP_ATOMIC_TRANSACTION_REQUIRED');
     await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM "Scholarship" WHERE "id" = ${id} FOR UPDATE`);
-    const existing = await this.prisma.scholarship.findUnique({ where: { id } });
+    const existing = await this.prisma.scholarship.findUnique({ where: { id }, include: { degreeTargets: true } });
     if (!existing) {
       throw new Error(`SCHOLARSHIP_NOT_FOUND:${id}`);
     }
     if (existing.publicationStatus !== ScholarshipPublicationStatus.DRAFT || [ScholarshipStatus.ARCHIVED, ScholarshipStatus.REJECTED].includes(existing.status as ScholarshipStatus)) throw new Error('SCHOLARSHIP_NON_EDITABLE_STATUS');
+    if (updates.universityLinks) updates = { ...updates,
+      universityLinks: await this.normalizeProgramParents(updates.universityLinks,
+        (updates.publicationStatus ?? existing.publicationStatus) === ScholarshipPublicationStatus.DRAFT
+          ? (updates.degreeTargets ?? existing.degreeTargets ?? []).filter(target => target.resolutionStatus === 'RESOLVED').map(target => target.degreeLevelId ?? '') : undefined),
+    };
 
     const legacyCompatibility = this.buildLegacyCompatibility(
       this.asOptionalRecord(existing.optionalFields),

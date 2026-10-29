@@ -49,12 +49,15 @@ export class PrismaScholarshipCanonicalLookupGateway
     request: ScholarshipCanonicalResolutionRequest,
   ): Promise<ScholarshipCanonicalCandidate[]> {
     if (!request.canonicalId) return [];
-    const records = await this.programReads.findPublished({
-      academicProgramId: request.canonicalId,
-      universityId: request.universityId ?? undefined,
-      degreeLevelId: request.degreeLevelId ?? undefined,
-    });
-    const record = records.find(row => row.id === request.canonicalId);
+    // Explicit owner review can link a draft without making it publicly eligible.
+    // Public discovery continues to use the owner's findPublished contract.
+    const records = await this.programReads.findByIds([request.canonicalId]);
+    const record = records.find(row => row.id === request.canonicalId &&
+      ['DRAFT', 'ACTIVE'].includes(row.status) &&
+      (!request.universityId || row.universityId === request.universityId) &&
+      (!request.degreeLevelId || row.degreeLevelId === request.degreeLevelId) &&
+      (row.publiclyEligible || Boolean(request.universityId && request.degreeLevelId &&
+        ['IMPORTED', 'READY_TO_REVIEW', 'NEEDS_REVIEW', 'READY_TO_PUBLISH', 'PUBLISHED'].includes(row.universityStatus ?? ''))));
     return record ? [{
       target: 'ACADEMIC_PROGRAM',
       id: record.id,

@@ -1,5 +1,6 @@
 import type { ScholarshipCanonicalResolutionService } from '../resolution';
 import { ScholarshipImportScreeningReader } from './ScholarshipImportScreeningReader';
+import { scholarshipImportSourceReview } from './ScholarshipImportSourceReview';
 import type {
   IScholarshipImportCanonicalResolutionDecisionPort,
   IScholarshipImportCenterGateway,
@@ -18,7 +19,10 @@ export class ScholarshipImportDecisionUseCases {
   ) {}
 
   async recordVerification(input: ScholarshipImportVerificationDecision) {
-    await this.assertScholarshipRecord(input.recordId);
+    const record = await this.assertScholarshipRecord(input.recordId);
+    if (!scholarshipImportSourceReview(record.rawPayload, input).valid) {
+      throw new Error('SCHOLARSHIP_IMPORT_SOURCE_REVIEW_INVALID');
+    }
     return this.verification.record(input);
   }
 
@@ -35,7 +39,17 @@ export class ScholarshipImportDecisionUseCases {
       if (target !== 'PROVIDER_UNIVERSITY' || payload.providerIsUniversity !== false) throw new Error('SCHOLARSHIP_CANONICAL_NOT_APPLICABLE_NOT_ALLOWED');
     }
     if (input.resolutionType === 'RESOLVED') {
-      const result = await this.resolver.resolve({ target: input.canonicalEntityType as never, rawValue: input.rawValue, canonicalId: input.canonicalId });
+      const scope: { universityId?: string; degreeLevelId?: string } = {};
+      if (target === 'ACADEMIC_PROGRAM') {
+        const effective = ScholarshipImportScreeningReader.resolve(record.rawPayload, await this.canonical.list(input.recordId)).entries;
+        const ids = (targets: string[]) => [...new Set(effective.filter(entry => targets.includes(entry.target) && entry.state === 'RESOLVED').map(entry => entry.canonicalReferenceId).filter((id): id is string => Boolean(id)))];
+        const universities = ids(['UNIVERSITY']);
+        const degrees = ids(['DEGREE_LEVEL']);
+        if (universities.length !== 1 || degrees.length !== 1) throw new Error('SCHOLARSHIP_CANONICAL_PROGRAM_OWNER_SCOPE_REQUIRED');
+        scope.universityId = universities[0];
+        scope.degreeLevelId = degrees[0];
+      }
+      const result = await this.resolver.resolve({ target: input.canonicalEntityType as never, rawValue: input.rawValue, canonicalId: input.canonicalId, ...scope });
       if (result.state !== 'RESOLVED') throw new Error('SCHOLARSHIP_CANONICAL_RESOLUTION_NOT_EXISTING_OR_AMBIGUOUS');
       // A reviewed INS-* / MJR-* public identity is lookup evidence. The
       // durable decision is consumed as an owning-table foreign key.
