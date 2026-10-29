@@ -585,7 +585,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
 
     if (filters.countOnly) {
       const total = await this.prisma.internationalTest.count({where});
-      return {data:[],total,page,pageSize,totalPages:Math.ceil(total/pageSize)};
+      return { data: [], total, page, limit: pageSize };
     }
     const [data, total, groups] = await Promise.all([
       this.prisma.internationalTest.findMany({

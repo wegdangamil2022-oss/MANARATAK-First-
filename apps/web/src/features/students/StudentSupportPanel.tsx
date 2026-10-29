@@ -209,25 +209,23 @@ export function StudentSupportPanel() {
     setNotice('');
   };
   return (
-    <section className="student-support-panel" style={{ fontFamily: 'Cairo, sans-serif' }}>
+    <section className="font-['Cairo',sans-serif] student-support-panel">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-bold text-[#142B5F]">
           {c('الدعم والمساعدة', 'Support and help')}
         </h2>
         <div className="flex gap-2">
           <button
-            style={{ fontFamily: 'Cairo, sans-serif' }}
             type="button"
             disabled={busy}
             onClick={() => void load()}
-            className="rounded-lg border px-3 py-2 text-sm"
+            className="font-['Cairo',sans-serif] rounded-lg border px-3 py-2 text-sm"
           >
             {c('تحديث', 'Refresh')}
           </button>
           {id ? (
             <button
-              style={{ fontFamily: 'Cairo, sans-serif' }}
-              className="rounded-lg border px-3 py-2 text-sm"
+              className="font-['Cairo',sans-serif] rounded-lg border px-3 py-2 text-sm"
               onClick={() => navigate()}
             >
               {c('جميع تذاكري', 'My cases')}
@@ -235,8 +233,7 @@ export function StudentSupportPanel() {
           ) : (
             ready && (
               <button
-                style={{ fontFamily: 'Cairo, sans-serif' }}
-                className="rounded-lg bg-[#0E7C86] px-3 py-2 text-sm text-white"
+                className="font-['Cairo',sans-serif] rounded-lg bg-[#0E7C86] px-3 py-2 text-sm text-white"
                 onClick={() => setCreating((v) => !v)}
               >
                 {c('طلب مساعدة جديد', 'New support case')}
@@ -265,8 +262,7 @@ export function StudentSupportPanel() {
             'Save outcome unknown; verify before sending again.',
           )}{' '}
           <button
-            style={{ fontFamily: 'Cairo, sans-serif' }}
-            className="rounded-lg border p-2"
+            className="font-['Cairo',sans-serif] rounded-lg border p-2"
             disabled={busy}
             onClick={() => void recover()}
           >
@@ -283,8 +279,7 @@ export function StudentSupportPanel() {
         <div className="mt-4 grid gap-2">
           {items.map((t) => (
             <button
-              style={{ fontFamily: 'Cairo, sans-serif' }}
-              className="flex flex-wrap justify-between gap-3 rounded-xl border bg-white p-3 text-start text-sm"
+              className="font-['Cairo',sans-serif] flex flex-wrap justify-between gap-3 rounded-xl border bg-white p-3 text-start text-sm"
               key={t.id}
               onClick={() => navigate(t.id)}
             >
@@ -309,9 +304,8 @@ export function StudentSupportPanel() {
           )}
           {cursor && (
             <button
-              style={{ fontFamily: 'Cairo, sans-serif' }}
               disabled={busy}
-              className="rounded-lg border p-2 text-sm"
+              className="font-['Cairo',sans-serif] rounded-lg border p-2 text-sm"
               onClick={() => void load(cursor)}
             >
               {c('تحميل المزيد', 'Load more')}
@@ -324,8 +318,7 @@ export function StudentSupportPanel() {
           <h3 className="text-base font-semibold">{record.title}</h3>
           {followup && (
             <button
-              style={{ fontFamily: 'Cairo, sans-serif' }}
-              className="rounded-lg border p-2 text-sm"
+              className="font-['Cairo',sans-serif] rounded-lg border p-2 text-sm"
               onClick={() => {
                 drafts.current.set('new', body);
                 setTitle(c('متابعة: ', 'Follow-up: ') + record.title);
@@ -346,8 +339,7 @@ export function StudentSupportPanel() {
           {!['CLOSED', 'CANCELLED'].includes(record.status) && (
             <div>
               <button
-                style={{ fontFamily: 'Cairo, sans-serif' }}
-                className="rounded-lg border px-3 py-2 text-sm"
+                className="font-['Cairo',sans-serif] rounded-lg border px-3 py-2 text-sm"
                 type="button"
                 disabled={busy || uncertain}
                 onClick={() => setCloseConfirm((v) => !v)}
@@ -356,8 +348,7 @@ export function StudentSupportPanel() {
               </button>
               {closeConfirm && (
                 <button
-                  style={{ fontFamily: 'Cairo, sans-serif' }}
-                  className="ms-2 rounded-lg border px-3 py-2 text-sm"
+                  className="font-['Cairo',sans-serif] ms-2 rounded-lg border px-3 py-2 text-sm"
                   disabled={busy}
                   type="button"
                   onClick={async () => {
@@ -389,9 +380,8 @@ export function StudentSupportPanel() {
           </p>
           {older && (
             <button
-              style={{ fontFamily: 'Cairo, sans-serif' }}
               disabled={busy}
-              className="rounded-lg border p-2 text-sm"
+              className="font-['Cairo',sans-serif] rounded-lg border p-2 text-sm"
               onClick={async () => {
                 setBusy(true);
                 try {
@@ -443,8 +433,7 @@ export function StudentSupportPanel() {
                 <label>
                   {c('العنوان', 'Subject')}
                   <input
-                    style={{ fontFamily: 'Cairo, sans-serif' }}
-                    className="mt-1 block w-full rounded-lg border p-2"
+                    className="font-['Cairo',sans-serif] mt-1 block w-full rounded-lg border p-2"
                     required
                     minLength={3}
                     maxLength={160}
@@ -455,8 +444,7 @@ export function StudentSupportPanel() {
                 <label>
                   {c('موضوع الطلب', 'Category')}
                   <select
-                    style={{ fontFamily: 'Cairo, sans-serif' }}
-                    className="mt-1 block w-full rounded-lg border p-2"
+                    className="font-['Cairo',sans-serif] mt-1 block w-full rounded-lg border p-2"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                   >
@@ -481,8 +469,7 @@ export function StudentSupportPanel() {
             <label>
               {c('رسالتك', 'Your message')}
               <textarea
-                style={{ fontFamily: 'Cairo, sans-serif' }}
-                className="mt-1 block w-full rounded-lg border p-2"
+                className="font-['Cairo',sans-serif] mt-1 block w-full rounded-lg border p-2"
                 required
                 minLength={id ? 1 : 3}
                 maxLength={4000}
@@ -498,9 +485,8 @@ export function StudentSupportPanel() {
               )}
             </p>
             <button
-              style={{ fontFamily: 'Cairo, sans-serif' }}
               disabled={busy || !body.trim()}
-              className="rounded-lg bg-[#0E7C86] px-4 py-2 text-white"
+              className="font-['Cairo',sans-serif] rounded-lg bg-[#0E7C86] px-4 py-2 text-white"
             >
               {c(id ? 'حفظ الرد' : 'إنشاء الطلب', id ? 'Save reply' : 'Create case')}
             </button>

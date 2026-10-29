@@ -23,7 +23,7 @@ function button(text: string) { return tree.root.findAllByType('button').find(no
 
 describe('B06 canonical choices', () => {
   it('keeps bounded navigation and exact selections in compact scholarship filters', async () => {
-    const load = vi.fn(async (_query?: string, page = 1) => page === 1
+    const load = vi.fn(async (_query?: string, page = 1, _cursor?: string, _signal?: AbortSignal) => page === 1
       ? Array.from({ length: 50 }, (_, index) => record(`country-${index}`))
       : [record('country-51')]);
     const change = vi.fn();
@@ -32,7 +32,8 @@ describe('B06 canonical choices', () => {
     expect(tree.root.findAllByType('input')).toHaveLength(0);
     expect(tree.root.findAllByType('button')).toHaveLength(0);
     await act(async () => tree.root.findByType('select').props.onChange({target:{value:'__canonical_more__'}})); await flush();
-    expect(load).toHaveBeenLastCalledWith('', 2, undefined);
+    expect(load).toHaveBeenLastCalledWith('', 2, undefined, expect.any(AbortSignal));
+    expect(load.mock.calls.at(-1)?.[3]?.aborted).toBe(false);
     expect(tree.root.findByType('select').props.value).toBe('country-existing');
     expect(tree.root.findAllByType('option').some(node => node.props.value === 'country-0')).toBe(true);
     expect(tree.root.findAllByType('option').some(node => node.props.value === 'country-51')).toBe(true);
@@ -124,7 +125,7 @@ describe('B06 canonical filters', () => {
 
 describe('B06 shared relationship editor', () => {
   it('saves exact IDs, metadata and independent source labels with the loaded revision', async () => {
-    const detail = { id: 's1', revision: 8, status: 'IMPORTED', displayName: 'Scholarship', studyLanguageReferenceId: 'lang-150', degreeTargets: [{ targetKey: 'degree', degreeLevelId: 'degree-1', sourceLabel: 'Official source degree' }], majorTargets: [{ targetKey: 'major', majorId: 'major-150', sourceLabel: 'Official source major', metadata: { degreeTargetKey: 'degree' } }] };
+    const detail = { id: 's1', revision: 8, status: 'IMPORTED', publicationStatus: 'DRAFT', displayName: 'Scholarship', studyLanguageReferenceId: 'lang-150', degreeTargets: [{ targetKey: 'degree', degreeLevelId: 'degree-1', sourceLabel: 'Official source degree' }], majorTargets: [{ targetKey: 'major', majorId: 'major-150', sourceLabel: 'Official source major', metadata: { degreeTargetKey: 'degree' } }] };
     let revision=8;
     mocks.request.mockImplementation(async (path, options) => {
       if(options?.method==='PUT'){revision=9;return {...detail,revision};}

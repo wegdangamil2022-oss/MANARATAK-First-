@@ -68,6 +68,10 @@ describe('Phase 05 Slice 2: Admin Mutation Audit Hooks', () => {
           } as any,
           authEvaluatorService: {
             evaluatePermission: vi.fn().mockResolvedValue({ isGranted: true }),
+            describeIdentityAccess: vi.fn().mockResolvedValue([{
+              id: 'assigned-university-editor', missing: false, sources: ['ASSIGNMENT'],
+              permissions: ['admin:universities:manage'], policies: [],
+            }]),
           } as any,
           auditRecordRepo: auditRepo,
         }),
@@ -316,22 +320,26 @@ describe('Phase 05 Slice 2: Admin Mutation Audit Hooks', () => {
 
       app = express();
       app.use(express.json());
+      app.use((req, _res, next) => { req.authUserId = 'asset-editor'; next(); });
       app.use(
         '/api/v1/assets',
         AssetPlatformRouter.create({
           ingestAssetUseCase: mockIngestUseCase,
           processAssetLifecycleUseCase: mockLifecycleUseCase,
           auditRecordRepo: auditRepo,
+          assetOwnerChoices: { types: async () => ['UNIVERSITY'], search: async () => [], assert: vi.fn().mockResolvedValue(undefined) },
+          assetRecordRepository: { queryAdmin: vi.fn(), findById: vi.fn().mockResolvedValue({ ownerType: 'UNIVERSITY', classification: 'INTERNAL' }) },
+          apiIdempotencyStore: { begin: vi.fn().mockResolvedValue({ kind: 'STARTED', scopeHash: 'scope', leaseToken: 'lease' }), complete: vi.fn().mockResolvedValue(undefined) } as any,
         }),
       );
     });
 
     it('POST /upload-locator creates audit record', async () => {
-      const res = await request(app).post('/api/v1/assets/upload-locator').send({
+      const res = await request(app).post('/api/v1/assets/upload-locator').set('Idempotency-Key', 'audit-upload-asset-99').send({
         assetId: 'asset-99',
         assetReference: 'ref-99',
         ownerId: 'owner-1',
-        ownerType: 'USER',
+        ownerType: 'UNIVERSITY',
         originalFilename: 'doc.pdf',
         mimeType: 'application/pdf',
         fileExtension: 'pdf',
@@ -344,6 +352,17 @@ describe('Phase 05 Slice 2: Admin Mutation Audit Hooks', () => {
       expect(records.length).toBe(1);
       expect(records[0].getAction().getValue()).toBe('REQUEST_ASSET_UPLOAD');
       expect(records[0].getTarget().getTargetId()).toBe('asset-99');
+    });
+
+    it('rejects private student assets before upload or success audit', async () => {
+      const res = await request(app).post('/api/v1/assets/upload-locator').set('Idempotency-Key', 'private-upload-rejected').send({
+        assetId: 'private-asset', assetReference: 'private-ref', ownerId: 'student-1', ownerType: 'USER',
+        originalFilename: 'cv.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 1024, classification: 'INTERNAL',
+      });
+      expect(res.status).toBe(403);
+      expect(res.body.error).toBe('ASSET_PRIVATE_OWNER_WORKFLOW_REQUIRED');
+      expect(mockIngestUseCase.requestUploadLocator).not.toHaveBeenCalled();
+      expect(getRecords()).toHaveLength(0);
     });
 
     it('POST /:assetId/validate creates audit record', async () => {

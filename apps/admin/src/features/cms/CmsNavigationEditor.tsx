@@ -154,11 +154,7 @@ export function CmsNavigationEditor({
       <fieldset disabled={disabled || !editing}>
         <div className="cms-menu-nodes">
           {nodes.map((node, index) => (
-            <div
-              key={node.id}
-              className="cms-menu-node"
-              style={{ marginInlineStart: Math.min(depth(node), 3) * 14 }}
-            >
+            <div key={node.id} className="cms-menu-node" data-depth={Math.min(depth(node), 3)}>
               <div className="cms-node-heading">
                 <Menu size={17} />
                 <strong>{node.displayText || (ar ? 'رابط جديد' : 'New link')}</strong>

@@ -301,7 +301,23 @@
     "ReviewSourceCheckpoint": "foundation_control_plane",
     "ReviewWorkView": "foundation_control_plane",
     "ReviewSlaPolicy": "foundation_control_plane",
-    "CourseLessonContentBlock": "learning"
+    "CourseLessonContentBlock": "learning",
+    "StaffAdminAccessRecord": "identity",
+    "StaffChangeRequestRecord": "identity",
+    "StaffDepartmentRecord": "identity",
+    "StaffGrantSourceRecord": "identity",
+    "StaffInvitationRecord": "identity",
+    "StaffJobTitleRecord": "identity",
+    "StaffLifecycleEventRecord": "identity",
+    "StaffMembershipRecord": "identity",
+    "StudentSupportCaseLinkRecord": "student",
+    "StudentSupportCaseRecord": "student",
+    "StudentSupportEventRecord": "student",
+    "StudentSupportMacroRecord": "student",
+    "StudentSupportMessageRecord": "student",
+    "StudentSupportPolicyRecord": "student",
+    "StudentSupportTeamMemberRecord": "student",
+    "StudentSupportTeamRecord": "student"
   },
   "adapterPathOwners": {
     "packages/infrastructure/src/reference-data/": "reference",
@@ -336,7 +352,8 @@
     "packages/infrastructure/src/services-platform/PrismaServiceTestDiscoveryLinkRepository.ts": "services",
     "packages/infrastructure/src/dashboard/": "foundation_control_plane",
     "packages/infrastructure/src/services-platform/PrismaManagedApplicationEvidenceGateway.ts": "services",
-    "packages/infrastructure/src/review-workspace/": "foundation_control_plane"
+    "packages/infrastructure/src/review-workspace/": "foundation_control_plane",
+    "packages/infrastructure/src/student-support/": "student"
   },
   "approvedCrossContextReadModels": {
     "packages/infrastructure/src/academic-taxonomy/PrismaAcademicTaxonomyImportGateway.ts": [
@@ -437,6 +454,10 @@
     ],
     "packages/infrastructure/src/background-jobs/PrismaCourseBulkPublicationRepository.ts": [
       "learning",
+      "events"
+    ],
+    "packages/infrastructure/src/student-support/PrismaSupportCaseRepository.ts": [
+      "notifications",
       "events"
     ]
   },
@@ -710,6 +731,30 @@
       "decision": "ADR-028",
       "reason": "Already-applied additive course lesson-block owner migration. Preserve exact SQL bytes and the original database ledger checksum; record ownership outside immutable historical SQL.",
       "reviewReference": "Cumulative admin release review, 2026-10-26; docs/ui/COURSES_NATIVE_AUTHORING_EXECUTION_2026-10-26.md and explicit original activation receipt."
+    },
+    "20261028000100_staff_draft_organization": {
+      "sha256": "e12dc9149a8cc8dbafba91a3c51b972ef52dcc7f108e8aafb624966093c5d926",
+      "owner": "identity",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Register previously committed additive owner tables and their existing canonical identity references. Preserve historical SQL bytes; this metadata reconciliation authorizes no database operation.",
+      "reviewReference": "docs/reviews/IMPORT_CI_UNBLOCKING_2026-10-29.md"
+    },
+    "20261028000200_student_support_cases": {
+      "sha256": "c548e4bfe514635d65aa2a1489e3c586290015512032c6d798b765dc17432787",
+      "owner": "student",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Register previously committed additive owner tables and their existing canonical identity references. Preserve historical SQL bytes; this metadata reconciliation authorizes no database operation.",
+      "reviewReference": "docs/reviews/IMPORT_CI_UNBLOCKING_2026-10-29.md"
+    },
+    "20261028000300_staff_lifecycle": {
+      "sha256": "da575ea3b31980bdb58bb3ff33d82994f843177e6e449f2da3cf83322155eb99",
+      "owner": "identity",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Register previously committed additive owner tables and their existing canonical identity references. Preserve historical SQL bytes; this metadata reconciliation authorizes no database operation.",
+      "reviewReference": "docs/reviews/IMPORT_CI_UNBLOCKING_2026-10-29.md"
     }
   }
 }

@@ -162,7 +162,7 @@ check('MNT-AUD-0011 sanitizer output becomes canonical quarantine locator before
   assetLifecycle.includes('storageGateway.moveToCleanZone(record.locator, record.checksum!.hash)') && !assetLifecycle.includes('dto.cleanBucketName') && !assetLifecycle.includes('dto.cleanPathKey'));
 check('MNT-AUD-0011 client cannot forge sanitizer metadata or clean storage locator and secure delivery route exists',
   assetRouter.includes('const sanitizeAssetSchema = z.object({}).strict()') && assetRouter.includes('const activateAssetSchema = z.object({}).strict()') &&
-  assetRouter.includes("router.post('/:assetId/delivery-grant'") && read('packages/domain/src/asset-platform/aggregates/AssetRecord.ts').includes('ASSET_DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET'));
+  /router\.post\(\s*'\/:assetId\/delivery-grant'\s*,/.test(assetRouter) && read('packages/domain/src/asset-platform/aggregates/AssetRecord.ts').includes('ASSET_DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET'));
 check('MNT-AUD-0011 upload ingestion returns provider-issued upload grant when production storage supports it',
   assetIngest.includes('storageGateway.generateUploadGrant') && /uploadGrant:\s*uploadGrant\s*\?/.test(assetIngest));
 check('MNT-AUD-0011 provider contract/security tests and runtime pending runbook are authored',
@@ -262,7 +262,7 @@ check('MNT-AUD-0034 notification foundation is durable, provider-capable and use
 check('MNT-AUD-0034 approved owner events create notification intents and P23 exposes governed operations',
   notificationOutbox.includes('context.idempotencyKey !== entry.id') && notificationOutbox.includes("entry.domain === 'SERVICES'") &&
   notificationRouter.includes("router.get('/templates'") && notificationRouter.includes("router.get('/intents'") && notificationRouter.includes("/intents/:id/retry") &&
-  notificationAdmin.includes('إدارة الإشعارات') && apiApp.includes("v1Router.use('/notifications', ...protectControlPlane('admin:platform:manage'"));
+  notificationAdmin.includes("<h1>{c('الإشعارات', 'Notifications')}</h1>") && apiApp.includes("v1Router.use('/notifications', ...protectControlPlane('admin:platform:manage'"));
 check('MNT-AUD-0034 notification migration/config/runbook are governed and runtime evidence remains pending',
   notificationMigration.includes('MANARATAK_MIGRATION_OWNER: notifications') &&
   migrationRecovery.migrations['20260907013000_w3_notification_delivery']?.recoveryClass === 'BACKUP_RESTORE_REQUIRED' &&

@@ -41,7 +41,11 @@ describe('Admin session refresh and command retry', () => {
     if (explicitKey) expect(firstHeaders.get('Idempotency-Key')).toBe(explicitKey);
     expect([...retryHeaders]).toEqual([...firstHeaders]);
     expect(retryHeaders.get('X-Correlation-ID')).toBe('trace-1');
-    expect(retry.body).toBe(payload); expect(retry.signal).toBe(controller.signal); expect(retry.credentials).toBe('include');
+    expect(retry.body).toBe(payload); expect(retry.signal).toBe(first.signal); expect(retry.credentials).toBe('include');
+    expect(retry.signal?.aborted).toBe(false);
+    controller.abort();
+    expect(first.signal?.aborted).toBe(true);
+    expect(retry.signal?.aborted).toBe(true);
     expect(security.fetchWithCsrf).toHaveBeenCalledTimes(3);
   });
 

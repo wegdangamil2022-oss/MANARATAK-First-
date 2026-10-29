@@ -295,12 +295,14 @@ export class AuthorizationAdminRouter {
       const reviewer = await verifyMakerChecker(req, actor);
       if (!governanceApprovalUseCases) throw Error('GOVERNANCE_APPROVAL_UNAVAILABLE');
       const id = z.string().trim().min(1).max(120).parse(req.header('x-governance-approval-id'));
-      const payload = await changePayload({
+      const target = authorizationChangeTargetSchema.parse({
         method: req.method,
         path: req.path,
-        body: req.body,
+        body: z.record(z.string(), z.unknown()).parse(req.body),
         changeTicket: reviewer.changeTicket,
       });
+      validateChangeBody(target);
+      const payload = await changePayload(target);
       await governanceApprovalUseCases.assertApproved(
         id,
         payload,

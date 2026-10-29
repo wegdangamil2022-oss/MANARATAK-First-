@@ -1174,6 +1174,70 @@
     "CourseLessonContentBlock": {
       "owner": "learning",
       "required": true
+    },
+    "StaffAdminAccessRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "StaffChangeRequestRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "StaffDepartmentRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "StaffGrantSourceRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "StaffInvitationRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "StaffJobTitleRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "StaffLifecycleEventRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "StaffMembershipRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "StudentSupportCaseLinkRecord": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSupportCaseRecord": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSupportEventRecord": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSupportMacroRecord": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSupportMessageRecord": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSupportPolicyRecord": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSupportTeamMemberRecord": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSupportTeamRecord": {
+      "owner": "student",
+      "required": true
     }
   },
   "consistencyProbes": {

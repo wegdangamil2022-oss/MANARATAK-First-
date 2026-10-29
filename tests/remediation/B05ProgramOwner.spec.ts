@@ -70,6 +70,7 @@ describe('B05 versioned owner program read contract', () => {
         majorLabel: undefined,
         studyLanguages: [],
         status: 'ACTIVE',
+          universityStatus: 'PUBLISHED',
         publiclyEligible: true,
       },
     ]);

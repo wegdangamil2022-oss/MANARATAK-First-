@@ -15,7 +15,11 @@ let tree: ReturnType<typeof create>;
 const asset = { id: 'asset-uuid', reference: 'asset:public-ref', lifecycleState: 'ACTIVE', metadata: { originalFilename: 'logo.png', mimeType: 'image/png' } };
 beforeEach(() => {
   (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
-  vi.useFakeTimers(); vi.stubGlobal('window', { setTimeout, clearTimeout });
+  vi.useFakeTimers();
+  vi.stubGlobal('window', Object.assign(new EventTarget(), {
+    setTimeout, clearTimeout, history: { state: { idx: 0 }, go: vi.fn() }, confirm: vi.fn(() => false),
+  }));
+  vi.stubGlobal('document', new EventTarget());
   state.request.mockReset().mockImplementation(async (path: string) => path.startsWith('/admin/careers') ? { data: [], total: 0, totalPages: 0 } : path.includes('?') ? { items: [asset], hasMore: false, nextCursor: null } : path.endsWith('/selection-audit') ? {} : asset);
 });
 afterEach(async () => { if (tree) await act(async () => tree.unmount()); vi.useRealTimers(); vi.unstubAllGlobals(); });
@@ -32,7 +36,7 @@ describe('B07 asset navigation and reuse', () => {
   });
   it('selects an employer image through the audited picker rather than a raw ID input', async () => {
     await mount(<CareerAdminPage />, ['admin:careers:manage', 'admin:careers:author', 'admin:assets:reuse']);
-    await act(async () => tree.root.findAllByType('button').find(b => b.children.includes('Add'))!.props.onClick());
+    await act(async () => tree.root.findAllByType('button').find(b => b.children.includes('Add employer'))!.props.onClick());
     await act(async () => vi.advanceTimersByTimeAsync(300));
     const picker = tree.root.findByType(AssetPicker);
     expect(picker.props.mimeTypePrefix).toBe('image/');

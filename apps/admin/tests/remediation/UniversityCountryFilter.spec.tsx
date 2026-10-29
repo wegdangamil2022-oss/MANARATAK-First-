@@ -49,7 +49,8 @@ it('clears country through the real optional picker, removes dependent geography
   expect(country.props.value).toBe('country-id');
   await act(async () => { country.props.onChange({ target: { value: '' } }); });
   await act(async () => { await vi.advanceTimersByTimeAsync(350); });
-  expect(tree!.root.findByProps({ 'data-current-query': true }).children.join('')).toBe('?sort=NAME_ASC');
+  const query = new URLSearchParams(tree!.root.findByProps({ 'data-current-query': true }).children.join(''));
+  expect(Object.fromEntries(query)).toEqual({ sort: 'NAME_ASC', page: '1', pageSize: '20' });
   const requests = api.request.mock.calls.map(([url]) => String(url));
   expect(requests).toContain('/admin/universities?page=1&pageSize=20&sort=NAME_ASC');
   expect(tree!.root.findAllByType('select').filter(node => ['Region', 'City'].includes(node.props['aria-label'])).every(node => node.props.disabled)).toBe(true);
@@ -59,6 +60,7 @@ it('resets the country deep link and other filters using the existing reset butt
   const reset = tree!.root.findAllByType('button').find(node => node.children.join('') === 'Reset')!;
   await act(async () => { reset.props.onClick(); });
   await act(async () => { await vi.advanceTimersByTimeAsync(350); });
-  expect(tree!.root.findByProps({ 'data-current-query': true }).children.join('')).toBe('');
+  const query = new URLSearchParams(tree!.root.findByProps({ 'data-current-query': true }).children.join(''));
+  expect(Object.fromEntries(query)).toEqual({ page: '1' });
   expect(api.request.mock.calls.map(([url]) => String(url))).toContain('/admin/universities?page=1&pageSize=20');
 });

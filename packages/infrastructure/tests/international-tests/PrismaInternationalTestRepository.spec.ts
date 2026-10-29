@@ -229,6 +229,16 @@ describe('PrismaInternationalTestRepository', () => {
     );
   });
 
+  it('counts the filtered scope without fetching records or governance details', async () => {
+    mockPrisma.internationalTest.count.mockResolvedValue(41);
+    const result = await repository.list({ countOnly: true, providerName: 'ETS', page: 2, limit: 20 });
+    expect(result).toEqual({ data: [], total: 41, page: 2, limit: 20 });
+    expect(mockPrisma.internationalTest.count).toHaveBeenCalledWith({ where: { providerName: 'ETS' } });
+    expect(mockPrisma.internationalTest.findMany).not.toHaveBeenCalled();
+    expect(mockPrisma.internationalTest.groupBy).not.toHaveBeenCalled();
+    expect(mockPrisma.$queryRaw).not.toHaveBeenCalled();
+  });
+
   it('should listPublished exclusively through an immutable owner snapshot',async()=>{
     await repository.listPublished({providerName:'IDP'});
     expect(mockPrisma.internationalTest.findMany).not.toHaveBeenCalled();

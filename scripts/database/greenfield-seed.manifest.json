@@ -1,7 +1,7 @@
 {
   "version": 1,
   "authority": "MNT-AUD-0035",
-  "seedSetVersion": "2026-10-16.2",
+  "seedSetVersion": "2026-10-29.1",
   "policy": {
     "requiresMigrationStatusClean": true,
     "requiresGreenfieldMutationGate": true,
@@ -127,14 +127,14 @@
       "state": "READY",
       "script": "scripts/bootstrap-phase18-student-tools.ts",
       "sourcePath": "packages/application/src/student-tools/OfficialStudentToolRegistry.ts",
-      "sourceVersion": "phase18-official-registry-v2-section19",
+      "sourceVersion": "phase18-official-registry-v2-section19-audience-b9a4b155",
       "expected": {
         "StudentToolDefinitionRecord": {
           "exact": 83
         }
       },
-      "provenance": "Phase 18 official student-tools registry",
-      "sourceSha256": "d5af8c7452d5ac9cd67495ba1fe92093634fd52abbeac1bb082d6187c7c11cf9"
+      "provenance": "Phase 18 official registry; reviewed b9a4b155 internal audience separation and release wording, docs/reviews/IMPORT_CI_UNBLOCKING_2026-10-29.md",
+      "sourceSha256": "233bc040d330c3f9d282a2f44f02f18794456de8704bcda6e40d54001facb778"
     }
   ],
   "operatorBootstraps": [

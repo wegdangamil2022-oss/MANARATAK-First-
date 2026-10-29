@@ -370,6 +370,15 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
+.cms-workspace .cms-menu-node[data-depth='1'] {
+  margin-inline-start: 14px;
+}
+.cms-workspace .cms-menu-node[data-depth='2'] {
+  margin-inline-start: 28px;
+}
+.cms-workspace .cms-menu-node[data-depth='3'] {
+  margin-inline-start: 42px;
+}
 .cms-workspace .cms-node-heading {
   grid-column: 1/-1;
   display: flex;

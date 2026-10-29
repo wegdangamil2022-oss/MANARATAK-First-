@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { execFileSync } from 'node:child_process';
+import { inspectAdminGuards } from './security/admin-guard-source-policy.mjs';
 
 const root = process.cwd();
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -92,7 +93,8 @@ check('MNT-AUD-0076 archive revokes sessions', archiveIdentity.includes('session
 check('MNT-AUD-0076 purge revokes sessions', purgeIdentity.includes('sessionManager.revokeAllSessions(input.identityId)'));
 check('MNT-AUD-0076 refresh revalidates lifecycle', authService.includes('principalAccessValidator.isAuthenticationAllowed(currentSession.userId)') && authService.includes('principalAccessValidator.isAuthenticationAllowed(rotated.userId)'));
 check('MNT-AUD-0076 learner auth revalidates lifecycle', userAuthMiddleware.includes('principalAccessValidator.isAuthenticationAllowed(payload.userId)') && userAuthMiddleware.includes('sessionManager.revokeAllSessions(payload.userId)'));
-check('MNT-AUD-0065 control plane passes session and lifecycle dependencies', /createAdminGuard\(\{\s*mfaUseCases:\s*container\.resolve\('mfaUseCases'\),\s*mode:\s*adminAuthMode,\s*tokenProvider:\s*adminTokenProvider,\s*sessionManager:\s*adminSessionManager,\s*principalAccessValidator\s*,?\s*\}\)/.test(app));
+const adminGuards = inspectAdminGuards(app);
+check('MNT-AUD-0065 control plane passes session and lifecycle dependencies', adminGuards.length === 4 && adminGuards.filter(guard => guard.controlPlane).length === 1 && adminGuards.every(guard => guard.valid));
 check('MNT-AUD-0062 legacy AI route uses strict control-plane wrapper', app.includes("v1Router.use('/ai', ...protectControlPlane('admin:ai:execute', 'aiGatewayRouter'))"));
 check('MNT-AUD-0062 canonical AI operator route inherits /admin boundary', app.includes("v1Router.use('/admin/ai/operator', requireAdminPermission('admin:ai:execute'), lazyRouter('aiGatewayRouter'))"));
 

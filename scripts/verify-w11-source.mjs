@@ -22,6 +22,7 @@ const section = (source, start, end) => {
 };
 
 const dashboard = section(useCases, 'public async getDashboard(', 'public async markNotificationRead(');
+const genericWorkspaceSchema = section(router, 'const workspaceSchema =', 'const privacyConsentSchema =');
 // Match the bounded array body without nested quantifiers, then validate its tokens.
 const eventBranches = [...repository.matchAll(/\[([^\[\]]*)\]\s*\.includes\(\s*event\.eventType\s*\)/g)]
   .filter(match => match[1].replace(/'[^']+'/g, '').replace(/[,\s]/g, '') === '')
@@ -69,7 +70,9 @@ const checks = [
     migration.includes('No StudentPrivacyConsentDecision rows are fabricated')],
   ['W11-PRIVACY-GENERIC-WRITE-GUARD',
     useCases.includes('STUDENT_PRIVACY_CONSENT_COMMAND_REQUIRED') && repository.includes('STUDENT_PRIVACY_CONSENT_COMMAND_REQUIRED') &&
-    router.includes('privacyPreferences is intentionally rejected; use PUT /student/privacy-consent') && router.includes('}).strict();')],
+    router.includes('privacyPreferences is intentionally rejected; use PUT /student/privacy-consent') &&
+    /\}\)\s*\.strict\(\)/.test(genericWorkspaceSchema) && !/^\s*privacyPreferences:/m.test(genericWorkspaceSchema) &&
+    router.includes('workspaceSchema.parse(req.body)')],
   ['W11-WEB-TO-CONSENT-CONTRACT',
     webClient.includes('/student/privacy-consent') && studentWeb.includes('updateMyStudentPrivacyConsent') &&
     studentWeb.indexOf('updateMyStudentWorkspace') < studentWeb.indexOf('updateMyStudentPrivacyConsent')],

@@ -444,6 +444,8 @@ const careerAdminRouter = read('apps/api/src/presentation/api/router/CareerAdmin
 const optimisticConcurrencyMigration = read('packages/infrastructure/prisma/migrations/20260906235500_phase20_phase21_optimistic_concurrency/migration.sql');
 const servicesAdminPage = read('apps/admin/src/pages/ServicesAdminPage.tsx');
 const careerAdminPage = read('apps/admin/src/pages/CareerAdminPage.tsx');
+const careerEditor = read('apps/admin/src/features/careers/CareerEditor.tsx');
+const careerRecordPanel = read('apps/admin/src/features/careers/CareerRecordPanel.tsx');
 check('MNT-AUD-0096 late-domain mutable records expose monotonic versions in schema and DTOs',
   ['ServiceCatalogRecord','ServiceRequestRecord','CareerEmployerRecord','CareerJobPostingRecord'].every((model) => {
     const match = schema.match(new RegExp(`model ${model} \\{([\\s\\S]*?)\\n\\}`));
@@ -460,7 +462,8 @@ check('MNT-AUD-0096 application and HTTP mutation boundaries require expectedVer
   serviceCatalogUseCases.includes('SERVICE_EXPECTED_VERSION_REQUIRED') && serviceRequestUseCases.includes('SERVICE_REQUEST_EXPECTED_VERSION_REQUIRED') &&
   careerAdminUseCases.includes('CAREER_EXPECTED_VERSION_REQUIRED') &&
   serviceAdminRouter.includes('expectedVersion: z.number().int().positive()') && careerAdminRouter.includes('expectedVersion: careerExpected') && read('apps/api/src/presentation/api/router/CareerHttp.ts').includes('careerExpected = z.number().int().positive()') &&
-  servicesAdminPage.includes('expectedVersion: service.version') && careerAdminPage.includes('body.expectedVersion = editing.version') && careerAdminPage.includes('expectedVersion:row.version'));
+  servicesAdminPage.includes('expectedVersion: service.version') && careerAdminPage.includes('<CareerEditor') && careerAdminPage.includes('<CareerRecordPanel') &&
+  careerEditor.includes('body.expectedVersion = record.version') && careerRecordPanel.includes('const version = detail?.version ?? row.version') && careerRecordPanel.includes('expectedVersion: version'));
 check('MNT-AUD-0096 controlled migration adds version fences for all four legacy late-domain aggregates',
   optimisticConcurrencyMigration.includes('-- MNT-AUD-0096:') &&
   ['ServiceCatalogRecord','ServiceRequestRecord','CareerEmployerRecord','CareerJobPostingRecord'].every((model) =>

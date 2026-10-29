@@ -13,6 +13,8 @@ const useCases = read('packages/application/src/cms/use-cases/CmsUseCases.ts');
 const router = read('apps/api/src/presentation/api/router/CmsAdminRouter.ts');
 const schema = read('packages/infrastructure/prisma/schema.prisma');
 const adminPage = read('apps/admin/src/pages/CmsAdminPage.tsx');
+const contentWorkspace = read('apps/admin/src/features/cms/CmsContentWorkspace.tsx');
+const contentDetails = read('apps/admin/src/features/cms/CmsContentDetails.tsx');
 const operations = read('apps/admin/src/features/cms/CmsOperationsPanels.tsx');
 const migrationPath = 'packages/infrastructure/prisma/migrations/20260826194500_w14_cms_integrity/migration.sql';
 const migration = exists(migrationPath) ? read(migrationPath) : '';
@@ -119,7 +121,8 @@ const checks = {
     !/startsAt: new Date\(\)\.toISOString\(\), status: 'DRAFT'/.test(operations) &&
     !/block-schemas[^\n]+method: 'POST'/.test(operations) &&
     /additionalProperties === true/.test(policy) &&
-    /Canonical URL يُولَّد تلقائيًا/.test(adminPage),
+    adminPage.includes('<CmsContentWorkspace') && contentWorkspace.includes('<CmsContentDetails') &&
+    /Canonical URL يُولَّد تلقائيًا/.test(contentDetails) && !/value=\{currentEditor\.canonicalUrl\}/.test(contentDetails),
 
   'GUARD-PHASE16-API-SEPARATION':
     /publishNavigation/.test(useCases) &&
