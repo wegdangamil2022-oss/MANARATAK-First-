@@ -1,0 +1,190 @@
+{
+  "scope": "BOUNDED_YENCHING_REVIEW_CONTINUATION_NOT_TRANSFER_OR_PUBLICATION",
+  "sourceSha": "bca159d4d2cedc0ffdc74ec7339cbcee2881f3c6",
+  "planHash": "6505781926528252096461e5f1b2552fe31e7857e55cf9980019d3d9105cf884",
+  "rehearsal": {
+    "pass": true,
+    "sourceSha": "bca159d4d2cedc0ffdc74ec7339cbcee2881f3c6",
+    "scope": "rehearsal",
+    "planHash": "6505781926528252096461e5f1b2552fe31e7857e55cf9980019d3d9105cf884",
+    "programId": "00e05718-9892-40af-aef4-81057aff7d91",
+    "programStatus": "DRAFT",
+    "programOwner": "INS-CHN-0001",
+    "programLookupState": "UNRESOLVED",
+    "recordId": "rec-6adf957c-54bc-43e2-920e-db4a3922b4b4",
+    "recordSourceUnchanged": true,
+    "reviewAssigned": true,
+    "activeLease": false,
+    "uniqueRequirementKeys": 17,
+    "languagePolicyMapping": "ANY_OF_WITH_EXEMPTIONS",
+    "scholarshipsCreated": 0,
+    "verification": "PENDING",
+    "protectedTablesUnchanged": [
+      "IdentityRecord",
+      "UserRecord",
+      "AccountRecord",
+      "RoleRecord",
+      "RoleAssignmentRecord",
+      "PolicyRecord"
+    ],
+    "at": "2026-10-29T13:42:58.047Z"
+  },
+  "original": {
+    "pass": true,
+    "sourceSha": "bca159d4d2cedc0ffdc74ec7339cbcee2881f3c6",
+    "scope": "original",
+    "planHash": "6505781926528252096461e5f1b2552fe31e7857e55cf9980019d3d9105cf884",
+    "programId": "d5b93d07-d7bb-401b-a0ab-c36f3d2440f3",
+    "programStatus": "DRAFT",
+    "programOwner": "INS-CHN-0001",
+    "programLookupState": "UNRESOLVED",
+    "recordId": "rec-afb2c8eb-d798-4d87-ac7e-8cedd906dc8c",
+    "recordSourceUnchanged": true,
+    "reviewAssigned": true,
+    "activeLease": false,
+    "uniqueRequirementKeys": 17,
+    "languagePolicyMapping": "ANY_OF_WITH_EXEMPTIONS",
+    "scholarshipsCreated": 0,
+    "verification": "PENDING",
+    "protectedTablesUnchanged": [
+      "IdentityRecord",
+      "UserRecord",
+      "AccountRecord",
+      "RoleRecord",
+      "RoleAssignmentRecord",
+      "PolicyRecord"
+    ],
+    "at": "2026-10-29T13:44:47.628Z"
+  },
+  "finalRead": {
+    "pass": true,
+    "sourceSha": "bca159d4d2cedc0ffdc74ec7339cbcee2881f3c6",
+    "counts": {
+      "universities": 4,
+      "programs": 1,
+      "internationalTests": 2,
+      "scholarships": 0
+    },
+    "program": {
+      "id": "d5b93d07-d7bb-401b-a0ab-c36f3d2440f3",
+      "universityId": "b6749423-cc46-4bbd-94ce-a2f916c56fe1",
+      "sourceReferenceId": "PKU-YCA-CHINA-STUDIES",
+      "sourceProgramName": "China Studies",
+      "status": "DRAFT",
+      "majorId": null,
+      "majorMappingState": "SOURCE_ONLY"
+    },
+    "reviewAssignment": {
+      "state": "ASSIGNED",
+      "claimedBy": null,
+      "claimUntil": null,
+      "version": 3
+    },
+    "scholarship": {
+      "recordId": "rec-afb2c8eb-d798-4d87-ac7e-8cedd906dc8c",
+      "readyToTransfer": false,
+      "verification": "PENDING",
+      "transferred": false,
+      "reviewReasons": [
+        "VERIFICATION:PENDING",
+        "CANONICAL:UNRESOLVED",
+        "CANONICAL:REVIEW_REQUIRED"
+      ],
+      "canonical": {
+        "state": "REVIEW_REQUIRED",
+        "unresolvedCount": 10,
+        "ambiguousCount": 0,
+        "reviewRequiredCount": 1
+      },
+      "languageMappingValid": true,
+      "distinctRequirementKeys": 17
+    },
+    "runtime": {
+      "scope": "ORIGINAL_NEON_DEVELOPMENT",
+      "sourceSha": "bca159d4d2cedc0ffdc74ec7339cbcee2881f3c6",
+      "workerScope": [],
+      "analytics": false,
+      "contentWrites": "CANONICAL_API_AUTHORIZATION_AND_MFA"
+    },
+    "at": "2026-10-29T13:50:35.837Z"
+  },
+  "disposableLabStopped": {
+    "pass": true,
+    "scope": "DISPOSABLE_LOCAL_ONLY",
+    "originalAffected": false,
+    "filesRetained": true,
+    "at": "2026-10-29T13:49:47.0328329Z"
+  },
+  "localValidation": {
+    "scholarshipAndImportTests": 169,
+    "testFiles": 24,
+    "sourcePreflightTests": 40,
+    "applicationBuild": true,
+    "apiTypecheck": true,
+    "changedFilesLintErrors": 0,
+    "existingAnyWarnings": 39,
+    "sourceQuality": "PASS",
+    "secretScan": "PASS"
+  },
+  "browser": {
+    "method": "DOM_AX_ONLY_NO_SCREENSHOTS",
+    "result": "LOGIN_WITH_MFA_REQUIRED",
+    "authenticatedPageVerifiedThisStep": false
+  },
+  "ci": {
+    "sourceSha": "bca159d4d2cedc0ffdc74ec7339cbcee2881f3c6",
+    "at": "2026-10-29T13:49:28.552Z",
+    "runs": [
+      {
+        "id": 40884961188,
+        "name": "Immutable Release Promotion",
+        "status": "completed",
+        "conclusion": "skipped",
+        "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/40884961188",
+        "event": "workflow_run",
+        "headSha": "bca159d4d2cedc0ffdc74ec7339cbcee2881f3c6"
+      },
+      {
+        "id": 40884728628,
+        "name": "Security Gates",
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/40884728628",
+        "event": "push",
+        "headSha": "bca159d4d2cedc0ffdc74ec7339cbcee2881f3c6"
+      },
+      {
+        "id": 40884728558,
+        "name": "Source Architecture Guards",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/40884728558",
+        "event": "push",
+        "headSha": "bca159d4d2cedc0ffdc74ec7339cbcee2881f3c6"
+      },
+      {
+        "id": 40884728672,
+        "name": "Enterprise CI Pipeline",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/40884728672",
+        "event": "push",
+        "headSha": "bca159d4d2cedc0ffdc74ec7339cbcee2881f3c6"
+      }
+    ],
+    "fullSourceClosure": "FAILED_BEFORE_FULL_BUILD",
+    "productionAccepted": false
+  },
+  "databaseSchemaChanged": false,
+  "originalPermissionsChanged": false,
+  "externalDeliveryEnabled": false,
+  "privateReceiptReferences": [
+    "continuation-reviewed-plan.json",
+    "continuation-original-privileges.json",
+    "continuation-rehearsal.json",
+    "continuation-original.json",
+    "continuation-final-original-read.json",
+    "continuation-lab-stopped.json"
+  ],
+  "at": "2026-10-29T13:54:14.448Z"
+}
