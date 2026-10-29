@@ -2,7 +2,6 @@ import { useId, useRef, type Dispatch, type ReactNode, type SetStateAction } fro
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import type { ScholarshipDto } from '@manaratak/domain';
 import type { ScholarshipCatalogUpdate } from '../../api/scholarshipCatalog';
-import { ScholarshipEligibilityCriteria } from './ScholarshipEligibilityCriteria';
 import {
   benefitText,
   moveScholarshipBenefit,
@@ -376,14 +375,7 @@ export function ScholarshipContentEditor({
     );
   }
   if (tab === 'eligibility') {
-    return (
-      <ScholarshipEligibilityCriteria
-        items={form.eligibilityItems ?? []}
-        language={language}
-        focusField={focusField}
-        onChange={(items) => set('eligibilityItems', items)}
-      />
-    );
+    return null; // Source-derived criteria have an individually audited save boundary.
   }
   if (tab === 'documents') {
     const rows = form.requiredDocumentItems ?? [];

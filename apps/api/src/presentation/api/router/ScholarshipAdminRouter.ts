@@ -810,6 +810,16 @@ export class ScholarshipAdminRouter {
     );
 
     // PATCH /admin/scholarships/:id
+    router.patch(
+      '/:id/eligibility-criteria/:criterionKey',
+      asyncHandler(async (req: Request, res: Response) => {
+        const input = z.object({ text: z.string().trim().min(1).max(20000) }).strict().parse(req.body);
+        const scholarship = await adminScholarshipUseCases.updateEligibilityCriterion(req.params.id, req.params.criterionKey, input.text, ownerContext(req));
+        sendRevision(res, scholarship);
+        res.json(scholarship);
+      }),
+    );
+
     // WP12-9 writes the normalized Scholarship contract directly. Zod strips
     // immutable/lifecycle fields that are not part of this authoring schema.
     router.patch(

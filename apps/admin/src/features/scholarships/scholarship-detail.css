@@ -225,14 +225,49 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 36px;
+  flex: 0 0 auto;
   min-height: 40px;
-  width: 36px;
+  width: auto;
   border: 0;
   border-radius: 8px;
   background: transparent;
   color: #0e7c86;
   padding: 4px;
+}
+.scholarship-criterion-editor {
+  flex: 1;
+  min-width: 0;
+}
+.scholarship-criterion-editor label {
+  display: block;
+  color: #142b5f;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.scholarship-criterion-editor textarea,
+.scholarship-criterion-editor input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #d8e4e7;
+  border-radius: 8px;
+  font: inherit;
+  background: white;
+}
+.scholarship-criterion-editor-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.scholarship-criterion-edited {
+  display: inline-block;
+  margin-inline-start: 8px;
+  color: #0e7c86;
+  font-size: 11px;
+}
+.scholarship-criteria-original {
+  margin-top: 16px;
+  font-size: 12px;
+  color: #142b5f;
 }
 .scholarship-criterion .scholarship-criterion-action:hover {
   background: #142b5f;

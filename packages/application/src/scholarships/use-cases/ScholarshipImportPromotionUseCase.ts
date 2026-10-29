@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { scholarshipEligibilitySource, literalScholarshipCriteria } from '@manaratak/domain';
 import { 
   IScholarshipRepository, 
   ScholarshipStatus,
@@ -87,9 +88,13 @@ export class ScholarshipImportPromotionUseCase {
         studyCountry: payload.studyCountry,
         applicationDeadline,
         sourceImportRecordId: record.id,
+        metadata: { ...payload.metadata, sourceEligibility: scholarshipEligibilitySource(payload.metadata) },
+        eligibilityItems: literalScholarshipCriteria(scholarshipEligibilitySource(payload.metadata)?.text ?? '').map((item, index) => ({
+          itemKey: item.key, itemTypeCode: 'GENERAL', valueText: item.text, priorityOrder: index, isRequired: true, resolutionStatus: 'SOURCE_ONLY',
+        })),
         optionalFields: {
           requiredDocuments: payload.requiredDocuments,
-          eligibilityCriteria: payload.eligibilityCriteria,
+          eligibilityCriteria: scholarshipEligibilitySource(payload.metadata)?.text ?? '',
           studyLanguage: payload.studyLanguage,
           targetUniversities: payload.targetUniversities,
           targetAcademicPrograms: payload.targetAcademicPrograms,

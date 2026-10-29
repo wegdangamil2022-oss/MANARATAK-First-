@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { SCHOLARSHIP_ELIGIBILITY_SECTION, type ScholarshipEligibilitySource } from '@manaratak/domain';
 
 export interface ScholarshipGuideRecord {
   sourceRecordId: string;
@@ -9,6 +10,7 @@ export interface ScholarshipGuideRecord {
   explicitlyImported: boolean;
   rawContent: string;
   sourceHash: string;
+  sourceEligibility?: ScholarshipEligibilitySource;
 }
 
 export function readScholarshipMasterGuide(content: string): ScholarshipGuideRecord[] {
@@ -32,6 +34,11 @@ export function readScholarshipMasterGuide(content: string): ScholarshipGuideRec
     current.rawContent = content.slice(startOffset, endOffset);
     current.sourceHash = createHash('sha256').update(current.rawContent, 'utf8').digest('hex');
     for (const [key, value] of Object.entries(current.fields)) current.fields[key] = value.trim();
+    const eligibilitySections = Object.entries(current.fields).filter(([key]) => key.replace(/^\d+\.\s*/, '') === SCHOLARSHIP_ELIGIBILITY_SECTION);
+    if (eligibilitySections.length > 1) throw new Error(`SCHOLARSHIP_GUIDE_DUPLICATE_ELIGIBILITY_SECTION:${current.sourceRecordId}`);
+    current.sourceEligibility = { version: 1, section: SCHOLARSHIP_ELIGIBILITY_SECTION,
+      text: eligibilitySections[0]?.[1] ?? '',
+      sourceRecordId: current.sourceRecordId, recordHash: current.sourceHash };
     records.push(current);
   };
   for (let index = 0; index < lines.length; index += 1) {

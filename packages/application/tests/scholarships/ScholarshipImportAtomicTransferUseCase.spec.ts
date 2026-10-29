@@ -33,6 +33,7 @@ function payload() {
     applicationDeadline: '2027-01-01',
     officialSourceUrl: 'https://example.edu/scholarship',
     metadata: {
+      rawSourceSections: { 'الشروط ومعايير التقديم': 'Academic merit' },
       verificationState: 'VERIFIED',
       academicYear: '2027',
       canonicalScreening: [{
@@ -200,8 +201,9 @@ describe('WP12-10 ScholarshipImportAtomicTransferUseCase', () => {
     await env.service.transfer({ recordId: 'rec-1', actorId: 'reviewer' });
     const items = env.create.mock.calls[0][0].eligibilityItems ?? [];
     expect(items.filter(item => item.itemTypeCode === 'INTERNATIONAL_TEST')).toHaveLength(0);
-    expect(items.find(item => item.itemTypeCode === 'LANGUAGE_PROFICIENCY')).toMatchObject({ operatorCode: 'ANY_OF_WITH_EXEMPTIONS' });
-    expect(items.find(item => item.itemTypeCode === 'LANGUAGE_PROFICIENCY')?.valueText).toContain('regional exceptions');
+    expect(items.map(item => item.valueText)).toEqual(['Academic merit.']);
+    expect(items.some(item => item.itemTypeCode === 'LANGUAGE_PROFICIENCY')).toBe(false);
+    expect(env.create.mock.calls[0][0].metadata?.conditionalLanguageEvidence).toMatchObject({ exemptions: 'Native English speakers; regional exceptions still apply.' });
   });
   it('rejects incomplete conditional language rules before any canonical mutation', async () => {
     const env = setup(); const source = payload();
@@ -359,7 +361,8 @@ describe('WP12-10 ScholarshipImportAtomicTransferUseCase', () => {
     expect(created.benefits?.length).toBeGreaterThan(0);
     expect(created.degreeTargets).toEqual(expect.arrayContaining([expect.objectContaining({ degreeLevelId: 'degree-phd' })]));
     expect(created.majorTargets).toEqual(expect.arrayContaining([expect.objectContaining({ majorId: 'major-cs' })]));
-    expect(created.eligibilityItems).toEqual(expect.arrayContaining([expect.objectContaining({ internationalTestId: 'test-ielts' })]));
+    expect(created.eligibilityItems?.map(item => item.valueText)).toEqual(['Academic merit.']);
+    expect(created.eligibilityItems?.some(item => item.internationalTestId)).toBe(false);
     expect(created.requiredDocumentItems?.length).toBeGreaterThan(0);
     expect(created.universityLinks).toEqual(expect.arrayContaining([expect.objectContaining({ universityId: 'university-qu' })]));
   });

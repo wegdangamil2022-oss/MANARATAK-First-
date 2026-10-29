@@ -50,7 +50,8 @@ export function scholarshipImportSourceReview(
     const source = typeof payload.eligibleMajorsOrFields === 'string' ? [payload.eligibleMajorsOrFields] : payload.eligibleMajorsOrFields;
     if (!source?.length || new Set(areas).size !== areas.length || source.length !== areas.length || source.some(label => !areas.includes(label))) return invalid;
   }
-  const { conditionalLanguagePolicy, ...textCorrections } = review.corrections ?? {};
+  // Eligibility corrections remain review/enrichment evidence, never source criteria.
+  const { conditionalLanguagePolicy, eligibilityCriteria: _eligibilityEnrichment, ...textCorrections } = review.corrections ?? {};
   const projected = { ...payload, ...textCorrections, metadata: { ...payload.metadata,
     ...(conditionalLanguagePolicy ? { conditionalLanguageEvidence: conditionalLanguagePolicy } : {}),
   } };

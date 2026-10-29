@@ -20,6 +20,15 @@ function fixture() {
 }
 
 describe('ScholarshipImportSourceReview', () => {
+  it('retains eligibility review enrichment without replacing the original source criteria', () => {
+    const { raw, review, verification } = fixture();
+    const source = { ...raw, eligibilityCriteria: 'Literal source only.' };
+    const decision = { ...review, rawPayloadFingerprint: scholarshipImportReviewFingerprint(source), corrections: { ...review.corrections, eligibilityCriteria: 'Expanded official restrictions must stay in evidence.' } };
+    const result = scholarshipImportSourceReview(source, { ...verification, evidence: { sourceReview: decision } });
+    expect(result.valid).toBe(true);
+    expect(result.payload.eligibilityCriteria).toBe(source.eligibilityCriteria);
+    expect(result.payload.metadata?.reviewedSourceInterpretation).toMatchObject({ corrections: { eligibilityCriteria: 'Expanded official restrictions must stay in evidence.' } });
+  });
   it('retains all source context without inventing majors or test foreign keys', () => {
     const { raw, verification } = fixture();
     const before = JSON.stringify(raw);

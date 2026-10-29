@@ -1,5 +1,5 @@
 import {prepareOwnerDescription, assertNoForgedOwnerDescriptions, assertOwnerDescriptionsCurrent, type OwnerDescriptionInput} from '../../localization/OwnerLocalizedDescription';
-import { assertUniversityProgramParent } from '@manaratak/domain';
+import { assertUniversityProgramParent, appendScholarshipEligibilityEdit, assertScholarshipEligibilityMetadataUnchanged } from '@manaratak/domain';
 import { 
   IScholarshipRepository, 
   ITransactionalScholarshipRepository,
@@ -236,6 +236,10 @@ export class AdminScholarshipUseCases {
     assertNoTranslationPayloadFields('SCHOLARSHIP', updates as unknown as Record<string, unknown>, ['localizedNames']);
     assertNoTranslationPayloadFields('SCHOLARSHIP', updates.optionalFields, ['localizedNames']);
     const existing = await this.getScholarship(id);
+    if (updates.metadata !== undefined) {
+      assertScholarshipEligibilityMetadataUnchanged(existing.metadata, updates.metadata);
+      updates = { ...updates, metadata: { ...existing.metadata, ...updates.metadata } };
+    }
     if (existing.publicationStatus !== ScholarshipPublicationStatus.DRAFT || [ScholarshipStatus.ARCHIVED, ScholarshipStatus.REJECTED].includes(existing.status)) throw new Error('SCHOLARSHIP_NON_EDITABLE_STATUS');
     const canonicalSafeUpdates = this.preserveCanonicalReferences(existing, updates);
     const classification = this.catalogCompleteness(existing, canonicalSafeUpdates);
@@ -267,6 +271,17 @@ export class AdminScholarshipUseCases {
         if (owner && owner.id !== existing.id) throw new Error('SCHOLARSHIP_CANONICAL_DEDUPE_COLLISION');
       }
       return repository.update(id, dataToUpdate);
+    });
+  }
+
+  public async updateEligibilityCriterion(id: string, key: string, text: string, context: ScholarshipMutationContext): Promise<ScholarshipDto> {
+    return this.mutate('SCHOLARSHIP_ELIGIBILITY_CRITERION_UPDATED', id, context, async (repository) => {
+      const current = await repository.findById(id);
+      if (!current) throw new Error('SCHOLARSHIP_NOT_FOUND');
+      if (current.publicationStatus !== ScholarshipPublicationStatus.DRAFT || [ScholarshipStatus.ARCHIVED, ScholarshipStatus.REJECTED].includes(current.status))
+        throw new Error('SCHOLARSHIP_NON_EDITABLE_STATUS');
+      const metadata = appendScholarshipEligibilityEdit(current.metadata, key, text, context.actorId, context.reason!, new Date().toISOString());
+      return repository.update(id, { metadata, status: current.status === ScholarshipStatus.READY_TO_PUBLISH ? ScholarshipStatus.READY_TO_REVIEW : undefined });
     });
   }
 

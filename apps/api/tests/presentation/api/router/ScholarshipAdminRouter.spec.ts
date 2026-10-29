@@ -10,6 +10,7 @@ describe('ScholarshipAdminRouter', () => {
     getScholarshipSummary: vi.fn(),
     getScholarship: vi.fn().mockResolvedValue({id: 'owner-1', revision: 2}),
     updateScholarship: vi.fn(),
+    updateEligibilityCriterion: vi.fn(),
     markReadyToReview: vi.fn(),
     markReadyToPublish: vi.fn(),
     publish: vi.fn(),
@@ -102,6 +103,20 @@ describe('ScholarshipAdminRouter', () => {
       }),
       expect.objectContaining({ actorId: 'admin-X', source: 'admin-scholarship-api' }),
     );
+  });
+
+  it('saves a single eligibility criterion with authenticated actor, reason and revision', async () => {
+    const useCases = createMockUseCases();
+    useCases.updateEligibilityCriterion.mockResolvedValue({ id: 's1', revision: 2 });
+    const response = await request(createApp(useCases)).patch('/admin/scholarships/s1/eligibility-criteria/source-criterion-2')
+      .set('If-Match', '1').set('X-Review-Reason', 'Approved criterion correction').send({ text: 'Literal approved correction.' });
+    expect(response.status).toBe(200);
+    expect(useCases.updateEligibilityCriterion).toHaveBeenCalledWith('s1', 'source-criterion-2', 'Literal approved correction.', expect.objectContaining({ actorId: 'admin-X', expectedRevision: 1, reason: 'Approved criterion correction' }));
+    expect(useCases.updateScholarship).not.toHaveBeenCalled();
+    expect(response.headers.etag).toContain('2');
+    const missingRevision = await request(createApp(useCases)).patch('/admin/scholarships/s1/eligibility-criteria/source-criterion-2').set('X-Review-Reason', 'reason').send({ text: 'Text' });
+    expect(missingRevision.status).not.toBe(200);
+    expect(useCases.updateEligibilityCriterion).toHaveBeenCalledTimes(1);
   });
 
   it('PATCH /admin/scholarships/:id strips readonly fields', async () => {

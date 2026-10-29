@@ -76,11 +76,15 @@ export function ScholarshipDetailReadView({
   tab,
   language,
   onEdit,
+  onCriterionSaved,
+  onCriterionDirtyChange,
 }: {
   scholarship: ScholarshipDto;
   tab: string;
   language: string;
   onEdit?: (field?: string) => void;
+  onCriterionSaved?: (updated: ScholarshipDto) => Promise<void>;
+  onCriterionDirtyChange?: (dirty: boolean) => void;
 }) {
   const tr = (ar: string, en: string) => (language === 'ar' ? ar : en);
   const label = (key: string) => labels[key]?.[language === 'ar' ? 0 : 1] ?? key;
@@ -332,9 +336,10 @@ export function ScholarshipDetailReadView({
   if (tab === 'eligibility')
     return (
       <ScholarshipEligibilityCriteria
-        items={scholarship.eligibilityItems ?? []}
+        scholarship={scholarship}
         language={language}
-        onEdit={onEdit}
+        onSaved={onCriterionSaved}
+        onDirtyChange={onCriterionDirtyChange}
       />
     );
   if (tab === 'documents')

@@ -322,6 +322,7 @@ export {
   type UpdateScholarshipDto,
 } from './scholarships/scholarships';
 export * from './scholarships/contracts';
+export * from './scholarships/ScholarshipSourceEligibility';
 export * from './majors/enums';
 export * from './majors/majors';
 export * from './majors/NewMajorCandidate';

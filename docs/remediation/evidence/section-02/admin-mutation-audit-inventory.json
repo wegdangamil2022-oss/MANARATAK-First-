@@ -1,5 +1,5 @@
 {
-  "version": 10,
+  "version": 11,
   "baseline": "b1702289f43d0363d7bbf91f8eba465e4355c53c",
   "scope": "Mounted canonical admin mutations; candidate permission sets for conditional policies, with policy fingerprints; source checks, not runtime or owner atomicity proof",
   "routes": [
@@ -7318,6 +7318,20 @@
       "permissionEvidence": [
         "admin:scholarships:manage"
       ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/scholarships/:id/eligibility-criteria/:criterionKey",
+      "owner": "ScholarshipAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": ["admin:scholarships:manage"],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",

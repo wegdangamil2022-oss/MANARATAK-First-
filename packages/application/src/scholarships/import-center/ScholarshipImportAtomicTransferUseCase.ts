@@ -7,6 +7,8 @@ import {
   ScholarshipPublicationStatus,
   ScholarshipStatus,
   ScholarshipVerificationStatus,
+  scholarshipEligibilitySource,
+  literalScholarshipCriteria,
   type CreateScholarshipDto,
   type IScholarshipRepository,
   type ITransactionalScholarshipRepository,
@@ -567,7 +569,7 @@ export class ScholarshipImportAtomicTransferUseCase
       applicationLink: payload.applicationLink,
       sponsorName: payload.sponsorName,
       requiredDocuments: payload.requiredDocuments,
-      eligibilityCriteria: payload.eligibilityCriteria,
+      eligibilityCriteria: scholarshipEligibilitySource(payload.metadata)?.text ?? '',
       studyLanguage: payload.studyLanguage,
       targetUniversities: payload.targetUniversities,
       targetAcademicPrograms: payload.targetAcademicPrograms,
@@ -577,6 +579,7 @@ export class ScholarshipImportAtomicTransferUseCase
       localizedNames: payload.localizedNames,
       metadata: {
         ...(payload.metadata ?? {}),
+        sourceEligibility: scholarshipEligibilitySource(payload.metadata),
         rawSourceTitle: plan.cleanedName.rawSourceTitle,
         sourceAliases: plan.cleanedName.sourceAliases,
       },
@@ -631,37 +634,11 @@ export class ScholarshipImportAtomicTransferUseCase
   }
 
   private eligibilityItems(plan: TransferPlan): NonNullable<CreateScholarshipDto['eligibilityItems']> {
-    const items: NonNullable<CreateScholarshipDto['eligibilityItems']> = [];
-    if (plan.payload.eligibilityCriteria) {
-      items.push({
-        itemKey: 'eligibility-text',
-        itemTypeCode: 'GENERAL',
-        valueText: plan.payload.eligibilityCriteria,
-        isRequired: true,
-        priorityOrder: 0,
-        resolutionStatus: 'SOURCE_ONLY',
-      });
-    }
-    const language = scholarshipImportLanguagePolicy(plan.payload);
-    if (language.present) {
-      if (!language.valid || !language.item) throw new Error('SCHOLARSHIP_IMPORT_LANGUAGE_POLICY_REVIEW_REQUIRED');
-      items.push(language.item);
-      return items;
-    }
-    const tests = this.uniqueStrings(this.strings(this.object(plan.payload.metadata).internationalTests));
-    tests.forEach((label, index) => {
-      const resolved = this.resolutionFor(plan.canonical, 'INTERNATIONAL_TEST', label);
-      items.push({
-        itemKey: `test-${index + 1}-${this.shortKey(label)}`,
-        itemTypeCode: 'INTERNATIONAL_TEST',
-        valueText: label,
-        internationalTestId: resolved?.canonicalReferenceId ?? null,
-        isRequired: true,
-        priorityOrder: index + 1,
-        resolutionStatus: resolved?.state ?? 'SOURCE_ONLY',
-      });
-    });
-    return items;
+    const source = scholarshipEligibilitySource(plan.payload.metadata);
+    return literalScholarshipCriteria(source?.text ?? '').map((item, index) => ({
+      itemKey: item.key, itemTypeCode: 'GENERAL', valueText: item.text, isRequired: true,
+      priorityOrder: index, resolutionStatus: 'SOURCE_ONLY', metadata: { sourceText: item.sourceText, origin: 'SOURCE_ELIGIBILITY_SECTION' },
+    }));
   }
 
   private requiredDocuments(plan: TransferPlan): NonNullable<CreateScholarshipDto['requiredDocumentItems']> {

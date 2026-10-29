@@ -1,195 +1,178 @@
-import { useRef } from 'react';
-import { Pencil, Plus, ShieldCheck, Trash2 } from 'lucide-react';
-import type { ScholarshipEligibilityItemDto } from '@manaratak/domain';
-import { scholarshipCardKey } from './ScholarshipPresentation';
-import {
-  scholarshipCriterionSections,
-  withScholarshipCriterionSections,
-} from './ScholarshipCriteria';
+import { useEffect, useRef, useState } from 'react';
+import { Pencil, ShieldCheck } from 'lucide-react';
+import { scholarshipEligibilityView, type ScholarshipDto } from '@manaratak/domain';
+import { scholarshipCatalogApi } from '../../api/scholarshipCatalog';
 
 export function ScholarshipEligibilityCriteria({
-  items,
+  scholarship,
   language,
-  onEdit,
-  onChange,
-  focusField,
+  onSaved,
+  onDirtyChange,
 }: {
-  items: ScholarshipEligibilityItemDto[];
+  scholarship: Pick<ScholarshipDto, 'id' | 'revision' | 'metadata'>;
   language: string;
-  onEdit?: (field?: string) => void;
-  onChange?: (items: ScholarshipEligibilityItemDto[]) => void;
-  focusField?: string;
+  onSaved?: (updated: ScholarshipDto) => Promise<void>;
+  onDirtyChange?: (dirty: boolean) => void;
 }) {
   const tr = (ar: string, en: string) => (language === 'ar' ? ar : en);
-  let number = 0;
-  const headings = {
-    general: '',
-    alternatives: tr(
-      'بدائل إثبات اللغة — تُراجع مع الإعفاءات وشروط فئة المتقدم',
-      'Alternative language evidence — subject to exemptions and applicant-specific rules',
-    ),
-    exemptions: tr('الإعفاءات وشروط فئات المتقدمين', 'Exemptions and applicant-specific rules'),
-    excluded: tr('الاختبارات والصيغ غير المقبولة', 'Excluded tests and delivery modes'),
-    delivery: tr('إرسال الدرجات وضوابطها', 'Score delivery and conditions'),
+  const view = scholarshipEligibilityView(scholarship.metadata);
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+  const [text, setText] = useState('');
+  const [reason, setReason] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+  useEffect(() => {
+    onDirtyChange?.(activeKey !== null);
+    return () => onDirtyChange?.(false);
+  }, [activeKey, onDirtyChange]);
+  const save = async () => {
+    if (!activeKey || !onSaved || saving || !text.trim() || reason.trim().length < 3) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const updated = await scholarshipCatalogApi.updateCriterion(
+        scholarship.id,
+        activeKey,
+        text,
+        reason,
+        scholarship.revision,
+      );
+      if (!mounted.current) return;
+      if (updated.id !== scholarship.id || (updated.revision ?? 0) <= (scholarship.revision ?? 0))
+        throw new Error('SCHOLARSHIP_CRITERION_READBACK_MISMATCH');
+      await onSaved(updated);
+      if (mounted.current) {
+        setActiveKey(null);
+        setReason('');
+      }
+    } catch (failure) {
+      if (mounted.current)
+        setError(
+          failure instanceof Error
+            ? failure.message
+            : tr('تعذر حفظ الشرط.', 'Could not save this criterion.'),
+        );
+    } finally {
+      if (mounted.current) setSaving(false);
+    }
   };
   return (
-    <section className="scholarship-read-card scholarship-criteria-panel">
+    <section
+      className="scholarship-read-card scholarship-criteria-panel"
+      aria-label={tr('الشروط ومعايير التقديم', 'Application conditions and criteria')}
+    >
       <div className="scholarship-criteria-heading">
         <h2>
           <ShieldCheck aria-hidden="true" />
           {tr('الشروط ومعايير التقديم', 'Application conditions and criteria')}
         </h2>
-        {onEdit && (
-          <button type="button" className="scholarship-card-edit" onClick={() => onEdit()}>
-            <Pencil aria-hidden="true" />
-            {tr('تعديل الشروط', 'Edit criteria')}
-          </button>
-        )}
       </div>
-      {items.map((item) => {
-        const sections = scholarshipCriterionSections(item);
-        return (
-          <div key={item.itemKey} className="scholarship-criteria-source">
-            {sections.map((section) => (
-              <div key={section.id} className="scholarship-criteria-section">
-                {headings[section.kind] && <h3>{headings[section.kind]}</h3>}
-                <ul className="scholarship-criteria-list">
-                  {section.parts.map((part) => {
-                    const index = ++number;
-                    const label = tr(`نص الشرط ${index}`, `Criterion text ${index}`);
-                    return (
-                      <li key={part.id} className="scholarship-criterion">
-                        <span className="scholarship-criterion-dot" aria-hidden="true" />
-                        {onChange ? (
-                          <CriterionInput
-                            text={part.text}
-                            label={label}
-                            focus={focusField === part.id}
-                            onChange={(text) =>
-                              onChange(
-                                items.map((row) =>
-                                  row.itemKey !== item.itemKey
-                                    ? row
-                                    : withScholarshipCriterionSections(
-                                        item,
-                                        sections.map((group) => ({
-                                          ...group,
-                                          parts: group.parts.map((value) =>
-                                            value.id === part.id ? { ...value, text } : value,
-                                          ),
-                                        })),
-                                      ),
-                                ),
-                              )
-                            }
-                          />
-                        ) : (
-                          <p dir="auto">
-                            {part.text || tr('أضف نص الشرط.', 'Add the condition text.')}
-                          </p>
-                        )}
-                        {!onChange && onEdit && (
-                          <button
-                            type="button"
-                            className="scholarship-criterion-action"
-                            aria-label={tr(`تعديل الشرط ${index}`, `Edit criterion ${index}`)}
-                            onClick={() => onEdit(part.id)}
-                          >
-                            <Pencil aria-hidden="true" />
-                          </button>
-                        )}
-                        {onChange && (
-                          <button
-                            type="button"
-                            className="scholarship-criterion-action scholarship-card-delete"
-                            aria-label={tr(`حذف الشرط ${index}`, `Remove criterion ${index}`)}
-                            onClick={() => {
-                              const next = sections
-                                .map((group) => ({
-                                  ...group,
-                                  parts: group.parts.filter((value) => value.id !== part.id),
-                                }))
-                                .filter((group) => group.parts.length);
-                              onChange(
-                                next.length
-                                  ? items.map((row) =>
-                                      row.itemKey === item.itemKey
-                                        ? withScholarshipCriterionSections(item, next)
-                                        : row,
-                                    )
-                                  : items.filter((row) => row.itemKey !== item.itemKey),
-                              );
-                            }}
-                          >
-                            <Trash2 aria-hidden="true" />
-                          </button>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
+      {!view.items.length && (
+        <p>
+          {tr('الشروط غير مذكورة في المصدر', 'Eligibility conditions are not stated in the source')}
+        </p>
+      )}
+      <ul className="scholarship-criteria-list">
+        {view.items.map((item, index) => (
+          <li key={item.key} className="scholarship-criterion">
+            <span className="scholarship-criterion-dot" aria-hidden="true" />
+            {activeKey === item.key ? (
+              <div className="scholarship-criterion-editor">
+                <label>
+                  {tr('نص الشرط', 'Criterion text')}
+                  <textarea
+                    aria-label={tr('نص الشرط', 'Criterion text')}
+                    autoFocus
+                    rows={2}
+                    value={text}
+                    disabled={saving}
+                    onChange={(event) => setText(event.target.value)}
+                  />
+                </label>
+                <label>
+                  {tr('سبب اعتماد التعديل', 'Reason for approving the edit')}
+                  <input
+                    aria-label={tr('سبب اعتماد التعديل', 'Reason for approving the edit')}
+                    value={reason}
+                    disabled={saving}
+                    onChange={(event) => setReason(event.target.value)}
+                  />
+                </label>
+                <div className="scholarship-criterion-editor-actions">
+                  <button
+                    type="button"
+                    className="scholarship-card-add"
+                    disabled={saving || !text.trim() || reason.trim().length < 3}
+                    onClick={() => void save()}
+                  >
+                    {tr('حفظ هذا الشرط', 'Save this criterion')}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={saving}
+                    className="scholarship-card-edit"
+                    onClick={() => {
+                      setActiveKey(null);
+                      setError(null);
+                    }}
+                  >
+                    {tr('إلغاء', 'Cancel')}
+                  </button>
+                </div>
+                {error && <p role="alert">{error}</p>}
               </div>
-            ))}
-          </div>
-        );
-      })}
-      {!items.length && <p>{tr('لم تُضف شروط بعد.', 'No conditions added yet.')}</p>}
-      {onChange && (
-        <button
-          type="button"
-          className="scholarship-card-add"
-          onClick={() =>
-            onChange([
-              ...items,
-              {
-                itemKey: scholarshipCardKey('condition'),
-                itemTypeCode: 'GENERAL',
-                valueText: '',
-                isRequired: true,
-                priorityOrder: items.length + 1,
-              },
-            ])
-          }
-        >
-          <Plus aria-hidden="true" />
-          {tr('إضافة شرط', 'Add condition')}
-        </button>
+            ) : (
+              <>
+                <p dir="auto">
+                  {item.text}
+                  {item.manuallyEdited && (
+                    <span className="scholarship-criterion-edited">
+                      {tr('تعديل معتمد', 'Approved edit')}
+                    </span>
+                  )}
+                </p>
+                {onSaved && (
+                  <button
+                    type="button"
+                    className="scholarship-criterion-action"
+                    disabled={activeKey !== null}
+                    aria-label={tr(`تعديل الشرط ${index + 1}`, `Edit criterion ${index + 1}`)}
+                    onClick={() => {
+                      setText(item.text);
+                      setReason('');
+                      setError(null);
+                      setActiveKey(item.key);
+                    }}
+                  >
+                    <Pencil aria-hidden="true" />
+                    {tr('تعديل', 'Edit')}
+                  </button>
+                )}
+              </>
+            )}
+          </li>
+        ))}
+      </ul>
+      {view.source?.text && (
+        <details className="scholarship-criteria-original">
+          <summary>
+            {tr(
+              'النص الأصلي من الملف — محفوظ للتتبع',
+              'Original source section — retained for traceability',
+            )}
+          </summary>
+          <p className="scholarship-long-text" dir="auto">
+            {view.source.text}
+          </p>
+        </details>
       )}
     </section>
-  );
-}
-
-function CriterionInput({
-  text,
-  label,
-  focus,
-  onChange,
-}: {
-  text: string;
-  label: string;
-  focus: boolean;
-  onChange: (text: string) => void;
-}) {
-  const ref = useRef<HTMLTextAreaElement>(null);
-  return (
-    <>
-      <textarea
-        ref={ref}
-        aria-label={label}
-        autoFocus={focus}
-        value={text}
-        rows={1}
-        dir="auto"
-        onChange={(event) => onChange(event.target.value)}
-      />
-      <button
-        type="button"
-        className="scholarship-criterion-action"
-        aria-label={`✎ ${label}`}
-        onClick={() => ref.current?.focus()}
-      >
-        <Pencil aria-hidden="true" />
-      </button>
-    </>
   );
 }

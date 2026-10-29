@@ -93,6 +93,22 @@ function revisionHeader(revision: number | undefined) {
 }
 
 export const scholarshipCatalogApi = {
+  updateCriterion(
+    id: string,
+    key: string,
+    text: string,
+    reason: string,
+    revision: number | undefined,
+  ) {
+    return adminApiClient.request<ScholarshipDto>(
+      `${BASE}/${encodeURIComponent(id)}/eligibility-criteria/${encodeURIComponent(key)}`,
+      {
+        method: 'PATCH',
+        headers: { 'X-Review-Reason': reason, 'If-Match': revisionHeader(revision) },
+        body: JSON.stringify({ text }),
+      },
+    );
+  },
   detail(id: string) {
     return adminApiClient.request<ScholarshipCatalogDetailResponse>(
       `${BASE}/${encodeURIComponent(id)}/catalog-detail`,

@@ -55,6 +55,33 @@ describe('AdminScholarshipUseCases', () => {
     expect(mockRepo.list).toHaveBeenCalledWith(filters);
   });
 
+  it('saves one source criterion under revision lock without replacing source, enrichment or relationships', async () => {
+    const metadata = { rawSourceSections: { 'الشروط ومعايير التقديم': 'درجة جامعية، سجل أكاديمي قوي.' }, conditionalLanguageEvidence: { score: 100 } };
+    const existing = { id: 'schol-1', displayName: 'Source scholarship', status: ScholarshipStatus.IMPORTED, ...publicationReady, revision: 1, metadata,
+      eligibilityItems: [{ itemKey: 'old-language', valueText: 'Enrichment retained' }], majorTargets: [{ targetKey: 'degree-1', majorId: 'm1' }] };
+    mockRepo.findById = vi.fn().mockResolvedValue(existing);
+    mockRepo.update = vi.fn().mockImplementation(async (_id, updates) => ({ ...existing, ...updates, revision: 2 }));
+    const saved = await useCases.updateEligibilityCriterion('schol-1', 'source-criterion-2', 'سجل أكاديمي متميز.', mutationContext);
+    expect(mockRepo.assertCurrentRevision).toHaveBeenCalledWith('schol-1', 1);
+    const updates = vi.mocked(mockRepo.update).mock.calls[0][1];
+    expect(Object.keys(updates).sort()).toEqual(['metadata', 'status']);
+    expect(updates.metadata?.rawSourceSections).toEqual(metadata.rawSourceSections);
+    expect(updates.metadata?.conditionalLanguageEvidence).toEqual(metadata.conditionalLanguageEvidence);
+    expect(updates.metadata?.eligibilityAuthoring).toMatchObject({ edits: [expect.objectContaining({ key: 'source-criterion-2', text: 'سجل أكاديمي متميز.', actorId: 'reviewer-1' })] });
+    expect(saved.majorTargets).toEqual(existing.majorTargets);
+    expect(saved.eligibilityItems).toEqual(existing.eligibilityItems);
+  });
+
+  it('rejects a stale or unknown criterion and source rewrites without altering the owner record', async () => {
+    const existing = { id: 'schol-1', displayName: 'Source', status: ScholarshipStatus.IMPORTED, ...publicationReady, metadata: { rawSourceSections: { 'الشروط ومعايير التقديم': 'Literal source.' } } };
+    mockRepo.findById = vi.fn().mockResolvedValue(existing);
+    await expect(useCases.updateScholarship('schol-1', { metadata: { rawSourceSections: {} } }, mutationContext)).rejects.toThrow('SOURCE_IMMUTABLE');
+    await expect(useCases.updateEligibilityCriterion('schol-1', 'wrong', 'Text', mutationContext)).rejects.toThrow('NOT_FOUND');
+    mockRepo.assertCurrentRevision = vi.fn().mockRejectedValue(new Error('REVISION_MISMATCH'));
+    await expect(useCases.updateEligibilityCriterion('schol-1', 'source-criterion-1', 'Text', mutationContext)).rejects.toThrow('REVISION_MISMATCH');
+    expect(mockRepo.update).not.toHaveBeenCalled();
+  });
+
   it('updateScholarship updates fields and recomputes completeness', async () => {
     mockRepo.findById = vi.fn().mockResolvedValue({
       id: 'schol-1',

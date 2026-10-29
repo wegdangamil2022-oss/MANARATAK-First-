@@ -1,7 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PrismaScholarshipRepository } from '../../src/scholarships/PrismaScholarshipRepository';
+import { appendScholarshipEligibilityEdit, scholarshipEligibilityView } from '@manaratak/domain';
 
 describe('PrismaScholarshipRepository', () => {
+  it('round trips an individual criterion approval through existing JSON without writing any child relations', async () => {
+    const metadata = { rawSourceSections: { 'الشروط ومعايير التقديم': 'شهادة جامعية، سجل قوي.' }, extraEvidence: { test: 'IELTS' } };
+    let stored: any = { id: 'sch-criteria', revision: 1, displayName: 'Scholarship', status: 'IMPORTED', publicationStatus: 'DRAFT', optionalFields: { metadata }, degreeTargets: [], benefits: [], majorTargets: [], eligibilityItems: [{ itemKey: 'old', valueText: 'Do not delete enrichment' }], requiredDocuments: [], sourceEvidence: [], universityLinks: [] };
+    mockPrisma.$queryRaw = vi.fn().mockResolvedValue([]);
+    mockPrisma.scholarship.findUnique.mockImplementation(async () => stored);
+    mockPrisma.scholarship.update.mockImplementation(async ({ data }: any) => { stored = { ...stored, optionalFields: JSON.parse(JSON.stringify(data.optionalFields)), revision: stored.revision + 1 }; return stored; });
+    const bound = new PrismaScholarshipRepository(mockPrisma, true, programReads);
+    const next = appendScholarshipEligibilityEdit(metadata, 'source-criterion-2', 'سجل متميز.', 'owner', 'اعتماد التعديل', '2026-10-29T16:00:00Z');
+    await bound.update('sch-criteria', { metadata: next });
+    const reread = await bound.findById('sch-criteria');
+    expect(scholarshipEligibilityView(reread?.metadata).items.map((item) => item.text)).toEqual(['شهادة جامعية.', 'سجل متميز.']);
+    expect(reread?.metadata?.rawSourceSections).toEqual(metadata.rawSourceSections);
+    expect(reread?.eligibilityItems?.[0].valueText).toBe('Do not delete enrichment');
+    for (const key of ['eligibilityItems', 'majorTargets', 'degreeTargets', 'universityLinks', 'benefits', 'requiredDocuments'])
+      expect(mockPrisma.scholarship.update.mock.calls[0][0].data[key]).toBeUndefined();
+  });
   let mockPrisma: any;
   let repository: PrismaScholarshipRepository;
   let programReads: any;

@@ -174,6 +174,7 @@ export function ScholarshipDetailPage() {
   const [focusField, setFocusField] = useState<string>();
   const [relationshipEditing, setRelationshipEditing] = useState(false);
   const [relationshipDirty, setRelationshipDirty] = useState(false);
+  const [criterionDirty, setCriterionDirty] = useState(false);
   const [translationOpen, setTranslationOpen] = useState(false);
   const [decisionReason, setDecisionReason] = useState('');
   const [pendingLeave, setPendingLeave] = useState<null | (() => void)>(null);
@@ -345,7 +346,7 @@ export function ScholarshipDetailPage() {
   }, [load]);
 
   const dirty = !!detail && JSON.stringify(form) !== savedForm.current;
-  const unsaved = dirty || relationshipDirty;
+  const unsaved = dirty || relationshipDirty || criterionDirty;
   const leaveApproved = useRef(false);
   const guard = (action: () => void) => {
     if (unsaved) setPendingLeave(() => action);
@@ -789,9 +790,9 @@ export function ScholarshipDetailPage() {
           </p>
         </div>
         <div className="scholarship-detail-actions">
-          {canEdit && !editing && (
+          {canEdit && !editing && activeTab !== 'eligibility' && (
             <button
-              disabled={relationshipDirty}
+              disabled={relationshipDirty || criterionDirty}
               title={
                 relationshipDirty
                   ? tr(
@@ -885,7 +886,14 @@ export function ScholarshipDetailPage() {
             aria-controls="scholarship-content"
             aria-selected={activeTab === tab.key}
             key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() =>
+              criterionDirty
+                ? guard(() => {
+                    setCriterionDirty(false);
+                    setActiveTab(tab.key);
+                  })
+                : setActiveTab(tab.key)
+            }
             onKeyDown={(event) => {
               if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
               event.preventDefault();
@@ -898,7 +906,12 @@ export function ScholarshipDetailPage() {
                         (event.key === 'ArrowRight' ? 1 : -1) * (dir === 'rtl' ? -1 : 1) +
                         9) %
                       9;
-              setActiveTab(navTabs[next].key);
+              if (criterionDirty)
+                guard(() => {
+                  setCriterionDirty(false);
+                  setActiveTab(navTabs[next].key);
+                });
+              else setActiveTab(navTabs[next].key);
               document.getElementById('scholarship-tab-' + navTabs[next].key)?.focus();
             }}
           >
@@ -968,13 +981,29 @@ export function ScholarshipDetailPage() {
             />
           </div>
         )}
-        {(!editing || activeTab === 'degrees_majors') &&
+        {(!editing || activeTab === 'degrees_majors' || activeTab === 'eligibility') &&
           activeTab !== 'health_audit' &&
           !(relationshipEditing && activeTab === 'degrees_majors') && (
             <ScholarshipDetailReadView
               scholarship={scholarship}
               tab={activeTab}
               language={language}
+              onCriterionDirtyChange={setCriterionDirty}
+              onCriterionSaved={
+                canEdit && !dirty && !relationshipDirty && !readbackUncertain
+                  ? async (updated) => {
+                      if (
+                        !mounted.current ||
+                        currentScope.current !== ownerEpoch ||
+                        updated.id !== id
+                      )
+                        throw new Error('SCHOLARSHIP_OWNER_SCOPE_CHANGED');
+                      setReadbackUncertain(true);
+                      if (!(await load(updated)))
+                        throw new Error('SCHOLARSHIP_CRITERION_READBACK_UNCERTAIN');
+                    }
+                  : undefined
+              }
               onEdit={
                 canEdit && !saving && !relationshipDirty && !dirty
                   ? (field) => {
@@ -1160,7 +1189,7 @@ export function ScholarshipDetailPage() {
         </main>
       </div>
 
-      {editing && (
+      {editing && activeTab !== 'eligibility' && (
         <form
           className="scholarship-edit-bar"
           onSubmit={(event) => {
