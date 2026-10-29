@@ -464,6 +464,27 @@ export class PrismaStaffLifecycleRepository implements IStaffLifecycleRepository
     await this.event(m.id, 'STAFF_' + r.action, r.requestedBy, r.reason, tx);
   }
   async adminAccessAllowed(identityId: string) {
+    try {
+      // Recheck the current flag, membership and time bounds together. No cached grants.
+      const [state] = await this.db.$queryRaw<Array<{ allowed: boolean }>>(Prisma.sql`
+        SELECT CASE WHEN access."identityId" IS NOT NULL
+          THEN access.allowed AND membership.status='ACTIVE'
+            AND (membership."startsAt" IS NULL OR membership."startsAt"<=clock_timestamp())
+            AND (membership."endsAt" IS NULL OR membership."endsAt">clock_timestamp())
+          ELSE NOT EXISTS(SELECT 1 FROM "StaffMembershipRecord" m
+            WHERE m."identityId"=${identityId} AND m.status IN ('ACTIVE','SUSPENDED','ENDED'))
+        END AS allowed
+        FROM (SELECT 1) anchor
+        LEFT JOIN ("StaffAdminAccessRecord" access JOIN "StaffMembershipRecord" membership
+          ON membership.id=access."membershipId" AND membership."identityId"=access."identityId")
+          ON access."identityId"=${identityId}
+      `);
+      return state?.allowed === true;
+    } catch (error) {
+      // Preserve compatibility with installations that have not installed staff tables.
+      if (!(error && typeof error === 'object' && 'code' in error && error.code === 'P2010'
+        && 'meta' in error && (error.meta as { code?: string })?.code === '42P01')) throw error;
+    }
     const probe = await this.db.$queryRaw<Array<{ present: boolean; memberships: boolean }>>(
       Prisma.sql`SELECT to_regclass(format('%I.%I',current_schema(),'StaffAdminAccessRecord')) IS NOT NULL AS present, to_regclass(format('%I.%I',current_schema(),'StaffMembershipRecord')) IS NOT NULL AS memberships`,
     );

@@ -186,13 +186,15 @@ export function MajorAdminPage() {
     return '/majors/'+encodeURIComponent(major.id)+'?'+params;
   };
 
+  const listLoaded = data !== null;
   useEffect(() => {
+    if (view !== 'new' && !listLoaded) return;
     const controller = new AbortController();
     adminApiClient.request<{ total: number }>(`/admin/majors/new-candidates?page=1&pageSize=1`, { signal: controller.signal })
       .then((result) => setNewCandidatesTotal(Number.isFinite(result.total)?result.total:null))
       .catch(() => undefined);
     return () => controller.abort();
-  }, []);
+  }, [view, listLoaded]);
 
   useEffect(() => {
     if (view === 'new') return;
@@ -225,7 +227,7 @@ export function MajorAdminPage() {
       }
     };
 
-    const timer=window.setTimeout(()=>void fetchMajors(),250);
+    const timer=window.setTimeout(()=>void fetchMajors(),search.trim()?250:0);
     return () => {window.clearTimeout(timer);controller.abort();};
   }, [page, statusFilter, completenessFilter, degreeFilter, taxonomyIdFilter, academicFieldFilter,disciplineFilter,collegeFilter,search, view,sort,refresh]);
 
@@ -422,9 +424,9 @@ export function MajorAdminPage() {
                   </select>
                 </div>
 
-                {canReadTaxonomy&&view!=='catalog'&&<CanonicalPicker label="التصنيف المعياري" icon={<Layers3 aria-hidden="true" className="h-3.5 w-3.5" />} value={taxonomyIdFilter} onChange={id=>{setTaxonomyIdFilter(id??'');setPage(1);}} load={(query,page)=>canonicalPickerApi.taxonomyNodes(undefined,query,page)} reloadKey="major-filter-taxonomy" optional compact paged allowInactive />}
-                {canReadTaxonomy&&view!=='catalog'&&<CanonicalPicker label="المجال الأكاديمي" icon={<BookOpen aria-hidden="true" className="h-3.5 w-3.5" />} value={academicFieldFilter} onChange={id=>{setAcademicFieldFilter(id??'');setPage(1);}} load={(query,page)=>canonicalPickerApi.taxonomyNodes('ACADEMIC_FIELD',query,page)} reloadKey="major-filter-field" optional compact paged allowInactive />}
-                {canReadTaxonomy&&view!=='catalog'&&<CanonicalPicker label="التصنيف الفرعي" icon={<Layers3 aria-hidden="true" className="h-3.5 w-3.5" />} value={disciplineFilter} onChange={id=>{setDisciplineFilter(id??'');setPage(1);}} load={(query,page)=>canonicalPickerApi.taxonomyNodes('DISCIPLINE',query,page)} reloadKey="major-filter-discipline" optional compact paged allowInactive />}
+                {canReadTaxonomy&&view!=='catalog'&&<CanonicalPicker label="التصنيف المعياري" icon={<Layers3 aria-hidden="true" className="h-3.5 w-3.5" />} value={taxonomyIdFilter} onChange={id=>{setTaxonomyIdFilter(id??'');setPage(1);}} load={(query,page,_cursor,signal)=>canonicalPickerApi.taxonomyNodes(undefined,query,page,signal)} reloadKey="major-filter-taxonomy" optional compact paged allowInactive />}
+                {canReadTaxonomy&&view!=='catalog'&&<CanonicalPicker label="المجال الأكاديمي" icon={<BookOpen aria-hidden="true" className="h-3.5 w-3.5" />} value={academicFieldFilter} onChange={id=>{setAcademicFieldFilter(id??'');setPage(1);}} load={(query,page,_cursor,signal)=>canonicalPickerApi.taxonomyNodes('ACADEMIC_FIELD',query,page,signal)} reloadKey="major-filter-field" optional compact paged allowInactive />}
+                {canReadTaxonomy&&view!=='catalog'&&<CanonicalPicker label="التصنيف الفرعي" icon={<Layers3 aria-hidden="true" className="h-3.5 w-3.5" />} value={disciplineFilter} onChange={id=>{setDisciplineFilter(id??'');setPage(1);}} load={(query,page,_cursor,signal)=>canonicalPickerApi.taxonomyNodes('DISCIPLINE',query,page,signal)} reloadKey="major-filter-discipline" optional compact paged allowInactive />}
                 <label><span><Building2 aria-hidden="true" />الكلية</span><input type="search" disabled={view==='catalog'} maxLength={200} value={collegeFilter} onChange={event=>{setCollegeFilter(event.target.value);setPage(1);}} placeholder="اسم الكلية كما ورد في المصدر" /></label>
               </div>
 

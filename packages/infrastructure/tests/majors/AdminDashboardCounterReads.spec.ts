@@ -4,6 +4,20 @@ import {PrismaUniversityRepository} from '../../src/universities/PrismaUniversit
 import {MajorStatus,UniversityStatus} from '@manaratak/domain';
 
 describe('Admin dashboard counter reads',()=>{
+ it('loads a paged major graph in four reads and preserves profile relationships and UTC timestamps',async()=>{
+  const db={$queryRaw:vi.fn(async(query:any)=>{
+   if(query.text.includes('count(*) AS total'))return[{total:1n,uniqueRootTotal:1n,published:0n,needsReview:1n,complete:1n}];
+   if(query.text.includes('SELECT "majorId","profileId"'))return[{majorId:'major',profileId:'profile'}];
+   if(query.text.includes('SELECT m.*'))return[{id:'major',displayName:'Root',updatedAt:new Date('2026-01-01T12:00:00Z'),optionalFields:{displayName:'Shadow'},sources:[{importedAt:'2026-01-01T12:00:00'}],levelProfiles:[{id:'profile',level:'BACHELOR',displayName:'Profile',updatedAt:'2026-01-01T12:00:00',academicField:{id:'field',canonicalName:'Canonical field',createdAt:'2026-01-01T12:00:00'},classificationMappings:[{id:'mapping',taxonomyNodeId:'field',relationshipType:'PRIMARY'}]}]}];
+   return[{profileId:'profile',state:'NO_CONTENT'}];
+  })};
+  const result=await new PrismaMajorRepository(db as any).list({page:1,pageSize:24});
+  expect(db.$queryRaw).toHaveBeenCalledTimes(4);expect(result.total).toBe(1);
+  expect(result.data[0].displayName).toBe('Profile');expect(result.data[0].profileId).toBe('profile');
+  expect(new Date(result.data[0].updatedAt!).toISOString()).toBe('2026-01-01T12:00:00.000Z');
+  expect(result.data[0].profiles?.[0].academicField?.nodeId).toBe('field');
+  expect(result.data[0].profiles?.[0].classificationMappings?.[0].taxonomyNodeId).toBe('field');
+ });
  it('counts major profile rows without fetching their full owner graphs, preserving filter semantics',async()=>{
   const aggregates:any[]=[];
   const db={major:{findMany:vi.fn()},$queryRaw:vi.fn(async(query:any)=>{

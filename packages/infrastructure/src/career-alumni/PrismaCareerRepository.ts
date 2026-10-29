@@ -195,6 +195,10 @@ export class PrismaCareerRepository implements ICareerRepository {
       where.employer = { verificationStatus: CareerEmployerStatus.VERIFIED };
       where.OR = [{ applicationDeadline: null }, { applicationDeadline: { gt: new Date() } }];
     }
+    if (filters.countOnly) {
+      const total = await this.jobs().count({where});
+      return {data:[],total,page,pageSize,totalPages:Math.ceil(total/pageSize)};
+    }
     const [rows,total]=await this.prisma.$transaction(async tx => Promise.all([this.jobs(tx).findMany({where,include:{employer:true},orderBy:[{updatedAt:'desc'},{id:'asc'}],skip:(page-1)*pageSize,take:pageSize}),this.jobs(tx).count({where})]), { isolationLevel: 'RepeatableRead' });
     return {data:rows.map((r:any)=>this.mapJob(r)),total,page,pageSize,totalPages:Math.ceil(total/pageSize)};
   }

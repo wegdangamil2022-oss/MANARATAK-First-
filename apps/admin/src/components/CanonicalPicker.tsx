@@ -3,7 +3,7 @@ import { useTranslation } from '../i18n/I18nProvider';
 import { type CanonicalPickerOption, type CanonicalPickerPage, canonicalOptionIsSelectable } from '../api/canonicalPickers';
 
 type Loader = (query?: string, page?: number) => Promise<CanonicalPickerOption[]>;
-type PickerLoader = (query?: string, page?: number, cursor?: string) => Promise<CanonicalPickerOption[] | CanonicalPickerPage>;
+type PickerLoader = (query?: string, page?: number, cursor?: string, signal?: AbortSignal) => Promise<CanonicalPickerOption[] | CanonicalPickerPage>;
 
 export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'default', optional = false, disabled = false, paged = false, allowInactive = false, compact = false, icon }: {
   label: string;
@@ -35,9 +35,10 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
   useEffect(() => { cursors.current = [undefined]; setNextCursor(undefined); setPage(1); }, [reloadKey]);
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
     setState('loading');
     setError('');
-    const timer = setTimeout(() => loaderRef.current(search.trim(), paged ? page : 1, cursors.current[page - 1]).then((result) => {
+    const timer = setTimeout(() => loaderRef.current(search.trim(), paged ? page : 1, cursors.current[page - 1], controller.signal).then((result) => {
       if (!active) return;
       const items = Array.isArray(result) ? result : result.options;
       const cursor = Array.isArray(result) ? undefined : result.nextCursor;
@@ -51,7 +52,7 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
       setError(err instanceof Error ? err.message : 'Canonical options unavailable');
       setState('error');
     }), 200);
-    return () => { active = false; clearTimeout(timer); };
+    return () => { active = false; clearTimeout(timer); controller.abort(); };
   }, [reloadKey, search, page, paged, compact]);
 
   const selected = useMemo(() => options.find((item) => item.id === value), [options, value]);

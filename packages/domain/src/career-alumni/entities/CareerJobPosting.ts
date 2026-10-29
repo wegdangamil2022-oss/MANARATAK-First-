@@ -61,6 +61,7 @@ export interface UpdateCareerJobPostingDto {
 export type CareerJobRepositoryUpdateDto = UpdateCareerJobPostingDto & { canonicalTitle?: string; canonicalDedupKey?: string };
 
 export interface CareerJobFilters {
+  countOnly?: boolean;
   status?: CareerJobStatus;
   opportunityType?: CareerOpportunityType;
   employmentType?: EmploymentType;

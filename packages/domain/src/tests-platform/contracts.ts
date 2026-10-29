@@ -679,6 +679,7 @@ export interface UpsertInternationalTestContentBlockDto {
 
 
 export interface InternationalTestFilters {
+  countOnly?: boolean;
   cursor?:string;
   cursorMode?:boolean;
   searchQuery?: string;

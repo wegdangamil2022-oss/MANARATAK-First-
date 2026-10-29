@@ -76,6 +76,44 @@ export async function loadDashboardSources(
   signal: AbortSignal,
   onReading: (reading: DashboardReading) => void,
 ): Promise<void> {
+  const catalogs = readings.filter(reading =>
+    ['universities','scholarships','majors','courses','tests','careers','cms'].includes(reading.source.domain)
+      && reading.source.key === `${reading.source.domain}:total` && reading.state !== 'forbidden');
+  if (catalogs.length > 1) {
+    const grouped = new Set(catalogs.map(reading => reading.source.key));
+    const controller = new AbortController();
+    const combined = AbortSignal.any([signal, controller.signal]);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const pending = Promise.race([
+      request(`/admin/dashboard/catalogs?keys=${catalogs.map(reading => reading.source.domain).join(',')}`, { signal: combined, cache: 'no-store' }),
+      new Promise<never>((_,reject) => { timer=setTimeout(() => { controller.abort(); reject(new Error('TIMED_OUT')); },30000); }),
+    ]).finally(() => clearTimeout(timer));
+    await Promise.all([
+      pending.then(async raw => {
+        const sources = raw && typeof raw === 'object' && 'sources' in raw ? raw.sources as Record<string, {state?: string;total?: number}> : {};
+        for (const previous of catalogs) {
+          if (signal.aborted) return;
+          const value = sources[previous.source.domain];
+          const reading = await readDashboardSource(previous, async () => {
+            if (value?.state === 'forbidden') throw new Error('[403]');
+            if (value?.state !== 'available') throw new Error('[503]');
+            return { total: value.total };
+          }, signal);
+          if (!signal.aborted) onReading(reading);
+        }
+        if (!signal.aborted && typeof window !== 'undefined'
+          && Object.values(sources).some(source => source?.state === 'forbidden'))
+          window.dispatchEvent(new Event('manaratak-admin-permission-changed'));
+      }).catch(async error => {
+        for (const previous of catalogs) {
+          const reading = await readDashboardSource(previous, async () => { throw error; }, signal);
+          if (!signal.aborted) onReading(reading);
+        }
+      }),
+      loadDashboardSources(readings.filter(reading => !grouped.has(reading.source.key)),request,signal,onReading),
+    ]);
+    return;
+  }
   let index = 0;
   await Promise.all(
     Array.from({ length: Math.min(3, readings.length) }, async () => {

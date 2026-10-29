@@ -173,6 +173,7 @@ export interface CmsContentDetailDto extends CmsContentDto {
 }
 
 export interface CmsContentFilters {
+  countOnly?: boolean;
   status?: CmsContentStatus;
   contentType?: CmsContentType;
   categorySlug?: string;

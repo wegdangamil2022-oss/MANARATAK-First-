@@ -491,6 +491,10 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     ] });
     if (constraints.length) where.AND = constraints;
 
+    if (filters.countOnly) {
+      const total = await this.prisma.scholarship.count({where});
+      return {data:[],total,page,pageSize,totalPages:Math.ceil(total/pageSize)};
+    }
     let data:any[];let total:number;
     if(filters.sort==='DEADLINE_ASC'){
       const snapshot=await this.prisma.$transaction(async db=>{

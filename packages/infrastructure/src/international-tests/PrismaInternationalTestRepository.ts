@@ -583,6 +583,10 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
       ]}]; delete where.OR;
     }
 
+    if (filters.countOnly) {
+      const total = await this.prisma.internationalTest.count({where});
+      return {data:[],total,page,pageSize,totalPages:Math.ceil(total/pageSize)};
+    }
     const [data, total, groups] = await Promise.all([
       this.prisma.internationalTest.findMany({
         where,

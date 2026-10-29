@@ -85,11 +85,11 @@ export const canonicalPickerApi = {
     const response = await adminApiClient.request<DataEnvelope<Record<string, unknown>>>('/admin/academic-taxonomy/degree-levels');
     return response.data.filter(item => !query.trim() || [item.nameAr, item.nameEn, item.canonicalCode].some(value => String(value ?? '').toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()))).map((item) => option(item));
   },
-  async taxonomyNodes(nodeType?: 'ACADEMIC_FIELD' | 'DISCIPLINE', query = '', page = 1): Promise<CanonicalPickerOption[]> {
+  async taxonomyNodes(nodeType?: 'ACADEMIC_FIELD' | 'DISCIPLINE', query = '', page = 1, signal?: AbortSignal): Promise<CanonicalPickerOption[]> {
     const params = new URLSearchParams({ page: String(page), pageSize: '50' });
     if (nodeType) params.set('nodeType', nodeType);
     if (query.trim()) params.set('q', query.trim());
-    const response = await adminApiClient.request<DataEnvelope<Record<string, unknown>>>(`/admin/academic-taxonomy/nodes?${params}`);
+    const response = await adminApiClient.request<DataEnvelope<Record<string, unknown>>>(`/admin/academic-taxonomy/nodes?${params}`, { signal });
     return response.data.map((item) => option({ ...item, id: item.nodeId ?? item.id }));
   },
   async majors(query = '', page = 1): Promise<CanonicalPickerOption[]> {

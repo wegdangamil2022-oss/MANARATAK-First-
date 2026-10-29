@@ -434,15 +434,17 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
       filters.countOnly ? Promise.resolve([] as Array<{majorId:string;profileId:string|null}>) : this.prisma.$queryRaw<Array<{majorId:string;profileId:string|null}>>(Prisma.sql`${query} SELECT "majorId","profileId" FROM filtered ORDER BY ${order},"rowId" DESC LIMIT ${pageSize} OFFSET ${(page-1)*pageSize}`),
       this.prisma.$queryRaw<Array<{total:bigint;uniqueRootTotal:bigint;published:bigint;needsReview:bigint;complete:bigint}>>(Prisma.sql`${query} SELECT count(*) AS total,count(DISTINCT "majorId") AS "uniqueRootTotal",count(*) FILTER(WHERE status='PUBLISHED') AS published,count(*) FILTER(WHERE status='READY_TO_REVIEW' OR "completenessStatus"='NEEDS_REVIEW') AS "needsReview",count(*) FILTER(WHERE "completenessStatus"='COMPLETE') AS complete FROM filtered`),
     ]);
-    const majors=ids.length?await this.prisma.major.findMany({where:{id:{in:[...new Set(ids.map(row=>row.majorId))]}},include:MAJOR_INCLUDE}):[];
     const profileIds=ids.flatMap(row=>row.profileId?[row.profileId]:[]);
-    const content=profileIds.length?await this.prisma.$queryRaw<Array<{profileId:string;versionId:string;state:'NO_CONTENT'|'INCOMPLETE'|'NEEDS_REVIEW'|'REVIEWED'}>>(Prisma.sql`
+    const [majors,content]=await Promise.all([
+      ids.length?this.listOwnerGraphs([...new Set(ids.map(row=>row.majorId))]):[],
+      profileIds.length?this.prisma.$queryRaw<Array<{profileId:string;versionId:string;state:'NO_CONTENT'|'INCOMPLETE'|'NEEDS_REVIEW'|'REVIEWED'}>>(Prisma.sql`
       SELECT p.id AS "profileId",v.id AS "versionId",CASE WHEN count(s.id)=0 THEN 'NO_CONTENT'
         WHEN bool_or(btrim(s.content)='' OR s."reviewStatus"='INCOMPLETE') THEN 'INCOMPLETE'
         WHEN v.status='APPROVED' AND v."approvedBy" IS NOT NULL AND bool_and(s."reviewStatus"='APPROVED') THEN 'REVIEWED' ELSE 'NEEDS_REVIEW' END AS state
       FROM "MajorLevelProfile" p LEFT JOIN LATERAL (SELECT id,status,"approvedBy" FROM "MajorVersion" WHERE "profileId"=p.id ORDER BY "versionNumber" DESC LIMIT 1) v ON true
       LEFT JOIN "MajorContentSection" s ON s."versionId"=v.id AND s."profileId"=p.id
-      WHERE p.id IN (${Prisma.join(profileIds)}) GROUP BY p.id,v.id,v.status,v."approvedBy"`):[];
+      WHERE p.id IN (${Prisma.join(profileIds)}) GROUP BY p.id,v.id,v.status,v."approvedBy"`):[],
+    ]);
     const data=ids.map(row=>{
       const record=majors.find(major=>major.id===row.majorId);if(!record) throw new Error('MAJOR_LIST_OWNER_CHANGED');
       const major=this.mapToDto(record);const profile=major.profiles?.find(item=>item.id===row.profileId);
@@ -454,6 +456,47 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     });
     const total=Number(counts[0]?.total ?? 0);
     return {data,total,page,pageSize,totalPages:Math.ceil(total/pageSize),countUnit:'DEGREE_PROFILE_OR_UNPROFILED_ROOT',uniqueRootTotal:Number(counts[0]?.uniqueRootTotal??0),stats:{published:Number(counts[0]?.published ?? 0),needsReview:Number(counts[0]?.needsReview ?? 0),complete:Number(counts[0]?.complete ?? 0)}};
+  }
+
+  /** Same bounded owner graph as MAJOR_INCLUDE, in one database round trip. */
+  private async listOwnerGraphs(ids: string[]) {
+    const records = await this.prisma.$queryRaw<Array<Record<string, any>>>(Prisma.sql`
+      SELECT m.*, to_jsonb(af) AS "academicField", to_jsonb(d) AS discipline,
+        COALESCE((SELECT jsonb_agg(c) FROM "MajorClassificationMapping" c WHERE c."majorId"=m.id),'[]'::jsonb) AS "classificationMappings",
+        COALESCE((SELECT jsonb_agg(s ORDER BY s."createdAt" DESC) FROM (
+          SELECT s.* FROM "MajorSource" s WHERE s."majorId"=m.id ORDER BY s."createdAt" DESC LIMIT 50
+        ) s),'[]'::jsonb) AS sources,
+        COALESCE((SELECT jsonb_agg(to_jsonb(p) || jsonb_build_object(
+          'degreeLevel',to_jsonb(dl),'academicField',to_jsonb(paf),'discipline',to_jsonb(pd),
+          'classificationMappings',COALESCE((SELECT jsonb_agg(c) FROM "MajorClassificationMapping" c WHERE c."profileId"=p.id),'[]'::jsonb)
+        )) FROM "MajorLevelProfile" p
+          LEFT JOIN "DegreeLevel" dl ON dl.id=p."degreeLevelId"
+          LEFT JOIN "AcademicTaxonomyNode" paf ON paf.id=p."academicFieldId"
+          LEFT JOIN "AcademicTaxonomyNode" pd ON pd.id=p."disciplineId"
+          WHERE p."majorId"=m.id),'[]'::jsonb) AS "levelProfiles"
+      FROM "Major" m
+      LEFT JOIN "AcademicTaxonomyNode" af ON af.id=m."academicFieldId"
+      LEFT JOIN "AcademicTaxonomyNode" d ON d.id=m."disciplineId"
+      WHERE m.id IN (${Prisma.join(ids)})
+    `);
+    // Prisma treats timestamp-without-time-zone columns as UTC. PostgreSQL JSON
+    // omits the zone, so restore Date values at the known relation boundaries.
+    const dates = (record: any) => {
+      if (!record) return record;
+      for (const key of ['createdAt','updatedAt','importedAt']) {
+        const value = record[key];
+        if (typeof value === 'string') record[key] = new Date(/[zZ]|[+-]\d\d:\d\d$/.test(value) ? value : value+'Z');
+      }
+      return record;
+    };
+    for (const record of records) {
+      dates(record.academicField); dates(record.discipline);
+      record.sources.forEach(dates);
+      for (const profile of record.levelProfiles) {
+        dates(profile); dates(profile.degreeLevel); dates(profile.academicField); dates(profile.discipline);
+      }
+    }
+    return records;
   }
 
   async findPublishedSnapshot(slug:string,options?:{degreeLevel?:string;profileCode?:string}):Promise<MajorDto|null> {

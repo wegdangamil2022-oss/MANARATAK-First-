@@ -284,6 +284,10 @@ export class PrismaCmsRepository implements ICmsRepository {
           }
         : {}),
     };
+    if (filters.countOnly) {
+      const total = await this.db.cmsContentNode.count({where});
+      return {data:[],total,page,pageSize,totalPages:Math.ceil(total/pageSize)};
+    }
     const [rows, total] = await Promise.all([
       this.db.cmsContentNode.findMany({
         where,
