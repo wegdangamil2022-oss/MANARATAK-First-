@@ -126,6 +126,15 @@ describe('Atomic scholarship criteria', () => {
     expect(saved.valueText).toContain('IELTS One Skill Retake.');
   });
   it('rejects an empty subcriterion and ignores stale presentation when canonical text changed elsewhere', () => {
+    expect(
+      scholarshipEditorValidation(
+        {
+          displayName: 'Scholarship',
+          eligibilityItems: [{ ...general, valueText: null, minimumValue: 18 }],
+        },
+        false,
+      ),
+    ).toBeNull();
     const sections = scholarshipCriterionSections(general);
     sections[0].parts[1].text = '';
     const changed = withScholarshipCriterionSections(general, sections);

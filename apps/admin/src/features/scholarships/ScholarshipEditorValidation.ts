@@ -11,10 +11,12 @@ export function scholarshipEditorValidation(
     return fail('اكتب اسم المنحة قبل الحفظ.', 'Enter the scholarship name before saving.');
   if (
     input.benefits?.some((item) => item.valueText === '') ||
-    input.eligibilityItems?.some((item) =>
-      scholarshipCriterionSections(item).some((section) =>
-        section.parts.some((part) => !part.text.trim()),
-      ),
+    input.eligibilityItems?.some(
+      (item) =>
+        item.valueText != null &&
+        scholarshipCriterionSections(item).some((section) =>
+          section.parts.some((part) => !part.text.trim()),
+        ),
     ) ||
     input.requiredDocumentItems?.some((item) => !item.displayName.trim())
   )
