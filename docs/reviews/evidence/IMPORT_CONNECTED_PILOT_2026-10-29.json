@@ -1,0 +1,561 @@
+{
+  "kind": "ORIGINAL_CONNECTED_IMPORT_PILOT",
+  "observedAt": "2026-10-29T02:39:26.250Z",
+  "sourceSha": "42b50853e8ca0a6a634fd0d30fa7a904d2c70444",
+  "initialDataImportSourceSha": "144936956d0387f2fceffe996a011eb55b58b32e",
+  "scope": "ORIGINAL_NEON_DEVELOPMENT",
+  "completion": "MANAGED_INITIAL_TEST_AND_UNIVERSITY_DRAFTS_APPLIED_SCHOLARSHIP_HELD",
+  "backup": {
+    "tables": 309,
+    "bytes": 2067963,
+    "sha256": "62d11e997ebfb5d0d4b0367d63a85af210bc71ea5631a7720bf45da2413b9899"
+  },
+  "restore": {
+    "tables": 309,
+    "allRowsMatched": true,
+    "comparison": "TABLE_NAME_KEYED_WITH_IDENTICAL_SORTED_ROW_HASHES",
+    "disposablePostgresMajor": 16
+  },
+  "tests": {
+    "count": 2,
+    "versions": 2,
+    "contentBlocks": 36,
+    "planHash": "07258f5c1792765f7c58c4daffcb6d3945d9a0797e3b2fd2903060b3bfb06957",
+    "previewHash": "5521ec5a8fbc072bbf556a6ad7ab5ba0cd961decf094d83fe618fe16adc9b66c",
+    "targets": [
+      {
+        "id": "9f1ad05a-9e55-4193-8f03-47f1b5e54f9d",
+        "publicId": "TOEFL-IBT",
+        "sourceHash": "c6512fb6328dc1b714d64b42ffd2f6cfcab5c577552aaa2236560f30db937457"
+      },
+      {
+        "id": "03fd4566-0c22-49fe-aa0b-80c9bb713ca2",
+        "publicId": "IELTS",
+        "sourceHash": "52c7bbea615899ed94eb1ed5b8c5be068f03b900faec77bf6aaa8c293ded48f8"
+      }
+    ],
+    "reconciled": "PASS",
+    "replayAdditionalWrites": 0,
+    "publiclyVisible": 0,
+    "contentVerification": "NEEDS_REVIEW"
+  },
+  "universities": {
+    "count": 4,
+    "sources": 4,
+    "changeSets": 2,
+    "changes": 8,
+    "records": [
+      {
+        "id": "e98f2b53-6e98-4f22-a5c3-725dc6730771",
+        "publicId": "INS-TUR-0145",
+        "displayName": "Middle East Technical University",
+        "countryReferenceId": "2c14f864-d235-4276-8c87-d1bb19ceca0d",
+        "regionReferenceId": "d9db85b6-b3d0-42a7-b45e-5eb6b0b5a66b",
+        "cityReferenceId": "25d9c584-2cd4-47ac-98a4-f7c3e68588ef",
+        "status": "READY_TO_REVIEW",
+        "completenessStatus": "NEEDS_REVIEW",
+        "officialWebsite": "https://www.metu.edu.tr/",
+        "officialSourceUrl": "https://www.metu.edu.tr/"
+      },
+      {
+        "id": "301d138c-a55a-4022-8279-1fe199751402",
+        "publicId": "INS-HUN-0006",
+        "displayName": "Eötvös Loránd University",
+        "countryReferenceId": "aa450b59-9731-4869-b3e8-7713aed3ae72",
+        "regionReferenceId": "7ccf3f41-ce49-4693-b545-974edd9d3ef9",
+        "cityReferenceId": "b986d010-bceb-481f-b9d9-572b33acab5e",
+        "status": "READY_TO_REVIEW",
+        "completenessStatus": "NEEDS_REVIEW",
+        "officialWebsite": "https://www.elte.hu/en",
+        "officialSourceUrl": "https://elte.hu/en/central-international-relations-office"
+      },
+      {
+        "id": "b6749423-cc46-4bbd-94ce-a2f916c56fe1",
+        "publicId": "INS-CHN-0001",
+        "displayName": "Peking University",
+        "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+        "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+        "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37",
+        "status": "READY_TO_REVIEW",
+        "completenessStatus": "NEEDS_REVIEW",
+        "officialWebsite": "https://www.pku.edu.cn/",
+        "officialSourceUrl": "https://www.pku.edu.cn/"
+      },
+      {
+        "id": "5ba8bf4c-6fcd-442e-8e31-1ba67d471400",
+        "publicId": "INS-CHN-0003",
+        "displayName": "Tsinghua University",
+        "countryReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+        "regionReferenceId": "8dc20c74-d135-49b3-ab53-e8f6d72cef90",
+        "cityReferenceId": "73e46ebf-5ee3-4ad2-98f9-9ef38ae2ed37",
+        "status": "READY_TO_REVIEW",
+        "completenessStatus": "NEEDS_REVIEW",
+        "officialWebsite": "https://www.tsinghua.edu.cn/",
+        "officialSourceUrl": "https://www.tsinghua.edu.cn/en/Contact.htm"
+      }
+    ],
+    "plans": [
+      {
+        "id": "STAGE_1:0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2:8dcbee6bbaae21f76ecf8bf9707e65a0452de7aaaa3325b07fa58881362eb383",
+        "planHash": "8dcbee6bbaae21f76ecf8bf9707e65a0452de7aaaa3325b07fa58881362eb383"
+      },
+      {
+        "id": "STAGE_1:24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030:fbe142c069d4b1835437daff1cb96c623897b8ae1361a01922ea8089f8592290",
+        "planHash": "fbe142c069d4b1835437daff1cb96c623897b8ae1361a01922ea8089f8592290"
+      }
+    ],
+    "artifactSha256": "1220efd6568914f03d9426d4944f8b68a2231caa947d8f6b1e716e978fb9025e",
+    "scannerReceipts": [
+      {
+        "provider": "WINDOWS_DEFENDER",
+        "sha256": "1220efd6568914f03d9426d4944f8b68a2231caa947d8f6b1e716e978fb9025e",
+        "exitCode": 0,
+        "digestUnchanged": true,
+        "clean": true,
+        "signatureVersion": "1.463.16.0",
+        "signatureUpdatedAt": "2026-10-28T20:03:00.0000000Z"
+      },
+      {
+        "provider": "WINDOWS_DEFENDER",
+        "sha256": "1220efd6568914f03d9426d4944f8b68a2231caa947d8f6b1e716e978fb9025e",
+        "exitCode": 0,
+        "digestUnchanged": true,
+        "clean": true,
+        "signatureVersion": "1.463.16.0",
+        "signatureUpdatedAt": "2026-10-28T20:03:00.0000000Z"
+      }
+    ],
+    "replayAdditionalWrites": 0,
+    "published": 0
+  },
+  "scholarship": {
+    "sourceRecordId": "SCH-OC-0051",
+    "recordId": "rec-afb2c8eb-d798-4d87-ac7e-8cedd906dc8c",
+    "batchId": "batch-054874ea-c5a7-4aa1-b082-f343d84039cc",
+    "artifactSha256": "7af4990c98b358f603655834a15cb5410690c15c637fd931887ec1483394a871",
+    "staged": 1,
+    "canonicalScholarshipsCreated": 0,
+    "verificationState": "PENDING",
+    "transferBlocked": true,
+    "failedTransferWrites": 0,
+    "holds": [
+      "MASTER_MAJOR_AND_CHINA_STUDIES_PROGRAM_IDENTITIES_NOT_ESTABLISHED",
+      "IELTS_ACADEMIC_VARIANT_NOT_GENERALLY_VERIFIED",
+      "LANGUAGE_ALTERNATIVES_EXEMPTIONS_AND_DELIVERY_RULES_REQUIRE_SUPPORTED_OWNER_MAPPING",
+      "SECOND_YEAR_FUNDING_AND_RESEARCH_SCOPE_NEED_ADDITIONAL_OFFICIAL_REVIEW"
+    ],
+    "canonical": [
+      {
+        "requirementKey": "PROVIDER_UNIVERSITY",
+        "target": "PROVIDER_UNIVERSITY",
+        "state": "RESOLVED",
+        "rawValue": "Yenching Academy of Peking University",
+        "canonicalReferenceId": "b6749423-cc46-4bbd-94ce-a2f916c56fe1",
+        "canonicalPublicId": null,
+        "canonicalStandardCode": null
+      },
+      {
+        "requirementKey": "COUNTRY",
+        "target": "COUNTRY",
+        "state": "RESOLVED",
+        "rawValue": "China",
+        "canonicalReferenceId": "082dfe5c-65cf-4c5b-bc0c-0c6cbf19f99f",
+        "canonicalPublicId": null,
+        "canonicalStandardCode": "CN"
+      },
+      {
+        "requirementKey": "LANGUAGE",
+        "target": "LANGUAGE",
+        "state": "RESOLVED",
+        "rawValue": "English",
+        "canonicalReferenceId": "4b8963e7-4d87-4b38-a7e0-24c495a18839",
+        "canonicalPublicId": null,
+        "canonicalStandardCode": "en"
+      },
+      {
+        "requirementKey": "DEGREE_LEVEL",
+        "target": "DEGREE_LEVEL",
+        "state": "RESOLVED",
+        "rawValue": "MASTER",
+        "canonicalReferenceId": "b826dfa1-586f-431b-8e4d-90c32925b1fe",
+        "canonicalPublicId": null,
+        "canonicalStandardCode": "MASTER"
+      },
+      {
+        "requirementKey": "MAJOR",
+        "target": "MAJOR",
+        "state": "UNRESOLVED",
+        "rawValue": "Economics and Management",
+        "canonicalReferenceId": null,
+        "canonicalPublicId": null,
+        "canonicalStandardCode": null
+      },
+      {
+        "requirementKey": "MAJOR",
+        "target": "MAJOR",
+        "state": "UNRESOLVED",
+        "rawValue": "Politics and International Relations",
+        "canonicalReferenceId": null,
+        "canonicalPublicId": null,
+        "canonicalStandardCode": null
+      },
+      {
+        "requirementKey": "MAJOR",
+        "target": "MAJOR",
+        "state": "UNRESOLVED",
+        "rawValue": "Law and Society",
+        "canonicalReferenceId": null,
+        "canonicalPublicId": null,
+        "canonicalStandardCode": null
+      },
+      {
+        "requirementKey": "MAJOR",
+        "target": "MAJOR",
+        "state": "UNRESOLVED",
+        "rawValue": "Philosophy and Religion",
+        "canonicalReferenceId": null,
+        "canonicalPublicId": null,
+        "canonicalStandardCode": null
+      },
+      {
+        "requirementKey": "MAJOR",
+        "target": "MAJOR",
+        "state": "UNRESOLVED",
+        "rawValue": "History and Archaeology",
+        "canonicalReferenceId": null,
+        "canonicalPublicId": null,
+        "canonicalStandardCode": null
+      },
+      {
+        "requirementKey": "MAJOR",
+        "target": "MAJOR",
+        "state": "UNRESOLVED",
+        "rawValue": "Literature and Culture",
+        "canonicalReferenceId": null,
+        "canonicalPublicId": null,
+        "canonicalStandardCode": null
+      },
+      {
+        "requirementKey": "UNIVERSITY",
+        "target": "UNIVERSITY",
+        "state": "RESOLVED",
+        "rawValue": "Peking University",
+        "canonicalReferenceId": "b6749423-cc46-4bbd-94ce-a2f916c56fe1",
+        "canonicalPublicId": "INS-CHN-0001",
+        "canonicalStandardCode": null
+      },
+      {
+        "requirementKey": "ACADEMIC_PROGRAM",
+        "target": "ACADEMIC_PROGRAM",
+        "state": "REVIEW_REQUIRED",
+        "rawValue": "China Studies",
+        "canonicalReferenceId": null,
+        "canonicalPublicId": null,
+        "canonicalStandardCode": null
+      },
+      {
+        "requirementKey": "INTERNATIONAL_TEST",
+        "target": "INTERNATIONAL_TEST",
+        "state": "RESOLVED",
+        "rawValue": "TOEFL iBT",
+        "canonicalReferenceId": "9f1ad05a-9e55-4193-8f03-47f1b5e54f9d",
+        "canonicalPublicId": "TOEFL-IBT",
+        "canonicalStandardCode": null
+      },
+      {
+        "requirementKey": "INTERNATIONAL_TEST",
+        "target": "INTERNATIONAL_TEST",
+        "state": "UNRESOLVED",
+        "rawValue": "IELTS Academic",
+        "canonicalReferenceId": null,
+        "canonicalPublicId": null,
+        "canonicalStandardCode": null
+      },
+      {
+        "requirementKey": "INTERNATIONAL_TEST",
+        "target": "INTERNATIONAL_TEST",
+        "state": "UNRESOLVED",
+        "rawValue": "Cambridge English Advanced",
+        "canonicalReferenceId": null,
+        "canonicalPublicId": null,
+        "canonicalStandardCode": null
+      },
+      {
+        "requirementKey": "INTERNATIONAL_TEST",
+        "target": "INTERNATIONAL_TEST",
+        "state": "UNRESOLVED",
+        "rawValue": "CET 6",
+        "canonicalReferenceId": null,
+        "canonicalPublicId": null,
+        "canonicalStandardCode": null
+      },
+      {
+        "requirementKey": "INTERNATIONAL_TEST",
+        "target": "INTERNATIONAL_TEST",
+        "state": "UNRESOLVED",
+        "rawValue": "TEM 4",
+        "canonicalReferenceId": null,
+        "canonicalPublicId": null,
+        "canonicalStandardCode": null
+      }
+    ],
+    "referenceCorrection": {
+      "pass": true,
+      "sourceSha": "42b50853e8ca0a6a634fd0d30fa7a904d2c70444",
+      "scope": "original",
+      "recordId": "rec-afb2c8eb-d798-4d87-ac7e-8cedd906dc8c",
+      "canonicalPublicIdentity": "INS-CHN-0001",
+      "canonicalForeignKey": "b6749423-cc46-4bbd-94ce-a2f916c56fe1",
+      "decisionId": "3d7b0d07-c59e-4aef-8786-919212bddf55",
+      "priorDecisionPreserved": true,
+      "scholarshipsCreated": 0,
+      "verification": "PENDING",
+      "at": "2026-10-29T02:36:54.419Z"
+    }
+  },
+  "integrity": {
+    "tablesCompared": 309,
+    "unchangedTables": 291,
+    "changes": [
+      {
+        "table": "CredentialRecord",
+        "before": 68,
+        "after": 69,
+        "oldRowsMissing": 0,
+        "kind": "EXISTING_AUTH_RUNTIME"
+      },
+      {
+        "table": "SessionRecord",
+        "before": 124,
+        "after": 125,
+        "oldRowsMissing": 1,
+        "kind": "EXISTING_AUTH_RUNTIME"
+      },
+      {
+        "table": "InternationalTest",
+        "before": 0,
+        "after": 2,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      },
+      {
+        "table": "University",
+        "before": 0,
+        "after": 4,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      },
+      {
+        "table": "AssetRecord",
+        "before": 5,
+        "after": 7,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      },
+      {
+        "table": "InternationalTestVersion",
+        "before": 0,
+        "after": 2,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      },
+      {
+        "table": "ImportRecord",
+        "before": 3,
+        "after": 8,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      },
+      {
+        "table": "InternationalTestContentBlock",
+        "before": 0,
+        "after": 36,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      },
+      {
+        "table": "ScholarshipImportCanonicalResolutionDecision",
+        "before": 0,
+        "after": 2,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      },
+      {
+        "table": "UniversitySourceRecord",
+        "before": 0,
+        "after": 4,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      },
+      {
+        "table": "UniversityImportChange",
+        "before": 0,
+        "after": 8,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      },
+      {
+        "table": "ImportBatch",
+        "before": 1,
+        "after": 3,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      },
+      {
+        "table": "ScholarshipImportVerificationDecision",
+        "before": 0,
+        "after": 1,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      },
+      {
+        "table": "UniversityImportChangeSet",
+        "before": 0,
+        "after": 2,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      },
+      {
+        "table": "InternationalTestGovernance",
+        "before": 0,
+        "after": 2,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      },
+      {
+        "table": "ImportScreeningReceipt",
+        "before": 628,
+        "after": 633,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      },
+      {
+        "table": "AuditRecord",
+        "before": 2486,
+        "after": 2491,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      },
+      {
+        "table": "TransactionalOutboxRecord",
+        "before": 2017,
+        "after": 2020,
+        "oldRowsMissing": 0,
+        "kind": "SCOPED_IMPORT"
+      }
+    ],
+    "previousImportRowsPreserved": true,
+    "protectedIdentityAndPermissionsUnchanged": true,
+    "authenticationActivity": "Existing browser authentication produced operational credential/session changes, separately identified from import writes. No account, role, policy or MFA settings were changed by the pilot."
+  },
+  "browserAcceptance": {
+    "method": "TEXT_ONLY_ACCESSIBILITY_AND_DOM_NO_SCREENSHOTS",
+    "authenticatedSession": "EXISTING_USER_SESSION_NORMAL_RUNTIME_AUTHENTICATION",
+    "universities": {
+      "observed": 4,
+      "published": 0,
+      "search": "Peking",
+      "filteredNames": [
+        "Peking University"
+      ],
+      "detail": "Tsinghua University",
+      "publicationDisabledForIncomplete": true
+    },
+    "tests": {
+      "observed": 2,
+      "published": 0,
+      "search": "TOEFL",
+      "filteredNames": [
+        "TOEFL iBT"
+      ]
+    },
+    "scholarship": {
+      "incoming": 1,
+      "verification": "PENDING",
+      "canonical": "REVIEW_REQUIRED",
+      "readyToTransfer": 0,
+      "transferred": 0,
+      "sourceTitleObserved": true
+    }
+  },
+  "boundaries": {
+    "migrations": false,
+    "seeding": false,
+    "deletions": false,
+    "rawSourceFilesChanged": false,
+    "accountsOrRolesChanged": false,
+    "mfaBypass": false,
+    "externalDelivery": false,
+    "workers": [],
+    "publicPublication": false
+  },
+  "privateReceiptSeals": [
+    {
+      "reference": "private/import-pilot-20261029/backup.json",
+      "sha256": "3ee933a505c944f92b37451bf0d7096fa2dadbbba5adda2d6d96369d70fd8ee9"
+    },
+    {
+      "reference": "private/import-pilot-20261029/restore.json",
+      "sha256": "bd66975c846e2ebedf8ad3ccdbb6246f30a45a8a0b3b465747671d329a143a9d"
+    },
+    {
+      "reference": "private/import-pilot-20261029/test-rehearsal.json",
+      "sha256": "aa2b6b7a586765d7b751a8f2242ab38401f35e0219d218dbef21dc4f1e29aee1"
+    },
+    {
+      "reference": "private/import-pilot-20261029/test-original-commit.json",
+      "sha256": "ea24154eafd45aedf7c255aae40315d4c14391fbff726dfde00015e6f1052d94"
+    },
+    {
+      "reference": "private/import-pilot-20261029/test-original-verification.json",
+      "sha256": "82c90c64c6281bc71133c3b823af6d1200490ad7442b547cc1a53c812ecadd65"
+    },
+    {
+      "reference": "private/import-pilot-20261029/university-rehearsal.json",
+      "sha256": "eac418edc9ef46d2ea7ca67980e97fdc17947b091ad6f0b425ae98497ada4647"
+    },
+    {
+      "reference": "private/import-pilot-20261029/university-original.json",
+      "sha256": "e5dc64a6518eeb06cccc1906bf90f160297ad66a3d60fcf26733019630613201"
+    },
+    {
+      "reference": "private/import-pilot-20261029/scholarship-rehearsal.json",
+      "sha256": "fac3188a20dadb193bda9fdb1c963cf6cb514c950bed1ccb005471411bfdce5a"
+    },
+    {
+      "reference": "private/import-pilot-20261029/scholarship-original.json",
+      "sha256": "6557be5eed91cde402ee563f1be4f55f53e2daebb8f72fd369ab89e5773e63ad"
+    },
+    {
+      "reference": "private/import-pilot-20261029/final-original-verification-after-fix.json",
+      "sha256": "dfcec7248cfee78410bdac0bbfb96c209e00c33fcc9b48ccb7f92e17b0876cf6"
+    },
+    {
+      "reference": "private/import-pilot-20261029/provider-reference-rehearsal.json",
+      "sha256": "f99d048ad1a1f786cd0a2a05cca0d59cee41bf166dad351dfeef0119008c27af"
+    },
+    {
+      "reference": "private/import-pilot-20261029/provider-reference-original.json",
+      "sha256": "d039316503d361cd39d2d244d87c91bd0e919b5dcc59c9f2c9e48fc6e69d643e"
+    },
+    {
+      "reference": "private/import-pilot-20261029/lab-stopped.json",
+      "sha256": "b8178d5cd2adaafb2f7ad4c60b7829ea54230c450289f1eec7f991738a82c42b"
+    }
+  ],
+  "verification": {
+    "relatedUnitTests": 35,
+    "applicationTypeScriptBuild": true,
+    "apiTypecheck": true,
+    "sourceQuality": true,
+    "secretScan": true,
+    "changedSourceLintErrors": 0
+  },
+  "remaining": [
+    "Import review assignment currently excludes structurally COMPLETE records that still need canonical review",
+    "P09b complete current test content and variant review before publication",
+    "P10b managed enrichment remains separate from initial identity imports",
+    "P11b scholarship academic program/major references and conditional language mapping",
+    "P13 complete authoring/review/publication/public visibility/withdrawal flow after content gates pass"
+  ]
+}
