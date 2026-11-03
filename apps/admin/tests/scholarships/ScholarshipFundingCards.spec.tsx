@@ -176,14 +176,18 @@ describe('Funding benefit cards', () => {
       );
     });
     const rows = tree.root.findAllByProps({ className: 'scholarship-criterion' });
-    expect(rows).toHaveLength(16); // 10 benefits + conditional context + 3 duration clauses + notes + amount.
+    expect(rows).toHaveLength(10); // Six first-year benefits, two duration clauses, notes and amount.
     expect(rows.map((row) => row.findByType('p').children.join(''))).toContain(
       'مساهمة في رحلة ذهاب وعودة',
     );
-    const context = rows
-      .map((row) => row.findByType('p').children.join(''))
-      .find((text) => text.startsWith('تمويل السنة الثانية'));
+    const note = tree.root.findByProps({ className: 'scholarship-funding-note' });
+    const context = note
+      .findAllByType('p')
+      .map((node) => node.children.join(''))
+      .join(' ');
     expect(context).toContain('طلبًا إضافيًا واستمرار المستوى الأكاديمي الجيد والإقامة في بكين');
+    expect(context).toContain('دعم السنة الثانية مشروط بطلب وقبول إضافيين.');
+    expect(context).not.toContain('المخصص الشهري');
     const sections = tree.root.findAllByType('section');
     expect(sections.at(-1)!.findByType('h2').children.join('')).toBe('النص الأصلي من الملف');
     expect(sections.at(-1)!.findByType('p').children.join('')).toBe(raw);

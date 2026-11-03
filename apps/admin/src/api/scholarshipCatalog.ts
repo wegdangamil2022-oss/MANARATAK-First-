@@ -5,6 +5,7 @@ import type {
   ScholarshipEligibilityItemDto,
   ScholarshipMajorTargetDto,
   ScholarshipRequiredDocumentDto,
+  ScholarshipUniversityLinkDto,
 } from '@manaratak/domain';
 import { adminApiClient } from './client';
 
@@ -93,6 +94,39 @@ function revisionHeader(revision: number | undefined) {
 }
 
 export const scholarshipCatalogApi = {
+  updateUniversities(
+    id: string,
+    universityLinks: ScholarshipUniversityLinkDto[],
+    reason: string,
+    revision: number | undefined,
+  ) {
+    return adminApiClient.request<ScholarshipDto>(
+      `${BASE}/${encodeURIComponent(id)}/canonical-relationships`,
+      {
+        method: 'PUT',
+        headers: { 'X-Review-Reason': reason, 'If-Match': revisionHeader(revision) },
+        body: JSON.stringify({
+          universityLinks: universityLinks.map(
+            ({
+              linkKey,
+              universityId,
+              academicProgramId,
+              sourceLabel,
+              relationshipTypeCode,
+              metadata,
+            }) => ({
+              linkKey,
+              universityId,
+              academicProgramId,
+              sourceLabel,
+              relationshipTypeCode,
+              metadata,
+            }),
+          ),
+        }),
+      },
+    );
+  },
   updateCriterion(
     id: string,
     key: string,

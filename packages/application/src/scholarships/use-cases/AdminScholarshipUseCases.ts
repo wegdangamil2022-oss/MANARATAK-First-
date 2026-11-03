@@ -358,7 +358,7 @@ export class AdminScholarshipUseCases {
       sponsorUniversityId: input.sponsorUniversityId,
       countryReferenceId: input.countryReferenceId,
       studyLanguageReferenceId: input.studyLanguageReferenceId,
-      studyLanguageResolutionStatus: input.studyLanguageReferenceId ? 'RESOLVED' : 'UNRESOLVED',
+      studyLanguageResolutionStatus: input.studyLanguageReferenceId === undefined ? undefined : input.studyLanguageReferenceId ? 'RESOLVED' : 'UNRESOLVED',
       benefits,
       degreeTargets,
       majorTargets,

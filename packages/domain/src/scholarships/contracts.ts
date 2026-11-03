@@ -133,6 +133,7 @@ export interface ScholarshipSourceEvidenceDto {
 }
 
 export interface ScholarshipUniversityLinkDto {
+  university?: { id: string; displayName: string; status: string } | null;
   id?: string;
   scholarshipId?: string;
   linkKey: string;

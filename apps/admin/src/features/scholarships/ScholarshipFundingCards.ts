@@ -150,6 +150,11 @@ export function fundingGroupTitle(group: FundingTextGroup, ar: boolean): string 
 export function fundingGroupContext(group: FundingTextGroup): string {
   return group.prefix.includes('،') ? group.prefix.replace(/،\s*ويشمل\s*$/u, '').trim() : '';
 }
+export function isSecondYearFunding(group: FundingTextGroup): boolean {
+  return /(?:تمويل|دعم|منحة)\s+(?:السنة|العام)\s+(?:الثانية|الثاني)/u.test(
+    fundingGroupsText([group]),
+  );
+}
 export function fundingCardText(value: string): string {
   return value.replace(
     /^و(?=(?:السكن|التأمين|التامين|مخصصًا|مخصص|المخصص|تكاليف|مساهمة|الرسوم|دعم|بدل|البدل|راتب|الراتب|تذكرة|الإقامة|الاقامة)(?:\s|$))/u,

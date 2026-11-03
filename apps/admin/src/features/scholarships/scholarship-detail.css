@@ -196,6 +196,34 @@
   font-size: 12px;
   color: #142b5f;
 }
+.scholarship-funding-note {
+  margin: 12px 0 4px;
+  padding: 8px 12px;
+  border-inline-start: 3px solid #d6a43b;
+  background: #faf7f0;
+  color: #142b5f;
+  font-size: 12px;
+  line-height: 1.9;
+}
+.scholarship-funding-note p {
+  margin: 4px 0;
+}
+.scholarship-participating-universities {
+  font-size: 12px;
+}
+.scholarship-participating-universities input,
+.scholarship-participating-universities select,
+.scholarship-participating-universities p {
+  font-size: 12px !important;
+}
+.scholarship-participating-universities .scholarship-editor-card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+.scholarship-participating-universities a {
+  color: #0e7c86;
+}
 .scholarship-criterion {
   display: flex;
   align-items: center;

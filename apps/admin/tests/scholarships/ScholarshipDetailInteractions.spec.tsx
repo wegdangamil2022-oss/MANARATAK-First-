@@ -24,7 +24,7 @@ vi.mock('../../src/components/OwnerDescriptionTranslationPanel', () => ({
 vi.mock('../../src/pages/ScholarshipRelationshipEditorPage', () => ({
   ScholarshipRelationshipEditorPage: () => <p>Existing canonical relationship editor</p>,
 }));
-import { ScholarshipDetailPage } from '../../src/pages/ScholarshipCatalogDetailPage';
+import { ScholarshipDetailPage, sameUniversityLinks } from '../../src/pages/ScholarshipCatalogDetailPage';
 import {
   ScholarshipDetailReadView,
   scholarshipHttpUrl,
@@ -103,6 +103,12 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 describe('Scholarship detail template and editing boundaries', () => {
+  it('detects missing or changed university relationships in a readback, regardless of order', () => {
+    const links = [{linkKey:'a',universityId:'u1',relationshipTypeCode:'PARTICIPATING'}, {linkKey:'b',universityId:'u2',academicProgramId:'p2'}];
+    expect(sameUniversityLinks(links, [...links].reverse())).toBe(true);
+    expect(sameUniversityLinks(links, links.slice(0,1))).toBe(false);
+    expect(sameUniversityLinks(links, [links[0], {...links[1], academicProgramId:'different'}])).toBe(false);
+  });
   it('does not display the previous owner after navigation to an unavailable record', async () => {
     await mount();
     state.detail.mockRejectedValue(new Error('New record unavailable'));
@@ -253,9 +259,9 @@ describe('Scholarship detail template and editing boundaries', () => {
     await act(async () => button('Continue editing').props.onClick());
     expect(tree.root.findByType('textarea').props.value).toBe('Unsaved history draft');
   });
-  it('defaults to saved read-only data with nine horizontal accessible tabs', async () => {
+  it('defaults to saved read-only data with ten horizontal accessible tabs', async () => {
     await mount();
-    expect(tree.root.findAllByProps({ role: 'tab' })).toHaveLength(9);
+    expect(tree.root.findAllByProps({ role: 'tab' })).toHaveLength(10);
     expect(tree.root.findAllByType('input')).toHaveLength(0);
     expect(tree.root.findAllByType('textarea')).toHaveLength(0);
     expect(tree.root.findByProps({ role: 'tablist' }).props.className.split(' ')).toContain(
@@ -263,6 +269,21 @@ describe('Scholarship detail template and editing boundaries', () => {
     );
     expect(JSON.stringify(tree.toJSON())).toContain('Verified source title');
     expect(button('Publish scholarship').props.disabled).toBe(true);
+  });
+  it('opens participating universities in its own relationship editor rather than generic content editing', async () => {
+    await mount();
+    await act(async () => button('Participating universities').props.onClick());
+    expect(JSON.stringify(tree.toJSON())).toContain(
+      'No participating universities have been added.',
+    );
+    await act(async () => tree.root.findByProps({ 'aria-label': 'Edit Manage participating universities' }).props.onClick());
+    expect(button('Save participating universities')).toBeDefined();
+    expect(
+      tree.root
+        .findAllByType('p')
+        .some((node) => node.children.includes('Existing canonical relationship editor')),
+    ).toBe(false);
+    expect(button('Save scholarship data')).toBeUndefined();
   });
   it('retains edits while switching template tabs and warns on cancel', async () => {
     await mount();

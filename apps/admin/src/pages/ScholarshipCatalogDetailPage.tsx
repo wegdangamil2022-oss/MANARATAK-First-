@@ -1,4 +1,5 @@
 import { ScholarshipContentEditor } from '../features/scholarships/ScholarshipContentEditor';
+import { ScholarshipParticipatingUniversitiesEditor } from '../features/scholarships/ScholarshipParticipatingUniversities';
 import { scholarshipEditorValidation } from '../features/scholarships/ScholarshipEditorValidation';
 import { scholarshipDetailText } from '../features/scholarships/ScholarshipDetailText';
 import { registerScholarshipHistoryGuard } from '../features/scholarships/ScholarshipHistoryGuard';
@@ -53,6 +54,7 @@ type TabKey =
   | 'eligibility'
   | 'documents'
   | 'links_unis'
+  | 'universities'
   | 'notes'
   | 'health_audit';
 
@@ -67,6 +69,14 @@ interface ConfirmationModalState {
 
 function asText(value: unknown): string {
   return value === null || value === undefined ? '' : String(value);
+}
+
+export function sameUniversityLinks(left: ScholarshipDto['universityLinks'], right: ScholarshipDto['universityLinks']): boolean {
+  const normalize = (links: ScholarshipDto['universityLinks']) => (links ?? []).map(link => ({
+    linkKey: link.linkKey, universityId: link.universityId ?? null, academicProgramId: link.academicProgramId ?? null,
+    sourceLabel: link.sourceLabel ?? null, relationshipTypeCode: link.relationshipTypeCode ?? null,
+  })).sort((a, b) => a.linkKey.localeCompare(b.linkKey));
+  return JSON.stringify(normalize(left)) === JSON.stringify(normalize(right));
 }
 
 function toUpdate(s: ScholarshipDto): ScholarshipCatalogUpdate {
@@ -173,6 +183,9 @@ export function ScholarshipDetailPage() {
   const [editing, setEditing] = useState(false);
   const [focusField, setFocusField] = useState<string>();
   const [relationshipEditing, setRelationshipEditing] = useState(false);
+  const [relationshipSection, setRelationshipSection] = useState<'degrees_majors' | 'universities'>(
+    'degrees_majors',
+  );
   const [relationshipDirty, setRelationshipDirty] = useState(false);
   const [criterionDirty, setCriterionDirty] = useState(false);
   const [translationOpen, setTranslationOpen] = useState(false);
@@ -284,6 +297,7 @@ export function ScholarshipDetailPage() {
             expected &&
             (response.scholarship.id !== expected.id ||
               response.scholarship.revision !== expected.revision ||
+              (expected.universityLinks !== undefined && !sameUniversityLinks(response.scholarship.universityLinks, expected.universityLinks)) ||
               JSON.stringify(toUpdate(response.scholarship)) !== JSON.stringify(toUpdate(expected)))
           )
             throw new Error('SCHOLARSHIP_READBACK_MISMATCH');
@@ -661,6 +675,7 @@ export function ScholarshipDetailPage() {
     eligibility: tr('شروط الأهلية', 'Eligibility'),
     documents: tr('المستندات', 'Documents'),
     links_unis: tr('الروابط والمصادر', 'Links and sources'),
+    universities: tr('الجامعات المشاركة', 'Participating universities'),
     notes: tr('الملاحظات', 'Notes'),
     health_audit: tr('الصحة والتدقيق', 'Health and audit'),
   };
@@ -734,8 +749,14 @@ export function ScholarshipDetailPage() {
     {
       key: 'links_unis' as TabKey,
       title: 'روابط التقديم والمصادر الرسمية',
-      subtitle: 'بوابة التقديم والجامعات الشريكة',
+      subtitle: 'بوابة التقديم والمصادر الرسمية',
       icon: <ExternalLink className="h-4 w-4" />,
+    },
+    {
+      key: 'universities' as TabKey,
+      title: 'الجامعات المشاركة',
+      subtitle: 'جامعات مرتبطة بسجلاتها في دليل الجامعات',
+      icon: <Building2 className="h-4 w-4" />,
     },
     {
       key: 'notes' as TabKey,
@@ -802,8 +823,10 @@ export function ScholarshipDetailPage() {
                   : undefined
               }
               onClick={() => {
-                setRelationshipEditing(activeTab === 'degrees_majors');
-                setEditing(activeTab !== 'degrees_majors');
+                const relationship = activeTab === 'degrees_majors' || activeTab === 'universities';
+                if (relationship) setRelationshipSection(activeTab);
+                setRelationshipEditing(relationship);
+                setEditing(!relationship);
               }}
             >
               <FileText />
@@ -901,11 +924,11 @@ export function ScholarshipDetailPage() {
                 event.key === 'Home'
                   ? 0
                   : event.key === 'End'
-                    ? 8
+                    ? navTabs.length - 1
                     : (index +
                         (event.key === 'ArrowRight' ? 1 : -1) * (dir === 'rtl' ? -1 : 1) +
-                        9) %
-                      9;
+                        navTabs.length) %
+                      navTabs.length;
               if (criterionDirty)
                 guard(() => {
                   setCriterionDirty(false);
@@ -925,7 +948,7 @@ export function ScholarshipDetailPage() {
         role="tabpanel"
         aria-labelledby={'scholarship-tab-' + activeTab}
       >
-        {activeTab === 'degrees_majors' && (
+        {(activeTab === 'degrees_majors' || activeTab === 'universities') && (
           <div className="scholarship-read-card">
             <p>
               {tr(
@@ -935,9 +958,12 @@ export function ScholarshipDetailPage() {
             </p>
             {canEdit && (
               <button
-                disabled={saving || dirty}
+                disabled={
+                  saving || dirty || (relationshipDirty && relationshipSection !== activeTab)
+                }
                 onClick={() => {
                   setEditing(false);
+                  setRelationshipSection(activeTab);
                   setRelationshipEditing(true);
                 }}
               >
@@ -967,23 +993,44 @@ export function ScholarshipDetailPage() {
           </div>
         )}
         {relationshipEditing && (
-          <div hidden={activeTab !== 'degrees_majors'}>
-            <ScholarshipRelationshipEditorPage
-              key={scholarship.id + ':' + scholarship.revision}
-              embedded
-              degreeOnly
-              disabled={saving || dirty || !canEdit}
-              onDirtyChange={setRelationshipDirty}
-              onSaved={async () => {
-                setRelationshipDirty(false);
-                await load();
-              }}
-            />
+          <div hidden={activeTab !== relationshipSection}>
+            {relationshipSection === 'universities' ? (
+              <ScholarshipParticipatingUniversitiesEditor
+                key={scholarship.id + ':' + scholarship.revision}
+                scholarship={scholarship}
+                language={language}
+                disabled={saving || actionLoading || dirty || readbackUncertain || !canEdit}
+                onDirtyChange={setRelationshipDirty}
+                onSaved={async (saved) => {
+                  if (!mounted.current || currentScope.current !== ownerEpoch || saved.id !== id)
+                    throw new Error('SCHOLARSHIP_OWNER_SCOPE_CHANGED');
+                  setReadbackUncertain(true);
+                  if (!(await load(saved)))
+                    throw new Error('SCHOLARSHIP_UNIVERSITIES_READBACK_UNCERTAIN');
+                  setRelationshipDirty(false);
+                }}
+              />
+            ) : (
+              <ScholarshipRelationshipEditorPage
+                key={scholarship.id + ':' + scholarship.revision}
+                embedded
+                degreeOnly
+                disabled={saving || dirty || !canEdit}
+                onDirtyChange={setRelationshipDirty}
+                onSaved={async () => {
+                  setRelationshipDirty(false);
+                  await load();
+                }}
+              />
+            )}
           </div>
         )}
-        {(!editing || activeTab === 'degrees_majors' || activeTab === 'eligibility') &&
+        {(!editing ||
+          activeTab === 'degrees_majors' ||
+          activeTab === 'universities' ||
+          activeTab === 'eligibility') &&
           activeTab !== 'health_audit' &&
-          !(relationshipEditing && activeTab === 'degrees_majors') && (
+          !(relationshipEditing && activeTab === relationshipSection) && (
             <ScholarshipDetailReadView
               scholarship={scholarship}
               tab={activeTab}
@@ -1007,7 +1054,11 @@ export function ScholarshipDetailPage() {
               onEdit={
                 canEdit && !saving && !relationshipDirty && !dirty
                   ? (field) => {
-                      if (field === 'educationalDegree' || activeTab === 'degrees_majors') {
+                      if (activeTab === 'universities') {
+                        setRelationshipSection('universities');
+                        setRelationshipEditing(true);
+                      } else if (field === 'educationalDegree' || activeTab === 'degrees_majors') {
+                        setRelationshipSection('degrees_majors');
                         setActiveTab('degrees_majors');
                         setRelationshipEditing(true);
                       } else {
@@ -1034,6 +1085,7 @@ export function ScholarshipDetailPage() {
                   guard(() => {
                     setEditing(false);
                     setActiveTab('degrees_majors');
+                    setRelationshipSection('degrees_majors');
                     setRelationshipEditing(true);
                   })
                 }

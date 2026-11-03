@@ -81,6 +81,16 @@ function lookup(overrides: Record<string, Partial<ScholarshipCanonicalCandidate>
 }
 
 describe('P9 Scholarship canonical relationship authoring', () => {
+  it('changes participating universities without overwriting language resolution or unrelated relationships', async () => {
+    const repo = repository(scholarship({studyLanguageReferenceId:'language-en', studyLanguageResolutionStatus:'RESOLVED'}));
+    const service = new AdminScholarshipUseCases(repo, atomic, lookup());
+    await service.replaceCanonicalRelationships('sch-1', {universityLinks:[{linkKey:'participant-1', universityId:'university-1', relationshipTypeCode:'PARTICIPATING'}]}, mutationContext);
+    expect(repo.update).toHaveBeenCalledWith('sch-1', expect.objectContaining({
+      studyLanguageReferenceId: undefined, studyLanguageResolutionStatus: undefined,
+      benefits: undefined, eligibilityItems: undefined, majorTargets: undefined, degreeTargets: undefined,
+      universityLinks:[expect.objectContaining({universityId:'university-1',resolutionStatus:'RESOLVED'})],
+    }));
+  });
   it('writes canonical IDs through the scholarship owner use case and derives resolved states', async () => {
     const current = scholarship();
     const repo = repository(current);

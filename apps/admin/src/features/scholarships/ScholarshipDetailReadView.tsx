@@ -1,5 +1,6 @@
 import type { ScholarshipDto } from '@manaratak/domain';
 import { ScholarshipEligibilityCriteria } from './ScholarshipEligibilityCriteria';
+import { ScholarshipUniversityCards } from './ScholarshipParticipatingUniversities';
 import {
   ScholarshipFundingReadCards,
   ScholarshipFundingOriginal,
@@ -358,6 +359,19 @@ export function ScholarshipDetailReadView({
       })),
       tr('المستندات المطلوبة', 'Required documents'),
     );
+  if (tab === 'universities')
+    return (
+      <section className="scholarship-read-card">
+        <div className="scholarship-group-heading">
+          <h2>{tr('الجامعات المشاركة', 'Participating universities')}</h2>
+          {edit(
+            'participating-universities',
+            tr('إدارة الجامعات المشاركة', 'Manage participating universities'),
+          )}
+        </div>
+        <ScholarshipUniversityCards links={scholarship.universityLinks ?? []} language={language} />
+      </section>
+    );
   if (tab === 'links_unis')
     return (
       <>
@@ -410,11 +424,6 @@ export function ScholarshipDetailReadView({
               'verifiedAt',
             ])}
           </details>
-        )}
-        {group(
-          'universityLinks',
-          tr('الجامعات والبرامج المرتبطة', 'Linked universities and programs'),
-          ['sourceLabel', 'universityId', 'academicProgramId', 'relationshipTypeCode'],
         )}
       </>
     );

@@ -7,6 +7,8 @@ import {
   fundingGroupTitle,
   fundingTextGroups,
   originalFundingText,
+  isSecondYearFunding,
+  fundingGroupsText,
 } from './ScholarshipFundingCards';
 
 export function ScholarshipFundingReadCards({
@@ -38,22 +40,28 @@ export function ScholarshipFundingReadCards({
   );
   const currency = (benefit as ScholarshipBenefitDto & { currency?: { isoCode?: string } }).currency
     ?.isoCode;
+  const groups = fundingTextGroups(benefit);
+  const duration = benefit.durationText ? fundingTextGroups(benefit, 'durationText') : [];
+  const renewal = [...groups.filter(isSecondYearFunding), ...duration.filter(isSecondYearFunding)];
   return (
     <div className="scholarship-funding-benefit">
-      {fundingTextGroups(benefit).map((group) => (
-        <div key={group.id} className="scholarship-funding-text-group">
-          {group.prefix && <h3>{fundingGroupTitle(group, ar)}</h3>}
-          <ul className="scholarship-criteria-list">
-            {fundingGroupContext(group) && row(`${group.id}-context`, fundingGroupContext(group))}
-            {group.cards.map((card) =>
-              row(card.id, fundingCardText(card.text) || benefitText(benefit, ar)),
-            )}
-          </ul>
-        </div>
-      ))}
+      {groups
+        .filter((group) => !isSecondYearFunding(group))
+        .map((group) => (
+          <div key={group.id} className="scholarship-funding-text-group">
+            {group.prefix && <h3>{fundingGroupTitle(group, ar)}</h3>}
+            <ul className="scholarship-criteria-list">
+              {fundingGroupContext(group) && row(`${group.id}-context`, fundingGroupContext(group))}
+              {group.cards.map((card) =>
+                row(card.id, fundingCardText(card.text) || benefitText(benefit, ar)),
+              )}
+            </ul>
+          </div>
+        ))}
       <ul className="scholarship-criteria-list">
-        {benefit.durationText &&
-          fundingTextGroups(benefit, 'durationText').flatMap((group) =>
+        {duration
+          .filter((group) => !isSecondYearFunding(group))
+          .flatMap((group) =>
             group.cards.map((card) => row(card.id, group.prefix + card.text + group.suffix)),
           )}
         {benefit.notes && row(`${benefit.benefitKey}-notes`, benefit.notes)}
@@ -68,6 +76,26 @@ export function ScholarshipFundingReadCards({
         {benefit.isOptional &&
           row(`${benefit.benefitKey}-optional`, ar ? 'ميزة اختيارية' : 'Optional benefit', false)}
       </ul>
+      {!!renewal.length && (
+        <aside className="scholarship-funding-note">
+          <strong>{ar ? 'ملاحظة تمويل السنة الثانية' : 'Second-year funding note'}</strong>
+          {renewal.map((group) => (
+            <p key={group.id}>{fundingGroupContext(group) || fundingGroupsText([group]).trim()}</p>
+          ))}
+          {onEdit && (
+            <button
+              type="button"
+              className="scholarship-card-edit"
+              onClick={() =>
+                onEdit(renewal[0].prefix ? `${renewal[0].id}-context` : renewal[0].cards[0].id)
+              }
+            >
+              <Pencil aria-hidden="true" />
+              {ar ? 'تعديل الملاحظة' : 'Edit note'}
+            </button>
+          )}
+        </aside>
+      )}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import {
   withFundingTextGroups,
   fundingGroupTitle,
   fundingGroupContext,
+  isSecondYearFunding,
 } from './ScholarshipFundingCards';
 import { ScholarshipFundingOriginal } from './ScholarshipFundingReadCards';
 import {
@@ -295,36 +296,37 @@ export function ScholarshipContentEditor({
                             }
                           />
                         )}
-                        {textGroup.cards.map((card, cardIndex) => (
-                          <TextCard
-                            key={card.id}
-                            title={tr('الميزة', 'Benefit')}
-                            multiline
-                            focus={
-                              focusField === card.id ||
-                              (focusField === key && groupIndex === 0 && cardIndex === 0)
-                            }
-                            value={card.text}
-                            onChange={(value) =>
-                              set(
-                                'benefits',
-                                benefits.map((row) =>
-                                  row.benefitKey === key
-                                    ? withFundingTextGroups(
-                                        row,
-                                        fundingTextGroups(row).map((group) => ({
-                                          ...group,
-                                          cards: group.cards.map((part) =>
-                                            part.id === card.id ? { ...part, text: value } : part,
-                                          ),
-                                        })),
-                                      )
-                                    : row,
-                                ),
-                              )
-                            }
-                          />
-                        ))}
+                        {(!isSecondYearFunding(textGroup) || !textGroup.prefix) &&
+                          textGroup.cards.map((card, cardIndex) => (
+                            <TextCard
+                              key={card.id}
+                              title={tr('الميزة', 'Benefit')}
+                              multiline
+                              focus={
+                                focusField === card.id ||
+                                (focusField === key && groupIndex === 0 && cardIndex === 0)
+                              }
+                              value={card.text}
+                              onChange={(value) =>
+                                set(
+                                  'benefits',
+                                  benefits.map((row) =>
+                                    row.benefitKey === key
+                                      ? withFundingTextGroups(
+                                          row,
+                                          fundingTextGroups(row).map((group) => ({
+                                            ...group,
+                                            cards: group.cards.map((part) =>
+                                              part.id === card.id ? { ...part, text: value } : part,
+                                            ),
+                                          })),
+                                        )
+                                      : row,
+                                  ),
+                                )
+                              }
+                            />
+                          ))}
                       </div>
                     ))}
                     {presentation.fundingGroups.length > 1 && (
