@@ -26,6 +26,7 @@ Follow-up to [the first cleanup](REPOSITORY_CLEANUP_2026-11-04.md), based on `75
 - Full npm-workspace build after generated-output cleanup: passed; repeated successfully after dependency pruning and the installed security update.
 - Full workspace TypeScript after cleanup: passed.
 - Complete Node suite on clean checkpoint `db755484`: **1,135 passed, zero failures, zero skips**. This resolves all seven Windows fixture failures recorded in the first cleanup.
+- Repeated the entire Node suite after dependency reconciliation/security update on clean checkpoint `f53122ab`: **1,135 passed, zero failures, zero skips**.
 - Cleanup safety regression tests: **3 passed**, including preservation of dependencies/private/storage/evidence and rejection of unknown or linked output locations.
 - Full application Vitest: **843 files passed, 3 skipped; 6,272 tests passed, 8 existing skips; zero failures**. No skips were added by this cleanup.
 - Final `ci:source:contracts`: passed, including architecture, authorization audit inventory, remediation and source plan closures; zero package/file dependency cycles.
@@ -42,3 +43,5 @@ The complete npm audit initially reported ten moderate entries from one `minimat
 The npm advisory payload reports `<11.0.1`, whereas the [maintainer-reviewed advisory updated November 4](https://github.com/advisories/GHSA-g3hv-75wg-m249) specifies **`>=7.0.0 <11.0.1`**. Those remaining 3.x copies are outside the stated affected range. This is documented as a registry/advisory range discrepancy; audit output was not suppressed or edited. A global replacement would break ESLint's legacy callable 3.x API, so the targeted override preserves it. The full development audit is not claimed as a zero-advisory pass.
 
 No original-database connection, migration, seed, deletion, account/role/MFA change or external-provider activation was performed. Historical migration SQL, imported source datasets and signed/source-specific evidence remain unchanged. Local validation logs are outside the checkout in the owner's private `repository-deep-cleanup-20261104` directory.
+
+The small temporary npm compatibility fixture in that private audit directory remains outside Git: automated safety review rejected its recursive removal with “blocked by policy” and supplied no detailed reason. No alternative deletion was attempted.
