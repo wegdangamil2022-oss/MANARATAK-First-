@@ -40,7 +40,7 @@
 
 | الأمر | النتيجة المسجلة |
 |---|---|
-| `node_modules/.bin/vitest run --config .section15-source-recheck-vitest.config.ts` | exit1؛ **24 ملفًا /173 اختبارًا:167 ناجح،6 فاشلة**؛9.03 ثانية. mocks/HTTP local/SSR/fake timers فقط. |
+| `node_modules/.bin/vitest run --config config/testing/review/section15-source-recheck-vitest.config.ts` | exit1؛ **24 ملفًا /173 اختبارًا:167 ناجح،6 فاشلة**؛9.03 ثانية. mocks/HTTP local/SSR/fake timers فقط. |
 | `node_modules/.bin/tsc -b packages/domain packages/application packages/infrastructure apps/api apps/admin --pretty false` | exit2؛ أخطاء مشتركة موضحة أدناه. لم يُعد الأمر بعد إصلاحها. |
 | `DATABASE_URL=postgresql://fixture:fixture@127.0.0.1:5432/source_only DIRECT_URL=postgresql://fixture:fixture@127.0.0.1:5432/source_only node_modules/.bin/prisma generate --schema packages/infrastructure/prisma/schema.prisma` | exit0؛ local client generation1.90 ثانية فقط، دون قاعدة بيانات أو تنفيذ ترحيل. |
 | Prettier لملف إعداد الاختبار وملف regressions الجديد | تنسيق المصدر فقط، ليس اختبارًا أو نجاحًا تشغيليًا. |

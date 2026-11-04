@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitest/config';
-import baseline from '../../.section16-vitest.config';
+import baseline from './review/section16-vitest.config';
 export default defineConfig({ ...baseline, test: { ...baseline.test, maxWorkers: 1, fileParallelism: false,
   include: ['packages/domain/tests/reference-data/**/*.spec.ts', 'packages/domain/tests/study-destinations/**/*.spec.ts',
     'packages/application/tests/study-destinations/**/*.spec.ts', 'packages/application/tests/reference-data/**/*.spec.ts',

@@ -163,8 +163,18 @@ try {
 const frontendSecurityPolicy = read('apps/frontend-security/ViteFrontendSecurityHeaders.ts');
 const webVite = read('apps/web/vite.config.ts');
 const adminVite = read('apps/admin/vite.config.ts');
-const webInlineStyleCount = (execFileSync('bash', ['-lc', "rg -n 'style=\\{\\{' apps/web/src --glob '*.{ts,tsx}' | wc -l"], { encoding: 'utf8', cwd: root }).trim() || '0');
-const adminInlineStyleCount = (execFileSync('bash', ['-lc', "rg -n 'style=\\{\\{' apps/admin/src --glob '*.{ts,tsx}' | wc -l"], { encoding: 'utf8', cwd: root }).trim() || '0');
+function countInlineStyleLines(directory) {
+  let count = 0;
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const file = path.join(directory, entry.name);
+    if (entry.isDirectory()) count += countInlineStyleLines(file);
+    else if (/\.tsx?$/.test(entry.name))
+      count += fs.readFileSync(file, 'utf8').split(/\r?\n/).filter(line => /style=\{\{/.test(line)).length;
+  }
+  return count;
+}
+const webInlineStyleCount = countInlineStyleLines(path.join(root, 'apps/web/src'));
+const adminInlineStyleCount = countInlineStyleLines(path.join(root, 'apps/admin/src'));
 check('MNT-AUD-0101 Web/Admin compose canonical frontend security policy', webVite.includes('frontendSecurityHeadersPlugin()') && adminVite.includes('frontendSecurityHeadersPlugin()'));
 check('MNT-AUD-0101 canonical frontend policy denies framing', frontendSecurityPolicy.includes("frame-ancestors 'none'") && frontendSecurityPolicy.includes("'X-Frame-Options': 'DENY'"));
 check('MNT-AUD-0101 script/style element policies do not permit unsafe-inline', !/script-src[^\n]*unsafe-inline/.test(frontendSecurityPolicy) && !/style-src 'self' 'unsafe-inline'/.test(frontendSecurityPolicy));

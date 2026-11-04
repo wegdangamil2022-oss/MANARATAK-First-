@@ -24,7 +24,7 @@
 | اختبارات الحراس | `tests/database/post28-neon-preflight.test.mjs` **جديد** |
 | الحوكمة والتجهيز | `scripts/architecture/operational-tooling-boundary.json`، `scripts/database/prepare-post28-acceptance.mjs`، `config/testing/post28-neon-target.json` |
 | تعليمات التشغيل | `docs/operations/POST28_NEON_READ_ONLY_PREFLIGHT.md` **جديد**، `docs/operations/POST28_NEON_TEST_DATABASE_HANDOFF.md`، `docs/operations/POST28_NEON_R04_R05_PREPARATION.md` |
-| جرد مولّد دون أسرار | `.env.aistudio.example`، `docs/operations/GOOGLE_AI_STUDIO_ENVIRONMENT.md` |
+| جرد مولّد دون أسرار | `.env.aistudio.example`، `docs/operations/ENVIRONMENT_INVENTORY.md` |
 
 التغيير18 ملفًا في المصدر المجمد؛ يضاف هذا التقرير والأدلة عند التسليم. لم تتغير schema أو migrations التاريخية أو lockfile أو منطق المنتج.
 

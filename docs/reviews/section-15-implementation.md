@@ -101,7 +101,7 @@ No connection to a real database was used by the tests.
 |---|---|
 | `npm run typecheck` | PASS; full monorepo project references |
 | `tsc -b packages/domain packages/application packages/infrastructure apps/api apps/admin` and final affected-project checks | PASS |
-| `npx vitest run --config .section15-vitest.config.ts` | PASS — **22 files / 156 tests**, zero failures |
+| `npx vitest run --config config/testing/review/section15-vitest.config.ts` | PASS — **22 files / 156 tests**, zero failures |
 | `npm run build -w @manaratak/admin` | PASS |
 | `node scripts/verify-phase15-source.mjs` | PASS — 14/14 source smoke checks |
 | `node scripts/verify-w4-student-support.mjs` | PASS — 9/9 source smoke checks |

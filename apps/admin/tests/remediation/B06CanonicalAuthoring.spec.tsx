@@ -136,7 +136,7 @@ describe('B06 shared relationship editor', () => {
     await mount(<MemoryRouter initialEntries={['/s1']}><Routes><Route path="/:id" element={<ScholarshipRelationshipEditorPage embedded onSaved={saved} />} /></Routes></MemoryRouter>);
     const reason = tree.root.findAllByType('input').find(n => n.props.placeholder === 'وضح سبب تعديل العلاقات')!;
     await act(async () => reason.props.onChange({ target: { value: 'Reviewed official source' } }));
-    await act(async () => button('Save all canonical relationships').props.onClick());
+    await act(async () => button('حفظ العلاقات المرجعية فقط').props.onClick());
     const call = mocks.request.mock.calls.find(([, options]) => options?.method === 'PUT')!;
     expect(call[1].headers['If-Match']).toBe('8');
     expect(JSON.parse(call[1].body)).toMatchObject({ studyLanguageReferenceId: 'lang-150', degreeTargets: detail.degreeTargets, majorTargets: detail.majorTargets });

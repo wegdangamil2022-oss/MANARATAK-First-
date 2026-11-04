@@ -13,14 +13,9 @@ MANARATAK is an npm-workspaces monorepo containing the public web application, A
 
 ## Current Status
 
-For the current POST28 work branch, R00–R09 implementation/evidence map, pending gates and resume order, read the [unified work index](docs/remediation/POST28_UNIFIED_WORK_INDEX_2026-10-19.md). Historical phase notes below do not supersede its source-specific local evidence.
+`main` contains the consolidated API, public/student application and dedicated Admin application. The [repository cleanup review](docs/reviews/REPOSITORY_CLEANUP_2026-11-04.md) records the current source review and validation limits.
 
-- Source remediation through WP10 is prepared.
-- Phase 10 source freeze is prepared; final acceptance follows the current work index.
-- Phase 11 University contracts are prepared; University bulk import is blocked.
-- University Stage 1 source Dry Run covers 10,723 rows; imported records remain 0.
-- Isolated local PostgreSQL migration/seed and a packaged API/Web/Admin browser diagnostic have source-specific evidence in the unified index; cloud/production acceptance and the remaining formal gates are still open.
-- This repository is not declared Production Ready.
+Earlier implementation and environment evidence remains in the [historical work index](docs/remediation/POST28_UNIFIED_WORK_INDEX_2026-10-19.md). Historical import counts and branch-specific acceptance results are not live database status. A successful source build does not establish production readiness.
 
 Database operations are governed by `docs/operations/GREENFIELD_DATABASE_PROVISIONING.md`; remediation state is tracked separately from runtime/database evidence.
 
@@ -33,7 +28,7 @@ Database operations are governed by `docs/operations/GREENFIELD_DATABASE_PROVISI
 - `packages/application`: Application use cases and domain adapters.
 - `packages/infrastructure`: Prisma and external infrastructure adapters.
 - `packages/core`, `packages/shared`, `packages/config`, `packages/types`, `packages/ui`: shared foundations.
-- `scripts`: operational, import, database, and source-verification scripts. Historical one-off scripts are under `scripts/archive` and are not operational entry points.
+- `scripts`: operational, import, database, and source-verification scripts. One-off patch scripts have been removed; reusable runtime checks live under `scripts/testing`.
 - `workspace`: source datasets, import artifacts, catalog indexes, reconciliation evidence, and generated reports. It is not application source.
 - `docs`: architecture, phase specifications, operations, implementation history, and remediation evidence.
 - `tests`: repository-level test entry points.
@@ -46,7 +41,7 @@ The canonical package manager is **npm**.
 - Workspaces: `apps/*`, `packages/*`
 - Runtime requirement: Node.js 22.16.0 (supported range `>=22.16.0 <23`) and npm `>=10.9.0 <11`
 
-The historical `bun.lock` is archived under `workspace/reports/remediation-history/lockfiles` and is not an active lockfile.
+Historical import and validation evidence under `workspace` is inert and does not select a package manager.
 
 ## Commands
 
@@ -68,6 +63,8 @@ npm run dev:admin
 npm run start
 ```
 
+`npm start` serves built Web/Admin static assets only; API requests require the API service or an explicitly configured reverse proxy. It is not the original-database launcher used by the local owner environment.
+
 Dependencies are not included in the handoff. Build and test results must be established in a controlled runtime environment; source-only verification is not runtime certification.
 
 ## Database Safety
@@ -88,6 +85,10 @@ University Stage 1 evidence is documented in `docs/remediation/wp10/PHASE_1_UNIV
 
 Use `.env.example` as the variable-name template. It contains no usable credentials. Keep real secrets outside source control and use strict authentication in deployed environments.
 
-## Git Handoff Note
+## Repository hygiene
 
-The bundled `.git` metadata is incomplete and must not be repaired from an older MANARATAK copy. Exclude `.git` from the final handoff ZIP and initialize or attach version control independently after validating the source handoff.
+The active applications are `apps/web` (students/public), `apps/admin` (the only Admin UI), and `apps/api`. Legacy administrative URLs in Web redirect to Admin.
+
+Section-specific test profiles live under `config/testing/review`; the root `vitest.config.ts` is the unit-test entry point. Google Studio launchers and export metadata are not supported. Historical migration SQL and signed/source-specific evidence remain unchanged.
+
+See [the repository cleanup review](docs/reviews/REPOSITORY_CLEANUP_2026-11-04.md) for the current inventory, removal rationale and verification results.

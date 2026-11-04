@@ -50,7 +50,7 @@ const contexts = [
     'apps/admin/src/pages/AcademicTaxonomyDetailPage.tsx',
     'apps/admin/src/pages/AcademicTaxonomyAdminPage.tsx',
     'apps/web/src/router/index.tsx', 'apps/web/src/components/Seo.tsx',
-    'apps/web/src/api/localizedEntities.ts', 'apps/web/src/api/client.ts',
+    'apps/web/src/api/client.ts',
     'apps/admin/vite.config.ts', 'apps/web/vite.config.ts',
   ]],
   ['apps/admin/tsconfig.json', [
@@ -62,7 +62,7 @@ const contexts = [
   ]],
   ['apps/web/tsconfig.json', [
     'apps/web/src/router/index.tsx', 'apps/web/src/components/Seo.tsx',
-    'apps/web/src/api/localizedEntities.ts', 'apps/web/src/api/client.ts',
+    'apps/web/src/api/client.ts',
     'apps/web/vite.config.ts',
   ]],
   ['tsconfig.json', ['apps/admin/vite.config.ts', 'apps/web/vite.config.ts']],

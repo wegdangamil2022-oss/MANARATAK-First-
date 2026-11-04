@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import path from 'node:path';
 import {verifyPlaywrightRun} from '../../scripts/release/lib/PlaywrightCasePolicy.mjs';
-const file='/fixture/boundary.spec.mjs';
-const report={config:{rootDir:'/fixture'},errors:[],stats:{expected:1,unexpected:0,skipped:0,flaky:0},suites:[{specs:[{id:'case-1',file:'boundary.spec.mjs',tests:[{projectName:'chromium',expectedStatus:'passed',status:'expected',results:[{status:'passed',retry:0}]}]}]}]};
+const fixtureRoot=path.resolve('/fixture'),file=path.join(fixtureRoot,'boundary.spec.mjs');
+const report={config:{rootDir:fixtureRoot},errors:[],stats:{expected:1,unexpected:0,skipped:0,flaky:0},suites:[{specs:[{id:'case-1',file:'boundary.spec.mjs',tests:[{projectName:'chromium',expectedStatus:'passed',status:'expected',results:[{status:'passed',retry:0}]}]}]}]};
 test('Playwright exact case comparison accepts a fully executed report',()=>assert.equal(verifyPlaywrightRun(report,report,[file]).passed,1));
 for(const [name,mutate] of [
   ['zero cases',r=>{r.suites=[];}],['missing file',r=>{r.suites[0].specs[0].file='other.spec.mjs';}],

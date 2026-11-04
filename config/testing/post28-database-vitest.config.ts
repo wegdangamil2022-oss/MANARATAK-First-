@@ -1,5 +1,5 @@
 import {defineConfig} from 'vitest/config';
-import base from '../../.section16-vitest.config';
+import base from './review/section16-vitest.config';
 import {databaseSuite} from './post28-database-suites.mjs';
 export default defineConfig({...base,test:{...base.test,
   globalSetup:['tests/database/post28-database-safety.setup.mjs'],

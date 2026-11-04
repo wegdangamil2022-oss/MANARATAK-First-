@@ -3,7 +3,30 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { resolveManagedSeedAsset, validateManagedSeedJson, writeSeedEvidence } from '../../scripts/database/managed-reference-seed-files.mjs';
+import {execFileSync} from 'node:child_process';
+import { privateSeedDirectory, resolveManagedSeedAsset, validateManagedSeedJson, writeSeedEvidence } from '../../scripts/database/managed-reference-seed-files.mjs';
+
+test('private configuration permission checks use the native security module and retain ACL enforcement',()=>{
+  const temporary=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'managed-seed-private-')));
+  const directory=path.join(temporary,'private'),file=path.join(directory,'configuration.json');
+  fs.mkdirSync(directory,{mode:0o700});
+  try{
+    if(process.platform==='win32'){
+      const account=execFileSync('whoami',[],{encoding:'utf8',windowsHide:true}).trim();
+      execFileSync('icacls',[directory,'/inheritance:r','/grant:r',account+':(OI)(CI)F'],{stdio:'pipe',windowsHide:true});
+    }
+    fs.writeFileSync(file,'{}',{mode:0o600});
+    assert.equal(privateSeedDirectory(file,process.cwd()),directory);
+    assert.throws(()=>privateSeedDirectory(file,directory),/PRIVATE_DIRECTORY_REQUIRED/);
+    if(process.platform!=='win32'){
+      fs.chmodSync(file,0o644);
+      assert.throws(()=>privateSeedDirectory(file,process.cwd()),/PRIVATE_MODE_REQUIRED/);
+    }
+  }finally{
+    if(fs.existsSync(file))fs.unlinkSync(file);
+    fs.rmdirSync(directory);fs.rmdirSync(temporary);
+  }
+});
 test('initial run checkpoint is exclusive and cannot overwrite another operator state',()=>{
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'managed-seed-state-')),filename=path.join(root,'state.json');
   try{

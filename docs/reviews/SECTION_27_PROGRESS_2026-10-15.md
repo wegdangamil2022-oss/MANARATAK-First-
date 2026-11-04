@@ -53,7 +53,7 @@
 ## التحقق المحدود للدفعة
 
 - `scripts/verify-cross-module-source-closure.mjs`: 69 حالة مصدر وعقد، دون قاعدة بيانات أو مزود أو HTTP listener.
-- `.section27-vitest.config.ts`: 19 حالة في أربعة ملفات فقط؛ تشمل واجهة المستندات وعقد تقرير الإدارة ومعاملات tracker الموجودة. لا يستورد إعدادها قائمة اختبارات القسم 16.
+- `config/testing/review/section27-vitest.config.ts`: 19 حالة في أربعة ملفات فقط؛ تشمل واجهة المستندات وعقد تقرير الإدارة ومعاملات tracker الموجودة. لا يستورد إعدادها قائمة اختبارات القسم 16.
 - TypeScript المستهدف: infrastructure وAPI وAdmin وWeb.
 - Prisma validate وgenerate وschema-to-schema diff فقط. يتطابق DDL المضاف مع diff؛ يزيد SQL لقطة الحقائق التاريخية ومعاملة الترحيل. **لم يُطبّق الترحيل.**
 - DI reachability: 411 تسجيلًا تصل إليها مسارات الإنتاج، دون تسجيل معزول. أعيد توليد الملف الحالي وشمل تسجيلات سابقة كانت غير محدثة فيه.

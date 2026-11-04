@@ -17,12 +17,12 @@
     "ownerLinksUi": {
       "passed": 8,
       "files": 4,
-      "command": "npx --yes --package=node@22 node node_modules/vitest/vitest.mjs run --config .section27-owner-links-vitest.config.ts"
+      "command": "npx --yes --package=node@22 node node_modules/vitest/vitest.mjs run --config config/testing/review/section27-owner-links-vitest.config.ts"
     },
     "trackerRegression": {
       "passed": 20,
       "files": 4,
-      "command": "npx --yes --package=node@22 node node_modules/vitest/vitest.mjs run --config .section27-vitest.config.ts"
+      "command": "npx --yes --package=node@22 node node_modules/vitest/vitest.mjs run --config config/testing/review/section27-vitest.config.ts"
     },
     "targetedTypeScript": {
       "status": "PASS",

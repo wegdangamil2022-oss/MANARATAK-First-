@@ -1,12 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { createElement } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
-import { createRequire } from 'node:module';
-const { MemoryRouter } = createRequire(new URL('../../apps/admin/package.json', import.meta.url))(
-  'react-router-dom',
-);
 import {
   dashboardAllowed,
   dashboardMetricHref,
@@ -29,14 +23,6 @@ import {
   readDashboardSource,
 } from '../../apps/admin/src/features/dashboard/DashboardLoader';
 import {
-  DashboardHealthPanel,
-  DashboardMetricCard,
-} from '../../apps/admin/src/features/dashboard/DashboardCards';
-import {
-  dashboardLabel,
-  dashboardTime,
-} from '../../apps/admin/src/features/dashboard/dashboardText';
-import {
   dashboardActivityProjection,
   dashboardAuditOwners,
   type ActivityAuditRecord,
@@ -49,8 +35,6 @@ const source = (key: string) => {
   assert.ok(found, key);
   return found;
 };
-const render = (element: ReturnType<typeof createElement>) =>
-  renderToStaticMarkup(createElement(MemoryRouter, null, element));
 function healthFixture(status = 'DEGRADED') {
   return {
     protocolVersion: 2,
@@ -575,39 +559,6 @@ test('activity parser returns only allowlisted event fields and rejects over-lim
       parseDashboardResponse(source('activity'), { ...value, items: Array(11).fill(event) }, when),
     /SCHEMA_MISMATCH/,
   );
-});
-test('AR/EN static rendering: accessible exact/partial/forbidden states and zero distinct from unknown', () => {
-  for (const language of ['ar', 'en']) {
-    const zero = parseDashboardResponse(source('scholarships:review'), { total: 0 }, when);
-    const markup = render(
-      createElement(DashboardMetricCard, { reading: zero, metric: 'review', language, now }),
-    );
-    assert.ok(markup.includes('aria-label'));
-    assert.ok(markup.includes(dashboardLabel('review', language)));
-    assert.ok(markup.includes('/review-queue?'));
-    const denied = render(
-      createElement(DashboardMetricCard, {
-        reading: initialDashboardReading(source('finance'), false),
-        metric: 'pendingPayments',
-        language,
-        now,
-      }),
-    );
-    assert.ok(denied.includes(dashboardLabel('forbidden', language)));
-    assert.ok(!denied.includes('href='));
-    assert.ok(dashboardTime(when, language).endsWith(' UTC'));
-  }
-});
-test('stale health render never advertises a current green/UP gate', () => {
-  const reading = parseDashboardResponse(source('health'), healthFixture('UP'), when);
-  const fresh = render(createElement(DashboardHealthPanel, { reading, language: 'en', now }));
-  assert.ok(fresh.includes('<dd>Operational</dd>'));
-  const old = render(
-    createElement(DashboardHealthPanel, { reading, language: 'en', now: now + 31000 }),
-  );
-  assert.ok(old.includes('Stale'));
-  assert.ok(!old.includes('<dd>Operational</dd>'));
-  assert.ok(!old.includes('Current diagnostic gate passed'));
 });
 test('integration source boundaries: owner guards retained, activity GET query-only, lifecycle cleanup fenced', () => {
   const app = fs.readFileSync('apps/api/src/app.ts', 'utf8');

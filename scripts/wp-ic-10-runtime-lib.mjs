@@ -65,7 +65,7 @@ export function securityAudit(repoRoot) {
     importedAdmin: 'packages/application/src/courses/use-cases/ImportedCourseAdminUseCases.ts',
     parser: 'packages/application/src/courses/parsers/CourseMasterArtifactParser.ts',
     packageJson: 'package.json',
-    archivedSessionTest: 'scripts/archive/remediation-root/test_session_manager.ts',
+    archivedSessionTest: 'scripts/testing/check-session-databases.ts',
   };
   const text = {};
   const checks = [];

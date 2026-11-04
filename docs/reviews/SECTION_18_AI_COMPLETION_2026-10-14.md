@@ -41,7 +41,7 @@ Node **22.23.3**؛ dependencies/client المحلية الموجودة من ال
 
 | الفحص | النتيجة النهائية |
 |---|---|
-| `vitest run --config .section18-ai-vitest.config.ts` | **13 ملفًا/178 اختبارًا، كلها نجحت**؛9.09 ثانية إجمالية،1.49 ثانية test execution؛maxWorkers=2. |
+| `vitest run --config config/testing/review/section18-ai-vitest.config.ts` | **13 ملفًا/178 اختبارًا، كلها نجحت**؛9.09 ثانية إجمالية،1.49 ثانية test execution؛maxWorkers=2. |
 | اختبارات جديدة | **32** ضمن178:22 read/result boundaries،3 owner identity بعد embedding latency،5 React interaction،2 HTTP privacy/result responses. mocks/fake clocks فقط؛ لا تجمع أعداد الجولات. |
 | `tsc -b packages/infrastructure apps/api apps/admin --pretty false` | نجاحexit0 على المصدر النهائي. |
 | ESLint المستهدف | نجاحexit0؛0 errors،73 warnings موثقة، تشمل any في fixtures وتحذيرات type-style القائمة؛ لا ادعاء إغلاقها. |

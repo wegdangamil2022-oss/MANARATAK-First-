@@ -38,7 +38,7 @@
 
 ## التحقق الخفيف
 
-- **64 اختبار Vitest في 6 ملفات**: عقد المالك، canonical lookup/resolution، مستودع/عرض المنح، وreadiness الحراس/القيد. الأمر: `npx --no-install vitest run --config .b05-vitest.config.ts`.
+- **64 اختبار Vitest في 6 ملفات**: عقد المالك، canonical lookup/resolution، مستودع/عرض المنح، وreadiness الحراس/القيد. الأمر: `npx --no-install vitest run --config config/testing/review/b05-vitest.config.ts`.
 - **10 اختبارات Node** لجرد القيود، وmetadata/checksums، وعقود persistence، وفحص أن SQL التدقيق لا يكتب البيانات ولا يقرأ محتويات الوثائق.
 - **9 اختبارات explorer** عبر `tsx --test tests/integration/section27/academic-program-explorer.test.ts`: pagination/count، scopes، الصلاحيات، فشل المالك، دفعة المنح وRepeatableRead.
 - **7 اختبارات رجعية للأصول من B04**: منع purge بالمرجع الوحيد، unlink/expiry، فشل delegate، وجرد حقول الاستخدام.

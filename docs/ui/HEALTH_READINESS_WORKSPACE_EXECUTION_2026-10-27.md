@@ -48,7 +48,7 @@ No global stylesheet or unrelated workspace was changed.
 
 Executed with Node 22.16.0 and the repository's installed dependencies:
 
-- `npx vitest run --config .section25-health-ui-vitest.config.ts`: **24 PASS**.
+- `npx vitest run --config config/testing/review/section25-health-ui-vitest.config.ts`: **24 PASS**.
   Covers freshness/future clock, optional failure truth, source identity,
   history provenance/deduplication/cap, safe export, legacy links, stale retry,
   incompatible schema, authorization loss, late response suppression,

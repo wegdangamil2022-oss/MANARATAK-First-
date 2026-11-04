@@ -18,7 +18,7 @@
 
 ## الفحوصات الخفيفة
 
-- **84 اختبارًا في 6 ملفات Vitest** عبر `.b04-vitest.config.ts`، بما فيها خدمة purge الفعلية مع usage gateway الحقيقي ومستودع الوثائق الحقيقي ببدائل persistence/provider. تشمل sole-reference، وانتهاء المدة، وunlink مع version conflict، وغياب delegate، وحوكمة الأصول ولغة المنحة.
+- **84 اختبارًا في 6 ملفات Vitest** عبر `config/testing/review/b04-vitest.config.ts`، بما فيها خدمة purge الفعلية مع usage gateway الحقيقي ومستودع الوثائق الحقيقي ببدائل persistence/provider. تشمل sole-reference، وانتهاء المدة، وunlink مع version conflict، وغياب delegate، وحوكمة الأصول ولغة المنحة.
 - **21 اختبار Node** لعقود المعمارية، وmetadata الترحيلات، وسياسة التشغيل. اختبار أداة الشهادات يقيم المصدر الفعلي مع بدائل خاملة لـPrisma وspawn/process؛ لا socket ولا subprocess حقيقي. يرفض الأهداف الأجنبية/الخاطئة قبل إنشاء العميل، ويرفض قاعدة محلية غير فارغة قبل الترحيل.
 - **43 اختبار B03** ناجحًا بعد دمج main، للتحقق من بقاء المسار الحقيقي واحتواء البيانات التجريبية.
 - `tsc -b packages/domain packages/application packages/infrastructure apps/admin apps/web --pretty false`: PASS. توليد Prisma محلي فقط؛ لا اتصال أو تطبيق DB.

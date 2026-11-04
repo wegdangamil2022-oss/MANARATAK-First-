@@ -45,9 +45,8 @@ test('organization allows active workspace configuration and generated dependenc
   const result = inspect(
     {
       'server.js': '',
-      'metadata.json': '{}',
       '.env.compose.example': '',
-      '.section16-vitest.config.ts': '',
+      'config/testing/review/section16-vitest.config.ts': '',
     },
     ['config', 'deploy/media-selfhost', 'tasks', 'vendor', 'storage', 'node_modules', 'release-artifacts'],
   );
@@ -128,13 +127,17 @@ test('archived harness imports require exact source identity, size and digest; a
   assert.deepEqual(active.report.brokenRelativeImports, ['scripts/active.mjs: ./original-external-checkout/tool.mjs']);
 });
 
-test('reviewed acceptance suite configs are allowed while unregistered hidden configs are rejected', () => {
+test('review profiles live under config/testing and retired root exports are rejected', () => {
   assert.equal(inspect({
-    '.b13-vitest.config.ts': '',
-    '.section20-finance-vitest.config.ts': '',
-    '.postclosure-review-vitest.config.ts': '',
-    '.b10-typecheck.json': '{}',
+    'config/testing/review/b13-vitest.config.ts': '',
+    'config/testing/review/section20-finance-vitest.config.ts': '',
+    'config/testing/review/postclosure-review-vitest.config.ts': '',
   }).status, 0);
+  for (const retired of ['metadata.json', 'vitest.workspace.ts', '.section16-vitest.config.ts']) {
+    const result = inspect({[retired]: ''});
+    assert.equal(result.status, 1);
+    assert.deepEqual(result.report.unexpectedRootFiles, [retired]);
+  }
   const unknown = inspect({'.b99-vitest.config.ts': ''}, ['evidence']);
   assert.equal(unknown.status, 1);
   assert.deepEqual(unknown.report.unexpectedRootFiles, ['.b99-vitest.config.ts']);

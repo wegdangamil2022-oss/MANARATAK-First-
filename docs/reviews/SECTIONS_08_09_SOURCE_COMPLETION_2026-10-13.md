@@ -29,7 +29,7 @@
 
 Node 22.23.3، دون credentials/provider/DB مستخدم:
 
-- `npx --no-install vitest run --config .sections08-09-completion-vitest.config.ts`: **18 ملفًا / 108 اختبارات PASS، 9.06 ثانية**؛ يشمل 64 closeout و44 حالة اختيار/مصدر/locale/ownership/paging. لا whole repository test أو browser/load suite.
+- `npx --no-install vitest run --config config/testing/review/sections08-09-completion-vitest.config.ts`: **18 ملفًا / 108 اختبارات PASS، 9.06 ثانية**؛ يشمل 64 closeout و44 حالة اختيار/مصدر/locale/ownership/paging. لا whole repository test أو browser/load suite.
 - `npx --no-install tsc -b packages/infrastructure apps/api apps/admin apps/web --pretty false`: **PASS** بعد تصحيح diagnostics المرتبطة بأنواع blockers، imports، وnullable cursor. الفحص النهائي بعد تعديل grouping المحايد نجح أيضًا.
 - Prisma validate: **PASS** باستخدام عناوين fixture محلية للتحقق فقط؛ لا اتصال، generate، migration أو seed لقاعدة المستخدم.
 - SQL fixture صغيرة في PGlite/ذاكرة: **PASS** لبيانات source/canonical/supplemental/legacy، source identity/profile separation، filters/totals/empty pages/collision refusal، قراءة degree/country/publication للجامعات والمنح، وSQL CAS/approval constraints للسجل الجديد وربط ImportRecord الأصلي ورفض المصدر الفاشل. استخدمت نفس SQL repository؛ ليست fake counts. المصدر: `evidence/sections-08-09-completion-20261013/major-sql-fixture.ts`. الحزمة المؤقتة ليست dependency جديدة للمشروع.

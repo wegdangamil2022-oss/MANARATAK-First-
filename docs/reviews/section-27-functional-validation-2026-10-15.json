@@ -22,12 +22,12 @@
     "ownerLinksUi": {
       "passed": 11,
       "files": 6,
-      "config": ".section27-owner-links-vitest.config.ts"
+      "config": "config/testing/review/section27-owner-links-vitest.config.ts"
     },
     "trackerRegression": {
       "passed": 20,
       "files": 4,
-      "config": ".section27-vitest.config.ts"
+      "config": "config/testing/review/section27-vitest.config.ts"
     },
     "discoveryRefreshFollowup": {
       "passed": 1,

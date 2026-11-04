@@ -63,7 +63,7 @@
 
 أُنجز على Node **22.16.0**:
 
-- **64/64 Vitest، 11 ملفًا** عبر `.home-catalog-vitest.config.ts`: الحالات/RTL-copy/التبويبات/الصور/روابط السياسة/mapper/snapshot/reload والـrouters، مع regression loading/cache والـproduction mode.
+- **64/64 Vitest، 11 ملفًا** عبر `config/testing/review/home-catalog-vitest.config.ts`: الحالات/RTL-copy/التبويبات/الصور/روابط السياسة/mapper/snapshot/reload والـrouters، مع regression loading/cache والـproduction mode.
 - **2/2 Node** لرفض prototype في production/staging وقدرة build.
 - **11 سجل متصفح ناجحًا** في `home-catalog.smoke.mjs`: ثلاث حالات viewport عربية للصفحة المبنية (390/768/1440) مع loading/empty/unavailable/retry/independent tabs، ست معاينات مكوّنات AR/EN مع CSS الإنتاج، تحقق سياسة `/en` القائمة، وتفاصيل/تصفح المالك. صور فعلية محفوظة محليًا، ولا horizontal overflow أو JavaScript pageerror في انتقالات الصفحة العربية.
 - route الإنجليزية العامة محجوبة **بسياسة الإصدار القائمة** `PUBLIC_ENGLISH_COPY_READY=false` وتحول إلى العربية؛ لم تُفعّل. فحص الإنجليزية هنا React/SSR للمكوّنات ولقطات layout مع CSS المبني، وليس ادعاء E2E لصفحة إنجليزية مفعلة.

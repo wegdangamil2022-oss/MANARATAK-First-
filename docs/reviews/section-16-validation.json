@@ -20,7 +20,7 @@
       "evidence": "docs/reviews/evidence/section-16/typecheck-full.txt"
     },
     {
-      "command": "npx vitest run --config .section16-vitest.config.ts",
+      "command": "npx vitest run --config config/testing/review/section16-vitest.config.ts",
       "exitCode": 0,
       "result": "PASS",
       "evidence": "docs/reviews/evidence/section-16/vitest.txt",

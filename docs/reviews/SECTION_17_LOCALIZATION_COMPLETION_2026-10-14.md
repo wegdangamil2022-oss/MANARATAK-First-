@@ -60,7 +60,7 @@ UniversityTranslation وMajor/root/section metadata تظل مخزن المالك
 ## النتائج الفعلية
 
 - Node22.23.3؛ dependencies من main، دون إضافة مكتبات. Prisma generation محلي فقط لتوافق client مع migration source، بلا URL/اتصال قاعدة.
-- `.section17-localization-vitest.config.ts`: **26 ملفًا /127 اختبارًا، كلها نجحت**؛18.74 ثانية إجمالية،1.50 ثانية test execution؛ maxWorkers=2.
+- `config/testing/review/section17-localization-vitest.config.ts`: **26 ملفًا /127 اختبارًا، كلها نجحت**؛18.74 ثانية إجمالية،1.50 ثانية test execution؛ maxWorkers=2.
 - Node: **11 اختبارًا ناجحًا** لنسخ JSX/مفاتيح القواميس/نقاء النصوص؛ منفصلة عن127.
 - TypeScript: `tsc -b packages/infrastructure packages/ui apps/api apps/admin apps/web --pretty false` نجحexit0 بعد إكمال Exam type وRootLayout.
 - source-quality translation gate نجح، مع `DATABASE_MUTATIONS_ALLOWED=false DATABASE_ENVIRONMENT=source` لهذه القراءة المصدرية فقط وDATABASE_URL unset؛ لم يتصل بقاعدة.

@@ -114,6 +114,14 @@
     "scripts/generate-localized-public-sitemap.ts"
   ],
   "reviewedPrismaScriptContracts": {
+    "scripts/testing/check-session-databases.ts": {
+      "purpose": "Read-only SELECT 1 connectivity diagnostic using two explicitly supplied test-session URLs, with no fallback to the application database",
+      "access": "isolated-read-write",
+      "environment": ["Node22; explicitly supplied disposable TEST_SESSION_ADMIN_DATABASE_URL and TEST_SESSION_APP_DATABASE_URL"],
+      "gate": "Diagnostic is never invoked by source checks; only constant SELECT 1 queries are used, and both clients are disconnected. Classification authorizes no database writes or original-database execution.",
+      "requiredSourceMarkers": ["TEST_SESSION_ADMIN_DATABASE_URL", "TEST_SESSION_APP_DATABASE_URL", "TEST_SESSION_DATABASE_URLS_REQUIRED", "$queryRawUnsafe('SELECT 1')", "$disconnect()"],
+      "review": "Repository cleanup 2026-11-04: retained operational diagnostic moved out of the archive exemption into monitored tooling; access category denotes database-connected tooling, while this helper only reads"
+    },
     "scripts/university-screening-preview.ts": {
       "purpose": "Read persisted university screening receipts and active source assets through the owning-domain preview gateway; no canonical writes or approval",
       "access": "isolated-read-write",

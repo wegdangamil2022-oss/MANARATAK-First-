@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitest/config';
-import baseline from '../../.section16-vitest.config';
+import baseline from './review/section16-vitest.config';
 
 const owners = [
   'services-platform',

@@ -31,7 +31,7 @@
 
 ## التحقق الخفيف
 
-- `vitest run --config .b01-vitest.config.ts`: **33 اختبارًا ناجحًا في 5 ملفات**؛ نحو 13 ثانية، دون قاعدة أو اتصالات خارجية.
+- `vitest run --config config/testing/review/b01-vitest.config.ts`: **33 اختبارًا ناجحًا في 5 ملفات**؛ نحو 13 ثانية، دون قاعدة أو اتصالات خارجية.
 - اختبارات HTTP على `createApiApp` الفعلي، وتركيب `/api/v1/search` الكسول عبر DI، وحراس الجلسة والصلاحية الفعلية، وحالة الاستخدام وPrisma adapter؛ credential provider وdelegate التخزين بدائل معزولة.
 - موجبات وسلبيات: البحث العام واللغة/cursor؛ 401 للمجهول والاعتماد الخاطئ/الجلسة/الحساب/MFA غير النشطة؛ 403 لنقص الصلاحية؛ عدم الانتحال من body/query؛ حفظ الهوية؛ قراءة الشخص نفسه؛ منع سجل شخص آخر/نطاق آخر/سجل قديم؛ رفض scope تعسفي؛ حدود الإدخال؛ 404 للتشخيص؛ غياب المخزن العالمي؛ عدم fallback إذا غاب العمود.
 - `tsc -b packages/application packages/infrastructure apps/api --pretty false`: ناجح.

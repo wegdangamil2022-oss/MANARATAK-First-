@@ -232,7 +232,7 @@
     {
       "id": "XMI-033",
       "status": "TARGETED_SOURCE_CONTRACTS_IMPLEMENTED_FULL_E2E_DEFERRED",
-      "paths": "tests/integration/section27; .section27-owner-links-vitest.config.ts; .section27-vitest.config.ts",
+      "paths": "tests/integration/section27; config/testing/review/section27-owner-links-vitest.config.ts; config/testing/review/section27-vitest.config.ts",
       "disposition": "Expanded targeted score/version/variant, graph cursor, privacy/consent, EAP phase, attestation, alias/revision and integrity/API/UI contracts. Full disposable PostgreSQL plus API E2E suite completion/execution remains deferred outside this user code-only scope. No mock-based E2E success claim.",
       "runtimeVerified": false
     },

@@ -40,7 +40,7 @@ run([
   'node_modules/vitest/vitest.mjs',
   'run',
   '--config',
-  '.certificates-isolated-vitest.config.ts',
+  'config/testing/review/certificates-isolated-vitest.config.ts',
   '--reporter=default',
   '--reporter=json',
   '--outputFile.json=certificate-isolated-results.json',

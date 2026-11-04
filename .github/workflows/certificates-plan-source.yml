@@ -8,7 +8,7 @@ on:
       - 'packages/shared/src/authorization/adminPermissionCatalog.ts'
       - 'packages/shared/src/localization/certificateCopy.ts'
       - 'apps/api/src/infrastructure/di/container.ts'
-      - '.certificates-vitest.config.ts'
+      - 'config/testing/review/certificates-vitest.config.ts'
       - 'scripts/architecture/verify-certificate-audit-coverage.mjs'
       - '.github/workflows/certificates-plan-source.yml'
   push:
@@ -33,6 +33,6 @@ jobs:
       - run: npm run db:generate
       - run: npx --no-install prisma validate --schema packages/infrastructure/prisma/schema.prisma
       - run: npx --no-install tsc -b apps/api apps/admin apps/web
-      - run: npx --no-install vitest run --config .certificates-vitest.config.ts
+      - run: npx --no-install vitest run --config config/testing/review/certificates-vitest.config.ts
       - run: npm run quality:source
       - run: node scripts/architecture/verify-certificate-audit-coverage.mjs

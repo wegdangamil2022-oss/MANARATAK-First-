@@ -31,7 +31,7 @@
 
 - Node **22.23.3**؛ dependencies من lockfile؛ أضيف `react-test-renderer@19.2.8` للاختبارات فقط، مع الحفاظ على React production **19.2.8**.
 - local Prisma Client generation فقط، دون اتصال قاعدة أو تنفيذ migration.
-- `.section15-completion-vitest.config.ts`: **26 ملفًا /187 اختبارًا، كلها نجحت**؛ 56.45 ثانية إجمالية، منها 2.91 ثانية test execution. الإعداد معزول للقسم والحدود المرتبطة، maxWorkers=2، ولا يشغّل suite المستودع العامة.
+- `config/testing/review/section15-completion-vitest.config.ts`: **26 ملفًا /187 اختبارًا، كلها نجحت**؛ 56.45 ثانية إجمالية، منها 2.91 ثانية test execution. الإعداد معزول للقسم والحدود المرتبطة، maxWorkers=2، ولا يشغّل suite المستودع العامة.
 - الاختبارات الخمسة الجديدة نجحت أيضًا منفردة؛ هي ضمن الـ187 ولا تجمع مرتين.
 - ESLint المستهدف: **0 errors،25 warnings**؛ تحذيرات الملف القائم وrefs عدادات الطلبات وany في fixtures مفصلة في evidence، ولا ندّعي إغلاقها.
 - TypeScript: `tsc -b packages/infrastructure apps/api apps/admin --pretty false` نجح (exit0)، وأعيد فحصه incremental على المصدر النهائي بنجاح. `git diff --check` نجح.

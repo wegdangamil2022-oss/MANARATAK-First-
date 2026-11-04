@@ -135,7 +135,7 @@
 **P0؛ يعتمد R00.** استخدام Node22 وlockfile الحالي في checkout مخصص؛ تثبيت الحزم لا يشغّل provision تلقائيًا، ومراجعة postinstall؛ `db:generate` توليد client وليس تطبيق migrations.
 
 - إعادة `node --test tests/release/section28.test.mjs` بعد التصحيح، ثم فحص syntax/JSON/YAML للملفات المعدلة والأدوات المستوردة.
-- تشغيل `.b13-vitest.config.ts` واستكمال اختبارات المسار الأصلي للائتمان: retry بعد CREDITED، نفس key بنية مختلفة، amount/currency/scale، version، reason، وعدم ledger/audit/outbox مكرر. بديل V8 المصحح لا يغني عن استدعاء owner/use case/router الحقيقي ببدائل مضبوطة.
+- تشغيل `config/testing/review/b13-vitest.config.ts` واستكمال اختبارات المسار الأصلي للائتمان: retry بعد CREDITED، نفس key بنية مختلفة، amount/currency/scale، version، reason، وعدم ledger/audit/outbox مكرر. بديل V8 المصحح لا يغني عن استدعاء owner/use case/router الحقيقي ببدائل مضبوطة.
 - إعادة حالتي HTTP: غياب `expectedVersion` في capture، ومفتاح طلب غائب/طويل؛ إثبات 400 لا نجاح business operation. إعادة حالات المتابعة للعكس والـreceipt وموافقة الخريج، وما تغير من fixtures فقط.
 - الفواحص السبعة للخطة السابقة وclosure وquality وDI وlint/typecheck المتأثر، ثم تجميع الفشل المتبقي في manifest/preflight وCI دون تعطيل أي mandatory gate. source security scans وdependency/secret/action pins وCodeQL في بيئتها المناسبة.
 - نتائج CI source/full المطلوبة تؤخذ من تشغيل فعلي أخضر على المرشح قبل التوقيع النهائي؛ build/unit الشاملان لا يشغلان في كل محاولة صغيرة. تُعاد بوابة CI على المرشح النهائي بعد R02 أيضًا.
@@ -425,8 +425,8 @@ flowchart TD
 |---|---|---|
 | Node/مصدر | `node --version`، `git status --short`، `git rev-parse HEAD` | R00؛ لا تكشف environment values |
 | release fixtures | `node --test tests/release/section28.test.mjs` | R01 بعد Node22 |
-| دين المالية | `npx --no-install vitest run --config .b13-vitest.config.ts` | R01؛ يشغل include الفعلي فقط، واستكمال الائتمان يحتاج مجموعة أصلية موجهة |
-| متابعة fixes | `.postclosure-review-vitest.config.ts`، `.b12-vitest.config.ts` | R01 باختيار المتأثر؛ توثيق count فعلي |
+| دين المالية | `npx --no-install vitest run --config config/testing/review/b13-vitest.config.ts` | R01؛ يشغل include الفعلي فقط، واستكمال الائتمان يحتاج مجموعة أصلية موجهة |
+| متابعة fixes | `config/testing/review/postclosure-review-vitest.config.ts`، `config/testing/review/b12-vitest.config.ts` | R01 باختيار المتأثر؛ توثيق count فعلي |
 | Prisma source | `npm run db:source:verify` | validate+generate بمصدر tool لا اتصال DB؛ توليد client داخل checkout مخصص |
 | جرد migrations مصدر | `npm run db:remediation:plan` و`npm run db:remediation:dry-run` | R01؛ dry-run الحالي inventory وليس rehearsal DB |
 | migration status/rows | `npm run db:remediation:status` و`:baseline` | **يتصلان بقاعدة**؛ R04/R05 على target مثبت، ليسا فحص مصدر |

@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitest/config';
-import baseline from '../../.section16-vitest.config';
+import baseline from './review/section16-vitest.config';
 import dashboard from './executive-dashboard.vitest.config';
 import scholarships from './scholarship-admin.vitest.config';
 import universities from './university-admin.vitest.config';

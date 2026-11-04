@@ -39,7 +39,7 @@ Node **22.23.3**؛ dependencies/Prisma Client المحلي من الجولة ا�
 
 | الفحص | النتيجة الحالية |
 |---|---|
-| `vitest run --config .section16-vitest.config.ts` | **28 ملفًا /148 اختبارًا، كلها نجحت**؛15.41 ثانية إجمالية،1.41 ثانية تنفيذ tests. maxWorkers=2 وبدائل/HTTP محلي وrenderer فقط. |
+| `vitest run --config config/testing/review/section16-vitest.config.ts` | **28 ملفًا /148 اختبارًا، كلها نجحت**؛15.41 ثانية إجمالية،1.41 ثانية تنفيذ tests. maxWorkers=2 وبدائل/HTTP محلي وrenderer فقط. |
 | الاختبارات الجديدة | **30** ضمن148:21 repository/rights/scheduler/cache،7 React interaction،1 HTTP،1 application؛ لا تجمع مرتين. |
 | `tsc -b packages/infrastructure apps/api apps/admin --pretty false` | exit0؛ مشاريع المصدر والعقود المتأثرة، دون build عام أو تشغيل التطبيق. |
 | ESLint المستهدف | exit0؛**0 errors،21 warnings**، تفاصيل any في fixtures محفوظة؛ لا ادعاء إغلاقها. |

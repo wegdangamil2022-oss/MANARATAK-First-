@@ -23,7 +23,7 @@
       "result": "PASS"
     },
     {
-      "command": "npx vitest run --config .section15-vitest.config.ts",
+      "command": "npx vitest run --config config/testing/review/section15-vitest.config.ts",
       "exitCode": 0,
       "result": "PASS",
       "files": 22,
