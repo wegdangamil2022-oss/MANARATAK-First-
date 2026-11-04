@@ -39,6 +39,7 @@ No database connection was needed for this cleanup. No migrations, resets, seeds
 - Full workspace TypeScript: passed again after cleanup. Final ESLint: zero errors, 5,061 existing warnings (5,067 before cleanup); warnings are not claimed as resolved.
 - Final full Vitest run with two workers: **843 files passed, 3 files skipped; 6,272 tests passed, 8 skipped; zero failures**. The skips are existing classifications, not exclusions added by cleanup.
 - Cleanup-specific organization/font contracts: **9 passed**.
+- All **67** test profiles under `config/testing` import successfully after relocation (the database profile was given its required suite selector; no database suite was executed).
 - Windows ACL/Playwright fixture regression checks after repair: **24 passed**.
 - `ci:source:contracts`: passed, including architecture, authorization audit inventory, remediation and source plan closures.
 - `ci:preflight`: passed; 459/459 DI registrations reachable, zero unresolved registrations, source environment inventory current.
@@ -46,4 +47,6 @@ No database connection was needed for this cleanup. No migrations, resets, seeds
 - Production dependency audit (`npm audit --omit=dev`): **zero advisories** at review time. This is not a claim about future advisories or every development dependency.
 - Tracked-source secret signature scan: passed.
 
-The first complete Node reference run reported 1,119 passed / 11 failed. It exposed a clean-checkout prerequisite, GNU-vs-BSD tar selection, two Windows test-fixture issues (fixed and independently rechecked), and privileged/POSIX symlink fixtures unavailable to this Windows account. A final clean-tree reference run follows the code checkpoint; source checks do not change OS privileges or weaken the symlink rejection policies. Detailed logs are retained outside the repository under the owner's private `repository-cleanup-20261104` directory.
+The final Node reference run used clean code checkpoint `62ec36f8` and the installed Git GNU tar: **1,124 passed / 7 failed, zero skipped**. All seven failures occur while creating symbolic-link fixtures (`EPERM`) before their assertions; this Windows account lacks that permission. They are the synthetic-curl fixture in `post28-neon-preflight.test.mjs`, four packaging/static-runtime fixtures in `post28-r07-static-runtime.test.mjs`, and two asset/artifact fixtures in `section28.test.mjs`. These tests still require a suitable CI/Linux or authorized Windows environment; the complete Node gate is not claimed as passing. No tests were disabled and no OS privileges or symlink rejection policies were weakened.
+
+The earlier Node run's clean-source and tar prerequisites now pass, as do the repaired native ACL and absolute-path fixtures. Detailed logs are retained outside the repository under the owner's private `repository-cleanup-20261104` directory.
