@@ -32,8 +32,8 @@ export class Result<T, E extends IResultError = IResultError> {
     return this._value as T;
   }
 
-  public static ok<U>(value?: U): Result<U, any> {
-    return new Result<U, any>(true, null, value);
+  public static ok<U, E extends IResultError = IResultError>(value?: U): Result<U, E> {
+    return new Result<U, E>(true, null, value);
   }
 
   public static fail<U, E extends IResultError = IResultError>(error: E): Result<U, E> {
@@ -50,7 +50,7 @@ export class ResultFactory {
     return Result.fail({ code, message, details });
   }
 
-  public static validationFailure<T>(message: string, errors: any[]): Result<T> {
+  public static validationFailure<T>(message: string, errors: unknown[]): Result<T> {
     return Result.fail({ code: ErrorCode.VALIDATION_ERROR, message, details: { errors } });
   }
 }

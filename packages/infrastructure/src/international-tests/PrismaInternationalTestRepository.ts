@@ -602,7 +602,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     const revisions = data.length ? await this.prisma.$queryRaw<Array<{testId:string;revision:number}>>(Prisma.sql`SELECT "testId","revision" FROM "InternationalTestGovernance" WHERE "testId" IN (${Prisma.join(data.map(row=>row.id))})`) : [];
     const revisionById = new Map(revisions.map(row=>[row.testId,row.revision]));
     const result = {
-      data: data.map((d: any) => ({...this.mapToDto(d),revision:revisionById.get(d.id)??0})), total, page, limit:pageSize,
+      data: data.map((d) => ({...this.mapToDto(d),revision:revisionById.get(d.id)??0})), total, page, limit:pageSize,
       statistics: {scope:'FILTERED',published:groups.filter(row=>row.status==='PUBLISHED').reduce((n,row)=>n+row._count._all,0),underReview:groups.filter(row=>['READY_TO_REVIEW','NEEDS_REVIEW'].includes(row.status)).reduce((n,row)=>n+row._count._all,0),incomplete:groups.filter(row=>row.completenessStatus==='INCOMPLETE').reduce((n,row)=>n+row._count._all,0)},
     };
     return result;
@@ -704,7 +704,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
       orderBy: [{ displayName: 'asc' },{ id: 'asc' }],
       skip: (Math.min(1000,Math.max(1,page))-1)*50, take: 50,
     });
-    return records.map((record: any) => this.mapProviderToDto(record));
+    return records.map((record) => this.mapProviderToDto(record));
   }
 
   async upsertProvider(
@@ -740,7 +740,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
 
   async listVariants(testId: string): Promise<InternationalTestVariantDto[]> {
     const records = await this.prisma.internationalTestVariant.findMany({ where: { testId } });
-    return records.map((r: any) => this.mapVariantToDto(r));
+    return records.map((r) => this.mapVariantToDto(r));
   }
 
   async upsertVariant(
@@ -779,7 +779,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
       where: { testId },
       orderBy: { order: 'asc' },
     });
-    return records.map((r: any) => this.mapSectionToDto(r));
+    return records.map((r) => this.mapSectionToDto(r));
   }
 
   async upsertSection(
@@ -944,7 +944,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     const records = await this.prisma.internationalTestPreparationMaterial.findMany({
       where: { testId },
     });
-    return records.map((r: any) => this.mapPreparationMaterialToDto(r));
+    return records.map((r) => this.mapPreparationMaterialToDto(r));
   }
 
   async upsertPreparationMaterial(

@@ -88,6 +88,4 @@ export class SecurityService implements ISecurityService {
     return timingSafeEqual(receivedSigBuf, expectedSigBuf);
   }
 
-  [key: string]: any;
-  static [key: string]: any;
 }

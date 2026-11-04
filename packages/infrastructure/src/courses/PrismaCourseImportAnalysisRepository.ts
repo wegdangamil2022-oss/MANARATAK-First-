@@ -47,7 +47,7 @@ export class PrismaCourseImportAnalysisRepository implements ICourseImportAnalys
       where: { providerId, normalizedOriginalTitle, languageVersionKey },
       orderBy: { createdAt: 'asc' },
     });
-    return records.map((record: any) => this.mapIdentity(record));
+    return records.map((record) => this.mapIdentity(record));
   }
 
   public async findSourceIdentitiesByNormalizedUrl(
@@ -63,7 +63,7 @@ export class PrismaCourseImportAnalysisRepository implements ICourseImportAnalys
       },
       orderBy: { createdAt: 'asc' },
     });
-    return records.map((record: any) => this.mapIdentity(record));
+    return records.map((record) => this.mapIdentity(record));
   }
 
   public async ensureSourceIdentity(input: EnsureCourseSourceIdentityInput): Promise<{

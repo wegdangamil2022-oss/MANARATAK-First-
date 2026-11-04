@@ -156,7 +156,7 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
     ]);
 
     return {
-      data: records.map((record: any) => this.mapCourse(record)),
+      data: records.map((record) => this.mapCourse(record)),
       total,
       page,
       pageSize: size,

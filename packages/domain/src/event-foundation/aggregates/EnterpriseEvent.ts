@@ -13,8 +13,14 @@ import { EnterpriseEventRegisteredEvent } from '../events/EnterpriseEventRegiste
 import { EnterpriseEventPublishedEvent } from '../events/EnterpriseEventPublishedEvent';
 import { EnterpriseEventArchivedEvent } from '../events/EnterpriseEventArchivedEvent';
 
+type EnterpriseLifecycleEvent =
+  | EnterpriseEventCreatedEvent
+  | EnterpriseEventRegisteredEvent
+  | EnterpriseEventPublishedEvent
+  | EnterpriseEventArchivedEvent;
+
 export class EnterpriseEvent {
-  private _domainEvents: any[] = [];
+  private _domainEvents: EnterpriseLifecycleEvent[] = [];
   private _lifecycleState: EventLifecycleState;
 
   private constructor(
@@ -122,7 +128,7 @@ export class EnterpriseEvent {
   public getLifecycleState(): EventLifecycleState { return this._lifecycleState; }
 
   // Event handling
-  public getDomainEvents(): any[] {
+  public getDomainEvents(): EnterpriseLifecycleEvent[] {
     return [...this._domainEvents];
   }
 
@@ -130,7 +136,7 @@ export class EnterpriseEvent {
     this._domainEvents = [];
   }
 
-  private addDomainEvent(event: any): void {
+  private addDomainEvent(event: EnterpriseLifecycleEvent): void {
     this._domainEvents.push(event);
   }
 }

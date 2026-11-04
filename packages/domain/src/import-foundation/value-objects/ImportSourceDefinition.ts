@@ -14,7 +14,7 @@ export interface ImportSourceDefinitionProps {
   connectorId: string;
   connectorVersion: string;
   updatedAt?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class ImportSourceDefinition {
@@ -29,7 +29,7 @@ export class ImportSourceDefinition {
   public readonly connectorId: string;
   public readonly connectorVersion: string;
   public readonly updatedAt?: Date;
-  public readonly metadata?: Record<string, any>;
+  public readonly metadata?: Record<string, unknown>;
 
   constructor(props: ImportSourceDefinitionProps) {
     if (!props.sourceId || props.sourceId.trim() === '') {

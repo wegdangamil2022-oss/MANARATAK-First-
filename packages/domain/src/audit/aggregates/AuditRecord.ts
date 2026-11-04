@@ -18,10 +18,15 @@ import { AuditRecordCreatedEvent } from '../events/AuditRecordCreatedEvent';
 import { AuditRetentionAssignedEvent } from '../events/AuditRetentionAssignedEvent';
 import { AuditArchivedEvent } from '../events/AuditArchivedEvent';
 
+type AuditRecordEvent =
+  | AuditRecordCreatedEvent
+  | AuditRetentionAssignedEvent
+  | AuditArchivedEvent;
+
 export class AuditRecord {
   private lifecycleState: AuditLifecycleState;
   private retentionMetadata?: AuditRetentionMetadata;
-  private readonly events: any[] = [];
+  private readonly events: AuditRecordEvent[] = [];
 
   private constructor(
     private readonly id: AuditId,
@@ -162,11 +167,11 @@ export class AuditRecord {
     this.addEvent(new AuditArchivedEvent(this.id));
   }
 
-  private addEvent(event: any): void {
+  private addEvent(event: AuditRecordEvent): void {
     this.events.push(event);
   }
 
-  public getEvents(): any[] {
+  public getEvents(): AuditRecordEvent[] {
     return [...this.events];
   }
 

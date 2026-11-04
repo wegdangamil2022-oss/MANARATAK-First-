@@ -9,7 +9,7 @@ export function canonicalProblemDetailsMiddleware(req: Request, res: Response, n
   const originalJson = res.json.bind(res);
   res.json = ((body: unknown) => {
     if (res.statusCode >= 400) {
-      const traceId = String((req as any).traceId || req.headers['x-correlation-id'] || 'unknown');
+      const traceId = String((req as Request & { traceId?: string }).traceId || req.headers['x-correlation-id'] || 'unknown');
       const canonical = isProblemDetails(body)
         ? body
         : legacyErrorToProblem({

@@ -2,7 +2,7 @@ export interface TokenPayload {
   userId: string;
   /** Server-side session identifier embedded in the short-lived access token. */
   sessionId?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface AuthTokens {

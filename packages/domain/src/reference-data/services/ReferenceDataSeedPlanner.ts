@@ -64,7 +64,7 @@ export class ReferenceDataSeedPlanner implements IReferenceDataSeedPlanner {
           );
           break;
         default:
-          throw new Error(`Unsupported entityType: ${(record as any).entityType}`);
+          throw new Error(`Unsupported entityType: ${record.entityType}`);
       }
 
       return {

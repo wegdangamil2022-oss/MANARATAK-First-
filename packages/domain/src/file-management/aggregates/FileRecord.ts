@@ -27,8 +27,15 @@ export interface FileRecordProps {
   checksum?: Checksum;
 }
 
+type FileRecordEvent =
+  | FileRegisteredEvent
+  | FileActivatedEvent
+  | FileArchivedEvent
+  | FileRestoredEvent
+  | FileDeletedEvent;
+
 export class FileRecord {
-  private events: any[] = [];
+  private events: FileRecordEvent[] = [];
 
   constructor(private props: FileRecordProps, isNew: boolean = false) {
     if (isNew) {
@@ -47,7 +54,7 @@ export class FileRecord {
   get state(): FileLifecycleState { return this.props.state; }
   get checksum(): Checksum | undefined { return this.props.checksum; }
 
-  public getUncommittedEvents(): any[] {
+  public getUncommittedEvents(): FileRecordEvent[] {
     return this.events;
   }
 

@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import { Result, ResultFactory } from '@manaratak/core';
+import { Result, ResultFactory, type ValidationSchema } from '@manaratak/core';
 
 export class ZodValidationProvider {
   /**
    * Validates a payload against a Zod schema.
    * If the schema is missing, it will throw an error to fail closed.
    */
-  public async validate<T>(payload: any, schema: z.ZodSchema<T>): Promise<Result<T>> {
+  public async validate<T>(payload: unknown, schema: ValidationSchema<T> | null | undefined): Promise<Result<T>> {
     if (!schema) {
       return ResultFactory.failure('Validation failed: Schema is missing', 'VALIDATION_ERROR');
     }

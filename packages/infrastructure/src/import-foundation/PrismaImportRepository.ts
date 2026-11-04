@@ -194,14 +194,14 @@ export class PrismaImportRepository {
       ]);
 
       const recordStatusCounts = Object.fromEntries(
-        recordStatusGroups.map((row: any) => [row.status, row._count._all]),
+        recordStatusGroups.map((row) => [row.status, row._count._all]),
       );
       const batchStatusCounts = Object.fromEntries(
-        batchStatusGroups.map((row: any) => [row.batchStatus, row._count._all]),
+        batchStatusGroups.map((row) => [row.batchStatus, row._count._all]),
       );
 
       const byDomainEntries = await Promise.all(
-        batchDomainGroups.map(async (row: any) => {
+        batchDomainGroups.map(async (row) => {
           const dataType = row.dataType;
           const domainRecordWhere = { batch: { dataType }, status: { notIn: ['CHECKPOINT', 'WORKER_FAILURE'] } };
           const [records, active, review, failed, transferred, statusGroups] = await Promise.all([
@@ -234,7 +234,7 @@ export class PrismaImportRepository {
               failedRecords: failed,
               transferredRecords: transferred,
               recordStatusCounts: Object.fromEntries(
-                statusGroups.map((statusRow: any) => [statusRow.status, statusRow._count._all]),
+                statusGroups.map((statusRow) => [statusRow.status, statusRow._count._all]),
               ),
             },
           ];
@@ -418,14 +418,14 @@ export class PrismaImportRepository {
       const highFailureIds = new Set(
         failureCandidates
           .filter(
-            (batch: any) =>
+            (batch) =>
               Number(batch.totalRecords ?? 0) > 0 &&
               Number(batch.failedRecords ?? 0) / Number(batch.totalRecords) > 0.1,
           )
-          .map((batch: any) => batch.id),
+          .map((batch) => batch.id),
       );
       const recentProblemBatches = recentProblemCandidates
-        .map((batch: any) => ({
+        .map((batch) => ({
           ...batch,
           stuck: (
             ['RUNNING', 'PROCESSING'].includes(String(batch.batchStatus)) &&
@@ -1175,7 +1175,7 @@ export class PrismaImportRepository {
         where: { sourceDedupKey: { in: keys }, status: { notIn: ['STAGING_REJECTED', 'STAGING_PENDING', 'STAGING_INVALID'] } },
         select: { sourceDedupKey: true },
       });
-      return Array.from(new Set(rows.map((row: any) => row.sourceDedupKey).filter(Boolean)));
+      return Array.from(new Set(rows.map((row) => row.sourceDedupKey).filter((key): key is string => Boolean(key))));
     }
 
     const requested = new Set(keys);

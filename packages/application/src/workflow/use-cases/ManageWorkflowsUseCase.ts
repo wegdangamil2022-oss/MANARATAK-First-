@@ -60,7 +60,7 @@ export class ManageWorkflowsUseCase {
     workflow.activate();
     
     // Find initial state and transition to it
-    const initialState = workflow.getDefinition().getStates().find((s: any) => s.getIsInitial());
+    const initialState = workflow.getDefinition().getStates().find((s) => s.getIsInitial());
     if (initialState) {
       if (WorkflowTransitionValidator.isValidTransition(workflow.getDefinition(), undefined, initialState)) {
          workflow.changeState(initialState);
@@ -87,7 +87,7 @@ export class ManageWorkflowsUseCase {
     }
     const workflow = workflows[0];
 
-    const toStateDef = workflow.getDefinition().getStates().find((s: any) => s.getName() === dto.toState);
+    const toStateDef = workflow.getDefinition().getStates().find((s) => s.getName() === dto.toState);
     if (!toStateDef) {
       throw new Error('Target state not found in definition');
     }

@@ -128,7 +128,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       take: 20,
     });
 
-    return records.map((record: any) => {
+    return records.map((record) => {
       const canonicalCodeMatch = normalize(record.canonicalCode) === term;
       const canonicalNameMatch = normalize(record.canonicalName) === term;
       const aliasMatch = record.aliases.some((alias: any) => normalize(alias.normalizedAlias) === term);
@@ -291,7 +291,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       include: { taxonomyNode: { select: { id: true, canonicalCode: true, canonicalName: true, nodeType: true } } },
       orderBy: [{ reviewState: 'asc' }, { createdAt: 'asc' }],
     });
-    return records.map((record: any) => this.mapTaxonomyLink(record));
+    return records.map((record) => this.mapTaxonomyLink(record));
   }
 
   public async listTaxonomyResolutions(courseId: string): Promise<CourseTaxonomyResolutionDto[]> {
@@ -417,7 +417,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       take: 10,
     });
 
-    return records.map((record: any) => {
+    return records.map((record) => {
       let matchMethod: CourseLanguageCandidateDto['matchMethod'] = 'EXACT_NAME';
       if (normalize(record.isoCode) === term) matchMethod = 'EXACT_ISO_CODE';
       else if (normalize(record.name) === term) matchMethod = 'EXACT_NAME';
@@ -517,7 +517,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       orderBy: [{ relationshipType: 'asc' }, { createdAt: 'asc' }],
     });
 
-    return records.flatMap((record: any) => {
+    return records.flatMap((record) => {
       const majorId = record.majorId ?? record.profile?.majorId;
       const majorStatus = record.major?.status ?? record.profile?.major?.status;
       if (!majorId || majorStatus === 'ARCHIVED' || record.profile?.status === 'ARCHIVED') return [];
@@ -615,7 +615,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       include: { major: { select: { id: true, publicId: true, slug: true, displayName: true, status: true } } },
       orderBy: [{ projectionState: 'asc' }, { createdAt: 'asc' }],
     });
-    return records.map((record: any) => this.mapMajorProjection(record));
+    return records.map((record) => this.mapMajorProjection(record));
   }
 
   public async reviewMajorProjection(input: {
@@ -742,7 +742,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       },
       orderBy: [{ reviewState: 'asc' }, { createdAt: 'asc' }],
     });
-    return records.map((record: any) => this.mapInternationalTestRelationship(record));
+    return records.map((record) => this.mapInternationalTestRelationship(record));
   }
 
   public async reviewInternationalTestRelationship(input: {

@@ -1,11 +1,11 @@
 export class EventMetadata {
-  private constructor(private readonly metadata: Readonly<Record<string, any>>) {}
+  private constructor(private readonly metadata: Readonly<Record<string, unknown>>) {}
 
-  public static create(metadata: Record<string, any> = {}): EventMetadata {
+  public static create(metadata: Record<string, unknown> = {}): EventMetadata {
     return new EventMetadata(Object.freeze({ ...metadata }));
   }
 
-  public getMetadata(): Readonly<Record<string, any>> {
+  public getMetadata(): Readonly<Record<string, unknown>> {
     return this.metadata;
   }
 }

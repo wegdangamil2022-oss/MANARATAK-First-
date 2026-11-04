@@ -73,7 +73,7 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
       } : { skip: 0, take: 5001 }),
     });
     if (!filters?.page && !filters?.pageSize && records.length > 5000) throw new Error('TAXONOMY_GRAPH_SCOPE_TOO_LARGE');
-    return records.map((r: any) => this.toNodeDto(r));
+    return records.map((r) => this.toNodeDto(r));
   }
 
   private nodeWhere(filters?: AcademicTaxonomyFilters) {
@@ -120,10 +120,10 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
     const where = { ...(parents ? { childNodeId: nodeId } : { parentNodeId: nodeId }),
       ...(filters.activeOnly ? parents ? { parentNode: { status: 'ACTIVE' } } : { childNode: { status: 'ACTIVE' } } : {}) };
     const [rows, total] = await Promise.all([
-      this.prisma.academicTaxonomyEdge.findMany({ where, orderBy: [{ isPrimary: 'desc' }, { id: 'asc' }], skip: (page - 1) * pageSize, take: pageSize, include: parents ? { parentNode: true } : { childNode: true } }),
+      this.prisma.academicTaxonomyEdge.findMany({ where, orderBy: [{ isPrimary: 'desc' }, { id: 'asc' }], skip: (page - 1) * pageSize, take: pageSize, include: { parentNode: parents, childNode: !parents } }),
       this.prisma.academicTaxonomyEdge.count({ where }),
     ]);
-    return { links: rows.map(row => ({ edgeId: row.id, nodeId: parents ? row.parentNodeId : row.childNodeId, isPrimary: row.isPrimary })), data: rows.map((row: any) => this.toNodeDto(parents ? row.parentNode : row.childNode)), total, page, pageSize, hasNextPage: page * pageSize < total };
+    return { links: rows.map(row => ({ edgeId: row.id, nodeId: parents ? row.parentNodeId : row.childNodeId, isPrimary: row.isPrimary })), data: rows.map((row) => this.toNodeDto(parents ? row.parentNode : row.childNode)), total, page, pageSize, hasNextPage: page * pageSize < total };
   }
 
   async getGovernanceSnapshot(standardType?: AcademicStandardType): Promise<TaxonomyGovernanceSnapshot> {
@@ -288,7 +288,7 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
   async listEdges(): Promise<AcademicTaxonomyEdgeDto[]> {
     const edges = await this.prisma.academicTaxonomyEdge.findMany({ orderBy: { id: 'asc' }, take: 20001 });
     if (edges.length > 20000) throw new Error('TAXONOMY_GRAPH_SCOPE_TOO_LARGE');
-    return edges.map((edge: any) => this.toEdgeDto(edge));
+    return edges.map((edge) => this.toEdgeDto(edge));
   }
 
   async findEdgeByNodes(parentNodeId: string, childNodeId: string): Promise<AcademicTaxonomyEdgeDto | null> {
@@ -304,7 +304,7 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
       include: { childNode: true },
     });
 
-    return edges.map((edge: any) => this.toNodeDto(edge.childNode));
+    return edges.map((edge) => this.toNodeDto(edge.childNode));
   }
 
   async listParents(childNodeId: string): Promise<AcademicTaxonomyNodeDto[]> {
@@ -313,7 +313,7 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
       include: { parentNode: true },
     });
 
-    return edges.map((edge: any) => this.toNodeDto(edge.parentNode));
+    return edges.map((edge) => this.toNodeDto(edge.parentNode));
   }
 
   async addEdge(data: UpsertAcademicTaxonomyEdgeDto): Promise<AcademicTaxonomyEdgeDto> {
@@ -341,7 +341,7 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
       orderBy: { createdAt: 'asc' },
     });
 
-    return records.map((r: any) => this.toAliasDto(r));
+    return records.map((r) => this.toAliasDto(r));
   }
 
   async listAliasesByNormalizedAlias(normalizedAlias: string): Promise<AcademicTaxonomyAliasDto[]> {
@@ -383,7 +383,7 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
       orderBy: { createdAt: 'asc' },
     });
 
-    return records.map((r: any) => this.toMappingDto(r));
+    return records.map((r) => this.toMappingDto(r));
   }
 
   async removeMapping(mappingId: string): Promise<void> {

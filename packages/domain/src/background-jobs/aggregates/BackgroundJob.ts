@@ -17,9 +17,17 @@ export interface BackgroundJobRestoreState {
   createdAt: Date;
 }
 
+type BackgroundJobEvent =
+  | BackgroundJobCreatedEvent
+  | BackgroundJobScheduledEvent
+  | BackgroundJobStartedEvent
+  | BackgroundJobCompletedEvent
+  | BackgroundJobFailedEvent
+  | BackgroundJobCancelledEvent;
+
 export class BackgroundJob {
   private status: BackgroundJobStatus;
-  private readonly events: any[] = [];
+  private readonly events: BackgroundJobEvent[] = [];
   private readonly createdAt: Date;
 
   private constructor(
@@ -111,7 +119,7 @@ export class BackgroundJob {
     }
   }
 
-  public getEvents(): ReadonlyArray<any> { return Object.freeze([...this.events]); }
+  public getEvents(): ReadonlyArray<BackgroundJobEvent> { return Object.freeze([...this.events]); }
   public clearEvents(): void { this.events.length = 0; }
-  private addEvent(event: any): void { this.events.push(event); }
+  private addEvent(event: BackgroundJobEvent): void { this.events.push(event); }
 }

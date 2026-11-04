@@ -1,7 +1,7 @@
 import * as express from 'express';
 
 export abstract class BaseController {
-  protected abstract executeImpl(req: express.Request, res: express.Response): Promise<void | any>;
+  protected abstract executeImpl(req: express.Request, res: express.Response): Promise<unknown>;
 
   public async execute(req: express.Request, res: express.Response): Promise<void> {
     try {

@@ -30,8 +30,8 @@ export interface DegreeLevelDto {
   nameAr: string;
   displayRank: number;
   status: DegreeLevelStatus;
-  aliases?: Record<string, any> | null;
-  metadata?: Record<string, any> | null;
+  aliases?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown> | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -42,6 +42,6 @@ export interface UpsertDegreeLevelDto {
   nameAr: string;
   displayRank?: number;
   status?: DegreeLevelStatus;
-  aliases?: Record<string, any> | null;
-  metadata?: Record<string, any> | null;
+  aliases?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown> | null;
 }

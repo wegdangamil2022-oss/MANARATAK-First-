@@ -132,7 +132,7 @@ export function assertImportRawSnapshotStoreForRuntime(env: RuntimeEnvironment, 
 
 export function createRateLimiterForRuntime(
   env: RuntimeEnvironment,
-  logger?: unknown,
+  logger?: Parameters<RedisClientFactoryFn>[1],
   createRedisClient: RedisClientFactoryFn = RedisClientFactory.createClient,
   sharedRedisClient?: ReturnType<RedisClientFactoryFn> | null,
 ): IRateLimiter {
@@ -151,8 +151,8 @@ export function createRateLimiterForRuntime(
     },
     logger,
   );
-  const keyPrefix = typeof (client as any).buildKey === 'function'
-    ? `${(client as any).buildKey('rate-limit', '')}`
+  const keyPrefix = typeof client.buildKey === 'function'
+    ? `${client.buildKey('rate-limit', '')}`
     : 'manaratak:rate-limit:';
-  return new RedisRateLimiter(client as any, keyPrefix);
+  return new RedisRateLimiter(client, keyPrefix);
 }

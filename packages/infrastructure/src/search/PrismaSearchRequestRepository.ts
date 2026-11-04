@@ -67,7 +67,8 @@ export class PrismaSearchRequestRepository implements ISearchRequestRepository {
         scope: SearchScope.create(row.scope),
         criteria: SearchCriteria.create(
           row.query ?? '',
-          filters.flatMap((raw: any) => {
+          filters.flatMap((raw) => {
+            if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return [];
             const operator = FilterComparison[String(raw?.operator) as keyof typeof FilterComparison];
             return raw?.field && operator ? [SearchFilter.create(String(raw.field), operator, raw.value)] : [];
           }),

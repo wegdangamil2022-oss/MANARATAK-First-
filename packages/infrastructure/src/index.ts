@@ -77,31 +77,13 @@ export * from './finance-platform/FinanceSafetyGateways';
 export { PrismaAIPlatformRepository, PrismaAIPlatformRepository as PrismaAIExecutionRepository } from './ai-platform/PrismaAIPlatformRepository';
 export * from './ai-platform/ProviderAdapters';
 export * from './ai-platform/EnvironmentAIAsyncPayloadProtector';
-/**
- * @deprecated Runtime code must resolve Prisma from RuntimeResourceRegistry/DI.
- * This compatibility holder exists only for legacy tests/adapters and never
- * constructs its own PrismaClient, preventing a second process-local pool.
- */
-export class PrismaConnection {
-  private static instance: any = null;
-  constructor(..._args: any[]) {}
-  static async connect() {
-    if (!this.instance) throw new Error('PRISMA_CONNECTION_NOT_BOUND_TO_RUNTIME_RESOURCE_REGISTRY');
-    return this.instance;
-  }
-  static getInstance() { return this.instance; }
-  static setInstance(inst: any) { this.instance = inst; }
-  [key: string]: any;
-  static [key: string]: any;
-}
 export * from './logging/AsyncLogContext';
 export * from './logging/PinoLoggerProvider';
 export * from './logging/LoggerService';
 export * from './logging/RequestLogger';
 export * from './logging/ErrorLogger';
 export class DefaultErrorSerializer {
-  constructor(..._args: any[]) {}
-  serialize(err: any, traceId: string = 'demo-trace-id') {
+  serialize(err: unknown, traceId: string = 'demo-trace-id') {
     const safeMessages: Record<string, string> = {
       VALIDATION_ERROR: 'The request is invalid.',
       UNAUTHORIZED: 'Authentication is required.',
@@ -111,15 +93,14 @@ export class DefaultErrorSerializer {
       INFRASTRUCTURE_ERROR: 'A required service is temporarily unavailable.',
       UNEXPECTED_ERROR: 'An unexpected error occurred.',
     };
-    const code = typeof err?.code === 'string' && safeMessages[err.code] ? err.code : 'UNEXPECTED_ERROR';
+    const suppliedCode = (err as { code?: unknown } | null | undefined)?.code;
+    const code = typeof suppliedCode === 'string' && safeMessages[suppliedCode] ? suppliedCode : 'UNEXPECTED_ERROR';
     return {
       code,
       message: safeMessages[code],
       traceId,
     };
   }
-  [key: string]: any;
-  static [key: string]: any;
 }
 export * from './validation/ZodValidationProvider';
 export * from './validation/DefaultSanitizer';

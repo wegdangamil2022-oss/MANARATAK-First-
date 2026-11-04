@@ -1,4 +1,4 @@
-import { IValidationService, IValidationContext, Result, ResultFactory } from '@manaratak/core';
+import { IValidationService, IValidationContext, Result, ResultFactory, type ValidationSchema } from '@manaratak/core';
 import { ZodValidationProvider } from './ZodValidationProvider';
 import { DefaultSanitizer } from './DefaultSanitizer';
 
@@ -8,7 +8,7 @@ export class ValidationService implements IValidationService {
     private readonly sanitizer: DefaultSanitizer = new DefaultSanitizer()
   ) {}
 
-  public async execute<T>(context: IValidationContext, schema: any): Promise<Result<T>> {
+  public async execute<T>(context: IValidationContext, schema: ValidationSchema<T> | null | undefined): Promise<Result<T>> {
     if (!schema) {
       return ResultFactory.failure('Validation failed: Schema is missing unexpectedly', 'VALIDATION_ERROR');
     }
@@ -17,7 +17,7 @@ export class ValidationService implements IValidationService {
       return ResultFactory.failure('Validation failed: Payload is missing', 'VALIDATION_ERROR');
     }
 
-    let payload = context.payload;
+    let payload: unknown = context.payload;
     
     // Optionally sanitize based on context metadata if needed. 
     // For now, we only apply sanitization if explicitly requested or let domain handle it.

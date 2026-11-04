@@ -75,7 +75,7 @@ const PrototypeSmartSearchPage: React.FC<SmartSearchPageProps> = ({
       .map((entry) => entry.item);
 
     const universityMatches = universities
-      .map((item: any) => ({ item, score: score(item) }))
+      .map((item) => ({ item, score: score(item) }))
       .sort((a, b) => b.score - a.score)
       .filter((entry, index) => entry.score > 0 || index < 2)
       .slice(0, 2)

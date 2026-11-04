@@ -39,7 +39,7 @@ export abstract class PrismaTestDiscoveryLinkRepository implements ITestDiscover
     };
   }
   async propose(input: Parameters<ITestDiscoveryLinkRepository['propose']>[0]) {
-    return this.prisma.$transaction(async (tx: any) => {
+    return this.prisma.$transaction(async (tx) => {
       const where = { ownerKey: input.ownerKey, testId: input.testId };
       const existing = await this.table(tx).findUnique({ where: { ownerKey_testId: where } });
       if ((existing?.version ?? 0) !== input.expectedVersion)
@@ -68,7 +68,7 @@ export abstract class PrismaTestDiscoveryLinkRepository implements ITestDiscover
     });
   }
   async review(input: Parameters<ITestDiscoveryLinkRepository['review']>[0]) {
-    return this.prisma.$transaction(async (tx: any) => {
+    return this.prisma.$transaction(async (tx) => {
       const row = await this.table(tx).findUnique({
         where: { ownerKey_testId: { ownerKey: input.ownerKey, testId: input.testId } },
       });

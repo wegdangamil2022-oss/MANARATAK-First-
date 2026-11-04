@@ -1,6 +1,9 @@
+import type { IIdentityRepository } from './identity/repositories/IIdentityRepository';
+import type { IdentityType } from './enums/IdentityType';
+
 export class IdentityValidationService {
-  constructor(private repo: any) {}
-  async validateNewIdentity(_type: any, primaryEmail?: string, primaryPhone?: string): Promise<void> {
+  constructor(private repo: Pick<IIdentityRepository, 'isEmailUnique' | 'isPhoneUnique'>) {}
+  async validateNewIdentity(_type: IdentityType, primaryEmail?: string, primaryPhone?: string): Promise<void> {
     if (primaryEmail && !(await this.repo.isEmailUnique(primaryEmail))) {
       throw new Error('Email must be unique');
     }

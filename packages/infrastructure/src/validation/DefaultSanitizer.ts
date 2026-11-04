@@ -7,7 +7,7 @@ export class DefaultSanitizer {
    * We will do a very lightweight basic sanitization (like trimming strings).
    * For XSS, we rely on React/Frontend and explicit rich-text sanitizers where applicable.
    */
-  public sanitize(payload: any): any {
+  public sanitize(payload: unknown): unknown {
     if (payload === null || payload === undefined) {
       return payload;
     }
@@ -24,9 +24,9 @@ export class DefaultSanitizer {
     }
 
     if (typeof payload === 'object') {
-      const sanitizedObj: any = {};
-      for (const key of Object.keys(payload)) {
-        sanitizedObj[key] = this.sanitize(payload[key]);
+      const sanitizedObj: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(payload)) {
+        sanitizedObj[key] = this.sanitize(value);
       }
       return sanitizedObj;
     }

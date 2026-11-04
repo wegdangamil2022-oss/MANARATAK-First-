@@ -32,7 +32,7 @@ export interface RuntimeResourceSnapshot {
  */
 export class RuntimeResourceRegistry {
   private prismaClient: PrismaClient | null = null;
-  private redisClient: any | null = null;
+  private redisClient: ReturnType<typeof RedisClientFactory.createClient> | null = null;
   private shuttingDown = false;
   private closed = false;
   private closePromise: Promise<void> | null = null;
@@ -45,7 +45,7 @@ export class RuntimeResourceRegistry {
   public constructor(
     private readonly env: Readonly<Record<string, string | undefined>>,
     private readonly config?: RuntimeConfigReader | null,
-    private readonly logger?: any,
+    private readonly logger?: Parameters<typeof RedisClientFactory.createClient>[1],
     private readonly allowExternalConnections = true,
     seededPrismaClient?: PrismaClient | null,
   ) {
@@ -64,7 +64,7 @@ export class RuntimeResourceRegistry {
     return this.prismaClient;
   }
 
-  public getRedisClient(): any | null {
+  public getRedisClient(): ReturnType<typeof RedisClientFactory.createClient> | null {
     if (this.closed) throw new Error('RUNTIME_RESOURCES_ALREADY_CLOSED');
     if (!this.allowExternalConnections) return null;
     const redisUrl = this.readString('REDIS_URL');
@@ -103,7 +103,7 @@ export class RuntimeResourceRegistry {
         try {
           await task();
         } catch (error) {
-          this.logger?.error?.('[RuntimeResources] Cleanup task failed', error);
+          this.logger?.error?.('[RuntimeResources] Cleanup task failed', error instanceof Error ? error : new Error(String(error)));
         }
       }
       this.cleanupTasks.length = 0;
@@ -115,7 +115,7 @@ export class RuntimeResourceRegistry {
           if (redis.isOpen && typeof redis.quit === 'function') await redis.quit();
           else if (typeof redis.disconnect === 'function') await redis.disconnect();
         } catch (error) {
-          this.logger?.error?.('[RuntimeResources] Redis shutdown failed', error);
+          this.logger?.error?.('[RuntimeResources] Redis shutdown failed', error instanceof Error ? error : new Error(String(error)));
         }
       }
 
@@ -123,7 +123,7 @@ export class RuntimeResourceRegistry {
       this.prismaClient = null;
       if (prisma) {
         try { await prisma.$disconnect(); }
-        catch (error) { this.logger?.error?.('[RuntimeResources] Prisma shutdown failed', error); }
+        catch (error) { this.logger?.error?.('[RuntimeResources] Prisma shutdown failed', error instanceof Error ? error : new Error(String(error))); }
       }
       this.closed = true;
     })();

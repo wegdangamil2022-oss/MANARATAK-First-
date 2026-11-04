@@ -9,9 +9,15 @@ import { CacheEntryExpiredEvent } from '../events/CacheEntryExpiredEvent';
 import { CacheEntryInvalidatedEvent } from '../events/CacheEntryInvalidatedEvent';
 import { CacheEntryRemovedEvent } from '../events/CacheEntryRemovedEvent';
 
+type CacheEntryEvent =
+  | CacheEntryCreatedEvent
+  | CacheEntryExpiredEvent
+  | CacheEntryInvalidatedEvent
+  | CacheEntryRemovedEvent;
+
 export class CacheEntry {
   private status: CacheEntryStatus;
-  private readonly events: any[] = [];
+  private readonly events: CacheEntryEvent[] = [];
   private readonly createdAt: Date;
 
   private constructor(
@@ -86,7 +92,7 @@ export class CacheEntry {
     }
   }
 
-  public getEvents(): ReadonlyArray<any> {
+  public getEvents(): ReadonlyArray<CacheEntryEvent> {
     return Object.freeze([...this.events]);
   }
 
@@ -94,7 +100,7 @@ export class CacheEntry {
     this.events.length = 0;
   }
 
-  private addEvent(event: any): void {
+  private addEvent(event: CacheEntryEvent): void {
     this.events.push(event);
   }
 }

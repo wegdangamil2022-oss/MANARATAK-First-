@@ -78,6 +78,4 @@ export class DefaultRateLimiter implements IRateLimiter {
     }
   }
 
-  [key: string]: any;
-  static [key: string]: any;
 }

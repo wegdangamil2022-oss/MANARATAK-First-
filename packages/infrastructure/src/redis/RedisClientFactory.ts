@@ -1,4 +1,5 @@
 import { createClient, RedisClientType } from 'redis';
+import type { ILogger } from '@manaratak/core';
 
 export interface RedisClientConfig {
   REDIS_URL?: string;
@@ -51,7 +52,7 @@ export class RedisClientFactory {
   /**
    * Creates an authenticated, bounded, real Redis client.
    */
-  public static createClient(config: RedisClientConfig | string, logger?: any): RedisClientType & { buildKey: (feature: string, key: string) => string } {
+  public static createClient(config: RedisClientConfig | string, logger?: Pick<ILogger, 'error'>): RedisClientType & { buildKey: (feature: string, key: string) => string } {
     let rawUrl: string | undefined;
     let namespace: string = 'manaratak:';
 
@@ -85,10 +86,10 @@ export class RedisClientFactory {
           return Math.min(retries * 500, 2000);
         }
       }
-    }) as any;
+    });
 
     let hasLoggedError = false;
-    client.on('error', (err: any) => {
+    client.on('error', (err: Error) => {
       if (!hasLoggedError) {
         hasLoggedError = true;
         const rawMsg = err?.message || String(err);
@@ -99,14 +100,15 @@ export class RedisClientFactory {
       }
     });
 
-    client.buildKey = (feature: string, key: string): string => {
-      return RedisClientFactory.buildKey(namespace, feature, key);
-    };
+    const namespacedClient = Object.assign(client, {
+      buildKey: (feature: string, key: string): string =>
+        RedisClientFactory.buildKey(namespace, feature, key),
+    });
 
-    client.connect().catch((_err: any) => {
+    client.connect().catch(() => {
       // Connect rejection is handled by the error event listener and health check
     });
 
-    return client;
+    return namespacedClient;
   }
 }

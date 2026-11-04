@@ -4,6 +4,14 @@ import { PrismaSearchRequestRepository } from '../../src/search/PrismaSearchRequ
 import { LogicalOperator, SearchCriteria,SearchPagination,SearchReference,SearchRequest,SearchRequestId,SearchRequestSpecification,SearchScope } from '@manaratak/domain';
 const base={id:'search-id',reference:'reference-a',scope:'PUBLIC_CATALOG',query:'private query',filters:[],logicalOperator:'AND',page:1,limit:20,sortField:null,sortDirection:null,state:'COMPLETED',totalCount:0,executionTimeMs:1,createdAt:new Date()};
 describe('Prisma search persistence ownership',()=>{
+ it('restores object filters in order and ignores non-object legacy JSON values',async()=>{
+  const filters=[null, false, 42, 'legacy', [], {field:'country',operator:'EQ',value:'YE'}, {field:'status',operator:'EQ',value:'ACTIVE'}];
+  const findMany=vi.fn().mockResolvedValue([{...base,filters,actorReferenceId:'actor-a'}]);
+  const repo=new PrismaSearchRequestRepository({apiSearchRequestRecord:{findMany}} as unknown as PrismaClient);
+  const records=await repo.findBy(SearchRequestSpecification.byActorAndReference('actor-a',SearchReference.create('reference-a'),SearchScope.create('PUBLIC_CATALOG')));
+  expect(records[0].criteria.filters.map(filter=>filter.field)).toEqual(['country','status']);
+  expect(records[0].criteria.filters.map(filter=>filter.value)).toEqual(['YE','ACTIVE']);
+ });
  it('filters reference/actor/scope in SQL before take, then rejects unexpected rows defensively',async()=>{
   const own={...base,actorReferenceId:'actor-a'};
   const findMany=vi.fn().mockResolvedValue([own,{...base,actorReferenceId:'actor-b'},{...base,actorReferenceId:null},{...own,scope:'identity'},{...own,reference:'another-reference'}]);

@@ -171,7 +171,7 @@ export class ManageSecurityPoliciesUseCase {
         scope: p.getDefinition().getScope(),
         structuralIntent: p.getDefinition().getStructuralIntent()
       },
-      rules: p.getRules().map((r: any) => ({
+      rules: p.getRules().map((r) => ({
         name: r.getName(),
         intent: r.getIntent(),
         parameters: r.getParameters()
