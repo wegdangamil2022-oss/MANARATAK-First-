@@ -13,7 +13,7 @@ MANARATAK is an npm-workspaces monorepo containing the public web application, A
 
 ## Current Status
 
-`main` contains the consolidated API, public/student application and dedicated Admin application. The [repository cleanup review](docs/reviews/REPOSITORY_CLEANUP_2026-11-04.md) records the current source review and validation limits.
+`main` contains the consolidated API, public/student application and dedicated Admin application. The [repository deep-cleanup review](docs/reviews/REPOSITORY_DEEP_CLEANUP_2026-11-04.md) records the current source review and validation limits.
 
 Earlier implementation and environment evidence remains in the [historical work index](docs/remediation/POST28_UNIFIED_WORK_INDEX_2026-10-19.md). Historical import counts and branch-specific acceptance results are not live database status. A successful source build does not establish production readiness.
 
@@ -91,4 +91,6 @@ The active applications are `apps/web` (students/public), `apps/admin` (the only
 
 Section-specific test profiles live under `config/testing/review`; the root `vitest.config.ts` is the unit-test entry point. Google Studio launchers and export metadata are not supported. Historical migration SQL and signed/source-specific evidence remain unchanged.
 
-See [the repository cleanup review](docs/reviews/REPOSITORY_CLEANUP_2026-11-04.md) for the current inventory, removal rationale and verification results.
+`npm run clean` removes generated `dist` and TypeScript build-state files across workspaces. Preview its targets with `node scripts/maintenance/clean-build-output.mjs --dry-run`. Dependencies and local runtime storage are retained.
+
+See [the deep-cleanup review](docs/reviews/REPOSITORY_DEEP_CLEANUP_2026-11-04.md) and [the initial cleanup inventory](docs/reviews/REPOSITORY_CLEANUP_2026-11-04.md) for removal rationale and verification results.

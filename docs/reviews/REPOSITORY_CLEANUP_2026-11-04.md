@@ -1,5 +1,7 @@
 # Repository cleanup — 2026-11-04
 
+Follow-up: [the deep cleanup review](REPOSITORY_DEEP_CLEANUP_2026-11-04.md) records the subsequent cleanup and resolves the Windows fixture failures described below. This document retains the first pass's historical results.
+
 ## Scope and method
 
 Reviewed the tracked repository (9,896 files at starting commit `4d36b20c`), npm workspaces, application entry points, routes, static assets, relative imports, test profiles, operational scripts and branch ancestry. Source import traversal was used to identify removal candidates; each candidate's references, tests and operational consumers were checked before removal. This is a repository/source review, not a claim that every user workflow has been exercised in production.
