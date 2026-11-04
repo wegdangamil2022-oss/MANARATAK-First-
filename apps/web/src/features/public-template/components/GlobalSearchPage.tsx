@@ -1,7 +1,6 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  ArrowRight, BookOpen, BriefcaseBusiness, Building2, ChevronLeft, FileText, GraduationCap,
+import { BookOpen, BriefcaseBusiness, Building2, ChevronLeft, FileText, GraduationCap,
   Landmark, Loader2, Search, Sparkles, Stethoscope, Wrench,
 } from 'lucide-react';
 import { ApiClient, type PublicGlobalSearchItem, type PublicGlobalSearchKind } from '../../../api/client';

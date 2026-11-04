@@ -1,12 +1,10 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import {
-  ArrowLeft,
   Award,
   BadgeCheck,
   BookOpen,
   BookOpenCheck,
-  Briefcase,
   ChevronLeft,
   CreditCard,
   ExternalLink,
@@ -14,7 +12,6 @@ import {
   GraduationCap,
   Layers3,
   Lock,
-  PlayCircle,
   ShieldCheck,
   Sparkles,
   Tag,

@@ -258,7 +258,7 @@ export class SecurityMiddlewareFactory {
                 req.authSessionId = payload.sessionId;
               }
             }
-          } catch (e) {
+          } catch {
             if (checkingStorage) {
               res.status(503).json({
                 error: {
@@ -385,7 +385,7 @@ export class SecurityMiddlewareFactory {
         if (!evaluator) {
           try {
             evaluator = container.resolve<AuthorizationEvaluatorService>('authEvaluatorService');
-          } catch (e) {
+          } catch {
             // Container resolution fallback
           }
         }
@@ -445,7 +445,7 @@ export class SecurityMiddlewareFactory {
             : requiredPermission.join(' | '),
         );
         next();
-      } catch (err: any) {
+      } catch {
         res.status(403).json({
           error: {
             code: 'ADMIN_PERMISSION_DENIED',
@@ -465,9 +465,7 @@ function assignAdminContext(res: Response, context: AdminRuntimeContext): void {
   res.locals.adminContext = context;
 }
 
-function getAdminContext(res: Response): AdminRuntimeContext | null {
-  return res.locals.adminContext ?? null;
-}
+
 
 function extractBearerToken(value: string | undefined): string | null {
   if (!value) return null;

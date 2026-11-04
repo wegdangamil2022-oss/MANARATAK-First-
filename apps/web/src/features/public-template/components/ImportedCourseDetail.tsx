@@ -7,7 +7,6 @@ import {
   BookOpen,
   Building2,
   CheckCircle2,
-  ChevronLeft,
   Clock3,
   Code2,
   Compass,

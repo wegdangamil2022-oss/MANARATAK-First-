@@ -3,7 +3,6 @@ import { PublicScholarshipUseCases } from '../../src/scholarships/use-cases/Publ
 import { 
   IScholarshipRepository, 
   ScholarshipStatus,
-  ScholarshipCompletenessState,
   ScholarshipPublicationStatus
 } from '@manaratak/domain';
 

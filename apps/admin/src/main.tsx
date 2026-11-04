@@ -7,7 +7,7 @@ import ReactDOM from 'react-dom/client';
     const testKey = '__storage_test__';
     window.localStorage.setItem(testKey, testKey);
     window.localStorage.removeItem(testKey);
-  } catch (e) {
+  } catch {
     const memoryStorage: Record<string, string> = {};
     const safeStorage = {
       getItem: (key: string) => (key in memoryStorage ? memoryStorage[key] : null),
@@ -24,7 +24,7 @@ import ReactDOM from 'react-dom/client';
     const testKey = '__session_test__';
     window.sessionStorage.setItem(testKey, testKey);
     window.sessionStorage.removeItem(testKey);
-  } catch (e) {
+  } catch {
     const memoryStorage: Record<string, string> = {};
     const safeSessionStorage = {
       getItem: (key: string) => (key in memoryStorage ? memoryStorage[key] : null),

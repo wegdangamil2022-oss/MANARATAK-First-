@@ -1,7 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
-import path from 'node:path';
 
 // Reconstruct DATABASE_URL for Prisma
 const host = encodeURIComponent(process.env.SQL_HOST || '');

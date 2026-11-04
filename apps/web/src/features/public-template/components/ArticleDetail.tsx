@@ -2,7 +2,6 @@ import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I1
 import React from 'react';
 import { CmsRichText } from '@manaratak/ui';
 import {
-  ArrowRight,
   BookOpenText,
   Building2,
   CalendarDays,

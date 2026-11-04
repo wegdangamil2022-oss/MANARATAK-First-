@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { ImportParserRegistry } from '../../src/import-foundation/parsers/ImportParserRegistry';
 import { IImportStreamParser, ImportStreamParserInput, ImportStreamParserContext } from '../../src/import-foundation/parsers/IImportStreamParser';
 import { ParsedImportRow, ImportParseError } from '@manaratak/domain';

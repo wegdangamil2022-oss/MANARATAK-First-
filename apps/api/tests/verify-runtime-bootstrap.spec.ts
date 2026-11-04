@@ -14,7 +14,7 @@ describe('WP1-C.1 Runtime Bootstrap Verification', () => {
         if (str.trim().startsWith('{') && str.trim().endsWith('}')) {
           capturedLogs.push(JSON.parse(str.trim()));
         }
-      } catch (e) {
+      } catch {
         // non-JSON log line
       }
       return originalStdoutWrite(chunk, encoding, cb);

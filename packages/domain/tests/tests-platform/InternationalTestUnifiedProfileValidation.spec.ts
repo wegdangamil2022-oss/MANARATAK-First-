@@ -3,10 +3,8 @@ import {
   InternationalTestImportPayloadSchema,
   InternationalTestValidationService,
   InternationalTestCategory,
-  InternationalTestStatus,
   InternationalTestCompletenessStatus,
-  InternationalTestValidationSeverity,
-  InternationalTestSourceTrustLevel
+  InternationalTestValidationSeverity
 } from '../../src/tests-platform';
 
 describe('InternationalTestUnifiedProfileValidation (P9J-3B)', () => {

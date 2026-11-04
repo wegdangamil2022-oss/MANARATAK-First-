@@ -5,8 +5,6 @@ import {
   Policy, 
   RoleAssignment, 
   AuthorizationEvaluatorService,
-  ResourceUrn,
-  Action,
   AccessDecision,
   IPolicyEvaluator
 } from '@manaratak/domain';

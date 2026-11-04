@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaAcademicTaxonomyRepository } from '../../src/academic-taxonomy/PrismaAcademicTaxonomyRepository';
 import {
   AcademicTaxonomyNodeType,
-  AcademicTaxonomyStatus,
   AcademicStandardType,
   AcademicMappingStrength,
 } from '@manaratak/domain';

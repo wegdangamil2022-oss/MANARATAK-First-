@@ -9,7 +9,7 @@ const tests = nodeTestFiles;
 if (tests.length === 0) throw new Error('NODE_UNIT_TESTS_NOT_FOUND');
 
 // Workspace exports include TypeScript sources; use the existing TS loader.
-const result = spawnSync(process.execPath, ['--import', 'tsx', '--test', ...tests], {
+const result = spawnSync(process.execPath, ['--import', 'tsx', '--test', '--test-concurrency=2', ...tests], {
   cwd: root,
   stdio: 'inherit',
   env: {...process.env,TSX_TSCONFIG_PATH:path.join(root,'tsconfig.base.json')},

@@ -6,7 +6,7 @@
     "dev": "vite --port=3001",
     "build": "tsc -b ../../packages/domain ../../packages/shared && vite build",
     "preview": "vite preview",
-    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "clean": "node ../../scripts/maintenance/clean-build-output.mjs",
     "lint": "eslint ."
   },
   "dependencies": {

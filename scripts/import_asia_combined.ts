@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { randomUUID, createHash } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 
 // Reconstruct DATABASE_URL for Prisma

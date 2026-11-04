@@ -11,12 +11,8 @@ import {
   Sparkles,
   BookOpen,
   Clock,
-  Users,
   Star,
   PlayCircle,
-  Award,
-  CheckCircle2,
-  SlidersHorizontal,
 } from 'lucide-react';
 import type { Course } from '../types';
 import { FavoriteButton } from './FavoriteButton';

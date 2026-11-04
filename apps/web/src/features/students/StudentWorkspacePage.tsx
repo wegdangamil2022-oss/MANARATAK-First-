@@ -27,7 +27,6 @@ import {
   Compass,
   Folder,
   Heart,
-  Home,
   LockKeyhole,
   RefreshCw,
   Route,
@@ -42,8 +41,6 @@ import {
   Clock3,
   Languages,
   Moon,
-  Sun,
-  LogIn,
   ShieldCheck,
   ChevronLeft,
   History as HistoryIcon,
@@ -62,7 +59,6 @@ import {
   Shield,
   RotateCcw,
   Save,
-  Eye,
 } from 'lucide-react';
 import {
   ApiClient as LiveApiClient,
@@ -5177,45 +5173,9 @@ function ProfileView({
   );
 }
 
-function HeroMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-20 rounded-xl px-3 py-2 text-center">
-      <strong className="block text-xl">{value}</strong>
-      <span className="text-xs text-[var(--mn-on-dark-muted)]">{label}</span>
-    </div>
-  );
-}
 
-function StatCard({
-  icon,
-  label,
-  value,
-  tone,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-  tone: 'success' | 'info' | 'warning' | 'accent';
-}) {
-  const styles: Record<typeof tone, string> = {
-    success:
-      'border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] text-[var(--mn-success-text)]',
-    info: 'border border-[var(--mn-info-border)] bg-[var(--mn-info-soft)] text-[var(--mn-info-text)]',
-    warning:
-      'border border-[var(--mn-warning-border)] bg-[var(--mn-warning-soft)] text-[var(--mn-warning-text)]',
-    accent:
-      'border border-[var(--mn-border-gold)] bg-[var(--mn-gold-surface)] text-[var(--mn-accent-text)]',
-  };
-  return (
-    <div className="mn-card rounded-3xl p-5">
-      <div className={`mb-4 grid h-11 w-11 place-items-center rounded-2xl text-xl ${styles[tone]}`}>
-        {icon}
-      </div>
-      <strong className="text-3xl font-bold text-[var(--mn-heading)]">{value}</strong>
-      <p className="mt-1 text-sm text-[var(--mn-text-muted)]">{label}</p>
-    </div>
-  );
-}
+
+
 
 function Panel({
   title,
@@ -5440,26 +5400,7 @@ function InvoicePanel({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  const singleControl =
-    React.isValidElement<{ className?: string }>(children) && React.Children.count(children) === 1;
-  if (singleControl) {
-    return (
-      <label className="block text-sm font-semibold text-[var(--mn-text)]">
-        {label}
-        {React.cloneElement(children, {
-          className: `${children.props.className || ''} mt-2 w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 font-normal outline-none focus:border-[var(--mn-focus)] focus:ring-2 focus:ring-[var(--mn-gold-surface)]`,
-        })}
-      </label>
-    );
-  }
-  return (
-    <div className="block text-sm font-semibold text-[var(--mn-text)]">
-      <span>{label}</span>
-      <div className="mt-2 space-y-2">{children}</div>
-    </div>
-  );
-}
+
 
 function Toggle({
   name,

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import {createSymbolicLinkFixture} from './helpers/symbolic-link.mjs';
 import {inspectStaticBuild} from '../../scripts/release/lib/StaticBuildPolicy.mjs';
 import {runSmoke} from '../../scripts/release/lib/SmokeContracts.mjs';
 const sha='a'.repeat(40);
@@ -18,14 +19,26 @@ for(const mutation of ['missing','empty','symlink-file','symlink-parent','traver
     const script=path.join(root,'assets/app.js');
     if(mutation==='missing')fs.rmSync(script);
     if(mutation==='empty')fs.writeFileSync(script,'');
-    if(mutation==='symlink-file'){fs.rmSync(script);fs.symlinkSync(path.join(root,'index.html'),script);}
-    if(mutation==='symlink-parent'){fs.renameSync(path.join(root,'assets'),path.join(root,'renamed'));fs.symlinkSync(path.join(root,'renamed'),path.join(root,'assets'));}
+    if(mutation==='symlink-file'){fs.rmSync(script);createSymbolicLinkFixture(path.join(root,'index.html'),script);}
+    if(mutation==='symlink-parent'){fs.renameSync(path.join(root,'assets'),path.join(root,'renamed'));createSymbolicLinkFixture(path.join(root,'renamed'),path.join(root,'assets'));}
     if(['traversal','external'].includes(mutation))fs.writeFileSync(path.join(root,'index.html'),`<meta name="manaratak-build-sha" content="${sha}"><script src="${mutation==='external'?'https://remote.example/a.js':'/assets/%2e%2e/a.js'}"></script>`);
-    if(mutation==='metadata-symlink'){fs.renameSync(path.join(root,'manaratak-build.json'),path.join(root,'metadata.json'));fs.symlinkSync(path.join(root,'metadata.json'),path.join(root,'manaratak-build.json'));}
+    if(mutation==='metadata-symlink'){fs.renameSync(path.join(root,'manaratak-build.json'),path.join(root,'metadata.json'));createSymbolicLinkFixture(path.join(root,'metadata.json'),path.join(root,'manaratak-build.json'));}
     assert.equal(inspectStaticBuild(root,'web',sha).status,'UNBUILT');
   } finally {fs.rmSync(root,{recursive:true,force:true});}
 });
 test('valid same-unit JS entry is BUILT',()=>{const root=fixture();try{assert.equal(inspectStaticBuild(root,'web',sha).status,'BUILT');}finally{fs.rmSync(root,{recursive:true,force:true});}});
+test('static descriptor links are rejected before any read through the link',t=>{
+  const root=fixture(),descriptor=path.join(root,'manaratak-build.json');
+  fs.renameSync(descriptor,path.join(root,'metadata.json'));
+  createSymbolicLinkFixture(path.join(root,'metadata.json'),descriptor);
+  const read=fs.readFileSync;let followed=false;
+  t.mock.method(fs,'readFileSync',(file,...args)=>{
+    if(file===descriptor)followed=true;
+    return read(file,...args);
+  });
+  try{assert.equal(inspectStaticBuild(root,'web',sha).status,'UNBUILT');assert.equal(followed,false);}
+  finally{t.mock.restoreAll();fs.rmSync(root,{recursive:true,force:true});}
+});
 const options={api:'https://api.example',web:'https://web.example',admin:'https://admin.example',sha};
 function fetcher(script={}) {return async url=>{
   if(url.includes('/monitoring/'))return new Response(JSON.stringify({protocolVersion:2,status:'UP',code:'AVAILABLE',timestamp:new Date().toISOString()}),{headers:{'content-type':'application/json','x-manaratak-source-sha':sha}});
@@ -39,7 +52,7 @@ test('smoke requests actual scripts for both built units',async()=>{let scripts=
 
 test('artifact input inspection rejects symlinks before tar packaging',async()=>{
   const {assertRegularArtifactInputs}=await import('../../scripts/release/lib/ArtifactInputPolicy.mjs');const root=fixture();
-  try{assert.doesNotThrow(()=>assertRegularArtifactInputs(root,['assets']));fs.symlinkSync(path.join(root,'index.html'),path.join(root,'assets/link'));assert.throws(()=>assertRegularArtifactInputs(root,['assets']),/SYMLINK/);assert.throws(()=>assertRegularArtifactInputs(root,['../outside']),/PATH_INVALID/);}finally{fs.rmSync(root,{recursive:true,force:true});}
+  try{assert.doesNotThrow(()=>assertRegularArtifactInputs(root,['assets']));createSymbolicLinkFixture(path.join(root,'index.html'),path.join(root,'assets/link'));assert.throws(()=>assertRegularArtifactInputs(root,['assets']),/SYMLINK/);assert.throws(()=>assertRegularArtifactInputs(root,['../outside']),/PATH_INVALID/);}finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 
 test('packager rejects dirty source or existing output before altering static inputs',async()=>{

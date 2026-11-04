@@ -2,7 +2,6 @@ import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I1
 import React, { useState } from 'react';
 import { PublishedScholarshipDetails } from './PublishedScholarshipDetails';
 import { Scholarship, Service } from '../types';
-import { RelatedArticlesStrip } from './RelatedArticlesStrip';
 import { DetailBackButton, DetailSectionHeader, useDetailSearchTarget } from './DetailUi';
 import {
   Building2,
@@ -16,17 +15,12 @@ import {
   ArrowUpLeft,
   Coins,
   GraduationCap,
-  Home,
   ShieldCheck,
-  Plane,
-  Wallet,
-  Sparkles,
   BookOpen,
   BookOpenText,
   Briefcase,
   ChevronLeft,
   FileText,
-  User,
   PenTool,
   Users,
   Activity,
@@ -934,5 +928,3 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
     </div>
   );
 };
-
-function ChevronBack() { return <ArrowLeft className="w-4 h-4 rotate-180" />; }

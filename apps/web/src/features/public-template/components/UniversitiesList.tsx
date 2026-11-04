@@ -1,7 +1,7 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { University } from '../types';
-import { Building2, Trophy, Globe, GraduationCap, ExternalLink, ChevronLeft } from 'lucide-react';
+import { Building2, Trophy, GraduationCap, ExternalLink } from 'lucide-react';
 
 interface UniversitiesListProps {
   universities: University[];

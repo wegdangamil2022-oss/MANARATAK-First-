@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { describe, expect, it } from 'vitest';
 import { databaseIntegrationEnabled, withDisposablePrisma } from './DisposablePostgresHarness';
 

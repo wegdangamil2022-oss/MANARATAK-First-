@@ -1,6 +1,6 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
-import { Briefcase, ChevronLeft, Sparkles, GraduationCap } from 'lucide-react';
+import { Briefcase, ChevronLeft } from 'lucide-react';
 
 interface FeaturedJobsProps {
   onViewAllClick: () => void;

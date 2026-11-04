@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { AcademicTaxonomyResolver } from '../packages/application/src/majors/services/AcademicTaxonomyResolver.ts';
-import { iscedFBaselineNodes, iscedFBaselineEdges } from '../packages/domain/src/academic-taxonomy/isced-f-baseline.ts';
+import { iscedFBaselineNodes } from '../packages/domain/src/academic-taxonomy/isced-f-baseline.ts';
 
 const resolver = new AcademicTaxonomyResolver();
 const catalogIndexPath = path.join(process.cwd(), 'workspace/catalog-index/phase10CatalogIndex.json');

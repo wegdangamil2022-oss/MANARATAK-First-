@@ -2,22 +2,14 @@ import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I1
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
-  ArrowRight,
   BookOpen,
-  Calendar,
-  Check,
-  CheckCircle2,
-  ChevronLeft,
   Clock,
   DollarSign,
   ExternalLink,
   Eye,
   GraduationCap,
   PlayCircle,
-  ShieldCheck,
   Sparkles,
-  Star,
-  Users,
 } from 'lucide-react';
 import type { Course } from '../types';
 import { courseLearnerPath } from '../courseLearningNavigation';

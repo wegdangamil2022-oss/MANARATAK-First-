@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import {createSymbolicLinkFixture} from './helpers/symbolic-link.mjs';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import {
@@ -280,7 +281,7 @@ test('FSA011 artifact traversal cannot read out of boundary', () => {
 test('FSA011 symlink artifact rejected', () => {
   const { root } = artifacts();
   fs.rmSync(path.join(root, 'api.tar'));
-  fs.symlinkSync(path.join(root, 'web.tar'), path.join(root, 'api.tar'));
+  createSymbolicLinkFixture(path.join(root, 'web.tar'), path.join(root, 'api.tar'));
   assert.throws(() => verifyReleaseManifest(root, sha), /PATH_INVALID/);
 });
 test('FSA011 signed proof checked against independently supplied key', () => {
@@ -710,7 +711,7 @@ test('FSA018 traversal asset aborts before all SQL', async () => {
 test('FSA018 symlink asset rejected', async () => {
   const input = recoveryFixture();
   fs.rmSync(path.join(input.assetDirectory, 'a.txt'));
-  fs.symlinkSync(input.databaseBackup, path.join(input.assetDirectory, 'a.txt'));
+  createSymbolicLinkFixture(input.databaseBackup, path.join(input.assetDirectory, 'a.txt'));
   await assert.rejects(() => recoveryInputs({ ...input, proof: input.data }), /SYMLINK/);
 });
 test('FSA017 measured >60min restore fails even structural success', () => {

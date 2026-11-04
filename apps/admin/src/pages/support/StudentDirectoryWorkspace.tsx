@@ -432,7 +432,7 @@ export function StudentDirectoryWorkspace({
         setTotal(result.total ?? null);
         setCursor(result.nextCursor);
         setHasMore(result.hasMore);
-      } catch (cause) {
+      } catch {
         if (request === listRequest.current) setError(t('stu_support_load_error'));
       } finally {
         if (request === listRequest.current) setLoading(false);
@@ -461,7 +461,7 @@ export function StudentDirectoryWorkspace({
           `/admin/students/support/${encodeURIComponent(id)}`,
         );
         if (request === detailRequest.current) setDetail(result);
-      } catch (cause) {
+      } catch {
         if (request === detailRequest.current) setDetailError(t('stu_support_detail_error'));
       } finally {
         if (request === detailRequest.current) setDetailLoading(false);
@@ -613,7 +613,7 @@ export function StudentDirectoryWorkspace({
                 : previous.recentServiceRequests,
           };
         });
-      } catch (error) {
+      } catch {
         if (request === ownerRequest.current) setOwnerError(t('stu_support_owner_error'));
       } finally {
         if (request === ownerRequest.current) setOwnerLoading(null);
@@ -765,7 +765,7 @@ export function StudentDirectoryWorkspace({
         `/admin/students/support/${encodeURIComponent(identityId)}/provisioning-diagnostic`,
       );
       if (req === diagnosticRequest.current) setProvisionDiagnostic(result);
-    } catch (error) {
+    } catch {
       if (req === diagnosticRequest.current) setDiagnosticError(t('stu_support_diagnostic_error'));
     } finally {
       if (req === diagnosticRequest.current) setDiagnosticLoading(false);
@@ -821,7 +821,7 @@ export function StudentDirectoryWorkspace({
             }
           : page,
       );
-    } catch (error) {
+    } catch {
       if (request === triageRequest.current) setTriageError(t('stu_support_triage_error'));
     } finally {
       if (request === triageRequest.current) setTriageLoading(false);
@@ -844,7 +844,7 @@ export function StudentDirectoryWorkspace({
             ? { trackerId, page: { ...page, items: [...previous.page.items, ...page.items] } }
             : { trackerId, page },
         );
-    } catch (error) {
+    } catch {
       if (request === historyRequest.current)
         setTrackerHistoryError(t('stu_support_history_error'));
     } finally {
@@ -867,7 +867,7 @@ export function StudentDirectoryWorkspace({
         setTrackerPage((prev) =>
           nextCursor && prev ? { ...result, items: [...prev.items, ...result.items] } : result,
         );
-    } catch (cause) {
+    } catch {
       if (request === trackerRequest.current) setTrackerError(t('stu_support_tracker_error'));
     } finally {
       if (request === trackerRequest.current) setTrackerLoading(false);

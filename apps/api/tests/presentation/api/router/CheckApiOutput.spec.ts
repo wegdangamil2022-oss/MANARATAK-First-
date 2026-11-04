@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'vitest';
 import { container, registerDependencies } from '../../../../src/infrastructure/di/container';
 import { AdminMajorUseCases } from '@manaratak/application';
 

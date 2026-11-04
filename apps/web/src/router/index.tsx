@@ -303,19 +303,7 @@ function CanonicalAdminRedirect({ legacyPath }: { legacyPath: string }) {
   return <PageLoadingFallback />;
 }
 
-function CanonicalAdminUnavailable() {
-  const { t } = useTranslation();
-  return (
-    <div className="mx-auto max-w-2xl py-12 text-center">
-      <div className="mn-card rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-8">
-        <h1 className="text-xl font-bold text-[var(--mn-heading)]">
-          {t('admin_unavailable_title')}
-        </h1>
-        <p className="mt-3 text-sm text-[var(--mn-text-muted)]">{t('admin_unavailable_desc')}</p>
-      </div>
-    </div>
-  );
-}
+
 
 export function AppRouter() {
   return <RouterProvider router={router} />;

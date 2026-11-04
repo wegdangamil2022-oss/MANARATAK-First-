@@ -1,6 +1,6 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
-import { Menu, User, Globe, Moon, Sun, Search, Sparkles, X, Bell, GraduationCap, BookOpen } from 'lucide-react';
+import { Menu, User, Moon, Sun, Search, Sparkles, X } from 'lucide-react';
 import { Language } from '../types';
 import { ManaratakLogo } from './ManaratakLogo';
 

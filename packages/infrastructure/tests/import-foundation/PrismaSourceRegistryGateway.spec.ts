@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import {
-  ImportSourceDefinition, SourceAccessClassification,
+import { SourceAccessClassification,
   SourceConnectorCategory, SourceStatus,
 } from '@manaratak/domain';
 import { PrismaSourceRegistryGateway } from '../../src/import-foundation/PrismaSourceRegistryGateway';

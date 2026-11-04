@@ -2470,7 +2470,7 @@ function parseArray(val: any): string[] {
       try {
         const parsed = JSON.parse(val);
         if (Array.isArray(parsed)) return parsed;
-      } catch (e) {
+      } catch {
         // ignore
       }
     }

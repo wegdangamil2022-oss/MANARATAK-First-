@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { randomUUID } from 'node:crypto';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { beforeAll, afterAll, describe, it, expect } from 'vitest';
 import { preflightTargets } from '../../../../scripts/database/post28-isolation.mjs';
 import { readDatabaseIdentity } from '../../../../scripts/database/post28-preflight.mjs';

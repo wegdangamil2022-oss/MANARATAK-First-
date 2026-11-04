@@ -7,8 +7,7 @@ const mutationContext = {actorId: 'reviewer-1', reason: 'Reviewed official sourc
 import { describe, it, expect } from 'vitest';
 import { 
   ScholarshipStatus, 
-  ScholarshipCompletenessState, 
-  ImportRecordStatus,
+  ScholarshipCompletenessState,
   IScholarshipRepository,
   ScholarshipDto
 } from '@manaratak/domain';

@@ -4,7 +4,7 @@ import type { PublicArticle } from '../types';
 import { HomeSectionEmptyCards } from './HomeSectionEmptyCards';
 import { homeCatalogStatus } from '../homeCatalogState';
 import type { PublicLiveDomainStatus } from '../publicLiveDataSource';
-import { Newspaper, Clock, ArrowUpLeft, ChevronLeft, Award, FileText, Plane, GraduationCap, Cpu, Search } from 'lucide-react';
+import { Newspaper, Clock, ArrowUpLeft, ChevronLeft } from 'lucide-react';
 
 interface FeaturedArticlesProps {
   articles: PublicArticle[];

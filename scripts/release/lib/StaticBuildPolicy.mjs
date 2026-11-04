@@ -4,6 +4,9 @@ import {staticScriptEntries} from './StaticScriptPolicy.mjs';
 import { SHA } from './ReleaseContracts.mjs';
 export function inspectStaticBuild(directory, unit, expectedSha) {
   try {
+    if(fs.lstatSync(directory).isSymbolicLink())throw new Error('INVALID');
+    for(const file of ['index.html','manaratak-build.json'])
+      if(fs.lstatSync(path.join(directory,file)).isSymbolicLink())throw new Error('INVALID');
     const index = path.join(directory, 'index.html'),
       descriptor = JSON.parse(
         fs.readFileSync(path.join(directory, 'manaratak-build.json'), 'utf8'),
@@ -17,10 +20,7 @@ export function inspectStaticBuild(directory, unit, expectedSha) {
       !html.includes(`<meta name="manaratak-build-sha" content="${descriptor.sourceSha}">`)
     )
       throw new Error('INVALID');
-    if(fs.lstatSync(directory).isSymbolicLink())throw new Error('INVALID');
     const root=fs.realpathSync(directory);
-    for(const file of ['index.html','manaratak-build.json'])
-      if(fs.lstatSync(path.join(directory,file)).isSymbolicLink())throw new Error('INVALID');
     for(const entry of staticScriptEntries(html)) {
       let name=decodeURIComponent(new URL(entry,'https://static.invalid/').pathname).replace(/^\//,'');
       if(unit==='admin'&&name.startsWith('admin/'))name=name.slice('admin/'.length);

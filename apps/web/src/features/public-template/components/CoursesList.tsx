@@ -1,7 +1,7 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { Course } from '../types';
-import { BookOpen, Star, Clock, Users, Award, PlayCircle } from 'lucide-react';
+import { BookOpen, Star, Clock, Users, PlayCircle } from 'lucide-react';
 
 interface CoursesListProps {
   courses: Course[];

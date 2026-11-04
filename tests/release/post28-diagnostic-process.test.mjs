@@ -28,10 +28,17 @@ test('GNU tar roundtrip accepts absolute Windows output locations via local path
   try {
     fs.mkdirSync(path.join(root,'input'));fs.mkdirSync(path.join(root,'unpacked'));
     fs.writeFileSync(path.join(root,'input/payload'),'artifact bytes');
+    const candidates=['tar'];
+    if(process.platform==='win32'){
+      const git=spawnSync('git',['--exec-path'],{encoding:'utf8'});
+      if(git.status===0)candidates.push(path.resolve(git.stdout.trim(),'../../../usr/bin/tar.exe'));
+    }
+    const tar=candidates.find(command=>/GNU tar/.test(spawnSync(command,['--version'],{encoding:'utf8'}).stdout??''));
+    assert.ok(tar,'GNU tar is required (Windows Git installation includes it)');
     const archive=tarLocalPath(path.join(root,'bundle.tar'));
-    const packed=spawnSync('tar',['--force-local','-cf',archive,'-C',tarLocalPath(path.join(root,'input')),'payload'],{encoding:'utf8'});
+    const packed=spawnSync(tar,['--force-local','-cf',archive,'-C',tarLocalPath(path.join(root,'input')),'payload'],{encoding:'utf8'});
     assert.equal(packed.status,0,packed.stderr);
-    const unpacked=spawnSync('tar',['--force-local','-xf',archive,'-C',tarLocalPath(path.join(root,'unpacked'))],{encoding:'utf8'});
+    const unpacked=spawnSync(tar,['--force-local','-xf',archive,'-C',tarLocalPath(path.join(root,'unpacked'))],{encoding:'utf8'});
     assert.equal(unpacked.status,0,unpacked.stderr);
     assert.equal(fs.readFileSync(path.join(root,'unpacked/payload'),'utf8'),'artifact bytes');
   }finally{fs.rmSync(root,{recursive:true,force:true});}

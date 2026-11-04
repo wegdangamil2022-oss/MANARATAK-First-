@@ -71,7 +71,7 @@ function expressApiPlugin(): Plugin {
                 } else {
                   try {
                     config = await configModule.ConfigurationRegistry.bootstrap(loader, new configModule.ZodEnvironmentValidator());
-                  } catch (bootstrapErr) {
+                  } catch {
                     config = configModule.ConfigurationRegistry.getInstance();
                   }
                 }

@@ -7,7 +7,6 @@ import {
   BookOpenCheck,
   ChevronDown,
   ChevronLeft,
-  Clock3,
   Database,
   Filter,
   Layers3,

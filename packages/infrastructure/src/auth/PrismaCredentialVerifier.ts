@@ -52,7 +52,7 @@ export class PrismaCredentialVerifier implements ICredentialVerifier {
 
       // 4. Password verification via timing-safe scrypt verification
       return await PasswordHasher.verify(credentialValue, credential.passwordHash);
-    } catch (error) {
+    } catch {
       // Fail closed deterministically without throwing or leaking database details
       return false;
     }

@@ -5,7 +5,6 @@ import { PushNotificationItem } from '../types';
 import {
   AlertTriangle,
   Bell,
-  BellRing,
   BookOpen,
   Building2,
   ChevronLeft,

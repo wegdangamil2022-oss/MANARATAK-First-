@@ -16,7 +16,6 @@ import {
   CheckCircle,
   Clock,
   FlaskConical,
-  Target,
   ShieldCheck,
   GitCompare,
   UserCheck,

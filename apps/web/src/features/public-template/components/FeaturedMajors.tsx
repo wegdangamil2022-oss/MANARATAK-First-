@@ -1,7 +1,7 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { Major } from '../types';
-import { Sparkles, ChevronLeft, GraduationCap } from 'lucide-react';
+import { ChevronLeft, GraduationCap } from 'lucide-react';
 
 interface FeaturedMajorsProps {
   majors: Major[];

@@ -11,7 +11,7 @@
   "private": true,
   "scripts": {
     "build": "tsc -b",
-    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "clean": "node ../../scripts/maintenance/clean-build-output.mjs",
     "lint": "eslint src",
     "test": "vitest run"
   },

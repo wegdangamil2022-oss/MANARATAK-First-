@@ -1452,7 +1452,7 @@ export function registerDependencies(
           if (fs.existsSync(keysFile)) {
             stableKeys = JSON.parse(fs.readFileSync(keysFile, 'utf8'));
           }
-        } catch (e) {
+        } catch {
           // ignore reading errors
         }
         
@@ -1468,7 +1468,7 @@ export function registerDependencies(
               privateKeyPem,
               publicKeyPem
             }, null, 2), 'utf8');
-          } catch (e) {
+          } catch {
             // ignore writing errors
           }
         }

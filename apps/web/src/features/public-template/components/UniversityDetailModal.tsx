@@ -7,33 +7,20 @@ import {
   Landmark,
   Calendar,
   Building2,
-  ChevronRight,
   ChevronLeft,
-  ArrowRight,
-  Layers,
   Trophy,
   GraduationCap,
   Languages,
-  Clock,
   Sparkles,
   BookOpen,  BookOpenText,  Briefcase,
-  Star,
   Globe,
   FileText,
-  HeartPulse,
-  Settings,
-  Scale,
   Users,
-  Monitor,
   Award,
-  PenLine,
   CheckCircle2,
   ArrowUpRight,
-  Send,
   UserCheck,
   Coins,
-  Stethoscope,
-  Wrench,
   Banknote,
   Info,
   Phone,
@@ -47,8 +34,6 @@ import {
 } from 'lucide-react';
 import { PublishedUniversityDetails } from './PublishedUniversityDetails';
 import { Service, University } from '../types';
-import { RelatedArticlesStrip } from './RelatedArticlesStrip';
-import { ContextualServicesStrip } from './ContextualServicesStrip';
 import { DetailBackButton, DetailSectionHeader, useDetailSearchTarget } from './DetailUi';
 
 interface UniversityDetailModalProps {

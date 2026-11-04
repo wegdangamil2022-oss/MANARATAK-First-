@@ -20,7 +20,6 @@ import {
   Sparkles,
   Users,
   WalletCards,
-  X,
 } from 'lucide-react';
 import { CountryDestination, CountryEntityRef } from '../types';
 import { RelatedArticlesStrip } from './RelatedArticlesStrip';

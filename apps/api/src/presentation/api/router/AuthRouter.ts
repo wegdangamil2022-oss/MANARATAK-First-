@@ -498,7 +498,7 @@ export class AuthRouter {
                   principalValidated = true;
                 }
               }
-            } catch (e) {
+            } catch {
               if (checkingStorage) {
                 res.status(503).json(
                   responseFormatter.error({
@@ -616,7 +616,7 @@ export class AuthRouter {
             effectivePermissions: Array.from(effectivePermissions),
           }),
         );
-      } catch (error: any) {
+      } catch {
         res.status(500).json(
           responseFormatter.error({
             code: 'INTERNAL_SERVER_ERROR',
@@ -726,7 +726,7 @@ export class AuthRouter {
             authenticated: true,
           }),
         );
-      } catch (error: any) {
+      } catch {
         res.status(500).json(
           responseFormatter.error({
             code: 'INTERNAL_SERVER_ERROR',
@@ -986,7 +986,7 @@ export class AuthRouter {
             message: result.message,
           }),
         );
-      } catch (error) {
+      } catch {
         res.status(500).json(
           responseFormatter.error({
             code: 'INTERNAL_SERVER_ERROR',

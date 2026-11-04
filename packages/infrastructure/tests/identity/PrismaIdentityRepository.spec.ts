@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Identity, IdentityType, User, Profile, ContactRegistry, TechnicalMetadata, Account } from '@manaratak/domain';
+import { Identity, IdentityType, User, Profile, ContactRegistry, TechnicalMetadata } from '@manaratak/domain';
 import { PrismaIdentityRepository } from '../../src/identity/PrismaIdentityRepository';
 
 describe('PrismaIdentityRepository', () => {

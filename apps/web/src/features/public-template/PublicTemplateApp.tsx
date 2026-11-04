@@ -55,19 +55,11 @@ import { StudentWorkspacePage as LiveStudentWorkspacePage } from '../students/St
 
 import {
   Scholarship,
-  University,
-  Course,
   Major,
   ApplicationMilestone,
   PushNotificationItem,
-  UserProfile,
-  Language,
   CategoryType,
-  Exam,
-  ImportedCourse,
-  PublicArticle,
   Service,
-  ServiceAudience,
   FavoriteKey,
   FavoriteKind,
   CountryDestination,
@@ -100,16 +92,10 @@ import { CoursesList } from './components/CoursesList';
 import { NavigationDrawer } from './components/NavigationDrawer';
 import { consumePostLoginAction, consumePostLoginReturn, isStudentPostLoginDestination, preservePostLoginAction, preservePostLoginReturn, rememberAuthenticatedIdentity } from '../students/postLoginIntent';
 import {
-  Filter,
-  SlidersHorizontal,
-  Sparkles,
   Heart,
   GraduationCap,
   Calendar,
-  CheckCircle2,
   ChevronLeft,
-  Search,
-  ArrowUpDown,
   AlertTriangle,
   RefreshCw,
   Building2,
@@ -847,7 +833,7 @@ export default function App() {
       gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 0.35);
-    } catch (e) {
+    } catch {
       // Audio autoplay policy fallback
     }
   };

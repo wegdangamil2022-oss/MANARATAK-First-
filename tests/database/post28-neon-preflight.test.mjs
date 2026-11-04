@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import childProcess from 'node:child_process';
+import {syncBuiltinESMExports} from 'node:module';
 import {preflightTargets,validateTargetDeclaration} from '../../scripts/database/post28-isolation.mjs';
 import {inspectNeonLiveIdentity,requireNeonTcpPolicy,requirePost28LocalExecution} from '../../scripts/database/post28-neon-policy.mjs';
 import {createNeonProviderReader} from '../../scripts/database/post28-neon-provider.mjs';
@@ -302,24 +304,29 @@ test('R03 registry pins the actual approved G/S roles and rejects unapproved sib
     assert.equal(reads,0);
   }
 });
-test('default provider transport sends credentials only on stdin and pins verified HTTPS GET (inert curl)',async()=>{
-  const os=await import('node:os'),path=await import('node:path');
-  const root=fs.mkdtempSync(path.join(os.tmpdir(),'post28-neon-curl-'));
+test('default provider transport sends credentials only on stdin and pins verified HTTPS GET (inert curl)',async t=>{
+  const provider=providerFor(expected),calls=[];
+  // Mock the OS process boundary, retaining the real default request builder.
+  // This does not depend on Unix shebangs or permission to create file symlinks.
+  t.mock.method(childProcess,'spawnSync',(command,args,options)=>{
+    calls.push({command,args,options});
+    return {status:0,stdout:JSON.stringify({...provider,role:{...provider.role,password:'must-not-escape'}})};
+  });
+  syncBuiltinESMExports();
   try{
-    const argsFile=path.join(root,'args.jsonl'),provider=providerFor(expected);
-    const script=`#!${process.execPath}\nimport fs from 'node:fs';
-      const input=fs.readFileSync(0,'utf8');
-      if(!input.includes('https://api.neon.tech/v2/projects/')||!input.includes('Authorization: Bearer synthetic-token'))process.exit(2);
-      fs.appendFileSync(${JSON.stringify(argsFile)},JSON.stringify(process.argv.slice(2))+'\\n');
-      console.log(${JSON.stringify(JSON.stringify({...provider,role:{...provider.role,password:'must-not-escape'}}))});`;
-    // A symlink preserves the .mjs entry while exposing the synthetic curl name.
-    const entry=path.join(root,'curl.mjs');fs.writeFileSync(entry,script,{mode:0o700});
-    fs.symlinkSync(entry,path.join(root,'curl'));
-    const reader=createNeonProviderReader({PATH:root,NEON_API_KEY:'synthetic-token'});
+    const reader=createNeonProviderReader({NEON_API_KEY:'synthetic-token'});
     assert.deepEqual(await reader(expected),provider);
-    const calls=fs.readFileSync(argsFile,'utf8').trim().split('\n').map(JSON.parse);
     assert.equal(calls.length,5);
-    for(const args of calls){assert.equal(args[0],'--disable');assert.ok(args.includes('--no-insecure'));
-      assert.ok(args.includes('GET'));assert.equal(args.join(' ').includes('synthetic-token'),false);}
-  }finally{fs.rmSync(root,{recursive:true,force:true});}
+    for(const {command,args,options} of calls){
+      assert.equal(command,'curl');assert.equal(args[0],'--disable');
+      assert.ok(args.includes('--no-insecure'));assert.ok(args.includes('--tlsv1.2'));
+      assert.equal(args[args.indexOf('--config')+1],'-');
+      assert.equal(args[args.indexOf('--proto')+1],'=https');
+      assert.equal(args[args.indexOf('--max-redirs')+1],'0');
+      assert.equal(args[args.indexOf('--request')+1],'GET');
+      assert.equal(args.join(' ').includes('synthetic-token'),false);
+      assert.ok(options.input.includes('https://api.neon.tech/v2/projects/'));
+      assert.ok(options.input.includes('Authorization: Bearer synthetic-token'));
+    }
+  }finally{t.mock.restoreAll();syncBuiltinESMExports();}
 });
