@@ -2,7 +2,7 @@ import { IDomainEvent } from './IDomainEvent';
 import { IAggregateRoot } from './IAggregateRoot';
 
 export class DomainEvents {
-  private static handlersMap: { [eventType: string]: any[] } = {};
+  private static handlersMap: { [eventType: string]: Array<(event: IDomainEvent) => void> } = {};
   private static markedAggregates: IAggregateRoot[] = [];
 
   public static markAggregateForDispatch(aggregate: IAggregateRoot): void {
@@ -36,7 +36,7 @@ export class DomainEvents {
   }
 
   private static removeAggregateFromMarkedDispatchList(aggregate: IAggregateRoot): void {
-    const index = this.markedAggregates.findIndex((a) => (a as any).equals(aggregate));
+    const index = this.markedAggregates.findIndex((a) => a.id.toString() === aggregate.id.toString());
     if (index !== -1) {
       this.markedAggregates.splice(index, 1);
     }
