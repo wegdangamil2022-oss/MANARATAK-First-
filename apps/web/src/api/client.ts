@@ -4368,24 +4368,4 @@ export class ApiClient {
     return res.json();
   }
 
-  private static async postImportedCourseAction(id: string, endpoint: string): Promise<any> {
-    const res = await apiFetch(
-      `${API_BASE_URL}/admin/courses/imported/${encodeURIComponent(id)}/${endpoint}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      },
-    );
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.error || `Failed imported-course operation: ${endpoint}`);
-    }
-    if (res.status === 204) return null;
-    return res.json();
-  }
-
-  static verifyAdminImportedCourseSource(id: string) {
-    return this.postImportedCourseAction(id, 'verify-source');
-  }
 }

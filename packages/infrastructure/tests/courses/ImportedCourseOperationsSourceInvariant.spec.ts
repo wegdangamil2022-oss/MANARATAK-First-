@@ -35,14 +35,11 @@ describe('WP-IC-07 source invariants', () => {
     }
   });
 
-  it('maps the legacy UI adapter through a closed switch instead of an open action URL', () => {
+  it('keeps imported-course administration out of the student client after retiring its legacy adapter', () => {
     const client = source('apps/web/src/api/client.ts');
-    const start = client.indexOf('// Imported External Courses API — explicit WP-IC-07 REST contract.');
-    const end = client.indexOf('// Student Services API', start);
-    const block = client.slice(start, end);
-    expect(block).toContain("case 'VERIFY_SOURCE'");
-    expect(block).toContain("return this.verifyAdminImportedCourseSource(id)");
-    expect(block).not.toContain('/${action}');
+    expect(client).not.toContain('/admin/courses/imported/');
+    expect(client).not.toContain('executeAdminImportedCourseAction');
+    expect(client).not.toContain('postImportedCourseAction');
   });
 
   it('redirects legacy Admin URLs to the official Admin application', () => {
