@@ -3,8 +3,8 @@ import { beforeAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { VaultTransitCertificateSignatureService } from '../../src/certificates/VaultTransitCertificateSignatureService';
 import { HttpCertificateAuthorityResolver } from '../../src/certificates/HttpCertificateAuthorityResolver';
 import type { CertificateIssuerDto } from '@manaratak/domain';
-describe.skipIf(process.env.CERTIFICATE_RUNTIME_ISOLATED !== '1')(
-  'deferred opaque signer and directory protocol fixtures',
+describe(
+  'local opaque signer and directory protocol fixtures',
   () => {
     let keys: ReturnType<typeof generateKeyPairSync>;
     beforeAll(() => {

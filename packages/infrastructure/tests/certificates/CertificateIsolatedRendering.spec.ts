@@ -10,8 +10,8 @@ const jpeg = readFileSync(
     'packages/infrastructure/assets/certificates/manaratak-logo-official.png',
   ),
 );
-describe.skipIf(process.env.CERTIFICATE_RUNTIME_ISOLATED !== '1')(
-  'deferred actual PDF and pinned visual document output',
+describe(
+  'local actual PDF and pinned visual document output',
   () => {
     it('materializes three approved images in a bilingual preview and real PDF', async () => {
       const checksum = createHash('sha256').update(jpeg).digest('hex');
