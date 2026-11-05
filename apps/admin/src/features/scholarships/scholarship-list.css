@@ -1,0 +1,26 @@
+.scholarship-list-name {
+  min-width: 0;
+  width: 100%;
+  font-family: 'Cairo', sans-serif;
+  text-align: start;
+}
+.scholarship-list-name-primary {
+  display: block;
+  color: #142b5f;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.scholarship-list-name a:hover .scholarship-list-name-primary {
+  color: #0e7c86;
+}
+.scholarship-list-name .scholarship-list-name-english {
+  margin: 2px 0 0;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.6;
+  text-align: match-parent;
+  overflow-wrap: anywhere;
+}

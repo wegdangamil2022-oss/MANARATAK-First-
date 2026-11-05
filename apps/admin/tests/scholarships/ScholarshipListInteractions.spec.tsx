@@ -72,6 +72,65 @@ afterEach(async () => {
   if (tree) await act(async () => tree.unmount());
 });
 describe('Scholarship list navigation and authoritative reads', () => {
+  it('shows the Arabic name first and the original English name below in cards and table', async () => {
+    const arabic = 'منحة أكاديمية يانتشينغ لجامعة بكين';
+    const english = 'Yenching Academy of Peking University Scholarship';
+    state.request.mockImplementation(async (url: string) =>
+      url.endsWith('/summary')
+        ? { all: 1 }
+        : {
+            ...page(arabic, 1),
+            data: [
+              {
+                ...row,
+                displayName: arabic,
+                canonicalName: arabic,
+                metadata: { sourcePresentation: { officialEnglishName: english } },
+              },
+            ],
+          },
+    );
+    await mount();
+    const assertNames = () => {
+      const names = tree.root.findByProps({ className: 'scholarship-list-name' });
+      expect(names.findByType('a').findByType('span').children).toEqual([arabic]);
+      expect(names.findByType('p').children).toEqual([english]);
+      expect(names.findByType('p').props.dir).toBe('ltr');
+      const texts = names.findAll((node) => node.type === 'span' || node.type === 'p');
+      expect(texts.map((node) => node.children)).toEqual([[arabic], [english]]);
+    };
+    assertNames();
+    await act(async () =>
+      tree.root
+        .findAllByType('button')
+        .find((node) => node.props.title === 'عرض الجدول')!
+        .props.onClick(),
+    );
+    assertNames();
+  });
+  it('uses saved Arabic and English translations and avoids repeating a monolingual title', async () => {
+    state.request.mockImplementation(async (url: string) =>
+      url.endsWith('/summary')
+        ? { all: 2 }
+        : {
+            ...page('unused', 2),
+            data: [
+              {
+                ...row,
+                localizedNames: { ar: 'اسم عربي معتمد', en: 'Approved English name' },
+                metadata: { sourcePresentation: { officialEnglishName: 'Original English name' } },
+              },
+              { ...row, id: 'sch-2', canonicalName: row.displayName },
+            ],
+          },
+    );
+    await mount();
+    const names = tree.root.findAllByProps({ className: 'scholarship-list-name' });
+    expect(names[0].findByType('a').findByType('span').children).toEqual(['اسم عربي معتمد']);
+    expect(names[0].findByType('p').children).toEqual(['Approved English name']);
+    expect(names[1].findByType('a').findByType('span').children).toEqual([row.displayName]);
+    expect(names[1].findAllByType('p')).toHaveLength(0);
+  });
   it('restores all filters from links and browser history and resets pagination on filtering', async () => {
     await mount(
       '/scholarships?query=medicine&status=PUBLISHED&fundingType=FULL&deadlineStatus=OPEN&completenessStatus=COMPLETE&page=3&universityId=uni-1',

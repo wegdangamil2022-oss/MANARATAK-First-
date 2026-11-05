@@ -3,6 +3,7 @@ import { adminPaths } from '../navigation/AdminRoutes';
 import { AdminLink } from '../components/AdminLink';
 import {ScholarshipCanonicalFilters} from '../components/ScholarshipCanonicalFilters';
 import { useScholarshipListQuery } from '../features/scholarships/useScholarshipListQuery';
+import { ScholarshipListName } from '../features/scholarships/ScholarshipListName';
 import {
 AlertTriangle,
 ArrowLeft,
@@ -39,6 +40,7 @@ interface Scholarship {
   displayName: string;
   canonicalName?: string;
   localizedNames?: Record<string, string>;
+  metadata?: Record<string, unknown>;
   status: string;
   completenessStatus: string;
   sponsorName?: string;
@@ -542,7 +544,7 @@ export function ScholarshipListPage() {
             return (
               <article
                 key={item.id}
-                className="bg-white rounded-2xl sm:rounded-3xl border border-[#142B5F]/20 hover:border-[#142B5F] shadow-xs hover:shadow-md transition-all duration-200 p-4 sm:p-5 relative overflow-hidden group flex flex-col gap-3.5 select-none w-full"
+                className="bg-white rounded-2xl border border-[#142B5F]/20 hover:border-[#142B5F] shadow-xs hover:shadow-md transition-all duration-200 p-3 sm:p-4 relative overflow-hidden group flex flex-col gap-3 w-full font-['Cairo',sans-serif]"
               >
                 {/* Right Gradient Hover Accent Bar */}
                 <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-[#142B5F] via-[#0E7C86] to-[#21A7B4] opacity-0 group-hover:opacity-100 transition-opacity rounded-r-3xl"></div>
@@ -550,28 +552,19 @@ export function ScholarshipListPage() {
                 {/* Top Row: Right (Circular Flag + Title + Sponsor) | Left (Status Badge & Relationship Link) */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   {/* Visual Right (RTL): Flag Badge + Titles */}
-                  <div className="flex items-center gap-3.5 text-right min-w-0 flex-1">
+                  <div className="flex items-start gap-2.5 text-right min-w-0 flex-1">
                     {/* Circular Flag Badge with Gradient Ring */}
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full p-0.5 bg-gradient-to-tr from-[#142B5F] via-[#0E7C86] to-[#F2CD78] shadow-xs shrink-0 flex items-center justify-center">
-                      <div className="w-full h-full rounded-full overflow-hidden bg-white border border-white flex items-center justify-center text-2xl sm:text-3xl shadow-inner">
+                    <div className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-tr from-[#142B5F] via-[#0E7C86] to-[#F2CD78] shadow-xs shrink-0 flex items-center justify-center">
+                      <div className="w-full h-full rounded-full overflow-hidden bg-white border border-white flex items-center justify-center text-lg shadow-inner">
                         <span role="img" aria-label={countryName}>{countryFlag}</span>
                       </div>
                     </div>
 
                     <div className="flex flex-col items-start text-right min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <AdminLink
-                          to={`/scholarships/${item.id}`}
-                          className="text-base sm:text-lg font-black text-[#142B5F] group-hover:text-[#0E7C86] font-['Cairo',sans-serif] leading-snug transition-colors line-clamp-1"
-                        >
-                          {item.localizedNames?.ar || item.displayName}
-                        </AdminLink>
-                      </div>
-
-                      <p dir="ltr" className="text-xs text-slate-500 text-right">{item.localizedNames?.en || item.canonicalName}</p>
-                      <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 font-['Cairo',sans-serif] truncate w-full mt-1">
+                      <ScholarshipListName scholarship={item} />
+                      <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 truncate w-full mt-1">
                         <Building2 className="w-3.5 h-3.5 text-[#0E7C86] shrink-0" />
-                        <span className="truncate">{item.providerName || item.sponsorName || item.canonicalName || 'جهة مانحة معتمدة'}</span>
+                        <span className="truncate">{item.providerName || item.sponsorName || tr('الجهة غير محددة', 'Sponsor unspecified')}</span>
                         <span className="text-slate-300">•</span>
                         <span className="font-bold text-[#142B5F]">{countryName}</span>
                       </div>
@@ -581,7 +574,7 @@ export function ScholarshipListPage() {
                   {/* Visual Left (RTL): Status Badge + Relationship Link Button */}
                   <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-center">
                     <span
-                      className={`inline-flex items-center rounded-xl px-3 py-1 text-xs font-black ${
+                      className={`inline-flex items-center rounded-lg px-2.5 py-1 text-[11px] font-semibold ${
                         item.status === 'PUBLISHED'
                           ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
                           : item.status === 'READY_TO_PUBLISH'
@@ -605,21 +598,21 @@ export function ScholarshipListPage() {
                 </div>
 
                 {/* Bottom Row / Badges Extended Row (Elongated Horizontal Layout on PC) */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 pt-1">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                   {/* 1. التمويل */}
-                  <div className="bg-[#FAF7F0] border border-slate-200/80 rounded-xl px-3.5 py-2 flex items-center justify-center gap-1.5 text-xs font-bold text-slate-800 font-['Cairo']">
+                  <div className="min-w-0 bg-[#FAF7F0] border border-slate-200/80 rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-slate-800">
                     <Coins className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     <span className="truncate">{isFull ? tr('تمويل كامل 💎', 'Fully funded') : ['PARTIAL', 'PARTIALLY_FUNDED'].includes(item.fundingTypeCode ?? '') ? tr('تمويل جزئي', 'Partially funded') : tr('التمويل غير محدد', 'Funding unspecified')}</span>
                   </div>
 
                   {/* 2. الدرجة العلمية */}
-                  <div className="bg-[#FAF7F0] border border-slate-200/80 rounded-xl px-3.5 py-2 flex items-center justify-center gap-1.5 text-xs font-bold text-slate-800 font-['Cairo']">
+                  <div className="min-w-0 bg-[#FAF7F0] border border-slate-200/80 rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-slate-800">
                     <GraduationCap className="w-3.5 h-3.5 text-[#142B5F] shrink-0" />
                     <span className="truncate">{degreesText}</span>
                   </div>
 
                   {/* 3. الموعد النهائي */}
-                  <div className="bg-[#FAF7F0] border border-slate-200/80 rounded-xl px-3.5 py-2 flex items-center justify-center gap-1.5 text-xs font-bold text-slate-800 font-['Cairo']">
+                  <div className="min-w-0 bg-[#FAF7F0] border border-slate-200/80 rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-slate-800">
                     <Calendar className="w-3.5 h-3.5 text-[#0E7C86] shrink-0" />
                     <span className={`truncate ${isClosed ? 'text-rose-600 font-bold' : ''}`}>{deadlineText}</span>
                   </div>
@@ -627,9 +620,9 @@ export function ScholarshipListPage() {
                   {/* 4. زر عرض التفاصيل (بلون المنارة مع النص الذهبي) */}
                   <AdminLink
                     to={`/scholarships/${item.id}`}
-                    className="bg-[#142B5F] hover:bg-[#0E7C86] text-white rounded-xl px-4 py-2 flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xs group/btn cursor-pointer"
+                    className="bg-[#142B5F] hover:bg-[#0E7C86] text-white rounded-lg px-3 py-1.5 flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xs group/btn cursor-pointer"
                   >
-                    <span className="text-xs font-black text-[#F2CD78]">عرض التفاصيل</span>
+                    <span className="text-xs font-semibold text-[#F2CD78]">عرض التفاصيل</span>
                     <ChevronLeft className="w-4 h-4 rotate-180 text-[#F2CD78] group-hover/btn:-translate-x-1 transition-transform" />
                   </AdminLink>
                 </div>
@@ -656,7 +649,7 @@ export function ScholarshipListPage() {
                 {filteredItems.map((item) => (
                   <tr key={item.id} className="transition-colors hover:bg-slate-50/70">
                     <td className="px-6 py-4">
-                      <div className="font-black text-[#142B5F] text-sm">{item.localizedNames?.ar || item.displayName}</div>
+                      <ScholarshipListName scholarship={item} />
                       <div className="mt-1 truncate max-w-xs text-xs font-bold text-slate-500">
                         {item.providerName || item.sponsorName || tr('جهة مانحة معتمدة', 'Accredited Sponsor')}
                       </div>
