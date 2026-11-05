@@ -24,19 +24,72 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 describe('Scholarship canonical relationships', () => {
+  it('keeps the embedded degree editor focused on degree cards, with no repeated owner header or empty technical table', async () => {
+    state.request.mockResolvedValue({
+      id: 'sch-1',
+      revision: 7,
+      displayName: 'Existing scholarship title',
+      status: 'IMPORTED',
+      publicationStatus: 'DRAFT',
+      degreeTargets: [
+        { targetKey: 'master', sourceLabel: 'Master', degreeLevelId: 'degree-master' },
+      ],
+      fundedProgramPairs: [],
+    });
+    await act(async () => {
+      tree = create(
+        <MemoryRouter initialEntries={['/scholarships/sch-1']}>
+          <Routes>
+            <Route
+              path="/scholarships/:id"
+              element={<ScholarshipRelationshipEditorPage embedded degreeOnly />}
+            />
+          </Routes>
+        </MemoryRouter>,
+      );
+    });
+    const text = tree.root
+      .findAll((node) => typeof node.type === 'string')
+      .flatMap((node) => node.children.filter((child) => typeof child === 'string'))
+      .join(' ');
+    expect(text).not.toContain('Existing scholarship title');
+    expect(text).not.toContain('IMPORTED');
+    expect(text).not.toContain('No evidenced degree and major pair specified.');
+    expect(
+      tree.root
+        .findAllByType('button')
+        .some((node) => node.children.includes('Save degrees and majors')),
+    ).toBe(true);
+    expect(state.request.mock.calls.every((call) => !call[1]?.method)).toBe(true);
+  });
   it('rejects a relationship response belonging to another owner', async () => {
-    state.request.mockResolvedValue({ id: 'different-owner', revision: 7, displayName: 'Wrong owner', status: 'IMPORTED', publicationStatus: 'DRAFT' });
-    await act(async () => { tree = create(<MemoryRouter initialEntries={['/scholarships/sch-1/relationships']}><Routes><Route path="/scholarships/:id/relationships" element={<ScholarshipRelationshipEditorPage />} /></Routes></MemoryRouter>); });
+    state.request.mockResolvedValue({
+      id: 'different-owner',
+      revision: 7,
+      displayName: 'Wrong owner',
+      status: 'IMPORTED',
+      publicationStatus: 'DRAFT',
+    });
+    await act(async () => {
+      tree = create(
+        <MemoryRouter initialEntries={['/scholarships/sch-1/relationships']}>
+          <Routes>
+            <Route
+              path="/scholarships/:id/relationships"
+              element={<ScholarshipRelationshipEditorPage />}
+            />
+          </Routes>
+        </MemoryRouter>,
+      );
+    });
     expect(JSON.stringify(tree.toJSON())).toContain('SCHOLARSHIP_READBACK_TARGET_MISMATCH');
     expect(tree.root.findAllByType('fieldset')).toHaveLength(0);
   });
   it('retries the first failed program page and clears the error after recovery', async () => {
-    state.request
-      .mockRejectedValueOnce(new Error('Unavailable'))
-      .mockResolvedValue({
-        items: [{ id: 'program-1', sourceProgramName: 'Verified program' }],
-        nextCursor: null,
-      });
+    state.request.mockRejectedValueOnce(new Error('Unavailable')).mockResolvedValue({
+      items: [{ id: 'program-1', sourceProgramName: 'Verified program' }],
+      nextCursor: null,
+    });
     await act(async () => {
       tree = create(
         <ScholarshipCanonicalFilters

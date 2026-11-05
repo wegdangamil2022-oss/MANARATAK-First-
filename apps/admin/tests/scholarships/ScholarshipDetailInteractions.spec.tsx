@@ -22,7 +22,16 @@ vi.mock('../../src/components/OwnerDescriptionTranslationPanel', () => ({
   OwnerDescriptionTranslationPanel: () => null,
 }));
 vi.mock('../../src/pages/ScholarshipRelationshipEditorPage', () => ({
-  ScholarshipRelationshipEditorPage: () => <p>Existing canonical relationship editor</p>,
+  ScholarshipRelationshipEditorPage: ({
+    onDirtyChange,
+  }: {
+    onDirtyChange?: (dirty: boolean) => void;
+  }) => (
+    <section>
+      <p>Existing canonical relationship editor</p>
+      <button onClick={() => onDirtyChange?.(true)}>Change relationship draft</button>
+    </section>
+  ),
 }));
 import {
   ScholarshipDetailPage,
@@ -300,6 +309,37 @@ describe('Scholarship detail template and editing boundaries', () => {
         .some((node) => node.children.includes('Existing canonical relationship editor')),
     ).toBe(false);
     expect(button('Save scholarship data')).toBeUndefined();
+  });
+  it('returns to the read view after leaving a clean relationship editor', async () => {
+    await mount();
+    await act(async () => button('Degrees and majors').props.onClick());
+    expect(JSON.stringify(tree.toJSON())).not.toContain('Existing canonical relationship editor');
+    await act(async () => button('Edit relationships').props.onClick());
+    expect(JSON.stringify(tree.toJSON())).toContain('Existing canonical relationship editor');
+    await act(async () => button('Overview').props.onClick());
+    await act(async () => button('Degrees and majors').props.onClick());
+    expect(JSON.stringify(tree.toJSON())).not.toContain('Existing canonical relationship editor');
+    expect(button('Finish relationship editing')).toBeUndefined();
+    expect(state.update).not.toHaveBeenCalled();
+  });
+  it('does not open a degree editor just because another clean section was in edit mode', async () => {
+    await mount();
+    await act(async () => button('Edit data').props.onClick());
+    await act(async () => button('Degrees and majors').props.onClick());
+    expect(tree.root.findAllByType('input')).toHaveLength(0);
+    expect(button('Save scholarship data')).toBeUndefined();
+    expect(JSON.stringify(tree.toJSON())).not.toContain('Existing canonical relationship editor');
+  });
+  it('retains an actual relationship draft while switching tabs', async () => {
+    await mount();
+    await act(async () => button('Degrees and majors').props.onClick());
+    await act(async () => button('Edit relationships').props.onClick());
+    await act(async () => button('Change relationship draft').props.onClick());
+    await act(async () => button('Overview').props.onClick());
+    await act(async () => button('Degrees and majors').props.onClick());
+    expect(JSON.stringify(tree.toJSON())).toContain('Existing canonical relationship editor');
+    expect(button('Publish scholarship').props.disabled).toBe(true);
+    expect(state.update).not.toHaveBeenCalled();
   });
   it('retains edits while switching template tabs and warns on cancel', async () => {
     await mount();

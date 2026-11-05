@@ -377,6 +377,117 @@
   font: inherit;
   font-size: 12px;
 }
+.scholarship-relationship-editor,
+.scholarship-relationship-editor * {
+  font-family: 'Cairo', sans-serif !important;
+  box-sizing: border-box;
+}
+.scholarship-relationship-editor {
+  color: #203442;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.scholarship-relationship-editor.is-standalone {
+  max-width: 1200px;
+  margin: auto;
+  padding: 16px;
+}
+.scholarship-relationship-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.scholarship-relationship-editor :is(input, select, button, label, p, span, td, th) {
+  font-size: 12px !important;
+}
+.scholarship-relationship-editor :is(h2, h3) {
+  color: #142b5f;
+  font-size: 14px !important;
+  line-height: 1.7;
+}
+.scholarship-relationship-fields {
+  display: grid;
+  gap: 12px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.scholarship-degree-groups > h2 {
+  margin: 0 0 10px;
+}
+.scholarship-degree-card {
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.scholarship-degree-card > h3 {
+  margin: 0 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #d6a43b;
+}
+.scholarship-degree-source-label {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+.scholarship-degree-card > .scholarship-card-grid:empty {
+  display: none;
+}
+.scholarship-degree-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.scholarship-degree-actions .scholarship-card-add {
+  margin-top: 0;
+}
+.scholarship-degree-actions .scholarship-card-delete {
+  background: #fff;
+  border: 1px solid #f0dce0;
+  border-radius: 8px;
+}
+.scholarship-relationship-editor input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #ddeff2;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #fff;
+  color: #203442;
+}
+.scholarship-relationship-save {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #ddeff2;
+  border-radius: 12px;
+  background: #fff;
+}
+.scholarship-relationship-save label {
+  flex: 1 1 240px;
+  display: grid;
+  gap: 6px;
+}
+.scholarship-relationship-save button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #0e7c86;
+  color: #fff;
+  box-shadow: none;
+}
 .scholarship-editor-card input[type='url'] {
   direction: ltr;
 }

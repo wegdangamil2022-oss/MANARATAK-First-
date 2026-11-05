@@ -380,6 +380,27 @@ export function ScholarshipDetailPage() {
     if (unsaved) setPendingLeave(() => action);
     else action();
   };
+  const selectTab = (next: TabKey) => {
+    if (next === activeTab) return;
+    const change = () => {
+      if (!relationshipDirty) setRelationshipEditing(false);
+      // Structural sections open as read views, while actual drafts survive.
+      if (
+        !dirty &&
+        (next === 'degrees_majors' || next === 'universities' || activeTab === 'degrees_majors')
+      ) {
+        setEditing(false);
+        setFocusField(undefined);
+      }
+      setActiveTab(next);
+    };
+    if (criterionDirty)
+      guard(() => {
+        setCriterionDirty(false);
+        change();
+      });
+    else change();
+  };
   useEffect(() => {
     if (!unsaved) {
       leaveApproved.current = false;
@@ -1047,14 +1068,7 @@ export function ScholarshipDetailPage() {
             aria-controls="scholarship-content"
             aria-selected={activeTab === tab.key}
             key={tab.key}
-            onClick={() =>
-              criterionDirty
-                ? guard(() => {
-                    setCriterionDirty(false);
-                    setActiveTab(tab.key);
-                  })
-                : setActiveTab(tab.key)
-            }
+            onClick={() => selectTab(tab.key)}
             onKeyDown={(event) => {
               if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
               event.preventDefault();
@@ -1067,12 +1081,7 @@ export function ScholarshipDetailPage() {
                         (event.key === 'ArrowRight' ? 1 : -1) * (dir === 'rtl' ? -1 : 1) +
                         navTabs.length) %
                       navTabs.length;
-              if (criterionDirty)
-                guard(() => {
-                  setCriterionDirty(false);
-                  setActiveTab(navTabs[next].key);
-                });
-              else setActiveTab(navTabs[next].key);
+              selectTab(navTabs[next].key);
               document.getElementById('scholarship-tab-' + navTabs[next].key)?.focus();
             }}
           >
@@ -1164,7 +1173,7 @@ export function ScholarshipDetailPage() {
           </div>
         )}
         {(!editing ||
-          activeTab === 'degrees_majors' ||
+          (activeTab === 'degrees_majors' && focusField !== 'source-degree-groups') ||
           activeTab === 'universities' ||
           activeTab === 'eligibility') &&
           activeTab !== 'health_audit' &&
@@ -1219,7 +1228,11 @@ export function ScholarshipDetailPage() {
                 scholarship={scholarship}
                 form={form}
                 setForm={setForm}
-                tab={activeTab}
+                tab={
+                  activeTab === 'degrees_majors' && focusField !== 'source-degree-groups'
+                    ? ''
+                    : activeTab
+                }
                 language={language}
                 focusField={focusField}
                 onRelationships={() =>

@@ -59,6 +59,8 @@ export function ScholarshipDegreeGroupsEditor({
         paged
         reloadKey="scholarship-majors"
         optional
+        displayMode="label"
+        selectedLabel={major.sourceLabel}
       />
       <label className="block">
         {tr('اسم التخصص في المنحة', 'Scholarship major label')}
@@ -119,7 +121,7 @@ export function ScholarshipDegreeGroupsEditor({
     <div className="scholarship-degree-groups">
       <h2>{tr('الدرجات والتخصصات', 'Degrees and majors')}</h2>
       {degrees.map((degree) => (
-        <section className="scholarship-read-card" key={degree.targetKey}>
+        <section className="scholarship-read-card scholarship-degree-card" key={degree.targetKey}>
           <h3>{degree.sourceLabel || tr('درجة تعليمية جديدة', 'New educational degree')}</h3>
           <div className="scholarship-card-grid">
             <CanonicalPicker
@@ -137,8 +139,10 @@ export function ScholarshipDegreeGroupsEditor({
               load={() => canonicalPickerApi.degreeLevels()}
               reloadKey="scholarship-degrees"
               optional
+              displayMode="label"
+              selectedLabel={degree.sourceLabel}
             />
-            <label>
+            <label className="scholarship-degree-source-label">
               {tr('اسم الدرجة في المنحة', 'Scholarship degree label')}
               <input
                 value={degree.sourceLabel ?? ''}
@@ -159,7 +163,7 @@ export function ScholarshipDegreeGroupsEditor({
               .filter((major) => major.metadata?.degreeTargetKey === degree.targetKey)
               .map(majorCard)}
           </div>
-          <div className="scholarship-group-heading">
+          <div className="scholarship-degree-actions">
             <button
               type="button"
               className="scholarship-card-add"
@@ -171,6 +175,10 @@ export function ScholarshipDegreeGroupsEditor({
             <button
               type="button"
               className="scholarship-card-delete"
+              title={tr(
+                'حذف الدرجة وإبقاء التخصصات غير موزعة',
+                'Remove degree and keep majors unassigned',
+              )}
               onClick={() => {
                 setDegrees((rows) => rows.filter((row) => row.targetKey !== degree.targetKey));
                 setMajors((rows) =>
@@ -183,10 +191,7 @@ export function ScholarshipDegreeGroupsEditor({
               }}
             >
               <Trash2 aria-hidden="true" />
-              {tr(
-                'حذف الدرجة وإبقاء التخصصات غير موزعة',
-                'Remove degree and keep majors unassigned',
-              )}
+              {tr('حذف الدرجة', 'Remove degree')}
             </button>
           </div>
         </section>

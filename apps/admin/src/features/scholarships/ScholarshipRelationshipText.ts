@@ -1,4 +1,10 @@
 export const scholarshipRelationshipLabels: Record<string, string> = {
+  IMPORTED: 'مستوردة',
+  READY_TO_REVIEW: 'جاهزة للمراجعة',
+  READY_TO_PUBLISH: 'جاهزة للنشر',
+  PUBLISHED: 'منشورة',
+  ARCHIVED: 'مؤرشفة',
+  REJECTED: 'مرفوضة',
   'Funded degree and major pairs': 'أزواج الدرجات والتخصصات الممولة',
   Degree: 'الدرجة',
   Major: 'التخصص',

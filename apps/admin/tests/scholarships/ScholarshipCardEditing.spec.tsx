@@ -534,7 +534,7 @@ describe('Scholarship card authoring', () => {
       majorId: 'computer-science',
       metadata: { degreeTargetKey: 'master' },
     });
-    await act(async () => button('Remove degree and keep majors unassigned').props.onClick());
+    await act(async () => button('Remove degree').props.onClick());
     expect(majors[0]).toMatchObject({
       majorId: 'computer-science',
       metadata: { degreeTargetKey: null },

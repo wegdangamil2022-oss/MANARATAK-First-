@@ -1,4 +1,5 @@
 import { ScholarshipDegreeGroupsEditor } from '../features/scholarships/ScholarshipDegreeGroupsEditor';
+import '../features/scholarships/scholarship-detail.css';
 import { useTranslation } from '../i18n/I18nProvider';
 import { scholarshipRelationshipText } from '../features/scholarships/ScholarshipRelationshipText';
 import { useEffect, useRef, useState } from 'react';
@@ -281,26 +282,31 @@ export function ScholarshipRelationshipEditorPage({
     ['ARCHIVED', 'REJECTED'].includes(scholarship.status);
 
   return (
-    <div dir={dir} className="mx-auto max-w-6xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          {!embedded && (
-            <Link
-              to={`/scholarships/${id}`}
-              className="inline-flex items-center gap-1 text-sm font-semibold text-[#0E7C86]"
-            >
-              <ArrowLeft className="h-4 w-4" /> Scholarship
-            </Link>
-          )}
-          <h2 className="mt-2 text-2xl font-bold">{scholarship.displayName}</h2>
-          <p className="text-sm text-[#203442]/65">
-            العلاقات المعتمدة — المعرّف مستقل عن وصف المصدر
-          </p>
+    <div
+      dir={dir}
+      className={`scholarship-relationship-editor ${embedded ? 'is-embedded' : 'is-standalone'}`}
+    >
+      {!embedded && (
+        <div className="scholarship-relationship-heading">
+          <div>
+            {!embedded && (
+              <Link
+                to={`/scholarships/${id}`}
+                className="inline-flex items-center gap-1 text-sm font-semibold text-[#0E7C86]"
+              >
+                <ArrowLeft className="h-4 w-4" /> Scholarship
+              </Link>
+            )}
+            <h2 className="mt-2 text-2xl font-bold">{scholarship.displayName}</h2>
+            <p className="text-sm text-[#203442]/65">
+              العلاقات المعتمدة — المعرّف مستقل عن وصف المصدر
+            </p>
+          </div>
+          <span className="rounded-full bg-[#DDEFF2]/60 text-[#142B5F] px-3 py-1 text-xs font-semibold">
+            {tr(scholarship.status)}
+          </span>
         </div>
-        <span className="rounded-full bg-[#DDEFF2]/60 text-[#142B5F] px-3 py-1 text-xs font-semibold">
-          {scholarship.status}
-        </span>
-      </div>
+      )}
       {immutable ? (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
           {scholarship.publicationStatus === 'PUBLISHED'
@@ -313,46 +319,45 @@ export function ScholarshipRelationshipEditorPage({
         </div>
       ) : null}
       {disabled && <p role="status">احفظ التعديلات الوصفية أولاً قبل تحرير العلاقات.</p>}
-      <section aria-label={tr('Funded degree and major pairs')} className="rounded-lg border p-4">
-        <h3 className="font-bold">{tr('Funded degree and major pairs')}</h3>
-        {scholarship.fundedProgramPairs?.length ? (
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr>
-                <th>{tr('Degree')}</th>
-                <th>{tr('Major')}</th>
-                <th>{tr('Programme')}</th>
-                <th>{tr('Teaching languages')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {scholarship.fundedProgramPairs.map((pair) => (
-                <tr key={pair.linkKey}>
-                  <td>{pair.degreeLabel || pair.degreeLevelId}</td>
-                  <td>{pair.majorLabel || pair.majorId}</td>
-                  <td>{pair.programName}</td>
-                  <td>
-                    {pair.studyLanguages?.map((language) => language.name).join(', ') ||
-                      tr('Unspecified')}
-                  </td>
+      {(!embedded || Boolean(scholarship.fundedProgramPairs?.length)) && (
+        <section
+          aria-label={tr('Funded degree and major pairs')}
+          className="scholarship-read-card scholarship-funded-pairs"
+        >
+          <h3 className="font-bold">{tr('Funded degree and major pairs')}</h3>
+          {scholarship.fundedProgramPairs?.length ? (
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr>
+                  <th>{tr('Degree')}</th>
+                  <th>{tr('Major')}</th>
+                  <th>{tr('Programme')}</th>
+                  <th>{tr('Teaching languages')}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p>{tr('No evidenced degree and major pair specified.')}</p>
-        )}
-      </section>
-      <fieldset disabled={disabled || saving || immutable} className="space-y-6">
-        <label className="block text-sm font-medium">
-          {tr('Review reason (required for audit)')}
-          <input
-            value={reviewReason}
-            onChange={(event) => setReviewReason(event.target.value)}
-            placeholder={tr('Why are these relationships changing?')}
-            className="mt-2 w-full rounded-lg border border-[#DDEFF2] px-3 py-2"
-          />
-        </label>
+              </thead>
+              <tbody>
+                {scholarship.fundedProgramPairs.map((pair) => (
+                  <tr key={pair.linkKey}>
+                    <td>{pair.degreeLabel || pair.degreeLevelId}</td>
+                    <td>{pair.majorLabel || pair.majorId}</td>
+                    <td>{pair.programName}</td>
+                    <td>
+                      {pair.studyLanguages?.map((language) => language.name).join(', ') ||
+                        tr('Unspecified')}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>{tr('No evidenced degree and major pair specified.')}</p>
+          )}
+        </section>
+      )}
+      <fieldset
+        disabled={disabled || saving || immutable}
+        className="scholarship-relationship-fields"
+      >
         {majorTargets.some((row) => row.sourceLabel?.trim() && !row.majorId) ? (
           <Link to="/majors" className="text-sm text-[#0E7C86] underline">
             {tr(
@@ -683,14 +688,27 @@ export function ScholarshipRelationshipEditorPage({
             </EditorSection>
           </>
         )}
-        <div className="sticky bottom-4 flex justify-end">
+        <div className="scholarship-relationship-save">
+          <label>
+            {tr('Review reason (required for audit)')}
+            <input
+              value={reviewReason}
+              onChange={(event) => setReviewReason(event.target.value)}
+              placeholder={tr('Why are these relationships changing?')}
+            />
+          </label>
           <button
             type="button"
             onClick={save}
             disabled={disabled || saving || immutable}
             className="inline-flex items-center gap-2 rounded-xl bg-[#0E7C86] px-5 py-3 text-sm font-bold text-white shadow-lg transition-colors hover:bg-[#142B5F] disabled:opacity-50"
           >
-            <Save className="h-4 w-4" /> {tr('Save all canonical relationships')}
+            <Save className="h-4 w-4" />{' '}
+            {degreeOnly
+              ? language === 'ar'
+                ? 'حفظ الدرجات والتخصصات'
+                : 'Save degrees and majors'
+              : tr('Save all canonical relationships')}
           </button>
         </div>
       </fieldset>
