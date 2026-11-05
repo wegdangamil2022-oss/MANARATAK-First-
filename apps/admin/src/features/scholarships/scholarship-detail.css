@@ -52,6 +52,26 @@
   color: #e4eef5;
   font-size: 12px;
 }
+.scholarship-header-decisions {
+  flex-basis: 100%;
+  min-width: 0;
+  border-top: 1px solid #ffffff38;
+  padding-top: 14px;
+}
+.scholarship-header-decisions h2 {
+  color: white;
+  margin: 0 0 6px;
+}
+.scholarship-header-decisions p {
+  color: #ffdfa6;
+  margin: 0 0 10px;
+}
+.scholarship-header-decisions fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
 .scholarship-detail-actions {
   display: flex;
   gap: 8px;

@@ -270,6 +270,10 @@ describe('Scholarship detail template and editing boundaries', () => {
   it('defaults to saved read-only data with eleven horizontal accessible tabs including original source', async () => {
     await mount();
     expect(tree.root.findAllByProps({ role: 'tab' })).toHaveLength(11);
+    expect(
+      tree.root.findByType('header').findAllByProps({ id: 'scholarship-decisions' }),
+    ).toHaveLength(1);
+    expect(tree.root.findAllByProps({ id: 'scholarship-decisions' })).toHaveLength(1);
     expect(tree.root.findAllByType('input')).toHaveLength(0);
     expect(tree.root.findAllByType('textarea')).toHaveLength(0);
     expect(tree.root.findByProps({ role: 'tablist' }).props.className.split(' ')).toContain(

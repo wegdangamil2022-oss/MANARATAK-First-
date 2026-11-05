@@ -858,16 +858,6 @@ export function ScholarshipDetailPage() {
                 {tr('تعديل البيانات', 'Edit data')}
               </button>
             )}
-          <button
-            onClick={() =>
-              document
-                .getElementById('scholarship-decisions')
-                ?.scrollIntoView({ behavior: 'smooth' })
-            }
-          >
-            <ShieldCheck />
-            {tr('المراجعة والنشر', 'Review and publication')}
-          </button>
           {officialUrl && (
             <a href={officialUrl} target="_blank" rel="noopener noreferrer">
               <ExternalLink />
@@ -881,6 +871,129 @@ export function ScholarshipDetailPage() {
             </a>
           )}
         </div>
+        <section id="scholarship-decisions" className="scholarship-header-decisions">
+          <h2>{tr('المراجعة والنشر', 'Review and publication')}</h2>
+          <p>{publicationIssues.join(' · ')}</p>
+          <fieldset
+            disabled={loading || saving || readbackUncertain}
+            className="scholarship-detail-actions"
+          >
+            {canManage && (
+              <>
+                <button
+                  disabled={
+                    actionLoading ||
+                    unsaved ||
+                    scholarship.status === 'ARCHIVED' ||
+                    scholarship.status === 'REJECTED' ||
+                    scholarship.status === 'PUBLISHED' ||
+                    detail.completeness.state === 'INCOMPLETE'
+                  }
+                  onClick={() =>
+                    openConfirmModal(
+                      'mark-ready',
+                      tr('تأكيد الجاهزية للمراجعة', 'Confirm review readiness'),
+                      tr(
+                        'إرسال السجل لمسار المراجعة الحالي.',
+                        'Submit to the existing review workflow.',
+                      ),
+                      tr('تأكيد', 'Confirm'),
+                    )
+                  }
+                >
+                  {tr('جاهز للمراجعة', 'Ready for review')}
+                </button>
+                <button
+                  disabled={
+                    actionLoading ||
+                    unsaved ||
+                    scholarship.status !== 'READY_TO_REVIEW' ||
+                    publicationIssues.length > 0
+                  }
+                  onClick={() =>
+                    openConfirmModal(
+                      'mark-publishable',
+                      tr('اعتماد الجاهزية للنشر', 'Approve publication readiness'),
+                      tr(
+                        'يتحقق الخادم من جميع المراجع والنسخ.',
+                        'The server verifies all references and versions.',
+                      ),
+                      tr('تأكيد', 'Confirm'),
+                    )
+                  }
+                >
+                  {tr('جاهز للنشر', 'Ready to publish')}
+                </button>
+                <button
+                  disabled={
+                    actionLoading ||
+                    unsaved ||
+                    scholarship.status !== 'READY_TO_PUBLISH' ||
+                    publicationIssues.length > 0
+                  }
+                  onClick={() =>
+                    openConfirmModal(
+                      'publish',
+                      tr('تأكيد النشر', 'Confirm publication'),
+                      tr(
+                        'سيصبح المحتوى متاحًا وفق شروط العرض العام.',
+                        'Content becomes public under the owner visibility rules.',
+                      ),
+                      tr('نشر', 'Publish'),
+                    )
+                  }
+                >
+                  {tr('نشر المنحة', 'Publish scholarship')}
+                </button>
+                <button
+                  disabled={
+                    actionLoading || unsaved || scholarship.publicationStatus !== 'PUBLISHED'
+                  }
+                  onClick={() =>
+                    openConfirmModal(
+                      'unpublish',
+                      tr('تأكيد إلغاء النشر', 'Confirm unpublish'),
+                      tr(
+                        'إخفاء السجل من العرض العام.',
+                        'Remove the record from public visibility.',
+                      ),
+                      tr('إلغاء النشر', 'Unpublish'),
+                      'amber',
+                    )
+                  }
+                >
+                  {tr('إلغاء النشر', 'Unpublish')}
+                </button>
+                <button
+                  disabled={actionLoading || unsaved || scholarship.status === 'ARCHIVED'}
+                  onClick={() =>
+                    openConfirmModal(
+                      'archive',
+                      tr('تأكيد الأرشفة', 'Confirm archive'),
+                      tr(
+                        'حفظ السجل في الأرشيف وفق عقد المالك.',
+                        'Archive under the owner lifecycle contract.',
+                      ),
+                      tr('أرشفة', 'Archive'),
+                      'rose',
+                    )
+                  }
+                >
+                  <Archive />
+                  {tr('أرشفة', 'Archive')}
+                </button>
+              </>
+            )}
+          </fieldset>
+          {unsaved && (
+            <p>
+              {tr(
+                'احفظ التغييرات قبل قرارات المراجعة أو النشر.',
+                'Save pending changes before review or publication decisions.',
+              )}
+            </p>
+          )}
+        </section>
       </header>
 
       {message && (
@@ -1359,124 +1472,6 @@ export function ScholarshipDetailPage() {
           )}
         </div>
       )}
-      <section id="scholarship-decisions" className="scholarship-read-card">
-        <h2>{tr('المراجعة والنشر', 'Review and publication')}</h2>
-        <p>{publicationIssues.join(' · ')}</p>
-        <fieldset
-          disabled={loading || saving || readbackUncertain}
-          className="scholarship-detail-actions"
-        >
-          {canManage && (
-            <>
-              <button
-                disabled={
-                  actionLoading ||
-                  unsaved ||
-                  scholarship.status === 'ARCHIVED' ||
-                  scholarship.status === 'REJECTED' ||
-                  scholarship.status === 'PUBLISHED' ||
-                  detail.completeness.state === 'INCOMPLETE'
-                }
-                onClick={() =>
-                  openConfirmModal(
-                    'mark-ready',
-                    tr('تأكيد الجاهزية للمراجعة', 'Confirm review readiness'),
-                    tr(
-                      'إرسال السجل لمسار المراجعة الحالي.',
-                      'Submit to the existing review workflow.',
-                    ),
-                    tr('تأكيد', 'Confirm'),
-                  )
-                }
-              >
-                {tr('جاهز للمراجعة', 'Ready for review')}
-              </button>
-              <button
-                disabled={
-                  actionLoading ||
-                  unsaved ||
-                  scholarship.status !== 'READY_TO_REVIEW' ||
-                  publicationIssues.length > 0
-                }
-                onClick={() =>
-                  openConfirmModal(
-                    'mark-publishable',
-                    tr('اعتماد الجاهزية للنشر', 'Approve publication readiness'),
-                    tr(
-                      'يتحقق الخادم من جميع المراجع والنسخ.',
-                      'The server verifies all references and versions.',
-                    ),
-                    tr('تأكيد', 'Confirm'),
-                  )
-                }
-              >
-                {tr('جاهز للنشر', 'Ready to publish')}
-              </button>
-              <button
-                disabled={
-                  actionLoading ||
-                  unsaved ||
-                  scholarship.status !== 'READY_TO_PUBLISH' ||
-                  publicationIssues.length > 0
-                }
-                onClick={() =>
-                  openConfirmModal(
-                    'publish',
-                    tr('تأكيد النشر', 'Confirm publication'),
-                    tr(
-                      'سيصبح المحتوى متاحًا وفق شروط العرض العام.',
-                      'Content becomes public under the owner visibility rules.',
-                    ),
-                    tr('نشر', 'Publish'),
-                  )
-                }
-              >
-                {tr('نشر المنحة', 'Publish scholarship')}
-              </button>
-              <button
-                disabled={actionLoading || unsaved || scholarship.publicationStatus !== 'PUBLISHED'}
-                onClick={() =>
-                  openConfirmModal(
-                    'unpublish',
-                    tr('تأكيد إلغاء النشر', 'Confirm unpublish'),
-                    tr('إخفاء السجل من العرض العام.', 'Remove the record from public visibility.'),
-                    tr('إلغاء النشر', 'Unpublish'),
-                    'amber',
-                  )
-                }
-              >
-                {tr('إلغاء النشر', 'Unpublish')}
-              </button>
-              <button
-                disabled={actionLoading || unsaved || scholarship.status === 'ARCHIVED'}
-                onClick={() =>
-                  openConfirmModal(
-                    'archive',
-                    tr('تأكيد الأرشفة', 'Confirm archive'),
-                    tr(
-                      'حفظ السجل في الأرشيف وفق عقد المالك.',
-                      'Archive under the owner lifecycle contract.',
-                    ),
-                    tr('أرشفة', 'Archive'),
-                    'rose',
-                  )
-                }
-              >
-                <Archive />
-                {tr('أرشفة', 'Archive')}
-              </button>
-            </>
-          )}
-        </fieldset>
-        {unsaved && (
-          <p>
-            {tr(
-              'احفظ التغييرات قبل قرارات المراجعة أو النشر.',
-              'Save pending changes before review or publication decisions.',
-            )}
-          </p>
-        )}
-      </section>
       {pendingLeave && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
           <section
