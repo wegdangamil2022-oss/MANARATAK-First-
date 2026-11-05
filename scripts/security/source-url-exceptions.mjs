@@ -6,7 +6,7 @@ const newsUrl = 'https://upy.ac.id/berita/yp-upy-serahkan-' +
 const slugOffset = newsUrl.indexOf('sk-');
 const slug = newsUrl.slice(slugOffset, -1);
 const sourcePaths = new Set([
-  'workspace/import-sources/scholarships/MANARATAK_Degree_Scholarships_Master_v6_6_2027_Audit_001_010_947.md',
+  'workspace/import-sources/scholarships/MANARATAK_Scholarships_Master_2027_Through_1138.md',
   'workspace/import-sources/reconciliation/m10-12-14/scholarships-sections.jsonl',
 ]);
 

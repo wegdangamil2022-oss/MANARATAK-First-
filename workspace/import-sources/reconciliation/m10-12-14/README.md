@@ -2,6 +2,8 @@
 
 These are deterministic, **offline source artifacts**, not DB contents or permission to import. Canonical IDs remain `null` until an explicit reviewed choice against a verified canonical snapshot and live owner validation.
 
+2026-11-06 current scholarship source: the unified 2027 master contains 1,138 primary identities (one related merged alias). The regenerated queue has 1,138 `UNMARKED` records held for explicit source/canonical review, zero execution markers and zero automatically approved imports. All source section aliases, original English names and basic source fields are retained. The scholarship counts and v6.6 discussion below are historical context; the current manifest/summary and [active source README](../../scholarships/README.md) take precedence. University and course queues are unchanged.
+
 2026-10-22: the owner replaced the active scholarship source with degree-only v6.6. Scholarship queues and source hashes were regenerated; the prior queues remain in Git. See [source replacement and screening](../../scholarships/README.md). Database writes remain paused.
 
 2026-10-13: the city CSVs were deliberately corrected and extended in [the city source reconciliation](../../../reports/city-region-reconciliation/2026-10-13/README.md). These derived queues and their source hashes were regenerated against the changed files; upstream university workbooks, course and scholarship inputs remain unchanged.

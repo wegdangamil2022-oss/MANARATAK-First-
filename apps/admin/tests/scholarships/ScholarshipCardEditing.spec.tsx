@@ -79,6 +79,122 @@ afterEach(async () => {
 });
 
 describe('Scholarship card authoring', () => {
+  it('shows the application guide once when the internal source URL is the same, retaining distinct canonical URLs', () => {
+    const scholarship = {
+      ...source,
+      applicationUrl: 'https://example.edu/apply',
+      officialSourceUrl: 'https://example.edu/guide',
+      sourceUrl: 'https://example.edu/guide',
+      metadata: {
+        ...source.metadata,
+        adminPresentation: {
+          sourceGroups: [
+            {
+              id: 'links',
+              title: 'Application links',
+              links: [
+                {
+                  id: 'apply',
+                  title: 'Apply',
+                  field: 'applicationUrl',
+                  url: 'https://example.edu/apply',
+                },
+                {
+                  id: 'guide',
+                  title: 'Official guide',
+                  field: 'officialSourceUrl',
+                  url: 'https://example.edu/guide',
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+    expect(
+      scholarshipPresentation(scholarship).sourceGroups.flatMap((group) => group.links),
+    ).toHaveLength(2);
+    expect(
+      scholarshipPresentation({
+        ...scholarship,
+        sourceUrl: 'https://example.edu/evidence',
+      }).sourceGroups.flatMap((group) => group.links),
+    ).toHaveLength(3);
+    expect(scholarship.sourceUrl).toBe('https://example.edu/guide');
+  });
+  it('shows the new source fields and keeps the full original Markdown read-only', async () => {
+    const scholarship = {
+      ...source,
+      metadata: {
+        ...source.metadata,
+        rawSourceBlock: '# Original <script>unsafe()</script>',
+        sourcePresentation: {
+          officialEnglishName: 'Official title',
+          applicationStatus: 'لم تُفتح بعد',
+          deadlineText: '30 نوفمبر 2026',
+          degreeGroups: [{ id: 'master', title: 'الماجستير', items: ['دراسات الصين.'] }],
+        },
+      },
+    };
+    await act(async () => {
+      tree = create(
+        <ScholarshipDetailReadView
+          scholarship={scholarship}
+          tab="identity"
+          language="en"
+          onEdit={vi.fn()}
+        />,
+      );
+    });
+    expect(tree.root.findAllByType('dt').map((node) => node.children.join(''))).toEqual(
+      expect.arrayContaining([
+        'Official English name',
+        'Application status in source',
+        'Deadline wording in source',
+      ]),
+    );
+    await act(async () => {
+      tree.update(
+        <ScholarshipDetailReadView
+          scholarship={scholarship}
+          tab="degrees_majors"
+          language="en"
+          onEdit={vi.fn()}
+        />,
+      );
+    });
+    expect(JSON.stringify(tree.toJSON())).toContain('دراسات الصين.');
+    await act(async () => {
+      tree.update(
+        <ScholarshipDetailReadView
+          scholarship={scholarship}
+          tab="source_original"
+          language="en"
+          onEdit={vi.fn()}
+        />,
+      );
+    });
+    expect(tree.root.findByType('pre').children).toEqual(['# Original <script>unsafe()</script>']);
+    expect(tree.root.findAllByType('script')).toHaveLength(0);
+    expect(tree.root.findAllByType('textarea')).toHaveLength(0);
+    expect(tree.root.findAllByType('button')).toHaveLength(0);
+  });
+  it('edits source presentation without changing raw evidence or canonical links', async () => {
+    await act(async () => {
+      tree = create(<Harness tab="identity" />);
+    });
+    await act(async () => {
+      tree.root
+        .findByProps({ 'aria-label': 'Official English name' })
+        .props.onChange({ target: { value: 'Corrected official name' } });
+    });
+    expect(current.metadata?.sourcePresentation).toMatchObject({
+      officialEnglishName: 'Corrected official name',
+    });
+    expect(current.metadata?.sourceReview).toEqual(source.metadata?.sourceReview);
+    expect(current.degreeTargets).toEqual(source.degreeTargets);
+    expect(current.isFullyFunded).toBe(true);
+  });
   it('keeps imported benefit conditions intact without repeating them as a long card heading', async () => {
     const valueText =
       'First year tuition, accommodation, insurance and travel contribution. '.repeat(3);

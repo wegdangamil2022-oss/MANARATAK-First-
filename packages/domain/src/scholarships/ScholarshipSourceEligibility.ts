@@ -1,3 +1,4 @@
+import { scholarshipSourceSection } from './ScholarshipSourceSections';
 export const SCHOLARSHIP_ELIGIBILITY_SECTION = 'الشروط ومعايير التقديم';
 export interface ScholarshipEligibilitySource {
   version: 1;
@@ -32,14 +33,12 @@ export function scholarshipEligibilitySource(
 ): ScholarshipEligibilitySource | null {
   const data = object(metadata);
   const sections = object(data.rawSourceSections);
-  if (Object.prototype.hasOwnProperty.call(sections, SCHOLARSHIP_ELIGIBILITY_SECTION)) {
+  const original = scholarshipSourceSection(sections, SCHOLARSHIP_ELIGIBILITY_SECTION);
+  if (original !== null) {
     return {
       version: 1,
       section: SCHOLARSHIP_ELIGIBILITY_SECTION,
-      text:
-        typeof sections[SCHOLARSHIP_ELIGIBILITY_SECTION] === 'string'
-          ? (sections[SCHOLARSHIP_ELIGIBILITY_SECTION] as string)
-          : '',
+      text: original,
       ...(typeof data.sourceReferenceId === 'string'
         ? { sourceRecordId: data.sourceReferenceId }
         : {}),
@@ -70,6 +69,20 @@ export function scholarshipEligibilitySource(
 
 /** Literal segmentation only. No words from other fields, test policies or inferred requirements. */
 export function literalScholarshipCriteria(text: string): ScholarshipLiteralCriterion[] {
+  // A source-authored numbered list already defines its item boundaries. Keep
+  // commas, alternatives and conditional sentences inside each original item.
+  if (/^\s*\d+[.)]\s+/m.test(text)) {
+    return text
+      .split(/^\s*\d+[.)]\s+/m)
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .map((sourceText, index) => ({
+        key: `source-criterion-${index + 1}`,
+        sourceText,
+        text: /[.!؟?]$/u.test(sourceText) ? sourceText : `${sourceText}.`,
+        manuallyEdited: false,
+      }));
+  }
   text = text.replace(/^(\s*)(?:[-*•]\s+|\d+[.)]\s+)/gm, '$1');
   const fragments: string[] = [];
   let start = 0,

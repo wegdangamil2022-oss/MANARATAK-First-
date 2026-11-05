@@ -323,6 +323,7 @@ export {
 } from './scholarships/scholarships';
 export * from './scholarships/contracts';
 export * from './scholarships/ScholarshipSourceEligibility';
+export * from './scholarships/ScholarshipSourceSections';
 export * from './majors/enums';
 export * from './majors/majors';
 export * from './majors/NewMajorCandidate';

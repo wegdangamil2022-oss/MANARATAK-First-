@@ -1,6 +1,7 @@
 import type { ScholarshipCatalogUpdate } from '../../api/scholarshipCatalog';
 import { scholarshipHttpUrl } from './ScholarshipPresentation';
 import { fundingTextGroups } from './ScholarshipFundingCards';
+import { scholarshipSourcePresentation } from './ScholarshipSourcePresentation';
 
 export function scholarshipEditorValidation(
   input: ScholarshipCatalogUpdate,
@@ -9,6 +10,15 @@ export function scholarshipEditorValidation(
   const fail = (arabic: string, english: string) => (ar ? arabic : english);
   if (!input.displayName?.trim())
     return fail('اكتب اسم المنحة قبل الحفظ.', 'Enter the scholarship name before saving.');
+  if (
+    scholarshipSourcePresentation(input.metadata).degreeGroups.some((group) =>
+      group.items.some((item) => !item.trim()),
+    )
+  )
+    return fail(
+      'أكمل اسم البرنامج أو احذف المربع الفارغ.',
+      'Complete the program name or remove the empty card.',
+    );
   if (
     input.benefits?.some(
       (item) =>

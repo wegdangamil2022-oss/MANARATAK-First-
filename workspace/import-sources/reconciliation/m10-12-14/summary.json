@@ -25,15 +25,14 @@
     }
   },
   "scholarships": {
-    "artifactHash": "f09c81d8a58c79ff05ef69a6009d181e31fe34d37f2c010ee566cd77e22902fd",
-    "totalSections": 947,
-    "uniqueSourceIds": 947,
+    "artifactHash": "6b657da9e1f5a9159b1952afe914d8aacb97593ed178e3cb99c141d564d1cf13",
+    "totalSections": 1138,
+    "uniqueSourceIds": 1138,
     "counts": {
-      "EXPLICIT_IMPORTED_CANDIDATE": 703,
-      "UNKNOWN_MARKER": 244
+      "UNMARKED": 1138
     },
     "declaredImportedCount": null,
-    "explicitImportedCandidates": 703,
+    "explicitImportedCandidates": 0,
     "summaryDifference": null,
     "differencePolicy": "SUMMARY_IS_NOT_RECORD_EVIDENCE; NO_SYNTHETIC_RECORDS; UNMARKED_AND_UNKNOWN_REMAIN_HELD",
     "databaseWrites": 0,

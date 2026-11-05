@@ -35,15 +35,15 @@
       "sha256": "ce64f4283b6d46882c23aa1604d9cf45a6b1691fa15816743161b6dffe059a52"
     },
     {
-      "datasetId": "degree-scholarships-master-v6.6-2027-audit-001-010",
+      "datasetId": "scholarships-master-2027-through-1138-2026-11-06",
       "entityType": "SCHOLARSHIP",
-      "sourcePath": "workspace/import-sources/scholarships/MANARATAK_Degree_Scholarships_Master_v6_6_2027_Audit_001_010_947.md",
+      "sourcePath": "workspace/import-sources/scholarships/MANARATAK_Scholarships_Master_2027_Through_1138.md",
       "format": "MARKDOWN",
-      "version": "6.6",
-      "recordCount": 947,
-      "status": "STAGED_MARKDOWN_READER_READY_CANONICAL_AND_OFFICIAL_REVIEW_REQUIRED",
+      "version": "2027-through-1138",
+      "recordCount": 1138,
+      "status": "STAGED_UNIFIED_SOURCE_CANONICAL_REVIEW_REQUIRED",
       "importOrder": 4,
-      "sha256": "f09c81d8a58c79ff05ef69a6009d181e31fe34d37f2c010ee566cd77e22902fd",
+      "sha256": "6b657da9e1f5a9159b1952afe914d8aacb97593ed178e3cb99c141d564d1cf13",
       "declaredImportedCount": null
     }
   ]

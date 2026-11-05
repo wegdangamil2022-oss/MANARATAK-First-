@@ -2020,24 +2020,29 @@
       "extension": ".jsonl"
     },
     {
-      "path": "workspace/import-sources/scholarships/MANARATAK_Degree_Scholarships_Master_v6_6_2027_Audit_001_010_947.md",
+      "path": "workspace/import-sources/scholarships/MANARATAK_Scholarships_Master_2027_Through_1138.md",
       "role": "CATALOG_SOURCE_CANDIDATE",
-      "bytes": 4892567,
-      "sha256": "f09c81d8a58c79ff05ef69a6009d181e31fe34d37f2c010ee566cd77e22902fd",
+      "bytes": 6391925,
+      "sha256": "6b657da9e1f5a9159b1952afe914d8aacb97593ed178e3cb99c141d564d1cf13",
       "extension": ".md",
       "declaration": {
-        "id": "degree-scholarships-master-v6.6-2027-audit-001-010",
-        "state": "STAGED_MARKDOWN_READER_READY_CANONICAL_AND_OFFICIAL_REVIEW_REQUIRED",
-        "declaredRecordCount": 947,
+        "id": "scholarships-master-2027-through-1138-2026-11-06",
+        "state": "STAGED_UNIFIED_SOURCE_CANONICAL_REVIEW_REQUIRED",
+        "declaredRecordCount": 1138,
         "hashMatches": true
       },
       "parser": "readScholarshipMasterGuide",
-      "rowCount": 947,
-      "uniqueSourceIds": 947,
-      "explicitImportedSourceMarkers": 703,
+      "rowCount": 1138,
+      "uniqueSourceIds": 1138,
+      "explicitImportedSourceMarkers": 0,
       "sectionCountDistribution": {
-        "12": 900,
-        "13": 47
+        "8": 1073,
+        "9": 65
+      },
+      "previousSource": {
+        "path": "workspace/import-sources/scholarships/MANARATAK_Degree_Scholarships_Master_v6_6_2027_Audit_001_010_947.md",
+        "sha256": "f09c81d8a58c79ff05ef69a6009d181e31fe34d37f2c010ee566cd77e22902fd",
+        "supersededOn": "2026-11-06"
       }
     },
     {

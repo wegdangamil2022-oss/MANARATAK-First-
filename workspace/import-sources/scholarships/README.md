@@ -1,29 +1,23 @@
-# Scholarship source — current version 6.6
+# Scholarship source — unified 2027 master through 1138
 
-On 2026-10-22 the owner supplied `MANARATAK_Degree_Scholarships_Master_v6_6_2027_Audit_001_010_947.md` and requested replacement of the old repository source. This is now the sole active scholarship dataset in `../dataset-manifest.json`. Its supplied bytes are unchanged: **4,892,567 bytes**, SHA-256 `f09c81d8a58c79ff05ef69a6009d181e31fe34d37f2c010ee566cd77e22902fd`.
+The owner replaced v6.6 on 2026-11-06 with `MANARATAK_Scholarships_Master_2027_Through_1138.md`. This is the only active scholarship dataset in `../dataset-manifest.json`. Its supplied bytes are unchanged: **6,391,925 bytes**, SHA-256 `6b657da9e1f5a9159b1952afe914d8aacb97593ed178e3cb99c141d564d1cf13`.
 
-## What was replaced
+The previous v6.6 source remains recoverable in Git at `63f9f42ee266a5dbaa704d7e59edd3738d1464cb`. Historical import receipts and source evidence are preserved; their old hashes must not be replaced with the new artifact hash.
 
-The v3.21 file was removed from the current tree to avoid two competing active masters. Its complete original bytes and the old derived queues remain recoverable in Git at commit `565f3ebcb0282d3db27b9283d060c5a32b5843e0` under `workspace/import-sources/scholarships/MANARATAK_Scholarship_Import_Master_Guide_v3.21(1).md` (SHA-256 `bcca756349fc16873ea9758f95708c8b1d5b11a9a1c35a7b44c2b2d02854c337`).
+## Reader and projection
 
-The new file has **947 unique source identities**: 343 also occur in the old 514-section file, 604 were absent from that file, and 171 old identities are absent from this one. These are exact identity comparisons, not a claim of 604 distinct new programs: name changes, splits, merges and exclusions still require source review. Absence from the new file never authorizes deleting database records or their student/history relationships.
+- 1,138 unique primary identities, display positions 0001–1138. The introductory example is excluded. One merged related identity is retained as an alias, never a second scholarship.
+- 1,073 records have eight sections; 65 have nine including optional participating universities. Resolve headings by labels and explicit aliases, never fixed numeric positions.
+- Hidden original IDs include both `SCH-*` and the new Italian IDs. Original English names, basic fields, exact raw blocks, line numbers, record hashes and source sections are retained.
+- `ScholarshipUnifiedSourceProjection` maps basic information, overview, participating universities, separately grouped funding benefits, degree/program groups, source-only numbered eligibility, required documents, important notes, application URL and official guide URL. It performs no network or database operations.
+- Source-authored numbered lists retain their item boundaries, including comma-separated alternatives inside one condition. Enrichment cannot contribute eligibility items.
+- The file has no execution-status markers. All 1,138 records enter offline canonical/source review; zero are automatically approved, published or claimed imported. Source availability labels are separate from platform workflow/publication status.
+- Date-only labels are preserved verbatim; an instant requires an explicit timezone/time review. Names never manufacture canonical universities, programs, majors or tests.
 
-## Reader and review states
+The application accepts its existing JSON/NDJSON/CSV import contracts. Markdown is projected to a provenance-bound payload before the existing asset, screening, owner review and atomic transfer flow. The single owner-requested replacement and its database evidence are documented separately in the current review report. This file does not authorize importing the entire source.
 
-- 900 records have 12 numbered sections; 47 have 13, including participating universities. Sections are resolved by their exact names so missing university sections cannot shift conditions or application URLs into the wrong relationship.
-- Numbered display positions are not source IDs. The reader retains the explicit original/new `SCH-*` ID, source line, complete raw section and SHA-256. Other referenced/merged IDs in a record are not new records.
-- 703 records have explicit `IMPORTED`-prefixed source metadata, across final-status, batch-status and decision labels. These are **held source candidates**, not database import receipts, publication approval or proof that applications are open.
-- 244 records have China transcription / 2027 verification-pending markers. They remain `UNKNOWN_MARKER` / `DO_NOT_PROMOTE` and receive no inferred canonical assignments. No record is silently marked imported.
-- The file declares 947 total records, not a separately evidenced count of imported records. `declaredImportedCount` and the comparison difference are therefore `null`; the old v3.21 summary claim of 359 is not reused.
+## Dashboard coverage
 
-The file includes historical/closed awards, conditional language evidence and alternative/waived requirements. Its 2027 audit is limited to records 0001–0010; it does not establish fresh official verification of every record. Its introductory degree-category counts predate later additions and are not used as authoritative totals. Missing application links or referenced companion reports must be reviewed before promotion.
+The existing sections cover all source section types. The dashboard additionally exposes official English name, source application status, mixed full/partial funding, source degree/program groups, the official application guide and a read-only full original-file tab. Editorial changes retain the raw source and canonical relationships.
 
-`ScholarshipMasterGuideReader` supports this format and the historical format. `ScholarshipSourceQuality` prepares only offline review queues. Canonical university, program, degree and international-test choices remain held for review against existing identities; no name-based links are created. The runtime manual-file importer still accepts its existing JSON/NDJSON/CSV contracts, not direct execution of this Markdown.
-
-**Database work remains paused.** This replacement, reader update and regeneration do not run migrations, seeds, imports, ledger recovery, publication or database cleanup. Follow the owner's separate relationship/mapping review before a later approved import.
-
-Subsequent owner instruction on 2026-10-22 authorizes finishing relationship review and merging ready repairs, then returning to schema preparation of the independent database. The review is now recorded in `docs/reviews/SCHOLARSHIP_V66_RELATIONSHIP_REVIEW_2026-10-22.md`. This supersedes the schema-preparation pause after its stated prerequisites; scholarship imports, unresolved canonical choices and publication remain held. Existing pause/recovery history is retained.
-
-Local verification for this replacement: 28 tests passed across the three directly affected reader/source-quality suites, including reproduction of the governed outputs and unchanged unrelated queues. Strict TypeScript checking of the six changed scripts/test files and scoped ESLint passed. This is offline source evidence; no runtime or current-head CI acceptance is claimed.
-
-The secret scanner initially misidentified an Indonesian university news URL's `sk-` title fragment as an OpenAI key. An exact URL-and-artifact exception covers only that non-secret slug in the supplied Markdown and its derived queue. No key pattern or directory-wide check is disabled. Three focused Node tests passed, including a separate synthetic credential on the same line and changed-host/path/slug rejection; these three were rerun after changing how the fixture URL is assembled. The subsequent tracked-file secret scan passed. Markdown's original trailing spaces are intentional hard breaks and were preserved; whitespace checks pass for code/other changes.
+The permanent scholarship identity is protected by `scholarship_identity_no_delete`. Replacing an imported draft uses the existing archive command and a new draft import; no trigger is disabled and no original schema migration is required.

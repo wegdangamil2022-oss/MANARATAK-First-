@@ -4,7 +4,7 @@ import { isKnownNonSecretSourceUrl } from '../../scripts/security/source-url-exc
 
 const url = 'https://upy.ac.id/berita/yp-upy-serahkan-' +
   ['sk', 'beasiswa-pendidikan-kepada-awardee-tahun-ajaran-2026-2027/'].join('-');
-const markdown = 'workspace/import-sources/scholarships/MANARATAK_Degree_Scholarships_Master_v6_6_2027_Audit_001_010_947.md';
+const markdown = 'workspace/import-sources/scholarships/MANARATAK_Scholarships_Master_2027_Through_1138.md';
 const jsonl = 'workspace/import-sources/reconciliation/m10-12-14/scholarships-sections.jsonl';
 const findings = (source, file = markdown, kind = 'OPENAI_KEY') =>
   [...source.matchAll(/\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}\b/g)]

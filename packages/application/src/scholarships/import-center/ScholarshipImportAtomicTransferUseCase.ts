@@ -511,6 +511,8 @@ export class ScholarshipImportAtomicTransferUseCase
     return {
       displayName: plan.cleanedName.displayName,
       providerName: payload.providerName ?? payload.sponsorName ?? null,
+      description: payload.description,
+      notes: this.stringValue(metadata.notes),
       sponsorUniversityId: this.firstResolved(plan.canonical, 'PROVIDER_UNIVERSITY')?.canonicalReferenceId ?? null,
       completenessStatus: plan.completeness.state,
       verificationStatus: plan.decisionSnapshot.verificationState === 'VERIFIED'

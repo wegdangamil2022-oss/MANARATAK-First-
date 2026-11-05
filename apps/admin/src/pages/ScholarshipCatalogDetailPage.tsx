@@ -56,6 +56,7 @@ type TabKey =
   | 'links_unis'
   | 'universities'
   | 'notes'
+  | 'source_original'
   | 'health_audit';
 
 interface ConfirmationModalState {
@@ -71,11 +72,20 @@ function asText(value: unknown): string {
   return value === null || value === undefined ? '' : String(value);
 }
 
-export function sameUniversityLinks(left: ScholarshipDto['universityLinks'], right: ScholarshipDto['universityLinks']): boolean {
-  const normalize = (links: ScholarshipDto['universityLinks']) => (links ?? []).map(link => ({
-    linkKey: link.linkKey, universityId: link.universityId ?? null, academicProgramId: link.academicProgramId ?? null,
-    sourceLabel: link.sourceLabel ?? null, relationshipTypeCode: link.relationshipTypeCode ?? null,
-  })).sort((a, b) => a.linkKey.localeCompare(b.linkKey));
+export function sameUniversityLinks(
+  left: ScholarshipDto['universityLinks'],
+  right: ScholarshipDto['universityLinks'],
+): boolean {
+  const normalize = (links: ScholarshipDto['universityLinks']) =>
+    (links ?? [])
+      .map((link) => ({
+        linkKey: link.linkKey,
+        universityId: link.universityId ?? null,
+        academicProgramId: link.academicProgramId ?? null,
+        sourceLabel: link.sourceLabel ?? null,
+        relationshipTypeCode: link.relationshipTypeCode ?? null,
+      }))
+      .sort((a, b) => a.linkKey.localeCompare(b.linkKey));
   return JSON.stringify(normalize(left)) === JSON.stringify(normalize(right));
 }
 
@@ -297,7 +307,11 @@ export function ScholarshipDetailPage() {
             expected &&
             (response.scholarship.id !== expected.id ||
               response.scholarship.revision !== expected.revision ||
-              (expected.universityLinks !== undefined && !sameUniversityLinks(response.scholarship.universityLinks, expected.universityLinks)) ||
+              (expected.universityLinks !== undefined &&
+                !sameUniversityLinks(
+                  response.scholarship.universityLinks,
+                  expected.universityLinks,
+                )) ||
               JSON.stringify(toUpdate(response.scholarship)) !== JSON.stringify(toUpdate(expected)))
           )
             throw new Error('SCHOLARSHIP_READBACK_MISMATCH');
@@ -677,6 +691,7 @@ export function ScholarshipDetailPage() {
     links_unis: tr('الروابط والمصادر', 'Links and sources'),
     universities: tr('الجامعات المشاركة', 'Participating universities'),
     notes: tr('الملاحظات', 'Notes'),
+    source_original: tr('النص الأصلي من الملف', 'Original file text'),
     health_audit: tr('الصحة والتدقيق', 'Health and audit'),
   };
   const missingFieldTabs: Record<string, TabKey> = {
@@ -766,6 +781,12 @@ export function ScholarshipDetailPage() {
       badge: 'إرشادي',
     },
     {
+      key: 'source_original' as TabKey,
+      title: 'النص الأصلي من الملف',
+      subtitle: 'نسخة مرجعية محفوظة للتتبع',
+      icon: <FileText className="h-4 w-4" />,
+    },
+    {
       key: 'health_audit' as TabKey,
       title: 'صحة البيانات وسجل التدقيق',
       subtitle: 'حالة الاكتمال وسجل التغييرات',
@@ -811,28 +832,32 @@ export function ScholarshipDetailPage() {
           </p>
         </div>
         <div className="scholarship-detail-actions">
-          {canEdit && !editing && activeTab !== 'eligibility' && (
-            <button
-              disabled={relationshipDirty || criterionDirty}
-              title={
-                relationshipDirty
-                  ? tr(
-                      'احفظ العلاقات أو ألغِ تحريرها أولًا',
-                      'Save or cancel relationship changes first',
-                    )
-                  : undefined
-              }
-              onClick={() => {
-                const relationship = activeTab === 'degrees_majors' || activeTab === 'universities';
-                if (relationship) setRelationshipSection(activeTab);
-                setRelationshipEditing(relationship);
-                setEditing(!relationship);
-              }}
-            >
-              <FileText />
-              {tr('تعديل البيانات', 'Edit data')}
-            </button>
-          )}
+          {canEdit &&
+            !editing &&
+            activeTab !== 'eligibility' &&
+            activeTab !== 'source_original' && (
+              <button
+                disabled={relationshipDirty || criterionDirty}
+                title={
+                  relationshipDirty
+                    ? tr(
+                        'احفظ العلاقات أو ألغِ تحريرها أولًا',
+                        'Save or cancel relationship changes first',
+                      )
+                    : undefined
+                }
+                onClick={() => {
+                  const relationship =
+                    activeTab === 'degrees_majors' || activeTab === 'universities';
+                  if (relationship) setRelationshipSection(activeTab);
+                  setRelationshipEditing(relationship);
+                  setEditing(!relationship);
+                }}
+              >
+                <FileText />
+                {tr('تعديل البيانات', 'Edit data')}
+              </button>
+            )}
           <button
             onClick={() =>
               document
@@ -1054,7 +1079,10 @@ export function ScholarshipDetailPage() {
               onEdit={
                 canEdit && !saving && !relationshipDirty && !dirty
                   ? (field) => {
-                      if (activeTab === 'universities') {
+                      if (field === 'source-degree-groups') {
+                        setFocusField(field);
+                        setEditing(true);
+                      } else if (activeTab === 'universities') {
                         setRelationshipSection('universities');
                         setRelationshipEditing(true);
                       } else if (field === 'educationalDegree' || activeTab === 'degrees_majors') {
@@ -1117,6 +1145,31 @@ export function ScholarshipDetailPage() {
               )}
 
               {/* Tab 9: Data Health & Audit */}
+              {activeTab === 'health_audit' &&
+                Array.isArray(scholarship.metadata?.reviewHolds) &&
+                scholarship.metadata.reviewHolds.length > 0 && (
+                  <section className="scholarship-read-card" role="status">
+                    <h2>{tr('ملاحظات مراجعة المصدر', 'Source review holds')}</h2>
+                    {scholarship.metadata.reviewHolds.map((hold, index) => {
+                      const item =
+                        hold && typeof hold === 'object' ? (hold as Record<string, unknown>) : {};
+                      return (
+                        <p key={index} className="scholarship-long-text">
+                          {item.code === 'SOURCE_APPLICATION_STATUS_CONFLICT'
+                            ? tr(
+                                `حالة التقديم في الملف: ${String(item.sourceValue)}. الصفحة الرسمية تعلن بدء التقديم؛ يلزم حسم التعارض قبل النشر.`,
+                                `Source application status: ${String(item.sourceValue)}. The official page announces applications are open; resolve this conflict before publication.`,
+                              )
+                            : typeof hold === 'string'
+                              ? hold
+                              : String(
+                                  item.code ?? tr('مراجعة المصدر مطلوبة', 'Source review required'),
+                                )}
+                        </p>
+                      );
+                    })}
+                  </section>
+                )}
               {activeTab === 'health_audit' && !dirty && !relationshipDirty && (
                 <ScholarshipReferenceLifecycleEditor
                   ownerId={scholarship.id}

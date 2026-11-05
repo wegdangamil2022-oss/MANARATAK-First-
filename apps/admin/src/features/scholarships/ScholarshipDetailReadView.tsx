@@ -7,6 +7,7 @@ import {
 } from './ScholarshipFundingReadCards';
 import { ExternalLink, FileText, Pencil } from 'lucide-react';
 import { scholarshipPresentation, scholarshipHttpUrl } from './ScholarshipPresentation';
+import { scholarshipSourcePresentation } from './ScholarshipSourcePresentation';
 export { scholarshipHttpUrl } from './ScholarshipPresentation';
 
 const labels: Record<string, [string, string]> = {
@@ -99,6 +100,7 @@ export function ScholarshipDetailReadView({
           : String(value);
   const data = scholarship as unknown as Record<string, unknown>;
   const presentation = scholarshipPresentation(scholarship, language === 'ar');
+  const sourcePresentation = scholarshipSourcePresentation(scholarship.metadata);
   const edit = (field: string, title: string) =>
     onEdit ? (
       <button
@@ -229,6 +231,25 @@ export function ScholarshipDetailReadView({
         )}
         {!scholarship.academicYear &&
           edit('academicYear', tr('إضافة السنة الدراسية', 'Add academic year'))}
+        {scholarship.metadata?.sourcePresentation != null && (
+          <dl className="scholarship-read-grid">
+            {(
+              [
+                ['officialEnglishName', tr('الاسم الرسمي بالإنجليزية', 'Official English name')],
+                ['applicationStatus', tr('حالة التقديم في المصدر', 'Application status in source')],
+                ['deadlineText', tr('الموعد كما ورد في المصدر', 'Deadline wording in source')],
+              ] as const
+            ).map(([key, title]) => (
+              <div key={key}>
+                <dt>{title}</dt>
+                <dd dir={key === 'officialEnglishName' ? 'ltr' : undefined}>
+                  {scalar(sourcePresentation[key])}
+                </dd>
+                {edit(key, title)}
+              </div>
+            ))}
+          </dl>
+        )}
       </section>
     );
   if (tab === 'overview' || tab === 'notes')
@@ -292,6 +313,32 @@ export function ScholarshipDetailReadView({
   if (tab === 'degrees_majors')
     return (
       <>
+        {!!sourcePresentation.degreeGroups.length && (
+          <section className="scholarship-read-card">
+            <div className="scholarship-group-heading">
+              <h2>{tr('الدرجات والبرامج كما وردت في المصدر', 'Source degrees and programs')}</h2>
+              {edit('source-degree-groups', tr('تحرير قوائم المصدر', 'Edit source lists'))}
+            </div>
+            <p>
+              {tr(
+                'قوائم المصدر محفوظة؛ اعتماد روابط التخصصات والبرامج يتم من محرر العلاقات.',
+                'Source lists are preserved; canonical links are approved in the relationship editor.',
+              )}
+            </p>
+            {sourcePresentation.degreeGroups.map((group) => (
+              <div key={group.id}>
+                <h3>{group.title}</h3>
+                <div className="scholarship-card-grid">
+                  {group.items.map((item, index) => (
+                    <article className="scholarship-editor-card" key={`${group.id}-${index}`}>
+                      <p className="scholarship-long-text">{item}</p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
         {(scholarship.degreeTargets ?? []).map((degree) => (
           <div key={degree.targetKey}>
             {textCards(
@@ -358,6 +405,32 @@ export function ScholarshipDetailReadView({
         text: item.description || item.displayName,
       })),
       tr('المستندات المطلوبة', 'Required documents'),
+    );
+  if (tab === 'source_original')
+    return (
+      <section className="scholarship-read-card">
+        <h2>{tr('النص الأصلي من الملف', 'Original file text')}</h2>
+        <p>
+          {tr(
+            'نسخة المصدر للقراءة والتتبع؛ التعديلات المعتمدة لا تستبدلها.',
+            'Read-only source evidence; approved edits do not replace it.',
+          )}
+        </p>
+        {typeof scholarship.metadata?.rawSourceBlock === 'string' ? (
+          <pre
+            className="scholarship-long-text scholarship-original-source"
+          >
+            {scholarship.metadata.rawSourceBlock}
+          </pre>
+        ) : (
+          <p>
+            {tr(
+              'النص الأصلي غير محفوظ لهذا السجل.',
+              'Original text is unavailable for this record.',
+            )}
+          </p>
+        )}
+      </section>
     );
   if (tab === 'universities')
     return (

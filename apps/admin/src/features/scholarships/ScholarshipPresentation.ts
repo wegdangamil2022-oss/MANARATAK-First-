@@ -131,7 +131,16 @@ export function scholarshipPresentation(
       ];
   // Canonical URLs changed in another workflow must remain visible.
   for (const link of defaults)
-    if (!sourceGroups.some((group) => group.links.some((item) => item.field === link.field))) {
+    if (
+      !sourceGroups.some((group) =>
+        group.links.some(
+          (item) =>
+            item.field === link.field ||
+            (scholarshipHttpUrl(link.url) !== null &&
+              scholarshipHttpUrl(item.url) === scholarshipHttpUrl(link.url)),
+        ),
+      )
+    ) {
       if (!sourceGroups.length)
         sourceGroups.push({
           id: 'official-links',

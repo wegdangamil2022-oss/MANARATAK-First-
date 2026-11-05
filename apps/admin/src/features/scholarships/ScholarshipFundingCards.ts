@@ -1,4 +1,5 @@
 import type { ScholarshipBenefitDto, ScholarshipDto } from '@manaratak/domain';
+import { scholarshipSourceSection } from '@manaratak/domain';
 
 export interface FundingTextGroup {
   id: string;
@@ -163,9 +164,5 @@ export function fundingCardText(value: string): string {
 }
 export function originalFundingText(metadata: ScholarshipDto['metadata']): string | null {
   const sections = object(metadata?.rawSourceSections);
-  return Object.prototype.hasOwnProperty.call(sections, 'المميزات والتمويل')
-    ? typeof sections['المميزات والتمويل'] === 'string'
-      ? (sections['المميزات والتمويل'] as string)
-      : ''
-    : null;
+  return scholarshipSourceSection(sections, 'التمويل والمزايا');
 }

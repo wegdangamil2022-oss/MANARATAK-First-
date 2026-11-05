@@ -3,6 +3,10 @@ import { Pencil, Plus, Trash2 } from 'lucide-react';
 import type { ScholarshipDto } from '@manaratak/domain';
 import type { ScholarshipCatalogUpdate } from '../../api/scholarshipCatalog';
 import {
+  scholarshipSourcePresentation,
+  withScholarshipSourcePresentation,
+} from './ScholarshipSourcePresentation';
+import {
   fundingTextGroups,
   withFundingTextGroups,
   fundingGroupTitle,
@@ -99,6 +103,12 @@ export function ScholarshipContentEditor({
   const ar = language === 'ar';
   const tr = (arabic: string, english: string) => (ar ? arabic : english);
   const presentation = scholarshipPresentation({ ...scholarship, ...form }, ar);
+  const sourcePresentation = scholarshipSourcePresentation(form.metadata);
+  const setSource = (patch: Partial<ReturnType<typeof scholarshipSourcePresentation>>) =>
+    setForm((previous) => ({
+      ...previous,
+      metadata: withScholarshipSourcePresentation(previous.metadata, patch),
+    }));
   const set = (field: keyof ScholarshipCatalogUpdate, value: unknown) =>
     setForm((previous) => ({ ...previous, [field]: value }));
   const updateGroups = (groups: FundingGroup[]) =>
@@ -139,8 +149,9 @@ export function ScholarshipContentEditor({
       <option value="">{tr('غير محدد', 'Not specified')}</option>
       <option value="FULLY_FUNDED">{tr('تمويل كامل', 'Full funding')}</option>
       <option value="PARTIALLY_FUNDED">{tr('تمويل جزئي', 'Partial funding')}</option>
+      <option value="MIXED">{tr('تمويل كامل وجزئي', 'Full and partial funding')}</option>
       {form.fundingTypeCode &&
-        !['FULLY_FUNDED', 'PARTIALLY_FUNDED'].includes(form.fundingTypeCode) && (
+        !['FULLY_FUNDED', 'PARTIALLY_FUNDED', 'MIXED'].includes(form.fundingTypeCode) && (
           <option value={form.fundingTypeCode}>
             {form.fundingTypeCode === 'FULL'
               ? tr('تمويل كامل', 'Full funding')
@@ -156,6 +167,24 @@ export function ScholarshipContentEditor({
       <section className="scholarship-read-card">
         <h2>{tr('المعلومات الأساسية', 'Basic information')}</h2>
         <div className="scholarship-card-grid">
+          <TextCard
+            title={tr('الاسم الرسمي بالإنجليزية', 'Official English name')}
+            value={sourcePresentation.officialEnglishName}
+            focus={focusField === 'officialEnglishName'}
+            onChange={(value) => setSource({ officialEnglishName: value })}
+          />
+          <TextCard
+            title={tr('حالة التقديم في المصدر', 'Application status in source')}
+            value={sourcePresentation.applicationStatus}
+            focus={focusField === 'applicationStatus'}
+            onChange={(value) => setSource({ applicationStatus: value })}
+          />
+          <TextCard
+            title={tr('الموعد كما ورد في المصدر', 'Deadline wording in source')}
+            value={sourcePresentation.deadlineText}
+            focus={focusField === 'deadlineText'}
+            onChange={(value) => setSource({ deadlineText: value })}
+          />
           {(
             [
               ['displayName', tr('اسم المنحة', 'Scholarship name')],
@@ -198,6 +227,77 @@ export function ScholarshipContentEditor({
             {fundingSelect}
           </TextCard>
         </div>
+      </section>
+    );
+  if (tab === 'degrees_majors')
+    return (
+      <section className="scholarship-read-card">
+        <h2>{tr('تحرير قوائم الدرجات والبرامج في المصدر', 'Edit source degrees and programs')}</h2>
+        {sourcePresentation.degreeGroups.map((group) => (
+          <div className="scholarship-read-card" key={group.id}>
+            <TextCard
+              title={tr('عنوان المجموعة', 'Group title')}
+              value={group.title}
+              onChange={(title) =>
+                setSource({
+                  degreeGroups: sourcePresentation.degreeGroups.map((row) =>
+                    row.id === group.id ? { ...row, title } : row,
+                  ),
+                })
+              }
+            />
+            {group.items.map((item, index) => (
+              <div key={`${group.id}-${index}`}>
+                <TextCard
+                  title={`${tr('برنامج أو تخصص', 'Program or major')} ${index + 1}`}
+                  value={item}
+                  multiline
+                  onChange={(value) =>
+                    setSource({
+                      degreeGroups: sourcePresentation.degreeGroups.map((row) =>
+                        row.id === group.id
+                          ? {
+                              ...row,
+                              items: row.items.map((text, n) => (n === index ? value : text)),
+                            }
+                          : row,
+                      ),
+                    })
+                  }
+                />
+                {remove(`${tr('حذف البرنامج', 'Remove program')} ${index + 1}`, () =>
+                  setSource({
+                    degreeGroups: sourcePresentation.degreeGroups.map((row) =>
+                      row.id === group.id
+                        ? { ...row, items: row.items.filter((_, n) => n !== index) }
+                        : row,
+                    ),
+                  }),
+                )}
+              </div>
+            ))}
+            {add(tr('إضافة برنامج أو تخصص', 'Add program or major'), () =>
+              setSource({
+                degreeGroups: sourcePresentation.degreeGroups.map((row) =>
+                  row.id === group.id ? { ...row, items: [...row.items, ''] } : row,
+                ),
+              }),
+            )}
+            {remove(tr('حذف المجموعة', 'Remove group'), () =>
+              setSource({
+                degreeGroups: sourcePresentation.degreeGroups.filter((row) => row.id !== group.id),
+              }),
+            )}
+          </div>
+        ))}
+        {add(tr('إضافة مجموعة درجة أو برنامج', 'Add degree or program group'), () =>
+          setSource({
+            degreeGroups: [
+              ...sourcePresentation.degreeGroups,
+              { id: scholarshipCardKey('source-degree'), title: '', items: [''] },
+            ],
+          }),
+        )}
       </section>
     );
   if (tab === 'overview')

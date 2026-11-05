@@ -402,6 +402,10 @@
   font-size: 13px;
   white-space: pre-wrap;
 }
+.scholarship-original-source {
+  white-space: pre-wrap;
+  font-family: inherit;
+}
 .scholarship-long-text {
   white-space: pre-wrap;
   overflow-wrap: anywhere;

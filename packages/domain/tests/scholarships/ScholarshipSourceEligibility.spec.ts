@@ -34,16 +34,17 @@ describe('Source-only scholarship eligibility', () => {
   it('reads 0094 from the real Markdown artifact and produces exactly the six requested conditions', () => {
     const file = fs.readFileSync(
       path.resolve(
-        'workspace/import-sources/scholarships/MANARATAK_Degree_Scholarships_Master_v6_6_2027_Audit_001_010_947.md',
+        'workspace/import-sources/scholarships/MANARATAK_Scholarships_Master_2027_Through_1138.md',
       ),
       'utf8',
     );
     const records = readScholarshipMasterGuide(file);
     const record = records.find((row) => row.sourceRecordId === 'SCH-OC-0051')!;
-    expect(record.sourceEligibility?.text).toBe(original);
+    expect(record.sourceEligibility?.text).toBe(
+      expected.map((text, index) => `${index + 1}. ${text}`).join('\n'),
+    );
     expect(
       scholarshipEligibilityView({
-        ...metadata,
         sourceEligibility: record.sourceEligibility,
       }).items.map((item) => item.text),
     ).toEqual(expected);
@@ -56,6 +57,20 @@ describe('Source-only scholarship eligibility', () => {
       expect(view.items.every((item) => source.text.includes(item.sourceText))).toBe(true);
       expect(view.items.some((item) => item.text.includes('INVENTED_TEST'))).toBe(false);
     }
+  });
+  it('keeps numbered source criteria intact when they contain commas, alternatives or multiple sentences', () => {
+    const source =
+      '1. معدل 3.50 إلى 3.84، مع اختبار 25 أو 1200. لا يفرض البديلان معًا.\n2. شرط آخر.';
+    expect(literalScholarshipCriteria(source).map((item) => item.text)).toEqual([
+      'معدل 3.50 إلى 3.84، مع اختبار 25 أو 1200. لا يفرض البديلان معًا.',
+      'شرط آخر.',
+    ]);
+    expect(
+      scholarshipEligibilitySource({
+        rawSourceSections: { 'شروط الأهلية ومعايير التقديم': '' },
+        sourceEligibility: { version: 1, section: 'الشروط ومعايير التقديم', text: 'INVENTED' },
+      })?.text,
+    ).toBe('');
   });
   it('ignores every enriched field, the legacy eligibility text, and the former generated cards', () => {
     const view = scholarshipEligibilityView({

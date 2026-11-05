@@ -1,5 +1,9 @@
 import { createHash } from 'node:crypto';
-import { SCHOLARSHIP_ELIGIBILITY_SECTION, type ScholarshipEligibilitySource } from '@manaratak/domain';
+import {
+  SCHOLARSHIP_ELIGIBILITY_SECTION,
+  type ScholarshipEligibilitySource,
+} from '@manaratak/domain';
+import { scholarshipSourceSectionLabel } from '../../packages/domain/src/scholarships/ScholarshipSourceSections';
 
 export interface ScholarshipGuideRecord {
   sourceRecordId: string;
@@ -11,13 +15,20 @@ export interface ScholarshipGuideRecord {
   rawContent: string;
   sourceHash: string;
   sourceEligibility?: ScholarshipEligibilitySource;
+  displayNumber?: string;
+  officialEnglishName?: string;
+  sourceFormat?: 'UNIFIED_2027' | 'LEGACY';
+  relatedSourceRecordIds?: string[];
 }
 
 export function readScholarshipMasterGuide(content: string): ScholarshipGuideRecord[] {
   const records: ScholarshipGuideRecord[] = [];
   const seen = new Set<string>();
   const lines = content.split(/\r?\n/);
-  const starts = [0, ...[...content.matchAll(/\r?\n/g)].map(match => match.index! + match[0].length)];
+  const starts = [
+    0,
+    ...[...content.matchAll(/\r?\n/g)].map((match) => match.index! + match[0].length),
+  ];
   let startOffset = 0;
   let current: ScholarshipGuideRecord | undefined;
   let degreeFormat = false;
@@ -30,46 +41,91 @@ export function readScholarshipMasterGuide(content: string): ScholarshipGuideRec
   };
   const finish = (endOffset: number) => {
     if (!current) return;
-    if (!current.sourceRecordId) throw new Error(`SCHOLARSHIP_GUIDE_MISSING_ID:${current.sourceLineNumber}`);
+    if (!current.sourceRecordId)
+      throw new Error(`SCHOLARSHIP_GUIDE_MISSING_ID:${current.sourceLineNumber}`);
     current.rawContent = content.slice(startOffset, endOffset);
     current.sourceHash = createHash('sha256').update(current.rawContent, 'utf8').digest('hex');
     for (const [key, value] of Object.entries(current.fields)) current.fields[key] = value.trim();
-    const eligibilitySections = Object.entries(current.fields).filter(([key]) => key.replace(/^\d+\.\s*/, '') === SCHOLARSHIP_ELIGIBILITY_SECTION);
-    if (eligibilitySections.length > 1) throw new Error(`SCHOLARSHIP_GUIDE_DUPLICATE_ELIGIBILITY_SECTION:${current.sourceRecordId}`);
-    current.sourceEligibility = { version: 1, section: SCHOLARSHIP_ELIGIBILITY_SECTION,
+    const eligibilitySections = Object.entries(current.fields).filter(
+      ([key]) => scholarshipSourceSectionLabel(key) === SCHOLARSHIP_ELIGIBILITY_SECTION,
+    );
+    if (eligibilitySections.length > 1)
+      throw new Error(`SCHOLARSHIP_GUIDE_DUPLICATE_ELIGIBILITY_SECTION:${current.sourceRecordId}`);
+    current.sourceEligibility = {
+      version: 1,
+      section: SCHOLARSHIP_ELIGIBILITY_SECTION,
       text: eligibilitySections[0]?.[1] ?? '',
-      sourceRecordId: current.sourceRecordId, recordHash: current.sourceHash };
+      sourceRecordId: current.sourceRecordId,
+      recordHash: current.sourceHash,
+    };
     records.push(current);
   };
   for (let index = 0; index < lines.length; index += 1) {
     const heading = /^# (SCH-[A-Z0-9-]+)\s*[—-]\s*(.+)$/.exec(lines[index]);
-    const degreeHeading = /^### منحة رقم (\d+)\s*—\s*(.+)$/.exec(lines[index]);
+    const degreeHeading = /^### (?:🎓\s*)?منحة رقم (\d+)\s*—\s*(.+)$/.exec(lines[index]);
     if (heading || degreeHeading) {
       finish(starts[index]);
       startOffset = starts[index];
       degreeFormat = Boolean(degreeHeading);
       metadata = true;
       current = {
-        sourceRecordId: '', sourceLineNumber: index + 1, title: (heading ?? degreeHeading)![2].trim(),
-        importStatus: null, fields: Object.create(null) as Record<string, string>, explicitlyImported: false,
-        rawContent: '', sourceHash: '',
+        sourceRecordId: '',
+        sourceLineNumber: index + 1,
+        title: (heading ?? degreeHeading)![2].trim(),
+        importStatus: null,
+        fields: Object.create(null) as Record<string, string>,
+        explicitlyImported: false,
+        rawContent: '',
+        sourceHash: '',
+        displayNumber: degreeHeading?.[1],
+        sourceFormat: 'LEGACY',
       };
       if (heading) registerIdentity(heading[1]);
       activeField = undefined;
       continue;
     }
     if (!current) continue;
+    if (degreeFormat && metadata && /^<!--\s*المعرّف (?:الأصلي|الجديد):/.test(lines[index])) {
+      const identity =
+        /^<!--\s*المعرّف (?:الأصلي|الجديد):\s*([A-Z][A-Z0-9-]{2,99})(?:;\s*المعرّف المرتبط المدمج:\s*([A-Z][A-Z0-9-]{2,99}))?\s*-->$/.exec(
+          lines[index],
+        );
+      if (!identity || current.sourceRecordId)
+        throw new Error(`SCHOLARSHIP_GUIDE_INVALID_ID:${index + 1}`);
+      registerIdentity(identity[1]);
+      current.sourceFormat = 'UNIFIED_2027';
+      if (identity[2]) {
+        if (seen.has(identity[2])) throw new Error(`SCHOLARSHIP_GUIDE_DUPLICATE_ID:${identity[2]}`);
+        seen.add(identity[2]);
+        current.relatedSourceRecordIds = [identity[2]];
+      }
+      continue;
+    }
+    if (degreeFormat && metadata && /^\*\*الاسم الرسمي بالإنجليزية:\*\*/.test(lines[index])) {
+      if (current.officialEnglishName)
+        throw new Error(`SCHOLARSHIP_GUIDE_DUPLICATE_ENGLISH_NAME:${index + 1}`);
+      current.officialEnglishName = lines[index]
+        .replace(/^\*\*الاسم الرسمي بالإنجليزية:\*\*\s*/, '')
+        .trim();
+      continue;
+    }
     if (degreeFormat && metadata && /^\*\*المعرّف (?:الأصلي|الجديد):\*\*/.test(lines[index])) {
-      const identity = /^\*\*المعرّف (?:الأصلي|الجديد):\*\*\s*`(SCH-[A-Z0-9-]+)`\s*$/.exec(lines[index]);
-      if (!identity || current.sourceRecordId) throw new Error(`SCHOLARSHIP_GUIDE_INVALID_ID:${index + 1}`);
+      const identity = /^\*\*المعرّف (?:الأصلي|الجديد):\*\*\s*`(SCH-[A-Z0-9-]+)`\s*$/.exec(
+        lines[index],
+      );
+      if (!identity || current.sourceRecordId)
+        throw new Error(`SCHOLARSHIP_GUIDE_INVALID_ID:${index + 1}`);
       registerIdentity(identity[1]);
       continue;
     }
     const status = degreeFormat
-      ? metadata ? /^\*\*(?:حالة الاستيراد(?: النهائية)?|القرار):\*\*\s*(.+?)\s*$/.exec(lines[index]) : null
+      ? metadata
+        ? /^\*\*(?:حالة الاستيراد(?: النهائية)?|القرار):\*\*\s*(.+?)\s*$/.exec(lines[index])
+        : null
       : /^\*\*حالة الاستيراد النهائية:\*\*\s*(.+?)\s*$/.exec(lines[index]);
     if (status) {
-      if (current.importStatus !== null) throw new Error(`SCHOLARSHIP_GUIDE_MULTIPLE_FINAL_MARKERS:${current.sourceRecordId}`);
+      if (current.importStatus !== null)
+        throw new Error(`SCHOLARSHIP_GUIDE_MULTIPLE_FINAL_MARKERS:${current.sourceRecordId}`);
       current.importStatus = status[1].trim();
       current.explicitlyImported = /^IMPORTED(?:$|[_\s(—-])/.test(current.importStatus);
     }
@@ -77,7 +133,8 @@ export function readScholarshipMasterGuide(content: string): ScholarshipGuideRec
     if (field) {
       metadata = false;
       activeField = field[1];
-      if (activeField in current.fields) throw new Error(`SCHOLARSHIP_GUIDE_DUPLICATE_FIELD:${current.sourceRecordId}`);
+      if (activeField in current.fields)
+        throw new Error(`SCHOLARSHIP_GUIDE_DUPLICATE_FIELD:${current.sourceRecordId}`);
       current.fields[activeField] = '';
       continue;
     }
