@@ -96,6 +96,10 @@ export class PrismaImportRepository {
     return this.inMemoryBatches.get(id) || null;
   }
 
+  async getBatchMetadataById(id: string): Promise<any | null> {
+    return this.prisma ? this.prisma.importBatch.findUnique({ where: { id } }) : this.inMemoryBatches.get(id) ?? null;
+  }
+
   async listBatches(filters?: { dataType?: string; limit?: number }): Promise<any[]> {
     let limit = filters?.limit ? parseInt(filters.limit as any, 10) : 50;
     if (isNaN(limit) || limit < 1) limit = 50;
@@ -776,9 +780,8 @@ export class PrismaImportRepository {
       const persist = async (client: PrismaClient) => {
         // Always acquire source-key locks in sorted order to avoid lock inversion.
         // hash collisions merely serialize unrelated keys; full keys are compared.
-        for (const key of keys) {
-          await client.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`phase6-source:${key}`}, 0))::text AS lock_result`;
-        }
+        if (keys.length) await client.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended('phase6-source:' || ordered.key, 0))::text AS lock_result
+          FROM (SELECT jsonb_array_elements_text(${JSON.stringify(keys)}::jsonb) AS key ORDER BY key) ordered`;
         // Renew the staging lease and lock its batch before inserting any chunk.
         // An expired/recovered parser cannot resurrect dedup reservations.
         const stagingBatches = [...new Set(recordsWithIds.filter(row =>

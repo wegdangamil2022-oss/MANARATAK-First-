@@ -25,6 +25,7 @@ type ImportRepository = {
   updateRecord?(id: string, updates: Record<string, unknown>, lease?: ImportJobLease): Promise<any>;
   updateBatchStats(id: string, data: Record<string, unknown>, lease?: ImportJobLease): Promise<any>;
   getBatchById?(id: string): Promise<any | null>;
+  getBatchMetadataById?(id: string): Promise<any | null>;
   getTimeline?(batchId: string): Promise<unknown>;
   listBatches(filters?: Record<string, unknown>): Promise<any[]>;
   listRecords(filters?: Record<string, unknown>): Promise<any>;
@@ -37,6 +38,8 @@ type ImportRepository = {
 };
 
 export interface StageImportRowsInput {
+  /** Operator batches already retain their bounded source records in the result. */
+  batchProjection?: 'METADATA_ONLY';
   ownerDomain: string;
   sourceSystem: string;
   rows: Array<Readonly<Record<string, unknown>>>;
@@ -457,7 +460,9 @@ export class ImportAdminUseCases {
         }
       }
 
-      const finalBatch = this.importRepository.getBatchById
+      const finalBatch = input.batchProjection === 'METADATA_ONLY' && this.importRepository.getBatchMetadataById
+        ? await this.importRepository.getBatchMetadataById(batch.id)
+        : this.importRepository.getBatchById
         ? await this.importRepository.getBatchById(batch.id)
         : finalizedBatch;
 

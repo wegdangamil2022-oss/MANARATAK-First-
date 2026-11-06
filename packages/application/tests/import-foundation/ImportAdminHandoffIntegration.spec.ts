@@ -6,6 +6,15 @@ function repo() {
   return { records, createBatch: vi.fn().mockResolvedValue({ id: 'batch-1' }), bulkCreateRecords: vi.fn(async (items) => { records.push(...items); return { count: items.length }; }), updateBatchStats: vi.fn(async (_id, data) => ({ id: 'batch-1', ...data })), listBatches: vi.fn(), listRecords: vi.fn(), findBySourceDedupKey: vi.fn().mockResolvedValue(null) };
 }
 describe('ImportAdminUseCases generic handoff integration', () => {
+  it('can return batch metadata without reloading all retained source records', async () => {
+    const storage = { ...repo(), getBatchMetadataById: vi.fn().mockResolvedValue({ id: 'batch-1', batchStatus: 'COMPLETED' }), getBatchById: vi.fn().mockRejectedValue(Error('SOURCE_DOWNLOAD_NOT_ALLOWED')) };
+    const service = new ImportAdminUseCases(storage);
+    const result = await service.stageNormalizedRows({ ownerDomain: 'MAJORS', sourceSystem: 'TEST', rows: [{ classificationCode: 'MJR-0001' }], batchProjection: 'METADATA_ONLY' });
+    expect(result.batch.id).toBe('batch-1');
+    expect(result.records).toHaveLength(1);
+    expect(storage.getBatchMetadataById).toHaveBeenCalledWith('batch-1');
+    expect(storage.getBatchById).not.toHaveBeenCalled();
+  });
   it('dispatches valid rows and persists consumer output without fabricated artifact evidence', async () => {
     const storage = repo(); const dispatch = vi.fn().mockResolvedValue({ stageState: 'STAGED_NEEDS_REVIEW', canonicalScreening: [{ state: 'UNRESOLVED' }] });
     const service = new ImportAdminUseCases(storage as any, undefined, { dispatch } as any);

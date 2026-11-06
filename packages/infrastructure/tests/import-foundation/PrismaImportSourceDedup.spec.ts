@@ -6,6 +6,15 @@ import { PrismaImportRepository } from '../../src/import-foundation/PrismaImport
  * PostgreSQL advisory locking; real cross-process contention is Post-28.
  */
 describe('Phase 6 cross-batch source identity contention', () => {
+  it('takes all sorted source locks in one SQL round trip before reading or inserting', async () => {
+    const lock = vi.fn().mockResolvedValue([]), read = vi.fn().mockResolvedValue([]), insert = vi.fn().mockResolvedValue({ count: 3 });
+    const client = { $queryRaw: lock, importRecord: { findMany: read, createMany: insert } };
+    const prisma = { $transaction: async (work: (tx: typeof client) => Promise<unknown>) => work(client) };
+    await new PrismaImportRepository(prisma as never).bulkCreateRecords(['z', 'a', 'm'].map(key => ({ batchId: 'b', sourceDedupKey: key, status: 'COMPLETE', rawPayload: {} })));
+    expect(lock).toHaveBeenCalledOnce();
+    expect(lock.mock.invocationCallOrder[0]).toBeLessThan(read.mock.invocationCallOrder[0]);
+    expect(read.mock.invocationCallOrder[0]).toBeLessThan(insert.mock.invocationCallOrder[0]);
+  });
   it('locks identity BEFORE global lookup and inserts one durable observation per source key', async () => {
     const persisted: Array<Record<string, any>> = [];
     const order: string[] = [];
