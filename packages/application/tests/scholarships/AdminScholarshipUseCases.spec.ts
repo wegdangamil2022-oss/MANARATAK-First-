@@ -55,6 +55,20 @@ describe('AdminScholarshipUseCases', () => {
     expect(mockRepo.list).toHaveBeenCalledWith(filters);
   });
 
+  it('keeps source-only programme scopes and programme-specific languages blocked from publication even after source verification', async () => {
+    const base = { id: 'scoped-offer', displayName: 'Reviewed source offer', status: ScholarshipStatus.IMPORTED, revision: 1, ...publicationReady };
+    for (const pending of [
+      { majorTargets: [{ targetKey: 'bachelor-programme-scope', majorId: null, sourceLabel: 'علوم الحاسوب.', resolutionStatus: 'SOURCE_ONLY', metadata: { degreeTargetKey: 'bachelor' } }] },
+      { studyLanguageSourceLabel: 'الإنجليزية أو المجرية وفق التخصص المعروض.', studyLanguageReferenceId: null, studyLanguageResolutionStatus: 'SOURCE_ONLY' },
+    ]) {
+      mockRepo.findById = vi.fn().mockResolvedValue({ ...base, ...pending });
+      await expect(useCases.markReadyToPublish(base.id, mutationContext)).rejects.toThrow('SCHOLARSHIP_CANONICAL_LINKS_UNRESOLVED');
+      mockRepo.findById = vi.fn().mockResolvedValue({ ...base, ...pending, status: ScholarshipStatus.READY_TO_PUBLISH });
+      await expect(useCases.publish(base.id, mutationContext)).rejects.toThrow('SCHOLARSHIP_CANONICAL_LINKS_UNRESOLVED');
+    }
+    expect(mockRepo.updateStatus).not.toHaveBeenCalled();
+  });
+
   it('saves one source criterion under revision lock without replacing source, enrichment or relationships', async () => {
     const metadata = { rawSourceSections: { 'الشروط ومعايير التقديم': 'درجة جامعية، سجل أكاديمي قوي.' }, conditionalLanguageEvidence: { score: 100 } };
     const existing = { id: 'schol-1', displayName: 'Source scholarship', status: ScholarshipStatus.IMPORTED, ...publicationReady, revision: 1, metadata,

@@ -39,7 +39,7 @@ describe('W8 scholarship source invariants', () => {
   it('binds verified transfer state and publication lifecycle to historical versions', () => {
     const transfer = read('packages/application/src/scholarships/import-center/ScholarshipImportAtomicTransferUseCase.ts');
     const repo = read('packages/infrastructure/src/scholarships/PrismaScholarshipRepository.ts');
-    expect(transfer).toContain("verificationStatus: plan.decisionSnapshot.verificationState === 'VERIFIED'");
+    expect(transfer).toContain("verificationStatus: !academicOffer && plan.decisionSnapshot.verificationState === 'VERIFIED'");
     expect(transfer).toContain('verificationRecordedAt');
     expect(repo).toContain('private jsonSafe');
     expect(repo).toContain("status: 'SUPERSEDED'");

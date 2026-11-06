@@ -1,16 +1,32 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ScholarshipImportDecisionUseCases } from '../../src';
+import { academicOfferFixture } from './ScholarshipAcademicOfferFixture';
 
 const scholarshipRecord = { id: 'record-1', batchId: 'batch-scholarship', status: 'STAGED', rawPayload: { providerIsUniversity: false, _domainHandoff: { canonicalScreening: [{ requirementKey: 'PROVIDER_UNIVERSITY', target: 'PROVIDER_UNIVERSITY', rawValue: 'Independent Foundation', state: 'REVIEW_REQUIRED' }, { requirementKey: 'COUNTRY', target: 'COUNTRY', rawValue: 'Yemen', state: 'UNRESOLVED' }] } } };
 function setup(record: any = scholarshipRecord, dataType = 'SCHOLARSHIPS') {
   const gateway = { listBatches: vi.fn(), listRecords: vi.fn(), getRecordById: vi.fn(async () => record), getBatchById: vi.fn(async () => ({ id: record?.batchId, sourceSystem: 'source', dataType, batchStatus: 'STAGED' })) };
   const verification = { record: vi.fn(async () => ({ decisionId: 'v1', recordedAt: '2026-08-24T00:00:00Z' })), latest: vi.fn(), list: vi.fn() };
   const canonical = { record: vi.fn(async () => ({ decisionId: 'c1', recordedAt: '2026-08-24T00:00:00Z' })), list: vi.fn() };
-  const resolver = { resolve: vi.fn(async (): Promise<{ state: string; canonicalReferenceId?: string }> => ({ state: 'RESOLVED' })) };
+  const resolver = { resolve: vi.fn(async (_request: { target: string; rawValue?: string | null; canonicalId?: string | null }): Promise<{ state: string; canonicalReferenceId?: string; candidates?: Array<{ lifecycle: string }> }> => ({ state: 'RESOLVED' })) };
   return { useCases: new ScholarshipImportDecisionUseCases(gateway as any, verification as any, canonical as any, resolver as any), verification, canonical, resolver };
 }
 
 describe('ScholarshipImportDecisionUseCases', () => {
+  it('verifies each reviewed degree label against its active owning-table id before saving the source review', async () => {
+    const f = academicOfferFixture(), env = setup({ ...scholarshipRecord, rawPayload: f.raw });
+    const input = { recordId: 'record-1', actorId: 'a', reason: 'Literal source offer review', ...f.verification };
+    env.resolver.resolve.mockImplementation(async request => {
+      const binding = f.review.academicOffer.groups.find(x => x.degreeLabel === request.rawValue || x.degreeLevelId === request.canonicalId);
+      return { state: 'RESOLVED', canonicalReferenceId: binding!.degreeLevelId, candidates: [{ lifecycle: 'ACTIVE' }] };
+    });
+    await env.useCases.recordVerification(input);
+    expect(env.resolver.resolve).toHaveBeenCalledTimes(6);
+    expect(env.verification.record).toHaveBeenCalledOnce();
+    env.verification.record.mockClear();
+    env.resolver.resolve.mockResolvedValue({ state: 'RESOLVED', canonicalReferenceId: 'different-degree' });
+    await expect(env.useCases.recordVerification(input)).rejects.toThrow('SCHOLARSHIP_IMPORT_ACADEMIC_DEGREE_REFERENCE_MISMATCH');
+    expect(env.verification.record).not.toHaveBeenCalled();
+  });
   it('rejects unknown and non-Scholarship records before verification persistence', async () => { const missing = setup(null); await expect(missing.useCases.recordVerification({ recordId: 'missing', state: 'VERIFIED', actorId: 'a', reason: 'r' })).rejects.toThrow('SCHOLARSHIP_IMPORT_RECORD_NOT_FOUND'); expect(missing.verification.record).not.toHaveBeenCalled(); const wrong = setup(scholarshipRecord, 'COURSES'); await expect(wrong.useCases.recordVerification({ recordId: 'record-1', state: 'VERIFIED', actorId: 'a', reason: 'r' })).rejects.toThrow('SCHOLARSHIP_IMPORT_RECORD_NOT_IN_SCHOLARSHIP_BATCH'); });
   it('writes a verified Scholarship decision', async () => { const env = setup(); await env.useCases.recordVerification({ recordId: 'record-1', state: 'VERIFIED', actorId: 'a', reason: 'official' }); expect(env.verification.record).toHaveBeenCalledOnce(); });
   it('rejects malformed source interpretation before durable verification', async () => {

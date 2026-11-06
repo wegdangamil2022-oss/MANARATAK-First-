@@ -20,8 +20,19 @@ export class ScholarshipImportDecisionUseCases {
 
   async recordVerification(input: ScholarshipImportVerificationDecision) {
     const record = await this.assertScholarshipRecord(input.recordId);
-    if (!scholarshipImportSourceReview(record.rawPayload, input).valid) {
+    const reviewed = scholarshipImportSourceReview(record.rawPayload, input);
+    if (!reviewed.valid) {
       throw new Error('SCHOLARSHIP_IMPORT_SOURCE_REVIEW_INVALID');
+    }
+    for (const group of reviewed.academicOffer?.groups ?? []) {
+      // Exact owning-table label lookup prevents swapping a Bachelor's heading
+      // onto a Master's UUID. A review can never introduce a new degree.
+      const result = await this.resolver.resolve({ target: 'DEGREE_LEVEL', rawValue: group.degreeLabel });
+      const active = await this.resolver.resolve({ target: 'DEGREE_LEVEL', canonicalId: group.degreeLevelId });
+      if (result.state !== 'RESOLVED' || result.canonicalReferenceId !== group.degreeLevelId ||
+        active.state !== 'RESOLVED' || active.canonicalReferenceId !== group.degreeLevelId || active.candidates?.[0]?.lifecycle !== 'ACTIVE') {
+        throw new Error('SCHOLARSHIP_IMPORT_ACADEMIC_DEGREE_REFERENCE_MISMATCH');
+      }
     }
     return this.verification.record(input);
   }

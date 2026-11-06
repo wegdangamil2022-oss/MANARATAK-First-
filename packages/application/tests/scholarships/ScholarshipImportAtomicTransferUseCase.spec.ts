@@ -13,6 +13,7 @@ import {
 } from '@manaratak/domain';
 import { AtomicDomainMutationCoordinator } from '../../src/event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { scholarshipImportReviewFingerprint } from '../../src/scholarships/import-center/ScholarshipImportReviewDecisionCodec';
+import { academicOfferFixture } from './ScholarshipAcademicOfferFixture';
 import {
   ScholarshipImportAtomicTransferUseCase,
   type IScholarshipImportAtomicGateway,
@@ -164,6 +165,37 @@ function existingScholarship(status: ScholarshipStatus = ScholarshipStatus.IMPOR
 }
 
 describe('WP12-10 ScholarshipImportAtomicTransferUseCase', () => {
+  it('transfers reviewed programme descriptions as PENDING with real degrees and source rows scoped to each degree', async () => {
+    const env = setup();
+    const fixture = academicOfferFixture();
+    const raw = { ...payload(), ...fixture.raw, metadata: { ...payload().metadata, ...fixture.raw.metadata,
+      canonicalScreening: [
+        ...payload().metadata.canonicalScreening,
+        { target: 'DEGREE_LEVEL', rawValue: fixture.raw.degreeLevel, state: 'UNRESOLVED' },
+        { target: 'LANGUAGE', rawValue: fixture.raw.studyLanguage, state: 'UNRESOLVED' },
+        ...fixture.raw.eligibleMajorsOrFields.map(rawValue => ({ target: 'MAJOR', rawValue, state: 'UNRESOLVED' })),
+      ],
+    } };
+    // Historic screening deduplicates identical labels across levels.
+    raw.metadata.canonicalScreening = raw.metadata.canonicalScreening.filter((x, i, all) => all.findIndex(y => y.target === x.target && y.rawValue === x.rawValue) === i);
+    env.getRecord().rawPayload = raw;
+    const before = JSON.stringify(raw);
+    const review = { ...fixture.review, rawPayloadFingerprint: scholarshipImportReviewFingerprint(raw) };
+    env.verification.latest.mockResolvedValue({ state: 'VERIFIED', evidence: { sourceReview: review } });
+    expect(await env.service.transfer({ recordId: 'rec-1', actorId: 'reviewer' })).toMatchObject({ publicationStatus: 'DRAFT' });
+    const created = env.create.mock.calls[0][0];
+    expect(created.verificationStatus).toBe('PENDING');
+    expect(created.degreeTargets).toHaveLength(3);
+    expect(created.degreeTargets?.map(x => [x.degreeLevelId, x.sourceLabel, x.resolutionStatus])).toEqual(review.academicOffer.groups.map(x => [x.degreeLevelId, x.degreeLabel, 'RESOLVED']));
+    expect(created.majorTargets).toHaveLength(4);
+    expect(created.majorTargets?.map(x => x.sourceLabel)).toEqual(['علوم الحاسوب.', 'تخصصات العلوم الإنسانية الأخرى المدرجة في النظام.', 'الرياضيات والفيزياء.', 'الرياضيات والفيزياء.']);
+    expect(created.majorTargets?.every(x => x.majorId === null && x.resolutionStatus === 'SOURCE_ONLY')).toBe(true);
+    expect(created.majorTargets?.map(x => x.metadata?.degreeTargetKey)).toEqual([created.degreeTargets![0].targetKey, created.degreeTargets![0].targetKey, created.degreeTargets![1].targetKey, created.degreeTargets![2].targetKey]);
+    expect(created).toMatchObject({ studyLanguage: fixture.raw.studyLanguage, studyLanguageReferenceId: null, studyLanguageResolutionStatus: 'SOURCE_ONLY' });
+    expect(created.universityLinks).toEqual([]);
+    expect(JSON.stringify(env.getRecord().rawPayload)).toBe(before);
+  });
+
   it('transfers a reviewed calendar date as draft metadata without assigning a timezone', async () => {
     const env = setup();
     const raw = { ...payload(), applicationDeadline: undefined, metadata: { ...payload().metadata,

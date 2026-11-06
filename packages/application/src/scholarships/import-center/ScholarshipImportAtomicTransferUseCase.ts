@@ -20,6 +20,7 @@ import { AtomicDomainMutationCoordinator } from '../../event-foundation/use-case
 import { ScholarshipImportScreeningReader } from './ScholarshipImportScreeningReader';
 import { scholarshipImportLanguagePolicy } from './ScholarshipImportLanguagePolicy';
 import { scholarshipImportSourceReview } from './ScholarshipImportSourceReview';
+import type { ScholarshipReviewedAcademicOffer } from './ScholarshipImportAcademicOffer';
 import type {
   IScholarshipImportAtomicGateway,
   IScholarshipImportReviewDecisionPort,
@@ -67,6 +68,7 @@ interface CanonicalScreeningRecord {
 }
 
 interface ResolvedDecisionSnapshot {
+  academicOffer?: ScholarshipReviewedAcademicOffer;
   reviewedPayload: ScholarshipImportPayload;
   sourceReviewValid: boolean;
   verificationState: string;
@@ -484,6 +486,7 @@ export class ScholarshipImportAtomicTransferUseCase
 
   private incomingData(plan: TransferPlan): Omit<CreateScholarshipDto, 'publicId' | 'slug' | 'canonicalName' | 'canonicalDedupKey' | 'status'> {
     const payload = plan.payload;
+    const academicOffer = plan.decisionSnapshot.academicOffer;
     const metadata = this.object(payload.metadata);
     const countryLabels = this.strings(payload.studyCountry, payload.targetCountries);
     const degreeLabels = this.uniqueStrings(
@@ -515,7 +518,7 @@ export class ScholarshipImportAtomicTransferUseCase
       notes: this.stringValue(metadata.notes),
       sponsorUniversityId: this.firstResolved(plan.canonical, 'PROVIDER_UNIVERSITY')?.canonicalReferenceId ?? null,
       completenessStatus: plan.completeness.state,
-      verificationStatus: plan.decisionSnapshot.verificationState === 'VERIFIED'
+      verificationStatus: !academicOffer && plan.decisionSnapshot.verificationState === 'VERIFIED'
         ? ScholarshipVerificationStatus.VERIFIED
         : ScholarshipVerificationStatus.PENDING,
       amountMinorUnits: payload.amountMinorUnits ?? null,
@@ -541,7 +544,11 @@ export class ScholarshipImportAtomicTransferUseCase
       studyLanguageSourceLabel: languageLabels[0] ?? null,
       studyLanguageResolutionStatus: languageResult?.state ?? (languageLabels.length ? 'SOURCE_ONLY' : null),
       benefits: this.benefits(plan, fundingTypeCode, currencyResult?.canonicalReferenceId ?? null),
-      degreeTargets: degreeLabels.map((label, index) => {
+      degreeTargets: academicOffer ? academicOffer.groups.map(group => ({
+        targetKey: `source-degree-${group.sourceGroupId}`,
+        degreeLevelId: group.degreeLevelId, sourceLabel: group.degreeLabel, resolutionStatus: 'RESOLVED',
+        metadata: { sourceGroupId: group.sourceGroupId, sourceHeading: group.sourceHeading },
+      })) : degreeLabels.map((label, index) => {
         const resolved = this.resolutionFor(plan.canonical, 'DEGREE_LEVEL', label);
         return {
           targetKey: `degree-${index + 1}-${this.shortKey(label)}`,
@@ -550,7 +557,13 @@ export class ScholarshipImportAtomicTransferUseCase
           resolutionStatus: resolved?.state ?? 'SOURCE_ONLY',
         };
       }),
-      majorTargets: majorLabels.map((label, index) => {
+      majorTargets: academicOffer ? academicOffer.groups.flatMap(group => group.items.map((sourceLabel, index) => ({
+        targetKey: `source-major-${group.sourceGroupId}-${index + 1}`,
+        majorId: null, sourceLabel, resolutionStatus: 'SOURCE_ONLY',
+        metadata: { degreeTargetKey: `source-degree-${group.sourceGroupId}`, degreeLevelId: group.degreeLevelId,
+          sourceGroupId: group.sourceGroupId, sourceHeading: group.sourceHeading,
+          classification: 'SOURCE_PROGRAMME_DESCRIPTION_NOT_CANONICAL_IDENTITY' },
+      }))) : majorLabels.map((label, index) => {
         const resolved = this.resolutionFor(plan.canonical, 'MAJOR', label);
         return {
           targetKey: `major-${index + 1}-${this.shortKey(label)}`,
@@ -804,6 +817,7 @@ export class ScholarshipImportAtomicTransferUseCase
       reviewedPayload: sourceReview.payload, sourceReviewValid: sourceReview.valid,
     });
     return { verificationState, verificationDecisionId, verificationRecordedAt, canonical, canonicalDecisionIds, fingerprint,
+      ...(sourceReview.academicOffer ? { academicOffer: sourceReview.academicOffer } : {}),
       reviewedPayload: sourceReview.payload, sourceReviewValid: sourceReview.valid };
   }
 
