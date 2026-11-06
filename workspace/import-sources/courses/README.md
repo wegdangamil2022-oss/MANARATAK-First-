@@ -13,6 +13,6 @@ Source comparison used normalized direct URL and normalized platform plus course
 
 The alleged older approximately 5,000-row course workbook is not present in the current repository or its available Git history. Its unique-course count and supersession status cannot be established. Do not retire it from any external source inventory until it is supplied and compared. All imports of the two staged files must use the reviewed projector rather than independent unrestricted batches.
 
-## Original database import progress — 2026-11-08
+## Original database import completed — 2026-11-08
 
-37 of 44 source batches are saved: 18,500 source records and 18,443 canonical courses (18,440 new and 3 preserved unchanged). The Neon project storage limit of 1 GB blocked further writes. Another 3,116 canonical courses remain, including 57 reviewed YouTube source records awaiting transfer. No courses were published and no data was removed. [Evidence and resume boundary](../../../docs/plans/imports/courses-full-2026-11-08.md).
+All 44 source batches and the reviewed 57-course freeCodeCamp follow-up are saved. The final catalog contains 21,559 canonical courses: 21,556 new and 3 preserved unchanged. The 21,559 source records retain original workbook provenance, and the review follow-up reused its existing source records. One video remains flagged for availability review; no courses were published. The earlier 1 GB storage block was resolved by increasing the original project limit to 5 GB. [Results, validation and publication limits](../../../docs/plans/imports/courses-full-2026-11-08.md).

@@ -75,9 +75,11 @@ export class NativeExternalCourseImportClient extends NativeUniversityImportClie
   }
   // Disjoint batches use repeatable snapshots plus exact advisory/row locks and
   // database uniqueness. This avoids false predicate conflicts on receipt pages.
+  // Keep abandoned transport connections from holding import locks indefinitely.
+  // Both limits are local to this operator transaction, never database defaults.
   async $transaction(work) {
     await this.send(
-      "BEGIN ISOLATION LEVEL REPEATABLE READ; SET LOCAL standard_conforming_strings=on; SELECT 'true'::jsonb;",
+      "BEGIN ISOLATION LEVEL REPEATABLE READ; SET LOCAL standard_conforming_strings=on; SET LOCAL idle_in_transaction_session_timeout='180s'; SET LOCAL lock_timeout='45s'; SELECT 'true'::jsonb;",
     );
     try {
       const result = await work(this);

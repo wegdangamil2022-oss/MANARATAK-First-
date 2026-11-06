@@ -1,0 +1,210 @@
+{
+  "status": "COMPLETE",
+  "pass": true,
+  "complete": true,
+  "counts": {
+    "courses": 21559,
+    "sourceRows": 21559,
+    "newCourses": 21556,
+    "existingPreserved": 3,
+    "published": 0,
+    "providers": 169
+  },
+  "baseImport": {
+    "pass": true,
+    "planHash": "fa5227295ca7a16be0ade4c29b3d98874d2476f898719b55d8ee6ed26fc25d27",
+    "counts": {
+      "courses": 21502,
+      "sourceRows": 21559,
+      "newCourses": 21499,
+      "published": 0,
+      "providers": 169
+    },
+    "summary": {
+      "inputRows": 21562,
+      "projectedRows": 21559,
+      "newProviders": 151,
+      "providers": 169,
+      "newCourses": 21499,
+      "existingPreserved": 3,
+      "blocked": 57,
+      "languageLinked": 18677,
+      "analysisCounts": {
+        "UNCHANGED": 3,
+        "NEW": 21499,
+        "INVALID": 57
+      },
+      "blockedReasons": {
+        "COURSE_IMPORT_SOURCE_IDENTITY_PROPOSAL_REQUIRED": 57
+      }
+    },
+    "proof": {
+      "pass": true,
+      "planHash": "fa5227295ca7a16be0ade4c29b3d98874d2476f898719b55d8ee6ed26fc25d27",
+      "samples": 3,
+      "actualPostgreSQL": true,
+      "sourceFieldsPreserved": true,
+      "providerAndLanguageReferences": true,
+      "provenance27": true,
+      "versions3": true,
+      "replayNoCanonicalWrites": true,
+      "forcedRollback": true,
+      "originalDatabaseWrites": 0
+    },
+    "existingCoursesPreserved": true,
+    "noPublication": true,
+    "noSchemaChange": true,
+    "sourceFilesUnchanged": true,
+    "completedAt": "2026-11-06T20:06:19.633Z"
+  },
+  "baseVerification": {
+    "pass": true,
+    "planHash": "fa5227295ca7a16be0ade4c29b3d98874d2476f898719b55d8ee6ed26fc25d27",
+    "samples": [
+      {
+        "publicId": "course-0ac7ad64",
+        "provider": "Saylor University",
+        "rawSource": true,
+        "sourceIdentity": true,
+        "provenance9": true,
+        "version1": true,
+        "adminDetailAndFilter": true
+      },
+      {
+        "publicId": "course-2543b0ea",
+        "provider": "UiPath Academy",
+        "rawSource": true,
+        "sourceIdentity": true,
+        "provenance9": true,
+        "version1": true,
+        "adminDetailAndFilter": true
+      },
+      {
+        "publicId": "course-95a4193f",
+        "provider": "Workato Academy",
+        "rawSource": true,
+        "sourceIdentity": true,
+        "provenance9": true,
+        "version1": true,
+        "adminDetailAndFilter": true
+      }
+    ],
+    "existing3Unchanged": true,
+    "review57SourcePreserved": true,
+    "noPublication": true,
+    "originalDatabaseReadOnly": true
+  },
+  "youtubeReview": {
+    "pass": true,
+    "planHash": "f8c319767bc58302fb7cd110ce27b130101bdd343483d9746bc19cd0e9226a42",
+    "sourcePlanHash": "fa5227295ca7a16be0ade4c29b3d98874d2476f898719b55d8ee6ed26fc25d27",
+    "applied": {
+      "records": 57,
+      "created": 57,
+      "preserved": 0,
+      "blocked": 0,
+      "publication": false
+    },
+    "counts": {
+      "courses": 21559,
+      "sourceRows": 21559,
+      "published": 0
+    },
+    "proof": {
+      "pass": true,
+      "planHash": "f8c319767bc58302fb7cd110ce27b130101bdd343483d9746bc19cd0e9226a42",
+      "samples": 57,
+      "sourceRowsUnchanged": true,
+      "duplicateSourcesCreated": 0,
+      "staleSourceReviewRejected": true,
+      "replayNoCanonicalWrites": true,
+      "providerMappingsPreserved": true,
+      "noPublication": true,
+      "forcedRollback": true,
+      "originalDatabaseWrites": 0
+    },
+    "sourceRowsUnchanged": true,
+    "noDuplicateSources": true,
+    "existing3CoursesPreserved": true,
+    "existingProviderFieldsPreservedExceptUpdatedAt": true,
+    "reviewedSources57": true,
+    "oEmbedConfirmed": 56,
+    "officialPublisherIdentityConfirmed": 57,
+    "availabilityReviewRequired": 1,
+    "officialPublisherArticle": {
+      "url": "https://www.freecodecamp.org/news/learn-big-o-notation",
+      "status": 200,
+      "sha256": "99cc6a2c0fccf63fb778a43001ffbf28e37d4b0bc71670d4ddbdea27281a9e18",
+      "bytes": 497463,
+      "linkedCourseUrl": "https://www.youtube.com/watch?v=Mo4vesaut8g",
+      "checkedAt": "2026-11-08T16:51:30.312Z"
+    },
+    "publication": false,
+    "completedAt": "2026-11-06T20:08:37.384Z"
+  },
+  "youtubeVerification": {
+    "pass": true,
+    "planHash": "f8c319767bc58302fb7cd110ce27b130101bdd343483d9746bc19cd0e9226a42",
+    "samples": [
+      {
+        "publicId": "course-86e91904",
+        "sourceRecordPreserved": true,
+        "languageResolved": true,
+        "fieldProvenance9": true,
+        "version1": true,
+        "adminDetailAndFilter": true,
+        "availabilityReview": false
+      },
+      {
+        "publicId": "course-b5421f2b",
+        "sourceRecordPreserved": true,
+        "languageResolved": true,
+        "fieldProvenance9": true,
+        "version1": true,
+        "adminDetailAndFilter": true,
+        "availabilityReview": true
+      },
+      {
+        "publicId": "course-460ab92b",
+        "sourceRecordPreserved": true,
+        "languageResolved": true,
+        "fieldProvenance9": true,
+        "version1": true,
+        "adminDetailAndFilter": true,
+        "availabilityReview": false
+      }
+    ],
+    "sourceRows57Reused": true,
+    "canonicalCourses21559": true,
+    "noPublication": true,
+    "availabilityReviewRequired": 1,
+    "scope": "ORIGINAL_DATABASE_READ_ONLY"
+  },
+  "finalSummary": {
+    "sourceRows": 21559,
+    "newCourses": 21556,
+    "existingPreserved": 3,
+    "canonicalCourses": 21559,
+    "sourceRowsHeld": 0,
+    "availabilityReviewRequired": 1,
+    "published": 0
+  },
+  "transactionLimitVerification": {
+    "pass": true,
+    "scope": "ORIGINAL_DATABASE_READ_ONLY",
+    "insideTransaction": {
+      "idle": "3min",
+      "lock": "45s"
+    },
+    "settingsRestored": true,
+    "databaseWrites": 0
+  },
+  "storageAfterUpgrade": {
+    "scope": "ORIGINAL_DATABASE_READ_ONLY",
+    "project_storage_limit": "5GB",
+    "database_bytes": "1107607552",
+    "database_oid": "16395",
+    "checkedAt": "2026-11-06T20:09:31.682Z",
+    "databaseWrites": 0
+  }
+}
