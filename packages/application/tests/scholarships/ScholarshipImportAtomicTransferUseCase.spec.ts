@@ -164,6 +164,21 @@ function existingScholarship(status: ScholarshipStatus = ScholarshipStatus.IMPOR
 }
 
 describe('WP12-10 ScholarshipImportAtomicTransferUseCase', () => {
+  it('transfers an explicitly reviewed absent deadline as a draft without a fabricated date', async () => {
+    const env = setup();
+    const raw = { ...payload(), applicationDeadline: undefined, metadata: { ...payload().metadata,
+      sourceBasicFields: { 'اسم المنحة': 'Example' }, sourcePresentation: { deadlineText: '' },
+    } };
+    env.getRecord().rawPayload = raw;
+    const before = JSON.stringify(raw);
+    env.verification.latest.mockResolvedValue({ state: 'VERIFIED', evidence: { sourceReview: {
+      version: 1, rawPayloadFingerprint: scholarshipImportReviewFingerprint(raw), officialSourceUrls: [raw.officialSourceUrl],
+      reason: 'Reviewed the missing source field; no date assumed.', deadlineEvidence: 'ABSENT_FROM_SOURCE_BASIC_FIELDS',
+    } } });
+    expect(await env.service.transfer({ recordId: 'rec-1', actorId: 'reviewer' })).toMatchObject({ publicationStatus: 'DRAFT' });
+    expect(env.create.mock.calls[0][0]).toMatchObject({ applicationDeadline: null, deadlineType: 'NOT_STATED_IN_SOURCE' });
+    expect(JSON.stringify(env.getRecord().rawPayload)).toBe(before);
+  });
   it('transfers a source-bound reviewed research interpretation as draft context, with raw evidence unchanged', async () => {
     const env = setup();
     const raw = { ...payload(), eligibleMajorsOrFields: ['History'], metadata: { ...payload().metadata,

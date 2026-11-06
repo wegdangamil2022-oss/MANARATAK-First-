@@ -11,6 +11,7 @@ const schema = z.object({
   rawPayloadFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
   officialSourceUrls: z.array(z.string().url()).min(1).max(10),
   reason: text,
+  deadlineEvidence: z.literal('ABSENT_FROM_SOURCE_BASIC_FIELDS').optional(),
   researchAreas: z.object({
     classification: z.literal('PROGRAM_RESEARCH_AREAS_NOT_PRIOR_DEGREE_RESTRICTIONS'),
     sourceLabels: z.array(text).min(1).max(100),
@@ -29,13 +30,13 @@ const schema = z.object({
 export function scholarshipImportSourceReview(
   rawPayload: unknown,
   verification?: Pick<ScholarshipImportVerificationDecision, 'state' | 'evidence'> | null,
-): { valid: boolean; present: boolean; payload: ScholarshipImportPayload;
+): { valid: boolean; present: boolean; reviewedDeadlineAbsence: boolean; payload: ScholarshipImportPayload;
   contextualize(entries: readonly ScholarshipCanonicalScreeningRecord[]): ScholarshipCanonicalScreeningRecord[] } {
   const payload = rawPayload as ScholarshipImportPayload;
   const unchanged = (entries: readonly ScholarshipCanonicalScreeningRecord[]) => entries.map(entry => ({ ...entry }));
   const candidate = verification?.evidence?.sourceReview;
-  if (candidate === undefined) return { valid: true, present: false, payload, contextualize: unchanged };
-  const invalid = { valid: false, present: true, payload, contextualize: unchanged };
+  if (candidate === undefined) return { valid: true, present: false, reviewedDeadlineAbsence: false, payload, contextualize: unchanged };
+  const invalid = { valid: false, present: true, reviewedDeadlineAbsence: false, payload, contextualize: unchanged };
   const parsed = schema.safeParse(candidate);
   if (!parsed.success || verification?.state !== 'VERIFIED') return invalid;
   const review = parsed.data;
@@ -45,6 +46,17 @@ export function scholarshipImportSourceReview(
     if (official.protocol !== 'https:' || !review.officialSourceUrls.includes(official.href) ||
         review.officialSourceUrls.some(value => { const url = new URL(value); return url.protocol !== 'https:' || url.origin !== official.origin || Boolean(url.username || url.password); })) return invalid;
   } catch { return invalid; }
+  if (review.deadlineEvidence) {
+    const basics = payload.metadata?.sourceBasicFields;
+    const presentation = payload.metadata?.sourcePresentation as { deadlineText?: unknown } | undefined;
+    // An approved absence is a source fact, never a date, rolling deadline or
+    // opening/closing status. Existing date evidence cannot be overwritten.
+    if (payload.applicationDeadline || payload.metadata?.deadlineMode || payload.metadata?.deadlineType ||
+        !basics || typeof basics !== 'object' || Array.isArray(basics) ||
+        !Object.prototype.hasOwnProperty.call(basics, 'اسم المنحة') ||
+        Object.prototype.hasOwnProperty.call(basics, 'الموعد النهائي') ||
+        typeof presentation?.deadlineText !== 'string' || presentation.deadlineText.trim()) return invalid;
+  }
   const areas = review.researchAreas?.sourceLabels ?? [];
   if (review.researchAreas) {
     const source = typeof payload.eligibleMajorsOrFields === 'string' ? [payload.eligibleMajorsOrFields] : payload.eligibleMajorsOrFields;
@@ -53,6 +65,7 @@ export function scholarshipImportSourceReview(
   // Eligibility corrections remain review/enrichment evidence, never source criteria.
   const { conditionalLanguagePolicy, eligibilityCriteria: _eligibilityEnrichment, ...textCorrections } = review.corrections ?? {};
   const projected = { ...payload, ...textCorrections, metadata: { ...payload.metadata,
+    ...(review.deadlineEvidence ? { deadlineMode: 'NOT_STATED_IN_SOURCE' } : {}),
     ...(conditionalLanguagePolicy ? { conditionalLanguageEvidence: conditionalLanguagePolicy } : {}),
   } };
   if ((review.languageEvidence || conditionalLanguagePolicy) && (!scholarshipImportLanguagePolicy(projected).present || !scholarshipImportLanguagePolicy(projected).valid)) return invalid;
@@ -62,7 +75,7 @@ export function scholarshipImportSourceReview(
       (entry.target === 'INTERNATIONAL_TEST' && tests.includes(entry.rawValue ?? '')))
       ? { ...entry, state: 'SOURCE_ONLY', canonicalReferenceId: null, canonicalPublicId: null, canonicalStandardCode: null }
       : { ...entry });
-  return { valid: true, present: true, contextualize, payload: {
+  return { valid: true, present: true, reviewedDeadlineAbsence: Boolean(review.deadlineEvidence), contextualize, payload: {
     ...projected,
     ...(review.researchAreas ? { eligibleMajorsOrFields: undefined } : {}),
     metadata: { ...projected.metadata, reviewedSourceInterpretation: review,

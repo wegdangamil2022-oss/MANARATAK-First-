@@ -427,7 +427,17 @@ export class ScholarshipImportCenterUseCases {
       extractedDegreeLevels: this.stringArray(name.extracted.degreeLevelLabels, []),
     });
     const persistedCompleteness = this.object(persistedHandoff.completeness);
-    const completeness = Object.keys(persistedCompleteness).length ? { ...calculatedCompleteness, state: (this.stringValue(persistedCompleteness.state) as ScholarshipCompletenessState) ?? calculatedCompleteness.state, missingFields: this.stringArray(persistedCompleteness.missingFields, calculatedCompleteness.missingFields), identityMissingFields: this.stringArray(persistedCompleteness.identityMissingFields, calculatedCompleteness.identityMissingFields), coreMissingFields: this.stringArray(persistedCompleteness.coreMissingFields, calculatedCompleteness.coreMissingFields), optionalMissingFields: this.stringArray(persistedCompleteness.optionalMissingFields, calculatedCompleteness.optionalMissingFields), identityReady: typeof persistedCompleteness.identityReady === 'boolean' ? persistedCompleteness.identityReady : calculatedCompleteness.identityReady } : calculatedCompleteness;
+    let completeness = Object.keys(persistedCompleteness).length ? { ...calculatedCompleteness, state: (this.stringValue(persistedCompleteness.state) as ScholarshipCompletenessState) ?? calculatedCompleteness.state, missingFields: this.stringArray(persistedCompleteness.missingFields, calculatedCompleteness.missingFields), identityMissingFields: this.stringArray(persistedCompleteness.identityMissingFields, calculatedCompleteness.identityMissingFields), coreMissingFields: this.stringArray(persistedCompleteness.coreMissingFields, calculatedCompleteness.coreMissingFields), optionalMissingFields: this.stringArray(persistedCompleteness.optionalMissingFields, calculatedCompleteness.optionalMissingFields), identityReady: typeof persistedCompleteness.identityReady === 'boolean' ? persistedCompleteness.identityReady : calculatedCompleteness.identityReady } : calculatedCompleteness;
+    if (sourceReview.reviewedDeadlineAbsence && completeness.state === ScholarshipCompletenessState.NEEDS_REVIEW) {
+      // Keep the original handoff snapshot intact. Only this explicitly reviewed
+      // blocker is superseded; unrelated missing fields still prevent transfer.
+      const coreMissingFields = completeness.coreMissingFields.filter(field => field !== 'deadlineMode');
+      const missingFields = completeness.missingFields.filter(field => field !== 'deadlineMode');
+      const resolved = completeness.identityReady && completeness.identityMissingFields.length === 0 &&
+        coreMissingFields.length === 0 && missingFields.length === 0 && calculatedCompleteness.state === ScholarshipCompletenessState.COMPLETE;
+      completeness = { ...completeness, coreMissingFields, missingFields,
+        state: resolved ? ScholarshipCompletenessState.COMPLETE : completeness.state };
+    }
     const incomingSourceImportRecordId = record.id;
     const dedupeInput = {
       cleanedScholarshipName: name.cleanedScholarshipName,

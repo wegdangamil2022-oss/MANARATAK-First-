@@ -117,6 +117,28 @@ function scholarshipRepository(existing: ScholarshipDto | null = null): IScholar
 }
 
 describe('WP12-7 ScholarshipImportCenterUseCases', () => {
+  it('clears only a reviewed missing-deadline snapshot while retaining other handoff blockers', async () => {
+    for (const otherMissing of [[], ['fundingCoverage']]) {
+      const raw = completePayload({ applicationDeadline: undefined,
+        _domainHandoff: { completeness: { state: 'NEEDS_REVIEW', identityReady: true,
+          coreMissingFields: ['deadlineMode', ...otherMissing], missingFields: ['deadlineMode', ...otherMissing] } },
+        metadata: { verificationState: 'PENDING', sourceBasicFields: { 'اسم المنحة': 'Example' },
+          sourcePresentation: { deadlineText: '' }, canonicalScreening: [{ target: 'COUNTRY', state: 'RESOLVED', rawValue: 'Qatar', canonicalReferenceId: 'country-qa' }] },
+      });
+      const local = gateway(); local.getRecordById = async () => ({ ...records[0], rawPayload: raw });
+      const decision = { state: 'VERIFIED' as const, recordId: records[0].id, actorId: 'reviewer', reason: 'No deadline stated in source basic fields.', evidence: { sourceReview: {
+        version: 1, rawPayloadFingerprint: scholarshipImportReviewFingerprint(raw), officialSourceUrls: [raw.officialSourceUrl],
+        reason: 'Reviewed absence, no assumed date.', deadlineEvidence: 'ABSENT_FROM_SOURCE_BASIC_FIELDS',
+      } } };
+      const verification = { latest: vi.fn(async () => decision), record: vi.fn(), list: vi.fn() };
+      const service = new ScholarshipImportCenterUseCases(local, scholarshipRepository(), undefined, undefined, undefined, verification);
+      const view = await service.getRecord(records[0].id);
+      expect(view.completeness.coreMissingFields).toEqual(otherMissing);
+      expect(view.readyToTransfer).toBe(otherMissing.length === 0);
+      raw.metadata.sourcePresentation.deadlineText = '2027-01-01';
+      expect(await service.getRecord(records[0].id)).toMatchObject({ readyToTransfer: false, reviewReasons: expect.arrayContaining(['SOURCE_REVIEW:INVALID']) });
+    }
+  });
   it('uses the same source-bound reviewed semantics as transfer and rejects a stale source review', async () => {
     const raw = completePayload({ eligibleMajorsOrFields: ['History'], metadata: { verificationState: 'PENDING', canonicalScreening: [
       { target: 'COUNTRY', state: 'RESOLVED', rawValue: 'Qatar', canonicalReferenceId: 'country-qa' },

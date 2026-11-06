@@ -20,6 +20,30 @@ function fixture() {
 }
 
 describe('ScholarshipImportSourceReview', () => {
+  it('records reviewed absence of a source deadline without inventing a date or changing source evidence', () => {
+    const { raw, review } = fixture();
+    const source = { ...raw, metadata: { ...raw.metadata,
+      sourceBasicFields: { 'اسم المنحة': 'Example' }, sourcePresentation: { deadlineText: '' },
+    } };
+    const decision = { ...review, rawPayloadFingerprint: scholarshipImportReviewFingerprint(source), deadlineEvidence: 'ABSENT_FROM_SOURCE_BASIC_FIELDS' };
+    const before = JSON.stringify(source);
+    const result = scholarshipImportSourceReview(source, { state: 'VERIFIED', evidence: { sourceReview: decision } });
+    expect(result.valid).toBe(true);
+    expect(result.payload.metadata?.deadlineMode).toBe('NOT_STATED_IN_SOURCE');
+    expect(result.payload.applicationDeadline).toBeUndefined();
+    expect(JSON.stringify(source)).toBe(before);
+    for (const changed of [
+      { ...source, applicationDeadline: '2027-01-01' },
+      { ...source, metadata: { ...source.metadata, sourceBasicFields: { 'اسم المنحة': 'Example', 'الموعد النهائي': 'November 2027' } } },
+      { ...source, metadata: { ...source.metadata, sourcePresentation: { deadlineText: 'November 2027' } } },
+      { ...source, metadata: { ...source.metadata, deadlineType: 'FIXED' } },
+      { ...source, metadata: { ...source.metadata, sourceBasicFields: undefined } },
+    ]) {
+      expect(scholarshipImportSourceReview(changed, { state: 'VERIFIED', evidence: { sourceReview: {
+        ...decision, rawPayloadFingerprint: scholarshipImportReviewFingerprint(changed),
+      } } }).valid).toBe(false);
+    }
+  });
   it('retains eligibility review enrichment without replacing the original source criteria', () => {
     const { raw, review, verification } = fixture();
     const source = { ...raw, eligibilityCriteria: 'Literal source only.' };
