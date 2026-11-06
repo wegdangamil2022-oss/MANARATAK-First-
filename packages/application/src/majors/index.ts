@@ -6,3 +6,4 @@ export * from './services/CanonicalMajorReferenceService';
 export * from './services/MajorImportScreeningConsumer';
 export * from './services/IMajorImportReviewGateway';
 export * from './use-cases/MajorOwnerImportUseCases';
+export { FellowshipImportScreeningConsumer } from './use-cases/ReviewedFellowshipBatchUseCase';
