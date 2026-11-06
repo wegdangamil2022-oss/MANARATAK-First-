@@ -6,6 +6,7 @@ import { useAdminAuthorization } from '../../security/AdminAuthorizationContext'
 import { CourseLookup, type CourseOptionPage } from './CourseLookup';
 import { certificateLabels, courseStatusLabels, studyLabels, useCourseCopy } from './useCourseCopy';
 import type { CourseScope } from './catalogState';
+import { arabicCourseValue } from './coursePresentation';
 
 export function CourseCatalogFilters({ params, scope, fixedScope, search, onSearch, change, reset }: {
   params: URLSearchParams; scope: CourseScope; fixedScope?: CourseScope; search: string;
@@ -19,12 +20,12 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
     </select>
   </label>;
   const facet = (key: 'learningLanguage' | 'difficultyLevel', title: string) => <CourseLookup key={`${key}-${scope}`} label={title} value={params.get(key) ?? ''}
-    hydrate={async value => ({ id: value, label: value })}
+    hydrate={async value => ({ id: value, label: ar ? arabicCourseValue(value) : value })}
     onChange={value => change({ [key]: value })} load={async (q, page): Promise<CourseOptionPage> => {
       const query = new URLSearchParams({ field: key, page: String(page), search: q });
       if (scope !== 'all') query.set('originType', scope === 'native' ? 'NATIVE_MANARATAK_COURSE' : 'EXTERNAL_LINKED_COURSE');
       const result = await adminApiClient.request<{ data: string[]; hasMore: boolean }>(`/admin/courses/catalog/options?${query}`);
-      return { data: result.data.map(value => ({ id: value, label: value })), hasMore: result.hasMore };
+      return { data: result.data.map(value => ({ id: value, label: ar ? arabicCourseValue(value) : value })), hasMore: result.hasMore };
     }} />;
   const filterTitles: Record<string, string> = {
     q: tr('البحث', 'Search'), scope: tr('النطاق', 'Scope'), status: tr('الحالة', 'Status'),
@@ -48,6 +49,7 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
     if (key === 'hasEnrollments') return value === 'true' ? tr('لديها تسجيلات', 'With enrollments') : tr('دون تسجيلات', 'No enrollments');
     if (key === 'linkHealth') return ({ VERIFIED: tr('متحقق منه سابقًا', 'Previously verified'), BROKEN: tr('معطل / مرفوض', 'Broken / rejected'), NEEDS_REVIEW: tr('يحتاج تحققًا', 'Needs verification'), UNKNOWN: tr('غير معلوم', 'Unknown') } as Record<string, string>)[value] ?? '';
     if (key === 'completenessStatus') return ({ IMPORTED: tr('مستوردة', 'Imported'), INCOMPLETE: tr('غير مكتملة', 'Incomplete'), NEEDS_REVIEW: tr('تحتاج مراجعة', 'Needs review'), COMPLETE: tr('مكتملة', 'Complete'), REJECTED: tr('مرفوضة', 'Rejected') } as Record<string, string>)[value] ?? tr('حالة محددة', 'Selected state');
+    if (ar && (key === 'learningLanguage' || key === 'difficultyLevel')) return arabicCourseValue(value);
     return value;
   };
   return <section className="course-panel course-filters" aria-labelledby="course-filters-title">

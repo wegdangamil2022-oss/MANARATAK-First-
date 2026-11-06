@@ -260,6 +260,11 @@ function CourseDetailWorkspace() {
       if(courseResponse.originType==='NATIVE_MANARATAK_COURSE'){
         navigate(`/courses/${encodeURIComponent(id)}/editor?returnTo=${encodeURIComponent(returnTo)}`,{replace:true});return;
       }
+      if(courseResponse.originType==='EXTERNAL_LINKED_COURSE'){
+        const query=new URLSearchParams(returnTo.split('?')[1] ?? '');
+        query.set('course',id);
+        navigate(`/courses/external?${query}`,{replace:true});return;
+      }
       const optional = courseResponse.optionalFields ?? {};
       for (const key of ['description', 'courseContent', 'instructor'] as const)
         if (typeof optional[key] === 'string') courseResponse[key] = optional[key];

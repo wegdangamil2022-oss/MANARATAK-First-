@@ -53,12 +53,12 @@ async function mount() {
       </MemoryRouter>,
     );
   });
+  await act(async () => button('Source and review operations').props.onClick());
   await act(async () =>
     tree.root
       .findAllByType('textarea')[0]
       .props.onChange({ target: { value: 'Reviewed official source' } }),
   );
-  await act(async () => button('Source and review operations').props.onClick());
   await act(async () => button('Check publication readiness').props.onClick());
 }
 beforeEach(() => {
@@ -74,6 +74,14 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 describe('External course command readback', () => {
+  it('renders a single source detail panel without unrelated content or the legacy tools link', async () => {
+    await mount();
+    const rendered = text(tree.toJSON());
+    expect(tree.root.findAll(node => node.props['aria-label'] === 'Course source fields')).toHaveLength(1);
+    for (const label of ['Arabic course name', 'English course name', 'Arabic provider name', 'English provider name', 'Free study', 'Free certificate', 'Certificate type', 'Study language', 'Course level', 'Course duration', 'Course topics', 'Direct course URL', 'Source number']) expect(rendered).toContain(label);
+    for (const label of ['Relationship and version tools', 'Prerequisites', 'Learning outcomes', 'Documented certificate conditions', 'Canonical course relationships']) expect(rendered).not.toContain(label);
+    expect(state.request.mock.calls.some(([url]) => url.includes('/history'))).toBe(false);
+  });
   it('verifies the exact persisted version and status before notifying the catalog', async () => {
     await mount();
     state.request.mockImplementation(async (path: string, options?: { method?: string }) => {

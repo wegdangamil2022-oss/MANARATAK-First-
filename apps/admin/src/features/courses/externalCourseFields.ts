@@ -1,40 +1,35 @@
 import type { CourseDto, ManualExternalCourseInput } from '@manaratak/domain';
 
-export type ExternalSection = 'identity' | 'learning' | 'certificate' | 'content' | 'source';
+export type ExternalSection = 'identity' | 'learning' | 'certificate' | 'source';
 export const externalSections = [
   { id: 'identity', ar: 'بيانات الدورة الأساسية', en: 'Course identity' },
-  { id: 'learning', ar: 'التعلم والتصنيف', en: 'Learning and classification' },
+  { id: 'learning', ar: 'لغة الدورة ومستواها ومدتها وموضوعاتها', en: 'Language, level, duration and topics' },
   { id: 'certificate', ar: 'الدراسة والشهادة', en: 'Study and certificate' },
-  { id: 'content', ar: 'الوصف والمحتوى الموثق', en: 'Documented content' },
   { id: 'source', ar: 'المصدر والمراجعة والنشر', en: 'Source, review and publication' },
 ] as const;
 export const externalFields: Record<Exclude<ExternalSection, 'source'>, Array<{ key: string; ar: string; en: string; kind?: 'textarea' | 'list' | 'boolean'; immutable?: boolean; required?: boolean }>> = {
   identity: [
-    { key: 'originalSourceTitle', ar: 'العنوان الأصلي', en: 'Original title', immutable: true, required: true },
-    { key: 'displayName', ar: 'اسم العرض', en: 'Display title' },
-    { key: 'platformName', ar: 'اسم منصة المصدر', en: 'Source platform' },
-    { key: 'directCourseUrl', ar: 'رابط الدورة الأصلي', en: 'Original course URL', immutable: true, required: true },
+    { key: 'displayName', ar: 'اسم الدورة بالعربية', en: 'Arabic course name' },
+    { key: 'originalSourceTitle', ar: 'اسم الدورة بالإنجليزية', en: 'English course name', immutable: true, required: true },
+    { key: 'providerName', ar: 'الجهة المقدمة بالعربية', en: 'Arabic provider name' },
+    { key: 'platformName', ar: 'الجهة المقدمة بالإنجليزية', en: 'English provider name' },
+    { key: 'directCourseUrl', ar: 'رابط الدورة المباشر', en: 'Direct course URL', immutable: true, required: true },
   ],
   learning: [
-    { key: 'learningLanguageRaw', ar: 'لغة المصدر', en: 'Source language' },
-    { key: 'studyLevelRaw', ar: 'مستوى المصدر', en: 'Source level' },
-    { key: 'studyDurationRaw', ar: 'المدة كما وردت في المصدر', en: 'Duration as provided by source' },
-    { key: 'shortCourseTopicsRaw', ar: 'موضوعات الدورة من المصدر', en: 'Source course topics', kind: 'textarea' },
+    { key: 'learningLanguageRaw', ar: 'لغة الدراسة', en: 'Study language' },
+    { key: 'studyLevelRaw', ar: 'مستوى الدورة', en: 'Course level' },
+    { key: 'studyDurationRaw', ar: 'مدة الدورة', en: 'Course duration' },
+    { key: 'shortCourseTopicsRaw', ar: 'موضوعات الدورة', en: 'Course topics', kind: 'textarea' },
   ],
   certificate: [
     { key: 'isStudyFree', ar: 'الدراسة مجانية', en: 'Free study', kind: 'boolean' },
     { key: 'isFreeCertificate', ar: 'الشهادة مجانية', en: 'Free certificate', kind: 'boolean' },
-    { key: 'certificateAvailable', ar: 'الشهادة متاحة', en: 'Certificate available', kind: 'boolean' },
     { key: 'certificateType', ar: 'نوع الشهادة', en: 'Certificate type' },
-    { key: 'certificateConditions', ar: 'شروط الشهادة الموثقة', en: 'Documented certificate conditions', kind: 'textarea' },
-  ],
-  content: [
-    { key: 'description', ar: 'وصف الدورة', en: 'Course description', kind: 'textarea' },
-    { key: 'learningOutcomes', ar: 'مخرجات التعلم — عنصر في كل سطر', en: 'Learning outcomes — one per line', kind: 'list' },
-    { key: 'prerequisites', ar: 'المتطلبات — عنصر في كل سطر', en: 'Prerequisites — one per line', kind: 'list' },
-    { key: 'acquiredSkills', ar: 'المهارات — عنصر في كل سطر', en: 'Skills — one per line', kind: 'list' },
   ],
 };
+export function externalDetailsPayload(form: Record<string, string>): Record<string, unknown> {
+  return Object.assign({}, ...Object.keys(externalFields).map(section => externalSectionPayload(form, section as Exclude<ExternalSection, 'source'>)));
+}
 export function externalForm(course?: CourseDto): Record<string, string> {
   const form: Record<string, string> = {};
   const values = { ...course?.optionalFields, ...course } as Record<string, unknown>;
@@ -54,6 +49,8 @@ export function externalSectionPayload(form: Record<string, string>, section: Ex
 export function manualExternalPayload(form: Record<string, string>): ManualExternalCourseInput {
   const fields = Object.assign({}, ...Object.keys(externalFields).map(section => externalSectionPayload(form, section as Exclude<ExternalSection, 'source'>, true)));
   if (!fields.displayName) delete fields.displayName;
+  // Manual creation derives providerName from the canonical provider; it is not a creation input.
+  delete fields.providerName;
   return { ...fields, externalProviderId: form.externalProviderId, evidenceUrl: form.evidenceUrl.trim(), evidenceObservedAt: new Date(form.evidenceObservedAt).toISOString(), evidenceNote: form.evidenceNote } as ManualExternalCourseInput;
 }
 export function externalIssue(code: string, tr: (ar: string, en: string) => string): string {
