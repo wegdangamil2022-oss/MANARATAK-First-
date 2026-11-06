@@ -29,6 +29,7 @@
     "reference:currencies:dry-run": "tsx scripts/dry-run-reference-currencies.ts",
     "reference:languages:dry-run": "tsx scripts/dry-run-reference-languages.ts",
     "reference:geography:dry-run": "tsx scripts/dry-run-reference-geography.ts",
+    "reference:geography:prepare": "tsx scripts/import/prepare-geography-import.ts",
     "datasets:sources:verify": "tsx scripts/import/verify-dataset-sources.ts",
     "imports:qc:prepare": "tsx scripts/import/source-quality.ts prepare",
     "pilot:m10:template": "tsx scripts/import/m10-pilot-evidence.ts template",
