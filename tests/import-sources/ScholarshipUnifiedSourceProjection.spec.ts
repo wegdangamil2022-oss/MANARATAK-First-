@@ -80,4 +80,19 @@ describe('unified 2027 scholarship projection', () => {
       'DUPLICATE_ELIGIBILITY_SECTION',
     );
   });
+  it('keeps the ELTE preamble as source context instead of screening it as a major', () => {
+    const record = records.find(record => record.displayNumber === '0406')!;
+    const payload = projectUnifiedScholarship(record, sourcePath, hash);
+    expect(payload.eligibleMajorsOrFields).toHaveLength(28);
+    expect(payload.eligibleMajorsOrFields).not.toContain(expect.stringContaining('التخصصات أدناه'));
+    expect(payload.eligibleMajorsOrFields).toContain('الرياضيات والفيزياء.');
+    expect(payload.metadata!.sourcePresentation).toMatchObject({ degreeGroups: [
+      { title: '', items: [expect.stringContaining('التخصصات أدناه')] },
+      { title: 'أولًا: البكالوريوس', items: expect.any(Array) },
+      { title: 'ثانيًا: الماجستير', items: expect.any(Array) },
+      { title: 'ثالثًا: الدكتوراه', items: expect.any(Array) },
+    ] });
+    expect(payload.metadata!.rawSourceBlock).toBe(record.rawContent);
+    expect(payload.degreeLevel).toBe('بكالوريوس وماجستير ودكتوراه.');
+  });
 });

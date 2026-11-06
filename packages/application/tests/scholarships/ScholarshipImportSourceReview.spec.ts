@@ -20,6 +20,60 @@ function fixture() {
 }
 
 describe('ScholarshipImportSourceReview', () => {
+  it('reviews a date-only source deadline without inventing a closing instant or replacing contradictory evidence', () => {
+    const raw = { scholarshipName: 'KAS-SAIIA', officialSourceUrl: 'https://source.example/awards',
+      metadata: { sourceBasicFields: { 'الموعد النهائي': '1 سبتمبر 2026' }, sourcePresentation: { deadlineText: '1 سبتمبر 2026' } } };
+    const review = { version: 1, rawPayloadFingerprint: scholarshipImportReviewFingerprint(raw), officialSourceUrls: [raw.officialSourceUrl],
+      reason: 'Literal source calendar day reviewed; no timezone or closing time supplied.', dateOnlyDeadline: { sourceText: '1 سبتمبر 2026' } };
+    const before = JSON.stringify(raw);
+    const result = scholarshipImportSourceReview(raw, { state: 'VERIFIED', evidence: { sourceReview: review } });
+    expect(result).toMatchObject({ valid: true, reviewedDeadline: true, reviewedDeadlineAbsence: false });
+    expect(result.payload.metadata).toMatchObject({ deadlineMode: 'DATE_ONLY', sourceDeadlineDate: '2026-09-01' });
+    expect(result.payload.applicationDeadline).toBeUndefined();
+    expect(JSON.stringify(raw)).toBe(before);
+    for (const changed of [
+      { ...raw, applicationDeadline: '2026-09-01T12:00:00Z' },
+      { ...raw, metadata: { ...raw.metadata, deadlineMode: 'ROLLING' } },
+      { ...raw, metadata: { ...raw.metadata, sourcePresentation: { deadlineText: 'Different source date' } } },
+      { ...raw, metadata: { ...raw.metadata, sourceBasicFields: {} } },
+    ]) expect(scholarshipImportSourceReview(changed, { state: 'VERIFIED', evidence: { sourceReview: {
+      ...review, rawPayloadFingerprint: scholarshipImportReviewFingerprint(changed),
+    } } }).valid).toBe(false);
+    expect(scholarshipImportSourceReview(raw, { state: 'VERIFIED', evidence: { sourceReview: {
+      ...review, dateOnlyDeadline: { sourceText: '15 يناير 2026' },
+    } } }).valid).toBe(false);
+    expect(scholarshipImportSourceReview(raw, { state: 'VERIFIED', evidence: { sourceReview: {
+      ...review, deadlineEvidence: 'ABSENT_FROM_SOURCE_BASIC_FIELDS',
+    } } }).valid).toBe(false);
+  });
+  it('supersedes only a literal academic preamble without rewriting the staged source or clearing actual majors', () => {
+    const raw = { scholarshipName: 'ELTE', officialSourceUrl: 'https://elte.example/awards',
+      eligibleMajorsOrFields: ['Programmes depend on the sending partner.', 'Mathematics and Physics.', 'Computer Science.'],
+      metadata: { rawSourceSections: { 'التخصصات المتاحة': 'Programmes depend on the sending partner.\n\n**Bachelor**\n1. Mathematics and Physics.\n\n**Master**\n1. Computer Science.' } } };
+    const review = { version: 1, rawPayloadFingerprint: scholarshipImportReviewFingerprint(raw),
+      officialSourceUrls: [raw.officialSourceUrl], reason: 'Preserve context separately from literal numbered academic entries.', academicListEvidence: 'NUMBERED_SOURCE_ITEMS_ONLY' };
+    const before = JSON.stringify(raw);
+    const result = scholarshipImportSourceReview(raw, { state: 'VERIFIED', evidence: { sourceReview: review } });
+    expect(result.valid).toBe(true);
+    expect(result.payload.eligibleMajorsOrFields).toEqual(['Mathematics and Physics.', 'Computer Science.']);
+    expect(result.payload.metadata?.rawSourceSections).toEqual(raw.metadata.rawSourceSections);
+    const entries = raw.eligibleMajorsOrFields.map((rawValue, i) => ({ requirementKey: `major-${i}`, target: 'MAJOR' as const,
+      rawValue, state: 'UNRESOLVED', canonicalReferenceId: null, canonicalPublicId: null, canonicalStandardCode: null }));
+    expect(result.contextualize(entries).map(item => item.state)).toEqual(['SOURCE_ONLY', 'UNRESOLVED', 'UNRESOLVED']);
+    expect(JSON.stringify(raw)).toBe(before);
+    for (const changed of [
+      { ...raw, eligibleMajorsOrFields: [...raw.eligibleMajorsOrFields, 'Invented label'] },
+      { ...raw, eligibleMajorsOrFields: ['Programmes depend on the sending partner.', 'Computer Science.', 'Mathematics and Physics.'] },
+      { ...raw, metadata: { rawSourceSections: { 'التخصصات المتاحة': 'Unnumbered context only.' } } },
+      { ...raw, metadata: {} },
+    ]) expect(scholarshipImportSourceReview(changed, { state: 'VERIFIED', evidence: { sourceReview: {
+      ...review, rawPayloadFingerprint: scholarshipImportReviewFingerprint(changed),
+    } } }).valid).toBe(false);
+    expect(scholarshipImportSourceReview(raw, { state: 'PENDING', evidence: { sourceReview: review } }).valid).toBe(false);
+    expect(scholarshipImportSourceReview(raw, { state: 'VERIFIED', evidence: { sourceReview: { ...review,
+      researchAreas: { classification: 'PROGRAM_RESEARCH_AREAS_NOT_PRIOR_DEGREE_RESTRICTIONS', sourceLabels: raw.eligibleMajorsOrFields },
+    } } }).valid).toBe(false);
+  });
   it('records reviewed absence of a source deadline without inventing a date or changing source evidence', () => {
     const { raw, review } = fixture();
     const source = { ...raw, metadata: { ...raw.metadata,

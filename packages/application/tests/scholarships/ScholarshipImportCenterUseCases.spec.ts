@@ -117,6 +117,22 @@ function scholarshipRepository(existing: ScholarshipDto | null = null): IScholar
 }
 
 describe('WP12-7 ScholarshipImportCenterUseCases', () => {
+  it('supersedes only the reviewed date-only deadline blocker in an immutable historical handoff', async () => {
+    const raw = completePayload({ applicationDeadline: undefined,
+      _domainHandoff: { completeness: { state: 'NEEDS_REVIEW', identityReady: true, coreMissingFields: ['deadlineMode'], missingFields: ['deadlineMode'] } },
+      metadata: { sourceBasicFields: { 'الموعد النهائي': '1 سبتمبر 2026' }, sourcePresentation: { deadlineText: '1 سبتمبر 2026' },
+        canonicalScreening: [{ target: 'COUNTRY', state: 'RESOLVED', rawValue: 'Qatar', canonicalReferenceId: 'country-qa' }] },
+    });
+    const local = gateway(); local.getRecordById = async () => ({ ...records[0], rawPayload: raw });
+    const verification = { latest: vi.fn(async () => ({ state: 'VERIFIED' as const, evidence: { sourceReview: {
+      version: 1, rawPayloadFingerprint: scholarshipImportReviewFingerprint(raw), officialSourceUrls: [raw.officialSourceUrl],
+      reason: 'Reviewed source calendar day only.', dateOnlyDeadline: { sourceText: '1 سبتمبر 2026' },
+    } } })), record: vi.fn(), list: vi.fn() };
+    const before = JSON.stringify(raw);
+    const service = new ScholarshipImportCenterUseCases(local, scholarshipRepository(), undefined, undefined, undefined, verification);
+    expect(await service.getRecord(records[0].id)).toMatchObject({ readyToTransfer: true, completeness: { coreMissingFields: [] } });
+    expect(JSON.stringify(raw)).toBe(before);
+  });
   it('clears only a reviewed missing-deadline snapshot while retaining other handoff blockers', async () => {
     for (const otherMissing of [[], ['fundingCoverage']]) {
       const raw = completePayload({ applicationDeadline: undefined,

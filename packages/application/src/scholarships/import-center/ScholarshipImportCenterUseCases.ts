@@ -428,7 +428,7 @@ export class ScholarshipImportCenterUseCases {
     });
     const persistedCompleteness = this.object(persistedHandoff.completeness);
     let completeness = Object.keys(persistedCompleteness).length ? { ...calculatedCompleteness, state: (this.stringValue(persistedCompleteness.state) as ScholarshipCompletenessState) ?? calculatedCompleteness.state, missingFields: this.stringArray(persistedCompleteness.missingFields, calculatedCompleteness.missingFields), identityMissingFields: this.stringArray(persistedCompleteness.identityMissingFields, calculatedCompleteness.identityMissingFields), coreMissingFields: this.stringArray(persistedCompleteness.coreMissingFields, calculatedCompleteness.coreMissingFields), optionalMissingFields: this.stringArray(persistedCompleteness.optionalMissingFields, calculatedCompleteness.optionalMissingFields), identityReady: typeof persistedCompleteness.identityReady === 'boolean' ? persistedCompleteness.identityReady : calculatedCompleteness.identityReady } : calculatedCompleteness;
-    if (sourceReview.reviewedDeadlineAbsence && completeness.state === ScholarshipCompletenessState.NEEDS_REVIEW) {
+    if (sourceReview.reviewedDeadline && completeness.state === ScholarshipCompletenessState.NEEDS_REVIEW) {
       // Keep the original handoff snapshot intact. Only this explicitly reviewed
       // blocker is superseded; unrelated missing fields still prevent transfer.
       const coreMissingFields = completeness.coreMissingFields.filter(field => field !== 'deadlineMode');

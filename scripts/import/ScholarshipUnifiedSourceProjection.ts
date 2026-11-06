@@ -1,4 +1,5 @@
 import type { ScholarshipImportPayload } from '@manaratak/domain';
+import { scholarshipAcademicSourceItems } from '@manaratak/domain';
 import type { ScholarshipGuideRecord } from './ScholarshipMasterGuideReader';
 import { scholarshipGuideSection } from './ScholarshipRelationshipSourceReview';
 
@@ -56,6 +57,7 @@ export function projectUnifiedScholarship(
   const basics = scholarshipBasicFields(record);
   const fundingGroups = scholarshipSourceGroups(section('التمويل والمزايا'));
   const degreeGroups = scholarshipSourceGroups(section('التخصصات المتاحة'));
+  const academicItems = scholarshipAcademicSourceItems(section('التخصصات المتاحة'));
   const benefits = fundingGroups.flatMap((group, groupIndex) =>
     group.items.map((valueText, index) => ({
       benefitKey: `source-benefit-${groupIndex + 1}-${index + 1}`,
@@ -88,7 +90,9 @@ export function projectUnifiedScholarship(
     eligibilityCriteria: record.sourceEligibility?.text ?? '',
     requiredDocuments: scholarshipSourceList(section('المستندات المطلوبة')),
     targetUniversities: scholarshipSourceList(section('الجامعات المشاركة')),
-    eligibleMajorsOrFields: degreeGroups.flatMap((group) => group.items),
+    // Unnumbered-only sections remain review requirements, never silently clear
+    // them. With a numbered list, its preamble is retained in sourcePresentation.
+    eligibleMajorsOrFields: academicItems.length ? academicItems : degreeGroups.flatMap(group => group.items),
     applicationLink: links.find((link) => link.field === 'applicationUrl')?.url,
     officialSourceUrl: links.find((link) => link.field === 'officialSourceUrl')?.url,
     metadata: {

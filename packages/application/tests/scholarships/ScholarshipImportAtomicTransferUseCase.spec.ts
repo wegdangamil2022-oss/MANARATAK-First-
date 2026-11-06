@@ -164,6 +164,21 @@ function existingScholarship(status: ScholarshipStatus = ScholarshipStatus.IMPOR
 }
 
 describe('WP12-10 ScholarshipImportAtomicTransferUseCase', () => {
+  it('transfers a reviewed calendar date as draft metadata without assigning a timezone', async () => {
+    const env = setup();
+    const raw = { ...payload(), applicationDeadline: undefined, metadata: { ...payload().metadata,
+      sourceBasicFields: { 'الموعد النهائي': '1 سبتمبر 2026' }, sourcePresentation: { deadlineText: '1 سبتمبر 2026' },
+    } };
+    env.getRecord().rawPayload = raw;
+    const before = JSON.stringify(raw);
+    env.verification.latest.mockResolvedValue({ state: 'VERIFIED', evidence: { sourceReview: {
+      version: 1, rawPayloadFingerprint: scholarshipImportReviewFingerprint(raw), officialSourceUrls: [raw.officialSourceUrl],
+      reason: 'Calendar day only, as in the source.', dateOnlyDeadline: { sourceText: '1 سبتمبر 2026' },
+    } } });
+    expect(await env.service.transfer({ recordId: 'rec-1', actorId: 'reviewer' })).toMatchObject({ publicationStatus: 'DRAFT' });
+    expect(env.create.mock.calls[0][0]).toMatchObject({ applicationDeadline: null, deadlineType: 'DATE_ONLY', metadata: { sourceDeadlineDate: '2026-09-01' } });
+    expect(JSON.stringify(env.getRecord().rawPayload)).toBe(before);
+  });
   it('transfers an explicitly reviewed absent deadline as a draft without a fabricated date', async () => {
     const env = setup();
     const raw = { ...payload(), applicationDeadline: undefined, metadata: { ...payload().metadata,

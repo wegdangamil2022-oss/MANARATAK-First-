@@ -324,6 +324,8 @@ export {
 export * from './scholarships/contracts';
 export * from './scholarships/ScholarshipSourceEligibility';
 export * from './scholarships/ScholarshipSourceSections';
+export * from './scholarships/ScholarshipAcademicSourceList';
+export * from './scholarships/ScholarshipSourceCalendarDate';
 export * from './majors/enums';
 export * from './majors/majors';
 export * from './majors/NewMajorCandidate';
