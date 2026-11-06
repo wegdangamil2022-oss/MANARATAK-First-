@@ -1,0 +1,167 @@
+{
+  "status": "ORIGINAL_SOURCE_APPLICATION_VERIFIED",
+  "date": "2026-11-06",
+  "geography": {
+    "regions": 5003,
+    "cities": 10676,
+    "countries": 194,
+    "evidence": "GEOGRAPHY_FULL_APPLICATION_2026-11-06.json"
+  },
+  "sourceCatalogs": {
+    "bachelor": 843,
+    "master": 1116,
+    "doctorate": 1114,
+    "fellowship": 329,
+    "sourceFilesParsed": 303,
+    "detailsMatched": 2982,
+    "bachelorMissingDetails": 91,
+    "fellowshipDetailFilesAvailable": 0
+  },
+  "major": {
+    "runId": "3777d50a-45e8-4e77-b5ed-a47844df650b",
+    "planHash": "d42a711c065944c45a9e76f067ec9489a3674da9d45a503f8c96880bdfa856fd",
+    "portsHash": "070708cf9ca3e044dfbb47a524f1fdd0dafff7d2caea16c6c150b50f66ac2175",
+    "operatorSha256": "f566f90c193a3dbf75609807059e8b55857497cd005358121b06f33490efc543",
+    "replayConcurrency": 2,
+    "linkOperatorSha256": "bd8ac2c36e5812a97a32ccd417d8f75883d77846f74ed24c3cdc7b1a1be9d403",
+    "batches": 123,
+    "counts": {
+      "majors": 1910,
+      "profiles": 3073,
+      "versions": 3081,
+      "sections": 60411,
+      "sources": 3081,
+      "aliases": 6901,
+      "mappings": 1775,
+      "reviews": 3081,
+      "audits": 123,
+      "outbox": 123
+    },
+    "linkedP6Records": 3073,
+    "verification": {
+      "pass": true,
+      "scope": "original",
+      "databaseWrites": 0,
+      "unchangedOtherTables": 294,
+      "oldScopeRowsPreserved": 80,
+      "sourceProfilesAllMatched": true,
+      "sourceAssetsByteVerified": 31,
+      "versions": 3073,
+      "expectedSections": 60411,
+      "sections": 60411,
+      "publishedVersions": 0,
+      "snapshotMismatch": 0,
+      "missingOrChangedSections": 0,
+      "brokenProfileLinks": 0,
+      "optionalPayloadMismatch": 0,
+      "unexpectedMajorPublication": 0,
+      "explicitSourceContextCorrections": 97,
+      "existingRelationshipsPreserved": true,
+      "sourceMissingDetailsNotInvented": 91,
+      "sourceClassificationOnlyUnresolved": 1306,
+      "fullReplayZeroWrites": true
+    }
+  },
+  "fellowship": {
+    "runId": "b454707f-5cdd-4af2-8028-c0f43854ca95",
+    "planHash": "6ada35b3afa2e4b3d03f75fea9c4205d730553e6d8c86e9e4307f00276d766b1",
+    "portsHash": "1d5415cbf297c5bdd25e76267cf6c7c3983eedf39b1bd687da7c04e60b1744ce",
+    "rows": 329,
+    "batches": 14,
+    "verification": {
+      "pass": true,
+      "scope": "original",
+      "databaseWrites": 0,
+      "sourceFellowshipsAllMatched": 329,
+      "permanentAssetsByteVerified": 4,
+      "sourceColumnsRetained": true,
+      "noInventedDegreeOrMajorLinks": true,
+      "noPublication": true,
+      "rollbackProof": true,
+      "fullReplayZeroWrites": true,
+      "counts": {
+        "fellowships": 329,
+        "majors": 380,
+        "profiles": 380,
+        "audits": 14,
+        "outbox": 14
+      }
+    },
+    "p6Ledger": {
+      "pass": true,
+      "scope": "original",
+      "planHash": "6ada35b3afa2e4b3d03f75fea9c4205d730553e6d8c86e9e4307f00276d766b1",
+      "portsHash": "97d310aaf45ecc0c57192a0dac7f48ced755558c2e36d626efb558d871e23d51",
+      "linked": 329,
+      "batches": 14,
+      "rollbackProof": true,
+      "fullReplayZeroWrites": true,
+      "domainDataUnchanged": true,
+      "counts": {
+        "fellowships": 329,
+        "definitionsFingerprint": "6f4c4626f43c5996f23eadf33f0eeced",
+        "sourceFingerprint": "9a47d65ba50d3d1077af8dfafc958f03",
+        "promotedRecords": 329,
+        "audit": 14,
+        "outbox": 14
+      }
+    }
+  },
+  "classification": {
+    "existingNodes": 163,
+    "existingEdges": 152,
+    "existingAliases": 39,
+    "existingDegrees": 7,
+    "profilesWithExplicitReviewedBroadField": 1767,
+    "sourceContextOnlyProfiles": 1306,
+    "additionalLiteralCollegeHeaderReview": {
+      "pass": true,
+      "scope": "original",
+      "planHash": "e8156b25351a337985d922fb1f6f3abc4bd4b0382921676f96f2f6c4edd97cac",
+      "portsHash": "56543e1701651d88c95ebb33a9c4383a1fab6a243c9c3a85f8dc23ceedb45f9e",
+      "reviewedProfiles": 97,
+      "batches": 4,
+      "noSourceChanges": true,
+      "noVersionOrSectionChanges": true,
+      "noDegreeChanges": true,
+      "noPublication": true,
+      "rollbackProof": true,
+      "fullReplayZeroWrites": true,
+      "concurrentMajorImport": true,
+      "counts": {
+        "profiles": 2255,
+        "versions": 2258,
+        "sections": 42305,
+        "mappings": 1270,
+        "reviewMappings": 97,
+        "audit": 4,
+        "outbox": 4
+      },
+      "reviewedHashes": [
+        "caec2623b6b7e9789d2087ccafb7dec5d4ef4b4550d1a966e8754de48a143a3a",
+        "83768acfd21468dc0243df5549b4b312e3d936efdb7baebe5dbfbcc1068e6b39",
+        "3f297283266f34168d8aac0917abb9857b0d3f2e9fac7fe61574d187a6682fc4",
+        "832575ecdb28ceca624bf955ae67a1672afffd15d4b44cf88e841b24fd1db403"
+      ]
+    },
+    "automaticKeywordApprovals": 0,
+    "unmergedSameNameBachelorCodes": 36
+  },
+  "safety": {
+    "schemaChanges": false,
+    "deletes": false,
+    "publication": false,
+    "priorScopeRowsPreserved": 80,
+    "unchangedOtherTables": 294,
+    "mainReplayZeroWrites": true,
+    "fellowshipReplayZeroWrites": true,
+    "linksReplayZeroWrites": true,
+    "rollbackRehearsalsPassed": true
+  },
+  "checks": {
+    "focusedTests": 31,
+    "typeBuild": "PASS",
+    "sourceQuality": "PASS"
+  },
+  "finishedAt": "2026-11-06T18:22:06.424Z"
+}
