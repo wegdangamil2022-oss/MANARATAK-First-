@@ -44,7 +44,7 @@ export async function runReviewedTestImport(args: string[], env = process.env): 
   const { PrismaInternationalTestImportChangeGateway } = await import('@manaratak/infrastructure');
   const prisma = new PrismaClient({ datasources: { db: { url: env.DATABASE_URL } } });
   try {
-    const executor = new InternationalTestImportChangeExecutor(new PrismaInternationalTestImportChangeGateway(prisma));
+    const executor = new InternationalTestImportChangeExecutor(new PrismaInternationalTestImportChangeGateway(prisma,{batchPersistence:true}));
     if (mode === 'dry-run') {
       const report = await executor.preview(plan, actorId);
       await saveJson(output, report);

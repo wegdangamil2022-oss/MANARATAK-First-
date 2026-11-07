@@ -29,6 +29,20 @@ async function fixture() {
   return { root, sourceRoot, sourceFile, manifestFile, review, reviewFile, planFile, rawContent };
 }
 describe('locked source loader and offline CLI', () => {
+  it('loads a nested reviewed archive path while preserving the stable source key',async()=>{
+    const f=await fixture();await mkdir(join(f.sourceRoot,'bundle/guides'),{recursive:true});
+    await writeFile(join(f.sourceRoot,'bundle/guides/Test_2026.md'),f.rawContent);
+    const manifest=JSON.stringify({matching_rows:[{folder:'language',filename:'Test_2026.md',classification:'NEW_TEST',relativePath:'bundle/guides/Test_2026.md'}]});
+    await writeFile(f.manifestFile,manifest);
+    const plan=await prepareReviewedTestImport({...f.review,sourceManifestHash:internationalTestSourceHash(manifest)},f.root);
+    expect(plan.entries[0].sourceKey).toBe('language/Test_2026.md');expect(plan.entries[0].rawContent).toBe(f.rawContent);
+  });
+  it('rejects an absolute archive mapping outside the approved source tree',async()=>{
+    const f=await fixture(),external=await mkdtemp(join(tmpdir(),'manaratak-map-outside-')),file=join(external,'Test_2026.md');await writeFile(file,f.rawContent);
+    const manifest=JSON.stringify({matching_rows:[{folder:'language',filename:'Test_2026.md',classification:'NEW_TEST',relativePath:file}]});await writeFile(f.manifestFile,manifest);
+    await expect(prepareReviewedTestImport({...f.review,sourceManifestHash:internationalTestSourceHash(manifest)},f.root)).rejects.toThrow('SOURCE_PATH_ESCAPE');
+  });
+
   it('preserves reviewed UUIDs and exact raw source; legacy ids are never inferred', async () => {
     const f = await fixture(); const plan = await prepareReviewedTestImport(f.review, f.root);
     expect(plan.entries[0].targetId).toBe(f.review.entries[0].targetId);
