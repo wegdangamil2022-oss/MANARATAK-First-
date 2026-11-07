@@ -185,8 +185,8 @@ export class PrismaInternationalTestImportChangeGateway implements International
   }
   private transactionTimeout(entries: number): number {
     // The reviewed contract caps batches at five. Allow the same bounded budget
-    // per entry on a distant database; a batch must still commit atomically.
-    return 30_000 * Math.min(5, Math.max(1, entries));
+    // for fixed authorization/receipt work plus each entry on a distant database.
+    return 90_000 + 12_000 * Math.min(5, Math.max(1, entries));
   }
   private readOnly<T>(operation: (tx: Tx) => Promise<T>, entries: number): Promise<T> {
     return this.prisma.$transaction(async tx => { await tx.$executeRaw`SET TRANSACTION READ ONLY`; return operation(tx); }, { isolationLevel: 'RepeatableRead', timeout: this.transactionTimeout(entries) });
@@ -222,9 +222,8 @@ export class PrismaInternationalTestImportChangeGateway implements International
     if (!identity || identity.deletedAt || identity.status !== 'ACTIVE' || !identity.user?.isEmailVerified || identity.account?.accessState !== 'Active') throw new Error('TEST_IMPORT_VERIFIED_ACTIVE_ACTOR_REQUIRED');
     const client = tx as unknown as PrismaClient;
     const evaluator = new AuthorizationEvaluatorService(new PrismaRoleRepository(client), new PrismaPolicyRepository(client), new PrismaRoleAssignmentRepository(client), new DefaultPolicyEvaluator());
-    for (const permission of ['admin:imports:manage', 'admin:international-tests:manage']) {
-      if (!(await evaluator.evaluatePermission(actorId, permission, { requestTime: new Date(), source: 'reviewed-test-import-cli' })).isGranted) throw new Error('TEST_IMPORT_ACTOR_PERMISSION_DENIED');
-    }
+    const decisions = await evaluator.evaluatePermissions(actorId,['admin:imports:manage','admin:international-tests:manage'],{requestTime:new Date(),source:'reviewed-test-import-cli'});
+    if(decisions.some(decision=>!decision.isGranted)) throw new Error('TEST_IMPORT_ACTOR_PERMISSION_DENIED');
   }
   private async inspect(tx: Tx, plan: InternationalTestImportPlan): Promise<InternationalTestImportPreview> {
     const receipts = await this.receipts(tx, plan);
