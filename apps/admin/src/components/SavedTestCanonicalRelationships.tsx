@@ -1,9 +1,11 @@
 import type { InternationalTestDto } from '@manaratak/domain';
 import { testRelationshipLabel } from '../features/international-tests/TestRelationshipLabels';
+import { TestProviderResolution } from '../features/international-tests/TestProviderResolution';
 import { Globe2, Languages, Layers, GraduationCap, Network } from 'lucide-react';
 
 type TestRelationships = Pick<
   InternationalTestDto,
+  | 'optionalFields'
   | 'countryRelationships'
   | 'languageRelationships'
   | 'academicTaxonomyRelationships'
@@ -45,6 +47,7 @@ export function SavedTestCanonicalRelationships({
         <Network size={18} />
         {isRtl ? 'الروابط المعيارية المحفوظة' : 'Saved canonical relationships'}
       </h3>
+      <TestProviderResolution test={test} isRtl={isRtl} />
       {!rows.length ? (
         <p className="text-[13px]">
           {isRtl ? 'لا توجد روابط معيارية محفوظة.' : 'No saved canonical relationships.'}

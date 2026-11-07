@@ -54,3 +54,4 @@ docs/reviews/evidence/post28/*/repaired-rollback-reference/** -text whitespace=c
 workspace/import-sources/international-tests/reviewed-20261107/** whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
 # The applied relationship review is bound to the exact plan bytes in its receipt.
 docs/plans/imports/tests-source-relationships-2026-11-08.plan.json -text
+docs/plans/imports/tests-reference-closure-2026-11-08.plan.json -text

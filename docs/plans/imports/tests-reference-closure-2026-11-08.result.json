@@ -1,0 +1,38 @@
+{
+  "pass": true,
+  "planHash": "60d5bb936df2108e117585f0c592908ac67d145341a26d6c7fa242b07af28538",
+  "result": {
+    "replayed": false,
+    "owners": 8,
+    "references": 2,
+    "relationships": 2,
+    "singleProvider": 1,
+    "multipleProviderDecisions": 5,
+    "referenceIds": {
+      "TW": "e2b5f8d2-3f89-4959-94f8-bd162765c768",
+      "fsl": "adc258fc-b01d-4ecf-9032-928e3871c60b"
+    }
+  },
+  "backupSha256": "a317599d64f4da02383660ed5f0cd4ff71db7f2a2f9493f757b39f5889b8768e",
+  "localProof": {
+    "pass": true,
+    "planHash": "60d5bb936df2108e117585f0c592908ac67d145341a26d6c7fa242b07af28538",
+    "owners": 8,
+    "newReferences": 2,
+    "newGovernedReferenceVersions": 2,
+    "sourceAndOtherDataPreserved": true,
+    "multipleProvidersWithoutFakePrimary": true,
+    "replayAndStaleRejection": true,
+    "forcedRollback": true
+  },
+  "counts": {
+    "tests": 234,
+    "versions": 253,
+    "blocks": 4757,
+    "singleProviders": 229,
+    "reviewedMultipleOrRegional": 5,
+    "missingReferences": 0,
+    "unpublished": 234
+  },
+  "completedAt": "2026-11-07T22:15:48.824Z"
+}

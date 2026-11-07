@@ -39,6 +39,7 @@ import { adminApiClient, setInternationalTestReviewReason } from '../api/client'
 import { InternationalTestSourceSectionsViewer } from '../components/InternationalTestSourceSectionsViewer';
 import { ReviewedGraphEditor } from '../components/ReviewedGraphEditor';
 import { SavedTestCanonicalRelationships } from '../components/SavedTestCanonicalRelationships';
+import { TestProviderResolution } from '../features/international-tests/TestProviderResolution';
 import { useTranslation } from '../i18n/I18nProvider';
 
 type InternationalTestCompletenessStatus = 'INCOMPLETE' | 'COMPLETE' | 'NEEDS_REVIEW';
@@ -125,6 +126,7 @@ interface OfficialLink {
 
 interface InternationalTestDetail extends Pick<
   InternationalTestDto,
+  | 'optionalFields'
   | 'countryRelationships'
   | 'languageRelationships'
   | 'academicTaxonomyRelationships'
@@ -3687,6 +3689,7 @@ function DescriptionTab({
         />
       </div>
 
+      <TestProviderResolution test={test} isRtl={isRtl} />
       <form {...editorForm} className="border rounded-xl p-5 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div>

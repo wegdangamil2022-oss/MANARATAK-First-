@@ -1,0 +1,425 @@
+{
+  "schemaVersion": 1,
+  "reviewedOn": "2026-11-08",
+  "actorId": "fc6dcd96-5741-42b4-8cb6-cbc587953aa6",
+  "providers": [
+    {
+      "id": "5bb4a7ac-4824-4646-afb6-1faa9b4acdfc",
+      "displayName": "AQA",
+      "key": "official-review-c665a3a3b5e7c8e94af48aa4"
+    },
+    {
+      "id": "f8a66a0a-6a29-4aaf-b8bf-9ca321173111",
+      "displayName": "OCR",
+      "key": "official-review-5e5bea5354e3f22eb70cc9df"
+    },
+    {
+      "id": "3f703cc1-9a9c-4d11-95cd-2c54652f3f48",
+      "displayName": "WJEC",
+      "key": "official-review-cc7412c4a5333a2eebaa9ff6"
+    },
+    {
+      "id": "716da2c7-cc8b-463a-a643-396125f7c230",
+      "displayName": "CCEA",
+      "key": "official-review-b89e064e13436a7a31cea469"
+    },
+    {
+      "id": "678e98c1-4276-49b1-954f-f880786b70ed",
+      "displayName": "Cambridge International Education",
+      "key": "official-review-270733d9aa2c71f8fdb07947"
+    },
+    {
+      "id": "98fe2c0c-5a68-4207-9446-7e2912b426ff",
+      "displayName": "OxfordAQA",
+      "key": "official-review-95922f09c29f8cc0274b3a57"
+    },
+    {
+      "id": "dd0cb525-bc44-4280-b471-fed57da4d4d7",
+      "displayName": "CKE",
+      "key": "official-review-cacc3e97a4432bce1eed22c1"
+    },
+    {
+      "id": "fb6c3d08-77ab-4fd3-81e6-f7d9ba4eef21",
+      "displayName": "CERMAT",
+      "key": "official-review-6f09947f99b43bc30b5276de"
+    },
+    {
+      "id": "43a1e931-8078-48c6-b90d-fc651dbf44fb",
+      "displayName": "NCVVO",
+      "key": "official-review-812703a5ce76f68ab14deaf3"
+    },
+    {
+      "id": "85eac81e-03ba-4dc7-8e39-b3a4b56f0a58",
+      "displayName": "SEFRI/SBFI",
+      "key": "official-review-06bd9553b998600bee95512b"
+    },
+    {
+      "id": "b39d0dc7-19e2-46b1-b338-aa391e53d921",
+      "displayName": "Oktatási Hivatal",
+      "key": "official-review-41e293668f64898566e0037b"
+    },
+    {
+      "id": "56feaef1-9114-4a70-90c1-c18037a8d0c6",
+      "displayName": "Lomonosov Moscow State University — TORFL Centre",
+      "key": "official-review-2879c13301765eba048eceb2"
+    },
+    {
+      "id": "4ac98b93-e634-4057-ab46-8379ce7a311f",
+      "displayName": "Peter the Great St Petersburg Polytechnic University — TORFL Centre",
+      "key": "official-review-ec4161fcff88cffdede922f4"
+    },
+    {
+      "id": "1ba2df75-d513-4b06-99f4-4d2f6bafec3c",
+      "displayName": "China Scholarship Council (CSC)",
+      "key": "official-review-a82ca47369388abf8c16cf90"
+    }
+  ],
+  "references": [
+    {
+      "kind": "COUNTRY",
+      "data": {
+        "iso2Code": "TW",
+        "iso3Code": "TWN",
+        "name": "Taiwan",
+        "nameAr": "تايوان",
+        "metadata": {
+          "sourceReview": {
+            "url": "https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry",
+            "finding": "IANA registers fsl as French Sign Language and TW as a region subtag.",
+            "checkedOn": "2026-11-08"
+          },
+          "isoSource": {
+            "url": "https://www.iso.org/obp/ui/#iso:code:3166:TW",
+            "finding": "ISO 3166-1 TW / TWN identifies the territory independently for data reference purposes.",
+            "checkedOn": "2026-11-08"
+          },
+          "referenceKind": "ISO_3166_TERRITORY",
+          "reviewStatus": "REVIEWED"
+        }
+      }
+    },
+    {
+      "kind": "LANGUAGE",
+      "data": {
+        "isoCode": "fsl",
+        "name": "French Sign Language",
+        "nameAr": "لغة الإشارة الفرنسية",
+        "nativeName": "Langue des signes française",
+        "direction": "LTR",
+        "metadata": {
+          "sourceReview": {
+            "url": "https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry",
+            "finding": "IANA registers fsl as French Sign Language and TW as a region subtag.",
+            "checkedOn": "2026-11-08"
+          },
+          "languageType": "SIGN_LANGUAGE",
+          "directionAppliesTo": "DISPLAY_LABEL",
+          "reviewStatus": "REVIEWED"
+        }
+      }
+    }
+  ],
+  "rows": [
+    {
+      "code": "A_Level",
+      "testId": "380a017b-2aba-46fa-ae47-7419795950c7",
+      "expectedRevision": 2,
+      "expectedCanonicalDedupKey": "gce advanced level / international as & a level|unknown",
+      "resolution": {
+        "schemaVersion": 1,
+        "reviewStatus": "RESOLVED",
+        "mode": "MULTIPLE_PROVIDERS",
+        "noteAr": "عائلة مؤهلات لها مجالس امتحانات مستقلة؛ حدد المجلس والنسخة قبل التسجيل.",
+        "providers": [
+          {
+            "providerId": "5bb4a7ac-4824-4646-afb6-1faa9b4acdfc",
+            "displayName": "AQA"
+          },
+          {
+            "providerId": "9ea2bef2-68b8-495f-b3d4-7e7b71cb3112",
+            "displayName": "Pearson Edexcel"
+          },
+          {
+            "providerId": "f8a66a0a-6a29-4aaf-b8bf-9ca321173111",
+            "displayName": "OCR"
+          },
+          {
+            "providerId": "3f703cc1-9a9c-4d11-95cd-2c54652f3f48",
+            "displayName": "WJEC"
+          },
+          {
+            "providerId": "716da2c7-cc8b-463a-a643-396125f7c230",
+            "displayName": "CCEA"
+          },
+          {
+            "providerId": "678e98c1-4276-49b1-954f-f880786b70ed",
+            "displayName": "Cambridge International Education"
+          },
+          {
+            "providerId": "98fe2c0c-5a68-4207-9446-7e2912b426ff",
+            "displayName": "OxfordAQA"
+          }
+        ],
+        "exhaustive": false,
+        "evidence": [
+          {
+            "url": "https://www.gov.uk/government/publications/ofqual-student-guide-to-exams-and-assessments-in-2026/useful-contacts",
+            "finding": "Ofqual lists examination boards separately from its regulatory function.",
+            "checkedOn": "2026-11-08"
+          },
+          {
+            "url": "https://www.cambridgeinternational.org/programmes-and-qualifications/cambridge-advanced/cambridge-international-as-and-a-levels/qualification/",
+            "finding": "Cambridge International offers its own AS and A Level qualifications.",
+            "checkedOn": "2026-11-08"
+          }
+        ],
+        "reviewedOn": "2026-11-08"
+      }
+    },
+    {
+      "code": "GCSE_England_UK",
+      "testId": "c8c8e901-3781-4f07-ac12-162aa824dfe6",
+      "expectedRevision": 2,
+      "expectedCanonicalDedupKey": "general certificate of secondary education (9–1)|unknown",
+      "resolution": {
+        "schemaVersion": 1,
+        "reviewStatus": "RESOLVED",
+        "mode": "MULTIPLE_PROVIDERS",
+        "noteAr": "تصدر الشهادات مجالس امتحانات متعددة؛ Ofqual جهة تنظيم وليست الجهة الممتحنة.",
+        "providers": [
+          {
+            "providerId": "5bb4a7ac-4824-4646-afb6-1faa9b4acdfc",
+            "displayName": "AQA"
+          },
+          {
+            "providerId": "9ea2bef2-68b8-495f-b3d4-7e7b71cb3112",
+            "displayName": "Pearson Edexcel"
+          },
+          {
+            "providerId": "f8a66a0a-6a29-4aaf-b8bf-9ca321173111",
+            "displayName": "OCR"
+          },
+          {
+            "providerId": "3f703cc1-9a9c-4d11-95cd-2c54652f3f48",
+            "displayName": "WJEC"
+          }
+        ],
+        "exhaustive": false,
+        "evidence": [
+          {
+            "url": "https://www.gov.uk/government/publications/ofqual-student-guide-to-exams-and-assessments-in-2026/useful-contacts",
+            "finding": "Ofqual lists examination boards separately from its regulatory function.",
+            "checkedOn": "2026-11-08"
+          }
+        ],
+        "reviewedOn": "2026-11-08"
+      }
+    },
+    {
+      "code": "Matura_Europe",
+      "testId": "51fb0621-a8c1-4a20-a1b8-5a7d63b4d30e",
+      "expectedRevision": 2,
+      "expectedCanonicalDedupKey": "matura / maturität / maturita / maturità — national upper-secondary leaving examinations|unknown",
+      "resolution": {
+        "schemaVersion": 1,
+        "reviewStatus": "RESOLVED",
+        "mode": "MULTIPLE_PROVIDERS",
+        "noteAr": "عائلة مؤهلات وطنية مستقلة؛ الجهة تعتمد على البلد والنظام التعليمي، وليست امتحانًا أوروبيًا واحدًا.",
+        "providers": [
+          {
+            "providerId": "dd0cb525-bc44-4280-b471-fed57da4d4d7",
+            "displayName": "CKE"
+          },
+          {
+            "providerId": "fb6c3d08-77ab-4fd3-81e6-f7d9ba4eef21",
+            "displayName": "CERMAT"
+          },
+          {
+            "providerId": "43a1e931-8078-48c6-b90d-fc651dbf44fb",
+            "displayName": "NCVVO"
+          },
+          {
+            "providerId": "85eac81e-03ba-4dc7-8e39-b3a4b56f0a58",
+            "displayName": "SEFRI/SBFI"
+          },
+          {
+            "providerId": "b39d0dc7-19e2-46b1-b338-aa391e53d921",
+            "displayName": "Oktatási Hivatal"
+          }
+        ],
+        "exhaustive": false,
+        "evidence": [
+          {
+            "url": "https://maturita.cermat.gov.cz/menu/maturitni-zkouska.html",
+            "finding": "CERMAT documents the common and school profile components of Czech Maturita.",
+            "checkedOn": "2026-11-08"
+          }
+        ],
+        "reviewedOn": "2026-11-08"
+      }
+    },
+    {
+      "code": "PAU_Spain",
+      "testId": "cd58df2e-0e3e-4e79-8c3b-a3b8da9e60e8",
+      "expectedRevision": 2,
+      "expectedCanonicalDedupKey": "prueba de acceso a la universidad (pau)|unknown",
+      "resolution": {
+        "schemaVersion": 1,
+        "reviewStatus": "RESOLVED",
+        "mode": "DECENTRALIZED_ADMINISTRATION",
+        "noteAr": "تنظم الاختبار إدارات التعليم والجامعات العامة في كل إقليم وفق المادة 13؛ حدد الإقليم والجامعة لمعرفة الجهة المحلية.",
+        "providers": [],
+        "exhaustive": false,
+        "evidence": [
+          {
+            "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2024-11858",
+            "finding": "Article 13 assigns organisation of PAU to educational administrations and public universities.",
+            "checkedOn": "2026-11-08"
+          }
+        ],
+        "reviewedOn": "2026-11-08"
+      }
+    },
+    {
+      "code": "TORFL_TRKI",
+      "testId": "e1560fba-4725-41f7-95e7-fc29db6cf42d",
+      "expectedRevision": 2,
+      "expectedCanonicalDedupKey": "torfl trki|unknown",
+      "resolution": {
+        "schemaVersion": 1,
+        "reviewStatus": "RESOLVED",
+        "mode": "MULTIPLE_PROVIDERS",
+        "noteAr": "تقدمه جامعات ومراكز مخولة متعددة؛ هذه أمثلة موثقة وليست قائمة حصرية.",
+        "providers": [
+          {
+            "providerId": "56feaef1-9114-4a70-90c1-c18037a8d0c6",
+            "displayName": "Lomonosov Moscow State University — TORFL Centre"
+          },
+          {
+            "providerId": "4ac98b93-e634-4057-ab46-8379ce7a311f",
+            "displayName": "Peter the Great St Petersburg Polytechnic University — TORFL Centre"
+          }
+        ],
+        "exhaustive": false,
+        "evidence": [
+          {
+            "url": "https://en.irlc.msu.ru/study_at_irlc/torfl",
+            "finding": "Moscow State University operates certification testing of Russian as a foreign language.",
+            "checkedOn": "2026-11-08"
+          },
+          {
+            "url": "https://english.spbstu.ru/education/programs/short-term-programs/russian-language-studies/testing-center-russian-as-foreign-language/",
+            "finding": "Peter the Great St Petersburg Polytechnic University operates its own TORFL testing centre.",
+            "checkedOn": "2026-11-08"
+          }
+        ],
+        "reviewedOn": "2026-11-08"
+      }
+    },
+    {
+      "code": "CSCA",
+      "testId": "90fc70d2-89e0-4877-aa7f-6c4f3934f0ce",
+      "expectedRevision": 3,
+      "expectedCanonicalDedupKey": "china scholastic competency assessment — 来华留学本科入学学业水平测试|unknown",
+      "resolution": {
+        "schemaVersion": 1,
+        "reviewStatus": "RESOLVED",
+        "mode": "SINGLE_PROVIDER",
+        "noteAr": "أطلقت مجلس المنح الدراسية الصيني الاختبار وفق الدليل الحكومي الرسمي.",
+        "providers": [
+          {
+            "providerId": "1ba2df75-d513-4b06-99f4-4d2f6bafec3c",
+            "displayName": "China Scholarship Council (CSC)"
+          }
+        ],
+        "exhaustive": false,
+        "evidence": [
+          {
+            "url": "https://english.shanghai.gov.cn/en-Individuals-Education-Testscompetitions/20260813/9565875c1c214744971b07e9236da16f.html",
+            "finding": "Shanghai government identifies China Scholarship Council as the body that launched CSCA.",
+            "checkedOn": "2026-11-08"
+          }
+        ],
+        "reviewedOn": "2026-11-08"
+      }
+    }
+  ],
+  "relations": [
+    {
+      "code": "DCL",
+      "kind": "LANGUAGE",
+      "referenceCode": "fsl",
+      "sourceKey": "NON_ENGLISH/MANARATAK_DCL_2026_Student_Guide_Pending_Approval.md",
+      "sourceHash": "718750694e01f0ac91f9b4324b8da436a0e8fe6b4f02dadb2ff82c24fd7810cc",
+      "excerpt": "| اللغات والنسخ | 13 مسارًا لغويًا، منها العربية والفرنسية والإنجليزية ولغة الإشارة الفرنسية |",
+      "reason": "No active canonical reference found; original source retained; no substitute created.",
+      "testId": "d5d2750e-c4c9-4615-b023-d9432cb0cc63",
+      "expectedRevision": 2,
+      "relationshipType": "TESTED_LANGUAGE"
+    },
+    {
+      "code": "GSAT_Taiwan",
+      "kind": "COUNTRY",
+      "referenceCode": "TW",
+      "sourceKey": "NATIONAL/21_GSAT_Taiwan_2026_2027_MANARATAK_National_Admission_Guide_22_Sections.md",
+      "sourceHash": "27e0746c1f350448fd360c246ef94ce0d7859c9934ba5ff5efbb63e1466c6c69",
+      "excerpt": "# اختبار GSAT 2026–2027 — تايوان — الدليل الموحد للطالب",
+      "reason": "No active canonical reference found; original source retained; no substitute created.",
+      "testId": "73fac7ef-a632-43e6-8f65-60d2c20eed7d",
+      "expectedRevision": 2,
+      "relationshipType": "SOURCE_JURISDICTION"
+    }
+  ],
+  "sources": {
+    "registry": {
+      "url": "https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry",
+      "finding": "IANA registers fsl as French Sign Language and TW as a region subtag.",
+      "checkedOn": "2026-11-08"
+    },
+    "iso": {
+      "url": "https://www.iso.org/obp/ui/#iso:code:3166:TW",
+      "finding": "ISO 3166-1 TW / TWN identifies the territory independently for data reference purposes.",
+      "checkedOn": "2026-11-08"
+    },
+    "csca": {
+      "url": "https://english.shanghai.gov.cn/en-Individuals-Education-Testscompetitions/20260813/9565875c1c214744971b07e9236da16f.html",
+      "finding": "Shanghai government identifies China Scholarship Council as the body that launched CSCA.",
+      "checkedOn": "2026-11-08"
+    },
+    "ofqual": {
+      "url": "https://www.gov.uk/government/publications/ofqual-student-guide-to-exams-and-assessments-in-2026/useful-contacts",
+      "finding": "Ofqual lists examination boards separately from its regulatory function.",
+      "checkedOn": "2026-11-08"
+    },
+    "cambridge": {
+      "url": "https://www.cambridgeinternational.org/programmes-and-qualifications/cambridge-advanced/cambridge-international-as-and-a-levels/qualification/",
+      "finding": "Cambridge International offers its own AS and A Level qualifications.",
+      "checkedOn": "2026-11-08"
+    },
+    "pau": {
+      "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2024-11858",
+      "finding": "Article 13 assigns organisation of PAU to educational administrations and public universities.",
+      "checkedOn": "2026-11-08"
+    },
+    "matura": {
+      "url": "https://maturita.cermat.gov.cz/menu/maturitni-zkouska.html",
+      "finding": "CERMAT documents the common and school profile components of Czech Maturita.",
+      "checkedOn": "2026-11-08"
+    },
+    "msu": {
+      "url": "https://en.irlc.msu.ru/study_at_irlc/torfl",
+      "finding": "Moscow State University operates certification testing of Russian as a foreign language.",
+      "checkedOn": "2026-11-08"
+    },
+    "spb": {
+      "url": "https://english.spbstu.ru/education/programs/short-term-programs/russian-language-studies/testing-center-russian-as-foreign-language/",
+      "finding": "Peter the Great St Petersburg Polytechnic University operates its own TORFL testing centre.",
+      "checkedOn": "2026-11-08"
+    },
+    "dcl": {
+      "url": "https://www.education.gouv.fr/le-diplome-de-competence-en-langue-dcl-2978",
+      "finding": "French education ministry lists DCL for French Sign Language as a distinct examination.",
+      "checkedOn": "2026-11-08"
+    }
+  }
+}
