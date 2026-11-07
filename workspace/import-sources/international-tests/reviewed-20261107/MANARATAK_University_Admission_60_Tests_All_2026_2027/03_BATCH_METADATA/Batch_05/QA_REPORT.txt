@@ -1,0 +1,13 @@
+MANARATAK — ADMISSION TESTS BATCH 05 — STRUCTURAL QA
+Date: 2026-11-04
+Tests: #09 GMAT; #10 MCAT
+Reference: IELTS Final 2026, 16 sections in the same order.
+Checked: 16 sections, section numbering, nested subheadings, markdown tables, Arabic texts, source URLs, JSON readback, no editorial notes, zip integrity.
+Source-research scope: Official GMAC/mba.com and AAMC sources as of the review date.
+Prices, seat availability, exam dates and admissions conditions should be rechecked at registration.
+MCAT 2027 AAMC fees and calendar are used; 2027 registration is open per official AAMC page.
+GMAT USA prices are examples only and are not generalized to other countries.
+These are guides, not official exam registration documents.
+
+GMAT | PASS | sections=16 | subsections=76 | tables=20 | official URLs=16 | MD bytes=45622 | JSON bytes=113169
+MCAT | PASS | sections=16 | subsections=86 | tables=20 | official URLs=20 | MD bytes=52030 | JSON bytes=127912

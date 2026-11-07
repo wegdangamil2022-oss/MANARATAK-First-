@@ -1,0 +1,26 @@
+{
+  "collection": "MANARATAK_Admission_Tests",
+  "version": "2026-11-04",
+  "count": 2,
+  "sections_per_test": 16,
+  "tests": [
+    {
+      "order": 3,
+      "id": "admission-act",
+      "code": "ACT",
+      "title": "اختبار ACT — الدليل الشامل للطالب",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_ACT_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_ACT_2026_2027_Student_Guide.json"
+    },
+    {
+      "order": 4,
+      "id": "admission-eju",
+      "code": "EJU",
+      "title": "اختبار EJU الشامل — الدليل الشامل للطالب",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_EJU_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_EJU_2026_2027_Student_Guide.json"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+MANARATAK — ADMISSION TESTS BATCH 06 — STRUCTURAL QA
+Date: 2026-11-04
+Tests: #11 UCAT UK; #12 GAMSAT.
+Reference template: IELTS Final 2026 with 16 section headers in exact order.
+Checked: Arabic text, 16 sections, numbered headings, subheadings, non-empty bodies,
+Markdown tables (same number of columns per row), source-domain checks, JSON import,
+no administrative notes/stray introduction, ZIP integrity.
+Source research: official ucat.ac.uk / ucat.edu.au / gamsat.acer.org website pages, 4 Nov 2026.
+UCAT 2027 test dates and fees have not been published: refer to 2026 historically only.
+GAMSAT March 2027 registration is announced to open during November 2026; exact dates need confirmation.
+IMPORTANT: Structural QA is not a guarantee of entry conditions or future exam dates.
+
+UCAT | PASS | sections=16 | subsections=65 | tables=19 | official/source URLs=24 | MD bytes=48446 | JSON bytes=116966 | SHA256 MD=444bb15c5dadd707373f39b991b4db22a8458a9906b618221cf87ffc97040004
+GAMSAT | PASS | sections=16 | subsections=69 | tables=19 | official/source URLs=8 | MD bytes=51413 | JSON bytes=123729 | SHA256 MD=8b91a7b6c171e5c1dad633f18be6fef6d8144a043398dda9f14a551aad80578b

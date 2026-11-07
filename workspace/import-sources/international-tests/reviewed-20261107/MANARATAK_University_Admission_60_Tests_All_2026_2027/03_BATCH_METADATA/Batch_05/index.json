@@ -1,0 +1,32 @@
+{
+  "collection": "MANARATAK_Admission_Tests",
+  "version": "2026-11-04",
+  "batch": 5,
+  "batch_count": 2,
+  "completed_to_date": 10,
+  "initial_scope_total": 13,
+  "sections_per_test": 16,
+  "notes": "Each guide has 16 ordered student-facing sections, markdown and structured blocks.",
+  "tests": [
+    {
+      "order": 9,
+      "id": "admission-gmat",
+      "code": "GMAT",
+      "title": "اختبار GMAT — الدليل الشامل للطالب",
+      "category": "إدارة الأعمال والدراسات العليا",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_GMAT_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_GMAT_2026_2027_Student_Guide.json"
+    },
+    {
+      "order": 10,
+      "id": "admission-mcat",
+      "code": "MCAT",
+      "title": "اختبار MCAT — الدليل الشامل للطالب",
+      "category": "الطب",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_MCAT_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_MCAT_2026_2027_Student_Guide.json"
+    }
+  ]
+}

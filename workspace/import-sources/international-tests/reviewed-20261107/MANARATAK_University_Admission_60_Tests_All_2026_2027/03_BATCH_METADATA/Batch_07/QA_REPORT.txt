@@ -1,0 +1,11 @@
+MANARATAK — ADMISSION TESTS BATCH 07 — STRUCTURAL QA
+Review date: 2026-11-04
+Tests: #13 LSAT; #14 TR-YOS (new test added beyond original 13).
+Template: IELTS Final — identical 16-section sequence.
+Checks: section count/order, subsection presence, no stray introductions, Markdown tables, unique official URLs, JSON load, zip integrity.
+Content review: official LSAC pages and ÖSYM 2026/2 PDF guide and calendar.
+Dates: LSAT international Jan/Apr/Jun 2027 as published; TR-YOS 2027 schedule not assumed from 2026.
+Scope note: structural checks do not establish ongoing availability for specific centers, universities or candidate eligibility.
+
+LSAT: PASS | sections=16 | subsections=54 | tables=13 | source URLs=14 | MD bytes=35035 | JSON bytes=84855 | sha256=7a62d935e67fc921da87a147b6b80e1f452ef427c3b47d4a241fe1118527a62f
+TR-YOS: PASS | sections=16 | subsections=63 | tables=13 | source URLs=10 | MD bytes=38797 | JSON bytes=93249 | sha256=461bbacaeb10d3cc0b9913489a15fb90b11cc66d0f2ba2ac86fe81e0f8661aa9

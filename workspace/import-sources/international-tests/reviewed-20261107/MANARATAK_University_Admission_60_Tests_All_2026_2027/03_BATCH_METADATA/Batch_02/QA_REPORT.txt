@@ -1,0 +1,9 @@
+MANARATAK ADMISSION TESTS — BATCH 02
+Date: 2026-11-04
+Tests: ACT, EJU
+Template: 16 sections, same order as final IELTS 2026 guide.
+Validated: numbering, headings, section nonemptiness, table dimensions, source links, no editorial placeholders.
+Validation is structural and source-based; variable policies must be rechecked at booking.
+
+ACT: PASS | sections=16 | official references/URLs=15 | tables=13 | subheadings=71 | bytes=40980
+EJU: PASS | sections=16 | official references/URLs=18 | tables=12 | subheadings=77 | bytes=46258

@@ -115,7 +115,7 @@ const report = {
   activeLockfiles: ['package-lock.json'].filter((file) => fs.existsSync(path.join(root, file))),
   competingRootLockfiles: ['bun.lock', 'pnpm-lock.yaml', 'yarn.lock', 'yarn.lock.yml'].filter((file) => fs.existsSync(path.join(root, file))),
   npmWorkspaces: packageJson.workspaces,
-  internationalTestSourcePresent: fs.existsSync(path.join(root, 'workspace/import-sources/international-tests/unified-56')),
+  internationalTestSourcePresent: fs.existsSync(path.join(root, 'workspace/import-sources/international-tests/reviewed-20261107')),
   majorCatalogSourcePresent: fs.existsSync(path.join(root, 'workspace/phase-10-major-catalogs')),
   universityImportFilesInRoot: rootEntries.filter((entry) => entry.isFile() && /universit.*\.(?:xlsx|xls|csv)$/i.test(entry.name)).map((entry) => entry.name),
 };

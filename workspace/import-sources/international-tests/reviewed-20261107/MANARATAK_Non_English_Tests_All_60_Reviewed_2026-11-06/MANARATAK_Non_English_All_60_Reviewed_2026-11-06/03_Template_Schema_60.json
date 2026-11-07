@@ -1,0 +1,153 @@
+{
+  "project": "منارتك — أدلة اختبارات اللغات غير الإنجليزية",
+  "edition": "الحزمة الشاملة — الدفعتان 1–30 و31–60",
+  "batch_number": "1+2",
+  "batch_size": 30,
+  "remaining": 0,
+  "template_version": "arabic-student-guide-2026-17-sections",
+  "sections": [
+    {
+      "id": 1,
+      "title": "نظرة عامة على الاختبار"
+    },
+    {
+      "id": 2,
+      "title": "استخدامات الاختبار والفئات المستهدفة"
+    },
+    {
+      "id": 3,
+      "title": "أنواع الاختبار ومستوياته وكيفية اختيار الأنسب"
+    },
+    {
+      "id": 4,
+      "title": "الاعتراف الدولي ومتطلبات الجهات المستقبلة"
+    },
+    {
+      "id": 5,
+      "title": "هيكل الاختبار ومدته"
+    },
+    {
+      "id": 6,
+      "title": "أقسام الاختبار وأنواع الأسئلة"
+    },
+    {
+      "id": 7,
+      "title": "نظام الدرجات والنجاح وتقييم الأداء"
+    },
+    {
+      "id": 8,
+      "title": "دلالة النتائج ومستويات الكفاءة والمقارنات المرجعية"
+    },
+    {
+      "id": 9,
+      "title": "طرق تقديم الاختبار والتوفر والمتطلبات التقنية"
+    },
+    {
+      "id": 10,
+      "title": "التحضير للاختبار والمواد التدريبية"
+    },
+    {
+      "id": 11,
+      "title": "مراكز الاختبار والمواعيد والتسجيل ومتطلبات الهوية"
+    },
+    {
+      "id": 12,
+      "title": "الرسوم والدفع والتعديل والإلغاء والاسترداد"
+    },
+    {
+      "id": 13,
+      "title": "يوم الاختبار والتعليمات والتسهيلات"
+    },
+    {
+      "id": 14,
+      "title": "النتائج والشهادات والصلاحية والتحقق"
+    },
+    {
+      "id": 15,
+      "title": "إعادة الاختبار ومراجعة الدرجات"
+    },
+    {
+      "id": 16,
+      "title": "الأسئلة الشائعة"
+    },
+    {
+      "id": 17,
+      "title": "المصادر الرسمية وآخر التحديثات"
+    }
+  ],
+  "design_constraints": {
+    "section_count": 17,
+    "extra_h2_forbidden": true,
+    "source_verification_per_test": "انتقائي؛ ليست مراجعة حية لكل بند",
+    "separate_test_specific_subheadings": true
+  },
+  "review_date": "2026-11-06",
+  "test_ids": [
+    "ACTFL_LPT",
+    "ACTFL_OPI",
+    "ACTFL_RPT",
+    "ACTFL_WPT",
+    "Avant_APT",
+    "Avant_STAMP_4S",
+    "BCT",
+    "BJT",
+    "CAPLE",
+    "CCE_Czech",
+    "CELI",
+    "Celpe_Bras",
+    "CELU",
+    "CERTIT",
+    "CILS",
+    "CNaVT",
+    "DCL",
+    "DELE",
+    "DELF_DALF",
+    "DFP",
+    "DSD_I_II",
+    "DSH",
+    "DTZ",
+    "ECL",
+    "EJU_Japanese",
+    "EPS_TOPIK",
+    "Goethe_Zertifikat",
+    "Greek_Attainment",
+    "Hamza_Academic",
+    "HSK",
+    "JLPT",
+    "JTEST",
+    "MCT",
+    "NAT_TEST",
+    "Norskproven",
+    "NT2",
+    "OSD",
+    "PLIDA",
+    "Polish_State_Certificate",
+    "Proeve_i_Dansk_1_2_3",
+    "SIELE",
+    "SKA",
+    "Sproochentest",
+    "Studieproeven",
+    "Swedex",
+    "TCF",
+    "TEF",
+    "TEG_Irish",
+    "telc_Deutsch",
+    "TestDaF",
+    "TISUS",
+    "TOCFL",
+    "TOMER",
+    "TOPIK",
+    "TORFL_TRKI",
+    "TYS",
+    "UKBI",
+    "YAEL_YAELNET",
+    "YCT",
+    "YKI_Finnish"
+  ],
+  "records_count": 60,
+  "approval_statuses": {
+    "final": 28,
+    "pending": 32
+  },
+  "source_links_verification": "تحقق رسمي انتقائي لبعض المعلومات؛ لا يُعد التحقق شاملًا لكل رابط في الأدلة."
+}

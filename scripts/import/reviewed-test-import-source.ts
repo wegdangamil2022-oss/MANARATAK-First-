@@ -3,8 +3,8 @@ import { isAbsolute, relative, resolve } from 'node:path';
 import { z } from 'zod';
 import { internationalTestImportEntrySchema, internationalTestSourceHash, prepareInternationalTestImport, type InternationalTestImportPlan } from '@manaratak/application';
 
-const manifestPath = 'workspace/import-sources/international-tests/reconciliation/final_matching_data.json';
-const sourcePath = 'workspace/import-sources/international-tests/unified-56';
+const manifestPath = 'workspace/import-sources/international-tests/reviewed-20261107/catalog-manifest.json';
+const sourcePath = 'workspace/import-sources/international-tests/reviewed-20261107';
 const reviewSchema = z.object({
   schemaVersion: z.literal(1), changeSetId: z.string().uuid(), sourceManifestHash: z.string().regex(/^[a-f0-9]{64}$/),
   targetMode: z.literal('INDEPENDENT_EMPTY_TEST_CATALOG').optional(),
@@ -12,6 +12,7 @@ const reviewSchema = z.object({
 }).strict();
 const manifestSchema = z.object({ matching_rows: z.array(z.object({
   filename: z.string(), folder: z.string(), classification: z.enum(['NEW_TEST', 'REPLACE_EXISTING', 'REVIEW_REQUIRED']),
+  relativePath: z.string().optional(),
 })) });
 
 async function readUtf8(file: string): Promise<string> {
@@ -24,17 +25,18 @@ async function sourceContext(workspace: string, expectedHash: string) {
   const content = await readUtf8(resolve(workspace, manifestPath));
   if (internationalTestSourceHash(content) !== expectedHash) throw new Error('TEST_IMPORT_MANIFEST_HASH_MISMATCH');
   const manifest = manifestSchema.parse(JSON.parse(content));
-  const rows = new Map<string, string>();
+  const rows = new Map<string, {classification:string;relativePath:string}>();
   for (const row of manifest.matching_rows) {
     const key = `${row.folder}/${row.filename}`;
     if (rows.has(key)) throw new Error('TEST_IMPORT_MANIFEST_DUPLICATE_SOURCE');
-    rows.set(key, row.classification);
+    rows.set(key, {classification:row.classification,relativePath:row.relativePath??key});
   }
   return { rows, root: await realpath(resolve(workspace, sourcePath)) };
 }
 async function readReviewedSource(context: Awaited<ReturnType<typeof sourceContext>>, entry: z.infer<typeof reviewSchema>['entries'][number]) {
-  if (context.rows.get(entry.sourceKey) !== entry.sourceClassification) throw new Error('TEST_IMPORT_SOURCE_CLASSIFICATION_MISMATCH');
-  const file = await realpath(resolve(context.root, entry.sourceKey));
+  const source=context.rows.get(entry.sourceKey);
+  if (source?.classification !== entry.sourceClassification) throw new Error('TEST_IMPORT_SOURCE_CLASSIFICATION_MISMATCH');
+  const file = await realpath(resolve(context.root, source.relativePath));
   const inside = relative(context.root, file);
   if (!inside || inside.startsWith('..') || isAbsolute(inside)) throw new Error('TEST_IMPORT_SOURCE_PATH_ESCAPE');
   const rawContent = await readUtf8(file);

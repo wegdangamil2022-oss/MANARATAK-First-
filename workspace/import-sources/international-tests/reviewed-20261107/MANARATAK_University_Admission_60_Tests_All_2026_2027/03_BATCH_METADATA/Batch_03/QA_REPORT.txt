@@ -1,0 +1,9 @@
+MANARATAK ADMISSION TESTS — BATCH 03
+Date: 2026-11-04
+Tests: TOLC, CEnT-S
+Template: 16 sections, same order as final IELTS 2026 guide.
+Validated: numbering, headings, section nonemptiness, table dimensions, source links, no editorial placeholders.
+Validation is structural and source-based; variable policies must be rechecked at booking.
+
+TOLC: PASS | sections=16 | official references/URLs=19 | tables=14 | subheadings=57 | bytes=39997
+CEnT-S: PASS | sections=16 | official references/URLs=10 | tables=16 | subheadings=61 | bytes=42987

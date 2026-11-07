@@ -1,3 +1,5 @@
+import { projectInternationalTestImportDraft } from './InternationalTestImportDraftProjection';
+import type { InternationalTestImportDraftRequestDto } from '@manaratak/domain';
 import { randomUUID } from 'node:crypto';
 import { Prisma, type PrismaClient } from '@prisma/client';
 import { z } from 'zod';
@@ -40,9 +42,9 @@ const versionHash = (version: Version): string => {
 /** Small reviewed pilot batches only. Version metadata is the durable receipt;
  * rollback preserves source/version evidence as SUPERSEDED and archives new roots. */
 export class PrismaInternationalTestImportChangeGateway implements InternationalTestImportChangeGateway {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient, private readonly options: { batchPersistence?: boolean } = {}) {}
   preview(plan: InternationalTestImportPlan, actorId: string): Promise<InternationalTestImportPreview> {
-    return this.readOnly(async tx => { await this.assertActor(tx, actorId); return this.inspect(tx, plan); });
+    return this.readOnly(async tx => { await this.assertActor(tx, actorId); return this.inspect(tx, plan); }, plan.entries.length);
   }
   async reconcile(plan: InternationalTestImportPlan, actorId: string) {
     return this.readOnly(async tx => {
@@ -51,7 +53,7 @@ export class PrismaInternationalTestImportChangeGateway implements International
       const issues = [...report.issues];
       if (!['APPLIED', 'ROLLED_BACK'].includes(report.state)) issues.push('TEST_IMPORT_RECEIPT_NOT_APPLIED');
       return { state: issues.length ? 'FAIL' as const : 'PASS' as const, issues, databaseWrites: 0 as const };
-    });
+    }, plan.entries.length);
   }
   async commit(plan: InternationalTestImportPlan, approval: InternationalTestImportApproval): Promise<InternationalTestImportResult> {
     return this.prisma.$transaction(async tx => {
@@ -68,14 +70,15 @@ export class PrismaInternationalTestImportChangeGateway implements International
       if (preview.issues.length || preview.state !== 'READY') throw new Error('TEST_IMPORT_PREVIEW_BLOCKED');
       if (preview.previewHash !== approval.previewHash) throw new Error('TEST_IMPORT_STALE_PREVIEW');
       return this.audited(tx, plan, approval, 'INTERNATIONAL_TEST_CHANGE_SET_APPLIED', async () => {
+        if (this.options.batchPersistence && plan.entries.every(entry => entry.resolution !== 'APPROVE_UPDATE')) return this.createBatch(tx,plan,approval);
         let writes = 0;
         for (const [sequence, entry] of plan.entries.entries()) {
           const before = await tx.internationalTest.findUnique({ where: { id: entry.targetId }, include: rootInclude });
-          const provider = await tx.internationalTestProvider.findUniqueOrThrow({ where: { id: entry.core.providerId } });
+          const provider = entry.core.providerId ? await tx.internationalTestProvider.findUniqueOrThrow({ where: { id: entry.core.providerId } }) : null;
           if (!before) {
             await tx.internationalTest.create({ data: {
-              id: entry.targetId, ...entry.core, providerName: provider.displayName,
-              canonicalDedupKey: InternationalTestDeduplicationService.generateKey({ canonicalName: entry.core.canonicalName, providerName: provider.displayName }),
+              id: entry.targetId, ...entry.core, providerName: provider?.displayName,
+              canonicalDedupKey: InternationalTestDeduplicationService.generateKey({ canonicalName: entry.core.canonicalName, providerName: provider?.displayName }),
               status: 'NEEDS_REVIEW', completenessStatus: 'NEEDS_REVIEW', isSourceVerified: false, isPubliclyVisible: false,
               optionalFields: { m10Source: { sourceKey: entry.sourceKey, sourceHash: entry.sourceHash, changeSetId: plan.changeSetId } },
             } });
@@ -89,13 +92,7 @@ export class PrismaInternationalTestImportChangeGateway implements International
             } });
           }
           const repository = new PrismaInternationalTestRepository(tx as unknown as PrismaClient,true);
-          const draft = await repository.createImportDraftVersion(entry.targetId, {
-            sourceFileName: entry.sourceKey.split('/').at(-1)!, sourceLocale: 'ar', sourceUri: entry.sourceUri,
-            sourceHash: entry.sourceHash, rawContent: entry.rawContent, importedBy: approval.actorId,
-            unmappedSections: InternationalTestMarkdownParser.parse(entry.rawContent).map(block => ({ sectionKey: block.blockKey, title: block.title, locale: 'ar', content: block.content, sourceSectionPath: block.blockKey })),
-            metadata: { sourceCycle: entry.sourceCycle, sourceKey: entry.sourceKey, sourceClassification: entry.sourceClassification, resolution: entry.resolution, reviewReason: entry.reviewReason, evidenceReference: entry.evidenceReference, sourceManifestHash: plan.sourceManifestHash,
-              ...(plan.targetMode ? { targetMode: plan.targetMode } : {}) },
-          });
+          const draft = await repository.createImportDraftVersion(entry.targetId,this.draftRequest(plan,entry,approval));
           await repository.advanceRevision(entry.targetId,await repository.getRevision(entry.targetId));
           const root = await tx.internationalTest.findUniqueOrThrow({ where: { id: entry.targetId }, include: rootInclude });
           const version = await tx.internationalTestVersion.findUniqueOrThrow({ where: { id: draft.versionId }, include: versionInclude });
@@ -111,7 +108,16 @@ export class PrismaInternationalTestImportChangeGateway implements International
         }
         return this.result(plan, 'APPLIED', false, writes + 2);
       });
-    }, { isolationLevel: 'Serializable', timeout: 30_000, maxWait: 10_000 });
+    }, { isolationLevel: 'Serializable', timeout: this.transactionTimeout(plan.entries.length), maxWait: 10_000 });
+  }
+  private draftRequest(plan: InternationalTestImportPlan, entry: InternationalTestImportPlan['entries'][number], approval: InternationalTestImportApproval): InternationalTestImportDraftRequestDto {
+    return {
+            sourceFileName: entry.sourceKey.split('/').at(-1)!, sourceLocale: 'ar', sourceUri: entry.sourceUri,
+            sourceHash: entry.sourceHash, rawContent: entry.rawContent, importedBy: approval.actorId,
+            unmappedSections: InternationalTestMarkdownParser.parse(entry.rawContent).map(block => ({ sectionKey: block.blockKey, title: block.title, locale: 'ar', content: block.content, sourceSectionPath: block.blockKey })),
+            metadata: { sourceCycle: entry.sourceCycle, sourceKey: entry.sourceKey, sourceClassification: entry.sourceClassification, resolution: entry.resolution, reviewReason: entry.reviewReason, evidenceReference: entry.evidenceReference, sourceManifestHash: plan.sourceManifestHash, ...(entry.providerResolution ? {providerResolution:entry.providerResolution} : {}),
+              ...(plan.targetMode ? { targetMode: plan.targetMode } : {}) },
+          };
   }
   async rollback(plan: InternationalTestImportPlan, approval: InternationalTestImportApproval): Promise<InternationalTestImportResult> {
     return this.prisma.$transaction(async tx => {
@@ -140,10 +146,50 @@ export class PrismaInternationalTestImportChangeGateway implements International
         }
         return this.result(plan, 'ROLLED_BACK', false, receipts.length * 3 + 2);
       });
-    }, { isolationLevel: 'Serializable', timeout: 30_000, maxWait: 10_000 });
+    }, { isolationLevel: 'Serializable', timeout: this.transactionTimeout(plan.entries.length), maxWait: 10_000 });
   }
-  private readOnly<T>(operation: (tx: Tx) => Promise<T>): Promise<T> {
-    return this.prisma.$transaction(async tx => { await tx.$executeRaw`SET TRANSACTION READ ONLY`; return operation(tx); }, { isolationLevel: 'RepeatableRead', timeout: 30_000 });
+  /** Opt-in grouped writes for entirely new owners, after the same locked preview.
+   * Updates retain the individual revision/version path. No skipDuplicates or upsert. */
+  private async createBatch(tx: Tx, plan: InternationalTestImportPlan, approval: InternationalTestImportApproval): Promise<InternationalTestImportResult> {
+    const providerIds = plan.entries.flatMap(entry => entry.core.providerId ? [entry.core.providerId] : []);
+    const providers = await tx.internationalTestProvider.findMany({where:{id:{in:providerIds}}});
+    const drafts = plan.entries.map(entry => {
+      const request = this.draftRequest(plan,entry,approval);
+      return {entry,request,id:randomUUID(),projection:projectInternationalTestImportDraft(request)};
+    });
+    await tx.internationalTest.createMany({data:plan.entries.map(entry => {
+      const provider = providers.find(row => row.id === entry.core.providerId);
+      return {id:entry.targetId,...entry.core,providerName:provider?.displayName,
+        canonicalDedupKey:InternationalTestDeduplicationService.generateKey({canonicalName:entry.core.canonicalName,providerName:provider?.displayName}),
+        status:'NEEDS_REVIEW',completenessStatus:'NEEDS_REVIEW',isSourceVerified:false,isPubliclyVisible:false,
+        optionalFields:{m10Source:{sourceKey:entry.sourceKey,sourceHash:entry.sourceHash,changeSetId:plan.changeSetId}}};
+    })});
+    await tx.internationalTestVersion.createMany({data:drafts.map(({entry,request,id,projection}) => ({
+      id,testId:entry.targetId,versionNumber:1,status:'DRAFT',sourceFileName:request.sourceFileName,sourceLocale:request.sourceLocale,
+      sourceUri:request.sourceUri,sourceHash:request.sourceHash,importedAt:new Date(),changeSummary:json(projection.changeSummary),
+      rawContentBlocks:projection.rawContentBlocks,metadata:json({importedBy:approval.actorId,detectedFields:{},detectedSections:[],unmappedSections:projection.unmappedSections.map(section=>section.sectionKey),...request.metadata}),
+    }))});
+    await tx.internationalTestContentBlock.createMany({data:drafts.flatMap(draft => draft.projection.reviewBlocks.map(block => ({...block,versionId:draft.id,metadata:json(block.metadata)})))});
+    const changed = await tx.$executeRaw(Prisma.sql`INSERT INTO "InternationalTestGovernance" ("testId","revision") VALUES ${Prisma.join(plan.entries.map(entry=>Prisma.sql`(${entry.targetId},1)`))}`);
+    if (changed !== plan.entries.length) throw new Error('INTERNATIONAL_TEST_REVISION_CONFLICT');
+    const roots = await tx.internationalTest.findMany({where:{id:{in:plan.entries.map(entry=>entry.targetId)}},include:rootInclude});
+    const versions = await tx.internationalTestVersion.findMany({where:{id:{in:drafts.map(draft=>draft.id)}},include:versionInclude});
+    for(const [sequence,draft] of drafts.entries()) {
+      const root=roots.find(row=>row.id===draft.entry.targetId),version=versions.find(row=>row.id===draft.id);
+      if(!root||!version) throw new Error('TEST_IMPORT_BATCH_RESULT_INCOMPLETE');
+      await this.saveJournal(tx,version,{changeSetId:plan.changeSetId,planHash:plan.planHash,previewHash:approval.previewHash,sequence,total:plan.entries.length,
+        state:'APPLIED',created:true,targetId:root.id,sourceKey:draft.entry.sourceKey,sourceHash:draft.entry.sourceHash,sourceCycle:draft.entry.sourceCycle,
+        actorId:approval.actorId,reviewReason:draft.entry.reviewReason,evidenceReference:draft.entry.evidenceReference,rootHash:internationalTestImportHash(root),versionHash:versionHash(version)});
+    }
+    return this.result(plan,'APPLIED',false,plan.entries.length*3+drafts.reduce((sum,draft)=>sum+draft.projection.reviewBlocks.length,0)+2);
+  }
+  private transactionTimeout(entries: number): number {
+    // The reviewed contract caps batches at five. Allow the same bounded budget
+    // per entry on a distant database; a batch must still commit atomically.
+    return 30_000 * Math.min(5, Math.max(1, entries));
+  }
+  private readOnly<T>(operation: (tx: Tx) => Promise<T>, entries: number): Promise<T> {
+    return this.prisma.$transaction(async tx => { await tx.$executeRaw`SET TRANSACTION READ ONLY`; return operation(tx); }, { isolationLevel: 'RepeatableRead', timeout: this.transactionTimeout(entries) });
   }
   private async lock(tx: Tx, plan: InternationalTestImportPlan, actorId: string): Promise<void> {
     await tx.$queryRaw`SELECT pg_advisory_xact_lock(725111)::text`;
@@ -158,9 +204,16 @@ export class PrismaInternationalTestImportChangeGateway implements International
       FROM "RoleAssignmentRecord" a JOIN "RoleRecord" r ON r."id" = a."roleId" WHERE a."identityId" = ${actorId}
     ) FOR SHARE OF p`);
     await this.assertActor(tx, actorId);
+    if (this.options.batchPersistence) {
+      await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "InternationalTest" WHERE "id" IN (${Prisma.join(plan.entries.map(entry=>entry.targetId))}) ORDER BY "id" FOR UPDATE`);
+      const providers=plan.entries.flatMap(entry=>entry.core.providerId?[entry.core.providerId]:[]),families=plan.entries.flatMap(entry=>entry.core.familyId?[entry.core.familyId]:[]);
+      if(providers.length) await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "InternationalTestProvider" WHERE "id" IN (${Prisma.join(providers)}) ORDER BY "id" FOR SHARE`);
+      if(families.length) await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "InternationalTestFamily" WHERE "id" IN (${Prisma.join(families)}) ORDER BY "id" FOR SHARE`);
+      return;
+    }
     for (const entry of [...plan.entries].sort((a, b) => a.targetId.localeCompare(b.targetId))) {
       await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "InternationalTest" WHERE "id" = ${entry.targetId} FOR UPDATE`);
-      await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "InternationalTestProvider" WHERE "id" = ${entry.core.providerId} FOR SHARE`);
+      if (entry.core.providerId) await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "InternationalTestProvider" WHERE "id" = ${entry.core.providerId} FOR SHARE`);
       if (entry.core.familyId) await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "InternationalTestFamily" WHERE "id" = ${entry.core.familyId} FOR SHARE`);
     }
   }
@@ -199,25 +252,27 @@ export class PrismaInternationalTestImportChangeGateway implements International
     // Rechecked under the same serializable write transaction after locking.
     // Receipted replay above must remain available after the first creation.
     if (plan.targetMode && await tx.internationalTest.count() !== 0) issues.push('TEST_IMPORT_INITIAL_CATALOG_NOT_EMPTY');
+    const batch = this.options.batchPersistence ? await this.loadInspectionRows(tx,plan) : null;
     for (const entry of plan.entries) {
-      const root = await tx.internationalTest.findUnique({ where: { id: entry.targetId }, include: rootInclude });
-      const provider = await tx.internationalTestProvider.findUnique({ where: { id: entry.core.providerId } });
-      const family = entry.core.familyId ? await tx.internationalTestFamily.findUnique({ where: { id: entry.core.familyId } }) : null;
-      if (!provider) issues.push('TEST_IMPORT_PROVIDER_NOT_FOUND');
+      const root = batch ? batch.roots.find(row=>row.id===entry.targetId) ?? null : await tx.internationalTest.findUnique({ where: { id: entry.targetId }, include: rootInclude });
+      const provider = entry.core.providerId ? (batch ? batch.providers.find(row=>row.id===entry.core.providerId) ?? null : await tx.internationalTestProvider.findUnique({ where: { id: entry.core.providerId } })) : null;
+      const family = entry.core.familyId ? (batch ? batch.families.find(row=>row.id===entry.core.familyId) ?? null : await tx.internationalTestFamily.findUnique({ where: { id: entry.core.familyId } })) : null;
+      if (entry.core.providerId && !provider) issues.push('TEST_IMPORT_PROVIDER_NOT_FOUND');
       if (entry.core.familyId && (!family || family.category !== entry.core.testCategory)) issues.push('TEST_IMPORT_FAMILY_CATEGORY_MISMATCH');
       if (entry.resolution !== 'APPROVE_UPDATE' && root) issues.push('TEST_IMPORT_CREATE_ID_EXISTS');
       if (entry.resolution === 'APPROVE_UPDATE' && !root) issues.push('TEST_IMPORT_UPDATE_OWNER_NOT_FOUND');
       if (root) {
         if (['PUBLISHED', 'ARCHIVED', 'REJECTED', 'SUPERSEDED', 'MERGED'].includes(root.status) || root.isPubliclyVisible || root.currentPublishedVersionId) issues.push('TEST_IMPORT_OWNER_IMMUTABLE');
-        for (const key of ['publicId', 'slug', 'canonicalName', 'providerId', 'testCategory'] as const) if (root[key] !== entry.core[key]) issues.push(`TEST_IMPORT_IDENTITY_MISMATCH:${key}`);
+        for (const key of ['publicId', 'slug', 'canonicalName', 'testCategory'] as const) if (root[key] !== entry.core[key]) issues.push(`TEST_IMPORT_IDENTITY_MISMATCH:${key}`);
+        if ((root.providerId ?? undefined) !== entry.core.providerId) issues.push('TEST_IMPORT_IDENTITY_MISMATCH:providerId');
         if ((root.familyId ?? undefined) !== entry.core.familyId) issues.push('TEST_IMPORT_IDENTITY_MISMATCH:familyId');
       }
       const dedupKey = InternationalTestDeduplicationService.generateKey({ canonicalName: entry.core.canonicalName, providerName: provider?.displayName });
       if (plannedDedupKeys.has(dedupKey)) issues.push('TEST_IMPORT_CANONICAL_IDENTITY_COLLISION');
       plannedDedupKeys.add(dedupKey);
-      const collisions = await tx.internationalTest.findMany({ where: { id: { not: entry.targetId }, OR: [{ publicId: entry.core.publicId }, { slug: entry.core.slug }, { canonicalDedupKey: dedupKey }] }, select: { id: true } });
+      const collisions = batch ? batch.collisions.filter(row=>row.id!==entry.targetId&&(row.publicId===entry.core.publicId||row.slug===entry.core.slug||row.canonicalDedupKey===dedupKey)).map(row=>({id:row.id})) : await tx.internationalTest.findMany({ where: { id: { not: entry.targetId }, OR: [{ publicId: entry.core.publicId }, { slug: entry.core.slug }, { canonicalDedupKey: dedupKey }] }, select: { id: true } });
       if (collisions.length) issues.push('TEST_IMPORT_CANONICAL_IDENTITY_COLLISION');
-      const duplicate = await tx.internationalTestVersion.findFirst({ where: { testId: entry.targetId, sourceHash: entry.sourceHash, metadata: { path: ['sourceCycle'], equals: entry.sourceCycle }, NOT: { status: 'SUPERSEDED' } } });
+      const duplicate = batch ? batch.versions.find(row=>row.testId===entry.targetId&&row.sourceHash===entry.sourceHash&&metadata(row.metadata).sourceCycle===entry.sourceCycle) ?? null : await tx.internationalTestVersion.findFirst({ where: { testId: entry.targetId, sourceHash: entry.sourceHash, metadata: { path: ['sourceCycle'], equals: entry.sourceCycle }, NOT: { status: 'SUPERSEDED' } } });
       if (duplicate) issues.push('TEST_IMPORT_SOURCE_CYCLE_ALREADY_EXISTS');
       const currentHash = root ? internationalTestImportHash(root) : null;
       const blockCount = InternationalTestMarkdownParser.parse(entry.rawContent).length + 1;
@@ -225,6 +280,18 @@ export class PrismaInternationalTestImportChangeGateway implements International
       observed.push({ currentHash, provider, family, collisions, duplicate });
     }
     return { changeSetId: plan.changeSetId, planHash: plan.planHash, previewHash: internationalTestImportHash({ planHash: plan.planHash, observed }), state: issues.length ? 'BLOCKED' : 'READY', changes, issues, databaseWrites: 0 };
+  }
+  private async loadInspectionRows(tx: Tx,plan: InternationalTestImportPlan) {
+    const ids=plan.entries.map(entry=>entry.targetId);
+    const roots=await tx.internationalTest.findMany({where:{id:{in:ids}},include:rootInclude});
+    const providerIds=plan.entries.flatMap(entry=>entry.core.providerId?[entry.core.providerId]:[]);
+    const providers=providerIds.length?await tx.internationalTestProvider.findMany({where:{id:{in:providerIds}}}):[];
+    const familyIds=plan.entries.flatMap(entry=>entry.core.familyId?[entry.core.familyId]:[]);
+    const families=familyIds.length?await tx.internationalTestFamily.findMany({where:{id:{in:familyIds}}}):[];
+    const dedupKeys=plan.entries.map(entry=>InternationalTestDeduplicationService.generateKey({canonicalName:entry.core.canonicalName,providerName:providers.find(row=>row.id===entry.core.providerId)?.displayName}));
+    const collisions=await tx.internationalTest.findMany({where:{OR:[{publicId:{in:plan.entries.map(entry=>entry.core.publicId)}},{slug:{in:plan.entries.map(entry=>entry.core.slug)}},{canonicalDedupKey:{in:dedupKeys}}]},select:{id:true,publicId:true,slug:true,canonicalDedupKey:true}});
+    const versions=await tx.internationalTestVersion.findMany({where:{testId:{in:ids},sourceHash:{in:plan.entries.map(entry=>entry.sourceHash)},NOT:{status:'SUPERSEDED'}}});
+    return {roots,providers,families,collisions,versions};
   }
   private receipts(tx: Tx, plan: InternationalTestImportPlan): Promise<Version[]> {
     return tx.internationalTestVersion.findMany({ where: { metadata: { path: ['m10Import', 'changeSetId'], equals: plan.changeSetId } }, include: versionInclude, orderBy: { testId: 'asc' } });

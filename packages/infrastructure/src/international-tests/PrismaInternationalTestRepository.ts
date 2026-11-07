@@ -1,3 +1,4 @@
+import { projectInternationalTestImportDraft } from './InternationalTestImportDraftProjection';
 import {decodeStableCursor,encodeStableCursor} from '../api-foundation/StableCursor';
 import { randomUUID } from 'node:crypto';
 import { InternationalTestGovernancePersistence } from './InternationalTestGovernancePersistence';
@@ -99,16 +100,7 @@ type InternationalTestVersionWithBlocks = Prisma.InternationalTestVersionGetPayl
   include: { contentBlocks: true };
 }>;
 
-type InternationalTestContentBlockCreateInput = {
-  blockKey: string;
-  blockType: string;
-  title?: string;
-  locale?: string;
-  content: string;
-  sourceSectionPath?: string;
-  reviewStatus: string;
-  metadata?: Record<string, unknown>;
-};
+
 
 interface InternationalTestTransactionContext extends AtomicPersistenceContext {
   readonly transactionClient: Prisma.TransactionClient;
@@ -1054,61 +1046,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
       select: { versionNumber: true, metadata: true },
     });
     const versionNumber = (latestVersion?.versionNumber ?? 0) + 1;
-    const hasRawContent = typeof data.rawContent === 'string' && data.rawContent.trim().length > 0;
-    const unmappedSections = data.unmappedSections ?? [];
-    const reviewBlocks: InternationalTestContentBlockCreateInput[] = [];
-
-    if (hasRawContent && data.rawContent) {
-      reviewBlocks.push({
-        blockKey: 'source.raw',
-        blockType: 'RAW_SOURCE',
-        title: data.sourceFileName,
-        content: data.rawContent,
-        sourceSectionPath: '/',
-        reviewStatus: 'NEEDS_REVIEW',
-        metadata: {
-          preservedOriginalSource: true,
-          ...(data.sourceHash ? { sourceHash: data.sourceHash } : {}),
-          ...(data.sourceUri ? { sourceUri: data.sourceUri } : {}),
-        },
-      });
-    }
-
-    for (const [index, section] of unmappedSections.entries()) {
-      if (!section.content || section.content.trim() === '') continue;
-      reviewBlocks.push({
-        blockKey: `unmapped.${index + 1}.${this.normalizeBlockKey(section.sectionKey)}`,
-        blockType: 'UNMAPPED_SOURCE_SECTION',
-        title: section.title ?? section.sectionKey,
-        locale: section.locale,
-        content: section.content,
-        sourceSectionPath: section.sourceSectionPath,
-        reviewStatus: 'NEEDS_REVIEW',
-        metadata: {
-          requiresMapping: true,
-          detectedFieldKeys: section.detectedFieldKeys ?? [],
-          ...(section.metadata ?? {}),
-        },
-      });
-    }
-
-    const changeSummary = {
-      ...this.buildImportChangeSummary(latestVersion?.metadata, data.detectedFields),
-      unmappedSectionCount: reviewBlocks.filter(
-        (block) => block.blockType === 'UNMAPPED_SOURCE_SECTION',
-      ).length,
-      unmappedSectionsRequireReview: reviewBlocks.some(
-        (block) => block.blockType === 'UNMAPPED_SOURCE_SECTION',
-      ),
-    };
-    const rawContentBlocks = reviewBlocks.map((block) => ({
-      blockKey: block.blockKey,
-      blockType: block.blockType,
-      ...(block.title ? { title: block.title } : {}),
-      ...(block.sourceSectionPath ? { sourceSectionPath: block.sourceSectionPath } : {}),
-      contentLength: block.content.length,
-      reviewStatus: block.reviewStatus,
-    }));
+    const {hasRawContent,unmappedSections,reviewBlocks,changeSummary,rawContentBlocks} = projectInternationalTestImportDraft(data,latestVersion?.metadata);
 
     const version = await this.prisma.internationalTestVersion.create({
       data: {
@@ -1319,57 +1257,6 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
 
   // --- Private Mapping Helpers ---
 
-  private normalizeBlockKey(value: string): string {
-    const normalized = value
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-    return normalized || 'section';
-  }
-
-  private buildImportChangeSummary(
-    previousMetadata: unknown,
-    detectedFields: Record<string, unknown> | undefined,
-  ): Record<string, unknown> {
-    if (!detectedFields) {
-      return {
-        comparisonStatus: 'PENDING_FIELD_MAPPING',
-        createdFromExistingTest: true,
-        addedFields: [],
-        removedFields: [],
-        changedFields: [],
-      };
-    }
-
-    const previousFields = this.extractDetectedFields(previousMetadata);
-    const previousKeys = Object.keys(previousFields);
-    const currentKeys = Object.keys(detectedFields);
-    const addedFields = currentKeys.filter((key) => !previousKeys.includes(key));
-    const removedFields = previousKeys.filter((key) => !currentKeys.includes(key));
-    const changedFields = currentKeys.filter((key) => {
-      if (!previousKeys.includes(key)) return false;
-      return JSON.stringify(previousFields[key]) !== JSON.stringify(detectedFields[key]);
-    });
-
-    return {
-      comparisonStatus: previousKeys.length > 0 ? 'COMPLETED' : 'BASELINE_VERSION',
-      createdFromExistingTest: true,
-      addedFields,
-      removedFields,
-      changedFields,
-      newFieldsRequireReview: addedFields.length > 0,
-      deletedSourceFieldsRequireReview: removedFields.length > 0,
-    };
-  }
-
-  private extractDetectedFields(metadata: unknown): Record<string, unknown> {
-    if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return {};
-    const detectedFields = (metadata as Record<string, unknown>).detectedFields;
-    if (!detectedFields || typeof detectedFields !== 'object' || Array.isArray(detectedFields))
-      return {};
-    return detectedFields as Record<string, unknown>;
-  }
 
   private asRecord(value: unknown): Record<string, unknown> | undefined {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;

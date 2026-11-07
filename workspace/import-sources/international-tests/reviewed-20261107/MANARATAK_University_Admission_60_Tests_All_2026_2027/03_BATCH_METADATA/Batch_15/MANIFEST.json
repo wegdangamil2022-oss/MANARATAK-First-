@@ -1,0 +1,40 @@
+{
+  "batch": 15,
+  "date": "2026-11-05",
+  "tests": [
+    29,
+    30
+  ],
+  "files": [
+    {
+      "name": "MANARATAK_JEE_Main_2026_2027_Student_Guide.md",
+      "bytes": 34908,
+      "sha256": "07acd102f8a18103b698c53bc65f82332255f4ec85901b9776cfde2f1449e9ba"
+    },
+    {
+      "name": "MANARATAK_JEE_Main_2026_2027_Student_Guide.json",
+      "bytes": 101154,
+      "sha256": "2f90a4ef3a69f60194ed7805b2114058de9ff9b5b30d999fb6eb97ed85ec002b"
+    },
+    {
+      "name": "MANARATAK_JEE_Advanced_2026_2027_Student_Guide.md",
+      "bytes": 39990,
+      "sha256": "b151930a257540a59488861513493e28749ad82038cfba357f8fd3e2850ca13e"
+    },
+    {
+      "name": "MANARATAK_JEE_Advanced_2026_2027_Student_Guide.json",
+      "bytes": 115421,
+      "sha256": "f441747581ce188df1e7108783148142e0881fb1834e15c1cb1ede34d4b28d58"
+    },
+    {
+      "name": "INDEX.md",
+      "bytes": 1808,
+      "sha256": "13a21566a3173b13cd23adbdcd7b0b90798348c9fa9166feba3a364e21fe2adc"
+    },
+    {
+      "name": "QA_REPORT.md",
+      "bytes": 2480,
+      "sha256": "085dba84cac774f76644da060e16d7cdad10a066e63bbda57f06df54c34b1c19"
+    }
+  ]
+}

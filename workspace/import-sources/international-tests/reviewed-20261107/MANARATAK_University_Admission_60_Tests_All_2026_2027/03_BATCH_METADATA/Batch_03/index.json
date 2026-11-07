@@ -1,0 +1,28 @@
+{
+  "collection": "MANARATAK_Admission_Tests",
+  "version": "2026-11-04",
+  "batch": 3,
+  "count": 2,
+  "completed_to_date": 6,
+  "sections_per_test": 16,
+  "tests": [
+    {
+      "order": 5,
+      "id": "admission-tolc",
+      "code": "TOLC",
+      "title": "اختبار TOLC — الدليل الشامل للطالب",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_TOLC_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_TOLC_2026_2027_Student_Guide.json"
+    },
+    {
+      "order": 6,
+      "id": "admission-cent-s",
+      "code": "CEnT-S",
+      "title": "اختبار CEnT-S — الدليل الشامل للطالب",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_CEnT_S_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_CEnT_S_2026_2027_Student_Guide.json"
+    }
+  ]
+}

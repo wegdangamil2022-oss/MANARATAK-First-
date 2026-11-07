@@ -1,0 +1,31 @@
+{
+  "collection": "MANARATAK_Admission_Tests",
+  "batch": 9,
+  "version": "2026-11-04",
+  "batch_count": 2,
+  "completed_to_date": 18,
+  "sections_per_test": 16,
+  "template_ref": "MANARATAK_IELTS_2026_Student_Guide_Final.md",
+  "tests": [
+    {
+      "order": 17,
+      "id": "admission-yks",
+      "code": "YKS",
+      "title": "اختبار YKS التركي — الدليل الشامل للطالب | منارتك 2026–2027",
+      "category": "البكالوريوس — تركيا",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_YKS_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_YKS_2026_2027_Student_Guide.json"
+    },
+    {
+      "order": 18,
+      "id": "admission-pgat",
+      "code": "PGAT",
+      "title": "اختبار القدرات العامة للجامعيين PGAT (قياس) — الدليل الشامل للطالب | منارتك 2026–2027",
+      "category": "الدراسات العليا — السعودية",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_PGAT_SAUDI_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_PGAT_SAUDI_2026_2027_Student_Guide.json"
+    }
+  ]
+}

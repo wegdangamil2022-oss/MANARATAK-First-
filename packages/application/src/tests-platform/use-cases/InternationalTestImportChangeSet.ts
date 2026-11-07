@@ -7,7 +7,7 @@ const digest = z.string().regex(/^[a-f0-9]{64}$/);
 const coreSchema = z.object({
   publicId: z.string().trim().min(1).max(120), slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(180),
   canonicalName: z.string().trim().min(1).max(300), displayName: z.string().trim().min(1).max(300),
-  testCategory: z.nativeEnum(InternationalTestCategory), providerId: z.string().uuid(), familyId: z.string().uuid().optional(),
+  testCategory: z.nativeEnum(InternationalTestCategory), providerId: z.string().uuid().optional(), familyId: z.string().uuid().optional(),
   localizedNameAr: z.string().trim().min(1).max(300).optional(), localizedNameEn: z.string().trim().min(1).max(300).optional(),
   abbreviation: z.string().trim().min(1).max(120).optional(),
 }).strict();
@@ -17,6 +17,7 @@ export const internationalTestImportEntrySchema = z.object({
   resolution: z.enum(['APPROVE_CREATE', 'APPROVE_UPDATE', 'APPROVE_INITIAL_CREATE']),
   reviewReason: z.string().trim().min(1).max(2000), evidenceReference: z.string().trim().min(1).max(500),
   targetId: z.string().uuid(), core: coreSchema,
+  providerResolution: z.literal('UNRESOLVED_FROM_SOURCE').optional(),
   sourceCycle: z.string().regex(/^\d{4}(?:-\d{4})?$/), sourceUri: z.string().url().max(2048).optional(),
   sourceHash: digest, rawContent: z.string().min(1).max(2_000_000),
 }).strict();
@@ -64,6 +65,8 @@ export function prepareInternationalTestImport(input: unknown): InternationalTes
   }
   const sources = new Set<string>(); const targets = new Set<string>(); const publicIds = new Set<string>(); const slugs = new Set<string>(); const canonicalKeys = new Set<string>();
   for (const entry of body.entries) {
+    if (!entry.core.providerId && entry.providerResolution !== 'UNRESOLVED_FROM_SOURCE') throw new Error('TEST_IMPORT_PROVIDER_REVIEW_REQUIRED');
+    if (entry.core.providerId && entry.providerResolution) throw new Error('TEST_IMPORT_PROVIDER_REVIEW_CONFLICT');
     const canonicalKey = `${entry.core.canonicalName.toLowerCase()}|${entry.core.providerId}`;
     if (sources.has(entry.sourceKey) || targets.has(entry.targetId) || publicIds.has(entry.core.publicId) || slugs.has(entry.core.slug) || canonicalKeys.has(canonicalKey)) throw new Error('TEST_IMPORT_DUPLICATE_PLAN_IDENTITY');
     sources.add(entry.sourceKey); targets.add(entry.targetId); publicIds.add(entry.core.publicId); slugs.add(entry.core.slug);

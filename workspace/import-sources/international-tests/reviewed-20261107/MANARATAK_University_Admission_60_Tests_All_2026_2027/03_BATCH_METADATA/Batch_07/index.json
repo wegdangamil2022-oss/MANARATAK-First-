@@ -1,0 +1,33 @@
+{
+  "collection": "MANARATAK_Admission_Tests",
+  "version": "2026-11-04",
+  "batch": 7,
+  "batch_count": 2,
+  "completed_to_date": 14,
+  "initial_scope_total": 13,
+  "expanded_scope_total": 14,
+  "sections_per_test": 16,
+  "template_ref": "MANARATAK_IELTS_2026_Student_Guide_Final.md",
+  "tests": [
+    {
+      "order": 13,
+      "id": "admission-lsat",
+      "code": "LSAT",
+      "title": "اختبار LSAT — الدليل الشامل للطالب (2026–2027)",
+      "category": "القانون — اختبارات القبول الدولي",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_LSAT_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_LSAT_2026_2027_Student_Guide.json"
+    },
+    {
+      "order": 14,
+      "id": "admission-tr-yos",
+      "code": "TR-YOS",
+      "title": "اختبار TR-YÖS — الدليل الشامل للطالب (2026–2027)",
+      "category": "البكالوريوس الدولي — تركيا",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_TR_YOS_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_TR_YOS_2026_2027_Student_Guide.json"
+    }
+  ]
+}

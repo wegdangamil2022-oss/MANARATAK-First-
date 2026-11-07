@@ -1,0 +1,29 @@
+{
+  "collection": "MANARATAK_Admission_Tests",
+  "version": "2026-11-04",
+  "batch": 4,
+  "count": 2,
+  "completed_to_date": 8,
+  "initial_scope_total": 13,
+  "sections_per_test": 16,
+  "tests": [
+    {
+      "order": 7,
+      "id": "admission-imat",
+      "code": "IMAT",
+      "title": "اختبار IMAT — الدليل الشامل للطالب",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_IMAT_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_IMAT_2026_2027_Student_Guide.json"
+    },
+    {
+      "order": 8,
+      "id": "admission-gre",
+      "code": "GRE",
+      "title": "اختبار GRE General Test — الدليل الشامل للطالب",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_GRE_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_GRE_2026_2027_Student_Guide.json"
+    }
+  ]
+}

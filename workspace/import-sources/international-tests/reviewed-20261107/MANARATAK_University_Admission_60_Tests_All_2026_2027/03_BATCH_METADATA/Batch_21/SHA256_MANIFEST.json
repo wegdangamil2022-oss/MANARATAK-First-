@@ -1,0 +1,36 @@
+{
+  "batch": 21,
+  "date": "2026-11-05",
+  "entries": [
+    {
+      "file": "INDEX.md",
+      "sha256": "f2754f49f6f1fdbf7fe3e61cad21665ae6f98c6d600cdac3b8d9d511a5ffc512",
+      "size_bytes": 1262
+    },
+    {
+      "file": "MANARATAK_IPMAT_Indore_2026_2027_Student_Guide.md",
+      "sha256": "bd9b90cc1416815d7453fed1a7c068b83ce3885be88ecdc0f002f52e17b4de39",
+      "size_bytes": 27274
+    },
+    {
+      "file": "MANARATAK_JIPMAT_2026_2027_Student_Guide.md",
+      "sha256": "ffd28d21452f38a2987d58f22797e8b98af896888d6528ecb4ba71e8967a3205",
+      "size_bytes": 27764
+    },
+    {
+      "file": "QA_REPORT.md",
+      "sha256": "4f25c23b72d226ebd3b93569b6332436f6d680e4d37e4daf2f199fc06569a198",
+      "size_bytes": 2147
+    },
+    {
+      "file": "MANARATAK_IPMAT_Indore_2026_2027_Student_Guide.json",
+      "sha256": "eaf8c64882f6d74c3db4f2358915af5e60dd684c540c0c393674514f153d0109",
+      "size_bytes": 64107
+    },
+    {
+      "file": "MANARATAK_JIPMAT_2026_2027_Student_Guide.json",
+      "sha256": "9f0daf39da164e9db7f76eb2c9f7788a5289a40bbe96e9c28b16458ea7c978bf",
+      "size_bytes": 65954
+    }
+  ]
+}

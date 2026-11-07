@@ -50,3 +50,5 @@ docs/reviews/evidence/post28/*/staging-worker-domain/** -text whitespace=cr-at-e
 docs/reviews/evidence/post28/*/staging-worker-linux/** -text whitespace=cr-at-eol,-blank-at-eof
 
 docs/reviews/evidence/post28/*/repaired-rollback-reference/** -text whitespace=cr-at-eol,-blank-at-eof
+# Preserve Markdown hard breaks in the supplied reviewed test guides.
+workspace/import-sources/international-tests/reviewed-20261107/** whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof

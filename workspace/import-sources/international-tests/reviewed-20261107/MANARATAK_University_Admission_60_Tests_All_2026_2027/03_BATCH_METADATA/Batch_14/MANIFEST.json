@@ -1,0 +1,46 @@
+{
+  "batch_number": 14,
+  "created": "2026-11-05",
+  "items": [
+    {
+      "sequence": 27,
+      "code": "STS_Eczacilik"
+    },
+    {
+      "sequence": 28,
+      "code": "NEET_UG"
+    }
+  ],
+  "files": [
+    {
+      "name": "MANARATAK_STS_Eczacilik_2026_2027_Student_Guide.md",
+      "size_bytes": 30240,
+      "sha256": "919a0a142469c2b4eb6c6ce565b9b9c5dbf89a84814c5403a230ce8fac5d01af"
+    },
+    {
+      "name": "MANARATAK_STS_Eczacilik_2026_2027_Student_Guide.json",
+      "size_bytes": 89948,
+      "sha256": "f9094a7c9814799f3b483153fc7b49348dc503f02f0d8e28e5fd7eed63297b41"
+    },
+    {
+      "name": "MANARATAK_NEET_UG_2026_2027_Student_Guide.md",
+      "size_bytes": 33079,
+      "sha256": "485a39071ae8adfe2538b3ac16240e08d01c8456b9fb8f6890e44853816c4d49"
+    },
+    {
+      "name": "MANARATAK_NEET_UG_2026_2027_Student_Guide.json",
+      "size_bytes": 95758,
+      "sha256": "2d0f8a7c591f3153a4e2e0c727a19c0fb1d9d3fb1d3a3937991a71cc444c9c71"
+    },
+    {
+      "name": "INDEX.md",
+      "size_bytes": 1355,
+      "sha256": "75bcb516cc023b5d9a90411eea5b41fffe835665549f4fa327d8f5661857790c"
+    },
+    {
+      "name": "QA_REPORT.md",
+      "size_bytes": 2393,
+      "sha256": "79572f61b6fae4dfdfc3c316d3a650423493bc5df612019eb56cc0a61b22a5bd"
+    }
+  ]
+}

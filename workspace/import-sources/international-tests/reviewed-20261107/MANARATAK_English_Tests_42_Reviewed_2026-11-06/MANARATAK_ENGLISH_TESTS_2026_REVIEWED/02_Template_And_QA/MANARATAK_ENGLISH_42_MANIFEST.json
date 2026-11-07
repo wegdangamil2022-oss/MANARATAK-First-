@@ -1,0 +1,5470 @@
+{
+  "platform": "منارتك",
+  "collection": "اختبارات اللغة الإنجليزية",
+  "language": "en",
+  "content_language": "ar",
+  "version": "2026-11-06-structural-review",
+  "test_count": 42,
+  "section_count": 16,
+  "canonical_sections": [
+    {
+      "id": "section-01",
+      "number": 1,
+      "title": "نظرة عامة على الاختبار"
+    },
+    {
+      "id": "section-02",
+      "number": 2,
+      "title": "استخدامات الاختبار ومميزاته"
+    },
+    {
+      "id": "section-03",
+      "number": 3,
+      "title": "أنواع الاختبار وكيف تختار النوع المناسب"
+    },
+    {
+      "id": "section-04",
+      "number": 4,
+      "title": "الاعتراف ومتطلبات القبول"
+    },
+    {
+      "id": "section-05",
+      "number": 5,
+      "title": "طرق تقديم الاختبار والمتطلبات التقنية"
+    },
+    {
+      "id": "section-06",
+      "number": 6,
+      "title": "هيكل الاختبار ومدته"
+    },
+    {
+      "id": "section-07",
+      "number": 7,
+      "title": "أقسام الاختبار وأنواع الأسئلة"
+    },
+    {
+      "id": "section-08",
+      "number": 8,
+      "title": "نظام الدرجات وتقييم الأداء"
+    },
+    {
+      "id": "section-09",
+      "number": 9,
+      "title": "التحضير للاختبار والمواد التدريبية"
+    },
+    {
+      "id": "section-10",
+      "number": 10,
+      "title": "مراكز الاختبار والمواعيد والرسوم"
+    },
+    {
+      "id": "section-11",
+      "number": 11,
+      "title": "التسجيل والحجز والسياسات المالية"
+    },
+    {
+      "id": "section-12",
+      "number": 12,
+      "title": "يوم الاختبار والتعليمات والتسهيلات"
+    },
+    {
+      "id": "section-13",
+      "number": 13,
+      "title": "النتائج والشهادات والتحقق منها"
+    },
+    {
+      "id": "section-14",
+      "number": 14,
+      "title": "إعادة الاختبار ومراجعة الدرجات"
+    },
+    {
+      "id": "section-15",
+      "number": 15,
+      "title": "الأسئلة الشائعة والاختبارات البديلة"
+    },
+    {
+      "id": "section-16",
+      "number": 16,
+      "title": "المصادر الرسمية وآخر التحديثات"
+    }
+  ],
+  "tests": [
+    {
+      "id": "en-01",
+      "order": 1,
+      "code": "IELTS",
+      "test_name": "IELTS",
+      "file": "01_Guides_42_MD/MANARATAK_IELTS_2026_Student_Guide_Final.md",
+      "original_filename": "MANARATAK_IELTS_2026_Student_Guide_Final.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1195,
+        1535,
+        2769,
+        2082,
+        2805,
+        832,
+        4219,
+        2419,
+        2602,
+        1948,
+        2505,
+        2262,
+        2042,
+        2296,
+        2051,
+        3730
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "271f7cfafb8d97f8315f75b57ce1896cf294fd94def2c465873cc15e360fdbae"
+    },
+    {
+      "id": "en-02",
+      "order": 2,
+      "code": "TOEFL_iBT",
+      "test_name": "TOEFL iBT",
+      "file": "01_Guides_42_MD/MANARATAK_TOEFL_iBT_2026_Student_Guide_Revised.md",
+      "original_filename": "MANARATAK_TOEFL_iBT_2026_Student_Guide_Revised.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1037,
+        1342,
+        814,
+        1234,
+        1258,
+        945,
+        1840,
+        1115,
+        1526,
+        1037,
+        1379,
+        1016,
+        1261,
+        719,
+        1121,
+        1282
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "10a661d78b04749105051213b27c184958a7871e65e9564f0c256ccef39b2ac6"
+    },
+    {
+      "id": "en-03",
+      "order": 3,
+      "code": "PTE_Academic",
+      "test_name": "PTE Academic",
+      "file": "01_Guides_42_MD/MANARATAK_PTE_Academic_2026_Student_Guide_Revised.md",
+      "original_filename": "MANARATAK_PTE_Academic_2026_Student_Guide_Revised.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        930,
+        1115,
+        1529,
+        1318,
+        865,
+        955,
+        2696,
+        1449,
+        1597,
+        782,
+        1434,
+        1005,
+        979,
+        1106,
+        1202,
+        1189
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "62514d7d370ee59a14d63806f6643a0aaa89a16b090e73a601896c942e48121e"
+    },
+    {
+      "id": "en-04",
+      "order": 4,
+      "code": "Duolingo_English_Test",
+      "test_name": "Duolingo English Test",
+      "file": "01_Guides_42_MD/MANARATAK_Duolingo_English_Test_2026_Student_Guide_Revised.md",
+      "original_filename": "MANARATAK_Duolingo_English_Test_2026_Student_Guide_Revised.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        992,
+        1134,
+        977,
+        1392,
+        1312,
+        960,
+        2249,
+        1223,
+        1686,
+        1059,
+        1469,
+        1450,
+        1336,
+        1364,
+        1388,
+        1646
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "be454d1d2c33cf70ab35ba727f70855ff9f7f0f94561a87973c2ccde1ae65565"
+    },
+    {
+      "id": "en-05",
+      "order": 5,
+      "code": "Cambridge_English_Qualifications",
+      "test_name": "Cambridge English Qualifications",
+      "file": "01_Guides_42_MD/MANARATAK_Cambridge_English_Qualifications_2026_Student_Guide_Revised.md",
+      "original_filename": "MANARATAK_Cambridge_English_Qualifications_2026_Student_Guide_Revised.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1328,
+        1461,
+        2737,
+        1506,
+        1251,
+        1436,
+        2226,
+        1823,
+        1208,
+        1054,
+        1230,
+        1120,
+        1231,
+        925,
+        1001,
+        1489
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "955b744c4daf0b8b62892616e548fb334be043881765f69e6a8f2fda6ddd992a"
+    },
+    {
+      "id": "en-06",
+      "order": 6,
+      "code": "Linguaskill",
+      "test_name": "Linguaskill",
+      "file": "01_Guides_42_MD/MANARATAK_Linguaskill_2026_Student_Guide_Revised.md",
+      "original_filename": "MANARATAK_Linguaskill_2026_Student_Guide_Revised.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1187,
+        1511,
+        1919,
+        1222,
+        1748,
+        1074,
+        3053,
+        1435,
+        1392,
+        1042,
+        1306,
+        1398,
+        1311,
+        1302,
+        1376,
+        1729
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "9db6fd603da7c307a921f86c0e0ceda84e762a94d80dfda27edad60bf29c0a27"
+    },
+    {
+      "id": "en-07",
+      "order": 7,
+      "code": "Oxford_Test_of_English",
+      "test_name": "Oxford Test of English",
+      "file": "01_Guides_42_MD/MANARATAK_Oxford_Test_of_English_2026_Student_Guide_Revised.md",
+      "original_filename": "MANARATAK_Oxford_Test_of_English_2026_Student_Guide_Revised.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1163,
+        1026,
+        1467,
+        1435,
+        949,
+        881,
+        2861,
+        1356,
+        1253,
+        825,
+        875,
+        1028,
+        1149,
+        1242,
+        889,
+        1018
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "f4bfb1ad36405a2b10b71bbb855091485390d9b578852721b6cb06ac04d58fd3"
+    },
+    {
+      "id": "en-08",
+      "order": 8,
+      "code": "OET",
+      "test_name": "OET",
+      "file": "01_Guides_42_MD/MANARATAK_OET_2026_Student_Guide_Revised.md",
+      "original_filename": "MANARATAK_OET_2026_Student_Guide_Revised.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1175,
+        1083,
+        965,
+        1699,
+        1372,
+        779,
+        2688,
+        1350,
+        1258,
+        1101,
+        1166,
+        1347,
+        1357,
+        1279,
+        880,
+        1364
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "26f7f402e322d5ac05e5624c2ab8feb2fc84fe5816a4837f8ae1207502d0235d"
+    },
+    {
+      "id": "en-09",
+      "order": 9,
+      "code": "TOEIC",
+      "test_name": "TOEIC",
+      "file": "01_Guides_42_MD/MANARATAK_TOEIC_2026_Student_Guide_Revised.md",
+      "original_filename": "MANARATAK_TOEIC_2026_Student_Guide_Revised.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        933,
+        1055,
+        1813,
+        1195,
+        1008,
+        787,
+        2563,
+        1303,
+        997,
+        904,
+        888,
+        1086,
+        911,
+        704,
+        1022,
+        1106
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "fe230d9e8c8f9d0428cc32a442a9065df10159ebd7f68fc31476c3649fdc15f3"
+    },
+    {
+      "id": "en-10",
+      "order": 10,
+      "code": "CELPIP",
+      "test_name": "CELPIP",
+      "file": "01_Guides_42_MD/MANARATAK_CELPIP_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_CELPIP_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1138,
+        1629,
+        1220,
+        2492,
+        1089,
+        1108,
+        2525,
+        1441,
+        1616,
+        1307,
+        1346,
+        1413,
+        1285,
+        1248,
+        1558,
+        1797
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "ddc50f3e85c802ad5d6af4e03ac0e5cfa71338c6d4ffbe7021000f86ce33be10"
+    },
+    {
+      "id": "en-11",
+      "order": 11,
+      "code": "PTE_Core",
+      "test_name": "PTE Core",
+      "file": "01_Guides_42_MD/MANARATAK_PTE_Core_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_PTE_Core_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1191,
+        1418,
+        1088,
+        2780,
+        921,
+        975,
+        3317,
+        1913,
+        1994,
+        1078,
+        1690,
+        1220,
+        1236,
+        1531,
+        1630,
+        2001
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "35e7b46364184ee8221229d0eaf588c83e43fd9ad9dccba151d2e6832b82c272"
+    },
+    {
+      "id": "en-12",
+      "order": 12,
+      "code": "TOEFL_Essentials",
+      "test_name": "TOEFL Essentials",
+      "file": "01_Guides_42_MD/MANARATAK_TOEFL_Essentials_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_TOEFL_Essentials_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1038,
+        1394,
+        1175,
+        1361,
+        1521,
+        949,
+        1871,
+        1349,
+        1396,
+        969,
+        1342,
+        1189,
+        1185,
+        1162,
+        1228,
+        1535
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "d11a5a622dcf5f86cdcd3748d7e50ee9bc70918bb1ba3db7098fe35d0ba7934f"
+    },
+    {
+      "id": "en-13",
+      "order": 13,
+      "code": "TOEFL_ITP",
+      "test_name": "TOEFL ITP",
+      "file": "01_Guides_42_MD/MANARATAK_TOEFL_ITP_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_TOEFL_ITP_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1105,
+        1328,
+        1020,
+        1347,
+        1185,
+        1180,
+        1596,
+        1336,
+        1441,
+        1150,
+        1205,
+        1143,
+        1027,
+        1067,
+        1297,
+        850
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "f25fccb34a5211e091e03b0a3377c6b9ae8f98b83f099aa68e55db4fbc0e4643"
+    },
+    {
+      "id": "en-14",
+      "order": 14,
+      "code": "TOEFL_Junior",
+      "test_name": "TOEFL Junior",
+      "file": "01_Guides_42_MD/MANARATAK_TOEFL_Junior_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_TOEFL_Junior_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1585,
+        930,
+        1166,
+        1053,
+        1197,
+        832,
+        2145,
+        1071,
+        1415,
+        901,
+        1020,
+        981,
+        1035,
+        947,
+        1365,
+        1049
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "3a8b5653e0d61f451fac0ab7a1088dbf5c71098b0b795631e47ebbc55d2d2316"
+    },
+    {
+      "id": "en-15",
+      "order": 15,
+      "code": "TOEFL_Primary",
+      "test_name": "TOEFL Primary",
+      "file": "01_Guides_42_MD/MANARATAK_TOEFL_Primary_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_TOEFL_Primary_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1117,
+        1045,
+        1420,
+        1058,
+        1056,
+        1200,
+        2250,
+        1339,
+        1157,
+        908,
+        886,
+        957,
+        942,
+        819,
+        1115,
+        1383
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "cc560d0b557fcead2cfdd21c1a4a19615dddf90e1dc7067f9fbacb5fbd71fda0"
+    },
+    {
+      "id": "en-16",
+      "order": 16,
+      "code": "Cambridge_English_Skills_Test",
+      "test_name": "Cambridge English Skills Test",
+      "file": "01_Guides_42_MD/MANARATAK_Cambridge_English_Skills_Test_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_Cambridge_English_Skills_Test_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1468,
+        1332,
+        1390,
+        1191,
+        1144,
+        1073,
+        2409,
+        1564,
+        1179,
+        900,
+        934,
+        978,
+        1032,
+        1103,
+        1267,
+        1736
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "536815aad291abad751ede15cde1907be4fc4d53717eb17b7245feaafd49913a"
+    },
+    {
+      "id": "en-17",
+      "order": 17,
+      "code": "Aptis_ESOL",
+      "test_name": "Aptis ESOL",
+      "file": "01_Guides_42_MD/MANARATAK_Aptis_ESOL_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_Aptis_ESOL_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1119,
+        1036,
+        1216,
+        1185,
+        853,
+        1243,
+        2270,
+        1120,
+        1205,
+        892,
+        923,
+        896,
+        859,
+        911,
+        1280,
+        1114
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "52acbd9ae01ed6185f5c1a784c147dcc423407f7aea9635a6ed72f8140a14379"
+    },
+    {
+      "id": "en-18",
+      "order": 18,
+      "code": "LanguageCert_Academic",
+      "test_name": "LanguageCert Academic",
+      "file": "01_Guides_42_MD/MANARATAK_LanguageCert_Academic_2026_Student_Guide_Revised.md",
+      "original_filename": "MANARATAK_LanguageCert_Academic_2026_Student_Guide_Revised.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1127,
+        1566,
+        1854,
+        1391,
+        1803,
+        892,
+        2880,
+        1379,
+        1411,
+        1064,
+        1337,
+        1142,
+        1166,
+        966,
+        1097,
+        1866
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "4f1fb6f8881495db53aaf9e74881abbd66750a73a69e9740c22bc3fbf02412a0"
+    },
+    {
+      "id": "en-19",
+      "order": 19,
+      "code": "LANGUAGECERT_General",
+      "test_name": "LanguageCert General",
+      "file": "01_Guides_42_MD/MANARATAK_LANGUAGECERT_General_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_LANGUAGECERT_General_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1203,
+        1242,
+        1656,
+        1394,
+        1098,
+        969,
+        2475,
+        1184,
+        1582,
+        1186,
+        1451,
+        1251,
+        1293,
+        1173,
+        1458,
+        1545
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "358a170445c484fdd3000a70769c544789ec429780b0b473b8d6518d4ac65c8f"
+    },
+    {
+      "id": "en-20",
+      "order": 20,
+      "code": "LANGUAGECERT_International_ESOL",
+      "test_name": "LanguageCert International ESOL",
+      "file": "01_Guides_42_MD/MANARATAK_LANGUAGECERT_International_ESOL_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_LANGUAGECERT_International_ESOL_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1018,
+        1208,
+        1478,
+        1436,
+        1076,
+        896,
+        2051,
+        1053,
+        1241,
+        1146,
+        1248,
+        1009,
+        1143,
+        1031,
+        1269,
+        1750
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "58e7770302da97f6077055409ca300446bc06ddbb0e861c22050e3d3594bb780"
+    },
+    {
+      "id": "en-21",
+      "order": 21,
+      "code": "LANGUAGECERT_LTE",
+      "test_name": "LanguageCert LTE",
+      "file": "01_Guides_42_MD/MANARATAK_LANGUAGECERT_LTE_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_LANGUAGECERT_LTE_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1327,
+        1000,
+        1359,
+        1061,
+        1051,
+        1032,
+        1722,
+        1447,
+        1202,
+        917,
+        1061,
+        1088,
+        1202,
+        747,
+        1503,
+        1774
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "bb2ca461022ed03b9790b1df5852ab568c8375061a4dd18b3edbf7e6bba27249"
+    },
+    {
+      "id": "en-22",
+      "order": 22,
+      "code": "Oxford_ELLT",
+      "test_name": "Oxford ELLT",
+      "file": "01_Guides_42_MD/MANARATAK_Oxford_ELLT_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_Oxford_ELLT_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1268,
+        1183,
+        1468,
+        1507,
+        1437,
+        1403,
+        1880,
+        1283,
+        1454,
+        1194,
+        1530,
+        1456,
+        1278,
+        1586,
+        1578,
+        1236
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "c848c740a12e0214ba471838b6da998584ce01696a9e596e5bdf2bca3df45261"
+    },
+    {
+      "id": "en-23",
+      "order": 23,
+      "code": "iTEP_Academic",
+      "test_name": "iTEP Academic",
+      "file": "01_Guides_42_MD/MANARATAK_iTEP_Academic_2026_Student_Guide_Revised.md",
+      "original_filename": "MANARATAK_iTEP_Academic_2026_Student_Guide_Revised.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1042,
+        1226,
+        984,
+        1427,
+        1293,
+        705,
+        1996,
+        1227,
+        1190,
+        1138,
+        1251,
+        1204,
+        1114,
+        1137,
+        1387,
+        1233
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "d333c3fa56be687e6d535efd942ccd84fa37bac337d3b2ed0d0ab84f68184d3b"
+    },
+    {
+      "id": "en-24",
+      "order": 24,
+      "code": "Michigan_English_Test_MET",
+      "test_name": "Michigan English Test (MET)",
+      "file": "01_Guides_42_MD/MANARATAK_Michigan_English_Test_MET_2026_Student_Guide_Revised.md",
+      "original_filename": "MANARATAK_Michigan_English_Test_MET_2026_Student_Guide_Revised.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1070,
+        1187,
+        1176,
+        1940,
+        1152,
+        608,
+        1717,
+        1122,
+        1142,
+        1103,
+        1069,
+        1191,
+        1004,
+        1446,
+        1037,
+        1449
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "81a1c380647bb6649182500545a4c0505d7fa3268626f722f5c43c60f8954cb7"
+    },
+    {
+      "id": "en-25",
+      "order": 25,
+      "code": "Michigan_ECCE",
+      "test_name": "Michigan ECCE",
+      "file": "01_Guides_42_MD/MANARATAK_Michigan_ECCE_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_Michigan_ECCE_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1683,
+        1156,
+        1001,
+        1146,
+        919,
+        1069,
+        2446,
+        1356,
+        1245,
+        794,
+        1144,
+        1180,
+        1125,
+        1112,
+        1290,
+        1571
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "12c0cdc791cfadbaf2d929c35ef514c32ae6bc9a85f923d463918125610e2dfe"
+    },
+    {
+      "id": "en-26",
+      "order": 26,
+      "code": "Michigan_ECPE",
+      "test_name": "Michigan ECPE",
+      "file": "01_Guides_42_MD/MANARATAK_Michigan_ECPE_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_Michigan_ECPE_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1672,
+        953,
+        890,
+        952,
+        862,
+        726,
+        1852,
+        920,
+        1315,
+        805,
+        984,
+        927,
+        863,
+        875,
+        1064,
+        1484
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "a1461c167b295af80451c756bd8ca647fd0a542bc60b8693f3e3103d64a75880"
+    },
+    {
+      "id": "en-27",
+      "order": 27,
+      "code": "MET_Go",
+      "test_name": "MET Go",
+      "file": "01_Guides_42_MD/MANARATAK_MET_Go_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_MET_Go_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1310,
+        1289,
+        1371,
+        951,
+        1153,
+        1113,
+        2847,
+        1325,
+        1220,
+        974,
+        1047,
+        1095,
+        1050,
+        956,
+        1235,
+        1754
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "ad13b429304156f7e2a81f2c0a21f5fe3777b4cef9825f396abee3e9add2598c"
+    },
+    {
+      "id": "en-28",
+      "order": 28,
+      "code": "CAEL",
+      "test_name": "CAEL",
+      "file": "01_Guides_42_MD/MANARATAK_CAEL_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_CAEL_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1135,
+        1220,
+        999,
+        1599,
+        1663,
+        1259,
+        1877,
+        1513,
+        1648,
+        1230,
+        1404,
+        1536,
+        1037,
+        1199,
+        1332,
+        1091
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "51854bf8fa9bef9bb31b374684b413ccff203208318d8c30ba652cc3a0750abb"
+    },
+    {
+      "id": "en-29",
+      "order": 29,
+      "code": "EnglishScore",
+      "test_name": "EnglishScore",
+      "file": "01_Guides_42_MD/MANARATAK_EnglishScore_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_EnglishScore_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1353,
+        1078,
+        1316,
+        1178,
+        1069,
+        1116,
+        1749,
+        999,
+        1116,
+        777,
+        950,
+        857,
+        993,
+        823,
+        1094,
+        1706
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "7dc3e9b397c4e93214510facdb8b187143d4ff4e96257e3bb558ea695ddcabbc"
+    },
+    {
+      "id": "en-30",
+      "order": 30,
+      "code": "EF_SET",
+      "test_name": "EF SET",
+      "file": "01_Guides_42_MD/MANARATAK_EF_SET_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_EF_SET_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1625,
+        1086,
+        1046,
+        1291,
+        1141,
+        1144,
+        1544,
+        990,
+        1093,
+        744,
+        941,
+        872,
+        1009,
+        851,
+        1064,
+        1033
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "1629395fd5afcb754b6950ff4077cab8fe80ecc7ab0f776b23cbc44fd8dbf69a"
+    },
+    {
+      "id": "en-31",
+      "order": 31,
+      "code": "EIKEN",
+      "test_name": "EIKEN",
+      "file": "01_Guides_42_MD/MANARATAK_EIKEN_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_EIKEN_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1630,
+        1113,
+        1669,
+        1045,
+        1166,
+        1122,
+        1934,
+        1226,
+        1142,
+        1069,
+        961,
+        939,
+        1073,
+        828,
+        1317,
+        1376
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "c8dad994371f764ffb0af1c11524ba9dd0b22047bd36148203dfcdb01f0d968b"
+    },
+    {
+      "id": "en-32",
+      "order": 32,
+      "code": "GTEC_Japan",
+      "test_name": "GTEC Japan",
+      "file": "01_Guides_42_MD/MANARATAK_GTEC_Japan_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_GTEC_Japan_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1561,
+        1422,
+        2003,
+        1633,
+        1463,
+        1731,
+        3082,
+        2260,
+        1608,
+        1850,
+        1849,
+        1341,
+        1705,
+        1498,
+        1636,
+        2678
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "53531ad93af475a1df9148f7cf0ec2165528d5483793751df582389387a2f7d3"
+    },
+    {
+      "id": "en-33",
+      "order": 33,
+      "code": "TEAP_Japan",
+      "test_name": "TEAP Japan",
+      "file": "01_Guides_42_MD/MANARATAK_TEAP_Japan_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_TEAP_Japan_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1651,
+        1386,
+        1292,
+        1537,
+        1428,
+        1573,
+        2965,
+        1844,
+        1773,
+        1274,
+        1497,
+        1552,
+        1589,
+        1278,
+        1182,
+        1892
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "605fb1c9ceb24695d270e890beef276e292ee7e472936bf23e98ec80d437c702"
+    },
+    {
+      "id": "en-34",
+      "order": 34,
+      "code": "STEP",
+      "test_name": "STEP",
+      "file": "01_Guides_42_MD/MANARATAK_STEP_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_STEP_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1318,
+        1278,
+        854,
+        1577,
+        1035,
+        1597,
+        1785,
+        1325,
+        1613,
+        1086,
+        1065,
+        1107,
+        1164,
+        970,
+        1371,
+        1469
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "7ad0a9aad14fb3b8571537d86dc24e1e1e7d75fb4afdc0a25dd3dd783a10af46"
+    },
+    {
+      "id": "en-35",
+      "order": 35,
+      "code": "EPT_Saudi",
+      "test_name": "EPT Saudi",
+      "file": "01_Guides_42_MD/MANARATAK_EPT_Saudi_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_EPT_Saudi_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1479,
+        1475,
+        1415,
+        1366,
+        1289,
+        1485,
+        2294,
+        1245,
+        1550,
+        1233,
+        1381,
+        1317,
+        1271,
+        1327,
+        1458,
+        1717
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "e65a3a6e2280b9c418d7922e42df0d611e24aca20967e51c5cb90131da1baa63"
+    },
+    {
+      "id": "en-36",
+      "order": 36,
+      "code": "IELCA",
+      "test_name": "IELCA",
+      "file": "01_Guides_42_MD/MANARATAK_IELCA_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_IELCA_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1577,
+        1313,
+        1702,
+        1962,
+        1728,
+        1210,
+        2737,
+        1509,
+        2128,
+        1384,
+        1373,
+        1490,
+        1388,
+        1101,
+        2199,
+        2271
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "9e43a2574cd8d8036ef77c7a6c861a217fc3ba45241d991388d66469e8e1ec03"
+    },
+    {
+      "id": "en-37",
+      "order": 37,
+      "code": "Pearson_English_International_Certificate",
+      "test_name": "Pearson English International Certificate",
+      "file": "01_Guides_42_MD/MANARATAK_Pearson_English_International_Certificate_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_Pearson_English_International_Certificate_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1333,
+        1086,
+        1212,
+        995,
+        926,
+        1016,
+        1533,
+        1013,
+        1038,
+        864,
+        916,
+        904,
+        879,
+        728,
+        1177,
+        1655
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "3979d2f6c0de50783b89a457c3393e24e4da34e772a9dc238b9524c441825c32"
+    },
+    {
+      "id": "en-38",
+      "order": 38,
+      "code": "Trinity_ISE_GESE",
+      "test_name": "Trinity ISE / GESE",
+      "file": "01_Guides_42_MD/MANARATAK_Trinity_ISE_GESE_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_Trinity_ISE_GESE_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1564,
+        1019,
+        1815,
+        1500,
+        953,
+        1358,
+        2166,
+        1113,
+        1290,
+        974,
+        948,
+        1082,
+        1077,
+        1004,
+        1347,
+        1619
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "c264f7e7118245e04ed8286aa1029578e3f48585ec133e331dcfe67b8d61a2d9"
+    },
+    {
+      "id": "en-39",
+      "order": 39,
+      "code": "Versant_English_Tests",
+      "test_name": "Versant English Tests",
+      "file": "01_Guides_42_MD/MANARATAK_Versant_English_Tests_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_Versant_English_Tests_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1173,
+        1032,
+        1300,
+        968,
+        951,
+        995,
+        1705,
+        1054,
+        1087,
+        904,
+        1015,
+        909,
+        1017,
+        702,
+        1203,
+        1347
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "1d4b2718aa35c80959e768a0dd406ef6df88837a0055f595ae681408f77903ab"
+    },
+    {
+      "id": "en-40",
+      "order": 40,
+      "code": "Skills_for_English",
+      "test_name": "Skills for English",
+      "file": "01_Guides_42_MD/MANARATAK_Skills_for_English_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_Skills_for_English_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1223,
+        1048,
+        1280,
+        1753,
+        984,
+        975,
+        2013,
+        1283,
+        1366,
+        986,
+        1326,
+        1109,
+        1216,
+        1291,
+        1600,
+        1548
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "163c853ea6b5568dea8f9ea73593136755112224ffa30b8dbf23b3470751580a"
+    },
+    {
+      "id": "en-41",
+      "order": 41,
+      "code": "TIE",
+      "test_name": "TIE",
+      "file": "01_Guides_42_MD/MANARATAK_TIE_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_TIE_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1455,
+        1433,
+        1621,
+        1718,
+        1417,
+        1203,
+        2387,
+        1534,
+        1869,
+        1103,
+        1176,
+        1441,
+        1078,
+        1030,
+        1633,
+        1874
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "acb6b4776fcefafd2744c92640c43b569bd866e290641ec80cf6519f46bcf554"
+    },
+    {
+      "id": "en-42",
+      "order": 42,
+      "code": "ETAPP",
+      "test_name": "ETAPP",
+      "file": "01_Guides_42_MD/MANARATAK_ETAPP_2026_Student_Guide.md",
+      "original_filename": "MANARATAK_ETAPP_2026_Student_Guide.md",
+      "sections": [
+        {
+          "id": "section-01",
+          "number": 1,
+          "title": "نظرة عامة على الاختبار",
+          "heading_level": 2
+        },
+        {
+          "id": "section-02",
+          "number": 2,
+          "title": "استخدامات الاختبار ومميزاته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-03",
+          "number": 3,
+          "title": "أنواع الاختبار وكيف تختار النوع المناسب",
+          "heading_level": 2
+        },
+        {
+          "id": "section-04",
+          "number": 4,
+          "title": "الاعتراف ومتطلبات القبول",
+          "heading_level": 2
+        },
+        {
+          "id": "section-05",
+          "number": 5,
+          "title": "طرق تقديم الاختبار والمتطلبات التقنية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-06",
+          "number": 6,
+          "title": "هيكل الاختبار ومدته",
+          "heading_level": 2
+        },
+        {
+          "id": "section-07",
+          "number": 7,
+          "title": "أقسام الاختبار وأنواع الأسئلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-08",
+          "number": 8,
+          "title": "نظام الدرجات وتقييم الأداء",
+          "heading_level": 2
+        },
+        {
+          "id": "section-09",
+          "number": 9,
+          "title": "التحضير للاختبار والمواد التدريبية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-10",
+          "number": 10,
+          "title": "مراكز الاختبار والمواعيد والرسوم",
+          "heading_level": 2
+        },
+        {
+          "id": "section-11",
+          "number": 11,
+          "title": "التسجيل والحجز والسياسات المالية",
+          "heading_level": 2
+        },
+        {
+          "id": "section-12",
+          "number": 12,
+          "title": "يوم الاختبار والتعليمات والتسهيلات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-13",
+          "number": 13,
+          "title": "النتائج والشهادات والتحقق منها",
+          "heading_level": 2
+        },
+        {
+          "id": "section-14",
+          "number": 14,
+          "title": "إعادة الاختبار ومراجعة الدرجات",
+          "heading_level": 2
+        },
+        {
+          "id": "section-15",
+          "number": 15,
+          "title": "الأسئلة الشائعة والاختبارات البديلة",
+          "heading_level": 2
+        },
+        {
+          "id": "section-16",
+          "number": 16,
+          "title": "المصادر الرسمية وآخر التحديثات",
+          "heading_level": 2
+        }
+      ],
+      "section_lengths": [
+        1487,
+        1344,
+        1487,
+        2000,
+        1448,
+        1480,
+        2357,
+        1433,
+        1737,
+        1346,
+        1390,
+        1245,
+        1119,
+        955,
+        1699,
+        1729
+      ],
+      "table_section_1": true,
+      "table_section_6": true,
+      "table_section_8": true,
+      "sha256": "09d3723a57c39da8ead39cfaf123940f430a9cbdfa2d281931f0825d476a0493"
+    }
+  ],
+  "data_notice": "توحدت الأقسام والجداول الرئيسية؛ معلومات المواعيد والرسوم واشتراطات الاعتراف متغيرة ويجب الرجوع للمصادر الأصلية قبل النشر."
+}

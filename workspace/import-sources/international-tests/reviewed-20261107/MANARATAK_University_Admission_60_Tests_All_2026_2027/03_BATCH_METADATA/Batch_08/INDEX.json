@@ -1,0 +1,36 @@
+{
+  "batch": 8,
+  "numbers": [
+    15,
+    16
+  ],
+  "count": 2,
+  "language": "ar",
+  "review_date": "2026-11-04",
+  "documents": [
+    {
+      "name": "MANARATAK_GAT_QUDURAT_2026_2027_Student_Guide.md",
+      "json": "MANARATAK_GAT_QUDURAT_2026_2027_Student_Guide.json",
+      "title": "اختبار القدرات العامة GAT (قياس) — الدليل الشامل للطالب | منارتك 2026–2027",
+      "section_count": 16,
+      "subsections": 67,
+      "tables": 11,
+      "links": 10,
+      "markdown_bytes": 39478,
+      "json_bytes": 235464,
+      "sha256": "e6401506e7986310dc29051664047ea0f8cc95b83948e256e536b51bbf9c201c"
+    },
+    {
+      "name": "MANARATAK_SAAT_TAHSILI_2026_2027_Student_Guide.md",
+      "json": "MANARATAK_SAAT_TAHSILI_2026_2027_Student_Guide.json",
+      "title": "اختبار التحصيل الدراسي SAAT (التحصيلي — قياس) — الدليل الشامل للطالب | منارتك 2026–2027",
+      "section_count": 16,
+      "subsections": 81,
+      "tables": 15,
+      "links": 10,
+      "markdown_bytes": 47577,
+      "json_bytes": 280493,
+      "sha256": "bd6b1c01bdbffa19c2967be763b08ca76dd16dfc4c2108bc208d03c329ed543a"
+    }
+  ]
+}

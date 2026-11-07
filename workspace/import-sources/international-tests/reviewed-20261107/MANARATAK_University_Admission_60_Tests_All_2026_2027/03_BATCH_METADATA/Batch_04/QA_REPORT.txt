@@ -1,0 +1,11 @@
+MANARATAK ADMISSION TESTS — BATCH 04
+Verification date: 2026-11-04
+Tests: IMAT, GRE General Test
+Template: exactly 16 ordered sections, same order as IELTS final 2026 guide.
+Checks: numbers, headings, title only before section 1, non-empty sections, tables columns, JSON parse, official links, absence of editorial placeholders.
+Official sources were researched for key 2026 facts; this is not an exhaustive legal or booking audit.
+For IMAT, 2026 test has already occurred; future dates must be checked against the next MUR decree.
+GRE amounts reflect ETS global fee page effective 2026-08-01, with country-specific conditions.
+
+IMAT: PASS | sections=16 | distinct source URLs=10 | tables=12 | subheadings=58 | bytes=37864
+GRE: PASS | sections=16 | distinct source URLs=14 | tables=14 | subheadings=59 | bytes=38171

@@ -1,0 +1,32 @@
+{
+  "collection": "MANARATAK_Admission_Tests",
+  "version": "2026-11-04",
+  "batch": 6,
+  "batch_count": 2,
+  "completed_to_date": 12,
+  "initial_scope_total": 13,
+  "sections_per_test": 16,
+  "template_ref": "MANARATAK_IELTS_2026_Student_Guide_Final.md",
+  "tests": [
+    {
+      "order": 11,
+      "id": "admission-ucat",
+      "code": "UCAT",
+      "title": "اختبار UCAT — الدليل الشامل للطالب (2026–2027)",
+      "category": "الطب وطب الأسنان — UCAT UK",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_UCAT_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_UCAT_2026_2027_Student_Guide.json"
+    },
+    {
+      "order": 12,
+      "id": "admission-gamsat",
+      "code": "GAMSAT",
+      "title": "اختبار GAMSAT — الدليل الشامل للطالب (2026–2027)",
+      "category": "الطب للخريجين — GAMSAT",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_GAMSAT_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_GAMSAT_2026_2027_Student_Guide.json"
+    }
+  ]
+}

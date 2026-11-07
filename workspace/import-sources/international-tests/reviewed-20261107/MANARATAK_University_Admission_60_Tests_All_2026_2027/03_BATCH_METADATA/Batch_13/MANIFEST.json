@@ -1,0 +1,46 @@
+{
+  "batch_number": 13,
+  "items": [
+    {
+      "sequence": 25,
+      "code": "STS_Tip_Doktorlugu"
+    },
+    {
+      "sequence": 26,
+      "code": "STS_Dis_Hekimligi"
+    }
+  ],
+  "created": "2026-11-05",
+  "files": [
+    {
+      "name": "MANARATAK_STS_Tip_Doktorlugu_2026_2027_Student_Guide.md",
+      "sha256": "3f25aa658275aefa53b6cee21ae1267320b0a6e9a49a9afe5ca10bc68360b896",
+      "bytes": 29737
+    },
+    {
+      "name": "MANARATAK_STS_Tip_Doktorlugu_2026_2027_Student_Guide.json",
+      "sha256": "f71a59b81ea77ca7e74b736ef335d184a2e070b09f12d4353fdcc501c07bc36d",
+      "bytes": 85912
+    },
+    {
+      "name": "MANARATAK_STS_Dis_Hekimligi_2026_2027_Student_Guide.md",
+      "sha256": "0d96bb2ea3f99f82c07873976e95e26cff4c6ef24feea0deafd074ee22906cb0",
+      "bytes": 26256
+    },
+    {
+      "name": "MANARATAK_STS_Dis_Hekimligi_2026_2027_Student_Guide.json",
+      "sha256": "f7b44b68094a2a31594df6c091af7d0942117abe8023873dfa27345207c70e74",
+      "bytes": 77847
+    },
+    {
+      "name": "INDEX.md",
+      "sha256": "fa8749dc26a6646c43b00a1a6ef3a522538a77b427bf2f05a89eb829427afa94",
+      "bytes": 1291
+    },
+    {
+      "name": "QA_REPORT.md",
+      "sha256": "2bd603bf9fc2148e87269f96b7b75c26395175060a11891375aaf160cf2daeb0",
+      "bytes": 1932
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "collection": "MANARATAK_Admission_Tests",
+  "version": "2026-11-04",
+  "count": 2,
+  "sections_per_test": 16,
+  "tests": [
+    {
+      "order": 1,
+      "id": "admission-csca",
+      "code": "CSCA",
+      "title": "اختبار CSCA — الدليل الشامل للطالب",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_CSCA_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_CSCA_2026_2027_Student_Guide.json"
+    },
+    {
+      "order": 2,
+      "id": "admission-sat",
+      "code": "SAT",
+      "title": "اختبار SAT — الدليل الشامل للطالب",
+      "sections": 16,
+      "markdown": "guides/MANARATAK_SAT_2026_2027_Student_Guide.md",
+      "json": "data/MANARATAK_SAT_2026_2027_Student_Guide.json"
+    }
+  ]
+}

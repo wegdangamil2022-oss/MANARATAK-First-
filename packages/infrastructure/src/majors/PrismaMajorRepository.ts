@@ -410,7 +410,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
       SELECT p.id AS "rowId",m.id AS "majorId",p.id AS "profileId",p."updatedAt" AS "createdAt",p.status,p."completenessStatus",p.level,
         coalesce(p."academicFieldId",m."academicFieldId") AS "fieldId",coalesce(p."disciplineId",m."disciplineId") AS "disciplineId",
         coalesce(p."displayName",m."displayName") AS "displayName",m."canonicalName",coalesce(p."localizedNameAr",m."localizedNameAr") AS "nameAr",
-        coalesce(p."localizedNameEn",m."localizedNameEn") AS "nameEn",p.code,m."facultyName",m."optionalFields"
+        coalesce(p."localizedNameEn",m."localizedNameEn") AS "nameEn",p.code,coalesce(nullif(btrim(p."collegeContext"),''),m."facultyName") AS "facultyName",m."optionalFields"
       FROM "MajorLevelProfile" p JOIN "Major" m ON m.id=p."majorId"
       UNION ALL
       SELECT m.id,m.id,NULL::text,m."updatedAt",m.status,m."completenessStatus",m."optionalFields"->>'degreeLevel',m."academicFieldId",m."disciplineId",

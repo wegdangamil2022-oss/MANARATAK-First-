@@ -18,7 +18,7 @@ function inspect(files = {}, directories = []) {
   mkdirSync(root, { recursive: true });
   try {
     for (const directory of [
-      'workspace/import-sources/international-tests/unified-56',
+      'workspace/import-sources/international-tests/reviewed-20261107',
       'workspace/phase-10-major-catalogs',
       ...directories,
     ])

@@ -1,0 +1,40 @@
+{
+  "batch": 16,
+  "date": "2026-11-05",
+  "tests": [
+    31,
+    32
+  ],
+  "files": [
+    {
+      "name": "MANARATAK_CUET_UG_2026_2027_Student_Guide.md",
+      "bytes": 28497,
+      "sha256": "f80e9eb066e01adbac2bed7690b5efc0809535f8c94d45d94a9d929fd8ead2eb"
+    },
+    {
+      "name": "MANARATAK_CUET_UG_2026_2027_Student_Guide.json",
+      "bytes": 82705,
+      "sha256": "1f022b9327b8762f23200a1f2ca367ab0899948478a30c3badc877c7cb69d8cf"
+    },
+    {
+      "name": "MANARATAK_CUET_PG_2026_2027_Student_Guide.md",
+      "bytes": 29041,
+      "sha256": "f4b467fde7f5463a1b459ed19f764a8a2d268d19d8719274932f89cb1ba0097a"
+    },
+    {
+      "name": "MANARATAK_CUET_PG_2026_2027_Student_Guide.json",
+      "bytes": 83983,
+      "sha256": "db0701248a25b146ec7cc99b7557e20bd04698910679a932ba3e4bab2258bd21"
+    },
+    {
+      "name": "INDEX.md",
+      "bytes": 1872,
+      "sha256": "3f86a8268c7875f836461974b0d1ab354ebe2d5efb813373f5bd6d9f4731f7ab"
+    },
+    {
+      "name": "QA_REPORT.md",
+      "bytes": 2421,
+      "sha256": "95b50d58f09f3beee865df360024ebe5a4ff8c9c5fa6cdc64eb45de86888d91d"
+    }
+  ]
+}

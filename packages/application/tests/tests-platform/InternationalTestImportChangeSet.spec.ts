@@ -3,6 +3,13 @@ import { actorId, reviewBody, reviewEntry } from './fixtures/reviewedTestImport'
 import { InternationalTestImportChangeExecutor, internationalTestImportHash, internationalTestSourceHash, prepareInternationalTestImport, validateInternationalTestImportPlan, type InternationalTestImportChangeGateway } from '../../src/tests-platform/use-cases/InternationalTestImportChangeSet';
 
 describe('reviewed test import contract', () => {
+  it('requires an explicit reviewed unresolved-provider decision instead of an invented provider',()=>{
+    const body=reviewBody();
+    delete (body.entries[0].core as {providerId?:string}).providerId;
+    expect(()=>prepareInternationalTestImport(body)).toThrow('TEST_IMPORT_PROVIDER_REVIEW_REQUIRED');
+    const reviewed={...body,entries:[{...body.entries[0],providerResolution:'UNRESOLVED_FROM_SOURCE'}]};
+    expect(prepareInternationalTestImport(reviewed).entries[0].core.providerId).toBeUndefined();
+  });
   it('seals explicit initial creation without rewriting historical classification', () => {
     const entry = { ...reviewEntry(), sourceClassification: 'REPLACE_EXISTING', resolution: 'APPROVE_INITIAL_CREATE' };
     const body = { ...reviewBody(), targetMode: 'INDEPENDENT_EMPTY_TEST_CATALOG', entries: [entry] };

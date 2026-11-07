@@ -14,9 +14,9 @@ afterEach(() => { vi.restoreAllMocks(); clientConstructor.mockClear(); });
 async function fixture() {
   // Keep ephemeral fixtures in the OS temp directory; no repository data changes.
   const root = await mkdtemp(join(tmpdir(), 'manaratak-tests-import-'));
-  const manifestFile = join(root, 'workspace/import-sources/international-tests/reconciliation/final_matching_data.json');
-  const sourceRoot = join(root, 'workspace/import-sources/international-tests/unified-56');
-  await mkdir(join(root, 'workspace/import-sources/international-tests/reconciliation'), { recursive: true });
+  const manifestFile = join(root, 'workspace/import-sources/international-tests/reviewed-20261107/catalog-manifest.json');
+  const sourceRoot = join(root, 'workspace/import-sources/international-tests/reviewed-20261107');
+  await mkdir(join(root, 'workspace/import-sources/international-tests/reviewed-20261107'), { recursive: true });
   await mkdir(join(sourceRoot, 'language'), { recursive: true });
   const { rawContent, ...entry } = reviewBody().entries[0];
   const manifest = JSON.stringify({ matching_rows: [{ folder: 'language', filename: 'Test_2026.md', classification: 'NEW_TEST', old_id: 'legacy-slug-is-not-an-account-id' }] });
