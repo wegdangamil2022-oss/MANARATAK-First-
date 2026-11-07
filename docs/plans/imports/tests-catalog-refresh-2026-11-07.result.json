@@ -1,0 +1,76 @@
+{
+  "pass": true,
+  "scope": "original",
+  "planHash": "bc2f6fb55ec360305b24d6df461383649d7cd95723731c14583f3eabb929331f",
+  "manifestHash": "c366b8a5a5d89c160cd869f85ecccb8dec52faacf8475bd9089997f61e293a44",
+  "entities": 234,
+  "sourceGuides": 253,
+  "sourceSections": 4504,
+  "oldPilotTestsRemoved": 2,
+  "oldPilotSourceBackupSha256": "364095e2c2da455c2b2aa69d71191b09b3240badc1fe5d3fd9c785317278f7e5",
+  "noPublication": true,
+  "sampleSize": 6,
+  "finishedAt": "2026-11-07T21:22:16.445Z",
+  "counts": {
+    "tests": 234,
+    "versions": 253,
+    "raw_sources": 253,
+    "source_sections": 4504,
+    "provider_linked": 89,
+    "published_or_verified": 0,
+    "non_draft_versions": 0
+  },
+  "completedBatches": 60,
+  "codeCommit": "11665608f0089d8639d1a4311f047055f73ed13b",
+  "sampleProof": {
+    "pass": true,
+    "scope": "sample",
+    "planHash": "bc2f6fb55ec360305b24d6df461383649d7cd95723731c14583f3eabb929331f",
+    "manifestHash": "c366b8a5a5d89c160cd869f85ecccb8dec52faacf8475bd9089997f61e293a44",
+    "entities": 6,
+    "sourceGuides": 8,
+    "sourceSections": 138,
+    "oldPilotTestsRemoved": 2,
+    "oldPilotSourceBackupSha256": "364095e2c2da455c2b2aa69d71191b09b3240badc1fe5d3fd9c785317278f7e5",
+    "noPublication": true,
+    "sampleSize": 6,
+    "finishedAt": "2026-11-07T20:27:54.757Z"
+  },
+  "batchProjectionProof": {
+    "pass": true,
+    "entities": 5,
+    "comparedStrategies": 2,
+    "sourcePreserved": true,
+    "governanceRevision": 1,
+    "replayWrites": 0,
+    "rolledBack": true,
+    "timings": [
+      {
+        "grouped": false,
+        "milliseconds": 546
+      },
+      {
+        "grouped": true,
+        "milliseconds": 282
+      }
+    ],
+    "finishedAt": "2026-11-07T20:41:46.565Z"
+  },
+  "tests": {
+    "internationalTests": 244,
+    "majors": 244,
+    "majorPreExistingSkipped": 7,
+    "collegeFilterPostgres": 1,
+    "batchPersistencePostgres": 1,
+    "sourceLoader": 10,
+    "sourceClosure": 37,
+    "repositoryOrganization": 7
+  },
+  "providerReferencesPending": 145,
+  "sourceArchives": 5,
+  "sourceManifest": "workspace/import-sources/international-tests/reviewed-20261107/catalog-manifest.json",
+  "originalSchemaChanged": false,
+  "accountsChanged": false,
+  "fellowshipDetailsDeferred": true,
+  "aggregateCheckAt": "2026-11-07T21:22:35.121Z"
+}
