@@ -1,3 +1,4 @@
+import { testRelationshipLabel } from '../features/international-tests/TestRelationshipLabels';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
 import { useEffect, useRef, useState } from 'react';
@@ -362,7 +363,7 @@ export function InternationalTestGovernanceWorkspace({
                     return (
                       <p key={`${kind}-${referenceId}-${row.relationshipType}`}>
                         {kind} · {String(row.referenceCode ?? row.canonicalCode ?? referenceId)} ·{' '}
-                        {String(row.relationshipType)}
+                        {testRelationshipLabel(String(row.relationshipType), isRtl)}
                         <button
                           type="button"
                           disabled={busy}

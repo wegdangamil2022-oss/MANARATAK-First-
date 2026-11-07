@@ -229,6 +229,36 @@ describe('PrismaInternationalTestRepository', () => {
     );
   });
 
+  it('combines source jurisdiction or availability with search, provider, category and stale filters', async () => {
+    mockPrisma.referenceCountry = { findUnique: vi.fn().mockResolvedValue({ id: 'country-in' }) };
+    mockPrisma.internationalTest.count.mockResolvedValue(1);
+    await repository.list({ countryIso2Code: 'in', providerName: 'NTA', q: 'CUET',
+      category: InternationalTestCategory.GRADUATE_ADMISSION, staleOnly: true, countOnly: true });
+    expect(mockPrisma.referenceCountry.findUnique).toHaveBeenCalledWith({where:{iso2Code:'IN'},select:{id:true}});
+    expect(mockPrisma.internationalTest.count).toHaveBeenCalledWith({ where: expect.objectContaining({
+      providerName: 'NTA', testCategory: InternationalTestCategory.GRADUATE_ADMISSION,
+      AND: [
+        { OR: [
+          { countryRelationships: { some: { canonicalReferenceId: 'country-in' } } },
+          { availability: { is: { availableCountryIds: { array_contains: ['country-in'] } } } },
+        ] },
+        { OR: expect.arrayContaining([{ evidence: { is: null } }]) },
+        { OR: expect.arrayContaining([{ canonicalName: { contains: 'CUET', mode: 'insensitive' } }]) },
+      ],
+    }) });
+  });
+
+  it('does not broaden an unknown country filter to all tests', async () => {
+    mockPrisma.referenceCountry = { findUnique: vi.fn().mockResolvedValue(null) };
+    mockPrisma.internationalTest.count.mockResolvedValue(0);
+    const result = await repository.list({ countryIso2Code: 'XX', countOnly: true });
+    expect(result.total).toBe(0);
+    expect(mockPrisma.internationalTest.count).toHaveBeenCalledWith({where:{AND:[{OR:[
+      {countryRelationships:{some:{canonicalReferenceId:'UNRESOLVED_COUNTRY'}}},
+      {availability:{is:{availableCountryIds:{array_contains:['UNRESOLVED_COUNTRY']}}}},
+    ]}]}});
+  });
+
   it('counts the filtered scope without fetching records or governance details', async () => {
     mockPrisma.internationalTest.count.mockResolvedValue(41);
     const result = await repository.list({ countOnly: true, providerName: 'ETS', page: 2, limit: 20 });

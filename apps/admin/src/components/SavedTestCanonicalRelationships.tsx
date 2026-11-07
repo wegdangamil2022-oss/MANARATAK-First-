@@ -1,4 +1,5 @@
 import type { InternationalTestDto } from '@manaratak/domain';
+import { testRelationshipLabel } from '../features/international-tests/TestRelationshipLabels';
 import { Globe2, Languages, Layers, GraduationCap, Network } from 'lucide-react';
 
 type TestRelationships = Pick<
@@ -77,7 +78,7 @@ export function SavedTestCanonicalRelationships({
                   <Icon size={16} className="text-[#0E7C86]" />
                   {name || code || (isRtl ? 'اسم المرجع غير متوفر' : 'Reference name unavailable')}
                 </p>
-                <p>{row.relationshipType}</p>
+                <p>{testRelationshipLabel(row.relationshipType, isRtl)}</p>
                 {row.notes ? <p>{row.notes}</p> : null}
                 <details className="text-[11px] text-slate-500">
                   <summary>{isRtl ? 'مرجع العلاقة' : 'Relationship reference'}</summary>

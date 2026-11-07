@@ -1,0 +1,39 @@
+{
+  "pass": true,
+  "planHash": "140ed4e8b982aaaaf36d3d6aa3bdc83d4f683cea4209eb7d48245a21903695f2",
+  "counts": {
+    "tests": 234,
+    "versions": 253,
+    "blocks": 4757,
+    "providersLinked": 228,
+    "unpublished": 234,
+    "country": 90,
+    "language": 250,
+    "degree": 68,
+    "taxonomy": 30,
+    "evidence": 232
+  },
+  "review": {
+    "providerReviewed": 145,
+    "providerLinked": 139,
+    "providerNotAsserted": 6,
+    "COUNTRY": 90,
+    "LANGUAGE": 250,
+    "DEGREE": 68,
+    "TAXONOMY": 30,
+    "missingCanonicalReferences": 2
+  },
+  "backupSha256": "fd3cdb79079a0095134360a8049b6ea19f7015a12cc9c3d4798bb99333689342",
+  "localProof": {
+    "pass": true,
+    "planHash": "140ed4e8b982aaaaf36d3d6aa3bdc83d4f683cea4209eb7d48245a21903695f2",
+    "sampleOwners": 7,
+    "allFourRelationshipKinds": true,
+    "sourcePreservation": true,
+    "unrelatedFieldsPreserved": true,
+    "revisionAndReplay": true,
+    "staleReviewRejected": true,
+    "forcedRollbackRestored": true
+  },
+  "completedAt": "2026-11-07T21:50:49.433Z"
+}

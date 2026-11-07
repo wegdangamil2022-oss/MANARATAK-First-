@@ -52,3 +52,5 @@ docs/reviews/evidence/post28/*/staging-worker-linux/** -text whitespace=cr-at-eo
 docs/reviews/evidence/post28/*/repaired-rollback-reference/** -text whitespace=cr-at-eol,-blank-at-eof
 # Preserve Markdown hard breaks in the supplied reviewed test guides.
 workspace/import-sources/international-tests/reviewed-20261107/** whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+# The applied relationship review is bound to the exact plan bytes in its receipt.
+docs/plans/imports/tests-source-relationships-2026-11-08.plan.json -text

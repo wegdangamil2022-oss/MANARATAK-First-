@@ -545,7 +545,13 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
 
     if (filters?.countryIso2Code) {
       const country=await this.prisma.referenceCountry.findUnique({where:{iso2Code:String(filters.countryIso2Code).toUpperCase()},select:{id:true}});
-      where.availability={is:{availableCountryIds:{array_contains:[country?.id??'UNRESOLVED_COUNTRY']}}};
+      const countryId = country?.id ?? 'UNRESOLVED_COUNTRY';
+      // Source country relationships describe jurisdiction/use, not test-centre
+      // availability. Both are valid discovery facets; never invent availability.
+      where.AND = [{ OR: [
+        { countryRelationships: { some: { canonicalReferenceId: countryId } } },
+        { availability: { is: { availableCountryIds: { array_contains: [countryId] } } } },
+      ] }];
     }
 
     if(filters?.staleOnly) where.OR=[{evidence:{is:null}},{evidence:{is:{retrievedAt:{lt:new Date(Date.now()-30*86400000)}}}}];
@@ -564,7 +570,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     const search = filters?.searchQuery || filters?.q;
     if (search && typeof search === 'string' && search.trim() !== '') {
       const query = search.trim();
-      where.AND = [...(where.OR?[{OR:where.OR}]:[]),{OR:[
+      where.AND = [...(where.AND ?? []),...(where.OR?[{OR:where.OR}]:[]),{OR:[
         { canonicalName: { contains: query, mode: 'insensitive' } },
         { localizedNameAr: { contains: query, mode: 'insensitive' } },
         { localizedNameEn: { contains: query, mode: 'insensitive' } },
