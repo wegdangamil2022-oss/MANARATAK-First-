@@ -1,0 +1,70 @@
+{
+  "stage": "STAGE_1",
+  "summary": {
+    "rows": 10723,
+    "existing": 7,
+    "new": 10716,
+    "resolved": 10553,
+    "sourceReview": 170,
+    "countryMissing": 8,
+    "cityMissing": 170,
+    "reviewSheet": 170
+  },
+  "sources": [
+    {
+      "file": "workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx",
+      "sha256": "53b23331455e654ffa47e1307acd120f9000822bb2a8c824c928370251abd645",
+      "rows": 1656,
+      "artifact": "universities-stage1-0.json",
+      "artifactHash": "a37bf2c715aecfce5246c8ed656d9446067a04891c833a261b10bd3c264d7356"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx",
+      "sha256": "24f2afc51e43e7c444fe0f295ef9b8188ffb89828be7d6e0a55e662da8b1d030",
+      "rows": 4154,
+      "artifact": "universities-stage1-1.json",
+      "artifactHash": "7548924d0658a639926df0e9c0ff71b18d33e0c42f95ff1b1832b4443a00289e"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx",
+      "sha256": "0f871323718f61c41860e40c2a10ffdbaa704bab8b082951be4fd60c33d7a3a2",
+      "rows": 2399,
+      "artifact": "universities-stage1-2.json",
+      "artifactHash": "1d845f57fa894c444e107fb8d67bd71a399f6193ea60efef3e97679e4acb3dc1"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx",
+      "sha256": "4b2b54f8ff05ac75b89c5261d9753b7ceb590bd6013febfddfa62f1c870925db",
+      "rows": 1566,
+      "artifact": "universities-stage1-3.json",
+      "artifactHash": "71d028aaadb5b3d3ed9c258b66f0177c49915834fbe13adc3d10bac5fbd34553"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-1/Oceania_Universities_Import_English_14_Countries_COMPLETE.xlsx",
+      "sha256": "0e9591dd35e18e5755b29bba77b479d2352f9761ef27cd29244d58adb379f618",
+      "rows": 69,
+      "artifact": "universities-stage1-4.json",
+      "artifactHash": "f689bedf829898cb0062105071d1bec42618a2dff5158f173f57965e43ebaddf"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-1/South_America_Universities_Import_English_12_Countries_COMPLETE.xlsx",
+      "sha256": "57b262677ea7f842836523544f766449b8df3cb2bcfbd6676226f52eef6d90b3",
+      "rows": 879,
+      "artifact": "universities-stage1-5.json",
+      "artifactHash": "09a3aa8d7c82e7ca4f877896a6b3aa95a6204bb72dbf6088d53abd5eefcf2de5"
+    }
+  ],
+  "planHash": "2932fbbafef00ea42e193699c712f235f66d0216da5324b0fd0244cf9291612c",
+  "batches": 25,
+  "prerequisites": {
+    "countries": 195,
+    "regions": 5003,
+    "cities": 10676,
+    "majors": 1910,
+    "profiles": 3073,
+    "unclassified": 0,
+    "tests": 234,
+    "test_versions": 253
+  },
+  "scope": "STAGE_1_ONLY_NO_ENRICHMENT_NO_PUBLICATION"
+}

@@ -1,0 +1,76 @@
+{
+  "pass": true,
+  "planHash": "2932fbbafef00ea42e193699c712f235f66d0216da5324b0fd0244cf9291612c",
+  "summary": {
+    "rows": 10723,
+    "existing": 7,
+    "new": 10716,
+    "resolved": 10553,
+    "sourceReview": 170,
+    "countryMissing": 8,
+    "cityMissing": 170,
+    "reviewSheet": 170
+  },
+  "counts": {
+    "universities": 10723,
+    "stage1Sources": 10723,
+    "newlyPublished": 0
+  },
+  "batches": 25,
+  "assets": 6,
+  "backupSha256": "610ef4c1ad2b5a21f97e4cba2865d0e0b423518e261ef8a54fb5d7d6c286bb98",
+  "localProof": {
+    "pass": true,
+    "planHash": "2932fbbafef00ea42e193699c712f235f66d0216da5324b0fd0244cf9291612c",
+    "sample": 3,
+    "create": 2,
+    "preserveExisting": true,
+    "unresolvedGeographyPreserved": true,
+    "rawSourcePreserved": true,
+    "journalSnapshotsMatch": true,
+    "copySourceEscapesPreserved": true,
+    "replayNoOwnerWrites": true,
+    "changedSourceRejected": true,
+    "forcedRollback": true
+  },
+  "stage2Imported": false,
+  "stage3Imported": false,
+  "existingRootsPreserved": true,
+  "sourceReviewRemaining": 170,
+  "completedAt": "2026-11-07T23:31:16.225Z",
+  "readVerification": {
+    "pass": true,
+    "samples": [
+      {
+        "code": "INS-CHN-0001",
+        "status": "READY_TO_REVIEW",
+        "sourceFields": true,
+        "stage1": true,
+        "laterStagesNotImported": true
+      },
+      {
+        "code": "INS-DZA-0001",
+        "status": "READY_TO_REVIEW",
+        "sourceFields": true,
+        "stage1": true,
+        "laterStagesNotImported": true
+      },
+      {
+        "code": "INS-EGY-0026",
+        "status": "IMPORTED",
+        "sourceFields": true,
+        "stage1": true,
+        "laterStagesNotImported": true
+      },
+      {
+        "code": "INS-XKX-0001",
+        "status": "IMPORTED",
+        "sourceFields": true,
+        "stage1": true,
+        "laterStagesNotImported": true
+      }
+    ],
+    "countryAndSearchFilter": true,
+    "scope": "ORIGINAL_DATABASE_READ_ONLY"
+  }
+}

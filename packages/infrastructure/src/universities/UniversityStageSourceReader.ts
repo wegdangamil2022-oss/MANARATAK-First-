@@ -47,6 +47,25 @@ export class UniversityStageSourceReader implements UniversityStageEvidenceReade
             fields: Object.fromEntries(headers.map((h, i) => [h, values[i] ?? null])),
           });
         });
+        // Geography Review contains distinct Stage-1 identities, not repeated
+        // copies of the main sheet. Retain their source evidence while links
+        // remain under review; never silently omit these universities.
+        if (artifact.stage === 1) {
+          const review = book.sheets.get('Geography Review');
+          if (review) {
+            const headerRow = review.textRows.findIndex(row => row[0] === 'Reference ID');
+            if (headerRow >= 0) {
+              const reviewHeaders = review.textRows[headerRow].map(value => String(value ?? '').trim());
+              review.textRows.slice(headerRow + 1).forEach((values, index) => {
+                const id = String(values[0] ?? '').trim();
+                if (!/^INS-/.test(id)) return;
+                if (result.has(id)) throw Error('SOURCE_DUPLICATE_IDENTITY');
+                result.set(id, { row: headerRow + index + 2,
+                  fields: Object.fromEntries(reviewHeaders.map((h, i) => [h, values[i] ?? null])) });
+              });
+            }
+          }
+        }
       } else {
         let current: SourceRow | undefined,
           id = '';

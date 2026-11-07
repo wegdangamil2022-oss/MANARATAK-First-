@@ -4,6 +4,19 @@ import { UNIVERSITY_STAGE_CARDS } from '@manaratak/domain';
 import catalog from '../../src/universities/UniversityStageSourceCatalog';
 describe('University stages reflect pinned source files, not guessed completion', () => {
   const reader = new UniversityStageSourceReader();
+  it('retains distinct Geography Review identities as Stage-1 source evidence', async () => {
+    const artifact = catalog.find(a => a.stage === 1 && a.continent === 'Africa')!;
+    const rows = await reader.read('INS-EGY-0026', [{
+      id: 'review-source', stage: 'STAGE_1', sourceArtifactId: artifact.sha256,
+      importedAt: '2026-11-08T00:00:00Z',
+    }]);
+    expect(rows[0].sourceState).toBe('AVAILABLE');
+    expect(rows[0].fields['Official English Name']).toBe('Matrouh University');
+    expect(rows[0].fields.City).toBe('Marsa Matrouh');
+    expect(rows[0].importState).toBe('IMPORTED');
+    expect(rows[1].importState).toBe('UNKNOWN');
+    expect(rows[0].issues).not.toContain('SOURCE_IDENTITY_NOT_FOUND_IN_ARTIFACT');
+  });
   it('covers all source columns, including current geography evidence and 44 enrichment columns', () => {
     for (const artifact of catalog.filter((a) => a.stage <= 2)) {
       const columns = UNIVERSITY_STAGE_CARDS.filter((c) => c.stage === artifact.stage).flatMap(
