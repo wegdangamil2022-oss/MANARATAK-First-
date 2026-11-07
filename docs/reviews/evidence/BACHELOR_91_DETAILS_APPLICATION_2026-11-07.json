@@ -1,0 +1,29 @@
+{
+  "pass": true,
+  "scope": "original",
+  "planHash": "bda5a0640e964c657c76b9a1dd29583fc8e2cef3785f5af206eebcaab66570cc",
+  "portsHash": "070708cf9ca3e044dfbb47a524f1fdd0dafff7d2caea16c6c150b50f66ac2175",
+  "runId": "ee84ba9c-b518-4c5b-9a06-f78ee52d17d4",
+  "source": "workspace/phase-10-major-detail-dossiers/bachelor/MANARATAK_Bachelor_91_Full_Majors_Details_Verified.md",
+  "sourceSha256": "d8ccecf1b36a883b52fbbb677406bd0282821781703d8799c310ee6fd1a211e7",
+  "profilesEnriched": 91,
+  "sectionsAdded": 1183,
+  "batches": 4,
+  "existingIdsAndClassificationPreserved": true,
+  "noNewMajorsOrProfiles": true,
+  "noPublication": true,
+  "verifiedSample": [
+    "MJR-0113",
+    "MJR-0663",
+    "MJR-0799",
+    "MJR-0838"
+  ],
+  "counts": {
+    "majors": 1910,
+    "profiles": 3073,
+    "versions": 3172,
+    "sections": 61594,
+    "sources": 3172
+  },
+  "finishedAt": "2026-11-07T20:03:17.824Z"
+}

@@ -3,6 +3,11 @@ import { ImportTargetDomain } from '@manaratak/domain';
 import { MajorDetailDossierMarkdownParser } from '../../src/majors/services/MajorDetailDossierMarkdownParser';
 
 describe('MajorDetailDossierMarkdownParser', () => {
+  it('accepts indented dossier headings without importing fenced examples', () => {
+    const result = MajorDetailDossierMarkdownParser.parse('```md\n# 1. مثال — Example\nMJR-9999\n```\n    # 1. الصحة الإنجابية — Reproductive Health\n    | الرمز | MJR-0113 |\n    ## 1. نبذة\n    نص المصدر.\n', 'BACHELOR');
+    expect(result.rows.map(row => row.code)).toEqual(['MJR-0113']);
+    expect(result.rows[0].contentBlocks[0].content).toBe('نص المصدر.');
+  });
   it('parses bachelor detail dossiers into reviewed content blocks', () => {
     const result = MajorDetailDossierMarkdownParser.parse(`
 # 1. الطب والجراحة — Medicine and Surgery

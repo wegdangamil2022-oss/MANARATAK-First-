@@ -1,6 +1,8 @@
 # Source provenance and derived review queues are bound to exact bytes.
 # Do not rewrite line endings during checkout/add on another operating system.
 workspace/import-sources/** -text
+# This retained Markdown source uses two-space hard line breaks.
+workspace/phase-10-major-detail-dossiers/bachelor/MANARATAK_Bachelor_91_Full_Majors_Details_Verified.md -text whitespace=-blank-at-eol
 workspace/reference-data/cities/** -text
 workspace/reference-data/languages/*.csv -text
 packages/infrastructure/src/courses/ExternalCourseProviderSeed.ts -text

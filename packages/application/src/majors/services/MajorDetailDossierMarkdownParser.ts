@@ -52,8 +52,17 @@ export class MajorDetailDossierMarkdownParser {
     const rows: MajorDetailDossierRow[] = [];
     let skippedSections = 0;
     let currentRecord: ParsedRecord | undefined;
+    let fence: string | undefined;
 
     for (const line of markdown.split(/\r?\n/)) {
+      const marker = line.match(/^[ \t]*(`{3,}|~{3,})/);
+      if (fence || marker) {
+        if (!fence) fence = marker![1];
+        else if (marker && marker[1][0] === fence[0] && marker[1].length >= fence.length) fence = undefined;
+        currentRecord?.lines.push(line);
+        currentRecord?.sections.at(-1)?.lines.push(line);
+        continue;
+      }
       const recordTitle = this.extractRecordTitle(line);
       if (recordTitle) {
         if (currentRecord) {
@@ -98,12 +107,12 @@ export class MajorDetailDossierMarkdownParser {
   }
 
   private static extractRecordTitle(line: string): string | undefined {
-    const match = line.match(/^#\s+\d+\.\s+(.+?)\s*$/);
+    const match = line.match(/^[ \t]*#\s+\d+\.\s+(.+?)\s*$/);
     return match ? match[1].trim() : undefined;
   }
 
   private static extractSectionHeading(line: string): { level: number; title: string } | undefined {
-    const match = line.match(/^(#{2,4})\s+(.+?)\s*$/);
+    const match = line.match(/^[ \t]*(#{2,4})\s+(.+?)\s*$/);
     if (!match) return undefined;
     return {
       level: match[1].length,
