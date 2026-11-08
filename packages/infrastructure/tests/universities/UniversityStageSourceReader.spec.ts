@@ -4,6 +4,16 @@ import { UNIVERSITY_STAGE_CARDS } from '@manaratak/domain';
 import catalog from '../../src/universities/UniversityStageSourceCatalog';
 describe('University stages reflect pinned source files, not guessed completion', () => {
   const reader = new UniversityStageSourceReader();
+  it('reads all 44 supplied South American enrichment fields with an independent Stage-2 receipt', async () => {
+    const artifact = catalog.find(a => a.stage === 2 && a.continent === 'South America')!;
+    const rows = await reader.read('INS-ARG-0001', [{ id: 'stage2-source', stage: 'STAGE_2',
+      sourceArtifactId: artifact.sha256, importedAt: '2026-11-08T00:00:00Z' }]);
+    expect(rows[1].importState).toBe('IMPORTED');
+    expect(Object.keys(rows[1].fields)).toHaveLength(44);
+    expect(rows[1].fields['Official Local Name']).toBe('Universidad Nacional del Alto Uruguay');
+    expect(rows[1].fields['Founded Year']).toBe('2014');
+    expect(rows[2].importState).toBe('UNKNOWN');
+  });
   it('retains distinct Geography Review identities as Stage-1 source evidence', async () => {
     const artifact = catalog.find(a => a.stage === 1 && a.continent === 'Africa')!;
     const rows = await reader.read('INS-EGY-0026', [{
@@ -35,7 +45,7 @@ describe('University stages reflect pinned source files, not guessed completion'
       });
       expect(rows.map((s) => s.sourceState)).toEqual([
         'AVAILABLE',
-        'NOT_SUPPLIED',
+        continent === 'South America' ? 'AVAILABLE' : 'NOT_SUPPLIED',
         'NOT_SUPPLIED',
         'NOT_SUPPLIED',
         'NOT_SUPPLIED',

@@ -116,6 +116,14 @@ export class NativeUniversityImportClient {
     this.buffer = '';
     this.errors = '';
     this.timeoutMs = timeoutMs;
+    this.process.stdin.on('error', () => {
+      this.closed = true;
+      for (const pending of this.pending.splice(0)) {
+        clearTimeout(pending.timer);
+        pending.reject(Error('NATIVE_IMPORT_INPUT_CLOSED'));
+      }
+      this.process.kill();
+    });
     this.process.on('error', () => {
       this.closed = true;
       for (const p of this.pending.splice(0)) {
@@ -291,6 +299,34 @@ export class NativeUniversityImportClient {
   async copyUniversityImportRows(table, keys, rows) {
     assert.ok(['University', 'UniversitySourceRecord', 'UniversityImportChange'].includes(table));
     assert.ok(rows.length > 0 && rows.length <= 1000);
+    let stage2Dictionary;
+    if (table === 'UniversitySourceRecord' && rows.every((row) => row.stage === 'STAGE_2')) {
+      const headers = Object.keys(rows[0].metadata.rawFields),
+        dictionary = [],
+        index = new Map();
+      const values = rows.map((row) => {
+        assert.deepEqual(Object.keys(row.metadata.rawFields), headers);
+        assert.ok(!('__stage2CopyDictionary' in row.metadata));
+        return headers.map((header) => {
+          const value = row.metadata.rawFields[header],
+            key = JSON.stringify(value);
+          if (!index.has(key)) {
+            index.set(key, dictionary.length);
+            dictionary.push(value);
+          }
+          return index.get(key);
+        });
+      });
+      stage2Dictionary = { headers, ids: rows.map((row) => row.id), first: rows[0].id };
+      rows = rows.map((row, offset) => ({
+        ...row,
+        metadata: {
+          ...row.metadata,
+          rawFields: values[offset],
+          ...(offset === 0 ? { __stage2CopyDictionary: dictionary } : {}),
+        },
+      }));
+    }
     // Journal snapshots duplicate rows just inserted on this same connection.
     // Reconstruct those exact fields server-side instead of uploading them twice.
     const snapshots = [];
@@ -346,6 +382,21 @@ export class NativeUniversityImportClient {
         ');',
     );
     assert.equal(result.copied, rows.length);
+    if (stage2Dictionary) {
+      // Expand the lossless transport dictionary before returning to the owner
+      // procedure. Only the original 44-field object reaches audit/commit.
+      const expanded = await this.$executeRawUnsafe(
+        'WITH dictionary AS MATERIALIZED (SELECT metadata->\'__stage2CopyDictionary\' AS values FROM "UniversitySourceRecord" WHERE id=$1) ' +
+          "UPDATE \"UniversitySourceRecord\" AS source SET metadata=jsonb_set(source.metadata-'__stage2CopyDictionary','{rawFields}'," +
+          "(SELECT jsonb_object_agg(header.key,dictionary.values->((source.metadata->'rawFields'->>(header.ordinal-1)::int)::int)) " +
+          'FROM jsonb_array_elements_text($2::jsonb) WITH ORDINALITY AS header(key,ordinal))) ' +
+          'FROM dictionary WHERE source.id=ANY($3::text[])',
+        stage2Dictionary.first,
+        JSON.stringify(stage2Dictionary.headers),
+        stage2Dictionary.ids,
+      );
+      assert.equal(expanded, rows.length, 'STAGE2_SOURCE_DICTIONARY_EXPANSION_INCOMPLETE');
+    }
     for (const group of snapshots) {
       const ownerTable = group.type === 'UNIVERSITY' ? 'University' : 'UniversitySourceRecord';
       const value =

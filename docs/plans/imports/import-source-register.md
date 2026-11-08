@@ -91,6 +91,7 @@
 | [workspace/import-sources/universities/stage-2-enrichment/Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE(20260813-215654).xlsx](../../../workspace/import-sources/universities/stage-2-enrichment/Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE%2820260813-215654%29.xlsx) | 4154 |  |
 | [workspace/import-sources/universities/stage-2-enrichment/Europe_Universities_Phase_1_Enrichment_2399_74_ENRICHED_FINAL_2026-08-10.xlsx](../../../workspace/import-sources/universities/stage-2-enrichment/Europe_Universities_Phase_1_Enrichment_2399_74_ENRICHED_FINAL_2026-08-10.xlsx) | 2399 |  |
 | [workspace/import-sources/universities/stage-2-enrichment/North_America_Universities_Phase_1_Enrichment_COMPLETED_1566(3)(3)(1).xlsx](../../../workspace/import-sources/universities/stage-2-enrichment/North_America_Universities_Phase_1_Enrichment_COMPLETED_1566%283%29%283%29%281%29.xlsx) | 1566 |  |
+| [workspace/import-sources/universities/stage-2-enrichment/South_America_Universities_Phase_1_Enrichment_UPDATED_879_COMPLETE.xlsx](../../../workspace/import-sources/universities/stage-2-enrichment/South_America_Universities_Phase_1_Enrichment_UPDATED_879_COMPLETE.xlsx) | 879 | أضيف 2026-11-08؛ البصمة في سجل مصادر المرحلة الثانية |
 | [workspace/import-sources/universities/stage-3-4/MANARATAK_Europe_Universities_Stage_3_Stage_4_1530_REVIEWED_0001_1530_FINAL.md](../../../workspace/import-sources/universities/stage-3-4/MANARATAK_Europe_Universities_Stage_3_Stage_4_1530_REVIEWED_0001_1530_FINAL.md) | 1530 |  |
 
 ## MAJOR_IDENTITY_SOURCE_CANDIDATE

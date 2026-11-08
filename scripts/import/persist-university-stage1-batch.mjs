@@ -8,7 +8,7 @@ export const universityStage1Hash = (value) =>
 // One bound JSON parameter avoids thousands of individual SQL parameters for
 // retained raw rows and journal snapshots. Columns remain generated exclusively
 // by this owner procedure; PostgreSQL applies the same constraints and defaults.
-async function insertOwnerRows(tx, table, rows) {
+export async function insertUniversityImportRows(tx, table, rows) {
   if (!rows.length) return;
   assert.ok(['University', 'UniversitySourceRecord', 'UniversityImportChange'].includes(table));
   rows = rows.map((row) => ({
@@ -286,8 +286,8 @@ export async function persistUniversityStage1Batch(tx, batch, context) {
       sequence: ++sequence,
     });
   }
-  await insertOwnerRows(tx, 'University', roots);
-  await insertOwnerRows(tx, 'UniversitySourceRecord', sources);
+  await insertUniversityImportRows(tx, 'University', roots);
+  await insertUniversityImportRows(tx, 'UniversitySourceRecord', sources);
   await tx.universityImportChangeSet.create({
     data: {
       id: changeSetId,
@@ -298,6 +298,6 @@ export async function persistUniversityStage1Batch(tx, batch, context) {
       appliedAt: new Date(),
     },
   });
-  await insertOwnerRows(tx, 'UniversityImportChange', changes);
+  await insertUniversityImportRows(tx, 'UniversityImportChange', changes);
   return { replayed: false, created: roots.length, preserved, sources: sources.length };
 }

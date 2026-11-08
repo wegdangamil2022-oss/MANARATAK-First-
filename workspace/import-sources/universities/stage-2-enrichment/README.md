@@ -8,10 +8,11 @@ These source artifacts contain the 44-field university enrichment stage. Their i
 | `Europe_Universities_Phase_1_Enrichment_2399_74_ENRICHED_FINAL_2026-08-10.xlsx` | 2,399 | 44 | `9705E974BF8F8A9050D7ED74B21AE94EEAE4C1EBA96A69DED95966942A8BD67F` |
 | `Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE(20260813-215654).xlsx` | 4,154 | 44 | `B014E5BBA8F648E66501258EB449D22FE923224A6FD4E7107C0DAD19CE0E55EE` |
 | `North_America_Universities_Phase_1_Enrichment_COMPLETED_1566(3)(3)(1).xlsx` | 1,566 | 44 | `058FA60CF7246F97FD6BE4D88DE4A7B305EF54D1DB448A55E9DF06A8F3374235` |
+| `South_America_Universities_Phase_1_Enrichment_UPDATED_879_COMPLETE.xlsx` | 879 | 44 | `73D62158A16D12DC7930C9FFA10DB5FFFF9FBC203AE40AEA93B15C96F4FEBA1E` |
 
-Total prepared records: **9,775**.
+Total supplied records: **10,654**. South America was recovered from the owner's local Downloads folder on 2026-11-08 and pinned without changing its bytes.
 
-Pending continents: **Oceania** and **South America**.
+Pending continent: **Oceania** (69 identities); the owner confirmed its enrichment file is not yet supplied.
 
 ## Identity And Promotion Rules
 
@@ -19,7 +20,7 @@ Pending continents: **Oceania** and **South America**.
 - Stage 2 may update only a university identity already established by Stage 1.
 - Name-only matching, random ID generation, and implicit university creation are prohibited.
 - Source validation and local dry-run are allowed without a database.
-- Promotion remains blocked until the Google Studio recovery gate and database identity comparison are complete.
+- Application requires the original-database identity/version comparison, active source assets, operator authorization and atomic audit/outbox. Source review flags are not publication approval.
 - The source workbooks are immutable inputs and must not be edited by import tooling.
 
 Run the source-only check with:

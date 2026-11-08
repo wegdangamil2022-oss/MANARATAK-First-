@@ -1,0 +1,14 @@
+{
+  "planHash": "7489b05d416418752543020423e79ee69e31bc36541918fa78f8181224234109",
+  "sourcePlanHash": "7950301f6a8c97ec4187f2628ae5769b264e121b49d35f68fa1fec1919a5428b",
+  "summary": {
+    "rows": 2390,
+    "batches": 5,
+    "sourceFiles": 1,
+    "sourceReadyTotal": 8653,
+    "sourceReviewRemaining": 2001,
+    "sourceRecordsCreated": 0,
+    "sourceRecordsModified": 0
+  },
+  "reason": "Recognize literal Verified review status in the European workbook; preserve existing source rows and independently journal owner updates."
+}

@@ -1,0 +1,127 @@
+{
+  "pass": true,
+  "planHash": "7950301f6a8c97ec4187f2628ae5769b264e121b49d35f68fa1fec1919a5428b",
+  "summary": {
+    "rows": 10654,
+    "sourceFiles": 5,
+    "sourceReady": 6263,
+    "sourceReview": 4391,
+    "projected": 6263,
+    "immutable": 0,
+    "oceaniaMissing": 69,
+    "issues": {
+      "SOURCE_REVIEW_NOT_APPROVED": 4391,
+      "MANUAL_VALUE_PRESERVED:officialSourceUrl": 7,
+      "MANUAL_VALUE_PRESERVED:institutionType": 4,
+      "MANUAL_VALUE_PRESERVED:officialWebsite": 1
+    }
+  },
+  "counts": {
+    "universities": 10723,
+    "stage2Sources": 10654,
+    "published": 0
+  },
+  "batches": 24,
+  "assets": 24,
+  "backupSha256": "3dfdbfdfbd997a5df2a26d9b1e5d1a45cb8cd3bd96cc9c25add0a4de4f23a7a5",
+  "localProof": {
+    "pass": true,
+    "planHash": "7950301f6a8c97ec4187f2628ae5769b264e121b49d35f68fa1fec1919a5428b",
+    "samples": 3,
+    "raw44FieldsPreserved": true,
+    "manualEditsPreserved": true,
+    "rejectedSourceNotPromoted": true,
+    "staleOwnerRejected": true,
+    "journalBeforeAfterVerified": true,
+    "replayNoOwnerWrites": true,
+    "forcedRollback": true
+  },
+  "identitiesAndCanonicalGeographyPreserved": true,
+  "stage3Imported": false,
+  "stage4Imported": false,
+  "oceaniaPending": 69,
+  "completedAt": "2026-11-08T00:18:35.875Z",
+  "newUniversities": 0,
+  "verifiedProjection": {
+    "pass": true,
+    "planHash": "7489b05d416418752543020423e79ee69e31bc36541918fa78f8181224234109",
+    "sourcePlanHash": "7950301f6a8c97ec4187f2628ae5769b264e121b49d35f68fa1fec1919a5428b",
+    "summary": {
+      "rows": 2390,
+      "batches": 5,
+      "sourceFiles": 1,
+      "sourceReadyTotal": 8653,
+      "sourceReviewRemaining": 2001,
+      "sourceRecordsCreated": 0,
+      "sourceRecordsModified": 0
+    },
+    "counts": {
+      "universities": 10723,
+      "stage2Sources": 10654,
+      "published": 0
+    },
+    "identitiesAndCanonicalGeographyPreserved": true,
+    "sourceRecordsUnchanged": true,
+    "localProof": {
+      "pass": true,
+      "planHash": "7950301f6a8c97ec4187f2628ae5769b264e121b49d35f68fa1fec1919a5428b",
+      "samples": 3,
+      "raw44FieldsPreserved": true,
+      "manualEditsPreserved": true,
+      "rejectedSourceNotPromoted": true,
+      "staleOwnerRejected": true,
+      "journalBeforeAfterVerified": true,
+      "verifiedStatusFollowUpPreservesSource": true,
+      "replayNoOwnerWrites": true,
+      "forcedRollback": true
+    },
+    "completedAt": "2026-11-08T15:12:47.167Z"
+  },
+  "combinedSummary": {
+    "sourceRows": 10654,
+    "sourceReady": 8653,
+    "sourceReview": 2001,
+    "oceaniaMissing": 69
+  },
+  "readVerification": {
+    "pass": true,
+    "planHash": "7950301f6a8c97ec4187f2628ae5769b264e121b49d35f68fa1fec1919a5428b",
+    "samples": [
+      {
+        "publicId": "INS-DZA-0001",
+        "source44Fields": true,
+        "projectionMatchesPlan": true,
+        "protectedFields": true,
+        "stage2Imported": true,
+        "sourceReady": true
+      },
+      {
+        "publicId": "INS-HUN-0006",
+        "source44Fields": true,
+        "projectionMatchesPlan": true,
+        "protectedFields": true,
+        "stage2Imported": true,
+        "sourceReady": true
+      },
+      {
+        "publicId": "INS-EGY-0107",
+        "source44Fields": true,
+        "projectionMatchesPlan": true,
+        "protectedFields": true,
+        "stage2Imported": true,
+        "sourceReady": false
+      },
+      {
+        "publicId": "INS-ARG-0001",
+        "source44Fields": true,
+        "projectionMatchesPlan": true,
+        "protectedFields": true,
+        "stage2Imported": true,
+        "sourceReady": true
+      }
+    ],
+    "countryAndSearchFilter": true,
+    "oceaniaUnchangedAndNotInvented": true,
+    "scope": "ORIGINAL_DATABASE_READ_ONLY"
+  }
+}

@@ -1,0 +1,189 @@
+{
+  "planHash": "7950301f6a8c97ec4187f2628ae5769b264e121b49d35f68fa1fec1919a5428b",
+  "summary": {
+    "rows": 10654,
+    "sourceFiles": 5,
+    "sourceReady": 6263,
+    "sourceReview": 4391,
+    "projected": 6263,
+    "immutable": 0,
+    "oceaniaMissing": 69,
+    "issues": {
+      "SOURCE_REVIEW_NOT_APPROVED": 4391,
+      "MANUAL_VALUE_PRESERVED:officialSourceUrl": 7,
+      "MANUAL_VALUE_PRESERVED:institutionType": 4,
+      "MANUAL_VALUE_PRESERVED:officialWebsite": 1
+    }
+  },
+  "sources": [
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Africa_Universities_Phase_1_FINAL_WEAK_RECORDS_REENRICHED.xlsx",
+      "sha256": "d027fb76545ddafb97efb2456721f0bd61075d90fd76fd7d217794c528d53dce",
+      "rows": 500,
+      "artifact": "universities-stage2-0.json",
+      "artifactHash": "323500a30730bfa22366e8e042e8cc1fdb1d3a840b2b06efab1ac1fbad7c8cc0"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Africa_Universities_Phase_1_FINAL_WEAK_RECORDS_REENRICHED.xlsx",
+      "sha256": "d027fb76545ddafb97efb2456721f0bd61075d90fd76fd7d217794c528d53dce",
+      "rows": 500,
+      "artifact": "universities-stage2-1.json",
+      "artifactHash": "cd421a855dbc3ac6864669c18e7af1b1429841b5e0e6d3fb3ea5c2e6a8625b5e"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Africa_Universities_Phase_1_FINAL_WEAK_RECORDS_REENRICHED.xlsx",
+      "sha256": "d027fb76545ddafb97efb2456721f0bd61075d90fd76fd7d217794c528d53dce",
+      "rows": 500,
+      "artifact": "universities-stage2-2.json",
+      "artifactHash": "e546d1225d3b91394c8a5ee2271449abf19fd0d49e58dfd86f5b62595a95dab0"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Africa_Universities_Phase_1_FINAL_WEAK_RECORDS_REENRICHED.xlsx",
+      "sha256": "d027fb76545ddafb97efb2456721f0bd61075d90fd76fd7d217794c528d53dce",
+      "rows": 156,
+      "artifact": "universities-stage2-3.json",
+      "artifactHash": "a125bec81fc3f3147a05f11bcd4a1056197c530193ff096b3aedd5c524b6fed1"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE(20260813-215654).xlsx",
+      "sha256": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee",
+      "rows": 500,
+      "artifact": "universities-stage2-4.json",
+      "artifactHash": "494d4a279db375901f39dbcdaa846027721e3b8a6b5d1295c8339dab9c9e540a"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE(20260813-215654).xlsx",
+      "sha256": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee",
+      "rows": 500,
+      "artifact": "universities-stage2-5.json",
+      "artifactHash": "f33bf5ba7ec506c700ba5ca9f138ad5ca2f3e0820e9b03bee984eb42b86593b5"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE(20260813-215654).xlsx",
+      "sha256": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee",
+      "rows": 500,
+      "artifact": "universities-stage2-6.json",
+      "artifactHash": "c0b746f81135169dadf11b6108d5f6f5186cd6d357111adaede82cf858c7ef8d"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE(20260813-215654).xlsx",
+      "sha256": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee",
+      "rows": 500,
+      "artifact": "universities-stage2-7.json",
+      "artifactHash": "211dd4454b305e79337f8e302ab5072ac2e06452f0a6db96ca2ae0493b583322"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE(20260813-215654).xlsx",
+      "sha256": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee",
+      "rows": 500,
+      "artifact": "universities-stage2-8.json",
+      "artifactHash": "6a5fb36a610215b38d9fd46766da700beb684c74b5a96f891255773cdb855639"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE(20260813-215654).xlsx",
+      "sha256": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee",
+      "rows": 500,
+      "artifact": "universities-stage2-9.json",
+      "artifactHash": "8c632d2f8648a73357bce09c9e484a7220a4013ea45b57d36cc8dca418663bce"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE(20260813-215654).xlsx",
+      "sha256": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee",
+      "rows": 500,
+      "artifact": "universities-stage2-10.json",
+      "artifactHash": "94c822cd42fe7db752552dee04c88fb806bb3fa7623762e8a2b37e54bece4c31"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE(20260813-215654).xlsx",
+      "sha256": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee",
+      "rows": 500,
+      "artifact": "universities-stage2-11.json",
+      "artifactHash": "1926a576dc4753a229d1028fb3a4bb2202581483fdbfd604b0fc3141f1fe50bc"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE(20260813-215654).xlsx",
+      "sha256": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee",
+      "rows": 154,
+      "artifact": "universities-stage2-12.json",
+      "artifactHash": "93fceae2ddd6121f13b4468ba87b997296f62f40ad05c3f2afec4603af4f4827"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Europe_Universities_Phase_1_Enrichment_2399_74_ENRICHED_FINAL_2026-08-10.xlsx",
+      "sha256": "9705e974bf8f8a9050d7ed74b21ae94eeae4c1eba96a69ded95966942a8bd67f",
+      "rows": 500,
+      "artifact": "universities-stage2-13.json",
+      "artifactHash": "7567629e5ea4096bbcee3fdae482fa6c538d8d047d6b14017be5d40d3d8a39a4"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Europe_Universities_Phase_1_Enrichment_2399_74_ENRICHED_FINAL_2026-08-10.xlsx",
+      "sha256": "9705e974bf8f8a9050d7ed74b21ae94eeae4c1eba96a69ded95966942a8bd67f",
+      "rows": 500,
+      "artifact": "universities-stage2-14.json",
+      "artifactHash": "b1a6076d375d8c5e31a7db7aee33ffbe53ebed94ed6734bf1da1520ef1fc9072"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Europe_Universities_Phase_1_Enrichment_2399_74_ENRICHED_FINAL_2026-08-10.xlsx",
+      "sha256": "9705e974bf8f8a9050d7ed74b21ae94eeae4c1eba96a69ded95966942a8bd67f",
+      "rows": 500,
+      "artifact": "universities-stage2-15.json",
+      "artifactHash": "df6e9640d13fd679c22ad5e83bf7efea4c65dd9ce3b74593d2b928d408181b4a"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Europe_Universities_Phase_1_Enrichment_2399_74_ENRICHED_FINAL_2026-08-10.xlsx",
+      "sha256": "9705e974bf8f8a9050d7ed74b21ae94eeae4c1eba96a69ded95966942a8bd67f",
+      "rows": 500,
+      "artifact": "universities-stage2-16.json",
+      "artifactHash": "da369162b41dade4363743dc35e9603ec59ab18afaf538408e14773386c20aac"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/Europe_Universities_Phase_1_Enrichment_2399_74_ENRICHED_FINAL_2026-08-10.xlsx",
+      "sha256": "9705e974bf8f8a9050d7ed74b21ae94eeae4c1eba96a69ded95966942a8bd67f",
+      "rows": 399,
+      "artifact": "universities-stage2-17.json",
+      "artifactHash": "e4f56f87c0b73490367d0be596d44a1af5ded4cd92195ef67abc19d6aa1104cd"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/North_America_Universities_Phase_1_Enrichment_COMPLETED_1566(3)(3)(1).xlsx",
+      "sha256": "058fa60cf7246f97fd6be4d88de4a7b305ef54d1db448a55e9df06a8f3374235",
+      "rows": 500,
+      "artifact": "universities-stage2-18.json",
+      "artifactHash": "b3afeb81f68c199d3e5eaaba391795d34e552eda6d2e33110cb3e7db53a4f2af"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/North_America_Universities_Phase_1_Enrichment_COMPLETED_1566(3)(3)(1).xlsx",
+      "sha256": "058fa60cf7246f97fd6be4d88de4a7b305ef54d1db448a55e9df06a8f3374235",
+      "rows": 500,
+      "artifact": "universities-stage2-19.json",
+      "artifactHash": "12195e630010584da0413072a7ae033208b8b46fd6f6691a18156cefd6398b7a"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/North_America_Universities_Phase_1_Enrichment_COMPLETED_1566(3)(3)(1).xlsx",
+      "sha256": "058fa60cf7246f97fd6be4d88de4a7b305ef54d1db448a55e9df06a8f3374235",
+      "rows": 500,
+      "artifact": "universities-stage2-20.json",
+      "artifactHash": "0cc93aa8e13d926c4db18aefc5347227cd4107f7c2ce76acc1893835a8377eac"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/North_America_Universities_Phase_1_Enrichment_COMPLETED_1566(3)(3)(1).xlsx",
+      "sha256": "058fa60cf7246f97fd6be4d88de4a7b305ef54d1db448a55e9df06a8f3374235",
+      "rows": 66,
+      "artifact": "universities-stage2-21.json",
+      "artifactHash": "55a0bf9c6b958d64ba7aa9792e9f3d2fa1133966b7b417e8eec4185d31af0084"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/South_America_Universities_Phase_1_Enrichment_UPDATED_879_COMPLETE.xlsx",
+      "sha256": "73d62158a16d12dc7930c9ffa10db5ffff9fbc203ae40aea93b15c96f4feba1e",
+      "rows": 500,
+      "artifact": "universities-stage2-22.json",
+      "artifactHash": "d910212bd17a40564e0b5d6c7e39157c730394bc51edf735b7769b9790426378"
+    },
+    {
+      "file": "workspace/import-sources/universities/stage-2-enrichment/South_America_Universities_Phase_1_Enrichment_UPDATED_879_COMPLETE.xlsx",
+      "sha256": "73d62158a16d12dc7930c9ffa10db5ffff9fbc203ae40aea93b15c96f4feba1e",
+      "rows": 379,
+      "artifact": "universities-stage2-23.json",
+      "artifactHash": "57178936f03ff913385afc1ede57211723fc3409aafcb920e2f56ecaadcdd29d"
+    }
+  ],
+  "batches": 24
+}
