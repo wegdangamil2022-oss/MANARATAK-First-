@@ -1,0 +1,622 @@
+{
+  "planHash": "fa5227295ca7a16be0ade4c29b3d98874d2476f898719b55d8ee6ed26fc25d27",
+  "summary": {
+    "inputRows": 21562,
+    "projectedRows": 21559,
+    "newProviders": 151,
+    "providers": 169,
+    "newCourses": 21499,
+    "existingPreserved": 3,
+    "blocked": 57,
+    "languageLinked": 18677,
+    "analysisCounts": {
+      "UNCHANGED": 3,
+      "NEW": 21499,
+      "INVALID": 57
+    },
+    "blockedReasons": {
+      "COURSE_IMPORT_SOURCE_IDENTITY_PROPOSAL_REQUIRED": 57
+    }
+  },
+  "files": [
+    {
+      "file": "workspace/import-sources/courses/MANARATAK_MASTER_1_RESEND_2026-09-15.xlsx",
+      "sha256": "8e92f89b4814ae40398d5b555b02a8c17eeb5db3ce247f316cf68987b99c8d88",
+      "rows": 16861,
+      "artifactFile": "courses-source-0.csv",
+      "assetSha256": "bceba449e57c1480596e5660572d255b25ff3e449580783784f54c51352ae1bc"
+    },
+    {
+      "file": "workspace/import-sources/courses/MANARATAK_Free_Courses_MASTER_2_UPDATED_2026-09-23_ATLASSIAN_161_CLOSED_130_WORKATO_162_BATCH_001_2_ADDED_21562_NOT_CLOSED.xlsx",
+      "sha256": "f5944476f63f13999216ebd5eb6dcfeb6bb067ce1ffb2166735bd973e5da321e",
+      "rows": 4701,
+      "artifactFile": "courses-source-1.csv",
+      "assetSha256": "02fd13c42c720e8e7767c5ef24dd3561d567e5f91624206695aa3f52419af260"
+    }
+  ],
+  "sourceDecisions": [
+    {
+      "action": "SKIP_REVIEWED_DUPLICATE_URL",
+      "url": "https://www.improvensclctesting.org/cme.aspx",
+      "kept": {
+        "sourceKey": "courses-master-1-2026-09-15#10632",
+        "artifactHash": "8e92f89b4814ae40398d5b555b02a8c17eeb5db3ce247f316cf68987b99c8d88",
+        "sourceHash": "d10825ccbdc034cae6bffe38ba29f38d7a3fd8d8ab3b1982ad9ffcec31a4e885",
+        "raw": {
+          "sourceOrder": "10631",
+          "providerLabel": "University of Chicago — Online CME",
+          "courseName": "Out-of-the-Box Solutions for Building Clinical Capacity in Community Settings to Improve Standardized ERBB2 (HER2) Testing in NSCLC",
+          "directCourseUrl": "https://www.improvensclctesting.org/cme.aspx",
+          "studyFreeRaw": "Yes",
+          "freeCertificateRaw": "Yes",
+          "certificateTypeRaw": "AMA PRA Category 1 Credit™ / ABIM MOC / Certificate of Completion",
+          "languageRaw": "English",
+          "studyLevelRaw": "Healthcare Professionals",
+          "courseDurationRaw": "Digital QI; 60-day reassessment",
+          "shortCourseTopicsRaw": "NSCLC • HER2 Testing • Clinical Capacity • Digital Quality Improvement"
+        }
+      },
+      "excluded": {
+        "sourceKey": "courses-master-2-2026-09-23#432",
+        "artifactHash": "f5944476f63f13999216ebd5eb6dcfeb6bb067ce1ffb2166735bd973e5da321e",
+        "sourceHash": "429f97de8cd7a153362958f9da0d858fbfb7eb2e2ffc7902b58d63021d94eb83",
+        "raw": {
+          "sourceOrder": "17292",
+          "providerLabel": "myCME",
+          "courseName": "Out-of-the-Box Solutions for Building Clinical Capacity in Community Settings to Improve Standardized ERBB2 (HER2) Testing in NSCLC",
+          "directCourseUrl": "https://www.improvensclctesting.org/cme.aspx",
+          "studyFreeRaw": "Yes",
+          "freeCertificateRaw": "Yes",
+          "certificateTypeRaw": "CME/CE Credit Certificate",
+          "languageRaw": "English",
+          "studyLevelRaw": "Healthcare Professionals",
+          "courseDurationRaw": "Longitudinal QI activity; reassessment after ≥60 days",
+          "shortCourseTopicsRaw": "NSCLC • HER2/ERBB2 Testing • Quality Improvement • Community Oncology"
+        }
+      },
+      "changedFields": [
+        "sourceOrder",
+        "providerLabel",
+        "certificateTypeRaw",
+        "courseDurationRaw",
+        "shortCourseTopicsRaw"
+      ],
+      "evidenceReference": "M10-14: exact artifact hashes and source row pair",
+      "canonicalCourseId": null
+    },
+    {
+      "action": "DISTINGUISH_ENGLISH_EDITION",
+      "original": {
+        "sourceKey": "courses-master-2-2026-09-23#2129",
+        "artifactHash": "f5944476f63f13999216ebd5eb6dcfeb6bb067ce1ffb2166735bd973e5da321e",
+        "sourceHash": "1325c27db6569267668715327768bf738eadc6fbe889d04a2f4c1067dfda4891",
+        "raw": {
+          "sourceOrder": "18989",
+          "providerLabel": "POK — Polimi Open Knowledge (Politecnico di Milano)",
+          "courseName": "Smart Learning Design",
+          "directCourseUrl": "https://www.pok.polimi.it/course/view.php?id=204",
+          "studyFreeRaw": "Yes",
+          "freeCertificateRaw": "Yes",
+          "certificateTypeRaw": "POK Open Badge",
+          "languageRaw": "English",
+          "studyLevelRaw": "Not officially specified",
+          "courseDurationRaw": "25–30 hours",
+          "shortCourseTopicsRaw": "Instructional Design • Hybrid Learning • Smart Learning • Learning Innovation"
+        }
+      },
+      "otherEdition": {
+        "sourceKey": "courses-master-2-2026-09-23#2112",
+        "artifactHash": "f5944476f63f13999216ebd5eb6dcfeb6bb067ce1ffb2166735bd973e5da321e",
+        "sourceHash": "1ba7dfc2810de76cd43178361a4f988fcfcc09333b48c5b09a40ff911c6fb20f",
+        "raw": {
+          "sourceOrder": "18972",
+          "providerLabel": "POK — Polimi Open Knowledge (Politecnico di Milano)",
+          "courseName": "Smart Learning Design",
+          "directCourseUrl": "https://www.pok.polimi.it/course/view.php?id=5",
+          "studyFreeRaw": "Yes",
+          "freeCertificateRaw": "Yes",
+          "certificateTypeRaw": "POK Open Badge",
+          "languageRaw": "Italian",
+          "studyLevelRaw": "Not officially specified",
+          "courseDurationRaw": "25–30 hours",
+          "shortCourseTopicsRaw": "Instructional Design • Hybrid Learning • Educational Technology • Learning Innovation"
+        }
+      },
+      "projectedName": "Smart Learning Design (English)",
+      "policy": "KEEP_DISTINCT_URL_AND_LANGUAGE_EDITION; RAW_NAME_UNCHANGED",
+      "canonicalCourseId": null
+    },
+    {
+      "action": "SKIP_REVIEWED_DUPLICATE_URL",
+      "url": "https://www.pok.polimi.it/course/view.php?id=232",
+      "kept": {
+        "sourceKey": "courses-master-2-2026-09-23#2070",
+        "artifactHash": "f5944476f63f13999216ebd5eb6dcfeb6bb067ce1ffb2166735bd973e5da321e",
+        "sourceHash": "bb00f083428e351f7d520cc20c2de812c510ff131ee0ee65b5dbdf58ca4c0d5c",
+        "raw": {
+          "sourceOrder": "18930",
+          "providerLabel": "POK — Polimi Open Knowledge (Politecnico di Milano)",
+          "courseName": "Stochastic processes",
+          "directCourseUrl": "https://www.pok.polimi.it/course/view.php?id=232",
+          "studyFreeRaw": "Yes",
+          "freeCertificateRaw": "Yes",
+          "certificateTypeRaw": "POK Open Badge",
+          "languageRaw": "English",
+          "studyLevelRaw": "Not officially specified",
+          "courseDurationRaw": "13 hours",
+          "shortCourseTopicsRaw": "Stochastic Processes • Probability • Signal Processing • MATLAB"
+        }
+      },
+      "excluded": {
+        "sourceKey": "courses-master-2-2026-09-23#2141",
+        "artifactHash": "f5944476f63f13999216ebd5eb6dcfeb6bb067ce1ffb2166735bd973e5da321e",
+        "sourceHash": "a842838cc83b900108c4ffd14cad124c216cd0f13fcdf7beb55eb2bd2fe6dac7",
+        "raw": {
+          "sourceOrder": "19001",
+          "providerLabel": "POK — Polimi Open Knowledge (Politecnico di Milano)",
+          "courseName": "Stochastic processes",
+          "directCourseUrl": "https://www.pok.polimi.it/course/view.php?id=232",
+          "studyFreeRaw": "Yes",
+          "freeCertificateRaw": "Yes",
+          "certificateTypeRaw": "POK Open Badge",
+          "languageRaw": "English",
+          "studyLevelRaw": "Not officially specified",
+          "courseDurationRaw": "13 hours",
+          "shortCourseTopicsRaw": "Stochastic Processes • Probability • Signal Processing • MATLAB"
+        }
+      },
+      "changedFields": ["sourceOrder"],
+      "evidenceReference": "M10-14: exact artifact hashes and source row pair",
+      "canonicalCourseId": null
+    },
+    {
+      "action": "SKIP_REVIEWED_DUPLICATE_URL",
+      "url": "https://www.pok.polimi.it/course/view.php?id=212",
+      "kept": {
+        "sourceKey": "courses-master-2-2026-09-23#2071",
+        "artifactHash": "f5944476f63f13999216ebd5eb6dcfeb6bb067ce1ffb2166735bd973e5da321e",
+        "sourceHash": "05fe11e45b37b15a7d67af4d3b9ef0b42ede8e799451f2aadbfece48790d1186",
+        "raw": {
+          "sourceOrder": "18931",
+          "providerLabel": "POK — Polimi Open Knowledge (Politecnico di Milano)",
+          "courseName": "Introduction to internet and networks",
+          "directCourseUrl": "https://www.pok.polimi.it/course/view.php?id=212",
+          "studyFreeRaw": "Yes",
+          "freeCertificateRaw": "Yes",
+          "certificateTypeRaw": "POK Open Badge",
+          "languageRaw": "English",
+          "studyLevelRaw": "Not officially specified",
+          "courseDurationRaw": "6 hours",
+          "shortCourseTopicsRaw": "Computer Networks • Internet Architecture • Network Protocols • Performance"
+        }
+      },
+      "excluded": {
+        "sourceKey": "courses-master-2-2026-09-23#2142",
+        "artifactHash": "f5944476f63f13999216ebd5eb6dcfeb6bb067ce1ffb2166735bd973e5da321e",
+        "sourceHash": "35fa10e8e4b4f43ba6b91d03ba7e2fd162136cf721a611d830f6406cd1a4f2dc",
+        "raw": {
+          "sourceOrder": "19002",
+          "providerLabel": "POK — Polimi Open Knowledge (Politecnico di Milano)",
+          "courseName": "Introduction to internet and networks",
+          "directCourseUrl": "https://www.pok.polimi.it/course/view.php?id=212",
+          "studyFreeRaw": "Yes",
+          "freeCertificateRaw": "Yes",
+          "certificateTypeRaw": "POK Open Badge",
+          "languageRaw": "English",
+          "studyLevelRaw": "Not officially specified",
+          "courseDurationRaw": "6 hours",
+          "shortCourseTopicsRaw": "Internet Architecture • Network Protocols • Packet Switching • Computer Networks"
+        }
+      },
+      "changedFields": ["sourceOrder", "shortCourseTopicsRaw"],
+      "evidenceReference": "M10-14: exact artifact hashes and source row pair",
+      "canonicalCourseId": null
+    }
+  ],
+  "sourceApprovalScope": "OWNER_FILE_IMPORT_ONLY_NOT_LIVE_VERIFIED",
+  "newProviderCount": 151,
+  "existingProviderCount": 18,
+  "existingCoursesPreserved": 3,
+  "heldRows": [
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 380,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=zOjov-2OZ0E",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 381,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=zg9ih6SVACc",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 382,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=Mo4vesaut8g",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 383,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=tWVWeAqZ0WU",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 384,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=IJDJ0kBx2LM",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 385,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=B31LgI4Y4DQ",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 386,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=oBt53YbR9Kk",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 387,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=8hly31xKli0",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 388,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=pkYVOmU3MgA",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 389,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=RGOj5yH7evk",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 390,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=pQN-pnXPaVg",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 391,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=916GWv2Qs08",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 392,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=1Rs2ND1ryYc",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 393,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=_a5j7KoflTs",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 394,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=aook54SsfhY",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 395,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=iJKCj8uAHz8",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 396,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=-qfEOE4vtxE",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 397,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=PkZNo7MFNFg",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 398,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=2LhoCfjm8R4",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 399,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=H2qPeJx1RDI",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 400,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=F5mRW0jo-U4",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 401,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=rfscVS0vtbw",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 402,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=Qr4QMBUPxWo",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 403,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=fis26HvvDII",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 404,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=RcSHAkpwXAQ",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 405,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=F9UC9DY-vIU",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 406,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=KCgYDCKqato",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 407,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=gB1F9G0JXOo",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 408,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=9Fd9hw329fY",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 409,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=fQXKjmCDkIA",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 410,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=FfWpgLFMI7w",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 411,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=KJgsSFOSQv0",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 508,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=8jLOx1hD3_o",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 509,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=GoXwIVyNvX0",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 510,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=OK_JCtrrv-c",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 511,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=6ERdu4k62wI",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 611,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=GhQdlIFylQ8",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 612,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=vtPkZShrvXQ",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 613,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=flpmSXVTqBI",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 614,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=HXV3zeQKqGY",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 615,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=ER8oKX5myE0",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 616,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=qw--VYLpxG4",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 618,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=4cWkVbC2bNE",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 619,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=lxEdaElkQhQ",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 620,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=byHcYRpMgI4",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 621,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=xh4gy1lbL2k",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 723,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=jBlTQjcKuaY",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 724,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=_V8eKsto3Ug",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 725,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=LHBE6Q9XlzI",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 726,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=ua-CiDNNj30",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 727,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=N6BghzuFLIg",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 728,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=NWONeJKn6kc",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 729,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=VtRLrQ3Ev-U",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 730,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=0oyCUWLL_fU",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 731,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=VyWAvY2CF9c",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 733,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=VtLXKU1PpRU",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    },
+    {
+      "dataset": "courses-master-1-2026-09-15",
+      "sourceRow": 734,
+      "provider": "freeCodeCamp",
+      "url": "https://www.youtube.com/watch?v=zJ-LqeX_fLU",
+      "reason": "COURSE_PROVIDER_DOMAIN_NOT_APPROVED"
+    }
+  ],
+  "scope": "EXTERNAL_COURSES_ONLY_NO_PUBLICATION_NO_EUROPE_STAGE_3_OR_4"
+}

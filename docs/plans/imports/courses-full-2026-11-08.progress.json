@@ -1,0 +1,119 @@
+{
+  "status": "BLOCKED_BY_PROJECT_STORAGE_LIMIT",
+  "complete": false,
+  "verification": {
+    "pass": true,
+    "complete": false,
+    "scope": "ORIGINAL_DATABASE_READ_ONLY",
+    "planHash": "fa5227295ca7a16be0ade4c29b3d98874d2476f898719b55d8ee6ed26fc25d27",
+    "completedBatches": 37,
+    "totalBatches": 44,
+    "sourceRowsSaved": 18500,
+    "canonicalCourses": 18443,
+    "newCourses": 18440,
+    "existing3Unchanged": true,
+    "sourceRowsPending": 3059,
+    "reviewedYoutubeSourcesAwaitingTransfer": 57,
+    "canonicalCoursesRemaining": 3116,
+    "published": 0,
+    "samples": [
+      {
+        "publicId": "course-0ac7ad64",
+        "rawSource": true,
+        "sourceIdentity": true,
+        "fieldProvenance9": true,
+        "version1": true,
+        "adminDetailAndFilter": true
+      },
+      {
+        "publicId": "course-ef6712eb",
+        "rawSource": true,
+        "sourceIdentity": true,
+        "fieldProvenance9": true,
+        "version1": true,
+        "adminDetailAndFilter": true
+      },
+      {
+        "publicId": "course-6646e67d",
+        "rawSource": true,
+        "sourceIdentity": true,
+        "fieldProvenance9": true,
+        "version1": true,
+        "adminDetailAndFilter": true
+      }
+    ],
+    "blocker": "NEON_PROJECT_STORAGE_LIMIT_1024_MB",
+    "checkedAt": "2026-11-08T17:26:51.547Z"
+  },
+  "capacity": {
+    "checkedAt": "2026-11-08T17:25:40.313Z",
+    "scope": "ORIGINAL_DATABASE_READ_ONLY",
+    "sizes": {
+      "database_bytes": "1050238976",
+      "project_limit": "1GB",
+      "courses": 18443,
+      "published": 0
+    },
+    "tables": [
+      {
+        "table_name": "UniversityImportChange",
+        "bytes": "140263424"
+      },
+      {
+        "table_name": "ImportRecord",
+        "bytes": "128532480"
+      },
+      {
+        "table_name": "CourseFieldProvenance",
+        "bytes": "124116992"
+      },
+      {
+        "table_name": "MajorContentSection",
+        "bytes": "86622208"
+      },
+      {
+        "table_name": "UniversitySourceRecord",
+        "bytes": "77766656"
+      },
+      {
+        "table_name": "CourseImportAnalysis",
+        "bytes": "53878784"
+      },
+      {
+        "table_name": "Course",
+        "bytes": "53370880"
+      },
+      {
+        "table_name": "CourseVersion",
+        "bytes": "48963584"
+      }
+    ]
+  },
+  "localBaseProof": {
+    "pass": true,
+    "planHash": "fa5227295ca7a16be0ade4c29b3d98874d2476f898719b55d8ee6ed26fc25d27",
+    "samples": 3,
+    "actualPostgreSQL": true,
+    "sourceFieldsPreserved": true,
+    "providerAndLanguageReferences": true,
+    "provenance27": true,
+    "versions3": true,
+    "replayNoCanonicalWrites": true,
+    "forcedRollback": true,
+    "originalDatabaseWrites": 0
+  },
+  "localReviewedSourceProof": {
+    "pass": true,
+    "planHash": "f8c319767bc58302fb7cd110ce27b130101bdd343483d9746bc19cd0e9226a42",
+    "samples": 57,
+    "sourceRowsUnchanged": true,
+    "duplicateSourcesCreated": 0,
+    "staleSourceReviewRejected": true,
+    "replayNoCanonicalWrites": true,
+    "providerMappingsPreserved": true,
+    "noPublication": true,
+    "forcedRollback": true,
+    "originalDatabaseWrites": 0
+  },
+  "youtubeReviewAppliedToOriginal": false
+}

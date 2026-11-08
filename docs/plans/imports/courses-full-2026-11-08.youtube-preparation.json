@@ -1,0 +1,533 @@
+{
+  "planHash": "f8c319767bc58302fb7cd110ce27b130101bdd343483d9746bc19cd0e9226a42",
+  "sourcePlanHash": "fa5227295ca7a16be0ade4c29b3d98874d2476f898719b55d8ee6ed26fc25d27",
+  "sourceRows": 57,
+  "newCoursesPlanned": 57,
+  "newSourceRows": 0,
+  "newProviders": 0,
+  "domainReviewed": "youtube.com",
+  "provider": "freeCodeCamp",
+  "oEmbedConfirmed": 56,
+  "officialPublisherIdentityConfirmed": 57,
+  "officialPublisherArticle": {
+    "url": "https://www.freecodecamp.org/news/learn-big-o-notation",
+    "status": 200,
+    "sha256": "99cc6a2c0fccf63fb778a43001ffbf28e37d4b0bc71670d4ddbdea27281a9e18",
+    "bytes": 497463,
+    "linkedCourseUrl": "https://www.youtube.com/watch?v=Mo4vesaut8g",
+    "checkedAt": "2026-11-08T16:51:30.312Z"
+  },
+  "availabilityReviewRequired": 1,
+  "publication": false,
+  "evidence": [
+    {
+      "recordId": "0ea88ad2-35bc-4918-ae91-7c5c13532626",
+      "url": "https://www.youtube.com/watch?v=zOjov-2OZ0E",
+      "status": 200,
+      "title": "Introduction to Programming and Computer Science - Full Course",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "09af77c4-cdc2-4c91-bcdb-ebe2a6b9280c",
+      "url": "https://www.youtube.com/watch?v=zg9ih6SVACc",
+      "status": 200,
+      "title": "Data Structures - Computer Science Course for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "421451ed-c8bf-4537-8ce1-b560aae4607e",
+      "url": "https://www.youtube.com/watch?v=tWVWeAqZ0WU",
+      "status": 200,
+      "title": "Graph Algorithms for Technical Interviews - Full Course",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "3c4ef04f-9d77-482a-8a69-a07d92781422",
+      "url": "https://www.youtube.com/watch?v=IJDJ0kBx2LM",
+      "status": 200,
+      "title": "Recursion in Programming - Full Course",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "17feab75-0278-4a80-a6a7-d6d238fbaa11",
+      "url": "https://www.youtube.com/watch?v=B31LgI4Y4DQ",
+      "status": 200,
+      "title": "Data Structures - Full Course Using C and C++",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "07aa8cad-2134-4f70-82af-48b26fabe0d6",
+      "url": "https://www.youtube.com/watch?v=oBt53YbR9Kk",
+      "status": 200,
+      "title": "Dynamic Programming - Learn to Solve Algorithmic Problems & Coding Challenges",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "16e1eca5-6634-462e-a1aa-66a621f434d7",
+      "url": "https://www.youtube.com/watch?v=8hly31xKli0",
+      "status": 200,
+      "title": "Algorithms and Data Structures Tutorial - Full Course for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "6acffc54-a564-4e3e-80d9-2e7daf751e86",
+      "url": "https://www.youtube.com/watch?v=pkYVOmU3MgA",
+      "status": 200,
+      "title": "Data Structures and Algorithms in Python - Full Course for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "4b53fde7-5079-4003-97bd-be9ce6ad44de",
+      "url": "https://www.youtube.com/watch?v=RGOj5yH7evk",
+      "status": 200,
+      "title": "Git and GitHub for Beginners - Crash Course",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "6b7d3f0a-6acf-4403-be1c-6e9b4eb4d52e",
+      "url": "https://www.youtube.com/watch?v=pQN-pnXPaVg",
+      "status": 200,
+      "title": "HTML Full Course - Build a Website Tutorial",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "8dfc4fd9-97c9-4121-ad91-9783776af4c1",
+      "url": "https://www.youtube.com/watch?v=916GWv2Qs08",
+      "status": 200,
+      "title": "HTML Tutorial - Website Crash Course for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "ae5824b2-8164-4861-93fd-07ba12bedc3d",
+      "url": "https://www.youtube.com/watch?v=1Rs2ND1ryYc",
+      "status": 200,
+      "title": "CSS Tutorial - Zero to Hero (Complete Course)",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "538eb9d8-e26c-4bf4-9d2e-58b0be5cfa4b",
+      "url": "https://www.youtube.com/watch?v=_a5j7KoflTs",
+      "status": 200,
+      "title": "Sass Tutorial for Beginners - CSS With Superpowers",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "e62267cd-eb7d-44f8-a8fd-2cf17aab3fc9",
+      "url": "https://www.youtube.com/watch?v=aook54SsfhY",
+      "status": 200,
+      "title": "Learn CSS Media Queries by Building 3 Projects - Full Course",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "e129a8f6-ce98-4cb9-a98d-ad5136b4ba95",
+      "url": "https://www.youtube.com/watch?v=iJKCj8uAHz8",
+      "status": 200,
+      "title": "Learn Bootstrap 5 and SASS by Building a Portfolio Website - Full Course",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "48cb373c-30fb-4ee6-828a-0ced8b36ad74",
+      "url": "https://www.youtube.com/watch?v=-qfEOE4vtxE",
+      "status": 200,
+      "title": "Bootstrap CSS Framework - Full Course for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "5713fab5-c559-46da-8d2a-9d8e3417868e",
+      "url": "https://www.youtube.com/watch?v=PkZNo7MFNFg",
+      "status": 200,
+      "title": "Learn JavaScript - Full Course for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "b2fc71b0-097c-47ac-9c5a-f34127da5ec2",
+      "url": "https://www.youtube.com/watch?v=H2qPeJx1RDI",
+      "status": 200,
+      "title": "Data Visualization with D3, JavaScript, React - Full Course [PART 2]",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "b7d24d66-8e23-4b51-a903-071ca815fe90",
+      "url": "https://www.youtube.com/watch?v=F5mRW0jo-U4",
+      "status": 200,
+      "title": "Python Django Web Framework - Full Course for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "92eecc05-8f5d-49b5-9d6c-84f1763f7792",
+      "url": "https://www.youtube.com/watch?v=rfscVS0vtbw",
+      "status": 200,
+      "title": "Learn Python - Full Course for Beginners [Tutorial]",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "46ed158c-8ba3-48de-9c6d-c74b03295ffe",
+      "url": "https://www.youtube.com/watch?v=2LhoCfjm8R4",
+      "status": 200,
+      "title": "Data Visualization with D3, JavaScript, React - Full Course",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "cf65c8a7-dbcb-4d54-aaf3-f7e2cc8f1f7a",
+      "url": "https://www.youtube.com/watch?v=Qr4QMBUPxWo",
+      "status": 200,
+      "title": "Flask Course - Python Web Application Development",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "ab830973-6653-4fcb-9b0b-44602c1fc058",
+      "url": "https://www.youtube.com/watch?v=Mo4vesaut8g",
+      "status": 404
+    },
+    {
+      "recordId": "2abf1b68-eaef-4ce7-857c-7f7c1463cc03",
+      "url": "https://www.youtube.com/watch?v=fis26HvvDII",
+      "status": 200,
+      "title": "Android Development for Beginners - Full Course",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "83596cda-b3c4-481a-84c9-44ac62602e04",
+      "url": "https://www.youtube.com/watch?v=RcSHAkpwXAQ",
+      "status": 200,
+      "title": "Android Development for Beginners - Full Course (Part 2)",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "11b631a2-650b-47d4-a27d-b2100745e5e4",
+      "url": "https://www.youtube.com/watch?v=F9UC9DY-vIU",
+      "status": 200,
+      "title": "Kotlin Course - Tutorial for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "cd1edec3-2510-47ba-a25a-bdad2a941730",
+      "url": "https://www.youtube.com/watch?v=fQXKjmCDkIA",
+      "status": 200,
+      "title": "Godot Game Engine Tutorial - Make a 2D Platformer Game",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "4c7c771f-30c7-4bed-8ab6-b98c2f911a44",
+      "url": "https://www.youtube.com/watch?v=9Fd9hw329fY",
+      "status": 200,
+      "title": "Create A 2.5D Platformer Game With Unreal Engine (Tutorial)",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "46aa3a1e-e00c-4af4-b13f-999bc2e3613c",
+      "url": "https://www.youtube.com/watch?v=gB1F9G0JXOo",
+      "status": 200,
+      "title": "Learn Unity - Beginner's Game Development Tutorial",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "e58b0a5d-9650-404c-9b83-113bd291fedf",
+      "url": "https://www.youtube.com/watch?v=KCgYDCKqato",
+      "status": 200,
+      "title": "iOS Development Course - Use Swift 5 and UIKit to Build a Netflix Clone",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "73fe4732-55a9-4ce2-a452-35693bd5f7bc",
+      "url": "https://www.youtube.com/watch?v=FfWpgLFMI7w",
+      "status": 200,
+      "title": "Pygame Tutorial for Beginners - Python Game Development Course",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "de5b7f4a-6968-41d6-b07a-9a05dd87c0ac",
+      "url": "https://www.youtube.com/watch?v=KJgsSFOSQv0",
+      "status": 200,
+      "title": "C Programming Tutorial for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "736b3fe9-c016-4722-b6dd-eb1954752ed7",
+      "url": "https://www.youtube.com/watch?v=8jLOx1hD3_o",
+      "status": 200,
+      "title": "C++ Programming Course - Beginner to Advanced",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "217a24ca-270a-4437-9e52-251a5d11f733",
+      "url": "https://www.youtube.com/watch?v=GoXwIVyNvX0",
+      "status": 200,
+      "title": "Intro to Java Programming - Course for Absolute Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "f6db8119-1e28-4148-9c70-1b67ee3fa9a0",
+      "url": "https://www.youtube.com/watch?v=OK_JCtrrv-c",
+      "status": 200,
+      "title": "PHP Programming Language Tutorial - Full Course",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "aaf5c708-fade-4640-a08e-605cc1461509",
+      "url": "https://www.youtube.com/watch?v=GhQdlIFylQ8",
+      "status": 200,
+      "title": "C# Tutorial - Full Course for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "b0b315a1-5e5d-4be4-8f76-b7d62bf53116",
+      "url": "https://www.youtube.com/watch?v=vtPkZShrvXQ",
+      "status": 200,
+      "title": "Spring Boot Tutorial for Beginners (Java Framework)",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "7caa64a5-f9bf-41fa-830b-c379ad683248",
+      "url": "https://www.youtube.com/watch?v=flpmSXVTqBI",
+      "status": 200,
+      "title": "Java Testing - JUnit 5 Crash Course",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "4cd24208-7db6-45a5-bb50-dbcb34bd18fc",
+      "url": "https://www.youtube.com/watch?v=HXV3zeQKqGY",
+      "status": 200,
+      "title": "SQL Tutorial - Full Database Course for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "05015002-f33c-4cf0-a035-ca504d00d729",
+      "url": "https://www.youtube.com/watch?v=ER8oKX5myE0",
+      "status": 200,
+      "title": "MySQL Database - Full Course",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "5994a865-9f00-457c-ae5e-784091239b19",
+      "url": "https://www.youtube.com/watch?v=6ERdu4k62wI",
+      "status": 200,
+      "title": "Use PHP to Create an MVC Framework - Full Course",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "34552d9e-de24-4957-9d52-b452ecec0689",
+      "url": "https://www.youtube.com/watch?v=qw--VYLpxG4",
+      "status": 200,
+      "title": "Learn PostgreSQL Tutorial - Full Course for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "1b359e99-4dee-4340-9abb-022cfdcad790",
+      "url": "https://www.youtube.com/watch?v=4cWkVbC2bNE",
+      "status": 200,
+      "title": "Database Systems - Cornell University Course (SQL, NoSQL, Large-Scale Data Analysis)",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "c87501f4-e55b-4997-9f71-a415e0f32d92",
+      "url": "https://www.youtube.com/watch?v=lxEdaElkQhQ",
+      "status": 200,
+      "title": "Database Systems - Cornell University Course (SQL, NoSQL, Large-Scale Data Analysis) - PART 2",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "a1a9632a-8db2-477a-adb9-09def2482ea4",
+      "url": "https://www.youtube.com/watch?v=byHcYRpMgI4",
+      "status": 200,
+      "title": "SQLite Databases With Python - Full Course",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "7e51baf2-2e32-4248-aba9-a39219d63b5c",
+      "url": "https://www.youtube.com/watch?v=xh4gy1lbL2k",
+      "status": 200,
+      "title": "NoSQL Database Tutorial – Full Course for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "0dd2b98a-b792-43fa-b8c6-68b1423ff559",
+      "url": "https://www.youtube.com/watch?v=jBlTQjcKuaY",
+      "status": 200,
+      "title": "Python for Bioinformatics - Drug Discovery Using Machine Learning and Data Analysis",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "5453da59-1e83-4eb9-8017-e7296de661da",
+      "url": "https://www.youtube.com/watch?v=_V8eKsto3Ug",
+      "status": 200,
+      "title": "R Programming Tutorial - Learn the Basics of Statistical Computing",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "2e9aeb3b-2acc-4ead-a340-c262835ddbc2",
+      "url": "https://www.youtube.com/watch?v=LHBE6Q9XlzI",
+      "status": 200,
+      "title": "Python for Data Science - Course for Beginners (Learn Python, Pandas, NumPy, Matplotlib)",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "70683dab-cdbb-4262-9c92-2ca0fce6c496",
+      "url": "https://www.youtube.com/watch?v=ua-CiDNNj30",
+      "status": 200,
+      "title": "Learn Data Science Tutorial - Full Course for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "ed1fe15a-d881-4615-bdf1-d31909fdc76a",
+      "url": "https://www.youtube.com/watch?v=N6BghzuFLIg",
+      "status": 200,
+      "title": "Intro to Data Science - Crash Course for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "dd80f31f-ec67-409e-8a2f-acb915729ce7",
+      "url": "https://www.youtube.com/watch?v=VtRLrQ3Ev-U",
+      "status": 200,
+      "title": "Python TensorFlow for Machine Learning – Neural Network Text Classification Tutorial",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "a1677076-b2d1-4388-8fdb-e49727d72cbe",
+      "url": "https://www.youtube.com/watch?v=NWONeJKn6kc",
+      "status": 200,
+      "title": "Machine Learning Course for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "f9be2caa-c897-475e-b7f0-633c4fc7231f",
+      "url": "https://www.youtube.com/watch?v=0oyCUWLL_fU",
+      "status": 200,
+      "title": "Practical Deep Learning for Coders - Full Course from fast.ai and Jeremy Howard",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "fda50e1b-1b94-476b-ad4c-483f03d304da",
+      "url": "https://www.youtube.com/watch?v=VyWAvY2CF9c",
+      "status": 200,
+      "title": "Deep Learning Crash Course for Beginners",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "6727d5be-942a-4d4e-b70c-68132df3b174",
+      "url": "https://www.youtube.com/watch?v=VtLXKU1PpRU",
+      "status": 200,
+      "title": "AutoCAD for Beginners - Full University Course",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    },
+    {
+      "recordId": "87dbbb5a-14e6-48ad-858e-41bf0356c735",
+      "url": "https://www.youtube.com/watch?v=zJ-LqeX_fLU",
+      "status": 200,
+      "title": "Arduino Course for Beginners - Open-Source Electronics Platform",
+      "authorName": "freeCodeCamp.org",
+      "authorUrl": "https://www.youtube.com/@freecodecamp",
+      "provider": "YouTube"
+    }
+  ]
+}
