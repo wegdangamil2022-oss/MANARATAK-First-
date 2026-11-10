@@ -1,6 +1,5 @@
 import { GraduationCap, Languages, Network } from 'lucide-react';
-import { CanonicalPicker } from '../../components/CanonicalPicker';
-import { canonicalPickerApi } from '../../api/canonicalPickers';
+import { RelatedCatalogPicker } from '../../components/RelatedCatalogPicker';
 import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
 
 export function TestAcademicFilters({
@@ -16,43 +15,25 @@ export function TestAcademicFilters({
   return (
     <>
       {hasPermission('admin:reference-data:manage') && (
-        <CanonicalPicker
-          compact
-          optional
-          allowInactive
-          displayMode="label"
+        <RelatedCatalogPicker catalog="international-tests" facet="languageReferenceId" context={params} ar={ar}
           label={ar ? 'لغة الاختبار المرتبطة' : 'Linked test language'}
           icon={<Languages size={16} />}
           value={params.get('languageReferenceId')}
-          reloadKey={'test-language:' + params.get('languageReferenceId')}
-          load={canonicalPickerApi.filterLanguages}
           onChange={(id) => change('languageReferenceId', id ?? '')}
         />
       )}
       {hasPermission('admin:academic-taxonomy:manage') && (
         <>
-          <CanonicalPicker
-            compact
-            optional
-            allowInactive
-            displayMode="label"
+          <RelatedCatalogPicker catalog="international-tests" facet="degreeLevelId" context={params} ar={ar}
             label={ar ? 'الدرجة التعليمية المرتبطة' : 'Linked degree level'}
             icon={<GraduationCap size={16} />}
             value={params.get('degreeLevelId')}
-            reloadKey={'test-degree:' + params.get('degreeLevelId')}
-            load={(q) => canonicalPickerApi.degreeLevels(q)}
             onChange={(id) => change('degreeLevelId', id ?? '')}
           />
-          <CanonicalPicker
-            compact
-            optional
-            allowInactive
-            displayMode="label"
+          <RelatedCatalogPicker catalog="international-tests" facet="taxonomyNodeId" context={params} ar={ar}
             label={ar ? 'المجال الأكاديمي المرتبط' : 'Linked academic field'}
             icon={<Network size={16} />}
             value={params.get('taxonomyNodeId')}
-            reloadKey={'test-field:' + params.get('taxonomyNodeId')}
-            load={q => canonicalPickerApi.filterTaxonomyNodes(undefined,q)}
             onChange={(id) => change('taxonomyNodeId', id ?? '')}
           />
         </>

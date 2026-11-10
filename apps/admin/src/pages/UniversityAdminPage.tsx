@@ -37,6 +37,7 @@ interface University {
   displayName: string;
   country: string;
   city?: string;
+  cityReferenceLabel?: string | null;
   foundedYear?: number;
   officialWebsite?: string;
   status: string;
@@ -366,7 +367,7 @@ export function UniversityAdminPage() {
           </div>
         </div>
         <div className="university-filter-fields grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <UniversityLocationFilters continent={searchParams.get('continent')??''} countryId={countryReferenceId} regionId={searchParams.get('regionReferenceId')??''} cityId={searchParams.get('cityReferenceId')??''} ar={isArabic} onChange={(key,value)=>{const next=new URLSearchParams(searchParams);if(value)next.set(key,value);else next.delete(key);if(key==='continent'){next.delete('countryReferenceId');next.delete('regionReferenceId');next.delete('cityReferenceId');}if(key==='countryReferenceId'){next.delete('regionReferenceId');next.delete('cityReferenceId');}if(key==='regionReferenceId')next.delete('cityReferenceId');setSearchParams(next);setPage(1);}} />
+          <UniversityLocationFilters context={searchParams} continent={searchParams.get('continent')??''} countryId={countryReferenceId} regionId={searchParams.get('regionReferenceId')??''} cityId={searchParams.get('cityReferenceId')??''} ar={isArabic} onChange={(key,value)=>{const next=new URLSearchParams(searchParams);if(value)next.set(key,value);else next.delete(key);if(key==='continent'){next.delete('countryReferenceId');next.delete('regionReferenceId');next.delete('cityReferenceId');}if(key==='countryReferenceId'){next.delete('regionReferenceId');next.delete('cityReferenceId');}if(key==='regionReferenceId')next.delete('cityReferenceId');setSearchParams(next);setPage(1);}} />
           <label><span><Building2 aria-hidden="true" />{tr('نوع المؤسسة','Institution type')}</span><select value={searchParams.get('institutionType')??''} onChange={event=>{const next=new URLSearchParams(searchParams);if(event.target.value)next.set('institutionType',event.target.value);else next.delete('institutionType');setSearchParams(next);setPage(1);}}><option value="">{tr('الكل','All')}</option>{[['UNIVERSITY','جامعة'],['COLLEGE','كلية'],['INSTITUTE','معهد'],['ACADEMY','أكاديمية'],['OTHER','أخرى']].map(([value,label])=><option key={value} value={value}>{isArabic?label:value}</option>)}</select></label>
           <label><span><ShieldCheck aria-hidden="true" />{tr('حالة النشر والمراجعة','Status')}</span><select value={statusFilter} onChange={event=>{setStatusFilter(event.target.value);setPage(1);}}><option value="">{tr('جميع الحالات','All statuses')}</option>{['IMPORTED','READY_TO_REVIEW','READY_TO_PUBLISH','PUBLISHED','REJECTED','ARCHIVED'].map(value=><option key={value} value={value}>{formatStatusLabel(value,isArabic)}</option>)}</select></label>
           <label><span><CheckCircle2 aria-hidden="true" />{tr('اكتمال البيانات','Completeness')}</span><select value={completenessFilter} onChange={event=>{setCompletenessFilter(event.target.value);setPage(1);}}><option value="">{tr('جميع مستويات الاكتمال','All completeness')}</option>{['COMPLETE','NEEDS_REVIEW','INCOMPLETE'].map(value=><option key={value} value={value}>{formatCompletenessLabel(value,isArabic)}</option>)}</select></label>
@@ -423,13 +424,13 @@ export function UniversityAdminPage() {
                       <th className="px-6 py-4 text-start">{tr('سنة التأسيس', 'Founded')}</th>
                       <th className="px-6 py-4 text-start">{tr('الموقع الإلكتروني', 'Website')}</th>
                       <th className="px-6 py-4 text-start">{tr('الحالة', 'Status')}</th>
-                      <th className="px-6 py-4 text-start">{tr('حالة الاكتمال', 'Completeness')}</th>
+                      <th className="px-6 py-4 text-start">{tr('حالة الاكتمال', 'Completeness')}</th><th className="px-6 py-4 text-start">{tr('التفاصيل','Details')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {filteredItems.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                        <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
                           <div className="flex flex-col items-center justify-center gap-2">
                             <School className="h-8 w-8 text-slate-300" />
                             <span className="font-bold">{tr('لا توجد جامعات تطابق الفلاتر المحددة.', 'No universities found matching your filters.')}</span>
@@ -457,7 +458,7 @@ export function UniversityAdminPage() {
                           <td className="px-6 py-4">
                             <span className="inline-flex items-center gap-1 font-bold text-slate-600">
                               <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                              {uni.city ? `${uni.city}، ` : ''}{uni.country}
+                              {uni.cityReferenceLabel || uni.city ? `${uni.cityReferenceLabel || uni.city}، ` : ''}{uni.country}
                             </span>
                           </td>
                           <td className="px-6 py-4 font-mono font-bold text-slate-600">
@@ -514,6 +515,7 @@ export function UniversityAdminPage() {
                               {formatCompletenessLabel(uni.completenessStatus, isArabic)}
                             </span>
                           </td>
+                          <td className="px-6 py-4"><AdminLink to={'/universities/'+uni.id} className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-[#142B5F] px-3 py-2 text-xs font-bold text-[#F2CD78]">{tr('عرض التفاصيل','View details')}<ArrowLeft className="h-3.5 w-3.5" aria-hidden="true"/></AdminLink></td>
                         </tr>
                       ))
                     )}
@@ -561,7 +563,7 @@ function UniversityCard({university:uni,ar}:{university:University;ar:boolean}) 
   const tr=(arabic:string,english:string)=>ar?arabic:english;
   return <article className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm transition hover:border-[#0E7C86] hover:shadow-md">
     <div className="flex flex-wrap items-start justify-between gap-4">
-      <div className="flex min-w-0 items-center gap-3"><span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#142B5F] to-[#0E7C86] text-[#F2CD78]"><School className="h-7 w-7" aria-hidden="true" /></span><div className="min-w-0"><AdminLink to={'/universities/'+uni.id} className="break-words text-lg font-black text-[#142B5F]">{uni.displayName}</AdminLink><p className="mt-1 text-xs text-slate-500">{[uni.city,uni.country].filter(Boolean).join('، ')||tr('الموقع غير محدد','Location unspecified')}</p></div></div>
+      <div className="flex min-w-0 items-center gap-3"><span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#142B5F] to-[#0E7C86] text-[#F2CD78]"><School className="h-7 w-7" aria-hidden="true" /></span><div className="min-w-0"><AdminLink to={'/universities/'+uni.id} className="break-words text-lg font-black text-[#142B5F]">{uni.displayName}</AdminLink><p className="mt-1 text-xs text-slate-500">{[uni.cityReferenceLabel||uni.city,uni.country].filter(Boolean).join('، ')||tr('الموقع غير محدد','Location unspecified')}</p></div></div>
       <span className="rounded-xl bg-teal-50 px-3 py-2 text-xs font-bold text-[#0E7C86]">{formatStatusLabel(uni.status,ar)}</span>
     </div>
     <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

@@ -1,8 +1,7 @@
 import {adminOptionLabel} from './adminOptionLabels';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { adminApiClient } from '../api/client';
-import { canonicalPickerApi } from '../api/canonicalPickers';
-import { CanonicalPicker } from './CanonicalPicker';
+import { RelatedCatalogPicker } from './RelatedCatalogPicker';
 import { Globe2, Languages, Coins, Building2, GraduationCap, Award, ClipboardCheck, BookOpen, ShieldCheck, FileText, Database, Landmark, ArrowDownWideNarrow } from 'lucide-react';
 
 const filterIcons = {countryReferenceId:Globe2,studyLanguageReferenceId:Languages,currencyReferenceId:Coins,universityId:Building2,majorId:GraduationCap,degreeLevelId:Award,internationalTestId:ClipboardCheck};
@@ -43,11 +42,13 @@ export function ScholarshipCanonicalFilters({
   onChange,
   ar,
   children,
+  context,
 }: {
   value: ScholarshipCanonicalFilterState;
   onChange: (value: ScholarshipCanonicalFilterState) => void;
   ar: boolean;
   children?: ReactNode;
+  context?:URLSearchParams;
 }) {
   const [error, setError] = useState('');
   const [programs, setPrograms] = useState<Array<{ id: string; sourceProgramName: string }>>([]);
@@ -104,7 +105,8 @@ export function ScholarshipCanonicalFilters({
   const update = (key: keyof ScholarshipCanonicalFilterState, next: string) =>
     onChange({
       ...value,
-      [key]: next,
+        [key]: next,
+        ...(key==='degreeLevelId'&&value.degreeLevelId!==next?{majorId:''}:{}),
       ...(['universityId', 'majorId', 'degreeLevelId'].includes(key) && value[key] !== next
         ? { academicProgramId: '' }
         : {}),
@@ -114,39 +116,12 @@ export function ScholarshipCanonicalFilters({
       {error && <div role="status"><p>{error}</p><button type="button" disabled={programsBusy} onClick={() => void loadPrograms(cursor ?? undefined)} className="rounded-xl bg-[#0E7C86] px-3 py-2 text-xs text-white">{ar ? 'إعادة تحميل البرامج' : 'Retry programs'}</button></div>}
       <div className="scholarship-filter-fields grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {children}
-        {(
-          [
-            ['countryReferenceId', ar ? 'الدولة' : 'Country', canonicalPickerApi.filterCountries],
-            [
-              'studyLanguageReferenceId',
-              ar ? 'لغة الدراسة' : 'Study language',
-              canonicalPickerApi.filterLanguages,
-            ],
-            ['currencyReferenceId', ar ? 'العملة' : 'Currency', canonicalPickerApi.filterCurrencies],
-            ['universityId', ar ? 'الجامعة' : 'University', canonicalPickerApi.universities],
-            ['majorId', ar ? 'التخصص' : 'Major', canonicalPickerApi.majors],
-            [
-              'degreeLevelId',
-              ar ? 'الدرجة العلمية' : 'Degree',
-              canonicalPickerApi.degreeLevels,
-            ],
-            ['internationalTestId', ar ? 'الاختبار' : 'Test', canonicalPickerApi.tests],
-          ] as const
-        ).map(([key, label, loader]) => (
-          <CanonicalPicker
-            key={key}
-            label={label}
-            icon={(() => { const Icon=filterIcons[key]; return <Icon aria-hidden="true" className="h-3.5 w-3.5 text-[#0E7C86]" />; })()}
-            value={value[key]}
-            onChange={(id) => update(key, id ?? '')}
-            load={loader}
-            reloadKey={`scholarship-filter:${key}`}
-            optional
-            compact
-            paged={['universityId','majorId','internationalTestId'].includes(key)}
-            allowInactive
-          />
-        ))}
+        {([
+          ['countryReferenceId',ar?'الدولة':'Country'],['studyLanguageReferenceId',ar?'لغة الدراسة':'Study language'],
+          ['currencyReferenceId',ar?'العملة':'Currency'],['degreeLevelId',ar?'الدرجة العلمية':'Degree'],
+          ['majorId',ar?'التخصص':'Major'],['universityId',ar?'الجامعة':'University'],['internationalTestId',ar?'الاختبار':'Test'],
+        ] as const).map(([key,label])=><RelatedCatalogPicker key={key} catalog="scholarships" facet={key} context={{...Object.fromEntries(context??new URLSearchParams()),...value}} ar={ar}
+          label={label} value={value[key]} icon={(()=>{const Icon=filterIcons[key];return <Icon size={14}/>;})()} onChange={id=>update(key,id)}/>)}
         <label>
           <span><BookOpen aria-hidden="true" />{ar ? 'البرنامج الأكاديمي' : 'Academic program'}</span>
           <select

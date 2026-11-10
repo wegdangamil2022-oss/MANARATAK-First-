@@ -1,8 +1,6 @@
-import { TestProviderFilter } from '../features/international-tests/TestProviderFilter';
 import { TestAcademicFilters } from '../features/international-tests/TestAcademicFilters';
 import { useSearchParams } from 'react-router-dom';
-import { CanonicalPicker } from '../components/CanonicalPicker';
-import { canonicalPickerApi } from '../api/canonicalPickers';
+import { RelatedCatalogPicker } from '../components/RelatedCatalogPicker';
 import type { InternationalTestStatus as CanonicalTestStatus } from '@manaratak/domain';
 type InternationalTestStatus = `${CanonicalTestStatus}`;
 import {
@@ -148,22 +146,6 @@ interface InternationalTestListResponse {
   totalPages?: number;
 }
 
-const testCategories: InternationalTestCategory[] = [
-  'ENGLISH_LANGUAGE',
-  'NON_ENGLISH_LANGUAGE',
-  'GENERAL_UNDERGRADUATE_ADMISSION',
-  'GRADUATE_ADMISSION',
-  'NATIONAL_INTERNATIONAL_ADMISSION',
-  'SPECIALIZED_ADMISSION',
-  'PROFESSIONAL_LICENSING_CERTIFICATION',
-  'LANGUAGE_PROFICIENCY',
-  'UNDERGRAD_ADMISSION',
-  'GRAD_ADMISSION',
-  'PROFESSIONAL_LICENSING',
-  'ACADEMIC_PLACEMENT',
-  'OTHER',
-];
-
 const statuses: InternationalTestStatus[] = [
   'IMPORTED',
   'READY_TO_REVIEW',
@@ -213,6 +195,7 @@ export function InternationalTestsAdminPage() {
       setParams((current) => {
         const next = new URLSearchParams(current);
         value ? next.set(key, value) : next.delete(key);
+        if(key==='testCategory')for(const child of ['countryIso2Code','languageReferenceId','degreeLevelId','taxonomyNodeId','providerName'])next.delete(child);
         if (key !== 'page' && key !== 'view') next.delete('page');
         return next;
       });
@@ -492,24 +475,7 @@ export function InternationalTestsAdminPage() {
           </button>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <label>
-            <span>
-              <BookOpen size={16} />
-              {say('التصنيف', 'Category')}
-            </span>
-            <select
-              aria-label={say('التصنيف', 'Category')}
-              value={categoryFilter}
-              onChange={(e) => update('testCategory', e.target.value)}
-            >
-              <option value="">{say('جميع التصنيفات', 'All categories')}</option>
-              {testCategories.map((c) => (
-                <option key={c} value={c}>
-                  {getCategoryLabel(c, isRtl)}
-                </option>
-              ))}
-            </select>
-          </label>
+          <RelatedCatalogPicker catalog="international-tests" facet="testCategory" context={params} ar={isRtl} label={say('التصنيف','Category')} value={categoryFilter} icon={<BookOpen size={16}/>} onChange={value=>update('testCategory',value)}/>
           <label>
             <span>
               <ShieldCheck size={16} />
@@ -529,31 +495,7 @@ export function InternationalTestsAdminPage() {
             </select>
           </label>
           {hasPermission('admin:reference-data:manage') ? (
-            <CanonicalPicker
-              compact
-              optional
-              allowInactive
-              label={say('الدولة المرتبطة بالاختبار', 'Country associated with the test')}
-              reloadKey={'test-country:' + countryFilter}
-              value={countryFilter}
-              icon={<Globe2 size={16} />}
-              load={async (q, p) => {
-                let rows = await canonicalPickerApi.filterCountries(q, p);
-                if (
-                  (p ?? 1) === 1 &&
-                  countryFilter &&
-                  !rows.some((row) => row.code === countryFilter)
-                ) {
-                  const selected = await canonicalPickerApi.countries(countryFilter, 1);
-                  rows = [...selected.filter((row) => row.code === countryFilter), ...rows];
-                }
-                return rows.map((row) => ({
-                  ...row,
-                  id: row.code ?? row.id,
-                }));
-              }}
-              onChange={(id) => update('countryIso2Code', id ?? '')}
-            />
+            <RelatedCatalogPicker catalog="international-tests" facet="countryIso2Code" context={params} ar={isRtl} label={say('الدولة المرتبطة بالاختبار','Country associated with the test')} value={countryFilter} icon={<Globe2 size={16}/>} onChange={value=>update('countryIso2Code',value)}/>
           ) : (
             <label>
               <span>
@@ -573,7 +515,7 @@ export function InternationalTestsAdminPage() {
               />
             </label>
           )}
-          <TestProviderFilter ar={isRtl} value={providerFilter} onChange={value=>update('providerName',value)}/>
+          <RelatedCatalogPicker catalog="international-tests" facet="providerName" context={params} ar={isRtl} label={say('الجهة المشغلة','Provider')} value={providerFilter} onChange={value=>update('providerName',value)}/>
           <TestAcademicFilters params={params} ar={isRtl} change={update}/>
           <label>
             <span>

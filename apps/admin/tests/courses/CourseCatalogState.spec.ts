@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { catalogQuery, changeCatalogFilters, certificateFact, studyFact } from '../../src/features/courses/catalogState';
 
 describe('course catalog facts and query scope', () => {
-  it('preserves academic relationship filters across views and resets pagination when changed', () => {
+  it('preserves academic filters across views and clears the dependent major when its field changes', () => {
     const params = new URLSearchParams('scope=external&majorId=major-1&taxonomyNodeId=field-1&relationshipState=HAS_MAJORS&page=7&view=cards');
     const query = catalogQuery(params);
     expect(query.get('majorId')).toBe('major-1');
@@ -10,9 +10,17 @@ describe('course catalog facts and query scope', () => {
     expect(query.get('relationshipState')).toBe('HAS_MAJORS');
     const next = changeCatalogFilters(params, { taxonomyNodeId: 'field-2' });
     expect(next.has('page')).toBe(false);
-    expect(next.get('majorId')).toBe('major-1');
+    expect(next.has('majorId')).toBe(false);
     expect(next.get('view')).toBe('cards');
     expect(catalogQuery(next).get('taxonomyNodeId')).toBe('field-2');
+  });
+  it('retains an explicitly supplied major when both academic selectors are updated together', () => {
+    const next = changeCatalogFilters(new URLSearchParams('taxonomyNodeId=old&majorId=old-major&page=3'), {
+      taxonomyNodeId: 'new-field', majorId: 'new-major',
+    });
+    expect(next.get('majorId')).toBe('new-major');
+    expect(next.get('taxonomyNodeId')).toBe('new-field');
+    expect(next.has('page')).toBe(false);
   });
   it('keeps native enrollment cohorts and false enrollment filters while presentation changes', () => {
     const params = new URLSearchParams('scope=native&cohortFrom=2026-01-01&cohortTo=2026-02-01&hasEnrollments=false&instructor=Teacher&view=cards');

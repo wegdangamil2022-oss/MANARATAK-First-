@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({ request: vi.fn(), reference: vi.fn() }));
 vi.mock('../../src/api/client', () => ({ adminApiClient: { request: mocks.request } }));
+vi.mock('../../src/api/catalogFilters',async original=>({...await original<typeof import('../../src/api/catalogFilters')>(),catalogFilterApi:{picker:vi.fn(async()=>({options:[{id:'country-exact',label:'Similar country name',lifecycle:'READ_FILTER_OPTION'}],nextCursor:null}))}}));
 vi.mock('../../src/api/referenceData', () => ({ getReferenceDataPage: mocks.reference, listAllReferenceData: async (kind:unknown,filters:object)=> (await mocks.reference(kind,{...filters,page:1,pageSize:100})).data }));
 vi.mock('../../src/i18n/I18nProvider', () => ({ useTranslation: () => ({ language: 'ar', dir: 'rtl' }) }));
 import { CanonicalPicker } from '../../src/components/CanonicalPicker';

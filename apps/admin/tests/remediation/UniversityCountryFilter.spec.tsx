@@ -3,12 +3,13 @@ import { act, create } from 'react-test-renderer';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 
-const api = vi.hoisted(() => ({ request: vi.fn(), filterCountries: vi.fn() }));
+const api = vi.hoisted(() => ({ request: vi.fn(), filterCountries: vi.fn(), picker:vi.fn() }));
 vi.mock('../../src/api/client', () => ({ adminApiClient: { request: api.request } }));
 vi.mock('../../src/api/canonicalPickers', () => ({
   canonicalPickerApi: { filterCountries: api.filterCountries, regions: async () => [], cities: async () => [] },
   canonicalOptionIsSelectable: () => true,
 }));
+vi.mock('../../src/api/catalogFilters',async original=>({...await original<typeof import('../../src/api/catalogFilters')>(),catalogFilterApi:{picker:api.picker}}));
 vi.mock('../../src/i18n/I18nProvider', () => ({
   useTranslation: () => ({ language: 'en', dir: 'ltr' }),
 }));
@@ -26,6 +27,7 @@ beforeEach(() => {
   vi.useFakeTimers();
   vi.stubGlobal('window', { setTimeout, clearTimeout });
   api.request.mockReset().mockResolvedValue({ data: [], total: 0, page: 1, pageSize: 20, totalPages: 1 });
+  api.picker.mockReset().mockImplementation(async(_catalog,facet)=>({options:facet==='countryReferenceId'?[{id:'country-id',label:'Yemen',lifecycle:'READ_FILTER_OPTION'}]:facet==='regionReferenceId'?[{id:'region-id',label:'Ibb',lifecycle:'READ_FILTER_OPTION'}]:[],nextCursor:null}));
   api.filterCountries.mockReset().mockResolvedValue([{ id: 'country-id', code: 'YE', label: 'Yemen', lifecycle: 'ACTIVE' }]);
 });
 afterEach(async () => {
@@ -36,7 +38,7 @@ afterEach(async () => {
 });
 async function mount() {
   await act(async () => {
-    tree = create(<MemoryRouter initialEntries={['/universities?countryReferenceId=country-id&regionReferenceId=region-id&cityReferenceId=city-id&sort=NAME_ASC']}>
+    tree = create(<MemoryRouter basename="/admin" initialEntries={['/admin/universities?countryReferenceId=country-id&regionReferenceId=region-id&cityReferenceId=city-id&sort=NAME_ASC']}>
       <UniversityAdminPage /><CurrentQuery />
     </MemoryRouter>);
   });
@@ -63,4 +65,18 @@ it('resets the country deep link and other filters using the existing reset butt
   const query = new URLSearchParams(tree!.root.findByProps({ 'data-current-query': true }).children.join(''));
   expect(Object.fromEntries(query)).toEqual({ page: '1' });
   expect(api.request.mock.calls.map(([url]) => String(url))).toContain('/admin/universities?page=1&pageSize=20&summary=true');
+});
+
+it('selects Ibb without keeping a stale city and sends the canonical region to the owner API',async()=>{
+ await mount();const region=tree!.root.findAllByType('select').find(node=>node.props['aria-label']==='Region')!;
+ await act(async()=>region.props.onChange({target:{value:'region-id'}}));await act(async()=>{await vi.advanceTimersByTimeAsync(350);});
+ const query=new URLSearchParams(tree!.root.findByProps({'data-current-query':true}).children.join(''));
+ expect(query.get('countryReferenceId')).toBe('country-id');expect(query.get('regionReferenceId')).toBe('region-id');expect(query.has('cityReferenceId')).toBe(false);
+ expect(api.request.mock.calls.map(([url])=>String(url)).some(url=>url.includes('/admin/universities?')&&url.includes('regionReferenceId=region-id')&&!url.includes('cityReferenceId'))).toBe(true);
+});
+it('shows a dedicated details link in the university table',async()=>{
+ api.request.mockResolvedValue({data:[{id:'ibb-university',displayName:'Ibb University',country:'Yemen',city:'Ibb',status:'IMPORTED',completenessStatus:'NEEDS_REVIEW'}],total:1,page:1,pageSize:20,totalPages:1});
+ await mount();const table=tree!.root.findAllByType('button').find(node=>node.children.some(child=>child==='Table'))!;await act(async()=>table.props.onClick());
+ const details=tree!.root.findAllByType('a').find(node=>node.children.some(child=>child==='View details'));
+ expect(details?.props.href).toBe('/admin/universities/ibb-university');
 });

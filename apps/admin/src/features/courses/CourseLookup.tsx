@@ -4,9 +4,9 @@ import { useCourseCopy } from './useCourseCopy';
 
 export interface CourseOption { id: string; label: string }
 export interface CourseOptionPage { data: CourseOption[]; hasMore: boolean }
-export function CourseLookup({ label, value, load, hydrate, onChange }: {
+export function CourseLookup({ label, value, load, hydrate, onChange, reloadKey='' }: {
   label: string; value: string; load: (query: string, page: number) => Promise<CourseOptionPage>;
-  hydrate?: (id: string) => Promise<CourseOption>; onChange: (id: string) => void;
+  hydrate?: (id: string) => Promise<CourseOption>; onChange: (id: string) => void;reloadKey?:string;
 }) {
   const { tr } = useCourseCopy();
   const [open, setOpen] = useState(false);
@@ -19,6 +19,7 @@ export function CourseLookup({ label, value, load, hydrate, onChange }: {
   const root = useRef<HTMLDivElement>(null);
   const loadRef = useRef(load); loadRef.current = load;
   const hydrateRef = useRef(hydrate); hydrateRef.current = hydrate;
+  useEffect(()=>{setPage(1);setData(undefined);},[reloadKey]);
   useEffect(() => {
     if (!value) { setSelected(undefined); return; }
     if (!hydrateRef.current) { setSelected(current => current?.id === value ? current : { id: value, label: tr('اختيار محفوظ', 'Saved selection') }); return; }
@@ -35,7 +36,7 @@ export function CourseLookup({ label, value, load, hydrate, onChange }: {
       if (active) setData(result);
     }).catch(() => { if (active) setError(tr('تعذر تحميل الخيارات', 'Could not load options')); }).finally(() => { if (active) setBusy(false); }), 250);
     return () => { active = false; clearTimeout(timer); };
-  }, [open, query, page, tr]);
+  }, [open, query, page, tr, reloadKey]);
   useEffect(() => {
     if (!open) return;
     const close = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) setOpen(false); };

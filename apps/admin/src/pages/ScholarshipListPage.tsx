@@ -416,7 +416,7 @@ export function ScholarshipListPage() {
             </div>
           </div>
 
-          <ScholarshipCanonicalFilters value={canonical} onChange={setCanonical} ar={isArabic}>
+          <ScholarshipCanonicalFilters context={new URLSearchParams(queryKey)} value={canonical} onChange={setCanonical} ar={isArabic}>
 
 
             <div>

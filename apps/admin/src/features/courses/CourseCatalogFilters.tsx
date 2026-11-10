@@ -1,11 +1,11 @@
 import { Filter, Search, SlidersHorizontal, RotateCcw, GraduationCap, Building2 } from 'lucide-react';
 import { adminApiClient } from '../../api/client';
-import { canonicalPickerApi, canonicalOptionIsSelectable } from '../../api/canonicalPickers';
+import { catalogFilterApi } from '../../api/catalogFilters';
 import { courseProviderRegistryApi } from '../../api/courseProviders';
 import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
 import { CourseLookup, type CourseOptionPage } from './CourseLookup';
 import { certificateLabels, courseStatusLabels, studyLabels, useCourseCopy } from './useCourseCopy';
-import type { CourseScope } from './catalogState';
+import {catalogQuery,type CourseScope} from './catalogState';
 import { arabicCourseValue } from './coursePresentation';
 
 export function CourseCatalogFilters({ params, scope, fixedScope, search, onSearch, change, reset }: {
@@ -14,6 +14,8 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
 }) {
   const { ar, tr } = useCourseCopy();
   const { hasPermission } = useAdminAuthorization();
+  const context=catalogQuery(params,scope),reloadKey=context.toString();
+  const related=async(facet:string,q:string,page:number):Promise<CourseOptionPage>=>{const result=await catalogFilterApi.options('courses',facet,context,q,page);return {data:result.options.map(row=>({id:row.id,label:ar?arabicCourseValue(row.labelAr):row.labelEn})),hasMore:result.nextPage!==null};};
   const field = (key: string, title: string, choices: Array<readonly [string, string]>) => <label className="course-field">
     <span><Filter size={16} aria-hidden="true"/>{title}</span><select aria-label={title} value={params.get(key) ?? ''} onChange={event => change({ [key]: event.target.value })}>
       <option value="">{tr('الكل', 'All')}</option>{choices.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
@@ -21,12 +23,7 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
   </label>;
   const facet = (key: 'learningLanguage' | 'difficultyLevel', title: string) => <CourseLookup key={`${key}-${scope}`} label={title} value={params.get(key) ?? ''}
     hydrate={async value => ({ id: value, label: ar ? arabicCourseValue(value) : value })}
-    onChange={value => change({ [key]: value })} load={async (q, page): Promise<CourseOptionPage> => {
-      const query = new URLSearchParams({ field: key, page: String(page), search: q });
-      if (scope !== 'all') query.set('originType', scope === 'native' ? 'NATIVE_MANARATAK_COURSE' : 'EXTERNAL_LINKED_COURSE');
-      const result = await adminApiClient.request<{ data: string[]; hasMore: boolean }>(`/admin/courses/catalog/options?${query}`);
-      return { data: result.data.map(value => ({ id: value, label: ar ? arabicCourseValue(value) : value })), hasMore: result.hasMore };
-    }} />;
+    reloadKey={reloadKey} onChange={value => change({ [key]: value })} load={(q,page)=>related(key,q,page)} />;
   const filterTitles: Record<string, string> = {
     q: tr('البحث', 'Search'), scope: tr('النطاق', 'Scope'), status: tr('الحالة', 'Status'),
     studyAccess: tr('الدراسة', 'Study'), certificateState: tr('الشهادة', 'Certificate'),
@@ -62,14 +59,14 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
       {field('studyAccess', tr('إتاحة الدراسة', 'Study access'), Object.entries(studyLabels).map(([id, labels]) => [id, labels[ar ? 0 : 1]]))}
       {field('certificateState', tr('الشهادة', 'Certificate'), Object.entries(certificateLabels).map(([id, labels]) => [id, labels[ar ? 0 : 1]]))}
       {hasPermission('admin:majors:manage') && <CourseLookup label={tr('التخصص المرتبط المعتمد', 'Approved academic major')} value={params.get('majorId') ?? ''} onChange={value => change({ majorId: value })}
-        hydrate={async id => { const record = await adminApiClient.request<{ displayName: string; localizedNameAr?: string; localizedNameEn?: string }>(`/admin/majors/${encodeURIComponent(id)}`); return { id, label: (ar ? record.localizedNameAr : record.localizedNameEn) || record.displayName }; }}
-        load={async (q, page) => { const options = await canonicalPickerApi.majors(q, page); return { data: options.map(option => ({ id: option.id, label: option.label })), hasMore: options.length === 50 }; }} />}
+        hydrate={async id => { const record = await adminApiClient.request<{ displayName: string; localizedNameAr?: string; localizedNameEn?: string;profiles?:Array<{localizedNameAr?:string}> }>(`/admin/majors/${encodeURIComponent(id)}`); return { id, label: (ar ? record.localizedNameAr||record.profiles?.find(profile=>profile.localizedNameAr)?.localizedNameAr : record.localizedNameEn) || record.displayName }; }}
+        reloadKey={reloadKey} load={(q,page)=>related('majorId',q,page)} />}
       {hasPermission('admin:academic-taxonomy:manage') && <CourseLookup label={tr('المجال الأكاديمي', 'Academic field')} value={params.get('taxonomyNodeId') ?? ''} onChange={value => change({ taxonomyNodeId: value })}
         hydrate={async id => { const record = await adminApiClient.request<{ canonicalName: string; localizedNames?: { ar?: string; en?: string } }>(`/admin/academic-taxonomy/nodes/${encodeURIComponent(id)}`); return { id, label: record.localizedNames?.[ar ? 'ar' : 'en'] || record.canonicalName }; }}
-        load={async (q) => { const options = await canonicalPickerApi.filterTaxonomyNodes(undefined, q); return { data: options.filter(canonicalOptionIsSelectable).map(option => ({ id: option.id, label: option.label })), hasMore: false }; }} />}
+        reloadKey={reloadKey} load={(q,page)=>related('taxonomyNodeId',q,page)} />}
       {scope !== 'native' && <CourseLookup label={tr('المزود الخارجي', 'External provider')} value={params.get('provider') ?? ''} onChange={value => change({ provider: value })}
         hydrate={async id => { const record = await courseProviderRegistryApi.get(id); return { id: record.id, label: record.displayName }; }}
-        load={async (q, page) => { const result = await courseProviderRegistryApi.list({ q, page, pageSize: 25 }); return { data: result.data.map(row => ({ id: row.id, label: row.displayName })), hasMore: result.page < result.totalPages }; }} />}
+        reloadKey={reloadKey} load={(q,page)=>related('externalProviderId',q,page)} />}
     </div>
     {scope === 'all' && params.get('provider') && <p className="course-hint"><Building2 size={16}/>{tr('اختيار مزود يقيد النتائج بالدورات الخارجية.', 'Selecting a provider limits results to external courses.')}</p>}
     <details className="course-extra-filters"><summary><SlidersHorizontal size={16}/>{tr('فلاتر إضافية', 'Additional filters')}</summary><div className="course-filter-grid">

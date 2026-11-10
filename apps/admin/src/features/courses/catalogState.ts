@@ -43,6 +43,7 @@ const externalKeys = ['provider', 'platformName', 'linkHealth', 'completenessSta
 export function changeCatalogFilters(current: URLSearchParams, updates: Record<string, string>): URLSearchParams {
   const next = new URLSearchParams(current);
   for (const [key, value] of Object.entries(updates)) value ? next.set(key, value) : next.delete(key);
+  if(updates.taxonomyNodeId!==undefined&&updates.taxonomyNodeId!==current.get('taxonomyNodeId')&&updates.majorId===undefined)next.delete('majorId');
   if (updates.scope === 'native') for (const key of externalKeys) next.delete(key);
   if (updates.scope !== undefined && updates.scope !== 'native') for (const key of ['cohortFrom', 'cohortTo', 'instructor', 'hasEnrollments']) next.delete(key);
   next.delete('page');

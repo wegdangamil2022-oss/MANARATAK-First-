@@ -24,8 +24,7 @@ X
 } from 'lucide-react';
 import { useEffect,useMemo,useState,useRef } from 'react';
 import { Link,useSearchParams } from 'react-router-dom';
-import { canonicalPickerApi } from '../api/canonicalPickers';
-import { CanonicalPicker } from '../components/CanonicalPicker';
+import { RelatedCatalogPicker } from '../components/RelatedCatalogPicker';
 import { adminApiClient } from '../api/client';
 import {majorDisplayNames,majorAcademicContext,type MajorAcademicMetadata} from '../utils/majorDisplayNames';
 import {useAdminAuthorization} from '../security/AdminAuthorizationContext';
@@ -166,7 +165,7 @@ export function MajorAdminPage() {
   const setQuery=(key:string,value:string,resetPage=true)=>{
     const next=new URLSearchParams(queryRef.current);
     if(value)next.set(key,value);else next.delete(key);
-    if(resetPage)next.delete('page');queryRef.current=next;setSearchParams(next,{replace:true});
+    if(resetPage)next.delete('page');if(key==='degreeLevel'){next.delete('academicFieldId');next.delete('disciplineId');next.delete('taxonomyNodeId');}if(key==='academicFieldId'){next.delete('disciplineId');next.delete('taxonomyNodeId');}if(key==='disciplineId')next.delete('taxonomyNodeId');queryRef.current=next;setSearchParams(next,{replace:true});
   };
   const statusFilter=searchParams.get('status')??'',setStatusFilter=(v:string)=>setQuery('status',v);
   const completenessFilter=searchParams.get('completenessStatus')??'',setCompletenessFilter=(v:string)=>setQuery('completenessStatus',v);
@@ -424,9 +423,9 @@ export function MajorAdminPage() {
                   </select>
                 </div>
 
-                {canReadTaxonomy&&view!=='catalog'&&<CanonicalPicker label="التصنيف المعياري" icon={<Layers3 aria-hidden="true" className="h-3.5 w-3.5" />} value={taxonomyIdFilter} onChange={id=>{setTaxonomyIdFilter(id??'');setPage(1);}} load={query=>canonicalPickerApi.filterTaxonomyNodes(undefined,query)} reloadKey="major-filter-taxonomy" optional compact allowInactive />}
-                {canReadTaxonomy&&view!=='catalog'&&<CanonicalPicker label="المجال الأكاديمي" icon={<BookOpen aria-hidden="true" className="h-3.5 w-3.5" />} value={academicFieldFilter} onChange={id=>{setAcademicFieldFilter(id??'');setPage(1);}} load={query=>canonicalPickerApi.filterTaxonomyNodes('ACADEMIC_FIELD',query)} reloadKey="major-filter-field" optional compact allowInactive />}
-                {canReadTaxonomy&&view!=='catalog'&&<CanonicalPicker label="التصنيف الفرعي" icon={<Layers3 aria-hidden="true" className="h-3.5 w-3.5" />} value={disciplineFilter} onChange={id=>{setDisciplineFilter(id??'');setPage(1);}} load={query=>canonicalPickerApi.filterTaxonomyNodes('DISCIPLINE',query)} reloadKey="major-filter-discipline" optional compact allowInactive />}
+                {canReadTaxonomy&&view!=='catalog'&&<RelatedCatalogPicker catalog="majors" facet="academicFieldId" context={searchParams} ar label="المجال الأكاديمي" icon={<BookOpen size={14}/>} value={academicFieldFilter} onChange={setAcademicFieldFilter}/>}
+                {canReadTaxonomy&&view!=='catalog'&&<RelatedCatalogPicker catalog="majors" facet="disciplineId" context={searchParams} ar label="التصنيف الفرعي" icon={<Layers3 size={14}/>} value={disciplineFilter} onChange={setDisciplineFilter}/>}
+                {canReadTaxonomy&&view!=='catalog'&&<details className="space-y-2 text-xs" open={Boolean(taxonomyIdFilter)}><summary>التصنيف التفصيلي — اختياري</summary><RelatedCatalogPicker catalog="majors" facet="taxonomyNodeId" context={searchParams} ar label="مجال البرنامج" icon={<Layers3 size={14}/>} value={taxonomyIdFilter} onChange={setTaxonomyIdFilter}/></details>}
                 <label><span><Building2 aria-hidden="true" />الكلية</span><input type="search" disabled={view==='catalog'} maxLength={200} value={collegeFilter} onChange={event=>{setCollegeFilter(event.target.value);setPage(1);}} placeholder="اسم الكلية كما ورد في المصدر" /></label>
               </div>
 

@@ -29,6 +29,7 @@ export function CanonicalPicker({
   icon,
   displayMode = 'reference',
   selectedLabel,
+  emptyLabel,
 }: {
   label: string;
   value?: string | null;
@@ -45,6 +46,7 @@ export function CanonicalPicker({
   /** Names-only presentation retains the same identity and lifecycle guards. */
   displayMode?: 'reference' | 'label';
   selectedLabel?: string | null;
+  emptyLabel?:string;
 }) {
   const { language } = useTranslation();
   const ar = language === 'ar';
@@ -151,7 +153,7 @@ export function CanonicalPicker({
             ? ar
               ? 'جارٍ التحميل…'
               : 'Loading…'
-            : optional
+            : emptyLabel && options.length===0 && !value ? emptyLabel : optional
               ? compact
                 ? ar
                   ? 'الكل'
