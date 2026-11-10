@@ -580,6 +580,8 @@ export function registerDependencies(
     }).singleton(),
     redisClient: asFunction(() => runtimeResources.getRedisClient()).singleton(),
     // --- Repositories ---
+    adminCatalogFilterReadPort: asFunction(({prisma})=>new PrismaAdminCatalogFilterReadPort(prisma)).singleton(),
+    adminCatalogFilterRouter: asFunction(cradle=>AdminCatalogFilterRouter.create(cradle)).singleton(),
     universityProgramReadPort: asFunction(({ prisma }) => new PrismaUniversityProgramReadPort(prisma)).singleton(),
     scholarshipRepository: asFunction(({ prisma, universityProgramReadPort }) => new PrismaScholarshipRepository(prisma, false, universityProgramReadPort)).singleton(),
     scholarshipCanonicalLookupGateway: asFunction(({ prisma, universityProgramReadPort }) => new PrismaScholarshipCanonicalLookupGateway(prisma, universityProgramReadPort)).singleton(),
@@ -1605,3 +1607,5 @@ export function registerDependencies(
 }
 
 export { container };
+import {PrismaAdminCatalogFilterReadPort} from '@manaratak/infrastructure';
+import {AdminCatalogFilterRouter} from '../../presentation/api/router/AdminCatalogFilterRouter.js';

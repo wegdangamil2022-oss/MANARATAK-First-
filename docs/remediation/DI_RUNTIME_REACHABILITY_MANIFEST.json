@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 459,
-  "reachableCount": 459,
+  "registrationCount": 462,
+  "reachableCount": 462,
   "unreachable": [],
   "registrations": [
     {
@@ -165,6 +165,26 @@
       "dependencies": [
         "prisma"
       ]
+    },
+    {
+      "name": "adminCatalogFilterReadPort",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AdminCatalogFilterRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "adminCatalogFilterRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
     },
     {
       "name": "adminCmsUseCases",
@@ -2479,6 +2499,15 @@
       ]
     },
     {
+      "name": "fellowshipImportScreeningConsumer",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "importHandoffDispatcher"
+      ],
+      "dependencies": []
+    },
+    {
       "name": "fileIntegrityValidationService",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -2822,6 +2851,7 @@
       ],
       "dependencies": [
         "academicTaxonomyScreeningConsumer",
+        "fellowshipImportScreeningConsumer",
         "importScreeningReceiptStore",
         "internationalTestImportHandoffConsumer",
         "majorImportScreeningConsumer",
@@ -3895,6 +3925,7 @@
         "academicTaxonomyImportGateway",
         "academicTaxonomyRepository",
         "adminBootstrapVerifier",
+        "adminCatalogFilterReadPort",
         "aiPlatformRepository",
         "apiExposureGateway",
         "apiIdempotencyStore",

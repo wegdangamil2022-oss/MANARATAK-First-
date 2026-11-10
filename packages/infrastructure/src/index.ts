@@ -260,3 +260,4 @@ export * from './identity/PrismaStaffWorkspaceRepository';
 export * from './identity/PrismaStaffLifecycleRepository';
 
 export * from './assets/AssetOwnerChoices';
+export * from './admin-catalog-filters/PrismaAdminCatalogFilterReadPort';

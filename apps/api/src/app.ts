@@ -987,6 +987,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
     // Phase 9: University Platform (Preserved structure, no data import)
     v1Router.use('/admin/university-programs', requireAdminPermission('admin:universities:manage'), container.resolve<Router>('universityProgramAdminRouter'));
+    v1Router.use('/admin/catalog-filters',lazyRouter('adminCatalogFilterRouter'));
     v1Router.use('/public/university-programs', container.resolve<Router>('universityProgramPublicRouter'));
     v1Router.use('/admin/universities', requireAdminPermission('admin:universities:manage'), container.resolve<Router>('universityAdminRouter'));
       v1Router.use('/public/universities', container.resolve<Router>('universityPublicRouter'));
