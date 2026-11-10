@@ -2,6 +2,18 @@ import { describe, expect, it } from 'vitest';
 import { catalogQuery, changeCatalogFilters, certificateFact, studyFact } from '../../src/features/courses/catalogState';
 
 describe('course catalog facts and query scope', () => {
+  it('preserves academic relationship filters across views and resets pagination when changed', () => {
+    const params = new URLSearchParams('scope=external&majorId=major-1&taxonomyNodeId=field-1&relationshipState=HAS_MAJORS&page=7&view=cards');
+    const query = catalogQuery(params);
+    expect(query.get('majorId')).toBe('major-1');
+    expect(query.get('taxonomyNodeId')).toBe('field-1');
+    expect(query.get('relationshipState')).toBe('HAS_MAJORS');
+    const next = changeCatalogFilters(params, { taxonomyNodeId: 'field-2' });
+    expect(next.has('page')).toBe(false);
+    expect(next.get('majorId')).toBe('major-1');
+    expect(next.get('view')).toBe('cards');
+    expect(catalogQuery(next).get('taxonomyNodeId')).toBe('field-2');
+  });
   it('keeps native enrollment cohorts and false enrollment filters while presentation changes', () => {
     const params = new URLSearchParams('scope=native&cohortFrom=2026-01-01&cohortTo=2026-02-01&hasEnrollments=false&instructor=Teacher&view=cards');
     const query = catalogQuery(params);

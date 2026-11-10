@@ -114,6 +114,13 @@
 .course-dialog .course-relation-list, .course-dialog .course-history-list { display:grid;gap:8px; }
 .course-dialog .course-relation-list article { border:1px solid #DDEFF2;padding:10px 12px;border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap; }
 .course-dialog .course-relation-list article>div:first-child { display:grid;gap:3px; }
+.course-academic-links { font-size:12px; line-height:1.7; }
+.course-academic-links h3 { display:flex;align-items:center;gap:7px;border-bottom:1px solid #D7AE6266;padding-bottom:8px; }
+.course-academic-tags,.course-academic-grid { display:flex;flex-wrap:wrap;gap:8px;margin:10px 0; }
+.course-academic-tags a { border:1px solid #DDEFF2;border-radius:8px;padding:5px 9px;color:#0E7C86; }
+.course-academic-grid a { display:flex;align-items:center;gap:7px;border:1px solid #DDEFF2;border-top-color:#D7AE62;border-radius:10px;padding:9px 12px;color:#142B5F;background:#F7FAFB; }
+.course-academic-grid a svg { color:#0E7C86; }
+.course-academic-links summary { display:flex;align-items:center;gap:7px;cursor:pointer;color:#0E7C86; }
 .course-dialog .course-history-list article { display:grid;gap:3px;padding:10px 12px;border-inline-start:3px solid #D6A43B;background:#FAFCFD;border-radius:8px;overflow-wrap:anywhere; }
 .course-dialog .course-history-list article>span, .course-dialog .course-history-list small { color:#64748b;font-size:12px; }.courses-workspace .course-external-overview { display:flex;gap:8px;flex-wrap:wrap; }
 .courses-workspace .course-external-overview button { flex:1 1 150px;justify-content:flex-start;padding:9px 12px; }

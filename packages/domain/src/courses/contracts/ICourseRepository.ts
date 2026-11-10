@@ -12,6 +12,9 @@ export interface CourseFilters {
   search?: string;
   externalProviderId?: string;
   majorId?: string;
+  /** Approved academic field, including active descendants. */
+  taxonomyNodeId?: string;
+  relationshipState?: 'CLASSIFIED' | 'UNCLASSIFIED' | 'HAS_MAJORS' | 'NO_MAJORS';
   category?: string;
   learningLanguage?: string;
   difficultyLevel?: string;

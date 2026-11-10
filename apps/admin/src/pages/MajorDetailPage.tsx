@@ -8,6 +8,7 @@ import {FellowshipAuthoringPanel} from '../components/FellowshipAuthoringPanel';
 import {useAdminAuthorization} from '../security/AdminAuthorizationContext';
 import {useOwnerOperationScope} from '../security/useOwnerOperationScope';
 import {MajorConsumerUsagePanel} from '../components/MajorConsumerUsagePanel';
+import {MajorRelatedCourses} from '../features/majors/MajorRelatedCourses';
 import {MajorGovernanceWorkspace} from '../components/MajorGovernanceWorkspace';
 /// <reference types="vite/client" />
 import {
@@ -1286,6 +1287,7 @@ export function MajorDetailPage() {
       )}
 
       {/* Tab 4: Relations and Aliases */}
+      {(activeTab === 'basic' || activeTab === 'relations') && hasPermission('admin:courses:manage') && <MajorRelatedCourses key={major.id} majorId={major.id}/>}
       {activeTab === 'relations' && (
         <section className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-3xl border border-[#DDEFF2] bg-white p-6 shadow-xs space-y-4">

@@ -9,6 +9,7 @@ import { useAdminAuthorization } from '../../security/AdminAuthorizationContext'
 import { useOwnerOperationScope } from '../../security/useOwnerOperationScope';
 import { CourseDialog } from './CourseDialog';
 import { CourseLookup } from './CourseLookup';
+import { CourseAcademicLinks } from './CourseAcademicLinks';
 import { courseNames, courseProviderNames, arabicCourseValue } from './coursePresentation';
 import { useCourseCopy } from './useCourseCopy';
 
@@ -146,6 +147,7 @@ export function ExternalCourseDrawer({ id, onClose, onSaved }: { id?: string; re
           {reasonField}<div className="course-drawer-toolbar"><button type="submit" className="course-primary" disabled={busy || reason.trim().length < 3 || (creating && !form.externalProviderId)}><Save size={16}/>{tr('حفظ بيانات الدورة', 'Save course details')}</button>{!creating && <button type="button" disabled={busy} onClick={cancel}><X size={16}/>{tr('إلغاء', 'Cancel')}</button>}</div>
         </form> : <dl className="course-master-fields"><div className="course-detail-value"><dt>{tr('الرقم في الملف', 'Source number')}</dt><dd>{String(source?.originalSourceRow?.sourceOrder ?? course?.optionalFields?.sourceOrder ?? '—')}</dd></div>{fields.map(field => <div className={`course-detail-value ${field.kind === 'textarea' || field.key === 'directCourseUrl' ? 'course-wide-field' : ''}`} key={field.key}><dt>{ar ? field.ar : field.en}</dt><dd dir={['originalSourceTitle', 'platformName', 'directCourseUrl'].includes(field.key) ? 'ltr' : 'auto'}>{field.key === 'directCourseUrl' && directUrl ? <a href={directUrl} target="_blank" rel="noopener noreferrer"><ExternalLink size={14}/>{directUrl}</a> : readValue(field.key)}</dd></div>)}</dl>}
       </section>
+      {!creating && course && <CourseAcademicLinks id={course.id} editable={Boolean(editable && !edit)} busy={busy} reviewReason={!actions ? reasonField : undefined} command={(action, body) => command(action, '', body)}/>}
       {!creating && actions && <section className="course-panel course-operations"><h3><ShieldCheck size={17}/>{tr('المراجعة والنشر', 'Review and publication')}</h3>{!edit && reasonField}<div className="course-drawer-toolbar">
         <button type="button" disabled={busy || !editable} onClick={() => void command('verify-source')}><ShieldCheck size={15}/>{tr('تحقق من المصدر', 'Verify source')}</button><button type="button" disabled={busy || !editable} onClick={() => void command('check-link')}><ExternalLink size={15}/>{tr('فحص الرابط', 'Check link')}</button><button type="button" disabled={busy} onClick={() => void checkReadiness()}><CheckCircle2 size={15}/>{tr('فحص جاهزية النشر', 'Check publication readiness')}</button>
         {course!.status === 'DRAFT' && <button type="button" disabled={busy} onClick={() => void command('mark-ready', '')}>{tr('إرسال للمراجعة', 'Submit for review')}</button>}

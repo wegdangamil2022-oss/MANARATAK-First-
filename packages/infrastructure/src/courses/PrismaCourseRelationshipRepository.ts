@@ -57,6 +57,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
         status: true,
         sourceImportRecordId: true,
         shortCourseTopicsRaw: true,
+        originalSourceTitle: true,
         category: true,
         learningLanguageRaw: true,
         learningLanguageReferenceId: true,
@@ -87,6 +88,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
     if (!course) return null;
     return {
       courseId: course.id,
+      originalSourceTitle: course.originalSourceTitle,
       status: course.status,
       sourceImportRecordId: course.sourceImportRecordId,
       shortCourseTopicsRaw: course.shortCourseTopicsRaw ?? course.category,
@@ -288,7 +290,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
         courseId,
         ...(reviewState ? { reviewState } : {}),
       },
-      include: { taxonomyNode: { select: { id: true, canonicalCode: true, canonicalName: true, nodeType: true } } },
+      include: { taxonomyNode: { select: { id: true, canonicalCode: true, canonicalName: true, nodeType: true, localizedNames: true } } },
       orderBy: [{ reviewState: 'asc' }, { createdAt: 'asc' }],
     });
     return records.map((record) => this.mapTaxonomyLink(record));
@@ -338,7 +340,6 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
         where: {
           courseId: input.courseId,
           sourceCourseTaxonomyLinkId: input.linkId,
-          sourceType: 'TAXONOMY_MAPPING',
         },
         data: { projectionState: 'REVIEW_REQUIRED' },
       }));
@@ -346,7 +347,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
     await this.commitOperations(operations);
     const record = await this.prisma.courseAcademicTaxonomyLink.findUniqueOrThrow({
       where: { id: input.linkId },
-      include: { taxonomyNode: { select: { id: true, canonicalCode: true, canonicalName: true, nodeType: true } } },
+      include: { taxonomyNode: { select: { id: true, canonicalCode: true, canonicalName: true, nodeType: true, localizedNames: true } } },
     });
     return this.mapTaxonomyLink(record);
   }
@@ -361,7 +362,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       this.prisma.course.findUnique({ where: { id: input.courseId }, select: { id: true } }),
       this.prisma.academicTaxonomyNode.findFirst({
         where: { id: input.taxonomyNodeId, status: 'ACTIVE' },
-        select: { id: true, canonicalCode: true, canonicalName: true, nodeType: true },
+        select: { id: true, canonicalCode: true, canonicalName: true, nodeType: true, localizedNames: true },
       }),
     ]);
     if (!course) throw new Error('COURSE_NOT_FOUND');
@@ -394,7 +395,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
         sourceTerm: taxonomyNode.canonicalName,
         confidence: 1,
       },
-      include: { taxonomyNode: { select: { id: true, canonicalCode: true, canonicalName: true, nodeType: true } } },
+      include: { taxonomyNode: { select: { id: true, canonicalCode: true, canonicalName: true, nodeType: true, localizedNames: true } } },
     });
     return this.mapTaxonomyLink(record);
   }
@@ -586,7 +587,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
         projectionState: input.projectionState,
         confidence: input.confidence ?? null,
       },
-      include: { major: { select: { id: true, publicId: true, slug: true, displayName: true, status: true } } },
+      include: { major: { select: { id: true, publicId: true, slug: true, displayName: true, status: true, localizedNameAr: true, localizedNameEn: true } } },
     });
     return this.mapMajorProjection(record);
   }
@@ -612,7 +613,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
   ): Promise<CourseMajorProjectionDto[]> {
     const records = await this.prisma.courseMajorProjection.findMany({
       where: { courseId, ...(state ? { projectionState: state } : {}) },
-      include: { major: { select: { id: true, publicId: true, slug: true, displayName: true, status: true } } },
+      include: { major: { select: { id: true, publicId: true, slug: true, displayName: true, status: true, localizedNameAr: true, localizedNameEn: true } } },
       orderBy: [{ projectionState: 'asc' }, { createdAt: 'asc' }],
     });
     return records.map((record) => this.mapMajorProjection(record));
@@ -631,7 +632,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
     const record = await this.prisma.courseMajorProjection.update({
       where: { id: input.projectionId },
       data: { projectionState: input.decision, reviewedBy: input.actorId, reviewedAt: new Date() },
-      include: { major: { select: { id: true, publicId: true, slug: true, displayName: true, status: true } } },
+      include: { major: { select: { id: true, publicId: true, slug: true, displayName: true, status: true, localizedNameAr: true, localizedNameEn: true } } },
     });
     return this.mapMajorProjection(record);
   }
@@ -676,7 +677,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
         projectionState: 'PROPOSED',
         confidence: 1,
       },
-      include: { major: { select: { id: true, publicId: true, slug: true, displayName: true, status: true } } },
+      include: { major: { select: { id: true, publicId: true, slug: true, displayName: true, status: true, localizedNameAr: true, localizedNameEn: true } } },
     });
     return this.mapMajorProjection(record);
   }

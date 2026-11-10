@@ -39,9 +39,21 @@ export function courseCatalogWhere(filters: CourseFilters): Prisma.CourseWhereIn
   if (filters.originType) where.originType = filters.originType;
   if (filters.platformName) where.platformName = { contains: filters.platformName, mode: 'insensitive' };
   if (filters.externalProviderId) where.externalProviderId = filters.externalProviderId;
-  if (filters.category) where.category = { contains: filters.category, mode: 'insensitive' };
+  if (filters.taxonomyNodeId) where.academicTaxonomyLinks = { some: {
+    taxonomyNodeId: filters.taxonomyNodeId, reviewState: 'APPROVED', taxonomyNode: { status: 'ACTIVE' },
+  } };
   if (filters.majorId) where.majorProjections = { some: { majorId: filters.majorId, projectionState: 'APPROVED' } };
   const and: Prisma.CourseWhereInput[] = [];
+  if (filters.relationshipState === 'CLASSIFIED' || filters.relationshipState === 'UNCLASSIFIED') and.push({ academicTaxonomyLinks: {
+    [filters.relationshipState === 'CLASSIFIED' ? 'some' : 'none']: { reviewState: 'APPROVED', taxonomyNode: { status: 'ACTIVE' } },
+  } });
+  if (filters.relationshipState === 'HAS_MAJORS' || filters.relationshipState === 'NO_MAJORS') and.push({ majorProjections: {
+    [filters.relationshipState === 'HAS_MAJORS' ? 'some' : 'none']: { projectionState: 'APPROVED', major: { status: { notIn: ['ARCHIVED', 'REJECTED'] } } },
+  } });
+  if (filters.category) and.push({ OR: [
+    { category: { contains: filters.category, mode: 'insensitive' } },
+    { ...external, shortCourseTopicsRaw: { contains: filters.category, mode: 'insensitive' } },
+  ] });
   if (filters.learningLanguage) and.push({ OR: [
     { learningLanguage: { contains: filters.learningLanguage, mode: 'insensitive' } },
     { ...external, learningLanguageRaw: { contains: filters.learningLanguage, mode: 'insensitive' } },

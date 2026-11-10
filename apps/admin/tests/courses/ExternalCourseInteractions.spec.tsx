@@ -39,7 +39,9 @@ const text = (value: unknown): string =>
 const button = (name: string) =>
   tree.root.findAllByType('button').find((node) => text(node) === name)!;
 async function read(path: string) {
-  return path.endsWith('/readiness')
+  return path.endsWith('/relationships')
+    ? { taxonomyLinks: [], majorProjections: [] }
+    : path.endsWith('/readiness')
     ? { version: 1, eligible: true, blockers: [] }
     : path.includes('/history')
       ? { data: [], versions: [], page: 1, totalPages: 0 }
@@ -77,6 +79,7 @@ describe('External course command readback', () => {
   it('renders a single source detail panel without unrelated content or the legacy tools link', async () => {
     await mount();
     const rendered = text(tree.toJSON());
+    expect(rendered).toContain('Related academic fields and majors');
     expect(tree.root.findAll(node => node.props['aria-label'] === 'Course source fields')).toHaveLength(1);
     for (const label of ['Arabic course name', 'English course name', 'Arabic provider name', 'English provider name', 'Free study', 'Free certificate', 'Certificate type', 'Study language', 'Course level', 'Course duration', 'Course topics', 'Direct course URL', 'Source number']) expect(rendered).toContain(label);
     for (const label of ['Relationship and version tools', 'Prerequisites', 'Learning outcomes', 'Documented certificate conditions', 'Canonical course relationships']) expect(rendered).not.toContain(label);

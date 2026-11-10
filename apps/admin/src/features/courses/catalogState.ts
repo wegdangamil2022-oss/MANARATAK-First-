@@ -53,7 +53,7 @@ export function catalogQuery(params: URLSearchParams, fixedScope?: CourseScope):
   const page = Number(params.get('page'));
   const size = Number(params.get('pageSize'));
   const query = new URLSearchParams({ page: String(Number.isSafeInteger(page) && page > 0 && page <= 100000 ? page : 1), pageSize: String([20, 50, 100].includes(size) ? size : 20) });
-  const keys = ['status', 'studyAccess', 'certificateState', 'majorId', 'category', 'learningLanguage', 'difficultyLevel', 'sort'];
+  const keys = ['status', 'studyAccess', 'certificateState', 'majorId', 'taxonomyNodeId', 'relationshipState', 'category', 'learningLanguage', 'difficultyLevel', 'sort'];
   if (scope === 'native') keys.push('cohortFrom', 'cohortTo', 'instructor', 'hasEnrollments');
   if (scope !== 'native') keys.push('platformName', 'completenessStatus', 'linkHealth');
   for (const key of keys) if (params.get(key)) query.set(key, params.get(key)!);

@@ -300,6 +300,23 @@ class FakeRelationshipRepository implements ICourseRelationshipRepository {
 }
 
 describe('CourseRelationshipResolutionService', () => {
+  it('retains a reviewed title relationship until its literal source title is changed', async () => {
+    const repository = new FakeRelationshipRepository();
+    const service = new CourseRelationshipResolutionService(repository);
+    repository.source.originalSourceTitle = 'Introduction to Python';
+    repository.resolutions.push({ id: 'reviewed-title', courseId: 'course-1', normalizedTerm: 'introduction to python', status: 'APPROVED' });
+    repository.links.push({ id: 'title-link', courseId: 'course-1', sourceResolutionId: 'reviewed-title', reviewState: 'APPROVED' } as any);
+    repository.projections.push({ id: 'title-major', courseId: 'course-1', sourceCourseTaxonomyLinkId: 'title-link', sourceType: 'DIRECT_REVIEWED', projectionState: 'APPROVED' } as any);
+
+    await service.analyzeCourse('course-1');
+    expect(repository.links.find(link => link.id === 'title-link')?.reviewState).toBe('APPROVED');
+    expect(repository.projections[0].projectionState).toBe('APPROVED');
+
+    repository.source.originalSourceTitle = 'A different topic';
+    await service.analyzeCourse('course-1');
+    expect(repository.links.find(link => link.id === 'title-link')?.reviewState).toBe('REVIEW_REQUIRED');
+    expect(repository.projections[0].projectionState).toBe('REVIEW_REQUIRED');
+  });
   it('creates only PROPOSED taxonomy links for exact unique matches', async () => {
     const repository = new FakeRelationshipRepository();
     const service = new CourseRelationshipResolutionService(repository);

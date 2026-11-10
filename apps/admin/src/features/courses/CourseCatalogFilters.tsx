@@ -1,6 +1,6 @@
 import { Filter, Search, SlidersHorizontal, RotateCcw, GraduationCap, Building2 } from 'lucide-react';
 import { adminApiClient } from '../../api/client';
-import { canonicalPickerApi } from '../../api/canonicalPickers';
+import { canonicalPickerApi, canonicalOptionIsSelectable } from '../../api/canonicalPickers';
 import { courseProviderRegistryApi } from '../../api/courseProviders';
 import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
 import { CourseLookup, type CourseOptionPage } from './CourseLookup';
@@ -32,7 +32,7 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
     studyAccess: tr('الدراسة', 'Study'), certificateState: tr('الشهادة', 'Certificate'),
     majorId: tr('تخصص معتمد محدد', 'Selected approved major'), provider: tr('مزود خارجي محدد', 'Selected external provider'),
     learningLanguage: tr('اللغة', 'Language'), difficultyLevel: tr('المستوى', 'Level'),
-    category: tr('المجال', 'Field'), platformName: tr('منصة المصدر', 'Source platform'),
+    taxonomyNodeId: tr('المجال الأكاديمي', 'Academic field'), relationshipState: tr('حالة الربط الأكاديمي', 'Academic relationships'), category: tr('موضوعات المصدر', 'Source topics'), platformName: tr('منصة المصدر', 'Source platform'),
     completenessStatus: tr('اكتمال بيانات الخارجية', 'External data completeness'), originType: tr('التصنيف القائم', 'Existing origin'),
     linkHealth: tr('فحص الرابط المسجل', 'Recorded link check'),
     instructor: tr('المدرب', 'Instructor'), hasEnrollments: tr('وجود تسجيلات', 'Has enrollments'),
@@ -40,11 +40,12 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
   };
   const active = [...params].filter(([key, value]) => value && filterTitles[key] && !(fixedScope && key === 'scope'));
   const chipValue = (key: string, value: string) => {
-    if (key === 'provider' || key === 'majorId') return '';
+    if (key === 'provider' || key === 'majorId' || key === 'taxonomyNodeId') return '';
     if (key === 'status') return courseStatusLabels[value]?.[ar ? 0 : 1] ?? tr('حالة محددة', 'Selected status');
     if (key === 'studyAccess') return studyLabels[value as keyof typeof studyLabels]?.[ar ? 0 : 1] ?? '';
     if (key === 'certificateState') return certificateLabels[value as keyof typeof certificateLabels]?.[ar ? 0 : 1] ?? '';
     if (key === 'scope') return value === 'native' ? tr('منارتك', 'Manaratak') : tr('خارجية', 'External');
+    if (key === 'relationshipState') return ({ CLASSIFIED: tr('مصنفة', 'Classified'), UNCLASSIFIED: tr('بلا مجال معتمد', 'No approved field'), HAS_MAJORS: tr('بتخصصات مرتبطة', 'With related majors'), NO_MAJORS: tr('بلا تخصصات مرتبطة', 'No related majors') } as Record<string, string>)[value] ?? '';
     if (key === 'originType') return tr('مدفوع قائم', 'Legacy paid');
     if (key === 'hasEnrollments') return value === 'true' ? tr('لديها تسجيلات', 'With enrollments') : tr('دون تسجيلات', 'No enrollments');
     if (key === 'linkHealth') return ({ VERIFIED: tr('متحقق منه سابقًا', 'Previously verified'), BROKEN: tr('معطل / مرفوض', 'Broken / rejected'), NEEDS_REVIEW: tr('يحتاج تحققًا', 'Needs verification'), UNKNOWN: tr('غير معلوم', 'Unknown') } as Record<string, string>)[value] ?? '';
@@ -61,7 +62,11 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
       {field('studyAccess', tr('إتاحة الدراسة', 'Study access'), Object.entries(studyLabels).map(([id, labels]) => [id, labels[ar ? 0 : 1]]))}
       {field('certificateState', tr('الشهادة', 'Certificate'), Object.entries(certificateLabels).map(([id, labels]) => [id, labels[ar ? 0 : 1]]))}
       {hasPermission('admin:majors:manage') && <CourseLookup label={tr('التخصص المرتبط المعتمد', 'Approved academic major')} value={params.get('majorId') ?? ''} onChange={value => change({ majorId: value })}
+        hydrate={async id => { const record = await adminApiClient.request<{ displayName: string; localizedNameAr?: string; localizedNameEn?: string }>(`/admin/majors/${encodeURIComponent(id)}`); return { id, label: (ar ? record.localizedNameAr : record.localizedNameEn) || record.displayName }; }}
         load={async (q, page) => { const options = await canonicalPickerApi.majors(q, page); return { data: options.map(option => ({ id: option.id, label: option.label })), hasMore: options.length === 50 }; }} />}
+      {hasPermission('admin:academic-taxonomy:manage') && <CourseLookup label={tr('المجال الأكاديمي', 'Academic field')} value={params.get('taxonomyNodeId') ?? ''} onChange={value => change({ taxonomyNodeId: value })}
+        hydrate={async id => { const record = await adminApiClient.request<{ canonicalName: string; localizedNames?: { ar?: string; en?: string } }>(`/admin/academic-taxonomy/nodes/${encodeURIComponent(id)}`); return { id, label: record.localizedNames?.[ar ? 'ar' : 'en'] || record.canonicalName }; }}
+        load={async (q, page) => { const options = await canonicalPickerApi.taxonomyNodes(undefined, q, page); return { data: options.filter(canonicalOptionIsSelectable).map(option => ({ id: option.id, label: option.label })), hasMore: options.length === 50 }; }} />}
       {scope !== 'native' && <CourseLookup label={tr('المزود الخارجي', 'External provider')} value={params.get('provider') ?? ''} onChange={value => change({ provider: value })}
         hydrate={async id => { const record = await courseProviderRegistryApi.get(id); return { id: record.id, label: record.displayName }; }}
         load={async (q, page) => { const result = await courseProviderRegistryApi.list({ q, page, pageSize: 25 }); return { data: result.data.map(row => ({ id: row.id, label: row.displayName })), hasMore: result.page < result.totalPages }; }} />}
@@ -69,13 +74,14 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
     {scope === 'all' && params.get('provider') && <p className="course-hint"><Building2 size={16}/>{tr('اختيار مزود يقيد النتائج بالدورات الخارجية.', 'Selecting a provider limits results to external courses.')}</p>}
     <details className="course-extra-filters"><summary><SlidersHorizontal size={16}/>{tr('فلاتر إضافية', 'Additional filters')}</summary><div className="course-filter-grid">
       {facet('learningLanguage', tr('لغة التدريس', 'Learning language'))}{facet('difficultyLevel', tr('المستوى', 'Level'))}
+      {field('relationshipState', tr('حالة الربط الأكاديمي', 'Academic relationships'), [['CLASSIFIED', tr('مصنفة بمجال معتمد', 'Approved field')], ['UNCLASSIFIED', tr('بلا مجال معتمد', 'No approved field')], ['HAS_MAJORS', tr('لديها تخصصات مرتبطة', 'With related majors')], ['NO_MAJORS', tr('بلا تخصصات مرتبطة', 'No related majors')]])}
       {scope === 'native' && <>
         <label className="course-field"><span><GraduationCap size={16}/>{tr('المدرب — مطابقة النص', 'Instructor — case-sensitive text')}</span><input maxLength={200} value={params.get('instructor') ?? ''} onChange={event => change({ instructor: event.target.value })}/></label>
         {field('hasEnrollments', tr('وجود تسجيلات في الفوج', 'Enrollments in cohort'), [['true', tr('لديها تسجيلات', 'With enrollments')], ['false', tr('دون تسجيلات', 'No enrollments')]])}
         <label className="course-field"><span><Filter size={16}/>{tr('فوج التسجيل: من (شامل) UTC', 'Enrollment cohort: from (inclusive) UTC')}</span><input type="date" value={params.get('cohortFrom') ?? ''} onChange={event => change({ cohortFrom: event.target.value })}/></label>
         <label className="course-field"><span><Filter size={16}/>{tr('فوج التسجيل: قبل (غير شامل) UTC', 'Enrollment cohort: before (exclusive) UTC')}</span><input type="date" value={params.get('cohortTo') ?? ''} onChange={event => change({ cohortTo: event.target.value })}/></label>
       </>}
-      <label className="course-field"><span><GraduationCap size={16}/>{tr('المجال / موضوع الدورة', 'Course field / topic')}</span><input value={params.get('category') ?? ''} maxLength={200} onChange={event => change({ category: event.target.value })}/></label>
+      <label className="course-field"><span><GraduationCap size={16}/>{tr('البحث في موضوعات المصدر', 'Search source topics')}</span><input value={params.get('category') ?? ''} maxLength={200} onChange={event => change({ category: event.target.value })}/></label>
       {scope !== 'native' && <>
         {field('linkHealth', tr('نتيجة فحص الرابط المسجلة', 'Recorded link check outcome'), [['VERIFIED', tr('متحقق منه سابقًا', 'Previously verified')], ['BROKEN', tr('معطل / مرفوض', 'Broken / rejected')], ['NEEDS_REVIEW', tr('يحتاج تحققًا', 'Needs verification')], ['UNKNOWN', tr('غير معلوم', 'Unknown')]])}
         {field('completenessStatus', tr('اكتمال بيانات الخارجية', 'External data completeness'), [['IMPORTED', tr('مستوردة', 'Imported')], ['INCOMPLETE', tr('غير مكتملة', 'Incomplete')], ['NEEDS_REVIEW', tr('تحتاج مراجعة', 'Needs review')], ['COMPLETE', tr('مكتملة', 'Complete')], ['REJECTED', tr('مرفوضة', 'Rejected')]])}

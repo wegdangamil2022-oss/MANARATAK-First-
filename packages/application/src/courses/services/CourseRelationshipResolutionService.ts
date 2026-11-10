@@ -106,7 +106,7 @@ export class CourseRelationshipResolutionService {
     // not leave a previous proposal/approval looking current to public queries.
     await this.repository.reconcileTaxonomyRelationships({
       courseId,
-      activeNormalizedTerms: terms.map(normalize),
+      activeNormalizedTerms: [...terms.map(normalize), ...(source.originalSourceTitle?.trim() ? [normalize(source.originalSourceTitle)] : [])],
     });
 
     const language = await this.resolveLanguage(

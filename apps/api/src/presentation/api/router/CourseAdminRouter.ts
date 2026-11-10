@@ -214,6 +214,8 @@ export class CourseAdminRouter {
       search: z.string().trim().max(200).optional(),
       externalProviderId: z.string().trim().min(1).max(200).optional(),
       majorId: z.string().trim().min(1).max(200).optional(),
+      taxonomyNodeId: z.string().trim().min(1).max(200).optional(),
+      relationshipState: z.enum(['CLASSIFIED', 'UNCLASSIFIED', 'HAS_MAJORS', 'NO_MAJORS']).optional(),
       category: z.string().trim().max(200).optional(),
       learningLanguage: z.string().trim().max(200).optional(),
       difficultyLevel: z.string().trim().max(200).optional(),

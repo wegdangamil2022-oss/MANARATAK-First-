@@ -86,6 +86,7 @@ export interface CourseInternationalTestRelationshipDto {
 
 export interface CourseRelationshipSourceDto {
   courseId: string;
+  originalSourceTitle?: string | null;
   status: string;
   sourceImportRecordId?: string | null;
   shortCourseTopicsRaw?: string | null;
@@ -152,7 +153,7 @@ export interface CourseAcademicTaxonomyLinkDto {
   reviewedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
-  taxonomyNode?: { id: string; canonicalCode: string; canonicalName: string; nodeType: string } | null;
+  taxonomyNode?: { id: string; canonicalCode: string; canonicalName: string; nodeType: string; localizedNames?: { ar?: string; en?: string } | null } | null;
 }
 
 export interface CourseMajorMappingCandidateDto {
@@ -181,7 +182,7 @@ export interface CourseMajorProjectionDto {
   reviewedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
-  major?: { id: string; publicId: string; slug: string; displayName: string; status: string } | null;
+  major?: { id: string; publicId: string; slug: string; displayName: string; status: string; localizedNameAr?: string | null; localizedNameEn?: string | null } | null;
 }
 
 export interface CourseLanguageCandidateDto {

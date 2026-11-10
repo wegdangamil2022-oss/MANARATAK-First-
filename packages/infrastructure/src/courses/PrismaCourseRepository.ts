@@ -344,6 +344,18 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
     const page = Math.max(1, filters.page ?? 1);
     const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 20));
     const where = courseCatalogWhere(filters);
+    if (filters.taxonomyNodeId) {
+      // UNION also bounds traversal in the presence of a malformed cycle.
+      const descendants = await this.prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+        WITH RECURSIVE field_nodes(id) AS (
+          SELECT id FROM "AcademicTaxonomyNode" WHERE id=${filters.taxonomyNodeId} AND status='ACTIVE'
+          UNION
+          SELECT n.id FROM "AcademicTaxonomyEdge" e JOIN field_nodes p ON p.id=e."parentNodeId"
+          JOIN "AcademicTaxonomyNode" n ON n.id=e."childNodeId" WHERE n.status='ACTIVE'
+        ) SELECT id FROM field_nodes
+      `);
+      where.academicTaxonomyLinks = { some: { taxonomyNodeId: { in: descendants.map(node => node.id) }, reviewState: 'APPROVED', taxonomyNode: { status: 'ACTIVE' } } };
+    }
     const result = await this.listPage(where, page, pageSize, filters.sort, filters.includeStatistics);
     if (nativeMetrics) result.nativeLearning = await nativeCourseLearningReport(this.prisma, filters, result.data.map(row => row.id));
     if (filters.includeStatistics) {
