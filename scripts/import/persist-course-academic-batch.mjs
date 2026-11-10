@@ -63,16 +63,31 @@ export async function persistCourseAcademicBatch(tx, batch, context) {
         'REVIEWED_MAJOR_CHANGED',
       );
   }
-  for (const table of [
-    'CourseTaxonomyResolution',
-    'CourseAcademicTaxonomyLink',
-    'CourseMajorProjection',
-  ]) {
+  for (const table of ['CourseAcademicTaxonomyLink', 'CourseMajorProjection']) {
     const [existing] = await tx.$queryRawUnsafe(
       `SELECT count(*)::int AS count FROM "${table}" WHERE "courseId"=ANY($1::text[])`,
       ids,
     );
     assert.equal(existing.count, 0, 'EXISTING_RELATIONSHIPS_REQUIRE_REVIEW');
+  }
+  const previousResolutions = await tx.$queryRawUnsafe(
+    'SELECT * FROM "CourseTaxonomyResolution" WHERE "courseId"=ANY($1::text[]) ORDER BY id FOR UPDATE',
+    ids,
+  );
+  for (const existing of previousResolutions) {
+    const source = batch.sourceSnapshots.find((row) => row.id === existing.courseId);
+    assert.ok(
+      !existing.reviewedBy &&
+        !existing.reviewedAt &&
+        ['UNRESOLVED', 'AMBIGUOUS', 'PROPOSED'].includes(existing.status) &&
+        existing.matchMethod !== 'ADMIN_REVIEW' &&
+        existing.sourceImportRecordId === source.sourceImportRecordId &&
+        String(source.shortCourseTopicsRaw ?? '')
+          .split(/[•|;\n]/u)
+          .map((term) => term.trim())
+          .includes(existing.sourceTerm),
+      'EXISTING_RESOLUTION_REQUIRES_REVIEW',
+    );
   }
   const resolutions = new Map(batch.resolutions.map((row) => [row.id, row]));
   const links = new Map(batch.links.map((row) => [row.id, row]));
@@ -113,9 +128,37 @@ export async function persistCourseAcademicBatch(tx, batch, context) {
     assert.equal(links.get(row.sourceCourseTaxonomyLinkId)?.courseId, row.courseId);
     assert.equal(links.get(row.sourceCourseTaxonomyLinkId)?.taxonomyNodeId, row.taxonomyNodeId);
   }
+  // Reuse only unreviewed automatic analyses of the same literal source term.
+  // Preserve their full prior state in the CourseVersion snapshot below.
+  const reusedResolutionIds = new Map();
+  for (const proposed of batch.resolutions) {
+    const existing = previousResolutions.find(
+      (row) => row.courseId === proposed.courseId && row.normalizedTerm === proposed.normalizedTerm,
+    );
+    if (!existing) continue;
+    assert.equal(existing.sourceTerm, proposed.sourceTerm, 'EXISTING_RESOLUTION_SOURCE_DRIFT');
+    reusedResolutionIds.set(proposed.id, existing.id);
+    assert.equal(
+      await tx.$executeRawUnsafe(
+        `UPDATE "CourseTaxonomyResolution" r SET status=p.status,"candidateTaxonomyNodeIds"=p."candidateTaxonomyNodeIds",
+        "chosenTaxonomyNodeId"=p."chosenTaxonomyNodeId","matchMethod"=p."matchMethod",confidence=p.confidence,
+        "reviewedBy"=p."reviewedBy","reviewedAt"=p."reviewedAt","updatedAt"=now()
+       FROM jsonb_populate_record(NULL::"CourseTaxonomyResolution",$1::jsonb) p WHERE r.id=p.id`,
+        JSON.stringify({ ...proposed, id: existing.id }),
+      ),
+      1,
+    );
+  }
+  const effectiveLinks = batch.links.map((row) => ({
+    ...row,
+    sourceResolutionId: reusedResolutionIds.get(row.sourceResolutionId) ?? row.sourceResolutionId,
+  }));
   for (const [delegate, rows] of [
-    [tx.courseTaxonomyResolution, batch.resolutions],
-    [tx.courseAcademicTaxonomyLink, batch.links],
+    [
+      tx.courseTaxonomyResolution,
+      batch.resolutions.filter((row) => !reusedResolutionIds.has(row.id)),
+    ],
+    [tx.courseAcademicTaxonomyLink, effectiveLinks],
     [tx.courseMajorProjection, batch.projections],
   ]) {
     for (let offset = 0; offset < rows.length; offset += 500) {
@@ -134,11 +177,13 @@ export async function persistCourseAcademicBatch(tx, batch, context) {
     `INSERT INTO "CourseVersion" (id,"courseId","versionNumber",reason,snapshot,"createdBy","createdAt")
     SELECT 'academic-version-'||id||'-'||version,id,version,'ACADEMIC_RELATIONSHIPS_REVIEWED',
       jsonb_build_object('course',to_jsonb(c),'modules','[]'::jsonb,'lessons','[]'::jsonb,'assets','[]'::jsonb,'quizzes','[]'::jsonb,'questionBanks','[]'::jsonb,'questions','[]'::jsonb,'contentBlocks','[]'::jsonb,
+        'previousTaxonomyResolutions',(SELECT coalesce(jsonb_agg(r),'[]'::jsonb) FROM jsonb_array_elements($3::jsonb) r WHERE r->>'courseId'=c.id),
         'academicTaxonomyLinks',(SELECT jsonb_agg(to_jsonb(l)) FROM "CourseAcademicTaxonomyLink" l WHERE l."courseId"=c.id),
         'majorProjections',(SELECT jsonb_agg(to_jsonb(p)) FROM "CourseMajorProjection" p WHERE p."courseId"=c.id)),$2,now()
     FROM "Course" c WHERE id=ANY($1::text[])`,
     ids,
     context.actorId,
+    JSON.stringify(previousResolutions),
   );
   const result = {
     courses: ids.length,
