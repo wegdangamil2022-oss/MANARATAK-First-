@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 import { courseTransportStatement } from './course-import-transport.mjs';
 import { NativeUniversityImportClient } from './native-university-import-client.mjs';
 const tables = {
@@ -8,6 +8,9 @@ const tables = {
   courseSourceIdentity: 'CourseSourceIdentity',
   courseSourceUrlHistory: 'CourseSourceUrlHistory',
   courseImportAnalysis: 'CourseImportAnalysis',
+  courseTaxonomyResolution: 'CourseTaxonomyResolution',
+  courseAcademicTaxonomyLink: 'CourseAcademicTaxonomyLink',
+  courseMajorProjection: 'CourseMajorProjection',
   courseFieldProvenance: 'CourseFieldProvenance',
   importBatch: 'ImportBatch',
   importRecord: 'ImportRecord',
@@ -106,6 +109,7 @@ export class NativeExternalCourseImportClient extends NativeUniversityImportClie
         'stagingCompletedAt',
         'availableAt',
         'lastVerifiedAt',
+        'reviewedAt',
       ]) {
         const value = row[key];
         if (typeof value === 'string')
@@ -143,5 +147,48 @@ export class NativeExternalCourseImportClient extends NativeUniversityImportClie
     const result = await this.send(transport.sql);
     assert.equal(result.copied, rows.length);
     return rows.length;
+  }
+  async assertCourseSourceSnapshots(rows) {
+    // Compare protected source values on the server instead of downloading the
+    // same long descriptions for every batch. Length prefixes preserve nulls,
+    // Unicode and separator characters without JSON/date serialization drift.
+    const fields = [
+      'id',
+      'publicId',
+      'canonicalName',
+      'displayName',
+      'originalSourceTitle',
+      'shortCourseTopicsRaw',
+      'sourceImportRecordId',
+      'status',
+    ];
+    assert.ok(rows.length > 0 && rows.length <= 250);
+    const parameters = [],
+      values = rows.map((row) => {
+        const content = fields
+          .map((field) =>
+            row[field] == null
+              ? '-'
+              : Buffer.byteLength(String(row[field])) + ':' + String(row[field]),
+          )
+          .join('|');
+        const hash = createHash('sha256').update(content).digest('hex'),
+          start = parameters.length;
+        parameters.push(row.id, row.version, row.updatedAt, hash);
+        return `($${start + 1}::text,$${start + 2}::int,($${start + 3}::timestamptz AT TIME ZONE 'UTC'),$${start + 4}::text)`;
+      });
+    const content = fields
+      .map(
+        (field) =>
+          `(CASE WHEN c."${field}" IS NULL THEN '-' ELSE octet_length(c."${field}")::text||':'||c."${field}" END)`,
+      )
+      .join("||'|'||");
+    const [result] = await this.$queryRawUnsafe(
+      `WITH expected(id,version,updated,hash) AS (VALUES ${values.join(',')})
+      SELECT count(*)::int AS matched FROM expected e JOIN "Course" c ON c.id=e.id
+      WHERE c.version=e.version AND c."updatedAt"=e.updated AND encode(sha256(convert_to(${content},'UTF8')),'hex')=e.hash`,
+      ...parameters,
+    );
+    assert.equal(result.matched, rows.length, 'COURSE_CHANGED_SINCE_ACADEMIC_REVIEW');
   }
 }
