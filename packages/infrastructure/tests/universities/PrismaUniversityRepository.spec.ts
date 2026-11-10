@@ -2,6 +2,17 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PrismaUniversityRepository } from '../../src/universities/PrismaUniversityRepository';
 
 describe('PrismaUniversityRepository', () => {
+  it('projects the canonical city label without replacing the original source city', async () => {
+    mockPrisma.university.findMany.mockResolvedValue([{
+      id: 'u', updatedAt: new Date('2026-11-12T00:00:00Z'), city: 'Sanah', cityReference: { name: 'Sanaa', nameAr: 'صنعاء' },
+      optionalFields: null, translations: [], localizedTexts: [],
+    }]);
+    mockPrisma.university.count.mockResolvedValue(1);
+    const result = await repository.list({ summary: true });
+    expect(result.data[0]).toMatchObject({ city: 'Sanah', cityReferenceLabel: 'صنعاء' });
+    expect(result.data[0]).not.toHaveProperty('cityReference');
+    expect(mockPrisma.university.findMany.mock.calls[0][0].select.cityReference).toEqual({ select: { name: true, nameAr: true } });
+  });
   it('combines continent and country filters and reads only card fields in summary mode',async()=>{
     mockPrisma.university.findMany.mockResolvedValue([]);mockPrisma.university.count.mockResolvedValue(0);
     await repository.list({continent:'Asia',countryReferenceId:'country-id',summary:true});

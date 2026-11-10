@@ -431,3 +431,4 @@ export * from './student-support/SupportCalendar';
 export * from './student-support/ISupportCaseRepository';
 
 export * from './identity/StaffLifecycle';
+export * from './admin-catalog-filters';

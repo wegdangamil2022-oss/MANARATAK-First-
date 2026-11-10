@@ -1,4 +1,6 @@
 import { projectInternationalTestImportDraft } from './InternationalTestImportDraftProjection';
+import {testCategoryFilterValues} from '@manaratak/domain';
+import {academicTaxonomyFilterNodeIds} from '../academic-taxonomy/AcademicTaxonomyFilterNodes';
 import {decodeStableCursor,encodeStableCursor} from '../api-foundation/StableCursor';
 import { randomUUID } from 'node:crypto';
 import { InternationalTestGovernancePersistence } from './InternationalTestGovernancePersistence';
@@ -505,16 +507,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     return this.mapToDto(record);
   }
 
-  async list(
-    filters: InternationalTestFilters,
-  ): Promise<PaginatedInternationalTestResult<InternationalTestDto>> {
-    const requestedPage = Number(filters?.page);
-    const requestedPageSize = Number(filters?.pageSize ?? filters?.limit);
-    const page = Number.isFinite(requestedPage) ? Math.max(1, Math.floor(requestedPage)) : 1;
-    const pageSize = Number.isFinite(requestedPageSize)
-      ? Math.min(100, Math.max(1, Math.floor(requestedPageSize)))
-      : 20;
-
+  async adminFilterWhere(filters: InternationalTestFilters): Promise<Prisma.InternationalTestWhereInput> {
     const where: any = {};
     if (filters?.status) {
       if (Array.isArray(filters.status)) {
@@ -532,10 +525,10 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
       if (Array.isArray(categories)) {
         const cleaned = categories.filter((c) => c && String(c).toLowerCase() !== 'all');
         if (cleaned.length > 0) {
-          where.testCategory = { in: cleaned };
+            where.testCategory = { in: [...new Set(cleaned.flatMap(value=>testCategoryFilterValues(value)))] };
         }
       } else if (typeof categories === 'string' && categories.trim() !== '' && categories.toLowerCase() !== 'all') {
-        where.testCategory = categories;
+          where.testCategory = {in:[...testCategoryFilterValues(categories)]};
       }
     }
 
@@ -547,7 +540,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     }
     if (filters.languageReferenceId) where.languageRelationships = { some: { canonicalReferenceId: filters.languageReferenceId } };
     if (filters.degreeLevelId) where.degreeRelationships = { some: { degreeLevelId: filters.degreeLevelId } };
-    if (filters.taxonomyNodeId) where.academicTaxonomyRelationships = { some: { taxonomyNodeId: filters.taxonomyNodeId } };
+    if (filters.taxonomyNodeId) where.academicTaxonomyRelationships = { some: { taxonomyNodeId: {in:await academicTaxonomyFilterNodeIds(this.prisma,filters.taxonomyNodeId)} } };
 
     if (filters?.countryIso2Code) {
       const country=await this.prisma.referenceCountry.findUnique({where:{iso2Code:String(filters.countryIso2Code).toUpperCase()},select:{id:true}});
@@ -586,6 +579,21 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
         { slug: { contains: query, mode: 'insensitive' } },
       ]}]; delete where.OR;
     }
+
+    return where;
+  }
+
+  async list(
+    filters: InternationalTestFilters,
+  ): Promise<PaginatedInternationalTestResult<InternationalTestDto>> {
+    const requestedPage = Number(filters?.page);
+    const requestedPageSize = Number(filters?.pageSize ?? filters?.limit);
+    const page = Number.isFinite(requestedPage) ? Math.max(1, Math.floor(requestedPage)) : 1;
+    const pageSize = Number.isFinite(requestedPageSize)
+      ? Math.min(100, Math.max(1, Math.floor(requestedPageSize)))
+      : 20;
+
+    const where = await this.adminFilterWhere(filters);
 
     if (filters.countOnly) {
       const total = await this.prisma.internationalTest.count({where});

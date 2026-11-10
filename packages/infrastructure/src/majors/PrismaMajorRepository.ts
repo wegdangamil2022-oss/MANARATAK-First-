@@ -404,8 +404,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     });
   }
 
-  async list(filters:MajorFilters):Promise<PaginatedMajorResult<MajorDto>> {
-    const page=Math.min(1000,Math.max(1,filters.page || 1));const pageSize=Math.min(50,Math.max(1,filters.pageSize || 25));
+  adminFilterRows(filters:MajorFilters):Prisma.Sql {
     const query=Prisma.sql`WITH rows AS (
       SELECT p.id AS "rowId",m.id AS "majorId",p.id AS "profileId",p."updatedAt" AS "createdAt",p.status,p."completenessStatus",p.level,
         coalesce(p."academicFieldId",m."academicFieldId") AS "fieldId",coalesce(p."disciplineId",m."disciplineId") AS "disciplineId",
@@ -429,6 +428,12 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
       AND (${filters.collegeOrFaculty ?? ''}='' OR strpos(lower(coalesce(r."facultyName",'')),lower(${filters.collegeOrFaculty ?? ''}))>0)
       AND (${filters.academicFieldOrDiscipline ?? ''}='' OR EXISTS(SELECT 1 FROM "AcademicTaxonomyNode" n WHERE n.id IN (r."fieldId",r."disciplineId") AND strpos(lower(n."canonicalName"),lower(${filters.academicFieldOrDiscipline ?? ''}))>0))
     )`;
+    return query;
+  }
+
+  async list(filters:MajorFilters):Promise<PaginatedMajorResult<MajorDto>> {
+    const page=Math.min(1000,Math.max(1,filters.page || 1));const pageSize=Math.min(50,Math.max(1,filters.pageSize || 25));
+    const query=this.adminFilterRows(filters);
     const order=Prisma.raw(({UPDATED_DESC:'"createdAt" DESC',NAME_AR:'coalesce("nameAr","displayName") COLLATE "C" ASC',NAME_EN:'coalesce("nameEn","canonicalName") COLLATE "C" ASC',DEGREE:'level ASC NULLS LAST',STATUS:'status ASC'} as const)[filters.sort??'UPDATED_DESC']);
     const [ids,counts]=await Promise.all([
       filters.countOnly ? Promise.resolve([] as Array<{majorId:string;profileId:string|null}>) : this.prisma.$queryRaw<Array<{majorId:string;profileId:string|null}>>(Prisma.sql`${query} SELECT "majorId","profileId" FROM filtered ORDER BY ${order},"rowId" DESC LIMIT ${pageSize} OFFSET ${(page-1)*pageSize}`),

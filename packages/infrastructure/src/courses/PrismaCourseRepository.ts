@@ -335,14 +335,7 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
     return data.map((record) => this.mapToDto(record));
   }
 
-  public async list(filters: CourseFilters): Promise<PaginatedCourseResult<CourseDto>> {
-    const nativeMetrics = filters.includeStatistics && filters.originType === CourseOriginType.NATIVE_MANARATAK_COURSE;
-    if (filters.includeStatistics && !this.transactionBound) return this.prisma.$transaction(
-      tx => new PrismaCourseRepository(tx as unknown as PrismaClient, true).list(filters),
-      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
-    );
-    const page = Math.max(1, filters.page ?? 1);
-    const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 20));
+  async adminFilterWhere(filters: CourseFilters): Promise<Prisma.CourseWhereInput> {
     const where = courseCatalogWhere(filters);
     if (filters.taxonomyNodeId) {
       // UNION also bounds traversal in the presence of a malformed cycle.
@@ -356,6 +349,18 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
       `);
       where.academicTaxonomyLinks = { some: { taxonomyNodeId: { in: descendants.map(node => node.id) }, reviewState: 'APPROVED', taxonomyNode: { status: 'ACTIVE' } } };
     }
+    return where;
+  }
+
+  public async list(filters: CourseFilters): Promise<PaginatedCourseResult<CourseDto>> {
+    const nativeMetrics = filters.includeStatistics && filters.originType === CourseOriginType.NATIVE_MANARATAK_COURSE;
+    if (filters.includeStatistics && !this.transactionBound) return this.prisma.$transaction(
+      tx => new PrismaCourseRepository(tx as unknown as PrismaClient, true).list(filters),
+      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+    );
+    const page = Math.max(1, filters.page ?? 1);
+    const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 20));
+    const where = await this.adminFilterWhere(filters);
     const result = await this.listPage(where, page, pageSize, filters.sort, filters.includeStatistics);
     if (nativeMetrics) result.nativeLearning = await nativeCourseLearningReport(this.prisma, filters, result.data.map(row => row.id));
     if (filters.includeStatistics) {

@@ -221,7 +221,7 @@ describe('PrismaInternationalTestRepository', () => {
       expect.objectContaining({
         where: expect.objectContaining({
           status: { in: [InternationalTestStatus.PUBLISHED] },
-          testCategory: { in: [InternationalTestCategory.LANGUAGE_PROFICIENCY] },
+          testCategory: { in: [InternationalTestCategory.ENGLISH_LANGUAGE,InternationalTestCategory.LANGUAGE_PROFICIENCY] },
           AND: expect.arrayContaining([{OR:[{providerName:'ETS'},{provider:{is:{displayName:'ETS'}}}]},expect.objectContaining({OR: expect.any(Array)})])
         })
       })
@@ -235,7 +235,7 @@ describe('PrismaInternationalTestRepository', () => {
       category: InternationalTestCategory.GRADUATE_ADMISSION, staleOnly: true, countOnly: true });
     expect(mockPrisma.referenceCountry.findUnique).toHaveBeenCalledWith({where:{iso2Code:'IN'},select:{id:true}});
     expect(mockPrisma.internationalTest.count).toHaveBeenCalledWith({ where: expect.objectContaining({
-      testCategory: InternationalTestCategory.GRADUATE_ADMISSION,
+      testCategory: {in:[InternationalTestCategory.GRADUATE_ADMISSION,InternationalTestCategory.GRAD_ADMISSION]},
       AND: expect.arrayContaining([
         {OR:[{providerName:'NTA'},{provider:{is:{displayName:'NTA'}}}]},
         { OR: [

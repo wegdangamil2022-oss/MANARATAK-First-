@@ -397,9 +397,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     }
   }
 
-  async list(filters: AdminScholarshipFilters): Promise<ScholarshipPage<ScholarshipDto>> {
-    const page = filters.page || 1;
-    const pageSize = filters.pageSize || 20;
+  async adminFilterWhere(filters: AdminScholarshipFilters): Promise<Prisma.ScholarshipWhereInput> {
     const where: Prisma.ScholarshipWhereInput = {};
     if (filters.status) where.status = filters.status;
     if (filters.completenessStatus) where.completenessStatus = filters.completenessStatus;
@@ -502,6 +500,14 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       { optionalFields: { path: ['localizedNames', 'en'], string_contains: filters.query } },
     ] });
     if (constraints.length) where.AND = constraints;
+
+    return where;
+  }
+
+  async list(filters: AdminScholarshipFilters): Promise<ScholarshipPage<ScholarshipDto>> {
+    const page = filters.page || 1;
+    const pageSize = filters.pageSize || 20;
+    const where = await this.adminFilterWhere(filters);
 
     if (filters.countOnly) {
       const total = await this.prisma.scholarship.count({where});

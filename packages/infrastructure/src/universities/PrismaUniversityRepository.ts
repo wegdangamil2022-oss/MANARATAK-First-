@@ -46,6 +46,7 @@ import {
 } from '../api-foundation/StableCursor';
 
 const universityDetails = {
+  cityReference: { select: { name: true, nameAr: true } },
   campuses: true,
   organizationUnits: true,
   academicPrograms: {
@@ -100,6 +101,7 @@ const universitySummarySelect = {
   country:true,city:true,foundedYear:true,officialWebsite:true,sourceUrl:true,officialSourceUrl:true,
   status:true,completenessStatus:true,countryReferenceId:true,regionReferenceId:true,cityReferenceId:true,
   institutionType:true,createdAt:true,updatedAt:true,
+  cityReference:{select:{name:true,nameAr:true}},
 } satisfies Prisma.UniversitySelect;
 
 interface UniversityTransactionContext extends AtomicPersistenceContext {
@@ -432,10 +434,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     return result;
   }
 
-  async list(filters: UniversityFilters): Promise<PaginatedUniversityResult<UniversityDto>> {
-    const page = Math.max(1, filters.page || 1);
-    const pageSize = Math.min(100, Math.max(1, filters.pageSize || 50));
-
+  adminFilterWhere(filters: UniversityFilters): Prisma.UniversityWhereInput {
     const where: Prisma.UniversityWhereInput = {};
     if (filters.status) where.status = filters.status;
     if (filters.completenessStatus) where.completenessStatus = filters.completenessStatus;
@@ -487,6 +486,15 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         },
       ];
     }
+
+    return where;
+  }
+
+  async list(filters: UniversityFilters): Promise<PaginatedUniversityResult<UniversityDto>> {
+    const page = Math.max(1, filters.page || 1);
+    const pageSize = Math.min(100, Math.max(1, filters.pageSize || 50));
+
+    const where = this.adminFilterWhere(filters);
 
     if (filters.countOnly) {
       const total = await this.prisma.university.count({ where });
@@ -1610,7 +1618,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   }
 
   private mapToDto(record: UniversityRecord): UniversityDto {
-    const { optionalFields, translations = [], localizedTexts = [], ...rest } = record;
+    const { optionalFields, translations = [], localizedTexts = [], cityReference, ...rest } = record;
     const safeOptionalFields = sanitizeUniversityOptionalFields(optionalFields);
     const localizedNames = Object.fromEntries(
       translations
@@ -1625,6 +1633,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     return {
       ...safeOptionalFields,
       ...rest,
+      cityReferenceLabel: cityReference?.nameAr || cityReference?.name || null,
       academicPrograms: (rest.academicPrograms ?? []).map((program) => ({
         id: program.id,
         universityId: program.universityId,

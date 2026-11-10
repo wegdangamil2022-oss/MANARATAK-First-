@@ -66,6 +66,8 @@ export interface UniversityDto {
   displayName: string;
   country?: string | null;
   city?: string | null;
+  /** Read-only label of the canonical city, separate from the unchanged source city text. */
+  cityReferenceLabel?: string | null;
   institutionType?: string | null;
   officialWebsite?: string | null;
   status: UniversityStatus;
