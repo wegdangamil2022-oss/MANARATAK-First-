@@ -1,0 +1,88 @@
+{
+  "pass": true,
+  "completedOn": "2026-11-12",
+  "planHash": "eaeec03c4e91e9b59478f1698ea398145ffa256bf004e90194394e6c9c4c4d6b",
+  "sourceHash": "6b657da9e1f5a9159b1952afe914d8aacb97593ed178e3cb99c141d564d1cf13",
+  "slugAmendment": {
+    "parentHash": "493f75ae797348067146046b76627b8e6107900bd7f26943794218e9d74709c5",
+    "changedUncommittedSlugs": 659,
+    "preservedCommittedBatches": 19
+  },
+  "newDrafts": 1134,
+  "existingRowsPreserved": 5,
+  "activeScholarships": 1138,
+  "batches": 46,
+  "resolved": {
+    "countries": 1021,
+    "languages": 488,
+    "sponsorUniversities": 648,
+    "majorLinks": 8384,
+    "degreeLinks": 1684,
+    "participatingUniversityLinks": 50,
+    "sourceTestLinks": 30
+  },
+  "graphCounts": {
+    "ScholarshipDegreeTarget": 1700,
+    "ScholarshipMajorTarget": 15244,
+    "ScholarshipUniversityLink": 425,
+    "ScholarshipEligibilityItem": 6020,
+    "ScholarshipRequiredDocument": 8128,
+    "ScholarshipBenefit": 4993,
+    "ScholarshipSourceEvidence": 1911,
+    "ScholarshipSponsorContext": 1134,
+    "ScholarshipApplicationCycle": 1134,
+    "ScholarshipVersion": 1134,
+    "ScholarshipEligibilityRuleVersion": 6020,
+    "ScholarshipAwardPackageVersion": 4993
+  },
+  "sourceTextUnchanged": true,
+  "eligibilityUnchanged": true,
+  "rawSectionsUnchanged": true,
+  "auditRecords": 46,
+  "outboxRecords": 46,
+  "filterChecks": [
+    {
+      "key": "majorId",
+      "id": "76013de2-04de-4a72-8481-2f9b29bd9863",
+      "total": 162,
+      "pass": true
+    },
+    {
+      "key": "internationalTestId",
+      "id": "975e4a91-3032-4e31-b5c4-b344cb258446",
+      "total": 13,
+      "pass": true
+    },
+    {
+      "key": "countryReferenceId",
+      "id": "2c14f864-d235-4276-8c87-d1bb19ceca0d",
+      "total": 4,
+      "pass": true
+    }
+  ],
+  "proof": {
+    "pass": true,
+    "planHash": "eaeec03c4e91e9b59478f1698ea398145ffa256bf004e90194394e6c9c4c4d6b",
+    "records": 25,
+    "forcedRollback": true,
+    "replayWithoutWrites": true,
+    "changedReplayRejected": true,
+    "auditAndOutbox": true,
+    "publication": false,
+    "originalDatabaseWrites": 0
+  },
+  "publication": false,
+  "schemaChanged": false,
+  "quality": {
+    "vitestTests": 51,
+    "nodeTests": 5,
+    "typeScript": "PASS",
+    "adminBuild": "PASS",
+    "sourceQuality": "PASS",
+    "secrets": "PASS"
+  },
+  "limitations": [
+    "Broad or ambiguous source descriptions remain source-only.",
+    "Source review is recorded separately from official verification; new drafts remain PENDING."
+  ]
+}
