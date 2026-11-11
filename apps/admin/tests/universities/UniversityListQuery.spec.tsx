@@ -20,6 +20,11 @@ afterEach(async () => {
   if (tree) await act(async () => tree.unmount());
 });
 describe('University list scope', () => {
+  it('preserves supported continents and rejects invalid continent values', () => {
+    expect(readUniversityListQuery('continent=South%20America').params.get('continent')).toBe('South America');
+    expect(readUniversityListQuery('continent=UNSPECIFIED').params.get('continent')).toBe('UNSPECIFIED');
+    expect(readUniversityListQuery('continent=bad').params.has('continent')).toBe(false);
+  });
   it('restores filters, location, pagination and router history without losing state', async () => {
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
     await act(async () => {

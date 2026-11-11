@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { FileText, Copy, Ban, Eye } from 'lucide-react';
@@ -125,7 +126,7 @@ export function NotificationTemplateDetails({ id, ar }: { id: string; ar: boolea
                 {c('لغة العرض والمعاينة', 'Display and preview language')}
                 <select value={locale} onChange={(e) => setLocale(e.target.value)}>
                   <option value="ar">العربية</option>
-                  <option value="en">English</option>
+                  <option value="en">{adminOptionLabel("English", ar)}</option>
                 </select>
               </label>
               {item.contents?.[locale] ? (

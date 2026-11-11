@@ -1,3 +1,4 @@
+import {adminOptionLabel} from './adminOptionLabels';
 import { useEffect, useRef, useState } from 'react';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
@@ -398,8 +399,8 @@ export function AuthorizationPolicyPanel({
               setForm({ ...form, ruleType: e.target.value as 'TIME' | 'IP' | 'COURSE_SCOPE' })
             }
           >
-            <option value="TIME">TIME</option>
-            <option value="IP">IP</option>
+            <option value="TIME">{adminOptionLabel("TIME", language === 'ar')}</option>
+            <option value="IP">{adminOptionLabel("IP", language === 'ar')}</option>
             <option value="COURSE_SCOPE">
               {language === 'ar' ? 'نطاق دورات محددة' : 'Assigned course scope'}
             </option>

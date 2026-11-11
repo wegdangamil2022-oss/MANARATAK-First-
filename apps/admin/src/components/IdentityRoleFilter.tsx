@@ -1,3 +1,4 @@
+import {adminOptionLabel} from './adminOptionLabels';
 import { useEffect, useState } from 'react';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
@@ -8,7 +9,7 @@ export function IdentityRoleFilter({
   value: string;
   onChange: (id: string) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [search, setSearch] = useState('');
   const [cursor, setCursor] = useState('');
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -72,7 +73,7 @@ export function IdentityRoleFilter({
           onChange={(e) => onChange(e.target.value)}
         >
           <option value="">{t('iam_all')}</option>
-          {value && !rows.some((row) => row.id === value) && <option value={value}>{value}</option>}
+          {value && !rows.some((row) => row.id === value) && <option value={value}>{adminOptionLabel(value, language === 'ar')}</option>}
           {rows.map((row) => (
             <option key={row.id} value={row.id}>
               {row.name}

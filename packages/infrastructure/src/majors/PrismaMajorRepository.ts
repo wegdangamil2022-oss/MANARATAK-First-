@@ -436,7 +436,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     ]);
     const profileIds=ids.flatMap(row=>row.profileId?[row.profileId]:[]);
     const [majors,content]=await Promise.all([
-      ids.length?this.listOwnerGraphs([...new Set(ids.map(row=>row.majorId))]):[],
+      ids.length?this.listOwnerGraphs([...new Set(ids.map(row=>row.majorId))],filters.summary):[],
       profileIds.length?this.prisma.$queryRaw<Array<{profileId:string;versionId:string;state:'NO_CONTENT'|'INCOMPLETE'|'NEEDS_REVIEW'|'REVIEWED'}>>(Prisma.sql`
       SELECT p.id AS "profileId",v.id AS "versionId",CASE WHEN count(s.id)=0 THEN 'NO_CONTENT'
         WHEN bool_or(btrim(s.content)='' OR s."reviewStatus"='INCOMPLETE') THEN 'INCOMPLETE'
@@ -459,15 +459,15 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
   }
 
   /** Same bounded owner graph as MAJOR_INCLUDE, in one database round trip. */
-  private async listOwnerGraphs(ids: string[]) {
+  private async listOwnerGraphs(ids: string[], summary=false) {
     const records = await this.prisma.$queryRaw<Array<Record<string, any>>>(Prisma.sql`
-      SELECT m.*, to_jsonb(af) AS "academicField", to_jsonb(d) AS discipline,
+      SELECT ${summary ? Prisma.sql`(to_jsonb(m)-'optionalFields')||jsonb_build_object('optionalFields',jsonb_build_object('degreeLevel',m."optionalFields"->'degreeLevel'))` : Prisma.sql`to_jsonb(m)`} AS "__owner", to_jsonb(af) ${summary?Prisma.sql`-ARRAY['metadata','description']`:Prisma.empty} AS "academicField", to_jsonb(d) ${summary?Prisma.sql`-ARRAY['metadata','description']`:Prisma.empty} AS discipline,
         COALESCE((SELECT jsonb_agg(c) FROM "MajorClassificationMapping" c WHERE c."majorId"=m.id),'[]'::jsonb) AS "classificationMappings",
-        COALESCE((SELECT jsonb_agg(s ORDER BY s."createdAt" DESC) FROM (
+        ${summary ? Prisma.sql`'[]'::jsonb` : Prisma.sql`COALESCE((SELECT jsonb_agg(s ORDER BY s."createdAt" DESC) FROM (
           SELECT s.* FROM "MajorSource" s WHERE s."majorId"=m.id ORDER BY s."createdAt" DESC LIMIT 50
-        ) s),'[]'::jsonb) AS sources,
-        COALESCE((SELECT jsonb_agg(to_jsonb(p) || jsonb_build_object(
-          'degreeLevel',to_jsonb(dl),'academicField',to_jsonb(paf),'discipline',to_jsonb(pd),
+        ) s),'[]'::jsonb)`} AS sources,
+        COALESCE((SELECT jsonb_agg(${summary ? Prisma.sql`(to_jsonb(p)-'metadata')` : Prisma.sql`to_jsonb(p)`} || jsonb_build_object(
+          'degreeLevel',to_jsonb(dl),'academicField',to_jsonb(paf) ${summary?Prisma.sql`-ARRAY['metadata','description']`:Prisma.empty},'discipline',to_jsonb(pd) ${summary?Prisma.sql`-ARRAY['metadata','description']`:Prisma.empty},
           'classificationMappings',COALESCE((SELECT jsonb_agg(c) FROM "MajorClassificationMapping" c WHERE c."profileId"=p.id),'[]'::jsonb)
         )) FROM "MajorLevelProfile" p
           LEFT JOIN "DegreeLevel" dl ON dl.id=p."degreeLevelId"
@@ -490,6 +490,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
       return record;
     };
     for (const record of records) {
+      if(record.__owner){Object.assign(record,record.__owner);delete record.__owner;dates(record);}
       dates(record.academicField); dates(record.discipline);
       record.sources.forEach(dates);
       for (const profile of record.levelProfiles) {

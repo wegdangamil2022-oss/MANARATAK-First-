@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../components/adminOptionLabels';
 import { TranslationOwnerCapabilitiesPanel } from '../components/TranslationOwnerCapabilitiesPanel';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -794,7 +795,7 @@ export function AdminTranslationWorkspacePage() {
                       onChange={(e) => change({ locale: e.target.value })}
                     >
                       <option value="ar">العربية</option>
-                      <option value="en">English</option>
+                      <option value="en">{adminOptionLabel("English", ar)}</option>
                     </select>
                   </label>
                   <label>

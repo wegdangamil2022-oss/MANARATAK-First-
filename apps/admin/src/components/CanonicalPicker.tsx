@@ -5,6 +5,7 @@ import {
   type CanonicalPickerPage,
   canonicalOptionIsSelectable,
 } from '../api/canonicalPickers';
+import {adminOptionLabel} from './adminOptionLabels';
 
 type Loader = (query?: string, page?: number) => Promise<CanonicalPickerOption[]>;
 type PickerLoader = (
@@ -103,6 +104,7 @@ export function CanonicalPicker({
   const selected = useMemo(() => options.find((item) => item.id === value), [options, value]);
   const selectedBlocked = !allowInactive && selected && !canonicalOptionIsSelectable(selected);
   const missing = Boolean(value) && !selected;
+  const showReferenceDetails = !compact && displayMode === 'reference';
 
   return (
     <div className="min-w-0 space-y-2 text-xs font-medium text-[#203442]">
@@ -110,7 +112,7 @@ export function CanonicalPicker({
         {icon}
         {label}
       </span>
-      {!compact && (
+      {(!compact || (paged && (pageHasMore || page>1 || search))) && (
         <input
           type="search"
           maxLength={200}
@@ -168,7 +170,7 @@ export function CanonicalPicker({
               : ar
                 ? 'التحديد الحالي (خارج النتائج المعروضة)'
                 : 'Current selection (outside bounded results)'}
-            {displayMode === 'reference' ? `: ${value}` : ''}
+            {showReferenceDetails ? `: ${value}` : ''}
           </option>
         )}
         {options.map((item) => (
@@ -178,8 +180,8 @@ export function CanonicalPicker({
             disabled={!allowInactive && !canonicalOptionIsSelectable(item)}
           >
             {item.label}
-            {displayMode === 'reference'
-              ? `${item.code ? ` · ${item.code}` : ''} · ${item.lifecycle}`
+            {showReferenceDetails
+              ? `${item.code ? ` · ${item.code}` : ''} · ${ar?adminOptionLabel(item.lifecycle):item.lifecycle}`
               : ''}
           </option>
         ))}

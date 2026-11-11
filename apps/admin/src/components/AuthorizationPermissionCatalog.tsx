@@ -1,3 +1,4 @@
+import {adminOptionLabel} from './adminOptionLabels';
 import { useState } from 'react';
 import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
 import { useTranslation } from '../i18n/I18nProvider';
@@ -43,7 +44,7 @@ export function AuthorizationPermissionCatalog({ permissions }: { permissions: s
             <option value="">{t('iam_all')}</option>
             {[...new Set(available.map((entry) => entry.domain))].map((value) => (
               <option key={value} value={value}>
-                {value}
+                {adminOptionLabel(value, language === 'ar')}
               </option>
             ))}
           </select>
@@ -58,7 +59,7 @@ export function AuthorizationPermissionCatalog({ permissions }: { permissions: s
             <option value="">{t('iam_all')}</option>
             {['STANDARD', 'HIGH', 'CRITICAL'].map((value) => (
               <option key={value} value={value}>
-                {value}
+                {adminOptionLabel(value, language === 'ar')}
               </option>
             ))}
           </select>

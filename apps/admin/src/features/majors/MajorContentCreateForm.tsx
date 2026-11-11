@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { useEffect, useRef, useState } from 'react';
 import { Plus, Save, X } from 'lucide-react';
 import { majorContentSlots } from '@manaratak/domain';
@@ -119,7 +120,7 @@ export function MajorContentCreateForm({
           اللغة
           <select value={locale} onChange={(event) => setLocale(event.target.value)}>
             <option value="ar">العربية</option>
-            <option value="en">English</option>
+            <option value="en">{adminOptionLabel("English")}</option>
           </select>
         </label>
       </div>

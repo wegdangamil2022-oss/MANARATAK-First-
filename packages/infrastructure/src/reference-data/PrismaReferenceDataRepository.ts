@@ -719,9 +719,9 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     }
     if (filters.countryIso2Code && ['CITY','REGION'].includes(type)) predicates.push(Prisma.sql`t."countryIso2Code"=${filters.countryIso2Code}`);
     if (filters.administrativeRegionId && type === 'CITY') predicates.push(Prisma.sql`t."administrativeRegionId"=${filters.administrativeRegionId}`);
-    if (filters.region && ['COUNTRY','CITY'].includes(type)) predicates.push(Prisma.sql`t."region"=${filters.region}`);
+    if (filters.region && ['COUNTRY','CITY'].includes(type)) predicates.push(type==='COUNTRY'&&filters.region==='Americas'?Prisma.sql`t."region" IN ('Americas','North America','South America')`:Prisma.sql`t."region"=${filters.region}`);
     if (filters.q) {
-      const columns = { COUNTRY:['name','nameAr','officialName','iso2Code','iso3Code'], CURRENCY:['name','isoCode','symbol'], LANGUAGE:['name','nativeName','isoCode'], CITY:['name','timezone'], REGION:['name','regionCode'] }[type];
+      const columns = { COUNTRY:['name','nameAr','officialName','iso2Code','iso3Code'], CURRENCY:['name','nameAr','isoCode','numericCode','symbol'], LANGUAGE:['name','nameAr','nativeName','isoCode'], CITY:['name','nameAr','timezone'], REGION:['name','nameAr','regionCode'] }[type];
       predicates.push(Prisma.sql`(${Prisma.join(columns.map(column => Prisma.sql`${Prisma.raw(`t."${column}"`)} ILIKE ${`%${filters.q}%`}`),' OR ')})`);
     }
     return Prisma.join(predicates,' AND ');
@@ -735,17 +735,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   private countryWhere(filters?: ReferenceDataFilters): Prisma.ReferenceCountryWhereInput {
-    const where: {
-      isActive?: boolean;
-      region?: string;
-      OR?: Array<{
-        nameAr?: { contains: string; mode: 'insensitive' };
-        name?: { contains: string; mode: 'insensitive' };
-        officialName?: { contains: string; mode: 'insensitive' };
-        iso2Code?: { contains: string; mode: 'insensitive' };
-        iso3Code?: { contains: string; mode: 'insensitive' };
-      }>;
-    } = {};
+    const where: Prisma.ReferenceCountryWhereInput = {};
 
     if (filters?.activeOnly) {
       where.isActive = true;
@@ -757,7 +747,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       Object.assign(where, { NOT: { AND: [{ lifecycleState: 'ACTIVE' }, { isActive: true }] } });
     }
     if (filters?.region) {
-      where.region = filters.region;
+      where.region = filters.region === 'Americas' ? {in:['Americas','North America','South America']} : filters.region;
     }
     if (filters?.q) {
       where.OR = [
@@ -773,15 +763,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   private currencyWhere(filters?: ReferenceDataFilters): Prisma.ReferenceCurrencyWhereInput {
-    const where: {
-      isActive?: boolean;
-      OR?: Array<{
-        name?: { contains: string; mode: 'insensitive' };
-        isoCode?: { contains: string; mode: 'insensitive' };
-        symbol?: { contains: string; mode: 'insensitive' };
-        numericCode?: { contains: string; mode: 'insensitive' };
-      }>;
-    } = {};
+    const where: Prisma.ReferenceCurrencyWhereInput = {};
 
     if (filters?.activeOnly) {
       where.isActive = true;
@@ -796,6 +778,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       where.OR = [
         { name: { contains: filters.q, mode: 'insensitive' } },
         { isoCode: { contains: filters.q, mode: 'insensitive' } },
+        { nameAr: { contains: filters.q, mode: 'insensitive' } },
         { symbol: { contains: filters.q, mode: 'insensitive' } },
         { numericCode: { contains: filters.q, mode: 'insensitive' } }
       ];
@@ -805,14 +788,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   private languageWhere(filters?: ReferenceDataFilters): Prisma.ReferenceLanguageWhereInput {
-    const where: {
-      isActive?: boolean;
-      OR?: Array<{
-        name?: { contains: string; mode: 'insensitive' };
-        nativeName?: { contains: string; mode: 'insensitive' };
-        isoCode?: { contains: string; mode: 'insensitive' };
-      }>;
-    } = {};
+    const where: Prisma.ReferenceLanguageWhereInput = {};
 
     if (filters?.activeOnly) {
       where.isActive = true;
@@ -827,6 +803,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       where.OR = [
         { name: { contains: filters.q, mode: 'insensitive' } },
         { nativeName: { contains: filters.q, mode: 'insensitive' } },
+        { nameAr: { contains: filters.q, mode: 'insensitive' } },
         { isoCode: { contains: filters.q, mode: 'insensitive' } }
       ];
     }
@@ -859,7 +836,8 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     if (filters?.q) {
       where.OR = [
         { name: { contains: filters.q, mode: 'insensitive' } },
-        { timezone: { contains: filters.q, mode: 'insensitive' } }
+        { timezone: { contains: filters.q, mode: 'insensitive' } },
+        { nameAr: { contains: filters.q, mode: 'insensitive' } },
       ];
     }
 
@@ -875,7 +853,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
         { countryReference: { lifecycleState: 'ACTIVE', isActive: true } },
       ] } } : {}),
       ...(filters?.countryIso2Code ? { countryIso2Code: filters.countryIso2Code } : {}),
-      ...(filters?.q ? { OR: [{ name: { contains: filters.q, mode: 'insensitive' as const } }, { regionCode: { contains: filters.q, mode: 'insensitive' as const } }] } : {}),
+      ...(filters?.q ? { OR: [{ name: { contains: filters.q, mode: 'insensitive' as const } }, {nameAr:{contains:filters.q,mode:'insensitive' as const}}, { regionCode: { contains: filters.q, mode: 'insensitive' as const } }] } : {}),
     };
   }
 

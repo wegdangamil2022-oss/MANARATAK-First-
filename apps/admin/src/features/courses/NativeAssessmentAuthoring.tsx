@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { FileQuestion, Pencil, Trash2, Plus } from 'lucide-react';
@@ -22,7 +23,7 @@ export function NativeAssessmentAuthoring({
   command: NativeCourseCommand;
   onDirty: (value: boolean) => void;
 }) {
-  const { tr } = useCourseCopy(),
+  const { tr, ar } = useCourseCopy(),
     [params, setParams] = useSearchParams();
   const quizzes = snapshot.quizzes.filter((row) => row.status !== 'ARCHIVED');
   const quizId = quizzes.some((row) => row.id === params.get('assessment'))
@@ -506,7 +507,7 @@ export function NativeAssessmentAuthoring({
                     .filter(Boolean)
                     .map((value, index) => (
                       <option key={index} value={value}>
-                        {value}
+                        {adminOptionLabel(value, ar)}
                       </option>
                     ))
                 )}

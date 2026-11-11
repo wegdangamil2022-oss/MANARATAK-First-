@@ -243,6 +243,7 @@ describe('PrismaReferenceDataRepository', () => {
           OR: [
             { name: { contains: 'USD', mode: 'insensitive' } },
             { isoCode: { contains: 'USD', mode: 'insensitive' } },
+            { nameAr: { contains: 'USD', mode: 'insensitive' } },
             { symbol: { contains: 'USD', mode: 'insensitive' } },
             { numericCode: { contains: 'USD', mode: 'insensitive' } }
           ]
@@ -359,6 +360,7 @@ describe('PrismaReferenceDataRepository', () => {
           OR: [
             { name: { contains: 'ar', mode: 'insensitive' } },
             { nativeName: { contains: 'ar', mode: 'insensitive' } },
+            { nameAr: { contains: 'ar', mode: 'insensitive' } },
             { isoCode: { contains: 'ar', mode: 'insensitive' } }
           ]
         },
@@ -490,6 +492,7 @@ describe('PrismaReferenceDataRepository', () => {
           OR: [
             { name: { contains: 'Cai', mode: 'insensitive' } },
             { timezone: { contains: 'Cai', mode: 'insensitive' } },
+            { nameAr: { contains: 'Cai', mode: 'insensitive' } },
           ],
         },
         include: { administrativeRegion: true },

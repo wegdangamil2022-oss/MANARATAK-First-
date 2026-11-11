@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../adminOptionLabels';
 import { TaxonomyNavigation, TaxonomyRefresh } from './TaxonomyWorkspaceUI';
 import { useAdministrationDraftGuard } from '../../features/reference-data/useAdministrationDraftGuard';
 import { useEffect, useState, useCallback, useRef } from 'react';
@@ -302,7 +303,7 @@ function Diagnostics({ isAr }: { isAr: boolean }) {
         >
           <option value="">{isAr ? 'جميع المعايير' : 'All standards'}</option>
           {['ISCED', 'CIP', 'CUSTOM_NATIONAL'].map((value) => (
-            <option key={value}>{value}</option>
+            <option key={value} value={value}>{adminOptionLabel(value, isAr)}</option>
           ))}
         </select>
       </label>
@@ -456,7 +457,7 @@ function Crosswalk({ isAr }: { isAr: boolean }) {
               }}
             >
               {['ISCED', 'CIP', 'CUSTOM_NATIONAL'].map((standard) => (
-                <option key={standard}>{standard}</option>
+                <option key={standard} value={standard}>{adminOptionLabel(standard, isAr)}</option>
               ))}
             </select>
           </label>
@@ -478,7 +479,7 @@ function Crosswalk({ isAr }: { isAr: boolean }) {
               'SPECIALIZATION_CATEGORY',
               'STANDARD_CLASSIFICATION',
             ].map((value) => (
-              <option key={value}>{value}</option>
+              <option key={value} value={value}>{adminOptionLabel(value, isAr)}</option>
             ))}
           </select>
         </label>
@@ -492,7 +493,7 @@ function Crosswalk({ isAr }: { isAr: boolean }) {
             }}
           >
             {['ACTIVE', 'DRAFT', 'READY_TO_REVIEW', 'ARCHIVED'].map((value) => (
-              <option key={value}>{value}</option>
+              <option key={value} value={value}>{adminOptionLabel(value, isAr)}</option>
             ))}
           </select>
         </label>

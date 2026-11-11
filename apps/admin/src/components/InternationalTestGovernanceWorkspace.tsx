@@ -1,3 +1,4 @@
+import {adminOptionLabel} from './adminOptionLabels';
 import { testRelationshipLabel } from '../features/international-tests/TestRelationshipLabels';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { useOwnerOperationScope } from '../security/useOwnerOperationScope';
@@ -484,7 +485,7 @@ export function InternationalTestGovernanceWorkspace({
                     }}
                   >
                     {Object.keys(fields).map((value) => (
-                      <option key={value}>{value}</option>
+                      <option key={value} value={value}>{adminOptionLabel(value, isRtl)}</option>
                     ))}
                   </select>
                 </label>

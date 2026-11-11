@@ -2,6 +2,18 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PrismaUniversityRepository } from '../../src/universities/PrismaUniversityRepository';
 
 describe('PrismaUniversityRepository', () => {
+  it('combines continent and country filters and reads only card fields in summary mode',async()=>{
+    mockPrisma.university.findMany.mockResolvedValue([]);mockPrisma.university.count.mockResolvedValue(0);
+    await repository.list({continent:'Asia',countryReferenceId:'country-id',summary:true});
+    const query=mockPrisma.university.findMany.mock.calls[0][0];
+    expect(query.where.countryReferenceId).toBe('country-id');expect(query.where.AND).toContainEqual({countryReference:{is:{region:'Asia'}}});
+    expect(query.select).toMatchObject({id:true,displayName:true,status:true,updatedAt:true});expect(query.include).toBeUndefined();expect(query.select.optionalFields).toBeUndefined();
+  });
+  it('keeps countries without a continent accessible in the explicit unspecified filter',async()=>{
+    mockPrisma.university.findMany.mockResolvedValue([]);mockPrisma.university.count.mockResolvedValue(0);
+    await repository.list({continent:'UNSPECIFIED',summary:true});
+    expect(mockPrisma.university.findMany.mock.calls[0][0].where.AND).toContainEqual({OR:[{countryReferenceId:null},{countryReference:{is:{region:null}}}]});
+  });
   let mockPrisma: any;
   let repository: PrismaUniversityRepository;
 

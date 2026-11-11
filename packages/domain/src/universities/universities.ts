@@ -234,6 +234,8 @@ export interface UniversityNormalizedDetailsUpdate {
 }
 
 export interface UniversityFilters {
+  summary?: boolean;
+  continent?: 'Africa'|'Asia'|'Europe'|'North America'|'South America'|'Oceania'|'UNSPECIFIED';
   /** Admin counter reads omit hydrated university details. */
   countOnly?: boolean;
   sort?: 'CREATED_DESC' | 'UPDATED_DESC' | 'NAME_ASC';
@@ -256,7 +258,7 @@ export interface UniversityFilters {
 
 export type PublicUniversityFilters = Omit<
   UniversityFilters,
-  'countOnly' | 'status' | 'completenessStatus' | 'country' | 'city' | 'page' | 'pageSize'
+  'continent' | 'summary' | 'countOnly' | 'status' | 'completenessStatus' | 'country' | 'city' | 'page' | 'pageSize'
 > & { cursor?: string; limit?: number };
 export type PublicUniversityDto = Omit<
   UniversityDto,
@@ -335,6 +337,7 @@ export interface PaginatedUniversityOrganizationUnitResult {
 }
 
 export interface IUniversityRepository {
+  getAdminSummary?():Promise<{total:number;published:number;readyToReview:number;complete:number;incomplete:number}>;
   readStageGeography?(
     id: string,
   ): Promise<{ region: string | null; subregion: string | null } | undefined>;

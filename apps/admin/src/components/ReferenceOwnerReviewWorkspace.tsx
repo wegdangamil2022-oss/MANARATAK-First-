@@ -1,3 +1,4 @@
+import {adminOptionLabel} from './adminOptionLabels';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import type { ReferenceOwnerReview, ReferenceSnapshotRecord } from '@manaratak/domain';
@@ -50,7 +51,7 @@ export function ReferenceOwnerReviewWorkspace({ receiptId }: { receiptId?: strin
       <h3 className="font-bold">سجل نسخ المعايير</h3>
       <p className="text-xs">يجب إرفاق نسخة مصدر حقيقية محفوظة ومفحوصة، ثم مراجعتها يدويًا. حفظ البيانات الوصفية لا يثبت تغطية الكتالوج أو عضوية كل رمز.</p>
       <form className="grid gap-2" onSubmit={event => { event.preventDefault(); let retrievedAt: string; try { retrievedAt = new Date(source.retrievedAt).toISOString(); } catch { setError('تاريخ الاسترجاع غير صالح'); return; } run('/standards/snapshots',{...source,retrievedAt,supersedesSnapshotId:source.supersedesSnapshotId || null}); }}>
-        <label>المعيار<select className="border p-2" value={source.standardFamily} onChange={event => setSource(value => ({...value,standardFamily:event.target.value}))}>{REQUIRED_REFERENCE_STANDARD_FAMILIES.map(family => <option key={family}>{family}</option>)}</select></label>
+        <label>المعيار<select className="border p-2" value={source.standardFamily} onChange={event => setSource(value => ({...value,standardFamily:event.target.value}))}>{REQUIRED_REFERENCE_STANDARD_FAMILIES.map(family => <option key={family} value={family}>{adminOptionLabel(family)}</option>)}</select></label>
         {([['sourceAuthority','الجهة الرسمية'],['sourceVersion','الإصدار'],['sourceUrl','رابط المصدر https'],['sourceArtifactId','ملف المصدر المحفوظ'],['sourceArtifactHash','SHA-256'],['retrievedAt','تاريخ الاسترجاع'],['supersedesSnapshotId','معرّف النسخة السابقة، إن وجدت']] as const).map(([key,label]) => <label key={key}>{label}<input className="border p-2 block w-full" required={key !== 'supersedesSnapshotId'} maxLength={key === 'sourceUrl' ? 2000 : 300} type={key === 'retrievedAt' ? 'datetime-local' : 'text'} value={source[key]} onChange={event => setSource(value => ({...value,[key]:event.target.value}))} /></label>)}
         <button type="submit" disabled={busy}>حفظ نسخة للمراجعة</button>
       </form>

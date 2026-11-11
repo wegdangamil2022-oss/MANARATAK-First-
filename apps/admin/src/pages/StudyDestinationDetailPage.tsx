@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../components/adminOptionLabels';
 import { useAdministrationDraftGuard } from '../features/reference-data/useAdministrationDraftGuard';
 import {
   DestinationCard,
@@ -898,7 +899,7 @@ export function StudyDestinationDetailPage() {
               }}
             >
               <option value="ar">العربية</option>
-              <option value="en">English</option>
+              <option value="en">{adminOptionLabel("English", isAr)}</option>
             </select>
           </label>
           <span>

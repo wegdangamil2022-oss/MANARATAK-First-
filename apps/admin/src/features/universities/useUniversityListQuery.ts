@@ -5,6 +5,7 @@ const options: Record<string, readonly string[]> = {
   status: ['IMPORTED', 'READY_TO_REVIEW', 'READY_TO_PUBLISH', 'PUBLISHED', 'REJECTED', 'ARCHIVED'],
   completenessStatus: ['INCOMPLETE', 'NEEDS_REVIEW', 'COMPLETE'],
   institutionType: ['UNIVERSITY', 'COLLEGE', 'INSTITUTE', 'ACADEMY', 'OTHER'],
+  continent: ['Africa', 'Asia', 'Europe', 'North America', 'South America', 'Oceania', 'UNSPECIFIED'],
   sort: ['CREATED_DESC', 'UPDATED_DESC', 'NAME_ASC'],
 };
 const keys = [
@@ -12,6 +13,7 @@ const keys = [
   'status',
   'completenessStatus',
   'countryReferenceId',
+  'continent',
   'regionReferenceId',
   'cityReferenceId',
   'institutionType',

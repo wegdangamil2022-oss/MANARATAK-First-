@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../components/adminOptionLabels';
 import { AI_WORKSPACES, resolveAIWorkspace } from '../features/ai-tools/aiNavigation';
 import { AIRegistryFields } from '../features/ai-tools/AIRegistryFields';
 import { AIEmergencyControl } from '../features/ai-tools/AIEmergencyControl';
@@ -559,7 +560,7 @@ function PlaygroundPanel() {
                 className="input"
               >
                 {['PUBLIC', 'INTERNAL', 'CONFIDENTIAL'].map((value) => (
-                  <option key={value}>{value}</option>
+                  <option key={value} value={value}>{adminOptionLabel(value, copy.language === 'ar')}</option>
                 ))}
               </select>
             </Field>
@@ -721,7 +722,7 @@ function ExecutionsPanel() {
               'CANCELLED',
               'TIMED_OUT',
             ].map((value) => (
-              <option key={value}>{value}</option>
+              <option key={value} value={value}>{adminOptionLabel(value, copy.language === 'ar')}</option>
             ))}
           </select>
           {(
@@ -940,7 +941,7 @@ function AsyncQueuePanel() {
               'DEAD_LETTER',
               'CANCELLED',
             ].map((value) => (
-              <option key={value}>{value}</option>
+              <option key={value} value={value}>{adminOptionLabel(value, copy.language === 'ar')}</option>
             ))}
           </select>
           <button
@@ -1372,7 +1373,7 @@ function KnowledgeIndexingPanel() {
               {domains
                 .filter((domain) => domain === 'CMS')
                 .map((domain) => (
-                  <option key={domain}>{domain}</option>
+                  <option key={domain} value={domain}>{adminOptionLabel(domain, copy.language === 'ar')}</option>
                 ))}
             </select>
           </Field>
@@ -1404,7 +1405,7 @@ function KnowledgeIndexingPanel() {
               onChange={(event) => setLocale(event.target.value)}
             >
               <option value="ar">{copy('العربية')}</option>
-              <option value="en">English</option>
+              <option value="en">{adminOptionLabel("English", copy.language === 'ar')}</option>
             </select>
           </Field>
         </fieldset>
@@ -1953,7 +1954,7 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
           >
             <option value="">{copy('كل الحالات')}</option>
             {statuses.map((value) => (
-              <option key={value}>{value}</option>
+              <option key={value} value={value}>{adminOptionLabel(value, copy.language === 'ar')}</option>
             ))}
           </select>
           <button onClick={refresh} disabled={list.loading} className="action-secondary">

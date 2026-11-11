@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { AIProviderType, AIRequestPurpose } from '@manaratak/domain';
 import { useWorkspaceCopy, useWorkspaceRead } from './Workspace';
 
@@ -301,7 +302,7 @@ export function AIRegistryFields({
   json: string;
   onChange: (value: string) => void;
 }) {
-  const { c } = useWorkspaceCopy();
+  const { c, language } = useWorkspaceCopy();
   const providers = useWorkspaceRead<{ data: Array<{ key: string }> }>(
     fields[resource]?.some((field) => field.reference === 'providers')
       ? '/admin/ai/providers'
@@ -368,7 +369,7 @@ export function AIRegistryFields({
                       ]),
                     ).map((option) => (
                       <option key={option} value={option}>
-                        {option}
+                        {adminOptionLabel(option, language === 'ar')}
                       </option>
                     ))}
                   </select>
@@ -443,7 +444,7 @@ export function AIRegistryFields({
                   )
                     .filter(Boolean)
                     .map((key) => (
-                      <option key={key}>{key}</option>
+                      <option key={key} value={key}>{adminOptionLabel(key, language === 'ar')}</option>
                     ))}
                 </select>
               </label>

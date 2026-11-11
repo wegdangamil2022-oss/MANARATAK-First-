@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FilePlus2, Save, Eye, Plus, X } from 'lucide-react';
@@ -195,7 +196,7 @@ export function NotificationTemplateEditor({ ar }: { ar: boolean }) {
               }}
             >
               <option value="ar">العربية</option>
-              <option value="en">English</option>
+              <option value="en">{adminOptionLabel("English", ar)}</option>
             </select>
           </label>
           <div dir={locale === 'ar' ? 'rtl' : 'ltr'}>

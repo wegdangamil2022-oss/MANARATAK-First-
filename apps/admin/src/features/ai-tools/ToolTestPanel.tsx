@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { adminApiClient, createAdminIdempotencyKey } from '../../api/client';
@@ -191,7 +192,7 @@ function ToolInputFields({
   input: Input;
   set: (key: string, value: unknown) => void;
 }) {
-  const { c } = useWorkspaceCopy();
+  const { c, language } = useWorkspaceCopy();
   const text = (
     key: string,
     ar: string,
@@ -448,7 +449,7 @@ function ToolInputFields({
             >
               <option value="">{c('اختر اللغة', 'Select language')}</option>
               <option value="ar">العربية</option>
-              <option value="en">English</option>
+              <option value="en">{adminOptionLabel("English", language === 'ar')}</option>
             </select>
           </label>
           <label>

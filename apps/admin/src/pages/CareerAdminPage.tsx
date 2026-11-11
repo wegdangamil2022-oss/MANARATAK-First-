@@ -556,19 +556,18 @@ export function CareerAdminPage() {
                           onChange={(id) => change({ employerId: id ?? '' })}
                         />
                         <CanonicalPicker
-                          paged
                           optional
                           allowInactive
                           label={c('الدولة', 'Country')}
                           value={params.get('countryReferenceId')}
-                          load={canonicalPickerApi.countries}
+                          load={canonicalPickerApi.filterCountries}
                           onChange={(id, option) =>
                             change({
                               countryReferenceId: id ?? '',
                               countryCode: option?.code ?? '',
                               cityReferenceId: '',
                             })
-                          }
+                          } displayMode="label"
                         />
                         <CanonicalCityPicker
                           uiLanguage={language}

@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Send, Search, UserCheck } from 'lucide-react';
@@ -280,7 +281,7 @@ export function NotificationIntentCreate({ ar }: { ar: boolean }) {
                 }}
               >
                 <option value="ar">العربية</option>
-                <option value="en">English</option>
+                <option value="en">{adminOptionLabel("English", ar)}</option>
               </select>
             </label>
             <label>

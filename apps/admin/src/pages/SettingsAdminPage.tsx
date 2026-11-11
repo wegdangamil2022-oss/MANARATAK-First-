@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../components/adminOptionLabels';
 import { SettingsGovernancePanel } from '../components/SettingsGovernancePanel';
 import { SettingsResolutionInspector } from '../components/SettingsResolutionInspector';
 import { canEditSettingsAssignment, canEditSettingsScope } from './settingsAssignmentGovernance';
@@ -1098,7 +1099,7 @@ export function SettingsAdminPage() {
                 >
                   <option value="ALL">{isAr ? 'كل النطاقات' : 'All scopes'}</option>
                   {['GLOBAL', 'DOMAIN', 'IDENTITY', 'TENANT'].map((value) => (
-                    <option key={value}>{value}</option>
+                    <option key={value} value={value}>{adminOptionLabel(value, isAr)}</option>
                   ))}
                 </select>
               </Field>
@@ -1385,10 +1386,10 @@ export function SettingsAdminPage() {
                           }
                           className="input"
                         >
-                          <option>String</option>
-                          <option>Number</option>
-                          <option>Boolean</option>
-                          <option>Json</option>
+                          <option value="String">{adminOptionLabel("String", isAr)}</option>
+                          <option value="Number">{adminOptionLabel("Number", isAr)}</option>
+                          <option value="Boolean">{adminOptionLabel("Boolean", isAr)}</option>
+                          <option value="Json">{adminOptionLabel("Json", isAr)}</option>
                         </select>
                       </Field>
                       <Field label={isAr ? 'الوصف' : 'Description'}>
@@ -1462,7 +1463,7 @@ export function SettingsAdminPage() {
                         >
                           <option value="">—</option>
                           {knownDomainScopeKeys.map((domain) => (
-                            <option key={domain}>{domain}</option>
+                            <option key={domain} value={domain}>{adminOptionLabel(domain, isAr)}</option>
                           ))}
                         </select>
                       </Field>
@@ -1700,12 +1701,12 @@ export function SettingsAdminPage() {
                           }
                           className="input"
                         >
-                          <option>GLOBAL</option>
-                          <option>DOMAIN</option>
+                          <option value="GLOBAL">{adminOptionLabel("GLOBAL", isAr)}</option>
+                          <option value="DOMAIN">{adminOptionLabel("DOMAIN", isAr)}</option>
                           <option value="TENANT" disabled>
                             {isAr ? 'TENANT — غير معتمد للتعديل' : 'TENANT — legacy read-only'}
                           </option>
-                          <option>IDENTITY</option>
+                          <option value="IDENTITY">{adminOptionLabel("IDENTITY", isAr)}</option>
                         </select>
                         <p className="text-xs text-slate-500">
                           {isAr
@@ -1727,7 +1728,7 @@ export function SettingsAdminPage() {
                             <option value="">{isAr ? 'اختر المجال' : 'Select domain'}</option>
                             {knownDomainScopeKeys.map((domain) => (
                               <option key={domain} value={domain}>
-                                {domain}
+                                {adminOptionLabel(domain, isAr)}
                               </option>
                             ))}
                           </select>
@@ -1868,7 +1869,7 @@ export function SettingsAdminPage() {
                       —
                     </option>
                     {knownDomainScopeKeys.map((domain) => (
-                      <option key={domain}>{domain}</option>
+                      <option key={domain} value={domain}>{adminOptionLabel(domain, isAr)}</option>
                     ))}
                   </select>
                 </Field>

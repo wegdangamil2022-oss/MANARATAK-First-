@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../components/adminOptionLabels';
 import { adminPaths } from '../navigation/AdminRoutes';
 import { AdminLink } from '../components/AdminLink';
 import {
@@ -3359,12 +3360,12 @@ function VerifiedArtifactPanel({ ownerDomain, isArabic, onStaged }: {
       : 'Select your approved CSV or NDJSON asset and preflight before staging. The owner decides acceptance and publication.'}</p>
     <fieldset disabled={busy} className="space-y-3">
       <MappingProfilePicker sourceId="MANUAL_EAP_UPLOAD" domain={domain} value={mappingProfileId} onChange={id => { setMappingProfileId(id); setProof(null); }} isArabic={isArabic} />
-      {domain === 'REFERENCE_DATA' && <label className="block">نوع المرجع<select className="border rounded p-2" value={referenceEntityType} onChange={event => { setReferenceEntityType(event.target.value as typeof referenceEntityType); clear(); }}>{['COUNTRY','CURRENCY','LANGUAGE','CITY'].map(type => <option key={type}>{type}</option>)}</select></label>}
+      {domain === 'REFERENCE_DATA' && <label className="block">نوع المرجع<select className="border rounded p-2" value={referenceEntityType} onChange={event => { setReferenceEntityType(event.target.value as typeof referenceEntityType); clear(); }}>{['COUNTRY','CURRENCY','LANGUAGE','CITY'].map(type => <option key={type} value={type}>{adminOptionLabel(type, isArabic)}</option>)}</select></label>}
       <AssetPicker value={assetId} purpose="IMPORT_ARTIFACT" label={isArabic ? 'الملف' : 'File'}
         onChange={id => { clear(); setAssetId(id); }} />
       <label>{isArabic ? 'التنسيق' : 'Format'} <select value={format} onChange={event => {
         clear(); setFormat(event.target.value as 'csv' | 'ndjson' | 'json');
-      }}><option value="csv">CSV</option><option value="ndjson">NDJSON</option><option value="json">JSON</option></select></label>
+      }}><option value="csv">{adminOptionLabel("CSV", isArabic)}</option><option value="ndjson">{adminOptionLabel("NDJSON", isArabic)}</option><option value="json">{adminOptionLabel("JSON", isArabic)}</option></select></label>
       <label>{isArabic ? 'القسم المالك' : 'Owner domain'} <select value={domain} onChange={event => {
         clear(); setDomain(event.target.value as Exclude<DomainKey, 'ALL'>);
       }}>{DOMAIN_CONFIG.map(item =>
@@ -3471,7 +3472,7 @@ function SourceAuthoringPanel({ sources, isArabic, onChanged, onStaged }: {
         const result = await adminApiClient.request<{ executionAllowed: boolean; executionBlocker: string | null }>(`/admin/imports/sources/${encodeURIComponent(draft.sourceId)}/test`, { method: 'POST', body: '{}' });
         if (mounted.current) setProbe(result);
       })} className="rounded border p-2">{isArabic ? 'فحص الإعدادات دون جلب' : 'Test configuration without fetching'}</button>
-      <label>{isArabic ? 'تنسيق البيانات' : 'Data format'} <select value={format} onChange={event => setFormat(event.target.value as 'csv' | 'ndjson' | 'json')}><option value="csv">CSV</option><option value="ndjson">NDJSON</option><option value="json">JSON</option></select></label>
+      <label>{isArabic ? 'تنسيق البيانات' : 'Data format'} <select value={format} onChange={event => setFormat(event.target.value as 'csv' | 'ndjson' | 'json')}><option value="csv">{adminOptionLabel("CSV", isArabic)}</option><option value="ndjson">{adminOptionLabel("NDJSON", isArabic)}</option><option value="json">{adminOptionLabel("JSON", isArabic)}</option></select></label>
       <label>{isArabic ? 'القسم المستلم' : 'Receiving domain'} <select value={domain} onChange={event => setDomain(event.target.value)}>{DOMAIN_CONFIG.map(value => <option key={value.key} value={value.key}>{isArabic ? value.ar : value.en}</option>)}</select></label>
       <MappingProfilePicker sourceId={draft.sourceId} domain={domain} value={mappingProfileId} onChange={setMappingProfileId} isArabic={isArabic} />
       <label><input type="checkbox" checked={useApprovedFallback} onChange={event => { setUseApprovedFallback(event.target.checked); setMappingProfileId(''); }} />{isArabic ? 'استخدام البديل المعتمد لهذا التشغيل' : 'Use approved fallback for this run'}</label>

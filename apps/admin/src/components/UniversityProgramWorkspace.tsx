@@ -1,3 +1,4 @@
+import {adminOptionLabel} from './adminOptionLabels';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
@@ -226,7 +227,7 @@ export function UniversityProgramWorkspace() {
             >
               <option value="">—</option>
               {['UNKNOWN', 'FULL_TIME', 'PART_TIME'].map((value) => (
-                <option key={value}>{value}</option>
+                <option key={value} value={value}>{adminOptionLabel(value, ar)}</option>
               ))}
             </select>
           </label>
@@ -238,7 +239,7 @@ export function UniversityProgramWorkspace() {
             >
               <option value="">—</option>
               {['DRAFT', 'ACTIVE', 'ARCHIVED'].map((value) => (
-                <option key={value}>{value}</option>
+                <option key={value} value={value}>{adminOptionLabel(value, ar)}</option>
               ))}
             </select>
           </label>
@@ -257,7 +258,7 @@ export function UniversityProgramWorkspace() {
                 'ARCHIVED',
                 'REJECTED',
               ].map((value) => (
-                <option key={value}>{value}</option>
+                <option key={value} value={value}>{adminOptionLabel(value, ar)}</option>
               ))}
             </select>
           </label>

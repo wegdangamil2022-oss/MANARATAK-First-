@@ -39,6 +39,7 @@ export interface UniversityMutationContext extends AtomicMutationRequestContext 
 }
 
 export class AdminUniversityUseCases {
+  async getSummary(){if(!this.repository.getAdminSummary)throw Error('UNIVERSITY_SUMMARY_NOT_CONFIGURED');return this.repository.getAdminSummary();}
   constructor(
     private readonly repository: IUniversityRepository,
     private readonly atomicMutations?: AtomicDomainMutationCoordinator,

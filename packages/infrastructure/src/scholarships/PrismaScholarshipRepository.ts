@@ -508,6 +508,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       return {data:[],total,page,pageSize,totalPages:Math.ceil(total/pageSize)};
     }
     let data:any[];let total:number;
+    const listShape:Pick<Prisma.ScholarshipFindManyArgs,'select'|'include'>=filters.summary?{select:{id:true}}:{include:this.normalizedInclude};
     if(filters.sort==='DEADLINE_ASC'){
       const snapshot=await this.prisma.$transaction(async db=>{
       // Dated opportunities precede unknown and year-round deadlines, even if a legacy year-round row has a date.
@@ -515,13 +516,26 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       const other:Prisma.ScholarshipWhereInput={AND:[where,{OR:[{applicationDeadline:null},{deadlineType:'OPEN_ALL_YEAR'}]}]};
       const [datedCount,allCount]=await Promise.all([db.scholarship.count({where:dated}),db.scholarship.count({where})]);
       const skip=(page-1)*pageSize;
-      const first=skip<datedCount?await db.scholarship.findMany({where:dated,skip,take:Math.min(pageSize,datedCount-skip),orderBy:[{applicationDeadline:'asc'},{id:'asc'}],include:this.normalizedInclude}):[];
-      const second=first.length<pageSize?await db.scholarship.findMany({where:other,skip:Math.max(0,skip-datedCount),take:pageSize-first.length,orderBy:{id:'asc'},include:this.normalizedInclude}):[];
+      const first=skip<datedCount?await db.scholarship.findMany({where:dated,skip,take:Math.min(pageSize,datedCount-skip),orderBy:[{applicationDeadline:'asc'},{id:'asc'}],...listShape}):[];
+      const second=first.length<pageSize?await db.scholarship.findMany({where:other,skip:Math.max(0,skip-datedCount),take:pageSize-first.length,orderBy:{id:'asc'},...listShape}):[];
       return {data:[...first,...second],total:allCount};
       },{isolationLevel:'RepeatableRead'});data=snapshot.data;total=snapshot.total;
     }else{
       const orderBy:Prisma.ScholarshipOrderByWithRelationInput[]=filters.sort==='UPDATED_DESC'?[{updatedAt:'desc'},{id:'asc'}]:filters.sort==='COMPLETENESS_ASC'?[{completenessStatus:'asc'},{id:'asc'}]:[{createdAt:'desc'},{id:'asc'}];
-      [data,total]=await Promise.all([this.prisma.scholarship.findMany({where,skip:(page-1)*pageSize,take:pageSize,orderBy,include:this.normalizedInclude}),this.prisma.scholarship.count({where})]);
+      [data,total]=await Promise.all([this.prisma.scholarship.findMany({where,skip:(page-1)*pageSize,take:pageSize,orderBy,...listShape}),this.prisma.scholarship.count({where})]);
+    }
+
+    if(filters.summary&&data.length){
+      const order=data.map(row=>row.id),rows=await this.prisma.$queryRaw<Array<{record:Record<string,unknown>}>>(Prisma.sql`
+        SELECT (to_jsonb(s)-'optionalFields')||jsonb_build_object(
+          'optionalFields',jsonb_strip_nulls(jsonb_build_object(
+            'localizedNames',s."optionalFields"->'localizedNames','degreeLevel',s."optionalFields"->'degreeLevel',
+            'fundingCoverage',s."optionalFields"->'fundingCoverage','studyCountry',s."optionalFields"->'studyCountry')),
+          'primaryCountry',jsonb_build_object('name',c.name,'nameAr',c."nameAr",'isActive',c."isActive",'lifecycleState',c."lifecycleState"),
+          'degreeTargets',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',d.id,'targetKey',d."targetKey",'sourceLabel',d."sourceLabel",'degreeLevelId',d."degreeLevelId",'degreeLevel',jsonb_build_object('canonicalCode',l."canonicalCode",'nameAr',l."nameAr",'nameEn',l."nameEn"))) FROM "ScholarshipDegreeTarget" d LEFT JOIN "DegreeLevel" l ON l.id=d."degreeLevelId" WHERE d."scholarshipId"=s.id),'[]'::jsonb)
+        ) AS record FROM "Scholarship" s LEFT JOIN "ReferenceCountry" c ON c.id=s."countryReferenceId" WHERE s.id IN (${Prisma.join(order)})`);
+      const indexed=new Map(rows.map(({record})=>[record.id,record]));
+      data=order.map(id=>{const row=indexed.get(id);if(!row)throw Error('SCHOLARSHIP_LIST_OWNER_CHANGED');for(const key of['createdAt','updatedAt','applicationDeadline','lastVerifiedAt'])if(typeof row[key]==='string')row[key]=new Date(/[zZ]|[+-]\d\d:\d\d$/.test(row[key])?row[key]:row[key]+'Z');return row;});
     }
 
     return {
@@ -534,19 +548,19 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   }
 
   async getAdminSummary() {
-    const [all, imported, missingFields, needsVerification, needsTranslation, readyToPublish, published, archived, inReview, incomplete] = await Promise.all([
-      this.prisma.scholarship.count(),
-      this.prisma.scholarship.count({ where: { status: { in: [ScholarshipStatus.IMPORTED, ScholarshipStatus.READY_TO_REVIEW] } } }),
-      this.prisma.scholarship.count({ where: { OR: [{ completenessStatus: { not: ScholarshipCompletenessState.COMPLETE } }, { applicationDeadline: null }] } }),
-      this.prisma.scholarship.count({ where: { OR: [{ verificationStatus: { not: ScholarshipVerificationStatus.VERIFIED } }, { officialSourceUrl: null }] } }),
-      this.prisma.scholarship.count({where:{OR:[{optionalFields:{equals:Prisma.DbNull}},{optionalFields:{path:['localizedNames','en'],equals:Prisma.AnyNull}},{optionalFields:{path:['localizedNames','en'],equals:''}}]}}),
-      this.prisma.scholarship.count({ where: { status: ScholarshipStatus.READY_TO_PUBLISH } }),
-      this.prisma.scholarship.count({ where: { status: ScholarshipStatus.PUBLISHED } }),
-      this.prisma.scholarship.count({ where: { status: ScholarshipStatus.ARCHIVED } }),
-      this.prisma.scholarship.count({ where: { status: ScholarshipStatus.READY_TO_REVIEW } }),
-      this.prisma.scholarship.count({ where: { completenessStatus: ScholarshipCompletenessState.INCOMPLETE } }),
-    ]);
-    return { all, imported, missingFields, needsVerification, needsTranslation, readyToPublish, published, archived, inReview, incomplete };
+    const [result]=await this.prisma.$queryRaw<Array<Record<string,number>>>(Prisma.sql`
+      SELECT count(*)::int AS "all",
+        count(*) FILTER(WHERE status IN ('IMPORTED','READY_TO_REVIEW'))::int AS imported,
+        count(*) FILTER(WHERE "completenessStatus"<>'COMPLETE' OR "applicationDeadline" IS NULL)::int AS "missingFields",
+        count(*) FILTER(WHERE "verificationStatus"<>'VERIFIED' OR "officialSourceUrl" IS NULL)::int AS "needsVerification",
+        count(*) FILTER(WHERE COALESCE("optionalFields"#>>'{localizedNames,en}','')='')::int AS "needsTranslation",
+        count(*) FILTER(WHERE status='READY_TO_PUBLISH')::int AS "readyToPublish",
+        count(*) FILTER(WHERE status='PUBLISHED')::int AS published,
+        count(*) FILTER(WHERE status='ARCHIVED')::int AS archived,
+        count(*) FILTER(WHERE status='READY_TO_REVIEW')::int AS "inReview",
+        count(*) FILTER(WHERE "completenessStatus"='INCOMPLETE')::int AS incomplete
+      FROM "Scholarship"`);
+    return result;
   }
 
   async listPublishedProgramRelationshipsPage(programIds:string[],limit:number):Promise<Record<string,PublishedProgramScholarshipPage>>{

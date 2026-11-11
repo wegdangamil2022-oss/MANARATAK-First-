@@ -431,8 +431,8 @@ export function ScholarshipListPage() {
                 className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 cursor-pointer font-['Cairo']"
               >
                 <option value="">كل أنواع التمويل</option>
-                <option value="FULL">💎 تمويل كامل 100% (Fully Funded)</option>
-                <option value="PARTIAL">تمويل جزئي (Partially Funded)</option>
+                <option value="FULL">💎 تمويل كامل 100%</option>
+                <option value="PARTIAL">تمويل جزئي</option>
               </select>
             </div>
 

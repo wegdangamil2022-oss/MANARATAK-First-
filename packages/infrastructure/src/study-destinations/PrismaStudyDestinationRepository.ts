@@ -144,7 +144,7 @@ export class PrismaStudyDestinationRepository implements IStudyDestinationReposi
     return {
       isActive: true,
       lifecycleState: 'ACTIVE',
-      region: filters.region,
+      region: filters.region==='Americas'?{in:['Americas','North America','South America']}:filters.region,
       ...(filters.q
         ? {
             OR: [

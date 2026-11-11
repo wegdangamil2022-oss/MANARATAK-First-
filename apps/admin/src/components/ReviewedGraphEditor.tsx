@@ -1,3 +1,4 @@
+import {adminOptionLabel} from './adminOptionLabels';
 import { useRef, useState, useEffect } from 'react';
 import { adminApiClient } from '../api/client';
 import { canonicalPickerApi } from '../api/canonicalPickers';
@@ -67,7 +68,7 @@ export function ReviewedGraphEditor({ ownerId, ownerStatus, domain, profiles = [
     <fieldset disabled={saving || immutable} className="space-y-3">
       {domain === 'TEST' ? <label className="block text-sm">{isRtl ? 'نوع السجل' : 'Reference kind'}
         <select value={kind} onChange={event => { setKind(event.target.value as Kind); setReferenceId(null); setQuery(''); }} className="block w-full rounded border p-2">
-          {kinds.map(value => <option key={value} value={value}>{value}</option>)}
+          {kinds.map(value => <option key={value} value={value}>{adminOptionLabel(value, isRtl)}</option>)}
         </select>
       </label> : <label className="block text-sm">{isRtl ? 'مالك الرابط' : 'Relationship owner'}
         <select value={profileId} onChange={event => setProfileId(event.target.value)} className="block w-full rounded border p-2">
@@ -81,7 +82,7 @@ export function ReviewedGraphEditor({ ownerId, ownerStatus, domain, profiles = [
       <CanonicalPicker label={isRtl ? 'السجل المعياري النشط' : 'Active canonical record'} value={referenceId} onChange={setReferenceId} load={loadOptions} reloadKey={`${ownerId}:${kind}:${query}`} disabled={saving || immutable} />
       <label className="block text-sm">{isRtl ? 'نوع العلاقة' : 'Relationship type'}
         {domain === 'MAJOR' ? <select value={relationshipType} onChange={event => setRelationshipType(event.target.value)} className="block w-full rounded border p-2">
-          {mappingTypes.map(value => <option key={value} value={value}>{value}</option>)}
+          {mappingTypes.map(value => <option key={value} value={value}>{adminOptionLabel(value, isRtl)}</option>)}
         </select> : <input required value={relationshipType} maxLength={120} onChange={event => setRelationshipType(event.target.value)} className="block w-full rounded border p-2" />}
       </label>
       <label className="block text-sm">{isRtl ? 'سبب المراجعة' : 'Review reason'}<textarea required maxLength={2000} value={reason} onChange={event => setReason(event.target.value)} className="block w-full rounded border p-2" /></label>

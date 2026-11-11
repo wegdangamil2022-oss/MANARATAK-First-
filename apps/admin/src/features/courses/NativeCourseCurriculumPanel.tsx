@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { CourseCurriculumSnapshotDto } from '@manaratak/domain';
@@ -34,7 +35,7 @@ export function NativeCourseCurriculumPanel({
   reload: () => Promise<void>;
   canEdit?:boolean;
 }) {
-  const { tr } = useCourseCopy();
+  const { tr, ar } = useCourseCopy();
   const [params, setParams] = useSearchParams();
   const modules = snapshot.modules
     .filter((module) => module.status !== 'ARCHIVED')
@@ -242,7 +243,7 @@ export function NativeCourseCurriculumPanel({
               }}
             >
               {['VIDEO', 'AUDIO', 'IMAGE', 'PDF', 'DOCUMENT', 'SUBTITLE', 'OTHER'].map((type) => (
-                <option key={type}>{type}</option>
+                <option key={type} value={type}>{adminOptionLabel(type, ar)}</option>
               ))}
             </select>
           </label>

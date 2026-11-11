@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../adminOptionLabels';
 import { TaxonomyRefresh } from './TaxonomyWorkspaceUI';
 import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
 import { useAdministrationDraftGuard } from '../../features/reference-data/useAdministrationDraftGuard';
@@ -177,7 +178,7 @@ export function AcademicTaxonomyImportWorkspace({ isAr }: { isAr: boolean }) {
         >
           <option value="">{isAr ? 'الكل' : 'All'}</option>
           {['PREVIEWED', 'APPROVED', 'REJECTED', 'APPLIED'].map((value) => (
-            <option key={value}>{value}</option>
+            <option key={value} value={value}>{adminOptionLabel(value, isAr)}</option>
           ))}
         </select>
       </label>

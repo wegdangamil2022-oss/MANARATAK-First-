@@ -95,22 +95,8 @@ export function UniversityAdminPage() {
     const request = ++statsRequest.current;
     setStatsLoading(true);
     try {
-      const [totalRes, pubRes, revRes, compRes, incompRes] = await Promise.allSettled([
-        adminApiClient.request<PaginatedResponse>('/admin/universities?page=1&pageSize=1'),
-        adminApiClient.request<PaginatedResponse>('/admin/universities?page=1&pageSize=1&status=PUBLISHED'),
-        adminApiClient.request<PaginatedResponse>('/admin/universities?page=1&pageSize=1&status=READY_TO_REVIEW'),
-        adminApiClient.request<PaginatedResponse>('/admin/universities?page=1&pageSize=1&completenessStatus=COMPLETE'),
-        adminApiClient.request<PaginatedResponse>('/admin/universities?page=1&pageSize=1&completenessStatus=INCOMPLETE'),
-      ]);
-
-      if (request !== statsRequest.current) return;
-      setStats({
-        total: totalRes.status === 'fulfilled' ? totalRes.value.total : null,
-        published: pubRes.status === 'fulfilled' ? pubRes.value.total : null,
-        readyToReview: revRes.status === 'fulfilled' ? revRes.value.total : null,
-        complete: compRes.status === 'fulfilled' ? compRes.value.total : null,
-        incomplete: incompRes.status === 'fulfilled' ? incompRes.value.total : null,
-      });
+      const result=await adminApiClient.request<UniversityStats>('/admin/universities/summary');
+      if(request===statsRequest.current)setStats(result);
     } catch {
       // transient fail safe
     } finally {
@@ -124,11 +110,11 @@ export function UniversityAdminPage() {
     setError(null);
     setData(null);
     try {
-      const params = new URLSearchParams({ page: page.toString(), pageSize: '20' });
+      const params = new URLSearchParams({ page: page.toString(), pageSize: '20',summary:'true' });
       if (searchTerm.trim()) params.set('search', searchTerm.trim());
       if (statusFilter) params.append('status', statusFilter);
       if (completenessFilter) params.append('completenessStatus', completenessFilter);
-      for(const key of ['regionReferenceId','cityReferenceId','institutionType','sort']){const value=searchParams.get(key);if(value)params.set(key,value);}
+      for(const key of ['continent','regionReferenceId','cityReferenceId','institutionType','sort']){const value=searchParams.get(key);if(value)params.set(key,value);}
       if (countryReferenceId) params.append('countryReferenceId', countryReferenceId);
 
       const response = await adminApiClient.request<PaginatedResponse>(`/admin/universities?${params.toString()}`,{signal,cache:'no-store'});
@@ -380,7 +366,7 @@ export function UniversityAdminPage() {
           </div>
         </div>
         <div className="university-filter-fields grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <UniversityLocationFilters countryId={countryReferenceId} regionId={searchParams.get('regionReferenceId')??''} cityId={searchParams.get('cityReferenceId')??''} ar={isArabic} onChange={(key,value)=>{const next=new URLSearchParams(searchParams);if(value)next.set(key,value);else next.delete(key);if(key==='countryReferenceId'){next.delete('regionReferenceId');next.delete('cityReferenceId');}if(key==='regionReferenceId')next.delete('cityReferenceId');setSearchParams(next);setPage(1);}} />
+          <UniversityLocationFilters continent={searchParams.get('continent')??''} countryId={countryReferenceId} regionId={searchParams.get('regionReferenceId')??''} cityId={searchParams.get('cityReferenceId')??''} ar={isArabic} onChange={(key,value)=>{const next=new URLSearchParams(searchParams);if(value)next.set(key,value);else next.delete(key);if(key==='continent'){next.delete('countryReferenceId');next.delete('regionReferenceId');next.delete('cityReferenceId');}if(key==='countryReferenceId'){next.delete('regionReferenceId');next.delete('cityReferenceId');}if(key==='regionReferenceId')next.delete('cityReferenceId');setSearchParams(next);setPage(1);}} />
           <label><span><Building2 aria-hidden="true" />{tr('نوع المؤسسة','Institution type')}</span><select value={searchParams.get('institutionType')??''} onChange={event=>{const next=new URLSearchParams(searchParams);if(event.target.value)next.set('institutionType',event.target.value);else next.delete('institutionType');setSearchParams(next);setPage(1);}}><option value="">{tr('الكل','All')}</option>{[['UNIVERSITY','جامعة'],['COLLEGE','كلية'],['INSTITUTE','معهد'],['ACADEMY','أكاديمية'],['OTHER','أخرى']].map(([value,label])=><option key={value} value={value}>{isArabic?label:value}</option>)}</select></label>
           <label><span><ShieldCheck aria-hidden="true" />{tr('حالة النشر والمراجعة','Status')}</span><select value={statusFilter} onChange={event=>{setStatusFilter(event.target.value);setPage(1);}}><option value="">{tr('جميع الحالات','All statuses')}</option>{['IMPORTED','READY_TO_REVIEW','READY_TO_PUBLISH','PUBLISHED','REJECTED','ARCHIVED'].map(value=><option key={value} value={value}>{formatStatusLabel(value,isArabic)}</option>)}</select></label>
           <label><span><CheckCircle2 aria-hidden="true" />{tr('اكتمال البيانات','Completeness')}</span><select value={completenessFilter} onChange={event=>{setCompletenessFilter(event.target.value);setPage(1);}}><option value="">{tr('جميع مستويات الاكتمال','All completeness')}</option>{['COMPLETE','NEEDS_REVIEW','INCOMPLETE'].map(value=><option key={value} value={value}>{formatCompletenessLabel(value,isArabic)}</option>)}</select></label>

@@ -17,6 +17,13 @@ function build() {
   return { tx, prisma, repository: new PrismaStudyDestinationRepository(prisma) };
 }
 describe('Study destination typed persistence contract without a database', () => {
+  it('includes both American continents in the existing Americas filter', async () => {
+    const x = build();
+    await x.repository.listAdminCountries({page:1,pageSize:20,region:'Americas'});
+    const {where} = x.tx.referenceCountry.findMany.mock.calls[0][0];
+    expect(where.region).toEqual({in:['Americas','North America','South America']});
+    expect(x.tx.referenceCountry.count).toHaveBeenCalledWith({where});
+  });
   it('paginates canonical countries before materialization with one join read and one count in a snapshot', async () => {
     const x = build();
     await x.repository.listAdminCountries({

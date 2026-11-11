@@ -1157,9 +1157,9 @@ export function MajorDetailPage() {
                                       onChange={(e) => handleBlockChange(sectionEditKey(block), 'reviewStatus', e.target.value)}
                                       className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 outline-none focus:border-[#0E7C86]"
                                     >
-                                      <option value="NEEDS_REVIEW">بحاجة لمراجعة (NEEDS_REVIEW)</option>
-                                      <option value="COMPLETE">مكتمل وجاهز للمراجعة (COMPLETE)</option>
-                                      <option value="INCOMPLETE">غير مكتمل (INCOMPLETE)</option>
+                                      <option value="NEEDS_REVIEW">بحاجة لمراجعة</option>
+                                      <option value="COMPLETE">مكتمل وجاهز للمراجعة</option>
+                                      <option value="INCOMPLETE">غير مكتمل</option>
                                     </select>
                                   </div>
 

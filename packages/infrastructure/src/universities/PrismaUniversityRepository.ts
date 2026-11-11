@@ -95,6 +95,12 @@ const universityDetails = {
 } satisfies Prisma.UniversityInclude;
 
 type UniversityRecord = Prisma.UniversityGetPayload<{ include: typeof universityDetails }>;
+const universitySummarySelect = {
+  id:true,publicId:true,slug:true,canonicalName:true,canonicalDedupKey:true,displayName:true,
+  country:true,city:true,foundedYear:true,officialWebsite:true,sourceUrl:true,officialSourceUrl:true,
+  status:true,completenessStatus:true,countryReferenceId:true,regionReferenceId:true,cityReferenceId:true,
+  institutionType:true,createdAt:true,updatedAt:true,
+} satisfies Prisma.UniversitySelect;
 
 interface UniversityTransactionContext extends AtomicPersistenceContext {
   readonly transactionClient: Prisma.TransactionClient;
@@ -417,6 +423,15 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     });
   }
 
+  async getAdminSummary(){
+    const [result]=await this.prisma.$queryRaw<Array<{total:number;published:number;readyToReview:number;complete:number;incomplete:number}>>(Prisma.sql`
+      SELECT count(*)::int AS total,count(*) FILTER(WHERE status='PUBLISHED')::int AS published,
+      count(*) FILTER(WHERE status='READY_TO_REVIEW')::int AS "readyToReview",
+      count(*) FILTER(WHERE "completenessStatus"='COMPLETE')::int AS complete,
+      count(*) FILTER(WHERE "completenessStatus"='INCOMPLETE')::int AS incomplete FROM "University"`);
+    return result;
+  }
+
   async list(filters: UniversityFilters): Promise<PaginatedUniversityResult<UniversityDto>> {
     const page = Math.max(1, filters.page || 1);
     const pageSize = Math.min(100, Math.max(1, filters.pageSize || 50));
@@ -427,6 +442,9 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     if (filters.countryReferenceId) where.countryReferenceId = filters.countryReferenceId;
     else if (filters.country && this.legacyCountryTextFiltersEnabled)
       where.country = filters.country;
+    if(filters.continent)where.AND=[filters.continent==='UNSPECIFIED'
+      ? {OR:[{countryReferenceId:null},{countryReference:{is:{region:null}}}]}
+      : {countryReference:{is:{region:filters.continent}}}];
     if (filters.regionReferenceId) where.regionReferenceId = filters.regionReferenceId;
     if (filters.cityReferenceId) where.cityReferenceId = filters.cityReferenceId;
     if (filters.institutionType)
@@ -474,6 +492,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       const total = await this.prisma.university.count({ where });
       return { data: [], total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
     }
+    const listShape:Pick<Prisma.UniversityFindManyArgs,'select'|'include'>=filters.summary?{select:universitySummarySelect}:{include:universityDetails};
     const [data, total] = await Promise.all([
       this.prisma.university.findMany({
         where,
@@ -485,13 +504,13 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
             : filters.sort === 'UPDATED_DESC'
               ? [{ updatedAt: 'desc' }, { id: 'asc' }]
               : [{ createdAt: 'desc' }, { id: 'asc' }],
-        include: universityDetails,
+        ...listShape,
       }),
       this.prisma.university.count({ where }),
     ]);
 
     return {
-      data: data.map((d) => this.mapToDto(d)),
+      data: data.map((d) => this.mapToDto(d as UniversityRecord)),
       total,
       page,
       pageSize,

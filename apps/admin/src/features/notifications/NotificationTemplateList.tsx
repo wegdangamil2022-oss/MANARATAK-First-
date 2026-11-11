@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { FileText, Plus, Search } from 'lucide-react';
 import { AdminLink } from '../../components/AdminLink';
@@ -120,7 +121,7 @@ export function NotificationTemplateList({ ar }: { ar: boolean }) {
           >
             <option value="">{c('كل اللغات', 'All languages')}</option>
             <option value="ar">العربية</option>
-            <option value="en">English</option>
+            <option value="en">{adminOptionLabel("English", ar)}</option>
           </select>
         </label>
       </div>

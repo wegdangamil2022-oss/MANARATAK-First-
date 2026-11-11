@@ -3,6 +3,13 @@ import { PrismaScholarshipRepository } from '../../src/scholarships/PrismaSchola
 import { appendScholarshipEligibilityEdit, scholarshipEligibilityView } from '@manaratak/domain';
 
 describe('PrismaScholarshipRepository', () => {
+  it('keeps canonical filtering and card names while leaving source payloads to detail reads',async()=>{
+    mockPrisma.scholarship.findMany.mockResolvedValue([{id:'summary'}]);mockPrisma.scholarship.count.mockResolvedValue(1);
+    mockPrisma.$queryRaw=vi.fn().mockResolvedValue([{record:{id:'summary',displayName:'منحة',updatedAt:'2026-11-12T00:00:00',optionalFields:{localizedNames:{ar:'منحة',en:'Scholarship'}},degreeTargets:[{degreeLevelId:'master'}],primaryCountry:{isActive:true,lifecycleState:'ACTIVE',nameAr:'اليمن'}}}]);
+    const result=await repository.list({summary:true,majorId:'major-id'});expect(mockPrisma.scholarship.findMany.mock.calls[0][0].select).toEqual({id:true});
+    expect(JSON.stringify(mockPrisma.scholarship.findMany.mock.calls[0][0].where)).toContain('major-id');
+    expect(result.data[0]).toMatchObject({id:'summary',displayName:'منحة',studyCountryLabel:'اليمن',degreeTargets:[{degreeLevelId:'master'}]});expect(result.data[0].localizedNames).toEqual({ar:'منحة',en:'Scholarship'});expect(result.data[0].updatedAt).toEqual(new Date('2026-11-12T00:00:00Z'));
+  });
   it('finds source-related draft tests in admin filters without requiring a published test', async () => {
     mockPrisma.scholarship.findMany.mockResolvedValue([]);mockPrisma.scholarship.count.mockResolvedValue(0);
     await repository.list({ internationalTestId: 'draft-test' });
@@ -278,18 +285,14 @@ describe('PrismaScholarshipRepository', () => {
     expect(serialized).not.toContain('countrySourceLabel');
   });
 
-  it('derives dashboard counters from unbounded database count queries', async () => {
-    mockPrisma.scholarship.count
-      .mockResolvedValueOnce(503).mockResolvedValueOnce(220).mockResolvedValueOnce(31).mockResolvedValueOnce(44)
-      .mockResolvedValueOnce(27).mockResolvedValueOnce(19).mockResolvedValueOnce(155).mockResolvedValueOnce(7)
-      .mockResolvedValueOnce(23).mockResolvedValueOnce(17);
-    await expect(repository.getAdminSummary()).resolves.toEqual({
+  it('reads all dashboard counters in one aggregate without hydrating catalog rows', async () => {
+    const counters={
       all: 503, imported: 220, missingFields: 31, needsVerification: 44,
       needsTranslation: 27, readyToPublish: 19, published: 155, archived: 7, inReview:23, incomplete:17,
-    });
-    expect(mockPrisma.scholarship.count).toHaveBeenCalledTimes(10);
-    expect(mockPrisma.scholarship.count).toHaveBeenNthCalledWith(9,{where:{status:'READY_TO_REVIEW'}});
-    expect(mockPrisma.scholarship.count).toHaveBeenNthCalledWith(10,{where:{completenessStatus:'INCOMPLETE'}});
+    };mockPrisma.$queryRaw=vi.fn().mockResolvedValue([counters]);
+    await expect(repository.getAdminSummary()).resolves.toEqual(counters);
+    expect(mockPrisma.$queryRaw).toHaveBeenCalledTimes(1);
+    expect(mockPrisma.scholarship.count).not.toHaveBeenCalled();
     expect(mockPrisma.scholarship.findMany).not.toHaveBeenCalled();
   });
 });

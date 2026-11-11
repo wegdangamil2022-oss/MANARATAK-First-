@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import {
@@ -426,7 +427,7 @@ export function ReviewWorkspacePage() {
         >
           {[10, 25, 50].map((value) => (
             <option key={value} value={value}>
-              {value}
+              {adminOptionLabel(value, language === 'ar')}
             </option>
           ))}
         </select>

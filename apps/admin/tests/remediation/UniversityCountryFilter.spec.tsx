@@ -3,10 +3,10 @@ import { act, create } from 'react-test-renderer';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 
-const api = vi.hoisted(() => ({ request: vi.fn(), countries: vi.fn() }));
+const api = vi.hoisted(() => ({ request: vi.fn(), filterCountries: vi.fn() }));
 vi.mock('../../src/api/client', () => ({ adminApiClient: { request: api.request } }));
 vi.mock('../../src/api/canonicalPickers', () => ({
-  canonicalPickerApi: { countries: api.countries, regions: async () => [], cities: async () => [] },
+  canonicalPickerApi: { filterCountries: api.filterCountries, regions: async () => [], cities: async () => [] },
   canonicalOptionIsSelectable: () => true,
 }));
 vi.mock('../../src/i18n/I18nProvider', () => ({
@@ -26,7 +26,7 @@ beforeEach(() => {
   vi.useFakeTimers();
   vi.stubGlobal('window', { setTimeout, clearTimeout });
   api.request.mockReset().mockResolvedValue({ data: [], total: 0, page: 1, pageSize: 20, totalPages: 1 });
-  api.countries.mockReset().mockResolvedValue([{ id: 'country-id', code: 'YE', label: 'Yemen', lifecycle: 'ACTIVE' }]);
+  api.filterCountries.mockReset().mockResolvedValue([{ id: 'country-id', code: 'YE', label: 'Yemen', lifecycle: 'ACTIVE' }]);
 });
 afterEach(async () => {
   if (tree) await act(async () => tree!.unmount());
@@ -52,7 +52,7 @@ it('clears country through the real optional picker, removes dependent geography
   const query = new URLSearchParams(tree!.root.findByProps({ 'data-current-query': true }).children.join(''));
   expect(Object.fromEntries(query)).toEqual({ sort: 'NAME_ASC', page: '1', pageSize: '20' });
   const requests = api.request.mock.calls.map(([url]) => String(url));
-  expect(requests).toContain('/admin/universities?page=1&pageSize=20&sort=NAME_ASC');
+  expect(requests).toContain('/admin/universities?page=1&pageSize=20&summary=true&sort=NAME_ASC');
   expect(tree!.root.findAllByType('select').filter(node => ['Region', 'City'].includes(node.props['aria-label'])).every(node => node.props.disabled)).toBe(true);
 });
 it('resets the country deep link and other filters using the existing reset button', async () => {
@@ -62,5 +62,5 @@ it('resets the country deep link and other filters using the existing reset butt
   await act(async () => { await vi.advanceTimersByTimeAsync(350); });
   const query = new URLSearchParams(tree!.root.findByProps({ 'data-current-query': true }).children.join(''));
   expect(Object.fromEntries(query)).toEqual({ page: '1' });
-  expect(api.request.mock.calls.map(([url]) => String(url))).toContain('/admin/universities?page=1&pageSize=20');
+  expect(api.request.mock.calls.map(([url]) => String(url))).toContain('/admin/universities?page=1&pageSize=20&summary=true');
 });

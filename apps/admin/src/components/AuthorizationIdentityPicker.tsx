@@ -1,3 +1,4 @@
+import {adminOptionLabel} from './adminOptionLabels';
 import { useEffect, useState } from 'react';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
@@ -16,7 +17,7 @@ export function AuthorizationIdentityPicker({
   onChange: (id: string) => void;
   approver?: boolean;
 }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const loadFailed = t('iam_load_failed');
   const [search, setSearch] = useState('');
   const [cursor, setCursor] = useState('');
@@ -98,7 +99,7 @@ export function AuthorizationIdentityPicker({
         >
           <option value="">{t('iam_select_identity')}</option>
           {value && !candidates.some((candidate) => candidate.id === value) && (
-            <option value={value}>{value}</option>
+            <option value={value}>{adminOptionLabel(value, language === 'ar')}</option>
           )}
           {candidates.map((candidate) => (
             <option value={candidate.id} key={candidate.id}>

@@ -7,6 +7,7 @@ import { UniversityAdminRouter } from '../../../../src/presentation/api/router/U
 
 describe('UniversityAdminRouter', () => {
   const createMockUseCases = () => ({
+    getSummary: vi.fn(),
     listUniversities: vi.fn(),
     listOrganizationUnits: vi.fn(),
     getUniversity: vi.fn().mockResolvedValue({ id: 'owner-1', revision: 2 }),
@@ -38,6 +39,21 @@ describe('UniversityAdminRouter', () => {
     );
     return app;
   };
+
+  it('routes aggregate counters before owner IDs and forwards continent and summary filters', async () => {
+    const useCases = createMockUseCases();
+    useCases.getSummary.mockResolvedValue({total:10723});
+    useCases.listUniversities.mockResolvedValue({data:[],total:0});
+    const app = createApp(useCases);
+    const summary = await request(app).get('/admin/universities/summary');
+    expect(summary.status).toBe(200);
+    expect(summary.headers['cache-control']).toBe('no-store');
+    expect(useCases.getUniversity).not.toHaveBeenCalled();
+    const list = await request(app).get('/admin/universities?continent=South%20America&summary=true&countryReferenceId=c');
+    expect(list.status).toBe(200);
+    expect(useCases.listUniversities).toHaveBeenCalledWith(expect.objectContaining({continent:'South America',summary:true,countryReferenceId:'c'}));
+    expect((await request(app).get('/admin/universities?continent=bad')).status).toBe(400);
+  });
 
   it('reads stage evidence without accepting a mutation or claiming source approval', async () => {
     const useCases = createMockUseCases();

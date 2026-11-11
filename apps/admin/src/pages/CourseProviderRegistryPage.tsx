@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../components/adminOptionLabels';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ExternalCourseProviderStatus } from '@manaratak/domain';
@@ -60,7 +61,7 @@ export function CourseProviderRegistryPage() {
     <h1 className="text-2xl font-bold">مزودو الدورات — الأسماء البديلة والنطاقات</h1>
     <form onSubmit={event => { event.preventDefault(); setQuery(draftQuery.trim()); setPage(1); }} className="flex flex-wrap items-end gap-3">
       <label>البحث<input className="block rounded border p-2" value={draftQuery} onChange={event => setDraftQuery(event.target.value)} /></label>
-      <label>الحالة<select className="block rounded border p-2" value={status} onChange={event => { setStatus(event.target.value as ExternalCourseProviderStatus | ''); setPage(1); }}><option value="">الكل</option>{Object.values(ExternalCourseProviderStatus).map(value => <option key={value} value={value}>{value}</option>)}</select></label>
+      <label>الحالة<select className="block rounded border p-2" value={status} onChange={event => { setStatus(event.target.value as ExternalCourseProviderStatus | ''); setPage(1); }}><option value="">الكل</option>{Object.values(ExternalCourseProviderStatus).map(value => <option key={value} value={value}>{adminOptionLabel(value)}</option>)}</select></label>
       <button className="rounded border p-2" type="submit">بحث</button><button className="rounded border p-2" type="button" disabled={saving} onClick={() => setReload(value => value + 1)}>تحديث</button>
     </form>
     {listError ? <p role="alert" className="text-red-700">{listError}</p> : null}

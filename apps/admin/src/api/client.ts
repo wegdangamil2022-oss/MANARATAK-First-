@@ -259,7 +259,7 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
     }
   }
   const universityMatch = endpoint.match(/^\/admin\/universities\/([^/?]+)(?:\/|\?|$)/);
-  const universityOwner = universityMatch && universityMatch[1] !== 'organization-units' ? universityMatch[1] : undefined;
+  const universityOwner = universityMatch && !['organization-units','summary'].includes(universityMatch[1]) ? universityMatch[1] : undefined;
   if (universityOwner && isMutation(options.method) && !headers.has('If-Match')) {
     const revision = universityRevisions.get(universityOwner);
     if (revision === undefined) throw new Error('أعد تحميل الجامعة قبل التعديل (إصدار السجل مطلوب).');

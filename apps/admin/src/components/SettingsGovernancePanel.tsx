@@ -1,3 +1,4 @@
+import {adminOptionLabel} from './adminOptionLabels';
 import { useEffect, useRef, useState } from 'react';
 import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
@@ -442,8 +443,8 @@ export function SettingsGovernancePanel({
                         invalid();
                       }}
                     >
-                      <option value="GLOBAL">GLOBAL</option>
-                      <option value="DOMAIN">DOMAIN</option>
+                      <option value="GLOBAL">{adminOptionLabel("GLOBAL", ar)}</option>
+                      <option value="DOMAIN">{adminOptionLabel("DOMAIN", ar)}</option>
                     </select>
                   </label>
                   {draft.level === 'DOMAIN' && (
@@ -462,7 +463,7 @@ export function SettingsGovernancePanel({
                       >
                         <option value="">—</option>
                         {domains.map((domain) => (
-                          <option key={domain}>{domain}</option>
+                          <option key={domain} value={domain}>{adminOptionLabel(domain, ar)}</option>
                         ))}
                       </select>
                     </label>
@@ -583,9 +584,9 @@ export function SettingsGovernancePanel({
                         invalid();
                       }}
                     >
-                      <option value="">GLOBAL</option>
+                      <option value="">{adminOptionLabel("GLOBAL", ar)}</option>
                       {domains.map((domain) => (
-                        <option key={domain}>{domain}</option>
+                        <option key={domain} value={domain}>{adminOptionLabel(domain, ar)}</option>
                       ))}
                     </select>
                   </label>

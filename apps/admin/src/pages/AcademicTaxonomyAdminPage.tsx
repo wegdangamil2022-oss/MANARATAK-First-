@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../components/adminOptionLabels';
 import {
   TaxonomyDialogFrame,
   TaxonomyNavigation,
@@ -554,8 +555,8 @@ export function AcademicTaxonomyAdminPage() {
                   }}
                 >
                   <option value="all">{isAr ? 'جميع المعايير' : 'All Standards'}</option>
-                  <option value="ISCED">ISCED</option>
-                  <option value="CIP">CIP</option>
+                  <option value="ISCED">{adminOptionLabel("ISCED", isAr)}</option>
+                  <option value="CIP">{adminOptionLabel("CIP", isAr)}</option>
                   <option value="CUSTOM_NATIONAL">
                     {isAr ? 'معيار وطني مخصص' : 'CUSTOM_NATIONAL'}
                   </option>
@@ -1008,8 +1009,8 @@ export function AcademicTaxonomyAdminPage() {
                       <option value="CUSTOM_NATIONAL">
                         {isAr ? 'وطني مخصص' : 'CUSTOM_NATIONAL'}
                       </option>
-                      <option value="ISCED">ISCED</option>
-                      <option value="CIP">CIP</option>
+                      <option value="ISCED">{adminOptionLabel("ISCED", isAr)}</option>
+                      <option value="CIP">{adminOptionLabel("CIP", isAr)}</option>
                     </select>
                   </div>
 

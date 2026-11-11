@@ -1,3 +1,4 @@
+import {adminOptionLabel} from './adminOptionLabels';
 import {useRef,useState} from 'react';
 import {canAuthorDomainTranslations} from '@manaratak/shared';
 import {adminApiClient} from '../api/client';
@@ -14,8 +15,8 @@ export function MajorTranslationPublicationPanel({publicId,profileId,versionId,s
   return <section aria-label="تسليم ترجمة نسخة التخصص" className="space-y-3 rounded border p-4">
     <h3>تسليم ترجمة معتمدة لنسخة العمل</h3><p>تُسلّم الأسماء والأقسام إلى الملف والنسخة المعروضين، ثم تُراجع وتُنشر عبر دورة التخصص.</p>
     {!enabled&&<p role="status">تفعيل الكتابة معلق وفق سياسة الترجمة.</p>}
-    <label>اللغة<select value={locale} disabled={busy} onChange={event=>{reset();setLocale(event.target.value);}}><option value="en">English</option><option value="ar">العربية</option></select></label>
-    <label>الحقل<select value={field} disabled={busy} onChange={event=>{reset();setField(event.target.value);}}><option value="displayName">الاسم</option>{sectionKeys.map(key=><option key={key} value={`section:${key}`}>{key}</option>)}</select></label>
+    <label>اللغة<select value={locale} disabled={busy} onChange={event=>{reset();setLocale(event.target.value);}}><option value="en">{adminOptionLabel("English")}</option><option value="ar">العربية</option></select></label>
+    <label>الحقل<select value={field} disabled={busy} onChange={event=>{reset();setField(event.target.value);}}><option value="displayName">الاسم</option>{sectionKeys.map(key=><option key={key} value={`section:${key}`}>{adminOptionLabel(key)}</option>)}</select></label>
     <button disabled={busy} onClick={()=>void preview()}>قراءة المرشح المحفوظ</button>
     {target&&<ul>{Object.entries(target.proposedFields??{}).map(([key,value])=><li key={key}>{key}: {value}</li>)}</ul>}
     <label>معرّف اعتماد التسليم<input disabled={!enabled||busy} value={approval} onChange={event=>setApproval(event.target.value)}/></label>

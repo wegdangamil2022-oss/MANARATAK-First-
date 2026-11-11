@@ -64,6 +64,8 @@ describe('PrismaAcademicTaxonomyRepository - Node Operations', () => {
           standardType: 'ISCED',
           OR: [
             { canonicalName: { contains: 'Edu', mode: 'insensitive' } },
+            { localizedNames: { path:['ar'],string_contains:'Edu' } },
+            { localizedNames: { path:['en'],string_contains:'Edu' } },
             { canonicalCode: { contains: 'Edu', mode: 'insensitive' } },
             { standardCode: { contains: 'Edu', mode: 'insensitive' } },
             { aliases: { some: { normalizedAlias: 'edu' } } },

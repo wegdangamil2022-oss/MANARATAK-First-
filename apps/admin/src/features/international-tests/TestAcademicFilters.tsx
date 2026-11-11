@@ -19,14 +19,13 @@ export function TestAcademicFilters({
         <CanonicalPicker
           compact
           optional
-          paged
           allowInactive
           displayMode="label"
           label={ar ? 'لغة الاختبار المرتبطة' : 'Linked test language'}
           icon={<Languages size={16} />}
           value={params.get('languageReferenceId')}
           reloadKey={'test-language:' + params.get('languageReferenceId')}
-          load={(q, page) => canonicalPickerApi.languages(q, page)}
+          load={canonicalPickerApi.filterLanguages}
           onChange={(id) => change('languageReferenceId', id ?? '')}
         />
       )}
@@ -47,14 +46,13 @@ export function TestAcademicFilters({
           <CanonicalPicker
             compact
             optional
-            paged
             allowInactive
             displayMode="label"
             label={ar ? 'المجال الأكاديمي المرتبط' : 'Linked academic field'}
             icon={<Network size={16} />}
             value={params.get('taxonomyNodeId')}
             reloadKey={'test-field:' + params.get('taxonomyNodeId')}
-            load={(q, page) => canonicalPickerApi.taxonomyNodes(undefined, q, page)}
+            load={q => canonicalPickerApi.filterTaxonomyNodes(undefined,q)}
             onChange={(id) => change('taxonomyNodeId', id ?? '')}
           />
         </>

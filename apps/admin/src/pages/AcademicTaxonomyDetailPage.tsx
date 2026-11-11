@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../components/adminOptionLabels';
 import {
   TaxonomyDialogFrame,
   TaxonomyNavigation,
@@ -837,7 +838,7 @@ function AcademicTaxonomyNodeWorkspace({ nodeId }: { nodeId?: string }) {
             'SPECIALIZATION_CATEGORY',
             'STANDARD_CLASSIFICATION',
           ].map((value) => (
-            <option key={value}>{value}</option>
+            <option key={value} value={value}>{adminOptionLabel(value, isAr)}</option>
           ))}
         </select>
       </label>
@@ -852,7 +853,7 @@ function AcademicTaxonomyNodeWorkspace({ nodeId }: { nodeId?: string }) {
         >
           <option value="">{isAr ? 'الكل' : 'All'}</option>
           {['ISCED', 'CIP', 'CUSTOM_NATIONAL'].map((value) => (
-            <option key={value}>{value}</option>
+            <option key={value} value={value}>{adminOptionLabel(value, isAr)}</option>
           ))}
         </select>
       </label>
@@ -1300,7 +1301,7 @@ function AcademicTaxonomyNodeWorkspace({ nodeId }: { nodeId?: string }) {
                     onChange={(e) => setNewAliasLocale(e.target.value)}
                   >
                     <option value="ar">{isAr ? 'العربية' : 'Arabic'}</option>
-                    <option value="en">English</option>
+                    <option value="en">{adminOptionLabel("English", isAr)}</option>
                   </select>
                 </div>
 
@@ -1799,9 +1800,9 @@ function AcademicTaxonomyNodeWorkspace({ nodeId }: { nodeId?: string }) {
                       disabled
                       aria-label={isAr ? 'نوع المعيار ثابت' : 'Immutable standard type'}
                     >
-                      <option value="CUSTOM_NATIONAL">CUSTOM_NATIONAL</option>
-                      <option value="ISCED">ISCED</option>
-                      <option value="CIP">CIP</option>
+                      <option value="CUSTOM_NATIONAL">{adminOptionLabel("CUSTOM_NATIONAL", isAr)}</option>
+                      <option value="ISCED">{adminOptionLabel("ISCED", isAr)}</option>
+                      <option value="CIP">{adminOptionLabel("CIP", isAr)}</option>
                     </select>
                   </div>
 
@@ -2114,9 +2115,9 @@ function AcademicTaxonomyNodeWorkspace({ nodeId }: { nodeId?: string }) {
                       value={mappingFormData.sourceStandard}
                       disabled
                     >
-                      <option value="CUSTOM_NATIONAL">CUSTOM_NATIONAL</option>
-                      <option value="ISCED">ISCED</option>
-                      <option value="CIP">CIP</option>
+                      <option value="CUSTOM_NATIONAL">{adminOptionLabel("CUSTOM_NATIONAL", isAr)}</option>
+                      <option value="ISCED">{adminOptionLabel("ISCED", isAr)}</option>
+                      <option value="CIP">{adminOptionLabel("CIP", isAr)}</option>
                     </select>
                   </div>
 
@@ -2129,9 +2130,9 @@ function AcademicTaxonomyNodeWorkspace({ nodeId }: { nodeId?: string }) {
                       value={mappingFormData.targetStandard}
                       disabled
                     >
-                      <option value="ISCED">ISCED</option>
-                      <option value="CIP">CIP</option>
-                      <option value="CUSTOM_NATIONAL">CUSTOM_NATIONAL</option>
+                      <option value="ISCED">{adminOptionLabel("ISCED", isAr)}</option>
+                      <option value="CIP">{adminOptionLabel("CIP", isAr)}</option>
+                      <option value="CUSTOM_NATIONAL">{adminOptionLabel("CUSTOM_NATIONAL", isAr)}</option>
                     </select>
                   </div>
                 </div>

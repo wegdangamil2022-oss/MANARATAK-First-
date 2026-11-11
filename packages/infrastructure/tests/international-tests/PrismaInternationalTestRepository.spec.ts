@@ -222,8 +222,7 @@ describe('PrismaInternationalTestRepository', () => {
         where: expect.objectContaining({
           status: { in: [InternationalTestStatus.PUBLISHED] },
           testCategory: { in: [InternationalTestCategory.LANGUAGE_PROFICIENCY] },
-          providerName: 'ETS',
-          AND: expect.arrayContaining([expect.objectContaining({OR: expect.any(Array)})])
+          AND: expect.arrayContaining([{OR:[{providerName:'ETS'},{provider:{is:{displayName:'ETS'}}}]},expect.objectContaining({OR: expect.any(Array)})])
         })
       })
     );
@@ -236,15 +235,16 @@ describe('PrismaInternationalTestRepository', () => {
       category: InternationalTestCategory.GRADUATE_ADMISSION, staleOnly: true, countOnly: true });
     expect(mockPrisma.referenceCountry.findUnique).toHaveBeenCalledWith({where:{iso2Code:'IN'},select:{id:true}});
     expect(mockPrisma.internationalTest.count).toHaveBeenCalledWith({ where: expect.objectContaining({
-      providerName: 'NTA', testCategory: InternationalTestCategory.GRADUATE_ADMISSION,
-      AND: [
+      testCategory: InternationalTestCategory.GRADUATE_ADMISSION,
+      AND: expect.arrayContaining([
+        {OR:[{providerName:'NTA'},{provider:{is:{displayName:'NTA'}}}]},
         { OR: [
           { countryRelationships: { some: { canonicalReferenceId: 'country-in' } } },
           { availability: { is: { availableCountryIds: { array_contains: ['country-in'] } } } },
         ] },
         { OR: expect.arrayContaining([{ evidence: { is: null } }]) },
         { OR: expect.arrayContaining([{ canonicalName: { contains: 'CUET', mode: 'insensitive' } }]) },
-      ],
+      ]),
     }) });
   });
 
@@ -263,7 +263,7 @@ describe('PrismaInternationalTestRepository', () => {
     mockPrisma.internationalTest.count.mockResolvedValue(41);
     const result = await repository.list({ countOnly: true, providerName: 'ETS', page: 2, limit: 20 });
     expect(result).toEqual({ data: [], total: 41, page: 2, limit: 20 });
-    expect(mockPrisma.internationalTest.count).toHaveBeenCalledWith({ where: { providerName: 'ETS' } });
+    expect(mockPrisma.internationalTest.count).toHaveBeenCalledWith({where:{AND:[{OR:[{providerName:'ETS'},{provider:{is:{displayName:'ETS'}}}]}]}});
     expect(mockPrisma.internationalTest.findMany).not.toHaveBeenCalled();
     expect(mockPrisma.internationalTest.groupBy).not.toHaveBeenCalled();
     expect(mockPrisma.$queryRaw).not.toHaveBeenCalled();

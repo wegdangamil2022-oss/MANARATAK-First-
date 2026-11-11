@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../components/adminOptionLabels';
 import { scholarshipCanonicalReviewInput } from '../api/scholarshipCanonicalReviewInput';
 import { useSearchParams } from 'react-router-dom';
 import { reviewOwnerBatch } from '../features/review-queue/ReviewOwnerNavigation';
@@ -811,7 +812,7 @@ function SourceRegistryPanel({
                 className="w-full rounded-lg border px-3 py-2"
               >
                 {sourceTypes.map((item) => (
-                  <option key={item}>{item}</option>
+                  <option key={item} value={item}>{adminOptionLabel(item)}</option>
                 ))}
               </select>
             </Field>
@@ -830,7 +831,7 @@ function SourceRegistryPanel({
                 className="w-full rounded-lg border px-3 py-2"
               >
                 {acquisitionModes.map((item) => (
-                  <option key={item}>{item}</option>
+                  <option key={item} value={item}>{adminOptionLabel(item)}</option>
                 ))}
               </select>
             </Field>
@@ -845,9 +846,9 @@ function SourceRegistryPanel({
                 }
                 className="w-full rounded-lg border px-3 py-2"
               >
-                <option>ACTIVE</option>
-                <option>DISABLED</option>
-                <option>NOT_CONFIGURED</option>
+                <option value="ACTIVE">{adminOptionLabel("ACTIVE")}</option>
+                <option value="DISABLED">{adminOptionLabel("DISABLED")}</option>
+                <option value="NOT_CONFIGURED">{adminOptionLabel("NOT_CONFIGURED")}</option>
               </select>
             </Field>
             {form.acquisitionMode !== 'MANUAL_FILE' ? (
@@ -1101,14 +1102,12 @@ function ImportNewPanel({
               onChange={(event) => setParserHint(event.target.value as typeof parserHint)}
               className="w-full rounded-lg border px-3 py-2"
             >
-              <option value="">Auto / none</option>
-              <option value="json">JSON</option>
+              <option value="">تلقائي / دون تحديد</option>
+              <option value="json">{adminOptionLabel("JSON")}</option>
               <option value="ndjson" disabled={manual}>
-                NDJSON
-              </option>
+                {adminOptionLabel("NDJSON")}</option>
               <option value="csv" disabled={manual}>
-                CSV
-              </option>
+                {adminOptionLabel("CSV")}</option>
             </select>
           </Field>
           {manual ? (
@@ -1943,7 +1942,7 @@ export function ScholarshipImportCenterPage() {
                   className="rounded-xl border px-3 py-2 text-sm"
                 >
                   {operationalClasses.map((item) => (
-                    <option key={item}>{item}</option>
+                    <option key={item} value={item}>{adminOptionLabel(item, language === 'ar')}</option>
                   ))}
                 </select>
                 <button
@@ -2099,7 +2098,7 @@ export function ScholarshipImportCenterPage() {
                     'FAILED',
                     'DLQ',
                   ].map((status) => (
-                    <option key={status}>{status}</option>
+                    <option key={status} value={status}>{adminOptionLabel(status, language === 'ar')}</option>
                   ))}
                 </select>
               </label>

@@ -8,7 +8,7 @@ describe('Admin dashboard counter reads',()=>{
   const db={$queryRaw:vi.fn(async(query:any)=>{
    if(query.text.includes('count(*) AS total'))return[{total:1n,uniqueRootTotal:1n,published:0n,needsReview:1n,complete:1n}];
    if(query.text.includes('SELECT "majorId","profileId"'))return[{majorId:'major',profileId:'profile'}];
-   if(query.text.includes('SELECT m.*'))return[{id:'major',displayName:'Root',updatedAt:new Date('2026-01-01T12:00:00Z'),optionalFields:{displayName:'Shadow'},sources:[{importedAt:'2026-01-01T12:00:00'}],levelProfiles:[{id:'profile',level:'BACHELOR',displayName:'Profile',updatedAt:'2026-01-01T12:00:00',academicField:{id:'field',canonicalName:'Canonical field',createdAt:'2026-01-01T12:00:00'},classificationMappings:[{id:'mapping',taxonomyNodeId:'field',relationshipType:'PRIMARY'}]}]}];
+   if(query.text.includes('AS "__owner"'))return[{id:'major',displayName:'Root',updatedAt:new Date('2026-01-01T12:00:00Z'),optionalFields:{displayName:'Shadow'},sources:[{importedAt:'2026-01-01T12:00:00'}],levelProfiles:[{id:'profile',level:'BACHELOR',displayName:'Profile',updatedAt:'2026-01-01T12:00:00',academicField:{id:'field',canonicalName:'Canonical field',createdAt:'2026-01-01T12:00:00'},classificationMappings:[{id:'mapping',taxonomyNodeId:'field',relationshipType:'PRIMARY'}]}]}];
    return[{profileId:'profile',state:'NO_CONTENT'}];
   })};
   const result=await new PrismaMajorRepository(db as any).list({page:1,pageSize:24});

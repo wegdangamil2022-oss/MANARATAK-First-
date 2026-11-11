@@ -532,14 +532,13 @@ export function InternationalTestsAdminPage() {
             <CanonicalPicker
               compact
               optional
-              paged
               allowInactive
               label={say('الدولة المرتبطة بالاختبار', 'Country associated with the test')}
               reloadKey={'test-country:' + countryFilter}
               value={countryFilter}
               icon={<Globe2 size={16} />}
               load={async (q, p) => {
-                let rows = await canonicalPickerApi.countries(q, p);
+                let rows = await canonicalPickerApi.filterCountries(q, p);
                 if (
                   (p ?? 1) === 1 &&
                   countryFilter &&

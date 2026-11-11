@@ -97,6 +97,8 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
       const exactStandardQuery = filters.q.trim().toUpperCase();
       const search = [
         { canonicalName: { contains: filters.q, mode: 'insensitive' } },
+        { localizedNames: { path: ['ar'], string_contains: filters.q } },
+        { localizedNames: { path: ['en'], string_contains: filters.q } },
         { canonicalCode: { contains: filters.q, mode: 'insensitive' } },
         { standardCode: { contains: filters.q, mode: 'insensitive' } },
         { aliases: { some: { normalizedAlias: normalizedQuery } } },

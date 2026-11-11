@@ -36,6 +36,7 @@ export class MajorAdminRouter {
 
     const allAsUndefined = (value: unknown) => typeof value === 'string' && ['', 'all', 'الكل'].includes(value.trim().toLowerCase()) ? undefined : value;
     const listQuerySchema = z.object({
+      summary: z.enum(['true','false']).transform(value=>value==='true').optional(),
       sort:z.enum(['UPDATED_DESC','NAME_AR','NAME_EN','DEGREE','STATUS']).optional(),
       countOnly: z.enum(['true', 'false']).transform(value => value === 'true').optional(),
       taxonomyNodeId: z.string().uuid().optional(),

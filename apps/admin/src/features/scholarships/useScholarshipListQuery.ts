@@ -44,7 +44,7 @@ export function readScholarshipListQuery(raw: string) {
     fundingType: value('fundingType'),
     deadlineStatus: value('deadlineStatus'),
   };
-  const apiParams = new URLSearchParams({ page: String(page), pageSize: '24' });
+  const apiParams = new URLSearchParams({ page: String(page), pageSize: '24',summary:'true' });
   for (const [key, entry] of Object.entries({ ...canonical, ...filters }))
     if (entry) apiParams.set(key, entry);
   return {

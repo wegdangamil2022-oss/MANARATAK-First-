@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
@@ -438,8 +439,8 @@ export function ReferenceRecordWorkspace({
             value={form[f.key]}
             onChange={(e) => setForm((old) => ({ ...old, [f.key]: e.target.value }))}
           >
-            <option value="LTR">LTR</option>
-            <option value="RTL">RTL</option>
+            <option value="LTR">{adminOptionLabel("LTR", isAr)}</option>
+            <option value="RTL">{adminOptionLabel("RTL", isAr)}</option>
           </select>
         </label>
       );
@@ -533,13 +534,12 @@ export function ReferenceRecordWorkspace({
           {supportsCountry && (
             <div>
               <CanonicalPicker
-                paged
                 optional
                 compact
                 allowInactive
                 label={isAr ? 'الدولة' : 'Country'}
                 value={filterCountryId}
-                load={canonicalPickerApi.countries}
+                load={canonicalPickerApi.filterCountries}
                 onChange={(id, option) => {
                   setFilterCountryId(id);
                   patch({ country: option?.code ?? '', regionId: '' });

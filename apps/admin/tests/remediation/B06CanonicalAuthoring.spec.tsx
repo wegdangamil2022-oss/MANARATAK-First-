@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({ request: vi.fn(), reference: vi.fn() }));
 vi.mock('../../src/api/client', () => ({ adminApiClient: { request: mocks.request } }));
-vi.mock('../../src/api/referenceData', () => ({ getReferenceDataPage: mocks.reference }));
+vi.mock('../../src/api/referenceData', () => ({ getReferenceDataPage: mocks.reference, listAllReferenceData: async (kind:unknown,filters:object)=> (await mocks.reference(kind,{...filters,page:1,pageSize:100})).data }));
 vi.mock('../../src/i18n/I18nProvider', () => ({ useTranslation: () => ({ language: 'ar', dir: 'rtl' }) }));
 import { CanonicalPicker } from '../../src/components/CanonicalPicker';
 import { canonicalPickerApi } from '../../src/api/canonicalPickers';
@@ -29,7 +29,7 @@ describe('B06 canonical choices', () => {
     const change = vi.fn();
     await mount(<CanonicalPicker label="Country" value="country-existing" onChange={change} load={load} compact paged optional allowInactive />);
     await flush();
-    expect(tree.root.findAllByType('input')).toHaveLength(0);
+    expect(tree.root.findAllByType('input')).toHaveLength(1);
     expect(tree.root.findAllByType('button')).toHaveLength(0);
     await act(async () => tree.root.findByType('select').props.onChange({target:{value:'__canonical_more__'}})); await flush();
     expect(load).toHaveBeenLastCalledWith('', 2, undefined, expect.any(AbortSignal));

@@ -1,3 +1,4 @@
+import {adminOptionLabel} from './adminOptionLabels';
 
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -303,7 +304,7 @@ export function GovernanceDialog({ entityType, record, onClose, onChanged, embed
             <p className="text-xs text-amber-800">تبقى المعرّفات والعلاقات التاريخية محفوظة؛ لا حذف ولا نقل تلقائي. الأرشفة تمنع عند وجود روابط مرصودة. الاستخدامات النصية/الخارجية غير المرصودة تبقى unknown، ولا يُستنتج منها اكتمال التغطية.</p>
             {['ACTIVE','DEPRECATED'].includes(record.lifecycleState) && <div className="space-y-2">
               {record.lifecycleState === 'DEPRECATED' && <>
-                <label>قرار التقاعد<select className="border p-2" value={retirementState} onChange={event => { setRetirementState(event.target.value as ReferenceLifecycleState); setReplacementId(null); }}>{['ARCHIVED','MERGED','SUPERSEDED'].map(state => <option key={state}>{state}</option>)}</select></label>
+                <label>قرار التقاعد<select className="border p-2" value={retirementState} onChange={event => { setRetirementState(event.target.value as ReferenceLifecycleState); setReplacementId(null); }}>{['ARCHIVED','MERGED','SUPERSEDED'].map(state => <option key={state} value={state}>{adminOptionLabel(state)}</option>)}</select></label>
                 {['MERGED','SUPERSEDED'].includes(retirementState) && <CanonicalPicker paged label="السجل البديل النشط" value={replacementId} reloadKey={`replacement:${entityType}:${record.id}`} load={async (query,page) => {
                   const values = entityType === 'COUNTRY' ? await canonicalPickerApi.countries(query,page) : entityType === 'CURRENCY' ? await canonicalPickerApi.currencies(query,page) : entityType === 'LANGUAGE' ? await canonicalPickerApi.languages(query,page) : entityType === 'REGION' ? await canonicalPickerApi.regions(record.countryIso2Code,query,page) : await canonicalPickerApi.cities(record.countryIso2Code,undefined,query,page);
                   return values.filter(item => item.id !== record.id);

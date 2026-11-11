@@ -1,3 +1,4 @@
+import {adminOptionLabel} from './adminOptionLabels';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { adminApiClient } from '../api/client';
 import { canonicalPickerApi } from '../api/canonicalPickers';
@@ -115,13 +116,13 @@ export function ScholarshipCanonicalFilters({
         {children}
         {(
           [
-            ['countryReferenceId', ar ? 'الدولة' : 'Country', canonicalPickerApi.countries],
+            ['countryReferenceId', ar ? 'الدولة' : 'Country', canonicalPickerApi.filterCountries],
             [
               'studyLanguageReferenceId',
               ar ? 'لغة الدراسة' : 'Study language',
-              canonicalPickerApi.languages,
+              canonicalPickerApi.filterLanguages,
             ],
-            ['currencyReferenceId', ar ? 'العملة' : 'Currency', canonicalPickerApi.currencies],
+            ['currencyReferenceId', ar ? 'العملة' : 'Currency', canonicalPickerApi.filterCurrencies],
             ['universityId', ar ? 'الجامعة' : 'University', canonicalPickerApi.universities],
             ['majorId', ar ? 'التخصص' : 'Major', canonicalPickerApi.majors],
             [
@@ -142,7 +143,7 @@ export function ScholarshipCanonicalFilters({
             reloadKey={`scholarship-filter:${key}`}
             optional
             compact
-            paged={key !== 'degreeLevelId'}
+            paged={['universityId','majorId','internationalTestId'].includes(key)}
             allowInactive
           />
         ))}
@@ -183,7 +184,7 @@ export function ScholarshipCanonicalFilters({
           >
             <option value="">—</option>
             {['PENDING', 'VERIFIED', 'FAILED'].map((status) => (
-              <option key={status}>{status}</option>
+              <option key={status} value={status}>{adminOptionLabel(status, ar)}</option>
             ))}
           </select>
         </label>
@@ -207,7 +208,7 @@ export function ScholarshipCanonicalFilters({
             value={value.translationLocale}
             onChange={(e) => update('translationLocale', e.target.value)}
           >
-            <option value="en">English</option>
+            <option value="en">{adminOptionLabel("English", ar)}</option>
             <option value="ar">العربية</option>
           </select>
         </label>

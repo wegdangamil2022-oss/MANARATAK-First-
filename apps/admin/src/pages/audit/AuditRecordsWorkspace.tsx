@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../../api/client';
 import { useTranslation } from '../../i18n/I18nProvider';
@@ -743,7 +744,7 @@ export function AuditRecordsWorkspace({
                     }
                   }}
                 >
-                  <option value="UTC">UTC</option>
+                  <option value="UTC">{adminOptionLabel("UTC", language === 'ar')}</option>
                   <option value="LOCAL">{t('audit_local_timezone')}</option>
                 </select>
               </label>
@@ -860,7 +861,7 @@ export function AuditRecordsWorkspace({
                   <option value="">{t('audit_text_032')}</option>
                   {['INFO', 'WARNING', 'ERROR', 'CRITICAL'].map((value) => (
                     <option key={value} value={value}>
-                      {value}
+                      {adminOptionLabel(value, language === 'ar')}
                     </option>
                   ))}
                 </select>

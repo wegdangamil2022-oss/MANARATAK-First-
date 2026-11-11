@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { useEffect, useState } from 'react';
 import { Building2 } from 'lucide-react';
 import { adminApiClient } from '../../api/client';
@@ -57,7 +58,7 @@ export function TestProviderFilter({
           onChange={(event) => onChange(event.target.value)}
         >
           <option value="">{ar ? 'كل الجهات' : 'All providers'}</option>
-          {value && !names.includes(value) && <option value={value}>{value}</option>}
+          {value && !names.includes(value) && <option value={value}>{adminOptionLabel(value, ar)}</option>}
           {names.map((name) => (
             <option key={name} value={name}>
               {name}

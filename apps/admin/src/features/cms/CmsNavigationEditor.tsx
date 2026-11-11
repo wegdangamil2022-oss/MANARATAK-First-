@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { CmsOwnerPicker } from './CmsOwnerPicker';
 import { useEffect, useState } from 'react';
 import { ArrowUp, ArrowDown, Plus, Trash2, Pencil, Save, Menu } from 'lucide-react';
@@ -199,7 +200,7 @@ export function CmsNavigationEditor({
                       <option value="DOMAIN_REFERENCE">
                         {ar ? 'مرجع قسم معتمد' : 'Canonical domain reference'}
                       </option>
-                      <option value="EXTERNAL_URL">HTTPS</option>
+                      <option value="EXTERNAL_URL">{adminOptionLabel("HTTPS", ar)}</option>
                     </select>
                   </label>
                   {node.targetType === 'CMS_CONTENT' ? (

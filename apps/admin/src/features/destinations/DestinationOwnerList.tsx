@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminApiClient } from '../../api/client';
@@ -131,7 +132,7 @@ export function DestinationOwnerList({
               'ARCHIVED',
               'REJECTED',
             ].map((value) => (
-              <option key={value}>{value}</option>
+              <option key={value} value={value}>{adminOptionLabel(value, isAr)}</option>
             ))}
           </select>
         </label>

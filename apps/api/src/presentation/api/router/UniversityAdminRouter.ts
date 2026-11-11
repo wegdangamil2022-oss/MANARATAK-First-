@@ -14,6 +14,8 @@ export class UniversityAdminRouter {
     const router = Router();
     const { adminUniversityUseCases } = cradle;
 
+    router.get('/summary',(_req,res,next)=>{res.set('Cache-Control','no-store');void adminUniversityUseCases.getSummary().then(result=>res.json(result)).catch(next);});
+
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
       Promise.resolve(fn(req, res, next)).catch(next);
     };
@@ -47,6 +49,7 @@ export class UniversityAdminRouter {
 
     const listQuerySchema = z
       .object({
+        summary: z.enum(['true','false']).transform(value=>value==='true').optional(),
         countOnly: z
           .enum(['true', 'false'])
           .transform((value) => value === 'true')
@@ -64,6 +67,7 @@ export class UniversityAdminRouter {
           .enum(['UNIVERSITY', 'COLLEGE', 'INSTITUTE', 'ACADEMY', 'OTHER'])
           .optional(),
         countryReferenceId: z.string().min(1).optional(),
+        continent: z.enum(['Africa','Asia','Europe','North America','South America','Oceania','UNSPECIFIED']).optional(),
         regionReferenceId: z.string().min(1).optional(),
         cityReferenceId: z.string().min(1).optional(),
         search: z.string().trim().min(1).max(200).optional(),

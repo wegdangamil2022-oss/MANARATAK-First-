@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../components/adminOptionLabels';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { AuthorizationEffectiveAccess } from '../components/AuthorizationEffectiveAccess';
@@ -388,7 +389,7 @@ export function IdentityAdminPage({
               <option value="">{t('iam_all')}</option>
               {['Active', 'Suspended', 'Locked', 'RateLimited'].map((state) => (
                 <option key={state} value={state}>
-                  {state}
+                  {adminOptionLabel(state, dir === 'rtl')}
                 </option>
               ))}
             </select>

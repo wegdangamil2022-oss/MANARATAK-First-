@@ -1,4 +1,4 @@
-import { getReferenceDataPage } from './referenceData';
+import { getReferenceDataPage, listAllReferenceData } from './referenceData';
 import { adminApiClient } from './client';
 
 export type CanonicalPickerLifecycle =
@@ -26,7 +26,9 @@ function selectableLifecycle(value: unknown, isActive?: boolean): string {
 }
 
 function pickLabel(item: Record<string, unknown>): string {
-  return String(item.displayName ?? item.canonicalName ?? item.nameAr ?? item.name ?? item.nameEn ?? item.sourceProgramName ?? item.canonicalCode ?? item.id ?? '');
+  const localized = item.localizedNames as Record<string, unknown> | undefined;
+  return String([localized?.ar, item.localizedNameAr, item.nameAr, item.displayName, item.canonicalName, item.name, item.nameEn, item.sourceProgramName, item.canonicalCode, item.id]
+    .find(value => typeof value === 'string' && value.trim()) ?? '');
 }
 
 function option(item: Record<string, unknown>, extras: Partial<CanonicalPickerOption> = {}): CanonicalPickerOption {
@@ -50,6 +52,30 @@ type DataEnvelope<T> = { data: T[] };
 type PageEnvelope<T> = { data: T[] };
 
 export const canonicalPickerApi = {
+  /** Small reference catalogs are complete in filters; large entity searches stay paged. */
+  async filterCountries(query = '', _page = 1): Promise<CanonicalPickerOption[]> {
+    return (await listAllReferenceData<Record<string, unknown>>('countries', {activeOnly:false,q:query.trim()||undefined}))
+      .map(item=>option(item,{metadata:{region:String(item.region??''),subregion:String(item.subregion??'')}}));
+  },
+  async filterLanguages(query = '', _page = 1): Promise<CanonicalPickerOption[]> {
+    return (await listAllReferenceData<Record<string, unknown>>('languages',{activeOnly:false,q:query.trim()||undefined})).map(item=>option(item));
+  },
+  async filterCurrencies(query = '', _page = 1): Promise<CanonicalPickerOption[]> {
+    return (await listAllReferenceData<Record<string, unknown>>('currencies',{activeOnly:false,q:query.trim()||undefined})).map(item=>option(item));
+  },
+  async filterTaxonomyNodes(nodeType?: 'ACADEMIC_FIELD'|'DISCIPLINE', query = '', parentNodeId?:string): Promise<CanonicalPickerOption[]> {
+    const options:CanonicalPickerOption[]=[];
+    for(let page=1;page<=1000;page++){
+      const params=new URLSearchParams({page:String(page),pageSize:'100'});
+      if(nodeType)params.set('nodeType',nodeType);if(query.trim())params.set('q',query.trim());if(parentNodeId)params.set('parentNodeId',parentNodeId);
+      const result=await adminApiClient.request<{data:Record<string,unknown>[];totalPages:number}>(`/admin/academic-taxonomy/nodes?${params}`);
+      if(!Number.isInteger(result.totalPages)||result.totalPages<0||result.totalPages>1000)throw Error('TAXONOMY_FILTER_PAGINATION_INVALID');
+      options.push(...result.data.map(item=>option({...item,id:item.nodeId??item.id})));
+      if(page>=result.totalPages)return options;
+      if(!result.data.length)throw Error('TAXONOMY_FILTER_PAGINATION_INVALID');
+    }
+    throw Error('TAXONOMY_FILTER_PAGE_LIMIT');
+  },
   async countries(query = '', page = 1): Promise<CanonicalPickerOption[]> {
     const { data: records } = await getReferenceDataPage<Record<string, unknown>>('countries', { activeOnly: false, q: query.trim() || undefined, page, pageSize: 50 });
     return records.map((item) => option(item));
@@ -93,7 +119,7 @@ export const canonicalPickerApi = {
     return response.data.map((item) => option({ ...item, id: item.nodeId ?? item.id }));
   },
   async majors(query = '', page = 1): Promise<CanonicalPickerOption[]> {
-    const params = new URLSearchParams({ page: String(page), pageSize: '50', catalog: 'false' });
+    const params = new URLSearchParams({ page: String(page), pageSize: '50', catalog: 'false', summary:'true' });
     if (query.trim()) params.set('search', query.trim().slice(0,200));
     const response = await adminApiClient.request<PageEnvelope<Record<string, unknown>>>(`/admin/majors?${params}`);
     return response.data.map((item) => option(item));
@@ -105,7 +131,7 @@ export const canonicalPickerApi = {
     return response.data.map((item) => option(item));
   },
   async universities(query = '', page = 1): Promise<CanonicalPickerOption[]> {
-    const params = new URLSearchParams({ page: String(page), pageSize: '50' });
+    const params = new URLSearchParams({ page: String(page), pageSize: '50',summary:'true' });
     if (query.trim()) params.set('search', query.trim());
     const response = await adminApiClient.request<PageEnvelope<Record<string, unknown>>>(`/admin/universities?${params}`);
     return response.data.map((item) => option(item));

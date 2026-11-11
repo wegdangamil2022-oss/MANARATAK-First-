@@ -1,3 +1,4 @@
+import {adminOptionLabel} from './adminOptionLabels';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { ResolvedSetting } from '@manaratak/domain';
 import { adminApiClient } from '../api/client';
@@ -106,7 +107,7 @@ export function SettingsResolutionInspector({
         >
           <option value="">{isAr ? 'عام · دون مجال' : 'Global · no domain'}</option>
           {domains.map((domain) => (
-            <option key={domain}>{domain}</option>
+            <option key={domain} value={domain}>{adminOptionLabel(domain, isAr)}</option>
           ))}
         </select>
         <label>

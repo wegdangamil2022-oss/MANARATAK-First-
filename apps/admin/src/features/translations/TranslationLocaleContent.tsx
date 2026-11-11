@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { Loader2, Save, ShieldCheck, Database } from 'lucide-react';
 import { useTranslation } from '../../i18n/I18nProvider';
 import {
@@ -23,7 +24,7 @@ export function LocaleEditor(props: {
   onStatusChange: (value: UniversityTranslationReviewStatus) => void;
   onSave: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const textDirection = props.locale === 'ar' ? 'rtl' : 'ltr';
   return (
     <div className="rounded-2xl border border-[#DDEFF2] p-4">
@@ -44,7 +45,7 @@ export function LocaleEditor(props: {
           >
             {reviewStates.map((state) => (
               <option key={state} value={state}>
-                {state}
+                {adminOptionLabel(state, language === 'ar')}
               </option>
             ))}
           </select>

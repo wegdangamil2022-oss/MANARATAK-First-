@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../components/adminOptionLabels';
 import { emptyForm } from '../features/services-finance/ServiceCatalogModel';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { canonicalPickerApi } from '../api/canonicalPickers';
@@ -621,7 +622,7 @@ export function ServicesAdminPage() {
                     >
                       <option value="">{t('all')}</option>
                       {Object.values(ServiceFulfillmentType).map((value) => (
-                        <option key={value}>{value}</option>
+                        <option key={value} value={value}>{adminOptionLabel(value, language === 'ar')}</option>
                       ))}
                     </select>
                   </label>
@@ -636,15 +637,14 @@ export function ServicesAdminPage() {
                     >
                       <option value="">{t('all')}</option>
                       {Object.values(ServiceCompletenessStatus).map((value) => (
-                        <option key={value}>{value}</option>
+                        <option key={value} value={value}>{adminOptionLabel(value, language === 'ar')}</option>
                       ))}
                     </select>
                   </label>
                   <CanonicalPicker
                     label={t('supported_countries')}
                     value={countryFilter || null}
-                    load={canonicalPickerApi.countries}
-                    paged
+                    load={canonicalPickerApi.filterCountries}
                     optional
                     onChange={(value) => {
                       setPage(1);
@@ -655,13 +655,12 @@ export function ServicesAdminPage() {
                           : next.delete('supportedCountryReferenceId');
                         return next;
                       });
-                    }}
+                    }} displayMode="label"
                   />
                   <CanonicalPicker
                     label={t('supported_languages')}
                     value={languageFilter || null}
-                    load={canonicalPickerApi.languages}
-                    paged
+                    load={canonicalPickerApi.filterLanguages}
                     optional
                     onChange={(value) => {
                       setPage(1);
@@ -672,7 +671,7 @@ export function ServicesAdminPage() {
                           : next.delete('supportedLanguageReferenceId');
                         return next;
                       });
-                    }}
+                    }} displayMode="label"
                   />
                   <SelectField
                     label={serviceText('التوفر', language)}

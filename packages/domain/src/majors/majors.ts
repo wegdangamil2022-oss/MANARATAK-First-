@@ -414,6 +414,8 @@ export interface MajorContentReviewSummary {
   blockingCodes?:string[];
 }
 export interface MajorFilters {
+  /** Thin admin cards; full source data remains available in detail reads. */
+  summary?: boolean;
   sort?: MajorAdminSort;
   /** Admin counter reads omit hydrated catalog rows. */
   countOnly?: boolean;
@@ -430,7 +432,7 @@ export interface MajorFilters {
   pageSize?: number;
 }
 
-export type PublicMajorFilters = Omit<MajorFilters, 'countOnly' | 'status' | 'completenessStatus' | 'page' | 'pageSize'> & { cursor?: string; limit?: number };
+export type PublicMajorFilters = Omit<MajorFilters, 'summary' | 'countOnly' | 'status' | 'completenessStatus' | 'page' | 'pageSize'> & { cursor?: string; limit?: number };
 
 export interface PaginatedMajorResult<T = MajorDto> {
   data: T[];

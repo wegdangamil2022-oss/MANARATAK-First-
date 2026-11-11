@@ -2,7 +2,7 @@ import { useMemo, useRef, type SetStateAction } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { STUDY_DESTINATION_READINESS_KEYS } from '@manaratak/domain';
 const choices: Record<string, readonly string[]> = {
-  region: ['Asia', 'Africa', 'Europe', 'Americas', 'Oceania'],
+  region: ['Asia', 'Africa', 'Europe', 'North America', 'South America', 'Americas', 'Oceania'],
   status: ['NO_PROFILE', 'DRAFT', 'IN_REVIEW', 'PUBLISHED', 'ARCHIVED'],
   completenessStatus: ['INCOMPLETE', 'READY_FOR_REVIEW', 'READY_TO_PUBLISH', 'COMPLETE'],
   missingCheck: STUDY_DESTINATION_READINESS_KEYS,

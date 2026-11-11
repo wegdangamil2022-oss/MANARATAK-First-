@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../../components/adminOptionLabels';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from '../../i18n/I18nProvider';
 import { FormEvent, useEffect, useRef, useState } from 'react';
@@ -324,7 +325,7 @@ export function AssetLibraryWorkspace({
           <option value="">{t('asset_text_014')} </option>
           {Object.values(AssetLifecycleState).map((value) => (
             <option key={value} value={value}>
-              {value}
+              {adminOptionLabel(value, dir === 'rtl')}
             </option>
           ))}
         </select>
@@ -346,7 +347,7 @@ export function AssetLibraryWorkspace({
               <option value="">{t('asset_text_016')} </option>
               {Object.values(AssetSecurityClassification).map((value) => (
                 <option key={value} value={value}>
-                  {value}
+                  {adminOptionLabel(value, dir === 'rtl')}
                 </option>
               ))}
             </select>
@@ -359,7 +360,7 @@ export function AssetLibraryWorkspace({
               <option value="">{t('asset_text_018')} </option>
               {Object.values(AssetRetentionCategory).map((value) => (
                 <option key={value} value={value}>
-                  {value}
+                  {adminOptionLabel(value, dir === 'rtl')}
                 </option>
               ))}
             </select>
@@ -403,7 +404,7 @@ export function AssetLibraryWorkspace({
               <option value="IMAGE">{t('asset_text_033')} </option>
               <option value="VIDEO">{t('asset_text_034')} </option>
               <option value="AUDIO">{t('asset_text_035')} </option>
-              <option value="PDF">PDF</option>
+              <option value="PDF">{adminOptionLabel("PDF", dir === 'rtl')}</option>
             </select>
             <select
               aria-label={t('asset_text_036')}

@@ -1,3 +1,4 @@
+import {adminOptionLabel} from '../components/adminOptionLabels';
 import { destinationRepairTarget } from '../features/destinations/destinationNavigation';
 import '../features/destinations/destinations.css';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -342,8 +343,8 @@ export function StudyDestinationsAdminPage() {
                 className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
               >
                 <option value="">{isAr ? 'كل المناطق' : 'All regions'}</option>
-                {['Asia', 'Africa', 'Europe', 'Americas', 'Oceania'].map((value) => (
-                  <option key={value}>{value}</option>
+                {['Asia', 'Africa', 'Europe', 'North America', 'South America', 'Americas', 'Oceania'].map((value) => (
+                  <option key={value} value={value}>{adminOptionLabel(value, isAr)}</option>
                 ))}
               </select>
               <select

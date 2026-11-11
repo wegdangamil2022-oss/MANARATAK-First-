@@ -288,6 +288,7 @@ export type ScholarshipRepositoryUpdateDto = UpdateScholarshipDto & {
 };
 
 export interface ScholarshipFilters {
+  summary?: boolean;
   /** Internal aggregate reads; transport schemas do not expose this switch. */
   countOnly?: boolean;
   countryLabel?: string;

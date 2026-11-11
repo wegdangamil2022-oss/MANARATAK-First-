@@ -1,3 +1,4 @@
+import {adminOptionLabel} from './adminOptionLabels';
 import { useEffect, useRef, useState } from 'react';
 import { canAuthorDomainTranslations, type TranslationDomainKey } from '@manaratak/shared';
 import { adminApiClient } from '../api/client';
@@ -134,7 +135,7 @@ export function OwnerDescriptionTranslationPanel({
           onChange={(event) => setLocale(event.target.value as 'ar' | 'en')}
         >
           <option value="ar">{tr('العربية', 'Arabic')}</option>
-          <option value="en">English</option>
+          <option value="en">{adminOptionLabel("English")}</option>
         </select>
       </label>
       <label>

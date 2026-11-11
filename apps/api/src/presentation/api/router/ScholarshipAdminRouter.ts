@@ -126,6 +126,7 @@ export class ScholarshipAdminRouter {
 
     const allAsUndefined = (value: unknown) => typeof value === 'string' && ['', 'all', 'الكل'].includes(value.trim().toLowerCase()) ? undefined : value;
     const listQuerySchema = z.object({
+      summary: z.enum(['true','false']).transform(value=>value==='true').optional(),
       countryLabel: z.string().trim().min(1).optional(),
       degreeLabel: z.string().trim().min(1).optional(),
       majorLabel: z.string().trim().min(1).optional(),
