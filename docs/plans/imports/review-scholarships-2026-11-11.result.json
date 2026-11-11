@@ -1,0 +1,84 @@
+{
+  "pass": true,
+  "planHash": "c0610c081619592707f44c74ac5317a75fe9b1926234b24e0a75951478ad09ef",
+  "nativePlanHash": "9e4d3f053d9cffc7c3d5a9e0c03bac0cf0e95d1e8c1c3cadbe6fc7636678c8ce",
+  "sourceHash": "6b657da9e1f5a9159b1952afe914d8aacb97593ed178e3cb99c141d564d1cf13",
+  "sourceRecords": 1138,
+  "previousSourceRecords": 4,
+  "newSourceRecords": 1134,
+  "batches": 46,
+  "catalogWrites": 0,
+  "previousCatalogRowsPreserved": 5,
+  "publication": false,
+  "originalSchemaChanged": false,
+  "proof": {
+    "pass": true,
+    "planHash": "c0610c081619592707f44c74ac5317a75fe9b1926234b24e0a75951478ad09ef",
+    "nativePlanHash": "9e4d3f053d9cffc7c3d5a9e0c03bac0cf0e95d1e8c1c3cadbe6fc7636678c8ce",
+    "records": 25,
+    "fullRawPayloadEquality": true,
+    "sourceDedupPreserved": true,
+    "replayWithoutDuplicates": true,
+    "changedReplayRejected": true,
+    "forcedRollback": true,
+    "committedAuditAndOutbox": true,
+    "configuredAuditRetention": true,
+    "catalogWrites": 0,
+    "originalDatabaseWrites": 0
+  },
+  "completedAt": "2026-11-11T20:55:41.741Z",
+  "verification": {
+    "pass": true,
+    "allNewSourceHashesMatch": true,
+    "allEligibilityHashesMatch": true,
+    "sourceIdentities": 1138,
+    "previousImportRecordsUnchanged": 5,
+    "previousSourceIdentitiesUnchanged": 4,
+    "previousCatalogRowsUnchanged": 5,
+    "activeAssets": 46,
+    "screeningReceipts": 1134,
+    "auditRecords": 46,
+    "outboxRecords": 46,
+    "samples": [
+      {
+        "sourceReferenceId": "SCH-OC-0125-PTA",
+        "valid": true,
+        "sourceTraceable": true,
+        "verification": "PENDING",
+        "readyToTransfer": false,
+        "reviewReasons": 5
+      },
+      {
+        "sourceReferenceId": "SCH-ID-048",
+        "valid": true,
+        "sourceTraceable": true,
+        "verification": "PENDING",
+        "readyToTransfer": false,
+        "reviewReasons": 4
+      },
+      {
+        "sourceReferenceId": "SCH-OC-0063",
+        "valid": true,
+        "sourceTraceable": true,
+        "verification": "PENDING",
+        "readyToTransfer": false,
+        "reviewReasons": 4
+      }
+    ]
+  },
+  "quality": {
+    "vitestTests": 94,
+    "nodeTests": 5,
+    "typeScript": "PASS",
+    "adminBuild": "PASS",
+    "sourceQuality": "PASS",
+    "secretScan": "PASS"
+  },
+  "remaining": {
+    "newCatalogTransfers": 1134,
+    "verification": "PENDING",
+    "canonicalSourceReview": 1134,
+    "publication": false
+  },
+  "completedOn": "2026-11-11"
+}
