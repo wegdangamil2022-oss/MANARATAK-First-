@@ -687,6 +687,9 @@ export interface InternationalTestFilters {
   category?: InternationalTestCategory | InternationalTestCategory[];
   providerName?: string;
   countryIso2Code?: string;
+  languageReferenceId?: string;
+  degreeLevelId?: string;
+  taxonomyNodeId?: string;
   completenessStatus?: InternationalTestCompletenessStatus | InternationalTestCompletenessStatus[];
   isPubliclyVisible?: boolean;
   page?: number;

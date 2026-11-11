@@ -1,4 +1,5 @@
 import { TestProviderFilter } from '../features/international-tests/TestProviderFilter';
+import { TestAcademicFilters } from '../features/international-tests/TestAcademicFilters';
 import { useSearchParams } from 'react-router-dom';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { canonicalPickerApi } from '../api/canonicalPickers';
@@ -263,6 +264,7 @@ export function InternationalTestsAdminPage() {
     statusFilter ||
     categoryFilter ||
     completenessFilter ||
+    params.get('languageReferenceId') || params.get('degreeLevelId') || params.get('taxonomyNodeId') ||
     staleOnly ||
     search,
   );
@@ -532,7 +534,7 @@ export function InternationalTestsAdminPage() {
               optional
               paged
               allowInactive
-              label={say('التوفر حسب الدولة', 'Availability by country')}
+              label={say('الدولة المرتبطة بالاختبار', 'Country associated with the test')}
               reloadKey={'test-country:' + countryFilter}
               value={countryFilter}
               icon={<Globe2 size={16} />}
@@ -557,10 +559,10 @@ export function InternationalTestsAdminPage() {
             <label>
               <span>
                 <Globe2 size={16} />
-                {say('التوفر حسب الدولة — رمز ISO2', 'Availability by country — ISO2')}
+                {say('الدولة المرتبطة — رمز ISO2', 'Associated country — ISO2')}
               </span>
               <input
-                aria-label={say('التوفر حسب الدولة', 'Availability by country')}
+                aria-label={say('الدولة المرتبطة بالاختبار', 'Country associated with the test')}
                 value={countryDraft}
                 maxLength={2}
                 placeholder="SA"
@@ -573,6 +575,7 @@ export function InternationalTestsAdminPage() {
             </label>
           )}
           <TestProviderFilter ar={isRtl} value={providerFilter} onChange={value=>update('providerName',value)}/>
+          <TestAcademicFilters params={params} ar={isRtl} change={update}/>
           <label>
             <span>
               <CheckCircle2 size={16} />

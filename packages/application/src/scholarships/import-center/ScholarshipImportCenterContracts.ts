@@ -115,6 +115,7 @@ export interface ScholarshipImportVerificationDecision {
 export interface IScholarshipImportVerificationDecisionPort {
   record(input: ScholarshipImportVerificationDecision): Promise<{ decisionId: string; recordedAt: string }>;
   latest(recordId: string): Promise<(ScholarshipImportVerificationDecision & { decisionId: string; recordedAt: string }) | null>;
+  latestMany?(recordIds: string[]): Promise<Array<ScholarshipImportVerificationDecision & { decisionId: string; recordedAt: string }>>;
   list(recordId: string): Promise<Array<ScholarshipImportVerificationDecision & { decisionId: string; recordedAt: string }>>;
 }
 export interface ScholarshipImportCanonicalResolutionDecision {
@@ -123,6 +124,7 @@ export interface ScholarshipImportCanonicalResolutionDecision {
 export interface IScholarshipImportCanonicalResolutionDecisionPort {
   record(input: ScholarshipImportCanonicalResolutionDecision): Promise<{ decisionId: string; recordedAt: string }>;
   list(recordId: string): Promise<Array<ScholarshipImportCanonicalResolutionDecision & { decisionId: string; recordedAt: string }>>;
+  listMany?(recordIds: string[]): Promise<Array<ScholarshipImportCanonicalResolutionDecision & { decisionId: string; recordedAt: string }>>;
 }
 
 export interface ScholarshipImportTransferRequest {

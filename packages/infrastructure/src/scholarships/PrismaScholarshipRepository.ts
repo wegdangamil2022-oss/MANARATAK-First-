@@ -162,6 +162,15 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     return record ? (await this.hydrateProgramOwners([this.mapToDto(record)]))[0] : null;
   }
 
+  async findByDedupKeys(keys: string[]): Promise<ScholarshipDto[]> {
+    if (keys.length > 200) throw new Error('SCHOLARSHIP_DUPLICATE_LOOKUP_PAGE_LIMIT');
+    if (!keys.length) return [];
+    const rows = await this.prisma.scholarship.findMany({
+      where: { canonicalDedupKey: { in: [...new Set(keys)] } }, include: this.normalizedInclude,
+    });
+    return this.hydrateProgramOwners(rows.map(row => this.mapToDto(row)));
+  }
+
   async create(data: CreateScholarshipDto): Promise<ScholarshipDto> {
     if (data.universityLinks)
       data = { ...data, universityLinks: await this.normalizeProgramParents(data.universityLinks,

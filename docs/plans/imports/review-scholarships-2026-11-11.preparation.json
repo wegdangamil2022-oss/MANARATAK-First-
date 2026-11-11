@@ -1,0 +1,186 @@
+{
+  "preparedOn": "2026-11-11",
+  "sourceFile": "workspace/import-sources/scholarships/MANARATAK_Scholarships_Master_2027_Through_1138.md",
+  "sourceHash": "6b657da9e1f5a9159b1952afe914d8aacb97593ed178e3cb99c141d564d1cf13",
+  "planHash": "c0610c081619592707f44c74ac5317a75fe9b1926234b24e0a75951478ad09ef",
+  "nativePlanHash": "9e4d3f053d9cffc7c3d5a9e0c03bac0cf0e95d1e8c1c3cadbe6fc7636678c8ce",
+  "sourceRecords": 1138,
+  "existingSourceRecords": 4,
+  "newSourceRecords": 1134,
+  "batches": 46,
+  "batchSize": 25,
+  "previousSourceIds": [
+    "SCH-OC-0051",
+    "SCH-OC-0155",
+    "SCH-OC-0117",
+    "SCH-OC-0030"
+  ],
+  "canonicalScreeningStates": {
+    "REVIEW_REQUIRED": 1559,
+    "UNRESOLVED": 14049,
+    "AMBIGUOUS": 696,
+    "RESOLVED": 1680
+  },
+  "recordsWithUnresolvedCanonical": 1134,
+  "stagingStates": {
+    "STAGED_NEEDS_REVIEW": 1134
+  },
+  "publication": false,
+  "catalogWrites": 0,
+  "audit": {
+    "pass": true,
+    "readOnly": true,
+    "checks": [
+      {
+        "section": "geography-universities",
+        "country": "CN",
+        "universityTotal": 826,
+        "sampleSearch": true,
+        "cityAndRegionFilters": true
+      },
+      {
+        "section": "geography-universities",
+        "country": "US",
+        "universityTotal": 958,
+        "sampleSearch": true,
+        "cityAndRegionFilters": true
+      },
+      {
+        "section": "geography-universities",
+        "country": "HU",
+        "universityTotal": 32,
+        "sampleSearch": true,
+        "cityAndRegionFilters": true
+      },
+      {
+        "section": "major-degree-filter",
+        "level": "BACHELOR",
+        "total": 843
+      },
+      {
+        "section": "major-degree-filter",
+        "level": "MASTER",
+        "total": 1116
+      },
+      {
+        "section": "major-field-filter",
+        "total": 182
+      },
+      {
+        "section": "test-category-filter",
+        "category": "ENGLISH_LANGUAGE",
+        "total": 42
+      },
+      {
+        "section": "test-category-filter",
+        "category": "GENERAL_UNDERGRADUATE_ADMISSION",
+        "total": 41
+      },
+      {
+        "section": "test-category-filter",
+        "category": "GRADUATE_ADMISSION",
+        "total": 50
+      },
+      {
+        "section": "test-category-filter",
+        "category": "NATIONAL_INTERNATIONAL_ADMISSION",
+        "total": 41
+      },
+      {
+        "section": "test-category-filter",
+        "category": "NON_ENGLISH_LANGUAGE",
+        "total": 60
+      },
+      {
+        "section": "test-provider-filter",
+        "total": 1
+      }
+    ],
+    "source": {
+      "file": "workspace/import-sources/scholarships/MANARATAK_Scholarships_Master_2027_Through_1138.md",
+      "sha256": "6b657da9e1f5a9159b1952afe914d8aacb97593ed178e3cb99c141d564d1cf13",
+      "total": 1138,
+      "validPayloads": 1138,
+      "invalidPayloads": [],
+      "existingSourceIds": [
+        "SCH-OC-0051",
+        "SCH-OC-0155",
+        "SCH-OC-0117",
+        "SCH-OC-0030"
+      ],
+      "newSourceRecords": 1134
+    },
+    "counts": {
+      "countries": 195,
+      "regions": 5003,
+      "cities": 10676,
+      "majors": 1910,
+      "major_profiles": 3073,
+      "tests": 234,
+      "universities": 10723,
+      "courses": 21559,
+      "scholarships": 5
+    },
+    "relationshipInventory": [
+      {
+        "kind": "test-language",
+        "count": 251
+      },
+      {
+        "kind": "test-degree",
+        "count": 68
+      },
+      {
+        "kind": "test-academic-field",
+        "count": 30
+      }
+    ]
+  },
+  "filters": {
+    "pass": true,
+    "checks": [
+      {
+        "key": "languageReferenceId",
+        "referenceId": "4b8963e7-4d87-4b38-a7e0-24c495a18839",
+        "total": 100
+      },
+      {
+        "key": "degreeLevelId",
+        "referenceId": "b826dfa1-586f-431b-8e4d-90c32925b1fe",
+        "total": 36
+      },
+      {
+        "key": "taxonomyNodeId",
+        "referenceId": "38aab781-bb8b-4974-b2d0-08d82a60f695",
+        "total": 6
+      }
+    ],
+    "majorDegrees": {
+      "BACHELOR": 843,
+      "MASTER": 1116,
+      "DOCTORATE": 1114
+    }
+  },
+  "benchmark": {
+    "pass": true,
+    "readOnly": true,
+    "sameOutput": true,
+    "originalDatabase": true,
+    "measurements": [
+      {
+        "label": "before",
+        "records": 3,
+        "queries": 15,
+        "elapsedMs": 16710,
+        "outputSha256": "222185ebc7cb5a2c128dea2cbbf646cb2a6501d042188a69781113a28f34c167"
+      },
+      {
+        "label": "after",
+        "records": 3,
+        "queries": 9,
+        "elapsedMs": 6016,
+        "outputSha256": "222185ebc7cb5a2c128dea2cbbf646cb2a6501d042188a69781113a28f34c167"
+      }
+    ]
+  }
+}

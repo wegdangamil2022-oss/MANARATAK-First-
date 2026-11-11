@@ -31,6 +31,7 @@ import { readScholarshipImportReviewDecision, readScholarshipImportTransferRecei
 import { ScholarshipImportScreeningReader } from './ScholarshipImportScreeningReader';
 import { scholarshipImportLanguagePolicy } from './ScholarshipImportLanguagePolicy';
 import { scholarshipImportSourceReview } from './ScholarshipImportSourceReview';
+import { scholarshipImportPageReads, type ScholarshipImportPageReads } from './ScholarshipImportPageReads';
 import type { ScholarshipSourceRegistryService } from '../source-registry/ScholarshipSourceRegistryService';
 
 const OWNER_DOMAIN = 'SCHOLARSHIPS';
@@ -139,7 +140,7 @@ export class ScholarshipImportCenterUseCases {
       page,
       pageSize,
     });
-    const analyzed = await Promise.all(result.data.map((record) => this.analyzeWithBatch(record)));
+    const analyzed = await this.analyzePage(result.data);
     return {
       data: analyzed,
       sourceTotal: result.total,
@@ -233,7 +234,7 @@ export class ScholarshipImportCenterUseCases {
     const page = this.bound(query.page, 1, 1, 10000);
     const pageSize = this.bound(query.pageSize, 25, 1, 50);
     const result = await this.gateway.listRecords({ dataType: OWNER_DOMAIN, page, pageSize });
-    const analyzed = await Promise.all(result.data.map(record => this.analyzeWithBatch(record)));
+    const analyzed = await this.analyzePage(result.data);
     const data = analyzed.filter(record => record.operationalClass === 'REAL' && !record.transferred && record.reviewReasons.length > 0)
       .map(record => ({
         id: record.id, batchId: record.batchId, sourceSystem: record.sourceSystem, sourceRowNumber: record.sourceRowNumber,
@@ -308,7 +309,7 @@ export class ScholarshipImportCenterUseCases {
       });
       sourceTotal = response.total;
       if (response.data.length === 0) break;
-      const views = await Promise.all(response.data.map((record) => this.analyzeWithBatch(record)));
+      const views = await this.analyzePage(response.data);
       const remaining = Math.max(0, maxRecords - scanned);
       const boundedViews = views.slice(0, remaining);
       scanned += boundedViews.length;
@@ -348,19 +349,28 @@ export class ScholarshipImportCenterUseCases {
     return Boolean(countryMatches && incomingUrl && existingUrl && incomingUrl === existingUrl);
   }
 
-  private async analyzeWithBatch(record: ScholarshipImportCenterStoredRecord) {
+  private async analyzePage(records: ScholarshipImportCenterStoredRecord[]) {
+    if (!records.length) return [];
+    const reads = await scholarshipImportPageReads(records.map(record => record.id), this.scholarshipRepository,
+      this.verificationDecisionPort, this.canonicalResolutionDecisionPort);
+    return Promise.all(records.map(record => this.analyzeWithBatch(record, reads)));
+  }
+
+  private async analyzeWithBatch(record: ScholarshipImportCenterStoredRecord, reads?: ScholarshipImportPageReads) {
     const batch = record.batch ?? await this.gateway.getBatchById(record.batchId);
     this.assertScholarshipBatch(batch);
-    return this.analyze(record, batch!);
+    return this.analyze(record, batch!, reads);
   }
 
   private async analyze(
     record: ScholarshipImportCenterStoredRecord,
     batch: ScholarshipImportCenterBatchRecord,
+    reads?: ScholarshipImportPageReads,
   ): Promise<ScholarshipImportCenterRecordView> {
     const operationalClass = this.operationalClass(record.rawPayload, batch.sourceSystem);
     const raw = this.object(record.rawPayload);
-    const persistedVerification = this.verificationDecisionPort ? await this.verificationDecisionPort.latest(record.id) : null;
+    const persistedVerification = reads ? await reads.latestVerification(record.id)
+      : this.verificationDecisionPort ? await this.verificationDecisionPort.latest(record.id) : null;
     const sourceReview = scholarshipImportSourceReview(raw, persistedVerification);
     const parsed = ScholarshipImportPayloadSchema.safeParse(sourceReview.payload);
     const base = {
@@ -410,7 +420,7 @@ export class ScholarshipImportCenterUseCases {
       : [];
     const persistedName = this.object(persistedHandoff.nameScreening);
     const name = Object.keys(persistedName).length ? { rawSourceTitle: this.stringValue(persistedName.rawSourceTitle) ?? parsed.data.scholarshipName, cleanedScholarshipName: this.stringValue(persistedName.cleanedScholarshipName) ?? parsed.data.scholarshipName, sourceAliases: Array.isArray(persistedName.sourceAliases) ? persistedName.sourceAliases.filter((value): value is string => typeof value === 'string') : aliases, extracted: this.object(persistedName.extracted), detectedYear: this.stringValue(persistedName.detectedYear) } : ScholarshipNamingService.clean(parsed.data.scholarshipName, aliases);
-    const canonicalDecisions = this.canonicalResolutionDecisionPort
+    const canonicalDecisions = reads ? await reads.canonicalDecisions(record.id) : this.canonicalResolutionDecisionPort
       ? await this.canonicalResolutionDecisionPort.list(record.id)
       : [];
     const effectiveCanonical = sourceReview.contextualize(ScholarshipImportScreeningReader.resolve(raw, canonicalDecisions).entries);
@@ -451,11 +461,12 @@ export class ScholarshipImportCenterUseCases {
     };
     const key = ScholarshipDeduplicationService.buildKey(dedupeInput);
     let existing = completeness.identityReady
-      ? await this.scholarshipRepository.findByDedupKey(key.duplicateKey)
+      ? await (reads ? reads.findDuplicate(key.duplicateKey) : this.scholarshipRepository.findByDedupKey(key.duplicateKey))
       : null;
     let legacyReconciliationRequired = false;
     if (!existing && completeness.identityReady) {
-      const legacyCandidate = await this.scholarshipRepository.findByDedupKey(ScholarshipDeduplicationService.buildLegacyKey(dedupeInput));
+      const legacyKey = ScholarshipDeduplicationService.buildLegacyKey(dedupeInput);
+      const legacyCandidate = await (reads ? reads.findDuplicate(legacyKey) : this.scholarshipRepository.findByDedupKey(legacyKey));
       if (legacyCandidate) {
         if (this.legacyDedupeCompatible(legacyCandidate, dedupeInput)) existing = legacyCandidate;
         else legacyReconciliationRequired = true;

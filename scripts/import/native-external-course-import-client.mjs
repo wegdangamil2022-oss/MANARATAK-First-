@@ -28,6 +28,11 @@ export class NativeExternalCourseImportClient extends NativeUniversityImportClie
   constructor(options) {
     super(options);
     this.initializeCourseDelegates();
+    // Operator imports must honor the configured audit retention policy too.
+    // Deliberately read-only: this adapter cannot change workspace policies.
+    this.auditWorkspaceRecord = {
+      findUnique: async (args) => (await super.find('AuditWorkspaceRecord', args))[0] ?? null,
+    };
   }
   initializeCourseDelegates() {
     for (const [delegate, table] of Object.entries(tables)) {

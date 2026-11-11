@@ -405,6 +405,7 @@ export interface IScholarshipRepository {
   update(id: string, updates: ScholarshipRepositoryUpdateDto): Promise<ScholarshipDto>;
   assertCurrentRevision?(id: string, expectedRevision: number): Promise<void>;
   findByDedupKey(key: string): Promise<ScholarshipDto | null>;
+  findByDedupKeys?(keys: string[]): Promise<ScholarshipDto[]>;
   findById(id: string): Promise<ScholarshipDto | null>;
   findBySlug(slug: string): Promise<ScholarshipDto | null>;
   findPublishedBySlug(slug: string): Promise<ScholarshipDto | null>;

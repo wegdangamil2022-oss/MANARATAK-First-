@@ -6,6 +6,13 @@ import { InternationalTestAdminRouter } from '../../../../src/presentation/api/r
 import { InternationalTestStatus } from '@manaratak/domain';
 
 describe('InternationalTestAdminRouter', () => {
+  it('passes canonical relationship filters through the validated list contract', async () => {
+    const useCases = createMockUseCases();
+    useCases.list.mockResolvedValue({ data: [], total: 0, page: 1, limit: 20 });
+    const response = await request(createApp(useCases)).get('/admin/international-tests?languageReferenceId=lang-1&degreeLevelId=degree-1&taxonomyNodeId=field-1');
+    expect(response.status).toBe(200);
+    expect(useCases.list).toHaveBeenCalledWith(expect.objectContaining({ languageReferenceId: 'lang-1', degreeLevelId: 'degree-1', taxonomyNodeId: 'field-1' }));
+  });
   const createMockUseCases = () => ({
     list: vi.fn(),
     get: vi.fn(),

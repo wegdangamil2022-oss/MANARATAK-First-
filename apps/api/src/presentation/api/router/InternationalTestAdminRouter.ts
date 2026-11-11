@@ -69,6 +69,9 @@ export class InternationalTestAdminRouter {
       sortBy:z.enum(['createdAt','updatedAt','canonicalName']).optional(),
       sortDirection:z.enum(['asc','desc']).optional(),
       providerName: cleanOptionalString(),
+      languageReferenceId: z.string().trim().min(1).max(200).optional(),
+      degreeLevelId: z.string().trim().min(1).max(200).optional(),
+      taxonomyNodeId: z.string().trim().min(1).max(200).optional(),
       countryIso2Code: z.preprocess((val) => {
         if (typeof val === 'string') {
           const trimmed = val.trim();

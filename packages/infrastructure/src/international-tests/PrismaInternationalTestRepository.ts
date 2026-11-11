@@ -540,15 +540,21 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     }
 
     if (filters?.providerName) {
-      where.providerName = filters.providerName;
+      where.AND = [{ OR: [
+        { providerName: filters.providerName },
+        { provider: { is: { displayName: filters.providerName } } },
+      ] }];
     }
+    if (filters.languageReferenceId) where.languageRelationships = { some: { canonicalReferenceId: filters.languageReferenceId } };
+    if (filters.degreeLevelId) where.degreeRelationships = { some: { degreeLevelId: filters.degreeLevelId } };
+    if (filters.taxonomyNodeId) where.academicTaxonomyRelationships = { some: { taxonomyNodeId: filters.taxonomyNodeId } };
 
     if (filters?.countryIso2Code) {
       const country=await this.prisma.referenceCountry.findUnique({where:{iso2Code:String(filters.countryIso2Code).toUpperCase()},select:{id:true}});
       const countryId = country?.id ?? 'UNRESOLVED_COUNTRY';
       // Source country relationships describe jurisdiction/use, not test-centre
       // availability. Both are valid discovery facets; never invent availability.
-      where.AND = [{ OR: [
+      where.AND = [...(where.AND ?? []), { OR: [
         { countryRelationships: { some: { canonicalReferenceId: countryId } } },
         { availability: { is: { availableCountryIds: { array_contains: [countryId] } } } },
       ] }];

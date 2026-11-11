@@ -117,6 +117,30 @@ function scholarshipRepository(existing: ScholarshipDto | null = null): IScholar
 }
 
 describe('WP12-7 ScholarshipImportCenterUseCases', () => {
+  it('batches page review reads without caching decisions across requests or changing readiness', async () => {
+    const local = gateway();
+    const pageRows = Array.from({ length: 100 }, (_, index) => ({ ...records[0], id: `bulk-${index}`, rawPayload: completePayload({ scholarshipName: `Distinct Scholarship ${index}` }), batch: batches[0] }));
+    local.listRecords = async () => ({ data: pageRows, total: 100, page: 1, pageSize: 100 });
+    const decisions = [{ recordId: 'bulk-0', state: 'FAILED' as const, actorId: 'reviewer', reason: 'Source conflict', decisionId: 'decision', recordedAt: '2026-11-11T00:00:00Z' }];
+    const scalarVerification = { record: vi.fn(), latest: vi.fn(async (id: string) => decisions.find(row => row.recordId === id) ?? null), list: vi.fn() };
+    const scalarCanonical = { record: vi.fn(), list: vi.fn(async () => []) };
+    const scalarRepository = scholarshipRepository();
+    const expected = await new ScholarshipImportCenterUseCases(local, scalarRepository, undefined, undefined, undefined, scalarVerification, scalarCanonical).listRecords({ pageSize: 100 });
+    const bulkVerification = { ...scalarVerification, latest: vi.fn(), latestMany: vi.fn(async () => decisions) };
+    const bulkCanonical = { ...scalarCanonical, list: vi.fn(), listMany: vi.fn(async () => []) };
+    const bulkRepository = { ...scholarshipRepository(), findByDedupKeys: vi.fn(async () => []) };
+    const service = new ScholarshipImportCenterUseCases(local, bulkRepository, undefined, undefined, undefined, bulkVerification, bulkCanonical);
+    expect(await service.listRecords({ pageSize: 100 })).toEqual(expected);
+    expect(scalarRepository.findByDedupKey).toHaveBeenCalledTimes(200);
+    expect(bulkRepository.findByDedupKey).not.toHaveBeenCalled();
+    expect(bulkRepository.findByDedupKeys).toHaveBeenCalledTimes(2);
+    expect(bulkVerification.latestMany).toHaveBeenCalledTimes(1); expect(bulkVerification.latest).not.toHaveBeenCalled();
+    expect(bulkCanonical.listMany).toHaveBeenCalledTimes(1); expect(bulkCanonical.list).not.toHaveBeenCalled();
+    decisions.splice(0);
+    const refreshed = await service.listRecords({ pageSize: 100 });
+    expect(refreshed.data[0].verification.state).toBe('VERIFIED');
+    expect(bulkVerification.latestMany).toHaveBeenCalledTimes(2);
+  });
   it('supersedes only the reviewed date-only deadline blocker in an immutable historical handoff', async () => {
     const raw = completePayload({ applicationDeadline: undefined,
       _domainHandoff: { completeness: { state: 'NEEDS_REVIEW', identityReady: true, coreMissingFields: ['deadlineMode'], missingFields: ['deadlineMode'] } },
