@@ -165,6 +165,42 @@ function existingScholarship(status: ScholarshipStatus = ScholarshipStatus.IMPOR
 }
 
 describe('WP12-10 ScholarshipImportAtomicTransferUseCase', () => {
+  it('transfers an explicitly reviewed source as an unverified draft without inventing unresolved links', async () => {
+    const env = setup();
+    const raw = env.getRecord().rawPayload as ReturnType<typeof payload>;
+    raw.metadata.verificationState = 'PENDING';
+    raw.metadata.canonicalScreening[0].state = 'UNRESOLVED';
+    await expect(env.service.transfer({ recordId: 'rec-1', actorId: 'reviewer' })).rejects.toThrow('SOURCE_NOT_VERIFIED');
+    await env.service.transfer({ recordId: 'rec-1', actorId: 'reviewer', sourceDraftReview: {
+      rawPayloadFingerprint: scholarshipImportReviewFingerprint(raw), reason: 'Owner has reviewed the source; save as draft.',
+    } });
+    expect(env.create.mock.calls[0][0]).toMatchObject({ publicationStatus: 'DRAFT', verificationStatus: 'PENDING',
+      lastVerifiedAt: null, countryReferenceId: null, metadata: { sourceDraftReview: { actorId: 'reviewer', officialVerification: 'PENDING' } } });
+    expect(env.create.mock.calls[0][0].eligibilityItems?.map(item => item.valueText)).toEqual(['Academic merit.']);
+    expect(env.getRecord().rawPayload).toEqual(raw);
+  });
+
+  it('rejects a changed source or empty review reason before creating a draft', async () => {
+    const env = setup();
+    for (const review of [{ rawPayloadFingerprint: '0'.repeat(64), reason: 'Reviewed' },
+      { rawPayloadFingerprint: scholarshipImportReviewFingerprint(env.getRecord().rawPayload), reason: ' ' }]) {
+      await expect(env.service.transfer({ recordId: 'rec-1', actorId: 'reviewer', sourceDraftReview: review })).rejects.toThrow('DRAFT_SOURCE_REVIEW_STALE');
+    }
+    expect(env.create).not.toHaveBeenCalled();
+  });
+
+  it('keeps a reviewed source degree variant separate when name cleaning collides', async () => {
+    const previous=existingScholarship();previous.metadata={rawSourceTitle:'University scholarship for bachelors'};
+    const env=setup(previous);const raw=env.getRecord().rawPayload as ReturnType<typeof payload> & {sourceReferenceId:string};
+    raw.sourceReferenceId='source-masters';
+    env.repository.findByDedupKey=async key=>key.includes('|source-variant:')?null:previous;
+    await env.service.transfer({recordId:'rec-1',actorId:'reviewer',sourceDraftReview:{
+      rawPayloadFingerprint:scholarshipImportReviewFingerprint(raw),reason:'Separate degrees and source identities',distinctSourceVariant:true,
+    }});
+    expect(env.create.mock.calls[0][0].canonicalDedupKey).toContain('|source-variant:source-masters');
+    expect(env.create.mock.calls[0][0].displayName).toBe(raw.scholarshipName);expect(env.update).not.toHaveBeenCalled();
+  });
+
   it('transfers reviewed programme descriptions as PENDING with real degrees and source rows scoped to each degree', async () => {
     const env = setup();
     const fixture = academicOfferFixture();

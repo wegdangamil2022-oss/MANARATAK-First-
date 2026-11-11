@@ -3,6 +3,17 @@ import { PrismaScholarshipRepository } from '../../src/scholarships/PrismaSchola
 import { appendScholarshipEligibilityEdit, scholarshipEligibilityView } from '@manaratak/domain';
 
 describe('PrismaScholarshipRepository', () => {
+  it('finds source-related draft tests in admin filters without requiring a published test', async () => {
+    mockPrisma.scholarship.findMany.mockResolvedValue([]);mockPrisma.scholarship.count.mockResolvedValue(0);
+    await repository.list({ internationalTestId: 'draft-test' });
+    const where=mockPrisma.scholarship.findMany.mock.calls[0][0].where;
+    expect(JSON.stringify(where)).not.toContain('PUBLISHED');
+    expect(where.AND).toContainEqual({ OR: [
+      {eligibilityItems:{some:{internationalTestId:'draft-test'}}},
+      {requiredDocuments:{some:{internationalTestId:'draft-test'}}},
+      {optionalFields:{path:['metadata','sourceRelationships','testIds'],array_contains:['draft-test']}},
+    ] });
+  });
   it('round trips an individual criterion approval through existing JSON without writing any child relations', async () => {
     const metadata = { rawSourceSections: { 'الشروط ومعايير التقديم': 'شهادة جامعية، سجل قوي.' }, extraEvidence: { test: 'IELTS' } };
     let stored: any = { id: 'sch-criteria', revision: 1, displayName: 'Scholarship', status: 'IMPORTED', publicationStatus: 'DRAFT', optionalFields: { metadata }, degreeTargets: [], benefits: [], majorTargets: [], eligibilityItems: [{ itemKey: 'old', valueText: 'Do not delete enrichment' }], requiredDocuments: [], sourceEvidence: [], universityLinks: [] };

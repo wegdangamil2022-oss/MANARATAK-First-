@@ -1,4 +1,5 @@
 import type { ScholarshipDto } from '@manaratak/domain';
+import { Link } from 'react-router-dom';
 import { ScholarshipEligibilityCriteria } from './ScholarshipEligibilityCriteria';
 import { ScholarshipUniversityCards } from './ScholarshipParticipatingUniversities';
 import {
@@ -101,6 +102,9 @@ export function ScholarshipDetailReadView({
   const data = scholarship as unknown as Record<string, unknown>;
   const presentation = scholarshipPresentation(scholarship, language === 'ar');
   const sourcePresentation = scholarshipSourcePresentation(scholarship.metadata);
+  const sourceRelations = scholarship.metadata?.sourceRelationships as { tests?: Array<{id:string;name:string}> } | undefined;
+  const relatedTests = Array.isArray(sourceRelations?.tests) ? sourceRelations.tests.filter(test =>
+    test && typeof test.id === 'string' && typeof test.name === 'string') : [];
   const edit = (field: string, title: string) =>
     onEdit ? (
       <button
@@ -448,6 +452,12 @@ export function ScholarshipDetailReadView({
   if (tab === 'links_unis')
     return (
       <>
+        {!!relatedTests.length && <section className="scholarship-read-card">
+          <h2>{tr('اختبارات مذكورة في المصدر', 'Tests mentioned in the source')}</h2>
+          <p>{tr('الذكر في المصدر لا يعني اشتراط جميع هذه الاختبارات؛ تُراجع الشروط الأصلية.', 'A source mention does not mean every test is required; consult the original criteria.')}</p>
+          <div className="scholarship-card-grid">{relatedTests.map(test => <Link className="scholarship-editor-card" key={test.id}
+            to={`/admin/international-tests/${encodeURIComponent(test.id)}`}>{test.name}</Link>)}</div>
+        </section>}
         {presentation.sourceGroups.map((sourceGroup) => (
           <section className="scholarship-read-card" key={sourceGroup.id}>
             <div className="scholarship-group-heading">

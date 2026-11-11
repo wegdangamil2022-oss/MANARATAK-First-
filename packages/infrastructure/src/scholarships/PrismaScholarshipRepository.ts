@@ -413,12 +413,9 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       { eligibilityItems: { some: { majorId: filters.majorId } } },
     ] });
     if (filters.internationalTestId) constraints.push({ OR: [
-      { eligibilityItems: { some: { internationalTestId: filters.internationalTestId,
-                internationalTest: { is: { status: 'PUBLISHED' } },
-              } } },
-      { requiredDocuments: { some: { internationalTestId: filters.internationalTestId,
-                internationalTest: { is: { status: 'PUBLISHED' } },
-              } } },
+      { eligibilityItems: { some: { internationalTestId: filters.internationalTestId } } },
+      { requiredDocuments: { some: { internationalTestId: filters.internationalTestId } } },
+      { optionalFields: { path: ['metadata', 'sourceRelationships', 'testIds'], array_contains: [filters.internationalTestId] } },
     ] });
     if (filters.academicProgramId) {
       const refs = await this.programReads.findByIds([filters.academicProgramId]);

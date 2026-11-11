@@ -47,6 +47,12 @@ const OWNER_DOMAIN = 'SCHOLARSHIPS';
 const SOURCE = 'scholarship-import-center';
 const BLOCKING_CANONICAL_STATES = new Set(['UNRESOLVED', 'AMBIGUOUS', 'REVIEW_REQUIRED']);
 
+export interface ScholarshipDraftSourceRelationPort {
+  link(data: CreateScholarshipDto, source: ScholarshipImportPayload): Promise<Pick<CreateScholarshipDto,
+    'countryReferenceId' | 'studyLanguageReferenceId' | 'studyLanguageResolutionStatus' | 'sponsorUniversityId' |
+    'degreeTargets' | 'majorTargets' | 'universityLinks' | 'eligibilityItems' | 'requiredDocumentItems' | 'metadata'>>;
+}
+
 type CanonicalTarget =
   | 'PROVIDER_UNIVERSITY'
   | 'UNIVERSITY'
@@ -108,6 +114,7 @@ export class ScholarshipImportAtomicTransferUseCase
     private readonly atomicMutations: AtomicDomainMutationCoordinator,
     private readonly verificationDecisions?: IScholarshipImportVerificationDecisionPort,
     private readonly canonicalDecisions?: IScholarshipImportCanonicalResolutionDecisionPort,
+    private readonly draftSourceRelations?: ScholarshipDraftSourceRelationPort,
   ) {}
 
   async recordDecision(
@@ -211,8 +218,31 @@ export class ScholarshipImportAtomicTransferUseCase
         } };
       }
 
-      const plan = await this.buildPlan(record, batch, scholarshipTx, true);
+      const draftReview = input.sourceDraftReview;
+      if (draftReview && (!draftReview.reason.trim() ||
+          draftReview.rawPayloadFingerprint !== scholarshipImportReviewFingerprint(record.rawPayload))) {
+        throw new Error('SCHOLARSHIP_IMPORT_DRAFT_SOURCE_REVIEW_STALE');
+      }
+      let plan = await this.buildPlan(record, batch, scholarshipTx, !draftReview);
+      const rawClass = String(this.object(record.rawPayload)._operationalClass ??
+        this.object(this.object(record.rawPayload).metadata).operationalClass ?? '').toUpperCase();
+      if (draftReview && (!plan.decisionSnapshot.sourceReviewValid ||
+          ['FAILED', 'REJECTED'].includes(plan.decisionSnapshot.verificationState) ||
+          ['TEST', 'DEMO', 'ARCHIVED'].includes(rawClass) || /TEST|DEMO|SANDBOX|ARCHIVE/iu.test(batch.sourceSystem))) {
+        throw new Error('SCHOLARSHIP_IMPORT_DRAFT_SOURCE_INVALID');
+      }
       const decision = readScholarshipImportReviewDecision(record.processingNotes);
+      if (draftReview?.distinctSourceVariant && plan.existing) {
+        const sourceIdentity = plan.payload.sourceReferenceId;
+        const previousTitle = this.stringValue(this.object(plan.existing.metadata).rawSourceTitle);
+        if (!sourceIdentity || !previousTitle || previousTitle === plan.cleanedName.rawSourceTitle ||
+            plan.existing.publicationStatus !== ScholarshipPublicationStatus.DRAFT ||
+            plan.existing.sourceImportRecordId === record.id) throw new Error('SCHOLARSHIP_IMPORT_SOURCE_VARIANT_NOT_DISTINCT');
+        const duplicateKey = `${plan.duplicateKey}|source-variant:${sourceIdentity}`;
+        if (await scholarshipTx.findByDedupKey(duplicateKey)) throw new Error('SCHOLARSHIP_IMPORT_SOURCE_VARIANT_ALREADY_EXISTS');
+        plan = { ...plan, existing: null, duplicateKey };
+      }
+      if (draftReview && plan.existing) throw new Error('SCHOLARSHIP_IMPORT_DRAFT_EXISTING_REQUIRES_REVIEW');
       let scholarship: ScholarshipDto;
       let mode: 'CREATE' | 'MERGE';
 
@@ -237,7 +267,20 @@ export class ScholarshipImportAtomicTransferUseCase
         mode = 'MERGE';
       } else {
         if (decision) throw new Error('SCHOLARSHIP_IMPORT_REVIEW_DECISION_NOT_APPLICABLE');
-        scholarship = await scholarshipTx.create(this.buildCreate(plan));
+        let data = this.buildCreate(plan);
+        if (draftReview) {
+          if (this.draftSourceRelations) data = { ...data, ...await this.draftSourceRelations.link(data, plan.payload) };
+          data.verificationStatus = ScholarshipVerificationStatus.PENDING;
+          data.displayName = plan.payload.scholarshipName;
+          data.completenessStatus = ScholarshipCompletenessClassifier.classify(plan.payload).state;
+          data.lastVerifiedAt = null;
+          data.sourceEvidence = data.sourceEvidence?.map(item => ({ ...item, verifiedAt: null }));
+          data.metadata = { ...data.metadata, sourceDraftReview: {
+            ...draftReview, actorId: input.actorId, reviewedAt: new Date().toISOString(),
+            officialVerification: 'PENDING', canonicalReview: plan.canonical,
+          } };
+        }
+        scholarship = await scholarshipTx.create(data);
         mode = 'CREATE';
       }
 

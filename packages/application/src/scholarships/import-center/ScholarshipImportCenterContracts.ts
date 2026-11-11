@@ -131,6 +131,9 @@ export interface ScholarshipImportTransferRequest {
   recordId: string;
   actorId: string;
   correlationId?: string;
+  /** Explicit source-review transfer into an unpublished, unverified draft.
+   * This attests the exact imported text, not official-site verification. */
+  sourceDraftReview?: { rawPayloadFingerprint: string; reason: string; distinctSourceVariant?: boolean };
 }
 
 export interface ScholarshipImportTransferResult {
