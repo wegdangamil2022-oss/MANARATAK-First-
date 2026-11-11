@@ -1,11 +1,11 @@
 import { createHash } from 'node:crypto';
 import { Prisma, type PrismaClient } from '@prisma/client';
 import { ImportRecordStatus, MajorDeduplicationService, type AtomicPersistenceContext, type MajorDto, type MajorLevelProfileDto, type MajorVersionDto } from '@manaratak/domain';
-import { MajorImportPromotionUseCase } from '../../../application/src/majors/use-cases/MajorImportPromotionUseCase';
-import { MajorImportScreeningConsumer, parseMajorOwnerPayload } from '../../../application/src/majors/services/MajorImportScreeningConsumer';
-import { ReviewedMajorTaxonomyResolver } from '../../../application/src/majors/services/ReviewedMajorTaxonomyResolver';
-import type { IReviewedMajorBatchGateway, ReviewedMajorBatch, MajorBatchResult } from '../../../application/src/majors/use-cases/ReviewedMajorBatchUseCase';
-import { taxonomyRevisionHash as hash } from '../../../application/src/academic-taxonomy/services/TaxonomyRevisionHash';
+import { MajorImportPromotionUseCase } from '@manaratak/application';
+import { MajorImportScreeningConsumer, parseMajorOwnerPayload } from '@manaratak/application';
+import { ReviewedMajorTaxonomyResolver } from '@manaratak/application';
+import type { IReviewedMajorBatchGateway, ReviewedMajorBatch, MajorBatchResult } from '@manaratak/application';
+import { taxonomyRevisionHash as hash } from '@manaratak/application';
 import { PrismaMajorImportReviewGateway } from './PrismaMajorImportReviewGateway';
 import { CanonicalMajorReferenceService } from '@manaratak/application';
 import { PrismaAcademicTaxonomyRepository } from '../academic-taxonomy/PrismaAcademicTaxonomyRepository';

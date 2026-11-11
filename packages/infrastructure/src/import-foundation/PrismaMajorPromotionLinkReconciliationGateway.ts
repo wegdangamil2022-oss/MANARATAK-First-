@@ -1,6 +1,6 @@
 import type { Prisma } from '@prisma/client';
 import type { AtomicPersistenceContext } from '@manaratak/domain';
-import type { IMajorPromotionLinkReconciliationGateway } from '../../../application/src/import-foundation/use-cases/ReconcileMajorPromotionLinksUseCase';
+import type { IMajorPromotionLinkReconciliationGateway } from '@manaratak/application';
 
 export class PrismaMajorPromotionLinkReconciliationGateway implements IMajorPromotionLinkReconciliationGateway {
   async reconcile(batchId: string, context: AtomicPersistenceContext) {

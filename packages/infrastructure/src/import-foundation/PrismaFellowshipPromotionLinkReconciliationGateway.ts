@@ -1,6 +1,6 @@
 import type { Prisma } from '@prisma/client';
 import type { AtomicPersistenceContext } from '@manaratak/domain';
-import type { IFellowshipPromotionLinkReconciliationGateway } from '../../../application/src/import-foundation/use-cases/ReconcileFellowshipPromotionLinksUseCase';
+import type { IFellowshipPromotionLinkReconciliationGateway } from '@manaratak/application';
 
 /** Completes only the P6 backlink for a demonstrably applied fellowship owner result. */
 export class PrismaFellowshipPromotionLinkReconciliationGateway implements IFellowshipPromotionLinkReconciliationGateway {

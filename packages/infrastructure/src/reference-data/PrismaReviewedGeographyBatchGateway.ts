@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { Prisma, type PrismaClient } from '@prisma/client';
 import { referenceCityScopeKey, normalizeReferenceIdentityToken, type AtomicPersistenceContext, type UniversalImportHandoff } from '@manaratak/domain';
-import type { IReviewedGeographyBatchGateway, ReviewedGeographyBatch, GeographyBatchResult } from '../../../application/src/reference-data/use-cases/ReviewedGeographyBatchUseCase';
-import { geographyCityHandoffs } from '../../../application/src/reference-data/use-cases/ReviewedGeographyBatchUseCase';
+import type { IReviewedGeographyBatchGateway, ReviewedGeographyBatch, GeographyBatchResult } from '@manaratak/application';
+import { geographyCityHandoffs } from '@manaratak/application';
 import { referenceImportPayloadDigest } from '@manaratak/application';
 import { screeningReceiptIdentity } from '../import-foundation/PrismaImportScreeningReceiptStore';
 import { PrismaReferenceOwnerReviewGateway } from './PrismaReferenceOwnerReviewGateway';

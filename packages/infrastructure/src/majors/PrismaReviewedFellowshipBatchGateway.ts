@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { Prisma, type PrismaClient } from '@prisma/client';
 import { FellowshipDeduplicationService, ImportRecordStatus, MajorStatus, type AtomicPersistenceContext, type FellowshipDefinitionDto, type IFellowshipDefinitionRepository } from '@manaratak/domain';
-import { FellowshipImportPromotionUseCase } from '../../../application/src/majors/use-cases/FellowshipImportPromotionUseCase';
-import { FellowshipImportScreeningConsumer, parseFellowshipOwnerPayload, type ReviewedFellowshipBatch, type FellowshipBatchResult, type IReviewedFellowshipBatchGateway } from '../../../application/src/majors/use-cases/ReviewedFellowshipBatchUseCase';
-import { taxonomyRevisionHash as hash } from '../../../application/src/academic-taxonomy/services/TaxonomyRevisionHash';
+import { FellowshipImportPromotionUseCase } from '@manaratak/application';
+import { FellowshipImportScreeningConsumer, parseFellowshipOwnerPayload, type ReviewedFellowshipBatch, type FellowshipBatchResult, type IReviewedFellowshipBatchGateway } from '@manaratak/application';
+import { taxonomyRevisionHash as hash } from '@manaratak/application';
 import { PrismaAssetRecordRepository } from '../asset-platform/PrismaAssetRecordRepository';
 import { AssetId } from '@manaratak/domain';
 import { screeningReceiptIdentity } from '../import-foundation/PrismaImportScreeningReceiptStore';

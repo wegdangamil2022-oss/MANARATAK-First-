@@ -269,3 +269,12 @@ export * from './student-support/SupportCaseUseCases';
 export * from './student-support/SupportNotificationGateway';
 
 export * from './identity/StaffLifecycleUseCases';
+export type { IFellowshipPromotionLinkReconciliationGateway } from './import-foundation/use-cases/ReconcileFellowshipPromotionLinksUseCase';
+export type { IMajorPromotionLinkReconciliationGateway } from './import-foundation/use-cases/ReconcileMajorPromotionLinksUseCase';
+export * from './reference-data/use-cases/ReviewedGeographyBatchUseCase';
+export * from './majors/use-cases/ReviewedMajorBatchUseCase';
+export * from './majors/use-cases/ReviewedFellowshipBatchUseCase';
+export * from './majors/use-cases/ReviewMajorSourceContextUseCase';
+export * from './majors/use-cases/ReviewMajorClassificationBatchUseCase';
+export * from './majors/services/ReviewedMajorTaxonomyResolver';
+export * from './academic-taxonomy/services/TaxonomyRevisionHash';

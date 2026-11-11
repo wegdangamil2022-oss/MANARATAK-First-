@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import type { AtomicPersistenceContext } from '@manaratak/domain';
-import type { IMajorClassificationReviewGateway, MajorClassificationReviewBatch } from '../../../application/src/majors/use-cases/ReviewMajorClassificationBatchUseCase';
+import type { IMajorClassificationReviewGateway, MajorClassificationReviewBatch } from '@manaratak/application';
 
 export class PrismaMajorClassificationReviewGateway implements IMajorClassificationReviewGateway {
   async apply(input: MajorClassificationReviewBatch, context: AtomicPersistenceContext, actorId: string) {

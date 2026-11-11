@@ -1,6 +1,6 @@
 import { Prisma, type PrismaClient } from '@prisma/client';
 import type { AtomicPersistenceContext } from '@manaratak/domain';
-import { majorSourceAcademicContext, type IMajorSourceContextReviewGateway, type MajorSourceContextReview } from '../../../application/src/majors/use-cases/ReviewMajorSourceContextUseCase';
+import { majorSourceAcademicContext, type IMajorSourceContextReviewGateway, type MajorSourceContextReview } from '@manaratak/application';
 
 export class PrismaMajorSourceContextReviewGateway implements IMajorSourceContextReviewGateway {
   async apply(input: MajorSourceContextReview, context: AtomicPersistenceContext, actorId: string) {
