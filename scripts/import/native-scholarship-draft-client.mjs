@@ -14,7 +14,16 @@ export class NativeScholarshipDraftClient extends NativeExternalCourseImportClie
         statements.push(sql.replace(/SELECT jsonb_build_object\('copied',\d+\);$/u,''));
       }
     }
-    assert.ok(statements.length>0);await this.send(statements.join('\n')+"\nSELECT 'true'::jsonb;");
+    assert.ok(statements.length>0);
+    try { await this.send(statements.join('\n')+"\nSELECT 'true'::jsonb;"); }
+    catch (error) {
+      // A stopped psql input pipe can hide the preceding SQL error as write EOF.
+      // Preserve its category so a uniqueness/validation failure is not retried
+      // as a transient connection problem. SQL payloads stay out of the error.
+      const category = this.errors?.match(/^ERROR:\s*(.+)$/mu)?.[1];
+      if (category) throw new Error('SCHOLARSHIP_DRAFT_WRITE_FAILED:' + category);
+      throw error;
+    }
   }
   async copyScholarshipRows(table, rows) {
     assert.ok(scholarshipDraftTables.includes(table));assert.ok(rows.length>0 && rows.length<=1000);

@@ -165,6 +165,13 @@ function existingScholarship(status: ScholarshipStatus = ScholarshipStatus.IMPOR
 }
 
 describe('WP12-10 ScholarshipImportAtomicTransferUseCase', () => {
+  it('keeps the full unique identifier in generated scholarship slugs', async () => {
+    const env = setup();
+    await env.service.transfer({ recordId: 'rec-1', actorId: 'reviewer' });
+    const created = env.create.mock.calls[0][0];
+    expect(created.publicId).toMatch(/^schol-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
+    expect(created.slug).toBe(`qatar-university-scholarship-2027-${created.publicId}`);
+  });
   it('transfers an explicitly reviewed source as an unverified draft without inventing unresolved links', async () => {
     const env = setup();
     const raw = env.getRecord().rawPayload as ReturnType<typeof payload>;

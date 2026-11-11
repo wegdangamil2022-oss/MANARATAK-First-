@@ -431,14 +431,14 @@ export class ScholarshipImportAtomicTransferUseCase
 
   private buildCreate(plan: TransferPlan): CreateScholarshipDto {
     const common = this.incomingData(plan);
-    const publicId = `schol-${randomUUID().slice(0, 8)}`;
+    const publicId = `schol-${randomUUID()}`;
     const slugBase = plan.cleanedName.cleanedScholarshipName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '') || 'scholarship';
     return {
       publicId,
-      slug: `${slugBase}-${publicId.slice(-4)}`,
+      slug: `${slugBase}-${publicId}`,
       canonicalName: plan.cleanedName.cleanedScholarshipName,
       canonicalDedupKey: plan.duplicateKey,
       status: ScholarshipStatus.IMPORTED,
