@@ -1,0 +1,29 @@
+{
+  "node": "22.23.3",
+  "vitest": {
+    "files": 9,
+    "passed": 53,
+    "failed": 0,
+    "seconds": 8.92
+  },
+  "nodeCopyGateTests": {
+    "passed": 5,
+    "failed": 0
+  },
+  "addedWebDictionaryKeys": 1190,
+  "webTypecheck": "PASS",
+  "dictionarySourceQuality": "PASS",
+  "arabicSemanticQuality": "PASS",
+  "eslint": {
+    "errors": 0,
+    "warnings": 150
+  },
+  "remainingRenderedCopyFindings": {
+    "CourseStudyRoomView.tsx": 1090
+  },
+  "publicEnglishCopyReady": false,
+  "translationContentMode": "INFRASTRUCTURE_ONLY",
+  "databaseConnections": 0,
+  "migrationsApplied": 0,
+  "heavyTestsRun": false
+}
