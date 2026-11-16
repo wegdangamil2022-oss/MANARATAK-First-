@@ -5,7 +5,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 
-const read = (file) => readFileSync(new URL(`../../${file}`, import.meta.url), 'utf8');
+const read = (file) => readFileSync(new URL(`../../${file}`, import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 
 test('The repository retains real configuration, runtime contracts and source datasets', () => {
   for (const file of [

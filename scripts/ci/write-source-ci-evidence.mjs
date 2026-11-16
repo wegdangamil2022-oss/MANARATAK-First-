@@ -20,8 +20,6 @@ const requiredSteps = [
   'artifacts',
 ];
 const sourceClosureManifestPath = 'scripts/ci/source-closure-manifest.json';
-const manifestBytes = fs.readFileSync(sourceClosureManifestPath);
-const manifest = JSON.parse(manifestBytes.toString('utf8'));
 if (!manifest.runtimePendingManifest || !fs.existsSync(manifest.runtimePendingManifest))
   throw new Error('SOURCE_RUNTIME_PENDING_AUTHORITY_UNAVAILABLE');
 const sha = requireSha(process.env.GITHUB_SHA),
@@ -45,7 +43,7 @@ const report = {
   pass,
   databaseConnectionRequired: false,
   sourceClosureManifest: {
-    path: 'scripts/ci/source-closure-manifest.json',
+    path: sourceClosureManifestPath,
     sha256: hash(manifestBytes),
     sourceGateIds: manifest.gates.filter(gate => gate.classification === 'SOURCE').map(gate => gate.id),
   },

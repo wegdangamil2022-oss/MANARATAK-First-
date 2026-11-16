@@ -7,6 +7,38 @@
   },
   "defaultCounterPolicy": "REQUIRED_UNCHANGED_UNLESS_DECLARED",
   "models": {
+    "AcademicStandardMapping": {
+      "owner": "academic_taxonomy",
+      "required": true
+    },
+    "AcademicTaxonomyAlias": {
+      "owner": "academic_taxonomy",
+      "required": true
+    },
+    "AcademicTaxonomyEdge": {
+      "owner": "academic_taxonomy",
+      "required": true
+    },
+    "AcademicTaxonomyImportReview": {
+      "owner": "academic_taxonomy",
+      "required": true
+    },
+    "AcademicTaxonomyNode": {
+      "owner": "academic_taxonomy",
+      "required": true
+    },
+    "AccountRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "AdminEmergencyAccessRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "AdministrativeRegion": {
+      "owner": "reference",
+      "required": true
+    },
     "AIAsyncJobRecord": {
       "owner": "ai",
       "required": true
@@ -77,38 +109,6 @@
     },
     "AIWorkflowVersionRecord": {
       "owner": "ai",
-      "required": true
-    },
-    "AcademicStandardMapping": {
-      "owner": "academic_taxonomy",
-      "required": true
-    },
-    "AcademicTaxonomyAlias": {
-      "owner": "academic_taxonomy",
-      "required": true
-    },
-    "AcademicTaxonomyEdge": {
-      "owner": "academic_taxonomy",
-      "required": true
-    },
-    "AcademicTaxonomyImportReview": {
-      "owner": "academic_taxonomy",
-      "required": true
-    },
-    "AcademicTaxonomyNode": {
-      "owner": "academic_taxonomy",
-      "required": true
-    },
-    "AccountRecord": {
-      "owner": "identity",
-      "required": true
-    },
-    "AdminEmergencyAccessRecord": {
-      "owner": "identity",
-      "required": true
-    },
-    "AdministrativeRegion": {
-      "owner": "reference",
       "required": true
     },
     "ApiIdempotencyRecord": {
@@ -327,6 +327,10 @@
       "owner": "learning",
       "required": true
     },
+    "CourseLessonContentBlock": {
+      "owner": "learning",
+      "required": true
+    },
     "CourseLessonProgress": {
       "owner": "learning",
       "required": true
@@ -336,6 +340,14 @@
       "required": true
     },
     "CourseModule": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseProviderHealthCheckpoint": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseProviderHealthRetry": {
       "owner": "learning",
       "required": true
     },
@@ -359,6 +371,10 @@
       "owner": "learning",
       "required": true
     },
+    "CourseSourceApproval": {
+      "owner": "learning",
+      "required": true
+    },
     "CourseSourceIdentity": {
       "owner": "learning",
       "required": true
@@ -379,8 +395,16 @@
       "owner": "identity",
       "required": true
     },
+    "DashboardMeasurementEpoch": {
+      "owner": "foundation_control_plane",
+      "required": true
+    },
     "DegreeLevel": {
       "owner": "reference",
+      "required": true
+    },
+    "DirectApplicationReport": {
+      "owner": "services",
       "required": true
     },
     "EmailVerificationTokenRecord": {
@@ -727,6 +751,14 @@
       "owner": "identity",
       "required": true
     },
+    "PublicAnalyticsConsent": {
+      "owner": "foundation_control_plane",
+      "required": true
+    },
+    "PublicAnalyticsEvent": {
+      "owner": "foundation_control_plane",
+      "required": true
+    },
     "ReferenceAliasRecord": {
       "owner": "reference",
       "required": true
@@ -770,6 +802,26 @@
     "RetentionDecisionRecord": {
       "owner": "platform_retention",
       "required": true
+    },
+    "ReviewSlaPolicy": {
+      "required": true,
+      "owner": "foundation_control_plane"
+    },
+    "ReviewSourceCheckpoint": {
+      "required": true,
+      "owner": "foundation_control_plane"
+    },
+    "ReviewWorkCase": {
+      "required": true,
+      "owner": "foundation_control_plane"
+    },
+    "ReviewWorkEvent": {
+      "required": true,
+      "owner": "foundation_control_plane"
+    },
+    "ReviewWorkView": {
+      "required": true,
+      "owner": "foundation_control_plane"
     },
     "RoleAssignmentRecord": {
       "owner": "identity",
@@ -841,6 +893,10 @@
     },
     "ScholarshipVersion": {
       "owner": "scholarships",
+      "required": true
+    },
+    "ServiceApplicationEvidence": {
+      "owner": "services",
       "required": true
     },
     "ServiceAvailabilitySlotRecord": {
@@ -927,15 +983,15 @@
       "owner": "settings",
       "required": true
     },
-    "SettingVersionRecord": {
-      "owner": "settings",
-      "required": true
-    },
     "Settings": {
       "owner": "settings",
       "required": true
     },
     "SettingsGovernanceRecord": {
+      "owner": "settings",
+      "required": true
+    },
+    "SettingVersionRecord": {
       "owner": "settings",
       "required": true
     },
@@ -945,6 +1001,38 @@
     },
     "SharedComponentRenderingProjection": {
       "owner": "foundation_control_plane",
+      "required": true
+    },
+    "StaffAdminAccessRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "StaffChangeRequestRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "StaffDepartmentRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "StaffGrantSourceRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "StaffInvitationRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "StaffJobTitleRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "StaffLifecycleEventRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "StaffMembershipRecord": {
+      "owner": "identity",
       "required": true
     },
     "StudentApplicationChecklistItem": {
@@ -999,7 +1087,39 @@
       "owner": "student",
       "required": true
     },
+    "StudentSupportCaseLinkRecord": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSupportCaseRecord": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSupportEventRecord": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSupportMacroRecord": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSupportMessageRecord": {
+      "owner": "student",
+      "required": true
+    },
     "StudentSupportOwnerReadObservation": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSupportPolicyRecord": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSupportTeamMemberRecord": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSupportTeamRecord": {
       "owner": "student",
       "required": true
     },
@@ -1040,6 +1160,14 @@
       "required": true
     },
     "StudyDestinationProfile": {
+      "owner": "reference",
+      "required": true
+    },
+    "StudyDestinationReviewPolicy": {
+      "owner": "reference",
+      "required": true
+    },
+    "StudyDestinationRevision": {
       "owner": "reference",
       "required": true
     },
@@ -1129,114 +1257,6 @@
     },
     "WorkflowExecutionProjection": {
       "owner": "foundation_control_plane",
-      "required": true
-    },
-    "PublicAnalyticsConsent": {
-      "owner": "foundation_control_plane",
-      "required": true
-    },
-    "PublicAnalyticsEvent": {
-      "owner": "foundation_control_plane",
-      "required": true
-    },
-    "DashboardMeasurementEpoch": {
-      "owner": "foundation_control_plane",
-      "required": true
-    },
-    "ServiceApplicationEvidence": {
-      "owner": "services",
-      "required": true
-    },
-    "DirectApplicationReport": {
-      "owner": "services",
-      "required": true
-    },
-    "ReviewWorkCase": {
-      "required": true,
-      "owner": "foundation_control_plane"
-    },
-    "ReviewWorkEvent": {
-      "required": true,
-      "owner": "foundation_control_plane"
-    },
-    "ReviewSourceCheckpoint": {
-      "required": true,
-      "owner": "foundation_control_plane"
-    },
-    "ReviewWorkView": {
-      "required": true,
-      "owner": "foundation_control_plane"
-    },
-    "ReviewSlaPolicy": {
-      "required": true,
-      "owner": "foundation_control_plane"
-    },
-    "CourseLessonContentBlock": {
-      "owner": "learning",
-      "required": true
-    },
-    "StaffAdminAccessRecord": {
-      "owner": "identity",
-      "required": true
-    },
-    "StaffChangeRequestRecord": {
-      "owner": "identity",
-      "required": true
-    },
-    "StaffDepartmentRecord": {
-      "owner": "identity",
-      "required": true
-    },
-    "StaffGrantSourceRecord": {
-      "owner": "identity",
-      "required": true
-    },
-    "StaffInvitationRecord": {
-      "owner": "identity",
-      "required": true
-    },
-    "StaffJobTitleRecord": {
-      "owner": "identity",
-      "required": true
-    },
-    "StaffLifecycleEventRecord": {
-      "owner": "identity",
-      "required": true
-    },
-    "StaffMembershipRecord": {
-      "owner": "identity",
-      "required": true
-    },
-    "StudentSupportCaseLinkRecord": {
-      "owner": "student",
-      "required": true
-    },
-    "StudentSupportCaseRecord": {
-      "owner": "student",
-      "required": true
-    },
-    "StudentSupportEventRecord": {
-      "owner": "student",
-      "required": true
-    },
-    "StudentSupportMacroRecord": {
-      "owner": "student",
-      "required": true
-    },
-    "StudentSupportMessageRecord": {
-      "owner": "student",
-      "required": true
-    },
-    "StudentSupportPolicyRecord": {
-      "owner": "student",
-      "required": true
-    },
-    "StudentSupportTeamMemberRecord": {
-      "owner": "student",
-      "required": true
-    },
-    "StudentSupportTeamRecord": {
-      "owner": "student",
       "required": true
     }
   },

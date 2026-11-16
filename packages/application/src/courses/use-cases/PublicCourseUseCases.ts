@@ -183,7 +183,9 @@ export class PublicCourseUseCases {
     const optionalPublic = this.pickOptionalPublicFields(optional);
     const descriptions = approvedOwnerDescriptions('COURSE', course);
     const pair = descriptions[locale];
-    const contentLanguage = {requestedLocale: locale, sourceLanguage: course.learningLanguageRaw ?? course.learningLanguage ?? null, titleFallback: !pair?.displayName};
+    const localized = optional.localizedNames && typeof optional.localizedNames === 'object'
+      ? (optional.localizedNames as Record<string, unknown>)[locale] : undefined;
+    const contentLanguage = {requestedLocale: locale, sourceLanguage: course.learningLanguageRaw ?? course.learningLanguage ?? null, titleFallback: !(pair?.displayName || (typeof localized === 'string' && localized.trim()))};
     return {
       contentLanguage,
       ownerId: course.id,

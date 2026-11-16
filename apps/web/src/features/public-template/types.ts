@@ -89,8 +89,6 @@ export interface CountryDestination {
   publicId?: string;
   slug?: string;
   ownerId?: string;
-  isFeatured?: boolean;
-  monthlyLivingCostRange?: {min: number; max: number; currencyCode: string; period: 'MONTH'};
   name: string;
   nameEn: string;
   flag: string;
@@ -296,7 +294,6 @@ export interface ImportedCourseEntityRef {
 }
 
 export interface ImportedCourse {
-  contentLanguage?:{requestedLocale:string;sourceLanguage:string|null;titleFallback:boolean};
   /** Stable public route key (slug in live mode). */
   id: string;
   publicId?: string;
@@ -388,7 +385,6 @@ export interface Service {
 }
 
 export interface Course {
-  contentLanguage?:{requestedLocale:string;sourceLanguage:string|null;titleFallback:boolean};
   /** Stable public route key (slug in live mode). */
   id: string;
   publicId?: string;

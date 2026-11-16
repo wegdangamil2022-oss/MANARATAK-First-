@@ -1,3 +1,4 @@
+import { CourseAdmissionsPanel } from '../../components/CourseAdmissionsPanel';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { NativeCourseDeliveryPanel } from './NativeCourseDeliveryPanel';
 import { NativeCourseCertificatePanel } from './NativeCourseCertificatePanel';
@@ -585,7 +586,7 @@ export function NativeCourseEditorPage() {
                 </div>
               </section>
             )}
-            {tab === 'students' && <NativeCourseStudentsPanel id={id} />}
+            {tab === 'students' && <><CourseAdmissionsPanel key={`${id}:${data.course.version}`} id={id} version={data.course.version} /><NativeCourseStudentsPanel id={id} /></>}
             {tab === 'reports' && <NativeCourseReportsPanel id={id} />}
           </fieldset>
         )

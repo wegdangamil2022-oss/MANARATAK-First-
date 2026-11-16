@@ -1,5 +1,5 @@
-import {courseAdminErrorResponse} from './CourseAdminErrorPolicy';
-import {requireAuthenticatedPrincipal} from '../../security/AuthenticatedPrincipal';
+import {courseAdminErrorResponse} from './CourseAdminErrorPolicy.js';
+import {requireAuthenticatedPrincipal} from '../../security/AuthenticatedPrincipal.js';
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
 import {

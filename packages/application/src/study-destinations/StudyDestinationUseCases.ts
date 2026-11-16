@@ -222,6 +222,18 @@ export class StudyDestinationUseCases {
       if (city?.countryReferenceId !== country.id) throw new Error('INVALID_STUDY_CITY_COUNTRY');
     }
     const existing = await this.repository.findByCountryReferenceId(country.id);
+    if (existing && normalized.evidenceSources &&
+        existing.sourceVerificationStatus === StudyDestinationVerificationStatus.VERIFIED &&
+        existing.governance?.proof && !this.hasSourceSensitiveChange(existing, {
+          ...normalized, evidenceSources: existing.evidenceSources,
+        })) {
+      const editableEvidence = (rows: typeof normalized.evidenceSources) =>
+        rows?.map(({sourceType, label, url}) => ({sourceType, label, url}));
+      if (JSON.stringify(editableEvidence(normalized.evidenceSources)) ===
+          JSON.stringify(editableEvidence(existing.evidenceSources))) {
+        normalized.evidenceSources = existing.evidenceSources.map(source => ({...source}));
+      }
+    }
     assertStudyDestinationTranslationUnchanged(existing, input);
     // Retain exact legacy English values on unrelated Arabic card saves.
     if (existing) for (const key of studyDestinationEnglishFields) {

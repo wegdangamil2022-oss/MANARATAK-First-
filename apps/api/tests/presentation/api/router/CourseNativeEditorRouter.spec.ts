@@ -1,6 +1,9 @@
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
+vi.mock('../../../../src/infrastructure/di/container.js', () => ({
+  container: { resolve: () => ({ evaluatePermission: async () => ({ isGranted: true }) }) },
+}));
 import { CourseAdminRouter } from '../../../../src/presentation/api/router/CourseAdminRouter';
 function setup() {
   const replaceLessonBlocks = vi.fn().mockResolvedValue([]),
@@ -44,11 +47,11 @@ describe('native editor contracts behind canonical application authorization', (
     app.use((req, _res, next) => { req.authUserId = 'publisher'; next(); });
     app.use('/admin/courses', CourseAdminRouter.create({
       adminCourseUseCases: { getCourse: async () => ({ id:'c', originType:'NATIVE_MANARATAK_COURSE', version: published ? 2 : 1 }) },
-      nativeCourseUseCases: { publish: async () => { published=true; } },
+      nativeCourseUseCases: { publish: async () => { published=true; }, getReadiness: async () => ({ready:true}) },
     } as never));
     const response = await request(app).post('/admin/courses/c/publish').set('If-Match','1').set('X-Review-Reason','Publish reviewed content').send({});
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({success:true});
+    expect(response.body).toMatchObject({success:true,_owner:{version:2,readiness:{ready:true}}});
     expect(response.headers['x-entity-version']).toBe('2');
   });
   it('requires a current course version and an authenticated audit reason for block writes', async () => {

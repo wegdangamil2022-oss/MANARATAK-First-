@@ -7,7 +7,7 @@ export const STUDENT_OWNER_EVENT_TYPES: Readonly<Record<string, readonly string[
     'StudentIdentityArchived',
   ],
   IDENTITY: ['StudentIdentityCreated', 'StudentIdentityActivated', 'StudentIdentitySuspended', 'StudentIdentityArchived'],
-  COURSES: ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted'],
+  COURSES: ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted', 'CourseEnrollmentRequested', 'CourseAdmissionApproved', 'CourseAdmissionRejected'],
   CERTIFICATES: ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered', 'CertificateArchived'],
 };
 

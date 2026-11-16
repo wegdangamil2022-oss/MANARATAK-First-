@@ -4,6 +4,9 @@ const event={eventId:'e-1',eventVersion:'1.0' as const,sourceDomain:'COURSES',ev
   studentReferenceId:'s-1',sourceReferenceId:'enrollment-1',title:'Completed',occurredAt:new Date('2026-10-10'),
   metadata:{courseId:'c-1',enrollmentId:'enrollment-1',progressPercentage:100,status:'COMPLETED'}};
 describe('P15 normalized internal owner-event policy',()=>{
+  it.each([['CourseEnrollmentRequested','PENDING'],['CourseAdmissionApproved','ACTIVE'],['CourseAdmissionRejected','CANCELLED']])('accepts admission lifecycle %s', (eventType,status)=>{
+    expect(()=>assertStudentIntegrationEvent({...event,eventType,metadata:{...event.metadata,status}})).not.toThrow();
+  });
   it('accepts the bounded owner completion contract',()=>expect(()=>assertStudentIntegrationEvent(event)).not.toThrow());
   it.each([
     {...event,sourceReferenceId:'foreign-enrollment'},

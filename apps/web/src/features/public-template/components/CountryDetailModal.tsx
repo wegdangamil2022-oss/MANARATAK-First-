@@ -183,8 +183,6 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
           />
         </div>
 
-        {country.imageUrl && <img src={country.imageUrl} alt={country.name} className="w-full max-h-56 object-cover" loading="lazy" referrerPolicy="no-referrer" />}
-
         {/* SVG background with matching vibrant 3-stop emerald gradient, subtle gold waves */}
         <div className="relative w-full h-[140px] sm:h-[145px]">
           <svg
@@ -648,7 +646,6 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
               </div>
             ))}
           </div>
-          {country.slug && <CountryCitiesPanel slug={country.slug} locale={language}/>}
           {country.studentLifeHighlights && (
             <div className="grid grid-cols-2 gap-2">
               {country.studentLifeHighlights.map((item, index) => (

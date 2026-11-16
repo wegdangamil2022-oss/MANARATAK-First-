@@ -99,7 +99,7 @@ check('JOBS-WEB-014 legacy fake careers detail removed', !exists('apps/web/src/f
 check('JOBS-WEB-015 legacy careers routes redirect to canonical admin', webRouter.includes("path: 'admin/*'") && webRouter.includes('<CanonicalAdminRedirect'));
 
 // Admin UX + identity
-check('JOBS-ADM-001 canonical country picker', adminPage.includes('load={canonicalPickerApi.countries}'));
+check('JOBS-ADM-001 canonical country picker', adminPage.includes('load={canonicalPickerApi.filterCountries}'));
 check('JOBS-ADM-002 canonical city picker', adminPage.includes('<CanonicalCityPicker') && cityPicker.includes('canonicalPickerApi.cities('));
 check('JOBS-ADM-003 list/filter state', hasAll(adminPage, ["query.set(tab === 'employers' ? 'verificationStatus' : 'status'", "'countryReferenceId'", 'currentScope.current = scope', 'list?.scope === scope']));
 check('JOBS-ADM-004 loading state', /loading\s*\?\s*\(\s*<p role="status"/.test(adminPage) && adminPage.includes('aria-busy={loading}'));

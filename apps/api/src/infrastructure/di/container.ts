@@ -31,11 +31,11 @@ import { CertificateVerificationPolicy, VaultTransitCertificateSignatureService,
 import { UniversityProgramWorkspaceUseCases } from '@manaratak/application';
 import { PrismaUniversityProgramWorkspaceGateway } from '@manaratak/infrastructure';
 import { UniversityProgramWorkspaceRouter } from '../../presentation/api/router/UniversityProgramWorkspaceRouter.js';
-import {CourseAdmissionRouter} from '../../presentation/api/router/CourseAdmissionRouter';
+import {CourseAdmissionRouter} from '../../presentation/api/router/CourseAdmissionRouter.js';
 import {CourseAdmissionUseCases} from '@manaratak/application';
 import {PrismaCourseAdmissionGateway} from '@manaratak/infrastructure';
 import {StudyDestinationPublicEnrichment} from '@manaratak/application';
-import { CourseSourceReviewRouter } from '../../presentation/api/router/CourseSourceReviewRouter';
+import { CourseSourceReviewRouter } from '../../presentation/api/router/CourseSourceReviewRouter.js';
 import { CourseSourceReviewUseCases } from '@manaratak/application';
 import { PrismaCourseSourceReviewGateway } from '@manaratak/infrastructure';
 import { SettingsGovernanceUseCases } from '@manaratak/application';

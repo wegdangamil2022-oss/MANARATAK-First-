@@ -979,7 +979,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
           const payload = row.payload as Record<string, unknown>;
           const occurredAt = new Date(String(payload?.occurredAt ?? ''));
           const supported:Record<string,readonly string[]> = {
-            COURSES:['CourseEnrolled','CourseProgressUpdated','CourseCompleted'],
+            COURSES:['CourseEnrolled','CourseProgressUpdated','CourseCompleted','CourseEnrollmentRequested','CourseAdmissionApproved','CourseAdmissionRejected'],
             CERTIFICATES:['CertificateIssued','CertificateRevoked','CertificateReissued','CertificateRenewed','CertificateExpired','CertificateArtifactsRendered','CertificateArchived'],
           };
           if (payload?.eventId !== row.eventId || payload.studentReferenceId !== row.studentReferenceId ||
@@ -1075,7 +1075,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
 
   private async projectIntegrationEvent(tx: any, event: StudentWorkspaceIntegrationEventDto): Promise<void> {
     const metadata = event.metadata ?? {};
-    if (['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted'].includes(event.eventType)) {
+    if (['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted', 'CourseEnrollmentRequested', 'CourseAdmissionApproved', 'CourseAdmissionRejected'].includes(event.eventType)) {
       const enrollmentId = String(metadata.enrollmentId ?? event.sourceReferenceId ?? '');
       const courseId = String(metadata.courseId ?? '');
       if (enrollmentId && courseId) {

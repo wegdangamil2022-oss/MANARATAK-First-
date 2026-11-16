@@ -1,8 +1,8 @@
 import {Router,type Request,type Response,type NextFunction} from 'express';
 import {z} from 'zod';
 import type {CourseSourceReviewUseCases} from '@manaratak/application';
-import {requireAuthenticatedPrincipal} from '../../security/AuthenticatedPrincipal';
-import {courseAdminErrorResponse} from './CourseAdminErrorPolicy';
+import {requireAuthenticatedPrincipal} from '../../security/AuthenticatedPrincipal.js';
+import {courseAdminErrorResponse} from './CourseAdminErrorPolicy.js';
 export class CourseSourceReviewRouter {
  static create({courseSourceReviewUseCases:owner}:{courseSourceReviewUseCases:CourseSourceReviewUseCases}):Router{
   const router=Router();const handle=(fn:(req:Request,res:Response)=>Promise<unknown>)=>(req:Request,res:Response,next:NextFunction)=>{Promise.resolve().then(()=>fn(req,res)).catch(next);};

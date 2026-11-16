@@ -94,6 +94,7 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
     ]);
     if(!path || !version) return null;
     const snapshot=version.snapshot && typeof version.snapshot==='object' && !Array.isArray(version.snapshot)?version.snapshot:{};
+    if (typeof snapshot.isStrictlyOrdered !== 'boolean' || !['ALL', 'ALL_REQUIRED'].includes(String(snapshot.completionLogic))) return null;
     return this.map({...path,title:typeof snapshot.title==='string'?snapshot.title:path.title,description:typeof snapshot.description==='string'||snapshot.description===null?snapshot.description:path.description,isStrictlyOrdered:typeof snapshot.isStrictlyOrdered==='boolean'?snapshot.isStrictlyOrdered:path.isStrictlyOrdered,completionLogic:snapshot.completionLogic==='ALL'||snapshot.completionLogic==='ALL_REQUIRED'?snapshot.completionLogic:path.completionLogic,version:versionNumber,status:version.status},version.courses,version.snapshot);
   }
 

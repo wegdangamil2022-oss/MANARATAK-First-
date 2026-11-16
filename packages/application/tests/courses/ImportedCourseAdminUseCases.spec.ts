@@ -121,7 +121,7 @@ describe('ImportedCourseAdminUseCases', () => {
   it('verifies source only when provider and direct URL domain are approved', async () => {
     const f = createFixture();
     const result = await f.useCases.verifySource('course-1');
-    expect(result.verified).toBe(true);
+    expect(result).toMatchObject({verified:false,preflightPassed:true,verificationState:'NOT_RECORDED'});
     expect(f.providers.isDomainApproved).toHaveBeenCalledWith('provider-1', 'https://example.org/course');
   });
 

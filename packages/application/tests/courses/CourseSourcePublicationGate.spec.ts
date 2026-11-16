@@ -8,7 +8,7 @@ describe('M10-14 course source publication gate', () => {
     const source = { learningLanguageRaw: 'English', learningLanguageReferenceId: 'language-en', learningLanguageResolutionState: 'RESOLVED', shortCourseTopicsRaw: 'Computing | Health' };
     const links = [{ reviewState: 'APPROVED', sourceTerm: 'Computing' }, { reviewState: 'APPROVED', sourceTerm: 'Health' }];
     const relationships = { getRelationshipSource: vi.fn().mockResolvedValue(source), listTaxonomyLinks: vi.fn().mockResolvedValue(links), listTaxonomyResolutions: vi.fn().mockResolvedValue([]), listMajorProjections: vi.fn().mockResolvedValue([]), listInternationalTestRelationships: vi.fn().mockResolvedValue([]) };
-    const operations = { getImportedCourseById: vi.fn().mockResolvedValue({ sourceVerified: true, linkHealth: 'VERIFIED_DIRECT' }) };
+    const operations = { hasCurrentSourceApproval: vi.fn().mockResolvedValue(true), getImportedCourseById: vi.fn().mockResolvedValue({ sourceVerified: true, linkHealth: 'VERIFIED_DIRECT' }) };
     const repository = { updateStatus: vi.fn() };
     const service = new CoursePublicationService(repository as unknown as ICourseRepository, operations as unknown as IImportedCourseOperationsRepository, undefined, relationships as unknown as ICourseRelationshipRepository);
     return { service, source, links, relationships, operations, repository };
@@ -54,7 +54,7 @@ describe('M10-14 course source publication gate', () => {
     const f=fixture(),row={...course,version:1},order:string[]=[];
     const tx={assertCurrentVersion:vi.fn(),findById:async()=>row,lockPublicationReferences:async()=>{order.push('locked');},updateStatus:vi.fn()};
     const relationships={...f.relationships,withTransaction:()=>{order.push('relationships-bound');return f.relationships;}};
-    const operations={...f.operations,withTransaction:()=>({getImportedCourseById:async()=>{order.push('source-reread');return {sourceVerified:false,linkHealth:'VERIFIED_DIRECT'};}})};
+    const operations={...f.operations,withTransaction:()=>({hasCurrentSourceApproval:async()=>true,getImportedCourseById:async()=>{order.push('source-reread');return {sourceVerified:false,linkHealth:'VERIFIED_DIRECT'};}})};
     const atomic={execute:async(_definition:unknown,work:any)=>work({boundaryId:'test'})};
     await expect(new CoursePublicationService({withTransaction:()=>tx} as any,operations as any,atomic as any,relationships as any).publish(row)).rejects.toThrow('IMPORTED_COURSE_SOURCE_VERIFICATION_REQUIRED');
     expect(order).toEqual(['locked','relationships-bound','source-reread']);expect(tx.updateStatus).not.toHaveBeenCalled();

@@ -587,6 +587,31 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Preserve invitation token hashes, activation and departure decisions, approvals and lifecycle history; never reactivate a departed identity or reset MFA as recovery. Source classification only, not execution approval. Shared targets require a verified compatible pre-mutation backup, reconciliation of subsequent writes and separate restore or forward-fix authorization. Fresh attested disposable targets may be reprovisioned under the existing policy. No destructive down SQL is authorized."
+    },
+    "20261117000100_certificate_replacement_one_to_one": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source integration only; migration has not been applied. Preserve approvals, review history, provider checkpoints and certificate replacement links. Shared targets require a verified compatible pre-mutation backup and a reviewed restore or forward fix; no destructive down SQL or data repair is authorized."
+    },
+    "20261117000200_study_destination_review_proof": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source integration only; migration has not been applied. Preserve approvals, review history, provider checkpoints and certificate replacement links. Shared targets require a verified compatible pre-mutation backup and a reviewed restore or forward fix; no destructive down SQL or data repair is authorized."
+    },
+    "20261117000300_course_source_approvals": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source integration only; migration has not been applied. Preserve approvals, review history, provider checkpoints and certificate replacement links. Shared targets require a verified compatible pre-mutation backup and a reviewed restore or forward fix; no destructive down SQL or data repair is authorized."
+    },
+    "20261117000400_study_destination_history_policy": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source integration only; migration has not been applied. Preserve approvals, review history, provider checkpoints and certificate replacement links. Shared targets require a verified compatible pre-mutation backup and a reviewed restore or forward fix; no destructive down SQL or data repair is authorized."
+    },
+    "20261117000500_course_provider_backlog": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source integration only; migration has not been applied. Preserve approvals, review history, provider checkpoints and certificate replacement links. Shared targets require a verified compatible pre-mutation backup and a reviewed restore or forward fix; no destructive down SQL or data repair is authorized."
     }
   }
 }

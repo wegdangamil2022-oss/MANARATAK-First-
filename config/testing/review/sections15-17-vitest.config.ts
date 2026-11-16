@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitest/config';
-import baseline from './.section15-vitest.config';
+import baseline from './section15-vitest.config';
 export default defineConfig({
   ...baseline,
   test: {

@@ -143,6 +143,17 @@ export const ADMIN_PERMISSION_CATALOG = [
     delegable: true,
   },
   {
+    key: 'admin:courses:admissions:manage',
+    domain: 'courses',
+    action: 'admissions:manage',
+    labelAr: 'مراجعة طلبات الالتحاق بالدورات',
+    labelEn: 'Review course admissions',
+    descriptionAr: 'مراجعة طلبات الالتحاق واتخاذ قرار موثق بشأنها.',
+    descriptionEn: 'Review course enrollment requests and record admission decisions.',
+    risk: 'HIGH',
+    delegable: true,
+  },
+  {
     key: 'admin:courses:publish',
     domain: 'courses',
     action: 'publish',

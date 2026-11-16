@@ -1,6 +1,9 @@
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
+vi.mock('../../../../src/infrastructure/di/container.js', () => ({
+  container: { resolve: () => ({ evaluatePermission: async () => ({ isGranted: true }) }) },
+}));
 import {
   CourseAccessType,
   CourseLessonType,
@@ -175,7 +178,6 @@ describe('CourseAdminRouter', () => {
 
     const response = await request(app).post('/admin/courses').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source').send({
       titleAr: 'دورة الذكاء الاصطناعي',
-      titleEn: 'AI Course',
       learningLanguage: 'Arabic',
     });
 

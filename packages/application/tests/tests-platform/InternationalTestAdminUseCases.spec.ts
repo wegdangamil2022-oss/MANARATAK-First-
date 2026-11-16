@@ -153,6 +153,7 @@ describe('InternationalTestAdminUseCases', () => {
 
       expect(mockRepository.update).toHaveBeenCalledWith('test-1', {
         status: InternationalTestStatus.READY_TO_PUBLISH,
+        isPubliclyVisible: false,
       });
     });
   });

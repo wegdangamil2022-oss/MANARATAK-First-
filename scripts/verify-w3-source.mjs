@@ -236,7 +236,7 @@ check('MNT-AUD-0089 P21 Career employer/job lifecycle publishes atomic events in
 
 check('MNT-AUD-0093 Course enrollment/progress mutations emit atomic owner events consumed by P15',
   courseProgress.includes('COURSE_ENROLLED_EVENT_TYPE') && courseProgress.includes('COURSE_PROGRESS_UPDATED_EVENT_TYPE') &&
-  courseProgress.includes('atomicMutations.execute') && studentOutboxWorker.includes("['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted']"));
+  courseProgress.includes('atomicMutations.execute') && ['CourseEnrolled','CourseProgressUpdated','CourseCompleted','CourseEnrollmentRequested','CourseAdmissionApproved','CourseAdmissionRejected'].every(event=>studentOutboxWorker.includes("'"+event+"'")));
 check('MNT-AUD-0016 Identity to StudentWorkspace bridge is idempotent on outbox identity and runtime-wired',
   studentOutboxGateway.includes('context.idempotencyKey !== entry.id') && studentOutboxGateway.includes('StudentIdentityCreated') &&
   studentOutboxWorker.includes("['IdentityStatusChanged.v1']") && studentOutboxWorker.includes("['RoleAssignmentCreated', 'RoleAssignmentRevoked']") &&

@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 462,
-  "reachableCount": 462,
+  "registrationCount": 468,
+  "reachableCount": 468,
   "unreachable": [],
   "registrations": [
     {
@@ -663,7 +663,6 @@
         "studentServiceRequestUseCases",
         "studentToolRegistryUseCases",
         "studentWorkspaceUseCases",
-        "studyDestinationPublicEnrichment",
         "studyDestinationUseCases"
       ],
       "dependencies": [
@@ -781,6 +780,7 @@
         "auditWorkspaceUseCases",
         "authorizationGovernanceUseCases",
         "courseAdminCommandUseCases",
+        "courseAdmissionUseCases",
         "courseBulkPublicationUseCases",
         "courseImportCoordinator",
         "courseProgressUseCases",
@@ -1855,6 +1855,39 @@
       "dependencies": []
     },
     {
+      "name": "courseAdmissionGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "courseAdmissionUseCases"
+      ],
+      "dependencies": [
+        "courseFinancialClearanceGateway",
+        "prisma"
+      ]
+    },
+    {
+      "name": "courseAdmissionRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "courseAdmissionUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/CourseAdmissionRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "atomicDomainMutationCoordinator",
+        "courseAdmissionGateway"
+      ]
+    },
+    {
       "name": "courseBulkPublicationRepository",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -2099,6 +2132,15 @@
       ]
     },
     {
+      "name": "coursePublicRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
       "name": "coursePublicationService",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -2112,15 +2154,6 @@
         "courseRepository",
         "importedCourseOperationsRepository"
       ]
-    },
-    {
-      "name": "coursePublicRouter",
-      "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/app.ts"
-      ],
-      "reachableThroughRegistrations": [],
-      "dependencies": []
     },
     {
       "name": "courseRelationshipQueryService",
@@ -3988,6 +4021,7 @@
         "certificateRepository",
         "certificateWorkspaceReadGateway",
         "cmsRepository",
+        "courseAdmissionGateway",
         "courseBulkPublicationRepository",
         "courseCurriculumRepository",
         "courseEnrollmentPolicyRepository",
@@ -4309,7 +4343,6 @@
         "crossModuleIntegrityUseCase",
         "referenceDataUseCases",
         "referenceResolver",
-        "studyDestinationPublicEnrichment",
         "studyDestinationUseCases"
       ],
       "dependencies": [
@@ -5613,17 +5646,6 @@
       ]
     },
     {
-      "name": "studentToolRateLimitGateway",
-      "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [],
-      "reachableThroughRegistrations": [
-        "studentToolExecutionUseCases"
-      ],
-      "dependencies": [
-        "studentToolRateLimiter"
-      ]
-    },
-    {
       "name": "studentToolRegistryRepository",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -5664,13 +5686,15 @@
       "dependencies": []
     },
     {
-      "name": "studentToolsAdminRouter",
+      "name": "studentToolSaveGateway",
       "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/app.ts"
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "studentToolExecutionUseCases"
       ],
-      "reachableThroughRegistrations": [],
-      "dependencies": []
+      "dependencies": [
+        "studentWorkspaceRepository"
+      ]
     },
     {
       "name": "studentToolTestDiscovery",
@@ -5700,15 +5724,13 @@
       ]
     },
     {
-      "name": "studentToolSaveGateway",
+      "name": "studentToolsAdminRouter",
       "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [],
-      "reachableThroughRegistrations": [
-        "studentToolExecutionUseCases"
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
       ],
-      "dependencies": [
-        "studentWorkspaceRepository"
-      ]
+      "reachableThroughRegistrations": [],
+      "dependencies": []
     },
     {
       "name": "studentToolsPublicRouter",
@@ -5853,19 +5875,6 @@
       "dependencies": []
     },
     {
-      "name": "studyDestinationPublicEnrichment",
-      "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [],
-      "reachableThroughRegistrations": [
-        "studyDestinationUseCases"
-      ],
-      "dependencies": [
-        "assetReferencePolicy",
-        "processAssetLifecycleUseCase",
-        "referenceDataRepository"
-      ]
-    },
-    {
       "name": "studyDestinationPublicRouter",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -5898,7 +5907,6 @@
         "atomicDomainMutationCoordinator",
         "processAssetLifecycleUseCase",
         "referenceDataRepository",
-        "studyDestinationPublicEnrichment",
         "studyDestinationRepository"
       ]
     },

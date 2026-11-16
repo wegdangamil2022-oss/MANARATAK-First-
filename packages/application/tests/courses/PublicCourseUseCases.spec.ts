@@ -20,6 +20,7 @@ describe('PublicCourseUseCases', () => {
       findById: vi.fn(),
       findByPublicId: vi.fn(),
       findPublishedBySlug: vi.fn(),
+      isPubliclyEligible: vi.fn().mockResolvedValue(true),
       updateStatus: vi.fn(),
       updateImportLink: vi.fn(),
       listByStatus: vi.fn(),

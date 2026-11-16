@@ -12,6 +12,7 @@ import { PrismaStudyDestinationRepository } from '../study-destinations/PrismaSt
  */
 type CmsOwnerReadClient = Pick<
   Prisma.TransactionClient,
+  | '$queryRaw'
   | 'university'
   | 'universityAcademicProgram'
   | 'major'

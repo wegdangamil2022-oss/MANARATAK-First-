@@ -21,7 +21,6 @@ import { FavoriteButton } from './FavoriteButton';
 import { DetailBackButton, DetailSectionHeader, useDetailSearchTarget } from './DetailUi';
 
 interface ImportedCourseDetailProps {
-  dataMode?: 'api'|'prototype';
   course: ImportedCourse;
   onBack?: () => void;
   onOpenMajor?: (majorId: string) => void;
@@ -46,8 +45,7 @@ const Fact = ({ icon: Icon, label, value }: { icon: React.ElementType; label: st
 );
 
 export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
-  course:initialCourse,
-  dataMode='api',
+  course,
   onBack,
   onOpenMajor,
   onOpenUniversity,
@@ -117,10 +115,10 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
       <main className="mx-auto -mt-4 max-w-lg space-y-3 mn-inline-gutter">
         <section className="relative z-20 rounded-[22px] border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-[0_10px_28px_rgba(20,43,95,0.09)] mn-panel ">
           <div className="grid grid-cols-2 gap-2">
-            <Fact icon={Globe2} label={t('course13_copy_210')} value={course.language} />
-            <Fact icon={GraduationCap} label={t('course13_copy_035')} value={levelLabel(course.level)} />
-            <Fact icon={Clock3} label={t('course13_copy_225')} value={course.duration} />
-            <Fact icon={Award} label={t('course13_copy_213')} value={course.certificateType} />
+            <Fact icon={Globe2} label="اللغة" value={course.language} />
+            <Fact icon={GraduationCap} label="المستوى" value={course.level} />
+            <Fact icon={Clock3} label="مدة الدورة" value={course.duration} />
+            <Fact icon={Award} label="نوع الشهادة" value={course.certificateType} />
           </div>
         </section>
 
@@ -268,7 +266,7 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
           </div>
 
           <a
-            href={dataMode==='api'&&course.slug?ApiClient.getCourseLaunchUrl(course.slug):course.directCourseUrl}
+            href={course.directCourseUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="mn-external-link inline-flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-white shadow-[0_8px_18px_rgba(20,43,95,0.22)] transition-transform active:scale-[0.99] mn-inverse "

@@ -49,7 +49,7 @@ describe('audit source, correlation and evidence semantics', () => {
       '/api/v1/admin/study-destinations/EG/publish', '/api/v1/admin/study-destinations/EG/archive']) {
       expect(MutationAuditPolicy.classify({ method: 'POST', originalUrl: path } as Request, 'ADMIN')).toBe('CRITICAL_AUDIT_REQUIRED');
     }
-    expect(MutationAuditPolicy.classify({ method: 'PATCH', originalUrl: '/api/v1/admin/study-destinations/EG/profile' } as Request, 'ADMIN')).toBe('STANDARD_AUDIT_REQUIRED');
+    expect(MutationAuditPolicy.classify({ method: 'PATCH', originalUrl: '/api/v1/admin/study-destinations/EG/profile' } as Request, 'ADMIN')).toBe('CRITICAL_AUDIT_REQUIRED');
   });
 });
 

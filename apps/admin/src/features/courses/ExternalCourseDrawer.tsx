@@ -1,3 +1,4 @@
+import { CourseSourceApprovalPanel } from '../../components/CourseSourceApprovalPanel';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 
 import { BookOpen, ShieldCheck, ExternalLink, Pencil, RefreshCw, Save, X, CheckCircle2, Send, Archive, Undo2, XCircle } from 'lucide-react';
@@ -156,6 +157,7 @@ export function ExternalCourseDrawer({ id, onClose, onSaved }: { id?: string; re
         {course!.status === 'PUBLISHED' && <button type="button" disabled={busy} onClick={() => void command('unpublish')}><Undo2 size={15}/>{tr('إلغاء النشر', 'Unpublish')}</button>}
         {editable && <><button type="button" disabled={busy} onClick={() => void command('reject')}><XCircle size={15}/>{tr('رفض الدورة', 'Reject course')}</button><button type="button" disabled={busy} onClick={() => void command('archive')}><Archive size={15}/>{tr('أرشفة', 'Archive')}</button></>}
       </div>{sourceError && <p className="course-hint">{tr('تعذرت قراءة بيانات التحقق من المصدر.', 'Source verification details unavailable.')}</p>}{readiness && <div role="status" className={readiness.eligible ? 'course-success' : 'course-hint'}>{readiness.eligible ? tr('اجتازت الدورة سياسة الجاهزية الحالية.', 'The course passed the current readiness policy.') : <ul>{readiness.blockers.map(blocker => <li key={blocker}>{externalIssue(blocker, tr)}</li>)}</ul>}</div>}</section>}
+      {!creating && actions && course && !edit && <CourseSourceApprovalPanel key={`${course.id}:${course.version}`} id={course.id} version={course.version} onSaved={() => { setReadiness(undefined); setRefresh(value => value + 1); }} />}
     </>}
   </CourseDialog>;
 }

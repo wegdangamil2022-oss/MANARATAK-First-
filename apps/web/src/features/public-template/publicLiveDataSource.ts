@@ -234,7 +234,6 @@ export function mapCourse(dto: PublicCourseDto): {
   const track = classifyCourseTrack(dto);
   const course: Course = {
     id: dto.slug,
-    contentLanguage:dto.contentLanguage,
     ownerId: dto.ownerId,
     publicId: dto.publicId,
     slug: dto.slug,
@@ -322,8 +321,6 @@ export function mapCountry(
   }
   return {
     id: country.id,
-    isFeatured: dto.isFeatured,
-    monthlyLivingCostRange: typeof costMin === 'number' && typeof costMax === 'number' ? {min: costMin, max: costMax, currencyCode, period: 'MONTH'} : undefined,
     ownerId: country.id,
     publicId: dto.publicId,
     slug: dto.slug,

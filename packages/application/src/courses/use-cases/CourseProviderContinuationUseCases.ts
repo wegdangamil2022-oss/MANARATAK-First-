@@ -7,7 +7,6 @@ import {
   IExternalCourseProviderRepository,
   IImportedCourseLinkChecker,
   IImportedCourseOperationsRepository,
-  ImportedCourseLinkCheckResult,
   ImportedCourseMasterRowContract,
 } from '@manaratak/domain';
 import { ImportAdminUseCases } from '../../import-foundation/use-cases/ImportAdminUseCases';

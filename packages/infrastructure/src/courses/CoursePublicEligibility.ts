@@ -1,4 +1,5 @@
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { courseSourceApprovalPredicate } from './CoursePublicTrustPredicate';
 import { publicCourseLanguageProof } from './CoursePublicLanguageProof';
 
 /** Shared current owner proof for public detail, search/count, relations and CMS. */
@@ -37,7 +38,7 @@ function normalizedUrl(value: string): string | null {
  * pagination/count so withdrawn records cannot produce short pages or bad totals.
  */
 export async function currentPublicCourseEligibility(
-  db: Pick<Prisma.TransactionClient, 'course'>,
+  db: Pick<Prisma.TransactionClient, 'course' | '$queryRaw'>,
   scope: Prisma.CourseWhereInput = {},
 ): Promise<Prisma.CourseWhereInput> {
   const base = publicCourseEligibility();
@@ -57,7 +58,12 @@ export async function currentPublicCourseEligibility(
         } },
       },
     });
+    const reviewed = rows.length ? new Set((await db.$queryRaw<Array<{id:string}>>(Prisma.sql`
+      SELECT c.id FROM "Course" c WHERE c.id IN (${Prisma.join(rows.map(row => row.id))})
+      AND ${courseSourceApprovalPredicate()}
+    `)).map(row => row.id)) : new Set<string>();
     for (const row of rows) {
+      if (!reviewed.has(row.id)) continue;
       const url = normalizedUrl(row.directCourseUrl);
       if (!url) continue;
       const host = new URL(url).hostname.toLowerCase().replace(/\.$/, '');

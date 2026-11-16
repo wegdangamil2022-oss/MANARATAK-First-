@@ -1,11 +1,130 @@
-import {useTranslation} from '../i18n/I18nProvider';
-import {useEffect,useState} from 'react';
-import {adminApiClient} from '../api/client';
-import {useAdminAuthorization} from '../security/AdminAuthorizationContext';
-export function CourseSourceApprovalPanel({id,version}:{id:string;version:number}){
- const {t}=useTranslation();
- const {hasPermission}=useAdminAuthorization();const allowed=hasPermission('admin:courses:review');const [reason,setReason]=useState('');const [validUntil,setValidUntil]=useState('');const [urls,setUrls]=useState('');const [history,setHistory]=useState<Array<{id:string;courseVersion:number;reviewedBy:string;reviewedAt:string;reason:string}>>([]);const [error,setError]=useState('');const [busy,setBusy]=useState(false);
- useEffect(()=>{let active=true;if(!allowed)return;void adminApiClient.request<{data:typeof history}>(`/admin/courses/source-reviews/${id}`).then(value=>{if(active)setHistory(value.data);}).catch(cause=>{if(active)setError(String(cause));});return()=>{active=false;};},[id,allowed]);
- const approve=async()=>{if(busy||!allowed)return;setBusy(true);setError('');try{await adminApiClient.request(`/admin/courses/source-reviews/${id}/approve`,{method:'POST',headers:{'If-Match':`"${version}"`},body:JSON.stringify({reason,validUntil:validUntil?new Date(validUntil).toISOString():null,evidenceUrls:urls.split('\n').map(value=>value.trim()).filter(Boolean)})});setHistory((await adminApiClient.request<{data:typeof history}>(`/admin/courses/source-reviews/${id}`)).data);}catch(cause){setError(String(cause));}finally{setBusy(false);}};
- return <section className="rounded border p-4 space-y-2"><h2 className="font-bold">{t('course13_copy_141')}</h2><p className="text-xs">{t('course13_copy_142')}</p>{!allowed?<p>{t('course13_copy_143')}</p>:<><label className="block">{t('course13_copy_144')}<textarea value={urls} onChange={event=>setUrls(event.target.value)} maxLength={12000}/></label><label className="block">{t('course13_copy_145')}<input type="datetime-local" value={validUntil} onChange={event=>setValidUntil(event.target.value)}/></label><label className="block">{t('course13_copy_146')}<input value={reason} onChange={event=>setReason(event.target.value)} maxLength={2000}/></label><button disabled={busy||reason.trim().length<3||!urls.trim()} onClick={()=>void approve()}>{t('course13_copy_147')}{version}</button>{error&&<p role="alert">{error}</p>}<ul>{history.map(row=><li key={row.id}>{t('course13_copy_010')}{row.courseVersion} · {row.reviewedBy} · {row.reviewedAt} · {row.reason}</li>)}</ul><p className="text-xs">{t('course13_copy_148')}</p></>}</section>;
+import { useTranslation } from '../i18n/I18nProvider';
+import { useEffect, useState } from 'react';
+import { adminApiClient } from '../api/client';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+export function CourseSourceApprovalPanel({
+  id,
+  version,
+  onSaved,
+}: {
+  id: string;
+  version: number;
+  onSaved?: () => void;
+}) {
+  const { t } = useTranslation();
+  const { hasPermission } = useAdminAuthorization();
+  const allowed = hasPermission('admin:courses:review');
+  const [reason, setReason] = useState('');
+  const [validUntil, setValidUntil] = useState('');
+  const [urls, setUrls] = useState('');
+  const [history, setHistory] = useState<
+    Array<{
+      id: string;
+      courseVersion: number;
+      reviewedBy: string;
+      reviewedAt: string;
+      reason: string;
+    }>
+  >([]);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    let active = true;
+    if (!allowed) return;
+    void adminApiClient
+      .request<{ data: typeof history }>(`/admin/courses/source-reviews/${id}`)
+      .then((value) => {
+        if (active) setHistory(value.data);
+      })
+      .catch((cause) => {
+        if (active) setError(String(cause));
+      });
+    return () => {
+      active = false;
+    };
+  }, [id, allowed]);
+  const approve = async () => {
+    if (busy || !allowed) return;
+    setBusy(true);
+    setError('');
+    try {
+      await adminApiClient.request(`/admin/courses/source-reviews/${id}/approve`, {
+        method: 'POST',
+        headers: { 'If-Match': `"${version}"` },
+        body: JSON.stringify({
+          reason,
+          validUntil: validUntil ? new Date(validUntil).toISOString() : null,
+          evidenceUrls: urls
+            .split('\n')
+            .map((value) => value.trim())
+            .filter(Boolean),
+        }),
+      });
+      setHistory(
+        (
+          await adminApiClient.request<{ data: typeof history }>(
+            `/admin/courses/source-reviews/${id}`,
+          )
+        ).data,
+      );
+      onSaved?.();
+    } catch (cause) {
+      setError(String(cause));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <section className="rounded border p-4 space-y-2">
+      <h2 className="font-bold">{t('course13_copy_141')}</h2>
+      <p className="text-xs">{t('course13_copy_142')}</p>
+      {!allowed ? (
+        <p>{t('course13_copy_143')}</p>
+      ) : (
+        <>
+          <label className="block">
+            {t('course13_copy_144')}
+            <textarea
+              value={urls}
+              onChange={(event) => setUrls(event.target.value)}
+              maxLength={12000}
+            />
+          </label>
+          <label className="block">
+            {t('course13_copy_145')}
+            <input
+              type="datetime-local"
+              value={validUntil}
+              onChange={(event) => setValidUntil(event.target.value)}
+            />
+          </label>
+          <label className="block">
+            {t('course13_copy_146')}
+            <input
+              value={reason}
+              onChange={(event) => setReason(event.target.value)}
+              maxLength={2000}
+            />
+          </label>
+          <button
+            disabled={busy || reason.trim().length < 3 || !urls.trim()}
+            onClick={() => void approve()}
+          >
+            {t('course13_copy_147')}
+            {version}
+          </button>
+          {error && <p role="alert">{error}</p>}
+          <ul>
+            {history.map((row) => (
+              <li key={row.id}>
+                {t('course13_copy_010')}
+                {row.courseVersion} · {row.reviewedBy} · {row.reviewedAt} · {row.reason}
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs">{t('course13_copy_148')}</p>
+        </>
+      )}
+    </section>
+  );
 }

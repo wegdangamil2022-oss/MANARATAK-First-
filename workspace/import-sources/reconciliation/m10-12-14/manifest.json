@@ -83,6 +83,11 @@
       "bytes": 609358
     },
     {
+      "path": "workspace/import-sources/universities/stage-2-enrichment/South_America_Universities_Phase_1_Enrichment_UPDATED_879_COMPLETE.xlsx",
+      "sha256": "73d62158a16d12dc7930c9ffa10db5ffff9fbc203ae40aea93b15c96f4feba1e",
+      "bytes": 363946
+    },
+    {
       "path": "workspace/import-sources/universities/stage-3-4/MANARATAK_Europe_Universities_Stage_3_Stage_4_1530_REVIEWED_0001_1530_FINAL.md",
       "sha256": "ce64f4283b6d46882c23aa1604d9cf45a6b1691fa15816743161b6dffe059a52",
       "bytes": 5510035
@@ -94,18 +99,18 @@
     },
     {
       "path": "workspace/reference-data/cities/americas/MANARATAK_Americas_Cities_All_Combined.csv",
-      "sha256": "d8d369c96ad9d325bfd074604795b71fa0e287e817b1c82cfc5a86ad8593ba12",
-      "bytes": 1860095
+      "sha256": "e7207d0044aebadd54029ff05a457355a7ff991dc77d09e3ce292045d9b21ef0",
+      "bytes": 1861111
     },
     {
       "path": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
-      "sha256": "b73b64e99a0892b26fb2295c612594a2589ccc8067cd9f7e810a6c20554060a0",
-      "bytes": 2345862
+      "sha256": "e1b4695ab519bb2a0b9bad72353ad5b62dabbbef5049115aa461dac11d0435f1",
+      "bytes": 2353728
     },
     {
       "path": "workspace/reference-data/cities/europe/MANARATAK_Europe_Cities_All_Combined.csv",
-      "sha256": "8e724b7e7c0260e2d84510850b79f09102b3f654bcc03da965009071a9a21fec",
-      "bytes": 1843590
+      "sha256": "11f05cde7051c0a1e3c75e83c2f00fa850f77e4894b5f44610c508fc6c76c30b",
+      "bytes": 1845524
     },
     {
       "path": "workspace/reference-data/cities/oceania/22_cities_oceania.csv",
@@ -151,8 +156,8 @@
   "outputs": [
     {
       "file": "universities-geography.jsonl",
-      "sha256": "1298da80e7ecf29e1f2299f3db1c72a708c221f7f55fcd1acf05beb9ba5975dc",
-      "bytes": 114839
+      "sha256": "ef6a95d4f30ce578ed08fba692fba56d9a526fcfc81b98339c49a111591058bd",
+      "bytes": 119158
     },
     {
       "file": "universities-stage34-quarantine.jsonl",

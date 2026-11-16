@@ -14,7 +14,6 @@ const useCases = read('packages/application/src/tests-platform/use-cases/Interna
 const governance = read('packages/infrastructure/src/international-tests/InternationalTestGovernancePersistence.ts');
 const publicMapper = read('packages/ui/src/public-tests/presentation.ts');
 const repo = read('packages/infrastructure/src/international-tests/PrismaInternationalTestRepository.ts');
-const governance = read('packages/infrastructure/src/international-tests/InternationalTestGovernancePersistence.ts');
 const repositoryContract = read('packages/domain/src/tests-platform/repository.ts');
 const router = read('apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts');
 const adminDetail = read('apps/admin/src/pages/InternationalTestDetailPage.tsx');

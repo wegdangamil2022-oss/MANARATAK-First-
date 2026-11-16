@@ -265,7 +265,7 @@ export const CoursesLandingPage: React.FC<CoursesLandingPageProps> = ({ onBack, 
               { label: publicT('public_accredited_certificates'), icon: BadgeCheck },
               { label: publicT('public_official_source_2'), icon: ExternalLink },
             ]}
-            cta={t('course13_extra_37')}
+            cta="استكشف الدورات"
             onClick={() => onOpenTrack?.('imported')}
           />
 
@@ -278,7 +278,7 @@ export const CoursesLandingPage: React.FC<CoursesLandingPageProps> = ({ onBack, 
               { label: publicT('public_save_progress'), icon: TrendingUp },
               { label: publicT('public_completion_certificate'), icon: Award },
             ]}
-            cta={t('course13_extra_37')}
+            cta="استكشف الدورات"
             onClick={() => onOpenTrack?.('native')}
           />
 
@@ -292,7 +292,7 @@ export const CoursesLandingPage: React.FC<CoursesLandingPageProps> = ({ onBack, 
               { label: publicT('public_advanced_level'), icon: Sparkles },
               { label: publicT('public_access_guarantee'), icon: ShieldCheck },
             ]}
-            cta={t('course13_extra_37')}
+            cta="استكشف الدورات"
             onClick={() => onOpenTrack?.('paid')}
           />
         </div>

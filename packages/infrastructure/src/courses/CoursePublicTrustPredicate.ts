@@ -11,4 +11,4 @@ export function courseSourceApprovalPredicate():Prisma.Sql {
  )`;
 }
 
-export function coursePublicTrustPredicate():Prisma.Sql {return Prisma.sql`(c."originType" <> 'EXTERNAL_LINKED_COURSE' OR (c."accessType"='FREE_STUDY_AND_CERTIFICATE' AND c."isStudyFree"=TRUE AND c."isFreeCertificate"=TRUE AND ${courseSourceApprovalPredicate()}))`;}
+export function coursePublicTrustPredicate():Prisma.Sql {return Prisma.sql`(c."originType" <> 'EXTERNAL_LINKED_COURSE' OR (c."accessType" IN ('FREE_STUDY','FREE_STUDY_AND_CERTIFICATE') AND c."isStudyFree"=TRUE AND ${courseSourceApprovalPredicate()}))`;}

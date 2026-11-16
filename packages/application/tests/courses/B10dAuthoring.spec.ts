@@ -11,7 +11,7 @@ describe('B10d draft authoring and historical identity',()=>{
   const curriculum:any={getCurriculumSnapshot:async()=>({modules}),reorderModules:vi.fn(async(_id,positions)=>{modules=positions;})};
   const uc=new CourseCurriculumUseCases(courses,curriculum);
   const atomic:any={execute:(_spec,fn)=>{const next=tail.then(()=>fn({boundaryId:'test'}));tail=next.catch(()=>{});return next;}};
-  const commands=new CourseAdminCommandUseCases(courses,paths,atomic,()=>({courseCurriculumUseCases:uc}) as any);
+  const commands=new CourseAdminCommandUseCases(courses,paths,atomic,()=>({courseCurriculumUseCases:uc,nativeCourseUseCases:{getReadiness:async()=>({ready:false})}}) as any);
   const execute=(positions:any[])=>commands.execute('COURSE','course','REORDER',{actorId:'editor',reason:'Reviewed order',expectedVersion:1},scope=>scope.courseCurriculumUseCases.reorderModules('course',positions));
   const results=await Promise.allSettled([execute([{id:'b',position:1},{id:'a',position:2}]),execute([{id:'a',position:1},{id:'b',position:2}])]);
   expect(results.map(item=>item.status)).toEqual(['fulfilled','rejected']);expect(curriculum.reorderModules).toHaveBeenCalledTimes(1);expect(modules).toEqual([{id:'b',position:1},{id:'a',position:2}]);expect(state.version).toBe(2);
