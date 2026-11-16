@@ -121,6 +121,7 @@ describe('CrossDomainGraphReadService P4 canonical projections', () => {
     expect(ctx.universityRepository.listPublished).toHaveBeenCalledWith(expect.objectContaining({ countryReferenceId: 'country-ye' }));
     expect(ctx.scholarshipRepository.listPublished).toHaveBeenCalledWith(expect.objectContaining({ countryReferenceId: 'country-ye' }));
     expect(ctx.internationalTestRepository.listPublished).toHaveBeenCalledWith(expect.objectContaining({ countryIso2Code: 'YE' }));
+    expect(ctx.universityRepository.listPublishedMajorGraph).toHaveBeenCalledWith(expect.objectContaining({ countryReferenceId: 'country-ye' }));
     expect(ctx.majorRepository.findPublishedByIds).toHaveBeenCalledWith(['major-1']);
     expect(ctx.courseRelationshipRepository.listPublishedRelatedCourses).toHaveBeenCalledWith(expect.objectContaining({ providerHeadquartersCountryReferenceId: 'country-ye' }));
     expect(graph.relationships.majors[0]).toMatchObject({ ownerId: 'major-1' });

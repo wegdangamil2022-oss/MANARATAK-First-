@@ -102,7 +102,8 @@ check('MNT-AUD-0062 canonical AI operator route inherits /admin boundary', app.i
 try {
   const lifecycleSourceTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/auth-lifecycle-remediation-source.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0076/0065/0062 native source contract tests execute', /# fail 0/.test(lifecycleSourceTest));
-} catch (error) {
+ } catch (error) {
+  console.error('auth-lifecycle source regression:', error.stderr?.toString() || error.stdout?.toString() || error.message);
   check('MNT-AUD-0076/0065/0062 native source contract tests execute', false);
 }
 
@@ -230,7 +231,8 @@ check('MNT-AUD-0040 lifecycle runbook exists', exists('docs/operations/RUNTIME_R
 try {
   const lifecycleTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/runtime/runtime-resource-lifecycle-source.test.mjs'), path.join(root, 'tests/runtime/runtime-shutdown-drain-runtime.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0040 native lifecycle source tests execute', /# fail 0/.test(lifecycleTest));
-} catch (error) {
+ } catch (error) {
+  console.error('shutdown source regression:', error.stderr?.toString() || error.stdout?.toString() || error.message);
   check('MNT-AUD-0040 native lifecycle source tests execute', false);
 }
 try {

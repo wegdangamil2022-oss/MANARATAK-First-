@@ -51,6 +51,7 @@ export class MutationAuditPolicy {
     '/admin/finance',
     '/admin/careers',
     '/admin/ai',
+    '/admin/student-document-reviews', // Private reviewer access/attestation requires durable audit intent.
     '/admin/student-tools',
     '/admin/notifications',
     '/admin/platform',

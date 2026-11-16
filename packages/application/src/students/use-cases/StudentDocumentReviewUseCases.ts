@@ -106,7 +106,9 @@ export class StudentDocumentReviewUseCases {
         binding.expiresAt?.getTime() ?? Infinity,
         asset.retention?.expiresAt?.getTime() ?? Infinity,
       ),
-      ttl = Math.min(60, Math.floor((deadline - Date.now()) / 1000));
+      // Delivery providers may calculate expiry a few milliseconds after this check.
+      // Reserve one second; never issue a grant beyond the reviewed retention window.
+      ttl = Math.min(60, Math.floor((deadline - Date.now() - 1000) / 1000));
     if (ttl < 1) throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
     const deliveryExpiresAt = Math.min(deadline, Date.now() + ttl * 1000);
     this.lifecycle.assertAuthenticatedDeliveryConfigured();

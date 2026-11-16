@@ -3760,6 +3760,22 @@
     },
     {
       "method": "POST",
+      "path": "/admin/courses/:id/localized-description",
+      "owner": "CourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:courses:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+    },
+    {
+      "method": "POST",
       "path": "/admin/courses/:id/mark-publishable",
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
@@ -4481,6 +4497,22 @@
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/courses/learning-paths/:pathId",
+      "owner": "CourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:courses:manage"
+      ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
@@ -6670,6 +6702,22 @@
     },
     {
       "method": "POST",
+      "path": "/admin/majors/:id/fellowship-profiles",
+      "owner": "MajorAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:majors:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+    },
+    {
+      "method": "POST",
       "path": "/admin/majors/:id/mark-publishable",
       "owner": "MajorAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
@@ -7381,6 +7429,22 @@
       "owner": "ScholarshipAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": ["admin:scholarships:manage"],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/scholarships/:id/localized-description",
+      "owner": "ScholarshipAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:scholarships:manage"
+      ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
