@@ -8,7 +8,7 @@ function build() {
   const options = vi.fn().mockResolvedValue({ options: [], nextPage: null });
   const guards = vi
     .spyOn(SecurityMiddlewareFactory, "createAdminPermissionGuard")
-    .mockImplementation((permission) => (req, res, next) => {
+    .mockImplementation((permission) => async (req, res, next) => {
       if (req.get("X-Test-Permission") !== permission) {
         res.status(403).end();
         return;

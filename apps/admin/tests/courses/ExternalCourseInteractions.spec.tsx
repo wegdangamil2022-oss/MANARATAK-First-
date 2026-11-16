@@ -15,6 +15,7 @@ vi.mock('../../src/features/courses/CourseLookup', () => ({ CourseLookup: () => 
 vi.mock('../../src/features/courses/ExternalCourseRelationships', () => ({
   ExternalCourseRelationships: () => null,
 }));
+vi.mock('../../src/components/CourseSourceApprovalPanel', () => ({ CourseSourceApprovalPanel: () => null }));
 import { ExternalCourseDrawer } from '../../src/features/courses/ExternalCourseDrawer';
 let tree: ReturnType<typeof create>;
 const onSaved = vi.fn();

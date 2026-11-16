@@ -124,8 +124,10 @@ check('University admin consumes canonical countryReferenceId query filter', uni
 check('University admin exposes an explicit clear action for country filter',
   /<UniversityLocationFilters[\s\S]*?onChange=\{\(key,value\)=>\{[^}]*if\(value\)next\.set\(key,value\);else next\.delete\(key\);/.test(universityAdmin) &&
   universityAdmin.includes('setSearchParams(next)') &&
-  universityLocationFilters.includes("onChange('countryReferenceId',id??'')") &&
-  /reloadKey="university-filter-countries"[^>]*\boptional\b/.test(universityLocationFilters));
+  universityLocationFilters.includes('facet="countryReferenceId"') &&
+  universityLocationFilters.includes("onChange('countryReferenceId',value)") &&
+  /<CanonicalPicker[\s\S]*?\boptional\b/.test(read('apps/admin/src/components/RelatedCatalogPicker.tsx')) &&
+  read('apps/admin/src/components/RelatedCatalogPicker.tsx').includes('onChange(id ?? "")'));
 
 check('Public client has Study Destination DTO', webClient.includes('PublicStudyDestinationDto'));
 check('Public client reads Study Destination endpoint', webClient.includes('getStudyDestinations') && webClient.includes('/study-destinations'));

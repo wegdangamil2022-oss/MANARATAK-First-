@@ -20,7 +20,7 @@ const requiredSteps = [
   'artifacts',
 ];
 const sourceClosureManifestPath = 'scripts/ci/source-closure-manifest.json';
-if (!manifest.runtimePendingManifest || !fs.existsSync(manifest.runtimePendingManifest))
+if (!manifest.runtimePendingManifest || !fs.existsSync(new URL('../../' + manifest.runtimePendingManifest, import.meta.url)))
   throw new Error('SOURCE_RUNTIME_PENDING_AUTHORITY_UNAVAILABLE');
 const sha = requireSha(process.env.GITHUB_SHA),
   steps = JSON.parse(process.env.SOURCE_CI_STEPS_JSON ?? '{}');

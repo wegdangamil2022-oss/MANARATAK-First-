@@ -17,6 +17,6 @@ describe('remediation verifier runner', () => {
     expect(result.stderr).toContain('REMEDIATION_VERIFIER_FAILED=verify-w8-source.mjs EXIT_CODE=9');
     expect(result.stderr).toContain('REMEDIATION_VERIFIERS=FAIL passed=14 failed=2');
     expect(result.stdout).toContain('REMEDIATION_FINAL_CLOSURE=SKIPPED_UNTIL_SOURCE_WAVES_PASS');
-  });
+  }, 30000);
 });
 

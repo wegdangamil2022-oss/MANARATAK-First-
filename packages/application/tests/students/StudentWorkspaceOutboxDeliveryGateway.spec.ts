@@ -259,3 +259,26 @@ describe('Student certificate owner-outbox bridge', () => {
     }));
   });
 });
+
+
+describe('Course admission owner-outbox bridge', () => {
+  it.each([
+    ['CourseEnrollmentRequested','PENDING'],
+    ['CourseAdmissionApproved','ACTIVE'],
+    ['CourseAdmissionRejected','CANCELLED'],
+  ])('delivers %s with a valid bounded student contract', async (eventType,status) => {
+    const {gateway,students}=fixture();
+    await gateway.deliver({
+      id:'admission-event',domain:'COURSES',eventType,createdAt:new Date('2026-11-17T00:00:00Z'),
+      aggregate:{aggregateType:'COURSE_ENROLLMENT',aggregateId:'enrollment-1'},
+      metadata:{eventVersion:'1.0.0'},
+      payload:{courseId:'course-1',enrollmentId:'enrollment-1',studentReferenceId:'student-1',
+        enrollmentStatus:status,courseVersion:1,reason:'private admission reason'},
+    } as any,{idempotencyKey:'admission-event'});
+    const event=students.consumeIntegrationEvent.mock.calls[0][0];
+    expect(event).toMatchObject({eventType,sourceDomain:'COURSES',sourceReferenceId:'enrollment-1',
+      metadata:{status,courseId:'course-1',enrollmentId:'enrollment-1'}});
+    expect(()=>assertStudentIntegrationEvent(event)).not.toThrow();
+    expect(JSON.stringify(event)).not.toContain('private admission reason');
+  });
+});

@@ -184,7 +184,7 @@ check('MNT-AUD-0101 script/style element policies do not permit unsafe-inline', 
 check('MNT-AUD-0101 API defense CSP denies framing and inline style elements', middleware.includes('frameAncestors: ["\'none\'"]') && middleware.includes('styleSrc: ["\'self\'"]'));
 check('MNT-AUD-0101 build policy emits _headers artifact', frontendSecurityPolicy.includes("fileName: '_headers'") && exists('scripts/security/verify-frontend-security-headers.mjs'));
 check('MNT-AUD-0114 inline-style remediation is explicitly registered', exists('docs/remediation/MNT-AUD-0114-INLINE-STYLE-CSP-COMPATIBILITY.md') && frontendSecurityPolicy.includes("style-src-attr 'none'") && !frontendSecurityPolicy.includes('unsafe-inline'));
-check('MNT-AUD-0114 Web/Admin inline style inventory is zero', inlineStyles.length === 0);
+check('MNT-AUD-0114 Web/Admin inline style inventory is zero', webInlineStyleCount === 0 && adminInlineStyleCount === 0);
 
 try {
   const frontendSecurityTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/frontend-security-headers-source.test.mjs'), path.join(root, 'tests/security/public-auth-source-policy.test.mjs')], { encoding: 'utf8' });
