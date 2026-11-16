@@ -30,16 +30,17 @@ check('P5-SEC-002 control-plane mutation audit enabled', app.includes("new Mutat
 
 for (const dir of ['packages/application/src', 'packages/infrastructure/src']) {
   const stack = [path.join(root, dir)];
-  let directEnv = false;
+  const directEnvFiles = [];
   while (stack.length) {
     const current = stack.pop();
     for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
       const full = path.join(current, entry.name);
       if (entry.isDirectory()) stack.push(full);
-      else if (/\.(ts|tsx|js|mjs)$/.test(entry.name) && /process\.env|import\.meta\.env/.test(fs.readFileSync(full, 'utf8'))) directEnv = true;
+      else if (/\.(ts|tsx|js|mjs)$/.test(entry.name) && /process\.env|import\.meta\.env/.test(fs.readFileSync(full, 'utf8'))) directEnvFiles.push(path.relative(root, full).replaceAll('\\', '/'));
     }
   }
-  check(`P3-CONFIG-001 no direct env reads under ${dir}`, !directEnv);
+  if (directEnvFiles.length) console.error('P3_CONFIG_UNAPPROVED_ENV_FILES: ' + directEnvFiles.join(', '));
+  check(`P3-CONFIG-001 no direct env reads under ${dir}`, directEnvFiles.length === 0);
 }
 
 const settingsService = read('packages/domain/src/settings/services/ConfigurationResolutionService.ts');
@@ -157,6 +158,7 @@ try {
   const strictValidationTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/strict-edge-validation-remediation-source.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0111 native source contract tests execute', /# fail 0/.test(strictValidationTest));
 } catch (error) {
+  console.error('MNT_AUD_0111_NATIVE_FAILURE', String(error?.stdout ?? '').slice(-4500), String(error?.stderr ?? '').slice(-1200));
   check('MNT-AUD-0111 native source contract tests execute', false);
 }
 
@@ -181,12 +183,13 @@ check('MNT-AUD-0101 script/style element policies do not permit unsafe-inline', 
 check('MNT-AUD-0101 API defense CSP denies framing and inline style elements', middleware.includes('frameAncestors: ["\'none\'"]') && middleware.includes('styleSrc: ["\'self\'"]'));
 check('MNT-AUD-0101 build policy emits _headers artifact', frontendSecurityPolicy.includes("fileName: '_headers'") && exists('scripts/security/verify-frontend-security-headers.mjs'));
 check('MNT-AUD-0114 inline-style remediation is explicitly registered', exists('docs/remediation/MNT-AUD-0114-INLINE-STYLE-CSP-COMPATIBILITY.md') && frontendSecurityPolicy.includes("style-src-attr 'none'") && !frontendSecurityPolicy.includes('unsafe-inline'));
-check('MNT-AUD-0114 Web/Admin inline style inventory is zero', Number(webInlineStyleCount) === 0 && Number(adminInlineStyleCount) === 0);
+check('MNT-AUD-0114 Web/Admin inline style inventory is zero', inlineStyles.length === 0);
 
 try {
   const frontendSecurityTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/frontend-security-headers-source.test.mjs'), path.join(root, 'tests/security/public-auth-source-policy.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0101/0114 native source contract tests execute', /# fail 0/.test(frontendSecurityTest));
 } catch (error) {
+  console.error('MNT_AUD_0101_NATIVE_FAILURE', String(error?.stdout ?? '').slice(-4500), String(error?.stderr ?? '').slice(-1200));
   check('MNT-AUD-0101/0114 native source contract tests execute', false);
 }
 

@@ -2096,15 +2096,6 @@
       ]
     },
     {
-      "name": "coursePublicRouter",
-      "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/app.ts"
-      ],
-      "reachableThroughRegistrations": [],
-      "dependencies": []
-    },
-    {
       "name": "coursePublicationService",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -2118,6 +2109,15 @@
         "courseRepository",
         "importedCourseOperationsRepository"
       ]
+    },
+    {
+      "name": "coursePublicRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
     },
     {
       "name": "courseRelationshipQueryService",
@@ -5576,6 +5576,17 @@
       ]
     },
     {
+      "name": "studentToolRateLimitGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "studentToolExecutionUseCases"
+      ],
+      "dependencies": [
+        "studentToolRateLimiter"
+      ]
+    },
+    {
       "name": "studentToolRegistryRepository",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -5616,15 +5627,13 @@
       "dependencies": []
     },
     {
-      "name": "studentToolSaveGateway",
+      "name": "studentToolsAdminRouter",
       "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [],
-      "reachableThroughRegistrations": [
-        "studentToolExecutionUseCases"
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
       ],
-      "dependencies": [
-        "studentWorkspaceRepository"
-      ]
+      "reachableThroughRegistrations": [],
+      "dependencies": []
     },
     {
       "name": "studentToolTestDiscovery",
@@ -5654,13 +5663,15 @@
       ]
     },
     {
-      "name": "studentToolsAdminRouter",
+      "name": "studentToolSaveGateway",
       "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/app.ts"
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "studentToolExecutionUseCases"
       ],
-      "reachableThroughRegistrations": [],
-      "dependencies": []
+      "dependencies": [
+        "studentWorkspaceRepository"
+      ]
     },
     {
       "name": "studentToolsPublicRouter",

@@ -11,20 +11,31 @@ const verifiers = [
   'verify-w16-final-closure.mjs',
 ];
 const passed = [];
+const failed = [];
 
 for (const verifier of verifiers) {
-  const result = spawnSync(process.execPath, [path.join(verifierDir, verifier)], { cwd: root, stdio: 'inherit' });
-  if (result.error) {
-    console.error(`REMEDIATION_VERIFIER_FAILED=${verifier} ERROR=${result.error.message}`);
-    process.exit(1);
+  // Final closure reruns every source wave: execute it only once all prior waves pass.
+  // On failure, still examine every remaining source-only wave to report all blockers.
+  if (verifier === 'verify-w16-final-closure.mjs' && failed.length) {
+    console.log('REMEDIATION_FINAL_CLOSURE=SKIPPED_UNTIL_SOURCE_WAVES_PASS');
+    break;
   }
-  if (result.status !== 0) {
-    console.error(`REMEDIATION_VERIFIER_FAILED=${verifier} EXIT_CODE=${result.status ?? 1}`);
-    process.exit(result.status ?? 1);
+  const result = spawnSync(process.execPath, [path.join(verifierDir, verifier)], { cwd: root, stdio: 'inherit' });
+  if (result.error || result.status !== 0) {
+    const detail = result.error ? `ERROR=${result.error.message}` : `EXIT_CODE=${result.status ?? 1}`;
+    failed.push(verifier);
+    console.error(`REMEDIATION_VERIFIER_FAILED=${verifier} ${detail}`);
+    continue;
   }
   passed.push(verifier);
 }
 
-console.log(`REMEDIATION_VERIFIERS=PASS ${passed.length}/${verifiers.length}`);
 console.log(`REMEDIATION_VERIFIER_ORDER=${verifiers.join(' -> ')}`);
+if (failed.length) {
+  console.error(`REMEDIATION_VERIFIERS=FAIL passed=${passed.length} failed=${failed.length}`);
+  console.error(`REMEDIATION_FAILED_WAVES=${failed.join(',')}`);
+  process.exitCode = 1;
+} else {
+  console.log(`REMEDIATION_VERIFIERS=PASS ${passed.length}/${verifiers.length}`);
+}
 

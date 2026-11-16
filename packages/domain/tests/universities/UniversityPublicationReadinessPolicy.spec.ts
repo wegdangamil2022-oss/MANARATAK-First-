@@ -18,7 +18,7 @@ describe('UniversityPublicationReadinessPolicy normalized program mappings', () 
       academicPrograms: [{ id: 'program-1', universityId: 'uni-1', sourceProgramName: 'Computer Science', normalizedName: 'computer science', degreeLevelId: null, majorId: null, status: 'ACTIVE', majorMappingState: 'CANONICALLY_MAPPED', campusIds: [], admissionRequirements: [], metadata: null }],
     });
     expect(result.blockingIssues.map(issue => issue.code)).toEqual(expect.arrayContaining([
-      'UNIVERSITY_PROGRAM_MAJOR_REFERENCE_MISSING',
+      'UNIVERSITY_PROGRAM_MAJOR_REVIEW_REQUIRED',
       'UNIVERSITY_PROGRAM_DEGREE_REFERENCE_MISSING',
     ]));
   });

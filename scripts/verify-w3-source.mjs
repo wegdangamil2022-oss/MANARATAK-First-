@@ -37,6 +37,7 @@ const signedProviderClient = read('packages/infrastructure/src/provider-http/Sig
 const assetProviderGateways = read('packages/infrastructure/src/asset-platform/HttpAssetSecurityGateways.ts');
 const runtimeDependencyPolicy = read('apps/api/src/infrastructure/di/RuntimeDependencyPolicy.ts');
 const assetLifecycle = read('packages/application/src/asset-platform/use-cases/ProcessAssetLifecycleUseCase.ts');
+const assetAggregate = read('packages/domain/src/asset-platform/aggregates/AssetRecord.ts');
 const assetIngest = read('packages/application/src/asset-platform/use-cases/IngestAssetUseCase.ts');
 const assetRouter = read('apps/api/src/presentation/api/router/AssetPlatformRouter.ts');
 const assetProviderSpec = read('packages/infrastructure/tests/asset-platform/HttpAssetSecurityGateways.spec.ts');

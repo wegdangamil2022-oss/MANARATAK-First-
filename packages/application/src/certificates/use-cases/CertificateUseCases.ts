@@ -343,7 +343,9 @@ export class CertificateUseCases {
     if (reason.trim().length < 8) throw new Error('RENEWAL_REASON_TOO_SHORT');
     const source = await this.requireCertificate(id);
     if (source.validityPolicy !== 'RENEWABLE') throw new Error('CERTIFICATE_NOT_RENEWABLE');
-    if (![CertificateStatus.ACTIVE, CertificateStatus.EXPIRED].includes(source.status)) throw new Error('CERTIFICATE_RENEWAL_STATE_INVALID');
+    if (![CertificateStatus.ACTIVE, CertificateStatus.EXPIRED].includes(source.status) &&
+      !(source.status === CertificateStatus.REISSUED && source.replacedByCertificateId))
+      throw new Error('CERTIFICATE_RENEWAL_STATE_INVALID');
     const template = await this.requireActiveTemplate(source.templateId);
     const periodDays = template.renewalPeriodDays ?? template.validityDurationDays;
     if (!periodDays || periodDays <= 0) throw new Error('CERTIFICATE_RENEWAL_PERIOD_REQUIRED');
@@ -361,7 +363,9 @@ export class CertificateUseCases {
   ) {
     if (reason.trim().length < 8) throw new Error('REISSUE_REASON_TOO_SHORT');
     const source = await this.requireCertificate(id);
-    if (source.status !== CertificateStatus.REVOKED) throw new Error('CERTIFICATE_MUST_BE_REVOKED_BEFORE_REISSUE');
+    if (source.status !== CertificateStatus.REVOKED &&
+      !(source.status === CertificateStatus.REISSUED && source.replacedByCertificateId))
+      throw new Error('CERTIFICATE_MUST_BE_REVOKED_BEFORE_REISSUE');
     const template = await this.requireActiveTemplate(templateId ?? source.templateId);
     if (
       recipientDisplayName !== undefined && recipientDisplayName !== source.recipientDisplayName
@@ -493,7 +497,11 @@ export class CertificateUseCases {
     if (!payload.eligibleForCertificate) throw new Error('Course completion is not eligible (COURSE_COMPLETION_NOT_ELIGIBLE)');
     const existing = await this.certificateRepository.findBySourceCompletionId(payload.completionId);
     if (existing) {
-      if (existing.studentReferenceId !== payload.studentReferenceId || existing.achievementId !== payload.courseId || existing.sourceEventPayloadHash !== this.digest(this.canonicalJson(payload))) throw new Error('CERTIFICATE_SOURCE_COMPLETION_COLLISION');
+      if (existing.studentReferenceId !== payload.studentReferenceId ||
+        existing.achievementType !== 'COURSE' || existing.achievementId !== payload.courseId ||
+        existing.sourceEventType !== event.eventType || existing.sourceEventVersion !== event.eventVersion ||
+        existing.sourceEventPayloadHash !== this.digest(this.canonicalJson(payload)))
+        throw new Error('CERTIFICATE_SOURCE_COMPLETION_COLLISION');
       return existing;
     }
     let course = await this.courseRepository.findById(payload.courseId);
@@ -547,7 +555,16 @@ export class CertificateUseCases {
       if(path.status!=='PUBLISHED'||path.certificateEligible!==true)throw new Error('CERTIFICATE_LEARNING_PATH_VERSION_NOT_ELIGIBLE');
     const completionId = event.eventId;
     const existing = await this.certificateRepository.findByLearningPathCompletionId(completionId);
-    if (existing) return existing;
+    if (existing) {
+      // The completion key is idempotent only for the exact same authoritative event.
+      // A collision may never return another student's previously issued certificate.
+      if (existing.studentReferenceId !== payload.studentReferenceId ||
+        existing.achievementType !== 'LEARNING_PATH' || existing.achievementId !== payload.learningPathId ||
+        existing.sourceEventType !== event.eventType || existing.sourceEventVersion !== event.eventVersion ||
+        existing.sourceEventPayloadHash !== this.digest(this.canonicalJson(payload)))
+        throw new Error('CERTIFICATE_SOURCE_COMPLETION_COLLISION');
+      return existing;
+    }
     const template = await this.requireDefaultActiveTemplate();
     const recipientDisplayName = await this.resolveRecipientDisplayName(payload.studentReferenceId);
     return this.issueAchievement(event, template, {

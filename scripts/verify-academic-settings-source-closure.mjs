@@ -8,6 +8,7 @@ const taxonomyPublicRouter = read('apps/api/src/presentation/api/router/Academic
 const taxonomyAdminRouter = read('apps/api/src/presentation/api/router/AcademicTaxonomyAdminRouter.ts');
 const taxonomyPublic = read('packages/application/src/academic-taxonomy/use-cases/PublicAcademicTaxonomyUseCases.ts');
 const taxonomyLocalized = read('packages/application/src/academic-taxonomy/use-cases/LocalizedPublicAcademicTaxonomyUseCases.ts');
+const taxonomyPublicOwner = read('packages/application/src/academic-taxonomy/use-cases/PublicAcademicTaxonomyUseCases.ts');
 const taxonomyAdminPage = read('apps/admin/src/pages/AcademicTaxonomyAdminPage.tsx');
 const taxonomyDetailPage = read('apps/admin/src/pages/AcademicTaxonomyDetailPage.tsx');
 const settingsDefinition = read('packages/domain/src/settings/entities/SettingDefinition.ts');

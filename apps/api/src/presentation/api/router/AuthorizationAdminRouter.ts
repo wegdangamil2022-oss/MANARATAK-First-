@@ -1573,7 +1573,7 @@ export class AuthorizationAdminRouter {
             action: 'POLICY_MUTATION_REJECTED',
             category: 'AUTHORIZATION',
             targetType: 'POLICY',
-            targetId: req.params.id || req.body?.id,
+            targetId: req.params.id,
             result: 'FAILURE',
             error,
           });
