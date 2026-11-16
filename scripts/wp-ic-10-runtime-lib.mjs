@@ -53,6 +53,16 @@ export function providerReplayForceReanalysisInvariant({ operationsSource, ident
   return canonicalOperationOwnsForceBranch && identityDiffHonorsForce;
 }
 
+export function rateSafeLinkHealthInvariant({ continuationSource, backlogSource }) {
+  // Link health moved to the backlog owner. Verify delegation and the applied
+  // bounds/delay there, rather than searching for retired continuation constants.
+  return /new CourseProviderBacklogUseCases\([^;]+\)\.run\(provider,\s*input\)/.test(continuationSource)
+    && /const limit\s*=\s*Math\.min\(10,\s*Math\.max\(1,\s*Math\.floor\(input\.limit\s*\?\?\s*10\)\)\)/.test(backlogSource)
+    && /const delayMs\s*=\s*Math\.min\(10000,\s*Math\.max\(750,\s*Math\.floor\(input\.delayMs\s*\?\?\s*1000\)\)\)/.test(backlogSource)
+    && /store\.page\(provider\.id,\s*claim\.cursor,\s*limit\s*-\s*retries\.length\)/.test(backlogSource)
+    && /await this\.wait\(delayMs\)/.test(backlogSource);
+}
+
 export function securityAudit(repoRoot) {
   const required = {
     app: 'apps/api/src/app.ts',
@@ -60,6 +70,7 @@ export function securityAudit(repoRoot) {
     coordinator: 'packages/application/src/courses/use-cases/CourseImportCoordinator.ts',
     seedPilot: 'scripts/wp-ic-08-course-seed-pilot.mjs',
     continuation: 'packages/application/src/courses/use-cases/CourseProviderContinuationUseCases.ts',
+    backlog: 'packages/application/src/courses/use-cases/CourseProviderBacklogUseCases.ts',
     operations: 'packages/application/src/courses/use-cases/CourseImportOperationsUseCases.ts',
     identityDiff: 'packages/application/src/courses/use-cases/CourseImportIdentityDiffUseCase.ts',
     importedAdmin: 'packages/application/src/courses/use-cases/ImportedCourseAdminUseCases.ts',
@@ -119,7 +130,7 @@ export function securityAudit(repoRoot) {
   ));
   checks.push(gate(
     'rate-safe-link-health',
-    /MAX_LINK_HEALTH_JOB_SIZE\s*=\s*10/.test(text.continuation) && /MIN_LINK_HEALTH_DELAY_MS\s*=\s*750/.test(text.continuation),
+    rateSafeLinkHealthInvariant({ continuationSource: text.continuation, backlogSource: text.backlog }),
     'bulk link verification remains bounded and rate-safe',
   ));
 

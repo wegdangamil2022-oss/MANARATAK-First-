@@ -1,12 +1,28 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {
   buildFinalReport,
   declaresSupportedNodeEngine,
   normalizeBaseUrl,
+  rateSafeLinkHealthInvariant,
   renderFinalMarkdown,
   validateMemoryResult,
 } from '../../scripts/wp-ic-10-runtime-lib.mjs';
+
+test('link health security gate follows the backlog owner and rejects missing bounds or delay', () => {
+  const read = name => readFileSync(new URL(`../../packages/application/src/courses/use-cases/${name}.ts`, import.meta.url), 'utf8');
+  const continuationSource = read('CourseProviderContinuationUseCases');
+  const backlogSource = read('CourseProviderBacklogUseCases');
+  assert.equal(rateSafeLinkHealthInvariant({ continuationSource, backlogSource }), true);
+  for (const changed of [
+    backlogSource.replace('Math.min(10,', 'Math.min(1000,'),
+    backlogSource.replace('Math.max(750,', 'Math.max(0,'),
+    backlogSource.replace('await this.wait(delayMs)', 'void delayMs'),
+    backlogSource.replace('limit - retries.length', '1000'),
+  ]) assert.equal(rateSafeLinkHealthInvariant({ continuationSource, backlogSource: changed }), false);
+  assert.equal(rateSafeLinkHealthInvariant({ continuationSource: continuationSource.replace(').run(provider,input)', ').unsafeRun(provider,input)'), backlogSource }), false);
+});
 
 test('node engine gate accepts supported minimum versions without pinning Node 20', () => {
   assert.equal(declaresSupportedNodeEngine('>=20'), true);
