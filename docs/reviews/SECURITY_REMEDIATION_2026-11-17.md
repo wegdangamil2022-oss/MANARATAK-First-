@@ -31,4 +31,13 @@ The audit inventory generator now fingerprints invoked route-local authorization
 
 Synthetic regressions live in `apps/api/tests/security/RouteCapabilitySecurity.spec.ts` and `AuthorizationReplaySecurity.spec.ts`. These exercise actual Express route matching, authorization denial before use-case calls, private-store exclusion, and response replay through the real middleware with an in-memory store. The scanner/idempotency source contracts are covered by `tests/security/admin-audit-coverage.test.mjs` and `tests/remediation/w4-api-idempotency.test.mjs`.
 
-The focused security suite passes 28 tests; the source-contract suites pass 27 tests. Broader repository validation results are recorded with the delivery commit.
+Validation completed with Node 22.16.0:
+
+* Focused security: 28 passing tests; audit/idempotency source contracts: 27 passing tests.
+* Full Vitest suite: 905 files passed, one file skipped; 6,619 tests passed, three skipped under the existing source test profile.
+* Full Node suite: 1,159 tests passed, no skips or failures. The subsequently updated imported-course guard suite separately passed all 10 tests, including a new rejection test for lost limits, delay or owner delegation.
+* TypeScript project build, workspace production build and Vercel TypeScript context passed. ESLint reported zero errors; warnings remain.
+* Source quality passed with no dependency cycles or baseline findings. The dependency audit reported zero known vulnerabilities; tracked-file secret scanning passed.
+* 32 of the 33 source manifest gates passed locally after updating an old test to send actual Express requests. The Nginx fixture requires a Linux development binary and remains unverified on this Windows host. Database and browser runtime gates were not run.
+
+The prior main commit's separate imported-course CI audit was also investigated. Its rate-limit check still searched the continuation facade for constants moved into `CourseProviderBacklogUseCases`. The audit now checks the current delegation, applied job bound, minimum delay, bounded page and wait call. Its 32 security checks pass; reducing/removing these constraints fails the new regression test. No production rate limit was relaxed.
