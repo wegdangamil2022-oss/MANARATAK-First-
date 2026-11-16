@@ -15,12 +15,16 @@ import { assertNoTranslationPayloadFields } from '@manaratak/shared';
 import { AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { CoursePublicationService } from '../services/CoursePublicationService';
 
-const IMPORT_LINEAGE_FIELDS: ReadonlyArray<keyof UpdateCourseDto> = [
+const IMPORT_LINEAGE_FIELDS: ReadonlyArray<keyof UpdateCourseDto|'sourceImportRecordId'> = [
   'directCourseUrl',
   'sourceUrl',
   'officialSourceUrl',
   'externalProviderId',
   'originalSourceTitle',
+  'accessType', 'isStudyFree', 'isFreeCertificate', 'certificateType',
+  'certificateAvailable', 'learningLanguageRaw', 'learningLanguage',
+  'studyLevelRaw', 'studyDurationRaw', 'studyDuration', 'shortCourseTopicsRaw',
+  'platformName', 'providerName', 'sourceImportRecordId',
 ];
 
 export class AdminCourseUseCases {
@@ -86,6 +90,7 @@ export class AdminCourseUseCases {
     assertNoTranslationPayloadFields('COURSE', updates.optionalFields, ['localizedNames', 'titleEn']);
     assertNoForgedOwnerDescriptions(updates.optionalFields);
     const existing = await this.getCourse(id);
+    if(updates.optionalFields){const editorial={...updates.optionalFields};for(const key of ['localizedNames','titleEn'])if(key in editorial && JSON.stringify(editorial[key])===JSON.stringify(existing.optionalFields?.[key]))delete editorial[key];assertNoTranslationPayloadFields('COURSE',editorial,['localizedNames','titleEn']);updates={...updates,optionalFields:editorial};}
     if ([CourseStatus.ARCHIVED, CourseStatus.REJECTED].includes(existing.status)) throw new Error('COURSE_INACTIVE_IMMUTABLE');
     if (existing.originType === CourseOriginType.NATIVE_MANARATAK_COURSE && updates.learningLanguage !== undefined && updates.learningLanguage !== existing.learningLanguage) {
       updates = { ...updates, learningLanguageRaw: updates.learningLanguage };
@@ -99,7 +104,7 @@ export class AdminCourseUseCases {
 
     if (existing.originType === CourseOriginType.EXTERNAL_LINKED_COURSE) {
       for (const field of IMPORT_LINEAGE_FIELDS) {
-        if (updates[field] !== undefined && !this.equal(updates[field], existing[field as keyof CourseDto])) {
+        if ((updates as Record<string,unknown>)[field] !== undefined && !this.equal((updates as Record<string,unknown>)[field], existing[field as keyof CourseDto])) {
           throw new Error(`IMPORTED_COURSE_${String(field).toUpperCase()}_CHANGE_REQUIRES_CONTROLLED_IMPORT`);
         }
       }

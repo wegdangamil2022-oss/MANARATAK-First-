@@ -47,6 +47,7 @@ export class PublicCourseUseCases {
       throw new Error('Course not found');
     }
 
+    if (course.originType === CourseOriginType.EXTERNAL_LINKED_COURSE && (!this.repository.isPubliclyEligible || !await this.repository.isPubliclyEligible(course.id))) throw new Error('Course not found');
     const result = this.mapToPublicDto(course, locale);
     if (course.originType !== CourseOriginType.EXTERNAL_LINKED_COURSE && this.curriculumRepository) {
       const curriculum = await this.curriculumRepository.getCurriculumSnapshot(course.id);
@@ -182,7 +183,9 @@ export class PublicCourseUseCases {
     const optionalPublic = this.pickOptionalPublicFields(optional);
     const descriptions = approvedOwnerDescriptions('COURSE', course);
     const pair = descriptions[locale];
+    const contentLanguage = {requestedLocale: locale, sourceLanguage: course.learningLanguageRaw ?? course.learningLanguage ?? null, titleFallback: !pair?.displayName};
     return {
+      contentLanguage,
       ownerId: course.id,
       publicId: course.publicId,
       slug: course.slug,

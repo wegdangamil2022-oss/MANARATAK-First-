@@ -1,0 +1,10 @@
+import {describe,expect,it,vi} from 'vitest';import {CourseSourceReviewUseCases} from '../../src/courses/use-cases/CourseSourceReviewUseCases';
+function fixture(){const gateway:any={approve:vi.fn(async()=>({verified:true})),history:vi.fn()};const atomic:any={execute:vi.fn(async(_definition,operation)=>operation({boundaryId:'tx',transactionClient:{}}))};return {gateway,atomic,owner:new CourseSourceReviewUseCases(gateway,atomic)};}
+const input={expectedVersion:3,reason:'Independent official source review',evidenceUrls:['https://p.example/official'],validUntil:null};
+describe('Continuation: source approval command',()=>{
+ it('records server actor, actual version, reason and bound persistence together',async()=>{const f=fixture();await f.owner.approve('c',input,{actorId:'server-reviewer'});expect(f.atomic.execute.mock.calls[0][0].context.actorId).toBe('server-reviewer');expect(f.atomic.execute.mock.calls[0][0].auditMetadata.expectedVersion).toBe(3);expect(f.gateway.approve.mock.calls[0][2]).toBe('server-reviewer');expect(f.gateway.approve.mock.calls[0][6].boundaryId).toBe('tx');});
+ it('requires an authenticated source reviewer before mutation',()=>{const f=fixture();expect(()=>f.owner.approve('c',input,{actorId:''})).toThrow('INPUT_REQUIRED');expect(f.atomic.execute).not.toHaveBeenCalled();});
+ it('does not invent an expiry date when no policy was supplied',async()=>{const f=fixture();await f.owner.approve('c',input,{actorId:'reviewer'});expect(f.gateway.approve.mock.calls[0][5]).toBeNull();});
+ it('rejects expired reviewer policy before writing',()=>{const f=fixture();expect(()=>f.owner.approve('c',{...input,validUntil:'2000-01-01T00:00:00.000Z'},{actorId:'reviewer'})).toThrow('EXPIRY_INVALID');expect(f.atomic.execute).not.toHaveBeenCalled();});
+ it.each(['http://p.example/x','https://user:pass@p.example/x'])('rejects unsafe evidence %s',url=>{const f=fixture();expect(()=>f.owner.approve('c',{...input,evidenceUrls:[url]},{actorId:'reviewer'})).toThrow('HTTPS_REQUIRED');expect(f.gateway.approve).not.toHaveBeenCalled();});
+});

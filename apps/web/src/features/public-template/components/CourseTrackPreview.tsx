@@ -19,6 +19,7 @@ import { FavoriteButton } from './FavoriteButton';
 
 interface CourseTrackPreviewProps {
   track: 'native' | 'paid';
+  dataMode?:'api'|'prototype';
   courses: Course[];
   onBack: () => void;
   onSelectCourse: (course: Course) => void;
@@ -29,7 +30,8 @@ interface CourseTrackPreviewProps {
 
 export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
   track,
-  courses = [],
+  courses:initialCourses = [],
+  dataMode='api',
   onBack,
   onSelectCourse,
   favoriteIds = [],
@@ -39,17 +41,21 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
   const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
 
   const isNative = track === 'native';
+  const [courses,setCourses]=useState(initialCourses);const [cursor,setCursor]=useState<string|undefined>();const [nextCursor,setNextCursor]=useState<string|null>(null);const [pageError,setPageError]=useState('');const [pageLoading,setPageLoading]=useState(false);
   const rawCourses = courses;
-  const pageTitle = isNative ? 'دورات منارتك' : 'الدورات المدفوعة';
+  const pageTitle = isNative ? t('course13_extra_38') : t('course13_extra_43');
   const pageSubtitle = isNative
-    ? 'برامج تدريبية وتأهيلية معتمدة لإتقان ملفات القبول، خطابات الدافع، وبناء السيرة الذاتية الأكاديمية'
-    : 'برامج تدريبية احترافية متقدمة لتطوير مهاراتك الأكاديمية والمهنية مع شهادات تخصصية';
+    ? t('course13_extra_53')
+    : t('course13_extra_54');
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('الكل');
   const [selectedLevel, setSelectedLevel] = useState('الكل');
 
+  useEffect(()=>{if(dataMode==='prototype')setCourses(initialCourses);},[dataMode,initialCourses]);
+  useEffect(()=>{setCursor(undefined);},[track,searchQuery]);
+  useEffect(()=>{if(dataMode!=='api')return;let active=true;setPageLoading(true);const timer=window.setTimeout(()=>{void ApiClient.getCourses({originType:isNative?'NATIVE_MANARATAK_COURSE':undefined,accessType:isNative?undefined:'PAID',cursor,limit:24,search:searchQuery.trim()||undefined}).then(page=>{if(active){setCourses(page.data.map(dto=>mapCourse(dto)).filter(row=>row.track===track).map(row=>row.course));setNextCursor(page.nextCursor??null);setPageError('');}}).catch(cause=>{if(active){setPageError(String(cause));setCourses([]);}}).finally(()=>{if(active)setPageLoading(false);});},300);return()=>{active=false;window.clearTimeout(timer);};},[track,dataMode,cursor,searchQuery]);
   // Extract available categories dynamically
   const categories = useMemo(() => {
     const set = new Set<string>();

@@ -5,6 +5,7 @@ import {
   type CourseLearningVersionDto,
 } from '@manaratak/domain';
 import {
+  requiredCompletionQuizIds,
   COURSE_COMPLETED_EVENT_TYPE,
   COURSE_ENROLLED_EVENT_TYPE,
   COURSE_PROGRESS_UPDATED_EVENT_TYPE,
@@ -133,7 +134,7 @@ export class CourseProgressUseCases {
   ) {}
 
   private learnerSnapshot(snapshot: StudentCourseProgressSnapshotDto): StudentCourseProgressSnapshotDto {
-    return {...snapshot, quizAttempts: (snapshot.quizAttempts ?? []).map(attempt => {
+    return {...snapshot, enrollment:snapshot.enrollment?{...snapshot.enrollment,metadata:{courseVersion:snapshot.enrollment.metadata?.courseVersion}}:snapshot.enrollment, quizAttempts: (snapshot.quizAttempts ?? []).map(attempt => {
       const grade = attempt.metadata?.assessmentGrade as {feedback?: string; gradedAt?: string} | undefined;
       return {...attempt, metadata: grade ? {assessmentGrade: {feedback: grade.feedback, gradedAt: grade.gradedAt}} : null};
     })};
@@ -171,6 +172,7 @@ export class CourseProgressUseCases {
     const enrollment = await this.progressRepository.findEnrollment(courseId, studentReferenceId);
     if (!enrollment) throw new Error('COURSE_ENROLLMENT_REQUIRED');
     if (enrollment.status !== CourseEnrollmentStatus.ACTIVE) throw new Error(`COURSE_ENROLLMENT_NOT_ACTIVE:${enrollment.status}`);
+    await this.assertWithdrawalAccess(courseId,enrollment);
     return enrollment;
   }
 
@@ -180,7 +182,17 @@ export class CourseProgressUseCases {
     if (enrollment.status !== CourseEnrollmentStatus.ACTIVE && enrollment.status !== CourseEnrollmentStatus.COMPLETED) {
       throw new Error(`COURSE_ENROLLMENT_NOT_ACCESSIBLE:${enrollment.status}`);
     }
+    await this.assertWithdrawalAccess(courseId,enrollment);
     return enrollment;
+  }
+
+  private async assertWithdrawalAccess(courseId: string, enrollment: CourseEnrollmentDto): Promise<void> {
+    const current = await this.ensureTrackableCourse(courseId);
+    if (current.status === CourseStatus.PUBLISHED) return;
+    const original = await this.learningVersion(courseId, enrollment);
+    const policy = original.course.optionalFields?.withdrawalAccessPolicy;
+    if (policy === 'HONOR_ENROLLED_VERSION') return;
+    throw new Error(policy === 'REVOKE' ? 'COURSE_LEARNING_ACCESS_REVOKED' : 'COURSE_WITHDRAWAL_ACCESS_POLICY_REQUIRED');
   }
 
   public async resolveLearningAsset(
@@ -332,7 +344,6 @@ export class CourseProgressUseCases {
     if (course.status !== CourseStatus.PUBLISHED) throw new Error('COURSE_ENROLLMENT_REQUIRES_PUBLISHED_COURSE');
 
     const policy = await this.enrollmentPolicies?.getPolicy(courseId);
-    if (policy?.requiresApproval) throw new Error('COURSE_ENROLLMENT_APPROVAL_REQUIRED');
     if (policy?.eligibilityRules && Object.keys(policy.eligibilityRules).length > 0) {
       throw new Error('COURSE_ENROLLMENT_ELIGIBILITY_EVALUATOR_REQUIRED');
     }
@@ -370,10 +381,10 @@ export class CourseProgressUseCases {
     await this.atomicMutations.execute(
       {
       domain: 'COURSES', aggregateType: 'COURSE_ENROLLMENT', aggregateId: `${courseId}:${studentReferenceId}`,
-      action: 'COURSE_ENROLLED', context: context ?? { actorId: studentReferenceId, actorType: 'STUDENT', source: 'learner-api' },
+      action: policy?.requiresApproval?'COURSE_ENROLLMENT_REQUESTED':'COURSE_ENROLLED', context: context ?? { actorId: studentReferenceId, actorType: 'STUDENT', source: 'learner-api' },
       outbox: {
         id: `course-enrolled:${courseId}:${studentReferenceId}`,
-        eventType: COURSE_ENROLLED_EVENT_TYPE,
+        eventType: policy?.requiresApproval?'CourseEnrollmentRequested':COURSE_ENROLLED_EVENT_TYPE,
         payload: enrollmentPayload,
         metadata: { eventVersion: '1.0.0', category: 'LearningPlatform' },
       },
@@ -594,9 +605,10 @@ export class CourseProgressUseCases {
         ? (course.optionalFields.completionCriteria as Record<string, unknown>)
         : {};
     if (enrollment.progressPercentage < 100) throw new Error('Course progress must reach 100% before completion');
-    const assessmentRequired = completionCriteria.assessmentRequired === true;
+    const requiredIds = requiredCompletionQuizIds(curriculum.quizzes, completionCriteria.assessmentRequired);
+    const assessmentRequired = requiredIds.length > 0;
     if (assessmentRequired) {
-      const requiredQuizzes = curriculum.quizzes.filter(quiz => quiz.status !== CourseContentStatus.ARCHIVED);
+      const requiredQuizzes = curriculum.quizzes.filter(quiz => requiredIds.includes(quiz.id));
       if (requiredQuizzes.length === 0) throw new Error('COURSE_ASSESSMENT_REQUIRED_BUT_MISSING');
       const attempts = await this.progressRepository.listQuizAttempts(courseId, studentReferenceId);
       for (const quiz of requiredQuizzes) {
@@ -654,6 +666,7 @@ export class CourseProgressUseCases {
   public async getProgress(courseId: string, studentReferenceId: string): Promise<StudentCourseProgressSnapshotDto | null> {
     await this.ensureTrackableCourse(courseId);
     const snapshot = await this.progressRepository.getStudentProgressSnapshot(courseId, studentReferenceId);
+    if(snapshot?.enrollment) await this.assertWithdrawalAccess(courseId,snapshot.enrollment);
     return snapshot ? this.learnerSnapshot(snapshot) : null;
   }
 

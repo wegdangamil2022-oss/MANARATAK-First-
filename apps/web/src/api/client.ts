@@ -244,6 +244,8 @@ export interface MajorFilters {
 }
 
 export interface CourseFilters {
+  search?: string;
+  majorId?:string;
   accessType?: string;
   originType?: string;
   platformName?: string;
@@ -1095,6 +1097,7 @@ export interface StudentOwnedAssetPageDto {
 }
 
 export interface StudentAssetDeliveryGrantDto {
+  mimeType: string;
   assetId: string;
   url: string;
   headers?: Record<string, string>;
@@ -2398,6 +2401,8 @@ export class ApiClient {
     }
     return res.json();
   }
+
+  static getCourseLaunchUrl(slug:string){return `${API_BASE_URL}/public/courses/${encodeURIComponent(slug)}/launch`;}
 
   static async getCourses(
     filters: CourseFilters,

@@ -1,0 +1,35 @@
+
+ RUN  v4.1.11 /workspace/MANARATAK-First-
+
+ ❯ packages/application/tests/courses/Section13AdmissionRecipientAndEligibility.spec.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/application/tests/courses/Section13AdmissionRecipientAndEligibility.spec.ts [ packages/application/tests/courses/Section13AdmissionRecipientAndEligibility.spec.ts ]
+Error: Transform failed with 1 error:
+/workspace/MANARATAK-First-/packages/application/src/courses/use-cases/CourseAdmissionUseCases.ts:5:135: ERROR: Unexpected "{"
+  Plugin: vite:esbuild
+  File: /workspace/MANARATAK-First-/packages/application/src/courses/use-cases/CourseAdmissionUseCases.ts:5:135
+  
+  Unexpected "{"
+  3  |  export interface CourseAdmissionGateway {
+  4  |   list(courseId:string,page:number):Promise<unknown>;
+  5  |   decide(courseId:string,enrollmentId:string,input:Parameters<CourseAdmissionGateway['decide']>[2],context:AtomicMutationRequestContext){
+     |                                                                                                                                         ^
+  6  |    if(!context.actorId||input.reason.trim().length<3)throw new Error('COURSE_ADMISSION_REVIEW_REQUIRED');
+  7  |    const payload:Record<string,unknown>={courseId,enrollmentId,courseVersion:input.expectedVersion};
+  
+ ❯ failureErrorWithLog node_modules/esbuild/lib/main.js:1467:15
+ ❯ node_modules/esbuild/lib/main.js:736:50
+ ❯ responseCallbacks.<computed> node_modules/esbuild/lib/main.js:603:9
+ ❯ handleIncomingPacket node_modules/esbuild/lib/main.js:658:12
+ ❯ Socket.readFromStdout node_modules/esbuild/lib/main.js:581:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  14:08:39
+   Duration  206ms (transform 39ms, setup 0ms, import 0ms, tests 0ms, environment 0ms)
+

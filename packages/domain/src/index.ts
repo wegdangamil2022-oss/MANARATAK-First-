@@ -432,3 +432,5 @@ export * from './student-support/ISupportCaseRepository';
 
 export * from './identity/StaffLifecycle';
 export * from './admin-catalog-filters';
+export * from './courses/CourseSourceTrust';
+export * from './study-destinations/StudyDestinationRevision';

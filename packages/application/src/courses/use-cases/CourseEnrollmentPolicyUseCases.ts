@@ -18,6 +18,7 @@ export class CourseEnrollmentPolicyUseCases {
 
   public async configure(input: UpsertCourseEnrollmentPolicyDto): Promise<CourseEnrollmentPolicyDto> {
     await this.requireCourse(input.courseId);
+    if(input.eligibilityRules&&Object.keys(input.eligibilityRules).length)throw new Error('COURSE_ENROLLMENT_ELIGIBILITY_EVALUATOR_REQUIRED');
     const owner = await this.courseRepository.findById(input.courseId);
     if (owner && ['PUBLISHED','ARCHIVED','REJECTED'].includes(owner.status)) throw new Error('COURSE_ENROLLMENT_POLICY_IMMUTABLE');
     for (const id of input.prerequisiteCourseIds ?? []) {

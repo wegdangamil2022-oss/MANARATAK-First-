@@ -1,0 +1,6 @@
+apps/admin/src/pages/courseEditorState.ts 106ms
+apps/admin/src/pages/useCourseNavigationGuard.ts 9ms
+apps/admin/src/components/CourseProviderBacklogPanel.tsx 35ms
+apps/api/src/presentation/api/router/CourseMetadataUpdateContract.ts 16ms
+packages/application/src/courses/use-cases/CourseProviderBacklogUseCases.ts 23ms
+packages/infrastructure/src/courses/PrismaCourseProviderBacklogStore.ts 28ms

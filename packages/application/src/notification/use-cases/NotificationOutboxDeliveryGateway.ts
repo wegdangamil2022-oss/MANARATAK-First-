@@ -56,7 +56,7 @@ export class NotificationOutboxDeliveryGateway implements IOutboxDeliveryGateway
     };
     if (
       entry.domain === 'COURSES' &&
-      ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted'].includes(entry.eventType)
+      ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted','CourseEnrollmentRequested','CourseAdmissionApproved','CourseAdmissionRejected'].includes(entry.eventType)
     ) {
       const studentReferenceId = this.required(
         payload.studentReferenceId,

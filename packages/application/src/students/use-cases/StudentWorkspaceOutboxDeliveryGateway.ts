@@ -272,7 +272,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
       return this.event(entry, studentReferenceId, entry.eventType, 'تم تحديث حالة الشهادة', metadata, certificateId);
     }
 
-    if (entry.domain === 'COURSES' && ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted'].includes(entry.eventType)) {
+    if (entry.domain === 'COURSES' && ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted','CourseEnrollmentRequested','CourseAdmissionApproved','CourseAdmissionRejected'].includes(entry.eventType)) {
       if (entry.metadata?.eventVersion !== '1.0.0' ||
           !['COURSE_ENROLLMENT','COURSE_COMPLETION'].includes(entry.aggregate?.aggregateType ?? '') ||
           ![payload.enrollmentId, `${payload.courseId}:${payload.studentReferenceId}`].includes(entry.aggregate?.aggregateId))
@@ -290,7 +290,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
         courseVersion: payload.courseVersion,
         eventVersion: entry.metadata.eventVersion ?? entry.metadata.schemaVersion ?? '1.0.0',
       };
-      const title = entry.eventType === 'CourseEnrolled' ? 'تم التسجيل في الدورة' : entry.eventType === 'CourseCompleted' ? 'تم إكمال الدورة' : 'تم تحديث تقدم الدورة';
+      const title = entry.eventType==='CourseEnrollmentRequested'?'طلب تسجيل بانتظار القبول':entry.eventType==='CourseAdmissionApproved'?'تم قبول التسجيل في الدورة':entry.eventType==='CourseAdmissionRejected'?'تم رفض طلب التسجيل في الدورة':entry.eventType === 'CourseEnrolled' ? 'تم التسجيل في الدورة' : entry.eventType === 'CourseCompleted' ? 'تم إكمال الدورة' : 'تم تحديث تقدم الدورة';
       return this.event(entry, studentReferenceId, entry.eventType, title, metadata, String(payload.enrollmentId ?? payload.completionId ?? courseId));
     }
     return null;

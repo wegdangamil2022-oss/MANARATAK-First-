@@ -38,6 +38,8 @@ export function OwnerCourseDetail({
     }
   };
 
+  if(!verified||course.id!==initialCourse.id)return <section><button onClick={onBack}>{t('course13_extra_0')}</button><p role={unavailable?'alert':'status'}>{unavailable?t('course13_extra_1'):t('course13_extra_2')}</p></section>;
+
   return (
     <div
       className="w-full max-w-md mx-auto pt-0 pb-12 text-start font-['Cairo',sans-serif] animate-in fade-in duration-200 bg-[var(--mn-surface-muted)] min-h-screen mn-panel"

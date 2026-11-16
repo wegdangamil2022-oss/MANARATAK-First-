@@ -1,0 +1,32 @@
+[
+  {
+    "method": "PATCH",
+    "path": "/admin/courses/learning-paths/:pathId",
+    "classification": "CRITICAL_AUDIT_REQUIRED"
+  },
+  {
+    "method": "POST",
+    "path": "/admin/study-destinations/:iso2Code/archive",
+    "classification": "CRITICAL_AUDIT_REQUIRED"
+  },
+  {
+    "method": "PUT",
+    "path": "/admin/study-destinations/:iso2Code/profile",
+    "classification": "CRITICAL_AUDIT_REQUIRED"
+  },
+  {
+    "method": "POST",
+    "path": "/admin/study-destinations/:iso2Code/publish",
+    "classification": "CRITICAL_AUDIT_REQUIRED"
+  },
+  {
+    "method": "POST",
+    "path": "/admin/study-destinations/:iso2Code/submit-review",
+    "classification": "CRITICAL_AUDIT_REQUIRED"
+  },
+  {
+    "method": "POST",
+    "path": "/admin/study-destinations/:iso2Code/verify-source",
+    "classification": "CRITICAL_AUDIT_REQUIRED"
+  }
+]

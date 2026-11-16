@@ -96,6 +96,8 @@ export interface UpdateCourseDto {
 }
 
 export interface ICourseRepository {
+  isPubliclyEligible?(id:string):Promise<boolean>;
+  stampVersionActor?(id:string,version:number,actorId:string):Promise<void>;
   assertCurrentVersion?(id: string, expectedVersion: number): Promise<void>;
   lockPublicationReferences?(id: string): Promise<void>;
   create(data: CreateCourseDto): Promise<CourseDto>;

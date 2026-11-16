@@ -31,6 +31,13 @@ import { CertificateVerificationPolicy, VaultTransitCertificateSignatureService,
 import { UniversityProgramWorkspaceUseCases } from '@manaratak/application';
 import { PrismaUniversityProgramWorkspaceGateway } from '@manaratak/infrastructure';
 import { UniversityProgramWorkspaceRouter } from '../../presentation/api/router/UniversityProgramWorkspaceRouter.js';
+import {CourseAdmissionRouter} from '../../presentation/api/router/CourseAdmissionRouter';
+import {CourseAdmissionUseCases} from '@manaratak/application';
+import {PrismaCourseAdmissionGateway} from '@manaratak/infrastructure';
+import {StudyDestinationPublicEnrichment} from '@manaratak/application';
+import { CourseSourceReviewRouter } from '../../presentation/api/router/CourseSourceReviewRouter';
+import { CourseSourceReviewUseCases } from '@manaratak/application';
+import { PrismaCourseSourceReviewGateway } from '@manaratak/infrastructure';
 import { SettingsGovernanceUseCases } from '@manaratak/application';
 import { PrismaSettingsGovernanceGateway } from '@manaratak/infrastructure';
 import { GovernanceApprovalUseCases } from '@manaratak/application';
@@ -1355,6 +1362,12 @@ export function registerDependencies(
     majorAdminRouter: asFunction((cradle) => MajorAdminRouter.create(cradle)).scoped(),
     majorPublicRouter: asFunction((cradle) => MajorPublicRouter.create(cradle)).singleton(),
     courseAccessService: asFunction(({authEvaluatorService,courseRepository,roleAssignmentRepository,roleRepository,policyRepository}) => new CourseAccessService(authEvaluatorService,courseRepository,roleAssignmentRepository,roleRepository,policyRepository)).scoped(),
+    courseAdmissionGateway: asFunction(({prisma,courseFinancialClearanceGateway})=>new PrismaCourseAdmissionGateway(prisma,courseFinancialClearanceGateway)).scoped(),
+    courseAdmissionUseCases: asFunction(({courseAdmissionGateway,atomicDomainMutationCoordinator})=>new CourseAdmissionUseCases(courseAdmissionGateway,atomicDomainMutationCoordinator)).scoped(),
+    courseAdmissionRouter: asFunction(cradle=>CourseAdmissionRouter.create(cradle)).singleton(),
+    courseSourceReviewGateway: asFunction(({prisma})=>new PrismaCourseSourceReviewGateway(prisma)).scoped(),
+    courseSourceReviewUseCases: asFunction(({courseSourceReviewGateway,atomicDomainMutationCoordinator})=>new CourseSourceReviewUseCases(courseSourceReviewGateway,atomicDomainMutationCoordinator)).scoped(),
+    courseSourceReviewRouter: asFunction(cradle=>CourseSourceReviewRouter.create(cradle)).singleton(),
     courseAdminRouter: asFunction((cradle) => CourseAdminRouter.create(cradle)).singleton(),
     courseLearnerRouter: asFunction((cradle) => CourseLearnerRouter.create(cradle)).singleton(),
     importedCourseAdminRouter: asFunction((cradle) => ImportedCourseAdminRouter.create(cradle)).singleton(),

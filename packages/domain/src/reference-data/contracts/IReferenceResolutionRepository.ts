@@ -28,6 +28,7 @@ export interface IReferenceResolutionRepository {
     currencies: ReferenceCurrencyDto[];
     cities: ReferenceCityDto[];
   }>;
+  resolveActiveStudyReferences?(ids:{countryIds:string[];languageIds:string[];currencyIds:string[]}):Promise<{countries:ReferenceCountryDto[];languages:ReferenceLanguageDto[];currencies:ReferenceCurrencyDto[]}>;
   resolveCountryCandidate(lookup: ReferenceLookup): Promise<ReferenceResolutionMatch<ReferenceCountryDto> | null>;
   resolveRegionCandidate(lookup: ReferenceLookup): Promise<ReferenceResolutionMatch<AdministrativeRegionDto> | null>;
   resolveCityCandidate(lookup: ReferenceLookup): Promise<ReferenceResolutionMatch<ReferenceCityDto> | null>;

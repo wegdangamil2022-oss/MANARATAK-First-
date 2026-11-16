@@ -663,6 +663,7 @@
         "studentServiceRequestUseCases",
         "studentToolRegistryUseCases",
         "studentWorkspaceUseCases",
+        "studyDestinationPublicEnrichment",
         "studyDestinationUseCases"
       ],
       "dependencies": [
@@ -784,6 +785,7 @@
         "courseImportCoordinator",
         "courseProgressUseCases",
         "coursePublicationService",
+        "courseSourceReviewUseCases",
         "degreeLevelUseCases",
         "governanceApprovalUseCases",
         "importGovernanceUseCases",
@@ -1942,6 +1944,7 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
+        "courseAdmissionGateway",
         "courseProgressUseCases"
       ],
       "dependencies": [
@@ -2182,6 +2185,38 @@
       ],
       "dependencies": [
         "prisma"
+      ]
+    },
+    {
+      "name": "courseSourceReviewGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "courseSourceReviewUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "courseSourceReviewRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "courseSourceReviewUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/CourseSourceReviewRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "atomicDomainMutationCoordinator",
+        "courseSourceReviewGateway"
       ]
     },
     {
@@ -3961,6 +3996,7 @@
         "courseProgressRepository",
         "courseRelationshipRepository",
         "courseRepository",
+        "courseSourceReviewGateway",
         "credentialVerifier",
         "degreeLevelRepository",
         "emailVerificationTokenRepository",
@@ -4273,6 +4309,7 @@
         "crossModuleIntegrityUseCase",
         "referenceDataUseCases",
         "referenceResolver",
+        "studyDestinationPublicEnrichment",
         "studyDestinationUseCases"
       ],
       "dependencies": [
@@ -5816,6 +5853,19 @@
       "dependencies": []
     },
     {
+      "name": "studyDestinationPublicEnrichment",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "studyDestinationUseCases"
+      ],
+      "dependencies": [
+        "assetReferencePolicy",
+        "processAssetLifecycleUseCase",
+        "referenceDataRepository"
+      ]
+    },
+    {
       "name": "studyDestinationPublicRouter",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -5848,6 +5898,7 @@
         "atomicDomainMutationCoordinator",
         "processAssetLifecycleUseCase",
         "referenceDataRepository",
+        "studyDestinationPublicEnrichment",
         "studyDestinationRepository"
       ]
     },

@@ -306,7 +306,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
     if (dataMode === 'api') return serverResult?.data ?? [];
     return countries.filter((c) => {
       const matchesSearch =
-        !searchQuery ||
+        dataMode==='api' || !searchQuery ||
         c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.continent.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -316,7 +316,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
       const matchesContinent = selectedContinent === 'الكل' || c.continent === selectedContinent;
       const matchesCountry = selectedCountryId === 'الكل' || (c.ownerId || c.id) === selectedCountryId;
 
-      return matchesSearch && matchesContinent && matchesCountry;
+      return dataMode==='api'||(matchesSearch && matchesContinent && matchesCountry);
     });
   }, [countries, searchQuery, selectedContinent, selectedCountryId, dataMode, serverResult]);
 
@@ -428,6 +428,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
       className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel "
       dir={publicDir}
     >
+      {dataMode==='api'&&<nav className="flex gap-3 p-3" aria-label="Destination pages"><button disabled={loadingPage||page<=1} onClick={()=>setPage(page-1)}>{language==='ar'?'السابق':'Previous'}</button><span>{page}/{Math.max(1,totalPages)}</span><button disabled={loadingPage||page>=totalPages} onClick={()=>setPage(page+1)}>{language==='ar'?'التالي':'Next'}</button>{loadingPage&&<span>{language==='ar'?'تحميل…':'Loading…'}</span>}{loadError&&<p role="alert">{loadError}</p>}</nav>}
       {/* ========================================================================= */}
       {/* HERO EMERALD BANNER - COMPACT ROYAL DESIGN                                */}
       {/* ========================================================================= */}

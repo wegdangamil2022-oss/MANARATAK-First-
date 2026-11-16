@@ -28,7 +28,7 @@ export class StudentWorkspaceOutboxWorker {
   }
 
   public async runLearningOnce(workerId: string): Promise<OutboxDispatchResult> {
-    return this.run(workerId, 'COURSES', ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted']);
+    return this.run(workerId, 'COURSES', ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted','CourseEnrollmentRequested','CourseAdmissionApproved','CourseAdmissionRejected']);
   }
 
   /** Lifecycle events only: certificate render jobs remain owned by the P14 artifact worker. */

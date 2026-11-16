@@ -120,7 +120,9 @@ export class ImportedCourseAdminUseCases {
   }
 
   public async verifySource(id: string): Promise<{
-    verified: boolean;
+    verified: false;
+    preflightPassed: true;
+    verificationState: 'NOT_RECORDED';
     reason: string;
     providerId: string;
     providerName: string;
@@ -139,8 +141,10 @@ export class ImportedCourseAdminUseCases {
     if (!approved) throw new Error('IMPORTED_COURSE_SOURCE_DOMAIN_NOT_APPROVED');
 
     return {
-      verified: true,
-      reason: 'APPROVED_PROVIDER_AND_DOMAIN',
+      verified: false,
+      preflightPassed: true,
+      verificationState: 'NOT_RECORDED',
+      reason: 'PREFLIGHT_APPROVED_PROVIDER_AND_DOMAIN_ONLY',
       providerId: provider.id,
       providerName: provider.displayName,
     };

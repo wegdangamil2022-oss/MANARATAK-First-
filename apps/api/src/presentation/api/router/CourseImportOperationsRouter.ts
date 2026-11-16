@@ -1,3 +1,5 @@
+import {courseAdminErrorResponse} from './CourseAdminErrorPolicy';
+import {requireAuthenticatedPrincipal} from '../../security/AuthenticatedPrincipal';
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -81,7 +83,8 @@ export class CourseImportOperationsRouter {
     }).strict();
 
     const linkHealthJobSchema = z.object({
-      page: z.number().int().min(1).optional(),
+      maxAttempts:z.number().int().min(1).max(10).optional(),
+      page: z.literal(1).optional(),
       limit: z.number().int().min(1).max(10).optional(),
       delayMs: z.number().int().min(750).max(10000).optional(),
     }).strict();
@@ -101,7 +104,9 @@ export class CourseImportOperationsRouter {
 
     router.get('/providers/:id/changed-links', asyncHandler(async (req, res) => {
       const limit = Math.min(100, Math.max(1, Number.parseInt(String(req.query.limit ?? '100'), 10) || 100));
-      res.json(await providerContinuationUseCases.getChangedLinkQueue(req.params.id, limit));
+      const cursor=z.string().max(1000).optional().parse(req.query.cursor);
+      res.set('Cache-Control','no-store');
+      res.json(await providerContinuationUseCases.getChangedLinkQueue(req.params.id, limit,cursor));
     }));
 
     router.post('/providers/:id/source-health/approve', asyncHandler(async (req, res) => {
@@ -130,6 +135,8 @@ export class CourseImportOperationsRouter {
       const result = await providerContinuationUseCases.stageProviderFile(req.params.id, payload);
       res.status(result.duplicateArtifact ? 200 : 201).json(result);
     }));
+
+    router.post('/providers/:id/link-health/dead-letter/:workId/retry',asyncHandler(async(req,res)=>{const body=z.object({reason:z.string().trim().min(3).max(2000)}).strict().parse(req.body);const provider=await externalCourseProviderRepository.findById(req.params.id);if(!provider)throw new Error('COURSE_PROVIDER_NOT_FOUND');if(!importedCourseOperationsRepository.providerBacklog)throw new Error('COURSE_PROVIDER_BACKLOG_NOT_CONFIGURED');await importedCourseOperationsRepository.providerBacklog.requeue(provider.id,req.params.workId,requireAuthenticatedPrincipal(req).principalId,body.reason);res.json({success:true});}));
 
     router.post('/providers/:id/link-health/jobs', asyncHandler(async (req, res) => {
       const payload = linkHealthJobSchema.parse(req.body ?? {});
@@ -218,8 +225,11 @@ export class CourseImportOperationsRouter {
         return res.status(409).json({ error: err.message, driftAlert: err.alert });
       }
       const message = err instanceof Error ? err.message : 'COURSE_IMPORT_OPERATION_FAILED';
+      if(/^(COURSE|IMPORTED_COURSE)_/.test(message)){const mapped=courseAdminErrorResponse(err);return res.status(mapped.status).json({error:mapped.error});}
+      const safeCode=/^IMPORT_[A-Z0-9_]+/.exec(message)?.[0];
+      if(!safeCode)return res.status(500).json({error:'COURSE_IMPORT_OPERATION_FAILED'});
       if (message === 'IMPORT_REVIEW_LEASE_REQUIRED') return res.status(409).json({ error: message, code: message, retryable: false });
-      if (message.includes('NOT_FOUND')) return res.status(404).json({ error: message });
+      if (message.includes('NOT_FOUND')) return res.status(404).json({ error: safeCode });
       if (
         message.includes('BLOCKED') ||
         message.includes('REQUIRED') ||
@@ -231,9 +241,9 @@ export class CourseImportOperationsRouter {
         message.includes('NOT_REGISTERED') ||
         message.includes('MISMATCH')
       ) {
-        return res.status(409).json({ error: message });
+        return res.status(409).json({ error: safeCode });
       }
-      return res.status(400).json({ error: message });
+      return res.status(400).json({ error: safeCode });
     });
 
     return router;

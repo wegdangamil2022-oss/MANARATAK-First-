@@ -1,3 +1,5 @@
+import { queryStableCursorPage } from '../api-foundation/StableCursor';
+import { coursePublicTrustPredicate } from './CoursePublicTrustPredicate';
 import { currentPublicCourseEligibility } from './CoursePublicEligibility';
 import { nativeCourseLearningReport } from './CourseNativeLearningReport';
 import { courseCatalogOrder, courseCatalogWhere, courseLinkHealthWhere } from './CourseCatalogQuery';
@@ -115,7 +117,6 @@ function parseCompleteness(value: string): CourseImportCompletenessState {
   }
 }
 
-import { queryStableCursorPage } from '../api-foundation/StableCursor';
 
 const RESERVED_OPTIONAL_FIELD_KEYS = new Set([
   'id',
@@ -416,6 +417,14 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
     return record ? this.mapToDto(record) : null;
   }
 
+  public async stampVersionActor(id:string,version:number,actorId:string):Promise<void> {
+    if(!this.transactionBound)throw new Error('COURSE_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    await this.prisma.courseVersion.updateMany({where:{courseId:id,versionNumber:version,createdBy:null},data:{createdBy:actorId}});
+  }
+  public async isPubliclyEligible(id:string):Promise<boolean> {
+    const rows=await this.prisma.$queryRaw<Array<{id:string}>>(Prisma.sql`SELECT c.id FROM "Course" c WHERE c.id=${id} AND c.status='PUBLISHED' AND c."completenessStatus"='COMPLETE' AND ${coursePublicTrustPredicate()} LIMIT 1`);
+    return rows.length===1;
+  }
   public async listPublished(filters: PublicCourseFilters): Promise<PaginatedCourseResult<CourseDto>> {
     if (!this.transactionBound) return this.prisma.$transaction(
       tx => new PrismaCourseRepository(tx as unknown as PrismaClient, true).listPublished(filters),

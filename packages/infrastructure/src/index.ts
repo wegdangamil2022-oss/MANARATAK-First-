@@ -261,3 +261,5 @@ export * from './identity/PrismaStaffLifecycleRepository';
 
 export * from './assets/AssetOwnerChoices';
 export * from './admin-catalog-filters/PrismaAdminCatalogFilterReadPort';
+export * from './courses/PrismaCourseSourceReviewGateway';
+export * from './courses/PrismaCourseAdmissionGateway';

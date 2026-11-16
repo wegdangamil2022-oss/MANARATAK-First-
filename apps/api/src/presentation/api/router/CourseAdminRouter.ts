@@ -1,3 +1,4 @@
+import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory.js';
 import type { CourseAccessService, CourseCertificateBindingOwner } from '@manaratak/application';
 import type { AuthorizationEvaluatorService } from '@manaratak/domain';
 import type {CourseAdminScope, CourseAdminContext, CourseAdminCommandUseCases} from '@manaratak/application';
@@ -75,7 +76,7 @@ export class CourseAdminRouter {
             await fn(req,buffered,cradle);
             const current=await cradle.adminCourseUseCases.getCourse(req.params.id);
             res.setHeader('X-Entity-Version',String(current.version));
-            res.json(body);
+            res.json(body&&typeof body==='object'?{...body,_owner:{version:current.version,status:current.status,updatedAt:current.updatedAt,readiness:current.originType==='NATIVE_MANARATAK_COURSE'?await cradle.nativeCourseUseCases.getReadiness(current.id):null}}:body);
             return;
           }
           const kind=req.route.path.startsWith('/learning-paths')?'LEARNING_PATH':'COURSE';
@@ -95,7 +96,7 @@ export class CourseAdminRouter {
           const result=await cradle.courseAdminCommandUseCases.execute(kind,id,commandName,context,
             async scope=>{await fn(req,buffered,scope);return responseBody;});
           if(result.version!==undefined) res.setHeader('X-Entity-Version',String(result.version));
-          if(responseState.kind==='send') res.send(responseBody);else res.json(responseBody);
+          if(responseState.kind==='send') res.send(responseBody);else res.json(responseBody && typeof responseBody==='object' && !Array.isArray(responseBody)?{...responseBody,_owner:result.ownerState}:responseBody);
         };
         run().catch(next);
       };
@@ -270,6 +271,7 @@ export class CourseAdminRouter {
     }));
 
     const updateBodySchema = z.object({
+      withdrawalAccessPolicy: z.enum(['HONOR_ENROLLED_VERSION', 'REVOKE']).optional(),
       displayName: z.string().optional(),
       accessType: z.nativeEnum(CourseAccessType).optional(),
       originType: z.nativeEnum(CourseOriginType).optional(),
@@ -364,7 +366,7 @@ export class CourseAdminRouter {
     const nativeCreateBodySchema = z.object({
       titleAr: z.string().trim().min(2),
       accessType: z.nativeEnum(CourseAccessType).optional(),
-      titleEn: z.string().trim().optional(),
+      titleEn: z.never().optional(),
       learningLanguage: z.string().trim().optional(),
       category: z.string().trim().optional(),
       difficultyLevel: z.string().trim().optional(),
@@ -460,11 +462,11 @@ export class CourseAdminRouter {
       const {learningPathUseCases}=scope;
       res.json(await learningPathUseCases.markReadyToPublish(req.params.pathId));
     }));
-    router.post('/learning-paths/:pathId/publish', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+    router.post('/learning-paths/:pathId/publish', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:publish'), asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {learningPathUseCases}=scope;
       res.json(await learningPathUseCases.publish(req.params.pathId));
     }));
-    router.post('/learning-paths/:pathId/archive', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+    router.post('/learning-paths/:pathId/archive', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:publish'), asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {learningPathUseCases}=scope;
       res.json(await learningPathUseCases.archive(req.params.pathId));
     }));
@@ -815,9 +817,9 @@ export class CourseAdminRouter {
       const updates = updateBodySchema.parse(req.body);
 
       const optionalFields: Record<string, unknown> = {};
+      if(updates.withdrawalAccessPolicy!==undefined)optionalFields.withdrawalAccessPolicy=updates.withdrawalAccessPolicy;
       if (updates.courseContent !== undefined) optionalFields.courseContent = updates.courseContent;
       if (updates.description !== undefined) optionalFields.description = updates.description;
-      if (updates.titleEn !== undefined) optionalFields.titleEn = updates.titleEn;
       if (updates.instructor !== undefined) optionalFields.instructor = updates.instructor;
       if (updates.prerequisites !== undefined) optionalFields.prerequisites = updates.prerequisites;
       if (updates.targetAudience !== undefined) optionalFields.targetAudience = updates.targetAudience;
@@ -826,7 +828,6 @@ export class CourseAdminRouter {
       if (updates.completionCriteria !== undefined) optionalFields.completionCriteria = updates.completionCriteria;
       if (updates.relatedMajorsOrFields !== undefined) optionalFields.relatedMajorsOrFields = updates.relatedMajorsOrFields;
       if (updates.acquiredSkills !== undefined) optionalFields.acquiredSkills = updates.acquiredSkills;
-      if (updates.localizedNames !== undefined) optionalFields.localizedNames = updates.localizedNames;
       if (updates.metadata !== undefined) optionalFields.metadata = updates.metadata;
 
       const dataToUpdate: UpdateCourseDto = {
@@ -862,7 +863,7 @@ export class CourseAdminRouter {
       res.status(200).json({ success: true });
     }));
 
-    router.post('/:id/mark-publishable', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+    router.post('/:id/mark-publishable', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:review'), asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {adminCourseUseCases, nativeCourseUseCases}=scope;
       const course = await adminCourseUseCases.getCourse(req.params.id);
       if (course.originType === CourseOriginType.NATIVE_MANARATAK_COURSE) await nativeCourseUseCases.markReadyToPublish(req.params.id);
@@ -870,7 +871,7 @@ export class CourseAdminRouter {
       res.status(200).json({ success: true });
     }));
 
-    router.post('/:id/publish', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+    router.post('/:id/publish', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:publish'), asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {adminCourseUseCases, nativeCourseUseCases}=scope;
       const course = await adminCourseUseCases.getCourse(req.params.id);
       if (course.originType === CourseOriginType.NATIVE_MANARATAK_COURSE) await nativeCourseUseCases.publish(req.params.id, mutationContext(req));
@@ -878,19 +879,19 @@ export class CourseAdminRouter {
       res.status(200).json({ success: true });
     }));
 
-    router.post('/:id/unpublish', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+    router.post('/:id/unpublish', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:publish'), asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {adminCourseUseCases}=scope;
       await adminCourseUseCases.unpublish(req.params.id);
       res.status(200).json({ success: true });
     }));
 
-    router.post('/:id/reject', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+    router.post('/:id/reject', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:review'), asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {adminCourseUseCases}=scope;
       await adminCourseUseCases.reject(req.params.id);
       res.status(200).json({ success: true });
     }));
 
-    router.post('/:id/archive', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+    router.post('/:id/archive', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:publish'), asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {adminCourseUseCases}=scope;
       await adminCourseUseCases.archive(req.params.id);
       res.status(200).json({ success: true });

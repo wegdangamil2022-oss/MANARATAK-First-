@@ -25,6 +25,7 @@ import { Course, ImportedCourse } from '../types';
 import { FavoriteButton } from './FavoriteButton';
 
 interface CoursesSearchPageProps {
+  dataMode?: 'api'|'prototype';
   courses?: Course[];
   onBack?: () => void;
   onSelectCourse?: (course: ImportedCourse) => void;
@@ -56,7 +57,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
   ]).filter(option => option.label).map(option => [option.value, option])).values()].sort((a, b) => a.label.localeCompare(b.label, 'ar'));
   const LANGUAGE_OPTIONS = distinct(importedCourses.map(c=>c.language));
   const LEVEL_OPTIONS = distinct(importedCourses.map(c=>c.level));
-  const CERTIFICATE_OPTIONS = distinct(importedCourses.map(c=>c.certificateType).concat('بدون شهادة مجانية'));
+  const CERTIFICATE_OPTIONS = distinct(importedCourses.map(c=>c.certificateType).concat('__NO_FREE_CERTIFICATE'));
 
   useEffect(() => {
     setSearchQuery(initialQuery);
@@ -87,6 +88,10 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
     (selectedPlatform !== 'all' ? 1 : 0) +
     advancedFiltersCount;
 
+  useEffect(()=>{if(dataMode==='prototype')setImportedCourses(initialImportedCourses);},[initialImportedCourses,dataMode]);
+  useEffect(()=>{setCursor(undefined);setHistory([]);},[searchQuery,selectedPlatform,selectedLanguage,selectedField]);
+  useEffect(()=>{if(dataMode!=='api')return;let active=true;setPageLoading(true);setPageError('');const timer=window.setTimeout(()=>{void ApiClient.getCourses({originType:'EXTERNAL_LINKED_COURSE',cursor,limit:24,search:searchQuery.trim()||undefined,platformName:selectedPlatform==='all'?undefined:selectedPlatform,learningLanguage:selectedLanguage==='all'?undefined:selectedLanguage,majorId:selectedField.startsWith('major:')?selectedField.slice(6):undefined}).then(result=>{if(active){setImportedCourses(result.data.flatMap(dto=>{const row=mapCourse(dto).imported;return row?[row]:[];}));setNextCursor(result.nextCursor??null);}}).catch(cause=>{if(active){setImportedCourses([]);setPageError(String(cause));}}).finally(()=>{if(active)setPageLoading(false);});},300);return()=>{active=false;window.clearTimeout(timer);};},[cursor,searchQuery,selectedPlatform,selectedLanguage,selectedField,dataMode]);
+
   const resetFilters = () => {
     setFreeCourseMode('all');
     setSelectedPlatform('all');
@@ -103,7 +108,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
     const query = searchQuery.trim().toLowerCase();
 
     return importedCourses.filter((course) => {
-      if (query) {
+      if (query && dataMode!=='api') {
         const searchable = [course.title, course.provider, course.platform, course.field, course.language, course.level, ...(course.relatedMajors ?? []).map(m=>m.name)]
           .join(' ')
           .toLowerCase();
@@ -119,7 +124,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
 
       if (selectedCertificate !== 'all') {
         const certificate = course.certificateType;
-        const matchesCertificate = selectedCertificate === 'بدون شهادة مجانية' ? !course.freeCertificate : certificate === selectedCertificate;
+        const matchesCertificate = selectedCertificate === '__NO_FREE_CERTIFICATE' ? !course.freeCertificate : certificate === selectedCertificate;
         if (!matchesCertificate) return false;
       }
 
@@ -127,6 +132,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
     });
   }, [
     importedCourses,
+    dataMode,
     searchQuery,
     freeCourseMode,
     selectedPlatform,
@@ -141,6 +147,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
       className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel "
       dir={publicDir}
     >
+      {dataMode==='api'&&<nav className="flex gap-3 p-3" aria-label="Course pages"><button disabled={pageLoading||!history.length} onClick={()=>{setCursor(history[history.length-1]);setHistory(history.slice(0,-1));}}>{t('course13_copy_191')}</button><span>{history.length+1}</span><button disabled={pageLoading||!nextCursor} onClick={()=>{setHistory([...history,cursor]);setCursor(nextCursor??undefined);}}>{t('course13_copy_192')}</button><span>{t('course13_copy_193')}</span>{pageError&&<p role="alert">{pageError}</p>}</nav>}
       {/* HERO — same visual language as Scholarships / Universities / Majors */}
       <div className="relative mn-search-hero text-white px-3 sm:px-4 pt-4 pb-12 sm:pb-14 overflow-hidden shadow-xs border-b border-[var(--mn-accent)]/20 mn-inverse ">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">

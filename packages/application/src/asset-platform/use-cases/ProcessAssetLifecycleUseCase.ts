@@ -292,6 +292,7 @@ export class ProcessAssetLifecycleUseCase {
         expiresAt > Math.min(deadline, this.deliveryDeadline(current)))
       throw new Error('ASSET_DELIVERY_GRANT_EXCEEDS_DEADLINE');
     return {
+      mimeType: record.metadata.mimeType,
       assetId: dto.assetId,
       url: grant.url,
       headers: grant.headers,

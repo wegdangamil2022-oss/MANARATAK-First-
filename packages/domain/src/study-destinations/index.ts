@@ -1,3 +1,5 @@
+import type {DestinationReviewPolicy,DestinationRevisionPage} from './StudyDestinationRevision';
+
 export enum StudyDestinationStatus {
   DRAFT = 'DRAFT',
   IN_REVIEW = 'IN_REVIEW',
@@ -59,6 +61,10 @@ export interface StudyDestinationCostHighlight {
   value: string;
 }
 
+export interface StudyDestinationSourceReviewProof {
+  actorId: string; reviewedAt: string; fingerprint: string; reason: string; approvedOrigins: string[];
+}
+
 export interface StudyDestinationAuthorityDecision {
   origin: string;
   authorityName: string;
@@ -109,6 +115,8 @@ export interface StudyDestinationProfileDto {
   revision: number;
   governance: StudyDestinationGovernance;
   cityReferenceIds: string[];
+  lastEditedBy?: string | null;
+  sourceReviewProof?: StudyDestinationSourceReviewProof | null;
   id: string;
   publicId: string;
   slug: string;
@@ -178,6 +186,7 @@ export interface StudyDestinationProfileInput {
 
 export interface StudyDestinationRepositoryCreateInput extends StudyDestinationProfileInput {
   governance?: StudyDestinationGovernance;
+  lastEditedBy?: string;
   publicId: string;
   slug: string;
   countryReferenceId: string;
@@ -187,6 +196,8 @@ export interface StudyDestinationRepositoryCreateInput extends StudyDestinationP
 
 export interface StudyDestinationRepositoryUpdateInput extends StudyDestinationProfileInput {
   governance?: StudyDestinationGovernance;
+  lastEditedBy?: string;
+  sourceReviewProof?: StudyDestinationSourceReviewProof | null;
   status?: StudyDestinationStatus;
   completenessStatus?: StudyDestinationCompletenessStatus;
   publishedAt?: string | null;
@@ -252,6 +263,12 @@ export interface IStudyDestinationRepository {
       profile: StudyDestinationProfileDto | null;
     }>
   >;
+  reviewPolicy?():Promise<DestinationReviewPolicy|null>;
+  saveReviewPolicy?(days:number|null,expectedUpdatedAt:string|null):Promise<DestinationReviewPolicy>;
+  appendRevision?(profileId:string,actorId:string,action:string,reason:string,diff:unknown,proof:unknown):Promise<void>;
+  revisionPage?(profileId:string,page:number):Promise<DestinationRevisionPage>;
+
+  findByCountryReferenceIds?(ids: string[]): Promise<StudyDestinationProfileDto[]>;
   findById(id: string): Promise<StudyDestinationProfileDto | null>;
   findBySlug(slug: string): Promise<StudyDestinationProfileDto | null>;
   findByCountryReferenceId(countryReferenceId: string): Promise<StudyDestinationProfileDto | null>;
@@ -336,7 +353,7 @@ export class StudyDestinationPublishingPolicy {
         key: 'admission-highlights',
         section: 'ACADEMICS',
         label: 'Admission highlights',
-        complete: nonEmpty(profile.admissionHighlightsAr),
+        complete: nonEmpty(profile.admissionHighlightsAr) && nonEmpty(profile.admissionHighlightsEn),
         blocking: true,
       },
       {
@@ -364,7 +381,7 @@ export class StudyDestinationPublishingPolicy {
         key: 'visa-requirements',
         section: 'VISA',
         label: 'Visa requirements',
-        complete: nonEmpty(profile.visaRequirementsAr),
+        complete: nonEmpty(profile.visaRequirementsAr) && nonEmpty(profile.visaRequirementsEn),
         blocking: true,
       },
       {

@@ -278,3 +278,6 @@ export * from './majors/use-cases/ReviewMajorSourceContextUseCase';
 export * from './majors/use-cases/ReviewMajorClassificationBatchUseCase';
 export * from './majors/services/ReviewedMajorTaxonomyResolver';
 export * from './academic-taxonomy/services/TaxonomyRevisionHash';
+export * from './courses/use-cases/CourseSourceReviewUseCases';
+export * from './study-destinations/StudyDestinationPublicEnrichment';
+export * from './courses/use-cases/CourseAdmissionUseCases';

@@ -4322,7 +4322,8 @@
       "owner": "ImportedCourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:courses:manage"
+        "admin:courses:manage",
+        "admin:courses:publish"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
@@ -4489,6 +4490,22 @@
       "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
     },
     {
+      "method": "PATCH",
+      "path": "/admin/courses/learning-paths/:pathId",
+      "owner": "CourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:courses:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+    },
+    {
       "method": "POST",
       "path": "/admin/courses/learning-paths/:pathId/archive",
       "owner": "CourseAdminRouter",
@@ -4561,6 +4578,22 @@
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
       "source": "apps/api/src/presentation/api/router/CourseProviderRegistryRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/courses/source-reviews/:id/approve",
+      "owner": "CourseSourceReviewRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:courses:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseSourceReviewRouter.ts"
     },
     {
       "method": "POST",
@@ -5377,6 +5410,22 @@
     {
       "method": "POST",
       "path": "/admin/imports/courses/providers/:id/files/preflight",
+      "owner": "CourseImportOperationsRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:imports:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseImportOperationsRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/imports/courses/providers/:id/link-health/dead-letter/:workId/retry",
       "owner": "CourseImportOperationsRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
@@ -9341,7 +9390,7 @@
       "method": "PUT",
       "path": "/admin/study-destinations/:iso2Code/profile",
       "owner": "StudyDestinationAdminRouter",
-      "classification": "STANDARD_AUDIT_REQUIRED",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
         "admin:study-destinations:edit"
       ],
@@ -9391,7 +9440,7 @@
       "method": "POST",
       "path": "/admin/study-destinations/:iso2Code/submit-review",
       "owner": "StudyDestinationAdminRouter",
-      "classification": "STANDARD_AUDIT_REQUIRED",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
         "admin:study-destinations:edit"
       ],
@@ -9416,7 +9465,7 @@
       "method": "POST",
       "path": "/admin/study-destinations/:iso2Code/verify-source",
       "owner": "StudyDestinationAdminRouter",
-      "classification": "STANDARD_AUDIT_REQUIRED",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
         "admin:study-destinations:verify"
       ],

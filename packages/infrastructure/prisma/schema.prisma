@@ -383,6 +383,7 @@ model Course {
 
   externalProvider           ExternalCourseProvider?        @relation(fields: [externalProviderId], references: [id], onDelete: SetNull)
   learningLanguageReference  ReferenceLanguage?             @relation("CourseLearningLanguageReference", fields: [learningLanguageReferenceId], references: [id], onDelete: SetNull)
+  sourceApprovals            CourseSourceApproval[]
   sourceIdentities           CourseSourceIdentity[]
   importAnalyses             CourseImportAnalysis[]
   fieldProvenance            CourseFieldProvenance[]
@@ -4163,6 +4164,9 @@ model StudyDestinationProfile {
   revision                         Int      @default(1)
   governance                       Json     @default("{}")
   cityReferenceIds                 Json     @default("[]")
+  lastEditedBy                     String?
+  sourceReviewProof                 Json?
+  revisions                         StudyDestinationRevision[]
   id                               String   @id @default(uuid())
   publicId                         String   @unique
   slug                             String   @unique
@@ -6639,4 +6643,66 @@ model StaffGrantSourceRecord {
  membership StaffMembershipRecord @relation(fields:[membershipId],references:[id],onDelete:Restrict,onUpdate:NoAction)
  identity IdentityRecord @relation(fields:[identityId],references:[id],onDelete:Restrict,onUpdate:NoAction)
  @@index([membershipId,revokedAt],map:"StaffGrant_membership_idx")
+}
+
+model CourseSourceApproval {
+ id String @id @default(uuid())
+ courseId String
+ courseVersion Int
+ providerId String
+ providerRevision DateTime
+ reviewedBy String
+ reviewedAt DateTime @default(now())
+ reason String
+ facts Json
+ factsHash String
+ evidenceUrls Json
+ course Course @relation(fields: [courseId], references: [id], onDelete: Restrict)
+ @@index([courseId, courseVersion, reviewedAt])
+}
+
+model StudyDestinationRevision {
+ id String @id @default(uuid())
+ profileId String
+ actorId String
+ action String
+ reason String
+ diff Json
+ proof Json?
+ createdAt DateTime @default(now())
+ profile StudyDestinationProfile @relation(fields:[profileId],references:[id],onDelete:Restrict)
+ @@index([profileId,createdAt,id])
+}
+model StudyDestinationReviewPolicy {
+ id String @id
+ maxEvidenceAgeDays Int?
+ updatedAt DateTime @updatedAt
+}
+
+
+// Section 13: real scan checkpoint and bounded retry/dead-letter observations; no backfill.
+model CourseProviderHealthCheckpoint {
+  providerId String @id
+  cursor String?
+  cycle Int @default(0)
+  scanned Int @default(0)
+  leaseToken String?
+  leaseExpiresAt DateTime?
+  completedAt DateTime?
+  updatedAt DateTime @updatedAt
+}
+model CourseProviderHealthRetry {
+  id String @id @default(uuid())
+  providerId String
+  courseId String
+  url String
+  urlHash String
+  attempts Int @default(0)
+  state String
+  nextAttemptAt DateTime?
+  reviewedBy String?
+  reviewReason String?
+  updatedAt DateTime @updatedAt
+  @@unique([providerId,courseId,urlHash])
+  @@index([providerId,state,nextAttemptAt,id])
 }
