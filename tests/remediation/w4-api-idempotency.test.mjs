@@ -30,7 +30,7 @@ test('principal-scoped command identity covers admin, control-plane and student 
   const workspace = read('apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts');
   const learner = read('apps/api/src/presentation/api/router/CourseLearnerRouter.ts');
   const adminMount = adminIdempotencyMount(app);
-  assert.match(adminMount, /createCanonicalIdempotencyMiddleware\(\{ store: apiIdempotencyStore, requireKey: true \}\)/);
+  assert.match(adminMount, /createCanonicalIdempotencyMiddleware\(\{ store: apiIdempotencyStore, requireKey: true, replayAuthorization: container\.resolve\('authEvaluatorService'\) \}\)/);
   assert.match(app, /protectControlPlane[\s\S]*createCanonicalIdempotencyMiddleware/);
   assert.match(workspace, /AuthMiddleware[\s\S]*createCanonicalIdempotencyMiddleware/);
   assert.match(learner, /AuthMiddleware[\s\S]*createCanonicalIdempotencyMiddleware/);
@@ -61,6 +61,7 @@ test('only exact student-tool test routes bypass generic plaintext replay custod
     compilerOptions: { target: ts.ScriptTarget.ES2022 },
   }).outputText, {
     apiIdempotencyStore: store,
+    container: {resolve:()=>({})},
     requireAdminPermission(permission) {
       assert.equal(permission, 'admin:settings:manage');
       return (_req, _res, next) => next();
@@ -74,6 +75,7 @@ test('only exact student-tool test routes bypass generic plaintext replay custod
   for (const [path, usesCanonical] of [
     ['/student-tools/gpa/test', false],
     ['/student-tools/gpa/test/', false],
+    ['/STUDENT-TOOLS/gpa/TEST/', false],
     ['/student-tools/gpa', true],
     ['/student-tools/gpa/release', true],
     ['/student-tools/gpa/test/extra', true],

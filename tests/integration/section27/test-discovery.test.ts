@@ -1,5 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import express from 'express';
+import request from 'supertest';
 import { TestDiscoveryOwnerUseCases } from '../../../packages/application/src/integration/TestDiscoveryOwnerUseCases';
 import {
   StudentToolTestDiscoveryOwnerGateway,
@@ -264,35 +266,25 @@ test('test-discovery persistence: failed CAS cannot write approval or its audit 
 });
 test('test-discovery API: uppercase or trailing-slash approval cannot bypass reviewer permission', async () => {
   let permission = '';
+  let reviewed = false;
   const router = testDiscoveryOwnerRouter(
-    {} as any,
+    { review: async () => { reviewed = true; } } as any,
     {
       evaluatePermission: async (_id: string, p: string) => {
         permission = p;
-        return { isGranted: false };
+        return { isGranted: p === 'propose' };
       },
     } as any,
     { view: 'view', propose: 'propose', review: 'review' },
   );
-  for (const path of ['/test/approve', '/test/approve/', '/test/APPROVE/']) {
-    let status = 0;
-    const res = {
-      setHeader: () => {},
-      status: (code: number) => {
-        status = code;
-        return res;
-      },
-      json: () => {},
-    };
-    await (router as any).stack[0].handle(
-      { authUserId: 'admin', method: 'POST', path, ip: '127.0.0.1' },
-      res,
-      () => {
-        throw new Error('permission bypass');
-      },
-    );
+  const app = express();
+  app.use(express.json());
+  app.use((req, _res, next) => { req.authUserId = 'admin'; next(); });
+  app.use('/:ownerKey/test-discovery', router);
+  for (const path of ['/test/approve', '/test/approve/', '/test/APPROVE/', '/test/revoke', '/test/REVOKE/']) {
+    await request(app).post('/owner/test-discovery' + path).send({ expectedVersion: 1, reason: 'Reviewed' }).expect(403);
     assert.equal(permission, 'review');
-    assert.equal(status, 403);
+    assert.equal(reviewed, false);
   }
 });
 test('test-discovery web contract: rejects unrelated owner, false emptiness and unsafe URLs', () => {

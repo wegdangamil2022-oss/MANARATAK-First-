@@ -1,3 +1,4 @@
+import { matchedCapabilityPath } from '../../security/MatchedCapabilityPath.js';
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
 import { AdminCmsUseCases } from '@manaratak/application';
@@ -75,12 +76,12 @@ export class CmsAdminRouter {
         return 'admin:cms:author';
       return null;
     };
-    router.use(async (req, res, next) => {
+    const authorize = async (req: Request, res: Response, next: NextFunction) => {
       if (!req.authUserId) {
         res.status(401).json({ error: 'CMS_AUTHENTICATED_ACTOR_REQUIRED' });
         return;
       }
-      const permission = requiredPermission(req.method, req.path);
+      const permission = requiredPermission(req.method === 'HEAD' ? 'GET' : req.method, matchedCapabilityPath(req));
       if (!permission) {
         res.status(403).json({ error: 'CMS_CAPABILITY_UNRECOGNIZED' });
         return;
@@ -101,7 +102,8 @@ export class CmsAdminRouter {
       } catch {
         res.status(403).json({ error: 'CMS_PERMISSION_DENIED', requiredPermission: permission });
       }
-    });
+    };
+
     const asyncHandler =
       (fn: (req: Request, res: Response) => Promise<void>) =>
       (req: Request, res: Response, next: NextFunction) =>
@@ -169,13 +171,13 @@ export class CmsAdminRouter {
     });
 
     router.get(
-      '/content',
+      '/content', authorize,
       asyncHandler(async (req, res) => {
         res.json(await adminCmsUseCases.listContent(querySchema.parse(req.query)));
       }),
     );
     router.post(
-      '/content',
+      '/content', authorize,
       asyncHandler(async (req, res) => {
         res
           .status(201)
@@ -183,13 +185,13 @@ export class CmsAdminRouter {
       }),
     );
     router.get(
-      '/content/:id',
+      '/content/:id', authorize,
       asyncHandler(async (req, res) => {
         res.json(await adminCmsUseCases.getContent(req.params.id));
       }),
     );
     router.patch(
-      '/content/:id',
+      '/content/:id', authorize,
       asyncHandler(async (req, res) => {
         res.json(
           await adminCmsUseCases.updateContent(
@@ -217,7 +219,7 @@ export class CmsAdminRouter {
       }),
     );
     router.put(
-      '/content/:id/localized',
+      '/content/:id/localized', authorize,
       asyncHandler(async (req, res) => {
         res.json(
           await adminCmsUseCases.upsertLocalizedContent(
@@ -229,13 +231,13 @@ export class CmsAdminRouter {
     );
 
     router.get(
-      '/content/:id/domain-links',
+      '/content/:id/domain-links', authorize,
       asyncHandler(async (req, res) => {
         res.json({ data: await adminCmsUseCases.listDomainLinks(req.params.id) });
       }),
     );
     router.put(
-      '/content/:id/domain-links',
+      '/content/:id/domain-links', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({
@@ -267,7 +269,7 @@ export class CmsAdminRouter {
     );
 
     router.get(
-      '/content/:id/readiness/:locale',
+      '/content/:id/readiness/:locale', authorize,
       asyncHandler(async (req, res) => {
         res.json(
           await adminCmsUseCases.getReadiness(
@@ -278,7 +280,7 @@ export class CmsAdminRouter {
       }),
     );
     router.get(
-      '/content/:id/revisions/:locale',
+      '/content/:id/revisions/:locale', authorize,
       asyncHandler(async (req, res) => {
         const { beforeVersion } = z
           .object({ beforeVersion: z.coerce.number().int().positive().max(2147483647).optional() })
@@ -294,7 +296,7 @@ export class CmsAdminRouter {
       }),
     );
     router.post(
-      '/content/:id/revisions/:locale/:revisionId/restore',
+      '/content/:id/revisions/:locale/:revisionId/restore', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({ expectedVersion: z.number().int().positive() })
@@ -344,13 +346,13 @@ export class CmsAdminRouter {
           );
         res.json(result);
       });
-    router.post('/content/:id/submit-review', workflow('submitForReview'));
-    router.post('/content/:id/approve', workflow('approveReview'));
-    router.post('/content/:id/reject', workflow('rejectReview'));
-    router.post('/content/:id/publish', workflow('publish'));
-    router.post('/content/:id/archive', workflow('archive'));
+    router.post('/content/:id/submit-review', authorize, workflow('submitForReview'));
+    router.post('/content/:id/approve', authorize, workflow('approveReview'));
+    router.post('/content/:id/reject', authorize, workflow('rejectReview'));
+    router.post('/content/:id/publish', authorize, workflow('publish'));
+    router.post('/content/:id/archive', authorize, workflow('archive'));
     router.post(
-      '/content/:id/schedule',
+      '/content/:id/schedule', authorize,
       asyncHandler(async (req, res) => {
         const body = workflowSchema.extend({ scheduledAt: z.coerce.date() }).parse(req.body);
         res.json(
@@ -365,7 +367,7 @@ export class CmsAdminRouter {
       }),
     );
     router.post(
-      '/content/:id/cancel-schedule',
+      '/content/:id/cancel-schedule', authorize,
       asyncHandler(async (req, res) => {
         const body = workflowSchema.parse(req.body);
         res.json(
@@ -379,13 +381,13 @@ export class CmsAdminRouter {
       }),
     );
     router.get(
-      '/categories',
+      '/categories', authorize,
       asyncHandler(async (_req, res) => {
         res.json({ data: await adminCmsUseCases.listCategories() });
       }),
     );
     router.post(
-      '/categories',
+      '/categories', authorize,
       asyncHandler(async (req, res) => {
         res
           .status(201)
@@ -393,13 +395,13 @@ export class CmsAdminRouter {
       }),
     );
     router.get(
-      '/tags',
+      '/tags', authorize,
       asyncHandler(async (_req, res) => {
         res.json({ data: await adminCmsUseCases.listTags() });
       }),
     );
     router.post(
-      '/tags',
+      '/tags', authorize,
       asyncHandler(async (req, res) => {
         res
           .status(201)
@@ -407,14 +409,14 @@ export class CmsAdminRouter {
       }),
     );
     router.get(
-      '/content/:id/preview',
+      '/content/:id/preview', authorize,
       asyncHandler(async (req, res) => {
         res.set({ 'Cache-Control': 'no-store, private', 'X-Robots-Tag': 'noindex, nofollow' });
         res.json(await adminCmsUseCases.getContent(req.params.id));
       }),
     );
     router.post(
-      '/content/:id/change-slug',
+      '/content/:id/change-slug', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({
@@ -437,7 +439,7 @@ export class CmsAdminRouter {
       }),
     );
     router.get(
-      '/redirects',
+      '/redirects', authorize,
       asyncHandler(async (req, res) => {
         const query = z
           .object({
@@ -457,7 +459,7 @@ export class CmsAdminRouter {
       }),
     );
     router.post(
-      '/redirects',
+      '/redirects', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({
@@ -474,7 +476,7 @@ export class CmsAdminRouter {
       }),
     );
     router.patch(
-      '/redirects/:id',
+      '/redirects/:id', authorize,
       asyncHandler(async (req, res) => {
         const data = z
           .object({
@@ -490,7 +492,7 @@ export class CmsAdminRouter {
       }),
     );
     router.get(
-      '/navigation',
+      '/navigation', authorize,
       asyncHandler(async (req, res) => {
         const query = z
           .object({
@@ -504,7 +506,7 @@ export class CmsAdminRouter {
       }),
     );
     router.put(
-      '/navigation',
+      '/navigation', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({
@@ -533,7 +535,7 @@ export class CmsAdminRouter {
       }),
     );
     router.post(
-      '/navigation/:id/publish',
+      '/navigation/:id/publish', authorize,
       asyncHandler(async (req, res) => {
         const body = z.object({ expectedVersion: z.number().int().positive() }).parse(req.body);
         res.json(
@@ -542,13 +544,13 @@ export class CmsAdminRouter {
       }),
     );
     router.get(
-      '/block-schemas',
+      '/block-schemas', authorize,
       asyncHandler(async (_req, res) => {
         res.json({ data: await adminCmsUseCases.listBlockSchemas() });
       }),
     );
     router.post(
-      '/block-schemas',
+      '/block-schemas', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({
@@ -567,7 +569,7 @@ export class CmsAdminRouter {
       }),
     );
     router.post(
-      '/block-schemas/:id/approve',
+      '/block-schemas/:id/approve', authorize,
       asyncHandler(async (req, res) => {
         z.object({})
           .strict()
@@ -576,7 +578,7 @@ export class CmsAdminRouter {
       }),
     );
     router.get(
-      '/blocks',
+      '/blocks', authorize,
       asyncHandler(async (req, res) => {
         const query = z
           .object({
@@ -588,7 +590,7 @@ export class CmsAdminRouter {
       }),
     );
     router.put(
-      '/blocks',
+      '/blocks', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({
@@ -606,7 +608,7 @@ export class CmsAdminRouter {
       }),
     );
     router.post(
-      '/blocks/:id/archive',
+      '/blocks/:id/archive', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({ expectedVersion: z.number().int().positive() })
@@ -618,7 +620,7 @@ export class CmsAdminRouter {
       }),
     );
     router.post(
-      '/blocks/:id/publish',
+      '/blocks/:id/publish', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({ expectedVersion: z.number().int().positive() })
@@ -630,7 +632,7 @@ export class CmsAdminRouter {
       }),
     );
     router.get(
-      '/announcements',
+      '/announcements', authorize,
       asyncHandler(async (req, res) => {
         const query = z
           .object({
@@ -644,7 +646,7 @@ export class CmsAdminRouter {
       }),
     );
     router.put(
-      '/announcements',
+      '/announcements', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({
@@ -664,7 +666,7 @@ export class CmsAdminRouter {
       }),
     );
     router.post(
-      '/announcements/:id/publish',
+      '/announcements/:id/publish', authorize,
       asyncHandler(async (req, res) => {
         const body = z.object({ expectedVersion: z.number().int().positive() }).parse(req.body);
         res.json(
@@ -677,7 +679,7 @@ export class CmsAdminRouter {
       }),
     );
     router.post(
-      '/announcements/:id/archive',
+      '/announcements/:id/archive', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({
@@ -696,7 +698,7 @@ export class CmsAdminRouter {
       }),
     );
     router.get(
-      '/operations/failed-schedules',
+      '/operations/failed-schedules', authorize,
       asyncHandler(async (req, res) => {
         const query = z
           .object({
@@ -716,7 +718,7 @@ export class CmsAdminRouter {
       }),
     );
     router.post(
-      '/operations/failed-schedules/:id/retry',
+      '/operations/failed-schedules/:id/retry', authorize,
       asyncHandler(async (req, res) => {
         const data = z
           .object({
@@ -736,7 +738,7 @@ export class CmsAdminRouter {
       }),
     );
     router.post(
-      '/operations/process-due-schedules',
+      '/operations/process-due-schedules', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({ limit: z.number().int().min(1).max(100).optional() })

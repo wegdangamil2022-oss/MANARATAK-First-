@@ -7,7 +7,6 @@ import {
 } from '@manaratak/application';
 import { assertBoundedStudentToolInput } from '@manaratak/domain';
 import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
-import { createCanonicalIdempotencyMiddleware } from '../../middleware/CanonicalIdempotencyMiddleware.js';
 
 export class StudentToolsPublicRouter {
   static create(cradle: {
@@ -31,23 +30,16 @@ export class StudentToolsPublicRouter {
       implementationStatus: z.string().optional(),
       search: z.string().optional(),
     });
-    const canonical = createCanonicalIdempotencyMiddleware({
-      store: cradle.apiIdempotencyStore,
-      requireKey: true,
-      principalResolver: (req) =>
-        req.authUserId ||
-        req.header('x-student-tools-session') ||
-        `anonymous-network:${req.ip || req.socket.remoteAddress || 'unknown'}`,
-    });
+    // Private execution, save and claim receipts stay in requester-bound owner
+    // custody. No spelling of a route may put output or a bearer token in the
+    // generic plaintext response store, including rejected/unknown routes.
     router.use((req, res, next) => {
-      if (req.method === 'POST' && /\/[^/]+\/execute$/.test(req.path)) {
+      if (req.method === 'POST') {
         const key = req.header('Idempotency-Key');
         if (!key || key.length < 8 || key.length > 200)
           return void res.status(400).json({ error: 'IDEMPOTENCY_KEY_REQUIRED' });
-        // P18's encrypted, requester-bound execution intent is the sole replay store for private output.
-        return next();
       }
-      return canonical(req, res, next);
+      next();
     });
 
     const anonymousIdentity = (req: Request, res: Response) => {

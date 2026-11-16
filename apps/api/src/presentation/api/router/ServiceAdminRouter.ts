@@ -178,15 +178,16 @@ export class ServiceAdminRouter {
       asyncHandler(async (req: Request, _res: Response, next: NextFunction) => {
         // Express matches routes case-insensitively and permits a trailing slash.
         const policyPath = req.path.replace(/\/+$/, '').toLowerCase();
+        const read = req.method === 'GET' || req.method === 'HEAD';
         const requests = policyPath.startsWith('/requests');
         await requirePermission(
           req,
           requests
-            ? req.method === 'GET'
+            ? read
               ? 'admin:services:requests:view'
               : 'admin:services:requests:fulfill'
             : policyPath.startsWith('/operations')
-              ? req.method !== 'GET' && /^\/operations\/(?:bookings|executions|deliveries)(?:\/|$)/.test(policyPath)
+              ? !read && /^\/operations\/(?:bookings|executions|deliveries)(?:\/|$)/.test(policyPath)
                 ? 'admin:services:requests:fulfill' : 'admin:services:operations:manage'
               : policyPath.endsWith('/mark-publishable')
               ? 'admin:services:review'
@@ -196,7 +197,7 @@ export class ServiceAdminRouter {
         );
         if (policyPath.endsWith('/finance-invoice'))
           await requirePermission(req, 'admin:finance:invoice:manage');
-        if (requests && req.method === 'GET' && !['/requests/unassigned','/requests'].includes(policyPath))
+        if (requests && read && !['/requests/unassigned','/requests'].includes(policyPath))
           await requirePermission(req, 'admin:services:requests:pii');
         next();
       }),

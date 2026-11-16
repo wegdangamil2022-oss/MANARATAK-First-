@@ -268,6 +268,22 @@ export function buildAuditInventory({ appSource, containerSource, routerSources,
         for (const argument of node.arguments.slice(1)) {
           const name = ts.isIdentifier(argument) ? argument.text
             : ts.isCallExpression(argument) && ts.isIdentifier(argument.expression) ? argument.expression.text : null;
+          const helper = ts.isIdentifier(argument) && !resolvers.has(name) ? evaluatorHelpers.get(name) : null;
+          if (helper && helper.position < node.pos && helper.block === node.parent.parent) {
+            const linked = new Map();
+            const helperAst = parse('guard.ts', helper.source);
+            visit(helperAst, child => {
+              if (!ts.isCallExpression(child) || !ts.isIdentifier(child.expression)) return;
+              const resolver = resolvers.get(child.expression.text);
+              if (resolver && resolver.position < helper.position && resolver.block === helper.block)
+                linked.set(child.expression.text, resolver.source);
+            });
+            const policySource = [...linked.values(), helper.source].join('\n');
+            inheritedPolicies.push({ resolver: name,
+              permissions: [...new Set([...policySource.matchAll(/['"](admin:[a-z0-9:*_-]+)['"]/g)].map(match => match[1]))].sort(),
+              sourceFingerprint: createHash('sha256').update(policySource).digest('hex') });
+            continue;
+          }
           const policy = resolvers.get(name);
           if (!policy || policy.position >= node.pos || policy.block !== node.parent.parent) continue;
           let permissions = policy.permissions;

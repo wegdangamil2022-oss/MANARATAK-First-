@@ -313,7 +313,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -326,7 +326,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -356,7 +356,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -369,7 +369,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -400,7 +400,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -413,7 +413,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -443,7 +443,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -456,7 +456,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -486,7 +486,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -499,7 +499,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -529,7 +529,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -542,7 +542,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -572,7 +572,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -585,7 +585,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -615,7 +615,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -628,7 +628,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -658,7 +658,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -671,7 +671,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -701,7 +701,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -714,7 +714,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -792,7 +792,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -805,7 +805,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -835,7 +835,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -848,7 +848,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -878,7 +878,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -891,7 +891,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -921,7 +921,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -934,7 +934,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -964,7 +964,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -977,7 +977,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -1007,7 +1007,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -1020,7 +1020,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -1050,7 +1050,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -1063,7 +1063,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -1093,7 +1093,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "permissionFor",
+          "resolver": "authorize",
           "permissions": [
             "admin:ai:configure",
             "admin:ai:cost:manage",
@@ -1106,7 +1106,7 @@
             "admin:ai:safety:manage",
             "admin:ai:view"
           ],
-          "sourceFingerprint": "0f3452fc33074fa549256c2f8a719500b1efddf38ccfb5b68c983ed4398f7ca9"
+          "sourceFingerprint": "0fefce5e99bbcc169bffbc2495310b70eef08288d9474de72ed4b4c52e888be1"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2356,7 +2356,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2368,7 +2368,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2397,7 +2397,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2409,7 +2409,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2438,7 +2438,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2450,7 +2450,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2479,7 +2479,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2491,7 +2491,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2520,7 +2520,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2532,7 +2532,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2561,7 +2561,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2573,7 +2573,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2602,7 +2602,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2614,7 +2614,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2643,7 +2643,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2655,7 +2655,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2684,7 +2684,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2696,7 +2696,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2725,7 +2725,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2737,7 +2737,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2766,7 +2766,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2778,7 +2778,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2807,7 +2807,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2819,7 +2819,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2848,7 +2848,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2860,7 +2860,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2889,7 +2889,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2901,7 +2901,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2930,7 +2930,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2942,7 +2942,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -2971,7 +2971,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -2983,7 +2983,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -3012,7 +3012,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -3024,7 +3024,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -3053,7 +3053,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -3065,7 +3065,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -3094,7 +3094,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -3106,7 +3106,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -3135,7 +3135,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -3147,7 +3147,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -3176,7 +3176,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -3188,7 +3188,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -3217,7 +3217,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -3229,7 +3229,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -3258,7 +3258,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -3270,7 +3270,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -3299,7 +3299,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -3311,7 +3311,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -3340,7 +3340,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -3352,7 +3352,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -3381,7 +3381,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -3393,7 +3393,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -3422,7 +3422,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -3434,7 +3434,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -3463,7 +3463,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -3475,7 +3475,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -3504,7 +3504,7 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "requiredPermission",
+          "resolver": "authorize",
           "permissions": [
             "admin:cms:author",
             "admin:cms:navigation:manage",
@@ -3516,7 +3516,7 @@
             "admin:cms:schemas:manage",
             "admin:cms:view"
           ],
-          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+          "sourceFingerprint": "c140166481751828f6df2362d435cee72ba91cd8b8fc944ed6ecdd22757e2a29"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -7698,7 +7698,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -7737,7 +7737,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -7776,7 +7776,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -7815,7 +7815,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -7854,7 +7854,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -7893,7 +7893,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -7932,7 +7932,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -7971,7 +7971,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8010,7 +8010,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8049,7 +8049,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8088,7 +8088,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8127,7 +8127,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8166,7 +8166,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8205,7 +8205,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8246,7 +8246,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8285,7 +8285,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8326,7 +8326,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8365,7 +8365,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8406,7 +8406,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8445,7 +8445,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8486,7 +8486,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8525,7 +8525,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8564,7 +8564,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8603,7 +8603,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8644,7 +8644,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8703,7 +8703,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8742,7 +8742,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8781,7 +8781,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -8820,7 +8820,7 @@
             "admin:services:requests:view",
             "admin:services:review"
           ],
-          "sourceFingerprint": "e38ab487499798c4162ada2740f1730c86d8c33650e2da206a9847a91cd30f8d"
+          "sourceFingerprint": "c7d2386e2688a31a75e753acddaf369ed7860cf740e944609757cee23bfdfbe9"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -9177,9 +9177,9 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "inline-middleware",
+          "resolver": "authorize",
           "permissions": [],
-          "sourceFingerprint": "49891e3cb87e3a3ff32eb686802aca71eff78e63f11bdcb5125dd41e0e6422f0"
+          "sourceFingerprint": "e3c6a7423c090f4c06c5395931faf34a6eeb1ff621f12cc7c35c99fc87792b06"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -9198,9 +9198,9 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "inline-middleware",
+          "resolver": "authorize",
           "permissions": [],
-          "sourceFingerprint": "49891e3cb87e3a3ff32eb686802aca71eff78e63f11bdcb5125dd41e0e6422f0"
+          "sourceFingerprint": "e3c6a7423c090f4c06c5395931faf34a6eeb1ff621f12cc7c35c99fc87792b06"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -9219,9 +9219,9 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "inline-middleware",
+          "resolver": "authorize",
           "permissions": [],
-          "sourceFingerprint": "49891e3cb87e3a3ff32eb686802aca71eff78e63f11bdcb5125dd41e0e6422f0"
+          "sourceFingerprint": "e3c6a7423c090f4c06c5395931faf34a6eeb1ff621f12cc7c35c99fc87792b06"
         }
       ],
       "auditEvidence": "REVIEWED_NON_MUTATING_POST_EXEMPTION",
@@ -9240,9 +9240,9 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "inline-middleware",
+          "resolver": "authorize",
           "permissions": [],
-          "sourceFingerprint": "49891e3cb87e3a3ff32eb686802aca71eff78e63f11bdcb5125dd41e0e6422f0"
+          "sourceFingerprint": "e3c6a7423c090f4c06c5395931faf34a6eeb1ff621f12cc7c35c99fc87792b06"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -9261,9 +9261,9 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "inline-middleware",
+          "resolver": "authorize",
           "permissions": [],
-          "sourceFingerprint": "49891e3cb87e3a3ff32eb686802aca71eff78e63f11bdcb5125dd41e0e6422f0"
+          "sourceFingerprint": "e3c6a7423c090f4c06c5395931faf34a6eeb1ff621f12cc7c35c99fc87792b06"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -9282,9 +9282,9 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "inline-middleware",
+          "resolver": "authorize",
           "permissions": [],
-          "sourceFingerprint": "49891e3cb87e3a3ff32eb686802aca71eff78e63f11bdcb5125dd41e0e6422f0"
+          "sourceFingerprint": "e3c6a7423c090f4c06c5395931faf34a6eeb1ff621f12cc7c35c99fc87792b06"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -9303,9 +9303,9 @@
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "inline-middleware",
+          "resolver": "authorize",
           "permissions": [],
-          "sourceFingerprint": "49891e3cb87e3a3ff32eb686802aca71eff78e63f11bdcb5125dd41e0e6422f0"
+          "sourceFingerprint": "e3c6a7423c090f4c06c5395931faf34a6eeb1ff621f12cc7c35c99fc87792b06"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -9324,9 +9324,9 @@
       "idempotency": "OWNER_ENCRYPTED_EXECUTION_REQUIRED",
       "conditionalPermissionPolicies": [
         {
-          "resolver": "inline-middleware",
+          "resolver": "authorize",
           "permissions": [],
-          "sourceFingerprint": "49891e3cb87e3a3ff32eb686802aca71eff78e63f11bdcb5125dd41e0e6422f0"
+          "sourceFingerprint": "e3c6a7423c090f4c06c5395931faf34a6eeb1ff621f12cc7c35c99fc87792b06"
         }
       ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",

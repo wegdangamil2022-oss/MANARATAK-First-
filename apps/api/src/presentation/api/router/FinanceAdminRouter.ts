@@ -59,7 +59,7 @@ export class FinanceAdminRouter {
       if (!idempotencyKey) throw new Error('IDEMPOTENCY_KEY_REQUIRED');
       if (idempotencyKey.length > 200) throw new Error('IDEMPOTENCY_KEY_TOO_LONG');
       const stateful =
-        /\/(?:invoices\/[^/]+\/(?:items|issue|void|credit-notes|installment-plans)|transfers\/[^/]+\/transitions|approvals\/[^/]+\/decisions|refunds\/[^/]+\/process|exchange-rates\/[^/]+\/activate|wallet-holds\/[^/]+\/(?:release|capture))$/.test(
+        /\/(?:invoices\/[^/]+\/(?:items|issue|void|credit-notes|installment-plans)|transfers\/[^/]+\/transitions|approvals\/[^/]+\/decisions|refunds\/[^/]+\/process|exchange-rates\/[^/]+\/activate|wallet-holds\/[^/]+\/(?:release|capture))\/?$/i.test(
           req.path,
         );
       const expectedVersion =

@@ -114,7 +114,7 @@ describe('P17 AI Admin per-operation authorization', () => {
     const { app } = appFor(['admin:ai:configure'], false);
     expect((await request(app).get('/admin/ai/overview')).status).toBe(401);
     const auth = appFor(['admin:ai:configure']);
-    expect((await request(auth.app).delete('/admin/ai/models/some-model')).status).toBe(403);
+    expect((await request(auth.app).delete('/admin/ai/models/some-model')).status).toBe(404);
   });
 });
 

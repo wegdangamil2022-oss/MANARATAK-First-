@@ -904,7 +904,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       const requireAdminPermission = SecurityMiddlewareFactory.createAdminPermissionGuard;
     // P18 tests keep private replay results in encrypted owner custody, rather than generic responseBody JSON.
     v1Router.use('/admin', (req, res, next) => {
-      if (/^\/student-tools\/[^/]+\/test\/?$/.test(req.path)) return next();
+      if (/^\/student-tools\/[^/]+\/test\/?$/i.test(req.path)) return next();
       // Finance commands authorize their action before replaying owner-ledger receipts.
       // A generic transport replay would bypass that current action permission.
       if (/^\/finance(?:\/|$)/i.test(req.path)) return next();
@@ -918,7 +918,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       // Invitation tokens and lifecycle receipts stay with their owner, never the generic response-body cache.
       if (/^\/staff\/lifecycle(?:\/|$)/i.test(req.path)) return next();
       if (/^\/assets\/(?:upload-locator|register-quarantined)\/?$/i.test(req.path)) return next();
-      const command = createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true });
+      const command = createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true, replayAuthorization: container.resolve('authEvaluatorService') });
       if (/^\/settings(?:\/|$)/i.test(req.path)) {
         return requireAdminPermission('admin:settings:manage')(req,res,()=>command(req,res,next));
       }
@@ -952,7 +952,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     v1Router.use('/admin/dashboard', lazyRouter('executiveDashboardRouter'));
     v1Router.use('/admin/review-workspace', requireAdminPermission('admin:platform:manage'), lazyRouter('reviewWorkspaceRouter'));
     v1Router.use('/admin/services', lazyRouter('managedApplicationEvidenceRouter')); // Matched evidence routes retain their management guard.
-    v1Router.use('/identities', SecurityMiddlewareFactory.createAdminGuard({ adminAccessAllowed: (id: string) => container.resolve<any>('staffLifecycleRepository').adminAccessAllowed(id), mfaUseCases: container.resolve('mfaUseCases'), mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator }), createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }), new MutationAuditMiddleware(auditRecordRepository, 'IDENTITY').generate(), requireAdminPermission('admin:identities:manage'), container.resolve<Router>('identityRouter'));
+    v1Router.use('/identities', SecurityMiddlewareFactory.createAdminGuard({ adminAccessAllowed: (id: string) => container.resolve<any>('staffLifecycleRepository').adminAccessAllowed(id), mfaUseCases: container.resolve('mfaUseCases'), mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator }), createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true, replayAuthorization: container.resolve('authEvaluatorService') }), new MutationAuditMiddleware(auditRecordRepository, 'IDENTITY').generate(), requireAdminPermission('admin:identities:manage'), container.resolve<Router>('identityRouter'));
 
     v1Router.use('/admin/audit/workspace', requireAdminPermission(['admin:audit:manage','admin:audit:cases:view','admin:audit:alerts:manage','admin:audit:retention:manage']), container.resolve<Router>('auditWorkspaceRouter'));
     v1Router.use('/admin/audit', requireAdminPermission('admin:audit:manage'), container.resolve<Router>('auditRouter'));
@@ -1001,7 +1001,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     // control-plane router is now inside the same strict auth + audit + RBAC boundary as /admin.
     const protectControlPlane = (permission: string, routerName: string) => [
       SecurityMiddlewareFactory.createAdminGuard({ adminAccessAllowed: (id: string) => container.resolve<any>('staffLifecycleRepository').adminAccessAllowed(id), mfaUseCases: container.resolve('mfaUseCases'), mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator }),
-      createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }),
+      createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true, replayAuthorization: container.resolve('authEvaluatorService') }),
       new MutationAuditMiddleware(auditRecordRepository, 'CONTROL_PLANE').generate(),
       requireAdminPermission(permission),
       lazyRouter(routerName),

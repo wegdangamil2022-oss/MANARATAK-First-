@@ -1,3 +1,4 @@
+import { captureAuthorizationEvaluator } from '../../presentation/security/AuthorizationReplayScope.js';
 import { StaffLifecycleRouter } from '../../presentation/api/router/StaffLifecycleRouter.js';
 import { StaffLifecycleUseCases } from '@manaratak/application';
 import { PrismaStaffLifecycleRepository } from '@manaratak/infrastructure';
@@ -921,7 +922,7 @@ export function registerDependencies(
     policyEvaluator: asClass(DefaultPolicyEvaluator).singleton(),
     authorizationDutyEvaluator: asFunction(({ prisma }) => isPrisma ? new PrismaDutyGuard(prisma) : undefined).singleton(),
     authEvaluatorService: asFunction(({ roleRepository, policyRepository, roleAssignmentRepository, policyEvaluator, emergencyAccessRepository, authorizationDutyEvaluator }) =>
-      new AuthorizationEvaluatorService(roleRepository, policyRepository, roleAssignmentRepository, policyEvaluator, emergencyAccessRepository, authorizationDutyEvaluator)).singleton(),
+      captureAuthorizationEvaluator(new AuthorizationEvaluatorService(roleRepository, policyRepository, roleAssignmentRepository, policyEvaluator, emergencyAccessRepository, authorizationDutyEvaluator))).singleton(),
     configurationValidationService: asClass(ConfigurationValidationService).singleton(),
     fileIntegrityValidationService: asClass(FileIntegrityValidationService).singleton(),
 

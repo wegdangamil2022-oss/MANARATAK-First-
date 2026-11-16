@@ -26,7 +26,7 @@ const checks = [
   ['IDEMP-004 identity compatibility alias guarded', /\/identities'[\s\S]{0,450}createCanonicalIdempotencyMiddleware/.test(app)],
   ['IDEMP-005 student workspace guarded after auth', /AuthMiddleware[\s\S]*createCanonicalIdempotencyMiddleware/.test(studentWorkspace)],
   ['IDEMP-006 learner course guarded after auth', /AuthMiddleware[\s\S]*createCanonicalIdempotencyMiddleware/.test(courseLearner)],
-  ['IDEMP-007 anonymous tool execution guarded', studentTools.includes('principalResolver') && studentTools.includes('x-student-tools-session')],
+  ['IDEMP-007 anonymous tool execution guarded', !studentTools.includes('createCanonicalIdempotencyMiddleware') && studentTools.includes('x-student-tools-session') && studentTools.includes('IDEMPOTENCY_KEY_REQUIRED')],
   ['IDEMP-008 replay/conflict semantics present', middleware.includes("decision.kind === 'REPLAY'") && middleware.includes("decision.kind === 'CONFLICT'") && middleware.includes('IDEMPOTENCY_KEY_PAYLOAD_CONFLICT')],
   ['IDEMP-009 browser transport parity', cors.includes("'Idempotency-Key'") && cors.includes("'Idempotency-Replayed'")],
   ['IDEMP-010 admin client supports retry key reuse', adminClient.includes('idempotencyKey?: string') && adminClient.includes("!headers.has('Idempotency-Key')")],

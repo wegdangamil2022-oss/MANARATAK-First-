@@ -9,15 +9,10 @@ export function testDiscoveryOwnerRouter(
   permissions: { view: string; propose: string; review: string },
 ) {
   const router = Router({ mergeParams: true });
-  router.use(async (req, res, next) => {
+  const authorize = (capability: 'view' | 'propose' | 'review') => async (req: Request, res: Response, next: NextFunction) => {
     if (!req.authUserId)
       return void res.status(401).json({ error: 'TEST_DISCOVERY_AUTH_REQUIRED' });
-    const permission =
-      req.method === 'GET'
-        ? permissions.view
-        : /\/approve\/?$/i.test(req.path)
-          ? permissions.review
-          : permissions.propose;
+    const permission = permissions[capability];
     try {
       const decision = await auth.evaluatePermission(req.authUserId, permission, {
         ip: req.ip,
@@ -30,7 +25,7 @@ export function testDiscoveryOwnerRouter(
     } catch {
       res.status(403).json({ error: 'TEST_DISCOVERY_PERMISSION_DENIED' });
     }
-  });
+  };
   const safe =
     (fn: (req: Request, res: Response) => Promise<unknown>) =>
     (req: Request, res: Response, next: NextFunction) =>
@@ -44,6 +39,7 @@ export function testDiscoveryOwnerRouter(
     .strict();
   router.get(
     '/',
+    authorize('view'),
     safe(async (req, res) => {
       const query = z
         .object({ after: z.string().trim().min(1).max(160).optional() })
@@ -54,6 +50,7 @@ export function testDiscoveryOwnerRouter(
   );
   router.post(
     '/',
+    authorize('propose'),
     safe(async (req, res) => {
       const body = command
         .extend({
@@ -70,6 +67,7 @@ export function testDiscoveryOwnerRouter(
   ] as const)
     router.post(
       `/:testId/${action}`,
+      authorize('review'),
       safe(async (req, res) => {
         const body = command.parse(req.body);
         res.json({

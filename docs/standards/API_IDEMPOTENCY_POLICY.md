@@ -20,7 +20,15 @@ These `POST` surfaces are not state-changing API commands under `STD-API-001`, o
 - `SearchRouter POST /`: query/read command. Search persistence is operational request history, not owner-domain mutation authority.
 - `AuthorizationRuntimeRouter POST /evaluate`: pure authorization decision query.
 
-`StudentToolsPublicRouter` is **not exempt**. Anonymous execution is scoped by the trusted anonymous-session token when present, otherwise by a network-derived fallback for the first request; the tool domain's own request fingerprint remains defense in depth.
+`StudentToolsPublicRouter` requires `Idempotency-Key`, but keeps replay custody in the student-tool owner. Execution intents bind the key and payload to an opaque requester reference; recoverable output stays encrypted in the owner store. Save/claim writes use the private workspace's student/execution identity. No public student-tool response or anonymous bearer token may enter the generic plaintext response store, regardless of route spelling or validation outcome.
+
+## Authorization of administrative response replay
+
+Every generic authenticated control-plane boundary records the successful action authorization checks and resource attributes evaluated downstream of that boundary. The API evaluator captures these checks in request-local async context. Stored responses carry an internal authorization envelope; clients receive only the original response body.
+
+Before returning a stored response, the boundary re-evaluates every recorded permission for the same authenticated principal using current role assignments, duty restrictions, policies, request time and network context. A revoked permission or expired policy returns `403 IDEMPOTENCY_REPLAY_PERMISSION_DENIED` without disclosing the receipt or executing the command again. An authorization failure or evaluator error never permits fallback to the recorded body.
+
+Historical receipts without authorization evidence, empty evidence, and unsupported complex policy attributes fail closed. They are not deleted or treated as new commands. Separately excluded owner command protocols retain their own resource authorization and replay contracts. This generic mechanism records IAM decisions; it does not replace owner-level ownership, assignment, or state validation.
 
 ## Client retry contract
 

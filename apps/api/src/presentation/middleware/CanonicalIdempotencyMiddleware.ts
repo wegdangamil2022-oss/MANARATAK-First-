@@ -4,6 +4,8 @@ import { createHash } from 'node:crypto';
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
 import { problemDetails } from '../http/ProblemDetails.js';
+import type { AuthorizationEvaluatorService } from '@manaratak/domain';
+import { authorizeStoredReplay, createAuthorizationReplayScope, runInAuthorizationReplayScope } from '../security/AuthorizationReplayScope.js';
 
 function sha256(value: string): string {
   return createHash('sha256').update(value).digest('hex');
@@ -34,6 +36,7 @@ export function createCanonicalIdempotencyMiddleware(input: {
   principalResolver?: (req: Request) => string | null | undefined;
   ttlSeconds?: number;
   leaseSeconds?: number;
+  replayAuthorization?: AuthorizationEvaluatorService;
 }): RequestHandler {
   const ttlSeconds = input.ttlSeconds ?? 24 * 60 * 60;
   const leaseSeconds = input.leaseSeconds ?? 120;
@@ -104,6 +107,14 @@ export function createCanonicalIdempotencyMiddleware(input: {
         leaseSeconds,
       });
       if (decision.kind === 'REPLAY') {
+        if (input.replayAuthorization) {
+          const envelope = decision.responseBody as { kind?: string; authorization?: unknown; body?: unknown } | null;
+          if (envelope?.kind !== 'AUTHORIZED_ADMIN_RESPONSE_V1' ||
+              !await authorizeStoredReplay(envelope.authorization, req, input.replayAuthorization))
+            return void res.status(403).json({ error: 'IDEMPOTENCY_REPLAY_PERMISSION_DENIED' });
+          res.setHeader('Idempotency-Replayed', 'true');
+          return void res.status(decision.statusCode).json(envelope.body);
+        }
         res.setHeader('Idempotency-Replayed', 'true');
         return void res.status(decision.statusCode).json(decision.responseBody);
       }
@@ -131,6 +142,10 @@ export function createCanonicalIdempotencyMiddleware(input: {
         );
       }
 
+      const authorization = input.replayAuthorization ? createAuthorizationReplayScope(principalId) : null;
+      const storedBody = (body: unknown) => authorization
+        ? { kind: 'AUTHORIZED_ADMIN_RESPONSE_V1', authorization, body }
+        : body;
       const originalJson = res.json.bind(res);
       const originalSend = res.send.bind(res);
       let finalized = false;
@@ -143,7 +158,7 @@ export function createCanonicalIdempotencyMiddleware(input: {
             scopeHash: decision.scopeHash,
             leaseToken: decision.leaseToken,
             statusCode: res.statusCode,
-            responseBody: body,
+            responseBody: storedBody(body),
           })
           .then(() => originalJson(body))
           .catch(next);
@@ -157,13 +172,14 @@ export function createCanonicalIdempotencyMiddleware(input: {
             scopeHash: decision.scopeHash,
             leaseToken: decision.leaseToken,
             statusCode: 204,
-            responseBody: null,
+            responseBody: storedBody(null),
           })
           .then(() => originalSend(body))
           .catch(next);
         return res;
       }) as Response['send'];
-      next();
+      if (authorization) runInAuthorizationReplayScope(authorization, next);
+      else next();
     } catch (error) {
       next(error);
     }

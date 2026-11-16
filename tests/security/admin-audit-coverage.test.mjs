@@ -34,6 +34,22 @@ const fixture = {
   policySource: "export class MutationAuditPolicy {static classify() {return 'CRITICAL_AUDIT_REQUIRED';}}",
 };
 
+test('route-local authorization fingerprints the invoked helper and permission resolver', () => {
+  const source = permission => `const router = Router();
+    const permissionFor = () => '${permission}';
+    const authorize = async (req,res,next) => {
+      const decision = await evaluator.evaluatePermission(req.authUserId, permissionFor(req.method,req.route.path));
+      if (!decision.isGranted) return res.status(403).end(); next();
+    };
+    router.post('/run', authorize, handler);`;
+  const original = buildAuditInventory({ ...fixture, routerSources: { 'TestRouter.ts': source('admin:test:execute') } });
+  const changed = buildAuditInventory({ ...fixture, routerSources: { 'TestRouter.ts': source('admin:test:manage') } });
+  const removed = buildAuditInventory({ ...fixture, routerSources: { 'TestRouter.ts': source('admin:test:execute').replace("'/run', authorize,", "'/run',") } });
+  assert.ok(original[0].permissionEvidence.includes('admin:test:execute'));
+  assert.match(checkAuditInventory(changed, original)[0], /AUDIT_CONTRACT_CHANGED/);
+  assert.match(checkAuditInventory(removed, original)[0], /AUDIT_CONTRACT_CHANGED/);
+});
+
 test('inventory discovers mounted mutations and refuses an unreviewed added route', () => {
   const original = buildAuditInventory(fixture);
   assert.equal(original.length, 1);

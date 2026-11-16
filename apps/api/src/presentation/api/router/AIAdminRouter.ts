@@ -1,3 +1,4 @@
+import { matchedCapabilityPath } from '../../security/MatchedCapabilityPath.js';
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
 import { AIExecutionStatus, AuthorizationEvaluatorService } from '@manaratak/domain';
@@ -164,12 +165,12 @@ export class AIAdminRouter {
         return 'admin:ai:execute';
       return null;
     };
-    router.use(async (req, res, next) => {
+    const authorize = async (req: Request, res: Response, next: NextFunction) => {
       if (!req.authUserId) {
         res.status(401).json({ error: 'AI_AUTHENTICATED_ACTOR_REQUIRED' });
         return;
       }
-      const permission = permissionFor(req.method, req.path);
+      const permission = permissionFor(req.method === 'HEAD' ? 'GET' : req.method, matchedCapabilityPath(req));
       if (!permission) {
         res.status(403).json({ error: 'AI_CAPABILITY_UNRECOGNIZED' });
         return;
@@ -194,7 +195,8 @@ export class AIAdminRouter {
       } catch {
         res.status(403).json({ error: 'AI_PERMISSION_DENIED', requiredPermission: permission });
       }
-    });
+    };
+
     const asyncHandler =
       (fn: (req: Request, res: Response) => Promise<void>) =>
       (req: Request, res: Response, next: NextFunction) =>
@@ -205,13 +207,13 @@ export class AIAdminRouter {
     };
 
     router.get(
-      '/overview',
+      '/overview', authorize,
       asyncHandler(async (_req, res) => {
         res.json(await cradle.aiPlatformAdminUseCases.overview());
       }),
     );
     router.post(
-      '/runtime/emergency-disable',
+      '/runtime/emergency-disable', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({
@@ -228,13 +230,13 @@ export class AIAdminRouter {
       }),
     );
     router.get(
-      '/provider-statuses',
+      '/provider-statuses', authorize,
       asyncHandler(async (_req, res) => {
         res.json({ data: cradle.aiPlatformAdminUseCases.providerStatuses() });
       }),
     );
     router.get(
-      '/executions',
+      '/executions', authorize,
       asyncHandler(async (req, res) => {
         res.json(
           await cradle.aiPlatformAdminUseCases.executions(executionFilters.parse(req.query)),
@@ -242,7 +244,7 @@ export class AIAdminRouter {
       }),
     );
     router.get(
-      '/executions/:publicId',
+      '/executions/:publicId', authorize,
       asyncHandler(async (req, res) => {
         const value = await cradle.aiPlatformAdminUseCases.execution(req.params.publicId);
         if (!value) {
@@ -253,7 +255,7 @@ export class AIAdminRouter {
       }),
     );
     router.get(
-      '/executions/:publicId/trace',
+      '/executions/:publicId/trace', authorize,
       asyncHandler(async (req, res) => {
         res.json({
           data: await cradle.aiPlatformAdminUseCases.executionTrace(req.params.publicId),
@@ -261,19 +263,19 @@ export class AIAdminRouter {
       }),
     );
     router.get(
-      '/async-queue/status',
+      '/async-queue/status', authorize,
       asyncHandler(async (_req, res) => {
         res.json(await cradle.aiExecutionUseCases.queueStatus());
       }),
     );
     router.get(
-      '/async-queue/jobs',
+      '/async-queue/jobs', authorize,
       asyncHandler(async (req, res) => {
         res.json(await cradle.aiExecutionUseCases.listAsyncJobs(jobFilters.parse(req.query)));
       }),
     );
     router.post(
-      '/async-queue/jobs/:publicId/:action',
+      '/async-queue/jobs/:publicId/:action', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({ confirmed: z.literal(true) })
@@ -290,7 +292,7 @@ export class AIAdminRouter {
       }),
     );
     router.get(
-      '/prompts/:key/versions/:version',
+      '/prompts/:key/versions/:version', authorize,
       asyncHandler(async (req, res) => {
         const value = await cradle.aiPlatformAdminUseCases.promptVersion(
           keySchema.parse(req.params.key),
@@ -304,7 +306,7 @@ export class AIAdminRouter {
       }),
     );
     router.get(
-      '/capabilities/:key/readiness',
+      '/capabilities/:key/readiness', authorize,
       asyncHandler(async (req, res) => {
         const query = z
           .object({
@@ -322,7 +324,7 @@ export class AIAdminRouter {
       }),
     );
     router.get(
-      '/workflow-runs/:publicId',
+      '/workflow-runs/:publicId', authorize,
       asyncHandler(async (req, res) => {
         const value = await cradle.aiWorkflowUseCases.find(keySchema.parse(req.params.publicId));
         if (!value) {
@@ -333,7 +335,7 @@ export class AIAdminRouter {
       }),
     );
     router.get(
-      '/evaluation-runs/:publicId',
+      '/evaluation-runs/:publicId', authorize,
       asyncHandler(async (req, res) => {
         const value = await cradle.aiEvaluationUseCases.find(keySchema.parse(req.params.publicId));
         if (!value) {
@@ -344,7 +346,7 @@ export class AIAdminRouter {
       }),
     );
     router.get(
-      '/:resource',
+      '/:resource', authorize,
       asyncHandler(async (req, res) => {
         const resource = resourceSchema.parse(req.params.resource);
         res.json({
@@ -356,7 +358,7 @@ export class AIAdminRouter {
       }),
     );
     router.get(
-      '/:resource/:key',
+      '/:resource/:key', authorize,
       asyncHandler(async (req, res) => {
         const resource = resourceSchema.parse(req.params.resource);
         const value = await cradle.aiPlatformAdminUseCases.find(
@@ -371,7 +373,7 @@ export class AIAdminRouter {
       }),
     );
     router.put(
-      '/:resource/:key',
+      '/:resource/:key', authorize,
       asyncHandler(async (req, res) => {
         const resource = resourceSchema.parse(req.params.resource);
         const key = keySchema.parse(req.params.key);
@@ -382,7 +384,7 @@ export class AIAdminRouter {
       }),
     );
     router.post(
-      '/prompts/:key/versions',
+      '/prompts/:key/versions', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({
@@ -404,7 +406,7 @@ export class AIAdminRouter {
       }),
     );
     router.post(
-      '/prompts/:key/versions/:version/approve',
+      '/prompts/:key/versions/:version/approve', authorize,
       asyncHandler(async (req, res) => {
         res.json(
           await cradle.aiPlatformAdminUseCases.approvePromptVersion(
@@ -416,7 +418,7 @@ export class AIAdminRouter {
       }),
     );
     router.post(
-      '/prompts/:key/deployments',
+      '/prompts/:key/deployments', authorize,
       asyncHandler(async (req, res) => {
         const body = z.object({ version: z.number().int().positive() }).strict().parse(req.body);
         res.json(
@@ -429,7 +431,7 @@ export class AIAdminRouter {
       }),
     );
     router.post(
-      '/prompts/:key/rollback',
+      '/prompts/:key/rollback', authorize,
       asyncHandler(async (req, res) => {
         const body = z.object({ version: z.number().int().positive() }).strict().parse(req.body);
         res.json(
@@ -442,7 +444,7 @@ export class AIAdminRouter {
       }),
     );
     router.post(
-      '/workflows/:key/runs',
+      '/workflows/:key/runs', authorize,
       asyncHandler(async (req, res) => {
         res
           .status(202)
@@ -456,7 +458,7 @@ export class AIAdminRouter {
       }),
     );
     router.post(
-      '/workflow-runs/:publicId/execute',
+      '/workflow-runs/:publicId/execute', authorize,
       asyncHandler(async (req, res) => {
         res.json(
           await cradle.aiWorkflowUseCases.run(
@@ -468,7 +470,7 @@ export class AIAdminRouter {
       }),
     );
     router.post(
-      '/evaluations/:key/runs',
+      '/evaluations/:key/runs', authorize,
       asyncHandler(async (req, res) => {
         res.status(202).json(
           await cradle.aiEvaluationUseCases.start(keySchema.parse(req.params.key), {
@@ -484,20 +486,20 @@ export class AIAdminRouter {
       }),
     );
     router.post(
-      '/evaluation-runs/:publicId/execute',
+      '/evaluation-runs/:publicId/execute', authorize,
       asyncHandler(async (req, res) => {
         actor(req);
         res.json(await cradle.aiEvaluationUseCases.run(req.params.publicId, actor(req)));
       }),
     );
     router.post(
-      '/evaluation-runs/:publicId/approve',
+      '/evaluation-runs/:publicId/approve', authorize,
       asyncHandler(async (req, res) => {
         res.json(await cradle.aiEvaluationUseCases.approve(req.params.publicId, actor(req)));
       }),
     );
     router.get(
-      '/configuration/:resource/:key/revisions',
+      '/configuration/:resource/:key/revisions', authorize,
       asyncHandler(async (req, res) => {
         const resource = z
           .enum(['guardrails', 'routingPolicies', 'consumers', 'evaluations', 'platformSettings'])
@@ -508,14 +510,14 @@ export class AIAdminRouter {
       }),
     );
     router.get(
-      '/executions/:publicId/reconciliation',
+      '/executions/:publicId/reconciliation', authorize,
       asyncHandler(async (req, res) => {
         res.setHeader('Cache-Control', 'no-store');
         res.json(await cradle.aiPlatformAdminUseCases.reconciliationEvidence(req.params.publicId));
       }),
     );
     router.post(
-      '/configuration/:resource/:key/:action',
+      '/configuration/:resource/:key/:action', authorize,
       asyncHandler(async (req, res) => {
         const resource = z
           .enum(['guardrails', 'routingPolicies', 'consumers', 'evaluations', 'platformSettings'])
@@ -555,7 +557,7 @@ export class AIAdminRouter {
       }),
     );
     router.post(
-      '/executions/:publicId/reconciliation/:action',
+      '/executions/:publicId/reconciliation/:action', authorize,
       asyncHandler(async (req, res) => {
         const action = z.enum(['PROPOSE', 'APPROVE']).parse(req.params.action);
         const body = z
@@ -582,7 +584,7 @@ export class AIAdminRouter {
       }),
     );
     router.get(
-      '/knowledge-indexes/:key/source',
+      '/knowledge-indexes/:key/source', authorize,
       asyncHandler(async (req, res) => {
         const query = z
           .object({
@@ -604,7 +606,7 @@ export class AIAdminRouter {
       }),
     );
     router.post(
-      '/knowledge-indexes/:key/remove',
+      '/knowledge-indexes/:key/remove', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({ sourceType: keySchema, sourceReferenceId: z.string().min(1).max(500) })
@@ -620,7 +622,7 @@ export class AIAdminRouter {
       }),
     );
     router.post(
-      '/knowledge-indexes/:key/index',
+      '/knowledge-indexes/:key/index', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({
@@ -640,7 +642,7 @@ export class AIAdminRouter {
       }),
     );
     router.post(
-      '/incidents/:publicId/events',
+      '/incidents/:publicId/events', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({ action: z.string().min(1), note: z.string().max(4000).optional() })
@@ -657,7 +659,7 @@ export class AIAdminRouter {
       }),
     );
     router.post(
-      '/playground/execute',
+      '/playground/execute', authorize,
       asyncHandler(async (req, res) => {
         const body = z
           .object({

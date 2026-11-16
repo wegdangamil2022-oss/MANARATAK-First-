@@ -1,6 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { CourseAccessService, CourseAction } from '@manaratak/application';
 export function courseRequestAction(method: string, path: string): CourseAction | 'manage' {
+  method = method === 'HEAD' ? 'GET' : method;
+  path = path.replace(/\/+$/, '').toLowerCase();
   const suffix = path.replace(/^\/[0-9a-f-]{36}(?:\/|$)/i, '');
   if (method === 'GET') {
     if (/^(learners|learning-report)(?:\/|$)/.test(suffix)) return 'learners';
@@ -32,7 +34,7 @@ export const createCourseAccessGuard =
         next();
         return;
       }
-      if (req.method === 'GET' && req.path === '/assigned') {
+      if (['GET', 'HEAD'].includes(req.method) && /^\/assigned\/?$/i.test(req.path)) {
         if (await access.workspace(req.authUserId, context)) next();
         else res.status(403).json({ error: 'COURSE_PERMISSION_DENIED' });
         return;

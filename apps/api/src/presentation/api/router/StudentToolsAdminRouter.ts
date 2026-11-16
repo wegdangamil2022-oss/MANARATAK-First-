@@ -26,37 +26,31 @@ export class StudentToolsAdminRouter {
   }) {
     const router = Router();
     if(cradle.studentToolTestDiscovery)router.use('/:ownerKey/test-discovery',testDiscoveryOwnerRouter(cradle.studentToolTestDiscovery,cradle.authEvaluatorService,{view:'admin:student-tools:view',propose:'admin:student-tools:manage-availability',review:'admin:student-tools:approve-release'}));
-    router.use(async (req, res, next) => {
+    const authorize = async (req: Request, res: Response, next: NextFunction) => {
       if (!req.authUserId) return void res.status(401).json({ error: 'TOOL_AUTH_REQUIRED' });
-      const suffix =
-        req.method === 'GET'
-          ? /\/(executions|audit)(\/[^/]+)?$/.test(req.path) || req.path === '/workspace/usage'
-            ? 'view-executions'
-            : 'view'
-          : req.path.endsWith('/metadata')
-            ? 'edit-metadata'
-            : req.path.endsWith('/test')
-              ? 'run-test'
-              : /\/release\/(APPROVE|REJECT|ACTIVATE)$/.test(req.path)
-                ? 'approve-release'
-                : 'manage-availability';
+      const path = req.route.path as string;
+      const read = req.method === 'GET' || req.method === 'HEAD';
+      let suffix: string | null = null;
+      if (read) suffix = path.includes('/executions') || path.endsWith('/audit') ||
+        (path === '/workspace/:section' && ['usage','executions'].includes(req.params.section))
+          ? 'view-executions' : 'view';
+      else if (path === '/:toolKey/metadata') suffix = 'edit-metadata';
+      else if (path === '/:toolKey/test') suffix = 'run-test';
+      else if (path === '/:toolKey/release/:action') suffix =
+        ['APPROVE','REJECT','ACTIVATE'].includes(req.params.action) ? 'approve-release' :
+        req.params.action === 'PROPOSE' ? 'manage-availability' : null;
+      else if (['/:toolKey/access-policy','/:toolKey/eligibility','/:toolKey/availability',
+        '/:toolKey/flags','/:toolKey/lifecycle/:action'].includes(path)) suffix = 'manage-availability';
+      if (!suffix) return void res.status(403).json({error:'TOOL_CAPABILITY_UNRECOGNIZED'});
       const permission = `admin:student-tools:${suffix}`;
       try {
-        const result = await cradle.authEvaluatorService.evaluatePermission(
-          req.authUserId,
-          permission,
-          { ip: req.ip, requestTime: new Date() },
-        );
-        if (!result.isGranted)
-          return void res
-            .status(403)
-            .json({ error: 'TOOL_PERMISSION_DENIED', requiredPermission: permission });
+        const result = await cradle.authEvaluatorService.evaluatePermission(req.authUserId, permission,
+          { ip: req.ip, requestTime: new Date() });
+        if (!result.isGranted) return void res.status(403).json({error:'TOOL_PERMISSION_DENIED',requiredPermission:permission});
         res.setHeader('X-Admin-Required-Permission', permission);
         next();
-      } catch {
-        res.status(403).json({ error: 'TOOL_PERMISSION_DENIED', requiredPermission: permission });
-      }
-    });
+      } catch { res.status(403).json({error:'TOOL_PERMISSION_DENIED',requiredPermission:permission}); }
+    };
     const revision = z
       .object({
         expectedRevision: z.number().int().min(0),
@@ -72,7 +66,7 @@ export class StudentToolsAdminRouter {
       (req: Request, res: Response, next: NextFunction) =>
         Promise.resolve(fn(req, res)).catch(next);
     router.get(
-      '/overview',
+      '/overview', authorize,
       safe(async (_req, res) => {
         const [tools, telemetry] = await Promise.all([
           cradle.studentToolRegistryUseCases.listAdminTools(),
@@ -92,7 +86,7 @@ export class StudentToolsAdminRouter {
       }),
     );
     router.get(
-      '/',
+      '/', authorize,
       safe(async (req, res) => {
         res.json(
           await cradle.studentToolRegistryUseCases.listAdminPage(
@@ -106,7 +100,7 @@ export class StudentToolsAdminRouter {
       pageSize: z.coerce.number().int().min(1).max(100).default(25),
     };
     const trace = z.string().trim().min(1).max(200).optional();
-    router.get('/workspace/:section', safe(async (req, res) => {
+    router.get('/workspace/:section', authorize, safe(async (req, res) => {
       const section = z.enum(['releases', 'quality', 'usage', 'executions']).parse(req.params.section);
       if (section === 'usage') {
         z.object({}).strict().parse(req.query);
@@ -122,24 +116,24 @@ export class StudentToolsAdminRouter {
       const query = z.object({ ...pageQuery, search: trace, status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'CONSUMED']).optional() }).strict().parse(req.query);
       return res.json(await cradle.studentToolRegistryUseCases.workspace(section, query));
     }));
-    router.get('/:toolKey/versions', safe(async (req, res) => {
+    router.get('/:toolKey/versions', authorize, safe(async (req, res) => {
       const { toolKey } = parseStrict(toolKeyParamSchema, req.params);
       const { page, pageSize } = z.object(pageQuery).strict().parse(req.query);
       res.json(await cradle.studentToolRegistryUseCases.versions(toolKey, page, pageSize));
     }));
-    router.get('/:toolKey/executions/:executionId', safe(async (req, res) => {
+    router.get('/:toolKey/executions/:executionId', authorize, safe(async (req, res) => {
       const { toolKey } = parseStrict(toolKeyParamSchema, { toolKey: req.params.toolKey });
       const executionId = z.string().regex(/^[A-Za-z0-9_-]{1,200}$/).parse(req.params.executionId);
       const data = await cradle.studentToolRegistryUseCases.executionDetail(toolKey, executionId);
       res.status(data ? 200 : 404).json(data ? { data } : { error: 'TOOL_EXECUTION_NOT_FOUND' });
     }));
-    router.patch('/:toolKey/access-policy', safe(async (req, res) => {
+    router.patch('/:toolKey/access-policy', authorize, safe(async (req, res) => {
       const { toolKey } = parseStrict(toolKeyParamSchema, req.params);
       const { expectedRevision, semanticVersion, changeNote, ...patch } = parseStrict(studentToolAccessPolicySchema, req.body);
       res.json({ data: await cradle.studentToolRegistryUseCases.updateVersionedConfiguration(toolKey, patch, { expectedRevision, semanticVersion, changeNote }, actor(req)) });
     }));
     router.get(
-      '/:toolKey/executions',
+      '/:toolKey/executions', authorize,
       safe(async (req, res) => {
         const { toolKey } = parseStrict(toolKeyParamSchema, req.params);
         const query = z
@@ -171,7 +165,7 @@ export class StudentToolsAdminRouter {
       }),
     );
     router.get(
-      '/:toolKey/audit',
+      '/:toolKey/audit', authorize,
       safe(async (req, res) => {
         const { toolKey } = parseStrict(toolKeyParamSchema, req.params);
         const { page, pageSize, ...filters } = z
@@ -184,7 +178,7 @@ export class StudentToolsAdminRouter {
       }),
     );
     router.post(
-      '/:toolKey/eligibility',
+      '/:toolKey/eligibility', authorize,
       safe(async (req, res) => {
         const { toolKey } = parseStrict(toolKeyParamSchema, req.params);
         const body = z
@@ -199,7 +193,7 @@ export class StudentToolsAdminRouter {
       }),
     );
     router.post(
-      '/:toolKey/release/:action',
+      '/:toolKey/release/:action', authorize,
       safe(async (req, res) => {
         const { toolKey } = parseStrict(toolKeyParamSchema, { toolKey: req.params.toolKey });
         const action = z
@@ -218,7 +212,7 @@ export class StudentToolsAdminRouter {
       }),
     );
     router.get(
-      '/:toolKey',
+      '/:toolKey', authorize,
       safe(async (req, res) => {
         const { toolKey } = parseStrict(toolKeyParamSchema, req.params);
         const tool = await cradle.studentToolRegistryUseCases.findTool(toolKey);
@@ -228,7 +222,7 @@ export class StudentToolsAdminRouter {
       }),
     );
     router.patch(
-      '/:toolKey/metadata',
+      '/:toolKey/metadata', authorize,
       safe(async (req, res) => {
         const { toolKey } = parseStrict(toolKeyParamSchema, req.params);
         const { expectedRevision, reason, ...patch } = parseStrict(
@@ -247,7 +241,7 @@ export class StudentToolsAdminRouter {
       }),
     );
     router.patch(
-      '/:toolKey/availability',
+      '/:toolKey/availability', authorize,
       safe(async (req, res) => {
         const { toolKey } = parseStrict(toolKeyParamSchema, req.params);
         const body = parseStrict(studentToolAvailabilitySchema, req.body);
@@ -263,7 +257,7 @@ export class StudentToolsAdminRouter {
       }),
     );
     router.patch(
-      '/:toolKey/flags',
+      '/:toolKey/flags', authorize,
       safe(async (req, res) => {
         const { toolKey } = parseStrict(toolKeyParamSchema, req.params);
         const { semanticVersion, changeNote, expectedRevision, ...featureFlags } = parseStrict(
@@ -281,7 +275,7 @@ export class StudentToolsAdminRouter {
       }),
     );
     router.post(
-      '/:toolKey/lifecycle/:action',
+      '/:toolKey/lifecycle/:action', authorize,
       safe(async (req, res) => {
         const { toolKey, action } = parseStrict(studentToolLifecycleParamSchema, req.params);
         const actions: Record<typeof action, StudentToolLifecycleStatus> = {
@@ -304,7 +298,7 @@ export class StudentToolsAdminRouter {
       }),
     );
     router.post(
-      '/:toolKey/test',
+      '/:toolKey/test', authorize,
       safe(async (req, res) => {
         actor(req);
         const { toolKey } = parseStrict(toolKeyParamSchema, req.params);
