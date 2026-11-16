@@ -1,0 +1,317 @@
+{
+  "source": "MANARATAK iso3166-2 administrative region CSV and university-study city CSV",
+  "status": "SOURCE_ALIAS_REVIEW_REQUIRED",
+  "date": "2026-10-13",
+  "isAutomaticDatabaseImportPermitted": false,
+  "rules": {
+    "RUS": {
+      "Adygeya": "RU-AD",
+      "Altayskiy Kray": "RU-ALT",
+      "Amurskaya Oblast’": "RU-AMU",
+      "Arkhangel’skaya Oblast’": "RU-ARK",
+      "Astrakhanskaya Oblast’": "RU-AST",
+      "Belgorodskaya Oblast’": "RU-BEL",
+      "Bryanskaya Oblast’": "RU-BRY",
+      "Buryatiya": "RU-BU",
+      "Chechnya": "RU-CE",
+      "Chuvashiya": "RU-CU",
+      "Irkutskaya Oblast’": "RU-IRK",
+      "Ivanovskaya Oblast’": "RU-IVA",
+      "Kabardino-Balkariya": "RU-KB",
+      "Kaliningradskaya Oblast’": "RU-KGD",
+      "Kalmykiya": "RU-KL",
+      "Karachayevo-Cherkesiya": "RU-KC",
+      "Kareliya": "RU-KR",
+      "Kemerovskaya Oblast’": "RU-KEM",
+      "Khabarovskiy Kray": "RU-KHA",
+      "Khakasiya": "RU-KK",
+      "Khanty-Mansiyskiy Avtonomnyy Okrug-Yugra": "RU-KHM",
+      "Kirovskaya Oblast’": "RU-KIR",
+      "Kostromskaya Oblast’": "RU-KOS",
+      "Krasnodarskiy Kray": "RU-KDA",
+      "Krasnoyarskiy Kray": "RU-KYA",
+      "Kurganskaya Oblast’": "RU-KGN",
+      "Kurskaya Oblast’": "RU-KRS",
+      "Leningradskaya Oblast’": "RU-LEN",
+      "Lipetskaya Oblast’": "RU-LIP",
+      "Magadanskaya Oblast’": "RU-MAG",
+      "Mariy-El": "RU-ME",
+      "Mordoviya": "RU-MO",
+      "Moskovskaya Oblast’": "RU-MOS",
+      "Murmanskaya Oblast’": "RU-MUR",
+      "Nenetskiy Avtonomnyy Okrug": "RU-NEN",
+      "North Ossetia": "RU-SE",
+      "Novgorodskaya Oblast’": "RU-NGR",
+      "Novosibirskaya Oblast’": "RU-NVS",
+      "Omskaya Oblast’": "RU-OMS",
+      "Orenburgskaya Oblast’": "RU-ORE",
+      "Orlovskaya Oblast’": "RU-ORL",
+      "Penzenskaya Oblast’": "RU-PNZ",
+      "Permskiy Kray": "RU-PER",
+      "Primorskiy Kray": "RU-PRI",
+      "Pskovskaya Oblast’": "RU-PSK",
+      "Rostovskaya Oblast’": "RU-ROS",
+      "Ryazanskaya Oblast’": "RU-RYA",
+      "Sakha (Yakutiya)": "RU-SA",
+      "Sakhalinskaya Oblast’": "RU-SAK",
+      "Samarskaya Oblast’": "RU-SAM",
+      "Saratovskaya Oblast’": "RU-SAR",
+      "Smolenskaya Oblast’": "RU-SMO",
+      "Stavropol’skiy Kray": "RU-STA",
+      "Sverdlovskaya Oblast’": "RU-SVE",
+      "Tambovskaya Oblast’": "RU-TAM",
+      "Tomskaya Oblast’": "RU-TOM",
+      "Tul’skaya Oblast’": "RU-TUL",
+      "Tverskaya Oblast’": "RU-TVE",
+      "Tyumenskaya Oblast’": "RU-TYU",
+      "Udmurtiya": "RU-UD",
+      "Ul’yanovskaya Oblast’": "RU-ULY",
+      "Vladimirskaya Oblast’": "RU-VLA",
+      "Volgogradskaya Oblast’": "RU-VGG",
+      "Vologodskaya Oblast’": "RU-VLG",
+      "Yamalo-Nenetskiy Avtonomnyy Okrug": "RU-YAN",
+      "Yaroslavskaya Oblast’": "RU-YAR",
+      "Yevreyskaya Avtonomnaya Oblast’": "RU-YEV",
+      "Zabaykal’skiy Kray": "RU-ZAB"
+    },
+    "LKA": {
+      "Western": "LK-1",
+      "Southern": "LK-3",
+      "North Western": "LK-6",
+      "Central": "LK-2",
+      "Eastern": "LK-5",
+      "Sabaragamuwa": "LK-9",
+      "North Central": "LK-7",
+      "Uva": "LK-8"
+    },
+    "SRB": {
+      "Novi Sad": "RS-06",
+      "Niš": "RS-20",
+      "Kragujevac": "RS-12",
+      "Šabac": "RS-08",
+      "Smederevo": "RS-10",
+      "Valjevo": "RS-09",
+      "Pančevo": "RS-04",
+      "Sremska Mitrovica": "RS-07",
+      "Čačak": "RS-17",
+      "Požarevac": "RS-11",
+      "Zrenjanin": "RS-02",
+      "Kraljevo": "RS-18",
+      "Novi Pazar": "RS-18",
+      "Užice": "RS-16",
+      "Kruševac": "RS-19",
+      "Vranje": "RS-24",
+      "Sombor": "RS-05",
+      "Pirot": "RS-22",
+      "Zaječar": "RS-15",
+      "Subotica": "RS-01",
+      "Bor": "RS-14"
+    },
+    "DEU": {
+      "North Rhine-Westphalia": "DE-NW",
+      "Bavaria": "DE-BY",
+      "Lower Saxony": "DE-NI",
+      "Rhineland-Palatinate": "DE-RP",
+      "Hesse": "DE-HE",
+      "Saxony": "DE-SN",
+      "Mecklenburg-Western Pomerania": "DE-MV",
+      "Thuringia": "DE-TH",
+      "Saxony-Anhalt": "DE-ST"
+    },
+    "ESP": {
+      "Andalusia": "ES-AN",
+      "Catalonia": "ES-CT",
+      "Castille-Leon": "ES-CL",
+      "Canary Islands": "ES-CN",
+      "Galicia": "ES-GA",
+      "Castille-La Mancha": "ES-CM",
+      "Basque Country": "ES-PV",
+      "Balearic Islands": "ES-IB",
+      "Navarre": "ES-NC"
+    },
+    "SWE": {
+      "Västra Götaland": "SE-O",
+      "Skåne": "SE-M",
+      "Stockholm": "SE-AB",
+      "Norrbotten": "SE-BD",
+      "Södermanland": "SE-D",
+      "Örebro": "SE-T",
+      "Östergötland": "SE-E",
+      "Halland": "SE-N",
+      "Kalmar": "SE-H",
+      "Västernorrland": "SE-Y",
+      "Uppsala": "SE-C",
+      "Västmanland": "SE-U",
+      "Jönköping": "SE-F",
+      "Gävleborg": "SE-X",
+      "Västerbotten": "SE-AC",
+      "Värmland": "SE-S",
+      "Dalarna": "SE-W",
+      "Blekinge": "SE-K",
+      "Kronoberg": "SE-G",
+      "Jämtland": "SE-Z",
+      "Gotland": "SE-I"
+    },
+    "BIH": {
+      "Bosnia and Herzegovina, Federation of": "BA-BIH",
+      "Srpska, Republika": "BA-SRP",
+      "Brcko District": "BA-BRC"
+    },
+    "BLR": {
+      "Brestskaya Voblasts’": "BY-BR",
+      "Minskaya Voblasts’": "BY-MI",
+      "Homyel’skaya Voblasts’": "BY-HO",
+      "Hrodzyenskaya Voblasts’": "BY-HR",
+      "Mahilyowskaya Voblasts’": "BY-MA",
+      "Vitsyebskaya Voblasts’": "BY-VI",
+      "Minsk": "BY-HM"
+    },
+    "KOR": {
+      "Gyeonggi": "KR-41",
+      "Jeonnam": "KR-46",
+      "Gyeongbuk": "KR-47",
+      "Chungnam": "KR-44",
+      "Gyeongnam": "KR-48",
+      "Gangwon": "KR-42",
+      "Jeonbuk": "KR-45",
+      "Chungbuk": "KR-43",
+      "Busan": "KR-26",
+      "Daegu": "KR-27",
+      "Daejeon": "KR-30",
+      "Gwangju": "KR-29",
+      "Incheon": "KR-28",
+      "Jeju": "KR-49",
+      "Seoul": "KR-11",
+      "Ulsan": "KR-31"
+    },
+    "SVK": {
+      "Nitra": "SK-NI",
+      "Prešov": "SK-PV",
+      "Banská Bystrica": "SK-BC",
+      "Žilina": "SK-ZI",
+      "Trnava": "SK-TA",
+      "Bratislava": "SK-BL",
+      "Košice": "SK-KI",
+      "Trenčin": "SK-TC"
+    },
+    "BEL": {
+      "Flanders": "BE-VLG",
+      "Wallonia": "BE-WAL",
+      "Brussels-Capital Region": "BE-BRU"
+    },
+    "KAZ": {
+      "Qaraghandy": "KZ-35",
+      "Türkistan": "KZ-61",
+      "Aqtöbe": "KZ-15",
+      "Qostanay": "KZ-39",
+      "Aqmola": "KZ-11",
+      "Zhambyl": "KZ-31",
+      "Zhetisū": "KZ-33",
+      "Pavlodar": "KZ-55",
+      "Qyzylorda": "KZ-43",
+      "East Kazakhstan": "KZ-63",
+      "Ulytaū": "KZ-62",
+      "West Kazakhstan": "KZ-27",
+      "Mangghystaū": "KZ-47",
+      "Atyraū": "KZ-23",
+      "Abay": "KZ-10",
+      "Nur-Sultan": "KZ-71",
+      "North Kazakhstan": "KZ-59"
+    },
+    "ITA": {
+      "Lombardy": "IT-25",
+      "Tuscany": "IT-52",
+      "Piedmont": "IT-21",
+      "Valle d’Aosta": "IT-23"
+    },
+    "CHL": {
+      "Región Metropolitana": "CL-RM",
+      "Araucanía": "CL-AR",
+      "Magallanes y de la Antártica Chilena": "CL-MA",
+      "Aysén": "CL-AI"
+    },
+    "ISR": {
+      "Central": "IL-M",
+      "Tel Aviv": "IL-TA",
+      "Southern": "IL-D",
+      "Haifa": "IL-HA",
+      "Northern": "IL-Z",
+      "Jerusalem": "IL-JM"
+    },
+    "MEX": {
+      "Veracruz": "MX-VER",
+      "Michoacán": "MX-MIC",
+      "Coahuila": "MX-COA"
+    },
+    "MMR": {
+      "Rakhine State": "MM-16",
+      "Shan State": "MM-17",
+      "Kayin State": "MM-13",
+      "Chin State": "MM-14",
+      "Mon State": "MM-15",
+      "Kachin State": "MM-11",
+      "Kayah State": "MM-12"
+    },
+    "KGZ": {
+      "Jalal-Abad": "KG-J",
+      "Chüy": "KG-C",
+      "Ysyk-Köl": "KG-Y",
+      "Bishkek": "KG-GB"
+    },
+    "LBN": {
+      "Mont-Liban": "LB-JL",
+      "Liban-Nord": "LB-AS",
+      "Béqaa": "LB-BI",
+      "Liban-Sud": "LB-JA",
+      "Nabatîyé": "LB-NA",
+      "Beyrouth": "LB-BA"
+    },
+    "UKR": {
+      "Krym, Avtonomna Respublika": "UA-43",
+      "Kyiv, Misto": "UA-30",
+      "Sevastopol, Misto": "UA-40"
+    },
+    "NOR": {
+      "Trøndelag": "NO-50"
+    },
+    "CHN": {
+      "Inner Mongolia": "CN-NM",
+      "Tibet": "CN-XZ"
+    },
+    "NGA": {
+      "Federal Capital Territory": "NG-FC"
+    },
+    "CMR": {
+      "Extrême-Nord": "CM-EN"
+    },
+    "ETH": {
+      "Ādīs Ābeba": "ET-AA",
+      "Bīnshangul Gumuz": "ET-BE"
+    },
+    "LAO": {
+      "Louangnamtha": "LA-LM"
+    },
+    "THA": {
+      "Nong Bua Lamphu": "TH-39"
+    },
+    "PRK": {
+      "P’yŏngnam": "KP-02",
+      "Hambuk": "KP-09",
+      "P’yŏngbuk": "KP-03",
+      "Hamnam": "KP-08",
+      "Chagang": "KP-04"
+    },
+    "PAK": {
+      "Azad Kashmir": "PK-JK"
+    },
+    "UZB": {
+      "Qoraqalpog‘iston": "UZ-QR"
+    },
+    "NZL": {
+      "Wellington": "NZ-WGN"
+    },
+    "CHE": {
+      "Bern": "CH-BE"
+    }
+  }
+}
