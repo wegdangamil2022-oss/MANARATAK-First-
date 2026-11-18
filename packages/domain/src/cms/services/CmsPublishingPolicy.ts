@@ -9,7 +9,6 @@ import {
 
 const RAW_ASSET_PATTERN = /^(?:https?:\/\/|data:|file:|[a-zA-Z]:\\|\/)/i;
 const CMS_BODY_MAX_LENGTH = 250_000;
-const HTML_TOKEN_PATTERN = /<[^>]*>/g;
 const ALLOWED_SIMPLE_TAG_PATTERN = /^<\/?(?:p|br|strong|em|b|i|u|ul|ol|li|blockquote|h2|h3|h4)\s*\/?>$/i;
 const ALLOWED_ANCHOR_PATTERN = /^<a\s+href=(['"])https:\/\/[^'"<>&\s]+\1(?:\s+target=(['"])_blank\2)?(?:\s+rel=(['"])(?:noopener(?:\s+noreferrer)?|noreferrer(?:\s+noopener)?)\3)?\s*>$|^<\/a\s*>$/i;
 
@@ -28,14 +27,22 @@ export class CmsPublishingPolicy {
 
   public static assertSafeRichText(body: string): void {
     if (body.length > CMS_BODY_MAX_LENGTH || body.includes('\u0000')) throw new Error('CMS_UNSAFE_RICH_TEXT');
-    const tokens = body.match(HTML_TOKEN_PATTERN) || [];
-    const withoutTokens = body.replace(HTML_TOKEN_PATTERN, '');
-    if (withoutTokens.includes('<') || withoutTokens.includes('>')) throw new Error('CMS_UNSAFE_RICH_TEXT');
-    for (const token of tokens) {
-      if (!ALLOWED_SIMPLE_TAG_PATTERN.test(token) && !ALLOWED_ANCHOR_PATTERN.test(token)) {
-        throw new Error('CMS_UNSAFE_RICH_TEXT');
+    // Scan once: an unclosed sequence of '<' must not repeatedly rescan the body.
+    let tagStart = -1;
+    for (let index = 0; index < body.length; index++) {
+      if (body[index] === '<') {
+        if (tagStart !== -1) throw new Error('CMS_UNSAFE_RICH_TEXT');
+        tagStart = index;
+      } else if (body[index] === '>') {
+        if (tagStart === -1) throw new Error('CMS_UNSAFE_RICH_TEXT');
+        const token = body.slice(tagStart, index + 1);
+        if (!ALLOWED_SIMPLE_TAG_PATTERN.test(token) && !ALLOWED_ANCHOR_PATTERN.test(token)) {
+          throw new Error('CMS_UNSAFE_RICH_TEXT');
+        }
+        tagStart = -1;
       }
     }
+    if (tagStart !== -1) throw new Error('CMS_UNSAFE_RICH_TEXT');
   }
 
   public static assertSafeNavigationTarget(targetType: string, targetValue: string): void {

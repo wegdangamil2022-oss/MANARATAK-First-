@@ -52,13 +52,20 @@ export class PrismaIdentityRepository implements IIdentityRepository {
     return IdentityMapper.toDomain(record);
   }
 
-  public async save(identity: Identity): Promise<void> {
+  public async save(identity: Identity, guard?: { expectedStatus: import('@manaratak/domain').LifeStatus; expectedEmail: string }): Promise<void> {
     const data = IdentityMapper.toPersistence(identity);
     const id = data.id;
     const events = [...identity.domainEvents];
 
     const persist = async (client: any) => {
       const delegate = this.delegateFor(client);
+      if (guard) {
+        const locked = await delegate.updateMany({
+          where: { id, status: guard.expectedStatus, user: { is: { primaryEmail: guard.expectedEmail } } },
+          data: { status: guard.expectedStatus },
+        });
+        if (locked.count !== 1) throw new Error('IDENTITY_VERIFICATION_STATE_CHANGED');
+      }
       const existing = await delegate.findUnique({ where: { id } });
       if (existing) {
         const { user, account, ...identityData } = data;
@@ -78,6 +85,12 @@ export class PrismaIdentityRepository implements IIdentityRepository {
             ...(user ? { user: { create: user.create } } : {}),
             ...(account ? { account: { create: account.create } } : {})
           }
+        });
+      }
+      if (events.some((event: any) => event?.constructor?.name === 'IdentityContactUpdatedEvent' && event.contactType === 'Email')) {
+        await client.passwordResetTokenRecord.updateMany({
+          where: { identityId: id, consumedAt: null },
+          data: { consumedAt: new Date() },
         });
       }
       if (events.length > 0) {
@@ -104,9 +117,9 @@ export class PrismaIdentityRepository implements IIdentityRepository {
       }
     };
 
-    if (events.length > 0) {
+    if (events.length > 0 || guard) {
       if (!this.prisma?.$transaction) throw new Error('IDENTITY_DURABLE_TRANSACTION_REQUIRED');
-      await this.prisma.$transaction(async (tx: any) => persist(tx));
+      await this.prisma.$transaction(async (tx: any) => persist(tx), guard ? { isolationLevel: 'Serializable' } : undefined);
       identity.clearEvents();
       return;
     }

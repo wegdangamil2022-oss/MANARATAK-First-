@@ -19,7 +19,7 @@ export interface IIdentityRepository {
   findById(id: string): Promise<Identity | null>;
   findByEmail(email: string): Promise<Identity | null>;
   findByPhone(phone: string): Promise<Identity | null>;
-  save(identity: Identity): Promise<void>;
+  save(identity: Identity, guard?: { expectedStatus: LifeStatus; expectedEmail: string }): Promise<void>;
   update(identity: Identity): Promise<void>;
   delete(id: string): Promise<void>;
   findAll(): Promise<Identity[]>;

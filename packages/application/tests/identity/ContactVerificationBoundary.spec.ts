@@ -32,7 +32,7 @@ describe('contact ownership verification boundary', () => {
     });
     expect(created.isSuccess).toBe(true);
     const id = created.getValue().id;
-    const update = new UpdateContactUseCase(repository);
+    const update = new UpdateContactUseCase(repository, { invalidatePendingForIdentity: async () => {} } as any);
     for (const flag of [{ verifyEmail: true }, { verifyPhone: true }]) {
       const result = await update.execute({ identityId: id, ...flag });
       expect(result.isSuccess).toBe(false);

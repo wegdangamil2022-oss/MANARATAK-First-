@@ -65,6 +65,10 @@ export class ResetPasswordUseCase {
       throw error;
     }
 
+    if (!(tokenRecord.createdAt instanceof Date) || !Number.isFinite(tokenRecord.createdAt.getTime())) {
+      throw Object.assign(new Error('Reset token is no longer valid'), { code: 'RESET_TOKEN_INVALID' });
+    }
+
     // 3. TTL expiration check
     if (new Date(tokenRecord.expiresAt).getTime() < Date.now()) {
       const error: any = new Error('Password reset token has expired');
@@ -74,10 +78,13 @@ export class ResetPasswordUseCase {
 
     // 4. Identity validation
     const identity = await this.identityRepository.findById(tokenRecord.identityId);
-    if (!identity) {
+    if (!identity || !identity.user) {
       const error: any = new Error('Identity associated with reset token not found');
       error.code = 'IDENTITY_NOT_FOUND';
       throw error;
+    }
+    if (identity.user.contactRegistry.primaryEmail.trim().toLowerCase() !== tokenRecord.email.trim().toLowerCase()) {
+      throw Object.assign(new Error('Reset token is no longer valid'), { code: 'RESET_TOKEN_INVALID' });
     }
 
     // 5. Hash new password
@@ -88,20 +95,26 @@ export class ResetPasswordUseCase {
     const prisma = this.prismaClient;
     if (prisma?.$transaction) {
       await prisma.$transaction(async (tx: any) => {
+        // The current address must still match when the token is consumed.
+        const currentUser = await tx.userRecord.findUnique({ where: { identityId: tokenRecord.identityId }, select: { primaryEmail: true } });
+        if (!currentUser || currentUser.primaryEmail.trim().toLowerCase() !== tokenRecord.email.trim().toLowerCase()) {
+          throw Object.assign(new Error('Reset token is no longer valid'), { code: 'RESET_TOKEN_INVALID' });
+        }
         const consumed = await tx.passwordResetTokenRecord.updateMany({
           where: { id: tokenRecord.id, tokenHash, consumedAt: null, expiresAt: { gt: new Date() } },
           data: { consumedAt: now },
         });
         if (consumed.count !== 1) throw Object.assign(new Error('Reset token is no longer valid'), { code: 'RESET_TOKEN_ALREADY_USED' });
         // A. Update Credential
-        const credDelegate = tx.credentialRecord || tx;
-        if (credDelegate?.updateMany) {
-          const updated = await credDelegate.updateMany({
-            where: { identityId: tokenRecord.identityId, type: 'password' },
-            data: { passwordHash: newPasswordHash, updatedAt: now },
-          });
-          if (updated.count !== 1) throw new Error('PASSWORD_CREDENTIAL_MISSING_OR_DUPLICATE');
-        }
+        const updated = await tx.credentialRecord.updateMany({
+          where: { identityId: tokenRecord.identityId, type: 'password', updatedAt: { lte: tokenRecord.createdAt } },
+          data: { passwordHash: newPasswordHash, updatedAt: now },
+        });
+        if (updated.count !== 1) throw Object.assign(new Error('Reset token is no longer valid'), { code: 'RESET_TOKEN_INVALID' });
+        await tx.passwordResetTokenRecord.updateMany({
+          where: { identityId: tokenRecord.identityId, consumedAt: null },
+          data: { consumedAt: now },
+        });
         // C. Revoke Active Sessions
         const sessionDelegate = tx.sessionRecord || tx;
         if (sessionDelegate?.updateMany) {
@@ -114,12 +127,13 @@ export class ResetPasswordUseCase {
     } else {
       // In-memory or repository fallback
       await this.tokenRepository.consume(tokenRecord.id, now);
-      if (prisma?.credentialRecord?.updateMany) {
-        await prisma.credentialRecord.updateMany({
-          where: { identityId: tokenRecord.identityId, type: 'password' },
-          data: { passwordHash: newPasswordHash, updatedAt: now },
-        });
-      }
+      await this.tokenRepository.invalidatePendingForIdentity(tokenRecord.identityId);
+      if (!prisma?.credentialRecord?.updateMany) throw new Error('PASSWORD_CREDENTIAL_STORE_UNAVAILABLE');
+      const updated = await prisma.credentialRecord.updateMany({
+        where: { identityId: tokenRecord.identityId, type: 'password', updatedAt: { lte: tokenRecord.createdAt } },
+        data: { passwordHash: newPasswordHash, updatedAt: now },
+      });
+      if (updated.count !== 1) throw Object.assign(new Error('Reset token is no longer valid'), { code: 'RESET_TOKEN_INVALID' });
     }
 
     // Revoke all sessions via SessionManager

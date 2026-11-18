@@ -57,6 +57,15 @@ describe('Phase 16 CMS publishing policy', () => {
     expect(() => CmsPublishingPolicy.assertRedirect('/ar/old', '/ar/../evil')).toThrow();
     expect(() => CmsPublishingPolicy.assertRedirect('/ar/old', '/ar/new?next=https://evil.invalid')).toThrow();
   });
+
+  it('rejects oversized malformed tag sequences without blocking on repeated scans', () => {
+    const started = performance.now();
+    for (const body of ['<'.repeat(250_000), 'text'.repeat(60_000) + '<', '<p>safe</p>>', '<p<em>>']) {
+      expect(() => CmsPublishingPolicy.assertSafeRichText(body)).toThrow('CMS_UNSAFE_RICH_TEXT');
+    }
+    expect(performance.now() - started).toBeLessThan(1000);
+    expect(() => CmsPublishingPolicy.assertSafeRichText('<p>نص &lt; آمن</p><br>')).not.toThrow();
+  });
 });
 
 describe('CMS schema review boundaries', () => {

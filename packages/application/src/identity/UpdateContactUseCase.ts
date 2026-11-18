@@ -1,10 +1,13 @@
 import { UseCase, Result, ResultFactory } from '@manaratak/core';
-import { IIdentityRepository } from '@manaratak/domain';
+import { IIdentityRepository, IPasswordResetTokenRepository } from '@manaratak/domain';
 import { UpdateContactInput, IdentityDto } from './dtos';
 import { IdentityDtoMapper } from './mapper';
 
 export class UpdateContactUseCase implements UseCase<UpdateContactInput, Result<IdentityDto>> {
-  constructor(private readonly identityRepository: IIdentityRepository) {}
+  constructor(
+    private readonly identityRepository: IIdentityRepository,
+    private readonly passwordResetTokenRepository: IPasswordResetTokenRepository,
+  ) {}
 
   public async execute(input: UpdateContactInput): Promise<Result<IdentityDto>> {
     try {
@@ -20,6 +23,9 @@ export class UpdateContactUseCase implements UseCase<UpdateContactInput, Result<
         const currentEmail = identity.user?.contactRegistry.primaryEmail;
         if (!isUnique && currentEmail !== input.email) {
           return ResultFactory.failure(`Email ${input.email} is already in use.`);
+        }
+        if (currentEmail?.trim().toLowerCase() !== input.email.trim().toLowerCase()) {
+          await this.passwordResetTokenRepository.invalidatePendingForIdentity(input.identityId);
         }
         identity.updateEmail(input.email);
       }

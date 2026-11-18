@@ -6,6 +6,10 @@ Inbound provider webhooks must use `FinanceProviderWebhookVerifier` with a durab
 
 This contract requires the provider identity in the signature; the former format without `providerKey` is rejected rather than accepted as a fallback. Update any prospective webhook sender to the new format before enabling the integration. No finance webhook ingress is currently mounted, and real provider interoperability remains subject to the sandbox tests below.
 
+Payment responses may omit `safeMaskedMetadata`. When present, only `brand`, `network`, `last4`, `expiryMonth`, `expiryYear`, and `funding` are accepted; unknown fields or values outside the constrained formats are rejected. Brand and network are limited to the supported network names in `SAFE_PAYMENT_METADATA`, `last4` is exactly four digits, expiry month is `01`–`12`, expiry year is four digits beginning with `20`, and funding is `credit`, `debit`, `prepaid` or `unknown`. Provider integrations that previously returned other metadata must map to these fields before activation; full account numbers, tokens, and other free-form data must never be returned as metadata. An invalid response is treated as a provider protocol failure, and ambiguous payment outcomes must be reconciled.
+
+FX provider responses must supply `numerator` and `denominator` as canonical positive decimal strings of at most 30 digits, without leading zeros. JSON numbers and larger integers are rejected before conversion.
+
 The finance reconciliation background job is the recovery path for ambiguous payment and bank-transfer outcomes. It must remain enabled under the global durable worker runtime.
 
 ## Closure evidence

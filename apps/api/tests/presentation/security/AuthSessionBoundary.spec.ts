@@ -82,6 +82,7 @@ describe('B02 session and CSRF contract',()=>{
   ['/api/v1/auth/register',{displayName:'Test',primaryEmail:'person@example.test',password:'test-password'},'registerUserUseCase'],
   ['/api/v1/auth/verify-email',{token:'synthetic-token'},'verifyEmailUseCase'],
   ['/api/v1/auth/resend-verification',{email:'person@example.test'},'resendVerificationUseCase'],
+  ['/api/v1/auth/forgot-password',{email:'person@example.test'},'forgotPasswordUseCase'],
   ['/api/v1/auth/reset-password',{token:'synthetic-token',newPassword:'test-password'},'resetPasswordUseCase'],
  ] as const)('applies independent keyed account/IP budgets before %s',async(path,body,key)=>{
   const {app,deps,consume}=fixture();consume.mockResolvedValue({allowed:false,remaining:0,resetTime:Date.now()+60_000});

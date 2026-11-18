@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { EventEmitter } from 'node:events';
 import type https from 'node:https';
 import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@manaratak/domain';
@@ -65,6 +65,51 @@ describe('NodeSafeSourceHttpTransport offline behavior', () => {
 });
 
 describe('NodeSafeSourceHttpTransport hard resource ceilings', () => {
+  it('bounds total request time even while a response keeps sending data', async () => {
+    vi.useFakeTimers();
+    try {
+      const response = Object.assign(new EventEmitter(), { headers: {}, statusCode: 200 });
+      const destroy = vi.fn();
+      const factory = ((_url: URL, _options: unknown, respond: Function) => Object.assign(new EventEmitter(), {
+        setTimeout: () => undefined,
+        destroy,
+        end: () => respond(response),
+      })) as unknown as typeof https.request;
+      const pending = new NodePinnedSourceRequestExecutor(factory).execute({
+        url: new URL('https://safe.example/catalog/'), pinnedAddress: '93.184.216.34', timeoutMs: 100, maxBytes: 1000,
+      });
+      const rejected = expect(pending).rejects.toThrow('SOURCE_REQUEST_TIMEOUT');
+      for (let count = 0; count < 3; count++) {
+        await vi.advanceTimersByTimeAsync(30);
+        response.emit('data', Buffer.from('x'));
+      }
+      await vi.advanceTimersByTimeAsync(10);
+      await rejected;
+      expect(destroy).toHaveBeenCalledOnce();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally { vi.useRealTimers(); }
+  });
+
+  it('clears the total deadline after a successful response', async () => {
+    vi.useFakeTimers();
+    try {
+      const destroy = vi.fn();
+      const factory = ((_url: URL, _options: unknown, respond: Function) => Object.assign(new EventEmitter(), {
+        setTimeout: () => undefined, destroy,
+        end: () => {
+          const response = Object.assign(new EventEmitter(), { headers: {}, statusCode: 200 });
+          respond(response); response.emit('data', Buffer.from('ok')); response.emit('end');
+        },
+      })) as unknown as typeof https.request;
+      await expect(new NodePinnedSourceRequestExecutor(factory).execute({
+        url: new URL('https://safe.example/catalog/'), pinnedAddress: '93.184.216.34', timeoutMs: 100, maxBytes: 10,
+      })).resolves.toMatchObject({ statusCode: 200 });
+      expect(vi.getTimerCount()).toBe(0);
+      await vi.advanceTimersByTimeAsync(200);
+      expect(destroy).not.toHaveBeenCalled();
+    } finally { vi.useRealTimers(); }
+  });
+
   it('clamps caller-provided response size and timeout to hard ceilings', async () => {
     const executor = new FakeExecutor([ok]);
     await new NodeSafeSourceHttpTransport(policy(), executor).get(source, {

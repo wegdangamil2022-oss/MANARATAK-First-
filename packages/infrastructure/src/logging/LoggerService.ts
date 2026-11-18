@@ -1,6 +1,6 @@
 import { ILogger, ILoggerProvider, ILogContext, IConfigurationService, LogLevel, StructuredLogMessage } from '@manaratak/core';
 import { PinoLoggerProvider } from './PinoLoggerProvider';
-import { AuditSecretSanitizer } from '../audit/AuditSecretSanitizer';
+import { sanitizeLogContext, sanitizeLogText } from './LogSanitizer';
 
 export class LoggerService implements ILogger {
   private readonly provider: ILoggerProvider;
@@ -48,19 +48,19 @@ export class LoggerService implements ILogger {
     context?: Record<string, unknown>
   ): void {
     const correlationId = this.logContext?.getCorrelationId();
-    const sanitizedContext = context ? AuditSecretSanitizer.sanitize(context) : undefined;
+    const sanitizedContext = context ? sanitizeLogContext(context) : undefined;
 
     const structuredMessage: StructuredLogMessage = {
       timestamp: new Date().toISOString(),
       level,
       correlationId,
-      message,
+      message: sanitizeLogText(message),
       context: sanitizedContext,
       error: error
         ? {
-            name: error.name || 'Error',
-            message: error.message || String(error),
-            stack: error.stack,
+            name: sanitizeLogText(error.name || 'Error'),
+            message: sanitizeLogText(error.message || String(error)),
+            stack: error.stack ? sanitizeLogText(error.stack) : undefined,
           }
         : undefined,
     };

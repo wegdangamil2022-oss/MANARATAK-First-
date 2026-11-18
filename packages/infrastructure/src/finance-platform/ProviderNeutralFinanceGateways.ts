@@ -36,7 +36,16 @@ const RETRYABLE_PROVIDER_ERROR =
   /^PROVIDER_(?:REQUEST_TIMEOUT|REQUEST_FAILED|HTTP_ERROR:(?:408|429|500|502|503|504))$/;
 const SAFE_REFERENCE = /^[A-Za-z0-9._:\/-]{1,256}$/;
 const SAFE_FAILURE = /^[A-Z0-9._:-]{1,128}$/;
-const SENSITIVE_METADATA_KEY = /(?:pan|card|token|secret|password|authorization|cookie|cvv|cvc)/i;
+// Provider metadata is persisted and returned to payment readers. Limit it to
+// values whose shape cannot carry an arbitrary provider response or secret.
+const SAFE_PAYMENT_METADATA: Record<string, RegExp> = {
+  brand: /^(?:visa|mastercard|amex|american express|discover|jcb|diners club|unionpay|mada|other|unknown)$/i,
+  network: /^(?:visa|mastercard|amex|american express|discover|jcb|diners club|unionpay|mada|other|unknown)$/i,
+  last4: /^\d{4}$/,
+  expiryMonth: /^(?:0[1-9]|1[0-2])$/,
+  expiryYear: /^20\d{2}$/,
+  funding: /^(?:credit|debit|prepaid|unknown)$/i,
+};
 
 function normalizeOptions(
   configOrSecretReference?: FinanceProviderHttpOptions | string | null,
@@ -172,10 +181,9 @@ function parseMaskedMetadata(value: unknown): Record<string, string> | undefined
   const result: Record<string, string> = {};
   for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
     if (
-      !/^[A-Za-z0-9._-]{1,64}$/.test(key) ||
-      SENSITIVE_METADATA_KEY.test(key) ||
+      !Object.hasOwn(SAFE_PAYMENT_METADATA, key) ||
       typeof raw !== 'string' ||
-      raw.length > 256
+      !SAFE_PAYMENT_METADATA[key].test(raw)
     ) {
       throw new Error('FINANCE_PROVIDER_MASKED_METADATA_INVALID');
     }
@@ -484,10 +492,10 @@ export class EnvironmentFxRateProviderAdapter
       ),
     );
     if (
-      !/^\d+$/.test(String(value.numerator ?? '')) ||
-      !/^\d+$/.test(String(value.denominator ?? '')) ||
-      BigInt(String(value.numerator)) <= 0n ||
-      BigInt(String(value.denominator)) <= 0n
+      typeof value.numerator !== 'string' ||
+      typeof value.denominator !== 'string' ||
+      !/^[1-9]\d{0,29}$/.test(value.numerator) ||
+      !/^[1-9]\d{0,29}$/.test(value.denominator)
     )
       throw new Error('FX_PROVIDER_RATE_INVALID');
     if (value.sourceCurrency !== sourceCurrency || value.targetCurrency !== targetCurrency)

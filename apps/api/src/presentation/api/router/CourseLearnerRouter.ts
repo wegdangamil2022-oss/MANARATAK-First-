@@ -26,6 +26,10 @@ export class CourseLearnerRouter {
   }): Router {
     if (!cradle.mfaUseCases) throw new Error('STUDENT_MFA_POLICY_REQUIRED');
     const router = Router();
+    router.use((_req, res, next) => {
+      res.setHeader('Cache-Control', 'private, no-store');
+      next();
+    });
     const { courseProgressUseCases, learningPathUseCases, tokenProvider, sessionManager, principalAccessValidator, apiIdempotencyStore } = cradle;
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
       Promise.resolve(fn(req, res, next)).catch((error) => {
@@ -51,21 +55,22 @@ export class CourseLearnerRouter {
       });
     router.use(new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator, cradle.mfaUseCases).generate());
     router.use(createStudentRoleGuard(cradle.roleAssignmentRepository));
-    router.use(createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }));
     const student = (req: Request) => { if (!req.authUserId) throw new Error('STUDENT_AUTHENTICATION_REQUIRED'); return req.authUserId; };
     const context = (req: Request) => ({ actorId: student(req), actorType: 'IDENTITY', correlationId: (req.headers['x-correlation-id'] as string | undefined) || (req.headers['x-request-id'] as string | undefined), source: 'student-course-api' });
 
     const lessonProgressSchema = z.object({ status: z.nativeEnum(CourseProgressStatus), progressPercentage: z.number().min(0).max(100), timeSpentSeconds: z.number().int().nonnegative().optional(), metadata: z.record(z.string(), z.unknown()).optional() });
     const submitSchema = z.object({ answers: z.record(z.string(), z.unknown()) });
 
-    router.post('/learning-paths/:pathId/enroll', asyncHandler(async (req: Request, res: Response) => res.status(201).json(await learningPathUseCases.enroll(req.params.pathId, student(req)))));
-    router.get('/learning-paths/:pathId/available-courses', asyncHandler(async (req: Request, res: Response) => res.json({ data: await learningPathUseCases.availableCourses(req.params.pathId, student(req)) })));
-    router.post('/learning-paths/:pathId/progress/refresh', asyncHandler(async (req: Request, res: Response) => res.json(await learningPathUseCases.refreshProgress(req.params.pathId, student(req), context(req)))));
-
+    // A short-lived delivery capability must always recheck current enrollment.
+    // Never persist or replay its response in the generic command store.
     router.post('/:courseId/lessons/:lessonId/assets/:assetReferenceId/delivery-grant', asyncHandler(async (req: Request, res: Response) => {
       const assetId = await courseProgressUseCases.resolveLearningAsset(req.params.courseId, req.params.lessonId, req.params.assetReferenceId, student(req));
       res.json(await cradle.processAssetLifecycleUseCase.requestDeliveryGrant({assetId, expiresInSeconds:300,browserCompatible:true}));
     }));
+    router.use(createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }));
+    router.post('/learning-paths/:pathId/enroll', asyncHandler(async (req: Request, res: Response) => res.status(201).json(await learningPathUseCases.enroll(req.params.pathId, student(req)))));
+    router.get('/learning-paths/:pathId/available-courses', asyncHandler(async (req: Request, res: Response) => res.json({ data: await learningPathUseCases.availableCourses(req.params.pathId, student(req)) })));
+    router.post('/learning-paths/:pathId/progress/refresh', asyncHandler(async (req: Request, res: Response) => res.json(await learningPathUseCases.refreshProgress(req.params.pathId, student(req), context(req)))));
     router.post('/:courseId/enroll', asyncHandler(async (req: Request, res: Response) => res.status(201).json(await courseProgressUseCases.enroll(req.params.courseId, student(req)))));
     router.post(
       '/:courseId/resume',

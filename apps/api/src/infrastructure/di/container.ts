@@ -1277,7 +1277,7 @@ export function registerDependencies(
     archiveIdentityUseCase: asFunction(({ identityRepository, sessionManager }) => new ArchiveIdentityUseCase(identityRepository, sessionManager)).scoped(),
     purgeIdentityUseCase: asFunction(({ identityRepository, sessionManager }) => new PurgeIdentityUseCase(identityRepository, sessionManager)).scoped(),
     updateProfileUseCase: asFunction(({ identityRepository }) => new UpdateProfileUseCase(identityRepository)).scoped(),
-    updateContactUseCase: asFunction(({ identityRepository }) => new UpdateContactUseCase(identityRepository)).scoped(),
+    updateContactUseCase: asFunction(({ identityRepository, passwordResetTokenRepository }) => new UpdateContactUseCase(identityRepository, passwordResetTokenRepository)).scoped(),
     getIdentityUseCase: asFunction(({ identityRepository }) => new GetIdentityUseCase(identityRepository)).scoped(),
     listIdentitiesUseCase: asFunction(
       ({ identityRepository, roleRepository, roleAssignmentRepository, auditRecordRepo }) =>

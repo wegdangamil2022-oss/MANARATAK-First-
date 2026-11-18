@@ -19,6 +19,7 @@ These `POST` surfaces are not state-changing API commands under `STD-API-001`, o
 - `AuthRouter`: login/refresh/logout bootstrap session lifecycle. Login/refresh cannot be principal-scoped before authentication; refresh rotation has its own single-use/replay lineage controls.
 - `SearchRouter POST /`: query/read command. Search persistence is operational request history, not owner-domain mutation authority.
 - `AuthorizationRuntimeRouter POST /evaluate`: pure authorization decision query.
+- `CourseLearnerRouter POST /:courseId/lessons/:lessonId/assets/:assetReferenceId/delivery-grant`: short-lived capability query. Authentication, MFA, student role and current course/lesson access are checked for every request. The response bypasses generic command persistence, including requests carrying an `Idempotency-Key`; enrollment and progress mutations retain their command boundary. All learner responses carry `Cache-Control: private, no-store` (the certificate-status route also uses `no-store`).
 
 `StudentToolsPublicRouter` requires `Idempotency-Key`, but keeps replay custody in the student-tool owner. Execution intents bind the key and payload to an opaque requester reference; recoverable output stays encrypted in the owner store. Save/claim writes use the private workspace's student/execution identity. No public student-tool response or anonymous bearer token may enter the generic plaintext response store, regardless of route spelling or validation outcome.
 

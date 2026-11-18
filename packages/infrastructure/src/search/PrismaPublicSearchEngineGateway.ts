@@ -138,11 +138,10 @@ export class PrismaPublicSearchEngineGateway implements IPublicSearchGateway {
           concat_ws(' ', t."displayName", t."canonicalName", t."localizedNameAr", t."localizedNameEn", t.abbreviation, t."providerName", t."testCategory")
         FROM "InternationalTest" t WHERE t.status = 'PUBLISHED' AND t."isPubliclyVisible" = true
         UNION ALL
-        SELECT 'articles', cc.id, COALESCE(lc."localizedSlug", cc.slug), COALESCE(lc.title, cc.title), COALESCE(lc.summary, cc.summary, ''), NULL, cc."contentType",
-          concat_ws(' ', COALESCE(lc.title, cc.title), COALESCE(lc.summary, cc.summary), cc."contentType", cc."categorySlug")
-        FROM "CmsContentNode" cc
-        LEFT JOIN "CmsLocalizedContent" lc ON lc."contentId" = cc.id AND lc.locale = ${input.locale} AND lc.state = 'PUBLISHED'
-        WHERE cc.status = 'PUBLISHED'
+        SELECT 'articles', p."contentId", p.slug, p.title, COALESCE(p.summary, ''), NULL, p."contentType",
+          concat_ws(' ', p.title, p.summary, p."contentType", p."categorySlug")
+        FROM "CmsPublishedContent" p
+        WHERE p.status = 'PUBLISHED' AND p.locale = ${input.locale} AND p."siteIdentifier" = 'manaratak'
         UNION ALL
         SELECT 'services', sv.id, sv.slug, sv."displayName", sv."serviceDescription", NULL, NULL,
           concat_ws(' ', sv."displayName", sv."canonicalName", sv."serviceDescription", sv."serviceCategory", sv."providerName")

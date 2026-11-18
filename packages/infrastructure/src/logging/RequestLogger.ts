@@ -1,5 +1,5 @@
 import { IRequestLogger, ILogger, ILogContext } from '@manaratak/core';
-import { AuditSecretSanitizer } from '../audit/AuditSecretSanitizer';
+import { sanitizeLogContext } from './LogSanitizer';
 
 export class RequestLogger implements IRequestLogger {
   constructor(
@@ -9,11 +9,12 @@ export class RequestLogger implements IRequestLogger {
 
   public logRequest(method: string, url: string, ip?: string, headers?: Record<string, unknown>): void {
     const correlationId = this.logContext?.getCorrelationId();
-    const sanitizedHeaders = headers ? AuditSecretSanitizer.sanitize(headers) : undefined;
+    const sanitizedHeaders = headers ? sanitizeLogContext(headers) : undefined;
+    const path = url.split(/[?#]/, 1)[0] || '/';
 
-    this.logger.debug(`Incoming request ${method} ${url}`, {
+    this.logger.debug(`Incoming request ${method} ${path}`, {
       method,
-      url,
+      url: path,
       ip,
       headers: sanitizedHeaders,
       correlationId,
@@ -22,10 +23,11 @@ export class RequestLogger implements IRequestLogger {
 
   public logResponse(method: string, url: string, statusCode: number, durationMs: number): void {
     const correlationId = this.logContext?.getCorrelationId();
-    const message = `HTTP ${method} ${url} ${statusCode} - ${durationMs}ms`;
+    const path = url.split(/[?#]/, 1)[0] || '/';
+    const message = `HTTP ${method} ${path} ${statusCode} - ${durationMs}ms`;
     const context = {
       method,
-      url,
+      url: path,
       statusCode,
       durationMs,
       correlationId,

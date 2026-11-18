@@ -46,7 +46,18 @@ export class NodePinnedSourceRequestExecutor implements IPinnedSourceRequestExec
 
   execute({ url, pinnedAddress, timeoutMs, maxBytes, headers }: PinnedSourceRequest): Promise<PinnedSourceResponse> {
     return new Promise((resolve, reject) => {
-      const req = this.requestFactory(
+      let req: ReturnType<typeof https.request> | undefined;
+      let settled = false;
+      const deadline = setTimeout(() => fail(new Error('SOURCE_REQUEST_TIMEOUT')), timeoutMs);
+      const fail = (error: Error) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(deadline);
+        req?.destroy();
+        reject(error);
+      };
+      try {
+      req = this.requestFactory(
         url,
         {
           servername: url.hostname,
@@ -62,30 +73,21 @@ export class NodePinnedSourceRequestExecutor implements IPinnedSourceRequestExec
         (res) => {
           const chunks: Buffer[] = [];
           let size = 0;
-          let settled = false;
-
           res.on('data', (chunk: Buffer) => {
             size += chunk.length;
             if (size > maxBytes && !settled) {
-              settled = true;
-              req.destroy();
-              reject(new Error('SOURCE_RESPONSE_TOO_LARGE'));
+              fail(new Error('SOURCE_RESPONSE_TOO_LARGE'));
             } else if (!settled) {
               chunks.push(chunk);
             }
           });
 
-          const failResponse = (error: Error) => {
-            if (settled) return;
-            settled = true;
-            req.destroy();
-            reject(error);
-          };
-          res.on('aborted', () => failResponse(new Error('SOURCE_RESPONSE_ABORTED')));
-          res.on('error', failResponse);
+          res.on('aborted', () => fail(new Error('SOURCE_RESPONSE_ABORTED')));
+          res.on('error', fail);
           res.on('end', () => {
             if (!settled) {
               settled = true;
+              clearTimeout(deadline);
               resolve({
                 statusCode: res.statusCode ?? 0,
                 location: res.headers.location,
@@ -100,9 +102,14 @@ export class NodePinnedSourceRequestExecutor implements IPinnedSourceRequestExec
         },
       );
 
-      req.setTimeout(timeoutMs, () => req.destroy(new Error('SOURCE_REQUEST_TIMEOUT')));
-      req.on('error', reject);
+      // The socket timeout alone only limits idle periods. The deadline above
+      // also bounds responses that keep sending small chunks indefinitely.
+      req.setTimeout(timeoutMs, () => fail(new Error('SOURCE_REQUEST_TIMEOUT')));
+      req.on('error', fail);
       req.end();
+      } catch (error) {
+        fail(error instanceof Error ? error : new Error(String(error)));
+      }
     });
   }
 }

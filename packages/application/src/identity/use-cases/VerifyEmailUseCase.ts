@@ -59,6 +59,12 @@ export class VerifyEmailUseCase {
       throw error;
     }
 
+    if (identity.status !== LifeStatus.PROVISIONED && identity.status !== LifeStatus.ACTIVE) {
+      const error: any = new Error('Identity is not eligible for email verification');
+      error.code = 'VERIFICATION_NOT_ALLOWED';
+      throw error;
+    }
+
     const primaryEmail = identity.user.contactRegistry.primaryEmail.trim().toLowerCase();
     if (primaryEmail !== tokenRecord.email.trim().toLowerCase()) {
       const error: any = new Error('Verification token email does not match identity primary email');
@@ -66,14 +72,16 @@ export class VerifyEmailUseCase {
       throw error;
     }
 
+    const expectedStatus = identity.status;
+
     // Mark email as verified on domain entity
     identity.user.contactRegistry.verifyEmail();
 
     // Transition lifecycle from PROVISIONED to ACTIVE
-    identity.activate();
+    if (identity.status === LifeStatus.PROVISIONED) identity.activate();
 
     // Persist activated identity
-    await this.identityRepository.save(identity);
+    await this.identityRepository.save(identity, { expectedStatus, expectedEmail: primaryEmail });
 
     // Consume token to prevent replay
     await this.tokenRepository.consume(tokenRecord.id, new Date());

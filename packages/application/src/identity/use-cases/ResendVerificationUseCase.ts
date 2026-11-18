@@ -39,6 +39,10 @@ export class ResendVerificationUseCase {
       return genericResponse;
     }
 
+    if (identity.status !== LifeStatus.PROVISIONED && identity.status !== LifeStatus.ACTIVE) {
+      return genericResponse;
+    }
+
     // If already active and verified, do not send another token
     if (identity.status === LifeStatus.ACTIVE && identity.user.contactRegistry.isEmailVerified) {
       return genericResponse;

@@ -36,6 +36,7 @@ export class PrismaPasswordCredentialRepository implements IPasswordCredentialRe
         where: { identityId, type: 'password', disabled: false, passwordHash: expectedHash }, data: { passwordHash },
       });
       if (updated.count !== 1) throw new Error('CREDENTIAL_CHANGED_OR_DISABLED');
+      await tx.passwordResetTokenRecord.updateMany({ where: { identityId, consumedAt: null }, data: { consumedAt: new Date() } });
       await tx.sessionRecord.updateMany({ where: { identityId, revokedAt: null }, data: { revokedAt: new Date() } });
       const id = randomUUID();
       await tx.auditRecord.create({ data: {

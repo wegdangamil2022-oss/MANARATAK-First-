@@ -1,6 +1,6 @@
 import pino, { Logger as PinoLogger } from 'pino';
 import { ILoggerProvider, StructuredLogMessage, LogLevel } from '@manaratak/core';
-import { AuditSecretSanitizer } from '../audit/AuditSecretSanitizer';
+import { sanitizeLogContext, sanitizeLogText } from './LogSanitizer';
 
 export class PinoLoggerProvider implements ILoggerProvider {
   private readonly pinoInstance: PinoLogger;
@@ -20,12 +20,13 @@ export class PinoLoggerProvider implements ILoggerProvider {
   }
 
   public log(message: StructuredLogMessage): void {
-    const sanitizedContext = message.context ? AuditSecretSanitizer.sanitize(message.context) : undefined;
+    const sanitizedContext = message.context ? sanitizeLogContext(message.context) : undefined;
+    const sanitizedMessage = sanitizeLogText(message.message);
     const sanitizedError = message.error
       ? {
-          name: message.error.name,
-          message: message.error.message,
-          stack: message.error.stack,
+          name: sanitizeLogText(message.error.name),
+          message: sanitizeLogText(message.error.message),
+          stack: message.error.stack ? sanitizeLogText(message.error.stack) : undefined,
         }
       : undefined;
 
@@ -38,20 +39,20 @@ export class PinoLoggerProvider implements ILoggerProvider {
 
     switch (message.level) {
       case LogLevel.DEBUG:
-        this.pinoInstance.debug(payload, message.message);
+        this.pinoInstance.debug(payload, sanitizedMessage);
         break;
       case LogLevel.INFO:
-        this.pinoInstance.info(payload, message.message);
+        this.pinoInstance.info(payload, sanitizedMessage);
         break;
       case LogLevel.WARN:
-        this.pinoInstance.warn(payload, message.message);
+        this.pinoInstance.warn(payload, sanitizedMessage);
         break;
       case LogLevel.ERROR:
       case LogLevel.FATAL:
-        this.pinoInstance.error(payload, message.message);
+        this.pinoInstance.error(payload, sanitizedMessage);
         break;
       default:
-        this.pinoInstance.info(payload, message.message);
+        this.pinoInstance.info(payload, sanitizedMessage);
         break;
     }
   }

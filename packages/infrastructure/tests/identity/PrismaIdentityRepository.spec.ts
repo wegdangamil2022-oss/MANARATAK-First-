@@ -13,14 +13,37 @@ describe('PrismaIdentityRepository', () => {
         findFirst: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
+        updateMany: vi.fn(),
         delete: vi.fn(),
         findMany: vi.fn(),
         count: vi.fn()
       },
       transactionalOutboxRecord: { upsert: vi.fn() },
+      passwordResetTokenRecord: { updateMany: vi.fn() },
     };
     mockPrisma.$transaction = vi.fn(async (mutation: (tx: any) => Promise<unknown>) => mutation(mockPrisma));
     repository = new PrismaIdentityRepository(mockPrisma);
+  });
+  it('rejects verification persistence when the expected identity state or email changed', async () => {
+    const identity = Identity.create(IdentityType.Human, new User({
+      profile: new Profile({ displayName: 'Example' }),
+      contactRegistry: new ContactRegistry({ primaryEmail: 'old@example.invalid', isEmailVerified: true, isPhoneVerified: false }),
+    }), { storageQuotaBytes: 2000, rateLimitMax: 200, rateLimitWindowMs: 60000 }, TechnicalMetadata.create('manager'));
+    mockPrisma.identityRecord.updateMany.mockResolvedValue({ count: 0 });
+    await expect(repository.save(identity, { expectedStatus: identity.status, expectedEmail: 'old@example.invalid' })).rejects.toThrow('IDENTITY_VERIFICATION_STATE_CHANGED');
+    expect(mockPrisma.identityRecord.update).not.toHaveBeenCalled();
+  });
+  it('invalidates recovery tokens transactionally when an email changes', async () => {
+    const identity = Identity.create(IdentityType.Human, new User({
+      profile: new Profile({ displayName: 'Example' }),
+      contactRegistry: new ContactRegistry({ primaryEmail: 'old@example.invalid', isEmailVerified: true, isPhoneVerified: false }),
+    }), { storageQuotaBytes: 2000, rateLimitMax: 200, rateLimitWindowMs: 60000 }, TechnicalMetadata.create('manager'));
+    identity.clearEvents();
+    identity.updateEmail('new@example.invalid');
+    mockPrisma.identityRecord.findUnique.mockResolvedValue({ id: identity.id.toString() });
+    await repository.save(identity);
+    expect(mockPrisma.passwordResetTokenRecord.updateMany).toHaveBeenCalledWith({ where: { identityId: identity.id.toString(), consumedAt: null }, data: { consumedAt: expect.any(Date) } });
+    expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
   });
   it('applies search and verification before both count and pagination, with a stable tie-breaker', async () => {
     mockPrisma.identityRecord.count.mockResolvedValue(41);

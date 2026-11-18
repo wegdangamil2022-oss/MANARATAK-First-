@@ -939,23 +939,16 @@ export class AuthRouter {
     );
 
     // 7. POST /forgot-password
-    router.post('/forgot-password', async (req: Request, res: Response) => {
+    const forgotPasswordSchema = z.object({
+      primaryEmail: z.string().trim().email('Invalid email address').max(255).optional(),
+      email: z.string().trim().email('Invalid email address').max(255).optional(),
+    }).strict().refine((data) => !!(data.primaryEmail || data.email), { message: 'Email address is required' });
+    router.post('/forgot-password', authBudget('forgot-password-account', 3, 15 * 60_000, (req) => {
+      const parsed = forgotPasswordSchema.safeParse(req.body);
+      return parsed.success ? (parsed.data.primaryEmail || parsed.data.email)!.toLowerCase() : undefined;
+    }), async (req: Request, res: Response) => {
       try {
-        const schema = z.union([
-          z
-            .object({ primaryEmail: z.string().trim().email('Invalid email address').max(255) })
-            .strict(),
-          z.object({ email: z.string().trim().email('Invalid email address').max(255) }).strict(),
-          z
-            .object({
-              primaryEmail: z.string().trim().email('Invalid email address').max(255).optional(),
-              email: z.string().trim().email('Invalid email address').max(255).optional(),
-            })
-            .refine((data) => !!(data.primaryEmail || data.email), {
-              message: 'Email address is required',
-            }),
-        ]);
-        const parseResult = schema.safeParse(req.body);
+        const parseResult = forgotPasswordSchema.safeParse(req.body);
         if (!parseResult.success) {
           res.status(400).json(
             responseFormatter.error({

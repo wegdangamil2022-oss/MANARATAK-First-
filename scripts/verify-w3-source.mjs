@@ -202,7 +202,11 @@ check('MNT-AUD-0018 signed provider transports execute payment, FX and bank oper
   financeProvider.includes('/v1/finance/fx/rate') && financeProvider.includes('/v1/finance/bank-transfers/submit') &&
   financeProvider.includes('maxAttempts') && !financeProvider.toLowerCase().includes('runtime transport is pending'));
 check('MNT-AUD-0018 finance responses, failures and telemetry are strict/redacted',
-  financeProvider.includes('SENSITIVE_METADATA_KEY') && financeProvider.includes('FINANCE_PROVIDER_PAYMENT_RESPONSE_INVALID') &&
+  financeProvider.includes('const SAFE_PAYMENT_METADATA: Record<string, RegExp>') &&
+  financeProvider.includes('!Object.hasOwn(SAFE_PAYMENT_METADATA, key)') &&
+  financeProvider.includes('!SAFE_PAYMENT_METADATA[key].test(raw)') &&
+  financeProvider.includes('FINANCE_PROVIDER_MASKED_METADATA_INVALID') &&
+  financeProvider.includes('FINANCE_PROVIDER_PAYMENT_RESPONSE_INVALID') &&
   financeProvider.includes('FINANCE_PROVIDER_BANK_RESPONSE_INVALID') && financeProvider.includes('failureCategory'));
 check('MNT-AUD-0018 webhook verification is HMAC body-bound, time-bounded and replay fenced in Redis',
   financeProvider.includes('FinanceProviderWebhookVerifier') && financeProvider.includes('timingSafeEqual') &&
