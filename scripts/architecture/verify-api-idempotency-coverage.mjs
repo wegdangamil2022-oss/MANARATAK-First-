@@ -11,6 +11,8 @@ const cors = read('apps/api/src/presentation/security/CanonicalApiCorsPolicy.ts'
 const studentWorkspace = read('apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts');
 const courseLearner = read('apps/api/src/presentation/api/router/CourseLearnerRouter.ts');
 const studentTools = read('apps/api/src/presentation/api/router/StudentToolsPublicRouter.ts');
+const adminGuardIndex = app.indexOf("v1Router.use('/admin', SecurityMiddlewareFactory.createAdminGuard");
+const adminCommandIndex = app.indexOf("const command = createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true, replayAuthorization: container.resolve('authEvaluatorService') })");
 
 const routerDir = 'apps/api/src/presentation/api/router';
 let mutations = 0;
@@ -21,7 +23,7 @@ for (const file of readdirSync(routerDir).filter((f) => f.endsWith('Router.ts'))
 
 const checks = [
   ['IDEMP-001 durable store composed', app.includes("apiIdempotencyStore") && middleware.includes('requestFingerprint') && middleware.includes('scopeHash')],
-  ['IDEMP-002 admin mutations guarded after auth', app.indexOf("createAdminGuard") < app.indexOf("createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true })")],
+  ['IDEMP-002 admin mutations guarded after auth with replay authorization', adminGuardIndex >= 0 && adminCommandIndex > adminGuardIndex],
   ['IDEMP-003 legacy control-plane guarded', /protectControlPlane[\s\S]*createCanonicalIdempotencyMiddleware/.test(app)],
   ['IDEMP-004 identity compatibility alias guarded', /\/identities'[\s\S]{0,450}createCanonicalIdempotencyMiddleware/.test(app)],
   ['IDEMP-005 student workspace guarded after auth', /AuthMiddleware[\s\S]*createCanonicalIdempotencyMiddleware/.test(studentWorkspace)],

@@ -105,7 +105,7 @@ check('FIN-BND-011 no arbitrary invoice creation in Finance Admin API', !files.a
 check('FIN-BND-012 no arbitrary invoice creation UI', hasNone(files.admin, ['CreateInvoiceForm', 'فاتورة جديدة', 'originDomain" label']));
 
 // Authenticated learner finance flow
-check('FIN-STU-001 student finance route authenticated globally', /router\.use\(\s*new AuthMiddleware\(tokenProvider, sessionManager, principalAccessValidator\)\.generate\(\)/.test(files.studentRouter));
+check('FIN-STU-001 student finance route authenticated globally with MFA policy', /router\.use\(\s*new AuthMiddleware\(tokenProvider, sessionManager, principalAccessValidator, cradle\.mfaUseCases\)\.generate\(\)/.test(files.studentRouter));
 check('FIN-STU-002 path ownership helper', files.studentRouter.includes('STUDENT_ROUTE_OWNERSHIP_MISMATCH'));
 check('FIN-STU-003 invoice list uses authenticated owner', files.studentRouter.includes('listStudentInvoices(ownStudentPath(req), pagination)'));
 check('FIN-STU-004 overview uses authenticated owner', files.studentRouter.includes('getStudentFinancialOverview(ownStudentPath(req))'));
