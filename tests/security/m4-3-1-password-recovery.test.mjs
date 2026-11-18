@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
+import { resetTransactionFixture } from './reset-transaction-fixture.mjs';
 import {
   ForgotPasswordUseCase,
   ResetPasswordUseCase,
@@ -95,33 +96,7 @@ test('M4.3.1 - Password Recovery Targeted Test Suite', async (t) => {
     passwordHasher: {
       hash: async (pw) => PasswordHasher.hash(pw),
     },
-    prismaClient: {
-      $transaction: async (fn) => {
-        const tx = {
-          credentialRecord: {
-            updateMany: async ({ where, data }) => {
-              credentialsByUserId.set(where.identityId, data.passwordHash);
-              return { count: 1 };
-            },
-          },
-          passwordResetTokenRecord: {
-            updateMany: async ({ where, data }) => {
-              const record = await tokenRepository.findByTokenHash(where.tokenHash);
-              if (!record || record.consumedAt || record.expiresAt <= new Date()) return { count: 0 };
-              await tokenRepository.consume(where.id, data.consumedAt);
-              return { count: 1 };
-            },
-          },
-          sessionRecord: {
-            updateMany: async ({ where, data }) => {
-              await sessionManager.revokeAllSessions(where.identityId);
-              return { count: 1 };
-            },
-          },
-        };
-        return fn(tx);
-      },
-    },
+    prismaClient: resetTransactionFixture(identityRepository, tokenRepository, credentialsByUserId, sessionManager),
   });
 
   // Seed an existing test user

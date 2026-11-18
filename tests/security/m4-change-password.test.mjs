@@ -20,6 +20,7 @@ async function harness() {
         if (credential.disabled || where.passwordHash !== credential.passwordHash) return { count: 0 };
         Object.assign(credential, data); return { count: 1 };
       } },
+      passwordResetTokenRecord: { updateMany: async () => ({ count: 0 }) },
       sessionRecord: { updateMany: async () => { await sessions.revokeAllSessions('student'); return { count: 2 }; } },
       auditRecord: { create: async () => {} },
     }),

@@ -20,6 +20,7 @@ import {
   LifeStatus,
 } from '@manaratak/domain';
 import { randomUUID } from 'node:crypto';
+import { resetTransactionFixture } from './reset-transaction-fixture.mjs';
 
 test('AuthRouter - POST /forgot-password & POST /reset-password HTTP Contract', async (t) => {
   const identityRepository = new InMemoryIdentityRepository();
@@ -32,6 +33,8 @@ test('AuthRouter - POST /forgot-password & POST /reset-password HTTP Contract', 
   const account = new Account({ identityId: randomUUID(), accessState: 'Active', storageQuotaBytes: 1024, rateLimitMax: 10, rateLimitWindowMs: 1000 });
   const identity = new Identity({ id: account.identityId, type: IdentityType.Human, status: LifeStatus.PROVISIONED, user, account, technicalMetadata: TechnicalMetadata.create('test') });
   await identityRepository.save(identity);
+  const credentials = new Map([[identity.id.toString(), 'initial-test-hash']]);
+  const prismaClient = resetTransactionFixture(identityRepository, passwordResetTokenRepository, credentials);
 
   const securityService = {
     getRateLimiter: () => ({
@@ -41,7 +44,7 @@ test('AuthRouter - POST /forgot-password & POST /reset-password HTTP Contract', 
 
   const cradle = {
     forgotPasswordUseCase:new ForgotPasswordUseCase({identityRepository,tokenRepository:passwordResetTokenRepository,emailDeliveryGateway}),
-    resetPasswordUseCase:new ResetPasswordUseCase({identityRepository,tokenRepository:passwordResetTokenRepository,passwordHasher:PasswordHasher}),
+    resetPasswordUseCase:new ResetPasswordUseCase({identityRepository,tokenRepository:passwordResetTokenRepository,passwordHasher:PasswordHasher,prismaClient}),
     authRateLimitKey:value=>`isolated-test:${value}`,
     authService: {},
     identityRepository,

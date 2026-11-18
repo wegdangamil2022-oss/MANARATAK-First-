@@ -16,15 +16,17 @@ test('login credential change during session creation revokes the new session be
 
 test('two reset attempts that both read an unused token permit only one credential update', async () => {
   let claimed = false; let updates = 0;
-  const token = { id: 'token', identityId: 'user', consumedAt: null, expiresAt: new Date(Date.now() + 60_000) };
-  const reset = new ResetPasswordUseCase({ identityRepository: { findById: async () => ({}) },
+  const token = { id: 'token', identityId: 'user', email: 'person@example.invalid', createdAt: new Date(), consumedAt: null, expiresAt: new Date(Date.now() + 60_000) };
+  const reset = new ResetPasswordUseCase({ identityRepository: { findById: async () => ({ user: { contactRegistry: { primaryEmail: token.email } } }) },
     tokenRepository: { findByTokenHash: async () => ({ ...token }) }, passwordHasher: { hash: async value => `hashed:${value}` },
     prismaClient: { $transaction: async (fn, options) => {
       assert.equal(options.isolationLevel, 'Serializable');
-      return fn({ passwordResetTokenRecord: { updateMany: async ({ where }) => {
+      return fn({ userRecord: { findUnique: async () => ({ primaryEmail: token.email }) }, passwordResetTokenRecord: { updateMany: async ({ where }) => {
+        if (!where.id) return { count: 0 };
         assert.equal(where.consumedAt, null); assert.ok(where.expiresAt.gt instanceof Date);
         if (claimed) return { count: 0 }; claimed = true; return { count: 1 };
-      } }, credentialRecord: { updateMany: async ({ data }) => {
+      } }, credentialRecord: { updateMany: async ({ where, data }) => {
+        assert.deepEqual(where.updatedAt, { lte: token.createdAt });
         assert.equal(data.disabled, undefined, 'reset must not re-enable a disabled credential'); updates++; return { count: 1 };
       } }, sessionRecord: { updateMany: async () => ({ count: 1 }) } });
     } } });

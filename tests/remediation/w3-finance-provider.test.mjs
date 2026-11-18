@@ -16,7 +16,9 @@ test('MNT-AUD-0018 finance adapters execute signed provider transports instead o
 
 test('MNT-AUD-0018 finance provider responses and telemetry reject unsafe data', () => {
   const src = read('packages/infrastructure/src/finance-platform/ProviderNeutralFinanceGateways.ts');
-  assert.match(src, /SENSITIVE_METADATA_KEY/);
+  assert.match(src, /SAFE_PAYMENT_METADATA/);
+  assert.match(src, /Object\.hasOwn\(SAFE_PAYMENT_METADATA, key\)/);
+  assert.match(src, /SAFE_PAYMENT_METADATA\[key\]\.test\(raw\)/);
   assert.match(src, /FINANCE_PROVIDER_MASKED_METADATA_INVALID/);
   assert.match(src, /FINANCE_PROVIDER_PAYMENT_RESPONSE_INVALID/);
   assert.match(src, /FINANCE_PROVIDER_BANK_RESPONSE_INVALID/);
