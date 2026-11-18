@@ -1,11 +1,14 @@
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { createApiApp } from '../src/app';
 import { container } from '../src/infrastructure/di/container';
 import { PrismaCredentialVerifier } from '@manaratak/infrastructure';
 import { AuthService } from '@manaratak/application';
 
 describe('WP1-E.1.1 DI Container & Auth Wiring Smoke Test', () => {
+  afterEach(() => vi.unstubAllEnvs());
+
   it('successfully boots the API container and resolves the real PrismaCredentialVerifier', async () => {
+    vi.stubEnv('STUDENT_SUPPORT_CURSOR_SECRET', 'synthetic-test-cursor-secret-00000000000000000000000000000000');
     // 1. Trigger the real Express API bootstrap
     const app = await createApiApp({
       connectExternalServices: false,
@@ -23,6 +26,10 @@ describe('WP1-E.1.1 DI Container & Auth Wiring Smoke Test', () => {
     // 3. Prove that PrismaCredentialVerifier is the active runtime verifier
     expect(credentialVerifier).toBeInstanceOf(PrismaCredentialVerifier);
     expect(authService).toBeInstanceOf(AuthService);
+
+    // Student routers are lazy-loaded, so boot alone does not instantiate them.
+    expect(container.resolve('studentWorkspaceRouter')).toBeDefined();
+    expect(container.resolve('courseLearnerRouter')).toBeDefined();
 
     // Verify internal credentialVerifier property on AuthService is our PrismaCredentialVerifier
     const internalVerifier = (authService as any).credentialVerifier;

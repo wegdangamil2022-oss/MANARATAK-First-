@@ -51,6 +51,7 @@ describe('StudentWorkspaceRouter', () => {
     const sessionManager: ISessionManager = {
       createSession: vi.fn(),
       revokeSession: vi.fn(),
+      revokeSessionFamilyByRefreshToken: vi.fn(),
       revokeAllSessions: vi.fn(),
       findRefreshSession: vi.fn(),
       consumeAndRotateRefreshSession: vi.fn(),
@@ -113,6 +114,7 @@ describe('StudentWorkspaceRouter', () => {
         tokenProvider,
         sessionManager,
         principalAccessValidator,
+        mfaUseCases: { sessionAuthenticated: vi.fn().mockResolvedValue(true) } as any,
         apiIdempotencyStore,
         assetRecordRepository,
         processAssetLifecycleUseCase: classDouble(ProcessAssetLifecycleUseCase.prototype),

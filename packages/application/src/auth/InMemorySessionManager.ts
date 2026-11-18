@@ -7,6 +7,7 @@ interface MemorySessionRecord {
   familyId: string;
   parentSessionId?: string;
   refreshTokenHash: string;
+  expiresAt: Date;
   revokedAt?: Date;
   rotatedAt?: Date;
 }
@@ -21,9 +22,9 @@ export class InMemorySessionManager implements ISessionManager {
     return crypto.createHash('sha256').update(token).digest('hex');
   }
 
-  public async createSession(userId: string, refreshToken: string, sessionId = crypto.randomUUID(), _sessionTtlSeconds?: number): Promise<void> {
+  public async createSession(userId: string, refreshToken: string, sessionId = crypto.randomUUID(), sessionTtlSeconds?: number): Promise<void> {
     const hash = this.hashToken(refreshToken);
-    const record: MemorySessionRecord = { userId, sessionId, familyId: sessionId, refreshTokenHash: hash };
+    const record: MemorySessionRecord = { userId, sessionId, familyId: sessionId, refreshTokenHash: hash, expiresAt: new Date(Date.now() + (sessionTtlSeconds ?? 7 * 86400) * 1000) };
     this.sessionsById.set(sessionId, record);
     this.sessionIdByRefreshHash.set(hash, sessionId);
   }
@@ -41,10 +42,22 @@ export class InMemorySessionManager implements ISessionManager {
     }
   }
 
+  public async revokeSessionFamilyByRefreshToken(refreshToken: string, expectedUserId?: string): Promise<boolean> {
+    const sessionId = this.sessionIdByRefreshHash.get(this.hashToken(refreshToken));
+    const target = sessionId ? this.sessionsById.get(sessionId) : undefined;
+    if (!target || target.expiresAt <= new Date() || (target.revokedAt && !target.rotatedAt) ||
+        (expectedUserId !== undefined && expectedUserId !== target.userId)) return false;
+    const now = new Date();
+    for (const session of this.sessionsById.values()) {
+      if (session.userId === target.userId && session.familyId === target.familyId && !session.revokedAt) session.revokedAt = now;
+    }
+    return true;
+  }
+
   public async findRefreshSession(refreshToken: string): Promise<RefreshSession | null> {
     const sessionId = this.sessionIdByRefreshHash.get(this.hashToken(refreshToken));
     const session = sessionId ? this.sessionsById.get(sessionId) : undefined;
-    if (!session || session.revokedAt) return null;
+    if (!session || session.revokedAt || session.expiresAt <= new Date()) return null;
     return { userId: session.userId, sessionId: session.sessionId, familyId: session.familyId };
   }
 
@@ -54,7 +67,7 @@ export class InMemorySessionManager implements ISessionManager {
     const parent = parentId ? this.sessionsById.get(parentId) : undefined;
 
     if (!parent) return null;
-    if (parent.revokedAt) {
+    if (parent.revokedAt || parent.expiresAt <= new Date()) {
       if (parent.rotatedAt) this.revokeFamily(parent.familyId);
       return null;
     }
@@ -77,6 +90,7 @@ export class InMemorySessionManager implements ISessionManager {
       familyId: parent.familyId,
       parentSessionId: parent.sessionId,
       refreshTokenHash: nextHash,
+      expiresAt: parent.expiresAt,
     };
     this.sessionsById.set(nextSessionId, child);
     this.sessionIdByRefreshHash.set(nextHash, nextSessionId);
@@ -91,7 +105,7 @@ export class InMemorySessionManager implements ISessionManager {
 
   public async isSessionActive(userId: string, sessionId: string): Promise<boolean> {
     const session = this.sessionsById.get(sessionId);
-    return !!session && session.userId === userId && !session.revokedAt;
+    return !!session && session.userId === userId && !session.revokedAt && session.expiresAt > new Date();
   }
 
   private revokeFamily(familyId: string): void {

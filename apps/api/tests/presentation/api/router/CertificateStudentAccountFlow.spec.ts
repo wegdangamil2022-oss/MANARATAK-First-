@@ -157,6 +157,7 @@ function harness() {
       },
       sessionManager: { isSessionActive: async () => true },
       principalAccessValidator: { isAuthenticationAllowed: async () => true },
+      mfaUseCases: { sessionAuthenticated: async () => true },
       roleAssignmentRepository: { findByIdentityId: async () => [{ roleId: 'student' }] },
       apiIdempotencyStore: {
         begin: async () => ({ kind: 'STARTED', scopeHash: randomUUID(), leaseToken: 'lease' }),

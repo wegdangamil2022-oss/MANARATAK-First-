@@ -32,6 +32,11 @@ describe('NodeSafeSourceHttpTransport offline behavior', () => {
     }
   });
   it('follows same-scope redirects and pins the validated address', async () => { const executor = new FakeExecutor([redirect('/catalog/final'), ok]); const result = await new NodeSafeSourceHttpTransport(policy(), executor).get(source, {}); expect(result.finalUrl).toBe('https://safe.example/catalog/final'); expect(executor.calls.map((call) => call.pinnedAddress)).toEqual(['93.184.216.34','93.184.216.34']); });
+  it('rejects an encoded traversal redirect before a second request', async () => {
+    const executor = new FakeExecutor([redirect('/catalog/%252e%252e%252fprivate'), ok]);
+    await expect(new NodeSafeSourceHttpTransport(policy(), executor).get(source, {})).rejects.toThrow('SOURCE_PATH_OUT_OF_SCOPE');
+    expect(executor.calls).toHaveLength(1);
+  });
   it('rejects redirect outside the allowed origin', async () => { await expect(new NodeSafeSourceHttpTransport(policy(), new FakeExecutor([redirect('https://evil.example/catalog/a')])).get(source, {})).rejects.toThrow('SOURCE_URL_OUT_OF_SCOPE'); });
   it('rejects redirect resolving to loopback', async () => { const scoped = new ImportSourceDefinition({ ...source, metadata: { allowedUrlScope: { allowedOrigins: ['https://safe.example','https://private.example'], allowedPathPrefixes: ['/catalog/'] } } }); await expect(new NodeSafeSourceHttpTransport(policy(), new FakeExecutor([redirect('https://private.example/catalog/a')])).get(scoped, {})).rejects.toThrow('SOURCE_ADDRESS_BLOCKED'); });
   it('enforces redirect limit', async () => { await expect(new NodeSafeSourceHttpTransport(policy(), new FakeExecutor(Array.from({ length: 6 }, () => redirect('/catalog/a')))).get(source, {})).rejects.toThrow('SOURCE_REDIRECT_LIMIT'); });

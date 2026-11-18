@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import type {CertificateReadModelService} from '@manaratak/application';
+import type {CertificateReadModelService, MfaUseCases} from '@manaratak/application';
 import { z } from 'zod';
 import { IPrincipalAccessValidator, ISessionManager, ITokenProvider } from '@manaratak/core';
 import { CourseProgressUseCases, LearningPathUseCases, ProcessAssetLifecycleUseCase } from '@manaratak/application';
@@ -21,8 +21,10 @@ export class CourseLearnerRouter {
     tokenProvider: ITokenProvider;
     sessionManager: ISessionManager;
     principalAccessValidator: IPrincipalAccessValidator;
+    mfaUseCases: MfaUseCases;
     apiIdempotencyStore: PrismaApiIdempotencyStore;
   }): Router {
+    if (!cradle.mfaUseCases) throw new Error('STUDENT_MFA_POLICY_REQUIRED');
     const router = Router();
     const { courseProgressUseCases, learningPathUseCases, tokenProvider, sessionManager, principalAccessValidator, apiIdempotencyStore } = cradle;
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
@@ -47,7 +49,7 @@ export class CourseLearnerRouter {
       }
         next(error);
       });
-    router.use(new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator).generate());
+    router.use(new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator, cradle.mfaUseCases).generate());
     router.use(createStudentRoleGuard(cradle.roleAssignmentRepository));
     router.use(createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }));
     const student = (req: Request) => { if (!req.authUserId) throw new Error('STUDENT_AUTHENTICATION_REQUIRED'); return req.authUserId; };

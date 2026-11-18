@@ -45,14 +45,14 @@ export class AuthService implements IAuthService {
 
   public async logout(userId: string, refreshToken: string): Promise<void> {
     await this.tokenProvider.validateRefreshToken(refreshToken);
-    await this.sessionManager.revokeSession(userId, refreshToken);
+    if (!await this.sessionManager.revokeSessionFamilyByRefreshToken(refreshToken, userId))
+      throw new InvalidTokenException('Session revoked or invalid');
   }
 
   public async logoutCurrentSession(refreshToken: string): Promise<void> {
     await this.tokenProvider.validateRefreshToken(refreshToken);
-    const session = await this.sessionManager.findRefreshSession(refreshToken);
-    if (!session) throw new InvalidTokenException('Session revoked or invalid');
-    await this.sessionManager.revokeSession(session.userId, refreshToken);
+    if (!await this.sessionManager.revokeSessionFamilyByRefreshToken(refreshToken))
+      throw new InvalidTokenException('Session revoked or invalid');
   }
 
   public async refreshTokens(refreshToken: string): Promise<AuthTokens> {

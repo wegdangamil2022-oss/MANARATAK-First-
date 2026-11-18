@@ -26,13 +26,14 @@ describe('SearchRouter public/internal access boundaries', () => {
     }) };
     const sessionManager = { isSessionActive: vi.fn().mockResolvedValue(true), revokeAllSessions: vi.fn() };
     const principalAccessValidator = { isAuthenticationAllowed: vi.fn().mockResolvedValue(true) };
+    const staffLifecycleRepository = { adminAccessAllowed: vi.fn().mockResolvedValue(true) };
     const mfaUseCases = { sessionAuthenticated: vi.fn().mockResolvedValue(true), assertFresh: vi.fn() };
     const app = express(); app.use(express.json());
     // Mount the production router with its real strict auth and permission guards.
     app.use('/api/v1/search', SearchRouter.create({ manageSearchUseCase, searchEngineGateway,
       authEvaluatorService: authEvaluatorService as unknown as Dependencies['authEvaluatorService'], tokenProvider: tokenProvider as unknown as Dependencies['tokenProvider'],
-      sessionManager: sessionManager as unknown as Dependencies['sessionManager'], principalAccessValidator: principalAccessValidator as unknown as Dependencies['principalAccessValidator'], mfaUseCases: mfaUseCases as unknown as Dependencies['mfaUseCases'] }));
-    return { app, executeSearch, getSearchRequestHistory, requestRepository, searchEngineGateway, authEvaluatorService, sessionManager, principalAccessValidator, mfaUseCases };
+      sessionManager: sessionManager as unknown as Dependencies['sessionManager'], principalAccessValidator: principalAccessValidator as unknown as Dependencies['principalAccessValidator'], mfaUseCases: mfaUseCases as unknown as Dependencies['mfaUseCases'], staffLifecycleRepository }));
+    return { app, executeSearch, getSearchRequestHistory, requestRepository, searchEngineGateway, authEvaluatorService, sessionManager, principalAccessValidator, mfaUseCases, staffLifecycleRepository };
   }
 
   it('keeps published catalog search anonymous and forwards locale/cursor without writing search history', async () => {
@@ -67,6 +68,39 @@ describe('SearchRouter public/internal access boundaries', () => {
     if (dependency === 'mfa') fixture.mfaUseCases.sessionAuthenticated.mockResolvedValue(false);
     const response = await request(fixture.app).get('/api/v1/search/history/some-reference').set('Authorization','Bearer valid-test-token');
     expect(response.status).toBe(401); expect(fixture.getSearchRequestHistory).not.toHaveBeenCalled();
+  });
+  it.each(['POST', 'GET'])('rejects staff whose admin access was denied on internal %s', async method => {
+    const fixture = appWith();
+    fixture.staffLifecycleRepository.adminAccessAllowed.mockResolvedValue(false);
+    const response = method === 'POST'
+      ? await request(fixture.app).post('/api/v1/search').set('Authorization','Bearer valid-test-token').send(validBody)
+      : await request(fixture.app).get('/api/v1/search/history/some-reference').set('Authorization','Bearer valid-test-token');
+    expect(response.status).toBe(403);
+    expect(response.body.error.code).toBe('STAFF_ADMIN_ACCESS_DENIED');
+    expect(fixture.staffLifecycleRepository.adminAccessAllowed).toHaveBeenCalledWith('actor-a');
+    expect(fixture.executeSearch).not.toHaveBeenCalled();
+    expect(fixture.getSearchRequestHistory).not.toHaveBeenCalled();
+  });
+  it.each(['POST', 'GET'])('fails closed on admin access store outage for %s without affecting anonymous search', async method => {
+    const fixture = appWith();
+    fixture.staffLifecycleRepository.adminAccessAllowed.mockRejectedValue(new Error('synthetic outage'));
+    const response = method === 'POST'
+      ? await request(fixture.app).post('/api/v1/search').set('Authorization','Bearer valid-test-token').send(validBody)
+      : await request(fixture.app).get('/api/v1/search/history/some-reference').set('Authorization','Bearer valid-test-token');
+    expect(response.status).toBe(503);
+    expect(response.body.error.code).toBe('STAFF_ADMIN_ACCESS_UNAVAILABLE');
+    expect(fixture.executeSearch).not.toHaveBeenCalled();
+    expect(fixture.getSearchRequestHistory).not.toHaveBeenCalled();
+    const checks = fixture.staffLifecycleRepository.adminAccessAllowed.mock.calls.length;
+    expect((await request(fixture.app).get('/api/v1/search/public?q=study')).status).toBe(200);
+    expect(fixture.staffLifecycleRepository.adminAccessAllowed).toHaveBeenCalledTimes(checks);
+  });
+  it('rechecks admin access after an existing session is denied', async () => {
+    const fixture = appWith();
+    expect((await request(fixture.app).get('/api/v1/search/history/some-reference').set('Authorization','Bearer valid-test-token')).status).toBe(200);
+    fixture.staffLifecycleRepository.adminAccessAllowed.mockResolvedValue(false);
+    expect((await request(fixture.app).get('/api/v1/search/history/some-reference').set('Authorization','Bearer valid-test-token')).status).toBe(403);
+    expect(fixture.getSearchRequestHistory).toHaveBeenCalledTimes(1);
   });
   it('does not let platform-manage alone grant search execution or history', async () => {
     const { app, executeSearch, getSearchRequestHistory } = appWith(['admin:platform:manage']);

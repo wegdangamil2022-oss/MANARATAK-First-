@@ -620,7 +620,10 @@ export class FinanceProviderWebhookVerifier {
     if (!Number.isFinite(timestampMs) || Math.abs(this.now() - timestampMs) > this.maxClockSkewMs)
       throw new Error('FINANCE_WEBHOOK_TIMESTAMP_INVALID');
     const bodyHash = createHash('sha256').update(input.rawBody).digest('hex');
-    const canonical = `${input.timestamp}\n${input.nonce}\n${bodyHash}`;
+    // Replay keys are provider-scoped, so the provider identity must also be
+    // authenticated. Otherwise a signed event could be replayed under a
+    // different provider key when the verifier uses the same signing secret.
+    const canonical = `${input.providerKey}\n${input.timestamp}\n${input.nonce}\n${bodyHash}`;
     const expected = createHmac('sha256', this.signingSecret).update(canonical).digest();
     const supplied = Buffer.from(input.signature, 'hex');
     if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected))

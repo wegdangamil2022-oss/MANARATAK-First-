@@ -1,5 +1,6 @@
 import { readCertificateArtifact } from '@manaratak/application';
 import type {
+  MfaUseCases,
   StudentDocumentUploadUseCases,
   StudentDocumentReviewUseCases,
   ManagedApplicationEvidenceUseCases,
@@ -54,6 +55,7 @@ export class StudentWorkspaceRouter {
     tokenProvider: ITokenProvider;
     sessionManager: ISessionManager;
     principalAccessValidator: IPrincipalAccessValidator;
+    mfaUseCases: MfaUseCases;
     apiIdempotencyStore: PrismaApiIdempotencyStore;
     assetRecordRepository: IAssetRecordRepository & {
       queryAdmin(
@@ -62,6 +64,7 @@ export class StudentWorkspaceRouter {
     };
     processAssetLifecycleUseCase: ProcessAssetLifecycleUseCase;
   }): Router {
+    if (!cradle.mfaUseCases) throw new Error('STUDENT_MFA_POLICY_REQUIRED');
     const router = Router();
     const {
       studentWorkspaceUseCases,
@@ -177,7 +180,7 @@ export class StudentWorkspaceRouter {
       .strict();
 
     router.use(
-      new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator).generate(),
+      new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator, cradle.mfaUseCases).generate(),
     );
     router.use(createStudentRoleGuard(cradle.roleAssignmentRepository));
     // Private support command receipts live in the owner store, after current role/row authorization.

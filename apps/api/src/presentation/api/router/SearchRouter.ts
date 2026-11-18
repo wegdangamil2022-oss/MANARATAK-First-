@@ -92,6 +92,7 @@ export class SearchRouter {
     sessionManager,
     principalAccessValidator,
     mfaUseCases,
+    staffLifecycleRepository,
   }: {
     manageSearchUseCase: ManageSearchUseCase;
     searchEngineGateway: IPublicSearchGateway;
@@ -100,6 +101,7 @@ export class SearchRouter {
     sessionManager: ISessionManager;
     principalAccessValidator: IPrincipalAccessValidator;
     mfaUseCases: MfaUseCases;
+    staffLifecycleRepository: { adminAccessAllowed(identityId: string): Promise<boolean> };
   }): Router {
     const router = Router();
     const noStore: RequestHandler = (_req, res, next) => {
@@ -108,6 +110,7 @@ export class SearchRouter {
     };
     const authenticateInternalSearch = SecurityMiddlewareFactory.createAdminGuard({
       mode: 'strict', tokenProvider, sessionManager, principalAccessValidator, mfaUseCases,
+      adminAccessAllowed: (identityId) => staffLifecycleRepository.adminAccessAllowed(identityId),
     });
     const executePermission = SecurityMiddlewareFactory.createAdminPermissionGuard('admin:search:execute', authEvaluatorService);
     const historyPermission = SecurityMiddlewareFactory.createAdminPermissionGuard('admin:search:history:read', authEvaluatorService);

@@ -2,6 +2,7 @@ import dns from 'node:dns/promises';
 import { isIP } from 'node:net';
 import type { ImportSourceDefinition } from '@manaratak/domain';
 import { PublicNetworkAddressPolicy } from '../../network/PublicNetworkAddressPolicy';
+import { isUnambiguousSourcePath } from './SourcePathSafety';
 
 export interface SourceAddressResolver {
   resolve(hostname: string): Promise<string[]>;
@@ -72,7 +73,8 @@ export class SourceNetworkSecurityPolicy {
     if (!originAllowed) throw new Error('SOURCE_URL_OUT_OF_SCOPE');
 
     const prefixes = raw?.allowedPathPrefixes?.length ? raw.allowedPathPrefixes : ['/'];
-    const pathAllowed = prefixes.some((prefix) => this.matchesPathPrefix(url.pathname, prefix));
+    const pathAllowed = isUnambiguousSourcePath(url.pathname) &&
+      prefixes.some((prefix) => this.matchesPathPrefix(url.pathname, prefix));
     if (!pathAllowed) throw new Error('SOURCE_PATH_OUT_OF_SCOPE');
   }
 

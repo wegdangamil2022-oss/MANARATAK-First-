@@ -1,4 +1,5 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
+import type { MfaUseCases } from '@manaratak/application';
 import {
   type IPrincipalAccessValidator,
   type ISessionManager,
@@ -21,7 +22,10 @@ export class OptionalAuthMiddleware {
     private readonly tokenProvider: ITokenProvider,
     private readonly sessionManager: ISessionManager,
     private readonly principalAccessValidator: IPrincipalAccessValidator,
-  ) {}
+    private readonly mfaUseCases: Pick<MfaUseCases, 'sessionAuthenticated'>,
+  ) {
+    if (!mfaUseCases) throw new Error('MFA_POLICY_REQUIRED');
+  }
 
   public generate = (): RequestHandler => {
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -46,8 +50,12 @@ export class OptionalAuthMiddleware {
           await this.sessionManager.revokeAllSessions(payload.userId);
           throw new UnauthorizedException('Authentication required');
         }
+        if (!await this.mfaUseCases.sessionAuthenticated(payload.userId, payload.sessionId)) {
+          throw new UnauthorizedException('MFA session required');
+        }
 
         req.authUserId = payload.userId;
+        req.authSessionId = payload.sessionId;
         return next();
       } catch {
         return void res.status(401).json({

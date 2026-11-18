@@ -45,6 +45,32 @@ export class PrismaSessionManager implements ISessionManager {
     });
   }
 
+  public async revokeSessionFamilyByRefreshToken(refreshToken: string, expectedUserId?: string): Promise<boolean> {
+    // Refresh rotation and logout both write the active parent. Serializable
+    // isolation prevents a concurrent rotation from leaving a live child after
+    // a successful logout; retry only confirmed transaction rollbacks.
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        return await this.prisma.$transaction(async tx => {
+          const target = await tx.sessionRecord.findUnique({
+            where: { refreshTokenHash: this.hashToken(refreshToken) },
+            select: { identityId: true, familyId: true, expiresAt: true, revokedAt: true, rotatedAt: true },
+          });
+          if (!target || target.expiresAt <= new Date() || (target.revokedAt && !target.rotatedAt) ||
+              (expectedUserId !== undefined && target.identityId !== expectedUserId)) return false;
+          await tx.sessionRecord.updateMany({
+            where: { identityId: target.identityId, familyId: target.familyId, revokedAt: null },
+            data: { revokedAt: new Date() },
+          });
+          return true;
+        }, { isolationLevel: 'Serializable' });
+      } catch (error) {
+        if (attempt >= 2 || !error || typeof error !== 'object' ||
+            !('code' in error) || error.code !== 'P2034') throw error;
+      }
+    }
+  }
+
   public async findRefreshSession(refreshToken: string): Promise<RefreshSession | null> {
     const session = await this.prisma.sessionRecord.findFirst({
       where: {

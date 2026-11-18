@@ -132,6 +132,8 @@ describe('server signed approvals and robots', () => {
     expect(authority.headersFor(source(Access.AUTHORIZED_ACCOUNT), new URL('https://example.org/data/items'))).toEqual({ Authorization: 'Bearer server-token' });
     expect(() => authority.headersFor(source(Access.AUTHORIZED_ACCOUNT), new URL('https://other.org/data'))).toThrow('SCOPE_MISMATCH');
     expect(() => authority.headersFor(source(Access.AUTHORIZED_ACCOUNT), new URL('https://example.org/data-evil'))).toThrow('SCOPE_MISMATCH');
+    expect(() => authority.headersFor(source(Access.AUTHORIZED_ACCOUNT), new URL('https://example.org/data/%252e%252e%252fprivate'))).toThrow('SCOPE_MISMATCH');
+    expect(authority.headersFor(source(Access.AUTHORIZED_ACCOUNT), new URL('https://example.org/data/my%20file'))).toEqual({ Authorization: 'Bearer server-token' });
     for (const changes of [{ expiresAt: '2000-01-01T00:00:00Z' }, { sourceRevision: new Date(0).toISOString() }])
       expect(() => new SignedSourceAccessAuthority(key, [token(Access.AUTHORIZED_ACCOUNT, changes)]).assertAllowed(source(Access.AUTHORIZED_ACCOUNT), Category.OFFICIAL_API)).toThrow('SIGNED_APPROVAL_REQUIRED');
     expect(() => new SignedSourceAccessAuthority(undefined).assertAllowed(source(Access.AUTHORIZED_ACCOUNT), Category.OFFICIAL_API)).toThrow('SIGNED_APPROVAL_REQUIRED');

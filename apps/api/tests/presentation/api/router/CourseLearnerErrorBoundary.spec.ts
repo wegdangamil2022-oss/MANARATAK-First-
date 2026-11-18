@@ -15,7 +15,7 @@ describe('course learner presentation errors', () => {
   it('leaves unknown failures to the global error handler', async () => {
     const app = express();
     const error = new Error('synthetic private database failure');
-    app.use(CourseLearnerRouter.create({ courseProgressUseCases: { getLearningWorkspace: vi.fn().mockRejectedValue(error) } } as never));
+    app.use(CourseLearnerRouter.create({ mfaUseCases: {}, courseProgressUseCases: { getLearningWorkspace: vi.fn().mockRejectedValue(error) } } as never));
     const observer = vi.fn();
     app.use((received: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => { observer(received); res.status(500).json({ code: 'UNEXPECTED_ERROR' }); });
     const response = await request(app).get('/synthetic-course/workspace');
@@ -27,7 +27,7 @@ describe('course learner presentation errors', () => {
   it('returns the safe enrollment-required contract instead of an unexpected server error', async () => {
     const app = express();
     const getLearningWorkspace = vi.fn().mockRejectedValue(new Error('COURSE_ENROLLMENT_REQUIRED'));
-    app.use(CourseLearnerRouter.create({ courseProgressUseCases: { getLearningWorkspace } } as never));
+    app.use(CourseLearnerRouter.create({ mfaUseCases: {}, courseProgressUseCases: { getLearningWorkspace } } as never));
     app.use((_error: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => { res.status(500).json({ code: 'UNEXPECTED_ERROR' }); });
     const response = await request(app).get('/synthetic-course/workspace');
     expect(response.status).toBe(403);

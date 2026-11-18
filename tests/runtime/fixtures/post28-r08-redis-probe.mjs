@@ -33,7 +33,7 @@ try{
     }
     const counters=await Promise.all([probe('counter'),probe('counter')]);assert.equal(counters.reduce((n,r)=>n+r.allowed,0),10);assert.equal(counters.reduce((n,r)=>n+r.total,0),24);
     const webhookSecret=randomBytes(32).toString('hex'),rawBody='{"event":"synthetic-capture-signal"}';
-    const sign=(timestamp=new Date().toISOString(),nonce=randomUUID())=>({providerKey:'POST28_SYNTHETIC',rawBody,timestamp,nonce,signature:createHmac('sha256',webhookSecret).update([timestamp,nonce,createHash('sha256').update(rawBody).digest('hex')].join('\n')).digest('hex')});
+    const sign=(timestamp=new Date().toISOString(),nonce=randomUUID())=>({providerKey:'POST28_SYNTHETIC',rawBody,timestamp,nonce,signature:createHmac('sha256',webhookSecret).update(['POST28_SYNTHETIC',timestamp,nonce,createHash('sha256').update(rawBody).digest('hex')].join('\n')).digest('hex')});
     const webhook=sign(),input={...config,webhookSecret,webhook};
     const webhookResults=await Promise.all([probe('webhook',input),probe('webhook',input)]);
     assert.equal(webhookResults.reduce((n,r)=>n+r.accepted,0),1);assert.equal(webhookResults.reduce((n,r)=>n+r.replayed,0),1);

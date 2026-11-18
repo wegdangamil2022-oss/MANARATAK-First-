@@ -96,6 +96,60 @@ describe('PrismaSessionManager', () => {
     // Since updateMany handles no-ops cleanly if no rows match, it is deterministic.
   });
 
+  it('retries a serialization conflict when logout races rotation, revoking only the token owner and family', async () => {
+    const tx = { sessionRecord: {
+      findUnique: vi.fn().mockResolvedValue({
+        identityId: 'user1', familyId: 'family1', expiresAt: new Date(Date.now() + 60_000),
+        revokedAt: new Date(), rotatedAt: new Date(),
+      }),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+    } };
+    mockPrisma.$transaction = vi.fn()
+      .mockRejectedValueOnce(Object.assign(new Error('synthetic serialization conflict'), { code: 'P2034' }))
+      .mockImplementationOnce(work => work(tx));
+    await expect(sessionManager.revokeSessionFamilyByRefreshToken('parent-token')).resolves.toBe(true);
+    expect(mockPrisma.$transaction).toHaveBeenCalledTimes(2);
+    for (const [, options] of mockPrisma.$transaction.mock.calls) expect(options).toEqual({ isolationLevel: 'Serializable' });
+    expect(tx.sessionRecord.findUnique).toHaveBeenCalledWith({
+      where: { refreshTokenHash: hashToken('parent-token') },
+      select: { identityId: true, familyId: true, expiresAt: true, revokedAt: true, rotatedAt: true },
+    });
+    expect(tx.sessionRecord.updateMany).toHaveBeenCalledWith({
+      where: { identityId: 'user1', familyId: 'family1', revokedAt: null },
+      data: { revokedAt: expect.any(Date) },
+    });
+  });
+
+  it('does not retry other database failures and does not claim logout succeeded', async () => {
+    const failure = Object.assign(new Error('synthetic database failure'), { code: 'P1001' });
+    mockPrisma.$transaction = vi.fn().mockRejectedValue(failure);
+    await expect(sessionManager.revokeSessionFamilyByRefreshToken('parent-token')).rejects.toBe(failure);
+    expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports failure after bounded logout serialization retries', async () => {
+    const conflict = Object.assign(new Error('synthetic serialization conflict'), { code: 'P2034' });
+    mockPrisma.$transaction = vi.fn().mockRejectedValue(conflict);
+    await expect(sessionManager.revokeSessionFamilyByRefreshToken('parent-token')).rejects.toBe(conflict);
+    expect(mockPrisma.$transaction).toHaveBeenCalledTimes(3);
+  });
+
+  it('refuses expired, separately revoked, missing, or wrong-owner refresh sessions', async () => {
+    const findUnique = vi.fn();
+    const updateMany = vi.fn();
+    mockPrisma.$transaction = vi.fn().mockImplementation(work => work({ sessionRecord: { findUnique, updateMany } }));
+    const active = { identityId: 'user1', familyId: 'family1', expiresAt: new Date(Date.now() + 60_000), revokedAt: null, rotatedAt: null };
+    for (const row of [null, { ...active, expiresAt: new Date(Date.now() - 1000) }, { ...active, revokedAt: new Date() }]) {
+      findUnique.mockResolvedValueOnce(row);
+      await expect(sessionManager.revokeSessionFamilyByRefreshToken('token')).resolves.toBe(false);
+    }
+    findUnique.mockResolvedValueOnce(active);
+    await expect(sessionManager.revokeSessionFamilyByRefreshToken('token', 'other-user')).resolves.toBe(false);
+    findUnique.mockResolvedValueOnce(active);
+    await expect(sessionManager.revokeSessionFamilyByRefreshToken('token', '')).resolves.toBe(false);
+    expect(updateMany).not.toHaveBeenCalled();
+  });
+
   it('retries a rolled-back serialization conflict and revokes the committed family on a fresh read', async () => {
     const tx = { sessionRecord: {
       findUnique: vi.fn().mockResolvedValue({

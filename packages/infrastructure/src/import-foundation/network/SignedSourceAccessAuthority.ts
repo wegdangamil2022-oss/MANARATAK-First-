@@ -1,6 +1,7 @@
 import { createPublicKey, verify, type KeyObject } from 'node:crypto';
 import { SourceAccessClassification, SourceAccessExecutionPolicy, SourceConnectorCategory, type ImportSourceDefinition } from '@manaratak/domain';
 import type { ISourceAccessAuthority } from '@manaratak/application';
+import { isUnambiguousSourcePath } from './SourcePathSafety';
 
 interface AccessGrant { audience: 'MANARATAK_IMPORT'; sourceId: string; sourceRevision: string; classification: string;
   origin: string; pathPrefixes: string[]; policyReference: string; expiresAt: string; credentialBinding?: string; }
@@ -52,7 +53,8 @@ export class SignedSourceAccessAuthority implements ISourceAccessAuthority {
     this.assertAllowed(source, source.category);
     if (source.accessClassification === SourceAccessClassification.PUBLIC_ALLOWED) return {};
     const grant = this.grant(source);
-    if (target.origin !== grant.origin || !grant.pathPrefixes.some(prefix => prefix === '/' || target.pathname === prefix || target.pathname.startsWith(`${prefix.replace(/\/$/, '')}/`)))
+    if (target.origin !== grant.origin || !isUnambiguousSourcePath(target.pathname) ||
+        !grant.pathPrefixes.some(prefix => prefix === '/' || target.pathname === prefix || target.pathname.startsWith(`${prefix.replace(/\/$/, '')}/`)))
       throw new Error('SOURCE_ACCESS_APPROVAL_SCOPE_MISMATCH');
     return source.accessClassification === SourceAccessClassification.AUTHORIZED_ACCOUNT ? { Authorization: this.bearer(grant) } : {};
   }
@@ -61,7 +63,7 @@ export class SignedSourceAccessAuthority implements ISourceAccessAuthority {
 export function assertRobotsAllowed(text: string, target: URL) {
   if (Buffer.byteLength(text) > 100_000) throw new Error('SOURCE_ROBOTS_POLICY_TOO_LARGE');
   const groups: Array<{ agents: string[]; rules: Array<{ allow: boolean; path: string }>; delay: number }> = [];
-  let group: typeof groups[number] | undefined; let seenRule = false;
+  let group: typeof groups[number] | undefined; let seenRule = false; let ruleCount = 0;
   for (const line of text.split(/\r?\n/)) {
     const clean = line.split('#')[0].trim(); if (!clean) continue;
     const colon = clean.indexOf(':'); if (colon < 0) continue;
@@ -72,7 +74,11 @@ export function assertRobotsAllowed(text: string, target: URL) {
     } else if (group && ['allow','disallow','crawl-delay'].includes(key)) {
       seenRule = true;
       if (key === 'crawl-delay') { const delay = Number(value); if (!Number.isFinite(delay) || delay < 0) throw new Error('SOURCE_ROBOTS_POLICY_INVALID'); group.delay = delay; }
-      else if (value) { if (!value.startsWith('/')) throw new Error('SOURCE_ROBOTS_POLICY_INVALID'); group.rules.push({ allow: key === 'allow', path: value }); }
+      else if (value) {
+        if (!value.startsWith('/')) throw new Error('SOURCE_ROBOTS_POLICY_INVALID');
+        if (Buffer.byteLength(value) > 4096 || ++ruleCount > 1000) throw new Error('SOURCE_ROBOTS_POLICY_TOO_COMPLEX');
+        group.rules.push({ allow: key === 'allow', path: value });
+      }
     }
   }
   const exact = groups.filter(group => group.agents.includes('manaratakimport'));
@@ -82,11 +88,31 @@ export function assertRobotsAllowed(text: string, target: URL) {
     const char = String.fromCharCode(parseInt(hex, 16));
     return /^[A-Za-z0-9._~-]$/.test(char) ? char : `%${hex.toUpperCase()}`;
   }).replace(/[^\x00-\x7f]/gu, char => encodeURIComponent(char));
-  const path = normalize(target.pathname + target.search); let winner: { allow: boolean; weight: number } | undefined;
+  const rawPath = target.pathname + target.search;
+  if (Buffer.byteLength(rawPath) > 8192) throw new Error('SOURCE_ROBOTS_PATH_TOO_LONG');
+  const path = normalize(rawPath); let winner: { allow: boolean; weight: number } | undefined;
+  // Match literal chunks in order instead of generating a backtracking RegExp
+  // from an untrusted robots.txt. The earliest possible chunk match leaves the
+  // most room for the following chunks; an anchored last chunk must end at EOF.
+  const matches = (value: string, anchored: boolean): boolean => {
+    const chunks = value.split('*');
+    if (!path.startsWith(chunks[0])) return false;
+    let cursor = chunks[0].length;
+    if (chunks.length === 1) return !anchored || cursor === path.length;
+    for (let index = 1; index < chunks.length; index++) {
+      const chunk = chunks[index];
+      if (anchored && index === chunks.length - 1) {
+        return path.endsWith(chunk) && path.length - chunk.length >= cursor;
+      }
+      const found = path.indexOf(chunk, cursor);
+      if (found < 0) return false;
+      cursor = found + chunk.length;
+    }
+    return true;
+  };
   for (const rule of applicable.flatMap(group => group.rules)) {
     const anchored = rule.path.endsWith('$'); const value = normalize(anchored ? rule.path.slice(0, -1) : rule.path);
-    const regex = '^' + value.split('*').map(part => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*') + (anchored ? '$' : '');
-    if (!new RegExp(regex).test(path)) continue;
+    if (!matches(value, anchored)) continue;
     const weight = Buffer.byteLength(value.replaceAll('*', ''));
     if (!winner || weight > winner.weight || weight === winner.weight && rule.allow) winner = { allow: rule.allow, weight };
   }

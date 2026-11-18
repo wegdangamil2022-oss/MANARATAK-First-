@@ -151,6 +151,15 @@ export class NodeSafeSourceHttpTransport implements ISafeSourceHttpTransport {
     for (let redirects = 0; redirects <= maxRedirects; redirects++) {
       const target = await this.policy.validate(source, current);
       if (source.robotsPolicyUrl) {
+        // A server that decodes twice can interpret a different robots target.
+        // A lone encoded percent remains valid; only newly exposed escapes are ambiguous.
+        const robotsTarget = target.url.pathname + target.url.search;
+        if (/%25/i.test(robotsTarget)) {
+          let decoded: string;
+          try { decoded = decodeURIComponent(robotsTarget); }
+          catch { throw new Error('SOURCE_ROBOTS_AMBIGUOUS_ENCODING'); }
+          if (/%[0-9a-f]{2}/i.test(decoded)) throw new Error('SOURCE_ROBOTS_AMBIGUOUS_ENCODING');
+        }
         const robotsUrl = new URL(source.robotsPolicyUrl);
         if (robotsUrl.origin !== target.url.origin || robotsUrl.pathname !== '/robots.txt' || robotsUrl.search || robotsUrl.hash)
           throw new Error('SOURCE_ROBOTS_POLICY_URL_INVALID');

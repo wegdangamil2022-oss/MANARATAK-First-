@@ -8,6 +8,8 @@ export interface RefreshSession {
 export interface ISessionManager {
   createSession(userId: string, refreshToken: string, sessionId?: string, sessionTtlSeconds?: number): Promise<void>;
   revokeSession(userId: string, refreshToken: string): Promise<void>;
+  /** Atomically revoke the login family identified by an active or rotated, unexpired refresh token. */
+  revokeSessionFamilyByRefreshToken(refreshToken: string, expectedUserId?: string): Promise<boolean>;
   revokeAllSessions(userId: string): Promise<void>;
   /** Resolve only an active, unexpired opaque refresh credential. */
   findRefreshSession(refreshToken: string): Promise<RefreshSession | null>;

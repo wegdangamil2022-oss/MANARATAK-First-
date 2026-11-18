@@ -28,11 +28,12 @@ describe('B01 real API mount with isolated persistence and credentials',()=>{
   // app mount, lazy DI router, auth/permission guards, use case and Prisma adapter.
   container.register({
    tokenProvider:asValue({verifyAccessToken:async(token:string)=>{
-    if(!['actor-a','actor-b','no-permissions'].includes(token))throw new Error('invalid token');
+    if(!['actor-a','actor-b','no-permissions','access-denied'].includes(token))throw new Error('invalid token');
     return {userId:token,sessionId:`session-${token}`};
    }}),
    sessionManager:asValue({isSessionActive:async()=>true,revokeAllSessions:async()=>{}}),
    principalAccessValidator:asValue({isAuthenticationAllowed:async()=>true}),
+   staffLifecycleRepository:asValue({adminAccessAllowed:async(id:string)=>id!=='access-denied'}),
    mfaUseCases:asValue({sessionAuthenticated:async()=>true,assertFresh:async()=>{}}),
    authEvaluatorService:asValue({evaluatePermission}),
    searchRequestRepo:asValue(new PrismaSearchRequestRepository(db as unknown as PrismaClient)),
@@ -54,6 +55,18 @@ describe('B01 real API mount with isolated persistence and credentials',()=>{
  it('does not let an authenticated user without search capability use either private route',async()=>{
   expect((await request(app).post('/api/v1/search').set('Authorization','Bearer no-permissions').send({scope:'PUBLIC_CATALOG',criteria:{query:'study'},pagination:{page:1,limit:10}})).status).toBe(403);
   expect((await request(app).get('/api/v1/search/history/guessed-reference').set('Authorization','Bearer no-permissions')).status).toBe(403);
+ });
+ it('rejects staff denied admin access even with search permissions at the real app mount',async()=>{
+  const beforeWrites=db.apiSearchRequestRecord.upsert.mock.calls.length;
+  const beforeReads=findMany.mock.calls.length;
+  const body={scope:'PUBLIC_CATALOG',criteria:{query:'study'},pagination:{page:1,limit:10}};
+  const post=await request(app).post('/api/v1/search').set('Authorization','Bearer access-denied').send(body);
+  const history=await request(app).get('/api/v1/search/history/guessed-reference').set('Authorization','Bearer access-denied');
+  expect(post.status).toBe(403);expect(history.status).toBe(403);
+  expect(post.body.code).toBe('STAFF_ADMIN_ACCESS_DENIED');
+  expect(history.body.code).toBe('STAFF_ADMIN_ACCESS_DENIED');
+  expect(db.apiSearchRequestRecord.upsert).toHaveBeenCalledTimes(beforeWrites);
+  expect(findMany).toHaveBeenCalledTimes(beforeReads);
  });
  it('creates and reads only attributable own history, never another actor’s reference',async()=>{
   const created=await request(app).post('/api/v1/search').set('Authorization','Bearer actor-a').send({scope:'PUBLIC_CATALOG',criteria:{query:'private test search'},pagination:{page:1,limit:10}});
