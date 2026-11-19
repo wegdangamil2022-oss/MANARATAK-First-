@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { University } from '../types';
+import { PublicCardsPagination, PublicFilterSelectModal, usePaginatedCatalog } from './DetailUi';
 
 interface UniversitiesSearchPageProps {
   dataMode?: 'api' | 'prototype';
@@ -44,6 +45,7 @@ const PrototypeUniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = (
   const [selectedContinent, setSelectedContinent] = useState('الكل');
   const [selectedCountry, setSelectedCountry] = useState('الكل');
   const [selectedCity, setSelectedCity] = useState('الكل');
+  const [activeFilterModal, setActiveFilterModal] = useState<'continent' | 'country' | 'city' | null>(null);
 
   const resultsRef = useRef<HTMLDivElement>(null);
   const [localSavedUniversities, setLocalSavedUniversities] = useState<string[]>([]);
@@ -64,6 +66,7 @@ const PrototypeUniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = (
     const values = new Set(
       universities.map((university) => university.continent).filter((value): value is string => Boolean(value)),
     );
+    ['آسيا', 'أوروبا', 'أمريكا الشمالية', 'أوقيانوسيا', 'أفريقيا'].forEach((c) => values.add(c));
     return ['الكل', ...Array.from(values)];
   }, [universities]);
 
@@ -130,6 +133,17 @@ const PrototypeUniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = (
       return true;
     });
   }, [universities, searchQuery, selectedContinent, selectedCountry, selectedCity]);
+
+  const {
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    pageItems: paginatedUniversities,
+  } = usePaginatedCatalog(
+    filteredUniversities,
+    `${searchQuery}|${selectedContinent}|${selectedCountry}|${selectedCity}`,
+    30,
+  );
 
   const activeFiltersCount =
     (selectedContinent !== 'الكل' ? 1 : 0) +
@@ -205,29 +219,29 @@ const PrototypeUniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = (
           </svg>
         </div>
 
-        <div className="max-w-md sm:max-w-xl mx-auto text-center relative z-10 space-y-2 pt-1">
+        <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto text-center relative z-10 space-y-2 md:space-y-3 pt-1 md:pt-3">
           {/* Top 4-pointed Gold Sparkle Star */}
           <div className="flex justify-center">
             <Sparkles className="h-5 w-5 text-[var(--mn-accent-text)] drop-shadow-[0_0_8px_rgba(214,164,59,0.8)]" aria-hidden="true" />
           </div>
 
           {/* Main Title */}
-          <div className="space-y-0.5">
-            <h1 className="text-xl sm:text-2xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">{publicT('public_your_first_step_toward')}{' '}
+          <div className="space-y-0.5 md:space-y-1">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight whitespace-nowrap truncate">{publicT('public_your_first_step_toward')}{' '}
               <span className="text-[var(--mn-accent-text)]">{publicT('public_the_right_university')}</span>
             </h1>
 
             {/* Small Gold Horizontal Divider */}
             <div className="flex justify-center pt-1 pb-0.5">
-              <div className="w-10 h-0.5 bg-[var(--mn-accent)] rounded-full mn-gold " />
+              <div className="w-10 md:w-16 h-0.5 bg-[var(--mn-accent)] rounded-full mn-gold " />
             </div>
 
             {/* Subtitle */}
-            <p className="text-[11px] sm:text-xs text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-xs sm:max-w-sm mx-auto">{publicT('public_discover_leading_universities_worldwide_with_clear_admission_requirements')}</p>
+            <p className="text-[11px] sm:text-xs md:text-sm lg:text-base text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-md md:max-w-2xl mx-auto truncate">{publicT('public_discover_leading_universities_worldwide_with_clear_admission_requirements')}</p>
           </div>
 
           {/* Integrated Clean White Search Bar in Hero */}
-          <div className="pt-1 max-w-sm sm:max-w-md mx-auto px-1">
+          <div className="pt-1 max-w-sm sm:max-w-md md:max-w-xl lg:max-w-2xl mx-auto px-1">
             <div className="relative">
               <input
                 type="text"
@@ -264,95 +278,98 @@ const PrototypeUniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = (
         {/* ========================================================================= */}
         {/* 3 SEPARATE FLOATING FILTER TILES (القارة • الدولة • المدينة) */}
         {/* ========================================================================= */}
-        <div className="max-w-lg mx-auto mn-inline-gutter mt-2.5 relative z-20 pb-0">
-        <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
-          {/* Tile 1: القارة */}
-          <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-gold-surface)]/40 border-1.5 border-[var(--mn-accent)]/70 hover:border-[var(--mn-accent)] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel ">
-            <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-semibold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
-              <Globe2 className="w-3.5 h-3.5 text-[var(--mn-accent-text)] shrink-0" />
-              <span className="truncate">
-                {selectedContinent === 'الكل' ? publicT('public_continent') : selectedContinent}
-              </span>
-            </div>
-            <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
-            <select
-              value={selectedContinent}
-              onChange={(e) => handleContinentChange(e.target.value)}
-              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+        <div className="max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto mn-inline-gutter mt-2.5 md:mt-4 relative z-20 pb-0 md:pb-2">
+          <div className="grid grid-cols-3 gap-2 sm:gap-2.5 md:gap-3.5">
+            {/* Tile 1: القارة */}
+            <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setActiveFilterModal('continent');
+                }
+              }}
+              onClick={() => setActiveFilterModal('continent')}
+              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel font-['Cairo',sans-serif]"
               title={publicT('public_choose_continent')}
             >
-              {continents.map((c) => (
-                <option key={c} value={c}>
-                  {c === 'الكل' ? publicT('public_all_continents') : c}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Tile 2: الدولة */}
-          <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-gold-surface)]/40 border-1.5 border-[var(--mn-accent)]/70 hover:border-[var(--mn-accent)] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel ">
-            <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-semibold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
-              <MapPin className="w-3.5 h-3.5 text-[var(--mn-accent-text)] shrink-0" />
-              <span className="truncate">
-                {selectedCountry === 'الكل' ? publicT('public_country') : selectedCountry}
-              </span>
+              <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
+                <Globe2 className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
+                <span className="truncate font-['Cairo',sans-serif]">
+                  {selectedContinent === 'الكل' ? publicT('public_continent') : selectedContinent}
+                </span>
+              </div>
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
-            <select
-              value={selectedCountry}
-              onChange={(e) => handleCountryChange(e.target.value)}
-              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+
+            {/* Tile 2: الدولة */}
+            <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setActiveFilterModal('country');
+                }
+              }}
+              onClick={() => setActiveFilterModal('country')}
+              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel font-['Cairo',sans-serif]"
               title={publicT('public_choose_country')}
             >
-              {countries.map((cnt) => (
-                <option key={cnt} value={cnt}>
-                  {cnt === 'الكل' ? publicT('public_all_countries_2') : cnt}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Tile 3: المدينة */}
-          <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-gold-surface)]/40 border-1.5 border-[var(--mn-accent)]/70 hover:border-[var(--mn-accent)] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel ">
-            <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-semibold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
-              <Building2 className="w-3.5 h-3.5 text-[var(--mn-accent-text)] shrink-0" />
-              <span className="truncate">{selectedCity === 'الكل' ? publicT('public_city') : selectedCity}</span>
+              <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
+                <MapPin className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
+                <span className="truncate font-['Cairo',sans-serif]">
+                  {selectedCountry === 'الكل' ? publicT('public_country') : selectedCountry}
+                </span>
+              </div>
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+
+            {/* Tile 3: المدينة */}
+            <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setActiveFilterModal('city');
+                }
+              }}
+              onClick={() => setActiveFilterModal('city')}
+              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel font-['Cairo',sans-serif]"
               title={publicT('public_choose_city')}
             >
-              {cities.map((cty) => (
-                <option key={cty} value={cty}>
-                  {cty === 'الكل' ? publicT('public_all_cities') : cty}
-                </option>
-              ))}
-            </select>
+              <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
+                <Building2 className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
+                <span className="truncate font-['Cairo',sans-serif]">{selectedCity === 'الكل' ? publicT('public_city') : selectedCity}</span>
+              </div>
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
+            </div>
           </div>
         </div>
       </div>
-      </div>
+
+      {/* Gold Divider Ribbon Line */}
+      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--mn-accent-text)] via-[var(--mn-accent-soft)] to-[var(--mn-accent-text)] shadow-xs mb-1" />
 
       {/* ========================================================================= */}
       {/* RESULTS LIST SECTION (ترك البطاقات فارغة وفق طلب المستخدم) */}
       {/* ========================================================================= */}
-      <div ref={resultsRef} className="w-full max-w-4xl mx-auto px-1 sm:px-2 pt-4 space-y-2.5">
+      <div ref={resultsRef} className="w-full max-w-4xl md:max-w-[1120px] lg:max-w-[1160px] mx-auto px-1 sm:px-2 md:px-4 pt-4 md:pt-5 space-y-2.5 md:space-y-4">
         {/* Section Header */}
         <div className="flex items-center justify-between px-1">
-          <span className="text-xs sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif] flex items-center gap-1.5">
+          <span className="text-xs sm:text-sm md:text-base font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif] flex items-center gap-1.5">
             <Landmark className="w-4 h-4 text-[var(--mn-heading)]" />
             <span>{publicT('public_international_university_directory')}</span>
           </span>
-          <span className="text-[10px] sm:text-[11px] text-[var(--mn-accent-text)] font-bold font-['Cairo',sans-serif]">{publicT('public_updated_regularly')}</span>
+          <span className="text-[10px] sm:text-[11px] md:text-xs text-[var(--mn-accent-text)] font-bold font-['Cairo',sans-serif]">{publicT('public_updated_regularly')}</span>
         </div>
 
         {/* Cards Container */}
-        <div className="flex flex-col gap-2.5 sm:gap-3 w-full pb-10">
+        <div className="flex flex-col gap-2.5 sm:gap-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 items-stretch w-full pb-10">
           {filteredUniversities.length === 0 ? (
-            <div className="bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-2 shadow-2xs mn-panel ">
+            <div className="bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-2 shadow-2xs mn-panel md:col-span-2 lg:col-span-3">
               <div className="w-12 h-12 rounded-full bg-[var(--mn-surface-muted)] flex items-center justify-center text-[var(--mn-text-muted)] mn-panel ">
                 <Search className="w-6 h-6" />
               </div>
@@ -364,7 +381,7 @@ const PrototypeUniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = (
               >{publicT('public_clear_all_filters')}</button>
             </div>
           ) : (
-            filteredUniversities.map((univ) => {
+            paginatedUniversities.map((univ) => {
               const isSaved = savedUniversities.includes(univ.id);
               return (
                 <div
@@ -378,15 +395,13 @@ const PrototypeUniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = (
                     }
                   }}
                   onClick={() => onSelectUniversity?.(univ)}
-                  className="bg-[var(--mn-surface)] rounded-xl sm:rounded-2xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] active:border-[#142B5F] shadow-sm transition-all duration-150 active:scale-[0.985] p-2.5 sm:p-3 relative overflow-hidden group cursor-pointer flex flex-col gap-2 sm:gap-2.5 select-none mn-panel "
+                  className="bg-[var(--mn-surface)] rounded-r-[4px] rounded-l-2xl border border-[#142B5F]/30 dark:border-[var(--mn-border)] border-r-3 border-r-[#142B5F] dark:border-r-[var(--mn-accent)] hover:border-[#142B5F]/50 dark:hover:border-[var(--mn-accent)]/40 shadow-xs transition-all duration-150 active:scale-[0.985] p-2.5 sm:p-3 md:p-4 h-full relative overflow-hidden group cursor-pointer flex flex-col justify-between gap-2 sm:gap-2.5 select-none mn-panel "
                 >
-                  <div className="absolute top-0 right-0 w-1.5 h-full bg-gradient-to-b from-[#142B5F] dark:from-[#D6A43B] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
                   {/* Top Row: Logo & Names + Actions */}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 sm:gap-2.5 text-start min-w-0 flex-1">
                       {/* Circular Flag Badge like the Scholarship Card */}
-                      <div className="w-9.5 h-9.5 sm:w-10.5 sm:h-10.5 rounded-full p-0.5 bg-gradient-to-tr from-[var(--mn-primary)] via-[var(--mn-hero-secondary)] to-[var(--mn-accent-soft)] shadow-xs shrink-0 flex items-center justify-center mn-inverse ">
+                      <div className="w-9.5 h-9.5 sm:w-10.5 sm:h-10.5 rounded-full p-0.5 bg-[#0E7C86] shadow-xs shrink-0 flex items-center justify-center mn-inverse ">
                         <div className="w-full h-full rounded-full overflow-hidden bg-[var(--mn-surface)] border border-white flex items-center justify-center text-lg sm:text-xl shadow-inner mn-panel ">
                           <span data-mn-design="8f05af8d3a">{univ.countryFlag || '🌐'}</span>
                         </div>
@@ -410,22 +425,22 @@ const PrototypeUniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = (
                       title={publicT('public_save_to_favorites')}
                     >
                       <Heart
-                        className={`w-4 h-4 ${isSaved ? 'fill-[var(--mn-accent)] text-[var(--mn-accent-text)]' : 'text-[var(--mn-text-muted)]'}`}
+                        className={`w-4 h-4 ${isSaved ? 'fill-[#0E7C86] text-[#0E7C86] dark:fill-[#38C6D4] dark:text-[#38C6D4]' : 'text-[var(--mn-text-muted)]'}`}
                       />
                     </button>
                   </div>
 
-                  {/* Bottom Row: 4 Pill Badges (3 Info Badges + View Details CTA Button) */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-0.5">
+                  {/* Bottom Row: 4 Boxes in 2x2 Grid with Right-Aligned Parallel Icons matching Country Cards */}
+                  <div className="grid grid-cols-2 gap-1.5 pt-1.5 border-t border-[var(--mn-border)]/50">
                     {/* 1. Ownership / Type */}
-                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg px-2 py-1 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
-                      <Briefcase className="w-3 h-3 text-[var(--mn-accent-text)] shrink-0" />
+                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-3 pl-2 py-1.5 flex items-center justify-start gap-1.5 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
+                      <Briefcase className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#239BA6] shrink-0" />
                       <span className="truncate">{univ.ownership || univ.type || publicT('public_government')}</span>
                     </div>
 
                     {/* 2. Location */}
-                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg px-2 py-1 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
-                      <MapPin className="w-3 h-3 text-[var(--mn-heading)] shrink-0" />
+                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-3 pl-2 py-1.5 flex items-center justify-start gap-1.5 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
+                      <MapPin className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#239BA6] shrink-0" />
                       <span className="truncate">
                         {univ.country}
                         {univ.city ? publicT('public_city_suffix', { v0: univ.city }) : ''}
@@ -433,20 +448,20 @@ const PrototypeUniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = (
                     </div>
 
                     {/* 3. Foundation Year */}
-                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg px-2 py-1 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
-                      <History className="w-3 h-3 text-[var(--mn-link)] shrink-0" />
+                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-3 pl-2 py-1.5 flex items-center justify-start gap-1.5 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
+                      <History className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#239BA6] shrink-0" />
                       <span className="truncate">
                         {univ.foundationYear ? publicT('public_founded_year', { v0: univ.foundationYear }) : publicT('public_accredited_university')}
                       </span>
                     </div>
 
-                    {/* 4. View Details Button matching Scholarship details CTA */}
+                    {/* 4. View Details Button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         onSelectUniversity?.(univ);
                       }}
-                      className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs mn-inverse hover:mn-inverse "
+                      className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs shrink-0 mn-inverse hover:mn-inverse "
                       data-mn-design="26ecd1db9e"
                     >
                       <span className="text-[10px] sm:text-[11px] font-bold text-center leading-tight text-[var(--mn-accent-soft)]">{publicT('public_view_details')}</span>
@@ -458,7 +473,61 @@ const PrototypeUniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = (
             })
           )}
         </div>
+
+        {filteredUniversities.length > 0 && (
+          <PublicCardsPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+              resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+            dir={publicDir}
+          />
+        )}
       </div>
+
+      <PublicFilterSelectModal
+        isOpen={activeFilterModal === 'continent'}
+        title={publicT('public_choose_continent')}
+        icon={Globe2}
+        selectedValue={selectedContinent}
+        onSelect={(val) => handleContinentChange(val)}
+        onClose={() => setActiveFilterModal(null)}
+        dir={publicDir}
+        options={continents.map((c) => ({
+          value: c,
+          label: c === 'الكل' ? publicT('public_all_continents') : c,
+        }))}
+      />
+
+      <PublicFilterSelectModal
+        isOpen={activeFilterModal === 'country'}
+        title={publicT('public_choose_country')}
+        icon={MapPin}
+        selectedValue={selectedCountry}
+        onSelect={(val) => handleCountryChange(val)}
+        onClose={() => setActiveFilterModal(null)}
+        dir={publicDir}
+        options={countries.map((cnt) => ({
+          value: cnt,
+          label: cnt === 'الكل' ? publicT('public_all_countries_2') : cnt,
+        }))}
+      />
+
+      <PublicFilterSelectModal
+        isOpen={activeFilterModal === 'city'}
+        title={publicT('public_choose_city')}
+        icon={Building2}
+        selectedValue={selectedCity}
+        onSelect={(val) => setSelectedCity(val)}
+        onClose={() => setActiveFilterModal(null)}
+        dir={publicDir}
+        options={cities.map((cty) => ({
+          value: cty,
+          label: cty === 'الكل' ? publicT('public_all_cities') : cty,
+        }))}
+      />
     </div>
   );
 };

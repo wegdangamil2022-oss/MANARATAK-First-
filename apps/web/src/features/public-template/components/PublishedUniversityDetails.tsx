@@ -163,38 +163,46 @@ export function PublishedUniversityDetails({
   const section = (id: string, title: string, icon: typeof BookOpen, children: React.ReactNode) => (
     <section
       key={id}
-      className="mn-detail-full-bleed relative bg-[var(--mn-surface)] border-y border-[var(--mn-border-brand)]/30 shadow-md mn-panel"
+      className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl p-3.5 sm:p-4 md:p-6 border-y md:border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
     >
-      <div className="absolute inset-x-0 top-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-      <DetailSectionHeader id={id} title={title} icon={icon} />
-      <div className="space-y-3 p-4 text-[11px] sm:text-xs font-bold leading-7 text-[var(--mn-text)]">
+      <div className="absolute inset-x-0 top-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
+      <DetailSectionHeader id={id} title={title} icon={icon} className="mb-3" />
+      <div className="space-y-3 text-[11px] sm:text-[11.5px] font-bold leading-[1.9] text-[var(--mn-text)]">
         {children}
       </div>
     </section>
   );
-  const collection = (rows: Row[], keys: string[], heading = 'name') =>
-    rows.map((row, index) => (
-      <article
-        key={text(row.id) || index}
-        className="rounded-xl border border-[var(--mn-border)] p-3"
-      >
-        {row[heading] != null && (
-          <h3 className="mb-2 text-[var(--mn-heading)]">{text(row[heading])}</h3>
-        )}
-        <Fields row={row} keys={keys} />
-      </article>
-    ));
+  const collection = (rows: Row[], keys: string[], heading = 'name') => (
+    <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-3.5 items-stretch">
+      {rows.map((row, index) => (
+        <article
+          key={text(row.id) || index}
+          className="rounded-xl border border-[var(--mn-border)] p-3 md:p-4 h-full"
+        >
+          {row[heading] != null && (
+            <h3 className="mb-2 text-[var(--mn-heading)]">{text(row[heading])}</h3>
+          )}
+          <Fields row={row} keys={keys} />
+        </article>
+      ))}
+    </div>
+  );
   const admissions = object(dto.internationalAdmissions);
   const documents = dto.generalRequiredDocuments ?? [];
   const graduateDocuments = dto.additionalGraduateRequirements ?? [];
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-2.5 md:gap-4">
       {dto.publicId && <UniversityProgramDiscovery universityPublicId={dto.publicId}/>}
       {section(
         'university-about',
         publicT('public_published_university_overview'),
         BookOpen,
-        <Value value={dto.description || publicT('public_no_overview_has_been_added_to_the_published')} />,
+        <div className="relative overflow-hidden rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] pl-3.5 pr-4 py-3 text-start">
+          <div className="absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86] dark:from-[#D6A43B] dark:to-[#E5B54F]" />
+          <div className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.95] text-justify font-['Cairo',sans-serif]">
+            <Value value={dto.description || publicT('public_no_overview_has_been_added_to_the_published')} />
+          </div>
+        </div>,
       )}
       {section(
         'university-programs',

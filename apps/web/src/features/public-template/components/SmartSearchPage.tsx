@@ -75,7 +75,7 @@ const PrototypeSmartSearchPage: React.FC<SmartSearchPageProps> = ({
       .map((entry) => entry.item);
 
     const universityMatches = universities
-      .map((item) => ({ item, score: score(item) }))
+      .map((item: any) => ({ item, score: score(item) }))
       .sort((a, b) => b.score - a.score)
       .filter((entry, index) => entry.score > 0 || index < 2)
       .slice(0, 2)
@@ -99,9 +99,9 @@ const PrototypeSmartSearchPage: React.FC<SmartSearchPageProps> = ({
         <div className="max-w-5xl mx-auto mn-inline-gutter py-5 sm:py-7">
           <div className="relative flex flex-col items-center justify-center text-center">
             {/* Back Button */}
-            <button 
-              onClick={onBack} 
-              className="absolute right-0 top-0 w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-white/20 bg-white/10 flex items-center justify-center cursor-pointer hover:bg-white/20 transition-colors z-20" 
+            <button
+              onClick={onBack}
+              className="absolute right-0 top-0 w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-white/20 bg-white/10 flex items-center justify-center cursor-pointer hover:bg-white/20 transition-colors z-20"
               aria-label={publicT('public_back_2')}
             >
               <ArrowLeft className="w-4 h-4" />
@@ -109,7 +109,7 @@ const PrototypeSmartSearchPage: React.FC<SmartSearchPageProps> = ({
 
             {/* Standardized Section Title */}
             <div className="relative pb-1 mb-1 inline-block mt-0.5">
-              <h1 
+              <h1
                 data-mn-design="6cb7f3251f"
                 className="font-bold text-white inline-flex items-center justify-center gap-1.5"
               >
@@ -120,7 +120,7 @@ const PrototypeSmartSearchPage: React.FC<SmartSearchPageProps> = ({
               </h1>
               <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[var(--mn-accent)] to-transparent" />
             </div>
-            <p 
+            <p
               data-mn-design="543c901a7d"
               className="text-[10.5px] sm:text-[11px] text-white/90 font-medium max-w-md mx-auto"
             >{publicT('public_describe_what_you_want_to_find_without_needing')}</p>
@@ -144,8 +144,8 @@ const PrototypeSmartSearchPage: React.FC<SmartSearchPageProps> = ({
                 className="w-full resize-none rounded-xl px-3 py-2 leading-5 text-[var(--mn-heading)] placeholder:text-[var(--mn-text-muted)] outline-none"
               />
               <div className="flex items-center justify-end gap-2 px-1 pb-1">
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   data-mn-design="e874c16af7"
                   className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-[var(--mn-primary)] px-3 py-1.5 font-bold text-white cursor-pointer mn-inverse"
                 >

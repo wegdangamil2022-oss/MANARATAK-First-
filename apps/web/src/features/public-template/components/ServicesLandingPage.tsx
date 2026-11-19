@@ -47,10 +47,10 @@ function ServicePathCard({
     <button
       type="button"
       onClick={onClick}
-      className="group w-full overflow-hidden rounded-[22px] border border-[var(--mn-border)] bg-[var(--mn-surface)] text-start shadow-sm transition-all hover:border-[var(--mn-accent)]/45 hover:shadow-md active:scale-[0.99] mn-panel "
+      className="group w-full h-full flex flex-col overflow-hidden rounded-[22px] border border-[var(--mn-border)] bg-[var(--mn-surface)] text-start shadow-sm transition-all hover:border-[var(--mn-accent)]/45 hover:shadow-md active:scale-[0.99] mn-panel "
     >
-      <div className="h-1 bg-gradient-to-l from-[var(--mn-accent)] via-[var(--mn-accent-soft)] to-[var(--mn-primary)] mn-gold " />
-      <div className="p-3.5 sm:p-4">
+      <div className="h-1 w-full shrink-0 bg-gradient-to-l from-[var(--mn-accent)] via-[var(--mn-accent-soft)] to-[var(--mn-primary)] mn-gold " />
+      <div className="p-3.5 sm:p-4 md:p-5 flex-1 flex flex-col justify-between">
         <div className="flex items-start gap-3">
           <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-2xl border border-[var(--mn-primary)]/15 bg-[var(--mn-primary)]/10 shadow-inner">
             <Icon className="h-6 w-6 text-[var(--mn-heading)]" />
@@ -102,7 +102,7 @@ export const ServicesLandingPage: React.FC<ServicesLandingPageProps> = ({ onBack
 
   return (
     <div className="min-h-screen bg-[var(--mn-page)] pb-24 text-[var(--mn-heading)] font-['Cairo',sans-serif] select-none mn-panel " dir={publicDir}>
-      <div className="relative mn-search-hero overflow-hidden border-b border-[var(--mn-accent)]/20 px-3 pb-12 pt-4 text-white shadow-xs sm:px-4 sm:pb-14 mn-inverse ">
+      <div className="relative mn-search-hero overflow-hidden px-3 sm:px-4 pt-4 pb-3 text-white shadow-xs mn-inverse ">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute left-5 top-3 grid grid-cols-5 gap-1.5 opacity-20">
             {Array.from({ length: 20 }).map((_, index) => (
@@ -111,8 +111,7 @@ export const ServicesLandingPage: React.FC<ServicesLandingPageProps> = ({ onBack
           </div>
           <div className="absolute -left-12 -top-12 h-56 w-56 rounded-full border border-[var(--mn-accent)]/25" />
           <div className="absolute -left-6 -top-6 h-72 w-72 rounded-full border border-[var(--mn-accent)]/15" />
-          <GraduationCap className="absolute -right-4 bottom-0 h-36 w-36 text-[var(--mn-heading)]" strokeWidth={1.2} />
-          <Sparkles className="absolute left-[18%] top-[42%] h-10 w-10 text-[var(--mn-accent)]/15" />
+          <GraduationCap className="absolute -right-4 bottom-0 h-36 w-36 text-white/10" strokeWidth={1.2} />
         </div>
 
         {onBack && (
@@ -127,35 +126,63 @@ export const ServicesLandingPage: React.FC<ServicesLandingPageProps> = ({ onBack
           </button>
         )}
 
-        <div className="relative z-10 mx-auto max-w-md space-y-3 pt-6 text-center sm:max-w-xl">
-          <div className="relative inline-block mb-2">
-            <div className="absolute -inset-x-6 -inset-y-3 rounded-full bg-[var(--mn-accent)]/10 blur-xl" />
-            <h1 className="relative font-['Cairo',sans-serif] text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl">{publicT('public_services')}{' '}<span className="text-[var(--mn-accent-soft)]">{publicT('public_manaratak')}</span>
+        <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto text-center relative z-10 space-y-2 md:space-y-3 pt-1">
+          <div className="flex justify-center">
+            <Sparkles className="h-5 w-5 text-[var(--mn-accent-text)] drop-shadow-[0_0_8px_rgba(214,164,59,0.8)]" aria-hidden="true" />
+          </div>
+
+          <div className="space-y-0.5 md:space-y-1">
+            <h1 className="font-['Cairo',sans-serif] text-xl sm:text-2xl md:text-3xl font-bold leading-tight tracking-tight text-white">
+              {publicT('public_services')}{' '}
+              <span className="text-[var(--mn-accent-text)]">{publicT('public_manaratak')}</span>
             </h1>
+
+            <div className="flex justify-center pt-1 pb-0.5">
+              <div className="w-10 md:w-14 h-0.5 bg-[var(--mn-accent)] rounded-full mn-gold " />
+            </div>
+
+            <p className="text-[11px] sm:text-xs md:text-sm text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-md md:max-w-2xl mx-auto truncate">
+              {publicT('public_support_throughout_your_study_journey_from_choosing_and')}
+            </p>
           </div>
-          <div className="flex items-center justify-center gap-2 pb-2 pt-1">
-            <div className="h-px w-12 bg-gradient-to-r from-transparent to-[var(--mn-accent-soft)]/50" />
-            <Briefcase className="h-4 w-4 text-[var(--mn-accent-text)]" />
-            <div className="h-px w-12 bg-gradient-to-l from-transparent to-[var(--mn-accent-soft)]/50" />
+        </div>
+
+        {/* 2 Quick Track Selector Tiles inside Hero */}
+        <div className="max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto mn-inline-gutter mt-2.5 md:mt-3.5 relative z-20 pb-0">
+          <div className="grid grid-cols-2 gap-2 sm:gap-2.5 md:gap-3.5">
+            <button
+              type="button"
+              onClick={() => onOpenTrack?.('student')}
+              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel "
+            >
+              <div className="flex items-center justify-center gap-1.5 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-semibold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
+                <GraduationCap className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
+                <span className="truncate">{publicT('public_student_services')}</span>
+              </div>
+              <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] mt-0.5 truncate">استشارات وتجهيز أكاديمي</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onOpenTrack?.('general')}
+              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel "
+            >
+              <div className="flex items-center justify-center gap-1.5 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-semibold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
+                <FileText className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
+                <span className="truncate">{publicT('public_general_services_and_support')}</span>
+              </div>
+              <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] mt-0.5 truncate">ترجمة وتوثيق وإجراءات</span>
+            </button>
           </div>
-          <p className="mx-auto max-w-[90%] font-['Cairo',sans-serif] text-[13px] font-medium leading-relaxed text-[var(--mn-on-dark-muted)] drop-shadow-md sm:text-sm">{publicT('public_support_throughout_your_study_journey_from_choosing_and')}</p>
         </div>
       </div>
 
-      <div className="relative z-20 mx-auto -mt-5 max-w-md mn-inline-gutter pb-24 sm:max-w-xl">
-        <div className="mb-3.5 rounded-[22px] border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3.5 py-3.5 shadow-lg mn-panel ">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0 text-start">
-              <h2 className="font-['Cairo',sans-serif] text-[15px] font-bold text-[var(--mn-heading)] sm:text-base">{publicT('public_choose_service_type')}</h2>
-              <p className="mt-0.5 font-['Cairo',sans-serif] text-[10.5px] font-semibold leading-5 text-[var(--mn-text-muted)] sm:text-[11px]">{publicT('public_choose_a_path_first_to_see_the_services')}</p>
-            </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[var(--mn-accent)]/20 bg-[var(--mn-accent)]/10">
-              <Search className="h-5 w-5 text-[var(--mn-accent-text)]" />
-            </div>
-          </div>
-        </div>
+      {/* Gold Divider Ribbon Line */}
+      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--mn-accent-text)] via-[var(--mn-accent-soft)] to-[var(--mn-accent-text)] shadow-xs mb-1" />
 
-        <div className="space-y-3">
+      <div className="relative z-20 mx-auto pt-3 md:pt-5 max-w-md mn-inline-gutter pb-24 sm:max-w-xl md:max-w-[1120px] lg:max-w-[1160px]">
+
+        <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-5 items-stretch">
           <ServicePathCard
             title={publicT('public_student_services')}
             eyebrow="استشارات وتجهيز أكاديمي للطالب"
@@ -190,4 +217,3 @@ export const ServicesLandingPage: React.FC<ServicesLandingPageProps> = ({ onBack
     </div>
   );
 };
-

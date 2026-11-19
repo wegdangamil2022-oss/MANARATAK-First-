@@ -39,7 +39,7 @@ async function mount() {
 
 async function click(label: string) {
   await act(async () => {
-    view!.root.findAllByType('button').find(button => button.children.includes(label))!.props.onClick();
+    view!.root.findAllByType('button').find(button => button.findAllByType('span').some(span => span.children.includes(label)) || button.children.includes(label))!.props.onClick();
   });
 }
 

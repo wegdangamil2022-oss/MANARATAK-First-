@@ -12,13 +12,19 @@ import {
   Paperclip,
   Play,
   Sparkles,
+  Upload,
   Camera,
+  User,
+  Video,
   ArrowLeft,
   Check,
+  Download,
   Award,
   MessageSquare,
   Send,
   Lock,
+  RefreshCw,
+  FileDown,
   HelpCircle,
   Info,
   Layers,
@@ -28,6 +34,7 @@ import {
   AlertCircle,
   Star,
   Coins,
+  ChevronRight,
   Globe,
   Calculator,
   ClipboardCheck,
@@ -55,6 +62,7 @@ import {
   Search,
   Stethoscope,
   ArrowDownNarrowWide,
+  ArrowUpDown,
   Image as ImageIcon,
   X,
   ZoomIn,
@@ -81,7 +89,7 @@ function RequirementHeaderCard({
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* Top subtle golden light */}
         <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-[#D6A43B] dark:via-[#F2CD78]/60 to-transparent" />
-        
+
         {/* Subtle decorative straight lines */}
         <div className="absolute inset-0 opacity-15">
           <div className="absolute top-3 left-6 w-32 h-[1px] bg-gradient-to-r from-[#D6A43B] to-transparent" />
@@ -1257,15 +1265,15 @@ export function CourseStudyRoomView({
   const getItemIcon = (type: CourseLessonItem['type']) => {
     switch (type) {
       case 'video':
-        return <Play className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#E5B54F] fill-[#D6A43B] dark:fill-[#E5B54F] rotate-180" />;
+        return <Play className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#38C6D4] fill-[#0E7C86]/20 rotate-180" />;
       case 'summary':
-        return <FileText className="w-3.5 h-3.5 text-[var(--mn-learning-resource-500)] dark:text-[var(--mn-learning-resource-400)]" />;
+        return <FileText className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#7EB6FF]" />;
       case 'attachment':
-        return <Paperclip className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />;
+        return <Paperclip className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#38C6D4]" />;
       case 'quiz':
-        return <CheckCircle2 className="w-3.5 h-3.5 text-[var(--mn-learning-success-500)] dark:text-[var(--mn-learning-success-400)]" />;
+        return <CheckCircle2 className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#38C6D4]" />;
       case 'practice':
-        return <BookOpen className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />;
+        return <BookOpen className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#7EB6FF]" />;
     }
   };
 
@@ -1342,7 +1350,7 @@ export function CourseStudyRoomView({
               <ArrowRight className="w-3.5 h-3.5 shrink-0" />
               <span className="leading-none">{publicT('public_course_back_to_lecture_list_162')}</span>
             </button>
-            
+
             <div className="text-center hidden sm:block">
               <span className="text-[10px] text-white/60 block font-bold">{publicT('public_course_lecture_163')}{' '}{activeLecture.id}: {activeLecture.title}</span>
             </div>
@@ -1357,7 +1365,7 @@ export function CourseStudyRoomView({
 
         {/* Dedicated Single-Column Classroom Layout - 100% Width */}
         <div className="w-full px-0 sm:px-4 lg:px-6 py-4 space-y-4">
-          
+
           {/* Realistic LMS Cinema-Style Video Frame */}
           <div
             role="button"
@@ -2620,7 +2628,7 @@ export function CourseStudyRoomView({
               })}
             </div>
           </div>
-          
+
           {/* Distinct Indigo-Turquoise Glowing Gradient Divider */}
           <div className="relative py-2 flex items-center justify-center">
             <div className="w-full h-[2px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#7EB6FF] to-transparent opacity-30" />
@@ -2669,7 +2677,7 @@ export function CourseStudyRoomView({
             {/* Who can enter the test Card */}
             <div id="who-section" className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4.5 pr-4.5 sm:pr-5 shadow-2xs space-y-3.5 text-right font-['Cairo',sans-serif]">
               <div className="absolute top-3 right-0 bottom-3 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#D6A43B] to-[#E5B54F]" />
-              
+
               <div className="pr-1 space-y-3">
                 {/* Heading with circular gold badge */}
                 <div className="flex items-center gap-2">
@@ -2858,7 +2866,7 @@ export function CourseStudyRoomView({
               {/* Examples: Hungary, Jordan, Cuba etc. */}
               <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4.5 pr-4.5 sm:pr-5 space-y-3 shadow-2xs">
                 <div className="absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86]" />
-                
+
                 <div className="pr-1 space-y-3">
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-[#0E7C86]/10 text-[#0E7C86] dark:text-[#2DD4BF] border border-[#0E7C86]/25 flex items-center justify-center shrink-0">
@@ -2899,7 +2907,7 @@ export function CourseStudyRoomView({
               {/* China Specific Detail */}
               <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4.5 pr-4.5 sm:pr-5 space-y-3 shadow-2xs">
                 <div className="absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#142B5F] via-[#0E7C86] to-[#D6A43B]" />
-                
+
                 <div className="pr-1 space-y-3">
                   <div className="flex items-center gap-2 pb-1 border-b border-slate-200/80 dark:border-slate-700/60">
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/10 dark:bg-[#7EB6FF]/15 text-[#142B5F] dark:text-[#7EB6FF] border border-[#142B5F]/20 flex items-center justify-center shrink-0">
@@ -2937,7 +2945,7 @@ export function CourseStudyRoomView({
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2 pt-1">
                     <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
                       لكن يجب الانتباه إلى أن فرص البكالوريوس في مسار Type B محدودة جدًا مقارنة بفرص الماجستير والدكتوراه، ولذلك نجد أن هذا المسار أكثر انتشارًا بين طلاب الدراسات العليا.
@@ -3176,7 +3184,7 @@ export function CourseStudyRoomView({
             {/* Formula & Calculator Card */}
             <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4.5 pr-4.5 sm:pr-5 shadow-2xs space-y-3.5 text-right font-['Cairo',sans-serif]">
               <div className="absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#D6A43B] to-[#E5B54F]" />
-              
+
               <div className="pr-1 space-y-3">
                 {/* Header for Step 5 */}
                 <div className="flex items-center gap-2">
@@ -3299,7 +3307,7 @@ export function CourseStudyRoomView({
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Visual Progress Ratio */}
                     <div className="w-full sm:w-48 space-y-0.5">
                       <div className="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden flex shadow-inner">
@@ -3797,11 +3805,11 @@ export function CourseStudyRoomView({
 
             {/* Subject Cards - Redesigned, Calm, Elegant Layout */}
             <div className="grid grid-cols-1 gap-3.5 font-['Cairo',sans-serif]">
-              
+
               {/* Mathematics Card */}
               <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4.5 pr-4.5 sm:pr-5 shadow-2xs space-y-3 text-right">
                 <div className="absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86]" />
-                
+
                 {/* Header of Math */}
                 <div className="pr-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-200/80 dark:border-slate-800">
                   <div className="flex items-center gap-2">
@@ -3876,11 +3884,11 @@ export function CourseStudyRoomView({
 
               {/* Chemistry & English Side by Side Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                
+
                 {/* Chemistry Card */}
                 <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4.5 pr-4.5 sm:pr-5 shadow-2xs space-y-3 text-right">
                   <div className="absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#0E7C86] to-[#21A7B4]" />
-                  
+
                   <div className="pr-1 flex items-center justify-between pb-2 border-b border-slate-200/80 dark:border-slate-800">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-[#0E7C86]/10 text-[#0E7C86] dark:text-[#2DD4BF] border border-[#0E7C86]/25 flex items-center justify-center shrink-0">
@@ -3911,7 +3919,7 @@ export function CourseStudyRoomView({
                 {/* English Card */}
                 <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4.5 pr-4.5 sm:pr-5 shadow-2xs space-y-3 text-right">
                   <div className="absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#D6A43B] to-[#E5B54F]" />
-                  
+
                   <div className="pr-1 flex items-center justify-between pb-2 border-b border-slate-200/80 dark:border-slate-800">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-[#D6A43B]/10 dark:bg-[#F2CD78]/15 text-[#D6A43B] dark:text-[#F2CD78] border border-[#D6A43B]/25 flex items-center justify-center shrink-0">
@@ -3962,7 +3970,7 @@ export function CourseStudyRoomView({
               {/* Centered Gold Underline directly under the title text */}
               <div className="h-[2px] w-36 sm:w-48 bg-gradient-to-r from-transparent via-[#D6A43B] dark:via-[#F2CD78] to-transparent rounded-full mt-2" />
             </div>
-            
+
             {/* Context/Reasoning Intro Box */}
             <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4 pr-4.5 sm:pr-5 shadow-2xs font-['Cairo',sans-serif]">
               <div className="absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86]" />
@@ -3973,7 +3981,7 @@ export function CourseStudyRoomView({
                 </p>
               </div>
             </div>
-            
+
             <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4 pr-4.5 sm:pr-5 shadow-2xs space-y-1 text-right font-['Cairo',sans-serif]">
               <div className="absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#D6A43B] to-[#E5B54F]" />
               <div className="pr-1">
@@ -3995,7 +4003,7 @@ export function CourseStudyRoomView({
                     آلية المفاضلة البديلة المعتمدة لعام 2026/2027:
                   </h4>
                 </div>
-                
+
                 <ul className="space-y-2 text-[11px] font-bold text-[var(--mn-text)] leading-[1.8]">
                   <li className="flex items-start gap-2 p-2.5 rounded-lg bg-slate-50/80 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700">
                     <span className="text-[#0E7C86] dark:text-[#2DD4BF] font-bold">•</span>
@@ -4058,7 +4066,7 @@ export function CourseStudyRoomView({
               {/* Centered Gold Underline directly under the title text */}
               <div className="h-[2px] w-36 sm:w-48 bg-gradient-to-r from-transparent via-[#D6A43B] dark:via-[#F2CD78] to-transparent rounded-full mt-2" />
             </div>
-            
+
             {/* The Common Mistake Box */}
             <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4 pr-4.5 sm:pr-5 shadow-2xs space-y-2 text-right font-['Cairo',sans-serif]">
               <div className="absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#D6A43B] to-[#E5B54F]" />
@@ -4090,7 +4098,7 @@ export function CourseStudyRoomView({
 
             {/* Examples Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              
+
               {/* Hungary Example */}
               <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4.5 pr-4.5 sm:pr-5 shadow-2xs space-y-2 text-right font-['Cairo',sans-serif]">
                 <div className="absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86]" />
@@ -4277,7 +4285,7 @@ export function CourseStudyRoomView({
 
             {/* Key Facts Grid: Seats & Timeline */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              
+
               {/* Card 1: Seats Allocation */}
               <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4.5 pr-4.5 sm:pr-5 shadow-2xs space-y-2.5 text-right font-['Cairo',sans-serif]">
                 <div className="absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86]" />
@@ -4403,7 +4411,7 @@ export function CourseStudyRoomView({
                   <p className="text-[var(--mn-text)] leading-[1.85] text-justify">
                     عند التقديم في منصة المنحة المجرية يرفع الطالب الوثائق المطلوبة بحسب الدرجة العلمية والتخصص والجامعة، وتشمل عادة: جواز السفر أو البطاقة الشخصية + شهادة المؤهل الدراسي + كشف الدرجات + إثبات اللغة + خطاب الدافع + الصورة الشخصية، مع ترجمة الوثائق إلى اللغة المطلوبة عند الحاجة.
                   </p>
-                  
+
                   <div className="p-3 bg-slate-50/80 dark:bg-slate-800/60 rounded-lg border border-slate-200/80 dark:border-slate-700 space-y-1.5">
                     <p className="text-[10.5px] text-[var(--mn-text-muted)] leading-[1.75] text-justify">
                       وإذا لم يكن جواز السفر جاهزًا وقت التقديم، يمكن للطالب التقديم باستخدام البطاقة الشخصية السارية مع رفع تعهد باستكمال جواز السفر لاحقًا، وكان آخر موعد لاستكمال الجواز في دورة 2026/2027 هو 1 أغسطس 2026.
@@ -4461,7 +4469,7 @@ export function CourseStudyRoomView({
 
             {/* Financial Coverage & After Acceptance Side-by-Side */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              
+
               {/* Financials */}
               <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4.5 pr-4.5 sm:pr-5 shadow-2xs space-y-2 text-right font-['Cairo',sans-serif]">
                 <div className="absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86]" />
@@ -4561,7 +4569,7 @@ export function CourseStudyRoomView({
 
             {/* Key Facts Grid: Timeline & Seats - 100% full verbatim text */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              
+
               {/* Card 1: Seats Allocation & Critical Reason */}
               <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4 pr-4.5 sm:pr-5 shadow-2xs space-y-2.5 text-right font-['Cairo',sans-serif]">
                 <div className="absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86]" />
@@ -4724,7 +4732,7 @@ export function CourseStudyRoomView({
 
             {/* Financials & After Acceptance Side-by-Side - 100% full verbatim text */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              
+
               {/* Financials */}
               <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4 pr-4.5 sm:pr-5 shadow-2xs space-y-2 text-right font-['Cairo',sans-serif]">
                 <div className="absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86]" />
@@ -9235,39 +9243,45 @@ export function CourseStudyRoomView({
         </button>
 
         {/* Header Content with Clean Layout & Hierarchy */}
-        <div className="max-w-xl mx-auto text-center relative z-10 space-y-2.5 pt-4 sm:pt-6 pb-1">
-          {/* Main Title */}
-          <div>
-            <span className="text-[15px] font-bold text-[var(--mn-accent-soft)] font-['Cairo',sans-serif] tracking-normal block mb-1">{publicT('public_course_manaratak_learning_platform_1126')}{' '}</span>
-            <h1 className="text-base sm:text-lg md:text-xl font-bold text-white font-['Cairo',sans-serif] leading-snug">{publicT('public_course_scholarship_and_university_admission_training_course_1127')}{' '}</h1>
+        <div className="max-w-xl mx-auto text-center relative z-10 space-y-2.5 pt-3 sm:pt-5 pb-1">
+          {/* Main Title First, Platform Subtitle Underneath */}
+          <div className="space-y-1">
+            <h1 className="text-base sm:text-lg md:text-xl font-bold text-white font-['Cairo',sans-serif] leading-snug">
+              {publicT('public_course_scholarship_and_university_admission_training_course_1127')}{' '}
+            </h1>
+            <span className="text-[12.5px] sm:text-[13.5px] font-bold text-[#F2CD78] font-['Cairo',sans-serif] tracking-normal block">
+              {publicT('public_course_manaratak_learning_platform_1126')}{' '}
+            </span>
           </div>
 
-          {/* Golden Line Underneath */}
+          {/* Horizon Petrol & Gold Line Underneath */}
           <div className="flex items-center justify-center gap-2 w-full pt-0.5">
-            <div className="w-14 h-0.5 bg-gradient-to-r from-transparent to-[#D6A43B] dark:to-[#E5B54F]" />
-            <div className="w-1.5 h-1.5 rounded-full bg-[#D6A43B] dark:bg-[#E5B54F] shadow-xs" />
-            <div className="w-14 h-0.5 bg-gradient-to-l from-transparent to-[#D6A43B] dark:to-[#E5B54F]" />
+            <div className="w-16 h-0.5 bg-gradient-to-r from-transparent to-[#38C6D4]" />
+            <div className="w-1.5 h-1.5 rotate-45 bg-[#F2CD78] shadow-xs" />
+            <div className="w-16 h-0.5 bg-gradient-to-l from-transparent to-[#38C6D4]" />
           </div>
 
           {/* Progress & Quick Actions Card Inside Hero */}
-          <div className="bg-white/10 dark:bg-black/30 border border-white/15 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 space-y-2.5 mt-2">
+          <div className="bg-white/10 dark:bg-black/30 border border-white/20 backdrop-blur-md rounded-2xl p-3.5 sm:p-4 space-y-3 mt-2 shadow-sm">
             <div className="flex items-center justify-between gap-2 text-xs font-bold text-white font-['Cairo',sans-serif]">
               <div className="flex items-center gap-1.5">
-                <span className="text-[11px] text-white/90">{publicT('public_course_progress_1128')}</span>
-                <span className="text-[var(--mn-accent-soft)] mn-font-title text-xs">{publicT('public_course_0_completed_1129')}</span>
+                <span className="text-[11.5px] text-white/95">{publicT('public_course_progress_1128')}</span>
+                <span className="text-[#38C6D4] font-bold text-xs">{publicT('public_course_0_completed_1129')}</span>
               </div>
-              <span className="text-[10.5px] font-bold text-[var(--mn-learning-success-300)] bg-[var(--mn-learning-success-900)]/60 border border-[var(--mn-learning-success-400)]/30 px-2.5 py-0.5 rounded-full">{publicT('public_course_lecture_1_of_7_1130')}{' '}</span>
+              <span className="text-[10.5px] font-bold text-white bg-[#142B5F]/75 border border-[#38C6D4]/45 px-2.5 py-0.5 rounded-lg">
+                {publicT('public_course_lecture_1_of_7_1130')}{' '}
+              </span>
             </div>
 
-            {/* Progress Bar */}
-            <div className="w-full h-2 rounded-full bg-white/20 overflow-hidden">
+            {/* Horizontal Horizon Petrol Progress Bar */}
+            <div className="w-full h-2.5 rounded-full bg-[#0A1838]/60 border border-[#38C6D4]/30 overflow-hidden p-[1px]">
               <div
-                className="h-full w-0 bg-gradient-to-r from-[#D6A43B] to-[#F3CE74] rounded-full transition-all duration-500 shadow-xs"
+                className="h-full w-full bg-gradient-to-l from-[#0E7C86] via-[#1598A4] to-[#38C6D4] rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(14,124,134,0.65)]"
                 data-mn-design="392c68093a"
               />
             </div>
 
-            {/* Resume Button */}
+            {/* Resume Button: Crisp White with Navy Text & Horizon Petrol Accent */}
             <div className="pt-0.5 flex items-center justify-center">
               <button
                 type="button"
@@ -9275,9 +9289,11 @@ export function CourseStudyRoomView({
                   setOpenLectureId(1);
                   setActiveItemId('1-1');
                 }}
-                className="w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#D6A43B] to-[#F3CE74] hover:brightness-110 text-[#142B5F] text-[13px] font-bold font-['Cairo',sans-serif] shadow-2xs transition-transform active:scale-95 cursor-pointer"
+                className="w-auto inline-flex items-center justify-center gap-2 px-5 py-2 rounded-xl bg-white hover:bg-[#F2F8FA] text-[#142B5F] border border-[#38C6D4]/50 text-[12.5px] sm:text-[13px] font-bold font-['Cairo',sans-serif] shadow-md transition-all active:scale-95 cursor-pointer"
               >
-                <Play className="w-3.5 h-3.5 text-[#142B5F] fill-[#142B5F]" />
+                <span className="w-5 h-5 rounded-full bg-gradient-to-l from-[#142B5F] to-[#0E7C86] flex items-center justify-center shrink-0">
+                  <Play className="w-2.5 h-2.5 text-white fill-white rotate-180" />
+                </span>
                 <span>{publicT('public_course_continue_lesson_1131')}</span>
               </button>
             </div>
@@ -9285,25 +9301,34 @@ export function CourseStudyRoomView({
         </div>
       </div>
 
-      {/* 2. LECTURES & SYLLABUS LIST (القائمة الجانبية والمحاضرات السبعة) */}
-      <div className="max-w-xl mx-auto px-3.5 sm:px-4 py-4 space-y-4">
-        <div className="rounded-3xl bg-[var(--mn-surface)] border border-[var(--mn-border)] p-3.5 sm:p-4 shadow-sm mn-panel space-y-3">
+      {/* 2. LECTURES & SYLLABUS LIST (ممتد بالكامل لليمين واليسار ومرتب بأناقة) */}
+      <div className="w-full max-w-xl mx-auto px-0 py-3 space-y-3">
+        <section className="relative w-full bg-[var(--mn-surface)] rounded-none px-2.5 sm:px-3.5 py-3.5 border-y border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 mn-panel space-y-3 overflow-hidden">
+          <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
+
+          {/* Section Header */}
           <div className="flex items-center justify-between border-b border-[var(--mn-border)] pb-2.5">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-[#142B5F] flex items-center justify-center shadow-xs shrink-0">
-                <BookOpen className="w-4 h-4 text-[#D6A43B] fill-[#D6A43B]" />
+              <div className="relative w-8 h-8 rounded-lg bg-[#142B5F] flex items-center justify-center shadow-2xs shrink-0 overflow-hidden">
+                <span className="pointer-events-none absolute top-0 right-0 w-2.5 h-2.5 bg-[#0E7C86] rounded-bl-md" />
+                <BookOpen className="w-4 h-4 text-white relative z-10" />
               </div>
               <div className="flex flex-col">
-                <h2 className="text-sm sm:text-base mn-font-emphasis text-[var(--mn-heading)] leading-none">{publicT('public_course_lecture_and_lesson_list_1132')}{' '}</h2>
-                <div className="w-12 h-0.5 bg-[#D6A43B] rounded-full mt-1.5" />
+                <h2 className="text-[13.5px] sm:text-[14.5px] font-bold text-[var(--mn-heading)] leading-tight font-['Cairo',sans-serif]">
+                  {publicT('public_course_lecture_and_lesson_list_1132')}{' '}
+                </h2>
+                <div className="w-14 h-[2px] bg-gradient-to-l from-[#142B5F] to-[#0E7C86] rounded-full mt-1" />
               </div>
             </div>
 
-            <span className="text-[10px] font-bold text-[var(--mn-primary)] dark:text-[var(--mn-accent-soft)] bg-[var(--mn-page)] px-2.5 py-1 rounded-lg border border-[var(--mn-border)]">{publicT('public_course_7_lectures_1133')}{' '}</span>
+            <span className="inline-flex items-center gap-1 text-[10.5px] font-bold text-[#142B5F] dark:text-[#38C6D4] bg-[var(--mn-page)] px-2.5 py-1 rounded-lg border border-[#142B5F]/20 dark:border-[#38C6D4]/30">
+              <Layers className="w-3 h-3 text-[#0E7C86] dark:text-[#38C6D4]" />
+              <span>{publicT('public_course_7_lectures_1133')}</span>
+            </span>
           </div>
 
           {/* 7 Lectures List */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {COURSE_LECTURES.map((lecture) => {
               const isOpen = openLectureId === lecture.id;
               const isCurrentLecture = lecture.id === 1;
@@ -9311,65 +9336,90 @@ export function CourseStudyRoomView({
               return (
                 <div
                   key={lecture.id}
-                  className={`rounded-2xl border transition-all overflow-hidden ${
+                  className={`relative rounded-xl border transition-all overflow-hidden ${
                     isOpen
-                      ? 'border-[#142B5F] dark:border-[#D6A43B]/80 bg-[var(--mn-page)]/90 shadow-2xs'
-                      : 'border-[var(--mn-border)] bg-[var(--mn-surface)] hover:border-[var(--mn-border-strong)]'
+                      ? 'border-[#142B5F] dark:border-[#0E7C86] bg-[var(--mn-surface)] shadow-xs'
+                      : 'border-[var(--mn-border)] bg-[var(--mn-page)]/70 hover:border-[#142B5F]/50'
                   }`}
                 >
+                  {/* Right-edge vertical accent bar */}
+                  <div
+                    className={`pointer-events-none absolute top-0 right-0 bottom-0 w-[3.5px] ${
+                      isCurrentLecture
+                        ? 'bg-gradient-to-b from-[#142B5F] to-[#0E7C86]'
+                        : 'bg-slate-300 dark:bg-slate-700'
+                    }`}
+                  />
+
                   {/* Lecture Header Button */}
                   <button
                     type="button"
                     onClick={() => toggleLecture(lecture.id)}
-                    className="w-full flex items-center justify-between p-3 text-right transition-colors cursor-pointer"
+                    className="w-full flex items-center justify-between py-2.5 pl-3 pr-3.5 text-right transition-colors cursor-pointer gap-2.5"
                   >
-                    <div className="flex items-start gap-2.5 min-w-0">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <span
-                        className={`w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5 ${
+                        className={`w-7 h-7 rounded-lg text-[11.5px] font-bold flex items-center justify-center shrink-0 ${
                           isCurrentLecture
-                            ? 'bg-[var(--mn-primary)] text-white shadow-xs mn-inverse'
-                            : 'bg-[var(--mn-surface-muted)] text-[var(--mn-text-muted)] border border-[var(--mn-border)]'
+                            ? 'bg-gradient-to-br from-[#142B5F] to-[#0E7C86] text-white shadow-2xs'
+                            : 'bg-[var(--mn-surface)] text-[#142B5F] dark:text-slate-200 border border-[var(--mn-border)]'
                         }`}
                       >
                         {lecture.id}
                       </span>
 
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <h3 className="text-[11.5px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug">
-                            {lecture.title}
-                          </h3>
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <h3 className="text-[11.5px] sm:text-[12.5px] font-bold text-[var(--mn-heading)] leading-snug font-['Cairo',sans-serif]">
+                          {lecture.title}
+                        </h3>
+
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--mn-text-muted)]">
+                            <BookOpen className="w-3 h-3 text-[#0E7C86] shrink-0" />
+                            <span>
+                              {lecture.items.length} {publicT('public_course_lessons_and_learning_items_1136')}
+                            </span>
+                          </span>
+
                           {isCurrentLecture ? (
-                            <span className="text-[9px] font-bold text-[var(--mn-learning-success-700)] dark:text-[var(--mn-learning-success-300)] bg-[var(--mn-learning-success-50)] dark:bg-[var(--mn-learning-success-950)]/60 px-1.5 py-0.2 rounded-md border border-[var(--mn-learning-success-300)]/40 shrink-0">{publicT('public_course_available_to_read_1134')}{' '}</span>
+                            <span className="text-[9.5px] font-bold text-[#0E7C86] dark:text-[#38C6D4] bg-[#0E7C86]/10 px-2 py-0.5 rounded-md border border-[#0E7C86]/25 shrink-0">
+                              {publicT('public_course_available_to_read_1134')}
+                            </span>
                           ) : (
-                            <span className="text-[9px] font-bold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-300/40 shrink-0 flex items-center gap-1">
-                              <Lock className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
+                            <span className="text-[9.5px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 shrink-0 inline-flex items-center gap-1">
+                              <Lock className="w-2.5 h-2.5 text-slate-500 dark:text-slate-400" />
                               <span>{publicT('public_course_locked_1135')}</span>
                             </span>
                           )}
                         </div>
-                        <span className="text-[10px] text-[var(--mn-text-muted)] block mt-0.5">
-                          {lecture.items.length}{' '}{publicT('public_course_lessons_and_learning_items_1136')}{' '}</span>
                       </div>
                     </div>
 
                     {isCurrentLecture ? (
-                      <ChevronDown
-                        className={`w-4 h-4 text-[var(--mn-text-muted)] transition-transform duration-200 shrink-0 mr-1.5 ${
-                          isOpen ? 'rotate-180 text-[var(--mn-heading)]' : ''
+                      <div
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border transition-colors ${
+                          isOpen
+                            ? 'bg-[#142B5F] text-white border-[#142B5F]'
+                            : 'bg-[var(--mn-surface)] text-[#142B5F] border-[var(--mn-border)]'
                         }`}
-                      />
+                      >
+                        <ChevronDown
+                          className={`w-4 h-4 transition-transform duration-200 ${
+                            isOpen ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </div>
                     ) : (
-                      <div className="flex items-center gap-1 shrink-0 mr-1 text-amber-500/80 dark:text-amber-400/80">
-                        <Lock className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                      <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 text-slate-400 dark:text-slate-500">
+                        <Lock className="w-3.5 h-3.5" />
                       </div>
                     )}
                   </button>
 
-                  {/* Lecture Nested Lessons & Items */}
+                  {/* Lecture Nested Lessons & Items (Clean Navy & Petrol design without excessive gold) */}
                   {isOpen && (
-                    <div className="border-t border-[var(--mn-border)] bg-[var(--mn-page)]/50 p-2 space-y-1.5 animate-in fade-in duration-150">
-                      {lecture.items.map((item) => {
+                    <div className="border-t border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 py-2.5 space-y-2 animate-in fade-in duration-150">
+                      {lecture.items.map((item, idx) => {
                         const isActive = activeItemId === item.id;
                         const isLocked = lecture.id !== 1 || !['1-1', '1-3', '1-4'].includes(item.id);
 
@@ -9397,51 +9447,77 @@ export function CourseStudyRoomView({
                               setActiveItemId(item.id);
                               window.scrollTo({ top: 0, behavior: 'instant' });
                             }}
-                            className={`flex items-start justify-between p-2.5 rounded-xl border transition-all cursor-pointer ${
+                            className={`group relative overflow-hidden flex items-center justify-between gap-2.5 py-2.5 pl-2.5 pr-3.5 rounded-xl border transition-all cursor-pointer ${
                               isActive
-                                ? 'bg-[var(--mn-primary)] text-white border-[var(--mn-primary)] shadow-xs mn-inverse'
+                                ? 'bg-gradient-to-l from-[#142B5F] to-[#0E7C86] text-white border-[#142B5F] shadow-xs mn-inverse'
                                 : isLocked
-                                ? 'bg-[var(--mn-surface)]/60 hover:bg-[var(--mn-surface-muted)] text-[var(--mn-heading)] border-[var(--mn-border)] opacity-85'
-                                : 'bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] text-[var(--mn-heading)] border-[var(--mn-border)]'
+                                ? 'bg-[var(--mn-surface)]/80 hover:bg-[var(--mn-surface)] text-[var(--mn-heading)] border-[var(--mn-border)]'
+                                : 'bg-[var(--mn-surface)] hover:border-[#0E7C86] text-[var(--mn-heading)] border-[var(--mn-border)] shadow-2xs'
                             }`}
                           >
-                            <div className="flex items-start gap-2.5 min-w-0">
-                              <span className="shrink-0 mt-0.5">{getItemIcon(item.type)}</span>
-                              <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                            {/* Subtle right accent bar on each lesson item */}
+                            <div
+                              className={`pointer-events-none absolute top-2 right-0 bottom-2 w-[3px] rounded-l-full ${
+                                isActive
+                                  ? 'bg-white'
+                                  : isLocked
+                                  ? 'bg-slate-300 dark:bg-slate-700'
+                                  : 'bg-gradient-to-b from-[#142B5F] to-[#0E7C86]'
+                              }`}
+                            />
+
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                              <span
+                                className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border ${
+                                  isActive
+                                    ? 'bg-white/15 border-white/30 text-white'
+                                    : isLocked
+                                    ? 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+                                    : 'bg-[#142B5F]/6 dark:bg-[#0E7C86]/15 border-[#142B5F]/15 dark:border-[#0E7C86]/30'
+                                }`}
+                              >
+                                {getItemIcon(item.type)}
+                              </span>
+
+                              <div className="min-w-0 flex-1">
                                 <span
-                                  className={`text-[11px] font-semibold whitespace-normal break-words leading-normal ${
-                                    isActive ? 'text-white font-bold' : 'text-[var(--mn-heading)]'
+                                  className={`text-[11px] sm:text-[11.5px] font-bold block leading-snug break-words font-['Cairo',sans-serif] ${
+                                    isActive ? 'text-white' : 'text-[var(--mn-heading)]'
                                   }`}
                                 >
-                                  {item.title}
+                                  {idx + 1}. {item.title}
                                 </span>
-                                {isLocked && (
-                                  <span className="text-[9px] font-bold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-300/40 shrink-0 flex items-center gap-1">
-                                    <Lock className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
-                                    <span>{publicT('public_course_locked_1137')}</span>
-                                  </span>
-                                )}
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2 shrink-0 mr-3 mt-0.5">
-                              {isLocked && (
-                                <Lock className="w-3.5 h-3.5 text-amber-500/90 dark:text-amber-400/90 shrink-0" />
-                              )}
+                            <div className="flex items-center gap-1.5 shrink-0">
                               {item.duration && (
                                 <span
-                                  className={`text-[9.5px] font-medium whitespace-nowrap ${
-                                    isActive ? 'text-white/80' : 'text-[var(--mn-text-muted)]'
+                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[9.5px] font-bold whitespace-nowrap ${
+                                    isActive
+                                      ? 'bg-white/15 border-white/25 text-white'
+                                      : 'bg-[var(--mn-page)] border-[var(--mn-border)] text-[#0E7C86] dark:text-[#38C6D4]'
                                   }`}
                                 >
-                                  {item.duration}
+                                  <Clock className="w-2.5 h-2.5 shrink-0" />
+                                  <span>{item.duration}</span>
                                 </span>
                               )}
-                              {item.completed && !isLocked ? (
-                                <span className="w-4 h-4 rounded-full bg-[var(--mn-learning-success-500)]/20 border border-[var(--mn-learning-success-500)]/50 flex items-center justify-center shrink-0">
-                                  <CheckCircle2 className="w-3 h-3 text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)]" />
+
+                              {isLocked ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-[9.5px] font-bold shrink-0">
+                                  <Lock className="w-2.5 h-2.5 shrink-0" />
+                                  <span>{publicT('public_course_locked_1137')}</span>
                                 </span>
-                              ) : null}
+                              ) : item.completed ? (
+                                <span className="w-6 h-6 rounded-lg bg-[#0E7C86]/15 border border-[#0E7C86]/35 flex items-center justify-center shrink-0">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#38C6D4]" />
+                                </span>
+                              ) : (
+                                <span className="w-6 h-6 rounded-lg bg-[#142B5F]/8 group-hover:bg-[#142B5F] text-[#142B5F] group-hover:text-white dark:bg-white/10 dark:text-white flex items-center justify-center shrink-0 transition-colors">
+                                  <ChevronLeft className="w-3.5 h-3.5" />
+                                </span>
+                              )}
                             </div>
                           </div>
                         );
@@ -9452,7 +9528,7 @@ export function CourseStudyRoomView({
               );
             })}
           </div>
-        </div>
+        </section>
       </div>
 
       {/* Access Denied Toast Notification for Study Room */}

@@ -216,6 +216,42 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
             </button>
           </div>}
 
+          {(mode === 'login' || mode === 'signup') && (
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => setSuccess('يرجى المتابعة عبر البريد الإلكتروني أو ربط حساب جوجل الخاص بك.')}
+                className="w-full min-h-[42px] flex items-center justify-center gap-2.5 py-2.5 px-3.5 bg-[var(--mn-page)] hover:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] text-[var(--mn-heading)] text-xs font-bold rounded-xl shadow-2xs transition-all cursor-pointer"
+              >
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="#EA4335"
+                    d="M12 10.2v3.9h5.5c-.2 1.2-.9 2.3-1.9 3l3.1 2.4c1.8-1.7 2.8-4.1 2.8-7 0-.7-.1-1.5-.2-2.3H12z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M6.5 14.3l-.7.5-2.5 1.9C4.9 19.8 8.2 22 12 22c2.7 0 5-.9 6.6-2.5l-3.1-2.4c-.9.6-2 1-3.5 1-2.7 0-5-1.8-5.8-4.3z"
+                  />
+                  <path
+                    fill="#4A90E2"
+                    d="M3.3 7.3C2.5 8.7 2 10.3 2 12s.5 3.3 1.3 4.7l3.2-2.4c-.2-.7-.3-1.5-.3-2.3s.1-1.6.3-2.3L3.3 7.3z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M12 5.8c1.5 0 2.8.5 3.9 1.5l2.9-2.9C17 2.8 14.7 2 12 2 8.2 2 4.9 4.2 3.3 7.3l3.2 2.4C7 7.6 9.3 5.8 12 5.8z"
+                  />
+                </svg>
+                <span>{mode === 'signup' ? 'سجّل عن طريق جوجل' : 'المتابعة عن طريق جوجل'}</span>
+              </button>
+              <div className="mt-3.5 relative flex items-center justify-center">
+                <div className="w-full border-t border-[var(--mn-border)]" />
+                <span className="relative px-2.5 bg-[var(--mn-surface)] text-[10.5px] font-bold text-[var(--mn-text-muted)]">
+                  أو باستخدام البريد الإلكتروني
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* SIGNUP FIELDS */}
           {mode === 'signup' && (
             <>

@@ -1,6 +1,16 @@
+import { ChevronLeft, Database, FileText, Target } from 'lucide-react';
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
-import { ArrowUpLeft, Award, Calculator, ChevronLeft, Database, FileText, Sparkles, Target } from 'lucide-react';
+import {
+  ArrowUpLeft,
+  Sparkles,
+  Scale,
+  FilePenLine,
+  Calculator,
+  ShieldCheck,
+  FileCheck2,
+  Award,
+} from 'lucide-react';
 
 interface AIToolsBannerProps {
   dataMode?: 'api' | 'prototype';
@@ -12,48 +22,42 @@ const TOOL_PAIRS = [
   [
     {
       id: 'university-comparison',
-      title: "public_compare_universities",
-      subtitle: "public_compare_university_information_before_deciding",
-      imageUrl: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=300&q=80',
-      fallbackIcon: <Database className="w-4 h-4 text-[#D6A43B]" />,
+      title: 'public_compare_universities',
+      subtitle: 'public_compare_university_information_before_deciding',
+      icon: Scale,
     },
     {
       id: 'motivation-letter-generator',
-      title: "public_motivation_letter_generator",
-      subtitle: "public_create_an_organized_draft_for_review",
-      imageUrl: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=300&q=80',
-      fallbackIcon: <Sparkles className="w-4 h-4 text-[#D6A43B]" />,
+      title: 'public_motivation_letter_generator',
+      subtitle: 'public_create_an_organized_draft_for_review',
+      icon: FilePenLine,
     },
     {
       id: 'gpa-calculator',
-      title: "public_gpa_calculator",
-      subtitle: "public_calculate_and_convert_your_academic_gpa",
-      imageUrl: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=300&q=80',
-      fallbackIcon: <Calculator className="w-4 h-4 text-[#D6A43B]" />,
+      title: 'public_gpa_calculator',
+      subtitle: 'public_calculate_and_convert_your_academic_gpa',
+      icon: Calculator,
     },
   ],
   // Column 2: 3 cards stacked vertically
   [
     {
       id: 'scholarship-eligibility-checker',
-      title: "public_scholarship_eligibility_analyzer",
-      subtitle: "public_assess_how_your_qualifications_match_the_requirements",
-      imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=300&q=80',
-      fallbackIcon: <Target className="w-4 h-4 text-[#D6A43B]" />,
+      title: 'public_scholarship_eligibility_analyzer',
+      subtitle: 'public_assess_how_your_qualifications_match_the_requirements',
+      icon: ShieldCheck,
     },
     {
       id: 'cv-builder',
-      title: "public_academic_cv_builder",
-      subtitle: "public_build_a_standard_academic_cv",
-      imageUrl: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&w=300&q=80',
-      fallbackIcon: <FileText className="w-4 h-4 text-[#D6A43B]" />,
+      title: 'public_academic_cv_builder',
+      subtitle: 'public_build_a_standard_academic_cv',
+      icon: FileCheck2,
     },
     {
       id: 'recommendation-assistant',
-      title: "public_recommendation_letter_assistant",
-      subtitle: "public_prepare_recommendation_templates_and_talking_points_for_your",
-      imageUrl: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=300&q=80',
-      fallbackIcon: <Award className="w-4 h-4 text-[#D6A43B]" />,
+      title: 'public_recommendation_letter_assistant',
+      subtitle: 'public_prepare_recommendation_templates_and_talking_points_for_your',
+      icon: Award,
     },
   ],
 ];
@@ -66,7 +70,7 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools, dat
       <div className="relative rounded-3xl p-3.5 sm:p-4 bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)]/80 border border-[var(--mn-border)] shadow-sm overflow-hidden mn-panel ">
         {/* Elegant top gradient border line */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
-        
+
         <div className="relative z-10">
           <div className="text-center mb-3 sm:mb-3.5">
             <div className="relative pb-1 mb-1 inline-block">
@@ -99,7 +103,7 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools, dat
                     >
                       <div className="w-8 h-8 rounded-full overflow-hidden p-[1px] bg-[#142B5F] dark:bg-[var(--mn-accent)] border border-[#D6A43B]/60 shrink-0 shadow-2xs flex items-center justify-center">
                         <img
-                          src={dataMode === 'prototype' ? tool.imageUrl : '/preview-art/tools.svg'}
+                          src={'/preview-art/tools.svg'}
                           alt={publicT(tool.title)}
                           className="w-full h-full rounded-full object-cover"
                           referrerPolicy="no-referrer"

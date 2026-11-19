@@ -1,305 +1,340 @@
-import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { CmsRichText } from '@manaratak/ui';
 import {
-  BookOpenText,
+  BookOpen,
   Building2,
-  CalendarDays,
-  Clock3,
-  ExternalLink,
+  Calendar,
+  Clock,
   FileText,
-  Globe2,
-  GraduationCap,
-  Languages,
-  MapPin,
-  Newspaper,
-  ShieldCheck,
-  Tag,
-  UserRound,
+  Globe,
+  Heart,
 } from 'lucide-react';
-import { ArticleEntityRef, PublicArticle } from '../types';
-import { FavoriteButton } from './FavoriteButton';
+import type { PublicArticle } from '../types';
 import { DetailBackButton, DetailSectionHeader, useDetailSearchTarget } from './DetailUi';
+import { CulturalExchangeArticleContent } from './CulturalExchangeArticleContent';
 
 interface ArticleDetailProps {
-  article: PublicArticle;
+  article?: PublicArticle;
+  relatedArticles?: PublicArticle[];
+  articleId?: string;
+  articleSlug?: string;
+  searchAnchor?: string;
+  searchTerm?: string;
+  isFavorite?: boolean;
+  onToggleFavorite?: (id: string) => void;
   onBack: () => void;
+  onSelectRelated?: (slug: string) => void;
+  isSaved?: boolean;
+  onToggleSave?: (id: string) => void;
   onOpenScholarship?: (id: string) => void;
   onOpenUniversity?: (id: string) => void;
   onOpenCountry?: (id: string) => void;
   onOpenMajor?: (id: string) => void;
   onOpenExam?: (id: string) => void;
   onOpenCourse?: (id: string) => void;
-  isFavorite?: boolean;
-  onToggleFavorite?: (id: string) => void;
-  searchAnchor?: string;
-  searchTerm?: string;
 }
 
-const entityIcon = (type: ArticleEntityRef['type']) => {
-  switch (type) {
-    case 'SCHOLARSHIP':
-      return <GraduationCap className="h-4 w-4" />;
-    case 'UNIVERSITY':
-      return <Building2 className="h-4 w-4" />;
-    case 'COUNTRY':
-      return <MapPin className="h-4 w-4" />;
-    case 'MAJOR':
-      return <BookOpenText className="h-4 w-4" />;
-    case 'EXAM':
-      return <Languages className="h-4 w-4" />;
-    case 'COURSE':
-      return <FileText className="h-4 w-4" />;
-  }
-};
-
-const entityLabel = (type: ArticleEntityRef['type']) => {
-  switch (type) {
-    case 'SCHOLARSHIP':
-      return 'منحة مرتبطة';
-    case 'UNIVERSITY':
-      return 'جامعة مرتبطة';
-    case 'COUNTRY':
-      return 'دولة مرتبطة';
-    case 'MAJOR':
-      return 'تخصص مرتبط';
-    case 'EXAM':
-      return 'اختبار مرتبط';
-    case 'COURSE':
-      return 'دورة مرتبطة';
-  }
-};
-
 export const ArticleDetail: React.FC<ArticleDetailProps> = ({
-  article,
-  onBack,
-  onOpenScholarship,
-  onOpenUniversity,
-  onOpenCountry,
-  onOpenMajor,
-  onOpenExam,
-  onOpenCourse,
-  isFavorite = false,
+  article: propArticle,
+  articleId,
+  articleSlug,
+  isFavorite,
   onToggleFavorite,
-  searchAnchor,
-  searchTerm,
+  onBack,
+  onSelectRelated,
+  isSaved = false,
+  relatedArticles: relatedArticleItems = [],
+  onToggleSave, searchAnchor, searchTerm, onOpenScholarship, onOpenUniversity, onOpenCountry, onOpenMajor, onOpenExam, onOpenCourse,
 }) => {
-  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
-
   useDetailSearchTarget(searchAnchor, searchTerm);
-  const openEntity = (entity: ArticleEntityRef) => {
-    if (!entity.id) return;
-    if (entity.type === 'SCHOLARSHIP' && entity.id) onOpenScholarship?.(entity.id);
-    if (entity.type === 'UNIVERSITY' && entity.id) onOpenUniversity?.(entity.id);
-    if (entity.type === 'COUNTRY') onOpenCountry?.(entity.id);
-    if (entity.type === 'MAJOR' && entity.id) onOpenMajor?.(entity.id);
-    if (entity.type === 'EXAM' && entity.id) onOpenExam?.(entity.id);
-    if (entity.type === 'COURSE' && entity.id) onOpenCourse?.(entity.id);
-  };
+  const targetId = propArticle?.id || articleId;
+  const targetSlug = propArticle?.slug || articleSlug;
+  const preview = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype';
+  const article = propArticle ? {
+    ...propArticle, authorNameAr: propArticle.author, authorRoleAr: propArticle.reviewer || '', countryAr: '',
+    sections: propArticle.sections.map((section, index) => ({ id: String(index), headingAr: section.title, paragraphsAr: section.paragraphs || [], bulletsAr: section.bullets, calloutAr: undefined as string | undefined })),
+  } : undefined;
+  if (!article) return <div role="status" className="p-6 text-center">المقال غير متاح<button type="button" onClick={onBack}>رجوع</button></div>;
+
+  const savedState = isFavorite ?? isSaved;
+  const handleToggleBookmark = onToggleFavorite || onToggleSave;
+
+  const isCulturalExchange =
+    preview && (article.id === 'art_cultural_exchange' ||
+    article.slug === 'yemen-cultural-exchange-scholarships-guide');
+
+  const relatedArticles = relatedArticleItems.filter(a => a.id !== article.id).slice(0, 3);
+
+  const authorityAr = isCulturalExchange
+    ? 'وزارة التعليم العالي والبحث العلمي — قطاع البعثات والعلاقات الثقافية'
+    : `${article.authorNameAr} — ${article.authorRoleAr}`;
 
   return (
     <div
-      className="min-h-screen bg-[var(--mn-page)] pb-20 font-['Cairo',sans-serif] mn-panel "
-      dir={publicDir}
+      className="w-full max-w-md md:max-w-[1120px] lg:max-w-[1160px] mx-auto pt-0 pb-12 text-start font-['Cairo',sans-serif] animate-in fade-in duration-200 bg-[var(--mn-surface-muted)] min-h-screen mn-panel mn-article-detail"
+      dir="rtl"
     >
-      <header className="relative overflow-hidden border-b-[3px] border-[var(--mn-accent)]/70 bg-gradient-to-b from-[var(--mn-primary)] via-[var(--mn-hero-secondary)] to-[var(--mn-primary)] px-4 pb-6 pt-3 text-white shadow-md mn-inverse ">
-        <div className="pointer-events-none absolute -left-20 -top-24 h-64 w-64 rounded-full border border-[var(--mn-accent)]/20" />
-        <div className="pointer-events-none absolute -right-20 bottom-0 h-48 w-48 rounded-full bg-[var(--mn-accent)]/10 blur-2xl" />
-        <div className="relative mx-auto max-w-3xl">
-          {onToggleFavorite && (
-            <FavoriteButton
-              active={isFavorite}
-              onToggle={(event) => {
-                event.stopPropagation();
-                onToggleFavorite(article.id);
-              }}
-              className="absolute left-0 top-0 z-20 bg-[var(--mn-surface)]/95 mn-panel "
-            />
-          )}
-          <div className="mb-4">
-            <DetailBackButton onBack={onBack} />
+      {/* 1. EDITORIAL ARTICLE HEADER (ترويسة خاصة بالمقالات والأدلة المرجعية) */}
+      <div className="relative w-full overflow-hidden bg-gradient-to-br from-[#142B5F] via-[#153B75] to-[#0E7C86] text-white border-b-2 border-[#D6A43B] shadow-md">
+        <div className="relative z-10 px-3.5 sm:px-5 md:px-8 py-4 md:py-5 space-y-3">
+          {/* الصف العلوي: عنوان المقال الرئيسي يميناً + أزرار المحفوظة والرجوع يساراً بمسافة آمنة بعيداً عن النص والخط الفاصل */}
+          <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/15">
+            <h1 className="flex-1 min-w-0 pl-2 text-[14.5px] sm:text-[16px] md:text-[22px] lg:text-[24px] font-extrabold text-white leading-[1.6] drop-shadow-xs">
+              {article.titleAr}
+            </h1>
+
+            <div className="flex items-center gap-2 shrink-0 mn-panel">
+              {handleToggleBookmark && (
+                <button
+                  type="button"
+                  onClick={() => handleToggleBookmark(article.id)}
+                  className="mn-detail-close transition-all active:scale-95 cursor-pointer"
+                  aria-label={savedState ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
+                  title={savedState ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
+                >
+                  <Heart
+                    className={`h-3.5 w-3.5 md:h-4 md:w-4 ${
+                      savedState
+                        ? 'fill-[#0E7C86] text-[#0E7C86] dark:fill-[#38C6D4] dark:text-[#38C6D4]'
+                        : 'text-[#142B5F] dark:text-[#F2CD78]'
+                    }`}
+                  />
+                </button>
+              )}
+              <DetailBackButton onBack={onBack} mode="back" />
+            </div>
           </div>
 
-          <div className="mb-3 flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 rounded-full border border-[var(--mn-accent)]/35 bg-[var(--mn-accent)]/10 px-2.5 py-1 text-[9px] font-bold text-[var(--mn-accent-text)]">
-              <Newspaper className="h-3 w-3" />
-              {article.contentTypeLabelAr}
-            </span>
-            <span className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[9px] font-bold text-white">
-              {article.categoryAr}
-            </span>
-          </div>
-
-          <h1 className="text-[22px] font-bold leading-9 sm:text-[28px]">{article.titleAr}</h1>
-          <p
-            className="mt-1 text-left text-[10px] font-semibold leading-5 text-[var(--mn-on-dark-muted)]"
-            dir="ltr"
-          >
-            {article.titleEn}
-          </p>
-          <p className="mt-3 text-[11px] font-semibold leading-6 text-[var(--mn-on-dark-muted)]">
-            {article.excerptAr}
-          </p>
-
-          <div className="mt-4 grid grid-cols-3 gap-1.5">
-            <MetaTile
-              icon={<UserRound className="h-3.5 w-3.5" />}
-              label="الكاتب"
-              value={article.author}
-            />
-            <MetaTile
-              icon={<Clock3 className="h-3.5 w-3.5" />}
-              label="القراءة"
-              value={article.readingTime || '—'}
-            />
-            <MetaTile
-              icon={<CalendarDays className="h-3.5 w-3.5" />}
-              label="آخر تحديث"
-              value={article.updatedAt}
-            />
+          {/* جهة الاختصاص والمرجع التحريري داخل شريط المقال العلوي */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-[#142B5F]/90 border border-[#F2CD78]/60 flex items-center justify-center shrink-0">
+              <Building2 className="w-3.5 h-3.5 text-[#F2CD78]" />
+            </div>
+            <p className="min-w-0 flex-1 text-[11px] sm:text-[12px] font-bold text-white leading-relaxed">
+              {authorityAr}
+            </p>
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="mx-auto max-w-3xl space-y-3 mn-inline-gutter pt-4">
-        {article.tags && article.tags.length > 0 && (
-          <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-            {article.tags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2.5 py-1.5 text-[9px] font-bold text-[var(--mn-text-muted)] shadow-sm mn-panel "
-              >
-                <Tag className="h-3 w-3 text-[var(--mn-accent-text)]" />
-                {tag}
+      <div className="px-0 md:px-4 space-y-3 md:space-y-4 z-20 relative pt-2.5 md:pt-4">
+        {/* 2. شريط بيانات المقال التحريري الموحد (جميع الأيقونات باللون النيلي) */}
+        <div
+          className="w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl border-y md:border border-[var(--mn-border)] shadow-sm overflow-hidden mn-panel"
+          dir="rtl"
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-x-reverse divide-[var(--mn-border)]">
+            {/* 1. تصنيف الدليل */}
+            <div className="p-2.5 sm:p-3 flex items-center gap-2 min-w-0 border-b md:border-b-0 border-[var(--mn-border)]">
+              <span className="w-6 h-6 rounded-md bg-[#142B5F] text-white flex items-center justify-center shrink-0">
+                <BookOpen className="w-3.5 h-3.5 text-white" />
               </span>
-            ))}
+              <div className="min-w-0 flex-1">
+                <span className="block text-[9.5px] font-bold text-[var(--mn-text-muted)] leading-tight">
+                  تصنيف الدليل
+                </span>
+                <span className="block text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] truncate mt-0.5">
+                  {article.categoryAr}
+                </span>
+              </div>
+            </div>
+
+            {/* 2. الدولة / النطاق */}
+            <div className="p-2.5 sm:p-3 flex items-center gap-2 min-w-0 border-b md:border-b-0 border-[var(--mn-border)]">
+              <span className="w-6 h-6 rounded-md bg-[#142B5F] text-white flex items-center justify-center shrink-0">
+                <Globe className="w-3.5 h-3.5 text-white" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <span className="block text-[9.5px] font-bold text-[var(--mn-text-muted)] leading-tight">
+                  الدولة / النطاق
+                </span>
+                <span className="block text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] truncate mt-0.5">
+                  {article.countryAr}
+                </span>
+              </div>
+            </div>
+
+            {/* 3. وقت القراءة */}
+            <div className="p-2.5 sm:p-3 flex items-center gap-2 min-w-0">
+              <span className="w-6 h-6 rounded-md bg-[#142B5F] text-white flex items-center justify-center shrink-0">
+                <Clock className="w-3.5 h-3.5 text-white" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <span className="block text-[9.5px] font-bold text-[var(--mn-text-muted)] leading-tight">
+                  وقت القراءة
+                </span>
+                <span className="block text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] truncate mt-0.5">
+                  {article.readingTime}
+                </span>
+              </div>
+            </div>
+
+            {/* 4. تاريخ التحديث */}
+            <div className="p-2.5 sm:p-3 flex items-center gap-2 min-w-0">
+              <span className="w-6 h-6 rounded-md bg-[#142B5F] text-white flex items-center justify-center shrink-0">
+                <Calendar className="w-3.5 h-3.5 text-white" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <span className="block text-[9.5px] font-bold text-[var(--mn-text-muted)] leading-tight">
+                  تاريخ التحديث
+                </span>
+                <span className="block text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] truncate mt-0.5">
+                  {article.updatedAt}
+                </span>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
 
-        <article className="space-y-3">
-          {article.body !== undefined ? (
-            <section className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 shadow-sm mn-panel">
-              <CmsRichText
-                body={article.body}
-                className="cms-rich-text text-sm leading-8 text-[var(--mn-text)]"
+        {/* 3. MAIN CONTENT SECTIONS */}
+        <div className="px-0 space-y-4 sm:space-y-5 md:space-y-6">
+          {/* مربع موحد يوضح ماذا سيشرح هذا المقال (بدلاً من أبرز المحاور والنقاط الجوهرية) */}
+          <div className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2 sm:px-2.5 md:px-6 py-3.5 sm:py-4 md:py-6 border-y md:border border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden space-y-2.5 mn-panel">
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
+            <DetailSectionHeader
+              icon={BookOpen}
+              title="ماذا سيشرح لك هذا المقال؟"
+              className="mb-1"
+            />
+            <div className="relative overflow-hidden rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] p-3 md:p-4 pr-4 shadow-2xs w-full">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute top-2.5 bottom-2.5 right-0 w-[3.5px] rounded-l-full bg-[linear-gradient(180deg,#0E7C86_0%,#0E7C86_75%,#142B5F_100%)]"
               />
-            </section>
-          ) : (
-            article.sections.map((section, index) => (
-              <section
-                key={`${article.id}-${index}`}
-                className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-sm sm:p-4 mn-panel "
-              >
-                <DetailSectionHeader
-                  id={`article-section-${index + 1}`}
-                  iconNode={<span className="text-[10px] font-bold">{index + 1}</span>}
-                  title={section.title}
+              <p className="w-full text-[11.5px] sm:text-[12px] font-bold text-[var(--mn-text)] leading-[1.9] text-justify">
+                <span
+                  aria-hidden="true"
+                  className="inline-block w-2.5 h-2.5 rotate-45 rounded-[2px] bg-[#142B5F] dark:bg-[#F2CD78] align-middle ml-2 shrink-0"
                 />
-                {section.paragraphs?.map((paragraph) => (
-                  <p
-                    key={paragraph}
-                    className="mb-2 last:mb-0 text-[10.5px] font-semibold leading-6 text-[var(--mn-text-muted)]"
-                  >
-                    {paragraph}
-                  </p>
-                ))}
-                {section.bullets && section.bullets.length > 0 && (
-                  <ul className="mt-2 space-y-1.5">
-                    {section.bullets.map((item) => (
-                      <li
-                        key={item}
-                        className="flex items-start gap-1.5 text-[10px] font-semibold leading-5 text-[var(--mn-text-muted)]"
-                      >
-                        <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--mn-accent-text)]" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+                {isCulturalExchange ? (
+                  <>
+                    يشرح هذا الدليل المرجعي خطوة بخطوة كل ما يحتاج الطالب اليمني معرفته حول{' '}
+                    <strong className="text-[var(--mn-heading)]">منح التبادل الثقافي</strong> المقدمة عبر وزارة التعليم العالي؛ بدءًا من مفهوم التبادل الثقافي وشروط الأهلية لآخر دفعتين، والفرق الدقيق بينه وبين المنح الخارجية المستقلة، مرورًا بطريقة حساب معدل المفاضلة الموزون (30% للثانوية و70% للاختبار) والمواد والوحدات المقررة، وصولًا إلى ملاحق التقديم التفصيلية لكل دولة (المجر، الصين، جامعة الأمير محمد بن فهد، مصر، الجزائر، كوبا، وباكستان)، وطريقة توزيع المقاعد بين المحافظات، وإجراءات التظلمات وما بعد القبول حتى السفر.
+                  </>
+                ) : (
+                  article.excerptAr
                 )}
-              </section>
-            ))
-          )}
-        </article>
+              </p>
+            </div>
+          </div>
 
-        {article.linkedEntities && article.linkedEntities.length > 0 && (
-          <section className="rounded-2xl border border-[var(--mn-border-brand)]/30 bg-[var(--mn-surface)] p-3.5 shadow-sm mn-panel ">
-            <DetailSectionHeader
-              id="article-related"
-              icon={Globe2}
-              title={publicT('public_related_in_manaratak')}
-              subtitle={publicT('public_go_directly_to_the_entity_related_to_this')}
-            />
-            <div className="grid grid-cols-2 gap-2">
-              {article.linkedEntities.map((entity) => (
-                <button
-                  key={`${entity.type}-${entity.id || entity.name}`}
-                  type="button"
-                  onClick={() => openEntity(entity)}
-                  className="min-h-[84px] rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2.5 text-start transition hover:border-[var(--mn-accent)] active:scale-[0.99] mn-panel "
+          {/* Official Body Template: Full Cultural Exchange Guide OR Standard Unified Article Sections */}
+          {isCulturalExchange ? (
+            <CulturalExchangeArticleContent />
+          ) : (
+            <div className="space-y-4 sm:space-y-5 md:space-y-6">
+              {'body' in article && article.body && <CmsRichText body={article.body} />}
+              {article.sections.map((sec, idx) => (
+                <div
+                  key={sec.id}
+                  className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2 sm:px-2.5 md:px-6 py-3.5 sm:py-4 md:py-6 border-y md:border border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden space-y-3 md:space-y-4 mn-panel"
                 >
-                  <div className="flex items-center gap-1.5 text-[var(--mn-heading)]">
-                    {entityIcon(entity.type)}
-                    <span className="text-[8px] font-bold text-[var(--mn-text-muted)]">
-                      {entityLabel(entity.type)}
-                    </span>
+                  <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
+                  <DetailSectionHeader
+                    icon={BookOpen}
+                    title={`${idx + 1}. ${sec.headingAr}`}
+                    className="mb-1"
+                  />
+
+                  <div className="space-y-2.5 md:space-y-3 w-full">
+                    {sec.paragraphsAr.map((p, pIdx) => (
+                      <div
+                        key={pIdx}
+                        className="rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] p-3 md:p-4 shadow-2xs w-full"
+                      >
+                        <p className="w-full text-[11.5px] sm:text-[12px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
+                          {p}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                  <p className="mt-1.5 text-[10px] font-bold leading-4 text-[var(--mn-heading)]">
-                    {entity.name}
-                  </p>
-                  {entity.meta && (
-                    <p className="mt-1 line-clamp-2 text-[8.5px] font-semibold leading-4 text-[var(--mn-text-muted)]">
-                      {entity.meta}
-                    </p>
+
+                  {sec.bulletsAr && sec.bulletsAr.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 pt-0.5 items-stretch w-full">
+                      {sec.bulletsAr.map((b, bIdx) => (
+                        <div
+                          key={bIdx}
+                          className="p-2.5 md:p-3.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] shadow-2xs w-full h-full flex items-center"
+                        >
+                          <p className="w-full text-[11.5px] sm:text-[12px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
+                            <span
+                              aria-hidden="true"
+                              className="inline-block w-2 h-2 rounded-full bg-[#0E7C86] dark:bg-[#38C6D4] align-middle ml-2 shrink-0"
+                            />
+                            {b}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
                   )}
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
 
-        {article.officialLinks && article.officialLinks.length > 0 && (
-          <section className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-sm mn-panel ">
-            <DetailSectionHeader
-              id="article-official-links"
-              icon={ExternalLink}
-              title={article.body !== undefined ? publicT('public_article_links') : publicT('public_official_sources_related_to_this_article')}
-            />
-            <div className="space-y-2">
-              {article.officialLinks.map((link) => (
-                <a
-                  key={link.url}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mn-external-link inline-flex min-h-10 items-center justify-between gap-3 rounded-xl px-3 py-2 mn-panel "
-                >
-                  <div>
-                    <p className="text-[10px] font-bold text-[var(--mn-heading)]">{link.label}</p>
-                    {link.note && (
-                      <p className="mt-0.5 text-[8.5px] font-semibold text-[var(--mn-text-muted)]">
-                        {link.note}
+                  {sec.calloutAr && (
+                    <div className="relative p-3 md:p-4 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] overflow-hidden w-full">
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute top-0 right-0 w-4 h-7 rounded-tr-xl border-t-[2.5px] border-r-[2.5px] border-[#0E7C86]"
+                      />
+                      <p className="w-full text-[11.5px] sm:text-[12px] font-bold text-[var(--mn-heading)] leading-[1.85] text-justify">
+                        <span
+                          aria-hidden="true"
+                          className="relative inline-flex w-3.5 h-3.5 border-t-[2px] border-r-[2px] border-[#142B5F] dark:border-[#F2CD78] rounded-tr-[3px] items-center justify-center align-middle ml-2 shrink-0"
+                        >
+                          <span className="w-1.5 h-1.5 bg-[#142B5F] dark:bg-[#F2CD78]" />
+                        </span>
+                        {sec.calloutAr}
                       </p>
-                    )}
-                  </div>
-                  <ExternalLink className="h-3.5 w-3.5 shrink-0 text-[var(--mn-accent-text)]" />
-                </a>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
-          </section>
-        )}
-      </main>
+          )}
+
+          {propArticle?.linkedEntities?.length ? <section className="space-y-2"><DetailSectionHeader icon={Building2} title="محتوى مرتبط" />{propArticle.linkedEntities.map((entity, index) => <button type="button" key={index} className="p-3 border rounded-xl" disabled={!entity.id} onClick={() => { const open = { SCHOLARSHIP: onOpenScholarship, UNIVERSITY: onOpenUniversity, COUNTRY: onOpenCountry, MAJOR: onOpenMajor, EXAM: onOpenExam, COURSE: onOpenCourse }[entity.type]; if (entity.id) open?.(entity.id); }}>{entity.name}</button>)}</section> : null}
+          {/* Related Articles Section */}
+          {relatedArticles.length > 0 && (
+            <div className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2 sm:px-2.5 md:px-6 py-3.5 sm:py-4 md:py-6 border-y md:border border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden space-y-3.5 md:space-y-4 mn-panel">
+              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
+              <DetailSectionHeader
+                icon={FileText}
+                title="أدلة ومقالات ذات صلة"
+                className="mb-1"
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 md:gap-4 items-stretch w-full">
+                {relatedArticles.map((rel) => (
+                  <div role="button" tabIndex={0} onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+                    key={rel.id}
+                    onClick={() => onSelectRelated && onSelectRelated(rel.slug)}
+                    className="group relative overflow-hidden rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:border-[#0E7C86]/50 p-3 md:p-4 transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute top-0 right-0 w-3.5 h-7 rounded-tr-xl border-t-[2.5px] border-r-[2.5px] border-[#0E7C86]"
+                    />
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="inline-block text-[10.5px] font-bold text-[#0E7C86] dark:text-[#21A7B4]">
+                          {rel.categoryAr}
+                        </span>
+                        <span className="text-[10px] font-bold text-[#0E7C86]">
+                          {rel.readingTime}
+                        </span>
+                      </div>
+                      <h4 className="text-[12px] font-bold text-[var(--mn-heading)] group-hover:text-[#0E7C86] transition-colors line-clamp-2 leading-[1.6]">
+                        {rel.titleAr}
+                      </h4>
+                      <p className="text-[10.5px] font-bold text-[var(--mn-text-muted)] line-clamp-2 leading-[1.65]">
+                        {rel.excerptAr}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
-
-function MetaTile({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-white/15 bg-white/10 px-2 py-2 text-center backdrop-blur-sm">
-      <div className="mx-auto flex w-fit items-center gap-1 text-[8px] font-bold text-[var(--mn-on-dark-muted)]">
-        {icon}
-        <span>{label}</span>
-      </div>
-      <p className="mt-1 line-clamp-2 text-[8.5px] font-bold leading-4 text-white">{value}</p>
-    </div>
-  );
-}

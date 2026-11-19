@@ -34,6 +34,30 @@ export interface ScholarshipExamRef {
   nameEn: string;
 }
 
+export interface ScholarshipBenefitGroup {
+  id: string;
+  title: string;
+  badge?: string;
+  items: string[];
+}
+
+export interface ScholarshipMajorItem {
+  label: string;
+  majorId?: string;
+}
+
+export interface ScholarshipLanguageMajorGroup {
+  id: string;
+  languageLabel: string;
+  badge?: string;
+  majors: ScholarshipMajorItem[];
+}
+
+export interface ScholarshipImportantNote {
+  label: string;
+  text: string;
+}
+
 export interface Scholarship {
   publishedData?: import('../../api/client').PublicScholarshipDto;
   /** Stable public route key (slug in live mode). */
@@ -49,9 +73,18 @@ export interface Scholarship {
   countryFlag: string;
   university: string;
   universityEn: string;
+  donorName?: string;
+  donorNameEn?: string;
+  donorTypeLabel?: string;
+  studyLanguageLabel?: string;
+  degreesShortLabel?: string;
   degreeLevel: DegreeLevel[];
   fundingType: FundingType | string;
   financialCoverage: string[];
+  benefitGroups?: ScholarshipBenefitGroup[];
+  majorsByLanguage?: Partial<Record<'bachelor' | 'master' | 'phd' | 'fellowship', ScholarshipLanguageMajorGroup[]>>;
+  requiredDocumentsList?: string[];
+  importantNotes?: ScholarshipImportantNote[];
   deadline: string; // YYYY-MM-DD
   daysLeft: number;
   featured: boolean;
@@ -299,16 +332,23 @@ export interface ImportedCourse {
   publicId?: string;
   slug?: string;
   ownerId?: string;
+  courseNumber?: string;
   title: string;
+  titleAr?: string;
+  titleEn?: string;
   provider: string;
   platform?: string;
   field: string;
   language: string;
+  languageEn?: string;
   level: string;
+  levelEn?: string;
   duration: string;
   studyFree: boolean;
   freeCertificate: boolean | null;
   certificateType: string;
+  certificateTypeAr?: string;
+  certificateTypeEn?: string;
   topics: string[];
   directCourseUrl: string;
   relatedMajors?: ImportedCourseEntityRef[];

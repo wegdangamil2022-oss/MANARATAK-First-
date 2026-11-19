@@ -7,14 +7,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate as useRouterNavigate } from 'react-router-dom';
 import './template.css';
 import {readStored, writeStored, readStoredArray} from './storage';
-import { usePublicNavigation, publicUrlForState } from './usePublicNavigation';
 import { PublicAnalyticsBoundary } from '../analytics/PublicAnalyticsBoundary';
+import { loadPublishedTestReference } from './publishedTestReference';
+import { usePublicNavigation, publicUrlForState } from './usePublicNavigation';
 import { usePublicLiveData } from './usePublicLiveData';
 import { usePublicRelationshipGraph } from './usePublicRelationshipGraph';
 import { ApiClient, type StablePublicGraphIdentity } from '../../api/client';
 import { useTranslation } from '../../i18n/I18nProvider';
 import { mapPublicScholarshipDto } from './publicScholarshipDataSource';
-import { loadPublishedTestReference } from './publishedTestReference';
 import {
   mapArticle, mapCareer, mapCountry, mapCourse, mapExam, mapPublicMajorDto, mapPublicUniversityDto, mapService,
 } from './publicLiveDataSource';
@@ -55,11 +55,19 @@ import { StudentWorkspacePage as LiveStudentWorkspacePage } from '../students/St
 
 import {
   Scholarship,
+  University,
+  Course,
   Major,
   ApplicationMilestone,
   PushNotificationItem,
+  UserProfile,
+  Language,
   CategoryType,
+  Exam,
+  ImportedCourse,
+  PublicArticle,
   Service,
+  ServiceAudience,
   FavoriteKey,
   FavoriteKind,
   CountryDestination,
@@ -80,22 +88,28 @@ import { FeaturedExams } from './components/FeaturedExams';
 import { FeaturedJobs } from './components/FeaturedJobs';
 import { FeaturedArticles } from './components/FeaturedArticles';
 import { FeaturedServices } from './components/FeaturedServices';
-import { HomeShowcaseFrame } from './components/HomeShowcaseFrame';
-import { HOME_DESIGN_SCHOLARSHIPS, HOME_DESIGN_UNIVERSITIES, HOME_DESIGN_COUNTRIES, HOME_DESIGN_COURSES, HOME_DESIGN_SERVICES } from './homeDesignPreviewData';
 import { RoadmapPreview } from './components/RoadmapPreview';
 import { FaqPreview } from './components/FaqPreview';
 import { ContactSection } from './components/ContactSection';
+import { ManaratakDesignShowcase, DesignShowcasePreviewSection } from './components/ManaratakDesignShowcase';
 import { BottomNavBar, TabType } from './components/BottomNavBar';
 import { PushNotificationCenter } from './components/PushNotificationCenter';
+import { CommunityChannelsModal } from './components/CommunityChannelsModal';
 import { UniversitiesList } from './components/UniversitiesList';
 import { CoursesList } from './components/CoursesList';
 import { NavigationDrawer } from './components/NavigationDrawer';
 import { consumePostLoginAction, consumePostLoginReturn, isStudentPostLoginDestination, preservePostLoginAction, preservePostLoginReturn, rememberAuthenticatedIdentity } from '../students/postLoginIntent';
 import {
+  Filter,
+  SlidersHorizontal,
+  Sparkles,
   Heart,
   GraduationCap,
   Calendar,
+  CheckCircle2,
   ChevronLeft,
+  Search,
+  ArrowUpDown,
   AlertTriangle,
   RefreshCw,
   Building2,
@@ -116,19 +130,6 @@ export default function App() {
   const scholarshipDataStatus = publicDataMode === 'prototype' ? 'prototype' : publicLive.statuses.scholarships;
   const unavailableDomains = Object.entries(publicLive.statuses).filter(([, status]) => status === 'unavailable').map(([domain]) => domain);
   const loadingDomains = Object.entries(publicLive.statuses).filter(([, status]) => status === 'loading').map(([domain]) => domain);
-  // Homepage preview is visual-only. Real published results remain the only search/detail data.
-  const showHomeDesign = (count: number, status: string) => publicDataMode === 'api' && count === 0 && status !== 'loading';
-  const homeDesignScholarships = showHomeDesign(scholarships.length, publicLive.statuses.scholarships);
-  const homeDesignUniversities = showHomeDesign(universities.length, publicLive.statuses.universities);
-  const homeDesignCountries = showHomeDesign(countries.length, publicLive.statuses.countries);
-  const homeDesignExams = showHomeDesign(exams.length, publicLive.statuses.exams);
-  const homeCourseCount = courses.length + (publicLive.data.homeCoursePreviews?.global?.courses.length ?? 0)
-    + (publicLive.data.homeCoursePreviews?.native?.courses.length ?? 0);
-  const homeDesignCourses = showHomeDesign(homeCourseCount, publicLive.statuses.courses);
-  const homeDesignArticles = showHomeDesign(articles.length, publicLive.statuses.articles);
-  const homeDesignServices = showHomeDesign(services.length, publicLive.statuses.services);
-  const homeDesignTools = publicDataMode === 'api' && tools.length === 0;
-  const homeDesignMajors = showHomeDesign(majors.length, publicLive.statuses.majors);
   const navigation = usePublicNavigation();
   const { back: goBack, navigate, replace: replaceNavigation } = navigation;
   function openStudentAccount(tab: string, requestId?: string) {
@@ -405,12 +406,34 @@ export default function App() {
 
   const [notifications, setNotifications] = useState<PushNotificationItem[]>(() => {
     if (publicDataMode !== 'prototype') return [];
-    return readStoredArray<PushNotificationItem>('manaratak_notifications', INITIAL_NOTIFICATIONS).filter((item, index, list) => !item.title.includes('مرحباً بك في منصة منارتك') || list.findIndex((candidate) => candidate.title.includes('مرحباً بك في منصة منارتك')) === index).map((item) => item.title.includes('مرحباً بك في منصة منارتك') ? {...item, id: 'welcome-v29', actionType: undefined, targetId: undefined, body: t('public_template_preview_notifications')} : item);
+    const stored = readStoredArray<PushNotificationItem>('manaratak_notifications', INITIAL_NOTIFICATIONS);
+    const merged = [
+      ...stored,
+      ...INITIAL_NOTIFICATIONS.filter((seed) => !stored.some((existing) => existing.id === seed.id)),
+    ];
+    return merged
+      .filter(
+        (item, index, list) =>
+          !item.title.includes('مرحباً بك في منصة منارتك') ||
+          list.findIndex((candidate) => candidate.title.includes('مرحباً بك في منصة منارتك')) === index,
+      )
+      .map((item) =>
+        item.title.includes('مرحباً بك في منصة منارتك')
+          ? {
+              ...item,
+              id: 'welcome-v29',
+              actionType: item.actionType || 'scholarship',
+              targetId: item.targetId || 'csc-china',
+              body: t('public_template_preview_notifications'),
+            }
+          : item,
+      );
   });
 
   // Modal Dialogs
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
+  const [isChannelsOpen, setIsChannelsOpen] = useState<boolean>(false);
   const [liveUnreadNotifications, setLiveUnreadNotifications] = useState(0);
   const [cycleIntent,setCycleIntent]=useState<{input:Parameters<typeof ApiClient.createMyStudentApplicationTracker>[0];cycles:Array<{id:string;cycleKey:string}>}|null>(null);
   const [cycleBusy,setCycleBusy]=useState(false);
@@ -672,11 +695,17 @@ export default function App() {
 
   const openSection = (target: string) => {
     setIsMenuOpen(false);
-    setIsNotificationOpen(false);
-    if (publicDataMode === 'prototype' && target === 'notifications') {
-      setIsNotificationOpen(true);
+    if (target === 'channels') {
+      setIsNotificationOpen(false);
+      setIsChannelsOpen((prev) => !prev);
       return;
     }
+    setIsChannelsOpen(false);
+    if (publicDataMode === 'prototype' && target === 'notifications') {
+      setIsNotificationOpen((prev) => !prev);
+      return;
+    }
+    setIsNotificationOpen(false);
     if (publicDataMode === 'api' && target === 'notifications') {
       openStudentAccount('notifications');
       return;
@@ -716,6 +745,7 @@ export default function App() {
   const openStudentTools = (toolKey?: string) => {
     setIsMenuOpen(false);
     setIsNotificationOpen(false);
+    setIsChannelsOpen(false);
     navigate({
       activeTab: 'ai-tools',
       nestedDetailId: toolKey ?? '',
@@ -724,22 +754,48 @@ export default function App() {
   };
   const openLanguage = () => {
     setIsMenuOpen(false);
+    setIsChannelsOpen(false);
     navigate({auxiliaryPage: 'language'});
   };
   // Close overlays when the user navigates with browser Back/Forward.
   useEffect(() => {
-    const close = () => {setIsMenuOpen(false); setIsNotificationOpen(false);};
+    const close = () => {setIsMenuOpen(false); setIsNotificationOpen(false); setIsChannelsOpen(false);};
     window.addEventListener('popstate', close);
     return () => window.removeEventListener('popstate', close);
   }, []);
 
-  // Sync Dark Mode Class to HTML and Body
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(() =>
+    publicDataMode === 'prototype'
+      ? {
+          name: 'WEGDAN GAMIL',
+          email: 'student@manaratak.edu',
+          gpa: '3.85',
+          degreeLevel: 'ماجستير',
+          targetMajor: 'علوم الحاسوب',
+          englishLevel: 'IELTS 7.0',
+          targetCountries: ['الصين', 'بريطانيا'], notificationsEnabled: false,
+        }
+      : null
+  );
+
+  // Sync Dark Mode Class and Student Profile to HTML and Body
   useEffect(() => {
     const applyPreferences = (event: Event) => {
-      const preferences = (event as CustomEvent<{theme?: string; unreadNotifications?: number}>).detail;
+      const preferences = (event as CustomEvent<{theme?: string; unreadNotifications?: number; displayName?: string; email?: string}>).detail;
       const theme = preferences?.theme;
       if (typeof preferences?.unreadNotifications === 'number') setLiveUnreadNotifications(preferences.unreadNotifications);
       if (theme === 'DARK' || theme === 'LIGHT' || theme === 'SYSTEM') setIsDarkMode(theme === 'DARK' || (theme === 'SYSTEM' && Boolean(window.matchMedia?.('(prefers-color-scheme: dark)').matches)));
+      if (preferences?.displayName) {
+        setUserProfile((prev) => ({
+          name: preferences.displayName || prev?.name || 'WEGDAN GAMIL',
+          email: preferences.email || prev?.email || '',
+          gpa: prev?.gpa || '',
+          degreeLevel: prev?.degreeLevel || '',
+          targetMajor: prev?.targetMajor || '',
+          englishLevel: prev?.englishLevel || '',
+          targetCountries: prev?.targetCountries || [], notificationsEnabled: prev?.notificationsEnabled ?? false,
+        }));
+      }
     };
     window.addEventListener('manaratak-student-preferences', applyPreferences);
     return () => window.removeEventListener('manaratak-student-preferences', applyPreferences);
@@ -782,7 +838,20 @@ export default function App() {
         try {
           const account = await ApiClient.getMyStudentDashboard();
           if (!cancelled && account.capabilityStatus?.notifications !== 'DEGRADED') setLiveUnreadNotifications(account.statistics.unreadNotifications);
-          if (!cancelled) window.dispatchEvent(new CustomEvent('manaratak-student-preferences', { detail: { theme: account.workspace.theme } }));
+          if (!cancelled) {
+            if (account.workspace?.displayName) {
+              setUserProfile({
+                name: account.workspace.displayName,
+                email: '',
+                gpa: '',
+                degreeLevel: '',
+                targetMajor: '',
+                englishLevel: '',
+                targetCountries: [], notificationsEnabled: false,
+              });
+            }
+            window.dispatchEvent(new CustomEvent('manaratak-student-preferences', { detail: { theme: account.workspace.theme, displayName: account.workspace?.displayName } }));
+          }
         } catch { /* Account cards retain their own retry path. */ }
         const pending = consumePostLoginAction();
         if (pending?.kind === 'SAVE_FAVORITE') {
@@ -833,7 +902,7 @@ export default function App() {
       gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 0.35);
-    } catch {
+    } catch (e) {
       // Audio autoplay policy fallback
     }
   };
@@ -875,6 +944,8 @@ export default function App() {
         title: t('public_template_welcome'),
         body: t('public_template_preview_notifications'),
         type: 'system',
+        actionType: 'scholarship',
+        targetId: 'csc-china',
       }, ...previous]);
     }, 2500);
     return () => clearTimeout(timer);
@@ -1064,17 +1135,14 @@ export default function App() {
 
   return (
     <div className="manaratak-public flex flex-col min-h-screen w-full bg-[var(--mn-page)] text-[var(--mn-text)] selection:bg-[var(--mn-accent)]/30 selection:text-[var(--mn-heading)] font-['Cairo',sans-serif] pb-24 sm:pb-28 transition-colors mn-panel ">
+      {publicDataMode === 'prototype' && <div role="status" className="border-b border-amber-300 bg-amber-50 p-2 text-center text-xs font-bold text-amber-950">{t('public_template_prototype')}</div>}
       {publicDataMode === 'api' && <PublicAnalyticsBoundary routeKey={publicUrlForState(navigation.state).split('?')[0]} />}
+      {testNavigationUnavailable && <p role="status">الاختبار غير متاح حاليًا</p>}
       {cycleIntent&&<div role="dialog" aria-modal="true" aria-label={language==='en'?'Choose application cycle':'اختيار دورة التقديم'} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"><div className="rounded-xl bg-[var(--mn-page)] p-6 space-y-3">
         <p>{language==='en'?'Choose the published application cycle. Each cycle keeps its own progress and history.':'اختر دورة التقديم المنشورة. لكل دورة تقدمها وسجلها المستقل.'}</p>
         {cycleIntent.cycles.map(c=><button type="button" className="block border rounded p-2" key={c.id} disabled={cycleBusy} onClick={()=>{setCycleBusy(true);void ApiClient.createMyStudentApplicationTracker({...cycleIntent.input,cycleId:c.id}).then(finishCycleTracking).catch(error=>triggerInstantPush({title:t('public_template_tracker_error'),body:error instanceof Error?error.message:t('public_template_retry'),type:'system'})).finally(()=>setCycleBusy(false));}}>{applicationCycleLabel(c.cycleKey,language==='en'?'en':'ar')}</button>)}
         <button type="button" disabled={cycleBusy} onClick={()=>setCycleIntent(null)}>{language==='en'?'Cancel':'إلغاء'}</button>
       </div></div>}
-      {testNavigationUnavailable && (
-        <p role="alert" className="px-4 py-2 text-sm bg-amber-50 text-amber-900">
-          {t('public_detailed_content_is_currently_unavailable_in_this_release')}
-        </p>
-      )}
       {(publicGraph.error ||
         publicGraph.stale ||
         publicGraph.partial ||
@@ -1143,6 +1211,8 @@ export default function App() {
         )}
         {isCompareRoute ? (
           <ComparePage locale={language} onBack={goBack} dataMode={publicDataMode} initialType={navigation.state.compareType} initialItems={navigation.state.compareItems} scholarships={scholarships} universities={universities} majors={majors} courses={courses} paidCourses={paidCourses} importedCourses={importedCourses} />
+        ) : navigation.state.auxiliaryPage === 'design-showcase' ? (
+          <ManaratakDesignShowcase onBack={goBack} />
         ) : navigation.state.auxiliaryPage ? (
           <PublicInfoPage dataMode={publicDataMode} page={navigation.state.auxiliaryPage} onBack={goBack} onServices={() => openSection('services')} />
         ) : isSmartSearchOpen ? (
@@ -1205,7 +1275,7 @@ export default function App() {
         ) : selectedArticle ? (
           <>
           <CmsArticleSeo article={selectedArticle} />
-          <ArticleDetail
+          <ArticleDetail relatedArticles={publicDataMode === 'prototype' ? articles : []}
             article={selectedArticle}
             searchAnchor={detailSearchAnchor}
             searchTerm={detailSearchTerm}
@@ -1257,8 +1327,16 @@ export default function App() {
               setSelectedMajor(major);
               window.scrollTo({ top: 0, behavior: 'instant' });
             }}
-            onOpenExam={(examId) => {
-              void openPublishedExamByIdentity(examId);
+            onOpenExam={(id) => {
+              const exam = exams.find((item) => item.id === id);
+              if (!exam) return;
+              setSelectedArticle(null);
+              setSelectedScholarship(null);
+              setSelectedUniversity(null);
+              setSelectedMajor(null);
+              setSelectedImportedCourse(null);
+              setSelectedExam(exam);
+              window.scrollTo({ top: 0, behavior: 'instant' });
             }}
             onOpenCourse={(id) => {
               const course = importedCourses.find((item) => item.id === id);
@@ -1304,9 +1382,7 @@ export default function App() {
               setSelectedCategory('countries');
               setActiveTab('search');
             }}
-            onOpenExam={(examId) => {
-              void openPublishedExamByIdentity(examId);
-            }}
+            onOpenExam={(examId) => { void openPublishedExamByIdentity(examId); }}
             onOpenScholarship={(scholarshipId) => {
               const related = byIdentity(scholarships, scholarshipId);
               if (!related) return;
@@ -1367,9 +1443,7 @@ export default function App() {
               setSelectedScholarship(related);
               window.scrollTo({ top: 0, behavior: 'instant' });
             }}
-            onOpenExam={(examId) => {
-              void openPublishedExamByIdentity(examId);
-            }}
+            onOpenExam={(examId) => { void openPublishedExamByIdentity(examId); }}
             onOpenArticle={(articleId) => {
               const article = articles.find((item) => item.id === articleId);
               if (!article) return;
@@ -1460,6 +1534,8 @@ export default function App() {
             course={selectedCourse}
             dataMode={publicDataMode}
             isStudying={isStudyingCourse}
+            isFavorite={isFavorite('course', selectedCourse.id)}
+            onToggleFavorite={() => handleToggleFavorite('course', selectedCourse.id)}
             onBack={goBack}
             onStartStudy={() => {
               setIsStudyingCourse(true);
@@ -1522,9 +1598,7 @@ export default function App() {
               setActiveTab('search');
               window.scrollTo({ top: 0, behavior: 'instant' });
             }}
-            onOpenExam={(examId) => {
-              void openPublishedExamByIdentity(examId);
-            }}
+            onOpenExam={(examId) => { void openPublishedExamByIdentity(examId); }}
           />
         ) : selectedExam ? (
           <ExamDetailModal
@@ -1603,51 +1677,45 @@ export default function App() {
                   <div className="space-y-5 relative z-10 w-full">
                     {/* 1. Featured Scholarships */}
                     <div className="relative w-full">
-                      <HomeShowcaseFrame active={homeDesignScholarships}>
-                      <FeaturedScholarships selection={homeDesignScholarships ? 'featured' : publicDataMode === 'api' ? 'published-preview' : 'featured'}
-                        scholarships={homeDesignScholarships ? HOME_DESIGN_SCHOLARSHIPS : scholarships}
-                        status={homeDesignScholarships ? 'ready' : publicLive.statuses.scholarships}
+                      <FeaturedScholarships
+                        selection="featured"
+                        scholarships={scholarships}
+                        status={publicLive.statuses.scholarships}
                         onRetry={publicLive.reload}
                         onSelectScholarship={setSelectedScholarship}
                         onToggleFavorite={(id) => handleToggleFavorite('scholarship', id)}
                         favoriteIds={favoriteIdsFor('scholarship')}
                         onViewAllClick={() => openSection('scholarships')}
                       />
-                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 2. Featured Majors */}
                     <div className="relative w-full">
-                      <HomeShowcaseFrame active={homeDesignMajors}>
                       <FeaturedMajors
                         majors={majors}
-                        dataMode={homeDesignMajors ? 'prototype' : publicDataMode}
+                        dataMode={publicDataMode}
                         onSelectMajor={setSelectedMajor}
                         onViewAllClick={() => openSection('majors')}
                       />
-                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 3. Featured Universities */}
                     <div className="relative w-full">
-                      <HomeShowcaseFrame active={homeDesignUniversities}>
                       <FeaturedUniversities
-                        universities={homeDesignUniversities ? HOME_DESIGN_UNIVERSITIES : universities}
-                        status={homeDesignUniversities ? 'ready' : publicLive.statuses.universities}
+                        universities={universities}
+                        status={publicLive.statuses.universities}
                         onRetry={publicLive.reload}
                         onSelectUniversity={setSelectedUniversity}
                         onViewAllClick={() => openSection('universities')}
                       />
-                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 4. Featured Countries */}
                     <div className="relative w-full">
-                      <HomeShowcaseFrame active={homeDesignCountries}>
                       <FeaturedCountries
-                        countries={homeDesignCountries ? HOME_DESIGN_COUNTRIES : countries}
-                        dataMode={homeDesignCountries ? 'prototype' : publicDataMode}
-                        status={homeDesignCountries ? 'ready' : publicLive.statuses.countries}
+                        countries={countries}
+                        dataMode={publicDataMode}
+                        status={publicLive.statuses.countries}
                         onRetry={publicLive.reload}
                         onSelectCountry={(country) => {
                           setCountryNavigationName(country);
@@ -1656,14 +1724,11 @@ export default function App() {
                         }}
                         onViewAllClick={() => openSection('countries')}
                       />
-                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 5. AI Tools Section */}
                     <div className="relative w-full">
-                      <HomeShowcaseFrame active={homeDesignTools}>
-                        <AIToolsBanner dataMode={homeDesignTools ? 'prototype' : publicDataMode} onOpenAiTools={() => openSection('ai-tools')} />
-                      </HomeShowcaseFrame>
+                      <AIToolsBanner dataMode={publicDataMode} onOpenAiTools={() => openSection('ai-tools')} />
                     </div>
 
                     {/* 6. Roadmap Preview */}
@@ -1682,11 +1747,10 @@ export default function App() {
 
                     {/* 7. Featured Exams */}
                     <div className="relative w-full">
-                      <HomeShowcaseFrame active={homeDesignExams}>
                       <FeaturedExams
                         exams={exams}
-                        dataMode={homeDesignExams ? 'prototype' : publicDataMode}
-                        status={homeDesignExams ? 'ready' : publicLive.statuses.exams}
+                        dataMode={publicDataMode}
+                        status={publicLive.statuses.exams}
                         onRetry={publicLive.reload}
                         onSelectExam={(exam) => {
                           setSelectedExam(exam);
@@ -1694,18 +1758,16 @@ export default function App() {
                         }}
                         onViewAllClick={() => openSection('exams')}
                       />
-                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 8. Featured Courses */}
                     <div className="relative w-full">
-                      <HomeShowcaseFrame active={homeDesignCourses}>
                       <FeaturedCourses
-                        courses={homeDesignCourses ? HOME_DESIGN_COURSES : courses}
-                        status={homeDesignCourses ? 'ready' : publicLive.statuses.courses}
-                        previews={homeDesignCourses ? undefined : publicLive.data.homeCoursePreviews}
+                        courses={courses}
+                        status={publicLive.statuses.courses}
+                        previews={publicLive.data.homeCoursePreviews}
                         onRetry={publicLive.reload}
-                        dataMode={homeDesignCourses ? 'prototype' : publicDataMode}
+                        dataMode={publicDataMode}
                         onSelectCourse={(course) => {
                           const isImported = course.originType === 'EXTERNAL_LINKED_COURSE' || publicDataMode === 'prototype' && (course.provider?.includes('Stanford') || course.provider?.includes('Harvard') || course.provider?.includes('Google') || course.provider?.includes('عالمية'));
                           if (isImported) {
@@ -1753,16 +1815,14 @@ export default function App() {
                           setSelectedCourseTrack(null);
                         }}
                       />
-                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 10. Featured Articles (Magazine Style) */}
                     <div className="relative w-full">
-                      <HomeShowcaseFrame active={homeDesignArticles}>
                       <FeaturedArticles
                         articles={articles}
-                        dataMode={homeDesignArticles ? 'prototype' : publicDataMode}
-                        status={homeDesignArticles ? 'ready' : publicLive.statuses.articles}
+                        dataMode={publicDataMode}
+                        status={publicLive.statuses.articles}
                         onRetry={publicLive.reload}
                         onSelectArticle={(articleId) => {
                           const article = articles.find((item) => item.id === articleId);
@@ -1772,15 +1832,13 @@ export default function App() {
                         }}
                         onViewAllClick={() => openSection('articles')}
                       />
-                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 11. Featured Services (Students & General Support) */}
                     <div className="relative w-full">
-                      <HomeShowcaseFrame active={homeDesignServices}>
                       <FeaturedServices
-                        services={homeDesignServices ? HOME_DESIGN_SERVICES : services}
-                        status={homeDesignServices ? 'ready' : publicLive.statuses.services}
+                        services={services}
+                        status={publicLive.statuses.services}
                         onRetry={publicLive.reload}
                         onViewAllClick={() => openSection('services')}
                         onSelectService={(service) => {
@@ -1789,7 +1847,6 @@ export default function App() {
                           window.scrollTo({ top: 0, behavior: 'instant' });
                         }}
                       />
-                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 12. Featured Jobs & Internships (Placed after Services) */}
@@ -1805,8 +1862,18 @@ export default function App() {
                     </div>
 
                     {/* 13. Contact & Branches Section */}
-                    <div className="relative w-full pb-4">
+                    <div className="relative w-full pb-2">
                       <ContactSection onOpen={() => navigate({ auxiliaryPage: 'contact' })} />
+                    </div>
+
+                    {/* 14. Manaratak Design Showcase Preview Section (Opens full Design & Interfaces page) */}
+                    <div className="relative w-full pb-4">
+                      <DesignShowcasePreviewSection
+                        onOpen={() => {
+                          navigate({ auxiliaryPage: 'design-showcase' });
+                          window.scrollTo({ top: 0, behavior: 'instant' });
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -1900,7 +1967,14 @@ export default function App() {
                   void openPublishedMajorByIdentity(majorId);
                 }}
                 onOpenExam={(examId) => {
-                  void openPublishedExamByIdentity(examId);
+                  const exam = exams.find((item) => item.id === examId);
+                  if (!exam) return;
+                  setCountryNavigationName('');
+                  setSelectedUniversity(null);
+                  setSelectedScholarship(null);
+                  setSelectedMajor(null);
+                  setSelectedExam(exam);
+                  window.scrollTo({ top: 0, behavior: 'instant' });
                 }}
                 onOpenArticle={(articleId) => {
                   const article = articles.find((item) => item.id === articleId);
@@ -2312,11 +2386,6 @@ export default function App() {
       </main>
 
       {/* Bottom Docked Navigation Bar (Always Visible) */}
-      {publicDataMode === 'prototype' && (
-        <p className="text-center text-xs text-[var(--mn-text-muted)] py-2" role="status">
-          {t('public_template_prototype')}
-        </p>
-      )}
       <BottomNavBar
         activeTab={activeTab}
         onTabChange={(tab) => {
@@ -2325,13 +2394,20 @@ export default function App() {
         favoritesCount={favoriteKeys.length}
         unreadNotificationsCount={unreadNotificationsCount}
         isNotificationsOpen={isNotificationOpen}
+        isChannelsOpen={isChannelsOpen}
+      />
+
+      {/* Community Channels & Groups Center Modal */}
+      <CommunityChannelsModal
+        isOpen={isChannelsOpen}
+        onClose={() => setIsChannelsOpen(false)}
       />
 
       {/* Slide-out Navigation Drawer Menu */}
       <NavigationDrawer
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
-        userProfile={null}
+        userProfile={userProfile}
         language={language}
         onToggleLanguage={openLanguage}
         isDarkMode={isDarkMode}

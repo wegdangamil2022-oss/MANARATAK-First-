@@ -30,7 +30,7 @@ import {
   CategoryType,
 } from '../types';
 import { FavoriteButton } from './FavoriteButton';
-import { DetailBackButton, DetailSectionHeader, useDetailSearchTarget } from './DetailUi';
+import { DetailBackButton, DetailSectionHeader, PublicCardsPagination, PublicFilterSelectModal, useDetailSearchTarget, usePaginatedCatalog } from './DetailUi';
 
 interface CareersSearchPageProps {
   live?: boolean;
@@ -64,7 +64,7 @@ const CareerOpportunityCard: React.FC<{
 }> = ({ opportunity, onOpen, isFavorite = false, onToggleFavorite }) => {
   const { t: publicT } = usePublicTemplateTranslation();
   return (
-  <article className="relative group bg-[var(--mn-surface)] border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-3xl p-3.5 sm:p-4 shadow-2xs hover:shadow-md transition-all active:scale-[0.99] mn-panel ">
+  <article className="relative group bg-[var(--mn-surface)] border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-3xl p-3.5 sm:p-4 shadow-2xs hover:shadow-md transition-all active:scale-[0.99] mn-panel h-full flex flex-col justify-between">
     {onToggleFavorite && (
       <FavoriteButton
         active={isFavorite}
@@ -75,7 +75,7 @@ const CareerOpportunityCard: React.FC<{
         className="absolute left-3 top-3 z-10"
       />
     )}
-    <button onClick={() => onOpen(opportunity)} className="w-full text-start cursor-pointer">
+    <button onClick={() => onOpen(opportunity)} className="w-full h-full flex flex-col justify-between text-start cursor-pointer">
       <div className="flex items-start gap-3">
         <div className="w-11 h-11 rounded-2xl bg-[var(--mn-primary)] text-white flex items-center justify-center shrink-0 border border-[var(--mn-accent)]/25 shadow-sm mn-inverse ">
           {opportunityIcon(opportunity.kind)}
@@ -195,7 +195,7 @@ const CareerOpportunityDetail: React.FC<{
         </svg>
       </div>
 
-      <div className="max-w-xl mx-auto text-center relative z-10 pt-2">
+      <div className="max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto text-center relative z-10 pt-2">
         <div className="w-12 h-12 mx-auto rounded-2xl border border-[var(--mn-accent)]/35 bg-white/10 backdrop-blur flex items-center justify-center text-[var(--mn-accent-text)] mb-3">
           {opportunityIcon(opportunity.kind)}
         </div>
@@ -212,7 +212,7 @@ const CareerOpportunityDetail: React.FC<{
       </div>
     </div>
 
-    <div className="max-w-xl mx-auto mn-inline-gutter -mt-4 relative z-20 space-y-3">
+    <div className="max-w-xl md:max-w-[1120px] lg:max-w-[1160px] mx-auto mn-inline-gutter -mt-4 relative z-20 space-y-3 md:space-y-4">
       <div className="bg-[var(--mn-gold-surface)] border border-[var(--mn-border-gold)] rounded-2xl px-3 py-2.5 text-center mn-panel ">
         <p className="text-[9px] sm:text-[10px] leading-5 font-bold text-[var(--mn-accent-text)] font-['Cairo',sans-serif]">{publicT('public_this_opportunity_is_from_the_published_career_alumni')}</p>
       </div>
@@ -235,7 +235,7 @@ const CareerOpportunityDetail: React.FC<{
       <section className="bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-3xl p-4 shadow-2xs mn-panel ">
         <DetailSectionHeader id="career-about" icon={Briefcase} title={publicT('public_about_this_opportunity')} />
         <p className="mt-2 text-[11px] sm:text-xs leading-7 text-[var(--mn-text-muted)] font-medium font-['Cairo',sans-serif]">{opportunity.description}</p>
-        <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
           <div className="rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] p-2.5 mn-panel ">
             <div className="text-[9px] text-[var(--mn-text-muted)] font-bold">{publicT('public_domain')}</div>
             <div className="mt-1 text-[10px] font-bold text-[var(--mn-heading)]">{opportunity.industry}</div>
@@ -255,8 +255,10 @@ const CareerOpportunityDetail: React.FC<{
         </div>
       </section>
 
-      <ListSection title={publicT('public_duties_and_responsibilities')} items={opportunity.responsibilities} />
-      <ListSection id="career-requirements" title={publicT('public_requirements')} items={opportunity.requirements} tone="success" />
+      <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-4 items-stretch">
+        <ListSection title={publicT('public_duties_and_responsibilities')} items={opportunity.responsibilities} />
+        <ListSection id="career-requirements" title={publicT('public_requirements')} items={opportunity.requirements} tone="success" />
+      </div>
 
       <section className="bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-3xl p-4 shadow-2xs mn-panel ">
         <DetailSectionHeader id="career-skills" icon={Sparkles} title={publicT('public_target_skills')} />
@@ -383,6 +385,7 @@ const LocalCareersSearchPage: React.FC<CareersSearchPageProps> = ({
   const [selectedExperience, setSelectedExperience] = useState<'الكل' | CareerExperienceLevel>('الكل');
   const [selectedEmploymentType, setSelectedEmploymentType] = useState('الكل');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [openFilterModal, setOpenFilterModal] = useState<'kind' | 'country' | 'industry' | 'workMode' | 'experience' | 'employmentType' | null>(null);
   const [localDetail, setLocalDetail] = useState<CareerOpportunityPreview | null>(() =>
     initialSelectedId ? opportunities.find((item) => item.id === initialSelectedId) || null : null,
   );
@@ -453,6 +456,17 @@ const LocalCareersSearchPage: React.FC<CareersSearchPageProps> = ({
     selectedEmploymentType,
   ]);
 
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedOpportunities,
+    goToPage,
+  } = usePaginatedCatalog(
+    filteredOpportunities,
+    `${searchQuery}|${selectedKind}|${selectedCountry}|${selectedIndustry}|${selectedWorkMode}|${selectedExperience}|${selectedEmploymentType}`,
+    30,
+  );
+
   const resetFilters = () => {
     setSearchQuery('');
     setSelectedKind('الكل');
@@ -490,7 +504,7 @@ const LocalCareersSearchPage: React.FC<CareersSearchPageProps> = ({
 
   return (
     <div className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel " dir={publicDir}>
-      <div className="relative mn-search-hero text-white px-3 sm:px-4 pt-4 pb-12 sm:pb-14 overflow-hidden shadow-sm mn-inverse ">
+      <div className="relative mn-search-hero text-white px-3 sm:px-4 pt-4 pb-3 overflow-hidden shadow-xs mn-inverse ">
         {onBack && (
           <button
             onClick={onBack}
@@ -512,31 +526,42 @@ const LocalCareersSearchPage: React.FC<CareersSearchPageProps> = ({
           </svg>
         </div>
 
-        <div className="max-w-xl mx-auto text-center relative z-10 space-y-2.5">
-          <div className="-mb-1 flex justify-center"><Sparkles className="h-4 w-4 text-[var(--mn-accent-text)]" aria-hidden="true" /></div>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white font-['Cairo',sans-serif] tracking-tight">
-              <span>{publicT('public_find')}{' '}</span>
-              <span className="relative inline-block text-white">{publicT('public_your_career_opportunity')}<svg className="absolute -bottom-1.5 inset-x-0 w-full h-2" viewBox="0 0 100 12" fill="none" preserveAspectRatio="none">
-                  <path d="M2,9 Q50,2 98,6" stroke="var(--mn-accent)" strokeWidth="2.5" strokeLinecap="round" />
-                </svg>
-              </span>
-            </h1>
-            <p className="text-[11px] sm:text-xs text-[var(--mn-on-dark-muted)] font-medium font-['Cairo',sans-serif] mt-1.5 leading-relaxed max-w-sm mx-auto">{publicT('public_jobs_internships_and_graduate_programs_in_one_directory')}</p>
+        <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto text-center relative z-10 space-y-2 pt-1">
+          <div className="flex justify-center">
+            <Sparkles className="h-5 w-5 text-[var(--mn-accent-text)] drop-shadow-[0_0_8px_rgba(214,164,59,0.8)]" aria-hidden="true" />
           </div>
 
-          <div className="pt-1 max-w-md mx-auto px-2">
+          <div className="space-y-0.5">
+            <h1 className="text-xl sm:text-2xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">
+              {publicT('public_find')}{' '}
+              <span className="text-[var(--mn-accent-text)]">{publicT('public_your_career_opportunity')}</span>
+            </h1>
+
+            {/* Small Gold Horizontal Divider */}
+            <div className="flex justify-center pt-1 pb-0.5">
+              <div className="w-10 h-0.5 bg-[var(--mn-accent)] rounded-full mn-gold " />
+            </div>
+
+            <p className="text-[11px] sm:text-xs text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-md mx-auto truncate">
+              {publicT('public_jobs_internships_and_graduate_programs_in_one_directory')}
+            </p>
+          </div>
+
+          <div className="pt-1 max-w-sm sm:max-w-md md:max-w-xl mx-auto px-1">
             <div className="relative">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={publicT('public_search_by_title_domain_skill_or_organization')}
-                className="w-full py-2.5 pl-4 pr-10 bg-[var(--mn-primary)]/85 hover:bg-[var(--mn-primary-hover)] focus:bg-[var(--mn-primary)] border border-[var(--mn-accent)]/40 focus:border-[var(--mn-accent)] rounded-full text-xs sm:text-[13px] font-bold text-white placeholder-white focus:outline-none shadow-inner transition-all text-center font-['Cairo',sans-serif] mn-inverse hover:mn-inverse focus:mn-inverse "
+                className="w-full py-2.5 pl-4 pr-10 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-[12px] font-bold placeholder:text-[var(--mn-text-muted)] placeholder:text-[12px] placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel "
               />
-              <Search className="w-4 h-4 text-[var(--mn-accent-text)] absolute right-4 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[var(--mn-accent-text)] absolute right-3.5 top-1/2 -translate-y-1/2" />
               {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="absolute left-3.5 top-1/2 -translate-y-1/2 p-1 text-[var(--mn-on-dark-muted)] hover:text-white cursor-pointer">
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 p-1 text-[var(--mn-text-muted)] hover:text-[var(--mn-text)] cursor-pointer"
+                >
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
@@ -545,95 +570,186 @@ const LocalCareersSearchPage: React.FC<CareersSearchPageProps> = ({
         </div>
 
         {activeFiltersCount > 0 && (
-          <div className="flex justify-center mt-3">
+          <div className="flex justify-center mt-2 relative z-10">
             <button
               onClick={resetFilters}
-              className="text-[10px] sm:text-[11px] font-bold text-[var(--mn-danger-text)] hover:text-[var(--mn-danger-text)] bg-[var(--mn-danger-soft)] hover:bg-[var(--mn-danger-soft)] px-3 py-1 rounded-full transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif]"
+              className="text-[10px] font-bold text-[var(--mn-danger-text)] hover:text-[var(--mn-danger-text)] bg-[var(--mn-surface-elevated)]/95 px-2.5 py-0.5 rounded-full shadow-xs transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif] mn-panel "
             >
-              <RotateCcw className="w-3 h-3" />{publicT('public_reset_filters')}{activeFiltersCount})
+              <RotateCcw className="w-3 h-3" />
+              <span>{publicT('public_reset_filters')}{activeFiltersCount})</span>
             </button>
           </div>
         )}
-      </div>
 
-      <div className="max-w-xl mx-auto mn-inline-gutter -mt-7 sm:-mt-8 relative z-20">
-        <div className="bg-[var(--mn-surface)] border border-[var(--mn-accent)]/50 rounded-3xl p-2 sm:p-2.5 shadow-md mn-panel ">
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-            <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-page)]/80 border border-[var(--mn-border)] rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-2xs transition-colors min-w-0 mn-panel hover:mn-panel ">
-              <div className="flex items-center gap-1 text-[var(--mn-heading)] font-bold text-[9px] sm:text-[11px] font-['Cairo',sans-serif] leading-tight min-w-0">
-                <Briefcase className="w-3 h-3 text-[var(--mn-accent-text)] shrink-0" />
+        {/* 3 SEPARATE FLOATING FILTER TILES INSIDE HERO */}
+        <div className="max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto mn-inline-gutter mt-2.5 relative z-20 pb-0">
+          <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
+            {/* Tile 1: نوع الفرصة */}
+            <button
+              type="button"
+              onClick={() => setOpenFilterModal('kind')}
+              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel "
+            >
+              <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
+                <Briefcase className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
                 <span className="truncate">{selectedKind === 'الكل' ? publicT('public_opportunity_type') : selectedKind}</span>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-1" />
-              <select value={selectedKind} onChange={(e) => setSelectedKind(e.target.value as 'الكل' | CareerOpportunityKind)} className="absolute inset-0 opacity-0 w-full h-full cursor-pointer" title={publicT('public_choose_opportunity_type')}>
-                {kinds.map((kind) => <option key={kind} value={kind}>{kind === 'الكل' ? publicT('public_all_opportunities') : kind}</option>)}
-              </select>
-            </div>
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
+            </button>
 
-            <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-page)]/80 border border-[var(--mn-border)] rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-2xs transition-colors min-w-0 mn-panel hover:mn-panel ">
-              <div className="flex items-center gap-1 text-[var(--mn-heading)] font-bold text-[9px] sm:text-[11px] font-['Cairo',sans-serif] leading-tight min-w-0">
-                <Globe2 className="w-3 h-3 text-[var(--mn-accent-text)] shrink-0" />
+            {/* Tile 2: الدولة */}
+            <button
+              type="button"
+              onClick={() => setOpenFilterModal('country')}
+              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel "
+            >
+              <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
+                <Globe2 className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
                 <span className="truncate">{selectedCountry === 'الكل' ? publicT('public_country') : selectedCountry}</span>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-1" />
-              <select value={selectedCountry} onChange={(e) => setSelectedCountry(e.target.value)} className="absolute inset-0 opacity-0 w-full h-full cursor-pointer" title={publicT('public_choose_country')}>
-                {countries.map((country) => <option key={country} value={country}>{country === 'الكل' ? publicT('public_all_countries') : country}</option>)}
-              </select>
-            </div>
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
+            </button>
 
+            {/* Tile 3: تصفية متقدمة */}
             <button
+              type="button"
               onClick={() => setShowAdvancedFilters((value) => !value)}
-              className={`relative border rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-2xs transition-colors min-w-0 cursor-pointer ${
+              className={`relative border-1.5 rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer ${
                 showAdvancedFilters || advancedFiltersCount > 0
                   ? 'bg-[var(--mn-primary)] border-[var(--mn-primary)] text-white mn-inverse '
-                  : 'bg-[var(--mn-surface)] hover:bg-[var(--mn-page)]/80 border-[var(--mn-border)] text-[var(--mn-heading)] mn-panel hover:mn-panel '
+                  : 'bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] mn-panel '
               }`}
             >
-              <div className="flex items-center gap-1 font-bold text-[9px] sm:text-[11px] font-['Cairo',sans-serif] leading-tight min-w-0">
-                <Filter className={`w-3 h-3 shrink-0 ${showAdvancedFilters || advancedFiltersCount > 0 ? 'text-[var(--mn-accent-soft)]' : 'text-[var(--mn-accent-text)]'}`} />
+              <div className="flex items-center justify-center gap-1 font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
+                <Filter className={`w-3.5 h-3.5 shrink-0 ${showAdvancedFilters || advancedFiltersCount > 0 ? 'text-[var(--mn-accent-soft)]' : 'text-[#142B5F] dark:text-[#D6A43B]'}`} />
                 <span className="truncate">{advancedFiltersCount > 0 ? publicT('public_filter_count', { v0: advancedFiltersCount }) : publicT('public_filter')}</span>
               </div>
-              <ChevronDown className={`w-3.5 h-3.5 mt-1 transition-transform ${showAdvancedFilters ? 'rotate-180' : ''} ${showAdvancedFilters || advancedFiltersCount > 0 ? 'text-[var(--mn-on-dark-muted)]' : 'text-[var(--mn-text-muted)]'}`} />
+              <ChevronDown className={`w-3.5 h-3.5 mt-0.5 transition-transform ${showAdvancedFilters ? 'rotate-180' : ''} ${showAdvancedFilters || advancedFiltersCount > 0 ? 'text-[var(--mn-on-dark-muted)]' : 'text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)]'}`} />
             </button>
           </div>
-        </div>
 
-        {showAdvancedFilters && (
-          <div className="mt-2 bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-3xl p-2.5 shadow-sm mn-panel ">
+          <PublicFilterSelectModal
+            isOpen={openFilterModal === 'kind'}
+            onClose={() => setOpenFilterModal(null)}
+            title={publicT('public_choose_opportunity_type')}
+            icon={Briefcase}
+            selectedValue={selectedKind}
+            onSelect={(val) => setSelectedKind(val as 'الكل' | CareerOpportunityKind)}
+            options={kinds.map((kind) => ({
+              value: kind,
+              label: kind === 'الكل' ? publicT('public_all_opportunities') : kind,
+            }))}
+          />
+
+          <PublicFilterSelectModal
+            isOpen={openFilterModal === 'country'}
+            onClose={() => setOpenFilterModal(null)}
+            title={publicT('public_choose_country')}
+            icon={Globe2}
+            selectedValue={selectedCountry}
+            onSelect={setSelectedCountry}
+            options={countries.map((country) => ({
+              value: country,
+              label: country === 'الكل' ? publicT('public_all_countries') : country,
+            }))}
+          />
+
+          <PublicFilterSelectModal
+            isOpen={openFilterModal === 'industry'}
+            onClose={() => setOpenFilterModal(null)}
+            title={publicT('public_domain')}
+            icon={Layers3}
+            selectedValue={selectedIndustry}
+            onSelect={setSelectedIndustry}
+            options={industries.map((item) => ({
+              value: item,
+              label: item === 'الكل' ? publicT('public_all_domains') : item,
+            }))}
+          />
+
+          <PublicFilterSelectModal
+            isOpen={openFilterModal === 'workMode'}
+            onClose={() => setOpenFilterModal(null)}
+            title={publicT('public_work_arrangement')}
+            icon={Laptop}
+            selectedValue={selectedWorkMode}
+            onSelect={(val) => setSelectedWorkMode(val as 'الكل' | CareerWorkMode)}
+            options={workModes.map((item) => ({
+              value: item,
+              label: item === 'الكل' ? publicT('public_all_arrangements') : item,
+            }))}
+          />
+
+          <PublicFilterSelectModal
+            isOpen={openFilterModal === 'experience'}
+            onClose={() => setOpenFilterModal(null)}
+            title={publicT('public_experience')}
+            icon={Users}
+            selectedValue={selectedExperience}
+            onSelect={(val) => setSelectedExperience(val as 'الكل' | CareerExperienceLevel)}
+            options={experienceLevels.map((item) => ({
+              value: item,
+              label: item === 'الكل' ? publicT('public_all_levels') : item,
+            }))}
+          />
+
+          <PublicFilterSelectModal
+            isOpen={openFilterModal === 'employmentType'}
+            onClose={() => setOpenFilterModal(null)}
+            title={publicT('public_employment_type')}
+            icon={Clock3}
+            selectedValue={selectedEmploymentType}
+            onSelect={setSelectedEmploymentType}
+            options={employmentTypes.map((item) => ({
+              value: item,
+              label: item === 'الكل' ? publicT('public_all_types') : item,
+            }))}
+          />
+
+          {showAdvancedFilters && (
+            <div className="mt-2.5 bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-3xl p-2.5 shadow-sm mn-panel ">
             <div className="grid grid-cols-2 gap-2">
-              <label className="relative rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 text-center cursor-pointer mn-panel ">
-                <div className="flex items-center justify-center gap-1"><Layers3 className="w-3 h-3 text-[var(--mn-accent-text)]" /><span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedIndustry === 'الكل' ? publicT('public_domain') : selectedIndustry}</span></div>
-                <select value={selectedIndustry} onChange={(e) => setSelectedIndustry(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer">
-                  {industries.map((item) => <option key={item} value={item}>{item === 'الكل' ? publicT('public_all_domains') : item}</option>)}
-                </select>
-              </label>
+              <button
+                type="button"
+                onClick={() => setOpenFilterModal('industry')}
+                className="relative rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 text-center cursor-pointer font-['Cairo',sans-serif] mn-panel "
+              >
+                <div className="flex items-center justify-center gap-1"><Layers3 className="w-3 h-3 text-[var(--mn-accent-text)]" /><span className="truncate text-[11px] font-bold text-[var(--mn-text)]">{selectedIndustry === 'الكل' ? publicT('public_domain') : selectedIndustry}</span></div>
+              </button>
 
-              <label className="relative rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 text-center cursor-pointer mn-panel ">
-                <div className="flex items-center justify-center gap-1"><Laptop className="w-3 h-3 text-[var(--mn-accent-text)]" /><span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedWorkMode === 'الكل' ? publicT('public_work_arrangement') : selectedWorkMode}</span></div>
-                <select value={selectedWorkMode} onChange={(e) => setSelectedWorkMode(e.target.value as 'الكل' | CareerWorkMode)} className="absolute inset-0 opacity-0 cursor-pointer">
-                  {workModes.map((item) => <option key={item} value={item}>{item === 'الكل' ? publicT('public_all_arrangements') : item}</option>)}
-                </select>
-              </label>
+              <button
+                type="button"
+                onClick={() => setOpenFilterModal('workMode')}
+                className="relative rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 text-center cursor-pointer font-['Cairo',sans-serif] mn-panel "
+              >
+                <div className="flex items-center justify-center gap-1"><Laptop className="w-3 h-3 text-[var(--mn-accent-text)]" /><span className="truncate text-[11px] font-bold text-[var(--mn-text)]">{selectedWorkMode === 'الكل' ? publicT('public_work_arrangement') : selectedWorkMode}</span></div>
+              </button>
 
-              <label className="relative rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 text-center cursor-pointer mn-panel ">
-                <div className="flex items-center justify-center gap-1"><Users className="w-3 h-3 text-[var(--mn-accent-text)]" /><span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedExperience === 'الكل' ? publicT('public_experience') : selectedExperience}</span></div>
-                <select value={selectedExperience} onChange={(e) => setSelectedExperience(e.target.value as 'الكل' | CareerExperienceLevel)} className="absolute inset-0 opacity-0 cursor-pointer">
-                  {experienceLevels.map((item) => <option key={item} value={item}>{item === 'الكل' ? publicT('public_all_levels') : item}</option>)}
-                </select>
-              </label>
+              <button
+                type="button"
+                onClick={() => setOpenFilterModal('experience')}
+                className="relative rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 text-center cursor-pointer font-['Cairo',sans-serif] mn-panel "
+              >
+                <div className="flex items-center justify-center gap-1"><Users className="w-3 h-3 text-[var(--mn-accent-text)]" /><span className="truncate text-[11px] font-bold text-[var(--mn-text)]">{selectedExperience === 'الكل' ? publicT('public_experience') : selectedExperience}</span></div>
+              </button>
 
-              <label className="relative rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 text-center cursor-pointer mn-panel ">
-                <div className="flex items-center justify-center gap-1"><Clock3 className="w-3 h-3 text-[var(--mn-accent-text)]" /><span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedEmploymentType === 'الكل' ? publicT('public_employment_type') : selectedEmploymentType}</span></div>
-                <select value={selectedEmploymentType} onChange={(e) => setSelectedEmploymentType(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer">
-                  {employmentTypes.map((item) => <option key={item} value={item}>{item === 'الكل' ? publicT('public_all_types') : item}</option>)}
-                </select>
-              </label>
+              <button
+                type="button"
+                onClick={() => setOpenFilterModal('employmentType')}
+                className="relative rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 text-center cursor-pointer font-['Cairo',sans-serif] mn-panel "
+              >
+                <div className="flex items-center justify-center gap-1"><Clock3 className="w-3 h-3 text-[var(--mn-accent-text)]" /><span className="truncate text-[11px] font-bold text-[var(--mn-text)]">{selectedEmploymentType === 'الكل' ? publicT('public_employment_type') : selectedEmploymentType}</span></div>
+              </button>
             </div>
           </div>
-        )}
+          )}
+        </div>
       </div>
 
-      <div className="w-full max-w-xl mx-auto mn-inline-gutter pt-3 space-y-2.5">
+      {/* Gold Divider Ribbon Line */}
+      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--mn-accent-text)] via-[var(--mn-accent-soft)] to-[var(--mn-accent-text)] shadow-xs mb-1" />
+
+      <div className="w-full max-w-xl md:max-w-[1120px] lg:max-w-[1160px] mx-auto mn-inline-gutter pt-3 space-y-2.5 md:space-y-4">
         <div className="flex items-center justify-between px-1">
           <div>
             <span className="text-xs sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_career_opportunities')}{filteredOpportunities.length})</span>
@@ -642,27 +758,40 @@ const LocalCareersSearchPage: React.FC<CareersSearchPageProps> = ({
           <span className="text-[9px] sm:text-[10px] text-[var(--mn-accent-text)] font-bold font-['Cairo',sans-serif]">Career</span>
         </div>
 
-        <div className="flex flex-col gap-2.5 sm:gap-3">
+        <div className="flex flex-col gap-2.5 sm:gap-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 items-stretch">
           {filteredOpportunities.length === 0 ? (
-            <div className="bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-2 shadow-2xs mn-panel ">
+            <div className="col-span-full bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-2 shadow-2xs mn-panel ">
               <div className="w-12 h-12 rounded-full bg-[var(--mn-surface-muted)] flex items-center justify-center text-[var(--mn-text-muted)] mn-panel "><Search className="w-6 h-6" /></div>
               <h3 className="text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_no_matching_opportunities')}</h3>
               <p className="text-xs text-[var(--mn-text-muted)] max-w-xs font-['Cairo',sans-serif]">{publicT('public_change_the_filters_or_search_the_published_opportunities')}</p>
               <button onClick={resetFilters} className="mt-2 px-4 py-1.5 bg-[var(--mn-primary)] text-white rounded-xl text-xs font-bold cursor-pointer font-['Cairo',sans-serif] mn-inverse ">{publicT('public_clear_filters')}</button>
             </div>
           ) : (
-            filteredOpportunities.map((opportunity) => (
-              <CareerOpportunityCard
-                key={opportunity.id}
-                opportunity={opportunity}
-                isFavorite={favoriteIds.includes(opportunity.id)}
-                onToggleFavorite={onToggleFavorite}
-                onOpen={(selected) => {
-                  setSelectedOpportunity(selected);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-              />
-            ))
+            <>
+              {paginatedOpportunities.map((opportunity) => (
+                <CareerOpportunityCard
+                  key={opportunity.id}
+                  opportunity={opportunity}
+                  isFavorite={favoriteIds.includes(opportunity.id)}
+                  onToggleFavorite={onToggleFavorite}
+                  onOpen={(selected) => {
+                    setSelectedOpportunity(selected);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                />
+              ))}
+
+              <div className="col-span-full">
+                <PublicCardsPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={filteredOpportunities.length}
+                  pageSize={30}
+                  onPageChange={goToPage}
+                  dir={publicDir}
+                />
+              </div>
+            </>
           )}
         </div>
       </div>

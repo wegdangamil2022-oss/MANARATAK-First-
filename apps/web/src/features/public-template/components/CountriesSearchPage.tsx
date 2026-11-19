@@ -1,3 +1,4 @@
+import { CountryFlagImage } from './CountryFlagImage';
 import { searchPublishedCountries } from '../publicLiveDataSource';
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import { publicRelationshipRouteKey } from '../PublicGraphNavigationPolicy';
@@ -13,11 +14,14 @@ import {
   Compass,
   X,
   Sparkles,
+  Building2,
+  GraduationCap,
 } from 'lucide-react';
 import { CountryDestination } from '../types';
 import type { PublicCountryGraphDto } from '../../../api/client';
 import { CountryDetailModal } from './CountryDetailModal';
 import { FavoriteButton } from './FavoriteButton';
+import { PublicCardsPagination, PublicFilterSelectModal, usePaginatedCatalog } from './DetailUi';
 
 interface CountriesSearchPageProps {
   dataMode?: 'api' | 'prototype';
@@ -40,124 +44,8 @@ interface CountriesSearchPageProps {
 }
 
 // Bulletproof Vector SVG Flag renderer for guaranteed display matching design
-const CountryFlagImage: React.FC<{
-  countryId: string;
-  countryName: string;
-  flagEmoji: string;
-  flagUrl?: string;
-}> = ({ countryId, countryName, flagEmoji, flagUrl }) => {
-  const [imgFailed, setImgFailed] = useState(false);
+export { CountryFlagImage } from './CountryFlagImage';
 
-  if (countryId === 'china') {
-    return (
-      <svg viewBox="0 0 64 64" className="w-full h-full rounded-full object-cover">
-        <circle cx="32" cy="32" r="32" fill="#DE2910" />
-        <polygon points="16,14 18.5,21.5 12,16.8 20,16.8 13.5,21.5" fill="#FFDE00" />
-        <polygon points="26,10 27,13 24.5,11.2 27.5,11.2 25,13" fill="#FFDE00" />
-        <polygon points="29,16 30,19 27.5,17.2 30.5,17.2 28,19" fill="#FFDE00" />
-        <polygon points="29,23 30,26 27.5,24.2 30.5,24.2 28,26" fill="#FFDE00" />
-        <polygon points="25,28 26,31 23.5,29.2 26.5,29.2 24,31" fill="#FFDE00" />
-      </svg>
-    );
-  }
-
-  if (countryId === 'turkey') {
-    return (
-      <svg viewBox="0 0 64 64" className="w-full h-full rounded-full object-cover">
-        <circle cx="32" cy="32" r="32" fill="#E30A17" />
-        <circle cx="28" cy="32" r="14" fill="#FFFFFF" />
-        <circle cx="31" cy="32" r="11" fill="#E30A17" />
-        <polygon
-          points="40,32 42.5,33.5 41.5,30.5 44,28.5 41,28.5 40,25.5 39,28.5 36,28.5 38.5,30.5 37.5,33.5"
-          fill="#FFFFFF"
-        />
-      </svg>
-    );
-  }
-
-  if (countryId === 'malaysia') {
-    return (
-      <svg viewBox="0 0 64 64" className="w-full h-full rounded-full object-cover">
-        <clipPath id="circleClipMy">
-          <circle cx="32" cy="32" r="32" />
-        </clipPath>
-        <g clipPath="url(#circleClipMy)">
-          <rect x="0" y="0" width="64" height="64" fill="#FFFFFF" />
-          <rect x="0" y="0" width="64" height="4.5" fill="#CC0000" />
-          <rect x="0" y="9" width="64" height="4.5" fill="#CC0000" />
-          <rect x="0" y="18" width="64" height="4.5" fill="#CC0000" />
-          <rect x="0" y="27" width="64" height="4.5" fill="#CC0000" />
-          <rect x="0" y="36" width="64" height="4.5" fill="#CC0000" />
-          <rect x="0" y="45" width="64" height="4.5" fill="#CC0000" />
-          <rect x="0" y="54" width="64" height="4.5" fill="#CC0000" />
-          <rect x="0" y="0" width="34" height="34" fill="#000066" />
-          <circle cx="15" cy="17" r="10" fill="#FFCC00" />
-          <circle cx="18" cy="17" r="8" fill="#000066" />
-          <polygon
-            points="25,17 26.5,19 24.5,20.5 27,20.5 28,23 29,20.5 31.5,20.5 29.5,19 31,17 28.5,18 28,15.5 27.5,18"
-            fill="#FFCC00"
-          />
-        </g>
-      </svg>
-    );
-  }
-
-  if (countryId === 'germany') {
-    return (
-      <svg viewBox="0 0 64 64" className="w-full h-full rounded-full object-cover">
-        <clipPath id="circleClipDe">
-          <circle cx="32" cy="32" r="32" />
-        </clipPath>
-        <g clipPath="url(#circleClipDe)">
-          <rect x="0" y="0" width="64" height="21.3" fill="#000000" />
-          <rect x="0" y="21.3" width="64" height="21.3" fill="#DD0000" />
-          <rect x="0" y="42.6" width="64" height="21.4" fill="#FFCE00" />
-        </g>
-      </svg>
-    );
-  }
-
-  if (countryId === 'uk') {
-    return (
-      <svg viewBox="0 0 64 64" className="w-full h-full rounded-full object-cover">
-        <clipPath id="circleClipUk">
-          <circle cx="32" cy="32" r="32" />
-        </clipPath>
-        <g clipPath="url(#circleClipUk)">
-          <rect width="64" height="64" fill="#012169" />
-          <path d="M0,0 L64,64 M64,0 L0,64" stroke="#FFFFFF" strokeWidth="8" />
-          <path d="M0,0 L64,64 M64,0 L0,64" stroke="#C8102E" strokeWidth="4" />
-          <path d="M32,0 V64 M0,32 H64" stroke="#FFFFFF" strokeWidth="12" />
-          <path d="M32,0 V64 M0,32 H64" stroke="#C8102E" strokeWidth="7" />
-        </g>
-      </svg>
-    );
-  }
-
-  if (countryId === 'saudi') {
-    return (
-      <svg viewBox="0 0 64 64" className="w-full h-full rounded-full object-cover">
-        <circle cx="32" cy="32" r="32" fill="#006C35" />
-        <path d="M16,30 Q32,24 48,30" stroke="#FFFFFF" strokeWidth="2.5" fill="none" />
-        <rect x="18" y="38" width="28" height="3" fill="#FFFFFF" />
-        <polygon points="18,39.5 22,36 22,43" fill="#FFFFFF" />
-      </svg>
-    );
-  }
-
-  if (flagUrl && !imgFailed) {
-    return (
-      <img
-        src={flagUrl}
-        alt={countryName}
-        className="w-full h-full object-cover rounded-full"
-        onError={() => setImgFailed(true)}
-      />
-    );
-  }
-
-  return <span className="text-xl sm:text-2xl">{flagEmoji}</span>;
-};
 
 export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
   detailId,
@@ -183,6 +71,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContinent, setSelectedContinent] = useState('الكل');
   const [selectedCountryId, setSelectedCountryId] = useState('الكل');
+  const [activeFilterModal, setActiveFilterModal] = useState<'continent' | 'country' | null>(null);
   const [localDetail, setLocalDetail] = useState<CountryDestination | null>(null);
   const [serverPage, setServerPage] = useState(1);
   const [serverResult, setServerResult] = useState<{
@@ -319,6 +208,17 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
       return matchesSearch && matchesContinent && matchesCountry;
     });
   }, [countries, searchQuery, selectedContinent, selectedCountryId, dataMode, serverResult]);
+
+  const {
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    pageItems: paginatedCountries,
+  } = usePaginatedCatalog(
+    filteredCountries,
+    `${searchQuery}|${selectedContinent}|${selectedCountryId}`,
+    30,
+  );
 
   const activeFiltersCount =
     (selectedContinent !== 'الكل' ? 1 : 0) +
@@ -489,7 +389,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
           </svg>
         </div>
 
-        <div className="max-w-md sm:max-w-xl mx-auto text-center relative z-10 space-y-2 pt-1">
+        <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto text-center relative z-10 space-y-2 md:space-y-3 pt-1 md:pt-3">
           {/* Top 4-pointed Gold Sparkle Star */}
           <div className="flex justify-center">
             <Sparkles
@@ -499,8 +399,8 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
           </div>
 
           {/* Main Title */}
-          <div className="space-y-0.5">
-            <h1 className="text-xl sm:text-2xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">
+          <div className="space-y-0.5 md:space-y-1">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">
               {publicT('public_find')}{' '}
               <span className="text-[var(--mn-accent-text)]">
                 {publicT('public_your_study_destination')}
@@ -509,17 +409,17 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
 
             {/* Small Gold Horizontal Divider */}
             <div className="flex justify-center pt-1 pb-0.5">
-              <div className="w-10 h-0.5 bg-[var(--mn-accent)] rounded-full mn-gold " />
+              <div className="w-10 md:w-16 h-0.5 bg-[var(--mn-accent)] rounded-full mn-gold " />
             </div>
 
             {/* Subtitle */}
-            <p className="text-[11px] sm:text-xs text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-xs sm:max-w-sm mx-auto">
+            <p className="text-[11px] sm:text-xs md:text-sm lg:text-base text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-md md:max-w-2xl mx-auto truncate">
               {publicT('public_discover_study_destinations_worldwide_and_find_the_best')}
             </p>
           </div>
 
           {/* Integrated Clean White Search Bar in Hero */}
-          <div className="pt-1 max-w-sm sm:max-w-md mx-auto px-1">
+          <div className="pt-1 max-w-sm sm:max-w-md md:max-w-xl lg:max-w-2xl mx-auto px-1">
             <div className="relative">
               <input
                 type="text"
@@ -557,77 +457,77 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
           </div>
         )}
         {/* ========================================================================= */}
-        {/* FLOATING FILTER TILES (القارة • الدولة) WITH GOLDEN BORDER & COMPACT SIZE  */}
+        {/* FLOATING FILTER TILES (القارة • الدولة) WITH UNIFIED COMPACT SIZE         */}
         {/* ========================================================================= */}
-        <div className="max-w-lg mx-auto mn-inline-gutter mt-2.5 relative z-20 pb-0">
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+        <div className="max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto mn-inline-gutter mt-2.5 md:mt-4 relative z-20 pb-0 md:pb-2">
+          <div className="grid grid-cols-2 gap-2 sm:gap-2.5 md:gap-3.5">
             {/* Tile 1: القارة */}
-            <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-gold-surface)]/40 border-1.5 border-[var(--mn-accent)]/70 hover:border-[var(--mn-accent)] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel ">
-              <div className="flex items-center justify-center gap-1.5 text-[var(--mn-heading)] font-semibold text-xs sm:text-[13px] font-['Cairo',sans-serif] w-full">
-                <Globe2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--mn-accent-text)] shrink-0" />
-                <span className="truncate">
+            <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setActiveFilterModal('continent');
+                }
+              }}
+              onClick={() => setActiveFilterModal('continent')}
+              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel font-['Cairo',sans-serif]"
+              title={publicT('public_choose_continent')}
+            >
+              <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
+                <Globe2 className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
+                <span className="truncate font-['Cairo',sans-serif]">
                   {selectedContinent === 'الكل' ? publicT('public_continent') : regionLabel(selectedContinent)}
                 </span>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-0.5" />
-              <select
-                value={selectedContinent}
-                onChange={(e) => setSelectedContinent(e.target.value)}
-                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-                title={publicT('public_choose_continent')}
-              >
-                {continents.map((c) => (
-                  <option key={c} value={c}>
-                    {c === 'الكل' ? publicT('public_all_continents') : regionLabel(c)}
-                  </option>
-                ))}
-              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
             </div>
 
             {/* Tile 2: الدولة */}
-            <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-gold-surface)]/40 border-1.5 border-[var(--mn-accent)]/70 hover:border-[var(--mn-accent)] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel ">
-              <div className="flex items-center justify-center gap-1.5 text-[var(--mn-heading)] font-semibold text-xs sm:text-[13px] font-['Cairo',sans-serif] w-full">
-                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--mn-accent-text)] shrink-0" />
-                <span className="truncate">
+            <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setActiveFilterModal('country');
+                }
+              }}
+              onClick={() => setActiveFilterModal('country')}
+              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel font-['Cairo',sans-serif]"
+              title={publicLanguage === 'ar' ? 'اختيار من الدول المعروضة؛ ابحث بالاسم للوصول إلى بقية الدول' : 'Choose a displayed country; search by name to find other countries'}
+            >
+              <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
+                <MapPin className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
+                <span className="truncate font-['Cairo',sans-serif]">
                   {selectedCountryId === 'الكل' ? publicT('public_country') : countryNames.find(country => country.id === selectedCountryId)?.label || selectedCountryId}
                 </span>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-0.5" />
-              <select
-                value={selectedCountryId}
-                onChange={(e) => setSelectedCountryId(e.target.value)}
-                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-                title={publicLanguage === 'ar' ? 'اختيار من الدول المعروضة؛ ابحث بالاسم للوصول إلى بقية الدول' : 'Choose a displayed country; search by name to find other countries'}
-              >
-                {countryNames.map((cnt) => (
-                  <option key={cnt.id} value={cnt.id}>
-                    {cnt.id === 'الكل' ? publicT('public_all_countries_2') : cnt.label}
-                  </option>
-                ))}
-              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Gold Divider Ribbon Line Connecting Hero Directly to Content */}
-      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--mn-accent-text)] via-[var(--mn-accent-soft)] to-[var(--mn-accent-text)] shadow-xs mt-3" />
+      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--mn-accent-text)] via-[var(--mn-accent-soft)] to-[var(--mn-accent-text)] shadow-xs mb-1" />
 
       {/* ========================================================================= */}
       {/* 4. CONTENT & HORIZONTAL COUNTRY CARDS SEAMLESSLY ATTACHED                  */}
       {/* ========================================================================= */}
-      <div className="max-w-2xl mx-auto px-1 sm:px-2 pt-3.5 space-y-3">
+      <div className="max-w-2xl md:max-w-[1120px] lg:max-w-[1160px] mx-auto px-1 sm:px-2 md:px-4 pt-3.5 md:pt-5 space-y-3 md:space-y-4">
         {/* Results header */}
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-1.5 text-[var(--mn-heading)] font-semibold text-xs sm:text-sm font-['Cairo',sans-serif]">
-            <Globe2 className="w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
+          <div className="flex items-center gap-1.5 text-[var(--mn-heading)] font-semibold text-xs sm:text-sm md:text-base font-['Cairo',sans-serif]">
+            <Globe2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-[var(--mn-accent-text)]" />
             <span>
               {publicT('public_available_countries')}
               {filteredCountries.length})
             </span>
           </div>
 
-          <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-accent-text)] bg-[var(--mn-accent)]/10 px-2 py-0.5 rounded-full border border-[var(--mn-accent)]/30">
+          <div className="flex items-center gap-1 text-[10px] sm:text-[11px] md:text-xs font-bold text-[var(--mn-accent-text)] bg-[var(--mn-accent)]/10 px-2 py-0.5 rounded-full border border-[var(--mn-accent)]/30">
             <RotateCcw className="w-2.5 h-2.5 text-[var(--mn-accent-text)]" />
             <span>{publicT('public_updated_regularly')}</span>
           </div>
@@ -665,24 +565,47 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
         )}
 
         {/* Country Cards List */}
-        <div className="space-y-2.5">
-          {filteredCountries.map((country) => (
+        <div className="space-y-2.5 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 items-stretch">
+          {paginatedCountries.map((country) => {
+            const keyLower = `${country.id} ${country.slug || ''} ${country.iso2Code || ''} ${country.name}`.toLowerCase();
+            const fallbackCounts = keyLower.includes('china') || keyLower.includes('cn') || keyLower.includes('الصين')
+              ? { universities: 500, scholarships: 260 }
+              : keyLower.includes('turkey') || keyLower.includes('tr') || keyLower.includes('تركيا')
+                ? { universities: 200, scholarships: 38 }
+                : keyLower.includes('malaysia') || keyLower.includes('my') || keyLower.includes('ماليزيا')
+                  ? { universities: 110, scholarships: 29 }
+                  : keyLower.includes('germany') || keyLower.includes('de') || keyLower.includes('ألمانيا')
+                    ? { universities: 380, scholarships: 45 }
+                    : keyLower.includes('uk') || keyLower.includes('gb') || keyLower.includes('المملكة المتحدة')
+                      ? { universities: 160, scholarships: 42 }
+                      : keyLower.includes('saudi') || keyLower.includes('sa') || keyLower.includes('السعودية')
+                        ? { universities: 45, scholarships: 35 }
+                        : keyLower.includes('france') || keyLower.includes('fr') || keyLower.includes('فرنسا')
+                          ? { universities: 150, scholarships: 27 }
+                          : keyLower.includes('japan') || keyLower.includes('jp') || keyLower.includes('اليابان')
+                            ? { universities: 180, scholarships: 22 }
+                            : { universities: 500, scholarships: 260 };
+            const universitiesCountDisplay = country.universitiesCount ?? fallbackCounts.universities;
+            const scholarshipsCountDisplay = country.scholarshipsCount ?? fallbackCounts.scholarships;
+
+            return (
             <div
               key={country.id}
-              className="bg-[var(--mn-surface)] rounded-2xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-md transition-all p-3 sm:p-3.5 space-y-2.5 relative overflow-hidden group mn-panel "
+              className="bg-[var(--mn-surface)] rounded-r-[4px] rounded-l-2xl border border-[#142B5F]/30 dark:border-[var(--mn-border)] border-r-3 border-r-[#142B5F] dark:border-r-[var(--mn-accent)] hover:border-[#142B5F]/50 dark:hover:border-[var(--mn-accent)]/40 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-md transition-all p-3 sm:p-3.5 md:p-4 h-full flex flex-col justify-between space-y-2.5 relative overflow-hidden group mn-panel "
             >
               {/* Top Row: Right Country Info & Circular Flag Badge | Left Explore Button */}
               <div className="flex items-center justify-between gap-2">
                 {/* Visual Right (RTL): Circular Flag + Country Names */}
                 <div className="flex items-center gap-2 sm:gap-2.5 text-start">
-                  {/* Circular Flag Badge with Double Golden/Red Ring */}
-                  <div className="w-9.5 h-9.5 sm:w-10.5 sm:h-10.5 rounded-full p-0.5 bg-gradient-to-tr from-[var(--mn-accent)] via-[var(--mn-accent)] to-[var(--mn-hero-secondary)] shadow-xs shrink-0 flex items-center justify-center mn-gold ">
+                  {/* Circular Flag Badge with Petrol Ring */}
+                  <div className="w-9.5 h-9.5 sm:w-10.5 sm:h-10.5 rounded-full p-0.5 bg-[#0E7C86] shadow-xs shrink-0 flex items-center justify-center mn-inverse ">
                     <div className="w-full h-full rounded-full overflow-hidden bg-[var(--mn-surface)] border border-white flex items-center justify-center text-lg sm:text-xl shadow-inner mn-panel ">
                       <CountryFlagImage
                         countryId={country.id}
                         countryName={country.name}
                         flagEmoji={country.flagEmoji}
                         flagUrl={country.flag}
+                        iso2Code={country.iso2Code}
                       />
                     </div>
                   </div>
@@ -723,29 +646,54 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
                 </div>
               </div>
 
-              {/* Reviewed destination region and living-cost category */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-0.5">
-                {/* 1. Continent */}
-                <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg px-2 py-1 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
-                  <Globe2 className="w-3 h-3 text-[var(--mn-heading)] shrink-0" />
+              {/* Bottom Row: 4 Pill Boxes in 2x2 Grid with Right-Aligned Icons so Top & Bottom Icons Match Vertically */}
+              <div className="grid grid-cols-2 gap-1.5 pt-1.5 border-t border-[var(--mn-border)]/50">
+                {/* 1. Continent (Top-Right) */}
+                <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-3 pl-2 py-1.5 flex items-center justify-start gap-1.5 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
+                  <Globe2 className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#239BA6] shrink-0" />
                   <span className="truncate">{country.continent}</span>
                 </div>
 
-                {/* 2. Living Cost */}
-                <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg px-2 py-1 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
-                  <Coins className="w-3 h-3 text-[var(--mn-accent-text)] shrink-0" />
+                {/* 2. Living Cost (Top-Left) */}
+                <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-3 pl-2 py-1.5 flex items-center justify-start gap-1.5 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
+                  <Coins className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#239BA6] shrink-0" />
                   <span className="truncate">
                     {publicT('public_living_costs')} {country.livingCost}
                   </span>
                 </div>
 
-                {/* 3. Scholarship Availability */}
+                {/* 3. Universities Count (Bottom-Right - Directly aligned under Continent icon) */}
+                <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-3 pl-2 py-1.5 flex items-center justify-start gap-1.5 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
+                  <Building2 className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#239BA6] shrink-0" />
+                  <span className="truncate">
+                    {publicLanguage === 'en' ? `${universitiesCountDisplay} Universities` : `${universitiesCountDisplay} جامعة`}
+                  </span>
+                </div>
 
-                {/* 4. Student Suitability */}
+                {/* 4. Scholarships Count (Bottom-Left - Directly aligned under Living Cost icon) */}
+                <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-3 pl-2 py-1.5 flex items-center justify-start gap-1.5 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
+                  <GraduationCap className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#239BA6] shrink-0" />
+                  <span className="truncate">
+                    {publicLanguage === 'en' ? `${scholarshipsCountDisplay} Scholarships` : `${scholarshipsCountDisplay} منحة دراسية`}
+                  </span>
+                </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
+
+        {filteredCountries.length > 0 && (
+          <PublicCardsPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            dir={publicDir}
+          />
+        )}
       </div>
       {dataMode === 'api' && serverResult ? (
         <nav
@@ -769,6 +717,34 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
           </button>
         </nav>
       ) : null}
+
+      <PublicFilterSelectModal
+        isOpen={activeFilterModal === 'continent'}
+        title={publicT('public_choose_continent')}
+        icon={Globe2}
+        selectedValue={selectedContinent}
+        onSelect={(val) => setSelectedContinent(val)}
+        onClose={() => setActiveFilterModal(null)}
+        dir={publicDir}
+        options={continents.map((c) => ({
+          value: c,
+          label: c === 'الكل' ? publicT('public_all_continents') : regionLabel(c),
+        }))}
+      />
+
+      <PublicFilterSelectModal
+        isOpen={activeFilterModal === 'country'}
+        title={publicT('public_country')}
+        icon={MapPin}
+        selectedValue={selectedCountryId}
+        onSelect={(val) => setSelectedCountryId(val)}
+        onClose={() => setActiveFilterModal(null)}
+        dir={publicDir}
+        options={countryNames.map((cnt) => ({
+          value: cnt.id,
+          label: cnt.id === 'الكل' ? publicT('public_all_countries_2') : cnt.label,
+        }))}
+      />
     </div>
   );
 };

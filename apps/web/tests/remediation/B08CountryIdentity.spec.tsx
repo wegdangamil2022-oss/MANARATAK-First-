@@ -14,8 +14,11 @@ it('passes the selected canonical country ID directly even when labels collide',
   state.search.mockResolvedValue({ data: [], total: 0, totalPages: 0 });
   const countries = [{ id: 'id-one', ownerId: 'id-one', name: 'Same country label', continent: 'Europe' }, { id: 'id-two', ownerId: 'id-two', name: 'Same country label', continent: 'Europe' }] as any;
   await act(async () => { tree = create(<CountriesSearchPage dataMode="api" countries={countries} onBack={() => {}} />); });
-  const select = tree.root.findAllByType('select').find(node => node.props.title?.includes('Choose a displayed country'))!;
-  await act(async () => select.props.onChange({ target: { value: 'id-two' } }));
+  const countryPicker = tree.root.findAll(node => node.props.title?.includes('Choose a displayed country'))[0]!;
+  await act(async () => countryPicker.props.onClick());
+  const { PublicFilterSelectModal } = await import('../../src/features/public-template/components/DetailUi');
+  const modal = tree.root.findAllByType(PublicFilterSelectModal).find(node => node.props.isOpen)!;
+  await act(async () => modal.props.onSelect('id-two'));
   await act(async () => vi.advanceTimersByTimeAsync(350));
   expect(state.search).toHaveBeenLastCalledWith(expect.objectContaining({ countryReferenceId: 'id-two', q: undefined, page: 1 }), 'en');
 });

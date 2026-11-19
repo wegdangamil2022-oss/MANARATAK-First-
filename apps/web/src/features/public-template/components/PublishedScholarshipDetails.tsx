@@ -1,3 +1,5 @@
+import { recordPublicEvent } from '../../analytics/publicAnalytics';
+import { ManagedApplicationEntry, DirectApplicationSelfReport } from '../../analytics/ManagedApplicationEntry';
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -6,8 +8,6 @@ import { BookOpen, Building2, Calendar, DollarSign, FileText, GraduationCap, Glo
 import type { Scholarship } from '../types';
 import { DetailSectionHeader } from './DetailUi';
 import { FundedProgramPairs } from './FundedProgramPairs';
-import { recordPublicEvent } from '../../analytics/publicAnalytics';
-import { ManagedApplicationEntry, DirectApplicationSelfReport } from '../../analytics/ManagedApplicationEntry';
 
 const benefitNames: Record<string, string> = { TUITION: "public_published_tuition_fees", TUITION_FEES: "public_published_tuition_fees", STIPEND: "public_published_stipend_or_allowance", ACCOMMODATION: "public_published_accommodation", HEALTH_INSURANCE: "public_published_health_insurance", TRAVEL: "public_published_travel", LIVING_ALLOWANCE: "public_published_living_allowance" };
 function Text({ value }: { value?: string | null }) {
@@ -39,20 +39,20 @@ export function PublishedScholarshipDetails({ scholarship, onOpenUniversity, onO
 
   const dto = scholarship.publishedData!;
   const canonicalAmount = fundingAmount(dto.amountMinorUnits, dto.amountCurrencyCode, language);
-  const section = (id: string, title: string, icon: typeof BookOpen, children: React.ReactNode) => <section key={id} dir={publicDir} className="relative bg-[var(--mn-surface)] rounded-2xl p-3.5 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel">
-    <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-primary)] to-transparent" />
-    <DetailSectionHeader id={id} icon={icon} title={title} className="mb-3" />
-    <div className="space-y-2 text-[11px] font-bold leading-[1.9] text-[var(--mn-heading)]">{children}</div>
+  const section = (id: string, title: string, icon: typeof BookOpen, children: React.ReactNode) => <section key={id} dir={publicDir} className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl p-3.5 sm:p-4 md:p-6 border-y md:border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel">
+    <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
+    <DetailSectionHeader id={id} icon={icon} title={title} className="mb-3 md:mb-4" />
+    <div className="space-y-2 md:space-y-3 text-[11px] font-bold leading-[1.9] text-[var(--mn-heading)]">{children}</div>
   </section>;
   const eligibility = dto.eligibilityItems || [];
   const documents = dto.requiredDocumentItems || [];
   const benefits = dto.benefits || [];
-  const list = (items: string[]) => items.length ? <ul className="space-y-2">{items.map((item, index) => <li key={index} className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)] border border-[var(--mn-border)]"><Text value={item} /></li>)}</ul> : <Text />;
+  const list = (items: string[]) => items.length ? <ul className="space-y-2 md:space-y-0 md:grid md:grid-cols-2 md:gap-3 items-stretch">{items.map((item, index) => <li key={index} className="h-full p-2.5 md:p-3.5 rounded-xl bg-[var(--mn-surface-muted)] border border-[var(--mn-border)]"><Text value={item} /></li>)}</ul> : <Text />;
   const requirementList = (items: Array<{ key: string; text: string; testId?: string | null }>) => <ul className="space-y-2">{items.map(item => <li key={item.key} className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)] border border-[var(--mn-border)]">
     <Text value={item.text} />
     {item.testId && onOpenExam && <button type="button" aria-label={`${publicT('public_view_linked_test')}: ${item.text}`} onClick={() => onOpenExam(item.testId!)} className="mt-2 rounded-lg border border-[var(--mn-border-brand)] p-2 text-[var(--mn-primary)]">{publicT('public_view_linked_test')}</button>}
   </li>)}</ul>;
-  return <div className="px-1.5 sm:px-2 space-y-2.5 z-20 relative -mt-2.5 sm:-mt-3">
+  return <div className="px-0 md:px-4 space-y-2.5 md:space-y-4 z-20 relative -mt-2.5 sm:-mt-3">
     {dto.hasUnavailableRequirements && <p role="status" className="rounded-xl border border-[var(--mn-border)] p-3 text-[var(--mn-heading)]">{publicT('public_requirements_partial')}</p>}
     {section('scholarship-donor', publicT('public_published_funding_organization'), Building2, <Text value={dto.providerName || dto.sponsorName} />)}
     {section('scholarship-country', publicT('public_published_country_and_scholarship_scope'), Globe, <><Text value={dto.studyCountryLabel || dto.countrySourceLabel || dto.studyCountry} />{dto.countryScope && <Text value={dto.countryScope} />}</>)}
@@ -69,9 +69,9 @@ export function PublishedScholarshipDetails({ scholarship, onOpenUniversity, onO
       {canonicalAmount && <p>{canonicalAmount}</p>}
       {dto.duration && <Text value={dto.duration} />}
     </>)}
-    {section('scholarship-eligibility', publicT('public_published_eligibility_and_admission_requirements'), ShieldCheck, eligibility.length ? requirementList(eligibility.map((item, index) => ({ key: item.itemKey || `eligibility-${index}`, testId: item.internationalTestId, text: [item.valueText || item.itemTypeCode, item.countryLabel, item.countryLabel ? item.operatorCode : undefined,
+    {section('scholarship-eligibility', publicT('public_published_eligibility_and_admission_requirements'), ShieldCheck, eligibility.length ? list(eligibility.map(item => [item.valueText || item.itemTypeCode, item.countryLabel, item.countryLabel ? item.operatorCode : undefined,
       item.minimumValue != null ? publicT('public_minimum_value', { v0: item.minimumValue }) : '', item.maximumValue != null ? publicT('public_maximum_value', { v0: item.maximumValue }) : '',
-      item.isRequired === false ? publicT('public_published_optional') : ''].filter(Boolean).join(' — ') }))) : <Text value={dto.eligibilityCriteria} />)}
+      item.isRequired === false ? publicT('public_published_optional') : ''].filter(Boolean).join(' — '))) : <Text value={dto.eligibilityCriteria} />)}
     {section('scholarship-documents', publicT('public_published_required_documents'), FileText, documents.length ? requirementList(documents.map((item, index) => ({ key: item.documentKey || `document-${index}`, testId: item.internationalTestId, text: [item.displayName, item.description, item.isRequired === false ? publicT('public_published_optional') : ''].filter(Boolean).join(' — ') }))) : <Text value={dto.requiredDocuments} />)}
     {section('scholarship-language', publicT('public_published_study_language'), Languages, list((dto.fundedProgramPairs ?? []).map(pair => `${pair.programName}: ${pair.studyLanguages?.map(item=>item.name).join('، ') || (language === 'ar' ? 'غير محددة' : 'Unspecified')}`)))}
     {section('scholarship-deadlines', publicT('public_published_deadlines_and_application_round'), Calendar, <>
@@ -81,13 +81,16 @@ export function PublishedScholarshipDetails({ scholarship, onOpenUniversity, onO
     </>)}
     {section('scholarship-application', publicT('public_published_how_to_apply_and_official_links'), ExternalLink, <>
       {dto.applicationMethod && <Text value={dto.applicationMethod} />}
-      {[[scholarship.applicationUrl, publicT('public_published_apply_for_scholarship')], [dto.officialSourceUrl || dto.officialWebsite || dto.sourceUrl, language === 'ar' ? 'المصدر الرسمي' : 'Official source']].map(([url, label], index) => url && /^https?:\/\//i.test(url) ? <a key={index} href={url} target="_blank" rel="noopener noreferrer" onClick={() => { if (index === 0 && scholarship.slug) void recordPublicEvent('application_outbound_click', 'scholarships', scholarship.slug); }} className="flex gap-2 p-3 rounded-xl border border-[var(--mn-border-brand)] text-[var(--mn-primary)]"><ExternalLink className="w-4 h-4" />{label}</a> : null)}
+      <div className="space-y-2 md:space-y-0 md:grid md:grid-cols-2 md:gap-3 items-stretch">
+        {[[scholarship.applicationUrl, publicT('public_published_apply_for_scholarship')], [dto.officialSourceUrl || dto.officialWebsite || dto.sourceUrl, 'المصدر الرسمي']].map(([url, label], index) => url && /^https?:\/\//i.test(url) ? <a key={index} href={url} target="_blank" rel="noopener noreferrer" className="h-full flex items-center gap-2 p-3 md:p-4 rounded-xl border border-[var(--mn-border-brand)] text-[var(--mn-primary)]"><ExternalLink className="w-4 h-4 shrink-0" />{label}</a> : null)}
+      </div>
+    </>)}
       <p className="text-xs">{language === 'ar' ? 'الرابط المباشر ينقلك للجهة لتقدّم بنفسك؛ النقر لا يثبت إتمام الطلب.' : 'The direct link takes you to apply yourself; a click does not prove a completed application.'}</p>
       <DirectApplicationSelfReport opportunityId={scholarship.slug} />
       <ManagedApplicationEntry opportunityId={scholarship.slug} />
-    </>)}
-    {scholarship.participatingUniversities?.length ? section('scholarship-universities', publicT('public_published_participating_universities'), Building2, <div className="space-y-2">{scholarship.participatingUniversities.map(item => <button key={item.id} type="button" onClick={() => onOpenUniversity?.(item.id)} className="w-full rounded-xl border border-[var(--mn-border-brand)] p-3 text-start text-[var(--mn-primary)]">{item.name}</button>)}</div>) : null}
-    {scholarship.requiredExams?.length ? section('scholarship-tests', publicT('public_published_required_exams'), ShieldCheck, <div className="space-y-2">{scholarship.requiredExams.map((item, index) => <button key={`${item.id}-${index}`} type="button" onClick={() => onOpenExam?.(item.id)} className="w-full rounded-xl border border-[var(--mn-border-brand)] p-3 text-start text-[var(--mn-primary)]">{item.name}</button>)}</div>) : null}
+
+    {scholarship.participatingUniversities?.length ? section('scholarship-universities', publicT('public_published_participating_universities'), Building2, <div className="space-y-2 md:space-y-0 md:grid md:grid-cols-3 lg:grid-cols-4 md:gap-3 items-stretch">{scholarship.participatingUniversities.map(item => <button key={item.id} type="button" onClick={() => onOpenUniversity?.(item.id)} className="w-full h-full rounded-xl border border-[var(--mn-border-brand)] p-3 md:p-3.5 text-start text-[var(--mn-primary)] cursor-pointer">{item.name}</button>)}</div>) : null}
+    {scholarship.requiredExams?.length ? section('scholarship-tests', publicT('public_published_required_exams'), ShieldCheck, <div className="space-y-2 md:space-y-0 md:grid md:grid-cols-3 md:gap-3 items-stretch">{scholarship.requiredExams.map((item, index) => <button key={`${item.id}-${index}`} type="button" onClick={() => onOpenExam?.(item.id)} className="w-full h-full rounded-xl border border-[var(--mn-border-brand)] p-3 md:p-3.5 text-start text-[var(--mn-primary)] cursor-pointer">{item.name}</button>)}</div>) : null}
     {dto.notes && section('scholarship-notes', publicT('public_published_scholarship_notes'), FileText, <Text value={dto.notes} />)}
   </div>;
 }

@@ -24,7 +24,7 @@ export const initialNavigation = {
   serviceReturnTab: null as TabType | null,
   favoriteLaunch: null as {kind: 'country' | 'tool' | 'career'; id?: string} | null,
   countryNavigationName: '', examNavigationQuery: '',
-  auxiliaryPage: null as 'faq' | 'contact' | 'language' | null,
+  auxiliaryPage: null as 'faq' | 'contact' | 'language' | 'design-showcase' | null,
   nestedDetailId: '',
   detailSearchAnchor: '',
   detailSearchTerm: '',

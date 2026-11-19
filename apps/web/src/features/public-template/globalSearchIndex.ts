@@ -209,7 +209,7 @@ export function buildGlobalSearchDocuments(input: {
   }
 
   for (const item of input.importedCourses) {
-    const base = createBase('courses', 'الدورات', item, item.title, undefined, [item.provider, item.field, item.language, item.level, item.certificateType], item.provider || 'دورة تدريبية', item.language);
+    const base = createBase('courses', 'الدورات', item, item.titleAr || item.title, item.titleEn, [item.title, item.titleAr || '', item.titleEn || '', item.provider, item.field, item.language, item.level, item.certificateType], item.provider || 'دورة تدريبية', item.language);
     docs.push(...sectionDocs(base, [
       { title: 'عن الدورة', anchor: 'course-about', content: [item.field, item.level, item.duration, item.provider] },
       { title: 'الموضوعات', anchor: 'course-topics', content: [item.topics] },

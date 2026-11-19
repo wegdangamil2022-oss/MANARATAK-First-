@@ -6,14 +6,17 @@ import {
   AlertTriangle,
   CheckCircle2,
   Database,
+  Search,
   BookOpen,
   PieChart,
   Code,
   Layers,
+  ChevronLeft,
   Share2,
   FileText,
   HelpCircle,
   Activity,
+  Award,
   Zap,
 } from 'lucide-react';
 

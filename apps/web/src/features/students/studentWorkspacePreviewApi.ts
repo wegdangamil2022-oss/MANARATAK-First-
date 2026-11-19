@@ -55,7 +55,7 @@ const initialRequests: StudentServiceRequestDto[] = [
 ];
 const initialDashboard: StudentDashboardSummaryDto = {
   workspace: {
-    id:'preview-workspace',studentReferenceId:previewStudentId,displayName:'WEGDAN GAMIL ABDULHADI Ali',
+    id:'preview-workspace',studentReferenceId:previewStudentId,displayName:'WEGDAN GAMIL',
     preferredLanguage:'ar',timezone:'Asia/Aden',theme:'LIGHT',status:'ACTIVE',version:1,
     metadata:{countryNameAr:'اليمن',countryIso2:'YE',cityNameAr:'صنعاء'},
     notificationMatrix:{inApp:true,email:true,push:false,learning:true,scholarships:true,certificates:true,payments:true},
@@ -116,6 +116,52 @@ let documentConsents: Record<string, boolean> = {};
 let snapshots: StudentWorkspaceSnapshotDto[] = [{id:'preview-snapshot-one',label:'إعداداتي السابقة',workspaceVersion:1,createdAt:timestamp}];
 let careerProfile = {headline:'طالب ومهتم بالبحث العلمي',summary:'ملف مهني تجريبي',skills:['البحث','اللغة الإنجليزية'],version:1};
 let alumni = {displayName:'طالب منارتك',visibility:'PRIVATE',version:1};
+const PREVIEW_AUTH_STORAGE_KEY = 'mn_preview_student_authenticated';
+let previewIdentity = {
+  principalId: previewStudentId,
+  displayName: 'WEGDAN GAMIL',
+  primaryEmail: 'student@example.invalid',
+  roles: ['STUDENT'],
+};
+
+export function isPreviewStudentAuthenticated(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.sessionStorage.getItem(PREVIEW_AUTH_STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export function loginPreviewStudent(profile?: { displayName?: string; email?: string }) {
+  if (profile?.displayName?.trim()) {
+    previewIdentity.displayName = profile.displayName.trim();
+    dashboard.workspace.displayName = profile.displayName.trim();
+  }
+  if (profile?.email?.trim()) {
+    previewIdentity.primaryEmail = profile.email.trim();
+  }
+  if (typeof window !== 'undefined') {
+    try {
+      window.sessionStorage.setItem(PREVIEW_AUTH_STORAGE_KEY, 'true');
+    } catch {
+      // ignore storage errors
+    }
+    window.dispatchEvent(new CustomEvent('mn-preview-auth-change', { detail: { authenticated: true } }));
+  }
+}
+
+export function logoutPreviewStudent() {
+  if (typeof window !== 'undefined') {
+    try {
+      window.sessionStorage.setItem(PREVIEW_AUTH_STORAGE_KEY, 'false');
+    } catch {
+      // ignore storage errors
+    }
+    window.dispatchEvent(new CustomEvent('mn-preview-auth-change', { detail: { authenticated: false } }));
+  }
+}
+
 const copy = <T>(value:T):T => structuredClone(value);
 function refreshCounters() {
   dashboard.statistics.savedItems=dashboard.savedItems.length;
@@ -130,7 +176,10 @@ async function callPreviewApi(method: string, ...args: unknown[]): Promise<unkno
   const a=args as any[];
   switch (method) {
     case 'getCurrentStudentIdentity':
-      return {principalId:previewStudentId,displayName:'WEGDAN GAMIL ABDULHADI Ali',primaryEmail:'student@example.invalid',roles:['STUDENT']};
+      if (!isPreviewStudentAuthenticated()) {
+        throw new Error('UNAUTHENTICATED_GUEST');
+      }
+      return copy(previewIdentity);
     case 'getMyStudentDashboard':refreshCounters();return copy(dashboard);
     case 'getStudentInvoices':return {data:copy(invoices),page:1,total:invoices.length,totalPages:1};
     case 'getStudentInvoicePayments':return [];
@@ -213,7 +262,7 @@ async function callPreviewApi(method: string, ...args: unknown[]): Promise<unkno
     case 'restoreMyStudentWorkspaceSnapshot':return changedWorkspace({theme:'LIGHT',accessibilityPreferences:copy(initialDashboard.workspace.accessibilityPreferences)});
     case 'resetMyStudentDashboardLayout':return changedWorkspace({layoutPreferences:{}});
     case 'clearMyStudentSearchHistory':return undefined;
-    case 'logoutStudent':return undefined;
+    case 'logoutStudent':logoutPreviewStudent();return undefined;
     case 'listMyActiveStudentAssets':return {items:copy(uploadedAssets.filter(x=>x.metadata.mimeType.startsWith(String(a[0]||'image/')))),hasMore:false,nextCursor:null};
     case 'completeMyDocumentUpload':return {assetId:String(a[0]),lifecycleState:'ACTIVE'};
     case 'requestMyDocumentUpload':{

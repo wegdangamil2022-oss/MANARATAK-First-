@@ -41,16 +41,16 @@ export function ScholarshipFaqSection() {
   }, [searchQuery]);
 
   return (
-    <div className="relative w-full bg-[var(--mn-surface)] rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[var(--mn-border)] shadow-xs space-y-3 text-start font-['Cairo',sans-serif]">
-      <p className="text-xs text-[var(--mn-text-muted)]">{language === 'en' ? 'General guidance and examples. Check the provider’s current published conditions and deadlines.' : 'إرشادات وأمثلة عامة؛ راجع الشروط والمواعيد الحالية المنشورة لدى الجهة المانحة.'}</p>
+    <div className="relative w-full bg-[var(--mn-surface)] rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 border border-[var(--mn-border)] shadow-xs space-y-3 md:space-y-4 text-start font-['Cairo',sans-serif]">
+      <p className="text-xs md:text-sm text-[var(--mn-text-muted)]">{language === 'en' ? 'General guidance and examples. Check the provider’s current published conditions and deadlines.' : 'إرشادات وأمثلة عامة؛ راجع الشروط والمواعيد الحالية المنشورة لدى الجهة المانحة.'}</p>
       {/* Top Accent Line */}
       <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-b border-[var(--mn-border)] pb-2.5">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-[#142B5F]/10 dark:bg-[#F2CD78]/15 text-[#142B5F] dark:text-[#F2CD78] flex items-center justify-center shrink-0">
-            <HelpCircle className="w-3.5 h-3.5 text-[#D6A43B]" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-b border-[var(--mn-border)] pb-2.5 md:pb-3.5">
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className="w-6 h-6 md:w-8 md:h-8 rounded-md bg-[#142B5F]/10 dark:bg-[#F2CD78]/15 text-[#142B5F] dark:text-[#F2CD78] flex items-center justify-center shrink-0">
+            <HelpCircle className="w-3.5 h-3.5 md:w-4.5 md:h-4.5 text-[#D6A43B]" />
           </div>
           <div>
             <h3 className="text-[13px] sm:text-[13.5px] font-bold text-[#142B5F] dark:text-[#F2CD78] leading-tight">{publicT('public_scholarship_frequently_asked_questions')}</h3>
@@ -60,38 +60,38 @@ export function ScholarshipFaqSection() {
       </div>
 
       {/* Search and Action Bar (Compact) */}
-      <div className="p-2 sm:p-2.5 rounded-lg bg-[var(--mn-page)] border border-[var(--mn-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="p-2 sm:p-2.5 md:p-3.5 rounded-lg bg-[var(--mn-page)] border border-[var(--mn-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         {/* Search Box */}
-        <div className="relative w-full sm:w-72">
-          <Search className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--mn-text-muted)] pointer-events-none" />
+        <div className="relative w-full sm:w-72 md:w-96">
+          <Search className="w-3.5 h-3.5 md:w-4 md:h-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--mn-text-muted)] pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={publicT('public_search_questions_or_answers')}
-            className="w-full pr-7 pl-2.5 py-1 text-[11.5px] font-bold rounded-md bg-[var(--mn-surface)] border border-[var(--mn-border)] text-[var(--mn-text)] placeholder:text-[var(--mn-text-muted)] focus:outline-none focus:border-[#D6A43B] transition-colors"
+            className="w-full pr-7 md:pr-8 pl-2.5 py-1 md:py-1.5 text-[11.5px] font-bold rounded-md bg-[var(--mn-surface)] border border-[var(--mn-border)] text-[var(--mn-text)] placeholder:text-[var(--mn-text-muted)] focus:outline-none focus:border-[#D6A43B] transition-colors"
           />
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
+        <div className="flex items-center gap-1.5 md:gap-2 self-end sm:self-auto shrink-0">
           <span className="text-[10.5px] font-bold text-[var(--mn-text-muted)] hidden md:inline-block ml-1">
             {filteredFaqs.length}{' '}{publicT('public_question')}</span>
           <button
             type="button"
             onClick={expandAll}
-            className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[#142B5F]/10 hover:bg-[#142B5F]/15 text-[#142B5F] dark:bg-[#F2CD78]/10 dark:text-[#F2CD78] border border-[#142B5F]/20 dark:border-[#F2CD78]/25 transition-colors cursor-pointer"
+            className="px-2 md:px-3 py-0.5 md:py-1 text-[11px] font-bold rounded-md bg-[#142B5F]/10 hover:bg-[#142B5F]/15 text-[#142B5F] dark:bg-[#F2CD78]/10 dark:text-[#F2CD78] border border-[#142B5F]/20 dark:border-[#F2CD78]/25 transition-colors cursor-pointer"
           >{publicT('public_expand_all')}</button>
           <button
             type="button"
             onClick={collapseAll}
-            className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-border)] text-[var(--mn-text-muted)] border border-[var(--mn-border)] transition-colors cursor-pointer"
+            className="px-2 md:px-3 py-0.5 md:py-1 text-[11px] font-bold rounded-md bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-border)] text-[var(--mn-text-muted)] border border-[var(--mn-border)] transition-colors cursor-pointer"
           >{publicT('public_collapse_all')}</button>
         </div>
       </div>
 
-      {/* Questions Accordion List (Compact Refined Cards) */}
-      <div className="space-y-1.5">
+      {/* Questions Accordion List (Compact Refined Cards on Mobile, 2-Column Balanced Grid on Desktop) */}
+      <div className="space-y-1.5 md:space-y-0 md:grid md:grid-cols-2 md:gap-2.5 items-start">
         {filteredFaqs.map((faq) => {
           const isOpen = openIds.includes(faq.id);
           return (
@@ -107,7 +107,7 @@ export function ScholarshipFaqSection() {
               <button
                 type="button"
                 onClick={() => toggleQuestion(faq.id)}
-                className={`w-full px-2.5 py-2 sm:px-3 sm:py-2.5 flex items-center justify-between gap-2.5 text-start cursor-pointer transition-colors select-none ${
+                className={`w-full px-2.5 py-2 sm:px-3 sm:py-2.5 md:px-3.5 md:py-3 flex items-center justify-between gap-2.5 text-start cursor-pointer transition-colors select-none ${
                   isOpen
                     ? "bg-[#142B5F]/5 dark:bg-[#F2CD78]/5"
                     : "hover:bg-[var(--mn-surface-muted)]/50"
@@ -116,7 +116,7 @@ export function ScholarshipFaqSection() {
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   {/* Navy Number Badge (المربع النيلي الصغير) */}
-                  <span className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 font-bold font-mono text-[10.5px] bg-[#142B5F] text-white dark:bg-[#142B5F] dark:text-[#F2CD78] border border-[#142B5F]/30 shadow-2xs">
+                  <span className="w-5 h-5 md:w-6 md:h-6 rounded-md flex items-center justify-center shrink-0 font-bold font-mono text-[10.5px] bg-[#142B5F] text-white dark:bg-[#142B5F] dark:text-[#F2CD78] border border-[#142B5F]/30 shadow-2xs">
                     {faq.id}
                   </span>
 
@@ -128,7 +128,7 @@ export function ScholarshipFaqSection() {
 
                 {/* Chevron Indicator */}
                 <ChevronDown
-                  className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
+                  className={`w-3.5 h-3.5 md:w-4 md:h-4 shrink-0 transition-transform duration-200 ${
                     isOpen ? "rotate-180 text-[#D6A43B]" : "text-[var(--mn-text-muted)]"
                   }`}
                 />
@@ -136,7 +136,7 @@ export function ScholarshipFaqSection() {
 
               {/* Accordion Answer Body */}
               {isOpen && (
-                <div className="px-3 pb-2.5 pt-1.5 space-y-2 border-t border-[var(--mn-border)] bg-[var(--mn-surface)]/60">
+                <div className="px-3 md:px-4 pb-2.5 md:pb-3.5 pt-1.5 md:pt-2.5 space-y-2 border-t border-[var(--mn-border)] bg-[var(--mn-surface)]/60">
                   {/* Answer Text */}
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.8] text-justify">
                     {faq.answer}
@@ -144,9 +144,9 @@ export function ScholarshipFaqSection() {
 
                   {/* Example Box if available */}
                   {faq.example && (
-                    <div className="mt-1 flex items-start gap-1.5 text-[11px] leading-[1.7] bg-[#142B5F]/5 dark:bg-[#F2CD78]/5 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 rounded-md p-2 shadow-2xs">
+                    <div className="mt-1 flex items-start gap-1.5 text-[11px] leading-[1.7] bg-[#142B5F]/5 dark:bg-[#F2CD78]/5 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 rounded-md p-2 md:p-3 shadow-2xs">
                       <div className="flex items-center gap-1 shrink-0 text-[#D6A43B] dark:text-[#F2CD78] mt-0.5">
-                        <Lightbulb className="w-3.5 h-3.5" />
+                        <Lightbulb className="w-3.5 h-3.5 md:w-4 md:h-4" />
                         <span className="font-bold text-[#142B5F] dark:text-[#F2CD78]">{publicT('public_example')}</span>
                       </div>
                       <span className="font-bold text-[var(--mn-text)] text-justify">
@@ -162,10 +162,10 @@ export function ScholarshipFaqSection() {
       </div>
 
       {/* Important Golden Rule Card at the End of FAQ (Compact) */}
-      <div className="rounded-lg bg-[#D6A43B]/10 dark:bg-[#D6A43B]/15 border border-[#D6A43B]/30 p-2.5 sm:p-3 space-y-1 text-start shadow-2xs">
+      <div className="rounded-lg bg-[#D6A43B]/10 dark:bg-[#D6A43B]/15 border border-[#D6A43B]/30 p-2.5 sm:p-3 md:p-4 space-y-1 text-start shadow-2xs">
         <div className="flex items-center gap-1.5">
-          <div className="w-5 h-5 rounded-md bg-[#D6A43B] text-white flex items-center justify-center shrink-0 shadow-2xs">
-            <Sparkles className="w-3 h-3" />
+          <div className="w-5 h-5 md:w-6 md:h-6 rounded-md bg-[#D6A43B] text-white flex items-center justify-center shrink-0 shadow-2xs">
+            <Sparkles className="w-3 h-3 md:w-3.5 md:h-3.5" />
           </div>
           <h4 className="text-[12px] font-bold text-[#142B5F] dark:text-[#F2CD78]">{publicT('public_important_principle')}</h4>
         </div>

@@ -13,9 +13,11 @@ import {
   Coins,
   Globe2,
   Sparkles,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { Scholarship, DegreeLevel } from '../types';
 import { type PublicScholarshipDataStatus } from '../publicScholarshipDataSource';
+import { PublicCardsPagination, PublicFilterSelectModal, usePaginatedCatalog } from './DetailUi';
 
 interface ScholarshipsSearchPageProps {
   scholarships?: Scholarship[];
@@ -174,6 +176,8 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
 
   // Custom filter popup accordion states
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isFundingModalOpen, setIsFundingModalOpen] = useState(false);
+  const [isDegreeModalOpen, setIsDegreeModalOpen] = useState(false);
   const [isCountriesExpanded, setIsCountriesExpanded] = useState(false);
   const [isMajorsExpanded, setIsMajorsExpanded] = useState(false);
   const [isLanguagesExpanded, setIsLanguagesExpanded] = useState(false);
@@ -201,13 +205,18 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
     return Array.from(options, ([id, label]) => ({ id, label }));
   }, [scholarshipSource, dataStatus]);
 
-  // Extract unique majors/fields dynamically from source data
+  // Extract unique majors/fields dynamically from source data (split comma lists into clean options)
   const majorOptions = useMemo(() => {
     const set = new Set<string>();
     scholarshipSource.forEach((s) => {
-      if (s.field) set.add(s.field.trim());
+      if (!s.field) return;
+      s.field
+        .split(/[،,()•/]+/)
+        .map((part) => part.trim())
+        .filter((part) => part && part !== 'كافة التخصصات' && part !== 'جميع التخصصات')
+        .forEach((part) => set.add(part));
     });
-    return Array.from(set).filter(Boolean);
+    return Array.from(set);
   }, [scholarshipSource]);
 
   // Keep filter options aligned with the actual scholarship dataset.
@@ -228,7 +237,7 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
       'زمالة أبحاث',
       'دورات تدريبية',
     ];
-    const available = new Set<DegreeLevel>();
+    const available = new Set<DegreeLevel>(['بكالوريوس', 'ماجستير', 'دكتوراه', 'زمالة أبحاث']);
     scholarshipSource.forEach((s) => s.degreeLevel.forEach((level) => available.add(level)));
     return ['الكل', ...preferredOrder.filter((level) => available.has(level))];
   }, [scholarshipSource]);
@@ -257,16 +266,19 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
         const matchesQuery = !q || searchableText.includes(q);
 
         const scholarshipCountryKey = s.countryReferenceId || (dataStatus === 'prototype' ? `prototype:${s.country}` : '');
-        
+
         // 1. Match country filter if selected
         const matchesCountry =
           !selectedFilter.startsWith('country:') ||
           scholarshipCountryKey === selectedFilter.replace('country:', '');
 
         // 2. Match major filter if selected
+        const targetMajor = selectedFilter.replace('major:', '').trim();
         const matchesMajor =
           !selectedFilter.startsWith('major:') ||
-          (s.field || '').trim() === selectedFilter.replace('major:', '');
+          (s.field || '').includes(targetMajor) ||
+          (s.field || '').includes('كافة التخصصات') ||
+          (s.field || '').includes('جميع التخصصات');
 
         // 3. Match IELTS-free filter if selected
         const matchesNoIelts =
@@ -294,12 +306,15 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
               fieldLower.includes('english') ||
               fieldLower.includes('إنجليزية') ||
               fieldLower.includes('انجليزية');
-            
+
             return hasEnglishKeywords || !!s.titleEn;
           })();
 
         const matchesDegree =
-          selectedDegree === 'الكل' || s.degreeLevel.includes(selectedDegree as DegreeLevel);
+          selectedDegree === 'الكل' ||
+          s.degreeLevel.includes(selectedDegree as DegreeLevel) ||
+          (selectedDegree === 'زمالة أبحاث' &&
+            (s.degreeLevel.some((d) => d.includes('زمالة')) || s.id === 'csc-china'));
         const matchesFunding = selectedFunding === 'الكل' || s.fundingType === selectedFunding;
 
         return matchesQuery && matchesCountry && matchesMajor && matchesNoIelts && matchesEnglishOnly && matchesDegree && matchesFunding;
@@ -316,6 +331,17 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
     selectedDegree,
     selectedFunding,
   ]);
+
+  const {
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    pageItems: paginatedScholarships,
+  } = usePaginatedCatalog(
+    filteredScholarships,
+    `${searchQuery}|${selectedFilter}|${selectedDegree}|${selectedFunding}`,
+    30,
+  );
 
   const handleFavoriteClick = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
@@ -405,38 +431,38 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
           </svg>
         </div>
 
-        <div className="max-w-md sm:max-w-xl mx-auto text-center relative z-10 space-y-2 pt-1">
+        <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto text-center relative z-10 space-y-2 md:space-y-3 pt-1 md:pt-2">
           {/* Top 4-pointed Gold Sparkle Star */}
           <div className="flex justify-center">
-            <Sparkles className="h-5 w-5 text-[var(--mn-accent-text)] drop-shadow-[0_0_8px_rgba(214,164,59,0.8)]" aria-hidden="true" />
+            <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-[var(--mn-accent-text)] drop-shadow-[0_0_8px_rgba(214,164,59,0.8)]" aria-hidden="true" />
           </div>
 
           {/* Main Title */}
-          <div className="space-y-0.5">
-            <h1 className="text-xl sm:text-2xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">{publicT('public_find')}{' '}<span className="text-[var(--mn-accent-text)]">{publicT('public_your_scholarship')}</span>
+          <div className="space-y-0.5 md:space-y-1">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">{publicT('public_find')}{' '}<span className="text-[var(--mn-accent-text)]">{publicT('public_your_scholarship')}</span>
             </h1>
 
             {/* Small Gold Horizontal Divider */}
             <div className="flex justify-center pt-1 pb-0.5">
-              <div className="w-10 h-0.5 bg-[var(--mn-accent)] rounded-full mn-gold " />
+              <div className="w-10 md:w-14 h-0.5 bg-[var(--mn-accent)] rounded-full mn-gold " />
             </div>
 
             {/* Subtitle */}
-            <p className="text-[11px] sm:text-xs text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-xs sm:max-w-sm mx-auto">{publicT('public_discover_scholarships_worldwide_and_build_your_future_with')}</p>
+            <p className="text-[11px] sm:text-xs md:text-sm text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-md md:max-w-2xl mx-auto truncate">{publicT('public_discover_scholarships_worldwide_and_build_your_future_with')}</p>
           </div>
 
           {/* Integrated Clean White Search Bar in Hero */}
-          <div className="pt-1 max-w-sm sm:max-w-md mx-auto px-1">
+          <div className="pt-1 max-w-sm sm:max-w-md md:max-w-xl mx-auto px-1">
             <div className="relative">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={publicT('public_enter_a_scholarship_name_major_or_country')}
-                className="w-full py-2.5 pl-4 pr-10 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-[12px] font-bold placeholder:text-[var(--mn-text-muted)] placeholder:text-[12px] placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel "
+                className="w-full py-2.5 md:py-3 pl-4 pr-10 md:pr-11 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-[12px] md:text-sm font-bold placeholder:text-[var(--mn-text-muted)] placeholder:text-[12px] md:placeholder:text-sm placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel "
                 data-mn-design="cd18739893"
               />
-              <Search className="w-4 h-4 text-[var(--mn-accent-text)] absolute right-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 md:w-4.5 md:h-4.5 text-[var(--mn-accent-text)] absolute right-3.5 md:right-4 top-1/2 -translate-y-1/2" />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
@@ -453,7 +479,7 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
           <div className="flex justify-center mt-2 relative z-10">
             <button
               onClick={handleResetFilters}
-              className="text-[10px] font-bold text-[var(--mn-danger-text)] hover:text-[var(--mn-danger-text)] bg-[var(--mn-surface-elevated)]/95 px-2.5 py-0.5 rounded-full shadow-xs transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif] mn-panel "
+              className="text-[10px] md:text-xs font-bold text-[var(--mn-danger-text)] hover:text-[var(--mn-danger-text)] bg-[var(--mn-surface-elevated)]/95 px-2.5 md:px-3.5 py-0.5 md:py-1 rounded-full shadow-xs transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif] mn-panel "
             >
               <RotateCcw className="w-3 h-3" />
               <span>{publicT('public_reset_filters')}{activeFiltersCount})</span>
@@ -464,8 +490,8 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
         {/* ========================================================================= */}
         {/* 3 SEPARATE FLOATING FILTER TILES (NOW INSIDE THE NAVY HERO CONTAINER) */}
         {/* ========================================================================= */}
-        <div className="max-w-lg mx-auto mn-inline-gutter mt-2.5 relative z-20 pb-0">
-          <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
+        <div className="max-w-lg md:max-w-3xl mx-auto mn-inline-gutter mt-2.5 md:mt-3.5 relative z-20 pb-0 md:pb-1">
+          <div className="grid grid-cols-3 gap-2 sm:gap-2.5 md:gap-3.5">
             {/* Tile 1: الفلترة الذكية */}
             <div
               role="button"
@@ -477,11 +503,11 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
                 }
               }}
               onClick={() => setIsFilterOpen(true)}
-              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel "
+              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 md:p-3 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] md:h-[70px] cursor-pointer mn-panel font-['Cairo',sans-serif]"
             >
-              <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-semibold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
-                <Globe2 className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
-                <span className="truncate">
+              <div className="flex items-center justify-center gap-1 md:gap-1.5 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-bold text-[11px] sm:text-xs md:text-sm font-['Cairo',sans-serif] w-full">
+                <Globe2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
+                <span className="truncate font-['Cairo',sans-serif]">
                   {selectedFilter === 'الكل'
                     ? publicT('public_filter_2')
                     : selectedFilter.startsWith('country:')
@@ -499,70 +525,74 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
             </div>
 
             {/* Tile 2: نوع التمويل */}
-            <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel ">
-              <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-semibold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
-                <Coins className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
-                <span className="truncate">
+            <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setIsFundingModalOpen(true);
+                }
+              }}
+              onClick={() => setIsFundingModalOpen(true)}
+              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 md:p-3 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] md:h-[70px] cursor-pointer mn-panel font-['Cairo',sans-serif]"
+              title={publicT('public_choose_funding_type')}
+            >
+              <div className="flex items-center justify-center gap-1 md:gap-1.5 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-bold text-[11px] sm:text-xs md:text-sm font-['Cairo',sans-serif] w-full">
+                <Coins className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
+                <span className="truncate font-['Cairo',sans-serif]">
                   {selectedFunding === 'الكل' ? publicT('public_funding') : selectedFunding}
                 </span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
-              <select
-                value={selectedFunding}
-                onChange={(e) => setSelectedFunding(e.target.value)}
-                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-                title={publicT('public_choose_funding_type')}
-              >
-                {fundingTypes.map((funding) => (
-                  <option key={funding} value={funding}>
-                    {funding === 'الكل' ? publicT('public_all_funding_types') : funding}
-                  </option>
-                ))}
-              </select>
             </div>
 
             {/* Tile 3: الدرجة العلمية */}
-            <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel ">
-              <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-semibold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
-                <GraduationCap className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
-                <span className="truncate">
-                  {selectedDegree === 'الكل' ? publicT('public_degree') : selectedDegree}
+            <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setIsDegreeModalOpen(true);
+                }
+              }}
+              onClick={() => setIsDegreeModalOpen(true)}
+              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 md:p-3 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] md:h-[70px] cursor-pointer mn-panel font-['Cairo',sans-serif]"
+              title={publicT('public_choose_degree')}
+            >
+              <div className="flex items-center justify-center gap-1 md:gap-1.5 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-bold text-[11px] sm:text-xs md:text-sm font-['Cairo',sans-serif] w-full">
+                <GraduationCap className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
+                <span className="truncate font-['Cairo',sans-serif]">
+                  {selectedDegree === 'الكل'
+                    ? publicT('public_degree')
+                    : selectedDegree === 'زمالة أبحاث'
+                      ? 'الزمالة'
+                      : selectedDegree}
                 </span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
-              <select
-                value={selectedDegree}
-                onChange={(e) => setSelectedDegree(e.target.value)}
-                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-                title={publicT('public_choose_degree')}
-              >
-                {degreeLevels.map((degree) => (
-                  <option key={degree} value={degree}>
-                    {degree === 'الكل' ? publicT('public_all_degrees') : degree}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
         </div>
       </div>
 
       {/* Gold Divider Ribbon Line */}
-      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--mn-accent-text)] via-[var(--mn-accent-soft)] to-[var(--mn-accent-text)] shadow-xs mb-3" />
+      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--mn-accent-text)] via-[var(--mn-accent-soft)] to-[var(--mn-accent-text)] shadow-xs mb-3 md:mb-5" />
 
       {/* ========================================================================= */}
       {/* 4. SCHOLARSHIP CARDS LIST                                                 */}
       {/* ========================================================================= */}
-      <div ref={resultsRef} className="w-full max-w-2xl mx-auto px-1 sm:px-2 pt-1 space-y-3">
+      <div ref={resultsRef} className="w-full max-w-2xl md:max-w-[1120px] lg:max-w-[1160px] mx-auto px-1 sm:px-2 md:px-4 pt-1 space-y-3 md:space-y-4">
         {/* Section Header: المنح المتاحة (N) • محدثة باستمرار */}
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-1.5 text-[var(--mn-heading)] font-semibold text-xs sm:text-sm font-['Cairo',sans-serif]">
-            <GraduationCap className="w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
+          <div className="flex items-center gap-1.5 text-[var(--mn-heading)] font-semibold text-xs sm:text-sm md:text-base font-['Cairo',sans-serif]">
+            <GraduationCap className="w-3.5 h-3.5 md:w-4.5 md:h-4.5 text-[var(--mn-accent-text)]" />
             <span>{publicT('public_available_scholarships')}{filteredScholarships.length})</span>
           </div>
 
-          <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-accent-text)] bg-[var(--mn-accent)]/10 px-2 py-0.5 rounded-full border border-[var(--mn-accent)]/30 font-['Cairo',sans-serif]">
-            <RotateCcw className="w-2.5 h-2.5 text-[var(--mn-accent-text)]" />
+          <div className="flex items-center gap-1 text-[10px] sm:text-[11px] md:text-xs font-bold text-[var(--mn-accent-text)] bg-[var(--mn-accent)]/10 px-2 md:px-3 py-0.5 md:py-1 rounded-full border border-[var(--mn-accent)]/30 font-['Cairo',sans-serif]">
+            <RotateCcw className="w-2.5 h-2.5 md:w-3 md:h-3 text-[var(--mn-accent-text)]" />
             <span>
               {dataStatus === 'prototype'
                 ? publicT('public_sample_template_information')
@@ -575,21 +605,21 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
           </div>
         </div>
 
-        {/* Cards Stack */}
-        <div className="flex flex-col gap-2.5 sm:gap-3 w-full">
+        {/* Cards Stack on Mobile, 2/3-Column Equal-Height Grid on Desktop */}
+        <div className="flex flex-col gap-2.5 sm:gap-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 items-stretch w-full">
           {filteredScholarships.length === 0 ? (
-            <div className="bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-2 shadow-2xs mn-panel ">
+            <div className="md:col-span-2 lg:col-span-3 bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-2 shadow-2xs mn-panel ">
               <div className="w-12 h-12 rounded-full bg-[var(--mn-surface-muted)] flex items-center justify-center text-[var(--mn-text-muted)] mn-panel ">
                 <Search className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">
+              <h3 className="text-sm md:text-base font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">
                 {dataStatus === 'unavailable'
                   ? publicT('public_could_not_load_published_scholarships')
                   : dataStatus === 'loading'
                     ? publicT('public_loading_published_scholarships')
                     : publicT('public_no_matching_scholarships_found')}
               </h3>
-              <p className="text-xs text-[var(--mn-text-muted)] max-w-xs font-['Cairo',sans-serif]">
+              <p className="text-xs md:text-sm text-[var(--mn-text-muted)] max-w-xs md:max-w-md font-['Cairo',sans-serif]">
                 {dataStatus === 'unavailable'
                   ? publicT('public_no_sample_information_has_been_substituted_try_again')
                   : dataStatus === 'loading'
@@ -598,11 +628,11 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
               </p>
               {dataStatus !== 'loading' && dataStatus !== 'unavailable' ? <button
                 onClick={handleResetFilters}
-                className="mt-2 px-4 py-1.5 bg-[var(--mn-primary)] text-white rounded-xl text-xs font-bold cursor-pointer font-['Cairo',sans-serif] mn-inverse "
+                className="mt-2 px-4 py-1.5 bg-[var(--mn-primary)] text-white rounded-xl text-xs md:text-sm font-bold cursor-pointer font-['Cairo',sans-serif] mn-inverse "
               >{publicT('public_clear_filters_and_view_all')}</button> : null}
             </div>
           ) : (
-            filteredScholarships.map((scholarship) => {
+            paginatedScholarships.map((scholarship) => {
               const isFav = favoriteIds.includes(scholarship.id);
               return (
                 <div
@@ -616,16 +646,14 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
                     }
                   }}
                   onClick={() => onSelectScholarship && onSelectScholarship(scholarship)}
-                  className="bg-[var(--mn-surface)] rounded-xl sm:rounded-2xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] active:border-[#142B5F] shadow-sm transition-all duration-150 active:scale-[0.985] p-2.5 sm:p-3 relative overflow-hidden group cursor-pointer flex flex-col gap-2 sm:gap-2.5 select-none mn-panel "
+                  className="h-full bg-[var(--mn-surface)] rounded-r-[4px] rounded-l-2xl border border-[#142B5F]/30 dark:border-[var(--mn-border)] border-r-3 border-r-[#142B5F] dark:border-r-[var(--mn-accent)] hover:border-[#142B5F]/50 dark:hover:border-[var(--mn-accent)]/40 shadow-xs transition-all duration-150 active:scale-[0.985] p-2.25 sm:p-2.75 md:p-3.75 relative overflow-hidden group cursor-pointer flex flex-col justify-between gap-2 sm:gap-2.25 md:gap-2.75 select-none mn-panel "
                 >
-                  <div className="absolute top-0 right-0 w-1.5 h-full bg-gradient-to-b from-[#142B5F] dark:from-[#D6A43B] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
                   {/* Top Row: Right Info & Circular Flag Badge | Left Favorite Button */}
                   <div className="flex items-center justify-between gap-2">
                     {/* Visual Right (RTL): Circular Flag + Scholarship Names */}
-                    <div className="flex items-center gap-2 sm:gap-2.5 text-start min-w-0 flex-1">
+                    <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3 text-start min-w-0 flex-1">
                       {/* Circular Flag Badge */}
-                      <div className="w-9.5 h-9.5 sm:w-10.5 sm:h-10.5 rounded-full p-0.5 bg-gradient-to-tr from-[var(--mn-primary)] via-[var(--mn-hero-secondary)] to-[var(--mn-accent-soft)] shadow-xs shrink-0 flex items-center justify-center mn-inverse ">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-11.5 md:h-11.5 rounded-full p-0.5 bg-[#0E7C86] shadow-xs shrink-0 flex items-center justify-center mn-inverse ">
                         <div className="w-full h-full rounded-full overflow-hidden bg-[var(--mn-surface)] border border-white flex items-center justify-center text-lg sm:text-xl shadow-inner mn-panel ">
                           <ScholarshipCountryFlag
                             country={scholarship.country}
@@ -636,10 +664,10 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
                       </div>
 
                       <div className="flex flex-col items-start text-start min-w-0 flex-1">
-                        <h3 className="text-[13px] sm:text-[14px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-['Cairo',sans-serif] leading-tight truncate w-full">
+                        <h3 className="text-[11.5px] sm:text-[12.5px] md:text-[14px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-['Cairo',sans-serif] leading-snug line-clamp-2 break-words w-full">
                           {scholarship.title}
                         </h3>
-                        <span className="text-[10px] sm:text-[11px] font-medium text-[var(--mn-text-muted)] font-['Cairo',sans-serif] truncate w-full">
+                        <span className="text-[9.5px] sm:text-[10.5px] md:text-[11.5px] font-medium text-[var(--mn-text-muted)] font-['Cairo',sans-serif] truncate w-full mt-0.5">
                           {scholarship.titleEn || scholarship.university}
                         </span>
                       </div>
@@ -648,46 +676,58 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
                     {/* Visual Left (RTL): Favorite Button */}
                     <button
                       onClick={(e) => handleFavoriteClick(e, scholarship.id)}
-                      className="w-8 h-8 rounded-full bg-[var(--mn-page)] hover:bg-[var(--mn-surface-muted)] border border-[var(--mn-border)] flex items-center justify-center transition-all active:scale-90 cursor-pointer shadow-2xs shrink-0 mn-panel hover:mn-panel "
+                      className="w-7.5 h-7.5 sm:w-8 sm:h-8 md:w-8.5 md:h-8.5 rounded-full bg-[var(--mn-page)] hover:bg-[var(--mn-surface-muted)] border border-[var(--mn-border)] flex items-center justify-center transition-all active:scale-90 cursor-pointer shadow-2xs shrink-0 mn-panel hover:mn-panel "
                       title={publicT('public_add_to_favorites')}
                     >
                       <Heart
-                        className={`w-4 h-4 ${isFav ? 'fill-[var(--mn-accent)] text-[var(--mn-accent-text)]' : 'text-[var(--mn-text-muted)]'}`}
+                        className={`w-3.75 h-3.75 md:w-4 md:h-4 ${isFav ? 'fill-[#0E7C86] text-[#0E7C86] dark:fill-[#38C6D4] dark:text-[#38C6D4]' : 'text-[var(--mn-text-muted)]'}`}
                       />
                     </button>
                   </div>
 
-                  {/* Bottom Row: 4 Pill Badges (3 info badges + View Details CTA Button) */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-0.5">
+                  {/* Bottom Row: 4 Pill Badges (3 info badges + View Details CTA Button) in 2x2 Grid with right-aligned parallel icons */}
+                  <div className="grid grid-cols-2 gap-1.25 sm:gap-1.5 md:gap-2 pt-1.5 md:pt-2.25 border-t border-[var(--mn-border)]/50 mt-auto">
                     {/* 1. التمويل */}
-                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg px-2 py-1 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
-                      <Coins className="w-3 h-3 text-[var(--mn-accent-text)] shrink-0" />
+                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-2.5 pl-2 py-1.25 sm:py-1.5 md:py-1.75 flex items-center justify-start gap-1.25 sm:gap-1.5 text-[9.5px] sm:text-[10.5px] md:text-[11.5px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
+                      <Coins className="w-3.25 h-3.25 sm:w-3.5 sm:h-3.5 md:w-3.75 md:h-3.75 text-[#0E7C86] dark:text-[#239BA6] shrink-0" />
                       <span className="truncate">{scholarship.fundingType}</span>
                     </div>
 
                     {/* 2. الدرجة العلمية */}
-                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg px-2 py-1 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
-                      <GraduationCap className="w-3 h-3 text-[var(--mn-heading)] shrink-0" />
-                      <span className="truncate">{scholarship.degreeLevel.join(' • ')}</span>
+                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-2.5 pl-2 py-1.25 sm:py-1.5 md:py-1.75 flex items-center justify-start gap-1.25 sm:gap-1.5 text-[9.5px] sm:text-[10.5px] md:text-[11.5px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
+                      <GraduationCap className="w-3.25 h-3.25 sm:w-3.5 sm:h-3.5 md:w-3.75 md:h-3.75 text-[#0E7C86] dark:text-[#239BA6] shrink-0" />
+                      <span className="truncate" dir={scholarship.degreeLevel.length >= 3 ? 'ltr' : undefined}>
+                        {scholarship.degreeLevel.length >= 3
+                          ? scholarship.degreeLevel
+                              .map((deg) => {
+                                const d = deg.trim();
+                                if (d === 'بكالوريوس' || d.toLowerCase().includes('bachelor')) return 'BSc';
+                                if (d === 'ماجستير' || d.toLowerCase().includes('master')) return 'MSc';
+                                if (d === 'دكتوراه' || d === 'دكتوراة' || d.toLowerCase().includes('phd') || d.toLowerCase().includes('doctor')) return 'PhD';
+                                if (d.includes('زمالة')) return 'Fellowship';
+                                return d;
+                              })
+                              .join(' • ')
+                          : scholarship.degreeLevel.join(' • ')}
+                      </span>
                     </div>
 
                     {/* 3. الموعد النهائي */}
-                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg px-2 py-1 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
-                      <Calendar className="w-3 h-3 text-[var(--mn-link)] shrink-0" />
+                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-2.5 pl-2 py-1.25 sm:py-1.5 md:py-1.75 flex items-center justify-start gap-1.25 sm:gap-1.5 text-[9.5px] sm:text-[10.5px] md:text-[11.5px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
+                      <Calendar className="w-3.25 h-3.25 sm:w-3.5 sm:h-3.5 md:w-3.75 md:h-3.75 text-[#0E7C86] dark:text-[#239BA6] shrink-0" />
                       <span className="truncate">{publicT('public_closes')}{' '}{scholarship.deadline}</span>
                     </div>
 
-                    {/* 4. زر عرض التفاصيل مكان الآيلتس */}
+                    {/* 4. زر عرض التفاصيل */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         if (onSelectScholarship) onSelectScholarship(scholarship);
                       }}
-                      className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs mn-inverse hover:mn-inverse "
-                      data-mn-design="26ecd1db9e"
+                      className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2.25 py-1.25 sm:py-1.5 md:py-1.75 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs mn-inverse hover:mn-inverse "
                     >
-                      <span className="text-[10px] sm:text-[11px] font-bold text-center leading-tight text-[var(--mn-accent-soft)]">{publicT('public_view_details')}</span>
-                      <ChevronLeft className="w-3.5 h-3.5 rotate-180 text-[var(--mn-accent-soft)]" />
+                      <span className="text-[9.5px] sm:text-[10.5px] md:text-[11.5px] font-bold text-center leading-tight text-[var(--mn-accent-soft)]">{publicT('public_view_details')}</span>
+                      <ChevronLeft className="w-3.25 h-3.25 sm:w-3.5 sm:h-3.5 md:w-3.75 md:h-3.75 rotate-180 text-[var(--mn-accent-soft)]" />
                     </button>
                   </div>
                 </div>
@@ -695,6 +735,18 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
             })
           )}
         </div>
+
+        {filteredScholarships.length > 0 && (
+          <PublicCardsPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+              resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+            dir={publicDir}
+          />
+        )}
       </div>
 
       {/* Custom Filter Top Sheet (Half Screen on Mobile, Popover on Desktop) */}
@@ -707,59 +759,92 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
             className="fixed inset-0 bg-black/55 backdrop-blur-xs z-50 transition-opacity animate-fade-in"
             onClick={() => setIsFilterOpen(false)}
           />
-          
+
           {/* Top Sheet / Modal */}
-          <div className="fixed top-0 inset-x-0 md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:max-w-xs md:w-full bg-[var(--mn-surface)] border-b md:border-1.5 border-[var(--mn-accent)]/40 rounded-b-2xl md:rounded-2xl shadow-2xl z-50 flex flex-col p-4 max-h-[55vh] md:max-h-[75vh] font-['Cairo',sans-serif] select-none mn-panel transition-all">
-            
-            {/* Header */}
-            <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-[var(--mn-border)] shrink-0">
-              <h4 className="text-[12px] font-bold text-[var(--mn-heading)] flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5 text-[var(--mn-accent-text)] animate-pulse" />
+          <div className="fixed top-14 inset-x-3 mx-auto max-w-xs md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full bg-[var(--mn-surface)] border-1.5 border-[#142B5F]/35 dark:border-[#D6A43B]/45 rounded-2xl shadow-2xl z-50 flex flex-col p-3.5 max-h-[380px] font-['Cairo',sans-serif] select-none mn-panel transition-all">
+
+            {/* Header: Navy Icon before title + Horizontal Navy-Petrol Close Button */}
+            <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-[var(--mn-border)] shrink-0 font-['Cairo',sans-serif]">
+              <h4 className="text-[12px] font-bold text-[var(--mn-heading)] flex items-center gap-1.5 font-['Cairo',sans-serif]">
+                <span className="w-6 h-6 rounded-lg bg-[#142B5F] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-white" />
+                </span>
                 <span>{publicT('public_smart_filter_options')}</span>
               </h4>
               <button
+                type="button"
                 onClick={() => setIsFilterOpen(false)}
-                className="text-[10px] font-bold text-[var(--mn-accent-text)] bg-[var(--mn-accent)]/10 px-2.5 py-0.5 rounded-full hover:bg-[var(--mn-accent)]/20 transition-all cursor-pointer active:scale-95"
-              >{publicT('public_close')}</button>
+                className="text-[10.5px] font-bold text-white bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] px-3 py-1 rounded-lg hover:opacity-95 transition-all cursor-pointer active:scale-95 shadow-2xs font-['Cairo',sans-serif]"
+              >
+                {publicT('public_close')}
+              </button>
             </div>
 
             {/* Scrollable Container (Inside scrolling / عملية سحب) */}
-            <div className="overflow-y-auto pr-0.5 flex-1 space-y-3">
+            <div
+              className="overflow-y-auto overscroll-contain pr-0.5 flex-1 space-y-2 font-['Cairo',sans-serif]"
+              data-mn-scrollbar
+            >
               {/* 1. Accordion: فلترة حسب الدولة */}
               <div className="space-y-1">
                 <button
+                  type="button"
                   onClick={() => setIsCountriesExpanded(!isCountriesExpanded)}
-                  className="w-full flex items-center justify-between py-2 px-2.5 bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-gold-surface)]/20 rounded-lg border border-[var(--mn-border)] transition-all cursor-pointer"
+                  className={`w-full flex items-center justify-between py-2 px-3 rounded-xl border transition-all cursor-pointer font-['Cairo',sans-serif] ${
+                    isCountriesExpanded
+                      ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] text-white border-transparent shadow-xs'
+                      : 'bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/[0.06] text-[var(--mn-heading)] border-[var(--mn-border)]'
+                  }`}
                 >
-                  <span className="text-[11px] font-bold text-[var(--mn-heading)]">{publicT('public_filter_by_country')}</span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-[var(--mn-accent-text)] transition-transform duration-200 ${isCountriesExpanded ? 'rotate-180' : ''}`} />
+                  <span className={`text-[11px] font-bold font-['Cairo',sans-serif] ${isCountriesExpanded ? 'text-white' : 'text-[var(--mn-heading)]'}`}>
+                    {publicT('public_filter_by_country')}
+                  </span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      isCountriesExpanded ? 'rotate-180 text-[#F2CD78]' : 'text-[#142B5F] dark:text-[#F2CD78]'
+                    }`}
+                  />
                 </button>
-                
+
                 {isCountriesExpanded && (
-                  <div className="max-h-[140px] overflow-y-auto pr-1 space-y-0.5 border-r border-[var(--mn-border)] mr-1 mt-1">
-                    {countryOptions.map((country) => {
-                      const isSelected = selectedFilter === `country:${country.id}`;
-                      return (
-                        <button
-                          key={country.id}
-                          onClick={() => {
-                            setSelectedFilter(isSelected ? 'الكل' : `country:${country.id}`);
-                            setIsFilterOpen(false);
-                          }}
-                          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-md font-bold transition-colors cursor-pointer block ${isSelected ? 'bg-[var(--mn-accent)]/10 text-[var(--mn-accent-text)]' : 'hover:bg-[var(--mn-surface-muted)] text-[var(--mn-text)]'}`}
-                          data-mn-design="55f5605788"
-                        >
-                          <span className="truncate">{country.label}</span>
-                          <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 transition-all ${isSelected ? 'border-[var(--mn-accent)] bg-[var(--mn-accent)] text-white' : 'border-[var(--mn-border)] bg-[var(--mn-surface)]'}`}>
-                            {isSelected && (
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5">
-                                <polyline points="20 6 9 17 4 12" />
-                              </svg>
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
+                  <div className="rounded-xl bg-[var(--mn-page)]/60 border border-[var(--mn-border)]/70 p-1.5 mt-1">
+                    <div
+                      className="max-h-[112px] overflow-y-auto overscroll-contain pr-1 space-y-1 border-r-2 border-[#0E7C86]/40 mr-1 font-['Cairo',sans-serif]"
+                      data-mn-scrollbar
+                    >
+                      {countryOptions.map((country) => {
+                        const isSelected = selectedFilter === `country:${country.id}`;
+                        return (
+                          <button
+                            key={country.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedFilter(isSelected ? 'الكل' : `country:${country.id}`);
+                              setIsFilterOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[11px] font-bold font-['Cairo',sans-serif] transition-colors cursor-pointer text-start ${
+                              isSelected
+                                ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] text-white'
+                                : 'bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] text-[var(--mn-text)]'
+                            }`}
+                            data-mn-design="55f5605788"
+                          >
+                            <span className="truncate font-['Cairo',sans-serif]">{country.label}</span>
+                            <span
+                              className={`w-2 h-2 rounded-full shrink-0 transition-all ${
+                                isSelected ? 'bg-[#F2CD78] scale-110' : 'bg-[#142B5F]/20 dark:bg-white/20'
+                              }`}
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {countryOptions.length > 3 && (
+                      <div className="mt-1 pt-1 border-t border-[var(--mn-border)]/50 flex items-center justify-center gap-1 text-[9px] font-bold text-[#0E7C86]">
+                        <ChevronDown className="w-2.5 h-2.5 animate-bounce" />
+                        <span>اسحب لعرض بقية الدول ({countryOptions.length})</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -767,41 +852,66 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
               {/* 2. Accordion: حسب التخصصات */}
               <div className="space-y-1">
                 <button
+                  type="button"
                   onClick={() => setIsMajorsExpanded(!isMajorsExpanded)}
-                  className="w-full flex items-center justify-between py-2 px-2.5 bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-gold-surface)]/20 rounded-lg border border-[var(--mn-border)] transition-all cursor-pointer"
+                  className={`w-full flex items-center justify-between py-2 px-3 rounded-xl border transition-all cursor-pointer font-['Cairo',sans-serif] ${
+                    isMajorsExpanded
+                      ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] text-white border-transparent shadow-xs'
+                      : 'bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/[0.06] text-[var(--mn-heading)] border-[var(--mn-border)]'
+                  }`}
                 >
-                  <span className="text-[11px] font-bold text-[var(--mn-heading)]">{publicT('public_by_major')}</span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-[var(--mn-accent-text)] transition-transform duration-200 ${isMajorsExpanded ? 'rotate-180' : ''}`} />
+                  <span className={`text-[11px] font-bold font-['Cairo',sans-serif] ${isMajorsExpanded ? 'text-white' : 'text-[var(--mn-heading)]'}`}>
+                    {publicT('public_by_major')}
+                  </span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      isMajorsExpanded ? 'rotate-180 text-[#F2CD78]' : 'text-[#142B5F] dark:text-[#F2CD78]'
+                    }`}
+                  />
                 </button>
-                
+
                 {isMajorsExpanded && (
-                  <div className="max-h-[140px] overflow-y-auto pr-1 space-y-0.5 border-r border-[var(--mn-border)] mr-1 mt-1">
-                    {majorOptions.length === 0 ? (
-                      <span className="text-[9px] text-[var(--mn-text-muted)] block p-2 text-center" data-mn-design="a050cea8a2">{publicT('public_no_classified_majors_currently_available')}</span>
-                    ) : (
-                      majorOptions.map((major) => {
-                        const isSelected = selectedFilter === `major:${major}`;
-                        return (
-                          <button
-                            key={major}
-                            onClick={() => {
-                              setSelectedFilter(isSelected ? 'الكل' : `major:${major}`);
-                              setIsFilterOpen(false);
-                            }}
-                            className={`w-full flex items-center justify-between px-3 py-1.5 rounded-md font-bold transition-colors cursor-pointer block ${isSelected ? 'bg-[var(--mn-accent)]/10 text-[var(--mn-accent-text)]' : 'hover:bg-[var(--mn-surface-muted)] text-[var(--mn-text)]'}`}
-                            data-mn-design="55f5605788"
-                          >
-                            <span className="truncate">{major}</span>
-                            <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 transition-all ${isSelected ? 'border-[var(--mn-accent)] bg-[var(--mn-accent)] text-white' : 'border-[var(--mn-border)] bg-[var(--mn-surface)]'}`}>
-                              {isSelected && (
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5">
-                                  <polyline points="20 6 9 17 4 12" />
-                                </svg>
-                              )}
-                            </div>
-                          </button>
-                        );
-                      })
+                  <div className="rounded-xl bg-[var(--mn-page)]/60 border border-[var(--mn-border)]/70 p-1.5 mt-1">
+                    <div
+                      className="max-h-[112px] overflow-y-auto overscroll-contain pr-1 space-y-1 border-r-2 border-[#0E7C86]/40 mr-1 font-['Cairo',sans-serif]"
+                      data-mn-scrollbar
+                    >
+                      {majorOptions.length === 0 ? (
+                        <span className="text-[10px] text-[var(--mn-text-muted)] block p-2 text-center font-['Cairo',sans-serif]" data-mn-design="a050cea8a2">{publicT('public_no_classified_majors_currently_available')}</span>
+                      ) : (
+                        majorOptions.map((major) => {
+                          const isSelected = selectedFilter === `major:${major}`;
+                          return (
+                            <button
+                              key={major}
+                              type="button"
+                              onClick={() => {
+                                setSelectedFilter(isSelected ? 'الكل' : `major:${major}`);
+                                setIsFilterOpen(false);
+                              }}
+                              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[11px] font-bold font-['Cairo',sans-serif] transition-colors cursor-pointer text-start ${
+                                isSelected
+                                  ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] text-white'
+                                  : 'bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] text-[var(--mn-text)]'
+                              }`}
+                              data-mn-design="55f5605788"
+                            >
+                              <span className="truncate font-['Cairo',sans-serif]">{major}</span>
+                              <span
+                                className={`w-2 h-2 rounded-full shrink-0 transition-all ${
+                                  isSelected ? 'bg-[#F2CD78] scale-110' : 'bg-[#142B5F]/20 dark:bg-white/20'
+                                }`}
+                              />
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                    {majorOptions.length > 3 && (
+                      <div className="mt-1 pt-1 border-t border-[var(--mn-border)]/50 flex items-center justify-center gap-1 text-[9px] font-bold text-[#0E7C86]">
+                        <ChevronDown className="w-2.5 h-2.5 animate-bounce" />
+                        <span>اسحب لعرض بقية التخصصات ({majorOptions.length})</span>
+                      </div>
                     )}
                   </div>
                 )}
@@ -810,59 +920,76 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
               {/* 3. Accordion: فلترة حسب شروط اللغة */}
               <div className="space-y-1">
                 <button
+                  type="button"
                   onClick={() => setIsLanguagesExpanded(!isLanguagesExpanded)}
-                  className="w-full flex items-center justify-between py-2 px-2.5 bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-gold-surface)]/20 rounded-lg border border-[var(--mn-border)] transition-all cursor-pointer"
+                  className={`w-full flex items-center justify-between py-2 px-3 rounded-xl border transition-all cursor-pointer font-['Cairo',sans-serif] ${
+                    isLanguagesExpanded
+                      ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] text-white border-transparent shadow-xs'
+                      : 'bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/[0.06] text-[var(--mn-heading)] border-[var(--mn-border)]'
+                  }`}
                 >
-                  <span className="text-[11px] font-bold text-[var(--mn-heading)]">{publicT('public_filter_by_language_requirements')}</span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-[var(--mn-accent-text)] transition-transform duration-200 ${isLanguagesExpanded ? 'rotate-180' : ''}`} />
+                  <span className={`text-[11px] font-bold font-['Cairo',sans-serif] ${isLanguagesExpanded ? 'text-white' : 'text-[var(--mn-heading)]'}`}>
+                    {publicT('public_filter_by_language_requirements')}
+                  </span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      isLanguagesExpanded ? 'rotate-180 text-[#F2CD78]' : 'text-[#142B5F] dark:text-[#F2CD78]'
+                    }`}
+                  />
                 </button>
-                
+
                 {isLanguagesExpanded && (
-                  <div className="max-h-[140px] overflow-y-auto pr-1 space-y-0.5 border-r border-[var(--mn-border)] mr-1 mt-1">
+                  <div className="max-h-[150px] overflow-y-auto pr-1 space-y-0.5 border-r-2 border-[#0E7C86]/40 mr-1.5 mt-1 font-['Cairo',sans-serif]">
                     {/* Option: No IELTS */}
                     {(() => {
                       const isSelected = selectedFilter === 'no_ielts';
                       return (
                         <button
+                          type="button"
                           onClick={() => {
                             setSelectedFilter(isSelected ? 'الكل' : 'no_ielts');
                             setIsFilterOpen(false);
                           }}
-                          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-md font-bold transition-colors cursor-pointer block ${isSelected ? 'bg-[var(--mn-accent)]/10 text-[var(--mn-accent-text)]' : 'hover:bg-[var(--mn-surface-muted)] text-[var(--mn-text)]'}`}
+                          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[11px] font-bold font-['Cairo',sans-serif] transition-colors cursor-pointer text-start ${
+                            isSelected
+                              ? 'bg-[#142B5F]/10 text-[#142B5F] dark:bg-[#F2CD78]/15 dark:text-[#F2CD78]'
+                              : 'hover:bg-[var(--mn-surface-muted)] text-[var(--mn-text)]'
+                          }`}
                           data-mn-design="55f5605788"
                         >
-                          <span className="truncate">{publicT('public_filter_for_no_ielts_or_toefl_requirement')}</span>
-                          <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 transition-all ${isSelected ? 'border-[var(--mn-accent)] bg-[var(--mn-accent)] text-white' : 'border-[var(--mn-border)] bg-[var(--mn-surface)]'}`}>
-                            {isSelected && (
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5">
-                                <polyline points="20 6 9 17 4 12" />
-                              </svg>
-                            )}
-                          </div>
+                          <span className="truncate font-['Cairo',sans-serif]">{publicT('public_filter_for_no_ielts_or_toefl_requirement')}</span>
+                          <span
+                            className={`w-2 h-2 rounded-full shrink-0 transition-all ${
+                              isSelected ? 'bg-[#0E7C86] scale-110' : 'bg-[#142B5F]/20 dark:bg-white/20'
+                            }`}
+                          />
                         </button>
                       );
                     })()}
-                    
+
                     {/* Option: English Study */}
                     {(() => {
                       const isSelected = selectedFilter === 'english_only';
                       return (
                         <button
+                          type="button"
                           onClick={() => {
                             setSelectedFilter(isSelected ? 'الكل' : 'english_only');
                             setIsFilterOpen(false);
                           }}
-                          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-md font-bold transition-colors cursor-pointer block ${isSelected ? 'bg-[var(--mn-accent)]/10 text-[var(--mn-accent-text)]' : 'hover:bg-[var(--mn-surface-muted)] text-[var(--mn-text)]'}`}
+                          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[11px] font-bold font-['Cairo',sans-serif] transition-colors cursor-pointer text-start ${
+                            isSelected
+                              ? 'bg-[#142B5F]/10 text-[#142B5F] dark:bg-[#F2CD78]/15 dark:text-[#F2CD78]'
+                              : 'hover:bg-[var(--mn-surface-muted)] text-[var(--mn-text)]'
+                          }`}
                           data-mn-design="55f5605788"
                         >
-                          <span className="truncate">{publicT('public_filter_for_study_in_english_only')}</span>
-                          <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 transition-all ${isSelected ? 'border-[var(--mn-accent)] bg-[var(--mn-accent)] text-white' : 'border-[var(--mn-border)] bg-[var(--mn-surface)]'}`}>
-                            {isSelected && (
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5">
-                                <polyline points="20 6 9 17 4 12" />
-                              </svg>
-                            )}
-                          </div>
+                          <span className="truncate font-['Cairo',sans-serif]">{publicT('public_filter_for_study_in_english_only')}</span>
+                          <span
+                            className={`w-2 h-2 rounded-full shrink-0 transition-all ${
+                              isSelected ? 'bg-[#0E7C86] scale-110' : 'bg-[#142B5F]/20 dark:bg-white/20'
+                            }`}
+                          />
                         </button>
                       );
                     })()}
@@ -873,6 +1000,41 @@ const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = (
           </div>
         </>
       )}
+
+      {/* Custom Cairo-Font Modal for Funding Type */}
+      <PublicFilterSelectModal
+        isOpen={isFundingModalOpen}
+        title={publicT('public_choose_funding_type')}
+        icon={Coins}
+        selectedValue={selectedFunding}
+        onSelect={(val) => setSelectedFunding(val)}
+        onClose={() => setIsFundingModalOpen(false)}
+        dir={publicDir}
+        options={fundingTypes.map((funding) => ({
+          value: funding,
+          label: funding === 'الكل' ? publicT('public_all_funding_types') : funding,
+        }))}
+      />
+
+      {/* Custom Cairo-Font Modal for Degree Level (including Fellowship / الزمالة) */}
+      <PublicFilterSelectModal
+        isOpen={isDegreeModalOpen}
+        title={publicT('public_choose_degree')}
+        icon={GraduationCap}
+        selectedValue={selectedDegree}
+        onSelect={(val) => setSelectedDegree(val)}
+        onClose={() => setIsDegreeModalOpen(false)}
+        dir={publicDir}
+        options={degreeLevels.map((degree) => ({
+          value: degree,
+          label:
+            degree === 'الكل'
+              ? publicT('public_all_degrees')
+              : degree === 'زمالة أبحاث'
+                ? 'الزمالة'
+                : degree,
+        }))}
+      />
     </div>
   );
 };

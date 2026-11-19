@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   BadgeCheck,
   Check,
+  ChevronLeft,
   DollarSign,
   Clock3,
   FileText,
@@ -117,7 +118,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
           <DetailBackButton onBack={onBack} />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-md text-right sm:max-w-xl">
+        <div className="relative z-10 mx-auto max-w-md text-right sm:max-w-xl md:max-w-[1120px] lg:max-w-[1160px]">
           <div className="mb-2 flex flex-wrap gap-1.5">
             <span className="rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[8.5px] font-bold text-[var(--mn-accent-soft)]">
               {service.badge}
@@ -135,7 +136,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
         </div>
       </div>
 
-      <main className="mx-auto max-w-md mn-inline-gutter pb-24 pt-3 sm:max-w-xl">
+      <main className="mx-auto max-w-md mn-inline-gutter pb-24 pt-3 md:pt-5 sm:max-w-xl md:max-w-[1120px] lg:max-w-[1160px]">
         <section className="mb-3 grid grid-cols-3 gap-1.5">
           <div className="rounded-xl border border-[var(--mn-border-gold)] bg-[var(--mn-surface)] p-2 text-center shadow-2xs mn-panel ">
             <Wallet className="mx-auto h-4 w-4 text-[var(--mn-accent-text)]" />
@@ -177,43 +178,46 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
           </p>
         </section>
 
-        <section className="mb-3 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-sm mn-panel ">
-          <SectionTitle
-            icon={<BadgeCheck className="h-4 w-4" />}
-            id="service-includes"
-            title={serviceCopy('ما الذي تشمل الخدمة؟', language)}
-          />
-          <ul className="space-y-1.5">
-            {service.includes.map((item) => (
-              <li
-                key={item}
-                className="flex items-start gap-1.5 text-[9.5px] font-semibold leading-4 text-[var(--mn-text-muted)]"
-              >
-                <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--mn-success-text)]" />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <div className="md:grid md:grid-cols-2 md:gap-4 items-stretch">
+          <section className="mb-3 md:mb-0 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 md:p-4 shadow-sm mn-panel h-full">
+            <SectionTitle
+              icon={<BadgeCheck className="h-4 w-4" />}
+              id="service-includes"
+              title={serviceCopy('ما الذي تشمل الخدمة؟', language)}
+            />
+            <ul className="space-y-1.5">
+              {service.includes.map((item) => (
+                <li
+                  key={item}
+                  className="flex items-start gap-1.5 text-[9.5px] font-semibold leading-4 text-[var(--mn-text-muted)]"
+                >
+                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--mn-success-text)]" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
 
-        <section className="mb-3 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-sm mn-panel ">
-          <SectionTitle
-            icon={<AlertCircle className="h-4 w-4" />}
-            id="service-excludes"
-            title={serviceCopy('ما الذي لا تشمل الخدمة؟', language)}
-          />
-          <ul className="space-y-1.5">
-            {service.excludes.map((item) => (
-              <li
-                key={item}
-                className="flex items-start gap-1.5 text-[9.5px] font-semibold leading-4 text-[var(--mn-text-muted)]"
-              >
-                <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--mn-danger-text)]" />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
+          <section className="mb-3 md:mb-0 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 md:p-4 shadow-sm mn-panel h-full">
+            <SectionTitle
+              icon={<AlertCircle className="h-4 w-4" />}
+              id="service-excludes"
+              title={serviceCopy('ما الذي لا تشمل الخدمة؟', language)}
+            />
+            <ul className="space-y-1.5">
+              {service.excludes.map((item) => (
+                <li
+                  key={item}
+                  className="flex items-start gap-1.5 text-[9.5px] font-semibold leading-4 text-[var(--mn-text-muted)]"
+                >
+                  <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--mn-danger-text)]" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+        <div className="hidden md:block md:mb-3" />
 
         {service.packages?.length ? (
           <section className="mb-3 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-sm mn-panel ">
@@ -366,11 +370,11 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
             id="service-faq"
             title={serviceCopy('الأسئلة الشائعة', language)}
           />
-          <div className="space-y-2">
+          <div className="space-y-2 md:space-y-0 md:grid md:grid-cols-2 md:gap-3 items-stretch">
             {service.faqs.map((faq) => (
               <div
                 key={faq.question}
-                className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 mn-panel "
+                className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 md:p-3.5 mn-panel h-full"
               >
                 <h3 className="text-[9.5px] font-bold text-[var(--mn-text)]">{faq.question}</h3>
                 <p className="mt-1 text-[9px] font-semibold leading-4 text-[var(--mn-text-muted)]">

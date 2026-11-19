@@ -9,17 +9,21 @@ const compiled = ts.transpileModule(source, {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText;
 
-function previewClient() {
+function previewClient(authenticated = false) {
+  const storage = new Map();
   let liveCalls = 0;
   let networkCalls = 0;
   const live = new Proxy({}, { get: () => () => { liveCalls++; throw new Error('LIVE_API_FORBIDDEN'); } });
   const sandbox = {
     module: { exports: {} }, structuredClone,
+    window: { sessionStorage: { getItem: key => storage.get(key), setItem: (key, value) => storage.set(key, value) }, dispatchEvent() {} },
+    CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options?.detail; } },
     fetch: () => { networkCalls++; throw new Error('NETWORK_FORBIDDEN'); },
     require: name => { assert.equal(name, '../../api/client'); return { ApiClient: live }; },
   };
   sandbox.exports = sandbox.module.exports;
   vm.runInNewContext(compiled, sandbox);
+  if (authenticated) sandbox.module.exports.loginPreviewStudent();
   return {
     client: sandbox.module.exports.PreviewStudentApiClient,
     assertOffline() { assert.equal(liveCalls, 0); assert.equal(networkCalls, 0); },
@@ -27,7 +31,7 @@ function previewClient() {
 }
 
 test('shared student workspace preview reads detached synthetic data without calling the live API', async () => {
-  const { client, assertOffline } = previewClient();
+  const { client, assertOffline } = previewClient(true);
   const identity = await client.getCurrentStudentIdentity();
   const dashboard = await client.getMyStudentDashboard();
   assert.equal(identity.principalId, 'design-preview-student');
@@ -42,5 +46,11 @@ test('unsupported private calls and real asset delivery fail closed without live
   await assert.rejects(client.getMyCertificateArtifactBlob('real-certificate', 'pdf'), /getMyCertificateArtifactBlob/);
   await assert.rejects(client.futurePrivateOperation('real-student'), /futurePrivateOperation/);
   await assert.rejects(client.getMyStudentAssetDeliveryGrant('real-asset'));
+  assertOffline();
+});
+
+test('guest preview requires explicit demo sign-in without contacting live authentication', async () => {
+  const { client, assertOffline } = previewClient();
+  await assert.rejects(client.getCurrentStudentIdentity(), /UNAUTHENTICATED_GUEST/);
   assertOffline();
 });

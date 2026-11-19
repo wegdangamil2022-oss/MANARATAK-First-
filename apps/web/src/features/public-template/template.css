@@ -2,20 +2,67 @@
 @source './';
 @source "../../../../../packages/ui/src";
 
-/* Header: preserve 40px touch targets while keeping the 320px layout inside the viewport. */
+/* Header & Mobile Balance: ~10% more compact containers & cards on mobile while preserving font sizes. */
 @media (max-width: 639px) {
-  #manaratak-header > div { padding-inline: var(--mn-container-mobile); }
+  #manaratak-header > div {
+    padding-inline: var(--mn-container-mobile);
+    min-height: 58px !important;
+    height: 58px;
+  }
   #manaratak-header .mn-header-row { min-width: 0; gap: 5px; }
   #manaratak-header .mn-header-brand { min-width: 0; flex: 1; gap: 6px; }
-  #manaratak-header .mn-header-brand > button { width: 60px; height: 60px; min-width: 60px; min-height: 60px; }
+  #manaratak-header .mn-header-brand > button,
+  #manaratak-header .mn-header-brand > div:first-child {
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
+  }
   #manaratak-header .mn-header-brand > div { min-width: 0; }
   #manaratak-header .mn-header-brand span:first-child { font-size: 15px; letter-spacing: .3px; }
   #manaratak-header .mn-header-brand span:last-child { font-size: 9px; overflow: hidden; text-overflow: ellipsis; }
   #manaratak-header .mn-header-actions { flex-shrink: 0; gap: 3px; }
-  #manaratak-header .mn-header-actions > button { width: 40px; min-width: 40px; height: 40px; min-height: 40px; padding-inline: 0; justify-content: center; }
+  #manaratak-header .mn-header-actions > button {
+    width: 35px !important;
+    min-width: 35px !important;
+    height: 35px !important;
+    min-height: 35px !important;
+    padding-inline: 0;
+    justify-content: center;
+  }
   #btn-single-language > svg { display: none; }
   #manaratak-header form, #manaratak-header input { min-width: 0; }
   #manaratak-header input { font-size: 11px; }
+
+  .manaratak-public .mn-search-control {
+    height: 35px !important;
+    min-height: 35px !important;
+  }
+  .manaratak-public [data-mn-design="56ab29fe6d"] {
+    height: 35px !important;
+    min-height: 35px !important;
+    max-height: 35px !important;
+  }
+  .manaratak-public section[id^="featured-"] {
+    padding-block: 6px !important;
+  }
+  .manaratak-public section[id^="featured-"] > div.rounded-3xl {
+    padding-block: 11px !important;
+    padding-inline: 9px !important;
+    border-radius: 20px !important;
+  }
+  .manaratak-public button[id^="btn-view-all-"] {
+    min-height: 36px !important;
+    padding-block: 7px !important;
+  }
+  .manaratak-public .mn-filter-chip {
+    min-height: 30px !important;
+    padding: 4px 10px !important;
+  }
+  .manaratak-public .mn-external-link {
+    min-height: 34px !important;
+    padding: 5px 10px !important;
+  }
 }
 @media (max-width: 359px) {
   #manaratak-header .mn-header-brand span:last-child { display: none; }
@@ -27,6 +74,7 @@
 /* Match the persisted manual switch. A public-only variant avoids conflicts
    with a second Tailwind entrypoint using the default OS-based dark variant. */
 @custom-variant mn-dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
   html,
@@ -65,6 +113,14 @@
       'Segoe UI',
       Roboto,
       sans-serif;
+  }
+
+  select,
+  option,
+  optgroup {
+    font-family: 'Cairo', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
   }
 }
 
@@ -211,7 +267,7 @@
   --mn-link: #0a626b;
   --mn-digital-text: #0a626b;
   --mn-hero-secondary: #095661;
-  --mn-section-line: #095661;
+  --mn-section-line: #142b5f;
   --mn-gold-surface: #fbefcf;
   --mn-border-gold: rgb(214 164 59 / 35%);
   --mn-on-dark-muted: #ddeff2;
@@ -360,7 +416,7 @@
   --mn-card-radius: 18px;
   --mn-card-border-dark: rgb(214 164 59 / 70%);
   --mn-card-border-dark-soft: rgb(214 164 59 / 34%);
-  --mn-interactive-arrow: #0e7c86;
+  --mn-interactive-arrow: #142b5f;
   font-family: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   overflow-x: clip;
 }
@@ -471,52 +527,209 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  margin-bottom: 11px;
+  gap: 2px;
+  padding-bottom: 6px;
+  margin-bottom: 10px;
   position: relative;
   text-align: center;
 }
+.manaratak-public .mn-detail-section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+.manaratak-public .mn-scholarship-detail .mn-detail-section-header-row {
+  justify-content: flex-start;
+  width: 176px;
+}
+@media (min-width: 640px) {
+  .manaratak-public .mn-scholarship-detail .mn-detail-section-header-row {
+    width: 192px;
+  }
+}
+.manaratak-public .mn-university-detail .mn-detail-section-header-row {
+  justify-content: center;
+  width: fit-content;
+  gap: 6px;
+}
+.manaratak-public .mn-major-detail .mn-detail-section-header-row {
+  justify-content: flex-start;
+  width: 248px;
+  max-width: 100%;
+  gap: 8px;
+}
+@media (min-width: 640px) {
+  .manaratak-public .mn-major-detail .mn-detail-section-header-row {
+    width: 264px;
+  }
+}
+.manaratak-public .mn-major-detail .mn-detail-section-icon {
+  width: 28px;
+  height: 28px;
+}
+.manaratak-public .mn-major-detail .mn-detail-section-title {
+  font-size: 14px;
+}
+@media (min-width: 640px) {
+  .manaratak-public .mn-major-detail .mn-detail-section-title {
+    font-size: 15px;
+  }
+}
 .manaratak-public .mn-detail-section-icon {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 999px;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgb(214 164 59 / 10%);
-  border: 1px solid rgb(214 164 59 / 28%);
-  color: var(--mn-primary);
+  background: #142b5f;
+  border: 1.5px solid rgb(214 164 59 / 70%);
+  color: #f2cd78;
+  box-shadow: 0 2px 8px rgb(20 43 95 / 16%);
 }
 .dark .manaratak-public .mn-detail-section-icon {
-  background: rgb(214 164 59 / 12%);
-  border-color: rgb(242 205 120 / 44%);
-  color: var(--mn-accent-soft);
+  background: #142b5f;
+  border-color: rgb(242 205 120 / 78%);
+  color: #f2cd78;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 35%);
+}
+.manaratak-public .mn-detail-section-icon.mn-icon-mix02 {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9px;
+  background: #142b5f;
+  border: 1px solid rgb(214 164 59 / 75%);
+  color: #f2cd78;
+  box-shadow: 0 2px 8px rgb(20 43 95 / 16%);
+}
+.dark .manaratak-public .mn-detail-section-icon.mn-icon-mix02 {
+  background: #142b5f;
+  border-color: rgb(242 205 120 / 78%);
+  color: #f2cd78;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 35%);
+}
+.manaratak-public .mn-quick-info-icon-box {
+  background: rgb(20 43 95 / 10%);
+  border: 2px solid #142b5f;
+  color: #142b5f;
+}
+.dark .manaratak-public .mn-quick-info-icon-box {
+  background: rgb(242 205 120 / 15%);
+  border: 2px solid #f2cd78;
+  color: #f2cd78;
+}
+.manaratak-public .mn-sub-item-icon {
+  background: #142b5f;
+  border: 1.5px solid #142b5f;
+  box-shadow: 0 0 0 1px rgb(20 43 95 / 40%), 0 1px 2px rgb(20 43 95 / 12%);
+  color: #ffffff;
+}
+.dark .manaratak-public .mn-sub-item-icon {
+  background: #142b5f;
+  border: 1.5px solid #142b5f;
+  box-shadow: 0 0 0 1px rgb(242 205 120 / 45%), 0 2px 6px rgb(0 0 0 / 35%);
+  color: #ffffff;
+}
+.manaratak-public .mn-major-chip {
+  position: relative;
+  overflow: hidden;
+  border-radius: 11px;
+}
+.manaratak-public .mn-major-chip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.75px;
+  background: linear-gradient(270deg, #142b5f 0px, #142b5f 4px, rgb(20 43 95 / 0%) 9px);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.dark .manaratak-public .mn-major-chip::before {
+  background: linear-gradient(270deg, #f2cd78 0px, #d6a43b 4px, rgb(242 205 120 / 0%) 9px);
+}
+.manaratak-public .mn-degree-tab-active {
+  background: linear-gradient(135deg, #142b5f 0%, #153b75 58%, #0e7c86 100%);
+  color: #f2cd78;
+  border-color: rgb(214 164 59 / 75%);
+  box-shadow: 0 3px 10px rgb(20 43 95 / 18%);
+}
+.dark .manaratak-public .mn-degree-tab-active {
+  background: linear-gradient(135deg, #d6a43b 0%, #f2cd78 100%);
+  color: #142b5f;
+  border-color: #f2cd78;
+  box-shadow: 0 3px 12px rgb(214 164 59 / 28%);
 }
 .manaratak-public .mn-detail-section-title {
+  position: relative;
   margin: 0;
+  padding: 0;
   color: var(--mn-heading);
   font-size: 14px;
-  line-height: 1.65;
+  line-height: 1.25;
   font-weight: 700;
   font-family: 'Cairo', sans-serif;
-  position: relative;
-  padding-bottom: 10px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
 }
 .manaratak-public .mn-detail-section-title::after {
   content: '';
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 0;
-  width: min(150px, 90%);
+  right: 0;
+  left: 0;
+  bottom: -5px;
   height: 2px;
   border-radius: 999px;
-  background: linear-gradient(90deg, transparent, var(--mn-accent), transparent);
+  background: linear-gradient(90deg, transparent, #d6a43b 18%, #d6a43b 100%);
+}
+.dark .manaratak-public .mn-detail-section-title::after {
+  background: linear-gradient(90deg, transparent, #f2cd78 18%, #f2cd78 100%);
 }
 @media (min-width: 640px) {
-  .manaratak-public .mn-detail-section-title { font-size: 16px; }
+  .manaratak-public .mn-detail-section-title { font-size: 15px; }
+}
+.manaratak-public .mn-article-detail .mn-detail-section-header {
+  width: 100%;
+  max-width: 100%;
+}
+.manaratak-public .mn-article-detail .mn-detail-section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 276px;
+  max-width: 100%;
+  margin-inline: auto;
+}
+@media (min-width: 640px) {
+  .manaratak-public .mn-article-detail .mn-detail-section-header-row {
+    width: 300px;
+  }
+}
+.manaratak-public .mn-article-detail .mn-detail-section-icon {
+  width: 28px;
+  height: 28px;
+}
+.manaratak-public .mn-article-detail .mn-detail-section-title {
+  font-size: 13.5px;
+  line-height: 1.35;
+  white-space: normal;
+  text-align: start;
+  min-width: 0;
+  max-width: 100%;
+}
+@media (min-width: 640px) {
+  .manaratak-public .mn-article-detail .mn-detail-section-title {
+    font-size: 14.5px;
+  }
 }
 
 .manaratak-public .mn-page-title {
@@ -695,7 +908,7 @@
   opacity: 0;
   color: var(--mn-accent);
   font-weight: 900;
-  font-family: Arial, sans-serif;
+  font-family: 'Cairo', sans-serif;
   animation-name: mn-fall-text;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
@@ -764,3 +977,262 @@
 .cms-rich-text ol { list-style: decimal; }
 .cms-rich-text a { color: var(--mn-accent-text); text-decoration: underline; }
 .cms-rich-text blockquote { border-inline-start: 3px solid var(--mn-accent); padding-inline-start: 1em; }
+
+/* Sleek visible horizontal scrollbar for Similar Scholarships carousel */
+@supports not selector(::-webkit-scrollbar) {
+  .manaratak-public .mn-similar-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #142B5F rgba(20, 43, 95, 0.08);
+  }
+  .dark .manaratak-public .mn-similar-scroll {
+    scrollbar-color: #D6A43B rgba(255, 255, 255, 0.08);
+  }
+}
+.manaratak-public .mn-similar-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.manaratak-public .mn-similar-scroll::-webkit-scrollbar-track {
+  background: rgba(20, 43, 95, 0.07);
+  border-radius: 999px;
+  margin-inline: 8px;
+}
+.dark .manaratak-public .mn-similar-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.07);
+}
+.manaratak-public .mn-similar-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #142B5F 0%, #0E7C86 100%);
+  border-radius: 999px;
+}
+.dark .manaratak-public .mn-similar-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #D6A43B 0%, #F2CD78 100%);
+  border-radius: 999px;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .manaratak-public .mn-gold-scroll {
+    scrollbar-width: auto;
+    scrollbar-color: #142B5F rgba(20, 43, 95, 0.12);
+  }
+  .dark .manaratak-public .mn-gold-scroll {
+    scrollbar-color: #38C6D4 rgba(20, 43, 95, 0.35);
+  }
+}
+.manaratak-public .mn-gold-scroll::-webkit-scrollbar {
+  height: 7px;
+  display: block;
+}
+.manaratak-public .mn-gold-scroll::-webkit-scrollbar-track {
+  background: rgba(20, 43, 95, 0.08);
+  border: 1px solid rgba(20, 43, 95, 0.18);
+  border-radius: 999px;
+  margin-inline: 4px;
+}
+.dark .manaratak-public .mn-gold-scroll::-webkit-scrollbar-track {
+  background: rgba(20, 43, 95, 0.45);
+  border: 1px solid rgba(56, 198, 212, 0.28);
+}
+.manaratak-public .mn-gold-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #142B5F 0%, #1B3B7B 100%);
+  border-radius: 999px;
+  border: 1px solid rgba(20, 43, 95, 0.35);
+}
+.dark .manaratak-public .mn-gold-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #1E3F85 0%, #38C6D4 100%);
+  border-radius: 999px;
+  border: 1px solid rgba(56, 198, 212, 0.45);
+}
+
+.manaratak-public .mn-corner-accent-blended {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 18px;
+  height: 78%;
+  border-top-right-radius: 16px;
+  padding-top: 2.5px;
+  padding-right: 3px;
+  background: linear-gradient(180deg, #9E731F 0%, #0E7C86 48%, #142B5F 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.dark .manaratak-public .mn-corner-accent-blended {
+  background: linear-gradient(180deg, #D6A43B 0%, #0E7C86 55%, #F2CD78 100%);
+}
+
+/* ========================================================
+   DESKTOP-ONLY RESPONSIVE TYPOGRAPHY & LAYOUT ENGINE (≥ 768px)
+   Mobile (< 768px) remains 100% untouched.
+   ======================================================== */
+@media (min-width: 768px) {
+  .manaratak-public .mn-public-container {
+    max-width: 1160px;
+    padding-inline: 24px;
+  }
+
+  .manaratak-public .mn-detail-content {
+    max-width: 1120px;
+    padding-inline: 24px;
+  }
+
+  .manaratak-public .mn-detail-content.mn-detail-content-narrow {
+    max-width: 1080px;
+  }
+
+  .manaratak-public .mn-detail-section-header {
+    padding-bottom: 8px;
+    margin-bottom: 14px;
+  }
+
+  .manaratak-public .mn-detail-section-icon,
+  .manaratak-public .mn-major-detail .mn-detail-section-icon,
+  .manaratak-public .mn-article-detail .mn-detail-section-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .manaratak-public .mn-detail-section-title,
+  .manaratak-public .mn-major-detail .mn-detail-section-title,
+  .manaratak-public .mn-article-detail .mn-detail-section-title,
+  .manaratak-public .mn-detail-section-title.mn-imported-detail-title {
+    font-size: 17px;
+    line-height: 1.35;
+  }
+
+  .manaratak-public .mn-scholarship-detail .mn-detail-section-header-row {
+    width: 236px;
+    gap: 10px;
+  }
+
+  .manaratak-public .mn-major-detail .mn-detail-section-header-row {
+    width: 310px;
+    gap: 10px;
+  }
+
+  .manaratak-public .mn-article-detail .mn-detail-section-header-row {
+    width: 360px;
+    gap: 10px;
+  }
+
+  .manaratak-public .mn-card-title {
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .manaratak-public .mn-body {
+    font-size: 15px;
+    line-height: 1.85;
+  }
+
+  .manaratak-public .mn-meta {
+    font-size: 13px;
+    line-height: 1.65;
+  }
+
+  .manaratak-public .mn-filter-chip {
+    min-height: 38px;
+    padding: 7px 14px;
+    font-size: 13px;
+  }
+
+  .manaratak-public .mn-external-link {
+    min-height: 42px;
+    padding: 9px 15px;
+    font-size: 13.5px;
+  }
+
+  .manaratak-public .mn-detail-close {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    border-radius: 11px;
+  }
+
+  .manaratak-public .mn-detail-small-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  /* Progressive desktop font scaling for micro/mobile utility classes */
+  .manaratak-public :where(.text-\[8\.5px\], .text-\[9px\], .text-\[9\.5px\], .text-\[10px\]) {
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .manaratak-public :where(.text-\[10\.5px\], .text-\[11px\]) {
+    font-size: 13.5px;
+    line-height: 1.7;
+  }
+  .manaratak-public :where(.text-\[11\.5px\], .text-xs, .text-\[12px\]) {
+    font-size: 14px;
+    line-height: 1.72;
+  }
+  .manaratak-public :where(.text-\[12\.5px\], .text-\[13px\], .text-\[13\.5px\]) {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .manaratak-public :where(.text-sm, .text-\[14px\], .text-\[14\.5px\]) {
+    font-size: 16px;
+    line-height: 1.65;
+  }
+  .manaratak-public :where(.text-\[15px\], .text-base) {
+    font-size: 18px;
+    line-height: 1.55;
+  }
+}
+
+@media (min-width: 1024px) {
+  .manaratak-public .mn-public-container {
+    max-width: 1200px;
+    padding-inline: 32px;
+  }
+
+  .manaratak-public .mn-detail-content {
+    max-width: 1160px;
+    padding-inline: 28px;
+  }
+
+  .manaratak-public .mn-detail-section-title,
+  .manaratak-public .mn-major-detail .mn-detail-section-title,
+  .manaratak-public .mn-article-detail .mn-detail-section-title,
+  .manaratak-public .mn-detail-section-title.mn-imported-detail-title {
+    font-size: 18.5px;
+  }
+
+  .manaratak-public .mn-scholarship-detail .mn-detail-section-header-row {
+    width: 256px;
+  }
+
+  .manaratak-public .mn-major-detail .mn-detail-section-header-row {
+    width: 332px;
+  }
+
+  .manaratak-public .mn-article-detail .mn-detail-section-header-row {
+    width: 386px;
+  }
+
+  .manaratak-public :where(.text-\[8\.5px\], .text-\[9px\], .text-\[9\.5px\], .text-\[10px\]) {
+    font-size: 12.5px;
+    line-height: 1.65;
+  }
+  .manaratak-public :where(.text-\[10\.5px\], .text-\[11px\]) {
+    font-size: 14px;
+    line-height: 1.75;
+  }
+  .manaratak-public :where(.text-\[11\.5px\], .text-xs, .text-\[12px\]) {
+    font-size: 14.5px;
+    line-height: 1.75;
+  }
+  .manaratak-public :where(.text-\[12\.5px\], .text-\[13px\], .text-\[13\.5px\]) {
+    font-size: 15.5px;
+    line-height: 1.72;
+  }
+  .manaratak-public :where(.text-sm, .text-\[14px\], .text-\[14\.5px\]) {
+    font-size: 17px;
+    line-height: 1.65;
+  }
+  .manaratak-public :where(.text-\[15px\], .text-base) {
+    font-size: 19px;
+    line-height: 1.55;
+  }
+}

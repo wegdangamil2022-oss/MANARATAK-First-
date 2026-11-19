@@ -1,65 +1,37 @@
-import { StudentSupportPanel } from './StudentSupportPanel';
-import { PreviewStudentApiClient } from './studentWorkspacePreviewApi';
-const ApiClient =
-  import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype'
-    ? PreviewStudentApiClient
-    : LiveApiClient;
-import { OwnerReferenceNotice } from './OwnerReferenceNotice';
-import { useTranslation } from '../../i18n/I18nProvider';
-import { StudentPrivateToolResult } from './StudentPrivateToolResult';
+import { PreviewStudentApiClient, loginPreviewStudent } from './studentWorkspacePreviewApi';
+const ApiClient = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? PreviewStudentApiClient : LiveApiClient;
+import {OwnerReferenceNotice} from './OwnerReferenceNotice';
+import {useTranslation} from '../../i18n/I18nProvider';
+import {StudentPrivateToolResult} from './StudentPrivateToolResult';
 import { StudentApplicationDocuments } from './StudentApplicationDocuments';
 import { StudentCareerWorkspace } from './StudentCareerWorkspace';
 import { StudentServiceBookingPanel } from './StudentServiceBookingPanel';
 import { StudentCertificatesPanel } from '../certificates/StudentCertificatesPanel';
 import { StudentNotificationsView, studentNotificationLink } from './StudentNotificationsView';
+import {
+  HorizontalSwipeTabs,
+  NextStepHeroCard,
+  ThisWeekScheduleCard,
+  GoalMatchedSection,
+  OpportunitiesDiscoverPanel,
+  OpportunitiesShortlistPanel,
+  OpportunitiesOffersPanel,
+  StudentDocumentsLibraryPanel,
+  LearningStudyPlanPanel,
+  LearningTestPrepPanel,
+  VaultComparisonsPanel,
+  VaultToolsResultsPanel,
+  ServiceDeliverablesPanel,
+  AcademicProfileSummaryCard,
+  StudentCalendarTasksPanel,
+  StudentSupportCenterPanel,
+  AccountQuickSearchModal,
+} from './StudentExpandedSections';
 import './student-workspace.css';
 import { StudentWorkspaceShell } from './StudentWorkspaceShell';
 import React, { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import {
-  ArrowLeft,
-  Award,
-  Bell,
-  BookOpen,
-  Bookmark,
-  CheckCircle2,
-  ClipboardList,
-  Compass,
-  Folder,
-  Heart,
-  LockKeyhole,
-  RefreshCw,
-  Route,
-  Settings2,
-  Star,
-  X,
-  User,
-  ListChecks,
-  GraduationCap,
-  CalendarClock,
-  Sparkles,
-  Clock3,
-  Languages,
-  Moon,
-  ShieldCheck,
-  ChevronLeft,
-  History as HistoryIcon,
-  Archive,
-  Trash2,
-  ExternalLink,
-  ChevronDown,
-  ChevronUp,
-  FileText,
-  Check,
-  AlertTriangle,
-  CreditCard,
-  Receipt,
-  Info,
-  LogOut,
-  Shield,
-  RotateCcw,
-  Save,
-} from 'lucide-react';
+import { ArrowLeft, Award, Bell, BookOpen, Bookmark, CheckCircle2, ClipboardList, Compass, FileCheck2, Folder, Heart, Home, LayoutGrid, LockKeyhole, RefreshCw, Route, Settings2, Star, X, User, ListChecks, GraduationCap, CalendarClock, Sparkles, Clock3, Languages, Moon, Sun, LogIn, ShieldCheck, ChevronLeft, History as HistoryIcon, Archive, Trash2, ExternalLink, ChevronDown, ChevronUp, FileText, Check, AlertTriangle, CreditCard, Receipt, Info, LogOut, Shield, RotateCcw, Save, Eye, Search, Plus, Layers, Filter, SlidersHorizontal, ArrowUpLeft, Camera, Upload, Scale, HelpCircle } from 'lucide-react';
 import {
   ApiClient as LiveApiClient,
   HydratedStudentSavedItemDto,
@@ -73,16 +45,7 @@ import {
   StudentServiceRequestDto,
 } from '../../api/client';
 
-export type CanonicalWorkspaceTab =
-  | 'SUMMARY'
-  | 'OPPORTUNITIES'
-  | 'LEARNING'
-  | 'VAULT'
-  | 'SERVICES'
-  | 'CAREERS'
-  | 'NOTIFICATIONS'
-  | 'SUPPORT'
-  | 'PROFILE';
+export type CanonicalWorkspaceTab = 'SUMMARY' | 'OPPORTUNITIES' | 'LEARNING' | 'VAULT' | 'SERVICES' | 'CAREERS' | 'NOTIFICATIONS' | 'PROFILE';
 export type LegacyWorkspaceTab = 'HOME' | 'JOURNEY' | 'SETTINGS';
 export type WorkspaceTab = CanonicalWorkspaceTab | LegacyWorkspaceTab;
 
@@ -94,6 +57,8 @@ function normalizeTab(t?: WorkspaceTab | null): CanonicalWorkspaceTab {
   return t;
 }
 
+
+
 function resolveTabFromQuery(queryTab: string | null): CanonicalWorkspaceTab | null {
   if (!queryTab) return null;
   const normalized = queryTab.toLowerCase();
@@ -103,23 +68,14 @@ function resolveTabFromQuery(queryTab: string | null): CanonicalWorkspaceTab | n
   if (normalized === 'vault' || normalized === 'saved') return 'VAULT';
   if (normalized === 'services' || normalized === 'requests') return 'SERVICES';
   if (normalized === 'careers') return 'CAREERS';
-  if (normalized === 'support') return 'SUPPORT';
   if (normalized === 'notifications') return 'NOTIFICATIONS';
   if (normalized === 'profile' || normalized === 'settings') return 'PROFILE';
   return null;
 }
 
-function trackerDisplayName(tracker: StudentApplicationTrackerDto): string {
-  return tracker.owner?.available
-    ? tracker.owner.displayName
-    : typeof tracker.ownerSnapshot?.displayName === 'string'
-      ? tracker.ownerSnapshot.displayName
-      : 'منحة محفوظة / Saved scholarship';
-}
+function trackerDisplayName(tracker:StudentApplicationTrackerDto):string {return tracker.owner?.available?tracker.owner.displayName:typeof tracker.ownerSnapshot?.displayName==='string'?tracker.ownerSnapshot.displayName:'منحة محفوظة / Saved scholarship';}
 
-export function StudentWorkspacePage({
-  initialTab = 'SUMMARY',
-}: { initialTab?: WorkspaceTab } = {}) {
+export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: WorkspaceTab } = {}) {
   const location = useLocation();
   const navigate = useNavigate();
   const [studentReferenceId, setStudentReferenceId] = useState<string | null>(null);
@@ -128,13 +84,11 @@ export function StudentWorkspacePage({
   const [paymentsByInvoice, setPaymentsByInvoice] = useState<
     Record<string, StudentFinancePaymentDto[]>
   >({});
-  const queryTab =
-    typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('tab') : null;
+  const queryTab = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('tab') : null;
   const hash = typeof window !== 'undefined' ? window.location.hash : '';
-  const resolvedInitialTab: CanonicalWorkspaceTab =
-    queryTab === 'vault' && hash === '#certificates'
-      ? 'LEARNING'
-      : resolveTabFromQuery(queryTab) || normalizeTab(initialTab);
+  const resolvedInitialTab: CanonicalWorkspaceTab = (queryTab === 'vault' && hash === '#certificates')
+    ? 'LEARNING'
+    : (resolveTabFromQuery(queryTab) || normalizeTab(initialTab));
   const [tab, setTab] = useState<CanonicalWorkspaceTab>(resolvedInitialTab);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -143,9 +97,7 @@ export function StudentWorkspacePage({
   const [retryKey, setRetryKey] = useState(0);
   const [snapshots, setSnapshots] = useState<StudentWorkspaceSnapshotDto[]>([]);
   const [hydratedSavedItems, setHydratedSavedItems] = useState<HydratedStudentSavedItemDto[]>([]);
-  const [applicationTrackers, setApplicationTrackers] = useState<StudentApplicationTrackerDto[]>(
-    [],
-  );
+  const [applicationTrackers, setApplicationTrackers] = useState<StudentApplicationTrackerDto[]>([]);
   const [serviceRequests, setServiceRequests] = useState<StudentServiceRequestDto[]>([]);
   const [sectionFailures, setSectionFailures] = useState<string[]>([]);
   const [profileDirty, setProfileDirty] = useState(false);
@@ -162,120 +114,56 @@ export function StudentWorkspacePage({
   const [invoiceError, setInvoiceError] = useState<string | null>(null);
   const invoiceSequence = useRef(0);
   const mutationPending = useRef(false);
-  const [selectedServiceRequest, setSelectedServiceRequest] =
-    useState<StudentServiceRequestDto | null>(null);
+  const [selectedServiceRequest, setSelectedServiceRequest] = useState<StudentServiceRequestDto | null>(null);
   const [requestedServiceNotFound, setRequestedServiceNotFound] = useState(false);
   const [requestedNotFoundId, setRequestedNotFoundId] = useState<string | null>(null);
-  const [identity, setIdentity] = useState<{
-    principalId: string;
-    displayName: string;
-    primaryEmail?: string;
-    roles?: string[];
-    roleNames?: string[];
-  } | null>(null);
+  const [identity, setIdentity] = useState<{ principalId: string; displayName: string; primaryEmail?: string; roles?: string[]; roleNames?: string[] } | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [profileSubTabRequest, setProfileSubTabRequest] = useState<'ACADEMIC' | 'SETTINGS' | 'CALENDAR' | 'SUPPORT' | null>(null);
+  const [opportunitiesSubTabRequest, setOpportunitiesSubTabRequest] = useState<'ACTIVE' | 'DISCOVER' | 'SHORTLIST' | 'OFFERS' | 'DOCUMENTS' | 'ARCHIVED' | null>(null);
+
+  useEffect(() => {
+    const onAuthChange = () => setRetryKey((v) => v + 1);
+    window.addEventListener('mn-preview-auth-change', onAuthChange);
+    return () => window.removeEventListener('mn-preview-auth-change', onAuthChange);
+  }, []);
 
   useEffect(() => {
     if (!dashboard) return;
-    window.dispatchEvent(
-      new CustomEvent('manaratak-student-preferences', {
-        detail: {
-          theme: dashboard.workspace.theme,
-          unreadNotifications:
-            dashboard.capabilityStatus?.notifications === 'DEGRADED'
-              ? undefined
-              : dashboard.statistics.unreadNotifications,
-        },
-      }),
-    );
-  }, [
-    dashboard?.workspace.theme,
-    dashboard?.statistics.unreadNotifications,
-    dashboard?.capabilityStatus?.notifications,
-  ]);
+    window.dispatchEvent(new CustomEvent('manaratak-student-preferences', { detail: { theme: dashboard.workspace.theme, unreadNotifications: dashboard.capabilityStatus?.notifications === 'DEGRADED' ? undefined : dashboard.statistics.unreadNotifications, displayName: dashboard.workspace.displayName || identity?.displayName, email: identity?.primaryEmail } }));
+  }, [dashboard?.workspace.theme, dashboard?.workspace.displayName, dashboard?.statistics.unreadNotifications, dashboard?.capabilityStatus?.notifications, identity?.displayName, identity?.primaryEmail]);
 
   useEffect(() => {
     if (tab !== 'LEARNING' || !studentReferenceId) return;
-    let active = true;
-    let latest = 0;
+    let active = true; let latest = 0;
     const refreshCertificates = async () => {
       if (document.visibilityState === 'hidden') return;
       const request = ++latest;
-      try {
-        const next = await ApiClient.getMyStudentDashboard();
-        if (active && request === latest) setDashboard(next);
-      } catch {
-        /* Preserve the loaded account during transient failures. */
-      }
+      try { const next = await ApiClient.getMyStudentDashboard(); if (active && request === latest) setDashboard(next); } catch { /* Preserve the loaded account during transient failures. */ }
     };
     window.addEventListener('focus', refreshCertificates);
     document.addEventListener('visibilitychange', refreshCertificates);
-    return () => {
-      active = false;
-      window.removeEventListener('focus', refreshCertificates);
-      document.removeEventListener('visibilitychange', refreshCertificates);
-    };
+    return () => {active=false;window.removeEventListener('focus',refreshCertificates);document.removeEventListener('visibilitychange',refreshCertificates);};
   }, [tab, studentReferenceId]);
 
   // Live owner reads bound stale catalog links without persisting a second canonical catalog.
-  useEffect(() => {
-    if (!studentReferenceId) return;
-    let active = true,
-      latest = 0;
-    const refreshOwners = async () => {
-      if (document.visibilityState === 'hidden' || mutationPending.current) return;
-      const request = ++latest;
-      const [trackers, saved] = await Promise.allSettled([
-        ApiClient.listMyStudentApplicationTrackers(),
-        ApiClient.listMyHydratedStudentSavedItems(),
-      ]);
-      if (!active || request !== latest || mutationPending.current) return;
-      if (trackers.status === 'fulfilled')
-        setApplicationTrackers((current) =>
-          trackers.value.map((fresh) => {
-            const prior = current.find((item) => item.id === fresh.id);
-            return prior && prior.version > fresh.version
-              ? { ...prior, owner: fresh.owner }
-              : fresh;
-          }),
-        );
-      else
-        setApplicationTrackers((current) =>
-          current.map((item) => ({
-            ...item,
-            deadlineAt: null,
-            scholarshipSlug: null,
-            owner: item.owner
-              ? { ...item.owner, available: false, slug: null, deadlineAt: null }
-              : null,
-          })),
-        );
-      setHydratedSavedItems((current) =>
-        saved.status === 'fulfilled'
-          ? saved.value
-          : current.map((item) => ({ ...item, owner: null })),
-      );
+  useEffect(()=>{
+    if(!studentReferenceId)return;let active=true,latest=0;
+    const refreshOwners=async()=>{
+      if(document.visibilityState==='hidden'||mutationPending.current)return;const request=++latest;
+      const [trackers,saved]=await Promise.allSettled([ApiClient.listMyStudentApplicationTrackers(),ApiClient.listMyHydratedStudentSavedItems()]);
+      if(!active||request!==latest||mutationPending.current)return;
+      if(trackers.status==='fulfilled')setApplicationTrackers(current=>trackers.value.map(fresh=>{const prior=current.find(item=>item.id===fresh.id);return prior&&prior.version>fresh.version?{...prior,owner:fresh.owner}:fresh;}));
+      else setApplicationTrackers(current=>current.map(item=>({...item,deadlineAt:null,scholarshipSlug:null,owner:item.owner?{...item.owner,available:false,slug:null,deadlineAt:null}:null})));
+      setHydratedSavedItems(current=>saved.status==='fulfilled'?saved.value:current.map(item=>({...item,owner:null})));
     };
-    const timer = window.setInterval(() => void refreshOwners(), 30000);
-    window.addEventListener('focus', refreshOwners);
-    document.addEventListener('visibilitychange', refreshOwners);
-    return () => {
-      active = false;
-      ++latest;
-      window.clearInterval(timer);
-      window.removeEventListener('focus', refreshOwners);
-      document.removeEventListener('visibilitychange', refreshOwners);
-    };
-  }, [studentReferenceId]);
+    const timer=window.setInterval(()=>void refreshOwners(),30000);window.addEventListener('focus',refreshOwners);document.addEventListener('visibilitychange',refreshOwners);
+    return()=>{active=false;++latest;window.clearInterval(timer);window.removeEventListener('focus',refreshOwners);document.removeEventListener('visibilitychange',refreshOwners);};
+  },[studentReferenceId]);
 
   // Synchronize Tab with URL query param and browser history (back/forward & refresh support)
   const handleTabChange = (nextTab: CanonicalWorkspaceTab, push = true) => {
-    if (
-      tab === 'PROFILE' &&
-      nextTab !== 'PROFILE' &&
-      profileDirty &&
-      !window.confirm('لديك تعديلات غير محفوظة. مغادرة الملف دون حفظ؟')
-    )
-      return;
+    if (tab === 'PROFILE' && nextTab !== 'PROFILE' && profileDirty && !window.confirm('لديك تعديلات غير محفوظة. مغادرة الملف دون حفظ؟')) return;
     if (nextTab !== 'PROFILE') setProfileDirty(false);
     setTab(nextTab);
     const searchParams = new URLSearchParams(location.search);
@@ -294,10 +182,7 @@ export function StudentWorkspacePage({
 
   useEffect(() => {
     if (!profileDirty) return;
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = '';
-    };
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; };
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
   }, [profileDirty]);
@@ -305,75 +190,41 @@ export function StudentWorkspacePage({
   useEffect(() => {
     if (tab !== 'SERVICES' || !studentReferenceId || loading) return;
     const request = ++serviceSequence.current;
-    setServiceLoading(true);
-    setServiceError(null);
+    setServiceLoading(true); setServiceError(null);
     ApiClient.listMyStudentServiceRequests({ status: serviceStatus || undefined })
-      .then((page) => {
+      .then(page => {
         if (request !== serviceSequence.current) return;
-        setSectionFailures((items) => items.filter((item) => item !== 'طلبات الخدمات'));
-        setServiceRequests(page.data);
-        setServicePage(page.page);
-        setServiceTotal(page.total);
-        setServiceHasMore(page.page < page.totalPages);
-      })
-      .catch((cause) => {
-        if (request === serviceSequence.current)
-          setServiceError(cause instanceof Error ? cause.message : 'تعذر تحميل الطلبات.');
-      })
-      .finally(() => {
-        if (request === serviceSequence.current) setServiceLoading(false);
-      });
-    return () => {
-      ++serviceSequence.current;
-    };
+        setSectionFailures(items => items.filter(item => item !== 'طلبات الخدمات'));
+        setServiceRequests(page.data); setServicePage(page.page); setServiceTotal(page.total); setServiceHasMore(page.page < page.totalPages);
+      }).catch(cause => { if (request === serviceSequence.current) setServiceError(cause instanceof Error ? cause.message : 'تعذر تحميل الطلبات.'); })
+      .finally(() => { if (request === serviceSequence.current) setServiceLoading(false); });
+    return () => { ++serviceSequence.current; };
   }, [tab, serviceStatus, studentReferenceId, loading]);
 
   async function loadMoreServices() {
     if (serviceLoading || !serviceHasMore) return;
     const request = ++serviceSequence.current;
-    setServiceLoading(true);
-    setServiceError(null);
+    setServiceLoading(true); setServiceError(null);
     try {
-      const page = await ApiClient.listMyStudentServiceRequests({
-        page: servicePage + 1,
-        status: serviceStatus || undefined,
-      });
+      const page = await ApiClient.listMyStudentServiceRequests({ page: servicePage + 1, status: serviceStatus || undefined });
       if (request !== serviceSequence.current) return;
-      setServiceRequests((items) => [
-        ...new Map([...items, ...page.data].map((item) => [item.id, item])).values(),
-      ]);
-      setServicePage(page.page);
-      setServiceTotal(page.total);
-      setServiceHasMore(page.page < page.totalPages);
-    } catch (cause) {
-      if (request === serviceSequence.current)
-        setServiceError(cause instanceof Error ? cause.message : 'تعذر تحميل المزيد.');
-    } finally {
-      if (request === serviceSequence.current) setServiceLoading(false);
-    }
+      setServiceRequests(items => [...new Map([...items, ...page.data].map(item => [item.id, item])).values()]);
+      setServicePage(page.page); setServiceTotal(page.total); setServiceHasMore(page.page < page.totalPages);
+    } catch (cause) { if (request === serviceSequence.current) setServiceError(cause instanceof Error ? cause.message : 'تعذر تحميل المزيد.'); }
+    finally { if (request === serviceSequence.current) setServiceLoading(false); }
   }
 
   async function loadMoreInvoices() {
     if (!studentReferenceId || invoiceLoading || invoices.length >= invoiceTotal) return;
     const request = ++invoiceSequence.current;
-    setInvoiceLoading(true);
-    setInvoiceError(null);
+    setInvoiceLoading(true); setInvoiceError(null);
     try {
-      const page = await ApiClient.getStudentInvoices(studentReferenceId, {
-        page: invoicePage + 1,
-      });
+      const page = await ApiClient.getStudentInvoices(studentReferenceId, { page: invoicePage + 1 });
       if (request !== invoiceSequence.current) return;
-      setInvoices((items) => [
-        ...new Map([...items, ...page.data].map((item) => [item.id, item])).values(),
-      ]);
-      setInvoicePage(page.page ?? invoicePage + 1);
-      setInvoiceTotal(page.total);
-    } catch (cause) {
-      if (request === invoiceSequence.current)
-        setInvoiceError(cause instanceof Error ? cause.message : 'تعذر تحميل الفواتير.');
-    } finally {
-      if (request === invoiceSequence.current) setInvoiceLoading(false);
-    }
+      setInvoices(items => [...new Map([...items, ...page.data].map(item => [item.id, item])).values()]);
+      setInvoicePage(page.page ?? invoicePage + 1); setInvoiceTotal(page.total);
+    } catch (cause) { if (request === invoiceSequence.current) setInvoiceError(cause instanceof Error ? cause.message : 'تعذر تحميل الفواتير.'); }
+    finally { if (request === invoiceSequence.current) setInvoiceLoading(false); }
   }
 
   useEffect(() => {
@@ -381,13 +232,7 @@ export function StudentWorkspacePage({
     const requested = params.get('tab');
     if (requested === 'vault' && location.hash === '#certificates') {
       setTab('LEARNING');
-      window.setTimeout(
-        () =>
-          document
-            .getElementById('certificates')
-            ?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-        100,
-      );
+      window.setTimeout(() => document.getElementById('certificates')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       return;
     }
     const next = resolveTabFromQuery(requested);
@@ -395,13 +240,7 @@ export function StudentWorkspacePage({
       setTab((prev) => (prev !== next ? next : prev));
     }
     if ((next === 'LEARNING' || next === 'VAULT') && location.hash === '#certificates') {
-      window.setTimeout(
-        () =>
-          document
-            .getElementById('certificates')
-            ?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-        100,
-      );
+      window.setTimeout(() => document.getElementById('certificates')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     }
   }, [location.search, location.hash]);
 
@@ -416,9 +255,7 @@ export function StudentWorkspacePage({
     }
     if (loading || !studentReferenceId) return;
 
-    const matched = serviceRequests.find(
-      (item) => item.id === requestedId || item.publicId === requestedId,
-    );
+    const matched = serviceRequests.find((item) => item.id === requestedId || item.publicId === requestedId);
     if (matched) {
       setSelectedServiceRequest(matched);
       setRequestedServiceNotFound(false);
@@ -459,14 +296,7 @@ export function StudentWorkspacePage({
         identityLoaded = true;
         setIdentity(identity);
         setStudentReferenceId(identity.principalId);
-        const [
-          dashboardResult,
-          invoiceResult,
-          snapshotResult,
-          hydratedSavedResult,
-          trackerResult,
-          serviceRequestResult,
-        ] = await Promise.allSettled([
+        const [dashboardResult, invoiceResult, snapshotResult, hydratedSavedResult, trackerResult, serviceRequestResult] = await Promise.allSettled([
           ApiClient.getMyStudentDashboard(),
           ApiClient.getStudentInvoices(identity.principalId),
           ApiClient.listMyStudentWorkspaceSnapshots(),
@@ -478,7 +308,7 @@ export function StudentWorkspacePage({
         if (dashboardResult.status === 'rejected') throw dashboardResult.reason;
         setDashboard(dashboardResult.value);
         setInvoices(invoiceResult.status === 'fulfilled' ? invoiceResult.value.data : []);
-        setInvoicePage(invoiceResult.status === 'fulfilled' ? (invoiceResult.value.page ?? 1) : 1);
+        setInvoicePage(invoiceResult.status === 'fulfilled' ? invoiceResult.value.page ?? 1 : 1);
         setInvoiceTotal(invoiceResult.status === 'fulfilled' ? invoiceResult.value.total : 0);
         setSectionFailures([
           ...(invoiceResult.status === 'rejected' ? ['الفواتير'] : []),
@@ -488,29 +318,17 @@ export function StudentWorkspacePage({
           ...(serviceRequestResult.status === 'rejected' ? ['طلبات الخدمات'] : []),
         ]);
         setSnapshots(snapshotResult.status === 'fulfilled' ? snapshotResult.value : []);
-        setHydratedSavedItems(
-          hydratedSavedResult.status === 'fulfilled' ? hydratedSavedResult.value : [],
-        );
+        setHydratedSavedItems(hydratedSavedResult.status === 'fulfilled' ? hydratedSavedResult.value : []);
         setApplicationTrackers(trackerResult.status === 'fulfilled' ? trackerResult.value : []);
-        const loadedRequests =
-          serviceRequestResult.status === 'fulfilled' ? serviceRequestResult.value.data : [];
+        const loadedRequests = serviceRequestResult.status === 'fulfilled' ? serviceRequestResult.value.data : [];
         setServiceRequests(loadedRequests);
-        setServicePage(
-          serviceRequestResult.status === 'fulfilled' ? serviceRequestResult.value.page : 1,
-        );
-        setServiceTotal(
-          serviceRequestResult.status === 'fulfilled' ? serviceRequestResult.value.total : 0,
-        );
-        setServiceHasMore(
-          serviceRequestResult.status === 'fulfilled' &&
-            serviceRequestResult.value.page < serviceRequestResult.value.totalPages,
-        );
+        setServicePage(serviceRequestResult.status === 'fulfilled' ? serviceRequestResult.value.page : 1);
+        setServiceTotal(serviceRequestResult.status === 'fulfilled' ? serviceRequestResult.value.total : 0);
+        setServiceHasMore(serviceRequestResult.status === 'fulfilled' && serviceRequestResult.value.page < serviceRequestResult.value.totalPages);
 
         const currentRequestedId = new URLSearchParams(window.location.search).get('requestId');
         if (currentRequestedId) {
-          const request = loadedRequests.find(
-            (item) => item.id === currentRequestedId || item.publicId === currentRequestedId,
-          );
+          const request = loadedRequests.find((item) => item.id === currentRequestedId || item.publicId === currentRequestedId);
           if (request) {
             setSelectedServiceRequest(request);
             setRequestedServiceNotFound(false);
@@ -532,11 +350,7 @@ export function StudentWorkspacePage({
         }
       } catch (cause) {
         if (active) {
-          if (!identityLoaded) {
-            setDashboard(null);
-            setIdentity(null);
-            setStudentReferenceId(null);
-          }
+          if (!identityLoaded) { setDashboard(null); setIdentity(null); setStudentReferenceId(null); }
           const msg = cause instanceof Error ? cause.message : 'تعذر تحميل مساحة الطالب';
           setError(msg);
           if (msg.includes('PROVISIONING_PENDING') || msg.includes('INITIALIZING')) {
@@ -581,134 +395,62 @@ export function StudentWorkspacePage({
 
   async function applicationError(cause: unknown, fallback: string) {
     const message = cause instanceof Error ? cause.message : fallback;
-    setError(
-      message.includes('VERSION_CONFLICT')
-        ? 'تغيّر ملف التقديم في جلسة أخرى. حدّثنا بياناته؛ راجع التعديل وأعد الحفظ.'
-        : message,
-    );
+    setError(message.includes('VERSION_CONFLICT') ? 'تغيّر ملف التقديم في جلسة أخرى. حدّثنا بياناته؛ راجع التعديل وأعد الحفظ.' : message);
     if (message.includes('VERSION_CONFLICT')) {
-      try {
-        setApplicationTrackers(await ApiClient.listMyStudentApplicationTrackers());
-      } catch {
-        setError('تعذر تحديث ملف التقديم بعد تعارض الإصدارات. أعد تحميل الحساب قبل الحفظ.');
-      }
+      try { setApplicationTrackers(await ApiClient.listMyStudentApplicationTrackers()); }
+      catch { setError('تعذر تحديث ملف التقديم بعد تعارض الإصدارات. أعد تحميل الحساب قبل الحفظ.'); }
     }
   }
 
   async function updateApplicationStage(tracker: StudentApplicationTrackerDto, stage: string) {
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
-    setError(null);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true); setError(null);
     try {
-      const updated = await ApiClient.updateMyStudentApplicationTracker(tracker.id, {
-        expectedVersion: tracker.version,
-        stage,
-      });
-      setApplicationTrackers((items) =>
-        items.map((item) => (item.id === tracker.id ? { ...updated, owner: item.owner } : item)),
-      );
+      const updated = await ApiClient.updateMyStudentApplicationTracker(tracker.id, { expectedVersion: tracker.version, stage });
+      setApplicationTrackers((items) => items.map((item) => item.id === tracker.id ? { ...updated, owner: item.owner } : item));
       setNotice('تم تحديث مرحلة التقديم وحفظها في مساحة الطالب.');
-    } catch (cause) {
-      await applicationError(cause, 'تعذر تحديث مرحلة التقديم');
-    } finally {
-      mutationPending.current = false;
-      setSaving(false);
-    }
+    } catch (cause) { await applicationError(cause, 'تعذر تحديث مرحلة التقديم'); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
-  async function toggleApplicationChecklist(
-    tracker: StudentApplicationTrackerDto,
-    itemId: string,
-    completed: boolean,
-  ) {
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
-    setError(null);
+  async function toggleApplicationChecklist(tracker: StudentApplicationTrackerDto, itemId: string, completed: boolean) {
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true); setError(null);
     try {
-      const updated = await ApiClient.updateMyStudentApplicationChecklistItem(
-        tracker.id,
-        itemId,
-        completed,
-        tracker.version,
-      );
-      setApplicationTrackers((items) =>
-        items.map((item) => (item.id === tracker.id ? { ...updated, owner: item.owner } : item)),
-      );
-    } catch (cause) {
-      await applicationError(cause, 'تعذر تحديث قائمة التقديم');
-    } finally {
-      mutationPending.current = false;
-      setSaving(false);
-    }
+      const updated = await ApiClient.updateMyStudentApplicationChecklistItem(tracker.id, itemId, completed, tracker.version);
+      setApplicationTrackers((items) => items.map((item) => item.id === tracker.id ? { ...updated, owner: item.owner } : item));
+    } catch (cause) { await applicationError(cause, 'تعذر تحديث قائمة التقديم'); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function archiveApplicationTracker(tracker: StudentApplicationTrackerDto) {
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
-    setError(null);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true); setError(null);
     try {
-      const updated = await ApiClient.archiveMyStudentApplicationTracker(
-        tracker.id,
-        tracker.version,
-      );
-      setApplicationTrackers((items) =>
-        items.map((item) => (item.id === tracker.id ? { ...updated, owner: item.owner } : item)),
-      );
+      const updated = await ApiClient.archiveMyStudentApplicationTracker(tracker.id, tracker.version);
+      setApplicationTrackers((items) => items.map((item) => item.id === tracker.id ? { ...updated, owner: item.owner } : item));
       setNotice('تمت أرشفة ملف التقديم وإلغاء التذكير المرتبط به.');
-    } catch (cause) {
-      await applicationError(cause, 'تعذر أرشفة ملف التقديم');
-    } finally {
-      mutationPending.current = false;
-      setSaving(false);
-    }
+    } catch (cause) { await applicationError(cause, 'تعذر أرشفة ملف التقديم'); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function updateApplicationNotes(tracker: StudentApplicationTrackerDto, notes: string) {
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
-    setError(null);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true); setError(null);
     try {
-      const updated = await ApiClient.updateMyStudentApplicationTracker(tracker.id, {
-        expectedVersion: tracker.version,
-        notes,
-      });
-      setApplicationTrackers((items) =>
-        items.map((item) => (item.id === tracker.id ? { ...updated, owner: item.owner } : item)),
-      );
+      const updated = await ApiClient.updateMyStudentApplicationTracker(tracker.id, { expectedVersion: tracker.version, notes });
+      setApplicationTrackers((items) => items.map((item) => item.id === tracker.id ? { ...updated, owner: item.owner } : item));
       setNotice('تم حفظ ملاحظات ملف التقديم.');
-    } catch (cause) {
-      await applicationError(cause, 'تعذر حفظ ملاحظات ملف التقديم');
-    } finally {
-      mutationPending.current = false;
-      setSaving(false);
-    }
+    } catch (cause) { await applicationError(cause, 'تعذر حفظ ملاحظات ملف التقديم'); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function removeApplicationTracker(tracker: StudentApplicationTrackerDto) {
     if (!window.confirm('إزالة ملف التقديم من مساحة الطالب؟')) return;
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
-    setError(null);
-    try {
-      await ApiClient.removeMyStudentApplicationTracker(tracker.id);
-      setApplicationTrackers((items) => items.filter((item) => item.id !== tracker.id));
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'تعذر إزالة ملف التقديم');
-    } finally {
-      mutationPending.current = false;
-      setSaving(false);
-    }
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true); setError(null);
+    try { await ApiClient.removeMyStudentApplicationTracker(tracker.id); setApplicationTrackers((items) => items.filter((item) => item.id !== tracker.id)); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر إزالة ملف التقديم'); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function openServiceRequest(requestId: string) {
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     setError(null);
     try {
       const match = serviceRequests.find((r) => r.id === requestId || r.publicId === requestId);
@@ -732,8 +474,7 @@ export function StudentWorkspacePage({
       setRequestedServiceNotFound(true);
       setRequestedNotFoundId(requestId);
     } finally {
-      mutationPending.current = false;
-      setSaving(false);
+      mutationPending.current = false; setSaving(false);
     }
   }
 
@@ -771,42 +512,25 @@ export function StudentWorkspacePage({
       });
       preferencesSaved = true;
       const privacyPreferences = {
-        retainSearchHistory: form.get('retainSearchHistory') === 'on',
-        allowPersonalization: form.get('allowPersonalization') === 'on',
-        allowProductAnalytics: form.get('allowProductAnalytics') === 'on',
-        publicProfileEnabled: false,
+          retainSearchHistory: form.get('retainSearchHistory') === 'on',
+          allowPersonalization: form.get('allowPersonalization') === 'on',
+          allowProductAnalytics: form.get('allowProductAnalytics') === 'on',
+          publicProfileEnabled: false,
       };
-      const privacyChanged = Object.entries(privacyPreferences).some(
-        ([key, value]) => dashboard.workspace.privacyPreferences?.[key] !== value,
-      );
-      if (privacyChanged)
-        await ApiClient.updateMyStudentPrivacyConsent({
-          expectedVersion: workspace.version,
-          purpose: 'تحديث تفضيلات الخصوصية من مساحة الطالب',
-          privacyPreferences,
-        });
+      const privacyChanged = Object.entries(privacyPreferences).some(([key, value]) => dashboard.workspace.privacyPreferences?.[key] !== value);
+      if (privacyChanged) await ApiClient.updateMyStudentPrivacyConsent({ expectedVersion: workspace.version, purpose: 'تحديث تفضيلات الخصوصية من مساحة الطالب', privacyPreferences });
       setDashboard(await ApiClient.getMyStudentDashboard());
       setProfileDirty(false);
-      window.dispatchEvent(
-        new CustomEvent('manaratak-student-preferences', { detail: { theme: workspace.theme } }),
-      );
+      window.dispatchEvent(new CustomEvent('manaratak-student-preferences', { detail: { theme: workspace.theme } }));
       setNotice('حُفظت تفضيلاتك بأمان على جميع أجهزتك.');
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : 'تعذر حفظ الإعدادات';
       setNotice(null);
-      setError(
-        preferencesSaved
-          ? `حُفظت بيانات الملف، لكن لم تكتمل مزامنة الخصوصية أو إعادة تحميل الحساب: ${message}. أعد تحميل الإعدادات قبل المحاولة مجدداً.`
-          : message.includes('VERSION_CONFLICT')
-            ? 'تغيّرت الإعدادات في جلسة أخرى. تم تحديث البيانات؛ راجع اختياراتك ثم احفظ مجددًا.'
-            : message,
-      );
+      setError(preferencesSaved ? `حُفظت بيانات الملف، لكن لم تكتمل مزامنة الخصوصية أو إعادة تحميل الحساب: ${message}. أعد تحميل الإعدادات قبل المحاولة مجدداً.` : message.includes('VERSION_CONFLICT')
+        ? 'تغيّرت الإعدادات في جلسة أخرى. تم تحديث البيانات؛ راجع اختياراتك ثم احفظ مجددًا.'
+        : message);
       if (preferencesSaved || message.includes('VERSION_CONFLICT')) {
-        try {
-          setDashboard(await ApiClient.getMyStudentDashboard());
-        } catch {
-          setRetryKey((value) => value + 1);
-        }
+        try { setDashboard(await ApiClient.getMyStudentDashboard()); } catch { setRetryKey((value) => value + 1); }
       }
     } finally {
       mutationPending.current = false;
@@ -821,9 +545,7 @@ export function StudentWorkspacePage({
     const form = new FormData(formElement);
     const name = String(form.get('collectionName') || '').trim();
     if (!name) return;
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
       await ApiClient.createMyStudentCollection({
         name,
@@ -837,50 +559,35 @@ export function StudentWorkspacePage({
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'تعذر إنشاء المجموعة');
     } finally {
-      mutationPending.current = false;
-      setSaving(false);
+      mutationPending.current = false; setSaving(false);
     }
   }
 
   async function renameCollection(collectionId: string, currentName: string) {
     const name = window.prompt('الاسم الجديد للمجموعة', currentName)?.trim();
     if (!name || name === currentName) return;
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
       await ApiClient.updateMyStudentCollection(collectionId, { name });
       setDashboard(await ApiClient.getMyStudentDashboard());
       setNotice('تم تحديث اسم المجموعة.');
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'تعذر تعديل المجموعة');
-    } finally {
-      mutationPending.current = false;
-      setSaving(false);
-    }
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر تعديل المجموعة'); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function deleteCollection(collectionId: string, name: string) {
     if (!window.confirm(`حذف مجموعة «${name}»؟ ستنتقل العناصر إلى المفضلة.`)) return;
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
       await ApiClient.deleteMyStudentCollection(collectionId);
       setDashboard(await ApiClient.getMyStudentDashboard());
       setNotice('حُذفت المجموعة ونُقلت عناصرها بأمان إلى المفضلة.');
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'تعذر حذف المجموعة');
-    } finally {
-      mutationPending.current = false;
-      setSaving(false);
-    }
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر حذف المجموعة'); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function moveSavedItem(itemId: string, collectionId: string | null) {
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
       await ApiClient.moveMyStudentSavedItem(itemId, collectionId);
       const [refreshedDashboard, refreshedHydration] = await Promise.all([
@@ -890,20 +597,12 @@ export function StudentWorkspacePage({
       setDashboard(refreshedDashboard);
       setHydratedSavedItems(refreshedHydration);
       setNotice('تم نقل العنصر إلى المجموعة المختارة.');
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'تعذر نقل العنصر');
-    } finally {
-      mutationPending.current = false;
-      setSaving(false);
-    }
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر نقل العنصر'); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function removeSavedItem(item: StudentSavedItemDto) {
-    const itemName = item.displayName || 'هذا العنصر';
-    if (!window.confirm(`هل أنت متأكد من إزالة «${itemName}» من المحفوظات؟`)) return;
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     setError(null);
     try {
       await ApiClient.removeMyStudentSavedItem(item.entityType, item.entityId);
@@ -913,20 +612,17 @@ export function StudentWorkspacePage({
       ]);
       setDashboard(refreshedDashboard);
       setHydratedSavedItems(refreshedHydration);
-      setNotice('تمت إزالة العنصر من المحفوظات بنجاح.');
+      setNotice('تمت إزالة العنصر من المفضلة بنجاح.');
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'تعذر إزالة العنصر من المحفوظات');
+      setError(cause instanceof Error ? cause.message : 'تعذر إزالة العنصر من المفضلة');
     } finally {
-      mutationPending.current = false;
-      setSaving(false);
+      mutationPending.current = false; setSaving(false);
     }
   }
 
   async function createSnapshot() {
     if (!studentReferenceId) return;
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
       await ApiClient.createMyStudentWorkspaceSnapshot('نسخة إعداداتي');
       setSnapshots(await ApiClient.listMyStudentWorkspaceSnapshots());
@@ -934,95 +630,69 @@ export function StudentWorkspacePage({
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'تعذر حفظ النسخة');
     } finally {
-      mutationPending.current = false;
-      setSaving(false);
+      mutationPending.current = false; setSaving(false);
     }
   }
 
   async function restoreSnapshot(snapshotId: string) {
     if (!dashboard) return;
     if (!window.confirm('استعادة نسخة الإعدادات واستبدال اختياراتك الحالية؟')) return;
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
-      const workspace = await ApiClient.restoreMyStudentWorkspaceSnapshot(
-        snapshotId,
-        dashboard.workspace.version,
-      );
-      setDashboard((current) => (current ? { ...current, workspace } : current));
+      const workspace = await ApiClient.restoreMyStudentWorkspaceSnapshot(snapshotId, dashboard.workspace.version);
+      setDashboard((current) => current ? { ...current, workspace } : current);
       setProfileDirty(false);
       setNotice('تمت استعادة نسخة الإعدادات مع التحقق من تعارض الإصدارات.');
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'تعذر استعادة النسخة');
-    } finally {
-      mutationPending.current = false;
-      setSaving(false);
-    }
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر استعادة النسخة'); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function resetLayout() {
     if (!dashboard) return;
-    if (
-      !window.confirm(
-        profileDirty
-          ? 'إعادة ترتيب اللوحة؟ ستفقد تعديلات الملف غير المحفوظة.'
-          : 'إعادة ترتيب لوحة حسابك إلى الترتيب الافتراضي؟',
-      )
-    )
-      return;
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
+    if (!window.confirm(profileDirty ? 'إعادة ترتيب اللوحة؟ ستفقد تعديلات الملف غير المحفوظة.' : 'إعادة ترتيب لوحة حسابك إلى الترتيب الافتراضي؟')) return;
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
       const workspace = await ApiClient.resetMyStudentDashboardLayout(dashboard.workspace.version);
-      setDashboard((current) => (current ? { ...current, workspace } : current));
+      setDashboard((current) => current ? { ...current, workspace } : current);
       setProfileDirty(false);
       setNotice('أُعيد تخطيط اللوحة إلى الإعدادات الآمنة.');
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'تعذر إعادة التخطيط');
-    } finally {
-      mutationPending.current = false;
-      setSaving(false);
-    }
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر إعادة التخطيط'); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function clearSearchHistory() {
     if (!studentReferenceId) return;
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
       await ApiClient.clearMyStudentSearchHistory();
       setNotice('مُسح سجل البحث الشخصي.');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'تعذر مسح سجل البحث');
     } finally {
-      mutationPending.current = false;
-      setSaving(false);
+      mutationPending.current = false; setSaving(false);
     }
   }
 
   async function logout() {
-    if (mutationPending.current) return;
-    mutationPending.current = true;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     setError(null);
     try {
       await ApiClient.logoutStudent();
-      window.location.assign('/');
+      setDashboard(null);
+      setIdentity(null);
+      setStudentReferenceId(null);
+      setError('UNAUTHENTICATED_GUEST');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'تعذر تسجيل الخروج');
     } finally {
-      mutationPending.current = false;
-      setSaving(false);
+      mutationPending.current = false; setSaving(false);
     }
   }
 
   if (loading) return <WorkspaceSkeleton />;
 
-  if (error && !dashboard) {
-    const isProvisioning = error.includes('PROVISIONING_PENDING') || error.includes('INITIALIZING');
+  if ((error && !dashboard) || !dashboard) {
+    const isProvisioning = Boolean(error && (error.includes('PROVISIONING_PENDING') || error.includes('INITIALIZING')));
     if (isProvisioning) {
       return (
         <main dir="rtl" className="mn-page-shell py-24 text-center">
@@ -1031,12 +701,9 @@ export function StudentWorkspacePage({
               <div className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-[var(--mn-surface-elevated)] text-[var(--mn-primary)]">
                 <RefreshCw className="h-7 w-7 animate-spin" />
               </div>
-              <h1 className="text-2xl font-bold text-[var(--mn-heading)]">
-                جارٍ إعداد مساحة الطالب الخاصة بك
-              </h1>
+              <h1 className="text-2xl font-bold text-[var(--mn-heading)]">جارٍ إعداد مساحة الطالب الخاصة بك</h1>
               <p className="mt-3 leading-7 text-[var(--mn-text-muted)]">
-                يتم الآن تجهيز لوحة التحكم وسجلاتك التعليمية لأول مرة تلقائياً. ستكون مساحتك جاهزة
-                خلال لحظات قليلة.
+                يتم الآن تجهيز لوحة التحكم وسجلاتك التعليمية لأول مرة تلقائياً. ستكون مساحتك جاهزة خلال لحظات قليلة.
               </p>
               <div className="mt-7 flex justify-center gap-3">
                 <button
@@ -1053,66 +720,147 @@ export function StudentWorkspacePage({
       );
     }
 
+    const guestTabMeta: Record<CanonicalWorkspaceTab, { title: string; description: string; icon: React.ComponentType<{ className?: string }> }> = {
+      SUMMARY: {
+        title: 'ملخصي ونظرة عامة',
+        description: 'تابِع أولوياتك اليومية، خطوتك القادمة، ومواعيد التقديم الهامة خلال الأسبوع في لوحة واحدة مركزة.',
+        icon: Home,
+      },
+      OPPORTUNITIES: {
+        title: 'فرصي ومتابعة المنح',
+        description: 'أدِر ملفات تقديمك على المنح الدراسية خطوة بخطوة، وتابع قائمة المهام والمستندات المطلوبة لكل منحة.',
+        icon: Route,
+      },
+      LEARNING: {
+        title: 'تعلمي ودوراتي التدريبية',
+        description: 'استكمل دوراتك التدريبية المسجلة، وتابع نسبة تقدمك الأكاديمي وحمّل شهاداتك المعتمدة فور إتمام الدراسة.',
+        icon: BookOpen,
+      },
+      VAULT: {
+        title: 'محفوظاتي وخزنتي الشخصية',
+        description: 'احفظ المنح الدراسية، الجامعات، التخصصات، والدورات المفضلة لديك في مجموعات منظمة للرجوع إليها في أي وقت.',
+        icon: Heart,
+      },
+      CAREERS: {
+        title: 'مساري الأكاديمي والمهني',
+        description: 'ابنِ ملفك الأكاديمي والمهني واستكشف التخصصات والفرص الوظيفية التي تتناسب مع مؤهلاتك وطموحك المستقبلي.',
+        icon: GraduationCap,
+      },
+      SERVICES: {
+        title: 'طلباتي والخدمات الأكاديمية',
+        description: 'قدّم على خدمات الاستشارة الأكاديمية ومراجعة المستندات، وتابع حالة طلباتك والفواتير المرتبطة بها بسهولة.',
+        icon: ClipboardList,
+      },
+      NOTIFICATIONS: {
+        title: 'إشعاراتي وتنبيهاتي الفورية',
+        description: 'احصل على تنبيهات مبكرة قبل إغلاق مواعيد المنح المحفوظة، وإشعارات فورية بتحديثات طلباتك ودوراتك.',
+        icon: Bell,
+      },
+      PROFILE: {
+        title: 'إعداداتي وملفي الأكاديمي',
+        description: 'أكمل بياناتك الأكاديمية، معدلك التراكمي، ومستوى اللغة لتخصيص توصيات المنح الدراسية الأنسب لملفك.',
+        icon: User,
+      },
+    };
+
+    const currentGuestSection = guestTabMeta[tab] || guestTabMeta.SUMMARY;
+    const GuestSectionIcon = currentGuestSection.icon;
+
     return (
-      <main dir="rtl" className="mn-page-shell py-24 text-center">
-        <div className="mn-public-container mx-auto max-w-xl">
-          <div className="mn-card rounded-[2rem] p-8 sm:p-10">
-            <div className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-[var(--mn-surface-muted)] text-[var(--mn-primary)]">
-              <LockKeyhole className="h-7 w-7" />
-            </div>
-            <h1 className="text-2xl font-bold text-[var(--mn-heading)]">مساحة الطالب محمية</h1>
-            <p className="mt-3 leading-7 text-[var(--mn-text-muted)]">{error}</p>
-            <div className="mt-7 flex justify-center gap-3">
-              <Link
-                to="/login"
-                className="rounded-xl bg-[var(--mn-primary)] px-6 py-3 font-semibold text-white hover:bg-[var(--mn-primary-hover)] mn-inverse"
-              >
-                تسجيل الدخول
-              </Link>
-              <button
-                type="button"
-                onClick={() => setRetryKey((value) => value + 1)}
-                className="rounded-xl border border-[var(--mn-border)] px-6 py-3 font-semibold text-[var(--mn-text)] hover:bg-[var(--mn-surface-muted)]"
-              >
-                إعادة المحاولة
-              </button>
-            </div>
+      <StudentWorkspaceShell
+        activeTab={tab}
+        onTabChange={handleTabChange}
+        isGuest
+        onOpenLogin={() => navigate('/login')}
+        onOpenSignup={() => navigate('/signup')}
+        onTogglePreviewAccount={() => loginPreviewStudent()}
+      >
+        <div className="w-full max-w-4xl mx-auto mt-0 font-['Cairo',sans-serif]">
+          <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] -mt-px">
+            <section
+              aria-label={currentGuestSection.title}
+              className="relative overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] shadow-2xs mn-panel font-['Cairo',sans-serif]"
+            >
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-[3px] z-10 bg-[#142B5F] dark:bg-[#D6A43B]"
+              />
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute top-0 right-0 h-1/4 w-[3px] z-10 bg-[#142B5F] dark:bg-[#D6A43B]"
+              />
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute top-0 left-0 h-1/4 w-[3px] z-10 bg-[#142B5F] dark:bg-[#D6A43B]"
+              />
+
+              <div className="px-3.5 py-4 sm:px-5 sm:py-5">
+                <div className="flex items-center gap-2.5">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/45 bg-[#142B5F]">
+                    <GuestSectionIcon className="h-4 w-4 text-[#F2CD78]" />
+                  </span>
+                  <h2 className="mn-student-petrol-heading text-[14px] sm:text-[15px] font-bold leading-tight text-[#1E293B] dark:text-[#F8FAFC] font-['Cairo',sans-serif]">
+                    {currentGuestSection.title}
+                  </h2>
+                </div>
+
+                <p className="mt-2.5 text-[11.5px] sm:text-[12.5px] font-medium leading-relaxed text-[#475569] dark:text-[#CBD5E1]">
+                  {currentGuestSection.description}
+                </p>
+
+                <div className="mt-3.5 pt-3 border-t border-[var(--mn-border)]/70 dark:border-white/10 flex items-center justify-start gap-2">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/login')}
+                    className="min-h-[34px] rounded-xl bg-[#142B5F] hover:bg-[#1a3675] border border-[#D6A43B]/55 px-4 py-1.5 text-[11.5px] font-bold text-[#F2CD78] inline-flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-[0.98] cursor-pointer"
+                  >
+                    <LogIn className="w-3.5 h-3.5 text-[#F2CD78]" />
+                    <span>تسجيل الدخول</span>
+                  </button>
+                </div>
+              </div>
+            </section>
           </div>
         </div>
-      </main>
+      </StudentWorkspaceShell>
     );
   }
-
-  if (!dashboard) return null;
   const { workspace, statistics } = dashboard;
   const notifications = (workspace.notificationMatrix || {}) as Record<string, boolean>;
   const privacy = (workspace.privacyPreferences || {}) as Record<string, boolean>;
   const accessibility = (workspace.accessibilityPreferences || {}) as Record<string, unknown>;
   // Residence is shown ONLY when recorded in the workspace; timezone alone does not establish country.
   const accountMetadata = (workspace.metadata || {}) as Record<string, unknown>;
-  const accountCountryName =
-    typeof accountMetadata.countryNameAr === 'string'
-      ? accountMetadata.countryNameAr
-      : typeof accountMetadata.countryName === 'string'
-        ? accountMetadata.countryName
-        : undefined;
-  const accountCountryIso2 =
-    typeof accountMetadata.countryIso2 === 'string'
-      ? accountMetadata.countryIso2.toUpperCase()
-      : typeof accountMetadata.residenceCountryIso2 === 'string'
-        ? accountMetadata.residenceCountryIso2.toUpperCase()
-        : '';
+  const accountCountryName = typeof accountMetadata.countryNameAr === 'string' ? accountMetadata.countryNameAr
+    : typeof accountMetadata.countryName === 'string' ? accountMetadata.countryName : undefined;
+  const accountCountryIso2 = typeof accountMetadata.countryIso2 === 'string' ? accountMetadata.countryIso2.toUpperCase()
+    : typeof accountMetadata.residenceCountryIso2 === 'string' ? accountMetadata.residenceCountryIso2.toUpperCase() : '';
   const accountCountryFlag = /^[A-Z]{2}$/.test(accountCountryIso2)
-    ? String.fromCodePoint(
-        ...Array.from(accountCountryIso2).map((letter) => 127397 + letter.charCodeAt(0)),
-      )
+    ? String.fromCodePoint(...Array.from(accountCountryIso2).map(letter => 127397 + letter.charCodeAt(0)))
     : undefined;
-  const accountCityName =
-    typeof accountMetadata.cityNameAr === 'string'
-      ? accountMetadata.cityNameAr
-      : typeof accountMetadata.cityName === 'string'
-        ? accountMetadata.cityName
-        : undefined;
+  const accountCityName = typeof accountMetadata.cityNameAr === 'string' ? accountMetadata.cityNameAr
+    : typeof accountMetadata.cityName === 'string' ? accountMetadata.cityName : undefined;
+
+  const activeApplicationsCount = applicationTrackers.filter((item) => item.status === 'ACTIVE').length;
+  const activeServiceRequestsCount = serviceRequests.filter(
+    (req) => !['COMPLETED', 'CANCELLED', 'REJECTED'].includes(req.status),
+  ).length;
+  const checklistTasks = applicationTrackers.flatMap((tracker) => tracker.checklist || []);
+  const completedChecklistTasks = checklistTasks.filter((task) => task.completed).length;
+  const baseCompletedProfileItems = [
+    Boolean(workspace.displayName || identity?.displayName),
+    Boolean(identity?.primaryEmail),
+    Boolean(accountCountryName),
+    Boolean(workspace.preferredLanguage),
+    dashboard.savedItems.length > 0,
+    dashboard.courseEnrollments.length > 0,
+  ].filter(Boolean).length;
+  const totalRequirementsCount = Math.max(10, 6 + checklistTasks.length);
+  const completedRequirementsCount = Math.min(
+    totalRequirementsCount,
+    baseCompletedProfileItems + completedChecklistTasks,
+  );
+  const readinessPercent = Math.round((completedRequirementsCount / totalRequirementsCount) * 100);
 
   return (
     <StudentWorkspaceShell
@@ -1126,35 +874,17 @@ export function StudentWorkspacePage({
       timezone={workspace.timezone}
       previewMode={import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype'}
       accessibility={accessibility}
+      readinessPercent={readinessPercent}
+      completedRequirementsCount={completedRequirementsCount}
+      totalRequirementsCount={totalRequirementsCount}
+      activeApplicationsCount={activeApplicationsCount}
+      activeServiceRequestsCount={activeServiceRequestsCount}
+      onTogglePreviewAccount={() => void logout()}
     >
-      <div className="w-full max-w-4xl mx-auto mt-5 space-y-5">
+      <div className="w-full max-w-4xl mx-auto space-y-4 mt-0">
         {error && <Alert tone="error" message={error} onClose={() => setError(null)} />}
-        {notice && (
-          <Alert
-            tone="success"
-            message={
-              import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype'
-                ? 'تم تنفيذ الإجراء داخل المعاينة فقط؛ لم يتم حفظ أي بيانات حقيقية.'
-                : notice
-            }
-            onClose={() => setNotice(null)}
-          />
-        )}
-        {sectionFailures.length > 0 && (
-          <div
-            role="alert"
-            className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
-          >
-            تعذر تحميل: {sectionFailures.join('، ')}.{' '}
-            <button
-              type="button"
-              onClick={() => setRetryKey((value) => value + 1)}
-              className="font-bold underline"
-            >
-              إعادة التحميل
-            </button>
-          </div>
-        )}
+        {notice && <Alert tone="success" message={import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? 'تم تنفيذ الإجراء داخل المعاينة فقط؛ لم يتم حفظ أي بيانات حقيقية.' : notice} onClose={() => setNotice(null)} />}
+        {sectionFailures.length > 0 && <div role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">تعذر تحميل: {sectionFailures.join('، ')}. <button type="button" onClick={() => setRetryKey(value => value + 1)} className="font-bold underline">إعادة التحميل</button></div>}
         {dashboard.partialFailures.length > 0 && (
           <Alert
             tone="warning"
@@ -1171,6 +901,19 @@ export function StudentWorkspacePage({
             setTab={handleTabChange}
             identity={identity}
             applicationTrackers={applicationTrackers}
+            onOpenSearch={() => setSearchOpen(true)}
+            onOpenDocuments={() => {
+              setOpportunitiesSubTabRequest('DOCUMENTS');
+              handleTabChange('OPPORTUNITIES');
+            }}
+            onOpenCalendar={() => {
+              setProfileSubTabRequest('CALENDAR');
+              handleTabChange('PROFILE');
+            }}
+            onOpenSupport={() => {
+              setProfileSubTabRequest('SUPPORT');
+              handleTabChange('PROFILE');
+            }}
           />
         )}
         {tab === 'OPPORTUNITIES' && !sectionFailures.includes('ملفات التقديم') && (
@@ -1183,27 +926,17 @@ export function StudentWorkspacePage({
             onNotesUpdate={updateApplicationNotes}
             onArchive={archiveApplicationTracker}
             onRemove={removeApplicationTracker}
-            onDocumentsChanged={() => {
-              void ApiClient.listMyStudentApplicationTrackers()
-                .then(setApplicationTrackers)
-                .catch(() => setError('تعذر تحديث ملفات التقديم'));
-            }}
+            onDocumentsChanged={() => { void ApiClient.listMyStudentApplicationTrackers().then(setApplicationTrackers).catch(() => setError('تعذر تحديث ملفات التقديم')); }}
+            requestedSubTab={opportunitiesSubTabRequest}
+            onClearRequestedSubTab={() => setOpportunitiesSubTabRequest(null)}
           />
         )}
-        {tab === 'LEARNING' && <LearningView dashboard={dashboard} />}
-        {tab === 'SUPPORT' &&
-          (import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? (
-            <p>قناة الدعم تحتاج حسابًا حقيقيًا / Support requires a live account.</p>
-          ) : (
-            <StudentSupportPanel />
-          ))}
-        {tab === 'NOTIFICATIONS' && (
-          <StudentNotificationsView
-            items={dashboard.notifications}
-            available={dashboard.capabilityStatus?.notifications !== 'DEGRADED'}
-            onRefresh={() => setRetryKey((value) => value + 1)}
+        {tab === 'LEARNING' && (
+          <LearningView
+            dashboard={dashboard}
           />
         )}
+        {tab === 'NOTIFICATIONS' && <StudentNotificationsView items={dashboard.notifications} available={dashboard.capabilityStatus?.notifications !== 'DEGRADED'} onRefresh={() => setRetryKey(value => value + 1)} />}
         {tab === 'VAULT' && (
           <VaultView
             dashboard={dashboard}
@@ -1214,49 +947,40 @@ export function StudentWorkspacePage({
             onDeleteCollection={deleteCollection}
             onMoveSavedItem={moveSavedItem}
             onRemoveSavedItem={removeSavedItem}
+            setTab={handleTabChange}
+            trackers={applicationTrackers}
           />
         )}
         {tab === 'CAREERS' && <StudentCareerWorkspace />}
         {tab === 'SERVICES' && (
-          <div className="mn-student-services-page space-y-5 font-['Cairo',sans-serif]">
+          <div className="mn-student-services-page space-y-4 font-['Cairo',sans-serif]">
+
             <ServiceRequestsView
-              requests={serviceError ? [] : serviceRequests}
-              serviceLoading={serviceLoading}
-              serviceError={serviceError}
-              invoiceError={invoiceError}
-              onRetry={() => setRetryKey((value) => value + 1)}
-              statusFilter={serviceStatus}
-              onStatusFilterChange={setServiceStatus}
-              totalRequests={serviceTotal}
-              selected={selectedServiceRequest}
-              requestedNotFoundId={requestedNotFoundId}
-              saving={saving}
-              onOpen={openServiceRequest}
-              invoices={invoices}
-              paymentsByInvoice={paymentsByInvoice}
-              onTogglePayments={toggleInvoicePayments}
-            />
+                requests={serviceError ? [] : serviceRequests}
+                serviceLoading={serviceLoading}
+                serviceError={serviceError}
+                invoiceError={invoiceError}
+                onRetry={() => setRetryKey(value => value + 1)}
+                statusFilter={serviceStatus}
+                onStatusFilterChange={setServiceStatus}
+                totalRequests={serviceTotal}
+                selected={selectedServiceRequest}
+                requestedNotFoundId={requestedNotFoundId}
+                saving={saving}
+                onOpen={openServiceRequest}
+                invoices={invoices}
+                paymentsByInvoice={paymentsByInvoice}
+                onTogglePayments={toggleInvoicePayments}
+              />
             <div className="flex flex-wrap items-center justify-center gap-2">
               {serviceHasMore && (
-                <button
-                  type="button"
-                  disabled={serviceLoading}
-                  onClick={() => void loadMoreServices()}
-                  className="min-h-9 rounded-lg bg-[var(--mn-primary)] px-3.5 py-1.5 text-[12px] font-bold text-white disabled:opacity-50"
-                >
+                <button type="button" disabled={serviceLoading} onClick={() => void loadMoreServices()} className="min-h-9 rounded-lg bg-[var(--mn-primary)] px-3.5 py-1.5 text-[12px] font-bold text-white disabled:opacity-50">
                   {serviceLoading ? 'جارٍ التحميل…' : 'تحميل طلبات إضافية'}
                 </button>
               )}
               {invoices.length < invoiceTotal && (
-                <button
-                  type="button"
-                  disabled={invoiceLoading}
-                  onClick={() => void loadMoreInvoices()}
-                  className="min-h-9 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3.5 py-1.5 text-[12px] font-bold text-[var(--mn-heading)] disabled:opacity-50"
-                >
-                  {invoiceLoading
-                    ? 'جارٍ تحميل الفواتير…'
-                    : `تحميل فواتير إضافية (${invoices.length} من ${invoiceTotal})`}
+                <button type="button" disabled={invoiceLoading} onClick={() => void loadMoreInvoices()} className="min-h-9 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3.5 py-1.5 text-[12px] font-bold text-[var(--mn-heading)] disabled:opacity-50">
+                  {invoiceLoading ? 'جارٍ تحميل الفواتير…' : `تحميل فواتير إضافية (${invoices.length} من ${invoiceTotal})`}
                 </button>
               )}
             </div>
@@ -1281,8 +1005,20 @@ export function StudentWorkspacePage({
             onResetLayout={resetLayout}
             onClearSearch={clearSearchHistory}
             onBack={() => handleTabChange('SUMMARY')}
+            trackers={applicationTrackers}
+            requestedSubTab={profileSubTabRequest}
+            onClearRequestedSubTab={() => setProfileSubTabRequest(null)}
           />
         )}
+
+        <AccountQuickSearchModal
+          open={searchOpen}
+          onClose={() => setSearchOpen(false)}
+          dashboard={dashboard}
+          trackers={applicationTrackers}
+          requests={serviceRequests}
+          onNavigateTab={handleTabChange}
+        />
       </div>
     </StudentWorkspaceShell>
   );
@@ -1294,27 +1030,26 @@ function SummaryView({
   paymentsByInvoice,
   onTogglePayments,
   setTab,
-  identity,
   applicationTrackers,
+  onOpenSearch,
+  onOpenDocuments,
+  onOpenCalendar,
+  onOpenSupport,
 }: {
   dashboard: StudentDashboardSummaryDto;
   invoices: StudentFinanceInvoiceDto[];
   paymentsByInvoice: Record<string, StudentFinancePaymentDto[]>;
   onTogglePayments: (invoiceId: string) => void;
   setTab: (tab: CanonicalWorkspaceTab) => void;
-  identity: {
-    principalId: string;
-    displayName: string;
-    primaryEmail?: string;
-    roles?: string[];
-    roleNames?: string[];
-  } | null;
+  identity: { principalId: string; displayName: string; primaryEmail?: string; roles?: string[]; roleNames?: string[] } | null;
   applicationTrackers: StudentApplicationTrackerDto[];
+  onOpenSearch: () => void;
+  onOpenDocuments: () => void;
+  onOpenCalendar: () => void;
+  onOpenSupport: () => void;
 }) {
   const [showAllActivities, setShowAllActivities] = useState(false);
 
-  // Combine the timeline and recent activity for the full log, removing duplicates.
-  // Keep the compact summary to three events until the user opens "كل السجلات".
   const activityLog = useMemo(() => {
     const seen = new Set<string>();
     return [...dashboard.timeline, ...dashboard.recentActivity]
@@ -1323,10 +1058,7 @@ function SummaryView({
         seen.add(event.id);
         return true;
       })
-      .sort(
-        (first, second) =>
-          (Date.parse(second.occurredAt) || 0) - (Date.parse(first.occurredAt) || 0),
-      );
+      .sort((first, second) => (Date.parse(second.occurredAt) || 0) - (Date.parse(first.occurredAt) || 0));
   }, [dashboard.timeline, dashboard.recentActivity]);
 
   const activeMilestones = useMemo(
@@ -1334,411 +1066,275 @@ function SummaryView({
     [applicationTrackers],
   );
 
-  // Surface only the most recently accessed unfinished course in the summary.
-  // Completed courses (including those at 100%) remain in the full Learning tab.
   const activeCourse = useMemo(
-    () =>
-      dashboard.courseEnrollments
-        .filter(
-          (item) =>
-            ['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(item.status) &&
-            item.progressPercentage < 100,
-        )
-        .sort(
-          (first, second) =>
-            (Date.parse(second.lastAccessedAt ?? '') || 0) -
-            (Date.parse(first.lastAccessedAt ?? '') || 0),
-        )[0] ?? null,
+    () => dashboard.courseEnrollments
+      .filter((item) => ['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(item.status) && item.progressPercentage < 100)
+      .sort((first, second) => (Date.parse(second.lastAccessedAt ?? '') || 0) - (Date.parse(first.lastAccessedAt ?? '') || 0))[0] ?? null,
     [dashboard.courseEnrollments],
   );
 
-  const urgentAlerts = useMemo(() => {
-    const unread = dashboard.notifications.filter((notification) => !notification.readAt);
-    const pendingInvoices = invoices
-      .filter((invoice) => ['ISSUED', 'PARTIALLY_PAID', 'OVERDUE'].includes(invoice.status))
-      .sort((a, b) => Number(b.status === 'OVERDUE') - Number(a.status === 'OVERDUE'));
-    const now = Date.now();
-    const criticalDeadlines = activeMilestones
-      .filter((tracker) => {
-        if (!tracker.deadlineAt) return false;
-        const remaining = new Date(tracker.deadlineAt).getTime() - now;
-        return Number.isFinite(remaining) && remaining >= 0 && remaining <= 48 * 60 * 60 * 1000;
-      })
-      .sort(
-        (a, b) => new Date(a.deadlineAt || '').getTime() - new Date(b.deadlineAt || '').getTime(),
-      );
-    return {
-      unread,
-      pendingInvoices,
-      criticalDeadlines,
-      hasCritical:
-        criticalDeadlines.length > 0 ||
-        pendingInvoices.some((invoice) => invoice.status === 'OVERDUE'),
-      hasUrgent: unread.length > 0 || pendingInvoices.length > 0 || criticalDeadlines.length > 0,
-    };
-  }, [dashboard.notifications, invoices, activeMilestones]);
-
-  const isNewStudent =
+  const isNewStudent = (
     dashboard.statistics.savedItems === 0 &&
     dashboard.statistics.activeCourses === 0 &&
     dashboard.statistics.certificates === 0 &&
-    applicationTrackers.length === 0;
-
-  const attentionPanel = urgentAlerts.hasUrgent ? (
-    <section
-      aria-label="أمور تحتاج انتباه الطالب"
-      className="mn-student-attention relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-white dark:bg-[#09152F] text-[#142B5F] dark:text-[#F4F9FC] text-right font-['Cairo',sans-serif]"
-    >
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent"
-      />
-      <div className="relative z-10 px-3 py-3.5 sm:px-5 sm:py-4">
-        <div className="flex items-center gap-2.5 font-bold text-[#142B5F] dark:text-[#F4F9FC]">
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/60 bg-[#142B5F]">
-            <Bell className="h-4 w-4 text-[#EAC775]" />
-          </span>
-          <h2 className="mn-student-summary-heading text-[14px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F4F9FC]">
-            يحتاج انتباهك
-          </h2>
-        </div>
-        <div className="mt-3 space-y-3.5">
-          {urgentAlerts.criticalDeadlines.slice(0, 2).map((tracker) => (
-            <div
-              key={tracker.id}
-              className="mn-student-attention-card flex min-w-0 items-center justify-between gap-2 rounded-lg border border-[#0E7C86]/50 dark:border-[#55B5B4]/65 border-r-[3px] border-r-[#0E7C86] dark:border-r-[#55CBC5] bg-white dark:bg-[#142B4E] px-2.5 py-2 shadow-2xs"
-            >
-              <div className="min-w-0 flex-1">
-                <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[#142B5F] dark:text-[#F2F7FA]">
-                  موعد تقديم قريب
-                </h3>
-                <p className="mt-0.5 text-[11px] sm:text-xs leading-4 text-[#526A71] dark:text-[#CCDFE4]">
-                  {trackerDisplayName(tracker)} — {formatDate(tracker.deadlineAt)}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setTab('OPPORTUNITIES')}
-                className="mn-student-attention-action shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 dark:border-[#55B5B4]/65 bg-[#EEF7F7] dark:bg-[#1D4461] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] dark:text-[#F2FAFA] hover:bg-[#DDEFEF] dark:hover:bg-[#28617A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]"
-              >
-                متابعة
-              </button>
-            </div>
-          ))}
-          {urgentAlerts.pendingInvoices.slice(0, 1).map((inv) => (
-            <div
-              key={inv.id}
-              className="mn-student-attention-card flex min-w-0 items-center justify-between gap-2 rounded-lg border border-[#0E7C86]/50 dark:border-[#55B5B4]/65 border-r-[3px] border-r-[#0E7C86] dark:border-r-[#55CBC5] bg-white dark:bg-[#142B4E] px-2.5 py-2 shadow-2xs"
-            >
-              <div className="min-w-0 flex-1">
-                <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[#142B5F] dark:text-[#F2F7FA]">
-                  {inv.status === 'OVERDUE' ? 'فاتورة متأخرة' : 'فاتورة مستحقة'}
-                </h3>
-                <p className="mt-0.5 text-[11px] sm:text-xs leading-4 text-[#526A71] dark:text-[#CCDFE4]">
-                  {inv.invoiceNumber} ({formatMoney(inv.amountDue)})
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => onTogglePayments(inv.id)}
-                className="mn-student-attention-action shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 dark:border-[#55B5B4]/65 bg-[#EEF7F7] dark:bg-[#1D4461] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] dark:text-[#F2FAFA] hover:bg-[#DDEFEF] dark:hover:bg-[#28617A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]"
-              >
-                تفاصيل الفاتورة
-              </button>
-            </div>
-          ))}
-          {urgentAlerts.unread.slice(0, 2).map((n) => (
-            <div
-              key={n.id}
-              className="mn-student-attention-card flex min-w-0 items-center justify-between gap-2 rounded-lg border border-[#0E7C86]/50 dark:border-[#55B5B4]/65 border-r-[3px] border-r-[#0E7C86] dark:border-r-[#55CBC5] bg-white dark:bg-[#142B4E] px-2.5 py-2 shadow-2xs"
-            >
-              <div className="min-w-0 flex-1">
-                <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[#142B5F] dark:text-[#F2F7FA]">
-                  {n.title}
-                </h3>
-                <p className="mt-0.5 text-[11px] sm:text-xs leading-4 text-[#526A71] dark:text-[#CCDFE4]">
-                  {n.message}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setTab('NOTIFICATIONS')}
-                className="mn-student-attention-action shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 dark:border-[#55B5B4]/65 bg-[#EEF7F7] dark:bg-[#1D4461] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] dark:text-[#F2FAFA] hover:bg-[#DDEFEF] dark:hover:bg-[#28617A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]"
-              >
-                عرض
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  ) : null;
+    applicationTrackers.length === 0
+  );
 
   return (
-    <div className="mt-3.5 space-y-6 sm:space-y-7 font-['Cairo',sans-serif]">
-      {/* Critical deadline or overdue invoice first; otherwise metrics first. */}
-      {urgentAlerts.hasCritical && attentionPanel}
-      {/* 2. Quick Stat Counters (Only meaningful numbers, clickable to respective tabs) */}
-      {!isNewStudent && (
-        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2">
-          <button
-            type="button"
-            onClick={() => setTab('OPPORTUNITIES')}
-            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-1.5 py-1.5 sm:px-2 sm:py-2 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
-          >
-            <Route className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0 group-hover:scale-110 transition-transform" />
-            <div className="text-[15px] sm:text-base leading-5 font-bold text-[var(--mn-heading)]">
-              {activeMilestones.length}
-            </div>
-            <div className="text-[10px] sm:text-[11px] font-bold leading-4 text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">
-              تقديمات نشطة
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab('LEARNING')}
-            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-1.5 py-1.5 sm:px-2 sm:py-2 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
-          >
-            <BookOpen className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0 group-hover:scale-110 transition-transform" />
-            <div className="text-[15px] sm:text-base leading-5 font-bold text-[var(--mn-heading)]">
-              {dashboard.statistics.activeCourses}
-            </div>
-            <div className="text-[10px] sm:text-[11px] font-bold leading-4 text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">
-              دورات جارية
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab('VAULT')}
-            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-1.5 py-1.5 sm:px-2 sm:py-2 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
-          >
-            <Heart className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0 group-hover:scale-110 transition-transform" />
-            <div className="text-[15px] sm:text-base leading-5 font-bold text-[var(--mn-heading)]">
-              {dashboard.statistics.savedItems}
-            </div>
-            <div className="text-[10px] sm:text-[11px] font-bold leading-4 text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">
-              عناصر محفوظة
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab('LEARNING')}
-            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-1.5 py-1.5 sm:px-2 sm:py-2 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
-          >
-            <Award className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0 group-hover:scale-110 transition-transform" />
-            <div className="text-[15px] sm:text-base leading-5 font-bold text-[var(--mn-heading)]">
-              {dashboard.statistics.certificates}
-            </div>
-            <div className="text-[10px] sm:text-[11px] font-bold leading-4 text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">
-              شهادات صادرة
-            </div>
-          </button>
-        </div>
-      )}
+    <div className="mt-0 space-y-3.5 font-['Cairo',sans-serif]">
+      {/* Unified Header Box + Quick Tools Bar attached directly to the 8-tab bar above */}
+      <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] -mt-px">
+        <section
+          aria-label="ملخصي ونظرة عامة"
+          className="relative overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] shadow-2xs mn-panel font-['Cairo',sans-serif]"
+        >
+          {/* Top line from right to left with a quarter-height drop on both right and left sides */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-[3px] z-10 bg-[#142B5F] dark:bg-[#D6A43B]"
+          />
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-0 right-0 h-1/4 w-[3px] z-10 bg-[#142B5F] dark:bg-[#D6A43B]"
+          />
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-0 left-0 h-1/4 w-[3px] z-10 bg-[#142B5F] dark:bg-[#D6A43B]"
+          />
 
-      {!urgentAlerts.hasCritical && attentionPanel}
+          <div className="px-3.5 py-3.5 sm:px-5 sm:py-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/45 bg-[#142B5F]">
+                  <LayoutGrid className="h-3.5 w-3.5 text-[#F2CD78]" aria-hidden="true" />
+                </span>
+                <h2 className="mn-student-summary-heading text-[14px] sm:text-[15px] font-bold leading-tight text-[#1E293B] dark:text-[#F8FAFC] font-['Cairo',sans-serif]">
+                  ملخصي ونظرة عامة
+                </h2>
+              </div>
 
-      {/* 3. New Student Welcome / Starting State (Clean consolidated starter card) */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={onOpenSearch}
+                  className="mn-student-summary-header-link inline-flex items-center gap-1 rounded-md border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-2 py-0.5 text-[9.5px] font-bold text-[#142B5F] dark:text-[#F8FAFC] hover:border-[#0E7C86] transition-colors cursor-pointer"
+                >
+                  <Search className="h-2.5 w-2.5 text-[#142B5F] dark:text-[#F2CD78]" />
+                  <span>بحث في حسابي</span>
+                </button>
+              </div>
+            </div>
+
+            <p className="mt-2 pr-9 text-[11px] sm:text-[12px] font-medium leading-relaxed text-[#475569] dark:text-[#CBD5E1]">
+              أولويات اليوم، مواعيد الأسبوع، واستكمال مسارك الدراسي
+            </p>
+          </div>
+        </section>
+      </div>
+
+      {/* 1. خطوتي التالية */}
+      <NextStepHeroCard
+        trackers={applicationTrackers}
+        dashboard={dashboard}
+        invoices={invoices}
+        onNavigate={setTab}
+      />
+
+      {/* 3. هذا الأسبوع (This Week Schedule & Deadlines) */}
+      <ThisWeekScheduleCard
+        trackers={applicationTrackers}
+        dashboard={dashboard}
+        onNavigate={setTab}
+        onOpenCalendar={onOpenCalendar}
+      />
+
+      {/* New Student Starting State */}
       {isNewStudent && (
-        <div className="rounded-2xl border border-[#D6A43B]/40 bg-gradient-to-br from-[#142B5F]/10 via-[#D6A43B]/5 to-transparent p-4 sm:p-5 text-right mn-panel">
-          <div className="flex items-start gap-3 sm:gap-3.5">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/40 flex items-center justify-center text-[#E5B54F] shrink-0 shadow-xs">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#E5B54F]" />
+        <section className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] px-3.5 py-3.5 sm:px-5 sm:py-4 text-right mn-panel shadow-2xs">
+          <div className="flex items-start gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-[#142B5F] border border-[#D6A43B]/40 flex items-center justify-center shrink-0">
+              <Sparkles className="w-3.5 h-3.5 text-[#F2CD78]" />
             </div>
             <div className="min-w-0 flex-1">
-              <h2 className="mn-student-summary-heading text-[14px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">
-                مرحبًا بك في مساحتك في منارتك
-              </h2>
-              <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] mt-1 leading-relaxed">
-                مساحتك جاهزة لتتبع طلبات المنح، التسجيل في الدورات، واستكشاف الجامعات والتخصصات وحفظ
-                ما يهمك.
-              </p>
-              <div className="mt-3.5 flex flex-wrap items-center gap-2">
+              <h3 className="text-[13px] font-bold font-['Cairo',sans-serif] text-[#1E293B] dark:text-[#F8FAFC]">
+                مرحبًا بك في مساحتك الأكاديمية
+              </h3>
+              <div className="mt-2.5 grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
                 <Link
                   to="/scholarships"
-                  className="rounded-xl bg-[var(--mn-primary)] px-3 py-1.5 text-xs font-bold text-white hover:bg-[var(--mn-primary-hover)] transition-colors inline-flex items-center gap-1.5 shadow-2xs"
+                  className="rounded-xl bg-[#142B5F] hover:bg-[#1a3675] border border-[#D6A43B]/35 px-3 py-2 text-[11.5px] font-bold text-white transition-colors inline-flex items-center justify-center gap-1.5 shadow-2xs"
                 >
-                  <Route className="w-3.5 h-3.5 text-[#E5B54F]" />
+                  <Route className="w-3.5 h-3.5 text-[#F2CD78]" />
                   <span>المنح الدراسية</span>
                 </Link>
                 <Link
                   to="/courses"
-                  className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-1.5 text-xs font-bold text-[var(--mn-heading)] hover:border-[#D6A43B] transition-colors inline-flex items-center gap-1.5 shadow-2xs"
+                  className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-[11.5px] font-bold text-[#1E293B] dark:text-[#F8FAFC] hover:border-[#0E7C86] transition-colors inline-flex items-center justify-center gap-1.5 shadow-2xs"
                 >
-                  <BookOpen className="w-3.5 h-3.5 text-[var(--mn-primary)] dark:text-[#E5B54F]" />
+                  <BookOpen className="w-3.5 h-3.5 text-[#0E7C86]" />
                   <span>الدورات التدريبية</span>
                 </Link>
                 <Link
                   to="/universities"
-                  className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-1.5 text-xs font-bold text-[var(--mn-heading)] hover:border-[#D6A43B] transition-colors inline-flex items-center gap-1.5 shadow-2xs"
+                  className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-[11.5px] font-bold text-[#1E293B] dark:text-[#F8FAFC] hover:border-[#0E7C86] transition-colors inline-flex items-center justify-center gap-1.5 shadow-2xs"
                 >
-                  <Compass className="w-3.5 h-3.5 text-[var(--mn-primary)] dark:text-[#E5B54F]" />
+                  <Compass className="w-3.5 h-3.5 text-[#0E7C86]" />
                   <span>دليل الجامعات</span>
                 </Link>
                 <Link
                   to="/majors"
-                  className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-1.5 text-xs font-bold text-[var(--mn-heading)] hover:border-[#D6A43B] transition-colors inline-flex items-center gap-1.5 shadow-2xs"
+                  className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-[11.5px] font-bold text-[#1E293B] dark:text-[#F8FAFC] hover:border-[#0E7C86] transition-colors inline-flex items-center justify-center gap-1.5 shadow-2xs"
                 >
-                  <GraduationCap className="w-3.5 h-3.5 text-[var(--mn-primary)] dark:text-[#E5B54F]" />
+                  <GraduationCap className="w-3.5 h-3.5 text-[#0E7C86]" />
                   <span>التخصصات</span>
                 </Link>
-                <button
-                  type="button"
-                  onClick={() => setTab('PROFILE')}
-                  className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--mn-text-muted)] hover:text-[var(--mn-heading)] transition-colors inline-flex items-center gap-1.5"
-                >
-                  <User className="w-3.5 h-3.5" />
-                  <span>إعداد الملف</span>
-                </button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 4. Continue learning: one recent unfinished course, optimized for mobile. */}
-      {activeCourse && (
-        <section
-          aria-label="متابعة التعلم"
-          className="relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel"
-        >
-          <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
-                <BookOpen className="h-4 w-4 text-[#E5B54F]" />
-              </span>
-              <h2 className="mn-student-summary-heading text-[14px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">
-                متابعة التعلم
-              </h2>
-            </div>
-            <button
-              type="button"
-              onClick={() => setTab('LEARNING')}
-              className="mn-student-summary-header-link inline-flex shrink-0 items-center gap-1 text-[11px] font-bold leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
-            >
-              <span>جميع الدورات</span>
-              <ChevronLeft className="h-3.5 w-3.5" />
-            </button>
-          </div>
-
-          <div className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3">
-            <div className="flex min-w-0 items-start justify-between gap-2">
-              <div className="min-w-0 flex-1">
-                <span className="text-[10px] sm:text-[11px] font-medium text-[var(--mn-text-muted)]">
-                  آخر دورة تتابعها
-                </span>
-                <h3 className="mt-0.5 text-xs sm:text-sm font-bold leading-5 text-[var(--mn-heading)] break-words">
-                  {activeCourse.courseName}
-                </h3>
-              </div>
-              <span
-                className="shrink-0 text-sm font-bold tabular-nums text-[#0E7C86] dark:text-[#72DED1]"
-                dir="ltr"
-              >
-                {Math.min(100, Math.max(0, activeCourse.progressPercentage))}%
-              </span>
-            </div>
-
-            <progress
-              className="mn-native-progress mn-native-progress-secondary mt-2.5 h-1.5 w-full"
-              value={Math.min(100, Math.max(0, activeCourse.progressPercentage))}
-              max={100}
-              aria-label={`نسبة إنجاز الدورة: ${activeCourse.progressPercentage}%`}
-            />
-
-            <div className="mt-2.5 flex justify-end">
-              <Link
-                to={`../student/courses/${encodeURIComponent(activeCourse.courseId)}`}
-                className="mn-student-summary-primary-action inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#142B5F] px-3 py-1.5 text-[11px] font-medium text-white dark:bg-[#D6A43B] dark:text-[#142B5F] hover:bg-[#203D74] dark:hover:bg-[#E5B54F] transition-colors font-['Cairo',sans-serif]"
-              >
-                <span>متابعة التعلم</span>
-                <ArrowLeft className="h-3.5 w-3.5" />
-              </Link>
             </div>
           </div>
         </section>
       )}
 
-      {/* 5. Active application trackers: last two updates, with complete details in Opportunities. */}
+      {/* 4. أكمل من حيث توقفت: متابعة التعلم + ملفات التقديم النشطة */}
+      {activeCourse && (
+        <section
+          aria-label="متابعة التعلم"
+          className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] py-3 sm:py-3.5 shadow-2xs mn-panel"
+        >
+          <div className="flex min-w-0 items-center justify-between gap-2 px-3.5 sm:px-5">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-[#D6A43B]/45 bg-[#142B5F] text-[#F2CD78]">
+                <BookOpen className="h-3.5 w-3.5 text-[#F2CD78]" />
+              </span>
+              <h3 className="text-[13px] sm:text-[14px] font-bold leading-snug font-['Cairo',sans-serif] text-[#1E293B] dark:text-[#F8FAFC]">
+                متابعة التعلم
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setTab('LEARNING')}
+              className="mn-student-summary-header-link inline-flex shrink-0 items-center gap-1 rounded-md border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 py-0.5 text-[9.5px] font-bold text-[#142B5F] dark:text-[#F8FAFC] hover:border-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]"
+            >
+              <span>جميع الدورات</span>
+              <ChevronLeft className="h-2.5 w-2.5 text-[#142B5F] dark:text-[#F2CD78]" />
+            </button>
+          </div>
+
+          <div className="mt-3 pt-0.5 px-3.5 sm:px-5">
+            <div className="relative overflow-hidden rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] pr-3.5 pl-2.5 py-2">
+              <span
+                aria-hidden="true"
+                className="mn-student-card-start-bar"
+              />
+              <div className="flex min-w-0 items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                  <span className="h-[19px] w-[19px] rounded-[5px] bg-[#142B5F] text-white flex items-center justify-center shrink-0">
+                    <BookOpen className="h-3 w-3 text-white" />
+                  </span>
+                  <h4 className="min-w-0 text-[10.5px] font-bold leading-snug text-[#1E293B] dark:text-[#F8FAFC] break-words font-['Cairo',sans-serif]">
+                    {activeCourse.courseName}
+                  </h4>
+                </div>
+                <span className="shrink-0 rounded-md border border-[#0E7C86]/25 bg-[#0E7C86]/10 px-1.5 py-0.5 text-[9px] font-bold tabular-nums text-[#0E7C86] dark:text-[#55CBC5]" dir="ltr">
+                  {Math.min(100, Math.max(0, activeCourse.progressPercentage))}%
+                </span>
+              </div>
+
+              <div className="mt-1.5 h-1 w-[92%] mx-auto overflow-hidden rounded-full bg-slate-200/85 dark:bg-slate-800" dir="rtl">
+                <div
+                  className="h-full rounded-full transition-all duration-300"
+                  data-mn-width={Math.round(Math.max(0, Math.min(100, Number(Math.min(100, Math.max(0, activeCourse.progressPercentage))) || 0)))} data-mn-progress-gradient
+                />
+              </div>
+
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <span className="text-[9.5px] font-medium text-[#64748B] dark:text-[#94A3B8]">
+                  {activeCourse.lastAccessedAt ? `آخر وصول: ${formatDate(activeCourse.lastAccessedAt)}` : `تاريخ التسجيل: ${formatDate(activeCourse.enrolledAt)}`}
+                </span>
+                <Link
+                  to={`../student/courses/${encodeURIComponent(activeCourse.courseId)}`}
+                  className="mn-student-summary-primary-action inline-flex items-center justify-center gap-1 rounded-md px-2.5 py-0.5 text-[9.5px] font-bold text-[#F2CD78] transition-colors font-['Cairo',sans-serif]"
+                >
+                  <span>متابعة التعلم</span>
+                  <ArrowLeft className="h-2.5 w-2.5 text-[#F2CD78]" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {activeMilestones.length > 0 && (
         <section
           aria-label="ملفات التقديم النشطة"
-          className="relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel font-['Cairo',sans-serif]"
+          className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] py-3 sm:py-3.5 shadow-2xs mn-panel font-['Cairo',sans-serif]"
         >
-          <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center justify-between gap-2 px-3.5 sm:px-5">
             <div className="flex min-w-0 items-center gap-2">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
-                <Route className="h-4 w-4 text-[#E5B54F]" />
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-[#D6A43B]/45 bg-[#142B5F] text-[#F2CD78]">
+                <Route className="h-3.5 w-3.5 text-[#F2CD78]" />
               </span>
-              <h2 className="mn-student-summary-heading text-[14px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">
+              <h3 className="text-[13px] sm:text-[14px] font-bold leading-snug font-['Cairo',sans-serif] text-[#1E293B] dark:text-[#F8FAFC]">
                 ملفات التقديم النشطة
-              </h2>
+              </h3>
             </div>
             <button
               type="button"
               onClick={() => setTab('OPPORTUNITIES')}
-              className="mn-student-summary-header-link inline-flex shrink-0 items-center gap-1 text-[11px] font-bold leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
+              className="mn-student-summary-header-link inline-flex shrink-0 items-center gap-1 rounded-md border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 py-0.5 text-[9.5px] font-bold text-[#142B5F] dark:text-[#F8FAFC] hover:border-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]"
             >
               <span>عرض الكل</span>
-              <ChevronLeft className="h-3.5 w-3.5" />
+              <ChevronLeft className="h-2.5 w-2.5 text-[#142B5F] dark:text-[#F2CD78]" />
             </button>
           </div>
 
-          <div className="space-y-3.5">
+          <div className="mt-3 pt-0.5 space-y-1.5 px-3.5 sm:px-5">
             {[...activeMilestones]
-              .sort(
-                (first, second) =>
-                  (Date.parse(second.updatedAt) || 0) - (Date.parse(first.updatedAt) || 0),
-              )
+              .sort((first, second) => (Date.parse(second.updatedAt) || 0) - (Date.parse(first.updatedAt) || 0))
               .slice(0, 2)
               .map((item) => {
                 const completed = item.checklist.filter((task) => task.completed).length;
-                const progress = item.checklist.length
-                  ? Math.round((completed / item.checklist.length) * 100)
-                  : 0;
+                const progress = item.checklist.length ? Math.round((completed / item.checklist.length) * 100) : 0;
                 return (
                   <div
                     key={item.id}
-                    className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-3 py-2.5"
+                    className="relative overflow-hidden rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] pr-3.5 pl-2.5 py-2"
                   >
-                    <div className="flex min-w-0 items-start justify-between gap-2">
-                      <h3 className="min-w-0 flex-1 text-xs sm:text-sm font-bold leading-5 text-[var(--mn-heading)] break-words">
-                        {trackerDisplayName(item)}
-                      </h3>
-                      <span
-                        className="shrink-0 text-[11px] font-bold tabular-nums text-[#0E7C86] dark:text-[#72DED1]"
-                        dir="ltr"
-                        title="نسبة إنجاز مهام الملف"
-                      >
+                    <span
+                      aria-hidden="true"
+                      className="mn-student-card-start-bar"
+                    />
+                    <div className="flex min-w-0 items-center justify-between gap-2">
+                      <div className="flex min-w-0 flex-1 items-center gap-1.5">
+                        <span className="h-[19px] w-[19px] rounded-[5px] bg-[#142B5F] text-white flex items-center justify-center shrink-0">
+                          <GraduationCap className="h-3 w-3 text-white" />
+                        </span>
+                        <h4 className="min-w-0 flex-1 text-[10.5px] font-bold leading-snug text-[#1E293B] dark:text-[#F8FAFC] break-words font-['Cairo',sans-serif]">
+                          {trackerDisplayName(item)}
+                        </h4>
+                      </div>
+                      <span className="shrink-0 rounded-md border border-[#142B5F]/20 bg-[#142B5F]/[0.07] dark:border-[#F2CD78]/30 dark:bg-[#142B5F]/60 px-1.5 py-0.5 text-[9px] font-bold tabular-nums text-[#142B5F] dark:text-[#F2CD78]" dir="ltr">
                         {progress}%
                       </span>
                     </div>
-                    <p
-                      className="mn-student-summary-meta mt-0.5 truncate text-[10px] font-semibold leading-[18px] text-[#526A71] dark:text-[#C8D5DD] font-['Cairo',sans-serif]"
-                      title={item.stage}
-                    >
-                      {item.stage}
-                    </p>
-                    <div className="mt-1.5 flex min-w-0 items-center justify-between gap-2">
-                      {item.deadlineAt ? (
-                        <span className="mn-student-summary-meta inline-flex min-w-0 items-center gap-1 text-[10px] font-semibold leading-[18px] text-[#526A71] dark:text-[#C8D5DD] font-['Cairo',sans-serif]">
-                          <CalendarClock className="h-3 w-3 shrink-0" />
-                          <span className="mn-student-summary-meta truncate">
-                            {formatDate(item.deadlineAt)}
-                          </span>
-                        </span>
-                      ) : (
-                        <span className="mn-student-summary-meta text-[10px] font-semibold text-[#526A71] dark:text-[#C8D5DD] font-['Cairo',sans-serif]">
-                          لا يوجد موعد محدد
-                        </span>
-                      )}
+
+                    <div className="mt-1.5 h-1 w-[92%] mx-auto overflow-hidden rounded-full bg-slate-200/85 dark:bg-slate-800" dir="rtl">
+                      <div
+                        className="h-full rounded-full transition-all duration-300"
+                        data-mn-width={Math.round(Math.max(0, Math.min(100, Number(Math.min(100, Math.max(0, progress))) || 0)))} data-mn-progress-gradient
+                      />
+                    </div>
+
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-[9.5px] font-medium text-[#64748B] dark:text-[#94A3B8]">
+                        {item.stage} · {completed}/{item.checklist.length} مهام
+                      </span>
                       <button
                         type="button"
                         onClick={() => setTab('OPPORTUNITIES')}
-                        className="mn-student-summary-primary-action inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#142B5F] px-3 py-1.5 text-[11px] font-medium text-white dark:bg-[#D6A43B] dark:text-[#142B5F] hover:bg-[#203D74] dark:hover:bg-[#E5B54F] transition-colors font-['Cairo',sans-serif]"
+                        className="mn-student-summary-primary-action inline-flex items-center justify-center gap-1 rounded-md px-2.5 py-0.5 text-[9.5px] font-bold text-[#F2CD78] transition-colors font-['Cairo',sans-serif] cursor-pointer"
                       >
-                        <span className="font-['Cairo',sans-serif]">متابعة الملف</span>
-                        <ArrowLeft className="h-3 w-3" />
+                        <span>متابعة الملف</span>
+                        <ArrowLeft className="h-2.5 w-2.5 text-[#F2CD78]" />
                       </button>
                     </div>
                   </div>
@@ -1748,69 +1344,156 @@ function SummaryView({
         </section>
       )}
 
-      {/* 6. Recent activities: compact timeline, expanded history only on demand. */}
+      {/* 5. مناسب لهدفي (Goal-Matched Recommendations) */}
+      <GoalMatchedSection onNavigate={setTab} />
+
+      {/* 6. نظرة سريعة (Quick Stats Grid — Number beside label + small Navy/Petrol icon & number) */}
+      <section
+        aria-label="نظرة سريعة"
+        className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] py-3 sm:py-3.5 shadow-2xs mn-panel font-['Cairo',sans-serif]"
+      >
+        <div className="flex items-center justify-between gap-2 px-3.5 sm:px-5">
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-[#D6A43B]/45 bg-[#142B5F] text-[#F2CD78]">
+              <Sparkles className="h-3.5 w-3.5" />
+            </span>
+            <h3 className="text-[13px] sm:text-[14px] font-bold text-[#1E293B] dark:text-[#F8FAFC]">
+              نظرة سريعة
+            </h3>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={onOpenCalendar}
+              className="mn-student-summary-header-link inline-flex items-center gap-1 rounded-md border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 py-0.5 text-[9.5px] font-bold text-[#142B5F] dark:text-[#F8FAFC] hover:border-[#0E7C86] cursor-pointer"
+            >
+              <CalendarClock className="h-2.5 w-2.5 text-[#142B5F] dark:text-[#F2CD78]" />
+              <span>التقويم</span>
+            </button>
+            <button
+              type="button"
+              onClick={onOpenSupport}
+              className="mn-student-summary-header-link inline-flex items-center gap-1 rounded-md border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 py-0.5 text-[9.5px] font-bold text-[#142B5F] dark:text-[#F8FAFC] hover:border-[#0E7C86] cursor-pointer"
+            >
+              <HelpCircle className="h-2.5 w-2.5 text-[#142B5F] dark:text-[#F2CD78]" />
+              <span>الدعم</span>
+            </button>
+          </div>
+        </div>
+        <div className="mt-3 pt-0.5 px-3.5 sm:px-5 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+          <button
+            type="button"
+            onClick={() => setTab('OPPORTUNITIES')}
+            className="mn-student-summary-stat-btn flex items-center justify-start gap-1.5 rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] text-right hover:border-[#0E7C86] transition-colors cursor-pointer"
+          >
+            <span className="grid h-[19px] w-[19px] shrink-0 place-items-center rounded-[5px] bg-[#0E7C86]/12 text-[#0E7C86] dark:text-[#55CBC5]">
+              <Route className="w-3 h-3" />
+            </span>
+            <span className="text-[10px] font-bold leading-snug text-[#334155] dark:text-[#CBD5E1] truncate">
+              تقديمات نشطة
+            </span>
+            <span className="shrink-0 rounded-md border border-[#142B5F]/20 bg-white dark:bg-slate-900 dark:border-white/15 px-1.5 py-0.5 text-[10px] font-extrabold leading-none tabular-nums text-[#142B5F] dark:text-[#F2CD78] shadow-2xs">
+              {activeMilestones.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setTab('LEARNING')}
+            className="mn-student-summary-stat-btn flex items-center justify-start gap-1.5 rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] text-right hover:border-[#0E7C86] transition-colors cursor-pointer"
+          >
+            <span className="grid h-[19px] w-[19px] shrink-0 place-items-center rounded-[5px] bg-[#0E7C86]/12 text-[#0E7C86] dark:text-[#55CBC5]">
+              <BookOpen className="w-3 h-3" />
+            </span>
+            <span className="text-[10px] font-bold leading-snug text-[#334155] dark:text-[#CBD5E1] truncate">
+              دورات جارية
+            </span>
+            <span className="shrink-0 rounded-md border border-[#142B5F]/20 bg-white dark:bg-slate-900 dark:border-white/15 px-1.5 py-0.5 text-[10px] font-extrabold leading-none tabular-nums text-[#142B5F] dark:text-[#F2CD78] shadow-2xs">
+              {dashboard.statistics.activeCourses}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setTab('VAULT')}
+            className="mn-student-summary-stat-btn flex items-center justify-start gap-1.5 rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] text-right hover:border-[#0E7C86] transition-colors cursor-pointer"
+          >
+            <span className="grid h-[19px] w-[19px] shrink-0 place-items-center rounded-[5px] bg-[#0E7C86]/12 text-[#0E7C86] dark:text-[#55CBC5]">
+              <Heart className="w-3 h-3" />
+            </span>
+            <span className="text-[10px] font-bold leading-snug text-[#334155] dark:text-[#CBD5E1] truncate">
+              عناصر محفوظة
+            </span>
+            <span className="shrink-0 rounded-md border border-[#142B5F]/20 bg-white dark:bg-slate-900 dark:border-white/15 px-1.5 py-0.5 text-[10px] font-extrabold leading-none tabular-nums text-[#142B5F] dark:text-[#F2CD78] shadow-2xs">
+              {dashboard.statistics.savedItems}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setTab('LEARNING')}
+            className="mn-student-summary-stat-btn flex items-center justify-start gap-1.5 rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] text-right hover:border-[#0E7C86] transition-colors cursor-pointer"
+          >
+            <span className="grid h-[19px] w-[19px] shrink-0 place-items-center rounded-[5px] bg-[#0E7C86]/12 text-[#0E7C86] dark:text-[#55CBC5]">
+              <Award className="w-3 h-3" />
+            </span>
+            <span className="text-[10px] font-bold leading-snug text-[#334155] dark:text-[#CBD5E1] truncate">
+              شهادات صادرة
+            </span>
+            <span className="shrink-0 rounded-md border border-[#142B5F]/20 bg-white dark:bg-slate-900 dark:border-white/15 px-1.5 py-0.5 text-[10px] font-extrabold leading-none tabular-nums text-[#142B5F] dark:text-[#F2CD78] shadow-2xs">
+              {dashboard.statistics.certificates}
+            </span>
+          </button>
+        </div>
+      </section>
+
+      {/* 7. آخر الأنشطة والخطوات */}
       {activityLog.length > 0 && (
         <section
           aria-label="آخر الأنشطة والخطوات"
-          className="relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel font-['Cairo',sans-serif]"
+          className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] py-3 sm:py-3.5 shadow-2xs mn-panel font-['Cairo',sans-serif]"
         >
-          <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center justify-between gap-2 px-3.5 sm:px-5">
             <div className="flex min-w-0 items-center gap-2">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
-                <HistoryIcon className="h-4 w-4 text-[#E5B54F]" />
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-[#D6A43B]/45 bg-[#142B5F] text-[#F2CD78]">
+                <HistoryIcon className="h-3.5 w-3.5 text-[#F2CD78]" />
               </span>
-              <h2 className="mn-student-summary-heading text-[14px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">
+              <h3 className="text-[13px] sm:text-[14px] font-bold leading-snug font-['Cairo',sans-serif] text-[#1E293B] dark:text-[#F8FAFC]">
                 آخر الأنشطة والخطوات
-              </h2>
+              </h3>
             </div>
             <button
               type="button"
               onClick={() => setShowAllActivities((previous) => !previous)}
               aria-expanded={showAllActivities}
               aria-controls="student-summary-activity-timeline"
-              className="inline-flex min-h-8 shrink-0 items-center gap-1 rounded-lg border border-[#142B5F]/30 bg-[var(--mn-surface)] px-2 py-1 text-[11px] font-bold leading-5 text-[#142B5F] dark:border-[#D6A43B]/50 dark:bg-[#10264A] dark:text-[#E5B54F] hover:bg-[#F5F8FB] dark:hover:bg-[#1B365A] cursor-pointer font-['Cairo',sans-serif]"
+              className="inline-flex min-h-6 shrink-0 items-center gap-1 rounded-md border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 py-0.5 text-[9.5px] font-bold text-[#142B5F] dark:text-[#F8FAFC] hover:border-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]"
             >
               <span>{showAllActivities ? 'إخفاء السجلات' : 'كل السجلات'}</span>
-              <ChevronLeft
-                className={`h-3.5 w-3.5 transition-transform ${showAllActivities ? '-rotate-90' : ''}`}
-              />
+              <ChevronLeft className={`h-2.5 w-2.5 text-[#142B5F] dark:text-[#F2CD78] transition-transform ${showAllActivities ? '-rotate-90' : ''}`} />
             </button>
           </div>
 
-          <ol
-            id="student-summary-activity-timeline"
-            className="mr-2.5 space-y-3 border-r-2 border-[#0E7C86]/35 pr-4 dark:border-[#5BC6C0]/45"
-          >
+          <ol id="student-summary-activity-timeline" className="mt-3 mr-5 ml-3 sm:mr-6 sm:ml-4 space-y-2 border-r-2 border-[#0E7C86]/35 pr-4 dark:border-[#5BC6C0]/45">
             {(showAllActivities
               ? activityLog
-              : dashboard.timeline.length > 0
-                ? [...dashboard.timeline]
-                    .sort(
-                      (first, second) =>
-                        (Date.parse(second.occurredAt) || 0) - (Date.parse(first.occurredAt) || 0),
-                    )
-                    .slice(0, 3)
-                : activityLog.slice(0, 3)
-            ).map((item) => (
-              <li key={item.id} className="relative min-w-0">
-                <span
-                  aria-hidden="true"
-                  className="absolute -right-[22px] top-1 h-2.5 w-2.5 rounded-full border-2 border-[var(--mn-surface)] bg-[#0E7C86] dark:bg-[#5BC6C0]"
-                />
-                <h3 className="text-xs sm:text-sm font-medium leading-5 text-[var(--mn-heading)] break-words">
-                  {item.title}
-                </h3>
-                <time className="mt-0.5 block text-[10px] leading-4 text-[var(--mn-text-muted)]">
-                  {formatDate(item.occurredAt)}
-                </time>
-              </li>
-            ))}
+              : (dashboard.timeline.length > 0
+                ? [...dashboard.timeline].sort((first, second) => (Date.parse(second.occurredAt) || 0) - (Date.parse(first.occurredAt) || 0)).slice(0, 3)
+                : activityLog.slice(0, 3)))
+              .map((item) => (
+                <li key={item.id} className="relative min-w-0">
+                  <span aria-hidden="true" className="absolute -right-[22px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--mn-surface)] bg-[#0E7C86] dark:bg-[#5BC6C0]" />
+                  <h4 className="text-[11px] font-bold leading-snug text-[#1E293B] dark:text-[#F8FAFC] break-words">{item.title}</h4>
+                  <time className="mt-0.5 block text-[9.5px] font-medium leading-4 text-[var(--mn-text-muted)]">
+                    {formatDate(item.occurredAt)}
+                  </time>
+                </li>
+              ))}
           </ol>
         </section>
       )}
 
-      {/* 7. Invoices (If any exist) */}
-
+      {/* 8. Invoices (If any exist) */}
       {invoices.length > 0 && (
         <div className="mn-student-summary-invoices">
           <InvoicePanel
@@ -1825,6 +1508,8 @@ function SummaryView({
   );
 }
 
+type OpportunitiesSubTab = 'ACTIVE' | 'DISCOVER' | 'SHORTLIST' | 'OFFERS' | 'DOCUMENTS' | 'ARCHIVED';
+
 function OpportunitiesView({
   dashboard,
   trackers,
@@ -1835,37 +1520,32 @@ function OpportunitiesView({
   onArchive,
   onRemove,
   onDocumentsChanged,
+  requestedSubTab,
+  onClearRequestedSubTab,
 }: {
   dashboard: StudentDashboardSummaryDto;
   trackers: StudentApplicationTrackerDto[];
   saving: boolean;
   onStageChange: (tracker: StudentApplicationTrackerDto, stage: string) => void;
-  onChecklistToggle: (
-    tracker: StudentApplicationTrackerDto,
-    itemId: string,
-    completed: boolean,
-  ) => void;
+  onChecklistToggle: (tracker: StudentApplicationTrackerDto, itemId: string, completed: boolean) => void;
   onNotesUpdate: (tracker: StudentApplicationTrackerDto, notes: string) => void;
   onArchive: (tracker: StudentApplicationTrackerDto) => void;
   onRemove: (tracker: StudentApplicationTrackerDto) => void;
   onDocumentsChanged: () => void;
+  requestedSubTab?: OpportunitiesSubTab | null;
+  onClearRequestedSubTab?: () => void;
 }) {
-  const [filter, setFilter] = useState<'ACTIVE' | 'ARCHIVED' | 'ALL'>('ACTIVE');
+  const [subTab, setSubTab] = useState<OpportunitiesSubTab>(requestedSubTab || 'ACTIVE');
 
-  const activeTrackers = useMemo(
-    () => trackers.filter((item) => item.status === 'ACTIVE'),
-    [trackers],
-  );
-  const archivedTrackers = useMemo(
-    () => trackers.filter((item) => item.status === 'ARCHIVED'),
-    [trackers],
-  );
+  useEffect(() => {
+    if (requestedSubTab) {
+      setSubTab(requestedSubTab);
+      onClearRequestedSubTab?.();
+    }
+  }, [requestedSubTab, onClearRequestedSubTab]);
 
-  const displayedTrackers = useMemo(() => {
-    if (filter === 'ACTIVE') return activeTrackers;
-    if (filter === 'ARCHIVED') return archivedTrackers;
-    return trackers;
-  }, [filter, activeTrackers, archivedTrackers, trackers]);
+  const activeTrackers = useMemo(() => trackers.filter((item) => item.status === 'ACTIVE'), [trackers]);
+  const archivedTrackers = useMemo(() => trackers.filter((item) => item.status === 'ARCHIVED'), [trackers]);
 
   const upcomingDeadlines = useMemo(() => {
     return activeTrackers
@@ -1877,284 +1557,164 @@ function OpportunitiesView({
       });
   }, [activeTrackers]);
 
-  const hasTrackers = trackers.length > 0;
-
-  // Personalize the introduction using only active application files.
-  // Archived records must not inflate the active task totals.
-  const activeTaskCount = activeTrackers.reduce((total, item) => total + item.checklist.length, 0);
-  const activeCompletedCount = activeTrackers.reduce(
-    (total, item) => total + item.checklist.filter((task) => task.completed).length,
-    0,
+  const savedScholarshipsCount = useMemo(
+    () => dashboard.savedItems.filter((item) => item.entityType === 'SCHOLARSHIP' || item.entityType === 'UNIVERSITY').length,
+    [dashboard.savedItems],
   );
-  const activeTaskProgress =
-    activeTaskCount > 0 ? Math.round((activeCompletedCount / activeTaskCount) * 100) : 0;
-  const activeFileDescription =
-    activeTrackers.length === 1
-      ? 'لديك ملف تقديم نشط واحد'
-      : activeTrackers.length === 2
-        ? 'لديك ملفا تقديم نشطان'
-        : `لديك ${activeTrackers.length} ملفات تقديم نشطة`;
-  const introduction =
-    activeTrackers.length === 0
-      ? 'لا توجد ملفات تقديم نشطة حاليًا. ابدأ بمتابعة منحة لتتمكن من تنظيم متطلباتها ومواعيدها.'
-      : activeTaskCount > 0
-        ? `${activeFileDescription}، وأنجزت ${activeCompletedCount} من أصل ${activeTaskCount} من مهام التقديم.`
-        : `${activeFileDescription}. لم تُضف مهام متابعة إلى هذه الملفات بعد.`;
+
+  const subTabs = [
+    { id: 'ACTIVE' as const, label: 'تقديماتي', count: activeTrackers.length, icon: CheckCircle2 },
+    { id: 'DISCOVER' as const, label: 'اكتشف', icon: Compass },
+    { id: 'SHORTLIST' as const, label: 'قائمتي', count: savedScholarshipsCount, icon: Star },
+    { id: 'OFFERS' as const, label: 'النتائج', icon: Award },
+    { id: 'DOCUMENTS' as const, label: 'المستندات', icon: FileCheck2 },
+    { id: 'ARCHIVED' as const, label: 'الأرشيف', count: archivedTrackers.length, icon: Archive },
+  ];
 
   return (
-    <div className="mn-student-opportunities-page mt-3 space-y-5 font-['Cairo',sans-serif] sm:mt-4">
-      {/* Reduced-height hero and the separate filters share a compact visual group. */}
-      <div className="space-y-1.5">
+    <div className="mn-student-opportunities-page mt-0 space-y-3.5 font-['Cairo',sans-serif]">
+      {/* Header box attached directly to the 8-tab bar above */}
+      <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] -mt-px">
         <section
           aria-label="فرصي وملفات التقديم"
-          className="relative overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-2xs mn-panel dark:border-white/10 sm:p-4"
+          className="relative overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] shadow-2xs mn-panel font-['Cairo',sans-serif]"
         >
-          {/* The gold accent runs along the entire RIGHT edge of the card. */}
-          <div
+          {/* Top line from right to left with a quarter-height drop on both right and left sides */}
+          <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 right-0 w-[3.5px] bg-gradient-to-b from-[#B78622] via-[#D6A43B] to-[#E5B54F]"
+            className="pointer-events-none absolute inset-x-0 top-0 h-[3px] z-10 bg-[#142B5F] dark:bg-[#D6A43B]"
+          />
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-0 right-0 h-1/4 w-[3px] z-10 bg-[#142B5F] dark:bg-[#D6A43B]"
+          />
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-0 left-0 h-1/4 w-[3px] z-10 bg-[#142B5F] dark:bg-[#D6A43B]"
           />
 
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-[#D6A43B]/30 bg-[#142B5F]">
-              <Route className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />
-            </span>
-            <h2 className="text-[14px] font-bold leading-[1.5] text-[var(--mn-heading)]">
-              فرصي وملفات التقديم
-            </h2>
-          </div>
-
-          <div className="mt-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 dark:bg-[var(--mn-surface-elevated)]">
-            <p className="text-[12px] font-bold leading-5 text-[var(--mn-heading)]">
-              تابع رحلتك نحو القبول الجامعي
-            </p>
-            <p className="mt-0.5 text-[11px] font-medium leading-[1.75] text-[var(--mn-text-muted)] sm:text-[12px]">
-              {introduction}
-            </p>
-          </div>
-
-          {hasTrackers && (
-            <div className="mt-2.5 grid grid-cols-3 gap-1.5 sm:gap-2">
-              <div className="min-w-0 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-1.5 py-2 text-center dark:bg-[var(--mn-surface-elevated)] sm:p-2.5">
-                <div className="text-[16px] font-bold leading-6 text-[var(--mn-heading)]">
-                  {activeTrackers.length}
-                </div>
-                <div className="mt-0.5 text-[10px] font-semibold leading-[1.5] text-[var(--mn-text-muted)]">
-                  تقديم نشط
-                </div>
+          <div className="px-3.5 py-3.5 sm:px-5 sm:py-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/45 bg-[#142B5F]">
+                  <Route className="h-3.5 w-3.5 text-[#F2CD78]" aria-hidden="true" />
+                </span>
+                <h2 className="mn-student-opportunities-heading text-[14px] sm:text-[15px] font-bold leading-tight text-[#1E293B] dark:text-[#F8FAFC] font-['Cairo',sans-serif]">
+                  فرصي وملفات التقديم
+                </h2>
               </div>
-              <div className="min-w-0 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-1.5 py-2 text-center dark:bg-[var(--mn-surface-elevated)] sm:p-2.5">
-                <div className="text-[16px] font-bold leading-6 text-[var(--mn-heading)]">
-                  {activeTaskProgress}%
-                </div>
-                <div className="mt-0.5 text-[10px] font-semibold leading-[1.5] text-[var(--mn-text-muted)]">
-                  إنجاز المهام ({activeCompletedCount}/{activeTaskCount})
-                </div>
-              </div>
-              <div className="min-w-0 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-1.5 py-2 text-center dark:bg-[var(--mn-surface-elevated)] sm:p-2.5">
-                <div className="text-[16px] font-bold leading-6 text-[var(--mn-heading)]">
-                  {archivedTrackers.length}
-                </div>
-                <div className="mt-0.5 text-[10px] font-semibold leading-[1.5] text-[var(--mn-text-muted)]">
-                  ملفات مؤرشفة
-                </div>
+
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="rounded-md border border-[#0E7C86]/25 bg-[#0E7C86]/10 px-2 py-0.5 text-[9.5px] font-bold text-[#0E7C86] dark:text-[#55CBC5] font-['Cairo',sans-serif]">
+                  {trackers.length} ملف تقديم
+                </span>
               </div>
             </div>
-          )}
 
-          <div dir="rtl" className="mt-2.5 flex w-full flex-wrap items-center gap-2">
-            <p className="text-[11px] font-medium leading-[1.6] text-[var(--mn-text-muted)]">
-              ملفاتك ومواعيدك في مكان واحد
+            <p className="mt-2 pr-9 text-[11px] sm:text-[12px] font-medium leading-relaxed text-[#475569] dark:text-[#CBD5E1]">
+              التقديمات، الاستكشاف، القائمة المختصرة، النتائج والمستندات
             </p>
-            <Link
-              to="/scholarships"
-              className="ms-auto inline-flex min-h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-[#142B5F] px-3 py-1.5 text-[11px] font-bold text-white shadow-2xs transition-colors hover:bg-[#203D74] dark:bg-[#D6A43B] dark:text-[#142B5F] dark:hover:bg-[#E5B54F]"
-            >
-              <Sparkles
-                className="h-3.5 w-3.5 text-[#E5B54F] dark:text-[#142B5F]"
-                aria-hidden="true"
-              />
-              <span>استكشف المنح</span>
-            </Link>
           </div>
         </section>
 
-        {/* Three INDIVIDUAL filter cards, aligned right with left breathing room. */}
-        {hasTrackers && (
-          <nav
-            aria-label="تصفية ملفات التقديم"
-            className="ml-auto grid w-[94%] grid-cols-3 gap-1.5 sm:w-[86%] sm:gap-2"
-          >
-            {[
-              {
-                value: 'ACTIVE' as const,
-                label: 'النشطة حاليًا',
-                count: activeTrackers.length,
-                icon: CheckCircle2,
-              },
-              {
-                value: 'ARCHIVED' as const,
-                label: 'المؤرشفة',
-                count: archivedTrackers.length,
-                icon: Archive,
-              },
-              { value: 'ALL' as const, label: 'الكل', count: trackers.length, icon: ListChecks },
-            ].map(({ value, label, count, icon: Icon }) => (
-              <button
-                key={value}
-                type="button"
-                aria-pressed={filter === value}
-                onClick={() => setFilter(value)}
-                className={`flex min-h-10 min-w-0 items-center justify-center gap-1 rounded-xl border px-1.5 py-1.5 text-center text-[10px] font-bold leading-[1.5] shadow-2xs transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] sm:text-[11px] ${
-                  filter === value
-                    ? 'border-[#0A6273] bg-gradient-to-l from-[#153B75] to-[#056579] text-white dark:border-[#D6A43B] dark:from-[#153B75] dark:to-[#0B6473]'
-                    : 'border-[var(--mn-border)] bg-[var(--mn-surface)] text-[var(--mn-heading)] hover:border-[#0E7C86] dark:border-white/20'
-                }`}
-              >
-                <Icon
-                  className={`h-3.5 w-3.5 shrink-0 ${filter === value ? 'text-[#E5B54F]' : 'text-[var(--mn-text-muted)]'}`}
-                  aria-hidden="true"
-                />
-                <span>
-                  {label} ({count})
-                </span>
-              </button>
-            ))}
-          </nav>
-        )}
+        {/* 6 Side-by-Side Sub-Tabs (2 rows of 3 on mobile, 6 on desktop) without swipe */}
+        <HorizontalSwipeTabs
+          ariaLabel="أقسام فرصي وملفات التقديم"
+          items={subTabs}
+          activeId={subTab}
+          onChange={setSubTab}
+        />
       </div>
 
-      {/* 3. Main Trackers or Single Clean Starter State */}
-      {!hasTrackers ? (
-        <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 sm:p-8 text-center mn-panel shadow-2xs">
-          <div className="w-12 h-12 rounded-2xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/40 flex items-center justify-center text-[#E5B54F] mx-auto mb-3.5 shadow-xs">
-            <Route className="w-6 h-6 text-[#E5B54F]" />
-          </div>
-          <h3 className="text-sm sm:text-base font-bold text-[var(--mn-heading)]">
-            ابدأ متابعة تقديماتك خطوة بخطوة
-          </h3>
-          <p className="text-xs text-[var(--mn-text-muted)] mt-2 leading-relaxed max-w-lg mx-auto">
-            <strong>ما الفرق؟</strong> حفظ المنحة في{' '}
-            <span className="font-semibold text-[var(--mn-heading)]">«محفوظاتي»</span> يتيح لك
-            الرجوع إليها في أي وقت، بينما فتح{' '}
-            <span className="font-semibold text-[var(--mn-heading)]">«ملف تقديم»</span> هنا يمكّنك
-            من إدارة المواعيد النهائية، إنجاز المتطلبات وقوائم المهام خطوة بخطوة حتى القبول.
-          </p>
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              to="/scholarships"
-              className="px-4 py-2 rounded-xl bg-[var(--mn-primary)] text-white text-xs font-bold hover:bg-[var(--mn-primary-hover)] transition-all shadow-2xs inline-flex items-center gap-2"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#E5B54F]" />
-              <span>استكشف دليل المنح الدراسية</span>
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <div className="grid gap-6 lg:grid-cols-[1.45fr_1fr]">
-          <div className="space-y-4">
-            <ApplicationTrackersPanel
-              trackers={displayedTrackers}
-              filter={filter}
-              saving={saving}
-              onStageChange={onStageChange}
-              onChecklistToggle={onChecklistToggle}
-              onNotesUpdate={onNotesUpdate}
-              onArchive={onArchive}
-              onRemove={onRemove}
-              onDocumentsChanged={onDocumentsChanged}
-            />
-          </div>
+      {/* Sub-Tab 1: ACTIVE (تقديماتي) */}
+      {subTab === 'ACTIVE' && (
+        <div className="space-y-3.5 min-w-0 max-w-full">
+          <ApplicationTrackersPanel
+            trackers={activeTrackers}
+            filter="ACTIVE"
+            saving={saving}
+            onStageChange={onStageChange}
+            onChecklistToggle={onChecklistToggle}
+            onNotesUpdate={onNotesUpdate}
+            onArchive={onArchive}
+            onRemove={onRemove}
+            onDocumentsChanged={onDocumentsChanged}
+          />
 
-          <div className="space-y-6">
-            {/* Upcoming Deadlines Panel */}
-            {upcomingDeadlines.length > 0 && (
-              <OpportunitiesSectionCard
-                title="المواعيد النهائية القريبة"
-                icon={<CalendarClock className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
-                description="مواعيد إغلاق تقديمات المنح المتابعة"
-              >
-                <div className="space-y-3">
-                  {upcomingDeadlines.slice(0, 4).map((tracker) => {
-                    const deadlineStr = tracker.deadlineAt || tracker.owner?.deadlineAt;
-                    const title = trackerDisplayName(tracker);
-                    return (
-                      <div
-                        key={tracker.id}
-                        className="p-2.5 rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] flex items-center justify-between gap-3 text-xs"
-                      >
-                        <div className="min-w-0">
-                          <div className="text-[12px] sm:text-[13px] font-bold leading-5 text-[var(--mn-heading)] break-words">
-                            {title}
-                          </div>
-                          <div className="text-[11px] text-[var(--mn-text-muted)] mt-0.5">
-                            {tracker.stage}
-                          </div>
-                        </div>
-                        <div className="shrink-0 text-right">
-                          <div className="inline-flex items-center gap-1 font-semibold text-[var(--mn-text-muted)] text-[11px] font-['Cairo',sans-serif]">
-                            <span>{formatDate(deadlineStr)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </OpportunitiesSectionCard>
-            )}
-
-            {/* Application Progress Summary */}
+          {upcomingDeadlines.length > 0 && (
             <OpportunitiesSectionCard
-              title="حصيلة التقديم"
-              icon={<ClipboardList className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
+              title="المواعيد النهائية القريبة"
+              icon={<CalendarClock className="h-3.5 w-3.5 text-[#F2CD78]" aria-hidden="true" />}
             >
-              <div className="space-y-4">
-                <ProgressRow label="إنجاز مهام التقديم النشطة" value={activeTaskProgress} />
-                <ProgressRow
-                  label="نسبة الملفات المؤرشفة"
-                  value={
-                    trackers.length
-                      ? Math.round((archivedTrackers.length / trackers.length) * 100)
-                      : 0
-                  }
-                />
-              </div>
-              <div className="mt-4 flex items-start gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-3 py-2.5 text-[11px] leading-[1.85] text-[var(--mn-text-muted)]">
-                <Info
-                  className="mt-0.5 h-4 w-4 shrink-0 text-[#0E7C86] dark:text-[#6AD2D1]"
-                  aria-hidden="true"
-                />
-                <p>
-                  <strong className="font-bold text-[var(--mn-heading)]">
-                    تنبيه دقة البيانات:
-                  </strong>{' '}
-                  حفظ المنحة في «محفوظاتي» يتيح الرجوع إليها لاحقًا، بينما فتح «ملف تقديم» هنا
-                  يمكّنك من متابعة المهام ومراحل التقديم خطوة بخطوة.
-                </p>
+              <div className="grid gap-1.5 sm:grid-cols-2">
+                {upcomingDeadlines.slice(0, 4).map((tracker) => {
+                  const deadlineStr = tracker.deadlineAt || tracker.owner?.deadlineAt;
+                  const title = trackerDisplayName(tracker);
+                  return (
+                    <div
+                      key={tracker.id}
+                      className="relative overflow-hidden pr-3.5 pl-2.5 py-2 rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] flex items-center justify-between gap-2"
+                    >
+                      <span aria-hidden="true" className="mn-student-card-start-bar" />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="grid h-[19px] w-[19px] shrink-0 place-items-center rounded-[5px] bg-[#142B5F] text-white">
+                            <GraduationCap className="h-3 w-3 text-white" aria-hidden="true" />
+                          </span>
+                          <div className="min-w-0 flex-1 text-[10.5px] font-bold leading-snug text-[#1E293B] dark:text-[#F8FAFC] truncate">{title}</div>
+                        </div>
+                        <div className="mt-0.5 pr-[25px] text-[9.5px] font-medium leading-snug text-[#64748B] dark:text-[#94A3B8] truncate">{tracker.stage}</div>
+                      </div>
+                      <span className="shrink-0 rounded-md border border-[#0E7C86]/25 bg-[#0E7C86]/10 px-1.5 py-0.5 text-[9px] font-bold text-[#0E7C86] dark:text-[#55CBC5]">
+                        {formatDate(deadlineStr)}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </OpportunitiesSectionCard>
-
-            {/* Timeline of activity */}
-            {dashboard.timeline.length > 0 && (
-              <OpportunitiesSectionCard
-                title="سجل الأنشطة والمواعيد"
-                icon={<HistoryIcon className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
-              >
-                <div className="mn-student-opportunities-activity">
-                  <ActivityList items={dashboard.timeline} />
-                </div>
-              </OpportunitiesSectionCard>
-            )}
-          </div>
+          )}
         </div>
+      )}
+
+      {/* Sub-Tab 2: DISCOVER (اكتشف) */}
+      {subTab === 'DISCOVER' && <OpportunitiesDiscoverPanel />}
+
+      {/* Sub-Tab 3: SHORTLIST (قائمتي المختصرة) */}
+      {subTab === 'SHORTLIST' && (
+        <OpportunitiesShortlistPanel
+          savedItems={dashboard.savedItems}
+          trackers={trackers}
+          onSwitchToActive={() => setSubTab('ACTIVE')}
+        />
+      )}
+
+      {/* Sub-Tab 4: OFFERS (النتائج والعروض + خطواتي بعد القبول) */}
+      {subTab === 'OFFERS' && <OpportunitiesOffersPanel trackers={trackers} />}
+
+      {/* Sub-Tab 5: DOCUMENTS (مستنداتي الموحدة) */}
+      {subTab === 'DOCUMENTS' && (
+        <StudentDocumentsLibraryPanel trackers={trackers} onDocumentsChanged={onDocumentsChanged} />
+      )}
+
+      {/* Sub-Tab 6: ARCHIVED (الأرشيف) */}
+      {subTab === 'ARCHIVED' && (
+        <ApplicationTrackersPanel
+          trackers={archivedTrackers}
+          filter="ARCHIVED"
+          saving={saving}
+          onStageChange={onStageChange}
+          onChecklistToggle={onChecklistToggle}
+          onNotesUpdate={onNotesUpdate}
+          onArchive={onArchive}
+          onRemove={onRemove}
+          onDocumentsChanged={onDocumentsChanged}
+        />
       )}
     </div>
   );
 }
 
-/** Matches the icon, Cairo 14px title, gold underline and spacing in ملخصي.
- * Kept separate from the generic Panel to avoid changing other student tabs.
- */
 function OpportunitiesSectionCard({
   title,
   icon,
@@ -2169,27 +1729,26 @@ function OpportunitiesSectionCard({
   return (
     <section
       aria-label={title}
-      className="mn-student-opportunities-section relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel font-['Cairo',sans-serif]"
+      className="mn-student-opportunities-section relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] py-3 sm:py-3.5 shadow-2xs mn-panel font-['Cairo',sans-serif] overflow-hidden"
     >
-      <div className="mb-3">
+      <div className="px-3.5 sm:px-5">
         <div className="flex min-w-0 items-center gap-2">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-[#D6A43B]/45 bg-[#142B5F] text-[#F2CD78]">
             {icon}
           </span>
-          <h3 className="mn-student-opportunities-heading min-w-0 text-[14px] font-bold leading-[1.22] text-[var(--mn-heading)]">
+          <h3 className="min-w-0 text-[13px] sm:text-[14px] font-bold leading-snug text-[#1E293B] dark:text-[#F8FAFC]">
             {title}
           </h3>
         </div>
         {description && (
-          <p className="mt-1.5 text-[11px] leading-[1.7] text-[var(--mn-text-muted)]">
-            {description}
-          </p>
+          <p className="mt-1 text-[10px] font-medium leading-relaxed text-[#64748B] dark:text-[#94A3B8]">{description}</p>
         )}
       </div>
-      {children}
+      <div className="mt-3 pt-0.5 px-3.5 sm:px-5">{children}</div>
     </section>
   );
 }
+
 
 const APPLICATION_STAGES = [
   'تجهيز المستندات',
@@ -2215,11 +1774,7 @@ function ApplicationTrackersPanel({
   filter: 'ACTIVE' | 'ARCHIVED' | 'ALL';
   saving: boolean;
   onStageChange: (tracker: StudentApplicationTrackerDto, stage: string) => void;
-  onChecklistToggle: (
-    tracker: StudentApplicationTrackerDto,
-    itemId: string,
-    completed: boolean,
-  ) => void;
+  onChecklistToggle: (tracker: StudentApplicationTrackerDto, itemId: string, completed: boolean) => void;
   onNotesUpdate: (tracker: StudentApplicationTrackerDto, notes: string) => void;
   onArchive: (tracker: StudentApplicationTrackerDto) => void;
   onRemove: (tracker: StudentApplicationTrackerDto) => void;
@@ -2228,28 +1783,30 @@ function ApplicationTrackersPanel({
   if (!trackers.length) {
     if (filter === 'ARCHIVED') {
       return (
-        <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 text-center mn-panel">
-          <Archive className="w-8 h-8 mx-auto text-[var(--mn-text-muted)] mb-2" />
-          <h3 className="font-bold text-sm text-[var(--mn-heading)]">لا توجد ملفات تقديم مؤرشفة</h3>
-          <p className="text-xs text-[var(--mn-text-muted)] mt-1 max-w-sm mx-auto">
+        <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-5 text-center mn-panel overflow-hidden">
+          <Archive className="w-7 h-7 mx-auto text-[#0E7C86] mb-1.5" />
+          <h3 className="font-bold text-[12.5px] sm:text-[13px] text-[#1E293B] dark:text-[#F8FAFC]">لا توجد ملفات تقديم مؤرشفة</h3>
+          <p className="text-[11px] text-[#64748B] dark:text-[#94A3B8] mt-1 max-w-sm mx-auto">
             عند إتمام تقديماتك أو أرشفتها ستظهر هنا للاحتفاظ بسجلك الأكاديمي.
           </p>
         </div>
       );
     }
     return (
-      <EmptyState
-        icon={<Route className="h-8 w-8 text-[#E5B54F]" />}
-        title="لا توجد ملفات تقديم نشطة بعد"
-        text="تصفح دليل المنح الدراسية واختر «متابعة التقديم» على المنحة التي ترغب بالتقديم عليها لتوليد ملف تتبع مخصص خطوة بخطوة."
-        href="/scholarships"
-        action="استكشف دليل المنح الآن"
-      />
+      <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-5 text-center mn-panel overflow-hidden">
+        <EmptyState
+          icon={<Route className="h-7 w-7 text-[#E5B54F]" />}
+          title="لا توجد ملفات تقديم نشطة بعد"
+          text="تصفح دليل المنح الدراسية واختر «متابعة التقديم» على المنحة التي ترغب بالتقديم عليها لتوليد ملف تتبع مخصص خطوة بخطوة."
+          href="/scholarships"
+          action="استكشف دليل المنح الآن"
+        />
+      </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3.5">
       {trackers.map((tracker) => (
         <ApplicationTrackerCard
           key={tracker.id}
@@ -2280,11 +1837,7 @@ function ApplicationTrackerCard({
   tracker: StudentApplicationTrackerDto;
   saving: boolean;
   onStageChange: (tracker: StudentApplicationTrackerDto, stage: string) => void;
-  onChecklistToggle: (
-    tracker: StudentApplicationTrackerDto,
-    itemId: string,
-    completed: boolean,
-  ) => void;
+  onChecklistToggle: (tracker: StudentApplicationTrackerDto, itemId: string, completed: boolean) => void;
   onNotesUpdate: (tracker: StudentApplicationTrackerDto, notes: string) => void;
   onArchive: (tracker: StudentApplicationTrackerDto) => void;
   onRemove: (tracker: StudentApplicationTrackerDto) => void;
@@ -2301,6 +1854,7 @@ function ApplicationTrackerCard({
   const slug = tracker.owner?.available === true ? tracker.owner.slug : null;
   const isArchived = tracker.status === 'ARCHIVED';
   const deadlineStr = tracker.deadlineAt || tracker.owner?.deadlineAt;
+  const nextTask = tracker.checklist.find((item) => !item.completed);
 
   function handleSaveNotes() {
     onNotesUpdate(tracker, notesDraft);
@@ -2308,147 +1862,208 @@ function ApplicationTrackerCard({
   }
 
   return (
-    <article className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel font-['Cairo',sans-serif] transition-all hover:border-[#D6A43B]/40">
+    <article className="relative overflow-hidden -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] px-3.5 py-3 sm:px-5 sm:py-3.5 shadow-2xs mn-panel font-['Cairo',sans-serif] transition-all">
       <OwnerReferenceNotice reference={tracker.owner?.referenceState} />
-      {/* Scholarship identity always precedes document tools. */}
-      {/* Top Header Row */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shrink-0 mt-0.5">
-            <GraduationCap className="w-5 h-5 text-[#E5B54F]" />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-[14px] leading-[1.5] font-bold text-[var(--mn-heading)] break-words">
-              {displayName}
-            </h3>
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              {isArchived ? (
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-500/10 text-slate-500 border border-slate-500/20">
-                  مؤرشف تنظيمياً
-                </span>
-              ) : (
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border border-[var(--mn-success-border)]">
-                  تقديم نشط
-                </span>
-              )}
-              {tracker.owner?.country && (
-                <span className="text-[11px] font-medium text-[var(--mn-text-muted)] bg-[var(--mn-page)] px-2 py-0.5 rounded-md border border-[var(--mn-border)]">
-                  {tracker.owner.country}
-                </span>
-              )}
-              <span className="text-[11px] font-semibold text-[#142B5F] dark:text-[#E5B54F] bg-[#142B5F]/10 dark:bg-[#E5B54F]/15 px-2 py-0.5 rounded-md border border-[#D6A43B]/20">
-                المرحلة (حسب تحديثك): {tracker.stage}
-              </span>
-            </div>
-          </div>
+
+      {/* Row 1: Official Navy Section Icon + Scholarship Title + Petrol Status Badge */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <span className="flex h-6 w-6 rounded-lg bg-[#142B5F] border border-[#D6A43B]/45 text-[#F2CD78] items-center justify-center shrink-0">
+            <GraduationCap className="w-3.5 h-3.5 text-[#F2CD78]" />
+          </span>
+
+          <h3 className="min-w-0 flex-1 text-[13px] sm:text-[14px] leading-snug font-bold text-[#1E293B] dark:text-[#F8FAFC] font-['Cairo',sans-serif] truncate">
+            {displayName}
+          </h3>
         </div>
 
-        {/* Progress % Badge */}
-        <div className="text-right shrink-0">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] text-[18px] font-bold text-[var(--mn-heading)]">
-            {progress}%
+        {isArchived ? (
+          <span className="text-[9.5px] font-bold px-2 py-0.5 rounded-md bg-slate-500/10 text-slate-600 dark:text-slate-300 border border-slate-500/20 shrink-0">
+            مؤرشف
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 text-[9.5px] font-bold px-2 py-0.5 rounded-md bg-[#0E7C86]/10 text-[#0E7C86] dark:text-[#55CBC5] border border-[#0E7C86]/25 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#0E7C86] dark:bg-[#55CBC5]" />
+            تقديم نشط
+          </span>
+        )}
+      </div>
+
+      {/* Row 2: 2x2 Info Boxes on Mobile with Navy icons and bigger title / smaller value below */}
+      <div className="mt-2.5 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+        <div className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-2.5 py-1.5">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] bg-[#142B5F]/10 text-[#142B5F] dark:bg-[#142B5F] dark:text-[#F2CD78]">
+              <Compass className="h-2.5 w-2.5" aria-hidden="true" />
+            </span>
+            <span className="text-[10.5px] font-bold leading-snug text-[#1E293B] dark:text-[#F8FAFC] truncate">
+              الدولة / الوجهة
+            </span>
           </div>
+          <span className="mt-0.5 pr-[24px] block text-[9.5px] font-medium text-[#64748B] dark:text-[#CBD5E1] truncate leading-snug">
+            {tracker.owner?.country || 'منحة دولية'}
+          </span>
+        </div>
+
+        <div className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-2.5 py-1.5">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] bg-[#142B5F]/10 text-[#142B5F] dark:bg-[#142B5F] dark:text-[#F2CD78]">
+              <CalendarClock className="h-2.5 w-2.5" aria-hidden="true" />
+            </span>
+            <span className="text-[10.5px] font-bold leading-snug text-[#1E293B] dark:text-[#F8FAFC] truncate">
+              موعد التقديم
+            </span>
+          </div>
+          <span className="mt-0.5 pr-[24px] block text-[9.5px] font-semibold text-[#0E7C86] dark:text-[#55CBC5] truncate leading-snug">
+            {deadlineStr ? formatDate(deadlineStr) : 'مفتوح / متجدد'}
+          </span>
+        </div>
+
+        <div className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-2.5 py-1.5">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] bg-[#142B5F]/10 text-[#142B5F] dark:bg-[#142B5F] dark:text-[#F2CD78]">
+              <Sparkles className="h-2.5 w-2.5" aria-hidden="true" />
+            </span>
+            <span className="text-[10.5px] font-bold leading-snug text-[#1E293B] dark:text-[#F8FAFC] truncate">
+              المرحلة الحالية
+            </span>
+          </div>
+          <span className="mt-0.5 pr-[24px] block text-[9.5px] font-medium text-[#64748B] dark:text-[#CBD5E1] truncate leading-snug">
+            {tracker.stage}
+          </span>
+        </div>
+
+        <div className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-2.5 py-1.5">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] bg-[#142B5F]/10 text-[#142B5F] dark:bg-[#142B5F] dark:text-[#F2CD78]">
+              <ListChecks className="h-2.5 w-2.5" aria-hidden="true" />
+            </span>
+            <span className="text-[10.5px] font-bold leading-snug text-[#1E293B] dark:text-[#F8FAFC] truncate">
+              نسبة الجاهزية
+            </span>
+          </div>
+          <span className="mt-0.5 pr-[24px] block text-[9.5px] font-bold text-[#142B5F] dark:text-[#F2CD78] leading-snug tabular-nums">
+            {progress}% ({completed}/{total})
+          </span>
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="mt-3.5">
-        <progress
-          className="mn-native-progress mn-native-progress-secondary h-2 w-full"
-          value={Math.min(100, Math.max(0, progress))}
-          max={100}
-          aria-label="نسبة إنجاز ملف التقديم"
-        />
+      {/* Row 3: Unified Progress Bar + Next Actionable Requirement with smooth start bar */}
+      <div className="relative overflow-hidden mt-2 rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] pr-3.5 pl-2.5 py-2">
+        <span aria-hidden="true" className="mn-student-card-start-bar" />
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <span className="h-[19px] w-[19px] rounded-[5px] bg-[#142B5F] text-white flex items-center justify-center shrink-0">
+              <CheckCircle2 className="h-3 w-3 text-white" aria-hidden="true" />
+            </span>
+            <span className="text-[10.5px] font-bold leading-snug text-[#1E293B] dark:text-[#F8FAFC]">
+              المهام المنجزة: {completed} من {total}
+            </span>
+          </div>
+          <span className="text-[9.5px] font-medium text-[#64748B] dark:text-[#94A3B8]">
+            آخر تحديث: {formatDate(tracker.updatedAt)}
+          </span>
+        </div>
+
+        <div className="mt-1.5 h-1 w-[92%] mx-auto rounded-full bg-slate-200/85 dark:bg-slate-800 overflow-hidden" dir="rtl">
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            data-mn-width={Math.round(Math.max(0, Math.min(100, Number(Math.min(100, Math.max(0, progress))) || 0)))} data-mn-progress-gradient
+          />
+        </div>
+
+        {nextTask && (
+          <div className="mt-1.5 pr-[25px] flex items-center justify-between gap-2 text-[9.5px] text-[#475569] dark:text-[#CBD5E1]">
+            <span className="min-w-0 flex-1 break-words leading-snug">
+              <strong className="text-[#1E293B] dark:text-[#F8FAFC]">الخطوة القادمة:</strong> {nextTask.label}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Source Unavailability Notice */}
       {tracker.owner && !tracker.owner.available && (
-        <div className="mt-3 rounded-xl bg-[var(--mn-warning-soft)] p-2.5 text-xs font-medium text-[var(--mn-warning-text)] flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
+        <div className="mt-2 rounded-xl bg-[var(--mn-warning-soft)] p-2 text-[10px] font-bold text-[var(--mn-warning-text)] flex items-center gap-2 border border-amber-500/20">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-600" />
           <span>غير معروضة حاليًا لدى المصدر؛ وسجلك محفوظ بحسابك.</span>
         </div>
       )}
 
-      {/* Keep document/cycle tools collapsed inside the scholarship card. */}
-      <StudentApplicationDocuments tracker={tracker} onChanged={onDocumentsChanged} />
-
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 text-[11px] text-[var(--mn-text-muted)]">
-        <span className="inline-flex items-center gap-1">
-          <ListChecks
-            className="h-3.5 w-3.5 text-[#142B5F] dark:text-[#E5B54F]"
-            aria-hidden="true"
-          />
-          المهام:{' '}
-          <strong>
-            {completed} من {total}
-          </strong>
-        </span>
-        <span>آخر تحديث: {formatDate(tracker.updatedAt)}</span>
+      {/* Row 4: Documents and application cycle accordion */}
+      <div className="w-full max-w-full min-w-0">
+        <StudentApplicationDocuments tracker={tracker} onChanged={onDocumentsChanged} />
       </div>
 
-      {/* Deadline and file action are prominent; management actions remain available. */}
-      <div className="mt-3 border-t border-[var(--mn-border)] dark:border-white/10 pt-3 flex flex-wrap items-center justify-between gap-3">
-        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--mn-text-muted)]">
-          <CalendarClock className="h-3.5 w-3.5 text-[#D6A43B]" aria-hidden="true" />
-          موعد التقديم: <strong>{formatDate(deadlineStr)}</strong>
-        </span>
+      {/* Row 5: Compact Unified Action Buttons on a single balanced line */}
+      <div className="mt-2.5 pt-2 border-t border-[var(--mn-border)] dark:border-white/10 flex items-center justify-between gap-1.5 font-['Cairo',sans-serif]">
         <button
           type="button"
           aria-expanded={expanded}
           onClick={() => setExpanded((value) => !value)}
-          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 text-[12px] font-bold text-[var(--mn-primary)] hover:text-[var(--mn-secondary)] transition-colors cursor-pointer"
+          className="mn-student-opp-btn-primary inline-flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0"
         >
-          <span>{expanded ? 'إخفاء تفاصيل الملف' : 'متابعة الملف'}</span>
-          {expanded ? (
-            <ChevronUp className="h-4 w-4" aria-hidden="true" />
-          ) : (
-            <ChevronDown className="h-4 w-4" aria-hidden="true" />
-          )}
+          <span>{expanded ? 'إخفاء التفاصيل' : 'تفاصيل الملف والمهام'}</span>
+          {expanded ? <ChevronUp className="h-3 w-3 text-[#F2CD78]" aria-hidden="true" /> : <ChevronDown className="h-3 w-3 text-[#F2CD78]" aria-hidden="true" />}
         </button>
-      </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
-        {slug && (
-          <Link
-            to={`/scholarships/${encodeURIComponent(slug)}`}
-            className="inline-flex min-h-8 items-center gap-1 text-[11px] font-semibold text-[var(--mn-text-muted)] hover:text-[#D6A43B] transition-colors"
-            title="صفحة المنحة"
+        <div className="flex items-center gap-1">
+          {slug && (
+            <Link
+              to={`/scholarships/${encodeURIComponent(slug)}`}
+              className="mn-student-opp-btn-secondary inline-flex items-center justify-center gap-1 border border-[#142B5F]/35 dark:border-white/15 bg-white dark:bg-[var(--mn-page)] text-[#142B5F] dark:text-[#F8FAFC] hover:border-[#0E7C86] transition-all cursor-pointer"
+              title="صفحة المنحة"
+            >
+              <ExternalLink className="h-2.5 w-2.5 text-[#142B5F] dark:text-[#F2CD78] shrink-0" aria-hidden="true" />
+              <span>المنحة</span>
+            </Link>
+          )}
+
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => onArchive(tracker)}
+            className="mn-student-opp-btn-secondary inline-flex items-center justify-center gap-1 border border-[#142B5F]/35 dark:border-white/15 bg-white dark:bg-[var(--mn-page)] text-[#142B5F] dark:text-[#E2E8F0] hover:border-[#D6A43B] transition-all cursor-pointer disabled:opacity-50"
+            title={isArchived ? 'إلغاء الأرشفة' : 'أرشفة'}
           >
-            <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>صفحة المنحة</span>
-          </Link>
-        )}
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => onArchive(tracker)}
-          className="rounded-lg border border-[var(--mn-border)] px-2.5 py-1 text-[11px] font-semibold text-[var(--mn-text-muted)] hover:border-[#D6A43B] transition-colors cursor-pointer"
-        >
-          {isArchived ? 'إلغاء الأرشفة' : 'أرشفة'}
-        </button>
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => onRemove(tracker)}
-          className="rounded-lg border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] px-2.5 py-1 text-[11px] font-semibold text-[var(--mn-danger-text)] hover:brightness-95 transition-colors cursor-pointer"
-        >
-          إزالة
-        </button>
+            <Archive className="h-2.5 w-2.5 text-[#142B5F] dark:text-[#F2CD78] shrink-0" aria-hidden="true" />
+            <span>{isArchived ? 'إلغاء الأرشفة' : 'أرشفة'}</span>
+          </button>
+
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => onRemove(tracker)}
+            className="mn-student-opp-btn-secondary inline-flex items-center justify-center gap-1 border border-rose-200 dark:border-rose-900/30 bg-rose-50/70 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 transition-all cursor-pointer disabled:opacity-50"
+            title="إزالة"
+          >
+            <Trash2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+            <span>إزالة</span>
+          </button>
+        </div>
       </div>
 
       {/* Expanded Details: Stage selector, Checklist, Notes */}
       {expanded && (
-        <div className="mt-4 pt-4 border-t border-[var(--mn-border)] dark:border-white/10 space-y-4 animate-in fade-in duration-200">
-          {/* Stage Selector */}
-          <div>
-            <label className="block text-xs font-bold text-[var(--mn-heading)] mb-1.5">
-              تحديث مرحلة التقديم الحالية:
-            </label>
+        <div className="mn-student-tracker-details mt-2.5 space-y-2.5 rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] p-2.5 shadow-2xs animate-in fade-in duration-200 dark:bg-[var(--mn-surface-elevated)]">
+          {/* Sub-section 1: Stage Selector */}
+          <div className="relative overflow-hidden rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] pr-3.5 pl-2.5 py-2.5">
+            <span aria-hidden="true" className="mn-student-card-start-bar" />
+            <div className="flex items-center gap-1.5">
+              <span className="grid h-[19px] w-[19px] shrink-0 place-items-center rounded-[5px] bg-[#142B5F] text-white">
+                <Sparkles className="h-3 w-3 text-white" />
+              </span>
+              <label className="text-[11px] font-bold text-[#1E293B] dark:text-[#F8FAFC] leading-snug">
+                المرحلة الحالية للتقديم
+              </label>
+            </div>
+            <p className="mt-0.5 pr-[25px] mb-2 text-[9.5px] font-medium leading-snug text-[#64748B] dark:text-[#94A3B8]">
+              اختر الخطوة التي وصلت إليها لتسهيل متابعة ملفك.
+            </p>
             <select
               disabled={saving}
               value={tracker.stage}
               onChange={(event) => onStageChange(tracker, event.target.value)}
-              className="w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-3 py-2 text-xs font-semibold text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
+              className="h-[34px] w-full rounded-lg border border-[var(--mn-border)] dark:border-white/15 bg-[var(--mn-page)] px-2.5 py-1 text-[11px] font-bold text-[#1E293B] dark:text-[#F8FAFC] outline-none transition-colors focus:border-[#0E7C86] disabled:opacity-60 dark:bg-[var(--mn-surface-elevated)]"
             >
               {APPLICATION_STAGES.map((stage) => (
                 <option key={stage} value={stage}>
@@ -2458,24 +2073,33 @@ function ApplicationTrackerCard({
             </select>
           </div>
 
-          {/* Checklist Items */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-[var(--mn-heading)]">
-                قائمة المهام والمتطلبات
-              </span>
-              <span className="text-[11px] text-[var(--mn-text-muted)] font-medium">
+          {/* Sub-section 2: Checklist Items */}
+          <div className="relative overflow-hidden rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] pr-3.5 pl-2.5 py-2.5">
+            <span aria-hidden="true" className="mn-student-card-start-bar" />
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="grid h-[19px] w-[19px] shrink-0 place-items-center rounded-[5px] bg-[#142B5F] text-white">
+                  <ListChecks className="h-3 w-3 text-white" />
+                </span>
+                <span className="text-[11px] font-bold text-[#1E293B] dark:text-[#F8FAFC] leading-snug truncate">
+                  قائمة المهام والمتطلبات
+                </span>
+              </div>
+              <span className="shrink-0 rounded-md border border-[#0E7C86]/25 bg-[#0E7C86]/10 px-1.5 py-0.5 text-[9px] font-bold text-[#0E7C86] dark:text-[#55CBC5]">
                 {completed} من {total} مكتمل
               </span>
             </div>
+            <p className="mt-0.5 pr-[25px] mb-2 text-[9.5px] font-medium leading-snug text-[#64748B] dark:text-[#94A3B8]">
+              علّم على المتطلبات التي أنجزتها، وستُحفظ متابعتك في ملف التقديم.
+            </p>
             <div className="space-y-1.5">
               {tracker.checklist.map((item) => (
                 <label
                   key={item.id}
-                  className={`flex items-center gap-2.5 rounded-xl p-2.5 text-xs transition-colors cursor-pointer border ${
+                  className={`flex min-h-[36px] items-center gap-2 rounded-lg border px-2.5 py-1.5 text-[10.5px] leading-snug transition-colors cursor-pointer ${
                     item.completed
-                      ? 'bg-[var(--mn-success-soft)] border-[var(--mn-success-border)] text-[var(--mn-text-muted)] line-through'
-                      : 'bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border-[var(--mn-border)] text-[var(--mn-heading)] font-medium'
+                      ? 'border-emerald-500/25 bg-emerald-500/[0.06] text-[#64748B]'
+                      : 'border-[var(--mn-border)] bg-[var(--mn-page)] text-[#1E293B] dark:text-[#F8FAFC] font-bold dark:bg-[var(--mn-surface-elevated)]'
                   }`}
                 >
                   <input
@@ -2483,11 +2107,13 @@ function ApplicationTrackerCard({
                     type="checkbox"
                     checked={item.completed}
                     onChange={(event) => onChecklistToggle(tracker, item.id, event.target.checked)}
-                    className="w-4 h-4 rounded accent-[#142B5F] dark:accent-[#E5B54F]"
+                    className="h-[15px] w-[15px] shrink-0 rounded accent-[#142B5F] dark:accent-[#E5B54F]"
                   />
-                  <span className="flex-1">{item.label}</span>
+                  <span className={`min-w-0 flex-1 font-['Cairo',sans-serif] text-[10.5px] leading-snug break-words ${item.completed ? 'line-through opacity-75' : ''}`}>
+                    {item.label}
+                  </span>
                   {item.completedAt && (
-                    <span className="text-[10px] text-[var(--mn-text-muted)] font-mono shrink-0">
+                    <span className="shrink-0 text-[9px] font-medium text-[#0E7C86] dark:text-[#55CBC5]">
                       {formatDate(item.completedAt)}
                     </span>
                   )}
@@ -2496,12 +2122,15 @@ function ApplicationTrackerCard({
             </div>
           </div>
 
-          {/* Notes Section */}
-          <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3 border border-[var(--mn-border)]">
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-[#D6A43B]" />
-                <span className="text-xs font-bold text-[var(--mn-heading)]">
+          {/* Sub-section 3: Notes Section */}
+          <div className="relative overflow-hidden rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] pr-3.5 pl-2.5 py-2.5">
+            <span aria-hidden="true" className="mn-student-card-start-bar" />
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span className="grid h-[19px] w-[19px] shrink-0 place-items-center rounded-[5px] bg-[#142B5F] text-white">
+                  <FileText className="h-3 w-3 text-white" aria-hidden="true" />
+                </span>
+                <span className="text-[11px] font-bold text-[#1E293B] dark:text-[#F8FAFC] leading-snug truncate">
                   ملاحظاتي على ملف التقديم
                 </span>
               </div>
@@ -2509,31 +2138,32 @@ function ApplicationTrackerCard({
                 <button
                   type="button"
                   onClick={() => setEditingNotes(true)}
-                  className="text-[11px] font-semibold text-[var(--mn-primary)] hover:underline cursor-pointer"
+                  className="inline-flex h-[26px] shrink-0 items-center justify-center gap-1 rounded-md border border-[#142B5F]/30 bg-[var(--mn-page)] px-2 text-[9.5px] font-bold text-[#142B5F] dark:border-white/15 dark:text-[#F2CD78] transition-colors hover:border-[#0E7C86] cursor-pointer"
                 >
-                  {tracker.notes ? 'تعديل الملاحظة' : 'إضافة ملاحظة'}
+                  <FileText className="h-2.5 w-2.5 text-[#142B5F] dark:text-[#F2CD78]" aria-hidden="true" />
+                  <span>{tracker.notes ? 'تعديل الملاحظة' : 'إضافة ملاحظة'}</span>
                 </button>
               )}
             </div>
 
             {editingNotes ? (
-              <div className="space-y-2 mt-2">
+              <div className="space-y-2 mt-1">
                 <textarea
                   value={notesDraft}
                   onChange={(e) => setNotesDraft(e.target.value)}
                   placeholder="سجّل أي تفاصيل مهمة (مثل اسم المشرف، تاريخ المقابلة، الملاحظات المطلوبة)..."
                   rows={3}
                   maxLength={500}
-                  className="w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2 text-xs text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
+                  className="min-h-[72px] w-full resize-y rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 py-1.5 text-[10.5px] leading-relaxed text-[#1E293B] dark:text-[#F8FAFC] outline-none transition-colors placeholder:text-[#64748B] focus:border-[#0E7C86]"
                 />
-                <div className="flex items-center justify-end gap-2">
+                <div className="flex items-center justify-end gap-1.5">
                   <button
                     type="button"
                     onClick={() => {
                       setNotesDraft(tracker.notes || '');
                       setEditingNotes(false);
                     }}
-                    className="px-2.5 py-1 rounded-md border text-xs font-semibold text-[var(--mn-text-muted)] hover:bg-[var(--mn-surface)]"
+                    className="inline-flex h-[26px] items-center justify-center rounded-md border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2.5 text-[10px] font-bold text-[#64748B] transition-colors hover:bg-[var(--mn-page)] cursor-pointer"
                   >
                     إلغاء
                   </button>
@@ -2541,14 +2171,14 @@ function ApplicationTrackerCard({
                     type="button"
                     disabled={saving}
                     onClick={handleSaveNotes}
-                    className="px-3 py-1 rounded-md bg-[var(--mn-primary)] text-white text-xs font-bold hover:bg-[var(--mn-primary-hover)] disabled:opacity-50"
+                    className="inline-flex h-[26px] items-center justify-center rounded-md bg-[#142B5F] hover:bg-[#1a3675] border border-[#D6A43B]/55 px-3 text-[10px] font-bold text-[#F2CD78] transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     حفظ الملاحظة
                   </button>
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-[var(--mn-text-muted)] leading-relaxed mt-1">
+              <p className="mt-1 rounded-lg border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] px-2.5 py-1.5 text-[10px] font-medium leading-relaxed text-[#475569] dark:text-[#CBD5E1] dark:bg-[var(--mn-surface-elevated)]">
                 {tracker.notes || 'لا توجد ملاحظات مسجلة لهذا الملف حتى الآن.'}
               </p>
             )}
@@ -2559,14 +2189,16 @@ function ApplicationTrackerCard({
   );
 }
 
+type LearningSubTab = 'COURSES' | 'PLAN' | 'EXAMS' | 'CERTIFICATES';
+
 function LearningView({ dashboard }: { dashboard: StudentDashboardSummaryDto }) {
-  const [filter, setFilter] = useState<'ALL' | 'IN_PROGRESS' | 'COMPLETED' | 'CERTIFICATES'>('ALL');
+  const [subTab, setSubTab] = useState<LearningSubTab>(() =>
+    typeof window !== 'undefined' && window.location.hash === '#certificates' ? 'CERTIFICATES' : 'COURSES'
+  );
+  const [courseFilter, setCourseFilter] = useState<'ALL' | 'IN_PROGRESS' | 'COMPLETED'>('ALL');
 
   const inProgressCourses = useMemo(
-    () =>
-      dashboard.courseEnrollments.filter((course) =>
-        ['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(course.status),
-      ),
+    () => dashboard.courseEnrollments.filter((course) => ['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(course.status)),
     [dashboard.courseEnrollments],
   );
   const completedCourses = useMemo(
@@ -2574,290 +2206,217 @@ function LearningView({ dashboard }: { dashboard: StudentDashboardSummaryDto }) 
     [dashboard.courseEnrollments],
   );
   const otherCourses = useMemo(
-    () =>
-      dashboard.courseEnrollments.filter(
-        (course) => !['ACTIVE', 'ENROLLED', 'IN_PROGRESS', 'COMPLETED'].includes(course.status),
-      ),
+    () => dashboard.courseEnrollments.filter((course) => !['ACTIVE', 'ENROLLED', 'IN_PROGRESS', 'COMPLETED'].includes(course.status)),
     [dashboard.courseEnrollments],
   );
   const certificates = useMemo(() => dashboard.certificates || [], [dashboard.certificates]);
   const hasAnyLearningData = dashboard.courseEnrollments.length > 0 || certificates.length > 0;
-  const learningIntroduction = hasAnyLearningData
-    ? `لديك ${inProgressCourses.length} دورة قيد التعلم، و${completedCourses.length} دورة مكتملة، و${certificates.length} شهادة مسجلة في حسابك.`
-    : 'لم تبدأ دوراتك بعد. اختر دورة مناسبة لتبدأ تعلمك وتتابع تقدمك وشهاداتك من هنا.';
 
-  const learningFilters: Array<{
-    id: 'ALL' | 'IN_PROGRESS' | 'COMPLETED' | 'CERTIFICATES';
-    label: string;
-  }> = [
-    { id: 'ALL', label: `الكل (${dashboard.courseEnrollments.length + certificates.length})` },
-    { id: 'IN_PROGRESS', label: `قيد التعلم (${inProgressCourses.length})` },
-    { id: 'COMPLETED', label: `المكتملة (${completedCourses.length})` },
-    { id: 'CERTIFICATES', label: `الشهادات (${certificates.length})` },
+  const learningSubTabs = [
+    { id: 'COURSES' as const, label: 'دوراتي', count: dashboard.courseEnrollments.length, icon: BookOpen },
+    { id: 'PLAN' as const, label: 'خطتي', icon: ListChecks },
+    { id: 'EXAMS' as const, label: 'الاختبارات والتحضير', icon: GraduationCap },
+    { id: 'CERTIFICATES' as const, label: 'شهاداتي', count: certificates.length, icon: Award },
   ];
 
   return (
-    <div className="mn-student-learning-page space-y-6 font-['Cairo',sans-serif]">
-      {dashboard.capabilityStatus?.learning === 'DEGRADED' && (
-        <Alert
-          tone="warning"
-          message="تعذر تحميل الدورات حالياً؛ القائمة الحالية لا تعني عدم وجود تسجيلات."
-        />
-      )}
-      {dashboard.capabilityStatus?.certificates === 'DEGRADED' && (
-        <Alert tone="warning" message="تعذر تحميل الشهادات حالياً. أعد تحديث الحساب." />
-      )}
-
-      {/* The same full-height right-hand gold accent as the Opportunities hero. */}
-      <section
-        aria-label="تعليمي وإنجازاتي"
-        className="mn-student-learning-hero relative overflow-hidden rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel"
-      >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 right-0 w-[3.5px] bg-gradient-to-b from-[#B78622] via-[#D6A43B] to-[#E5B54F]"
-        />
-        <div className="flex min-w-0 items-center gap-2.5">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
-            <BookOpen className="h-[18px] w-[18px] text-[#E5B54F]" aria-hidden="true" />
-          </span>
-          <h2 className="text-[14px] font-bold leading-[1.35] text-[var(--mn-heading)]">
-            تعليمي وإنجازاتي
-          </h2>
-        </div>
-
-        <div className="mt-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-3 py-2.5">
-          <p className="text-[12px] font-bold leading-5 text-[var(--mn-heading)]">
-            تابع تعلمك وحقق أهدافك
-          </p>
-          <p className="mt-0.5 text-[11px] sm:text-[12px] font-medium leading-[1.85] text-[var(--mn-text-muted)]">
-            {learningIntroduction}
-          </p>
-        </div>
-
-        {hasAnyLearningData && (
-          <div className="mt-4 grid grid-cols-3 gap-2">
-            {[
-              {
-                key: 'IN_PROGRESS' as const,
-                number: inProgressCourses.length,
-                label: 'قيد التعلم',
-              },
-              { key: 'COMPLETED' as const, number: completedCourses.length, label: 'دورات مكتملة' },
-              { key: 'CERTIFICATES' as const, number: certificates.length, label: 'شهادات صادرة' },
-            ].map((stat) => (
-              <button
-                key={stat.key}
-                type="button"
-                onClick={() => setFilter(stat.key)}
-                aria-label={`${stat.label}: ${stat.number}، عرض التفاصيل`}
-                className="min-w-0 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center transition-colors hover:border-[#D6A43B]/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86]"
-              >
-                <span className="block text-[17px] sm:text-[18px] font-bold leading-6 text-[var(--mn-heading)]">
-                  {stat.number}
-                </span>
-                <span className="mt-0.5 block text-[10px] sm:text-[11px] font-semibold leading-[1.6] text-[var(--mn-text-muted)]">
-                  {stat.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div dir="rtl" className="mt-4 flex w-full flex-wrap items-center gap-3">
-          <p className="text-[11px] font-medium leading-[1.7] text-[var(--mn-text-muted)]">
-            دوراتك وتقدمك وشهاداتك في مكان واحد
-          </p>
-          <Link
-            to="/courses"
-            className="ms-auto inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#142B5F] px-3.5 py-2 text-[12px] font-bold text-white shadow-2xs transition-colors hover:bg-[#203D74] dark:bg-[#D6A43B] dark:text-[#142B5F] dark:hover:bg-[#E5B54F]"
-          >
-            <Sparkles
-              className="h-3.5 w-3.5 text-[#E5B54F] dark:text-[#142B5F]"
-              aria-hidden="true"
-            />
-            <span>استكشف الدورات</span>
-          </Link>
-        </div>
-      </section>
-
-      {hasAnyLearningData && (
-        <nav
-          aria-label="تصفية الدورات والشهادات"
-          className="grid grid-cols-2 gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2 sm:grid-cols-4"
+    <div className="mn-student-learning-page mt-0 space-y-3.5 font-['Cairo',sans-serif]">
+      {/* Header box attached directly to the 8-tab bar above */}
+      <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] -mt-px">
+        <section
+          aria-label="تعليمي وإنجازاتي"
+          className="mn-student-learning-hero relative overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] shadow-2xs mn-panel font-['Cairo',sans-serif]"
         >
-          {learningFilters.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setFilter(item.id)}
-              aria-pressed={filter === item.id}
-              className={`min-h-9 min-w-0 rounded-lg px-2 py-1.5 text-[11px] font-bold leading-[1.7] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] ${
-                filter === item.id
-                  ? 'bg-[var(--mn-primary)] text-white shadow-2xs'
-                  : 'bg-[var(--mn-page)] text-[var(--mn-text-muted)] hover:bg-[var(--mn-surface-muted)]'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
-      )}
+          {/* Selective Start-of-Box Accent Line (Navy) */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 right-0 w-[4px] z-10 bg-[#142B5F]"
+          />
 
-      {!hasAnyLearningData ? (
-        <LearningSectionCard
-          title="ابدأ رحلتك التعليمية"
-          icon={<BookOpen className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
-        >
-          <div className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-4 text-center">
-            <p className="text-[12px] font-semibold leading-[1.9] text-[var(--mn-text-muted)]">
-              سجّل في دورة من دليل منارتك لتظهر هنا الدروس التي تتابعها، ونسب إنجازك، والشهادات التي
-              تصدر لك.
-            </p>
+          <div className="px-3.5 py-3 pr-4 sm:px-5 sm:py-3.5 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/45 bg-[#142B5F]">
+                <BookOpen className="h-4 w-4 text-[#F2CD78]" aria-hidden="true" />
+              </span>
+              <div>
+                <h2 className="mn-student-learning-heading text-[14px] sm:text-[15px] font-bold leading-tight text-[#1E293B] dark:text-[#F8FAFC]">
+                  تعليمي وإنجازاتي
+                </h2>
+                <p className="text-[10.5px] font-medium text-[#64748B] dark:text-[#94A3B8]">
+                  الدورات المسجلة، خطة الدراسة الأسبوعية، التحضير للاختبارات والشهادات
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex shrink-0 items-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] dark:border-white/15 px-2.5 py-1 text-[11px] font-semibold text-[#334155] dark:text-[#E2E8F0]">
+              {dashboard.courseEnrollments.length} دورة · {certificates.length} شهادة
+            </span>
           </div>
-        </LearningSectionCard>
-      ) : (
+        </section>
+
+        {/* Horizontal Swipe Sub-Tabs */}
+        <HorizontalSwipeTabs
+          ariaLabel="أقسام تعلمي وإنجازاتي"
+          items={learningSubTabs}
+          activeId={subTab}
+          onChange={setSubTab}
+        />
+      </div>
+
+      {dashboard.capabilityStatus?.learning === 'DEGRADED' && <Alert tone="warning" message="تعذر تحميل الدورات حالياً؛ القائمة الحالية لا تعني عدم وجود تسجيلات." />}
+      {dashboard.capabilityStatus?.certificates === 'DEGRADED' && <Alert tone="warning" message="تعذر تحميل الشهادات حالياً. أعد تحديث الحساب." />}
+
+      {subTab === 'COURSES' && (
         <>
-          {(filter === 'ALL' || filter === 'IN_PROGRESS') && (
-            <LearningSectionCard
-              title="دورات قيد التعلم"
-              icon={<Clock3 className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
-              count={`${inProgressCourses.length} دورة`}
-            >
-              {inProgressCourses.length === 0 ? (
-                <p className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-4 text-center text-[12px] text-[var(--mn-text-muted)]">
-                  لا توجد دورات قيد التعلم حاليًا.
-                </p>
-              ) : (
-                <div className="grid gap-3.5 sm:grid-cols-2">
-                  {inProgressCourses.map((course) => (
-                    <article
-                      key={course.enrollmentId || course.courseId}
-                      className="mn-student-learning-course flex min-w-0 flex-col justify-between rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3.5 transition-colors hover:border-[#D6A43B]/50"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="rounded-full border border-[var(--mn-info-border)] bg-[var(--mn-info-soft)] px-2 py-0.5 text-[11px] font-semibold text-[var(--mn-info-text)]">
-                            قيد التعلم
-                          </span>
-                          <span className="text-[16px] font-bold text-[var(--mn-heading)]">
-                            {course.progressPercentage}%
-                          </span>
-                        </div>
-                        <h4 className="mt-2 text-[14px] font-bold leading-[1.65] text-[var(--mn-heading)] break-words">
-                          {course.courseName}
-                        </h4>
-                        <progress
-                          className="mn-native-progress mn-native-progress-secondary mt-3 h-2 w-full"
-                          value={Math.min(100, Math.max(0, course.progressPercentage))}
-                          max={100}
-                          aria-label={`تقدم دورة ${course.courseName}`}
-                        />
-                        <p className="mt-2 text-[11px] font-medium leading-[1.7] text-[var(--mn-text-muted)]">
-                          {course.lastAccessedAt
-                            ? `آخر وصول: ${formatDate(course.lastAccessedAt)}`
-                            : `تاريخ التسجيل: ${formatDate(course.enrolledAt)}`}
-                        </p>
-                      </div>
-                      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--mn-border)] pt-3">
-                        <span className="text-[11px] text-[var(--mn-text-muted)]">
-                          متابعة تقدم الدورة
-                        </span>
-                        <Link
-                          to={`../student/courses/${encodeURIComponent(course.courseId)}`}
-                          className="ms-auto inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-[var(--mn-primary)] px-3 py-1.5 text-[12px] font-bold text-white transition-colors hover:bg-[var(--mn-primary-hover)]"
-                        >
-                          <span>متابعة التعلم</span>
-                          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-                        </Link>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </LearningSectionCard>
-          )}
 
-          {(filter === 'ALL' || filter === 'COMPLETED') && (
-            <LearningSectionCard
-              title="الدورات المكتملة"
-              icon={<CheckCircle2 className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
-              count={`${completedCourses.length} دورة`}
-            >
-              {completedCourses.length === 0 ? (
-                <p className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-4 text-center text-[12px] text-[var(--mn-text-muted)]">
-                  لا توجد دورات مكتملة حتى الآن.
+          {!hasAnyLearningData ? (
+            <LearningSectionCard title="ابدأ رحلتك التعليمية" icon={<BookOpen className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}>
+              <div className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-4 text-center">
+                <p className="text-[12px] font-semibold leading-[1.8] text-[var(--mn-text-muted)]">
+                  سجّل في دورة من دليل منارتك لتظهر هنا الدروس التي تتابعها ونسب إنجازك.
                 </p>
-              ) : (
-                <div className="grid gap-3.5 sm:grid-cols-2">
-                  {completedCourses.map((course) => (
-                    <article
-                      key={course.enrollmentId || course.courseId}
-                      className="mn-student-learning-course flex min-w-0 flex-col justify-between rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3.5 transition-colors hover:border-[#D6A43B]/50"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="rounded-full border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] px-2 py-0.5 text-[11px] font-semibold text-[var(--mn-success-text)]">
-                            مكتملة بنجاح
-                          </span>
-                          <span className="text-[16px] font-bold text-[var(--mn-success-text)]">
-                            100%
-                          </span>
-                        </div>
-                        <h4 className="mt-2 text-[14px] font-bold leading-[1.65] text-[var(--mn-heading)] break-words">
-                          {course.courseName}
-                        </h4>
-                        <div className="mt-2 flex items-center gap-1.5 text-[11px] leading-[1.7] text-[var(--mn-text-muted)]">
-                          <Check
-                            className="h-3.5 w-3.5 shrink-0 text-[var(--mn-success-text)]"
-                            aria-hidden="true"
-                          />
-                          <span>
-                            {course.completedAt
-                              ? `تاريخ الإتمام: ${formatDate(course.completedAt)}`
-                              : 'تاريخ الإتمام غير متاح'}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--mn-border)] pt-3">
-                        <span className="text-[11px] text-[var(--mn-text-muted)]">
-                          مراجعة محتوى الدورة
-                        </span>
-                        <Link
-                          to={`../student/courses/${encodeURIComponent(course.courseId)}`}
-                          className="ms-auto inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-1.5 text-[12px] font-bold text-[var(--mn-primary)] transition-colors hover:border-[#D6A43B]/50"
-                        >
-                          <span>مراجعة المواد</span>
-                          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-                        </Link>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </LearningSectionCard>
-          )}
-
-          {filter === 'ALL' && otherCourses.length > 0 && (
-            <LearningSectionCard
-              title="تسجيلات معلقة أو سابقة"
-              icon={<ClipboardList className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
-              count={`${otherCourses.length} تسجيل`}
-            >
-              <div className="grid gap-3.5 sm:grid-cols-2">
-                {otherCourses.map((course) => (
-                  <CourseCard key={course.enrollmentId || course.courseId} course={course} />
-                ))}
               </div>
             </LearningSectionCard>
+          ) : (
+            <>
+              {(courseFilter === 'ALL' || courseFilter === 'IN_PROGRESS') && (
+                <LearningSectionCard
+                  title="دورات قيد التعلم"
+                  icon={<Clock3 className="h-3.5 w-3.5 text-[#E5B54F]" aria-hidden="true" />}
+                  count={`${inProgressCourses.length} دورة`}
+                >
+                  {inProgressCourses.length === 0 ? (
+                    <p className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3.5 text-center text-[11.5px] font-medium text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">
+                      لا توجد دورات قيد التعلم حاليًا.
+                    </p>
+                  ) : (
+                    <div className="grid gap-2.5 sm:grid-cols-2">
+                      {inProgressCourses.map((course) => (
+                        <article
+                          key={course.enrollmentId || course.courseId}
+                          className="mn-student-learning-course relative overflow-hidden flex min-w-0 flex-col justify-between rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3 shadow-xs transition-all hover:border-[#D6A43B]/60 font-['Cairo',sans-serif]"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="rounded-full border border-[#0E7C86]/25 bg-[#0E7C86]/10 px-2 py-0.5 text-[10px] sm:text-[10.5px] font-bold text-[#0E7C86] dark:text-[#E5B54F] dark:border-[#E5B54F]/30 dark:bg-[#E5B54F]/10">
+                                قيد التعلم
+                              </span>
+                              <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E5B54F]">
+                                {course.progressPercentage}%
+                              </span>
+                            </div>
+
+                            <h4 className="mt-1.5 text-[12px] sm:text-[12.5px] font-bold leading-snug text-[var(--mn-heading)] break-words">
+                              {course.courseName}
+                            </h4>
+
+                            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800" dir="rtl">
+                              <div
+                                className="h-full rounded-full bg-gradient-to-l from-[#142B5F] via-[#163D76] to-[#0E7C86] dark:from-[#D6A43B] dark:to-[#E5B54F] transition-all duration-300"
+                                data-mn-width={Math.round(Math.max(0, Math.min(100, Number(Math.min(100, Math.max(0, course.progressPercentage))) || 0)))}
+                              />
+                            </div>
+
+                            <p className="mt-1.5 text-[10.5px] font-medium text-[var(--mn-text-muted)]">
+                              {course.lastAccessedAt
+                                ? `آخر وصول: ${formatDate(course.lastAccessedAt)}`
+                                : `تاريخ التسجيل: ${formatDate(course.enrolledAt)}`}
+                            </p>
+                          </div>
+
+                          <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-[var(--mn-border)] pt-2">
+                            <span className="text-[10.5px] font-medium text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">متابعة تقدم الدورة</span>
+                            <Link
+                              to={`../student/courses/${encodeURIComponent(course.courseId)}`}
+                              className="ms-auto inline-flex min-h-8 items-center justify-center gap-1 rounded-lg bg-[#142B5F] hover:bg-[#163D76] dark:bg-[#D6A43B] dark:text-[#142B5F] dark:hover:bg-[#E5B54F] px-3 py-1 text-[11px] font-bold text-white transition-all shadow-xs"
+                            >
+                              <span>متابعة التعلم</span>
+                              <ArrowLeft className="h-3 w-3" aria-hidden="true" />
+                            </Link>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                </LearningSectionCard>
+              )}
+
+              {(courseFilter === 'ALL' || courseFilter === 'COMPLETED') && (
+                <LearningSectionCard
+                  title="الدورات المكتملة"
+                  icon={<CheckCircle2 className="h-3.5 w-3.5 text-[#E5B54F]" aria-hidden="true" />}
+                  count={`${completedCourses.length} دورة`}
+                >
+                  {completedCourses.length === 0 ? (
+                    <p className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3.5 text-center text-[11.5px] font-medium text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">
+                      لا توجد دورات مكتملة حتى الآن.
+                    </p>
+                  ) : (
+                    <div className="grid gap-2.5 sm:grid-cols-2">
+                      {completedCourses.map((course) => (
+                        <article
+                          key={course.enrollmentId || course.courseId}
+                          className="mn-student-learning-course relative overflow-hidden flex min-w-0 flex-col justify-between rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3 shadow-xs transition-all hover:border-[#D6A43B]/60 font-['Cairo',sans-serif]"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="rounded-full border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] px-2 py-0.5 text-[10px] sm:text-[10.5px] font-bold text-[var(--mn-success-text)] font-['Cairo',sans-serif]">
+                                مكتملة بنجاح
+                              </span>
+                              <span className="text-[12px] font-extrabold text-[var(--mn-success-text)] font-['Cairo',sans-serif]">
+                                100%
+                              </span>
+                            </div>
+                            <h4 className="mt-1.5 text-[12px] sm:text-[12.5px] font-bold leading-snug text-[var(--mn-heading)] break-words font-['Cairo',sans-serif]">
+                              {course.courseName}
+                            </h4>
+                            <div className="mt-1.5 flex items-center gap-1.5 text-[10.5px] font-medium text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">
+                              <Check className="h-3.5 w-3.5 shrink-0 text-[var(--mn-success-text)]" aria-hidden="true" />
+                              <span>{course.completedAt ? `تاريخ الإتمام: ${formatDate(course.completedAt)}` : 'تاريخ الإتمام غير متاح'}</span>
+                            </div>
+                          </div>
+                          <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-[var(--mn-border)] pt-2">
+                            <span className="text-[10.5px] font-medium text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">مراجعة محتوى الدورة</span>
+                            <Link
+                              to={`../student/courses/${encodeURIComponent(course.courseId)}`}
+                              className="ms-auto inline-flex min-h-8 items-center justify-center gap-1 rounded-lg bg-[#142B5F] hover:bg-[#163D76] dark:bg-[#D6A43B] dark:text-[#142B5F] dark:hover:bg-[#E5B54F] px-3 py-1 text-[11px] font-bold text-white transition-all shadow-xs"
+                            >
+                              <span>مراجعة المواد</span>
+                              <ArrowLeft className="h-3 w-3" aria-hidden="true" />
+                            </Link>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                </LearningSectionCard>
+              )}
+
+              {courseFilter === 'ALL' && otherCourses.length > 0 && (
+                <LearningSectionCard
+                  title="تسجيلات معلقة أو سابقة"
+                  icon={<ClipboardList className="h-3.5 w-3.5 text-[#E5B54F]" aria-hidden="true" />}
+                  count={`${otherCourses.length} تسجيل`}
+                >
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {otherCourses.map((course) => (
+                      <CourseCard key={course.enrollmentId || course.courseId} course={course} />
+                    ))}
+                  </div>
+                </LearningSectionCard>
+              )}
+            </>
           )}
         </>
       )}
 
-      {(filter === 'ALL' || filter === 'CERTIFICATES') && (
+      {subTab === 'PLAN' && <LearningStudyPlanPanel dashboard={dashboard} />}
+
+      {subTab === 'EXAMS' && <LearningTestPrepPanel />}
+
+      {subTab === 'CERTIFICATES' && (
         <LearningSectionCard
           title="إنجازاتي وشهاداتي"
-          icon={<Award className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
+          icon={<Award className="h-3.5 w-3.5 text-[#E5B54F]" aria-hidden="true" />}
         >
           <StudentCertificatesPanel initial={certificates} compactLearning />
         </LearningSectionCard>
@@ -2866,7 +2425,7 @@ function LearningView({ dashboard }: { dashboard: StudentDashboardSummaryDto }) 
   );
 }
 
-/** Matches the typography and card identity of ملخصي without altering other tabs. */
+/** Stretched edge-to-edge section matching ملخصي and فرصي. */
 function LearningSectionCard({
   title,
   icon,
@@ -2881,24 +2440,25 @@ function LearningSectionCard({
   return (
     <section
       aria-label={title}
-      className="mn-student-learning-section relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel"
+      className="mn-student-learning-section relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] py-3.5 sm:py-4 shadow-2xs mn-panel font-['Cairo',sans-serif]"
     >
-      <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
+      <div className="mb-3 flex min-w-0 items-center justify-between gap-2 border-b border-[var(--mn-border)] dark:border-white/10 pb-2.5 px-3.5 sm:px-5">
         <div className="flex min-w-0 items-center gap-2">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
-            {icon}
+          <span className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-[9px] border border-[#D6A43B]/75 bg-[#142B5F] text-[#F2CD78] shadow-[0_2px_8px_rgba(20,43,95,0.16)]">
+            <span className="pointer-events-none absolute top-0 right-0 h-2.5 w-2.5 rounded-bl-md bg-[#D6A43B]" />
+            <span className="relative z-10">{icon}</span>
           </span>
-          <h3 className="mn-student-learning-heading min-w-0 text-[14px] font-bold leading-[1.22] text-[var(--mn-heading)]">
+          <h3 className="inline-block border-b-2 border-[#D6A43B] pb-0.5 min-w-0 text-[14px] sm:text-[15px] font-bold leading-snug text-[#1E293B] dark:text-[#F8FAFC]">
             {title}
           </h3>
         </div>
         {count && (
-          <span className="shrink-0 text-[11px] font-semibold text-[var(--mn-text-muted)]">
+          <span className="inline-flex shrink-0 items-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-2 py-0.5 text-[10px] font-semibold text-[#334155] dark:text-[#E2E8F0]">
             {count}
           </span>
         )}
       </div>
-      {children}
+      <div className="px-3.5 sm:px-5">{children}</div>
     </section>
   );
 }
@@ -2942,30 +2502,22 @@ function formatParameterValue(value: unknown): string {
 function getServiceRequestStatusBadge(status: string) {
   const normalized = status.toUpperCase();
   switch (normalized) {
-    case 'REQUESTED':
-      return { label: 'طلب جديد', className: 'bg-amber-500/10 text-amber-700 border-amber-500/20' };
-    case 'ACCEPTED':
-      return { label: 'مقبول', className: 'bg-teal-500/10 text-teal-700 border-teal-500/20' };
-    case 'AWAITING_PAYMENT':
-      return {
-        label: 'بانتظار الدفع',
-        className: 'bg-amber-500/10 text-amber-700 border-amber-500/20',
-      };
+    case 'REQUESTED': return { label: 'طلب جديد', className: 'bg-amber-500/10 text-amber-700 border-amber-500/20' };
+    case 'ACCEPTED': return { label: 'مقبول', className: 'bg-teal-500/10 text-teal-700 border-teal-500/20' };
+    case 'AWAITING_PAYMENT': return { label: 'بانتظار الدفع', className: 'bg-amber-500/10 text-amber-700 border-amber-500/20' };
     case 'COMPLETED':
     case 'FULFILLED':
     case 'RESOLVED':
       return {
         label: 'مكتمل بنجاح',
-        className:
-          'bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border-[var(--mn-success-border)]',
+        className: 'bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border-[var(--mn-success-border)]',
       };
     case 'IN_PROGRESS':
     case 'PROCESSING':
     case 'IN_REVIEW':
       return {
         label: 'قيد المراجعة والتنفيذ',
-        className:
-          'bg-[var(--mn-info-soft)] text-[var(--mn-info-text)] border-[var(--mn-info-border)]',
+        className: 'bg-[var(--mn-info-soft)] text-[var(--mn-info-text)] border-[var(--mn-info-border)]',
       };
     case 'ACTION_REQUIRED':
     case 'NEEDS_INPUT':
@@ -3003,8 +2555,7 @@ function getInvoiceStatusBadge(status: string) {
     case 'PAID':
       return {
         label: 'مدفوعة بالكامل',
-        className:
-          'bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border-[var(--mn-success-border)]',
+        className: 'bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border-[var(--mn-success-border)]',
       };
     case 'PENDING':
     case 'ISSUED':
@@ -3016,8 +2567,7 @@ function getInvoiceStatusBadge(status: string) {
     case 'PROCESSING':
       return {
         label: 'قيد المعالجة',
-        className:
-          'bg-[var(--mn-info-soft)] text-[var(--mn-info-text)] border-[var(--mn-info-border)]',
+        className: 'bg-[var(--mn-info-soft)] text-[var(--mn-info-text)] border-[var(--mn-info-border)]',
       };
     case 'OVERDUE':
       return {
@@ -3066,6 +2616,8 @@ const TECHNICAL_REQUEST_KEYS = new Set([
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+type ServicesSubTab = 'REQUESTS' | 'BOOKINGS' | 'DELIVERABLES' | 'INVOICES';
+
 function ServiceRequestsView({
   requests,
   serviceLoading,
@@ -3099,21 +2651,8 @@ function ServiceRequestsView({
   paymentsByInvoice: Record<string, StudentFinancePaymentDto[]>;
   onTogglePayments: (invoiceId: string) => void;
 }) {
-  const [activeTab, setActiveTab] = useState<'REQUESTS' | 'INVOICES'>('REQUESTS');
-  useEffect(() => {
-    if (selected) setActiveTab('REQUESTS');
-  }, [selected?.id]);
-
-  const pendingCount = useMemo(
-    () =>
-      requests.filter(
-        (request) =>
-          !['COMPLETED', 'FULFILLED', 'RESOLVED', 'CANCELLED', 'REJECTED'].includes(
-            request.status.toUpperCase(),
-          ),
-      ).length,
-    [requests],
-  );
+  const [activeTab, setActiveTab] = useState<ServicesSubTab>('REQUESTS');
+  useEffect(() => { if (selected) setActiveTab('REQUESTS'); }, [selected?.id]);
 
   const matchedInvoice = useMemo(() => {
     if (!selected) return undefined;
@@ -3124,170 +2663,94 @@ function ServiceRequestsView({
     );
   }, [selected, invoices]);
 
-  // A directly linked, authorized request must remain inspectable even if it is
-  // absent from the currently fetched/filtered request page.
-  const hasAnyRequestsOrInvoices =
-    requests.length > 0 ||
-    invoices.length > 0 ||
-    Boolean(selected) ||
-    Boolean(requestedNotFoundId) ||
-    Boolean(invoiceError);
+  const hasAnyRequestsOrInvoices = requests.length > 0 || invoices.length > 0 || Boolean(selected) || Boolean(requestedNotFoundId) || Boolean(invoiceError);
+
+  const serviceSubTabs = [
+    { id: 'REQUESTS' as const, label: 'طلبات الخدمات', count: requests.length, icon: ClipboardList },
+    { id: 'BOOKINGS' as const, label: 'الحجوزات والمواعيد', icon: CalendarClock },
+    { id: 'DELIVERABLES' as const, label: 'الملفات المستلمة', icon: FileText },
+    { id: 'INVOICES' as const, label: 'الفواتير والمدفوعات', count: invoices.length, icon: Receipt },
+  ];
 
   return (
-    <div className="space-y-5" aria-busy={serviceLoading}>
-      {/* Main service overview uses the same right-edge stripe as فرصي and تعليمي. */}
-      <section
-        aria-label="طلباتي ومدفوعاتي"
-        className="relative overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel dark:border-white/10 sm:p-5"
-      >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 right-0 w-[3.5px] bg-gradient-to-b from-[#B78622] via-[#D6A43B] to-[#E5B54F]"
-        />
-        <div className="flex min-w-0 items-center gap-2.5">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
-            <ClipboardList className="h-[18px] w-[18px] text-[#E5B54F]" aria-hidden="true" />
-          </span>
-          <h2 className="text-[14px] font-bold leading-[1.35] text-[var(--mn-heading)]">
-            طلباتي ومدفوعاتي
-          </h2>
-        </div>
-        <div className="mt-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2.5 dark:bg-[var(--mn-surface-elevated)]">
-          <p className="text-[12px] font-bold leading-5 text-[var(--mn-heading)]">
-            تابع خدماتك ومعاملاتك في مكان واحد
-          </p>
-          <p className="mt-0.5 text-[11px] font-medium leading-[1.85] text-[var(--mn-text-muted)] sm:text-[12px]">
-            اطّلع على حالة طلبات الخدمات الأكاديمية والاستشارية، وتفاصيلها، والفواتير والدفعات
-            المرتبطة بها.
-          </p>
-        </div>
-        {hasAnyRequestsOrInvoices && (
-          <div className="mt-4 grid grid-cols-3 gap-2">
-            {[
-              { label: 'طلبات معروضة', number: requests.length, tab: 'REQUESTS' as const },
-              { label: 'قيد المتابعة', number: pendingCount, tab: 'REQUESTS' as const },
-              { label: 'فواتير معروضة', number: invoices.length, tab: 'INVOICES' as const },
-            ].map((stat) => (
-              <button
-                key={stat.label}
-                type="button"
-                aria-label={`${stat.label}: ${stat.number}، عرض التفاصيل`}
-                onClick={() => setActiveTab(stat.tab)}
-                className="min-w-0 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 text-center transition-colors hover:border-[#D6A43B]/50 dark:bg-[var(--mn-surface-elevated)] sm:p-3"
-              >
-                <span className="block text-[17px] font-bold leading-6 text-[var(--mn-heading)] sm:text-[18px]">
-                  {stat.number}
-                </span>
-                <span className="mt-0.5 block text-[10px] font-semibold leading-[1.6] text-[var(--mn-text-muted)] sm:text-[11px]">
-                  {stat.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-        <div dir="rtl" className="mt-4 flex w-full flex-wrap items-center gap-3">
-          <p className="text-[11px] font-medium leading-[1.7] text-[var(--mn-text-muted)]">
-            طلباتك وفواتيرك في مساحة واحدة
-          </p>
-          <Link
-            to="/services"
-            className="ms-auto inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#142B5F] px-3.5 py-2 text-[12px] font-bold text-white shadow-2xs transition-colors hover:bg-[#203D74] dark:bg-[#D6A43B] dark:text-[#142B5F] dark:hover:bg-[#E5B54F]"
-          >
-            <Sparkles
-              className="h-3.5 w-3.5 text-[#E5B54F] dark:text-[#142B5F]"
-              aria-hidden="true"
-            />
-            <span>استكشف الخدمات</span>
-          </Link>
-        </div>
-      </section>
+    <div className="mt-0 space-y-3.5" aria-busy={serviceLoading}>
+      {/* Header box attached directly to the 8-tab bar above */}
+      <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] -mt-px">
+        <section
+          aria-label="طلباتي ومدفوعاتي"
+          className="mn-student-services-hero relative overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] shadow-2xs mn-panel font-['Cairo',sans-serif]"
+        >
+          {/* Selective Start-of-Box Accent Line (Navy) */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 right-0 w-[4px] z-10 bg-[#142B5F]"
+          />
 
-      <section
-        aria-label="تصفية طلبات الخدمات"
-        className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-2xs mn-panel dark:border-white/10 sm:p-4"
-      >
-        <div className="mb-3 flex min-w-0 items-center gap-2">
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
-            <Settings2 className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />
-          </span>
-          <h3 className="mn-student-services-heading text-[14px] font-bold text-[var(--mn-heading)]">
-            تصفية الطلبات
-          </h3>
-        </div>
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <label className="min-w-[185px] flex-1 text-[11px] font-semibold text-[var(--mn-heading)] sm:max-w-[290px]">
-            حالة الطلب
+          <div className="px-3.5 py-3 pr-4 sm:px-5 sm:py-3.5 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/45 bg-[#142B5F]">
+                <ClipboardList className="h-4 w-4 text-[#F2CD78]" aria-hidden="true" />
+              </span>
+              <div>
+                <h2 className="mn-student-services-heading text-[14px] sm:text-[15px] font-bold leading-tight text-[#1E293B] dark:text-[#F8FAFC] font-['Cairo',sans-serif]">
+                  طلباتي ومدفوعاتي
+                </h2>
+                <p className="text-[10.5px] font-medium text-[#64748B] dark:text-[#94A3B8]">
+                  طلبات الخدمات، المواعيد الاستشارية، المخرجات والفواتير
+                </p>
+              </div>
+            </div>
+
+            <Link
+              to="/services"
+              className="inline-flex min-h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-[#142B5F] hover:bg-[#1a3675] px-3 py-1 text-[11px] font-bold font-['Cairo',sans-serif] text-[#F2CD78] shadow-2xs transition-colors border border-[#D6A43B]/40"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-[#F2CD78]" aria-hidden="true" />
+              <span>استكشف الخدمات</span>
+            </Link>
+          </div>
+        </section>
+
+        {/* Unified Horizontal Swipe Sub-Tabs */}
+        <HorizontalSwipeTabs
+          ariaLabel="أقسام طلباتي ومدفوعاتي"
+          items={serviceSubTabs}
+          activeId={activeTab}
+          onChange={setActiveTab}
+        />
+      </div>
+
+      {activeTab === 'REQUESTS' && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3.5 py-2.5">
+          <div className="flex items-center gap-2">
+            <Filter className="h-3.5 w-3.5 text-[#0E7C86]" />
+            <label htmlFor="service-status-select" className="text-[11.5px] font-bold text-[#1E293B] dark:text-[#F8FAFC]">
+              حالة الطلب:
+            </label>
+          </div>
+          <div className="flex items-center gap-2">
             <select
+              id="service-status-select"
               value={statusFilter}
               onChange={(event) => onStatusFilterChange(event.target.value)}
-              className="mt-1 block min-h-10 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-[12px] font-semibold text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
+              className="min-h-8 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 py-1 text-[11px] font-bold text-[#1E293B] dark:text-[#F8FAFC] outline-none focus:border-[#0E7C86]"
             >
               <option value="">جميع الحالات</option>
-              {[
-                'REQUESTED',
-                'ACCEPTED',
-                'IN_PROGRESS',
-                'AWAITING_PAYMENT',
-                'COMPLETED',
-                'CANCELLED',
-              ].map((status) => (
-                <option key={status} value={status}>
-                  {getServiceRequestStatusBadge(status).label}
-                </option>
+              {['REQUESTED','ACCEPTED','IN_PROGRESS','AWAITING_PAYMENT','COMPLETED','CANCELLED'].map((status) => (
+                <option key={status} value={status}>{getServiceRequestStatusBadge(status).label}</option>
               ))}
             </select>
-          </label>
-          <span
-            role="status"
-            className="text-[11px] font-semibold leading-[1.8] text-[var(--mn-text-muted)]"
-          >
-            {totalRequests === requests.length
-              ? `${requests.length} طلب`
-              : `عرض ${requests.length} من ${totalRequests} طلب`}
-          </span>
+            <span role="status" className="rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 py-1 text-[10.5px] font-semibold text-[#475569] dark:text-[#CBD5E1]">
+              {totalRequests === requests.length ? `${requests.length} طلب` : `${requests.length} من ${totalRequests}`}
+            </span>
+          </div>
         </div>
-      </section>
-
-      {hasAnyRequestsOrInvoices && (
-        <nav
-          aria-label="عرض طلبات الخدمات والفواتير"
-          className="grid grid-cols-2 gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2"
-        >
-          <button
-            type="button"
-            onClick={() => setActiveTab('REQUESTS')}
-            aria-pressed={activeTab === 'REQUESTS'}
-            className={`min-h-10 min-w-0 rounded-lg px-2 py-1.5 text-[11px] font-bold leading-[1.7] transition-colors ${
-              activeTab === 'REQUESTS'
-                ? 'bg-[var(--mn-primary)] text-white shadow-2xs'
-                : 'bg-[var(--mn-page)] text-[var(--mn-text-muted)] hover:bg-[var(--mn-surface-muted)]'
-            }`}
-          >
-            طلبات الخدمات ({requests.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('INVOICES')}
-            aria-pressed={activeTab === 'INVOICES'}
-            className={`min-h-10 min-w-0 rounded-lg px-2 py-1.5 text-[11px] font-bold leading-[1.7] transition-colors ${
-              activeTab === 'INVOICES'
-                ? 'bg-[var(--mn-primary)] text-white shadow-2xs'
-                : 'bg-[var(--mn-page)] text-[var(--mn-text-muted)] hover:bg-[var(--mn-surface-muted)]'
-            }`}
-          >
-            الفواتير والمدفوعات ({invoices.length})
-          </button>
-        </nav>
       )}
 
       {serviceError && (
         <div className="space-y-2" role="alert">
           <Alert tone="error" message={serviceError} />
-          <button
-            type="button"
-            onClick={onRetry}
-            className="inline-flex min-h-9 items-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-1.5 text-[12px] font-bold text-[var(--mn-heading)]"
-          >
+          <button type="button" onClick={onRetry} className="inline-flex min-h-9 items-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-1.5 text-[12px] font-bold text-[#1E293B] dark:text-[#F8FAFC]">
             إعادة تحميل الطلبات
           </button>
         </div>
@@ -3295,110 +2758,97 @@ function ServiceRequestsView({
       {invoiceError && (
         <div className="space-y-2">
           <Alert tone="error" message={invoiceError} />
-          <button
-            type="button"
-            onClick={onRetry}
-            className="inline-flex min-h-9 items-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-1.5 text-[12px] font-bold text-[var(--mn-heading)]"
-          >
+          <button type="button" onClick={onRetry} className="inline-flex min-h-9 items-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-1.5 text-[12px] font-bold text-[#1E293B] dark:text-[#F8FAFC]">
             إعادة تحميل الفواتير
           </button>
         </div>
       )}
 
-      {/* Loading doesn't unmount the main view, so the active tab stays selected. */}
       {serviceLoading && (
-        <p
-          role="status"
-          className="rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-[11px] font-semibold text-[var(--mn-text-muted)]"
-        >
+        <p role="status" className="rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-[11px] font-semibold text-[var(--mn-text-muted)]">
           جارٍ تحديث الطلبات…
         </p>
       )}
 
-      {/* 3. Main Content View */}
-      {serviceLoading && activeTab === 'REQUESTS' ? (
-        <div
-          role="status"
-          className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 text-center text-[12px] font-semibold text-[var(--mn-text-muted)]"
-        >
-          جارٍ تحميل بيانات الطلبات…
-        </div>
-      ) : !hasAnyRequestsOrInvoices && serviceError ? (
-        <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 text-center text-[12px] text-[var(--mn-text-muted)]">
-          تعذر جلب الطلبات حاليًا. يمكنك إعادة المحاولة دون فقدان اختيارك.
-        </div>
-      ) : !hasAnyRequestsOrInvoices ? (
-        <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 sm:p-8 text-center mn-panel shadow-2xs">
-          <div className="w-12 h-12 rounded-2xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/40 flex items-center justify-center text-[#E5B54F] mx-auto mb-3.5 shadow-xs">
-            <ClipboardList className="w-6 h-6 text-[#E5B54F]" />
-          </div>
-          <h3 className="text-[14px] font-bold text-[var(--mn-heading)]">
-            {statusFilter
-              ? 'لا توجد طلبات مطابقة للحالة المختارة'
-              : 'لا توجد طلبات خدمات أو فواتير مسجلة'}
-          </h3>
-          <p className="mt-2 text-[11px] leading-[1.85] text-[var(--mn-text-muted)]">
-            {statusFilter
-              ? 'اختر «جميع الحالات» لعرض الطلبات الأخرى، أو تصفح دليل الخدمات.'
-              : 'يمكنك استكشاف الخدمات الأكاديمية والاستشارية، وستظهر طلباتك وفواتيرك هنا عند توفرها.'}
-          </p>
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              to="/services"
-              className="px-4 py-2 rounded-xl bg-[var(--mn-primary)] text-white text-xs font-bold hover:bg-[var(--mn-primary-hover)] transition-all shadow-2xs inline-flex items-center gap-2"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#E5B54F]" />
-              <span>استكشف دليل الخدمات والاستشارات</span>
-            </Link>
-          </div>
-        </div>
-      ) : activeTab === 'REQUESTS' ? (
-        requests.length === 0 && !selected && !requestedNotFoundId ? (
-          <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 text-center mn-panel">
-            <ClipboardList className="w-8 h-8 mx-auto text-[var(--mn-text-muted)] mb-2" />
-            <h3 className="text-[14px] font-bold text-[var(--mn-heading)]">
-              {serviceError
-                ? 'تعذر تحميل طلباتك حاليًا'
-                : statusFilter
-                  ? 'لا توجد طلبات مطابقة للحالة المختارة'
-                  : 'لا توجد طلبات خدمات معروضة حاليًا'}
-            </h3>
-            <p className="mt-1 text-[11px] leading-[1.85] text-[var(--mn-text-muted)]">
-              {serviceError
-                ? 'يمكنك إعادة تحميل الطلبات من الزر أعلاه. ستبقى الفواتير المحمّلة متاحة هنا.'
-                : 'يمكنك اختيار حالة أخرى أو الاطلاع على الفواتير والمدفوعات أو تقديم طلب جديد عبر دليل الخدمات.'}
-            </p>
-            <Link
-              to="/services"
-              className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--mn-primary)] text-white text-xs font-bold hover:bg-[var(--mn-primary-hover)] transition-all"
-            >
-              <span>دليل الخدمات</span>
-            </Link>
-          </div>
+      {/* Sub-Tab 2: BOOKINGS (الحجوزات والمواعيد) */}
+      {activeTab === 'BOOKINGS' && (
+        selected || requests[0] ? (
+          <StudentServiceBookingPanel requestId={(selected || requests[0]).id} />
         ) : (
-          <div className="grid gap-6 lg:grid-cols-[1fr_1.35fr]">
-            {/* Left Column: Requests List */}
-            <ServiceSectionCard
-              title="سجل الطلبات المقدمة"
-              icon={<ClipboardList className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
-              count={`${requests.length} طلب`}
-            >
+          <ServiceSectionCard title="الحجوزات والمواعيد الاستشارية" icon={<CalendarClock className="h-3.5 w-3.5 text-[#F2CD78]" />}>
+            <p className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-4 text-center text-[11.5px] font-medium text-[var(--mn-text-muted)]">
+              عند تقديم طلب خدمة استشارية ستتمكن من حجز موعد الجلسة وإدارته مباشرة من هنا.
+            </p>
+          </ServiceSectionCard>
+        )
+      )}
+
+      {/* Sub-Tab 3: DELIVERABLES (الملفات المستلمة) */}
+      {activeTab === 'DELIVERABLES' && <ServiceDeliverablesPanel requests={requests} />}
+
+      {/* Sub-Tab 1 & 4: REQUESTS or INVOICES */}
+      {activeTab !== 'BOOKINGS' && activeTab !== 'DELIVERABLES' && (
+        serviceLoading && activeTab === 'REQUESTS' ? (
+          <div role="status" className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] rounded-none border-x-0 border-t border-b border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 text-center text-[12px] font-semibold text-[var(--mn-text-muted)]">
+            جارٍ تحميل بيانات الطلبات…
+          </div>
+        ) : !hasAnyRequestsOrInvoices && serviceError ? (
+          <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] rounded-none border-x-0 border-t border-b border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 text-center text-[12px] text-[var(--mn-text-muted)]">
+            تعذر جلب الطلبات حاليًا. يمكنك إعادة المحاولة دون فقدان اختيارك.
+          </div>
+        ) : !hasAnyRequestsOrInvoices ? (
+          <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-5 sm:p-7 text-center mn-panel shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/40 flex items-center justify-center text-[#F2CD78] mx-auto mb-3 shadow-xs">
+              <ClipboardList className="w-5 h-5 text-[#F2CD78]" />
+            </div>
+            <h3 className="text-[12.5px] sm:text-[13px] font-bold text-[#1E293B] dark:text-[#F8FAFC]">{statusFilter ? 'لا توجد طلبات مطابقة للحالة المختارة' : 'لا توجد طلبات خدمات أو فواتير مسجلة'}</h3>
+            <p className="mt-1.5 text-[11px] leading-[1.8] text-[var(--mn-text-muted)]">
+              {statusFilter ? 'اختر «جميع الحالات» لعرض الطلبات الأخرى، أو تصفح دليل الخدمات.' : 'يمكنك استكشاف الخدمات الأكاديمية والاستشارية، وستظهر طلباتك وفواتيرك هنا عند توفرها.'}
+            </p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                to="/services"
+                className="px-3.5 py-2 rounded-xl bg-[#142B5F] text-white text-[11.5px] font-bold hover:bg-[#1a3675] transition-all shadow-2xs inline-flex items-center gap-2 border border-[#D6A43B]/40"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#F2CD78]" />
+                <span>استكشف دليل الخدمات والاستشارات</span>
+              </Link>
+            </div>
+          </div>
+        ) : activeTab === 'REQUESTS' ? (
+          requests.length === 0 && !selected && !requestedNotFoundId ? (
+            <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-5 text-center mn-panel">
+              <ClipboardList className="w-7 h-7 mx-auto text-[#0E7C86] mb-1.5" />
+              <h3 className="text-[12.5px] sm:text-[13px] font-bold text-[#1E293B] dark:text-[#F8FAFC]">{serviceError ? 'تعذر تحميل طلباتك حاليًا' : statusFilter ? 'لا توجد طلبات مطابقة للحالة المختارة' : 'لا توجد طلبات خدمات معروضة حاليًا'}</h3>
+              <p className="mt-1 text-[11px] leading-[1.8] text-[var(--mn-text-muted)]">
+                {serviceError
+                  ? 'يمكنك إعادة تحميل الطلبات من الزر أعلاه. ستبقى الفواتير المحمّلة متاحة هنا.'
+                  : 'يمكنك اختيار حالة أخرى أو الاطلاع على الفواتير والمدفوعات أو تقديم طلب جديد عبر دليل الخدمات.'}
+              </p>
+              <Link
+                to="/services"
+                className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#142B5F] text-white text-[11.5px] font-bold hover:bg-[#1a3675] transition-all border border-[#D6A43B]/40"
+              >
+                <span>دليل الخدمات</span>
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-4">
+            {/* Requests List Section */}
+            <ServiceSectionCard title="سجل الطلبات المقدمة" icon={<ClipboardList className="h-3.5 w-3.5 text-[#F2CD78]" aria-hidden="true" />} count={`${requests.length} طلب`}>
+
               <div className="space-y-2.5">
                 {requests.length === 0 && (
-                  <p className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3 text-[11px] leading-[1.8] text-[var(--mn-text-muted)]">
-                    لا توجد طلبات في القائمة المعروضة حاليًا. يمكنك مراجعة تفاصيل الطلب المفتوح على
-                    الجانب.
+                  <p className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3 text-[11.5px] leading-[1.8] text-[var(--mn-text-muted)]">
+                    لا توجد طلبات في القائمة المعروضة حاليًا. يمكنك مراجعة تفاصيل الطلب المفتوح بالأسفل.
                   </p>
                 )}
                 {requests.map((request) => {
                   const statusInfo = getServiceRequestStatusBadge(request.status);
-                  const isSelected =
-                    selected?.id === request.id || selected?.publicId === request.publicId;
+                  const isSelected = selected?.id === request.id || selected?.publicId === request.publicId;
                   const hasDirectInvoice = !!(
-                    (request.financeInvoiceId &&
-                      invoices.some((i) => i.id === request.financeInvoiceId)) ||
-                    (request.financeInvoicePublicId &&
-                      invoices.some((i) => i.publicId === request.financeInvoicePublicId))
+                    (request.financeInvoiceId && invoices.some((i) => i.id === request.financeInvoiceId)) ||
+                    (request.financeInvoicePublicId && invoices.some((i) => i.publicId === request.financeInvoicePublicId))
                   );
 
                   return (
@@ -3416,23 +2866,21 @@ function ServiceRequestsView({
                       }`}
                     >
                       <div className="flex flex-wrap items-start justify-between gap-2">
-                        <div className="flex min-w-0 flex-1 items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shrink-0">
-                            <ClipboardList className="w-4 h-4 text-[#E5B54F]" />
+                        <div className="flex min-w-0 flex-1 items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shrink-0">
+                            <ClipboardList className="w-3.5 h-3.5 text-[#E5B54F]" />
                           </div>
                           <div className="min-w-0">
-                            <div className="text-[14px] font-bold leading-[1.65] text-[var(--mn-heading)] break-words">
+                            <div className="text-[12px] sm:text-[12.5px] font-bold leading-snug text-[var(--mn-heading)] break-words">
                               طلب خدمة رقم #{request.publicId}
                             </div>
-                            <div className="text-[11px] text-[var(--mn-text-muted)] mt-0.5">
+                            <div className="text-[10.5px] text-[var(--mn-text-muted)] mt-0.5">
                               تاريخ التقديم: {formatDate(request.createdAt)}
                             </div>
                           </div>
                         </div>
 
-                        <span
-                          className={`max-w-full rounded-full border px-2 py-0.5 text-[10px] font-bold leading-[1.7] ${statusInfo.className}`}
-                        >
+                        <span className={`max-w-full rounded-full border px-2 py-0.5 text-[10px] font-bold leading-[1.7] ${statusInfo.className}`}>
                           {statusInfo.label}
                         </span>
                       </div>
@@ -3454,252 +2902,196 @@ function ServiceRequestsView({
             {/* Right Column: Selected Request Details */}
             <div>
               {selected ? (
-                <ServiceSectionCard
-                  title="تفاصيل الطلب المحدد"
-                  icon={<FileText className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
-                >
+                <ServiceSectionCard title="تفاصيل الطلب المحدد" icon={<FileText className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}>
                   <div className="space-y-5">
-                    {/* Top Details Header */}
-                    <div className="flex min-w-0 flex-wrap items-start justify-between gap-3 border-b border-[var(--mn-border)] pb-4 dark:border-white/10">
+                  {/* Top Details Header */}
+                  <div className="flex min-w-0 flex-wrap items-start justify-between gap-3 border-b border-[var(--mn-border)] pb-4 dark:border-white/10">
+                    <div>
+                      <h4 className="text-[12px] sm:text-[12.5px] font-bold leading-[1.45] text-[var(--mn-heading)] break-words">
+                        طلب خدمة رقم <span className="text-[#B78622] dark:text-[#E5B54F]">#{selected.publicId}</span>
+                      </h4>
+                      <div className="text-[10.5px] text-[var(--mn-text-muted)] mt-0.5">
+                        تاريخ الإنشاء: {formatDate(selected.createdAt)} · آخر تحديث: {formatDate(selected.updatedAt)}
+                      </div>
+                    </div>
+
+                    <span className={`self-start sm:self-center text-xs font-bold px-3 py-1 rounded-full border ${getServiceRequestStatusBadge(selected.status).className}`}>
+                      {getServiceRequestStatusBadge(selected.status).label}
+                    </span>
+                  </div>
+
+                  {/* Action Required Banner if applicable */}
+                  {(selected.status.toUpperCase() === 'ACTION_REQUIRED' || selected.status.toUpperCase() === 'NEEDS_INPUT') && (
+                    <div className="rounded-xl bg-[var(--mn-warning-soft)] border border-[var(--mn-warning-border)] p-3.5 text-xs text-[var(--mn-warning-text)] flex items-start gap-2.5">
+                      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                       <div>
-                        <h4 className="text-[14px] font-bold leading-[1.65] text-[var(--mn-heading)] break-words">
-                          طلب خدمة رقم{' '}
-                          <span className="text-[#B78622] dark:text-[#E5B54F]">
-                            #{selected.publicId}
-                          </span>
-                        </h4>
-                        <div className="text-[11px] text-[var(--mn-text-muted)] mt-1">
-                          تاريخ الإنشاء: {formatDate(selected.createdAt)} · آخر تحديث:{' '}
-                          {formatDate(selected.updatedAt)}
-                        </div>
-                      </div>
-
-                      <span
-                        className={`self-start sm:self-center text-xs font-bold px-3 py-1 rounded-full border ${getServiceRequestStatusBadge(selected.status).className}`}
-                      >
-                        {getServiceRequestStatusBadge(selected.status).label}
-                      </span>
-                    </div>
-
-                    {/* Action Required Banner if applicable */}
-                    {(selected.status.toUpperCase() === 'ACTION_REQUIRED' ||
-                      selected.status.toUpperCase() === 'NEEDS_INPUT') && (
-                      <div className="rounded-xl bg-[var(--mn-warning-soft)] border border-[var(--mn-warning-border)] p-3.5 text-xs text-[var(--mn-warning-text)] flex items-start gap-2.5">
-                        <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                        <div>
-                          <div className="font-bold">يتطلب هذا الطلب إجراءً منك</div>
-                          {selected.fulfillmentMetadata &&
-                          (selected.fulfillmentMetadata.instructions ||
-                            selected.fulfillmentMetadata.actionInstructions) ? (
-                            <div className="mt-1 leading-relaxed text-[11px]">
-                              {String(
-                                selected.fulfillmentMetadata.instructions ||
-                                  selected.fulfillmentMetadata.actionInstructions,
-                              )}
-                            </div>
-                          ) : (
-                            <div className="mt-0.5 leading-relaxed text-[11px]">
-                              يرجى مراجعة تفاصيل وملاحظات الطلب لاستكمال المعالجة أو التواصل مع
-                              الدعم الأكاديمي.
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Structured Request Parameters (Human-friendly, No raw JSON, No technical UUIDs) */}
-                    <div>
-                      <h4 className="mb-2.5 flex items-center gap-1.5 text-[12px] font-bold text-[var(--mn-heading)]">
-                        <Info className="w-3.5 h-3.5 text-[#D6A43B]" />
-                        <span>بيانات ومعايير الطلب المسجلة</span>
-                      </h4>
-
-                      {selected.requestParameters &&
-                      Object.keys(selected.requestParameters).length > 0 ? (
-                        <div className="grid gap-2 sm:grid-cols-2">
-                          {Object.entries(selected.requestParameters)
-                            .filter(
-                              ([key, value]) =>
-                                !TECHNICAL_REQUEST_KEYS.has(key) &&
-                                !UUID_PATTERN.test(String(value)),
-                            )
-                            .map(([key, value]) => (
-                              <div
-                                key={key}
-                                className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 text-xs"
-                              >
-                                <div className="text-[10.5px] font-semibold text-[var(--mn-text-muted)]">
-                                  {formatParameterKey(key)}
-                                </div>
-                                <div className="font-bold text-[var(--mn-heading)] mt-0.5 break-words">
-                                  {formatParameterValue(value)}
-                                </div>
-                              </div>
-                            ))}
-                        </div>
-                      ) : (
-                        <div className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3 text-xs text-[var(--mn-text-muted)]">
-                          لا توجد معايير إضافية مدخلة لهذا الطلب.
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Actual Real Timestamps Timeline */}
-                    <div>
-                      <h4 className="mb-2.5 flex items-center gap-1.5 text-[12px] font-bold text-[var(--mn-heading)]">
-                        <CalendarClock className="w-3.5 h-3.5 text-[#D6A43B]" />
-                        <span>سجل المواعيد والتوثيق</span>
-                      </h4>
-
-                      <div className="space-y-2 text-xs">
-                        <div className="p-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] flex items-center justify-between">
-                          <span className="text-[var(--mn-text-muted)]">تاريخ تقديم الطلب:</span>
-                          <span className="font-bold text-[var(--mn-heading)]">
-                            {formatDate(selected.createdAt)}
-                          </span>
-                        </div>
-                        <div className="p-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] flex items-center justify-between">
-                          <span className="text-[var(--mn-text-muted)]">آخر تحديث من النظام:</span>
-                          <span className="font-bold text-[var(--mn-heading)]">
-                            {formatDate(selected.updatedAt)}
-                          </span>
-                        </div>
-                        {selected.completedAt && (
-                          <div className="p-2.5 rounded-xl border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] flex items-center justify-between">
-                            <span className="text-[var(--mn-success-text)] font-semibold">
-                              تاريخ إتمام الخدمة:
-                            </span>
-                            <span className="font-bold text-[var(--mn-success-text)]">
-                              {formatDate(selected.completedAt)}
-                            </span>
+                        <div className="font-bold">يتطلب هذا الطلب إجراءً منك</div>
+                        {selected.fulfillmentMetadata && (selected.fulfillmentMetadata.instructions || selected.fulfillmentMetadata.actionInstructions) ? (
+                          <div className="mt-1 leading-relaxed text-[11px]">
+                            {String(selected.fulfillmentMetadata.instructions || selected.fulfillmentMetadata.actionInstructions)}
+                          </div>
+                        ) : (
+                          <div className="mt-0.5 leading-relaxed text-[11px]">
+                            يرجى مراجعة تفاصيل وملاحظات الطلب لاستكمال المعالجة أو التواصل مع الدعم الأكاديمي.
                           </div>
                         )}
                       </div>
                     </div>
+                  )}
 
-                    {/* Linked Invoice if directly and strictly verified */}
-                    {matchedInvoice && (
-                      <div className="rounded-xl border border-[#D6A43B]/40 bg-gradient-to-br from-[var(--mn-surface)] to-[var(--mn-page)] p-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
-                              <Receipt className="w-3.5 h-3.5 text-[#E5B54F]" />
-                            </div>
-                            <div>
-                              <div className="text-[13px] font-bold leading-[1.65] text-[var(--mn-heading)] break-words">
-                                فاتورة مرتبطة #
-                                {matchedInvoice.invoiceNumber || matchedInvoice.publicId}
+                  {/* Structured Request Parameters (Human-friendly, No raw JSON, No technical UUIDs) */}
+                  <div>
+                    <h4 className="mb-2.5 flex items-center gap-1.5 text-[12px] font-bold text-[var(--mn-heading)]">
+                      <Info className="w-3.5 h-3.5 text-[#D6A43B]" />
+                      <span>بيانات ومعايير الطلب المسجلة</span>
+                    </h4>
+
+                    {selected.requestParameters && Object.keys(selected.requestParameters).length > 0 ? (
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {Object.entries(selected.requestParameters)
+                          .filter(([key, value]) => !TECHNICAL_REQUEST_KEYS.has(key) && !UUID_PATTERN.test(String(value)))
+                          .map(([key, value]) => (
+                            <div
+                              key={key}
+                              className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 text-xs"
+                            >
+                              <div className="text-[10.5px] font-semibold text-[var(--mn-text-muted)]">
+                                {formatParameterKey(key)}
                               </div>
-                              <div className="text-[10px] text-[var(--mn-text-muted)]">
-                                تاريخ الإصدار:{' '}
-                                {formatDate(matchedInvoice.issuedAt || matchedInvoice.updatedAt)}
+                              <div className="font-bold text-[var(--mn-heading)] mt-0.5 break-words">
+                                {formatParameterValue(value)}
                               </div>
                             </div>
-                          </div>
-
-                          <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getInvoiceStatusBadge(matchedInvoice.status).className}`}
-                          >
-                            {getInvoiceStatusBadge(matchedInvoice.status).label}
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[var(--mn-border)]">
-                          <div className="p-2 rounded-lg bg-[var(--mn-surface)] border border-[var(--mn-border)]">
-                            <div className="text-[10px] text-[var(--mn-text-muted)]">
-                              إجمالي المبلغ:
-                            </div>
-                            <div className="text-xs font-bold text-[var(--mn-heading)] mt-0.5">
-                              {formatMoney(matchedInvoice.totalAmount)}
-                            </div>
-                          </div>
-                          <div className="p-2 rounded-lg bg-[var(--mn-surface)] border border-[var(--mn-border)]">
-                            <div className="text-[10px] text-[var(--mn-text-muted)]">
-                              المبلغ المستحق:
-                            </div>
-                            <div className="text-xs font-bold text-[#D6A43B] mt-0.5">
-                              {formatMoney(matchedInvoice.amountDue)}
-                            </div>
-                          </div>
-                        </div>
-
-                        {matchedInvoice.dueDate && (
-                          <div className="text-[10.5px] text-[var(--mn-text-muted)] flex items-center gap-1">
-                            <span>تاريخ الاستحقاق:</span>
-                            <strong>{formatDate(matchedInvoice.dueDate)}</strong>
-                          </div>
-                        )}
-
-                        <button
-                          type="button"
-                          onClick={() => onTogglePayments(matchedInvoice.id)}
-                          aria-expanded={Boolean(paymentsByInvoice[matchedInvoice.id])}
-                          className="w-full text-center py-1.5 rounded-lg border border-[var(--mn-border)] text-xs font-bold text-[var(--mn-primary)] hover:bg-[var(--mn-page)] transition-colors cursor-pointer"
-                        >
-                          {paymentsByInvoice[matchedInvoice.id]
-                            ? 'إخفاء سجل الدفعات'
-                            : 'عرض سجل الدفعات'}
-                        </button>
-
-                        {paymentsByInvoice[matchedInvoice.id] && (
-                          <div className="space-y-1.5 pt-2 border-t border-[var(--mn-border)]">
-                            {paymentsByInvoice[matchedInvoice.id].length === 0 ? (
-                              <div className="text-xs text-[var(--mn-text-muted)] text-center py-1">
-                                لا توجد عمليات دفع مسجلة حتى الآن.
-                              </div>
-                            ) : (
-                              paymentsByInvoice[matchedInvoice.id].map((payment) => (
-                                <div
-                                  key={payment.id}
-                                  className="p-2 rounded-lg bg-[var(--mn-surface)] border border-[var(--mn-border)] flex items-center justify-between text-xs"
-                                >
-                                  <div>
-                                    <div className="font-bold text-[var(--mn-heading)]">
-                                      {formatMoney(payment.amount)}
-                                    </div>
-                                    <div className="text-[10px] text-[var(--mn-text-muted)]">
-                                      {formatDate(payment.createdAt)} · {payment.paymentMethod}
-                                    </div>
-                                  </div>
-                                  <span
-                                    className={`text-[11px] font-bold px-2 py-0.5 rounded-md border ${['CAPTURED', 'SUCCESS', 'PAID'].includes(payment.status.toUpperCase()) ? 'bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border-[var(--mn-success-border)]' : getInvoiceStatusBadge(payment.status).className}`}
-                                  >
-                                    {['CAPTURED', 'SUCCESS', 'PAID'].includes(
-                                      payment.status.toUpperCase(),
-                                    )
-                                      ? 'ناجحة'
-                                      : getInvoiceStatusBadge(payment.status).label}
-                                  </span>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        )}
+                          ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3 text-xs text-[var(--mn-text-muted)]">
+                        لا توجد معايير إضافية مدخلة لهذا الطلب.
                       </div>
                     )}
                   </div>
+
+                  {/* Actual Real Timestamps Timeline */}
+                  <div>
+                    <h4 className="mb-2.5 flex items-center gap-1.5 text-[12px] font-bold text-[var(--mn-heading)]">
+                      <CalendarClock className="w-3.5 h-3.5 text-[#D6A43B]" />
+                      <span>سجل المواعيد والتوثيق</span>
+                    </h4>
+
+                    <div className="space-y-2 text-xs">
+                      <div className="p-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] flex items-center justify-between">
+                        <span className="text-[var(--mn-text-muted)]">تاريخ تقديم الطلب:</span>
+                        <span className="font-bold text-[var(--mn-heading)]">{formatDate(selected.createdAt)}</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] flex items-center justify-between">
+                        <span className="text-[var(--mn-text-muted)]">آخر تحديث من النظام:</span>
+                        <span className="font-bold text-[var(--mn-heading)]">{formatDate(selected.updatedAt)}</span>
+                      </div>
+                      {selected.completedAt && (
+                        <div className="p-2.5 rounded-xl border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] flex items-center justify-between">
+                          <span className="text-[var(--mn-success-text)] font-semibold">تاريخ إتمام الخدمة:</span>
+                          <span className="font-bold text-[var(--mn-success-text)]">{formatDate(selected.completedAt)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Linked Invoice if directly and strictly verified */}
+                  {matchedInvoice && (
+                    <div className="rounded-xl border border-[#D6A43B]/40 bg-gradient-to-br from-[var(--mn-surface)] to-[var(--mn-page)] p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
+                            <Receipt className="w-3.5 h-3.5 text-[#E5B54F]" />
+                          </div>
+                          <div>
+                            <div className="text-[13px] font-bold leading-[1.65] text-[var(--mn-heading)] break-words">
+                              فاتورة مرتبطة #{matchedInvoice.invoiceNumber || matchedInvoice.publicId}
+                            </div>
+                            <div className="text-[10px] text-[var(--mn-text-muted)]">
+                              تاريخ الإصدار: {formatDate(matchedInvoice.issuedAt || matchedInvoice.updatedAt)}
+                            </div>
+                          </div>
+                        </div>
+
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getInvoiceStatusBadge(matchedInvoice.status).className}`}>
+                          {getInvoiceStatusBadge(matchedInvoice.status).label}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[var(--mn-border)]">
+                        <div className="p-2 rounded-lg bg-[var(--mn-surface)] border border-[var(--mn-border)]">
+                          <div className="text-[10px] text-[var(--mn-text-muted)]">إجمالي المبلغ:</div>
+                          <div className="text-xs font-bold text-[var(--mn-heading)] mt-0.5">
+                            {formatMoney(matchedInvoice.totalAmount)}
+                          </div>
+                        </div>
+                        <div className="p-2 rounded-lg bg-[var(--mn-surface)] border border-[var(--mn-border)]">
+                          <div className="text-[10px] text-[var(--mn-text-muted)]">المبلغ المستحق:</div>
+                          <div className="text-xs font-bold text-[#D6A43B] mt-0.5">
+                            {formatMoney(matchedInvoice.amountDue)}
+                          </div>
+                        </div>
+                      </div>
+
+                      {matchedInvoice.dueDate && (
+                        <div className="text-[10.5px] text-[var(--mn-text-muted)] flex items-center gap-1">
+                          <span>تاريخ الاستحقاق:</span>
+                          <strong>{formatDate(matchedInvoice.dueDate)}</strong>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => onTogglePayments(matchedInvoice.id)}
+                        aria-expanded={Boolean(paymentsByInvoice[matchedInvoice.id])}
+                        className="w-full text-center py-1.5 rounded-lg border border-[var(--mn-border)] text-xs font-bold text-[var(--mn-primary)] hover:bg-[var(--mn-page)] transition-colors cursor-pointer"
+                      >
+                        {paymentsByInvoice[matchedInvoice.id] ? 'إخفاء سجل الدفعات' : 'عرض سجل الدفعات'}
+                      </button>
+
+                      {paymentsByInvoice[matchedInvoice.id] && (
+                        <div className="space-y-1.5 pt-2 border-t border-[var(--mn-border)]">
+                          {paymentsByInvoice[matchedInvoice.id].length === 0 ? (
+                            <div className="text-xs text-[var(--mn-text-muted)] text-center py-1">
+                              لا توجد عمليات دفع مسجلة حتى الآن.
+                            </div>
+                          ) : (
+                            paymentsByInvoice[matchedInvoice.id].map((payment) => (
+                              <div
+                                key={payment.id}
+                                className="p-2 rounded-lg bg-[var(--mn-surface)] border border-[var(--mn-border)] flex items-center justify-between text-xs"
+                              >
+                                <div>
+                                  <div className="font-bold text-[var(--mn-heading)]">{formatMoney(payment.amount)}</div>
+                                  <div className="text-[10px] text-[var(--mn-text-muted)]">{formatDate(payment.createdAt)} · {payment.paymentMethod}</div>
+                                </div>
+                                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md border ${['CAPTURED', 'SUCCESS', 'PAID'].includes(payment.status.toUpperCase()) ? 'bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border-[var(--mn-success-border)]' : getInvoiceStatusBadge(payment.status).className}`}>
+                                  {['CAPTURED', 'SUCCESS', 'PAID'].includes(payment.status.toUpperCase()) ? 'ناجحة' : getInvoiceStatusBadge(payment.status).label}
+                                </span>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  </div>
                 </ServiceSectionCard>
               ) : requestedNotFoundId ? (
-                <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-8 text-center mn-panel">
+                <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] rounded-none border-x-0 border-t border-b border-amber-500/30 bg-amber-500/10 p-6 text-center mn-panel">
                   <AlertTriangle className="w-8 h-8 mx-auto text-amber-600 dark:text-amber-400 mb-2" />
-                  <h3 className="text-[14px] font-bold text-[var(--mn-heading)]">
-                    الطلب المطلوب غير موجود أو غير مصرّح بعرضه
-                  </h3>
+                  <h3 className="text-[14px] font-bold text-[#1E293B] dark:text-[#F8FAFC]">الطلب المطلوب غير موجود أو غير مصرّح بعرضه</h3>
                   <p className="text-xs text-[var(--mn-text-muted)] mt-1.5 max-w-xs mx-auto leading-relaxed">
-                    المعرّف المُدخل{' '}
-                    <span className="font-mono font-bold">#{requestedNotFoundId}</span> لا يطابق أي
-                    طلب في سجلك المصرح به. يمكنك اختيار أحد طلباتك من القائمة المقابلة.
+                    المعرّف المُدخل <span className="font-mono font-bold">#{requestedNotFoundId}</span> لا يطابق أي طلب في سجلك المصرح به. يمكنك اختيار أحد طلباتك من القائمة أعلاه.
                   </p>
                 </div>
               ) : (
-                <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-8 text-center mn-panel">
-                  <ClipboardList className="w-8 h-8 mx-auto text-[var(--mn-text-muted)] mb-2" />
-                  <h3 className="text-[14px] font-bold text-[var(--mn-heading)]">
-                    اختر طلبًا لعرض تفاصيله
-                  </h3>
-                  <p className="text-xs text-[var(--mn-text-muted)] mt-1 max-w-xs mx-auto">
-                    اضغط على أي طلب من القائمة المقابلة للاطلاع على تفاصيل المعايير والمواعيد
-                    والفاتورة المرتبطة.
+                <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-5 text-center mn-panel">
+                  <ClipboardList className="w-7 h-7 mx-auto text-[#0E7C86] mb-1.5" />
+                  <h3 className="text-[12.5px] sm:text-[13px] font-bold text-[#1E293B] dark:text-[#F8FAFC]">اختر طلبًا لعرض تفاصيله</h3>
+                  <p className="text-[11px] text-[var(--mn-text-muted)] mt-1 max-w-xs mx-auto">
+                    اضغط على أي طلب من السجل أعلاه للاطلاع على تفاصيل المعايير والمواعيد والفاتورة المرتبطة.
                   </p>
                 </div>
               )}
@@ -3708,23 +3100,14 @@ function ServiceRequestsView({
         )
       ) : (
         /* Invoices Full Section */
-        <ServiceSectionCard
-          title="سجل الفواتير والمدفوعات"
-          icon={<Receipt className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
-          count={`${invoices.length} فاتورة`}
-        >
+        <ServiceSectionCard title="سجل الفواتير والمدفوعات" icon={<Receipt className="h-4 w-4 text-[#F2CD78]" aria-hidden="true" />} count={`${invoices.length} فاتورة`}>
+
           {invoices.length === 0 ? (
             <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 text-center mn-panel">
               <CreditCard className="w-8 h-8 mx-auto text-[var(--mn-text-muted)] mb-2" />
-              <h4 className="text-[14px] font-bold text-[var(--mn-heading)]">
-                {invoiceError
-                  ? 'تعذر تحميل الفواتير حاليًا'
-                  : 'لا توجد فواتير أو مدفوعات مسجلة بحسابك'}
-              </h4>
+              <h4 className="text-[14px] font-bold text-[var(--mn-heading)]">{invoiceError ? 'تعذر تحميل الفواتير حاليًا' : 'لا توجد فواتير أو مدفوعات مسجلة بحسابك'}</h4>
               <p className="text-[11px] leading-[1.85] text-[var(--mn-text-muted)] mt-1 max-w-sm mx-auto">
-                {invoiceError
-                  ? 'أعد المحاولة من زر إعادة تحميل الفواتير أعلاه.'
-                  : 'عند طلب خدمات مدفوعة أو استشارات خاصة ستظهر فواتيرك وإيصالات السداد هنا.'}
+                {invoiceError ? 'أعد المحاولة من زر إعادة تحميل الفواتير أعلاه.' : 'عند طلب خدمات مدفوعة أو استشارات خاصة ستظهر فواتيرك وإيصالات السداد هنا.'}
               </p>
             </div>
           ) : (
@@ -3741,11 +3124,11 @@ function ServiceRequestsView({
                     <div>
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div className="flex min-w-0 flex-1 items-center gap-2">
-                          <div className="w-8 h-8 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
-                            <Receipt className="w-4 h-4 text-[#E5B54F]" />
+                          <div className="w-7 h-7 rounded-lg bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
+                            <Receipt className="w-3.5 h-3.5 text-[#E5B54F]" />
                           </div>
                           <div>
-                            <div className="text-[14px] font-bold leading-[1.65] text-[var(--mn-heading)] break-words">
+                            <div className="text-[12px] sm:text-[12.5px] font-bold leading-[1.45] text-[var(--mn-heading)] break-words">
                               فاتورة #{invoice.invoiceNumber || invoice.publicId}
                             </div>
                             <div className="text-[10px] text-[var(--mn-text-muted)]">
@@ -3754,26 +3137,20 @@ function ServiceRequestsView({
                           </div>
                         </div>
 
-                        <span
-                          className={`max-w-full rounded-full border px-2 py-0.5 text-[10px] font-bold leading-[1.7] ${statusInfo.className}`}
-                        >
+                        <span className={`max-w-full rounded-full border px-2 py-0.5 text-[10px] font-bold leading-[1.7] ${statusInfo.className}`}>
                           {statusInfo.label}
                         </span>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-[var(--mn-border)]">
                         <div className="p-2 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)]">
-                          <div className="text-[10px] text-[var(--mn-text-muted)]">
-                            إجمالي الفاتورة:
-                          </div>
+                          <div className="text-[10px] text-[var(--mn-text-muted)]">إجمالي الفاتورة:</div>
                           <div className="text-xs font-bold text-[var(--mn-heading)] mt-0.5">
                             {formatMoney(invoice.totalAmount)}
                           </div>
                         </div>
                         <div className="p-2 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)]">
-                          <div className="text-[10px] text-[var(--mn-text-muted)]">
-                            المتبقي للدفع:
-                          </div>
+                          <div className="text-[10px] text-[var(--mn-text-muted)]">المتبقي للدفع:</div>
                           <div className="text-xs font-bold text-[#D6A43B] mt-0.5">
                             {formatMoney(invoice.amountDue)}
                           </div>
@@ -3788,18 +3165,11 @@ function ServiceRequestsView({
 
                       {invoice.lineItems && invoice.lineItems.length > 0 && (
                         <div className="mt-2.5 space-y-1">
-                          <div className="text-[10px] font-bold text-[var(--mn-heading)]">
-                            بنود الفاتورة:
-                          </div>
+                          <div className="text-[10px] font-bold text-[var(--mn-heading)]">بنود الفاتورة:</div>
                           {invoice.lineItems.map((item, idx) => (
-                            <div
-                              key={idx}
-                              className="flex flex-wrap items-start justify-between gap-1.5 text-[11px] leading-[1.7] text-[var(--mn-text-muted)]"
-                            >
+                            <div key={idx} className="flex flex-wrap items-start justify-between gap-1.5 text-[11px] leading-[1.7] text-[var(--mn-text-muted)]">
                               <span>{item.description}</span>
-                              <span className="shrink-0 text-[11px] font-semibold text-[var(--mn-heading)]">
-                                {formatMoney(item.totalPrice)}
-                              </span>
+                              <span className="shrink-0 text-[11px] font-semibold text-[var(--mn-heading)]">{formatMoney(item.totalPrice)}</span>
                             </div>
                           ))}
                         </div>
@@ -3829,21 +3199,11 @@ function ServiceRequestsView({
                                 className="p-2 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] flex items-center justify-between text-xs"
                               >
                                 <div>
-                                  <div className="font-bold text-[var(--mn-heading)]">
-                                    {formatMoney(payment.amount)}
-                                  </div>
-                                  <div className="text-[10px] text-[var(--mn-text-muted)]">
-                                    {formatDate(payment.createdAt)} · {payment.paymentMethod}
-                                  </div>
+                                  <div className="font-bold text-[var(--mn-heading)]">{formatMoney(payment.amount)}</div>
+                                  <div className="text-[10px] text-[var(--mn-text-muted)]">{formatDate(payment.createdAt)} · {payment.paymentMethod}</div>
                                 </div>
-                                <span
-                                  className={`text-[11px] font-bold px-2 py-0.5 rounded-md border ${['CAPTURED', 'SUCCESS', 'PAID'].includes(payment.status.toUpperCase()) ? 'bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border-[var(--mn-success-border)]' : getInvoiceStatusBadge(payment.status).className}`}
-                                >
-                                  {['CAPTURED', 'SUCCESS', 'PAID'].includes(
-                                    payment.status.toUpperCase(),
-                                  )
-                                    ? 'ناجحة'
-                                    : getInvoiceStatusBadge(payment.status).label}
+                                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md border ${['CAPTURED', 'SUCCESS', 'PAID'].includes(payment.status.toUpperCase()) ? 'bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border-[var(--mn-success-border)]' : getInvoiceStatusBadge(payment.status).className}`}>
+                                  {['CAPTURED', 'SUCCESS', 'PAID'].includes(payment.status.toUpperCase()) ? 'ناجحة' : getInvoiceStatusBadge(payment.status).label}
                                 </span>
                               </div>
                             ))
@@ -3857,7 +3217,7 @@ function ServiceRequestsView({
             </div>
           )}
         </ServiceSectionCard>
-      )}
+      ))}
       {activeTab === 'REQUESTS' && selected && !serviceLoading && (
         <StudentServiceBookingPanel requestId={selected.id} />
       )}
@@ -3865,7 +3225,7 @@ function ServiceRequestsView({
   );
 }
 
-/** Matches Summary and Opportunities: 14px Cairo and a gold underline only below the title. */
+/** Stretched edge-to-edge section matching Summary and Opportunities. */
 function ServiceSectionCard({
   title,
   icon,
@@ -3880,25 +3240,31 @@ function ServiceSectionCard({
   return (
     <section
       aria-label={title}
-      className="mn-student-services-section relative -mx-[2px] w-[calc(100%+4px)] min-w-0 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-2xs mn-panel dark:border-white/10 sm:mx-0 sm:w-full sm:p-4"
+      className="mn-student-services-section relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] min-w-0 overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] bg-[var(--mn-surface)] py-3.5 shadow-2xs mn-panel dark:border-white/10 sm:py-4 font-['Cairo',sans-serif]"
     >
-      <div className="mb-3 flex min-w-0 flex-wrap items-center justify-between gap-2">
+      <div className="mb-3 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--mn-border)] dark:border-white/10 pb-2.5 px-3.5 sm:px-5">
         <div className="flex min-w-0 items-center gap-2">
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
-            {icon}
+          <span className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-[9px] border border-[#D6A43B]/75 bg-[#142B5F] text-[#F2CD78] shadow-[0_2px_8px_rgba(20,43,95,0.16)]">
+            <span className="pointer-events-none absolute top-0 right-0 h-2.5 w-2.5 rounded-bl-md bg-[#D6A43B]" />
+            <span className="relative z-10">{icon}</span>
           </span>
-          <h3 className="mn-student-services-heading min-w-0 text-[14px] font-bold leading-[1.22] text-[var(--mn-heading)]">
+          <h3 className="inline-block border-b-2 border-[#D6A43B] pb-0.5 min-w-0 text-[14px] sm:text-[15px] font-bold leading-snug font-['Cairo',sans-serif] text-[#1E293B] dark:text-[#F8FAFC]">
             {title}
           </h3>
         </div>
         {count && (
-          <span className="text-[11px] font-semibold text-[var(--mn-text-muted)]">{count}</span>
+          <span className="inline-flex shrink-0 items-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-2 py-0.5 text-[10px] font-semibold text-[#334155] dark:text-[#E2E8F0]">
+            {count}
+          </span>
         )}
       </div>
-      {children}
+      <div className="px-3.5 sm:px-5">{children}</div>
     </section>
   );
 }
+
+
+type VaultSubTab = 'ALL' | 'COLLECTIONS' | 'COMPARISONS' | 'TOOLS' | 'DOCUMENTS';
 
 function VaultView({
   dashboard,
@@ -3909,6 +3275,8 @@ function VaultView({
   onDeleteCollection,
   onMoveSavedItem,
   onRemoveSavedItem,
+  setTab,
+  trackers = [],
 }: {
   dashboard: StudentDashboardSummaryDto;
   hydratedSavedItems: HydratedStudentSavedItemDto[];
@@ -3918,12 +3286,19 @@ function VaultView({
   onDeleteCollection: (collectionId: string, name: string) => void;
   onMoveSavedItem: (itemId: string, collectionId: string | null) => void;
   onRemoveSavedItem: (item: StudentSavedItemDto) => void;
+  setTab?: (tab: CanonicalWorkspaceTab) => void;
+  trackers?: StudentApplicationTrackerDto[];
 }) {
   const { language } = useTranslation();
+  const [subTab, setSubTab] = useState<VaultSubTab>('ALL');
   const [typeFilter, setTypeFilter] = useState('ALL');
   const [collectionFilter, setCollectionFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isCollectionsOpen, setIsCollectionsOpen] = useState(false);
+  const [showCreateInline, setShowCreateInline] = useState(false);
+  const [movingItem, setMovingItem] = useState<StudentSavedItemDto | null>(null);
 
   const savedItems = dashboard.savedItems;
   const collections = dashboard.collections;
@@ -3973,21 +3348,17 @@ function VaultView({
     return counts;
   }, [savedItems]);
 
-  const supportedTypes = [
-    { id: 'ALL', label: 'الكل' },
+  const VAULT_TYPES = [
     { id: 'SCHOLARSHIP', label: 'المنح' },
     { id: 'UNIVERSITY', label: 'الجامعات' },
     { id: 'MAJOR', label: 'التخصصات' },
     { id: 'COURSE', label: 'الدورات' },
-    { id: 'INTERNATIONAL_TEST', label: 'الاختبارات' },
+    { id: 'INTERNATIONAL_TEST', label: 'الاختبارات الدولية' },
     { id: 'CERTIFICATE', label: 'الشهادات' },
     { id: 'CMS_CONTENT', label: 'المقالات والمحتوى' },
     { id: 'SERVICE', label: 'الخدمات' },
     { id: 'STUDENT_TOOL', label: 'أدوات الطالب' },
-  ];
-  const visibleTypes = supportedTypes.filter(
-    (type) => type.id === 'ALL' || (typeCounts[type.id] || 0) > 0 || type.id === typeFilter,
-  );
+  ] as const;
 
   const filteredItems = useMemo(() => {
     const query = searchQuery.trim().toLocaleLowerCase();
@@ -4010,323 +3381,573 @@ function VaultView({
     });
   }, [savedItems, typeFilter, collectionFilter, searchQuery, getSavedTitle]);
 
-  const getEntityIcon = (type: string) => {
-    const iconStyle = 'h-4 w-4 text-[#E5B54F]';
+  const getEntityIcon = (type: string, customClass = 'h-4 w-4 text-[#E5B54F]') => {
     switch (type) {
       case 'SCHOLARSHIP':
-        return <GraduationCap className={iconStyle} aria-hidden="true" />;
+        return <GraduationCap className={customClass} aria-hidden="true" />;
       case 'UNIVERSITY':
-        return <Compass className={iconStyle} aria-hidden="true" />;
+        return <Compass className={customClass} aria-hidden="true" />;
       case 'MAJOR':
-        return <BookOpen className={iconStyle} aria-hidden="true" />;
+        return <BookOpen className={customClass} aria-hidden="true" />;
       case 'COURSE':
-        return <Clock3 className={iconStyle} aria-hidden="true" />;
+        return <Clock3 className={customClass} aria-hidden="true" />;
       case 'INTERNATIONAL_TEST':
-        return <ClipboardList className={iconStyle} aria-hidden="true" />;
+        return <ClipboardList className={customClass} aria-hidden="true" />;
       case 'CERTIFICATE':
-        return <Award className={iconStyle} aria-hidden="true" />;
+        return <Award className={customClass} aria-hidden="true" />;
       case 'CMS_CONTENT':
-        return <FileText className={iconStyle} aria-hidden="true" />;
+        return <FileText className={customClass} aria-hidden="true" />;
       case 'SERVICE':
-        return <Receipt className={iconStyle} aria-hidden="true" />;
+        return <Receipt className={customClass} aria-hidden="true" />;
       case 'STUDENT_TOOL':
-        return <Sparkles className={iconStyle} aria-hidden="true" />;
+        return <Sparkles className={customClass} aria-hidden="true" />;
       default:
-        return <Star className={iconStyle} aria-hidden="true" />;
+        return <Star className={customClass} aria-hidden="true" />;
     }
   };
 
   const handleCreateSubmit = (event: FormEvent<HTMLFormElement>) => {
     onCreateCollection(event);
     setShowCreateModal(false);
+    setShowCreateInline(false);
   };
 
+  const isAllActive = typeFilter === 'ALL' && collectionFilter === 'ALL';
+  const isFilterActive = typeFilter !== 'ALL';
+  const isCollectionActive = collectionFilter !== 'ALL';
+
+  const activeTypeObj = VAULT_TYPES.find((t) => t.id === typeFilter);
+  const selectedCollection = collections.find((c) => c.id === collectionFilter);
+  const activeCollectionLabel =
+    collectionFilter === 'UNCOLLECTED'
+      ? 'دون مجموعة'
+      : selectedCollection?.name || 'محددة';
+  const uncollectedCount = useMemo(
+    () => savedItems.filter((i) => !i.collectionId).length,
+    [savedItems],
+  );
+
+  const vaultSubTabs = [
+    { id: 'ALL' as const, label: 'الكل', count: savedItems.length, icon: Bookmark },
+    { id: 'COLLECTIONS' as const, label: 'المجموعات', count: collections.length, icon: Folder },
+    { id: 'COMPARISONS' as const, label: 'المقارنات والقرارات', icon: Scale },
+    { id: 'TOOLS' as const, label: 'نتائج الأدوات', count: typeCounts.STUDENT_TOOL || 0, icon: Sparkles },
+    { id: 'DOCUMENTS' as const, label: 'مستنداتي', icon: FileText },
+  ];
+
   return (
-    <div className="mn-student-vault-page space-y-6 font-['Cairo',sans-serif]">
-      {/* Hero: same right-hand gold stripe and left-hand discovery action as فرصي/تعليمي. */}
-      <section
-        aria-label="محفوظاتي ومجموعاتي"
-        className="relative overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel dark:border-white/10 sm:p-5"
-      >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 right-0 w-[3.5px] bg-gradient-to-b from-[#B78622] via-[#D6A43B] to-[#E5B54F]"
-        />
-        <div className="flex min-w-0 items-center gap-2.5">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
-            <Heart className="h-[18px] w-[18px] text-[#E5B54F]" aria-hidden="true" />
-          </span>
-          <h2 className="text-[14px] font-bold leading-[1.35] text-[var(--mn-heading)]">
-            محفوظاتي ومجموعاتي
-          </h2>
-        </div>
-        <div className="mt-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2.5 dark:bg-[var(--mn-surface-elevated)]">
-          <p className="text-[12px] font-bold leading-5 text-[var(--mn-heading)]">
-            كل ما يهمك في مكان واحد
-          </p>
-          <p className="mt-0.5 text-[11px] font-medium leading-[1.85] text-[var(--mn-text-muted)] sm:text-[12px]">
-            {savedItems.length
-              ? `لديك ${savedItems.length} عنصر محفوظ و${collections.length} مجموعة. نظّم المنح والجامعات والدورات وغيرها، وارجع إليها متى احتجت.`
-              : 'احفظ المنح والجامعات والتخصصات والدورات وغيرها، ثم نظّم ما حفظته في مجموعاتك الشخصية.'}
-          </p>
-        </div>
+    <div className="mn-student-vault-page mt-0 space-y-3.5 font-['Cairo',sans-serif]">
+      {/* Header box attached directly to the 8-tab bar above */}
+      <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] -mt-px">
+        <section
+          aria-label="محفوظاتي ومجموعاتي"
+          className="mn-student-vault-hero relative overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] shadow-2xs mn-panel font-['Cairo',sans-serif]"
+        >
+          {/* Selective Start-of-Box Accent Line (Navy) */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 right-0 w-[4px] z-10 bg-[#142B5F]"
+          />
 
-        {(savedItems.length > 0 || collections.length > 0) && (
-          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {[
-              { number: savedItems.length, label: 'إجمالي المحفوظات' },
-              { number: collections.length, label: 'مجموعات شخصية' },
-              { number: typeCounts.SCHOLARSHIP || 0, label: 'منح محفوظة' },
-              {
-                number:
-                  (typeCounts.UNIVERSITY || 0) + (typeCounts.MAJOR || 0) + (typeCounts.COURSE || 0),
-                label: 'جامعات وتخصصات ودورات',
-              },
-            ].map((stat) => (
-              <div
-                key={stat.label}
-                className="min-w-0 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 text-center dark:bg-[var(--mn-surface-elevated)] sm:p-3"
-              >
-                <span className="block text-[17px] font-bold leading-6 text-[var(--mn-heading)] sm:text-[18px]">
-                  {stat.number}
-                </span>
-                <span className="mt-0.5 block text-[10px] font-semibold leading-[1.6] text-[var(--mn-text-muted)] sm:text-[11px]">
-                  {stat.label}
-                </span>
+          <div className="px-3.5 py-3 pr-4 sm:px-5 sm:py-3.5 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/45 bg-[#142B5F]">
+                <Heart className="h-4 w-4 text-[#F2CD78]" aria-hidden="true" />
+              </span>
+              <div>
+                <h2 className="mn-student-vault-heading text-[14px] sm:text-[15px] font-bold leading-tight text-[#1E293B] dark:text-[#F8FAFC] font-['Cairo',sans-serif]">
+                  محفوظاتي ومجموعاتي
+                </h2>
+                <p className="text-[10.5px] font-medium text-[#64748B] dark:text-[#94A3B8]">
+                  العناصر المحفوظة، المجموعات، المقارنات، نتائج الأدوات والمستندات
+                </p>
               </div>
-            ))}
-          </div>
-        )}
-        <div dir="rtl" className="mt-4 flex w-full flex-wrap items-center gap-3">
-          <p className="text-[11px] font-medium leading-[1.7] text-[var(--mn-text-muted)]">
-            محفوظاتك ومجموعاتك في مكان واحد
-          </p>
-          <Link
-            to="/scholarships"
-            className="ms-auto inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#142B5F] px-3.5 py-2 text-[12px] font-bold text-white shadow-2xs transition-colors hover:bg-[#203D74] dark:bg-[#D6A43B] dark:text-[#142B5F] dark:hover:bg-[#E5B54F]"
-          >
-            <Sparkles
-              className="h-3.5 w-3.5 text-[#E5B54F] dark:text-[#142B5F]"
-              aria-hidden="true"
-            />
-            <span>استكشف المنح</span>
-          </Link>
-        </div>
-      </section>
-
-      {/* Collections: creation, selection, rename, and deletion remain intact. */}
-      <VaultSectionCard
-        title="مجموعاتي الشخصية"
-        icon={<Folder className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
-        count={`${collections.length} مجموعة`}
-        action={
-          <button
-            type="button"
-            onClick={() => setShowCreateModal((value) => !value)}
-            aria-expanded={showCreateModal}
-            aria-controls="mn-vault-create-collection"
-            className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 py-1.5 text-[11px] font-bold text-[var(--mn-heading)] transition-colors hover:border-[#D6A43B]"
-          >
-            <Folder className="h-3.5 w-3.5 text-[#B78622]" aria-hidden="true" />
-            <span>{showCreateModal ? 'إغلاق النموذج' : 'مجموعة جديدة'}</span>
-          </button>
-        }
-      >
-        <p className="mb-3 text-[11px] leading-[1.8] text-[var(--mn-text-muted)]">
-          أنشئ مجموعاتك لتنظيم المحفوظات، ثم اختر أي مجموعة لعرض عناصرها.
-        </p>
-
-        {showCreateModal && (
-          <form
-            id="mn-vault-create-collection"
-            onSubmit={handleCreateSubmit}
-            className="mb-3 rounded-xl border border-[#D6A43B]/40 bg-[var(--mn-page)] p-3 dark:bg-[var(--mn-surface-elevated)]"
-          >
-            <h4 className="mb-3 text-[13px] font-bold text-[var(--mn-heading)]">
-              إنشاء مجموعة جديدة
-            </h4>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="block text-[11px] font-semibold text-[var(--mn-heading)]">
-                اسم المجموعة *
-                <input
-                  name="collectionName"
-                  required
-                  maxLength={80}
-                  placeholder="مثال: منح أوروبا 2027"
-                  className="mt-1 block min-h-10 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 text-[12px] text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
-                />
-              </label>
-              <label className="block text-[11px] font-semibold text-[var(--mn-heading)]">
-                الوصف (اختياري)
-                <input
-                  name="collectionDescription"
-                  maxLength={240}
-                  placeholder="ملاحظة حول أهداف المجموعة..."
-                  className="mt-1 block min-h-10 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 text-[12px] text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
-                />
-              </label>
             </div>
-            <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
+
+            <div className="flex items-center gap-2">
+              <span className="inline-flex shrink-0 items-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] dark:border-white/15 px-2.5 py-1 text-[11px] font-semibold text-[#334155] dark:text-[#E2E8F0]">
+                {savedItems.length} محفوظات
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* Horizontal Swipe Sub-Tabs */}
+        <HorizontalSwipeTabs
+          ariaLabel="أقسام محفوظاتي ومجموعاتي"
+          items={vaultSubTabs}
+          activeId={subTab}
+          onChange={(next) => {
+            setSubTab(next);
+            if (next === 'COLLECTIONS') setIsCollectionsOpen(true);
+          }}
+        />
+      </div>
+
+      {/* Sub-Tab 3: COMPARISONS (المقارنات والقرارات) */}
+      {subTab === 'COMPARISONS' && (
+        <VaultComparisonsPanel
+          savedItems={savedItems}
+          onOpenApplications={() => setTab?.('OPPORTUNITIES')}
+        />
+      )}
+
+      {/* Sub-Tab 4: TOOLS (نتائج الأدوات) */}
+      {subTab === 'TOOLS' && (
+        <VaultToolsResultsPanel
+          savedItems={savedItems}
+          hydratedSavedItems={hydratedSavedItems}
+        />
+      )}
+
+      {/* Sub-Tab 5: DOCUMENTS (مستنداتي) */}
+      {subTab === 'DOCUMENTS' && <StudentDocumentsLibraryPanel trackers={trackers} />}
+
+      {/* Sub-Tab 1 & 2: ALL & COLLECTIONS */}
+      {(subTab === 'ALL' || subTab === 'COLLECTIONS') && (
+        <section
+          aria-label="العناصر المحفوظة"
+          className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] px-3.5 py-3.5 sm:px-5 sm:py-4 shadow-2xs mn-panel font-['Cairo',sans-serif]"
+        >
+        {/* Top Controls Container */}
+        <div className="relative pb-0.5">
+          <div className="mb-3 border-b border-[var(--mn-border)] dark:border-white/10 pb-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#D6A43B]/40 bg-[#142B5F] dark:bg-[#0c1a3b]">
+                <Bookmark className="h-3.5 w-3.5 text-[#F2CD78]" aria-hidden="true" />
+              </span>
+              <h3 className="text-[13px] sm:text-[14px] font-bold leading-snug text-[#1E293B] dark:text-[#F8FAFC] font-['Cairo',sans-serif] border-b-2 border-[#D6A43B] pb-0.5">
+                العناصر المحفوظة ({filteredItems.length})
+              </h3>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              {(typeFilter !== 'ALL' || collectionFilter !== 'ALL') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTypeFilter('ALL');
+                    setCollectionFilter('ALL');
+                  }}
+                  className="inline-flex min-h-7 items-center gap-1 rounded-lg border border-[#0E7C86]/40 bg-[#0E7C86]/10 px-2 py-0.5 text-[10px] font-bold text-[#0E7C86] dark:text-[#55CBC5] cursor-pointer"
+                >
+                  <span>عرض الكل</span>
+                  <span>✕</span>
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => setShowCreateModal(false)}
-                className="min-h-9 rounded-lg border border-[var(--mn-border)] px-3 py-1.5 text-[12px] font-semibold text-[var(--mn-text-muted)]"
+                onClick={() => {
+                  setIsFilterOpen((prev) => !prev);
+                  setIsCollectionsOpen(false);
+                }}
+                aria-expanded={isFilterOpen}
+                className={`inline-flex min-h-7 items-center gap-1 rounded-lg border px-2.5 py-1 text-[10.5px] font-bold transition-colors cursor-pointer ${
+                  isFilterOpen || isFilterActive
+                    ? 'border-[#142B5F] bg-[#142B5F] text-[#F2CD78]'
+                    : 'border-[var(--mn-border)] bg-[var(--mn-page)] text-[#142B5F] dark:text-[#F8FAFC] hover:border-[#0E7C86]'
+                }`}
               >
-                إلغاء
+                <Filter className="h-3 w-3 text-[#0E7C86]" aria-hidden="true" />
+                <span>{isFilterActive ? activeTypeObj?.label : 'فلترة النوع'}</span>
               </button>
               <button
-                type="submit"
-                disabled={saving}
-                className="min-h-9 rounded-lg bg-[var(--mn-primary)] px-3 py-1.5 text-[12px] font-bold text-white disabled:opacity-50"
+                type="button"
+                onClick={() => {
+                  setIsCollectionsOpen((prev) => !prev);
+                  setIsFilterOpen(false);
+                }}
+                aria-expanded={isCollectionsOpen}
+                className={`inline-flex min-h-7 items-center gap-1 rounded-lg border px-2.5 py-1 text-[10.5px] font-bold transition-colors cursor-pointer ${
+                  isCollectionsOpen || isCollectionActive
+                    ? 'border-[#0E7C86] bg-[#0E7C86] text-white'
+                    : 'border-[var(--mn-border)] bg-[var(--mn-page)] text-[#142B5F] dark:text-[#F8FAFC] hover:border-[#0E7C86]'
+                }`}
               >
-                حفظ المجموعة
+                <Folder className="h-3 w-3 text-[#0E7C86]" aria-hidden="true" />
+                <span>مجموعاتي ({collections.length})</span>
               </button>
             </div>
-          </form>
-        )}
+          </div>
+        </div>
 
-        {collections.length === 0 ? (
-          <p className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3 text-[11px] leading-[1.85] text-[var(--mn-text-muted)] dark:bg-[var(--mn-surface-elevated)]">
-            لا توجد مجموعات شخصية بعد. يمكنك إنشاء مجموعة جديدة الآن، أو حفظ العناصر دون مجموعة.
-          </p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => setCollectionFilter('ALL')}
-              aria-pressed={collectionFilter === 'ALL'}
-              className={`min-h-9 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold transition-colors ${
-                collectionFilter === 'ALL'
-                  ? 'border-[#142B5F] bg-[#142B5F] text-white dark:border-[#D6A43B] dark:bg-[#D6A43B] dark:text-[#142B5F]'
-                  : 'border-[var(--mn-border)] bg-[var(--mn-page)] text-[var(--mn-heading)] hover:border-[#D6A43B]'
-              }`}
-            >
-              جميع المجموعات ({savedItems.length})
-            </button>
-            {collections.map((collection) => (
-              <div
-                key={collection.id}
-                className="inline-flex min-w-0 items-center overflow-hidden rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)]"
-              >
+        <div className="space-y-2.5 mb-3 font-['Cairo',sans-serif]">
+
+          {/* Dropdown Panel for Box 2: Filter by 9 Types */}
+          {isFilterOpen && (
+            <div className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3 shadow-md animate-in fade-in duration-150">
+              <div className="flex items-center justify-between pb-2 mb-2 border-b border-[var(--mn-border)]/60 dark:border-white/10">
+                <div className="flex items-center gap-1.5 text-[12px] font-bold text-[var(--mn-heading)]">
+                  <Filter className="h-3.5 w-3.5 text-[#D6A43B]" aria-hidden="true" />
+                  <span>فلترة حسب نوع المحفوظات</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {typeFilter !== 'ALL' && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTypeFilter('ALL');
+                      }}
+                      className="text-[10.5px] font-bold text-[#D6A43B] dark:text-[#E5B54F] hover:underline cursor-pointer"
+                    >
+                      عرض جميع الأنواع
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsFilterOpen(false)}
+                    className="p-1 rounded-md text-[var(--mn-text-muted)] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
+                    aria-label="إغلاق قائمة الفلترة"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* The 9 Types Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5 max-h-[300px] overflow-y-auto pr-0.5">
+                {/* Reset to All Types */}
                 <button
                   type="button"
-                  onClick={() => setCollectionFilter(collection.id)}
-                  aria-pressed={collectionFilter === collection.id}
-                  className={`min-h-9 min-w-0 break-words px-2.5 py-1.5 text-[11px] font-bold transition-colors ${
-                    collectionFilter === collection.id
+                  onClick={() => {
+                    setTypeFilter('ALL');
+                    setIsFilterOpen(false);
+                  }}
+                  className={`flex items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-[11px] font-bold transition-colors cursor-pointer ${
+                    typeFilter === 'ALL'
                       ? 'bg-[#142B5F] text-white dark:bg-[#D6A43B] dark:text-[#142B5F]'
-                      : 'text-[var(--mn-heading)] hover:text-[#B78622]'
+                      : 'bg-[var(--mn-surface)] border border-[var(--mn-border)]/50 text-[var(--mn-heading)] hover:border-[#D6A43B]'
                   }`}
                 >
-                  {collection.name} ({collection.itemCount})
+                  <div className="flex items-center gap-2">
+                    <Layers className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>جميع الأنواع</span>
+                  </div>
+                  <span className="text-[10px] font-semibold opacity-85">({savedItems.length})</span>
                 </button>
-                {collection.type === 'PERSONAL' && (
-                  <div className="flex items-center gap-1 border-r border-[var(--mn-border)] px-1">
+
+                {/* The 9 Specific Types with exact IDs */}
+                {VAULT_TYPES.map((type) => {
+                  const active = typeFilter === type.id;
+                  const count = typeCounts[type.id] || 0;
+                  return (
                     <button
+                      key={type.id}
                       type="button"
-                      disabled={saving}
-                      title="تعديل اسم المجموعة"
-                      aria-label={`تعديل اسم المجموعة ${collection.name}`}
-                      onClick={() => onRenameCollection(collection.id, collection.name)}
-                      className="min-h-9 px-1 text-[11px] font-semibold text-[var(--mn-text-muted)] hover:text-[#B78622] disabled:opacity-50"
+                      onClick={() => {
+                        setTypeFilter(type.id);
+                        setIsFilterOpen(false);
+                      }}
+                      className={`flex items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-[11px] font-bold transition-colors cursor-pointer ${
+                        active
+                          ? 'bg-[#142B5F] text-white dark:bg-[#D6A43B] dark:text-[#142B5F]'
+                          : 'bg-[var(--mn-surface)] border border-[var(--mn-border)]/50 text-[var(--mn-heading)] hover:border-[#D6A43B]'
+                      }`}
                     >
-                      تعديل
+                      <div className="flex items-center gap-2 truncate">
+                        {getEntityIcon(type.id)}
+                        <span className="truncate">{type.label}</span>
+                      </div>
+                      <span className="text-[10px] font-semibold opacity-85 shrink-0">
+                        ({count})
+                      </span>
                     </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Dropdown Panel for Box 3: Collections (List, Create, Rename, Delete) */}
+          {isCollectionsOpen && (
+            <div className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3 shadow-md animate-in fade-in duration-150">
+              <div className="flex items-center justify-between pb-2 mb-2 border-b border-[var(--mn-border)]/60 dark:border-white/10">
+                <div className="flex items-center gap-1.5 text-[12px] font-bold text-[var(--mn-heading)]">
+                  <Folder className="h-3.5 w-3.5 text-[#0E7C86] dark:text-[#55CBC5]" aria-hidden="true" />
+                  <span>مجموعاتي الشخصية ({collections.length})</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateInline(!showCreateInline)}
+                    className="inline-flex items-center gap-1 rounded-md bg-[#142B5F] dark:bg-[#D6A43B] dark:text-[#142B5F] px-2 py-0.5 text-[10.5px] font-bold text-white hover:opacity-90 cursor-pointer"
+                  >
+                    <Plus className="h-3 w-3" />
+                    <span>مجموعة جديدة</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCollectionsOpen(false);
+                      setShowCreateInline(false);
+                    }}
+                    className="p-1 rounded-md text-[var(--mn-text-muted)] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
+                    aria-label="إغلاق قائمة المجموعات"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Inline Form to Create Collection */}
+              {showCreateInline && (
+                <form
+                  id="mn-vault-create-collection"
+                  onSubmit={handleCreateSubmit}
+                  className="mb-3 rounded-lg border border-[#D6A43B]/40 bg-[var(--mn-surface)] p-2.5 space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <h5 className="text-[11.5px] font-bold text-[var(--mn-heading)]">إنشاء مجموعة جديدة</h5>
                     <button
                       type="button"
-                      disabled={saving}
-                      title="حذف المجموعة"
-                      aria-label={`حذف المجموعة ${collection.name}`}
-                      onClick={() => onDeleteCollection(collection.id, collection.name)}
-                      className="grid h-9 w-8 place-items-center rounded-md text-[var(--mn-danger-text)] hover:bg-[var(--mn-danger-soft)] disabled:opacity-50"
+                      onClick={() => setShowCreateInline(false)}
+                      className="text-[10px] text-[var(--mn-text-muted)] hover:underline cursor-pointer"
                     >
-                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      إلغاء
                     </button>
                   </div>
-                )}
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() => setCollectionFilter('UNCOLLECTED')}
-              aria-pressed={collectionFilter === 'UNCOLLECTED'}
-              className={`min-h-9 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold transition-colors ${
-                collectionFilter === 'UNCOLLECTED'
-                  ? 'border-[#142B5F] bg-[#142B5F] text-white dark:border-[#D6A43B] dark:bg-[#D6A43B] dark:text-[#142B5F]'
-                  : 'border-[var(--mn-border)] bg-[var(--mn-page)] text-[var(--mn-heading)] hover:border-[#D6A43B]'
-              }`}
-            >
-              دون مجموعة
-            </button>
-          </div>
-        )}
-      </VaultSectionCard>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <input
+                      name="collectionName"
+                      required
+                      maxLength={80}
+                      placeholder="اسم المجموعة (مثال: منح أوروبا 2027) *"
+                      className="min-h-8 w-full rounded-md border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 py-1 text-[11px] text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
+                    />
+                    <input
+                      name="collectionDescription"
+                      maxLength={240}
+                      placeholder="الوصف (اختياري)..."
+                      className="min-h-8 w-full rounded-md border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 py-1 text-[11px] text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-1.5 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateInline(false)}
+                      className="min-h-7 rounded-md border border-[var(--mn-border)] px-2.5 text-[10.5px] font-medium text-[var(--mn-text-muted)] cursor-pointer"
+                    >
+                      إلغاء
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="min-h-7 rounded-md bg-[#142B5F] dark:bg-[#D6A43B] dark:text-[#142B5F] px-3 text-[10.5px] font-bold text-white disabled:opacity-50 cursor-pointer"
+                    >
+                      حفظ المجموعة
+                    </button>
+                  </div>
+                </form>
+              )}
 
-      {/* Search and type filters affect only saved items; no changes to API writes. */}
-      <VaultSectionCard
-        title="العناصر المحفوظة"
-        icon={<Bookmark className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
-        count={`${filteredItems.length} من ${savedItems.length}`}
-      >
-        {savedItems.length > 0 && (
-          <div className="mb-4 space-y-3">
-            <label
-              className="block text-[11px] font-semibold text-[var(--mn-heading)]"
-              htmlFor="mn-vault-search"
-            >
-              البحث في محفوظاتي
-              <input
-                id="mn-vault-search"
-                type="search"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="ابحث عن اسم منحة أو جامعة أو دورة..."
-                className="mt-1 block min-h-10 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-[12px] font-medium text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
-              />
-            </label>
-            <div aria-label="تصفية حسب النوع" className="flex flex-wrap gap-1.5">
-              {visibleTypes.map((type) => (
+              {/* Quick Filters for All / Uncollected */}
+              <div className="flex flex-wrap items-center gap-1.5 mb-2 pb-2 border-b border-[var(--mn-border)]/40">
                 <button
-                  key={type.id}
                   type="button"
-                  onClick={() => setTypeFilter(type.id)}
-                  aria-pressed={typeFilter === type.id}
-                  className={`min-h-9 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold transition-colors ${
-                    typeFilter === type.id
-                      ? 'border-[#142B5F] bg-[#142B5F] text-white dark:border-[#D6A43B] dark:bg-[#D6A43B] dark:text-[#142B5F]'
-                      : 'border-[var(--mn-border)] bg-[var(--mn-page)] text-[var(--mn-text-muted)] hover:border-[#D6A43B]'
+                  onClick={() => {
+                    setCollectionFilter('ALL');
+                    setIsCollectionsOpen(false);
+                  }}
+                  className={`min-h-7 rounded-md px-2.5 py-1 text-[10.5px] font-bold transition-all cursor-pointer ${
+                    collectionFilter === 'ALL'
+                      ? 'bg-[#142B5F] text-white dark:bg-[#D6A43B] dark:text-[#142B5F] shadow-2xs'
+                      : 'border border-[var(--mn-border)] bg-[var(--mn-surface)] text-[var(--mn-heading)] hover:border-[#D6A43B]'
                   }`}
                 >
-                  {type.label} ({typeCounts[type.id] || 0})
+                  كل المجموعات ({savedItems.length})
                 </button>
-              ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCollectionFilter('UNCOLLECTED');
+                    setIsCollectionsOpen(false);
+                  }}
+                  className={`min-h-7 rounded-md px-2.5 py-1 text-[10.5px] font-bold transition-all cursor-pointer ${
+                    collectionFilter === 'UNCOLLECTED'
+                      ? 'bg-[#142B5F] text-white dark:bg-[#D6A43B] dark:text-[#142B5F] shadow-2xs'
+                      : 'border border-[var(--mn-border)] bg-[var(--mn-page)] text-[var(--mn-heading)] hover:border-[#D6A43B]'
+                  }`}
+                >
+                  دون مجموعة ({uncollectedCount})
+                </button>
+              </div>
+
+              {/* Collections List with Rename & Delete */}
+              <div className="space-y-1.5 max-h-[260px] overflow-y-auto pr-0.5">
+                {collections.length === 0 ? (
+                  <p className="p-3 text-center text-[11px] text-[var(--mn-text-muted)] bg-[var(--mn-surface)] rounded-lg border border-[var(--mn-border)]/50">
+                    لا توجد مجموعات بعد. انقر على «مجموعة جديدة» لإضافة مجموعتك الأولى.
+                  </p>
+                ) : (
+                  collections.map((collection) => {
+                    const isSelected = collectionFilter === collection.id;
+                    return (
+                      <div
+                        key={collection.id}
+                        className={`group flex items-center justify-between gap-2 rounded-lg border p-2 transition-all ${
+                          isSelected
+                            ? 'border-[#0E7C86] bg-[#0E7C86]/10 dark:bg-[#0E7C86]/20'
+                            : 'border-[var(--mn-border)]/60 bg-[var(--mn-surface)] hover:border-[#D6A43B]/60'
+                        }`}
+                      >
+                        <div role="button" tabIndex={0} onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+                          onClick={() => {
+                            setCollectionFilter(collection.id);
+                            setIsCollectionsOpen(false);
+                          }}
+                          className="flex min-w-0 flex-1 items-center gap-2 cursor-pointer"
+                        >
+                          <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                            <Folder className="h-3.5 w-3.5 fill-amber-500/20" aria-hidden="true" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h5 className="text-[12px] font-bold text-[var(--mn-heading)] truncate font-['Cairo',sans-serif]">
+                              {collection.name}
+                            </h5>
+                            <span className="text-[10px] text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">
+                              {collection.itemCount} عناصر
+                            </span>
+                          </div>
+                          {isSelected && (
+                            <span className="text-[10px] font-bold text-[#0E7C86] dark:text-[#55CBC5] bg-[#0E7C86]/15 px-1.5 py-0.5 rounded">
+                              محددة
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          {collection.type === 'PERSONAL' && (
+                            <>
+                              <button
+                                type="button"
+                                disabled={saving}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onRenameCollection(collection.id, collection.name);
+                                }}
+                                title="تعديل اسم المجموعة"
+                                className="px-2 py-0.5 text-[10px] font-bold text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer"
+                              >
+                                تعديل
+                              </button>
+                              <button
+                                type="button"
+                                disabled={saving}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onDeleteCollection(collection.id, collection.name);
+                                }}
+                                title="حذف المجموعة"
+                                className="p-1 text-rose-500 hover:bg-rose-500/10 rounded transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="h-3 w-3" aria-hidden="true" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             </div>
+          )}
+
+          {/* Search box placed below the 3 boxes & dropdown panels */}
+          <div className="relative w-full">
+            <input
+              id="mn-vault-search"
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="ابحث في محفوظاتك..."
+              className="w-full min-h-9 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] pr-9 pl-3 text-[11px] placeholder:text-[11px] font-medium font-['Cairo',sans-serif] text-[var(--mn-heading)] outline-none focus:border-[#D6A43B] transition-colors"
+            />
+            <Search
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--mn-text-muted)]"
+              aria-hidden="true"
+            />
           </div>
-        )}
+
+          {/* Active Filters Summary Strip */}
+          {(typeFilter !== 'ALL' || collectionFilter !== 'ALL' || searchQuery.trim() !== '') && (
+            <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-['Cairo',sans-serif] pt-0.5">
+              <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">الفلاتر النشطة:</span>
+              {typeFilter !== 'ALL' && (
+                <span className="inline-flex items-center gap-1 rounded-md border border-[#D6A43B]/40 bg-[#142B5F]/5 dark:bg-[#D6A43B]/10 px-2 py-0.5 text-[10.5px] font-bold text-[#142B5F] dark:text-[#E5B54F]">
+                  <span>النوع: {activeTypeObj?.label || typeFilter}</span>
+                  <button
+                    type="button"
+                    onClick={() => setTypeFilter('ALL')}
+                    className="cursor-pointer text-[11px] hover:opacity-70"
+                    title="إزالة فلتر النوع"
+                  >
+                    ✕
+                  </button>
+                </span>
+              )}
+              {collectionFilter !== 'ALL' && (
+                <span className="inline-flex items-center gap-1 rounded-md border border-[#0E7C86]/40 bg-[#0E7C86]/5 dark:bg-[#0E7C86]/10 px-2 py-0.5 text-[10.5px] font-bold text-[#0E7C86] dark:text-[#55CBC5]">
+                  <span>المجموعة: {activeCollectionLabel}</span>
+                  <button
+                    type="button"
+                    onClick={() => setCollectionFilter('ALL')}
+                    className="cursor-pointer text-[11px] hover:opacity-70"
+                    title="إزالة فلتر المجموعة"
+                  >
+                    ✕
+                  </button>
+                </span>
+              )}
+              {searchQuery.trim() !== '' && (
+                <span className="inline-flex items-center gap-1 rounded-md border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 py-0.5 text-[10.5px] font-medium text-[var(--mn-heading)]">
+                  <span>بحث: «{searchQuery}»</span>
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="cursor-pointer text-[11px] hover:opacity-70"
+                    title="مسح البحث"
+                  >
+                    ✕
+                  </button>
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setTypeFilter('ALL');
+                  setCollectionFilter('ALL');
+                  setSearchQuery('');
+                }}
+                className="text-[10px] font-bold text-rose-500 hover:underline cursor-pointer mr-auto"
+              >
+                إعادة ضبط الكل
+              </button>
+            </div>
+          )}
+        </div>
+        </div>
 
         {savedItems.length === 0 ? (
           <div className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-5 text-center dark:bg-[var(--mn-surface-elevated)]">
-            <Heart className="mx-auto h-7 w-7 text-[#B78622]" aria-hidden="true" />
+            <Heart className="mx-auto h-7 w-7 text-[#D6A43B]" aria-hidden="true" />
             <h4 className="mt-2 text-[13px] font-bold text-[var(--mn-heading)]">
-              {collections.length > 0
-                ? 'مجموعاتك جاهزة لاستقبال المحفوظات'
-                : 'لا توجد عناصر محفوظة بعد'}
+              {collections.length > 0 ? 'مجموعاتك جاهزة لاستقبال المحفوظات' : 'لا توجد عناصر محفوظة بعد'}
             </h4>
             <p className="mt-1 text-[11px] leading-[1.85] text-[var(--mn-text-muted)]">
               تصفح المنح والجامعات والدورات، واضغط رمز القلب في صفحاتها لإضافتها إلى محفوظاتك.
             </p>
             <Link
               to="/scholarships"
-              className="mt-3 inline-flex min-h-9 items-center justify-center rounded-lg bg-[var(--mn-primary)] px-3 py-1.5 text-[12px] font-bold text-white"
+              className="mt-3 inline-flex min-h-9 items-center justify-center rounded-lg bg-[#142B5F] dark:bg-[#D6A43B] dark:text-[#142B5F] px-4 py-1.5 text-[12px] font-bold text-white shadow-2xs"
             >
               استكشف المنح
             </Link>
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-5 text-center dark:bg-[var(--mn-surface-elevated)]">
-            <h4 className="text-[13px] font-bold text-[var(--mn-heading)]">
-              لا توجد عناصر مطابقة للتصفية
-            </h4>
+            <h4 className="text-[13px] font-bold text-[var(--mn-heading)]">لا توجد عناصر مطابقة للتصفية</h4>
             <p className="mt-1 text-[11px] leading-[1.85] text-[var(--mn-text-muted)]">
               جرّب بحثًا آخر أو اعرض جميع المحفوظات.
             </p>
@@ -4337,13 +3958,13 @@ function VaultView({
                 setCollectionFilter('ALL');
                 setSearchQuery('');
               }}
-              className="mt-3 min-h-9 rounded-lg bg-[var(--mn-primary)] px-3 py-1.5 text-[12px] font-bold text-white"
+              className="mt-3 min-h-8 rounded-lg bg-[#142B5F] dark:bg-[#D6A43B] dark:text-[#142B5F] px-3 py-1 text-[11px] font-bold text-white cursor-pointer"
             >
               إعادة ضبط التصفية
             </button>
           </div>
         ) : (
-          <div className="grid gap-3.5 sm:grid-cols-2">
+          <div className="space-y-2.5 font-['Cairo',sans-serif] mt-3.5">
             {filteredItems.map((item) => {
               const owner = hydratedBySavedItemId.get(item.id);
               const displayName = getSavedTitle(item);
@@ -4355,91 +3976,92 @@ function VaultView({
                     ? '/student?tab=learning#certificates'
                     : null
                   : available !== true
-                    ? null
-                    : slug
-                      ? buildEntityLink(item.entityType, slug)
-                      : item.entityType === 'STUDENT_TOOL'
-                        ? '/tools'
-                        : null;
+                  ? null
+                  : slug
+                  ? buildEntityLink(item.entityType, slug)
+                  : item.entityType === 'STUDENT_TOOL'
+                  ? '/tools'
+                  : null;
+
+              const itemCountry =
+                (typeof item.metadata?.country === 'string' && item.metadata.country) ||
+                (owner && 'country' in owner && typeof (owner as { country?: string }).country === 'string'
+                  ? (owner as { country?: string }).country
+                  : null);
+              const typeText = arabicEntityType(item.entityType);
+              const subtitle = itemCountry ? `${typeText} · ${itemCountry}` : typeText;
+              const currentCollection = item.collectionId
+                ? collections.find((col) => col.id === item.collectionId)
+                : null;
 
               return (
                 <article
                   key={item.id}
-                  className="mn-student-vault-item flex min-w-0 flex-col justify-between rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3.5 transition-colors hover:border-[#D6A43B]/50 dark:bg-[var(--mn-surface-elevated)]"
+                  className="group relative overflow-hidden rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3 shadow-2xs font-['Cairo',sans-serif] transition-all hover:border-[#D6A43B]/60"
                 >
-                  <div>
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
-                          {getEntityIcon(item.entityType)}
-                        </span>
-                        <span className="rounded-md border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2 py-0.5 text-[11px] font-semibold text-[var(--mn-text-muted)]">
-                          {arabicEntityType(item.entityType)}
-                        </span>
+                  {/* Top Section: Emblem Icon on right, Title & Subtitle in middle, Favorite Heart button on left */}
+                  <div className="flex items-center justify-between gap-2.5">
+                    <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                      {/* Rounded Emblem Icon */}
+                      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 text-[#E5B54F] shadow-xs">
+                        {getEntityIcon(item.entityType, 'h-4 w-4 text-[#E5B54F]')}
                       </div>
-                      <button
-                        type="button"
-                        disabled={saving}
-                        onClick={() => onRemoveSavedItem(item)}
-                        title="إزالة من المحفوظات"
-                        aria-label={`إزالة ${displayName} من المحفوظات`}
-                        className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-[var(--mn-danger-text)] transition-colors hover:bg-[var(--mn-danger-soft)] disabled:opacity-50"
-                      >
-                        <Trash2 className="h-4 w-4" aria-hidden="true" />
-                      </button>
-                    </div>
-                    <h4 className="mt-2.5 break-words text-[14px] font-bold leading-[1.65] text-[var(--mn-heading)]">
-                      {displayName}
-                    </h4>
 
-                    {!available && item.entityType !== 'STUDENT_TOOL' && (
-                      <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-[var(--mn-warning-soft)] p-2 text-[11px] font-medium leading-[1.7] text-[var(--mn-warning-text)]">
-                        <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                        <span>
-                          {available === false
-                            ? 'غير معروض حاليًا لدى المصدر؛ وسجلك محفوظ.'
-                            : 'تعذر تأكيد حالة المصدر حاليًا؛ وسجلك محفوظ.'}
-                        </span>
+                      {/* Title & Subtitle (e.g. منحة · الصين) */}
+                      <div className="min-w-0 flex-1">
+                        <h4 className="text-[12px] sm:text-[12.5px] font-bold text-[var(--mn-heading)] leading-snug break-words font-['Cairo',sans-serif]">
+                          {displayName}
+                        </h4>
+                        <p className="mt-0.5 text-[10.5px] sm:text-[11px] font-medium text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">
+                          {subtitle}
+                        </p>
                       </div>
-                    )}
-                    <OwnerReferenceNotice reference={owner?.referenceState} />
-                    {item.entityType === 'STUDENT_TOOL' && (
-                      <StudentPrivateToolResult
-                        savedReference={owner?.privateReference ?? item.id}
-                        available={owner?.visibility === 'STUDENT_PRIVATE' && available === true}
-                      />
-                    )}
-                    <p className="mt-2 text-[11px] font-medium text-[var(--mn-text-muted)]">
-                      حُفظ في: <strong>{formatDate(item.savedAt)}</strong>
-                    </p>
+                    </div>
+
+                    {/* Heart button (زر المفضلة) to un-favorite immediately */}
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => onRemoveSavedItem(item)}
+                      title="إزالة من المفضلة"
+                      aria-label={`إزالة ${displayName} من المفضلة`}
+                      className="grid h-8 w-8 sm:h-9 sm:w-9 shrink-0 place-items-center rounded-full text-rose-500 hover:bg-rose-500/10 active:scale-90 transition-transform cursor-pointer"
+                    >
+                      <Heart className="h-4.5 w-4.5 fill-rose-500 text-rose-500" aria-hidden="true" />
+                    </button>
                   </div>
 
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--mn-border)] pt-3">
-                    <label className="min-w-0 flex-1 text-[11px] font-semibold text-[var(--mn-text-muted)]">
-                      <span className="sr-only">نقل إلى مجموعة</span>
-                      <select
-                        aria-label={`نقل ${displayName} إلى مجموعة`}
-                        value={item.collectionId ?? ''}
-                        disabled={saving}
-                        onChange={(event) => onMoveSavedItem(item.id, event.target.value || null)}
-                        className="min-h-9 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2 py-1.5 text-[11px] font-medium text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
-                      >
-                        <option value="">دون مجموعة</option>
-                        {collections.map((collection) => (
-                          <option key={collection.id} value={collection.id}>
-                            {collection.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    {targetUrl && (
+                  {/* Horizontal Divider Line */}
+                  <div className="my-2.5 border-t border-[var(--mn-border)]/60 dark:border-white/10" aria-hidden="true" />
+
+                  {/* Bottom Row: Clean group button on right, Details link with ↖ on left - matching ChatGPT mockup */}
+                  <div className="flex items-center justify-between gap-2 text-[11px] sm:text-[11.5px]">
+                    {/* Right side (RTL start): Clean group button with folder icon */}
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => setMovingItem(item)}
+                      className="inline-flex items-center gap-1.5 font-bold text-[11px] sm:text-[11.5px] text-[var(--mn-heading)] hover:text-[#D6A43B] active:opacity-70 transition-colors cursor-pointer select-none"
+                      title="نقل أو إضافة إلى مجموعة"
+                    >
+                      <Folder className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#55CBC5]" aria-hidden="true" />
+                      <span className="truncate max-w-[140px] sm:max-w-[200px]">
+                        {currentCollection ? currentCollection.name : 'إضافة لمجموعة'}
+                      </span>
+                    </button>
+
+                    {/* Left side (RTL end): عرض التفاصيل with arrow */}
+                    {targetUrl ? (
                       <Link
                         to={targetUrl}
-                        className="ms-auto inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-lg bg-[var(--mn-primary)] px-3 py-1.5 text-[12px] font-bold text-white transition-colors hover:bg-[var(--mn-primary-hover)]"
+                        className="inline-flex items-center gap-1 font-bold text-[11px] sm:text-[11.5px] text-[var(--mn-heading)] hover:text-[#D6A43B] transition-colors shrink-0"
+                        title="عرض التفاصيل"
                       >
-                        <span>فتح</span>
-                        <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                        <ArrowUpLeft className="h-3.5 w-3.5 text-[var(--mn-text-muted)] group-hover:text-[#D6A43B]" aria-hidden="true" />
+                        <span>عرض التفاصيل</span>
                       </Link>
+                    ) : (
+                      <span className="text-[10.5px] text-[var(--mn-text-muted)] font-medium">محفوظة</span>
                     )}
                   </div>
                 </article>
@@ -4447,12 +4069,110 @@ function VaultView({
             })}
           </div>
         )}
-      </VaultSectionCard>
+      </section>
+      )}
+
+      {/* Move to Collection Modal / Sheet */}
+      {movingItem && (
+        <div tabIndex={0} onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="نقل إلى مجموعة"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-2 sm:p-4 backdrop-blur-xs font-['Cairo',sans-serif]"
+          onClick={() => setMovingItem(null)}
+        >
+          <div role="button" tabIndex={0} onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+            className="w-full max-w-sm rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-[var(--mn-border)] dark:border-white/10 pb-2.5">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#0E7C86]/10 text-[#0E7C86] dark:text-[#55CBC5]">
+                  <Folder className="h-4 w-4" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <h4 className="text-[13px] font-bold text-[var(--mn-heading)]">نقل إلى مجموعة</h4>
+                  <p className="text-[11px] text-[var(--mn-text-muted)] truncate max-w-[200px]">
+                    {getSavedTitle(movingItem)}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMovingItem(null)}
+                className="grid h-7 w-7 shrink-0 place-items-center rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-[var(--mn-text-muted)] cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-3 max-h-60 overflow-y-auto space-y-1">
+              {/* Uncollected option */}
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => {
+                  onMoveSavedItem(movingItem.id, null);
+                  setMovingItem(null);
+                }}
+                className={`w-full flex items-center justify-between rounded-xl px-3 py-2 text-right text-[12px] font-bold transition-colors cursor-pointer ${
+                  !movingItem.collectionId
+                    ? 'bg-[#142B5F] text-white dark:bg-[#D6A43B] dark:text-[#142B5F]'
+                    : 'hover:bg-[var(--mn-page)] text-[var(--mn-heading)]'
+                }`}
+              >
+                <span>دون مجموعة (إلغاء التعيين)</span>
+                {!movingItem.collectionId && <span>✓</span>}
+              </button>
+
+              {collections.map((col) => {
+                const isSelected = movingItem.collectionId === col.id;
+                return (
+                  <button
+                    key={col.id}
+                    type="button"
+                    disabled={saving}
+                    onClick={() => {
+                      onMoveSavedItem(movingItem.id, col.id);
+                      setMovingItem(null);
+                    }}
+                    className={`w-full flex items-center justify-between rounded-xl px-3 py-2 text-right text-[12px] font-bold transition-colors cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#142B5F] text-white dark:bg-[#D6A43B] dark:text-[#142B5F]'
+                        : 'hover:bg-[var(--mn-page)] text-[var(--mn-heading)]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Folder className="h-3.5 w-3.5 opacity-70" aria-hidden="true" />
+                      <span>{col.name}</span>
+                    </div>
+                    {isSelected && <span>✓</span>}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-3 border-t border-[var(--mn-border)] dark:border-white/10 pt-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setMovingItem(null);
+                  setShowCreateModal(true);
+                }}
+                className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-[#D6A43B]/60 bg-[#D6A43B]/5 py-2 text-[11.5px] font-bold text-[#142B5F] dark:text-[#E5B54F] hover:bg-[#D6A43B]/10 cursor-pointer"
+              >
+                <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>+ إنشاء مجموعة جديدة</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-/** Matches the cards and gold-underlined 14px headers in ملخصي/فرصي/تعليمي. */
+/** Stretched edge-to-edge section matching ملخصي/فرصي/تعلمي. */
 function VaultSectionCard({
   title,
   icon,
@@ -4469,20 +4189,22 @@ function VaultSectionCard({
   return (
     <section
       aria-label={title}
-      className="mn-student-vault-section relative -mx-[2px] w-[calc(100%+4px)] rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-2xs mn-panel dark:border-white/10 sm:mx-0 sm:w-full sm:p-4"
+      className="mn-student-vault-section relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] bg-[var(--mn-surface)] px-3.5 py-3.5 shadow-2xs mn-panel dark:border-white/10 sm:px-5 sm:py-4 font-['Cairo',sans-serif]"
     >
-      <div className="mb-3 flex min-w-0 flex-wrap items-center justify-between gap-2">
+      <div className="mb-3 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--mn-border)] dark:border-white/10 pb-2">
         <div className="flex min-w-0 items-center gap-2">
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-[#D6A43B]/40 bg-[#142B5F] dark:bg-[#0c1a3b]">
             {icon}
           </span>
-          <h3 className="mn-student-vault-heading min-w-0 text-[14px] font-bold leading-[1.22] text-[var(--mn-heading)]">
+          <h3 className="min-w-0 text-[12.5px] sm:text-[13px] font-bold leading-snug text-[#1E293B] dark:text-[#F8FAFC]">
             {title}
           </h3>
         </div>
         <div className="flex min-w-0 items-center gap-2">
           {count && (
-            <span className="text-[11px] font-semibold text-[var(--mn-text-muted)]">{count}</span>
+            <span className="inline-flex shrink-0 items-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-2 py-0.5 text-[10.5px] font-semibold text-[#334155] dark:text-[#E2E8F0]">
+              {count}
+            </span>
           )}
           {action}
         </div>
@@ -4493,17 +4215,14 @@ function VaultSectionCard({
 }
 
 function StudentAvatarAssetPicker({ currentAssetId }: { currentAssetId: string | null }) {
-  const [assets, setAssets] = useState<
-    Array<{
-      id: string;
-      reference: string;
-      metadata?: { originalFilename?: string; mimeType?: string };
-    }>
-  >([]);
+  const [assets, setAssets] = useState<Array<{ id: string; reference: string; metadata?: { originalFilename?: string; mimeType?: string } }>>([]);
   const [selected, setSelected] = useState(currentAssetId ?? '');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadConsent, setUploadConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -4522,8 +4241,7 @@ function StudentAvatarAssetPicker({ currentAssetId }: { currentAssetId: string |
   useEffect(() => {
     let active = true;
     let cleanupUrl: string | null = null;
-    setPreviewUrl(null);
-    setError(null);
+    setPreviewUrl(null); setError(null);
 
     if (!selected) {
       setLoadingPreview(false);
@@ -4563,52 +4281,195 @@ function StudentAvatarAssetPicker({ currentAssetId }: { currentAssetId: string |
     };
   }, [selected]);
 
+  async function handleFileSelect(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file || uploading) return;
+    if (!uploadConsent) { setError('يرجى الموافقة على رفع الصورة أولاً'); return; }
+    if (!['image/png', 'image/jpeg'].includes(file.type) || file.size < 1 || file.size > 5 * 1024 * 1024) {
+      setError('اختر صورة PNG أو JPEG بحجم لا يتجاوز 5 ميغابايت'); return;
+    }
+    setUploading(true); setError(null);
+    try {
+      const upload = await ApiClient.requestMyDocumentUpload({ originalFilename: file.name, mimeType: file.type, byteSize: file.size, consent: true });
+      if (import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE !== 'prototype') {
+        const grant = upload.uploadGrant;
+        if (!grant) throw new Error('خدمة رفع الصور غير متاحة حالياً');
+        const target = new URL(grant.uploadUrl);
+        if (target.username || target.password || (target.protocol !== 'https:' && !(import.meta.env.DEV && target.protocol === 'http:' && ['localhost','127.0.0.1'].includes(target.hostname))) || !['PUT','POST'].includes(grant.method) || !Number.isFinite(Date.parse(grant.expiresAt)) || Date.parse(grant.expiresAt) <= Date.now()) throw new Error('رابط رفع الصورة غير صالح');
+        const response = await fetch(target, { method: grant.method, headers: grant.headers, body: file, credentials: 'omit', redirect: 'error' });
+        if (!response.ok) throw new Error('تعذر رفع الصورة؛ حاول مجدداً');
+      }
+      const result = await ApiClient.completeMyDocumentUpload(upload.assetId);
+      if (result.assetId !== upload.assetId || result.lifecycleState !== 'ACTIVE') throw new Error('الصورة قيد المعالجة؛ حاول مجدداً لاحقاً');
+      setAssets(prev => [{ id: upload.assetId, reference: upload.assetId, metadata: { originalFilename: file.name, mimeType: file.type } }, ...prev]);
+      setSelected(upload.assetId); setUploadConsent(false);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'تعذر رفع الصورة');
+    } finally {
+      setUploading(false); if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
+
   return (
-    <div className="space-y-3">
-      <label className="block text-xs font-bold text-[var(--mn-heading)]">
-        الصورة الشخصية (من الأصول الآمنة)
-      </label>
+    <div className="relative overflow-hidden p-3 rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] font-['Cairo',sans-serif] space-y-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <label className="block text-[11.5px] font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">
+          الصورة الشخصية (من الأصول الآمنة)
+        </label>
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-[#D6A43B]/60 bg-[#D6A43B]/10 hover:bg-[#D6A43B]/20 text-[#8C600B] dark:text-[#E0B244] px-2.5 py-1 text-[11px] font-bold transition-colors cursor-pointer disabled:opacity-50 font-['Cairo',sans-serif]"
+          title="رفع أو إضافة صورة شخصية جديدة من جهازك"
+        >
+          {uploading ? (
+            <>
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              <span>جارٍ الرفع…</span>
+            </>
+          ) : (
+            <>
+              <Camera className="w-3.5 h-3.5" />
+              <span>إضافة صورة جديدة</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      <label className="flex items-center gap-2 text-xs my-2"><input type="checkbox" checked={uploadConsent} onChange={event => setUploadConsent(event.target.checked)} />أوافق على رفع صورتي وحفظها في ملفي الشخصي</label>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg"
+        className="hidden"
+        onChange={handleFileSelect}
+      />
+
       <div className="flex items-center gap-3">
-        <div className="relative w-14 h-14 rounded-2xl bg-[#142B5F] border-2 border-[#B38018]/50 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          title="انقر لتغيير أو إضافة صورة شخصية"
+          className="group relative w-12 h-12 rounded-xl bg-[#142B5F] border-2 border-[#D6A43B]/60 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs cursor-pointer"
+        >
           {previewUrl ? (
             <img src={previewUrl} alt="معاينة الصورة" className="w-full h-full object-cover" />
           ) : (
-            <User className="w-7 h-7 text-[#E0B244]" />
+            <User className="w-6 h-6 text-[#E5B54F]" />
           )}
-          {loadingPreview && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <RefreshCw className="w-4 h-4 text-white animate-spin" />
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+            <Camera className="w-4 h-4 text-white" />
+          </div>
+          {(loadingPreview || uploading) && (
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+              <RefreshCw className="w-3.5 h-3.5 text-white animate-spin" />
             </div>
           )}
-        </div>
+        </button>
+
         <div className="flex-1 min-w-0">
           <select
             name="avatarAssetId"
             value={selected}
             onChange={(event) => setSelected(event.target.value)}
-            className="w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 text-xs sm:text-sm font-medium text-[var(--mn-text)] outline-none focus:border-[#B38018] focus:ring-2 focus:ring-[#B38018]/20 transition-all"
+            className="w-full rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] px-3 py-1.5 text-[12px] font-medium text-[var(--mn-text)] outline-none focus:border-[#D6A43B] focus:ring-2 focus:ring-[#D6A43B]/20 transition-all font-['Cairo',sans-serif]"
           >
             <option value="">بدون صورة رمزية (الأيقونة الافتراضية)</option>
-            {selected && !assets.some((asset) => asset.id === selected) && (
-              <option value={selected}>الصورة الحالية</option>
-            )}
+            {selected && !assets.some(asset => asset.id === selected) && <option value={selected}>الصورة المحددة</option>}
             {assets.map((asset) => (
               <option key={asset.id} value={asset.id}>
-                {asset.metadata?.originalFilename ||
-                  asset.reference ||
-                  `صورة (${asset.id.slice(0, 8)})`}
+                {asset.metadata?.originalFilename || asset.reference || `صورة (${asset.id.slice(0, 8)})`}
               </option>
             ))}
           </select>
-          <p className="mt-1 text-[11px] text-[var(--mn-text-muted)]">
+          <p className="mt-1 text-[11px] text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">
             تُجلب الصور المعتمدة حصرياً من أصول ملفك الآمنة في المنصة.
           </p>
         </div>
       </div>
-      {error && <span className="block text-xs text-rose-500">{error}</span>}
+      {error && <span className="block text-[11px] text-rose-500 font-['Cairo',sans-serif]">{error}</span>}
     </div>
   );
 }
+
+function ProfileSectionCard({
+  title,
+  icon,
+  subtitle,
+  action,
+  children,
+  className = '',
+}: {
+  title: string;
+  icon: React.ReactNode;
+  subtitle?: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section
+      aria-label={title}
+      className={`relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] px-3.5 py-3.5 sm:px-5 sm:py-4 shadow-2xs mn-panel font-['Cairo',sans-serif] ${className}`}
+    >
+      <div className="mb-3 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--mn-border)] dark:border-white/10 pb-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-[#D6A43B]/40 bg-[#142B5F] dark:bg-[#0c1a3b]">
+            {icon}
+          </span>
+          <div className="min-w-0">
+            <h3 className="min-w-0 text-[12.5px] sm:text-[13px] font-bold leading-snug text-[#1E293B] dark:text-[#F8FAFC] font-['Cairo',sans-serif]">
+              {title}
+            </h3>
+            {subtitle && (
+              <p className="mt-0.5 text-[10.5px] font-medium text-[var(--mn-text-muted)] break-words font-['Cairo',sans-serif]">
+                {subtitle}
+              </p>
+            )}
+          </div>
+        </div>
+        {action && <div className="flex items-center gap-2">{action}</div>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function ProfileToggle({
+  name,
+  label,
+  description,
+  defaultChecked,
+}: {
+  name: string;
+  label: string;
+  description?: string;
+  defaultChecked: boolean;
+}) {
+  return (
+    <label className="mn-student-profile-toggle group flex cursor-pointer items-center justify-between gap-2.5 rounded-lg border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-3 py-1.5 min-h-[36px] hover:border-[#D6A43B]/60 hover:bg-[var(--mn-surface-muted)] transition-all font-['Cairo',sans-serif]">
+      <div className="min-w-0 flex-1">
+        <span className="text-[12px] font-semibold text-[#1E293B] dark:text-[#F8FAFC] block leading-snug font-['Cairo',sans-serif]">
+          {label}
+        </span>
+        {description && (
+          <span className="mt-0.5 text-[10.5px] text-[var(--mn-text-muted)] block leading-tight font-['Cairo',sans-serif]">
+            {description}
+          </span>
+        )}
+      </div>
+      <input
+        type="checkbox"
+        name={name}
+        defaultChecked={defaultChecked}
+        className="h-4 w-4 rounded accent-[#142B5F] dark:accent-[#D6A43B] shrink-0 cursor-pointer"
+      />
+    </label>
+  );
+}
+
+type ProfileSubTab = 'ACADEMIC' | 'SETTINGS' | 'CALENDAR' | 'SUPPORT';
 
 function ProfileView({
   dashboard,
@@ -4624,20 +4485,16 @@ function ProfileView({
   onRestoreSnapshot,
   onResetLayout,
   onClearSearch,
-  onBack,
   onDirtyChange,
   dirty,
+  trackers = [],
+  requestedSubTab,
+  onClearRequestedSubTab,
 }: {
   onDirtyChange: (dirty: boolean) => void;
   dirty: boolean;
   dashboard: StudentDashboardSummaryDto;
-  identity: {
-    principalId: string;
-    displayName: string;
-    primaryEmail?: string;
-    roles?: string[];
-    roleNames?: string[];
-  } | null;
+  identity: { principalId: string; displayName: string; primaryEmail?: string; roles?: string[]; roleNames?: string[] } | null;
   onLogout: () => void;
   notifications: Record<string, boolean>;
   privacy: Record<string, boolean>;
@@ -4650,532 +4507,515 @@ function ProfileView({
   onResetLayout: () => void;
   onClearSearch: () => void;
   onBack?: () => void;
+  trackers?: StudentApplicationTrackerDto[];
+  requestedSubTab?: ProfileSubTab | null;
+  onClearRequestedSubTab?: () => void;
 }) {
-  const [searchClearConfirm, setSearchClearConfirm] = useState(false);
+  const [subTab, setSubTab] = useState<ProfileSubTab>(requestedSubTab || 'ACADEMIC');
+  const [showAdvancedBackups, setShowAdvancedBackups] = useState(false);
+
+  useEffect(() => {
+    if (requestedSubTab) {
+      setSubTab(requestedSubTab);
+      onClearRequestedSubTab?.();
+    }
+  }, [requestedSubTab, onClearRequestedSubTab]);
 
   function handleClearSearch() {
-    if (
-      window.confirm('هل أنت متأكد من مسح كامل سجل البحث الشخصي؟ لا يمكن التراجع عن هذا الإجراء.')
-    ) {
+    if (window.confirm('هل أنت متأكد من مسح كامل سجل البحث الشخصي؟ لا يمكن التراجع عن هذا الإجراء.')) {
       onClearSearch();
-      setSearchClearConfirm(false);
     }
   }
 
+  const profileSubTabs = [
+    { id: 'ACADEMIC' as const, label: 'ملفي الأكاديمي', icon: GraduationCap },
+    { id: 'SETTINGS' as const, label: 'الإعدادات والخصوصية', icon: Settings2 },
+    { id: 'CALENDAR' as const, label: 'التقويم والمهام', icon: CalendarClock },
+    { id: 'SUPPORT' as const, label: 'الدعم والمساعدة', icon: HelpCircle },
+  ];
+
   return (
-    <form onSubmit={onSave} onChange={() => onDirtyChange(true)} className="space-y-6">
-      <fieldset disabled={saving} className="space-y-6 min-w-0 border-0 p-0">
-        {dirty && (
-          <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
-            لديك تعديلات غير محفوظة.
-          </p>
-        )}
-        {/* Top Banner with Nile & Gold Identity */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#142B5F] via-[#1A387A] to-[#142B5F] p-4 sm:p-6 text-white shadow-md border border-[#B38018]/30">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5">
-              {onBack && (
-                <button
-                  type="button"
-                  onClick={onBack}
-                  className="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white shrink-0 transition-colors cursor-pointer"
-                  title="العودة إلى ملخصي"
-                >
-                  <ArrowLeft className="w-5 h-5 text-[#E5B54F]" />
-                </button>
-              )}
+    <div className="mn-student-profile-page mt-0 space-y-3.5 font-['Cairo',sans-serif]">
+      {/* Unified inline section header attached directly to the 8-tab bar above */}
+      <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] -mt-px">
+        <section
+          aria-label="إعداداتي وملفي الشخصي"
+          className="mn-student-profile-hero relative overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] shadow-2xs mn-panel font-['Cairo',sans-serif]"
+        >
+          {/* Selective Start-of-Box Accent Line (Navy) */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 right-0 w-[4px] z-10 bg-[#142B5F]"
+          />
+
+          <div className="px-3.5 py-3 pr-4 sm:px-5 sm:py-3.5 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/45 bg-[#142B5F]">
+                <User className="h-4 w-4 text-[#F2CD78]" aria-hidden="true" />
+              </span>
               <div>
-                <div className="flex items-center gap-2">
-                  <Settings2 className="w-5 h-5 text-[#E5B54F]" />
-                  <h1 className="text-lg sm:text-xl font-bold">ملفي وإعدادات الحساب</h1>
-                </div>
-                <p className="mt-1 text-xs sm:text-sm text-white/80 leading-relaxed">
-                  إدارة هويتك، تفضيلات العرض والتجربة، الإشعارات، والأمان والتزامن السحابي
+                <h2 className="mn-student-profile-heading text-[14px] sm:text-[15px] font-bold leading-tight text-[#1E293B] dark:text-[#F8FAFC] font-['Cairo',sans-serif]">
+                  إعداداتي وملفي الشخصي
+                </h2>
+                <p className="text-[10.5px] font-medium text-[#64748B] dark:text-[#94A3B8]">
+                  الملف الأكاديمي، تفضيلات الحساب، التقويم والدعم الفني
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] dark:border-white/15 px-2.5 py-1 text-[11px] font-semibold text-[#334155] dark:text-[#E2E8F0]">
+                <ShieldCheck className="h-3.5 w-3.5 text-[#0E7C86] dark:text-[#55CBC5]" aria-hidden="true" />
+                <span>{arabicStatus(dashboard.workspace.status)}</span>
+              </span>
+
               <button
                 type="button"
                 disabled={saving}
                 onClick={onLogout}
-                className="flex items-center gap-1.5 rounded-xl border border-rose-400/40 bg-rose-500/20 px-3.5 py-2 text-xs font-bold text-rose-100 hover:bg-rose-500/30 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-rose-300 dark:border-rose-900/40 bg-rose-50 dark:bg-rose-950/30 px-2.5 py-1 text-[11px] font-bold text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors cursor-pointer shrink-0 disabled:opacity-50"
                 title="تسجيل الخروج من الحساب"
               >
-                <LogOut className="w-4 h-4 text-rose-300" />
+                <LogOut className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" aria-hidden="true" />
                 <span>تسجيل الخروج</span>
               </button>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Section 1: بيانات الحساب والهوية */}
-          <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-5 sm:p-6 shadow-sm space-y-5">
-            <div className="flex items-center gap-2.5 pb-3 border-b border-[var(--mn-border)] dark:border-white/10">
-              <div className="w-8 h-8 rounded-lg bg-[#142B5F]/10 dark:bg-white/10 flex items-center justify-center text-[#142B5F] dark:text-[#E0B244]">
-                <User className="w-4 h-4" />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-[var(--mn-heading)]">بياناتي والهوية</h2>
-                <p className="text-xs text-[var(--mn-text-muted)]">
-                  معلومات الحساب المعتمدة في منصة منارتك
-                </p>
-              </div>
-            </div>
+        {/* Horizontal Swipe Sub-Tabs */}
+        <HorizontalSwipeTabs
+          ariaLabel="أقسام إعداداتي وملفي"
+          items={profileSubTabs}
+          activeId={subTab}
+          onChange={setSubTab}
+        />
+      </div>
 
-            <div className="space-y-4">
-              {/* Avatar Asset Picker */}
-              <StudentAvatarAssetPicker
-                currentAssetId={dashboard.workspace.avatarAssetId ?? null}
-              />
+      {/* Sub-Tab 3: CALENDAR (التقويم والمهام) */}
+      {subTab === 'CALENDAR' && <StudentCalendarTasksPanel trackers={trackers} />}
 
-              {/* Display Name - Editable */}
-              <div>
-                <label className="block text-xs font-bold text-[var(--mn-heading)] mb-1.5">
-                  الاسم الظاهر
-                </label>
-                <input
-                  name="displayName"
-                  defaultValue={dashboard.workspace.displayName || ''}
-                  maxLength={120}
-                  placeholder="أدخل اسمك الظاهر"
-                  className="w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--mn-text)] outline-none focus:border-[#B38018] focus:ring-2 focus:ring-[#B38018]/20 transition-all font-medium"
-                />
-                <p className="mt-1 text-[11px] text-[var(--mn-text-muted)]">
-                  الاسم الظاهر في مساحة حسابك؛ الشهادات الصادرة تحتفظ ببيانات إصدارها.
-                </p>
-              </div>
+      {/* Sub-Tab 4: SUPPORT (الدعم والمساعدة) */}
+      {subTab === 'SUPPORT' && <StudentSupportCenterPanel />}
 
-              {/* Email Address - Read only */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold text-[var(--mn-heading)]">
-                    البريد الإلكتروني الأساسي
-                  </label>
-                  <span className="text-[10px] font-semibold text-[var(--mn-text-muted)] bg-[var(--mn-surface-muted)] px-2 py-0.5 rounded-md flex items-center gap-1">
-                    <LockKeyhole className="w-3 h-3 text-[var(--mn-text-muted)]" /> للقراءة فقط
-                  </span>
-                </div>
-                <input
-                  type="text"
-                  readOnly
-                  disabled
-                  value={identity?.primaryEmail || 'غير مسجل'}
-                  className="w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-muted)] px-3.5 py-2.5 text-sm text-[var(--mn-text-muted)] font-mono cursor-not-allowed"
-                />
-              </div>
+      {/* Sub-Tab 1 & 2: ACADEMIC & SETTINGS (Keep form mounted so saving works from either view) */}
+      {subTab === 'ACADEMIC' && <AcademicProfileSummaryCard />}
 
-              {/* Role Status */}
-              <div className="pt-2">
-                <div className="p-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-muted)]/50 flex items-center justify-between">
-                  <div>
-                    <span className="text-[11px] font-semibold text-[var(--mn-text-muted)] block">
-                      حالة الحساب الأكاديمي
-                    </span>
-                    <span className="text-xs font-bold text-[#142B5F] dark:text-[#E0B244] mt-0.5 inline-flex items-center gap-1.5">
-                      <ShieldCheck className="w-3.5 h-3.5 text-[var(--mn-success-text)]" />
-                      {arabicStatus(dashboard.workspace.status)}
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-[var(--mn-text-muted)] bg-[var(--mn-page)] px-2 py-0.5 rounded-md border border-[var(--mn-border)]">
-                    حساب طالب
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+      <form
+        onSubmit={onSave}
+        onChange={() => onDirtyChange(true)}
+        className={subTab === 'ACADEMIC' || subTab === 'SETTINGS' ? "space-y-3.5 font-['Cairo',sans-serif]" : 'hidden'}
+      >
+        <fieldset disabled={saving} className="space-y-3.5 min-w-0 border-0 p-0">
+          {dirty && (
+            <p role="status" className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] rounded-none border-x-0 border-t border-b border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-4 py-2.5 text-[11.5px] font-bold text-amber-900 dark:text-amber-200 font-['Cairo',sans-serif]">
+              لديك تعديلات غير محفوظة، اضغط على زر الحفظ بالأسفل لتطبيقها سحابياً.
+            </p>
+          )}
 
-          {/* Section 2: تفضيلات التجربة والعرض */}
-          <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-5 sm:p-6 shadow-sm space-y-5">
-            <div className="flex items-center gap-2.5 pb-3 border-b border-[var(--mn-border)] dark:border-white/10">
-              <div className="w-8 h-8 rounded-lg bg-[#142B5F]/10 dark:bg-white/10 flex items-center justify-center text-[#142B5F] dark:text-[#E0B244]">
-                <Sparkles className="w-4 h-4" />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-[var(--mn-heading)]">
-                  تفضيلات التجربة والعرض
-                </h2>
-                <p className="text-xs text-[var(--mn-text-muted)]">تخصيص اللغة والمظهر والوصول</p>
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="block text-xs font-bold text-[var(--mn-heading)] mb-1.5 flex items-center gap-1.5">
-                  <Languages className="w-3.5 h-3.5 text-[#B38018]" />
-                  اللغة المفضلة
-                </label>
-                <select
-                  name="preferredLanguage"
-                  defaultValue={dashboard.workspace.preferredLanguage || 'ar'}
-                  className="w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-elevated)] px-3 py-2.5 text-xs sm:text-sm text-[var(--mn-text)] font-medium outline-none focus:border-[#B38018] focus:ring-2 focus:ring-[#B38018]/20"
-                >
-                  <option value="ar">العربية (الافتراضية)</option>
-                  <option value="en">English (الإنجليزية)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[var(--mn-heading)] mb-1.5 flex items-center gap-1.5">
-                  <Clock3 className="w-3.5 h-3.5 text-[#B38018]" />
-                  المنطقة الزمنية
-                </label>
-                <select
-                  name="timezone"
-                  defaultValue={dashboard.workspace.timezone || 'Asia/Aden'}
-                  className="w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-elevated)] px-3 py-2.5 text-xs sm:text-sm text-[var(--mn-text)] font-medium outline-none focus:border-[#B38018] focus:ring-2 focus:ring-[#B38018]/20"
-                >
-                  {dashboard.workspace.timezone &&
-                    !['Asia/Aden', 'Asia/Riyadh', 'Asia/Dubai', 'Africa/Cairo', 'UTC'].includes(
-                      dashboard.workspace.timezone,
-                    ) && (
-                      <option value={dashboard.workspace.timezone}>
-                        {dashboard.workspace.timezone}
-                      </option>
-                    )}
-                  <option value="Asia/Aden">عدن (GMT+3)</option>
-                  <option value="Asia/Riyadh">الرياض (GMT+3)</option>
-                  <option value="Asia/Dubai">دبي (GMT+4)</option>
-                  <option value="Africa/Cairo">القاهرة (حسب التوقيت المحلي)</option>
-                  <option value="UTC">التوقيت العالمي الموحد (UTC)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[var(--mn-heading)] mb-1.5 flex items-center gap-1.5">
-                  <Moon className="w-3.5 h-3.5 text-[#B38018]" />
-                  المظهر العام
-                </label>
-                <select
-                  name="theme"
-                  defaultValue={dashboard.workspace.theme || 'SYSTEM'}
-                  className="w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-elevated)] px-3 py-2.5 text-xs sm:text-sm text-[var(--mn-text)] font-medium outline-none focus:border-[#B38018] focus:ring-2 focus:ring-[#B38018]/20"
-                >
-                  <option value="SYSTEM">تلقائي (حسب نظام الجهاز)</option>
-                  <option value="LIGHT">المظهر الفاتح</option>
-                  <option value="DARK">المظهر الداكن</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[var(--mn-heading)] mb-1.5 flex items-center gap-1.5">
-                  <Settings2 className="w-3.5 h-3.5 text-[#B38018]" />
-                  حجم خط الواجهة
-                </label>
-                <select
-                  name="textScale"
-                  defaultValue={String(accessibility.textScale || 'DEFAULT')}
-                  className="w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-elevated)] px-3 py-2.5 text-xs sm:text-sm text-[var(--mn-text)] font-medium outline-none focus:border-[#B38018] focus:ring-2 focus:ring-[#B38018]/20"
-                >
-                  <option value="SMALL">خط صغير (Compact)</option>
-                  <option value="DEFAULT">الافتراضي (Standard)</option>
-                  <option value="LARGE">خط كبير (Large)</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Accessibility Toggles */}
-            <div className="pt-2 border-t border-[var(--mn-border)] dark:border-white/10 space-y-2.5">
-              <span className="text-xs font-bold text-[var(--mn-heading)] block mb-2">
-                إمكانية الوصول والراحة
-              </span>
-              <div className="grid gap-2.5 sm:grid-cols-2">
-                <Toggle
-                  name="reduceMotion"
-                  label="تقليل الحركة والتأثيرات"
-                  defaultChecked={Boolean(accessibility.reduceMotion)}
-                />
-                <Toggle
-                  name="highContrast"
-                  label="وضع التباين المرتفع"
-                  defaultChecked={Boolean(accessibility.highContrast)}
-                />
-              </div>
-            </div>
-
-            <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-[11.5px] text-amber-900 dark:text-amber-200 flex items-start gap-2">
-              <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              <span>
-                تُحفظ جميع التفضيلات سحابياً في حسابك وتُطبّق على الفور عبر جميع أجهزتك المتصلة.
-              </span>
-            </div>
-          </div>
-
-          {/* Section 3: إعدادات الإشعارات */}
-          <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-5 sm:p-6 shadow-sm space-y-5">
-            <div className="flex items-center gap-2.5 pb-3 border-b border-[var(--mn-border)] dark:border-white/10">
-              <div className="w-8 h-8 rounded-lg bg-[#142B5F]/10 dark:bg-white/10 flex items-center justify-center text-[#142B5F] dark:text-[#E0B244]">
-                <Bell className="w-4 h-4" />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-[var(--mn-heading)]">إعدادات الإشعارات</h2>
-                <p className="text-xs text-[var(--mn-text-muted)]">
-                  اختر القنوات والفئات التي تهمك
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <span className="text-xs font-bold text-[var(--mn-heading)] block mb-2.5">
-                قنوات الاستقبال
-              </span>
-              <div className="grid gap-2 sm:grid-cols-3">
-                <Toggle
-                  name="notifyInApp"
-                  label="داخل المنصة"
-                  defaultChecked={notifications.inApp ?? true}
-                />
-                <Toggle
-                  name="notifyEmail"
-                  label="البريد الإلكتروني"
-                  defaultChecked={notifications.email ?? true}
-                />
-                <Toggle
-                  name="notifyPush"
-                  label="الإشعارات الفورية"
-                  defaultChecked={notifications.push ?? false}
-                />
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-[var(--mn-border)] dark:border-white/10">
-              <span className="text-xs font-bold text-[var(--mn-heading)] block mb-2.5">
-                فئات التنبيهات
-              </span>
-              <div className="grid gap-2 sm:grid-cols-2">
-                <Toggle
-                  name="notifyLearning"
-                  label="تحديثات التعلم والدورات"
-                  defaultChecked={notifications.learning ?? true}
-                />
-                <Toggle
-                  name="notifyCertificates"
-                  label="إصدار الشهادات والاعتمادات"
-                  defaultChecked={notifications.certificates ?? true}
-                />
-                <Toggle
-                  name="notifyScholarships"
-                  label="المنح ومواعيد التقديم"
-                  defaultChecked={notifications.scholarships ?? true}
-                />
-                <Toggle
-                  name="notifyPayments"
-                  label="الفواتير وسجلات الدفع والطلبات"
-                  defaultChecked={notifications.payments ?? true}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Section 4: مركز الخصوصية والبيانات */}
-          <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-5 sm:p-6 shadow-sm space-y-5">
-            <div className="flex items-center gap-2.5 pb-3 border-b border-[var(--mn-border)] dark:border-white/10">
-              <div className="w-8 h-8 rounded-lg bg-[#142B5F]/10 dark:bg-white/10 flex items-center justify-center text-[#142B5F] dark:text-[#E0B244]">
-                <Shield className="w-4 h-4" />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-[var(--mn-heading)]">
-                  الخصوصية وسجل البحث
-                </h2>
-                <p className="text-xs text-[var(--mn-text-muted)]">
-                  إدارة خصوصية البحث والتوصيات ومسح البيانات المحفوظة
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-2.5">
-              <span className="text-xs font-bold text-[var(--mn-heading)] block">
-                خيارات الخصوصية والبيانات
-              </span>
-              <Toggle
-                name="retainSearchHistory"
-                label="الاحتفاظ بسجل البحث الشخصي"
-                defaultChecked={privacy.retainSearchHistory ?? false}
-              />
-              <Toggle
-                name="allowPersonalization"
-                label="السماح بتخصيص التوصيات الذكية"
-                defaultChecked={privacy.allowPersonalization ?? false}
-              />
-              <Toggle
-                name="allowProductAnalytics"
-                label="المساهمة في تحليلات تحسين أداء المنصة"
-                defaultChecked={privacy.allowProductAnalytics ?? false}
-              />
-            </div>
-
-            <div className="pt-2 border-t border-[var(--mn-border)] dark:border-white/10 flex items-center justify-between gap-3">
-              <div>
-                <span className="text-xs font-bold text-[var(--mn-heading)] block">
-                  مسح سجل البحث
-                </span>
-                <span className="text-[11px] text-[var(--mn-text-muted)]">
-                  حذف عمليات البحث المحفوظة من حسابك فوراً.
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={handleClearSearch}
-                disabled={saving}
-                className="rounded-xl border border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/30 px-3.5 py-2 text-xs font-bold text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
+          <div className="space-y-3.5">
+            {/* Section 1: بياناتي والهوية (Shown in ACADEMIC sub-tab) */}
+            <div className={subTab === 'ACADEMIC' ? 'block' : 'hidden'}>
+              <ProfileSectionCard
+                title="بياناتي والهوية"
+                icon={<User className="w-4 h-4 text-[#F2CD78]" />}
+                subtitle="معلومات الحساب المعتمدة في منصة منارتك"
               >
-                مسح السجل الآن
-              </button>
-            </div>
-          </div>
+                <div className="space-y-3">
+                  <StudentAvatarAssetPicker currentAssetId={dashboard.workspace.avatarAssetId ?? null} />
 
-          {/* Section 5: إعدادات متقدمة ومعلومات النظام */}
-          <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-5 sm:p-6 shadow-sm space-y-5 lg:col-span-2">
-            <div className="flex items-center gap-2.5 pb-3 border-b border-[var(--mn-border)] dark:border-white/10">
-              <div className="w-8 h-8 rounded-lg bg-[#142B5F]/10 dark:bg-white/10 flex items-center justify-center text-[#142B5F] dark:text-[#E0B244]">
-                <Settings2 className="w-4 h-4" />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-[var(--mn-heading)]">
-                  إعدادات متقدمة ومعلومات النظام
-                </h2>
-                <p className="text-xs text-[var(--mn-text-muted)]">
-                  معرّفات تقنية داخلية، تفاصيل التزامن السحابي، وإدارة نسخ مساحة العمل
-                </p>
-              </div>
-            </div>
+                  <div>
+                    <label className="block text-[11.5px] font-bold text-[var(--mn-heading)] mb-1 font-['Cairo',sans-serif]">
+                      الاسم الظاهر
+                    </label>
+                    <input
+                      name="displayName"
+                      defaultValue={dashboard.workspace.displayName || ''}
+                      maxLength={120}
+                      placeholder="أدخل اسمك الظاهر"
+                      className="w-full rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface-elevated)] px-3 py-2 text-[12px] font-medium text-[var(--mn-text)] outline-none focus:border-[#0E7C86] transition-all font-['Cairo',sans-serif]"
+                    />
+                  </div>
 
-            {/* Internal Identifiers & Technical Sync Details */}
-            <div className="grid gap-3 sm:grid-cols-2 text-xs">
-              <div className="p-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-muted)]/50">
-                <span className="text-[10.5px] font-semibold text-[var(--mn-text-muted)] block">
-                  معرّف النظام الداخلي (Principal ID)
-                </span>
-                <span
-                  className="text-[11px] font-mono text-[var(--mn-heading)] mt-1 block truncate select-all"
-                  title={identity?.principalId}
-                >
-                  {identity?.principalId || '—'}
-                </span>
-                <span className="text-[10px] text-[var(--mn-text-muted)] mt-0.5 block">
-                  معرّف تقني فريد يُستخدم في ربط الخدمات وإدارتها
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-muted)]/50">
-                <span className="text-[10.5px] font-semibold text-[var(--mn-text-muted)] block">
-                  إصدار تكوين مساحة العمل
-                </span>
-                <span className="text-xs font-bold text-[var(--mn-heading)] mt-1 inline-flex items-center gap-1.5 font-mono">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[var(--mn-success-text)]" />
-                  الإصدار #{dashboard.workspace.version}
-                </span>
-                <span className="text-[10px] text-[var(--mn-text-muted)] mt-0.5 block">
-                  آخر مزامنة سحابية: {formatDate(dashboard.workspace.updatedAt)}
-                </span>
-              </div>
-            </div>
-
-            {/* Workspace Snapshot & Layout Management */}
-            <div className="pt-2 border-t border-[var(--mn-border)] dark:border-white/10 space-y-3">
-              <span className="text-xs font-bold text-[var(--mn-heading)] block">
-                النسخ الاحتياطية وإعادة التعيين
-              </span>
-              <div className="grid grid-cols-2 gap-2.5">
-                <button
-                  type="button"
-                  onClick={onSnapshot}
-                  disabled={saving}
-                  className="rounded-xl border border-[#B38018]/40 bg-[#B38018]/10 hover:bg-[#B38018]/20 px-3 py-2 text-xs font-bold text-[#8C600B] dark:text-[#E0B244] transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <Save className="w-3.5 h-3.5" />
-                  <span>حفظ نسخة إعدادات</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={onResetLayout}
-                  disabled={saving}
-                  className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-elevated)] hover:bg-[var(--mn-surface-muted)] px-3 py-2 text-xs font-semibold text-[var(--mn-text)] transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>استعادة التخطيط</span>
-                </button>
-              </div>
-
-              {/* Snapshots List */}
-              {snapshots.length > 0 && (
-                <div className="space-y-1.5 pt-1">
-                  <span className="text-[11px] font-bold text-[var(--mn-text-muted)] block">
-                    النسخ الاحتياطية المسجلة:
-                  </span>
-                  <div className="space-y-1.5 max-h-36 overflow-y-auto">
-                    {snapshots.slice(0, 4).map((snapshot) => (
-                      <div
-                        key={snapshot.id}
-                        className="flex items-center justify-between p-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-muted)] text-xs"
-                      >
-                        <div className="min-w-0 pr-1">
-                          <span className="font-semibold text-[var(--mn-heading)] block truncate">
-                            {snapshot.label || 'نسخة إعدادات مساحة العمل'}
-                          </span>
-                          <span className="text-[10px] text-[var(--mn-text-muted)]">
-                            {formatDate(snapshot.createdAt)}
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => onRestoreSnapshot(snapshot.id)}
-                          disabled={saving}
-                          className="rounded-lg bg-[var(--mn-surface)] hover:bg-[#B38018] hover:text-white border border-[var(--mn-border)] px-2.5 py-1 text-[11px] font-bold text-[var(--mn-primary)] transition-colors cursor-pointer shrink-0 disabled:opacity-50"
-                        >
-                          استعادة
-                        </button>
-                      </div>
-                    ))}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11.5px] font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">
+                        البريد الإلكتروني الأساسي
+                      </label>
+                      <span className="text-[10px] font-semibold text-[var(--mn-text-muted)] bg-[var(--mn-page)] px-2 py-0.5 rounded-md flex items-center gap-1 border border-[var(--mn-border)] dark:border-white/10">
+                        <LockKeyhole className="w-3 h-3 text-[var(--mn-text-muted)]" /> للقراءة فقط
+                      </span>
+                    </div>
+                    <input
+                      type="text"
+                      readOnly
+                      disabled
+                      value={identity?.primaryEmail || 'غير مسجل'}
+                      className="w-full rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] px-3 py-2 text-[12px] text-[var(--mn-text-muted)] font-mono cursor-not-allowed"
+                    />
                   </div>
                 </div>
-              )}
+              </ProfileSectionCard>
             </div>
-          </div>
-        </div>
 
-        {/* End-of-form save section: scrolls naturally, never floats above profile settings. */}
-        <div className="relative mt-5 mb-6 rounded-2xl bg-[#142B5F] text-white p-4 shadow-xl border-2 border-[#B38018]/60 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 text-center sm:text-right">
-            <ShieldCheck className="w-5 h-5 text-[#E5B54F] shrink-0 hidden sm:block" />
-            <div>
-              <p className="text-xs sm:text-sm font-bold text-white">
-                هل أجريت تغييرات على ملفك وإعداداتك؟
-              </p>
-              <p className="text-[11px] text-white/70">
-                اضغط على الزر لحفظ وتطبيق كافة التفضيلات سحابياً فوراً.
-              </p>
+            {/* Sections 2, 3, 4, 5: Shown in SETTINGS sub-tab */}
+            <div className={subTab === 'SETTINGS' ? 'space-y-3.5' : 'hidden'}>
+              {/* Section 2: تفضيلات التجربة والعرض */}
+              <ProfileSectionCard
+                title="تفضيلات التجربة والعرض"
+                icon={<Sparkles className="w-4 h-4 text-[#E5B54F]" />}
+                subtitle="تخصيص اللغة والمظهر والوصول"
+              >
+                <div className="space-y-3">
+                  <div className="grid gap-2.5 sm:grid-cols-2">
+                    <div>
+                      <label className="block text-[11.5px] font-bold text-[var(--mn-heading)] mb-1 flex items-center gap-1.5 font-['Cairo',sans-serif]">
+                        <Languages className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#F2CD78]" />
+                        اللغة المفضلة
+                      </label>
+                      <select
+                        name="preferredLanguage"
+                        defaultValue={dashboard.workspace.preferredLanguage || 'ar'}
+                        className="w-full rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface-elevated)] px-3 py-2 text-[12px] text-[var(--mn-text)] font-medium outline-none focus:border-[#0E7C86] font-['Cairo',sans-serif]"
+                      >
+                        <option value="ar">العربية (الافتراضية)</option>
+                        <option value="en">English (الإنجليزية)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11.5px] font-bold text-[var(--mn-heading)] mb-1 flex items-center gap-1.5 font-['Cairo',sans-serif]">
+                        <Clock3 className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#F2CD78]" />
+                        المنطقة الزمنية
+                      </label>
+                      <select
+                        name="timezone"
+                        defaultValue={dashboard.workspace.timezone || 'Asia/Aden'}
+                        className="w-full rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface-elevated)] px-3 py-2 text-[12px] text-[var(--mn-text)] font-medium outline-none focus:border-[#0E7C86] font-['Cairo',sans-serif]"
+                      >
+                        {dashboard.workspace.timezone && !['Asia/Aden','Asia/Riyadh','Asia/Dubai','Africa/Cairo','UTC'].includes(dashboard.workspace.timezone) && <option value={dashboard.workspace.timezone}>{dashboard.workspace.timezone}</option>}
+                        <option value="Asia/Aden">عدن (GMT+3)</option>
+                        <option value="Asia/Riyadh">الرياض (GMT+3)</option>
+                        <option value="Asia/Dubai">دبي (GMT+4)</option>
+                        <option value="Africa/Cairo">القاهرة (حسب التوقيت المحلي)</option>
+                        <option value="UTC">التوقيت العالمي الموحد (UTC)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11.5px] font-bold text-[var(--mn-heading)] mb-1 flex items-center gap-1.5 font-['Cairo',sans-serif]">
+                        <Moon className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#F2CD78]" />
+                        المظهر العام
+                      </label>
+                      <select
+                        name="theme"
+                        defaultValue={dashboard.workspace.theme || 'SYSTEM'}
+                        className="w-full rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface-elevated)] px-3 py-2 text-[12px] text-[var(--mn-text)] font-medium outline-none focus:border-[#0E7C86] font-['Cairo',sans-serif]"
+                      >
+                        <option value="SYSTEM">تلقائي (حسب نظام الجهاز)</option>
+                        <option value="LIGHT">المظهر الفاتح</option>
+                        <option value="DARK">المظهر الداكن</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11.5px] font-bold text-[var(--mn-heading)] mb-1 flex items-center gap-1.5 font-['Cairo',sans-serif]">
+                        <Settings2 className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#F2CD78]" />
+                        حجم خط الواجهة
+                      </label>
+                      <select
+                        name="textScale"
+                        defaultValue={String(accessibility.textScale || 'DEFAULT')}
+                        className="w-full rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface-elevated)] px-3 py-2 text-[12px] text-[var(--mn-text)] font-medium outline-none focus:border-[#0E7C86] font-['Cairo',sans-serif]"
+                      >
+                        <option value="SMALL">خط صغير (Compact)</option>
+                        <option value="DEFAULT">الافتراضي (Standard)</option>
+                        <option value="LARGE">خط كبير (Large)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-[var(--mn-border)] dark:border-white/10 space-y-2">
+                    <span className="text-[11.5px] font-bold text-[var(--mn-heading)] block font-['Cairo',sans-serif]">إمكانية الوصول والراحة</span>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <ProfileToggle
+                        name="reduceMotion"
+                        label="تقليل الحركة والتأثيرات"
+                        defaultChecked={Boolean(accessibility.reduceMotion)}
+                      />
+                      <ProfileToggle
+                        name="highContrast"
+                        label="وضع التباين المرتفع"
+                        defaultChecked={Boolean(accessibility.highContrast)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </ProfileSectionCard>
+
+              {/* Section 3: إعدادات الإشعارات والتنبيهات */}
+              <ProfileSectionCard
+                title="إعدادات الإشعارات والتنبيهات"
+                icon={<Bell className="w-4 h-4 text-[#E5B54F]" />}
+                subtitle="اختر القنوات والفئات التي تهمك"
+              >
+                <div className="space-y-3 font-['Cairo',sans-serif]">
+                  <div>
+                    <span className="text-[11.5px] font-bold text-[var(--mn-heading)] block mb-1.5 font-['Cairo',sans-serif]">قنوات الاستقبال</span>
+                    <div className="grid gap-2 grid-cols-1 sm:grid-cols-3">
+                      <ProfileToggle
+                        name="notifyInApp"
+                        label="داخل المنصة"
+                        defaultChecked={notifications.inApp ?? true}
+                      />
+                      <ProfileToggle
+                        name="notifyEmail"
+                        label="البريد الإلكتروني"
+                        defaultChecked={notifications.email ?? true}
+                      />
+                      <ProfileToggle
+                        name="notifyPush"
+                        label="الإشعارات الفورية"
+                        defaultChecked={notifications.push ?? false}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-[var(--mn-border)] dark:border-white/10">
+                    <span className="text-[11.5px] font-bold text-[var(--mn-heading)] block mb-1.5 font-['Cairo',sans-serif]">فئات التنبيهات</span>
+                    <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
+                      <ProfileToggle
+                        name="notifyLearning"
+                        label="تحديثات التعلم والدورات"
+                        defaultChecked={notifications.learning ?? true}
+                      />
+                      <ProfileToggle
+                        name="notifyCertificates"
+                        label="إصدار الشهادات والاعتمادات"
+                        defaultChecked={notifications.certificates ?? true}
+                      />
+                      <ProfileToggle
+                        name="notifyScholarships"
+                        label="المنح ومواعيد التقديم"
+                        defaultChecked={notifications.scholarships ?? true}
+                      />
+                      <ProfileToggle
+                        name="notifyPayments"
+                        label="الفواتير والطلبات المالية"
+                        defaultChecked={notifications.payments ?? true}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </ProfileSectionCard>
+
+              {/* Section 4: مركز الخصوصية وسجل البحث */}
+              <ProfileSectionCard
+                title="الخصوصية وسجل البحث"
+                icon={<Shield className="w-4 h-4 text-[#E5B54F]" />}
+                subtitle="إدارة خصوصية البحث والتوصيات"
+              >
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <ProfileToggle
+                      name="retainSearchHistory"
+                      label="الاحتفاظ بسجل البحث الشخصي"
+                      defaultChecked={privacy.retainSearchHistory ?? false}
+                    />
+                    <ProfileToggle
+                      name="allowPersonalization"
+                      label="السماح بتخصيص التوصيات الذكية"
+                      defaultChecked={privacy.allowPersonalization ?? false}
+                    />
+                    <ProfileToggle
+                      name="allowProductAnalytics"
+                      label="المساهمة في تحسين أداء المنصة"
+                      defaultChecked={privacy.allowProductAnalytics ?? false}
+                    />
+                  </div>
+
+                  <div className="p-2.5 rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] flex items-center justify-between gap-3 font-['Cairo',sans-serif]">
+                    <div>
+                      <span className="text-[11.5px] font-bold text-[var(--mn-heading)] block">مسح سجل البحث</span>
+                      <span className="text-[10.5px] text-[var(--mn-text-muted)]">حذف عمليات البحث المحفوظة فوراً.</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleClearSearch}
+                      disabled={saving}
+                      className="rounded-lg border border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/30 px-3 py-1.5 text-[11px] font-bold text-rose-700 dark:text-rose-300 hover:bg-rose-100 transition-colors shrink-0 disabled:opacity-50 cursor-pointer font-['Cairo',sans-serif]"
+                    >
+                      مسح السجل الآن
+                    </button>
+                  </div>
+                </div>
+              </ProfileSectionCard>
+
+              {/* Section 5: Collapsible Advanced Settings & Backups */}
+              <ProfileSectionCard
+                title="إعدادات متقدمة والنسخ الاحتياطية"
+                icon={<Settings2 className="w-3.5 h-3.5 text-[#E5B54F]" />}
+                action={
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvancedBackups((prev) => !prev)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 py-1 text-[10.5px] font-bold text-[#142B5F] dark:text-[#F8FAFC] cursor-pointer"
+                  >
+                    <span>{showAdvancedBackups ? 'إخفاء' : 'عرض الخيارات'}</span>
+                    {showAdvancedBackups ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                  </button>
+                }
+              >
+                {showAdvancedBackups ? (
+                  <div className="space-y-3 font-['Cairo',sans-serif]">
+                    <div className="grid gap-2.5 sm:grid-cols-2 text-xs">
+                      <div className="p-2.5 rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)]">
+                        <span className="text-[10px] font-semibold text-[var(--mn-text-muted)] block">معرّف النظام الداخلي</span>
+                        <span className="text-[11px] font-mono text-[var(--mn-heading)] mt-0.5 block truncate select-all">
+                          {identity?.principalId || '—'}
+                        </span>
+                      </div>
+
+                      <div className="p-2.5 rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)]">
+                        <span className="text-[10px] font-semibold text-[var(--mn-text-muted)] block">إصدار مساحة العمل</span>
+                        <span className="text-[11px] font-bold text-[var(--mn-heading)] mt-0.5 inline-flex items-center gap-1.5 font-mono">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[var(--mn-success-text)]" />
+                          الإصدار #{dashboard.workspace.version}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={onSnapshot}
+                        disabled={saving}
+                        className="rounded-xl border border-[#D6A43B]/40 bg-[#D6A43B]/10 hover:bg-[#D6A43B]/20 px-3 py-2 text-[11.5px] font-bold text-[#8C600B] dark:text-[#E0B244] transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <Save className="w-3.5 h-3.5" />
+                        <span>حفظ نسخة إعدادات</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={onResetLayout}
+                        disabled={saving}
+                        className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface-elevated)] hover:bg-[var(--mn-surface-muted)] px-3 py-2 text-[11.5px] font-bold text-[var(--mn-text)] transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>استعادة التخطيط</span>
+                      </button>
+                    </div>
+
+                    {snapshots.length > 0 && (
+                      <div className="space-y-1.5 pt-1">
+                        {snapshots.slice(0, 4).map((snapshot) => (
+                          <div
+                            key={snapshot.id}
+                            className="flex items-center justify-between p-2 rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] text-xs"
+                          >
+                            <div className="min-w-0 pr-1">
+                              <span className="font-bold text-[var(--mn-heading)] block truncate text-[11.5px]">
+                                {snapshot.label || 'نسخة إعدادات مساحة العمل'}
+                              </span>
+                              <span className="text-[10px] text-[var(--mn-text-muted)]">
+                                {formatDate(snapshot.createdAt)}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => onRestoreSnapshot(snapshot.id)}
+                              disabled={saving}
+                              className="rounded-lg bg-[var(--mn-surface)] hover:bg-[#142B5F] hover:text-white border border-[var(--mn-border)] px-2.5 py-1 text-[10.5px] font-bold text-[#142B5F] dark:text-[#E0B244] transition-colors cursor-pointer shrink-0 disabled:opacity-50"
+                            >
+                              استعادة
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8]">
+                    يتضمن النسخ الاحتياطية لإعدادات مساحة العمل واستعادة التخطيط الافتراضي.
+                  </p>
+                )}
+              </ProfileSectionCard>
             </div>
           </div>
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full sm:w-auto rounded-xl bg-gradient-to-r from-[#B38018] via-[#DDAA35] to-[#B38018] px-8 py-3 font-bold text-[#142B5F] shadow-md hover:brightness-110 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer text-sm"
-          >
-            {saving ? (
-              <>
-                <RefreshCw className="w-4 h-4 animate-spin text-[#142B5F]" />
-                <span>جارٍ حفظ التفضيلات…</span>
-              </>
-            ) : (
-              <>
-                <Check className="w-4 h-4 text-[#142B5F]" />
-                <span>حفظ جميع التعديلات</span>
-              </>
-            )}
-          </button>
-        </div>
-      </fieldset>
-    </form>
+
+          {/* End-of-form save bar stretched edge-to-edge */}
+          <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] px-3.5 py-3 sm:px-5 sm:py-3.5 shadow-2xs mn-panel flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 font-['Cairo',sans-serif]">
+            <div className="flex items-center gap-2 text-right">
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-[#D6A43B]/40 bg-[#142B5F]">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#F2CD78]" />
+              </span>
+              <p className="text-[11.5px] sm:text-[12px] font-bold text-[#1E293B] dark:text-[#F8FAFC]">
+                حفظ التعديلات ومزامنتها سحابياً عبر حسابك
+              </p>
+            </div>
+            <button
+              type="submit"
+              disabled={saving}
+              className="w-full sm:w-auto min-h-9 rounded-xl bg-[#142B5F] hover:bg-[#1a3675] border border-[#D6A43B]/45 px-4 py-1.5 text-[11.5px] font-bold text-white shadow-2xs active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer font-['Cairo',sans-serif]"
+            >
+              {saving ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#F2CD78]" />
+                  <span>جارٍ حفظ التفضيلات…</span>
+                </>
+              ) : (
+                <>
+                  <Check className="w-3.5 h-3.5 text-[#F2CD78]" />
+                  <span>حفظ جميع التعديلات</span>
+                </>
+              )}
+            </button>
+          </div>
+        </fieldset>
+      </form>
+    </div>
   );
 }
 
+function HeroMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-20 rounded-xl px-3 py-2 text-center">
+      <strong className="block text-xl">{value}</strong>
+      <span className="text-xs text-[var(--mn-on-dark-muted)]">{label}</span>
+    </div>
+  );
+}
 
-
-
+function StatCard({
+  icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  tone: 'success' | 'info' | 'warning' | 'accent';
+}) {
+  const styles: Record<typeof tone, string> = {
+    success: 'border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] text-[var(--mn-success-text)]',
+    info: 'border border-[var(--mn-info-border)] bg-[var(--mn-info-soft)] text-[var(--mn-info-text)]',
+    warning: 'border border-[var(--mn-warning-border)] bg-[var(--mn-warning-soft)] text-[var(--mn-warning-text)]',
+    accent: 'border border-[var(--mn-border-gold)] bg-[var(--mn-gold-surface)] text-[var(--mn-accent-text)]',
+  };
+  return (
+    <div className="mn-card rounded-3xl p-5">
+      <div
+        className={`mb-4 grid h-11 w-11 place-items-center rounded-2xl text-xl ${styles[tone]}`}
+      >
+        {icon}
+      </div>
+      <strong className="text-3xl font-bold text-[var(--mn-heading)]">{value}</strong>
+      <p className="mt-1 text-sm text-[var(--mn-text-muted)]">{label}</p>
+    </div>
+  );
+}
 
 function Panel({
   title,
@@ -5206,32 +5046,19 @@ function CourseCard({
 }) {
   return (
     <Link
-      to={
-        ['ACTIVE', 'COMPLETED', 'ENROLLED', 'IN_PROGRESS'].includes(course.status)
-          ? `../student/courses/${encodeURIComponent(course.courseId)}`
-          : `/courses/${encodeURIComponent(course.courseSlug || course.courseId)}`
-      }
+      to={['ACTIVE', 'COMPLETED', 'ENROLLED', 'IN_PROGRESS'].includes(course.status) ? `../student/courses/${encodeURIComponent(course.courseId)}` : `/courses/${encodeURIComponent(course.courseSlug || course.courseId)}`}
       className={`group block rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 hover:border-[var(--mn-border-gold)] hover:shadow-sm ${wide ? 'sm:p-5' : ''}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <span className="text-xs font-semibold text-[var(--mn-secondary)]">
-            {['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(course.status)
-              ? 'قيد التعلم'
-              : arabicStatus(course.status)}
+            {['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(course.status) ? 'قيد التعلم' : arabicStatus(course.status)}
           </span>
           <h3 className="mt-1 truncate font-bold">{course.courseName}</h3>
         </div>
-        <span className="text-sm font-bold text-[var(--mn-success-text)]">
-          {course.progressPercentage}%
-        </span>
+        <span className="text-sm font-bold text-[var(--mn-success-text)]">{course.progressPercentage}%</span>
       </div>
-      <progress
-        className="mn-native-progress mn-native-progress-secondary mt-4 h-2 w-full"
-        value={Math.min(100, Math.max(0, course.progressPercentage))}
-        max={100}
-        aria-label="تقدم الدورة"
-      />
+      <progress className="mn-native-progress mn-native-progress-secondary mt-4 h-2 w-full" value={Math.min(100, Math.max(0, course.progressPercentage))} max={100} aria-label="تقدم الدورة" />
       <div className="mt-3 flex justify-between text-xs text-[var(--mn-text-muted)]">
         <span>
           {course.lastAccessedAt
@@ -5255,12 +5082,8 @@ function ActivityList({ items }: { items: StudentDashboardSummaryDto['timeline']
           <span className="mt-1 h-3 w-3 shrink-0 rounded-full bg-[var(--mn-secondary)] ring-4 ring-[var(--mn-gold-surface)]" />
           <div>
             <h3 className="text-sm font-bold">{item.title}</h3>
-            {item.description && (
-              <p className="mt-1 text-sm text-[var(--mn-text-muted)]">{item.description}</p>
-            )}
-            <time className="mt-1 block text-xs text-[var(--mn-text-muted)]">
-              {formatDate(item.occurredAt)}
-            </time>
+            {item.description && <p className="mt-1 text-sm text-[var(--mn-text-muted)]">{item.description}</p>}
+            <time className="mt-1 block text-xs text-[var(--mn-text-muted)]">{formatDate(item.occurredAt)}</time>
           </div>
         </li>
       ))}
@@ -5279,12 +5102,7 @@ function ProgressRow({ label, value }: { label: string; value: number }) {
         <span className="font-bold text-[var(--mn-heading)]">{label}</span>
         <span className="shrink-0 font-medium text-[var(--mn-text-muted)]">{value}%</span>
       </div>
-      <progress
-        className="mn-native-progress mn-native-progress-secondary h-2 w-full"
-        value={Math.min(100, Math.max(0, value))}
-        max={100}
-        aria-label={label}
-      />
+      <progress className="mn-native-progress mn-native-progress-secondary h-2 w-full" value={Math.min(100, Math.max(0, value))} max={100} aria-label={label} />
     </div>
   );
 }
@@ -5303,39 +5121,40 @@ function InvoicePanel({
   const content = (
     <>
       {invoices.length ? (
-        <div className={compactSummary ? 'space-y-3.5' : 'space-y-3'}>
+        <div className={compactSummary ? 'space-y-2.5' : 'space-y-3'}>
           {invoices.map((invoice) => (
             <div
               key={invoice.id}
               className={
                 compactSummary
-                  ? 'rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-3 py-2.5'
+                  ? 'relative overflow-hidden rounded-xl border border-[var(--mn-border)]/80 dark:border-white/10 bg-[var(--mn-page)]/75 dark:bg-[var(--mn-surface-elevated)] px-3 py-2.5'
                   : 'rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4'
               }
             >
-              <div className="flex justify-between gap-3">
-                <div>
-                  <h3
-                    className={
-                      compactSummary
-                        ? 'text-xs sm:text-sm font-bold leading-5 text-[var(--mn-heading)] break-words'
-                        : 'font-bold'
-                    }
-                  >
-                    {invoice.invoiceNumber}
-                  </h3>
-                  <p
-                    className={
-                      compactSummary
-                        ? 'mt-0.5 text-[11px] sm:text-xs leading-5 text-[var(--mn-text-muted)]'
-                        : 'mt-1 text-sm text-[var(--mn-text-muted)]'
-                    }
-                  >
-                    المستحق {formatMoney(invoice.amountDue)}
-                  </p>
+              <div className="flex items-start justify-between gap-2.5">
+                <div className="flex min-w-0 items-center gap-1.5">
+                  {compactSummary && (
+                    <span className="w-4 h-4 rounded-[4px] bg-[#142B5F] text-white flex items-center justify-center shrink-0">
+                      <Receipt className="h-2.5 w-2.5 text-white" />
+                    </span>
+                  )}
+                  <div className="min-w-0">
+                    <h3 className={compactSummary ? 'text-[10.5px] font-bold leading-snug text-[#1E293B] dark:text-[#F8FAFC] break-words' : 'font-bold'}>
+                      {invoice.invoiceNumber}
+                    </h3>
+                    <p className={compactSummary ? 'mt-0.5 text-[9.5px] font-medium leading-snug text-[var(--mn-text-muted)]' : 'mt-1 text-sm text-[var(--mn-text-muted)]'}>
+                      المستحق {formatMoney(invoice.amountDue)}
+                    </p>
+                  </div>
                 </div>
                 <span
-                  className={`h-fit rounded-full ${compactSummary ? 'px-2 py-0.5 text-[10px] sm:text-[11px]' : 'px-3 py-1 text-xs'} font-bold font-['Cairo',sans-serif] ${invoice.status === 'PAID' ? 'border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] text-[var(--mn-success-text)]' : 'border border-[var(--mn-warning-border)] bg-[var(--mn-warning-soft)] text-[var(--mn-warning-text)]'}`}
+                  className={`h-fit shrink-0 rounded-md ${compactSummary ? 'px-2 py-0.5 text-[9.5px]' : 'px-3 py-1 text-xs'} font-bold font-['Cairo',sans-serif] ${
+                    invoice.status === 'PAID'
+                      ? 'border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] text-[var(--mn-success-text)]'
+                      : invoice.status === 'ISSUED'
+                        ? 'border border-[#142B5F] bg-[#142B5F] text-white'
+                        : 'border border-[var(--mn-warning-border)] bg-[var(--mn-warning-soft)] text-[var(--mn-warning-text)]'
+                  }`}
                 >
                   {arabicStatus(invoice.status)}
                 </span>
@@ -5345,25 +5164,22 @@ function InvoicePanel({
                 onClick={() => onToggle(invoice.id)}
                 className={
                   compactSummary
-                    ? "mn-student-summary-primary-action mt-2 inline-flex items-center justify-center rounded-lg bg-[#142B5F] px-3 py-1.5 font-semibold text-white dark:bg-[#D6A43B] dark:text-[#142B5F] hover:bg-[#203D74] dark:hover:bg-[#E5B54F] transition-colors font-['Cairo',sans-serif]"
+                    ? "mn-student-summary-primary-action mt-2 inline-flex items-center justify-center rounded-md px-2.5 py-0.5 text-[9.5px] font-bold text-[#F2CD78] transition-colors font-['Cairo',sans-serif] cursor-pointer"
                     : 'mt-3 text-xs font-semibold text-[var(--mn-secondary)]'
                 }
               >
                 {paymentsByInvoice[invoice.id] ? 'إخفاء الدفعات' : 'عرض الدفعات'}
               </button>
               {paymentsByInvoice[invoice.id] && (
-                <div className="mt-3 space-y-2 border-t border-[var(--mn-border)] pt-3">
+                <div className="mt-2 space-y-1.5 border-t border-[var(--mn-border)]/70 pt-2">
                   {paymentsByInvoice[invoice.id].length ? (
                     paymentsByInvoice[invoice.id].map((payment) => (
-                      <p
-                        key={payment.id}
-                        className="rounded-lg bg-[var(--mn-surface-muted)] p-2 text-xs"
-                      >
+                      <p key={payment.id} className="rounded-lg bg-[var(--mn-surface-muted)] p-2 text-[10px] font-semibold">
                         {formatMoney(payment.amount)} — {arabicStatus(payment.status)}
                       </p>
                     ))
                   ) : (
-                    <p className="text-xs text-[var(--mn-text-muted)]">لا توجد دفعات مسجلة.</p>
+                    <p className="text-[10px] text-[var(--mn-text-muted)]">لا توجد دفعات مسجلة.</p>
                   )}
                 </div>
               )}
@@ -5385,22 +5201,51 @@ function InvoicePanel({
   return (
     <section
       aria-label="الفواتير والدفعات"
-      className="relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel font-['Cairo',sans-serif]"
+      className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-x-0 border-t border-b border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] py-3 sm:py-3.5 shadow-2xs mn-panel font-['Cairo',sans-serif]"
     >
-      <div className="mb-3 flex min-w-0 items-center gap-2">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
-          <Receipt className="h-4 w-4 text-[#E5B54F]" />
+      <div className="flex min-w-0 items-center justify-between gap-2 px-3.5 sm:px-5">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-[#D6A43B]/45 bg-[#142B5F] text-[#F2CD78]">
+            <Receipt className="h-3.5 w-3.5 text-[#F2CD78]" />
+          </span>
+          <h3 className="text-[13px] sm:text-[14px] font-bold leading-snug font-['Cairo',sans-serif] text-[#1E293B] dark:text-[#F8FAFC]">
+            الفواتير والدفعات
+          </h3>
+        </div>
+        <span className="inline-flex shrink-0 items-center rounded-md border border-[#142B5F]/20 bg-[#142B5F]/[0.07] dark:border-[#F2CD78]/30 dark:bg-[#142B5F]/60 px-2 py-0.5 text-[9.5px] font-bold text-[#142B5F] dark:text-[#F2CD78]">
+          {invoices.length} فاتورة
         </span>
-        <h2 className="mn-student-summary-heading text-[14px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">
-          الفواتير والدفعات
-        </h2>
       </div>
-      {content}
+      <div className="mt-3 pt-0.5 px-3.5 sm:px-5">{content}</div>
     </section>
   );
 }
 
-
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  const singleControl = React.isValidElement<{ className?: string }>(children) && React.Children.count(children) === 1;
+  if (singleControl) {
+    return (
+      <label className="block text-sm font-semibold text-[var(--mn-text)]">
+        {label}
+        {React.cloneElement(children, {
+          className: `${children.props.className || ''} mt-2 w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 font-normal outline-none focus:border-[var(--mn-focus)] focus:ring-2 focus:ring-[var(--mn-gold-surface)]`,
+        })}
+      </label>
+    );
+  }
+  return (
+    <div className="block text-sm font-semibold text-[var(--mn-text)]">
+      <span>{label}</span>
+      <div className="mt-2 space-y-2">{children}</div>
+    </div>
+  );
+}
 
 function Toggle({
   name,
@@ -5464,12 +5309,9 @@ function Alert({
   onClose?: () => void;
 }) {
   const styles = {
-    error:
-      'border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] text-[var(--mn-danger-text)]',
-    success:
-      'border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] text-[var(--mn-success-text)]',
-    warning:
-      'border-[var(--mn-warning-border)] bg-[var(--mn-warning-soft)] text-[var(--mn-warning-text)]',
+    error: 'border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] text-[var(--mn-danger-text)]',
+    success: 'border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] text-[var(--mn-success-text)]',
+    warning: 'border-[var(--mn-warning-border)] bg-[var(--mn-warning-soft)] text-[var(--mn-warning-text)]',
   };
   return (
     <div
@@ -5497,10 +5339,7 @@ function WorkspaceSkeleton() {
       <div className="h-64 animate-pulse bg-[var(--mn-primary)]" />
       <div className="mx-auto grid max-w-7xl gap-5 px-[9px] py-8 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
         {Array.from({ length: 8 }, (_, index) => (
-          <div
-            key={index}
-            className="h-40 animate-pulse rounded-3xl bg-[var(--mn-surface)] border border-[var(--mn-border)]"
-          />
+          <div key={index} className="h-40 animate-pulse rounded-3xl bg-[var(--mn-surface)] border border-[var(--mn-border)]" />
         ))}
       </div>
     </div>
@@ -5513,13 +5352,7 @@ function formatMoney(amount: MoneyAmountDto): string {
 }
 function formatDate(value?: string | null): string {
   return value
-    ? Number.isNaN(new Date(value).getTime())
-      ? '—'
-      : new Date(value).toLocaleDateString('ar', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
+    ? (Number.isNaN(new Date(value).getTime()) ? '—' : new Date(value).toLocaleDateString('ar', { year: 'numeric', month: 'short', day: 'numeric' }))
     : '—';
 }
 function arabicStatus(value: string): string {
@@ -5532,18 +5365,7 @@ function arabicStatus(value: string): string {
         ACTIVE: 'نشطة',
         COMPLETED: 'مكتملة',
         REVOKED: 'ملغاة',
-        SUSPENDED: 'معلّقة',
-        ARCHIVED: 'مؤرشفة',
-        INITIALIZING: 'قيد التهيئة',
-        EXPIRED: 'منتهية الصلاحية',
-        WAITLISTED: 'قائمة الانتظار',
-        CANCELLED: 'ملغاة',
-        ENROLLED: 'مسجل',
-        IN_PROGRESS: 'قيد التعلم',
-        ISSUED: 'صادرة',
-        PARTIALLY_PAID: 'مدفوعة جزئياً',
-        OVERDUE: 'متأخرة',
-        DRAFT: 'مسودة',
+        SUSPENDED: 'معلّقة', ARCHIVED: 'مؤرشفة', INITIALIZING: 'قيد التهيئة', EXPIRED: 'منتهية الصلاحية', WAITLISTED: 'قائمة الانتظار', CANCELLED: 'ملغاة', ENROLLED: 'مسجل', IN_PROGRESS: 'قيد التعلم', ISSUED: 'صادرة', PARTIALLY_PAID: 'مدفوعة جزئياً', OVERDUE: 'متأخرة', DRAFT: 'مسودة',
       } as Record<string, string>
     )[value] || value
   );
@@ -5558,9 +5380,7 @@ function arabicEntityType(value: string): string {
         MAJOR: 'تخصص',
         CERTIFICATE: 'شهادة',
         STUDENT_TOOL: 'أداة طالب',
-        INTERNATIONAL_TEST: 'اختبار دولي',
-        CMS_CONTENT: 'محتوى',
-        SERVICE: 'خدمة',
+        INTERNATIONAL_TEST:'اختبار دولي',CMS_CONTENT:'محتوى',SERVICE:'خدمة',
       } as Record<string, string>
     )[value] || value
   );
@@ -5573,9 +5393,7 @@ function buildEntityLink(type: string, slug: string): string {
       MAJOR: 'majors',
       COURSE: 'courses',
       STUDENT_TOOL: 'tools',
-      INTERNATIONAL_TEST: 'exams',
-      CMS_CONTENT: 'articles',
-      SERVICE: 'services',
+      INTERNATIONAL_TEST:'exams',CMS_CONTENT:'articles',SERVICE:'services',
     } as Record<string, string>
   )[type];
   return base

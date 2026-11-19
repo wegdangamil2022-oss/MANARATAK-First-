@@ -1,8 +1,9 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../../i18n/I18nProvider';
 import React, { useState } from 'react';
-import { CheckCircle2, GraduationCap, Dna, Zap, Scale, Layers } from 'lucide-react';
+import { Check, ArrowUpLeft, GraduationCap, Dna, Zap, Scale, Layers } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Major } from '../../types';
+import { DetailSectionHeader } from '../DetailUi';
 
 interface DoctorateAcademicBackgroundsSliderProps {
   major: Major;
@@ -79,35 +80,29 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
 
   return (
     <div
-      className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel "
+      className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel font-['Cairo',sans-serif]"
       dir={publicDir}
     >
-      {/* Top Emerald Accent Line */}
-      <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+      {/* Top Royal Navy / Gold Accent Line */}
+      <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
 
       {/* Section Header */}
-      <div className="flex flex-col items-center justify-center mb-3.5 pt-0.5">
-        <div className="flex items-center justify-center gap-2 mb-1.5">
-          <div className="w-6.5 h-6.5 rounded-full bg-[var(--mn-primary)]/5 border border-[var(--mn-accent)]/60 ring-2 ring-[var(--mn-focus)]/20 flex items-center justify-center shrink-0 shadow-2xs">
-            <Layers className="w-3.5 h-3.5 text-[var(--mn-heading)]" />
-          </div>
-          <h2 className="text-xs sm:text-[13px] font-bold text-[var(--mn-heading)] leading-tight">{publicT('public_4_suitable_academic_backgrounds_and_entry_paths')}</h2>
-        </div>
-        {/* Glowing Gold Underline */}
-        <div className="w-[140px] h-[1.5px] bg-gradient-to-r from-transparent via-[var(--mn-accent-soft)] to-transparent shadow-[0_0_8px_rgba(214,164,59,0.7)]" />
-      </div>
+      <DetailSectionHeader
+        id="major-academic-backgrounds"
+        className="mb-3"
+        title={publicT('public_4_suitable_academic_backgrounds_and_entry_paths')}
+        iconClassName="mn-icon-mix02"
+        iconNode={
+          <>
+            <span className="pointer-events-none absolute top-0 right-0 w-2.5 h-2.5 bg-[#D6A43B] rounded-bl-md" />
+            <Layers className="h-4 w-4 relative z-10 text-[#F2CD78]" />
+          </>
+        }
+      />
 
-      {/* 4 Clean Segmented Tab Buttons (التنقل السريع) with Animated Glowing Line */}
-      <div className="relative mb-3 rounded-2xl overflow-hidden p-[2px] shadow-[0_0_12px_rgba(214,164,59,0.2)] bg-[var(--mn-surface-muted)]/50">
-        {/* Animated Moving Glowing Border Line (Slanted Shine) */}
-        <motion.div
-          className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-[var(--mn-accent-soft)] to-transparent opacity-100 -rotate-12 scale-150 origin-center"
-          initial={{ x: '-100%' }}
-          animate={{ x: '100%' }}
-          transition={{ duration: 3, ease: 'linear', repeat: Infinity }}
-        />
-
-        <div className="relative grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1.5 bg-[var(--mn-page)]/95 backdrop-blur-sm rounded-[14px] mn-panel ">
+      {/* 4 Clean Segmented Tab Buttons */}
+      <div className="relative mb-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-1.5 font-['Cairo',sans-serif]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
           {tabs.map((tab, idx) => {
             const Icon = tab.icon;
             const isActive = activeTab === idx;
@@ -116,16 +111,16 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
                 key={tab.id}
                 type="button"
                 onClick={() => handleSelectTab(idx)}
-                className={`py-2 px-2 rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer select-none text-center ${
+                className={`py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer select-none text-center font-['Cairo',sans-serif] ${
                   isActive
-                    ? 'bg-[var(--mn-surface)] text-[var(--mn-heading)] shadow-xs border border-[var(--mn-accent)]/60 ring-1 ring-[var(--mn-focus)]/20 font-bold mn-panel '
-                    : 'text-[var(--mn-text-muted)] hover:text-[var(--mn-heading)] hover:bg-[var(--mn-surface-muted)] border border-transparent font-bold'
+                    ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] text-white border border-[#D6A43B]/75 shadow-sm font-bold mn-inverse'
+                    : 'bg-[var(--mn-surface)] text-[var(--mn-heading)] border border-[var(--mn-border)] hover:border-[#142B5F]/45 dark:hover:border-[#F2CD78] font-bold mn-panel'
                 }`}
               >
-                <Icon
-                  className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[var(--mn-heading)]' : 'text-[var(--mn-text-muted)]'}`}
-                />
-                <span className="text-[11px] sm:text-[11.5px] leading-tight truncate">
+                <span className="w-5 h-5 rounded-md bg-[#142B5F] border border-[#D6A43B]/75 flex items-center justify-center shrink-0 shadow-2xs">
+                  <Icon className="w-3 h-3 text-[#F2CD78]" />
+                </span>
+                <span className="text-[11px] sm:text-[11.5px] leading-tight truncate font-['Cairo',sans-serif]">
                   {tab.tabLabel}
                 </span>
               </button>
@@ -135,7 +130,7 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
       </div>
 
       {/* Swipeable Slide Content Container */}
-      <div className="relative min-h-[160px] overflow-hidden rounded-2xl bg-[var(--mn-page)]/60 border border-[var(--mn-border-gold)] p-3 sm:p-4">
+      <div className="relative overflow-hidden rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] p-3 font-['Cairo',sans-serif]">
         <AnimatePresence mode="wait" initial={false} custom={direction}>
           <motion.div
             key={activeTab}
@@ -148,36 +143,42 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.2}
             onDragEnd={handleDragEnd}
-            className="w-full space-y-3 text-start cursor-grab active:cursor-grabbing"
+            className="w-full space-y-2.5 text-start cursor-grab active:cursor-grabbing font-['Cairo',sans-serif]"
           >
             {/* Slide Header */}
-            <div className="flex items-center gap-2.5 pb-2.5 border-b border-[var(--mn-border-gold)]">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[var(--mn-primary)] to-[var(--mn-primary)] text-[var(--mn-accent-text)] flex items-center justify-center shadow-2xs shrink-0 mn-inverse ">
-                {React.createElement(currentTab.icon, { className: 'w-4.5 h-4.5 text-[var(--mn-accent-soft)]' })}
+            <div className="flex items-center gap-2.5 pb-2.5 border-b border-[var(--mn-border)]">
+              <div className="w-8 h-8 rounded-xl bg-[#142B5F] border border-[#D6A43B]/75 flex items-center justify-center shadow-2xs shrink-0">
+                {React.createElement(currentTab.icon, { className: 'w-4 h-4 text-[#F2CD78]' })}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-[12px] sm:text-[13px] font-bold text-[var(--mn-heading)] leading-tight">
+                <h3 className="text-[11.5px] sm:text-[12px] font-bold text-[var(--mn-heading)] leading-tight font-['Cairo',sans-serif]">
                   {currentTab.title}
                 </h3>
-                <p className="text-[10.5px] text-[var(--mn-text-muted)] font-bold mt-0.5 leading-snug">
+                <p className="text-[10px] sm:text-[10.5px] text-[var(--mn-text-muted)] font-bold mt-0.5 leading-snug font-['Cairo',sans-serif]">
                   {currentTab.description}
                 </p>
               </div>
             </div>
 
             {/* Slide Items Content */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-['Cairo',sans-serif]">
               {currentTab.items.map((item, idx) => (
                 <div
                   key={idx}
-                  className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border-gold)] hover:border-[var(--mn-accent)] hover:shadow-2xs transition-all duration-200 text-start mn-panel "
+                  className="group flex items-center justify-between gap-2 p-2.5 rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border)] hover:border-[#0E7C86]/55 hover:shadow-2xs transition-all duration-200 text-start h-full mn-panel font-['Cairo',sans-serif]"
                 >
-                  <div className="w-5 h-5 rounded-lg bg-[var(--mn-primary)]/10 text-[var(--mn-heading)] flex items-center justify-center shrink-0 mt-0.5 font-bold text-[11px]">
-                    <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  <div className="flex items-start gap-2 min-w-0 flex-1">
+                    {/* B-02: صح بترولي الأفق صافي بحجم متناسق مع الخط */}
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#0E7C86]/12 border border-[#0E7C86] text-[#0E7C86] dark:text-[#38C6D4] flex items-center justify-center shrink-0 mt-0.5">
+                      <Check className="w-2 h-2 stroke-[2.75]" />
+                    </span>
+                    <span className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] leading-snug flex-1 font-['Cairo',sans-serif]">
+                      {item}
+                    </span>
                   </div>
-                  <span className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] leading-relaxed flex-1">
-                    {item}
-                  </span>
+                  {(activeTab === 0 || activeTab === 1) && (
+                    <ArrowUpLeft className="w-3.5 h-3.5 text-[var(--mn-interactive-arrow)] group-hover:scale-110 transition-transform shrink-0" />
+                  )}
                 </div>
               ))}
             </div>

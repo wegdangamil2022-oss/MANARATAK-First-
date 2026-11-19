@@ -1,6 +1,7 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpen, BriefcaseBusiness, Building2, ChevronLeft, FileText, GraduationCap,
+import {
+  ArrowRight, BookOpen, BriefcaseBusiness, Building2, ChevronLeft, FileText, GraduationCap,
   Landmark, Loader2, Search, Sparkles, Stethoscope, Wrench,
 } from 'lucide-react';
 import { ApiClient, type PublicGlobalSearchItem, type PublicGlobalSearchKind } from '../../../api/client';
@@ -162,7 +163,7 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
     if (segments.length >= 2) {
       const [category, slug] = segments;
       const decodedSlug = decodeURIComponent(slug);
-      
+
       if (category === 'scholarships') {
         const item = scholarships.find(s => s.slug === decodedSlug || s.id === result.id);
         if (item) return onOpenScholarship(item, target);
@@ -201,9 +202,9 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
   return (
     <div className="mn-page-shell pb-24" dir={locale === 'en' ? 'ltr' : 'rtl'}>
       {/* ========================================================================= */}
-      {/* HERO BANNER - MATCHING MAJORS SEARCH PAGE DESIGN */}
+      {/* HERO BANNER - UNIFIED PLATFORM HERO DESIGN                                */}
       {/* ========================================================================= */}
-      <div className="relative mn-search-hero text-white px-3 sm:px-4 pt-4 pb-12 sm:pb-14 overflow-hidden shadow-sm mn-inverse ">
+      <div className="relative mn-search-hero text-white px-3 sm:px-4 pt-4 pb-3 overflow-hidden shadow-xs mn-inverse ">
         {/* Back Button */}
         {onBack && (
           <button
@@ -245,51 +246,47 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
           </svg>
         </div>
 
-        <div className="max-w-xl mx-auto text-center relative z-10 space-y-2.5">
-          {/* Little 4-pointed Gold Sparkle Star */}
-          <div className="flex justify-center -mb-1">
-            <Sparkles className="h-4 w-4 text-[var(--mn-accent-text)]" aria-hidden="true" />
+        <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto text-center relative z-10 space-y-2 pt-1">
+          {/* Top 4-pointed Gold Sparkle Star */}
+          <div className="flex justify-center">
+            <Sparkles className="h-5 w-5 text-[var(--mn-accent-text)] drop-shadow-[0_0_8px_rgba(214,164,59,0.8)]" aria-hidden="true" />
           </div>
 
-          {/* Headline with Gold Curve */}
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white font-['Cairo',sans-serif] tracking-tight">
-              <span>{publicT('public_results')}{' '}</span>
-              <span className="relative inline-block text-white">{publicT('public_global_search')}{/* Gold brush accent line underneath */}
-                <svg
-                  className="absolute -bottom-1.5 inset-x-0 w-full h-2 text-[var(--mn-accent-text)]"
-                  viewBox="0 0 100 12"
-                  fill="none"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M2,9 Q50,2 98,6"
-                    stroke="var(--mn-accent)"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>
+          {/* Main Title */}
+          <div className="space-y-0.5">
+            <h1 className="text-xl sm:text-2xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">
+              {publicT('public_results')}{' '}
+              <span className="text-[var(--mn-accent-text)]">{publicT('public_global_search')}</span>
             </h1>
 
+            {/* Small Gold Horizontal Divider */}
+            <div className="flex justify-center pt-1 pb-0.5">
+              <div className="w-10 h-0.5 bg-[var(--mn-accent)] rounded-full mn-gold " />
+            </div>
+
             {/* Subtitle */}
-            <p className="text-[11px] sm:text-xs text-[var(--mn-on-dark-muted)] font-medium font-['Cairo',sans-serif] mt-1.5 leading-relaxed max-w-xs sm:max-w-sm mx-auto">{publicT('public_search_across_published_public_scholarship_university_and_major')}</p>
+            <p className="text-[11px] sm:text-xs text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-md mx-auto truncate">
+              {publicT('public_search_across_published_public_scholarship_university_and_major')}
+            </p>
           </div>
         </div>
       </div>
 
+      {/* Gold Divider Ribbon Line */}
+      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--mn-accent-text)] via-[var(--mn-accent-soft)] to-[var(--mn-accent-text)] shadow-xs mb-1" />
+
       <div className="mn-public-container space-y-4 py-4">
         {/* Try Smart Search Button with Fine Rotating Gold Spark Line and Smooth Indigo-Turquoise Gradient */}
-        <button 
-          type="button" 
-          onClick={onOpenSmartSearch} 
+        <button
+          type="button"
+          onClick={onOpenSmartSearch}
           className="group relative flex w-full items-center justify-between gap-3 overflow-hidden rounded-2xl p-[1px] transition-all duration-300 hover:shadow-md cursor-pointer"
         >
           {/* A very fine, thin gold spark line rotating smoothly without being flashing or annoying */}
           <div className="animate-button-orbit absolute inset-[-150%] bg-[conic-gradient(from_0deg,transparent_80%,#D6A43B_95%,transparent_100%)]" />
-          
+
           {/* Inner button container with smooth Indigo-Turquoise gradient matching the top hero */}
-          <div 
+          <div
             data-mn-design="543c901a7d"
             className="relative flex w-full items-center justify-between gap-3 rounded-[14px] bg-gradient-to-r from-[#142B5F] to-[#0E7C86] px-5 py-3 text-start"
           >
@@ -317,24 +314,24 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
         {!loading && searchError ? <div className="mn-card border-red-200 py-10 text-center"><div className="text-xs font-semibold">{publicT('public_could_not_load_search_results')}</div><div className="mt-1 text-[10px] text-[var(--mn-text-muted)]">{searchError}</div><button type="button" onClick={() => void executeServerSearch()} className="mt-3 mn-filter-chip is-selected">{publicT('public_try_again')}</button></div> : null}
 
         {!loading && !searchError && query.trim() && searchMode === 'api' && serverItems.length > 0 ? (
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 items-stretch">
             {serverItems.map((result) => {
               const kind = result.kind as GlobalResultKind;
               const favoriteKind = favoriteKindForResult(kind);
               const favoriteKey = `${favoriteKind}:${result.id}` as FavoriteKey;
-              return <article key={`${result.kind}:${result.id}`} role="link" tabIndex={0} aria-label={publicT('public_open_title', { v0: result.title })} onClick={() => handleResultClick(result)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleResultClick(result); } }} className="mn-card w-full cursor-pointer p-3.5 text-start transition hover:-translate-y-0.5 hover:border-[var(--mn-accent)]/60 hover:shadow-md">
+              return <article key={`${result.kind}:${result.id}`} role="link" tabIndex={0} aria-label={publicT('public_open_title', { v0: result.title })} onClick={() => handleResultClick(result)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleResultClick(result); } }} className="mn-card w-full h-full flex flex-col justify-between cursor-pointer p-3.5 text-start transition hover:-translate-y-0.5 hover:border-[var(--mn-accent)]/60 hover:shadow-md">
                 <div className="flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--mn-primary)] text-white mn-inverse">{CATEGORY_META[kind].icon}</div><div className="min-w-0 flex-1"><div className="text-[10px] font-semibold text-[var(--mn-accent-text)]">{publicT(CATEGORY_META[kind].label)}</div><h2 className="mt-0.5 text-[14px] font-semibold leading-snug text-[var(--mn-heading)] sm:text-[15px]">{result.title}</h2>{result.subtitle && <p className="mt-1 line-clamp-2 text-[11px] leading-5 text-[var(--mn-text-muted)] sm:text-xs">{result.subtitle}</p>}</div><div className="flex shrink-0 flex-col items-center gap-1.5">{onToggleFavorite && <FavoriteButton active={favoriteKeys.includes(favoriteKey)} onToggle={(event) => { event.stopPropagation(); onToggleFavorite(favoriteKind, result.id); }} />}<ChevronLeft className="mn-card-arrow h-4 w-4" /></div></div>
               </article>;
             })}
-            {hasMore && nextCursor && <button type="button" disabled={loadingMore} onClick={() => void executeServerSearch(nextCursor, true)} className="mn-card w-full py-3 text-center text-xs font-semibold disabled:opacity-60">{loadingMore ? publicT('public_loading_more') : publicT('public_load_more')}</button>}
+            {hasMore && nextCursor && <button type="button" disabled={loadingMore} onClick={() => void executeServerSearch(nextCursor, true)} className="col-span-full mn-card w-full py-3 text-center text-xs font-semibold disabled:opacity-60">{loadingMore ? publicT('public_loading_more') : publicT('public_load_more')}</button>}
           </div>
         ) : null}
 
         {!loading && !searchError && query.trim() && searchMode === 'prototype' && visiblePrototype.length > 0 ? (
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 items-stretch">
             {visiblePrototype.map((result) => {
               const favoriteKind = favoriteKindForResult(result.kind); const favoriteKey = `${favoriteKind}:${result.targetId}` as FavoriteKey;
-              return <article key={`${result.key}:${result.anchor || 'top'}`} role="button" tabIndex={0} onClick={() => openPrototypeResult(result)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openPrototypeResult(result); } }} className="mn-card w-full cursor-pointer p-3.5 text-start"><div className="flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--mn-primary)] text-white mn-inverse">{CATEGORY_META[result.kind].icon}</div><div className="min-w-0 flex-1"><div className="text-[10px] font-semibold text-[var(--mn-accent-text)]">{result.category}</div><h2 className="mt-0.5 text-[14px] font-semibold text-[var(--mn-heading)]">{result.title}</h2><p className="mt-1 line-clamp-2 text-[11px] text-[var(--mn-text-muted)]">{result.excerpt || result.subtitle}</p></div>{onToggleFavorite && <FavoriteButton active={favoriteKeys.includes(favoriteKey)} onToggle={(event) => { event.stopPropagation(); onToggleFavorite(favoriteKind, result.targetId); }} />}</div></article>;
+              return <article key={`${result.key}:${result.anchor || 'top'}`} role="button" tabIndex={0} onClick={() => openPrototypeResult(result)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openPrototypeResult(result); } }} className="mn-card w-full h-full flex flex-col justify-between cursor-pointer p-3.5 text-start"><div className="flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--mn-primary)] text-white mn-inverse">{CATEGORY_META[result.kind].icon}</div><div className="min-w-0 flex-1"><div className="text-[10px] font-semibold text-[var(--mn-accent-text)]">{result.category}</div><h2 className="mt-0.5 text-[14px] font-semibold text-[var(--mn-heading)]">{result.title}</h2><p className="mt-1 line-clamp-2 text-[11px] text-[var(--mn-text-muted)]">{result.excerpt || result.subtitle}</p></div>{onToggleFavorite && <FavoriteButton active={favoriteKeys.includes(favoriteKey)} onToggle={(event) => { event.stopPropagation(); onToggleFavorite(favoriteKind, result.targetId); }} />}</div></article>;
             })}
           </div>
         ) : null}

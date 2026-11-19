@@ -2,11 +2,13 @@ import { useTranslation } from '../../../i18n/I18nProvider';
 import { serviceCopy } from '../serviceCopy';
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import {
+  ChevronDown,
   ChevronLeft,
   Clock3,
   FileText,
   GraduationCap,
   Briefcase,
+  RotateCcw,
   Search,
   SlidersHorizontal,
   Wallet,
@@ -17,6 +19,7 @@ import { ApiClient } from '../../../api/client';
 import { mapService } from '../publicLiveDataSource';
 import { Service, ServiceAudience } from '../types';
 import { FavoriteButton } from './FavoriteButton';
+import { PublicCardsPagination, PublicFilterSelectModal, usePaginatedCatalog } from './DetailUi';
 
 interface ServicesDirectoryPageProps {
   services: Service[];
@@ -40,6 +43,7 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
   const { language, dir } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('الكل');
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [remoteRows, setRemoteRows] = useState<Service[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -149,7 +153,16 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
     });
   }, [audienceServices, searchQuery, selectedCategory, remote]);
 
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedServices,
+    goToPage,
+  } = usePaginatedCatalog(filteredServices, `${searchQuery}|${selectedCategory}|${audience}`, 30);
+
   const isStudent = audience === 'student';
+  const activeFiltersCount =
+    (selectedCategory !== 'الكل' ? 1 : 0) + (searchQuery.trim() !== '' ? 1 : 0);
 
   return (
     <div
@@ -165,7 +178,7 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
           </button>
         )}
       </div>
-      <div className="relative mn-search-hero overflow-hidden px-3 pb-12 pt-4 text-white shadow-xs sm:px-4 sm:pb-14 mn-inverse ">
+      <div className="relative mn-search-hero overflow-hidden px-3 sm:px-4 pt-4 pb-3 text-white shadow-xs mn-inverse ">
         <button
           type="button"
           onClick={onBack}
@@ -196,77 +209,110 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
           )}
         </div>
 
-        <div className="relative z-10 mx-auto max-w-md space-y-2 pt-2 text-center sm:max-w-xl">
+        <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto text-center relative z-10 space-y-2 pt-1">
           <div className="flex justify-center">
             <Sparkles
               className="h-5 w-5 text-[var(--mn-accent-text)] drop-shadow-[0_0_8px_rgba(214,164,59,0.8)]"
               aria-hidden="true"
             />
           </div>
-          <h1 className="font-['Cairo',sans-serif] text-xl font-bold leading-tight text-white sm:text-2xl">
-            {isStudent
-              ? serviceCopy('الخدمات الطلابية', language)
-              : serviceCopy('الخدمات العامة والدعم', language)}
-          </h1>
-          <p className="mx-auto max-w-[90%] text-[11px] font-semibold leading-5 text-[var(--mn-on-dark-muted)] sm:text-xs">
-            {isStudent
-              ? serviceCopy(
-                  'خدمات تساعد الطالب في الاختيار وتجهيز ملفه الأكاديمي والتقديم.',
-                  language,
-                )
-              : serviceCopy('خدمات مساندة للوثائق والإجراءات المرتبطة برحلة الدراسة.', language)}
-          </p>
 
-          <div className="relative mx-auto mt-3 max-w-md">
-            <input
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder={serviceCopy('ابحث عن خدمة...', language)}
-              className="h-11 w-full rounded-2xl border border-white/15 bg-[var(--mn-surface)] px-10 text-[11px] font-bold text-[var(--mn-heading)] shadow-lg outline-none transition focus:border-[var(--mn-accent)] sm:text-xs mn-panel "
-            />
-            <Search className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mn-accent-text)]" />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--mn-text-muted)]"
-                aria-label={serviceCopy('مسح البحث', language)}
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
+          <div className="space-y-0.5">
+            <h1 className="font-['Cairo',sans-serif] text-xl sm:text-2xl font-bold leading-tight tracking-tight text-white">
+              {isStudent
+                ? serviceCopy('الخدمات الطلابية', language)
+                : serviceCopy('الخدمات العامة والدعم', language)}
+            </h1>
+
+            {/* Small Gold Horizontal Divider */}
+            <div className="flex justify-center pt-1 pb-0.5">
+              <div className="w-10 h-0.5 bg-[var(--mn-accent)] rounded-full mn-gold " />
+            </div>
+
+            <p className="text-[11px] sm:text-xs text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-md mx-auto truncate">
+              {isStudent
+                ? serviceCopy(
+                    'خدمات تساعد الطالب في الاختيار وتجهيز ملفه الأكاديمي والتقديم.',
+                    language,
+                  )
+                : serviceCopy('خدمات مساندة للوثائق والإجراءات المرتبطة برحلة الدراسة.', language)}
+            </p>
+          </div>
+
+          <div className="pt-1 max-w-sm sm:max-w-md md:max-w-xl mx-auto px-1">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder={serviceCopy('ابحث عن خدمة...', language)}
+                className="w-full py-2.5 pl-4 pr-10 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-[12px] font-bold placeholder:text-[var(--mn-text-muted)] placeholder:text-[12px] placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel "
+              />
+              <Search className="w-4 h-4 text-[var(--mn-accent-text)] absolute right-3.5 top-1/2 -translate-y-1/2" />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 p-1 text-[var(--mn-text-muted)] hover:text-[var(--mn-text)] cursor-pointer"
+                  aria-label={serviceCopy('مسح البحث', language)}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {activeFiltersCount > 0 && (
+          <div className="flex justify-center mt-2 relative z-10">
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedCategory('الكل');
+              }}
+              className="text-[10px] font-bold text-[var(--mn-danger-text)] hover:text-[var(--mn-danger-text)] bg-[var(--mn-surface-elevated)]/95 px-2.5 py-0.5 rounded-full shadow-xs transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif] mn-panel "
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>{serviceCopy('إعادة التعيين', language)} ({activeFiltersCount})</span>
+            </button>
+          </div>
+        )}
+
+        {/* FLOATING FILTER TILE INSIDE HERO */}
+        <div className="max-w-lg md:max-w-2xl mx-auto mn-inline-gutter mt-2.5 relative z-20 pb-0">
+          <div className="grid grid-cols-1 gap-2 sm:gap-2.5">
+            <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setIsCategoryModalOpen(true);
+                }
+              }}
+              onClick={() => setIsCategoryModalOpen(true)}
+              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel font-['Cairo',sans-serif]"
+              title={serviceCopy('نوع الخدمة', language)}
+            >
+              <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
+                <span className="truncate font-['Cairo',sans-serif]">
+                  {selectedCategory === 'الكل'
+                    ? serviceCopy('نوع الخدمة', language)
+                    : serviceCopy(selectedCategory, language)}
+                </span>
+              </div>
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="relative z-20 mx-auto -mt-5 max-w-md mn-inline-gutter pb-24 sm:max-w-xl">
-        <div className="mb-3 rounded-[20px] border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2.5 shadow-lg mn-panel ">
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--mn-primary)]/10 text-[var(--mn-heading)]">
-              <SlidersHorizontal className="h-4 w-4" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <label className="mb-1 block text-[9px] font-bold text-[var(--mn-text-muted)]">
-                {serviceCopy('نوع الخدمة', language)}
-              </label>
-              <select
-                value={selectedCategory}
-                onChange={(event) => setSelectedCategory(event.target.value)}
-                className="h-9 w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 text-[10px] font-bold text-[var(--mn-text)] outline-none mn-panel "
-              >
-                {categories.map((category) => (
-                  <option
-                    key={serviceCopy(category, language)}
-                    value={serviceCopy(category, language)}
-                  >
-                    {serviceCopy(category, language)}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
+      {/* Gold Divider Ribbon Line */}
+      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--mn-accent-text)] via-[var(--mn-accent-soft)] to-[var(--mn-accent-text)] shadow-xs mb-1" />
 
+      <div className="relative z-20 mx-auto pt-3 max-w-md mn-inline-gutter pb-24 sm:max-w-xl md:max-w-[1120px] lg:max-w-[1160px]">
         <div className="mb-2 flex items-center justify-between px-1">
           <div>
             <h2 className="text-[13px] font-bold text-[var(--mn-heading)]">
@@ -282,9 +328,9 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
           </span>
         </div>
 
-        <div className="space-y-2.5">
+        <div className="space-y-2.5 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 items-stretch">
           {filteredServices.length === 0 ? (
-            <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-5 text-center shadow-sm mn-panel ">
+            <div className="col-span-full rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-5 text-center shadow-sm mn-panel ">
               <Search className="mx-auto h-6 w-6 text-[var(--mn-text-muted)]" />
               <h3 className="mt-2 text-xs font-bold text-[var(--mn-text)]">
                 {serviceCopy('لا توجد خدمات مطابقة', language)}
@@ -294,72 +340,99 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
               </p>
             </div>
           ) : (
-            filteredServices.map((service) => (
-              <article
-                key={service.id}
-                className="relative group overflow-hidden rounded-2xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] bg-[var(--mn-surface)] p-3 shadow-sm transition-all hover:shadow-md mn-panel "
-              >
-                {onToggleFavorite && (
-                  <FavoriteButton
-                    active={favoriteIds.includes(service.id)}
-                    onToggle={(event) => {
-                      event.stopPropagation();
-                      onToggleFavorite(service.id);
-                    }}
-                    className="absolute left-3 top-3 z-20"
-                  />
-                )}
-                <div className="flex items-start gap-2.5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--mn-accent)]/20 bg-[var(--mn-accent)]/10">
-                    {isStudent ? (
-                      <GraduationCap className="h-5 w-5 text-[var(--mn-heading)]" />
-                    ) : (
-                      <Briefcase className="h-5 w-5 text-[var(--mn-heading)]" />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-start justify-between gap-1.5">
-                      <div className="min-w-0">
-                        <h3 className="font-['Cairo',sans-serif] text-[12.5px] font-bold leading-5 text-[var(--mn-heading)] sm:text-[13.5px]">
-                          {service.title}
-                        </h3>
-                        <p className="mt-0.5 text-[9px] font-bold text-[var(--mn-accent-text)]">
-                          {serviceCopy(service.category, language)}
-                        </p>
-                      </div>
-                      <span className="rounded-full bg-[var(--mn-primary)]/10 px-2 py-1 text-[8px] font-bold text-[var(--mn-heading)]">
-                        {service.badge}
-                      </span>
+            <>
+              {paginatedServices.map((service) => (
+                <article
+                  key={service.id}
+                  className="relative group overflow-hidden rounded-2xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] bg-[var(--mn-surface)] p-3 md:p-4 shadow-sm transition-all hover:shadow-md mn-panel h-full flex flex-col justify-between"
+                >
+                  {onToggleFavorite && (
+                    <FavoriteButton
+                      active={favoriteIds.includes(service.id)}
+                      onToggle={(event) => {
+                        event.stopPropagation();
+                        onToggleFavorite(service.id);
+                      }}
+                      className="absolute left-3 top-3 z-20"
+                    />
+                  )}
+                  <div className="flex items-start gap-2.5">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--mn-accent)]/20 bg-[var(--mn-accent)]/10">
+                      {isStudent ? (
+                        <GraduationCap className="h-5 w-5 text-[var(--mn-heading)]" />
+                      ) : (
+                        <Briefcase className="h-5 w-5 text-[var(--mn-heading)]" />
+                      )}
                     </div>
-                    <p className="mt-1.5 line-clamp-2 text-[10px] font-semibold leading-4 text-[var(--mn-text-muted)]">
-                      {service.shortDescription}
-                    </p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-start justify-between gap-1.5">
+                        <div className="min-w-0">
+                          <h3 className="font-['Cairo',sans-serif] text-[12.5px] font-bold leading-5 text-[var(--mn-heading)] sm:text-[13.5px]">
+                            {service.title}
+                          </h3>
+                          <p className="mt-0.5 text-[9px] font-bold text-[var(--mn-accent-text)]">
+                            {serviceCopy(service.category, language)}
+                          </p>
+                        </div>
+                        <span className="rounded-full bg-[var(--mn-primary)]/10 px-2 py-1 text-[8px] font-bold text-[var(--mn-heading)]">
+                          {service.badge}
+                        </span>
+                      </div>
+                      <p className="mt-1.5 line-clamp-2 text-[10px] font-semibold leading-4 text-[var(--mn-text-muted)]">
+                        {service.shortDescription}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="mt-2.5 grid grid-cols-2 gap-1.5 sm:grid-cols-3">
-                  <div className="flex min-h-8 items-center justify-center gap-1 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 text-[9px] font-bold text-[var(--mn-text-muted)] mn-panel ">
-                    <Clock3 className="h-3 w-3 shrink-0 text-[var(--mn-accent-text)]" />
-                    <span className="truncate">{service.turnaround}</span>
+                  <div className="mt-2.5 grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+                    <div className="flex min-h-8 items-center justify-center gap-1 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 text-[9px] font-bold text-[var(--mn-text-muted)] mn-panel ">
+                      <Clock3 className="h-3 w-3 shrink-0 text-[var(--mn-accent-text)]" />
+                      <span className="truncate">{service.turnaround}</span>
+                    </div>
+                    <div className="flex min-h-8 items-center justify-center gap-1 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 text-[9px] font-bold text-[var(--mn-text-muted)] mn-panel ">
+                      <Wallet className="h-3 w-3 shrink-0 text-[var(--mn-heading)]" />
+                      <span className="truncate">{service.priceLabel}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onSelectService?.(service)}
+                      className="col-span-2 flex min-h-8 items-center justify-center gap-1 rounded-lg bg-[var(--mn-primary)] px-2 text-[9.5px] font-bold text-white shadow-2xs transition hover:bg-[var(--mn-primary)] active:scale-95 sm:col-span-1 mn-inverse hover:mn-inverse "
+                    >
+                      {serviceCopy('عرض التفاصيل', language)}
+                      <ChevronLeft className="h-3 w-3" />
+                    </button>
                   </div>
-                  <div className="flex min-h-8 items-center justify-center gap-1 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 text-[9px] font-bold text-[var(--mn-text-muted)] mn-panel ">
-                    <Wallet className="h-3 w-3 shrink-0 text-[var(--mn-heading)]" />
-                    <span className="truncate">{service.priceLabel}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => onSelectService?.(service)}
-                    className="col-span-2 flex min-h-8 items-center justify-center gap-1 rounded-lg bg-[var(--mn-primary)] px-2 text-[9.5px] font-bold text-white shadow-2xs transition hover:bg-[var(--mn-primary)] active:scale-95 sm:col-span-1 mn-inverse hover:mn-inverse "
-                  >
-                    {serviceCopy('عرض التفاصيل', language)}
-                    <ChevronLeft className="h-3 w-3" />
-                  </button>
-                </div>
-              </article>
-            ))
+                </article>
+              ))}
+
+              <div className="col-span-full">
+                <PublicCardsPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={filteredServices.length}
+                  pageSize={30}
+                  onPageChange={goToPage}
+                  dir={dir}
+                />
+              </div>
+            </>
           )}
         </div>
       </div>
+
+      <PublicFilterSelectModal
+        isOpen={isCategoryModalOpen}
+        title={serviceCopy('نوع الخدمة', language)}
+        icon={SlidersHorizontal}
+        selectedValue={selectedCategory}
+        onSelect={(val) => setSelectedCategory(val)}
+        onClose={() => setIsCategoryModalOpen(false)}
+        dir={dir}
+        options={categories.map((category) => {
+          const val = serviceCopy(category, language);
+          return { value: val, label: val };
+        })}
+      />
     </div>
   );
 };

@@ -217,22 +217,22 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
   ];
 
   return (
-    <section id="categories-section" className="w-full py-3">
+    <section id="categories-section" className="w-full py-2 md:py-4">
       {/* Section Title */}
-      <div className="flex items-center justify-between mb-3 px-1">
-        <h3 className="text-sm font-bold text-[var(--mn-heading)] flex items-center gap-1.5">
+      <div className="flex items-center justify-between mb-2 md:mb-4 px-1">
+        <h3 className="text-sm md:text-base lg:text-lg font-bold text-[var(--mn-heading)] flex items-center gap-1.5">
           <span>{publicT('public_browse_by_category')}</span>
         </h3>
         {selectedCategory !== 'all' && (
           <button
             onClick={() => onSelectCategory('all')}
-            className="text-[11px] text-[var(--mn-heading)] font-bold hover:underline cursor-pointer"
+            className="text-[11px] md:text-xs text-[var(--mn-heading)] font-bold hover:underline cursor-pointer"
           >{publicT('public_view_all')}</button>
         )}
       </div>
 
       {/* Grid of 10 Category Cards */}
-      <div className="grid grid-cols-5 gap-1.5 sm:gap-2 text-center">
+      <div className="grid grid-cols-5 lg:grid-cols-10 gap-1 sm:gap-2 md:gap-2.5 text-center items-stretch">
         {categories.map((cat) => {
           const isActive = selectedCategory === cat.id;
 
@@ -240,7 +240,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
             <button
               key={cat.id}
               onClick={() => onSelectCategory(isActive ? 'all' : cat.id)}
-              className={`flex min-w-0 flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl transition-all active:scale-95 group cursor-pointer ${
+              className={`h-full flex min-w-0 flex-col items-center justify-center p-1 sm:p-2 md:p-3 rounded-xl sm:rounded-2xl transition-all active:scale-95 group cursor-pointer ${
                 isActive
                   ? 'bg-[var(--mn-primary)] text-[var(--mn-accent-text)] shadow-sm ring-2 ring-[var(--mn-focus)] mn-inverse '
                   : 'bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-page)] border border-[var(--mn-border)] shadow-2xs hover:border-[var(--mn-accent)]/50 mn-panel hover:mn-panel '
@@ -248,7 +248,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
             >
               {/* Circular Icon Container */}
               <div
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center mb-1 sm:mb-1.5 transition-transform group-hover:scale-110 ${
+                className={`w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center mb-1 sm:mb-1.5 md:mb-2 transition-transform group-hover:scale-110 ${
                   isActive
                     ? 'bg-[#D6A43B] text-[#142B5F] border border-[#D6A43B] shadow-xs'
                     : 'bg-[#142B5F] text-[#D6A43B] border border-[#142B5F] group-hover:border-[#D6A43B]/60'
@@ -256,14 +256,14 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
               >
                 {cat.icon(
                   isActive
-                    ? 'w-5 h-5 text-[#142B5F]'
-                    : 'w-5 h-5 text-[#D6A43B]'
+                    ? 'w-4 h-4 sm:w-5 sm:h-5 md:w-5.5 md:h-5.5 text-[#142B5F]'
+                    : 'w-4 h-4 sm:w-5 sm:h-5 md:w-5.5 md:h-5.5 text-[#D6A43B]'
                 )}
               </div>
 
               {/* Label */}
               <span
-                className={`text-[10px] sm:text-[11px] font-bold leading-tight break-words ${
+                className={`text-[10px] sm:text-[11px] md:text-xs font-bold leading-tight break-words ${
                   isActive ? 'text-[var(--mn-accent-text)] font-bold' : 'text-[var(--mn-text)]'
                 }`}
               >

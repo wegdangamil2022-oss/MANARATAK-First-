@@ -25,17 +25,16 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   <button
     type="button"
     onClick={onToggle}
-    className={`${compact ? 'w-8 h-8' : 'min-h-8 px-2.5'} rounded-lg border flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
+    className={`${compact ? 'w-8 h-8 rounded-full' : 'min-h-8 px-2.5 rounded-lg'} border flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
       active
-        ? 'bg-[var(--mn-danger-soft)] border-[var(--mn-danger-border)] text-[var(--mn-danger-text)] dark:bg-[var(--mn-danger-soft)]/20 dark:border-[var(--mn-danger-border)]'
-        : 'bg-[var(--mn-surface)] border-[var(--mn-border)] text-[var(--mn-text-muted)] hover:text-[var(--mn-danger-text)] hover:border-[var(--mn-danger-border)] mn-panel '
+        ? 'bg-[var(--mn-page)] border-[var(--mn-border)] text-[var(--mn-primary)] dark:text-[var(--mn-accent-soft)] mn-panel '
+        : 'bg-[var(--mn-page)] border-[var(--mn-border)] text-[var(--mn-text-muted)] hover:bg-[var(--mn-surface-muted)] mn-panel '
     } ${className}`}
     aria-label={accessibleLabel}
     title={accessibleLabel}
   >
-    <Heart className={`w-3.5 h-3.5 ${active ? 'fill-red-500 text-[var(--mn-danger-text)]' : ''}`} />
+    <Heart className={`w-4 h-4 ${active ? 'fill-[#0E7C86] text-[#0E7C86] dark:fill-[#38C6D4] dark:text-[#38C6D4]' : 'text-[var(--mn-text-muted)]'}`} />
     {!compact && <span className="text-[10px] font-bold">{active ? publicT('public_saved_2') : publicT('public_save')}</span>}
   </button>
 );
 };
-

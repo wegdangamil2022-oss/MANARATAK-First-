@@ -171,14 +171,14 @@ export function StudentServiceBookingPanel({ requestId }: { requestId: string })
   return (
     <section
       dir={dir}
-      className="mn-student-service-booking-panel space-y-3 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-2xs mn-panel dark:border-white/10 sm:p-4"
+      className="mn-student-service-booking-panel relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] space-y-3 rounded-none border-x-0 border-t border-b border-[var(--mn-border)] bg-[var(--mn-surface)] px-3.5 py-3.5 sm:px-5 sm:py-4 shadow-2xs mn-panel dark:border-white/10 overflow-hidden"
       aria-label={label('مواعيد ومخرجات الخدمة', 'Service bookings and deliverables')}
     >
-      <div className="mb-3 flex min-w-0 items-center gap-2">
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
-          <CalendarClock className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />
+      <div className="mb-2.5 flex min-w-0 items-center gap-2 border-b border-[var(--mn-border)] dark:border-white/10 pb-2.5">
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-[#D6A43B]/35 bg-[#142B5F] [&>svg]:h-3.5 [&>svg]:w-3.5">
+          <CalendarClock className="h-3.5 w-3.5 text-[#F2CD78]" aria-hidden="true" />
         </span>
-        <h3 className="mn-student-services-heading min-w-0 text-[14px] font-bold text-[var(--mn-heading)]">{label('مواعيد ومخرجات الخدمة', 'Service bookings and deliverables')}</h3>
+        <h3 className="min-w-0 text-[12.5px] sm:text-[13px] font-bold text-[#1E293B] dark:text-[#F8FAFC]">{label('مواعيد ومخرجات الخدمة', 'Service bookings and deliverables')}</h3>
       </div>
       {notice && <p role="status" className="rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] p-3 text-[11px] leading-[1.8] text-[var(--mn-text-muted)]">{notice}</p>}
       {packages.length > 0 && (

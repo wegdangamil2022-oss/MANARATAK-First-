@@ -6,6 +6,8 @@ type Props = {
   course: Course;
   dataMode: 'api' | 'prototype';
   isStudying: boolean;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
   onBack: () => void;
   onStartStudy: () => void;
   onStopStudy: () => void;
@@ -28,6 +30,8 @@ export function PublicCourseEntry(props: Props) {
       course={props.course}
       dataMode={props.dataMode}
       track={props.course.accessType === 'PAID' ? 'paid' : 'native'}
+      isFavorite={props.isFavorite}
+      onToggleFavorite={props.onToggleFavorite}
       onBack={props.onBack}
       onStartStudy={props.dataMode === 'prototype' ? props.onStartStudy : undefined}
     />

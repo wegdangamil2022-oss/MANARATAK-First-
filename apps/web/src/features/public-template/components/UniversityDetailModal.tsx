@@ -7,20 +7,36 @@ import {
   Landmark,
   Calendar,
   Building2,
+  ChevronRight,
   ChevronLeft,
+  ArrowRight,
+  ArrowLeft,
+  ArrowUpLeft,
+  Layers,
   Trophy,
   GraduationCap,
   Languages,
+  Clock,
   Sparkles,
   BookOpen,  BookOpenText,  Briefcase,
+  Star,
   Globe,
   FileText,
+  HeartPulse,
+  Settings,
+  Scale,
   Users,
+  Monitor,
   Award,
+  PenLine,
+  Check,
   CheckCircle2,
   ArrowUpRight,
+  Send,
   UserCheck,
   Coins,
+  Stethoscope,
+  Wrench,
   Banknote,
   Info,
   Phone,
@@ -31,9 +47,12 @@ import {
   Compass,
   Globe2,
   Zap,
+  Bookmark,
 } from 'lucide-react';
 import { PublishedUniversityDetails } from './PublishedUniversityDetails';
 import { Service, University } from '../types';
+import { RelatedArticlesStrip } from './RelatedArticlesStrip';
+import { ContextualServicesStrip } from './ContextualServicesStrip';
 import { DetailBackButton, DetailSectionHeader, useDetailSearchTarget } from './DetailUi';
 
 interface UniversityDetailModalProps {
@@ -68,839 +87,1076 @@ export const UniversityDetailModal: React.FC<UniversityDetailModalProps> = ({
   searchTerm,
 }) => {
   const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+  const [actionToast, setActionToast] = React.useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setActionToast(msg);
+    window.setTimeout(() => setActionToast(null), 2400);
+  };
 
   useDetailSearchTarget(searchAnchor, searchTerm);
   return (
     <div
-      className="w-full bg-[var(--mn-page)] dark:bg-[var(--mn-page)] animate-fade-in font-['Cairo',sans-serif] min-h-screen mn-panel dark:mn-panel "
+      className="w-full max-w-md md:max-w-[1120px] lg:max-w-[1160px] mx-auto pt-0 pb-12 text-start font-['Cairo',sans-serif] animate-in fade-in duration-200 bg-[var(--mn-surface-muted)] min-h-screen relative mn-panel mn-university-detail"
       dir={publicDir}
     >
-      {/* 1. القسم الأول: رأس الصفحة الملتصق بالهيدر والجوانب */}
-      <div className="w-full bg-gradient-to-b from-[var(--mn-primary)] via-[var(--mn-section-line)] to-[var(--mn-primary)] dark:from-[var(--mn-surface-elevated)] dark:via-[var(--mn-surface-elevated)] dark:to-[var(--mn-surface-elevated)] pt-3 pb-4 border-b-[3px] border-[var(--mn-accent)]/70 relative z-10 shadow-md overflow-hidden mn-inverse dark:mn-panel ">
-        <div className="absolute top-2 right-2 z-30"><DetailBackButton onBack={onClose} mode="close" /></div>
-        {/* Decorative Background Elements */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Top-left dot grid */}
-          <div className="absolute top-2 left-4 grid grid-cols-5 gap-1.5 opacity-20">
-            {Array.from({ length: 15 }).map((_, i) => (
-              <div key={i} className="w-1 h-1 rounded-full bg-[var(--mn-accent)] mn-gold " />
-            ))}
-          </div>
-
-          {/* Thin gold curved orbital line on left */}
-          <div className="absolute -top-12 -left-12 w-48 h-48 rounded-full border border-[var(--mn-accent)]/25 pointer-events-none" />
-          <div className="absolute -top-4 -left-4 w-60 h-60 rounded-full border border-[var(--mn-accent)]/15 pointer-events-none" />
-
-          {/* University / Academic Building silhouette on right in transparent shade */}
-          <svg
-            className="absolute -right-6 bottom-0 h-44 w-44 text-[var(--mn-heading)] pointer-events-none"
-            viewBox="0 0 200 200"
-            fill="currentColor"
+      {/* 1. TOP HERO CONTAINER (Compact horizontal layout matching ScholarshipDetailModal) */}
+      <div className="relative w-full overflow-hidden">
+        <div className="absolute top-2 left-2 md:top-3.5 md:left-4 z-30 flex flex-col md:flex-row items-center gap-1.5 md:gap-2 scale-80 md:scale-100 origin-top-left">
+          <DetailBackButton onBack={onClose} mode="back" />
+          <button
+            type="button"
+            onClick={onToggleSave}
+            className="mn-detail-close transition-all active:scale-95 cursor-pointer"
+            aria-label={isSaved ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
+            title={isSaved ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
           >
-            {/* Columns and Pediment (Academic building) */}
-            <polygon points="100,30 40,80 160,80" />
-            <rect x="50" y="80" width="15" height="120" />
-            <rect x="85" y="80" width="15" height="120" />
-            <rect x="120" y="80" width="15" height="120" />
-            <rect x="40" y="180" width="130" height="20" />
-          </svg>
+            <Heart
+              className={`h-3.5 w-3.5 ${
+                isSaved
+                  ? 'fill-[#0E7C86] text-[#0E7C86] dark:fill-[#38C6D4] dark:text-[#38C6D4]'
+                  : 'text-[var(--mn-heading)]'
+              }`}
+            />
+          </button>
+        </div>
 
-          {/* Lower Curved Gold Swirl */}
+        {/* SVG background with vibrant 3-stop navy-to-petrol gradient and subtle gold waves */}
+        <div className="relative w-full h-[115px] sm:h-[120px] md:h-[145px]">
           <svg
-            className="absolute bottom-0 inset-x-0 w-full h-10 opacity-30"
-            viewBox="0 0 500 80"
-            fill="none"
+            viewBox="0 0 500 115"
             preserveAspectRatio="none"
+            className="w-full h-full absolute inset-0 block"
           >
+            <defs>
+              <linearGradient id="uniHeroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#142B5F" />
+                <stop offset="52%" stopColor="#153B75" />
+                <stop offset="100%" stopColor="#0E7C86" />
+              </linearGradient>
+            </defs>
+
+            {/* Main base background */}
+            <path d="M 0,0 L 500,0 L 500,90 Q 250,112 0,90 Z" fill="url(#uniHeroGrad)" />
+
+            {/* Decorative Gold Waves */}
+            <g opacity="0.25">
+              <path
+                d="M -50,30 Q 120,-10 260,35 T 550,20"
+                stroke="var(--mn-accent)"
+                strokeWidth="1.5"
+                fill="none"
+              />
+              <path
+                d="M -30,60 Q 150,20 320,55 T 560,35"
+                stroke="var(--mn-accent)"
+                strokeWidth="1"
+                fill="none"
+              />
+
+              {/* Gold Sparkle Dots */}
+              <circle cx="35" cy="25" r="1.5" fill="var(--mn-accent)" />
+              <circle cx="50" cy="18" r="1" fill="var(--mn-accent)" />
+              <circle cx="42" cy="38" r="1.2" fill="var(--mn-accent)" />
+              <circle cx="445" cy="22" r="1.5" fill="var(--mn-accent)" />
+              <circle cx="460" cy="35" r="1" fill="var(--mn-accent)" />
+              <circle cx="430" cy="42" r="1.2" fill="var(--mn-accent)" />
+            </g>
+
+            {/* Gold accent border following the bottom curve */}
             <path
-              d="M-20,70 Q250,-20 520,70"
-              stroke="var(--mn-accent)"
-              strokeWidth="2"
+              d="M 0,90 Q 250,112 500,90"
               fill="none"
+              stroke="var(--mn-accent)"
+              strokeWidth="2.2"
+              strokeLinecap="round"
             />
           </svg>
-        </div>
 
-        <div className="mn-detail-content mn-detail-content-narrow flex flex-col gap-3 relative z-10">
-          {/* البيانات العلوية: الشعار، الاسم، زر المفضلة */}
-          <div className="flex justify-between items-start mt-1">
-            <div className="flex items-start gap-3 sm:gap-4">
-              {/* المربع حق العلم مع خط ذهبي */}
-              <div className="w-11 h-11 sm:w-14 sm:h-14 bg-white/10 rounded-xl flex items-center justify-center text-2xl sm:text-3xl border border-[var(--mn-accent)] shrink-0 shadow-sm backdrop-blur-sm">
-                {university.countryFlag}
+          {/* Hero Content: Horizontal Row (Glowing Gold Graduation Badge Right -> Arrow -> Title Left) */}
+          <div
+            className="absolute inset-0 flex items-center justify-between px-4 sm:px-6 md:px-10 pt-1 pb-4 z-10"
+            dir={publicDir}
+          >
+            {/* Right Side: Glowing Gold Graduation Badge + Arrow */}
+            <div className="flex items-center gap-2.5 md:gap-3.5 shrink-0">
+              <div className="w-11 h-11 md:w-14 md:h-14 rounded-full border-2 border-[#F2CD78] flex items-center justify-center p-1.5 shadow-[0_0_12px_rgba(214,164,59,0.45)] bg-gradient-to-br from-[#142B5F] to-[#0E7C86] shrink-0">
+                <svg viewBox="0 0 40 40" className="w-full h-full">
+                  <defs>
+                    <linearGradient id="uniGoldCapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="var(--mn-accent-soft)" />
+                      <stop offset="45%" stopColor="var(--mn-accent-soft)" />
+                      <stop offset="100%" stopColor="var(--mn-accent)" />
+                    </linearGradient>
+                    <filter id="uniGoldShine" x="-30%" y="-30%" width="160%" height="160%">
+                      <feGaussianBlur stdDeviation="1" result="blur" />
+                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                  </defs>
+                  <polygon
+                    points="20,6 37,14 20,22 3,14"
+                    fill="url(#uniGoldCapGrad)"
+                    stroke="#FFF2B2"
+                    strokeWidth="0.8"
+                    filter="url(#uniGoldShine)"
+                  />
+                  <path
+                    d="M9,17.5 v6 c0,3.5 4.8,6.5 11,6.5 s11,-3 11,-6.5 v-6"
+                    fill="url(#uniGoldCapGrad)"
+                    stroke="#FFF2B2"
+                    strokeWidth="0.6"
+                  />
+                  <path
+                    d="M20,14 L34,16.5 v8.5"
+                    stroke="#FFEAA7"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="34" cy="26" r="1.8" fill="#FFEAA7" filter="url(#uniGoldShine)" />
+                </svg>
               </div>
-              <div className="flex flex-col pt-0.5">
-                <h1 className="text-[22px] sm:text-[28px] font-bold text-white leading-tight drop-shadow-sm flex items-baseline gap-2 flex-wrap">
-                  <span>{university.name}</span>
-                  <span className="text-sm sm:text-base text-[var(--mn-accent-text)] font-bold opacity-90">
-                    ({university.nameEn.replace('University of ', '').replace(' University', '')})
-                  </span>
-                </h1>
-              </div>
-            </div>
-            <button
-              onClick={onToggleSave}
-              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all border shrink-0 ${
-                isSaved
-                  ? 'bg-[var(--mn-danger-solid)]/20 border-[var(--mn-danger-border)]'
-                  : 'bg-white/10 hover:bg-white/20 border-white/10 backdrop-blur-sm'
-              }`}
-            >
-              <Heart
-                className={`w-4 h-4 sm:w-5 sm:h-5 ${isSaved ? 'fill-red-500 text-[var(--mn-danger-text)]' : 'text-white'}`}
-              />
-            </button>
-          </div>
 
-          {/* 4 عناصر بيانات - تم تحويلها لعرض طولي/شبكي (2x2) لمنع اختفاء النص */}
-          <div className="grid grid-cols-2 gap-2 sm:gap-2.5 border-t border-white/10 pt-3 mt-1">
-            <button
-              type="button"
-              onClick={() => university.countryReferenceId && onOpenCountry?.(university.countryReferenceId)}
-              className="bg-[var(--mn-surface-elevated)]/95 backdrop-blur-sm w-full rounded-lg py-1.5 px-2.5 flex flex-col sm:flex-row items-center text-center sm:text-start gap-1.5 shadow-sm border border-[var(--mn-border)] transition-all hover:border-[var(--mn-accent)]/70 hover:shadow-md cursor-pointer mn-panel "
-              title={publicT('public_explore_study_country', { v0: university.country })}
-            >
-              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--mn-accent-text)] shrink-0" />
-              <span className="text-[10px] sm:text-[11.5px] text-[var(--mn-heading)] font-bold leading-snug">
-                {university.country}
-                {university.city ? publicT('public_city_suffix', { v0: university.city }) : ''}
-              </span>
-            </button>
-
-            <div className="bg-[var(--mn-surface-elevated)]/95 backdrop-blur-sm w-full rounded-lg py-1.5 px-2.5 flex flex-col sm:flex-row items-center text-center sm:text-start gap-1.5 shadow-sm border border-[var(--mn-border)] mn-panel ">
-              <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--mn-accent-text)] shrink-0" />
-              <span className="text-[10px] sm:text-[11.5px] text-[var(--mn-heading)] font-bold leading-snug">
-                {university.ownership || publicT('public_not_specified_2')}
-              </span>
+              <ArrowLeft className="w-4 h-4 text-[#F2CD78] shrink-0 opacity-95 drop-shadow-[0_0_4px_rgba(214,164,59,0.4)]" />
             </div>
 
-            <div className="bg-[var(--mn-surface-elevated)]/95 backdrop-blur-sm w-full rounded-lg py-1.5 px-2.5 flex flex-col sm:flex-row items-center text-center sm:text-start gap-1.5 shadow-sm border border-[var(--mn-border)] mn-panel ">
-              <Landmark className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--mn-accent-text)] shrink-0" />
-              <span className="text-[10px] sm:text-[11.5px] text-[var(--mn-heading)] font-bold leading-snug">
-                {university.type || publicT('public_not_specified_2')}
-              </span>
-            </div>
-
-            <div className="bg-[var(--mn-surface-elevated)]/95 backdrop-blur-sm w-full rounded-lg py-1.5 px-2.5 flex flex-col sm:flex-row items-center text-center sm:text-start gap-1.5 shadow-sm border border-[var(--mn-border)] mn-panel ">
-              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--mn-accent-text)] shrink-0" />
-              <span className="text-[10px] sm:text-[11.5px] text-[var(--mn-heading)] font-bold leading-snug">
-                {university.foundationYear || publicT('public_not_specified_2')}
-              </span>
-            </div>
-          </div>
-
-          {/* زر الموقع الرسمي - لون أبيض وخط أخضر وحجم أصغر */}
-          {university.websiteUrl ? (
-            <div className="w-full flex justify-center mt-1">
-              <a
-                href={university.websiteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mn-external-link inline-flex min-h-10 w-auto items-center justify-center gap-2 rounded-xl px-3 py-2 text-[11px] font-bold sm:text-xs"
-              >
-                <span>{publicT('public_official_university_website')}</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            </div>
-          ) : (
-            <div className="w-full flex justify-center mt-1">
-              <div className="w-full sm:w-2/3 bg-white/10 text-white rounded-lg py-2 flex items-center justify-center gap-2 font-bold text-[11px] sm:text-xs border border-white/10">
-                <span>{publicT('public_official_website_unavailable')}</span>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* 2. استكمال باقي الصفحة (الأقسام الـ 11) */}
-      <div className="mn-detail-content mn-detail-content-narrow pt-6 pb-24 flex flex-col gap-6">
-        {university.publishedData ? <PublishedUniversityDetails university={university} onOpenMajor={onOpenMajor} onOpenExam={onOpenExam}/> : <>
-        {/* القسم الأول: نبذة عن الجامعة */}
-        <div
-          className="mn-detail-full-bleed relative bg-[var(--mn-surface)] border-y border-[var(--mn-border-brand)]/30 dark:border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/50 dark:shadow-none overflow-hidden mn-panel dark:mn-panel "
-          dir={publicDir}
-        >
-          {/* خط التزيين العلوي المتدرج */}
-          <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
-
-          <DetailSectionHeader
-            id="university-about"
-            icon={Info}
-            title={publicT('public_1_university_overview')}
-            className="mx-4 mt-4 sm:mx-5"
-          />
-
-          <div className="p-4 sm:p-5">
-            <div className="bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] rounded-2xl p-4 sm:p-5 border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] shadow-2xs relative overflow-hidden mn-panel dark:mn-panel ">
-              {/* زخرفة خلفية ناعمة */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[var(--mn-page)] to-[var(--mn-surface-muted)]/50 rounded-bl-full -z-10 opacity-70 mn-panel "></div>
-
-              <p className="text-[12.5px] sm:text-[13.5px] font-semibold text-[var(--mn-text)] dark:text-[var(--mn-text)] leading-[1.9] text-justify font-['Cairo',sans-serif] whitespace-pre-line">
-                {university.description}
+            {/* Left Side (in RTL): University Title & English Subtitle */}
+            <div className="flex flex-col text-start min-w-0 flex-1 pr-1.5">
+              <h1 className="text-[15px] sm:text-[15px] md:text-xl lg:text-2xl font-bold text-white leading-tight truncate drop-shadow-sm" data-mn-design="827f35e03a">
+                {university.name}
+              </h1>
+              <p className="text-[11px] sm:text-[11px] md:text-sm font-bold text-[#F2CD78] font-['Cairo',sans-serif] mt-0.5 tracking-wider truncate">
+                {university.nameEn}
               </p>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* القسم الثاني: التصنيفات العالمية — تصميم احترافي فاخر ملتصق بالجوانب ومتناسق مع باقي الأقسام */}
+      {/* MAIN CONTENT WRAPPER */}
+      <div className="px-0 md:px-4 space-y-2.5 md:space-y-4 z-20 relative mt-1 md:mt-2" dir={publicDir}>
+        {/* 2. 2-COLUMN X 2-ROW QUICK INFO GRID + DEDICATED OFFICIAL WEBSITE ROW */}
+        <div className="px-2 sm:px-2.5 space-y-2 pt-1" dir={publicDir}>
+          {/* ROW 1: دولة ومدينة الدراسة | ملكية الجامعة */}
+          <div className="flex items-stretch gap-2">
+            {/* Right Card: دولة ومدينة الدراسة */}
+            <button
+              type="button"
+              onClick={() =>
+                (university.countryReferenceId || university.country) &&
+                onOpenCountry?.(university.countryReferenceId || university.country)
+              }
+              className="flex-1 bg-[var(--mn-surface)] rounded-2xl p-2.5 border border-[var(--mn-border)] shadow-sm flex items-start gap-2 min-w-0 hover:border-[#142B5F]/45 dark:hover:border-[#F2CD78] hover:shadow-md active:scale-[0.99] transition-all text-start group cursor-pointer mn-panel"
+              title={publicT('public_explore_study_country', { v0: university.country })}
+            >
+              <div className="w-7 h-7 rounded-full bg-[#142B5F]/10 border-2 border-[#142B5F] text-[#142B5F] dark:bg-[#F2CD78]/15 dark:border-[#F2CD78] dark:text-[#F2CD78] flex items-center justify-center shrink-0 -mt-0.5">
+                <MapPin className="w-3.5 h-3.5 text-current" />
+              </div>
+              <div className="flex flex-col min-w-0 text-start flex-1">
+                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug">
+                  {publicT('public_study_country')}
+                </span>
+                <span className="text-[9.5px] sm:text-[10px] font-bold text-[var(--mn-text-muted)] leading-snug mt-1 break-words">
+                  {university.country}
+                  {university.city ? publicT('public_city_suffix', { v0: university.city }) : ''}
+                </span>
+              </div>
+              <div className="w-5 h-5 rounded-full bg-[#142B5F] border border-[#D6A43B]/75 text-[#F2CD78] flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform mt-0.5">
+                <ArrowUpLeft className="w-3 h-3 stroke-[2.5] shrink-0" />
+              </div>
+            </button>
+
+            {/* Diamond Connector */}
+            <div className="w-1.5 h-1.5 rotate-45 bg-[#D6A43B] shadow-[0_0_5px_rgba(214,164,59,0.5)] shrink-0 self-center" />
+
+            {/* Left Card: ملكية الجامعة */}
+            <div className="flex-1 bg-[var(--mn-surface)] rounded-2xl p-2.5 border border-[var(--mn-border)] shadow-sm flex items-start gap-2 min-w-0 mn-panel">
+              <div className="w-7 h-7 rounded-full bg-[#142B5F]/10 border-2 border-[#142B5F] text-[#142B5F] dark:bg-[#F2CD78]/15 dark:border-[#F2CD78] dark:text-[#F2CD78] flex items-center justify-center shrink-0 -mt-0.5">
+                <Building2 className="w-3.5 h-3.5 text-current" />
+              </div>
+              <div className="flex flex-col min-w-0 text-start flex-1">
+                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug">
+                  ملكية الجامعة
+                </span>
+                <span className="text-[9.5px] sm:text-[10px] font-bold text-[var(--mn-text-muted)] leading-snug mt-1 break-words">
+                  {university.ownership || publicT('public_not_specified_2')}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* ROW 2: نوع المؤسسة | سنة التأسيس */}
+          <div className="flex items-stretch gap-2">
+            {/* Right Card: نوع المؤسسة */}
+            <div className="flex-1 bg-[var(--mn-surface)] rounded-2xl p-2.5 border border-[var(--mn-border)] shadow-sm flex items-start gap-2 min-w-0 mn-panel">
+              <div className="w-7 h-7 rounded-full bg-[#142B5F]/10 border-2 border-[#142B5F] text-[#142B5F] dark:bg-[#F2CD78]/15 dark:border-[#F2CD78] dark:text-[#F2CD78] flex items-center justify-center shrink-0 -mt-0.5">
+                <Landmark className="w-3.5 h-3.5 text-current" />
+              </div>
+              <div className="flex flex-col min-w-0 text-start flex-1">
+                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug">
+                  نوع المؤسسة
+                </span>
+                <span className="text-[9.5px] sm:text-[10px] font-bold text-[var(--mn-text-muted)] leading-snug mt-1 break-words">
+                  {university.type || publicT('public_not_specified_2')}
+                </span>
+              </div>
+            </div>
+
+            {/* Diamond Connector */}
+            <div className="w-1.5 h-1.5 rotate-45 bg-[#D6A43B] shadow-[0_0_5px_rgba(214,164,59,0.5)] shrink-0 self-center" />
+
+            {/* Left Card: سنة التأسيس */}
+            <div className="flex-1 bg-[var(--mn-surface)] rounded-2xl p-2.5 border border-[var(--mn-border)] shadow-sm flex items-start gap-2 min-w-0 mn-panel">
+              <div className="w-7 h-7 rounded-full bg-[#142B5F]/10 border-2 border-[#142B5F] text-[#142B5F] dark:bg-[#F2CD78]/15 dark:border-[#F2CD78] dark:text-[#F2CD78] flex items-center justify-center shrink-0 -mt-0.5">
+                <Calendar className="w-3.5 h-3.5 text-current" />
+              </div>
+              <div className="flex flex-col min-w-0 text-start flex-1">
+                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug">
+                  سنة التأسيس
+                </span>
+                <span className="text-[9.5px] sm:text-[10px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif] leading-snug mt-1 break-words">
+                  {university.foundationYear || publicT('public_not_specified_2')}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* ROW 3: DEDICATED OFFICIAL UNIVERSITY WEBSITE ROW */}
+          {university.websiteUrl ? (
+            <a
+              href={university.websiteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative overflow-hidden w-full rounded-2xl py-2.5 pl-3 pr-0 bg-gradient-to-l from-[#142B5F]/[0.05] via-[var(--mn-surface)] to-[#0E7C86]/[0.08] dark:from-[#142B5F]/55 dark:via-[var(--mn-surface)] dark:to-[#0E7C86]/25 border border-[#142B5F]/35 dark:border-[#38C6D4]/50 hover:border-[#142B5F] dark:hover:border-[#F2CD78] shadow-sm hover:shadow-md active:scale-[0.99] transition-all flex items-center justify-between gap-2 group mn-panel"
+            >
+              {/* الخط الهندسي باللون النيلي على الزاوية اليمنى */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute top-0 right-0 w-4 h-[78%] rounded-tr-2xl border-t-[3px] border-r-[3.5px] border-[#142B5F] dark:border-[#38C6D4]"
+              />
+
+              <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                {/* خط نيلي خفيف يخرج من قلب الخط الهندسي وينتهي برأس سهم ذهبي يشير إلى الكلمة */}
+                <svg
+                  viewBox="0 0 36 20"
+                  className="w-8 h-5 shrink-0 -mr-[1px]"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  {/* اتصال مباشر بالخط الهندسي النيلي الجانبي */}
+                  <path
+                    d="M 35 2 L 35 10 L 8 10"
+                    stroke="#142B5F"
+                    className="dark:stroke-[#38C6D4]"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  {/* عقدة هندسية صغيرة عند مخرج السهم */}
+                  <circle cx="26" cy="10" r="1.6" fill="#142B5F" className="dark:fill-[#38C6D4]" />
+                  {/* رأس السهم باللون الذهبي */}
+                  <polygon
+                    points="1.5,10 10.5,5.2 8.6,10 10.5,14.8"
+                    fill="#D6A43B"
+                    stroke="#B8841E"
+                    strokeWidth="0.6"
+                  />
+                </svg>
+
+                <span className="text-[11.5px] sm:text-xs font-bold text-[var(--mn-heading)] leading-tight">
+                  {publicT('public_official_university_website')}
+                </span>
+              </div>
+
+              <div className="w-5 h-5 rounded-full bg-[#142B5F] border border-[#D6A43B]/75 text-[#F2CD78] flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                <ExternalLink className="w-2.5 h-2.5 stroke-[2.2] shrink-0" />
+              </div>
+            </a>
+          ) : (
+            <div className="relative overflow-hidden w-full bg-[var(--mn-surface)] rounded-2xl py-2.5 pl-3 pr-0 border border-[var(--mn-border)] shadow-sm flex items-center justify-between gap-2 opacity-80 mn-panel">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute top-0 right-0 w-4 h-[78%] rounded-tr-2xl border-t-[3px] border-r-[3.5px] border-[#142B5F] dark:border-[#38C6D4]"
+              />
+              <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                <svg
+                  viewBox="0 0 36 20"
+                  className="w-8 h-5 shrink-0 -mr-[1px]"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M 35 2 L 35 10 L 8 10"
+                    stroke="#142B5F"
+                    className="dark:stroke-[#38C6D4]"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <circle cx="26" cy="10" r="1.6" fill="#142B5F" className="dark:fill-[#38C6D4]" />
+                  <polygon
+                    points="1.5,10 10.5,5.2 8.6,10 10.5,14.8"
+                    fill="#D6A43B"
+                    stroke="#B8841E"
+                    strokeWidth="0.6"
+                  />
+                </svg>
+                <span className="text-[10.5px] font-bold text-[var(--mn-text-muted)] leading-tight">
+                  {publicT('public_official_website_unavailable')}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 4. استكمال باقي الصفحة (الأقسام الـ 11) */}
+        {university.publishedData ? (
+          <PublishedUniversityDetails university={university} onOpenMajor={onOpenMajor} onOpenExam={onOpenExam} />
+        ) : (
+          <>
+            {/* القسم الأول: نبذة عن الجامعة */}
+            <div
+              className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2.5 sm:px-3 md:p-6 py-3.5 border-y md:border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
+              dir={publicDir}
+            >
+              {/* خط التزيين العلوي النيلي / الذهبي الموحد */}
+              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent z-10" />
+
+              <UniversitySectionHeader
+                id="university-about"
+                icon={BookOpen}
+                title={publicT('public_1_university_overview')}
+                className="mb-3"
+              />
+
+              <div className="relative overflow-hidden rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] shadow-2xs pl-3 pr-3.5 py-2.5 text-start">
+                <div className="absolute top-2.5 right-0 bottom-2.5 w-[3px] rounded-l-full bg-[linear-gradient(180deg,#0E7C86_0%,#0E7C86_75%,#142B5F_100%)] dark:bg-[linear-gradient(180deg,#38C6D4_0%,#0E7C86_75%,#142B5F_100%)]" />
+                <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.9] text-justify font-['Cairo',sans-serif] whitespace-pre-line">
+                  <span className="inline-block w-3 h-3 rounded-[3px] bg-[#142B5F] shadow-[2px_2px_0px_#0E7C86] ml-2 align-middle shrink-0" />
+                  {university.description}
+                </p>
+              </div>
+            </div>
+
+        {/* القسم الثاني: التصنيفات العالمية — تصميم موحد متناسق مع هوية منارتك */}
         {university.rankings && university.rankings.length > 0 && (
           <div
-            className="mn-detail-full-bleed relative bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-y border-[var(--mn-border-brand)]/30 dark:border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/50 dark:shadow-none overflow-hidden mn-panel dark:mn-panel "
+            className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2.5 sm:px-3 md:p-6 py-3.5 border-y md:border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
             dir={publicDir}
           >
-            {/* خط التزيين العلوي المتدرج */}
-            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
+            {/* خط التزيين العلوي النيلي / الذهبي الموحد */}
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent z-10" />
 
-            <DetailSectionHeader
+            <UniversitySectionHeader
               id="university-rankings"
               icon={Trophy}
               title={publicT('public_2_international_rankings_and_academic_accreditations')}
-              className="mx-4 mt-4 sm:mx-5"
+              className="mb-3"
             />
 
             {/* المحتوى الداخلي لقائمة التصنيفات */}
-            <div className="p-4 sm:p-5 space-y-2.5 font-['Cairo',sans-serif]">
+            <div className="space-y-2 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 items-stretch font-['Cairo',sans-serif]">
               {university.rankings.map((ranking, idx) => {
                 const rankNum = ranking.rank.replace('#', '').replace('عالميًا', '').trim();
-                return (
-                  <div
-                    key={idx}
-                    className="bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] rounded-2xl border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] hover:border-[var(--mn-border-brand)] dark:hover:border-[var(--mn-accent)] p-3 sm:p-3.5 shadow-2xs hover:shadow-xs transition-all flex items-center justify-between gap-2.5 relative overflow-hidden group mn-panel dark:mn-panel "
-                  >
-                    {/* Right / Start: Accent bar + Rank Pill */}
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      {/* Left vertical emerald/gold accent curve */}
-                      <div className="w-1.5 h-9 bg-gradient-to-b from-[var(--mn-primary)] to-[var(--mn-accent-soft)] rounded-full shrink-0 mn-inverse " />
+                const Wrapper = ranking.link ? 'a' : 'div';
+                const wrapperProps = ranking.link
+                  ? {
+                      href: ranking.link,
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                      title: publicT('public_visit_ranking_page'),
+                    }
+                  : {};
 
-                      {/* Rank Pill with Trophy */}
-                      <div className="bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border-gold)] dark:border-[var(--mn-accent)]/30 rounded-full py-1 px-3 flex items-center gap-2 shadow-2xs mn-panel dark:mn-panel ">
-                        <div className="w-6 h-6 rounded-full bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)]/20 flex items-center justify-center text-[var(--mn-accent-text)] dark:text-[var(--mn-accent-text)] shrink-0 mn-inverse ">
-                          <Trophy className="w-3.5 h-3.5 text-[var(--mn-accent-text)] dark:text-[var(--mn-accent-text)]" />
+                return (
+                  <Wrapper
+                    key={idx}
+                    {...wrapperProps}
+                    className="relative overflow-hidden rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:border-[#142B5F]/45 dark:hover:border-[#F2CD78] pl-3 pr-3.5 py-2.5 shadow-2xs hover:shadow-xs transition-all flex items-center justify-between gap-2.5 group mn-panel"
+                  >
+                    {/* الخط الهندسي المنحني في بداية المربع */}
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute top-0 right-0 w-4 h-[78%] rounded-tr-xl border-t-[3px] border-r-[3.5px] border-[#142B5F] dark:border-[#D6A43B]"
+                    />
+
+                    {/* اليمين: أيقونة التصنيف مقابل اسم التصنيف + سهم التنقل بجانب الاسم + سنة الإصدار بالأسفل */}
+                    <div className="flex items-start gap-2 min-w-0 flex-1">
+                      <div className="w-6 h-6 rounded-lg mn-sub-item-icon flex items-center justify-center shrink-0 shadow-2xs -mt-0.5">
+                        <Trophy className="w-3.5 h-3.5 text-white" />
+                      </div>
+
+                      <div className="flex flex-col items-start text-start min-w-0 flex-1">
+                        <div className="inline-flex items-center gap-1 whitespace-nowrap max-w-full">
+                          <h3 className="text-[10.5px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug truncate">
+                            {ranking.name === 'Academic Ranking of World Universities (ARWU)' ? (
+                              <>
+                                <span className="sm:hidden">Academic Ranking (ARWU)</span>
+                                <span className="hidden sm:inline">{ranking.name}</span>
+                              </>
+                            ) : (
+                              ranking.name
+                            )}
+                          </h3>
+                          {ranking.link && (
+                            <ArrowUpLeft className="w-3.5 h-3.5 -mt-1 text-[#0E7C86] dark:text-[#F2CD78] stroke-[2.5] shrink-0 transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" />
+                          )}
                         </div>
-                        <span className="text-xs sm:text-[12.5px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] font-['Cairo',sans-serif]">
-                          {rankNum}{' '}{publicT('public_worldwide_2')}</span>
+                        <span className="text-[10px] sm:text-[10.5px] font-bold text-[var(--mn-text)] mt-1 leading-snug">
+                          {publicT('public_edition')} {ranking.year}
+                        </span>
                       </div>
                     </div>
 
-                    {/* Middle: Ranking Name & Edition Year */}
-                    <div className="flex flex-col items-start text-start flex-1 min-w-0 px-2">
-                      {ranking.link ? (
-                        <a
-                          href={ranking.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs sm:text-[12.5px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-text)] hover:text-[var(--mn-heading)] dark:hover:text-[var(--mn-accent-text)] transition-colors font-['Cairo',sans-serif] leading-snug line-clamp-1"
-                        >
-                          {ranking.name}
-                        </a>
-                      ) : (
-                        <h3 className="text-xs sm:text-[12.5px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-text)] font-['Cairo',sans-serif] leading-snug line-clamp-1">
-                          {ranking.name}
-                        </h3>
-                      )}
-                      <span className="text-[10px] text-[var(--mn-text-muted)] dark:text-[var(--mn-text-muted)] font-medium font-['Cairo',sans-serif] mt-0.5">{publicT('public_edition')}{' '}{ranking.year}
-                      </span>
+                    {/* اليسار (نهاية الجدول): شارة الترتيب العالمي */}
+                    <div className="flex items-center shrink-0">
+                      <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#142B5F] border border-[#D6A43B]/75 text-[#F2CD78] shadow-2xs">
+                        <span className="text-[10px] sm:text-[10.5px] font-bold font-['Cairo',sans-serif] leading-none">
+                          #{rankNum} {publicT('public_worldwide_2')}
+                        </span>
+                      </div>
                     </div>
-
-                    {/* Left / End: External Link Icon */}
-                    <div className="shrink-0">
-                      {ranking.link ? (
-                        <a
-                          href={ranking.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--mn-text-muted)] hover:text-[var(--mn-heading)] dark:hover:text-[var(--mn-accent-text)] hover:bg-[var(--mn-page)] dark:hover:bg-[var(--mn-surface-muted)] transition-colors hover:mn-panel dark:hover:mn-panel "
-                          title={publicT('public_visit_ranking_page')}
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      ) : (
-                        <div className="w-8 h-8 flex items-center justify-center text-[var(--mn-text-muted)] dark:text-[var(--mn-text-muted)]">
-                          <ExternalLink className="w-4 h-4" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  </Wrapper>
                 );
               })}
             </div>
           </div>
         )}
 
-        {/* القسم الثالث: الدراسة والتخصصات — تصميم احترافي فاخر ملتصق بالجوانب ومتنوع الأنماط */}
+        {/* القسم الثالث: الدراسة والتخصصات والبرامج الأكاديمية — بنسبة 95% بدون مربع داخل مربع */}
         {university.studyPrograms && (
           <div
-            className="mn-detail-full-bleed relative bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-y border-[var(--mn-border-brand)]/30 dark:border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/50 dark:shadow-none overflow-hidden mn-panel dark:mn-panel "
+            className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2.5 sm:px-3 md:p-6 py-3.5 border-y md:border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
             dir={publicDir}
           >
-            {/* خط التزيين العلوي المتدرج */}
-            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
+            {/* خط التزيين العلوي النيلي / الذهبي الموحد */}
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent z-10" />
 
-            <DetailSectionHeader
+            <UniversitySectionHeader
               id="university-programs"
               icon={GraduationCap}
               title={publicT('public_3_study_majors_and_academic_programs')}
-              className="mx-4 mt-4 sm:mx-5"
+              className="mb-3"
             />
 
-            {/* المحتوى الداخلي المتنوع الأنماط والتفاصيل */}
-            <div className="p-4 sm:p-5 space-y-4 font-['Cairo',sans-serif]">
-              {/* 1. لغات التدريس وأنماط الدراسة (المربع الأول) */}
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] space-y-2.5 shadow-2xs mn-panel dark:mn-panel">
-                <div className="flex items-center gap-2">
-                  <div className="w-5.5 h-5.5 rounded-lg bg-[var(--mn-primary)]/10 dark:bg-[var(--mn-accent)]/20 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] flex items-center justify-center shrink-0">
-                    <Globe className="w-3.5 h-3.5" />
+            {/* المحتوى الداخلي المنظم بعرض 95% مباشر بدون مربعات خارجية مكررة */}
+            <div className="space-y-3 font-['Cairo',sans-serif]">
+              {/* 1. لغات التدريس وأنماط الدراسة */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-[18px] h-[18px] rounded-[5px] bg-[#142B5F] border border-[#142B5F] text-white mn-sub-item-icon flex items-center justify-center shrink-0 shadow-2xs">
+                    <Languages className="w-2.5 h-2.5 text-white" />
                   </div>
-                  <span className="text-[11.5px] sm:text-xs font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] font-['Cairo',sans-serif]">{publicT('public_teaching_languages_and_study_arrangements')}</span>
+                  <span className="text-[11px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug">
+                    {publicT('public_teaching_languages_and_study_arrangements')}
+                  </span>
                 </div>
 
-                <div className="space-y-2 pt-0.5">
+                <div className="grid grid-cols-1 gap-2">
                   {/* لغات التدريس */}
-                  {university.studyPrograms.teachingLanguages && university.studyPrograms.teachingLanguages.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="text-[10px] sm:text-[10.5px] font-bold text-[var(--mn-text-muted)] shrink-0">{publicT('public_teaching_languages')}</span>
-                      {university.studyPrograms.teachingLanguages.map((lang) => (
-                        <div
-                          key={lang}
-                          className="bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border border-[var(--mn-accent)]/30 dark:border-[var(--mn-accent)]/25 text-[var(--mn-heading)] dark:text-[var(--mn-text)] px-2.5 py-1 rounded-lg text-[10px] sm:text-[10.5px] font-bold flex items-center gap-1.5 shadow-2xs font-['Cairo',sans-serif] mn-panel dark:mn-panel"
-                        >
-                          <div className="w-1.5 h-1.5 rounded-full bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] shrink-0 mn-inverse dark:mn-gold" />
-                          <span>{lang}</span>
+                  {university.studyPrograms.teachingLanguages &&
+                    university.studyPrograms.teachingLanguages.length > 0 && (
+                      <div className="rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] px-3 py-2 flex flex-wrap items-center justify-start gap-2.5 sm:gap-3 shadow-2xs">
+                        <span className="inline-flex items-center gap-1.5 text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] shrink-0">
+                          <span className="w-2 h-2 rounded-full bg-[#142B5F] dark:bg-[#F2CD78] shrink-0" />
+                          <span>{publicT('public_teaching_languages')}</span>
+                        </span>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {university.studyPrograms.teachingLanguages.map((lang) => (
+                            <span
+                              key={lang}
+                              className="bg-[var(--mn-surface)] border border-[var(--mn-border)] text-[var(--mn-heading)] px-2.5 py-0.5 rounded-lg text-[10px] font-bold inline-flex items-center shadow-2xs"
+                            >
+                              {lang}
+                            </span>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    )}
 
                   {/* أنماط الدراسة والحضور */}
-                  {university.studyPrograms.studyModes && university.studyPrograms.studyModes.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="text-[10px] sm:text-[10.5px] font-bold text-[var(--mn-text-muted)] shrink-0">{publicT('public_attendance_arrangements')}</span>
-                      {university.studyPrograms.studyModes.map((mode) => (
-                        <div
-                          key={mode}
-                          className="bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border border-[var(--mn-accent)]/30 dark:border-[var(--mn-accent)]/25 text-[var(--mn-heading)] dark:text-[var(--mn-text)] px-2.5 py-1 rounded-lg text-[10px] sm:text-[10.5px] font-bold flex items-center gap-1.5 shadow-2xs font-['Cairo',sans-serif] mn-panel dark:mn-panel"
-                        >
-                          <div className="w-1.5 h-1.5 rounded-full bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] shrink-0 mn-inverse dark:mn-gold" />
-                          <span>{mode}</span>
+                  {university.studyPrograms.studyModes &&
+                    university.studyPrograms.studyModes.length > 0 && (
+                      <div className="rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] px-3 py-2 flex flex-wrap items-center justify-start gap-2.5 sm:gap-3 shadow-2xs">
+                        <span className="inline-flex items-center gap-1.5 text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] shrink-0">
+                          <span className="w-2 h-2 rounded-full bg-[#0E7C86] dark:bg-[#F2CD78] shrink-0" />
+                          <span>{publicT('public_attendance_arrangements')}</span>
+                        </span>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {university.studyPrograms.studyModes.map((mode) => (
+                            <span
+                              key={mode}
+                              className="bg-[var(--mn-surface)] border border-[var(--mn-border)] text-[var(--mn-heading)] px-2 py-0.5 rounded-lg text-[9.5px] sm:text-[10px] font-bold inline-flex items-center shadow-2xs"
+                            >
+                              {mode}
+                            </span>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    )}
                 </div>
               </div>
 
-              {/* 2. الدرجات التعليمية المتاحة */}
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] space-y-2 shadow-2xs mn-panel dark:mn-panel ">
-                <div className="flex items-center gap-2">
-                  <div className="w-5.5 h-5.5 rounded-lg bg-[var(--mn-primary)]/10 dark:bg-[var(--mn-accent)]/20 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] flex items-center justify-center shrink-0">
-                    <GraduationCap className="w-3.5 h-3.5" />
+              {/* 2. الدرجات التعليمية المتاحة (شبكة مربعين متناسقة تملأ العرض) */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-[18px] h-[18px] rounded-[5px] bg-[#142B5F] border border-[#142B5F] text-white mn-sub-item-icon flex items-center justify-center shrink-0 shadow-2xs">
+                    <GraduationCap className="w-2.5 h-2.5 text-white" />
                   </div>
-                  <span className="text-[11.5px] sm:text-xs font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] font-['Cairo',sans-serif]">{publicT('public_degrees_available_for_admission_and_study')}</span>
+                  <span className="text-[11px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug">
+                    {publicT('public_degrees_available_for_admission_and_study')}
+                  </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
                   {(university.studyPrograms.degrees ?? []).map((degree) => (
                     <div
                       key={degree}
-                      className="bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border border-[var(--mn-accent)]/30 dark:border-[var(--mn-accent)]/25 text-[var(--mn-heading)] dark:text-[var(--mn-text)] px-2.5 py-1 rounded-lg text-[10px] sm:text-[10.5px] font-bold flex items-center gap-1.5 shadow-2xs hover:border-[var(--mn-border-brand)] transition-all font-['Cairo',sans-serif] mn-panel dark:mn-panel "
+                      className="bg-[var(--mn-page)] border border-[var(--mn-border)] text-[var(--mn-heading)] px-3 py-2 rounded-xl text-[10px] sm:text-[10.5px] font-bold flex items-center gap-1.5 shadow-2xs min-w-0"
                     >
-                      <div className="w-1.5 h-1.5 rounded-full bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] shrink-0 mn-inverse dark:mn-gold " />
-                      <span>{degree}</span>
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#142B5F] dark:bg-[#D6A43B] shrink-0" />
+                      <span className="truncate">{degree}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* 3. الكليات والأقسام الأكاديمية الرئيسية */}
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] space-y-2 shadow-2xs mn-panel dark:mn-panel ">
-                <div className="flex items-center gap-2">
-                  <div className="w-5.5 h-5.5 rounded-lg bg-[var(--mn-primary)]/10 dark:bg-[var(--mn-accent)]/20 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] flex items-center justify-center shrink-0">
-                    <Building2 className="w-3.5 h-3.5" />
+              {/* 3. الكليات والأقسام الأكاديمية الرئيسية (شبكة مربعين متناسقة تملأ العرض) */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-[18px] h-[18px] rounded-[5px] bg-[#142B5F] border border-[#142B5F] text-white mn-sub-item-icon flex items-center justify-center shrink-0 shadow-2xs">
+                    <Building2 className="w-2.5 h-2.5 text-white" />
                   </div>
-                  <span className="text-[11.5px] sm:text-xs font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] font-['Cairo',sans-serif]">{publicT('public_main_faculties_and_academic_departments')}</span>
+                  <span className="text-[11px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug">
+                    {publicT('public_main_faculties_and_academic_departments')}
+                  </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
                   {(university.studyPrograms.faculties ?? []).map((faculty, index) => (
                     <div
                       key={index}
-                      className="bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border border-[var(--mn-accent)]/30 dark:border-[var(--mn-accent)]/25 text-[var(--mn-heading)] dark:text-[var(--mn-text)] px-2.5 py-1 rounded-lg text-[10px] sm:text-[10.5px] font-bold flex items-center gap-1.5 shadow-2xs hover:border-[var(--mn-border-brand)] transition-all font-['Cairo',sans-serif] mn-panel dark:mn-panel "
+                      className="bg-[var(--mn-page)] border border-[var(--mn-border)] text-[var(--mn-heading)] px-3 py-2 rounded-xl text-[10px] sm:text-[10.5px] font-bold flex items-center gap-1.5 shadow-2xs min-w-0"
                     >
-                      <div className="w-1.5 h-1.5 rounded-full bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] shrink-0 mn-inverse dark:mn-gold " />
-                      <span>{faculty}</span>
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#142B5F] dark:bg-[#D6A43B] shrink-0" />
+                      <span className="truncate">{faculty}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* 4. أهم التخصصات الرائدة */}
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] space-y-2 shadow-2xs mn-panel dark:mn-panel ">
-                <div className="flex items-center gap-2">
-                  <div className="w-5.5 h-5.5 rounded-lg bg-[var(--mn-primary)]/10 dark:bg-[var(--mn-accent)]/20 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] flex items-center justify-center shrink-0">
-                    <BookOpen className="w-3.5 h-3.5" />
+              {/* 4. أهم التخصصات الرائدة بالجامعة (شبكة مربعين متناسقة تملأ العرض) */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-[18px] h-[18px] rounded-[5px] bg-[#142B5F] border border-[#142B5F] text-white mn-sub-item-icon flex items-center justify-center shrink-0 shadow-2xs">
+                    <BookOpen className="w-2.5 h-2.5 text-white" />
                   </div>
-                  <span className="text-[11.5px] sm:text-xs font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] font-['Cairo',sans-serif]">{publicT('public_leading_academic_majors_at_the_university')}</span>
+                  <span className="text-[11px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug">
+                    {publicT('public_leading_academic_majors_at_the_university')}
+                  </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
                   {(
                     university.studyPrograms.majorLinks?.length
-                      ? university.studyPrograms.majorLinks
-                      : (university.studyPrograms.topKeyMajors ?? []).map((label) => ({ label, majorId: undefined }))
+                      ? university.studyPrograms.majorLinks.map(m => ({ label: m.label, majorId: m.majorId }))
+                      : (university.studyPrograms.topKeyMajors ?? []).map(label => ({ label, majorId: undefined }))
                   ).map((major, idx) => {
                     const { label: majorName, majorId } = major;
 
                     return (
-                      <div
+                      <button
                         key={majorId || `${majorName}-${idx}`}
-                        role={majorId ? 'button' : undefined}
-                        tabIndex={majorId ? 0 : undefined}
-                        onKeyDown={majorId ? function (event) {
-                          if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault();
-                            onOpenMajor?.(majorId);
-                          }
-                        } : undefined}
-                        onClick={majorId ? () => { if (major.majorId) onOpenMajor?.(major.majorId); } : undefined}
-                        className={`bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border border-[var(--mn-accent)]/30 dark:border-[var(--mn-accent)]/25 text-[var(--mn-heading)] dark:text-[var(--mn-text)] px-2.5 py-1 rounded-lg text-[10px] sm:text-[10.5px] font-bold flex items-center gap-1.5 shadow-2xs hover:border-[var(--mn-border-brand)] transition-all font-['Cairo',sans-serif] mn-panel dark:mn-panel ${
-                          majorId ? 'cursor-pointer hover:text-[var(--mn-accent-text)]' : ''
+                        type="button"
+                        onClick={() => major.majorId && onOpenMajor?.(major.majorId)}
+                        aria-label={
+                          majorId
+                            ? publicT('public_open_major_manaratak', { v0: majorName })
+                            : undefined
+                        }
+                        title={
+                          majorId
+                            ? publicT('public_open_major_manaratak', { v0: majorName })
+                            : undefined
+                        }
+                        className={`mn-major-chip w-full flex items-center justify-between gap-1.5 px-3 py-2 bg-[var(--mn-page)] border border-[#142B5F]/20 dark:border-[var(--mn-border)] text-[var(--mn-heading)] text-[10px] sm:text-[10.5px] font-bold rounded-xl transition-all group min-w-0 text-start ${
+                          majorId
+                            ? 'hover:border-[#0E7C86]/65 dark:hover:border-[#F2CD78]/65 hover:shadow-2xs active:scale-95 cursor-pointer'
+                            : 'hover:border-[#0E7C86]/45 dark:hover:border-[#F2CD78]/45 cursor-default'
                         }`}
-                        title={majorId ? publicT('public_open_major_manaratak', { v0: majorName }) : undefined}
                       >
-                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] shrink-0 mn-inverse dark:mn-gold " />
-                        <span>{majorName}</span>
-                      </div>
+                        <span className="truncate">{majorName}</span>
+                        <ArrowUpLeft className="w-3.5 h-3.5 text-[var(--mn-interactive-arrow)] opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-200 shrink-0" />
+                      </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* 5. زر الدليل الرسمي المباشر */}
-              {(university.studyPrograms.undergradDirectoryUrl || university.studyPrograms.postgradDirectoryUrl) && (
-                <div className="pt-2 pb-0.5 flex justify-center">
-                  <a
-                    href={
-                      university.studyPrograms.undergradDirectoryUrl ||
-                      university.studyPrograms.postgradDirectoryUrl
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-500/10 via-cyan-600/15 to-[var(--mn-learning-exercise-600)]/10 hover:from-teal-500/20 hover:via-cyan-600/25 hover:to-[var(--mn-learning-exercise-600)]/20 text-teal-950 border border-teal-400/50 dark:from-amber-500/15 dark:via-yellow-500/20 dark:to-amber-600/15 dark:hover:from-amber-500/25 dark:hover:via-yellow-500/30 dark:hover:to-amber-600/25 dark:text-amber-200 dark:border-amber-400/50 shadow-2xs hover:shadow-xs transition-all duration-200 text-[10px] sm:text-[10.5px] font-bold font-['Cairo',sans-serif] group text-center"
-                  >
-                    <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-teal-600 via-cyan-700 to-[var(--mn-learning-exercise-800)] text-white dark:from-amber-500 dark:via-yellow-500 dark:to-amber-600 dark:text-zinc-950 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform font-bold">
-                      <FileText className="w-2.5 h-2.5" />
-                    </div>
-                    <span>{publicT('public_explore_the_universitys_official_program_and_major_directory')}</span>
-                    <ExternalLink className="w-2.5 h-2.5 text-cyan-700 dark:text-amber-300 group-hover:translate-x-[-2px] transition-transform" />
-                  </a>
-                </div>
+              {/* 5. زر الدليل الرسمي المباشر للبرامج والتخصصات */}
+              {(university.studyPrograms.undergradDirectoryUrl ||
+                university.studyPrograms.postgradDirectoryUrl) && (
+                <OfficialInfoLink
+                  href={
+                    university.studyPrograms.undergradDirectoryUrl ||
+                    university.studyPrograms.postgradDirectoryUrl
+                  }
+                  label={publicT('public_explore_the_universitys_official_program_and_major_directory')}
+                  icon={<FileText className="w-3.5 h-3.5" />}
+                />
               )}
             </div>
           </div>
         )}
 
-        {/* القسم الرابع: القبول للطلاب الدوليين */}
+        {/* القسم الرابع: القبول الجامعي والتسجيل للطلاب الدوليين — بدون مربع داخل مربع */}
         {university.internationalAdmissions && (
-        <div
-          className="mn-detail-full-bleed relative bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-y border-[var(--mn-border-brand)]/30 dark:border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/50 dark:shadow-none overflow-hidden mn-panel dark:mn-panel "
-          dir={publicDir}
-        >
-          {/* خط التزيين الأزرق العلوي المتدرج */}
-          <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
+          <div
+            className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2.5 sm:px-3 md:p-6 py-3.5 border-y md:border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
+            dir={publicDir}
+          >
+            {/* خط التزيين العلوي النيلي / الذهبي الموحد */}
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent z-10" />
 
-          <DetailSectionHeader
-            id="university-admissions"
-            icon={Globe}
-            title={publicT('public_4_international_student_admission_and_registration')}
-            className="mx-4 mt-4 sm:mx-5"
-          />
+            <UniversitySectionHeader
+              id="university-admissions"
+              icon={Globe}
+              title={publicT('public_4_international_student_admission_and_registration')}
+              className="mb-3"
+            />
 
-          {/* المحتوى الداخلي لقسم القبول والتسجيل */}
-          <div className="p-4 sm:p-5 space-y-4 font-['Cairo',sans-serif]">
-            {/* 1. هل تقبل الجامعة طلابًا دوليين؟ */}
-            <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-[var(--mn-page)]/90 dark:from-[var(--mn-surface-elevated)] via-[var(--mn-surface)] dark:via-[var(--mn-surface-elevated)] to-[var(--mn-surface-muted)]/30 dark:to-[var(--mn-surface-muted)] border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] space-y-2.5 shadow-2xs mn-panel dark:mn-panel ">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-[var(--mn-primary)]/10 dark:bg-[var(--mn-accent)]/20 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] flex items-center justify-center shrink-0">
-                  <UserCheck className="w-3.5 h-3.5" />
-                </div>
-                <span className="text-xs sm:text-[13px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] font-['Cairo',sans-serif]">{publicT('public_does_the_university_accept_international_students')}</span>
-              </div>
-
-              <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] dark:text-[var(--mn-text)] leading-relaxed pr-8 font-['Cairo',sans-serif]">
-                {university.internationalAdmissions.acceptsDescription ||
-                  (university.internationalAdmissions.acceptsInternationalStudents === true
-                    ? publicT('public_international_admission_yes', { v0: university.name })
-                    : university.internationalAdmissions.acceptsInternationalStudents === false
-                      ? publicT('public_international_admission_no', { v0: university.name })
-                      : publicT('public_international_student_admission_status_is_not_specified_in')) }
-              </p>
-            </div>
-
-            {/* 2. روابط وبوابات التقديم الرسمية المعتمدة (في مربع واحد موحد) */}
-            <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] space-y-2.5 shadow-2xs mn-panel dark:mn-panel font-['Cairo',sans-serif]">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-5.5 h-5.5 rounded-lg bg-[var(--mn-primary)]/10 dark:bg-[var(--mn-accent)]/20 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] flex items-center justify-center shrink-0">
-                    <Globe2 className="w-3.5 h-3.5" />
+            {/* المحتوى الداخلي لقسم القبول والتسجيل بعرض 95% مباشر */}
+            <div className="space-y-3 font-['Cairo',sans-serif]">
+              {/* 1. هل تقبل الجامعة طلابًا دوليين؟ */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-[18px] h-[18px] rounded-[5px] bg-[#142B5F] border border-[#142B5F] text-white mn-sub-item-icon flex items-center justify-center shrink-0 shadow-2xs">
+                    <UserCheck className="w-2.5 h-2.5 text-white" />
                   </div>
-                  <span className="text-[11.5px] sm:text-xs font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] font-['Cairo',sans-serif]">{publicT('public_official_admission_links_and_portals')}</span>
+                  <span className="text-[11px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug">
+                    {publicT('public_does_the_university_accept_international_students')}
+                  </span>
                 </div>
-                <span className="inline-flex items-center gap-1 text-[9px] sm:text-[9.5px] font-bold text-[var(--mn-accent-text)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border-gold)]/60 dark:border-[var(--mn-border)] px-2 py-0.5 rounded-full">
-                  <ShieldCheck className="w-2.5 h-2.5" />{publicT('public_official_sites')}</span>
+
+                <div className="relative overflow-hidden rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] pl-3 pr-3.5 py-2.5 shadow-2xs">
+                  <div className="absolute top-2.5 right-0 bottom-2.5 w-[3px] rounded-l-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86] dark:from-[#D6A43B] dark:to-[#E5B54F]" />
+                  <p className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify font-['Cairo',sans-serif]">
+                    {university.internationalAdmissions.acceptsDescription ||
+                      (university.internationalAdmissions.acceptsInternationalStudents === true
+                        ? publicT('public_international_admission_yes', { v0: university.name })
+                        : university.internationalAdmissions.acceptsInternationalStudents === false
+                          ? publicT('public_international_admission_no', { v0: university.name })
+                          : publicT('public_international_student_admission_status_is_not_specified_in'))}
+                  </p>
+                </div>
               </div>
 
-              {/* شبكة بوابات التقديم الفرعية الموحدة */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
-                {/* 1. قبول البكالوريوس */}
-                {university.internationalAdmissions.undergradAdmissionUrl && (
-                  <a
-                    href={university.internationalAdmissions.undergradAdmissionUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] dark:hover:bg-[var(--mn-surface-muted)] rounded-xl p-2 sm:p-2.5 border border-[var(--mn-border-gold)]/50 dark:border-[var(--mn-border)] hover:border-[var(--mn-accent)] transition-all flex items-center justify-between gap-2 text-start mn-panel dark:mn-panel"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-7 h-7 rounded-lg bg-[var(--mn-primary)]/10 dark:bg-[var(--mn-accent)]/15 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                        <BookOpenCheck className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-text)] group-hover:text-[var(--mn-accent-text)] transition-colors leading-tight truncate">{publicT('public_undergraduate_admission')}</span>
-                        <span className="text-[9px] font-medium text-[var(--mn-text-muted)] truncate mt-0.5">{publicT('public_degree_requirements')}</span>
-                      </div>
-                    </div>
-                    <div className="w-5 h-5 rounded-md bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] text-[var(--mn-text-muted)] group-hover:text-[var(--mn-accent-text)] flex items-center justify-center shrink-0 transition-colors">
-                      <ArrowUpRight className="w-3 h-3" />
-                    </div>
-                  </a>
-                )}
+              {/* 2. روابط وبوابات التقديم الرسمية المعتمدة (مباشرة بعرض 95% بدون مربع خارجي إضافي) */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <div className="w-[18px] h-[18px] rounded-[5px] bg-[#142B5F] border border-[#142B5F] text-white mn-sub-item-icon flex items-center justify-center shrink-0 shadow-2xs">
+                    <Globe2 className="w-2.5 h-2.5 text-white" />
+                  </div>
+                  <span className="text-[11px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug">
+                    {publicT('public_official_admission_links_and_portals')}
+                  </span>
+                </div>
 
-                {/* 2. قبول الدراسات العليا */}
-                {university.internationalAdmissions.postgradAdmissionUrl && (
-                  <a
-                    href={university.internationalAdmissions.postgradAdmissionUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] dark:hover:bg-[var(--mn-surface-muted)] rounded-xl p-2 sm:p-2.5 border border-[var(--mn-border-gold)]/50 dark:border-[var(--mn-border)] hover:border-[var(--mn-accent)] transition-all flex items-center justify-between gap-2 text-start mn-panel dark:mn-panel"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                        <Scroll className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-text)] group-hover:text-[var(--mn-accent-text)] transition-colors leading-tight truncate">{publicT('public_postgraduate_admission')}</span>
-                        <span className="text-[9px] font-medium text-[var(--mn-text-muted)] truncate mt-0.5">{publicT('public_masters_and_doctorate')}</span>
-                      </div>
-                    </div>
-                    <div className="w-5 h-5 rounded-md bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] text-[var(--mn-text-muted)] group-hover:text-[var(--mn-accent-text)] flex items-center justify-center shrink-0 transition-colors">
-                      <ArrowUpRight className="w-3 h-3" />
-                    </div>
-                  </a>
-                )}
-
-                {/* 3. صفحة الطلاب الدوليين */}
-                {university.internationalAdmissions.internationalStudentsUrl && (
-                  <a
-                    href={university.internationalAdmissions.internationalStudentsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] dark:hover:bg-[var(--mn-surface-muted)] rounded-xl p-2 sm:p-2.5 border border-[var(--mn-border-gold)]/50 dark:border-[var(--mn-border)] hover:border-[var(--mn-accent)] transition-all flex items-center justify-between gap-2 text-start mn-panel dark:mn-panel"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-7 h-7 rounded-lg bg-[var(--mn-learning-success-500)]/15 text-[var(--mn-learning-success-700)] dark:text-[var(--mn-learning-success-300)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                        <Compass className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-text)] group-hover:text-[var(--mn-accent-text)] transition-colors leading-tight truncate">{publicT('public_international_student_and_visa_guide')}</span>
-                        <span className="text-[9px] font-medium text-[var(--mn-text-muted)] truncate mt-0.5">{publicT('public_international_student_office')}</span>
-                      </div>
-                    </div>
-                    <div className="w-5 h-5 rounded-md bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] text-[var(--mn-text-muted)] group-hover:text-[var(--mn-accent-text)] flex items-center justify-center shrink-0 transition-colors">
-                      <ArrowUpRight className="w-3 h-3" />
-                    </div>
-                  </a>
-                )}
-
-                {/* 4. بوابة التقديم الإلكتروني الرئيسية */}
-                {university.internationalAdmissions.applicationPortalUrl && (
-                  <a
-                    href={university.internationalAdmissions.applicationPortalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] dark:hover:bg-[var(--mn-surface-muted)] rounded-xl p-2 sm:p-2.5 border border-[var(--mn-border-gold)]/60 dark:border-[var(--mn-accent)]/40 hover:border-[var(--mn-accent)] transition-all flex items-center justify-between gap-2 text-start mn-panel dark:mn-panel"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[var(--mn-primary)] via-[var(--mn-accent)] to-[var(--mn-primary)] text-white dark:text-zinc-950 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
-                        <Zap className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-text)] group-hover:text-[var(--mn-accent-text)] transition-colors leading-tight">{publicT('public_main_online_application_portal')}</span>
-                          <span className="inline-flex items-center text-[8px] font-bold text-white dark:text-zinc-950 bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] px-1 py-0.2 rounded shrink-0">{publicT('public_direct_portal')}</span>
+                {/* قائمة بوابات التقديم الفرعية بشكل طولي متناسق */}
+                <div className="flex flex-col md:grid md:grid-cols-2 gap-2 md:gap-3">
+                  {/* 1. قبول البكالوريوس */}
+                  {university.internationalAdmissions.undergradAdmissionUrl && (
+                    <a
+                      href={university.internationalAdmissions.undergradAdmissionUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative overflow-hidden group bg-[var(--mn-page)] hover:border-[#142B5F]/45 dark:hover:border-[#F2CD78] rounded-xl px-3 py-2.5 border border-[var(--mn-border)] shadow-2xs hover:shadow-xs active:scale-[0.99] transition-all flex items-center justify-between gap-2 text-start min-w-0"
+                    >
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className="w-5 h-5 rounded-full mn-quick-info-icon-box flex items-center justify-center shrink-0">
+                          <BookOpenCheck className="w-3 h-3 text-current" />
                         </div>
-                        <span className="text-[9px] font-medium text-[var(--mn-text-muted)] truncate mt-0.5">{publicT('public_university_registration_and_student_account_platform')}</span>
+                        <div className="flex flex-wrap items-center gap-1.5 min-w-0 flex-1">
+                          <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug">
+                            {publicT('public_undergraduate_admission')}
+                          </span>
+                          <span className="text-[9px] sm:text-[9.5px] font-medium text-[var(--mn-text-muted)] leading-snug">
+                            ({publicT('public_degree_requirements')})
+                          </span>
+                          <span className="w-5 h-5 rounded-full bg-[#142B5F] border border-[#D6A43B]/75 text-[#F2CD78] inline-flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform mr-1">
+                            <ExternalLink className="w-2.5 h-2.5 stroke-[2.2] shrink-0" />
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="w-5 h-5 rounded-md bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] text-[var(--mn-text-muted)] group-hover:text-[var(--mn-accent-text)] flex items-center justify-center shrink-0 transition-colors">
-                      <ArrowUpRight className="w-3 h-3" />
-                    </div>
-                  </a>
-                )}
-              </div>
+                    </a>
+                  )}
 
-              {/* ملاحظة الأمان والتوثيق */}
-              <div className="flex items-center justify-center gap-1.5 pt-1 text-[9.5px] font-medium text-[var(--mn-text-muted)]">
-                <ShieldCheck className="w-3 h-3 text-[var(--mn-accent-text)] shrink-0" />
-                <span>{publicT('public_all_portals_take_you_directly_to_the_universitys')}</span>
+                  {/* 2. قبول الدراسات العليا */}
+                  {university.internationalAdmissions.postgradAdmissionUrl && (
+                    <a
+                      href={university.internationalAdmissions.postgradAdmissionUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative overflow-hidden group bg-[var(--mn-page)] hover:border-[#142B5F]/45 dark:hover:border-[#F2CD78] rounded-xl px-3 py-2.5 border border-[var(--mn-border)] shadow-2xs hover:shadow-xs active:scale-[0.99] transition-all flex items-center justify-between gap-2 text-start min-w-0"
+                    >
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className="w-5 h-5 rounded-full mn-quick-info-icon-box flex items-center justify-center shrink-0">
+                          <Scroll className="w-3 h-3 text-current" />
+                        </div>
+                        <div className="flex flex-wrap items-center gap-1.5 min-w-0 flex-1">
+                          <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug">
+                            {publicT('public_postgraduate_admission')}
+                          </span>
+                          <span className="text-[9px] sm:text-[9.5px] font-medium text-[var(--mn-text-muted)] leading-snug">
+                            ({publicT('public_masters_and_doctorate')})
+                          </span>
+                          <span className="w-5 h-5 rounded-full bg-[#142B5F] border border-[#D6A43B]/75 text-[#F2CD78] inline-flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform mr-1">
+                            <ExternalLink className="w-2.5 h-2.5 stroke-[2.2] shrink-0" />
+                          </span>
+                        </div>
+                      </div>
+                    </a>
+                  )}
+
+                  {/* 3. صفحة الطلاب الدوليين */}
+                  {university.internationalAdmissions.internationalStudentsUrl && (
+                    <a
+                      href={university.internationalAdmissions.internationalStudentsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative overflow-hidden group bg-[var(--mn-page)] hover:border-[#142B5F]/45 dark:hover:border-[#F2CD78] rounded-xl px-3 py-2.5 border border-[var(--mn-border)] shadow-2xs hover:shadow-xs active:scale-[0.99] transition-all flex items-center justify-between gap-2 text-start min-w-0"
+                    >
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className="w-5 h-5 rounded-full mn-quick-info-icon-box flex items-center justify-center shrink-0">
+                          <Compass className="w-3 h-3 text-current" />
+                        </div>
+                        <div className="flex flex-wrap items-center gap-1.5 min-w-0 flex-1">
+                          <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug">
+                            {publicT('public_international_student_and_visa_guide')}
+                          </span>
+                          <span className="text-[9px] sm:text-[9.5px] font-medium text-[var(--mn-text-muted)] leading-snug">
+                            ({publicT('public_international_student_office')})
+                          </span>
+                          <span className="w-5 h-5 rounded-full bg-[#142B5F] border border-[#D6A43B]/75 text-[#F2CD78] inline-flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform mr-1">
+                            <ExternalLink className="w-2.5 h-2.5 stroke-[2.2] shrink-0" />
+                          </span>
+                        </div>
+                      </div>
+                    </a>
+                  )}
+
+                  {/* 4. بوابة التقديم الإلكتروني الرئيسية */}
+                  {university.internationalAdmissions.applicationPortalUrl && (
+                    <a
+                      href={university.internationalAdmissions.applicationPortalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative overflow-hidden group bg-[var(--mn-page)] hover:border-[#142B5F]/45 dark:hover:border-[#F2CD78] rounded-xl px-3 py-2.5 border border-[var(--mn-border)] shadow-2xs hover:shadow-xs active:scale-[0.99] transition-all flex items-center justify-between gap-2 text-start min-w-0"
+                    >
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className="w-5 h-5 rounded-full mn-quick-info-icon-box flex items-center justify-center shrink-0">
+                          <Zap className="w-3 h-3 text-current" />
+                        </div>
+                        <div className="flex flex-wrap items-center gap-1.5 min-w-0 flex-1">
+                          <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug">
+                            {publicT('public_main_online_application_portal')}
+                          </span>
+                          <span className="text-[9px] sm:text-[9.5px] font-medium text-[var(--mn-text-muted)] leading-snug">
+                            ({publicT('public_university_registration_and_student_account_platform')})
+                          </span>
+                          <span className="w-5 h-5 rounded-full bg-[#142B5F] border border-[#D6A43B]/75 text-[#F2CD78] inline-flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform mr-1">
+                            <ExternalLink className="w-2.5 h-2.5 stroke-[2.2] shrink-0" />
+                          </span>
+                        </div>
+                      </div>
+                    </a>
+                  )}
+                </div>
+
+                {/* ملاحظة الأمان والتوثيق */}
+                <div className="flex items-center justify-center gap-1.5 pt-0.5 text-[9.5px] sm:text-[10px] font-bold text-[var(--mn-text-muted)]">
+                  <div className="w-4 h-4 rounded-full bg-[#142B5F] border border-[#D6A43B]/75 text-[#F2CD78] flex items-center justify-center shrink-0">
+                    <ShieldCheck className="w-2.5 h-2.5" />
+                  </div>
+                  <span>{publicT('public_all_portals_take_you_directly_to_the_universitys')}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
         )}
 
-        {/* القسم الخامس: الرسوم الدراسية وتكاليف الدراسة */}
+        {/* القسم الخامس: الرسوم الدراسية وتكاليف الدراسة — بدون مربع داخل مربع وبدون خطوط فاصلة وهمية */}
         {university.tuitionFees && (
           <div
-            className="mn-detail-full-bleed relative bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-y border-[var(--mn-border-brand)]/30 dark:border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/50 dark:shadow-none overflow-hidden mn-panel dark:mn-panel "
+            className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2.5 sm:px-3 md:p-6 py-3.5 border-y md:border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
             dir={publicDir}
           >
-            {/* خط التزيين العلوي المتدرج */}
-            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
+            {/* خط التزيين العلوي النيلي / الذهبي الموحد */}
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent z-10" />
 
-            <DetailSectionHeader
+            <UniversitySectionHeader
               id="university-tuition"
               icon={Landmark}
               title={publicT('public_5_tuition_and_study_costs')}
-              className="mx-4 mt-4 sm:mx-5"
+              className="mb-3"
             />
 
-            {/* المحتوى الداخلي لقسم الرسوم */}
-            <div className="p-4 sm:p-5 space-y-4 font-['Cairo',sans-serif]">
-              {/* بطاقة الرسوم السنوية العامة والعملة - تصميم عصري مدمج ومريح للهاتف */}
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] space-y-3 shadow-2xs relative overflow-hidden mn-panel dark:mn-panel font-['Cairo',sans-serif]">
-                {/* رأس البطاقة */}
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-[var(--mn-primary)]/10 dark:bg-[var(--mn-accent)]/20 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] flex items-center justify-center shrink-0">
-                    <Landmark className="w-3.5 h-3.5" />
+            {/* المحتوى الداخلي لقسم الرسوم بعرض 95% مباشر */}
+            <div className="space-y-3 font-['Cairo',sans-serif]">
+              {/* 1. متوسط الرسوم السنوية العامة والعملة */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <div className="w-[18px] h-[18px] rounded-[5px] bg-[#142B5F] border border-[#142B5F] text-white mn-sub-item-icon flex items-center justify-center shrink-0 shadow-2xs">
+                      <Landmark className="w-2.5 h-2.5 text-white" />
+                    </div>
+                    <span className="text-[11px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug">
+                      {publicT('public_average_annual_tuition')}
+                    </span>
                   </div>
-                  <span className="text-xs sm:text-[13px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] font-['Cairo',sans-serif]">{publicT('public_average_annual_tuition')}</span>
+
+                  {/* شارة العملة المعتمدة كمربع عادي أبيض مثل بقية الأقسام */}
+                  {university.tuitionFees.currency && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-[var(--mn-heading)] shadow-2xs shrink-0">
+                      <Coins className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#F2CD78] shrink-0" />
+                      <span className="text-[9.5px] sm:text-[10px] font-bold text-[var(--mn-heading)] whitespace-nowrap">
+                        {publicT('public_currency')} {university.tuitionFees.currency}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                {/* لوحة القيمة البارزة للرسوم متضمنة العملة المعتمدة على الجانب الأيسر */}
+                {/* لوحة القيمة البارزة للرسوم مع أيقونة نيلية بنفس الحجم */}
                 {university.tuitionFees.annualAverageTuition && (
-                  <div className="rounded-xl p-3 sm:p-3.5 bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border-gold)]/60 dark:border-[var(--mn-border)] shadow-2xs flex items-center justify-between gap-2.5 mn-panel dark:mn-panel">
-                    {/* الجانب الأيمن: المبلغ البارز */}
-                    <div className="text-xs sm:text-sm md:text-[15px] mn-font-emphasis text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] font-['Cairo',sans-serif] tracking-tight">
+                  <div className="rounded-xl px-3 py-2.5 bg-[var(--mn-page)] border border-[var(--mn-border)] shadow-2xs flex items-center gap-2">
+                    <Coins className="w-4 h-4 text-[#142B5F] dark:text-[#F2CD78] shrink-0" />
+                    <div className="text-[11.5px] sm:text-xs font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif] leading-snug">
                       {university.tuitionFees.annualAverageTuition}
                     </div>
-
-                    {/* الجانب الأيسر: شارة العملة على جنب */}
-                    {university.tuitionFees.currency && (
-                      <div className="bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border-gold)]/70 dark:border-[var(--mn-border)] rounded-xl py-1.5 px-2.5 flex items-center gap-1.5 shadow-2xs shrink-0">
-                        <Coins className="w-3 h-3 text-[var(--mn-accent-text)]" />
-                        <span className="text-[9.5px] sm:text-[10px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] whitespace-nowrap">{publicT('public_currency')}{' '}{university.tuitionFees.currency}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 )}
 
                 {/* الملاحظة التوضيحية التفصيلية للرسوم */}
                 {university.tuitionFees.generalDescription && (
-                  <div className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--mn-page)]/60 dark:bg-[var(--mn-surface)]/60 border border-[var(--mn-border-gold)]/40 dark:border-[var(--mn-border)]/60">
-                    <Info className="w-3.5 h-3.5 text-[var(--mn-accent-text)] shrink-0 mt-0.5" />
-                    <p className="text-[10px] sm:text-[10.5px] font-medium text-[var(--mn-text-muted)] leading-relaxed font-['Cairo',sans-serif]">
+                  <div className="relative overflow-hidden flex items-start gap-2 px-3 py-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] shadow-2xs">
+                    <div className="w-3.5 h-3.5 rounded-full bg-[#142B5F]/12 dark:bg-[#D6A43B]/20 border border-[#0E7C86]/55 dark:border-[#F2CD78]/55 flex items-center justify-center shrink-0 mt-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-[#142B5F] to-[#0E7C86] dark:from-[#D6A43B] dark:to-[#F2CD78]" />
+                    </div>
+                    <p className="text-[10px] sm:text-[10.5px] font-bold text-[var(--mn-text)] leading-relaxed text-justify font-['Cairo',sans-serif]">
                       {university.tuitionFees.generalDescription}
                     </p>
                   </div>
                 )}
               </div>
 
-              {/* شبكة رسوم التخصصات والمراحل الأكاديمية */}
-              <div className="space-y-2 pt-1">
-                <div className="flex items-center gap-2 pr-1">
-                  <div className="w-6 h-6 rounded-full bg-[var(--mn-primary)]/5 dark:bg-[var(--mn-accent)]/10 border border-[var(--mn-accent)]/60 ring-2 ring-[var(--mn-focus)]/20 flex items-center justify-center shrink-0 shadow-2xs">
-                    <Building2 className="w-3 h-3 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)]" />
+              {/* 2. تفصيل الرسوم حسب الكلية والمرحلة الدراسية (مباشرة بدون إطار خارجي إضافي أو خط فاصل علوي) */}
+              {(university.tuitionFees.undergradTuition ||
+                university.tuitionFees.medicineTuition ||
+                university.tuitionFees.engineeringTuition ||
+                university.tuitionFees.postgradTuition) && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-[18px] h-[18px] rounded-[5px] bg-[#142B5F] border border-[#142B5F] text-white mn-sub-item-icon flex items-center justify-center shrink-0 shadow-2xs">
+                      <Building2 className="w-2.5 h-2.5 text-white" />
+                    </div>
+                    <span className="text-[11px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug">
+                      {publicT('public_fee_breakdown_by_faculty_and_level')}
+                    </span>
                   </div>
-                  <span className="text-[11.5px] sm:text-xs font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] leading-tight font-['Cairo',sans-serif]">{publicT('public_fee_breakdown_by_faculty_and_level')}</span>
+
+                  <div className="rounded-xl border border-[var(--mn-border)] overflow-hidden divide-y divide-[var(--mn-border)] shadow-2xs">
+                    {/* 1. رسوم البكالوريوس */}
+                    {university.tuitionFees.undergradTuition && (
+                      <div className="grid grid-cols-12 items-stretch odd:bg-[var(--mn-page)] even:bg-[var(--mn-surface)]">
+                        <div className="col-span-6 py-2.5 px-3 border-l border-[var(--mn-border)] flex items-center gap-2 min-w-0">
+                          <div className="w-5 h-5 rounded-full mn-quick-info-icon-box flex items-center justify-center shrink-0">
+                            <GraduationCap className="w-3 h-3 text-current" />
+                          </div>
+                          <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug">
+                            {publicT('public_undergraduate_fees')}
+                          </span>
+                        </div>
+                        <div className="col-span-6 py-2.5 px-3 flex items-center justify-center text-center">
+                          <span className="text-[10.5px] sm:text-[11px] font-bold text-[#142B5F] dark:text-[#F2CD78] leading-snug">
+                            {university.tuitionFees.undergradTuition}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 2. رسوم كلية الطب */}
+                    {university.tuitionFees.medicineTuition && (
+                      <div className="grid grid-cols-12 items-stretch odd:bg-[var(--mn-page)] even:bg-[var(--mn-surface)]">
+                        <div className="col-span-6 py-2.5 px-3 border-l border-[var(--mn-border)] flex items-center gap-2 min-w-0">
+                          <div className="w-5 h-5 rounded-full mn-quick-info-icon-box flex items-center justify-center shrink-0">
+                            <Stethoscope className="w-3 h-3 text-current" />
+                          </div>
+                          <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug">
+                            {publicT('public_medical_school_fees')}
+                          </span>
+                        </div>
+                        <div className="col-span-6 py-2.5 px-3 flex items-center justify-center text-center">
+                          <span className="text-[10.5px] sm:text-[11px] font-bold text-[#142B5F] dark:text-[#F2CD78] leading-snug">
+                            {university.tuitionFees.medicineTuition}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 3. رسوم الكليات الهندسية */}
+                    {university.tuitionFees.engineeringTuition && (
+                      <div className="grid grid-cols-12 items-stretch odd:bg-[var(--mn-page)] even:bg-[var(--mn-surface)]">
+                        <div className="col-span-6 py-2.5 px-3 border-l border-[var(--mn-border)] flex items-center gap-2 min-w-0">
+                          <div className="w-5 h-5 rounded-full mn-quick-info-icon-box flex items-center justify-center shrink-0">
+                            <Wrench className="w-3 h-3 text-current" />
+                          </div>
+                          <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug">
+                            {publicT('public_engineering_faculty_fees')}
+                          </span>
+                        </div>
+                        <div className="col-span-6 py-2.5 px-3 flex items-center justify-center text-center">
+                          <span className="text-[10.5px] sm:text-[11px] font-bold text-[#142B5F] dark:text-[#F2CD78] leading-snug">
+                            {university.tuitionFees.engineeringTuition}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 4. رسوم الدراسات العليا */}
+                    {university.tuitionFees.postgradTuition && (
+                      <div className="grid grid-cols-12 items-stretch odd:bg-[var(--mn-page)] even:bg-[var(--mn-surface)]">
+                        <div className="col-span-6 py-2.5 px-3 border-l border-[var(--mn-border)] flex items-center gap-2 min-w-0">
+                          <div className="w-5 h-5 rounded-full mn-quick-info-icon-box flex items-center justify-center shrink-0">
+                            <Award className="w-3 h-3 text-current" />
+                          </div>
+                          <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug">
+                            {publicT('public_postgraduate_fees')}
+                          </span>
+                        </div>
+                        <div className="col-span-6 py-2.5 px-3 flex items-center justify-center text-center">
+                          <span className="text-[10.5px] sm:text-[11px] font-bold text-[#142B5F] dark:text-[#F2CD78] leading-snug">
+                            {university.tuitionFees.postgradTuition}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
+              )}
 
-                <div className="flex flex-col gap-2 pt-0.5">
-                  {/* 1. رسوم البكالوريوس (المرحلة الجامعية) */}
-                  {university.tuitionFees.undergradTuition && (
-                    <div className="bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] rounded-xl border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] hover:border-[var(--mn-border-brand)] dark:hover:border-[var(--mn-accent)] p-2.5 sm:p-3 shadow-2xs hover:shadow-xs transition-all flex flex-row items-center justify-between gap-3 relative overflow-hidden group mn-panel dark:mn-panel ">
-                      <div className="flex items-center gap-2.5 shrink-0">
-                        <div className="w-1.5 h-8 bg-gradient-to-b from-[var(--mn-primary)] to-[var(--mn-accent-soft)] rounded-full shrink-0 mn-inverse " />
-                        <span className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-text)]">{publicT('public_undergraduate_fees')}</span>
-                      </div>
-                      <div className="bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-[var(--mn-border)] rounded-lg py-1.5 px-3 flex items-center justify-center text-center shadow-2xs shrink-0 max-w-[55%] group-hover:border-[var(--mn-border-brand)]/30 dark:group-hover:border-[var(--mn-accent)]/50 transition-colors mn-panel dark:mn-panel ">
-                        <span className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] dark:text-white">
-                          {university.tuitionFees.undergradTuition}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 2. رسوم البكالوريوس في الطب */}
-                  {university.tuitionFees.medicineTuition && (
-                    <div className="bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] rounded-xl border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] hover:border-[var(--mn-border-brand)] dark:hover:border-[var(--mn-accent)] p-2.5 sm:p-3 shadow-2xs hover:shadow-xs transition-all flex flex-row items-center justify-between gap-3 relative overflow-hidden group mn-panel dark:mn-panel ">
-                      <div className="flex items-center gap-2.5 shrink-0">
-                        <div className="w-1.5 h-8 bg-gradient-to-b from-[var(--mn-primary)] to-[var(--mn-accent-soft)] rounded-full shrink-0 mn-inverse " />
-                        <span className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-text)]">{publicT('public_medical_school_fees')}</span>
-                      </div>
-                      <div className="bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-[var(--mn-border)] rounded-lg py-1.5 px-3 flex items-center justify-center text-center shadow-2xs shrink-0 max-w-[55%] group-hover:border-[var(--mn-border-brand)]/30 dark:group-hover:border-[var(--mn-accent)]/50 transition-colors mn-panel dark:mn-panel ">
-                        <span className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] dark:text-white">
-                          {university.tuitionFees.medicineTuition}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 3. رسوم الكليات الهندسية */}
-                  {university.tuitionFees.engineeringTuition && (
-                    <div className="bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] rounded-xl border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] hover:border-[var(--mn-border-brand)] dark:hover:border-[var(--mn-accent)] p-2.5 sm:p-3 shadow-2xs hover:shadow-xs transition-all flex flex-row items-center justify-between gap-3 relative overflow-hidden group mn-panel dark:mn-panel ">
-                      <div className="flex items-center gap-2.5 shrink-0">
-                        <div className="w-1.5 h-8 bg-gradient-to-b from-[var(--mn-primary)] to-[var(--mn-accent-soft)] rounded-full shrink-0 mn-inverse " />
-                        <span className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-text)]">{publicT('public_engineering_faculty_fees')}</span>
-                      </div>
-                      <div className="bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-[var(--mn-border)] rounded-lg py-1.5 px-3 flex items-center justify-center text-center shadow-2xs shrink-0 max-w-[55%] group-hover:border-[var(--mn-border-brand)]/30 dark:group-hover:border-[var(--mn-accent)]/50 transition-colors mn-panel dark:mn-panel ">
-                        <span className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] dark:text-white">
-                          {university.tuitionFees.engineeringTuition}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 4. رسوم الدراسات العليا */}
-                  {university.tuitionFees.postgradTuition && (
-                    <div className="bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] rounded-xl border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] hover:border-[var(--mn-border-brand)] dark:hover:border-[var(--mn-accent)] p-2.5 sm:p-3 shadow-2xs hover:shadow-xs transition-all flex flex-row items-center justify-between gap-3 relative overflow-hidden group mn-panel dark:mn-panel ">
-                      <div className="flex items-center gap-2.5 shrink-0">
-                        <div className="w-1.5 h-8 bg-gradient-to-b from-[var(--mn-primary)] to-[var(--mn-accent-soft)] rounded-full shrink-0 mn-inverse " />
-                        <span className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-text)]">{publicT('public_postgraduate_fees')}</span>
-                      </div>
-                      <div className="bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-[var(--mn-border)] rounded-lg py-1.5 px-3 flex items-center justify-center text-center shadow-2xs shrink-0 max-w-[55%] group-hover:border-[var(--mn-border-brand)]/30 dark:group-hover:border-[var(--mn-accent)]/50 transition-colors mn-panel dark:mn-panel ">
-                        <span className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] dark:text-white">
-                          {university.tuitionFees.postgradTuition}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* زر رابط الرسوم الرسمي الممتد - بنفس التصميم المميز والأنيق */}
+              {/* 3. زر جدول الرسوم والتكاليف الرسمي بالجامعة */}
               {university.tuitionFees.officialTuitionUrl && (
-                <div className="pt-2 pb-0.5 flex justify-center">
-                  <a
-                    href={university.tuitionFees.officialTuitionUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-500/10 via-cyan-600/15 to-[var(--mn-learning-exercise-600)]/10 hover:from-teal-500/20 hover:via-cyan-600/25 hover:to-[var(--mn-learning-exercise-600)]/20 text-teal-950 border border-teal-400/50 dark:from-amber-500/15 dark:via-yellow-500/20 dark:to-amber-600/15 dark:hover:from-amber-500/25 dark:hover:via-yellow-500/30 dark:hover:to-amber-600/25 dark:text-amber-200 dark:border-amber-400/50 shadow-2xs hover:shadow-xs transition-all duration-200 text-[10px] sm:text-[10.5px] font-bold font-['Cairo',sans-serif] group text-center"
-                  >
-                    <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-teal-600 via-cyan-700 to-[var(--mn-learning-exercise-800)] text-white dark:from-amber-500 dark:via-yellow-500 dark:to-amber-600 dark:text-zinc-950 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform font-bold">
-                      <Landmark className="w-2.5 h-2.5" />
-                    </div>
-                    <span>{publicT('public_universitys_official_tuition_and_fees_schedule')}</span>
-                    <ExternalLink className="w-2.5 h-2.5 text-cyan-700 dark:text-amber-300 group-hover:translate-x-[-2px] transition-transform" />
-                  </a>
-                </div>
+                <OfficialInfoLink
+                  href={university.tuitionFees.officialTuitionUrl}
+                  label={publicT('public_universitys_official_tuition_and_fees_schedule')}
+                  icon={<Landmark className="w-3.5 h-3.5" />}
+                />
               )}
             </div>
           </div>
         )}
 
-        {/* المنح الدراسية تأتي مباشرة بعد الرسوم لمساعدة الطالب على تقييم خيارات التمويل */}
+        {/* 6. المنح الدراسية المتاحة (شريط بطاقات أفقي قابل للتمرير) */}
         {university.scholarships && university.scholarships.length > 0 && (
           <section
-            className="mn-detail-full-bleed relative bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-y border-[var(--mn-border-brand)]/30 dark:border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/40 dark:shadow-none overflow-hidden mn-panel dark:mn-panel"
+            className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2.5 sm:px-3 md:p-6 py-3.5 border-y md:border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
             dir={publicDir}
             aria-labelledby="university-scholarships"
           >
-            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent z-10" />
 
-            <div className="flex items-center justify-between mx-4 mt-4 sm:mx-5">
-              <DetailSectionHeader
-                id="university-scholarships"
-                icon={Award}
-                title={publicT('public_6_available_scholarships')}
-                subtitle={publicT('public_scholarships_related_to_the_university_including_funding_options')}
-              />
-              <span className="hidden sm:inline-flex items-center gap-1 text-[10.5px] font-bold text-[var(--mn-accent-text)] bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] px-2.5 py-1 rounded-full shrink-0">
-                <GraduationCap className="w-3.5 h-3.5" />
-                {university.scholarships.length}{' '}{publicT('public_scholarships_2')}</span>
-            </div>
+            <UniversitySectionHeader
+              id="university-scholarships"
+              icon={Award}
+              title={publicT('public_6_available_scholarships')}
+              className="mb-3"
+            />
 
-            <div className="grid grid-cols-1 gap-2.5 p-3.5 sm:grid-cols-2 sm:gap-3 sm:p-4">
-              {university.scholarships.map((scholarship, index) => (
+            {/* شريط البطاقات الأفقي القابل للتمرير (تصميم عرضي متناسق) */}
+            <div className="flex items-stretch gap-2.5 overflow-x-auto mn-similar-scroll pb-2 pt-0.5 snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3.5 md:overflow-visible md:pb-0">
+              {university.scholarships.map((scholarship) => (
                 <article
                   key={scholarship.id}
-                  className="group relative overflow-hidden rounded-2xl border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] hover:bg-[var(--mn-surface)] dark:hover:bg-[var(--mn-surface)] p-3 sm:p-3.5 shadow-2xs hover:shadow-xs transition-all hover:border-[var(--mn-accent)] flex flex-col justify-between mn-panel dark:mn-panel"
+                  onClick={() =>
+                    scholarship.platformScholarshipId &&
+                    onOpenScholarship?.(scholarship.platformScholarshipId)
+                  }
+                  className={`relative overflow-hidden w-[290px] sm:w-[315px] md:w-full h-full shrink-0 bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-2xl p-2.5 pr-3 md:p-3.5 flex flex-col justify-between gap-1.5 snap-center transition-all hover:border-[#0E7C86]/55 dark:hover:border-[#F2CD78]/65 mn-panel group ${
+                    scholarship.platformScholarshipId ? 'cursor-pointer active:scale-[0.99]' : ''
+                  }`}
                 >
-                  <div>
-                    {/* الصف العلوي: الأيقونة والعناوين والنوع */}
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-start gap-2 min-w-0">
-                        <div className="w-6 h-6 rounded-full bg-amber-500/15 border border-amber-400/40 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
-                          <Award className="w-3.5 h-3.5" />
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                          <h3 className="text-[11.5px] sm:text-[12px] font-bold leading-snug text-[var(--mn-heading)] dark:text-white group-hover:text-[var(--mn-accent-text)] transition-colors truncate">
-                            {scholarship.name}
-                          </h3>
-                          {scholarship.nameEn && (
-                            <p className="text-[9px] font-medium text-[var(--mn-text-muted)] truncate" dir="ltr">
-                              {scholarship.nameEn}
-                            </p>
-                          )}
-                        </div>
-                      </div>
+                  {/* الزاوية الهندسية في بداية المربع (إلى المنتصف فقط) */}
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute top-0 right-0 w-4 h-1/2 rounded-tr-2xl border-t-[3px] border-r-[3.5px] border-[#142B5F] dark:border-[#D6A43B]"
+                  />
 
-                      {scholarship.type && (
-                        <span className="rounded-full bg-[var(--mn-learning-success-500)]/10 border border-[var(--mn-learning-success-500)]/25 text-[8.5px] font-bold text-[var(--mn-learning-success-700)] dark:text-[var(--mn-learning-success-300)] px-1.5 py-0.5 shrink-0 whitespace-nowrap">
-                          {scholarship.type}
+                  {/* 1. مربع اسم المنحة باللون النيلي البترولي */}
+                  <div className="rounded-xl px-2.5 py-2 bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] text-white shadow-2xs flex items-center gap-2 min-w-0">
+                    <div className="w-6 h-6 rounded-lg bg-white/15 border border-white/25 flex items-center justify-center shrink-0">
+                      <GraduationCap className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <div className="flex flex-col items-start text-start min-w-0 flex-1">
+                      <div className="inline-flex items-center gap-1 max-w-full">
+                        <h3 className="text-[11px] font-bold text-white leading-snug truncate">
+                          {scholarship.name}
+                        </h3>
+                        {scholarship.platformScholarshipId && (
+                          <ArrowUpLeft className="w-3.5 h-3.5 -mt-1 text-[#F2CD78] stroke-[2.5] shrink-0 transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" />
+                        )}
+                      </div>
+                      {scholarship.nameEn && (
+                        <span className="text-[9px] font-bold text-white/80 leading-tight mt-0.5 block text-start truncate max-w-full">
+                          {scholarship.nameEn}
                         </span>
                       )}
                     </div>
+                  </div>
 
-                    {/* الفئة المستهدفة */}
-                    {scholarship.audience && (
-                      <div className="flex items-center gap-1 mt-1.5 pt-1.5 border-t border-[var(--mn-border-gold)]/20 dark:border-[var(--mn-border)] text-[9.5px]">
-                        <Users className="w-2.5 h-2.5 text-[var(--mn-accent-text)] shrink-0" />
-                        <span className="font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] shrink-0 text-[9px]">{publicT('public_target_applicants')}</span>
-                        <span className="text-[var(--mn-text-muted)] font-medium truncate">
-                          {scholarship.audience}
+                  {/* 2. الدولة + نوع التمويل (أيقونة فقط بلون بترولي أفق بدون دائرة) */}
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <div className="bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-xl px-2.5 py-1.5 flex items-center gap-1.5 min-w-0 mn-panel">
+                      <MapPin className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#38C6D4] shrink-0" />
+                      <span className="text-[9.5px] font-bold text-[var(--mn-heading)] truncate">
+                        {university.country}
+                      </span>
+                    </div>
+
+                    {scholarship.type && (
+                      <div className="bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-xl px-2.5 py-1.5 flex items-center gap-1.5 min-w-0 mn-panel">
+                        <Coins className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#38C6D4] shrink-0" />
+                        <span className="text-[9.5px] font-bold text-[var(--mn-heading)] truncate">
+                          {scholarship.type}
                         </span>
                       </div>
                     )}
                   </div>
 
-                  {/* أزرار الإجراءات المدمجة أسفل الكارت */}
-                  <div className="flex items-center justify-between gap-2 mt-2 pt-1.5 border-t border-[var(--mn-border-gold)]/20 dark:border-[var(--mn-border)]">
-                    {scholarship.platformScholarshipId ? (
-                      <button
-                        type="button"
-                        onClick={() => onOpenScholarship?.(scholarship.platformScholarshipId!)}
-                        className="inline-flex items-center gap-0.5 text-[9px] font-bold text-[var(--mn-accent-text)] hover:underline cursor-pointer py-0.5"
-                      >
-                        <Sparkles className="w-2.5 h-2.5" />
-                        <span>{publicT('public_scholarship_guide')}</span>
-                        <ChevronLeft className="w-2.5 h-2.5" />
-                      </button>
-                    ) : (
-                      <span className="inline-flex items-center gap-0.5 text-[9px] font-medium text-[var(--mn-text-muted)]">
-                        <ShieldCheck className="w-2.5 h-2.5 text-[var(--mn-accent-text)]" />
-                        <span>{publicT('public_approved_scholarship')}</span>
-                      </span>
-                    )}
+                  {/* 3. الفئة المستهدفة (أيقونة فقط بلون بترولي أفق بدون دائرة) */}
+                  {scholarship.audience && (
+                    <div className="bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-xl px-2.5 py-1.5 flex items-center gap-1.5 mn-panel min-w-0">
+                      <Users className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#38C6D4] shrink-0" />
+                      <p className="text-[9.5px] leading-snug text-[var(--mn-text)] font-bold truncate min-w-0 flex-1">
+                        <span className="text-[var(--mn-heading)] ml-1">
+                          {publicT('public_target_applicants')}
+                        </span>
+                        <span className="font-semibold text-[var(--mn-text-muted)]">
+                          {scholarship.audience}
+                        </span>
+                      </p>
+                    </div>
+                  )}
 
+                  {/* 4. ذيل البطاقة: المصدر الرسمي كمربع بلون نيلي بترولي */}
+                  <div className="mt-auto pt-1 border-t border-[var(--mn-border)] flex items-center justify-end">
                     <a
                       href={scholarship.officialUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(event) => event.stopPropagation()}
-                      className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-[var(--mn-text-muted)] hover:text-[var(--mn-accent-text)] transition-colors py-0.5"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] border border-[#0E7C86]/50 text-white text-[9.5px] sm:text-[10px] font-bold shadow-2xs hover:opacity-95 transition-opacity"
                     >
                       <span>{publicT('public_official_source')}</span>
-                      <ArrowUpRight className="w-2.5 h-2.5" />
+                      <ExternalLink className="w-2.5 h-2.5 text-white stroke-[2.25] shrink-0" />
                     </a>
                   </div>
                 </article>
@@ -911,88 +1167,186 @@ export const UniversityDetailModal: React.FC<UniversityDetailModalProps> = ({
 
         <UniversityDecisionSections university={university} onOpenExam={onOpenExam} />
 
-        {(contextualServices.length > 0 || (university.relatedArticles && university.relatedArticles.length > 0)) && (
-          <section className="mx-4 sm:mx-5 mb-8 mt-2 rounded-2xl border border-[var(--mn-border-brand)]/30 dark:border-[var(--mn-border)] bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] shadow-md shadow-[var(--mn-shadow-ink)]/50 dark:shadow-none overflow-hidden mn-panel dark:mn-panel relative">
-            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
-            
-            <div className="p-4 sm:p-5">
-              {contextualServices.length > 0 && (
-                <div className={university.relatedArticles && university.relatedArticles.length > 0 ? "mb-6 pb-6 border-b border-[var(--mn-border-brand)]/10 dark:border-[var(--mn-border)]" : ""}>
-                  <div className="mb-3 flex items-center gap-2">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-[var(--mn-primary)]/10 text-[var(--mn-heading)] dark:bg-[var(--mn-accent)]/10 dark:text-[var(--mn-accent-text)]">
-                      <Briefcase className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <h3 className="text-[11px] font-bold text-[var(--mn-heading)]">{publicT('public_services_that_may_help_during_your_application')}</h3>
-                      <p className="text-[8.5px] font-medium text-[var(--mn-text-muted)] mt-0.5 leading-4">{publicT('public_a_contextual_suggestion_only_these_services_are_not')}</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    {contextualServices.map((service) => (
-                      <button
-                        key={service.id}
-                        type="button"
-                        onClick={() => onOpenService?.(service)}
-                        className="group flex min-h-12 items-center gap-2.5 rounded-xl border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] px-3 py-2.5 text-start transition-colors hover:border-[var(--mn-accent)] dark:hover:border-[var(--mn-border-gold)] active:scale-[0.99] mn-panel dark:mn-panel shadow-2xs"
-                      >
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--mn-primary)]/10 dark:bg-[var(--mn-accent)]/10 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)]">
-                          <GraduationCap className="h-4 w-4" />
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[9.5px] font-bold text-[var(--mn-text)] dark:text-[var(--mn-text)] group-hover:text-[var(--mn-heading)] transition-colors">{service.title}</span>
-                          <span className="mt-0.5 block truncate text-[8.5px] font-medium text-[var(--mn-text-muted)]">{service.category}</span>
-                        </span>
-                        <ChevronLeft className="h-4 w-4 shrink-0 text-[var(--mn-accent-text)] transition-transform group-hover:-translate-x-0.5" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+        {/* 12. خدمات تساعدك بالتقديم */}
+        {contextualServices.length > 0 && (
+          <section
+            className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2.5 sm:px-3 md:p-6 py-3.5 border-y md:border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
+            dir={publicDir}
+          >
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent z-10" />
 
-              {university.relatedArticles && university.relatedArticles.length > 0 && (
-                <div>
-                  <div className="mb-3 flex items-center gap-2">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-[var(--mn-primary)]/10 text-[var(--mn-heading)] dark:bg-[var(--mn-accent)]/10 dark:text-[var(--mn-accent-text)]">
-                      <BookOpenText className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <h3 className="text-[11px] font-bold text-[var(--mn-heading)]">{publicT('public_related_articles_and_guides')}</h3>
-                      <p className="text-[8.5px] font-medium text-[var(--mn-text-muted)] mt-0.5 leading-4">{publicT('public_editorial_content_to_help_you_understand_requirements_and')}</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {university.relatedArticles.map((article) => (
-                      <button
-                        key={article.id}
-                        type="button"
-                        onClick={() => onOpenArticle?.(article.id)}
-                        disabled={!onOpenArticle}
-                        className="group flex flex-col justify-between rounded-xl border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] p-3.5 text-start transition-colors enabled:hover:border-[var(--mn-accent)] dark:enabled:hover:border-[var(--mn-border-gold)] enabled:active:scale-[0.99] mn-panel dark:mn-panel shadow-2xs h-full"
-                      >
-                        <div>
-                          <div className="flex items-center gap-1.5 text-[8px] font-bold text-[var(--mn-accent-text)] mb-2">
-                            <span>{article.typeLabel || publicT('public_article')}</span>
-                            {article.category && <span className="text-[var(--mn-text-muted)]">• {article.category}</span>}
-                          </div>
-                          <p className="text-[10px] sm:text-[10.5px] font-bold leading-5 text-[var(--mn-text)] group-hover:text-[var(--mn-heading)] transition-colors line-clamp-2">{article.title}</p>
-                        </div>
-                        <div className="mt-3 flex items-center justify-between gap-2 border-t border-[var(--mn-border-gold)]/50 dark:border-[var(--mn-border)]/50 pt-2.5">
-                          {article.meta ? <p className="line-clamp-1 text-[8.5px] font-semibold text-[var(--mn-text-muted)]">{article.meta}</p> : <span />}
-                          <ChevronLeft className="h-3.5 w-3.5 shrink-0 text-[var(--mn-accent-text)] transition-transform group-hover:-translate-x-0.5" />
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+            <UniversitySectionHeader
+              icon={Briefcase}
+              title={publicT('public_services_that_may_help_during_your_application')}
+              level={3}
+              className="mb-3"
+            />
+
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 md:gap-3 items-stretch">
+              {contextualServices.map((service) => (
+                <button
+                  key={service.id}
+                  type="button"
+                  onClick={() => onOpenService?.(service)}
+                  className="relative overflow-hidden group flex items-center justify-between gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] pl-3 pr-3.5 py-2.5 text-start transition-all hover:border-[#0E7C86]/60 dark:hover:border-[#F2CD78]/60 active:scale-[0.99] mn-panel shadow-2xs cursor-pointer"
+                >
+                  {/* خط بداية المربع بترولي مع نيلي */}
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute top-2.5 right-0 bottom-2.5 w-[3.5px] rounded-l-full bg-[linear-gradient(180deg,#0E7C86_0%,#0E7C86_75%,#142B5F_100%)] dark:bg-[linear-gradient(180deg,#38C6D4_0%,#0E7C86_75%,#142B5F_100%)]"
+                  />
+
+                  <span className="flex items-start gap-2 min-w-0 flex-1 pr-0.5">
+                    {/* جوهرة نيلي فقط قبل اسم الخدمة مباشرة */}
+                    <span
+                      className="mt-1.5 w-2.5 h-2.5 rotate-45 rounded-[2px] bg-[#142B5F] dark:bg-[#F2CD78] shrink-0"
+                      aria-hidden="true"
+                    />
+
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] group-hover:text-[#0E7C86] dark:group-hover:text-[#F2CD78] transition-colors leading-snug">
+                        {service.title}
+                      </span>
+                      <span className="mt-1 inline-flex items-center gap-1 rounded-md bg-[#142B5F]/[0.06] dark:bg-[#D6A43B]/15 px-2 py-0.5 text-[8.5px] font-bold text-[#142B5F] dark:text-[#F2CD78]">
+                        <span className="w-1 h-1 rounded-full bg-[#D6A43B] dark:bg-[#F2CD78]" />
+                        <span>{service.category}</span>
+                      </span>
+                    </span>
+                  </span>
+
+                  <ArrowUpLeft className="h-4 w-4 shrink-0 text-[var(--mn-interactive-arrow)] group-hover:text-[#0E7C86] dark:group-hover:text-[#F2CD78] transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" />
+                </button>
+              ))}
             </div>
           </section>
         )}
-        </>}
+
+        {/* 13. مقالات وأدلة مرتبطة */}
+        {university.relatedArticles && university.relatedArticles.length > 0 && (
+          <section
+            className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2.5 sm:px-3 md:p-6 py-3.5 border-y md:border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
+            dir={publicDir}
+          >
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent z-10" />
+
+            <UniversitySectionHeader
+              icon={BookOpenText}
+              title={publicT('public_related_articles_and_guides')}
+              level={3}
+              className="mb-3"
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3 items-stretch">
+              {university.relatedArticles.map((article) => (
+                <button
+                  key={article.id}
+                  type="button"
+                  onClick={() => onOpenArticle?.(article.id)}
+                  disabled={!onOpenArticle}
+                  className="relative overflow-hidden group flex items-center justify-between gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] pl-3 pr-3.5 py-2.5 text-start transition-all enabled:hover:border-[#0E7C86]/60 dark:enabled:hover:border-[#F2CD78]/60 enabled:active:scale-[0.99] mn-panel shadow-2xs cursor-pointer"
+                >
+                  <span className="absolute top-2 right-0 bottom-2 w-[3px] rounded-l-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86] dark:from-[#D6A43B] dark:to-[#E5B54F]" />
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div className="w-7 h-7 rounded-full mn-sub-item-icon flex items-center justify-center shrink-0">
+                      <BookOpenText className="h-3.5 w-3.5 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 text-[8px] font-bold text-[#0E7C86] dark:text-[#F2CD78] mb-0.5">
+                        <span>{article.typeLabel || publicT('public_article')}</span>
+                        {article.category && <span className="text-[var(--mn-text-muted)]">• {article.category}</span>}
+                      </div>
+                      <p className="text-[10px] sm:text-[10.5px] font-bold leading-snug text-[var(--mn-heading)] group-hover:text-[#0E7C86] dark:group-hover:text-[#F2CD78] transition-colors line-clamp-2">
+                        {article.title}
+                      </p>
+                      {article.meta && (
+                        <p className="mt-0.5 line-clamp-1 text-[8.5px] font-semibold text-[var(--mn-text-muted)]">
+                          {article.meta}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="w-5 h-5 rounded-full bg-[#142B5F] border border-[#D6A43B]/75 text-[#F2CD78] flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                    <ArrowUpLeft className="h-3 w-3 shrink-0 stroke-[2.25]" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 14. أزرار الإجراءات السفلية (مشاركة وحفظ الجامعة — متطابقة مع قسم المنح) */}
+        <div className="px-2.5 sm:px-3 pt-2 pb-2 flex justify-center gap-3 w-full">
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                navigator.clipboard.writeText(window.location.href).catch(() => {});
+              }
+              showToast('تم نسخ رابط الجامعة للمشاركة');
+            }}
+            className="py-2.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer bg-[var(--mn-surface)] text-[var(--mn-heading)] border border-[#D6A43B]/60 dark:border-[#F2CD78]/50 hover:border-[#D6A43B] dark:hover:border-[#F2CD78] flex-1 max-w-[170px] text-xs font-bold mn-panel"
+          >
+            <span>مشاركة الجامعة</span>
+            <Share2 className="w-4 h-4 text-[#D6A43B] dark:text-[#F2CD78]" />
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              onToggleSave?.(e);
+              showToast(isSaved ? 'تمت إزالة الجامعة من المفضلة' : 'تم حفظ الجامعة في المفضلة');
+            }}
+            className="py-2.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer flex-1 max-w-[170px] bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] text-white border border-[#D6A43B]/65 text-xs font-bold"
+          >
+            <span>{isSaved ? 'محفوظة بالمفضلة' : 'حفظ الجامعة'}</span>
+            <Bookmark
+              className={`w-4 h-4 ${isSaved ? 'fill-[#F2CD78] text-[#F2CD78]' : 'text-[#F2CD78]'}`}
+            />
+          </button>
+        </div>
+        </>
+        )}
       </div>
+
+      {actionToast && (
+        <div className="fixed bottom-6 inset-x-4 max-w-xs mx-auto bg-[var(--mn-primary)] text-white px-4 py-2 rounded-full shadow-2xl z-50 flex items-center justify-center gap-2 text-xs font-bold animate-in fade-in slide-in-from-bottom-2 mn-inverse">
+          <Check className="w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
+          <span>{actionToast}</span>
+        </div>
+      )}
     </div>
   );
 };
+
+function UniversitySectionHeader({
+  id,
+  icon: Icon,
+  title,
+  level = 2,
+  className = 'mb-3',
+}: {
+  id?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  level?: 2 | 3 | 4;
+  className?: string;
+}) {
+  return (
+    <DetailSectionHeader
+      id={id}
+      title={title}
+      level={level}
+      className={className}
+      iconClassName="mn-icon-mix02"
+      iconNode={
+        <>
+          <span className="pointer-events-none absolute top-0 right-0 w-2.5 h-2.5 bg-[#D6A43B] rounded-bl-md" />
+          <Icon className="h-4 w-4 relative z-10 text-[#F2CD78]" />
+        </>
+      }
+    />
+  );
+}
 
 function UniversityDecisionSections({
   university,
@@ -1011,219 +1365,344 @@ function UniversityDecisionSections({
   const dataTrust = university.dataTrust;
 
   return (
-    <div className="mn-detail-full-bleed space-y-6" dir={publicDir}>
+    <div className="space-y-2.5 md:space-y-4" dir={publicDir}>
+      {/* 7. متطلبات اللغة — بدون مربع داخل مربع وبعرض 95% */}
       {language && (
         <section
-          className="mn-detail-full-bleed relative bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-y border-[var(--mn-border-brand)]/30 dark:border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/50 dark:shadow-none overflow-hidden mn-panel dark:mn-panel "
+          className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2.5 sm:px-3 md:p-6 py-3.5 border-y md:border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
           aria-labelledby="language-requirements"
         >
-          <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
+          <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent z-10" />
 
-          <CompactSectionHeader
+          <UniversitySectionHeader
             id="language-requirements"
+            icon={Languages}
             title={publicT('public_7_language_requirements')}
-            icon={<Languages className="h-4 w-4" />}
+            className="mb-3"
           />
-          <div className="space-y-3 p-4 sm:p-5">
-            <div className="grid grid-cols-2 gap-2">
-              <CompactFact label={publicT('public_are_there_language_requirements')} value={language.required ? publicT('public_yes') : publicT('public_no')} />
-              <CompactFact label={publicT('public_required_language')} value={language.languages.join('، ')} />
-            </div>
-            <div className="rounded-xl border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] p-3 mn-panel dark:mn-panel ">
-              <p className="mb-2 text-[10px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)]">{publicT('public_accepted_exams')}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {(language.acceptedTestLinks?.length
-                  ? language.acceptedTestLinks.map((link) => ({ label: link.label, examId: link.examId }))
-                  : language.acceptedTests.map((label) => ({ label, examId: '' }))).map((test) => {
-                  const className =
-                    "rounded-lg border border-[var(--mn-accent)]/30 bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] px-2 py-0.5 text-[8.5px] sm:text-[9px] font-semibold text-[var(--mn-text)] dark:text-[var(--mn-text)] mn-panel dark:mn-panel tracking-normal";
 
-                  return test.examId ? (
+          <div className="space-y-3">
+            {/* 1. حالة متطلبات اللغة واللغة المطلوبة */}
+            <div className="grid grid-cols-2 gap-2">
+              <CompactFact
+                label={publicT('public_are_there_language_requirements')}
+                value={language.required ? publicT('public_yes') : publicT('public_no')}
+                badge="navy-petrol-bars"
+              />
+              <CompactFact
+                label={publicT('public_required_language')}
+                value={language.languages.join('، ')}
+                badge="navy-petrol-bars"
+              />
+            </div>
+
+            {/* 2. الاختبارات المعتمدة (مباشرة بعرض 95% بدون إطار خارجي مكرر) */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-1.5">
+                <div className="w-[18px] h-[18px] rounded-[5px] bg-[#142B5F] border border-[#142B5F] text-white mn-sub-item-icon flex items-center justify-center shrink-0 shadow-2xs">
+                  <BookOpenCheck className="w-2.5 h-2.5 text-white" />
+                </div>
+                <p className="text-[11px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug">
+                  {publicT('public_accepted_exams')}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                {(language.acceptedTestLinks?.length ? language.acceptedTestLinks : language.acceptedTests.map(label => ({ label, examId: undefined }))).map((test) => {
+                  const { label, examId } = test;
+
+                  return examId ? (
                     <button
                       type="button"
-                      key={test.examId}
-                      onClick={() => onOpenExam?.(test.examId)}
-                      className={`${className} cursor-pointer transition-all hover:border-[var(--mn-accent)] hover:text-[var(--mn-heading)]`}
-                      title={publicT('public_open_page_title', { v0: test.label })}
+                      key={label}
+                      onClick={() => test.examId && onOpenExam?.(test.examId)}
+                      className="bg-[var(--mn-page)] rounded-xl border border-[#142B5F]/20 dark:border-[var(--mn-border)] hover:border-[#0E7C86]/65 dark:hover:border-[#F2CD78]/65 px-2.5 py-2 shadow-2xs hover:shadow-xs active:scale-[0.99] transition-all flex items-center gap-1.5 text-start cursor-pointer group min-w-0"
+                      title={publicT('public_open_page_title', { v0: label })}
                     >
-                      {test.label}
+                      {/* نقطة نيلي فقط */}
+                      <span
+                        className="w-1.5 h-1.5 rounded-full bg-[#142B5F] dark:bg-[#F2CD78] shrink-0"
+                        aria-hidden="true"
+                      />
+                      <span className="inline-flex items-center gap-1 min-w-0 flex-wrap">
+                        <span className="text-[10px] sm:text-[10.5px] font-bold text-[var(--mn-heading)] leading-snug break-words" dir="ltr">
+                          {label}
+                        </span>
+                        <ArrowUpLeft className="w-3.5 h-3.5 -mt-1 text-[#0E7C86] dark:text-[#F2CD78] stroke-[2.5] opacity-95 group-hover:opacity-100 group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0" />
+                      </span>
                     </button>
                   ) : (
-                    <span key={test.label} className={className}>
-                      {test.label}
-                    </span>
+                    <div
+                      key={label}
+                      className="bg-[var(--mn-page)] rounded-xl border border-[var(--mn-border)] px-2.5 py-2 shadow-2xs flex items-center gap-1.5 min-w-0"
+                    >
+                      {/* نقطة نيلي فقط */}
+                      <span
+                        className="w-1.5 h-1.5 rounded-full bg-[#142B5F] dark:bg-[#F2CD78] shrink-0"
+                        aria-hidden="true"
+                      />
+                      <span className="text-[10px] sm:text-[10.5px] font-bold text-[var(--mn-heading)] leading-snug break-words" dir="ltr">
+                        {label}
+                      </span>
+                    </div>
                   );
                 })}
               </div>
             </div>
+
+            {/* 3. الرابط الرسمي لمتطلبات اللغة */}
             <OfficialInfoLink
               href={language.officialUrl}
               label={publicT('public_official_language_requirements')}
-              icon={<Languages className="w-2.5 h-2.5" />}
+              icon={<Languages className="w-3.5 h-3.5" />}
             />
           </div>
         </section>
       )}
 
+      {/* 8. المستندات المطلوبة للتقديم — بدون مربع داخل مربع وبعرض 95% */}
       {documents && (
         <section
-          className="mn-detail-full-bleed relative bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-y border-[var(--mn-border-brand)]/30 dark:border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/50 dark:shadow-none overflow-hidden mn-panel dark:mn-panel "
+          className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2.5 sm:px-3 md:p-6 py-3.5 border-y md:border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
           aria-labelledby="required-documents-title"
         >
-          <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
+          <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent z-10" />
 
-          <CompactSectionHeader
+          <UniversitySectionHeader
             id="required-documents-title"
+            icon={FileText}
             title={publicT('public_8_required_documents')}
-            icon={<FileText className="h-4 w-4" />}
+            className="mb-3"
           />
-          <div className="space-y-3 p-4 sm:p-5">
-            <div className="grid gap-2.5 sm:grid-cols-2">
-              <DocumentList title={publicT('public_general_required_documents')} items={documents.generalDocuments} />
-              <DocumentList
-                title={publicT('public_additional_postgraduate_requirements')}
-                items={documents.graduateAdditionalDocuments}
-              />
-            </div>
+
+          <div className="space-y-3">
+            <DocumentList
+              title={publicT('public_general_required_documents')}
+              items={documents.generalDocuments}
+              headerIcon={<FileText className="w-2.5 h-2.5 text-white" />}
+              variant="petrol-dot"
+            />
+
+            <DocumentList
+              title={publicT('public_additional_postgraduate_requirements')}
+              items={documents.graduateAdditionalDocuments}
+              headerIcon={<GraduationCap className="w-2.5 h-2.5 text-white" />}
+              variant="petrol-dot"
+            />
+
             <OfficialInfoLink
               href={documents.officialUrl}
               label={publicT('public_official_required_documents_guide')}
-              icon={<FileText className="w-2.5 h-2.5" />}
+              icon={<FileText className="w-3.5 h-3.5" />}
             />
           </div>
         </section>
       )}
 
+      {/* 9. السكن الجامعي — بدون مربع داخل مربع وبعرض 95% */}
       {housing && (
         <section
-          className="mn-detail-full-bleed relative bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-y border-[var(--mn-border-brand)]/30 dark:border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/50 dark:shadow-none overflow-hidden mn-panel dark:mn-panel "
+          className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2.5 sm:px-3 md:p-6 py-3.5 border-y md:border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
           aria-labelledby="university-housing"
         >
-          <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
+          <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent z-10" />
 
-          <CompactSectionHeader
+          <UniversitySectionHeader
             id="university-housing"
+            icon={Building2}
             title={publicT('public_9_university_accommodation')}
-            icon={<Building2 className="h-4 w-4" />}
+            className="mb-3"
           />
-          <div className="space-y-3 p-4 sm:p-5">
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <CompactFact label={publicT('public_is_accommodation_available')} value={housing.available ? publicT('public_yes') : publicT('public_no')} />
+
+          <div className="space-y-2.5">
+            <div className="grid grid-cols-2 gap-2">
+              <CompactFact
+                label={publicT('public_is_accommodation_available')}
+                value={housing.available ? publicT('public_yes') : publicT('public_no')}
+                badge="navy-petrol-bars"
+              />
               <CompactFact
                 label={publicT('public_international_students')}
                 value={housing.internationalStudentsEligible ? publicT('public_eligible') : publicT('public_ineligible')}
+                badge="navy-petrol-bars"
               />
-              <CompactFact label={publicT('public_typical_cost')} value={housing.typicalCost} />
-              <CompactFact label={publicT('public_currency_2')} value={housing.currency} />
+              <CompactFact
+                label={publicT('public_typical_cost')}
+                value={housing.typicalCost}
+                badge="navy-petrol-bars"
+              />
+              <CompactFact
+                label={publicT('public_currency_2')}
+                value={housing.currency}
+                badge="navy-petrol-bars"
+              />
             </div>
+
             {housing.officialUrl && (
               <OfficialInfoLink
                 href={housing.officialUrl}
                 label={publicT('public_official_university_accommodation_guide')}
-                icon={<Building2 className="w-2.5 h-2.5" />}
+                icon={<Building2 className="w-3.5 h-3.5" />}
               />
             )}
           </div>
         </section>
       )}
 
+      {/* 10. تكاليف المعيشة — بدون مربع داخل مربع وبعرض 95% */}
       {livingCosts && (
         <section
-          className="mn-detail-full-bleed relative bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-y border-[var(--mn-border-brand)]/30 dark:border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/50 dark:shadow-none overflow-hidden mn-panel dark:mn-panel "
+          className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2.5 sm:px-3 md:p-6 py-3.5 border-y md:border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
           aria-labelledby="university-living-costs-title"
         >
-          <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
+          <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent z-10" />
 
-          <CompactSectionHeader
+          <UniversitySectionHeader
             id="university-living-costs-title"
+            icon={Banknote}
             title={publicT('public_10_living_costs')}
-            icon={<Banknote className="h-4 w-4" />}
+            className="mb-3"
           />
-          <div className="space-y-2.5 p-4 sm:p-5">
+
+          <div className="space-y-2.5">
             <div className="grid grid-cols-2 gap-2">
-              <CompactFact label={publicT('public_estimated_monthly_cost')} value={livingCosts.monthlyEstimate} />
-              <CompactFact label={publicT('public_currency_2')} value={livingCosts.currency} />
+              <CompactFact
+                label={publicT('public_estimated_monthly_cost')}
+                value={livingCosts.monthlyEstimate}
+                icon={<Coins className="w-4 h-4 sm:w-[17px] sm:h-[17px] text-[#142B5F] dark:text-[#F2CD78]" />}
+              />
+              <CompactFact
+                label={publicT('public_currency_2')}
+                value={livingCosts.currency}
+                icon={<Banknote className="w-4 h-4 sm:w-[17px] sm:h-[17px] text-[#142B5F] dark:text-[#F2CD78]" />}
+              />
             </div>
-            <p className="rounded-xl border border-[var(--mn-border-gold)] bg-[var(--mn-surface-muted)] px-3 py-2 text-[9.5px] font-semibold leading-4 text-[var(--mn-text-muted)] dark:border-[var(--mn-border)] dark:bg-[var(--mn-surface-elevated)] dark:text-[var(--mn-text-muted)] mn-panel dark:mn-panel ">
-              {livingCosts.variationNote}
-            </p>
+
+            {livingCosts.variationNote && (
+              <div className="relative overflow-hidden flex items-start gap-2 bg-[var(--mn-page)] rounded-xl py-2.5 pl-3 pr-3.5 border border-[var(--mn-border)] shadow-2xs">
+                {/* خط عمودي مميز في بداية المربع */}
+                <span className="absolute top-2.5 right-0 bottom-2.5 w-[3px] rounded-l-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86] dark:from-[#D6A43B] dark:to-[#38C6D4]" />
+                <div className="w-3.5 h-3.5 rounded-full bg-[#142B5F]/12 dark:bg-[#D6A43B]/20 border border-[#0E7C86]/55 dark:border-[#F2CD78]/55 flex items-center justify-center shrink-0 mt-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-[#142B5F] to-[#0E7C86] dark:from-[#D6A43B] dark:to-[#F2CD78]" />
+                </div>
+                <p className="text-[10px] sm:text-[10.5px] font-bold leading-relaxed text-[var(--mn-text)]">
+                  {livingCosts.variationNote}
+                </p>
+              </div>
+            )}
+
             {livingCosts.officialUrl && (
               <OfficialInfoLink
                 href={livingCosts.officialUrl}
                 label={publicT('public_official_living_cost_information_and_guide')}
-                icon={<Banknote className="w-2.5 h-2.5" />}
+                icon={<Banknote className="w-3.5 h-3.5" />}
               />
             )}
           </div>
         </section>
       )}
 
+      {/* 11. بيانات التواصل والروابط الرسمية — بدون مربع داخل مربع وبعرض 95% */}
       {contacts && (
         <section
-          className="mn-detail-full-bleed relative bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-y border-[var(--mn-border-brand)]/30 dark:border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/50 dark:shadow-none overflow-hidden mn-panel dark:mn-panel "
+          className="relative w-full bg-[var(--mn-surface)] rounded-none md:rounded-2xl px-2.5 sm:px-3 md:p-6 py-3.5 border-y md:border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
           aria-labelledby="university-contacts"
         >
-          <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
+          <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent z-10" />
 
-          <CompactSectionHeader
+          <UniversitySectionHeader
             id="university-contacts"
+            icon={Phone}
             title={publicT('public_11_contact_details_and_official_links')}
-            icon={<Phone className="h-4 w-4" />}
+            className="mb-3"
           />
-          <div className="mn-detail-small-grid p-4 sm:p-5">
-            {contacts.phone && (
-              <ReferenceLink
-                href={`tel:${contacts.phone.replace(/\s/g, '')}`}
-                label={publicT('public_official_phone_number')}
-                value={contacts.phone}
-              />
+
+          <div className="flex flex-col gap-3">
+            {/* Primary Contact Channels: 4 full-width rows formatted as two compartments with a divider */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-1.5">
+                <div className="w-[18px] h-[18px] rounded-[5px] bg-[#142B5F] border border-[#142B5F] text-white mn-sub-item-icon flex items-center justify-center shrink-0 shadow-2xs">
+                  <Building2 className="w-2.5 h-2.5 text-white" />
+                </div>
+                <p className="text-[11px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug">
+                  قنوات التواصل والجهات الرسمية
+                </p>
+              </div>
+
+              <div className="flex flex-col md:grid md:grid-cols-2 gap-2 md:gap-3">
+                {contacts.phone && (
+                  <ReferenceLink
+                    href={`tel:${contacts.phone.replace(/\s/g, '')}`}
+                    label={publicT('public_official_phone_number')}
+                    value={contacts.phone}
+                    ltrValue
+                  />
+                )}
+                <ReferenceLink
+                  href={contacts.officialWebsite}
+                  label={publicT('public_official_website')}
+                  value={getUrlDisplayHost(contacts.officialWebsite)}
+                  ltrValue
+                />
+                {contacts.mainSocial && (
+                  <ReferenceLink
+                    href={contacts.mainSocial.url}
+                    label={publicT('public_social_media')}
+                    value={contacts.mainSocial.label}
+                  />
+                )}
+                {contacts.governmentRegister && (
+                  <ReferenceLink
+                    href={contacts.governmentRegister.url}
+                    label={publicT('public_official_organization')}
+                    value={contacts.governmentRegister.label}
+                    ltrValue
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Official Useful Links */}
+            {contacts.usefulLinks && contacts.usefulLinks.length > 0 && (
+              <div className="flex flex-col gap-2">
+                {contacts.usefulLinks.map((link) => (
+                  <OfficialInfoLink
+                    key={link.url}
+                    href={link.url}
+                    label={link.label}
+                    icon={<ExternalLink className="w-3.5 h-3.5" />}
+                  />
+                ))}
+              </div>
             )}
-            <ReferenceLink
-              href={contacts.officialWebsite}
-              label={publicT('public_official_website')}
-              value={getUrlDisplayHost(contacts.officialWebsite)}
-            />
-            {contacts.mainSocial && (
-              <ReferenceLink
-                href={contacts.mainSocial.url}
-                label={publicT('public_social_media')}
-                value={contacts.mainSocial.label}
-                icon={<Share2 className="h-3.5 w-3.5" />}
-              />
+
+            {/* Data Trust Verification Box */}
+            {dataTrust && (
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] px-3 py-2.5 text-[9.5px] font-bold shadow-2xs mn-panel">
+                <span className="flex items-center gap-1.5 text-[var(--mn-heading)]">
+                  <span className="w-4 h-4 rounded-full bg-[#142B5F] border border-[#D6A43B]/75 text-[#F2CD78] flex items-center justify-center shrink-0">
+                    <ShieldCheck className="h-2.5 w-2.5" />
+                  </span>
+                  <span>
+                    {publicT('public_last_information_verification')}{' '}
+                    <span className="text-[var(--mn-text-muted)]">{dataTrust.lastVerified}</span>
+                  </span>
+                </span>
+                <a
+                  href={dataTrust.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[#142B5F] dark:text-[#F2CD78] hover:underline"
+                >
+                  <span>
+                    {publicT('public_source')} {dataTrust.sourceLabel}
+                  </span>
+                  <ArrowUpLeft className="h-3 w-3 shrink-0 text-[var(--mn-interactive-arrow)]" />
+                </a>
+              </div>
             )}
-            {contacts.governmentRegister && (
-              <ReferenceLink
-                href={contacts.governmentRegister.url}
-                label={publicT('public_official_organization')}
-                value={contacts.governmentRegister.label}
-              />
-            )}
-            {contacts.usefulLinks?.map((link) => (
-              <ReferenceLink
-                key={link.url}
-                href={link.url}
-                label="رابط رسمي مفيد"
-                value={link.label}
-              />
-            ))}
           </div>
         </section>
-      )}
-
-      {dataTrust && (
-        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-[var(--mn-primary)] px-4 py-2.5 text-[9px] font-bold text-[var(--mn-on-dark-muted)] mn-inverse ">
-          <span className="flex items-center gap-1">
-            <ShieldCheck className="h-3.5 w-3.5 text-[var(--mn-accent-text)]" />{publicT('public_last_information_verification')}{' '}{dataTrust.lastVerified}
-          </span>
-          <span className="hidden h-3 w-px bg-white/25 sm:block" />
-          <a
-            href={dataTrust.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[var(--mn-accent-text)] underline-offset-2 hover:underline"
-          >{publicT('public_source')}{' '}{dataTrust.sourceLabel}
-          </a>
-        </div>
       )}
     </div>
   );
@@ -1241,74 +1720,159 @@ function ReferenceLink({
   href,
   label,
   value,
-  icon,
+  ltrValue = false,
 }: {
   href: string;
   label: string;
   value: string;
   icon?: React.ReactNode;
+  ltrValue?: boolean;
 }) {
   return (
     <a
       href={href}
       target={href.startsWith('tel:') ? undefined : '_blank'}
       rel={href.startsWith('tel:') ? undefined : 'noopener noreferrer'}
-      className="group flex min-h-12 items-center gap-2 rounded-xl border border-[var(--mn-border-gold)] bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] px-3 py-2 transition-colors hover:border-[var(--mn-accent)] dark:border-[var(--mn-border)] mn-panel dark:mn-panel "
+      className="relative overflow-hidden group grid grid-cols-12 items-stretch rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] transition-all hover:border-[#0E7C86]/60 dark:hover:border-[#F2CD78]/60 active:scale-[0.99] shadow-2xs min-w-0"
     >
-      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--mn-primary)]/10 text-[var(--mn-heading)] dark:bg-[var(--mn-accent)]/10 dark:text-[var(--mn-accent-text)]">
-        {icon ?? <ExternalLink className="h-3.5 w-3.5" />}
-      </span>
-      <span className="min-w-0">
-        <span className="block text-[8.5px] font-bold text-[var(--mn-accent-text)] dark:text-[var(--mn-accent-text)]">
+      {/* خط بداية المربع بشكل أوضح باللون البترولي والنيلي */}
+      <span className="absolute top-2.5 right-0 bottom-2.5 w-[3px] rounded-l-full bg-gradient-to-b from-[#142B5F] via-[#153B75] to-[#0E7C86] dark:from-[#F2CD78] dark:to-[#38C6D4]" />
+
+      {/* المربع الأول: العنوان باللون النيلي */}
+      <div className="col-span-5 py-2.5 pr-3.5 pl-2.5 border-l border-[var(--mn-border)] flex items-center min-w-0">
+        <span className="text-[10.5px] sm:text-[11px] font-bold text-[#142B5F] dark:text-[#F2CD78] leading-snug">
           {label}
         </span>
-        <span className="block text-[9.5px] font-bold leading-4 text-[var(--mn-text)] group-hover:text-[var(--mn-heading)] dark:text-[var(--mn-text)]">
+      </div>
+
+      {/* المربع الثاني (بعد الفاصل): القيمة بوضوح مع سهم التنقل */}
+      <div className="col-span-7 py-2.5 px-3 bg-[var(--mn-surface)]/55 flex items-center justify-between gap-1.5 min-w-0">
+        <span
+          dir={ltrValue ? 'ltr' : undefined}
+          className="text-[10.5px] sm:text-[11px] font-bold text-[#142B5F] dark:text-[#F2CD78] leading-snug truncate"
+        >
           {value}
         </span>
-      </span>
+        <ArrowUpLeft className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#F2CD78] stroke-[2.25] transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" />
+      </div>
     </a>
   );
 }
 
-function CompactSectionHeader({
-  id,
-  title,
+function CompactFact({
+  label,
+  value,
   icon,
+  badge,
+  highlight = false,
+  variant = 'default',
 }: {
-  id: string;
-  title: string;
-  icon: React.ReactNode;
+  label: string;
+  value: string;
+  icon?: React.ReactNode;
+  badge?: 'navy-check' | 'navy-petrol-bars';
+  highlight?: boolean;
+  variant?: 'default' | 'navy-petrol';
 }) {
-  return <DetailSectionHeader id={id} iconNode={icon} title={title} className="px-4 pt-4 sm:px-5" />;
-}
-
-function CompactFact({ label, value }: { label: string; value: string }) {
+  const isNavyPetrol = variant === 'navy-petrol';
   return (
-    <div className="min-w-0 rounded-xl border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] px-2.5 py-2.5 shadow-2xs mn-panel dark:mn-panel ">
-      <span className="block text-[9px] font-bold text-[var(--mn-accent-text)] dark:text-[var(--mn-accent-text)]">
-        {label}
-      </span>
-      <span className="mt-1 block text-[10px] sm:text-[10.5px] font-bold leading-4 text-[var(--mn-text)] dark:text-[var(--mn-text)]">
+    <div
+      className={`rounded-xl p-2.5 shadow-2xs flex flex-col items-start justify-center min-w-0 ${
+        isNavyPetrol
+          ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] border border-[#0E7C86]/50 text-white'
+          : highlight
+          ? 'bg-[#D6A43B]/[0.08] dark:bg-[#D6A43B]/15 border border-[#D6A43B]/45'
+          : 'bg-[var(--mn-page)] border border-[var(--mn-border)]'
+      }`}
+    >
+      {/* الصف العلوي: الأيقونة مقابل العنوان بخط أكبر وواضح */}
+      <div className="flex items-center gap-1.5 min-w-0 w-full">
+        {isNavyPetrol ? (
+          icon ? (
+            <div className="shrink-0 text-white">{icon}</div>
+          ) : (
+            <span className="inline-flex items-center gap-0.5 shrink-0" aria-hidden="true">
+              <span className="w-1 h-3.5 rounded-full bg-white" />
+              <span className="w-1 h-2.5 rounded-full bg-[#38C6D4]" />
+            </span>
+          )
+        ) : badge === 'navy-petrol-bars' ? (
+          <span className="inline-flex items-center gap-0.5 shrink-0" aria-hidden="true">
+            <span className="w-1 h-3.5 rounded-full bg-[#142B5F] dark:bg-[#F2CD78]" />
+            <span className="w-1 h-2.5 rounded-full bg-[#0E7C86] dark:bg-[#38C6D4]" />
+          </span>
+        ) : badge === 'navy-check' ? (
+          <div className="w-4 h-4 rounded-full bg-[#142B5F] border border-[#D6A43B]/75 flex items-center justify-center shrink-0 shadow-2xs">
+            <Check className="w-2.5 h-2.5 text-[#F2CD78] stroke-[2.5]" />
+          </div>
+        ) : (
+          icon && <div className="shrink-0">{icon}</div>
+        )}
+        <span
+          className={`text-[10.5px] sm:text-[11px] font-bold leading-snug truncate ${
+            isNavyPetrol ? 'text-white' : 'text-[var(--mn-heading)]'
+          }`}
+        >
+          {label}
+        </span>
+      </div>
+
+      {/* القيمة بالأسفل بحجم متوازن وفي الوسط */}
+      <span
+        className={`w-full text-center text-[9.5px] sm:text-[10px] font-bold leading-snug mt-1 ${
+          isNavyPetrol
+            ? 'text-white font-extrabold'
+            : highlight
+            ? 'text-[#B8841E] dark:text-[#F2CD78]'
+            : 'text-[var(--mn-text-muted)]'
+        }`}
+      >
         {value}
       </span>
     </div>
   );
 }
 
-function DocumentList({ title, items }: { title: string; items: string[] }) {
+function DocumentList({
+  title,
+  items,
+  headerIcon,
+  variant = 'gold-dot',
+}: {
+  title: string;
+  items: string[];
+  headerIcon?: React.ReactNode;
+  variant?: 'gold-dot' | 'petrol-dot';
+}) {
   return (
-    <div className="rounded-xl border border-[var(--mn-border-gold)] dark:border-[var(--mn-border)] bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] p-3 mn-panel dark:mn-panel ">
-      <h3 className="mb-2 text-[10px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)]">
-        {title}
-      </h3>
-      <ul className="space-y-1.5">
+    <div className="space-y-2">
+      <div className="flex items-center gap-1.5">
+        <div className="w-[18px] h-[18px] rounded-[5px] bg-[#142B5F] border border-[#142B5F] text-white mn-sub-item-icon flex items-center justify-center shrink-0 shadow-2xs">
+          {headerIcon ?? <FileText className="w-2.5 h-2.5 text-white" />}
+        </div>
+        <h3 className="text-[11px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug">
+          {title}
+        </h3>
+      </div>
+
+      <ul className="grid grid-cols-2 gap-2">
         {items.map((item) => (
           <li
             key={item}
-            className="flex items-start gap-1.5 text-[9.5px] sm:text-[10px] font-semibold leading-4 text-[var(--mn-text-muted)] dark:text-[var(--mn-text-muted)]"
+            className="bg-[var(--mn-page)] rounded-xl border border-[var(--mn-border)] px-2.5 py-2 shadow-2xs flex items-start gap-2 min-w-0"
           >
-            <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-[var(--mn-accent-text)]" />
-            <span>{item}</span>
+            {variant === 'gold-dot' ? (
+              <div className="w-3.5 h-3.5 rounded-full bg-[#D6A43B]/15 dark:bg-[#D6A43B]/20 border border-[#D6A43B]/55 dark:border-[#F2CD78]/50 flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#D6A43B] dark:bg-[#F2CD78]" />
+              </div>
+            ) : (
+              <div className="w-3.5 h-3.5 rounded-full bg-[#142B5F]/12 dark:bg-[#D6A43B]/20 border border-[#0E7C86]/55 dark:border-[#F2CD78]/55 flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-[#142B5F] to-[#0E7C86] dark:from-[#D6A43B] dark:to-[#F2CD78]" />
+              </div>
+            )}
+            <span className="text-[10px] sm:text-[10.5px] font-bold text-[var(--mn-text)] leading-snug">
+              {item}
+            </span>
           </li>
         ))}
       </ul>
@@ -1319,7 +1883,6 @@ function DocumentList({ title, items }: { title: string; items: string[] }) {
 function OfficialInfoLink({
   href,
   label,
-  icon,
 }: {
   href?: string;
   label: string;
@@ -1327,19 +1890,52 @@ function OfficialInfoLink({
 }) {
   if (!href) return null;
   return (
-    <div className="pt-2 pb-0.5 flex justify-center">
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-500/10 via-cyan-600/15 to-[var(--mn-learning-exercise-600)]/10 hover:from-teal-500/20 hover:via-cyan-600/25 hover:to-[var(--mn-learning-exercise-600)]/20 text-teal-950 border border-teal-400/50 dark:from-amber-500/15 dark:via-yellow-500/20 dark:to-amber-600/15 dark:hover:from-amber-500/25 dark:hover:via-yellow-500/30 dark:hover:to-amber-600/25 dark:text-amber-200 dark:border-amber-400/50 shadow-2xs hover:shadow-xs transition-all duration-200 text-[10px] sm:text-[10.5px] font-bold font-['Cairo',sans-serif] group text-center"
-      >
-        <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-teal-600 via-cyan-700 to-[var(--mn-learning-exercise-800)] text-white dark:from-amber-500 dark:via-yellow-500 dark:to-amber-600 dark:text-zinc-950 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform font-bold">
-          {icon ?? <FileText className="w-2.5 h-2.5" />}
-        </div>
-        <span>{label}</span>
-        <ExternalLink className="w-2.5 h-2.5 text-cyan-700 dark:text-amber-300 group-hover:translate-x-[-2px] transition-transform" />
-      </a>
-    </div>
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="relative overflow-hidden w-full rounded-xl py-2.5 pl-2.5 pr-0 bg-[var(--mn-page)] border border-[var(--mn-border)] hover:border-[#0E7C86]/60 dark:hover:border-[#F2CD78]/60 shadow-2xs hover:shadow-xs active:scale-[0.99] transition-all flex items-center justify-between gap-2 group cursor-pointer mn-panel"
+    >
+      {/* الخط الهندسي باللون النيلي على الزاوية اليمنى متناسق مع حجم المربعات */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute top-0 right-0 w-3.5 h-[75%] rounded-tr-xl border-t-[3px] border-r-[3.5px] border-[#142B5F] dark:border-[#38C6D4]"
+      />
+
+      <div className="flex items-center gap-2 min-w-0 flex-1">
+        {/* خط نيلي خفيف يخرج من قلب الخط الهندسي وينتهي برأس سهم ذهبي يشير إلى الكلمة */}
+        <svg
+          viewBox="0 0 36 20"
+          className="w-7 h-4 shrink-0 -mr-[1px]"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M 35 2 L 35 10 L 8 10"
+            stroke="#142B5F"
+            className="dark:stroke-[#38C6D4]"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <circle cx="26" cy="10" r="1.6" fill="#142B5F" className="dark:fill-[#38C6D4]" />
+          <polygon
+            points="1.5,10 10.5,5.2 8.6,10 10.5,14.8"
+            fill="#D6A43B"
+            stroke="#B8841E"
+            strokeWidth="0.6"
+          />
+        </svg>
+
+        <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug text-start">
+          {label}
+        </span>
+
+        {/* أيقونة التنقل قريبة ومباشرة بجانب الكلام */}
+        <span className="w-5 h-5 rounded-full bg-[#142B5F] border border-[#D6A43B]/75 text-[#F2CD78] inline-flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform mr-1">
+          <ExternalLink className="w-2.5 h-2.5 stroke-[2.25] shrink-0" />
+        </span>
+      </div>
+    </a>
   );
 }
