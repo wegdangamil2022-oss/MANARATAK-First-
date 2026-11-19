@@ -6657,7 +6657,7 @@ model CourseSourceApproval {
  facts Json
  factsHash String
  evidenceUrls Json
- course Course @relation(fields: [courseId], references: [id], onDelete: Restrict)
+ course Course @relation(fields: [courseId], references: [id], onDelete: Restrict, onUpdate: NoAction)
  @@index([courseId, courseVersion, reviewedAt])
 }
 
@@ -6670,7 +6670,7 @@ model StudyDestinationRevision {
  diff Json
  proof Json?
  createdAt DateTime @default(now())
- profile StudyDestinationProfile @relation(fields:[profileId],references:[id],onDelete:Restrict)
+ profile StudyDestinationProfile @relation(fields:[profileId],references:[id],onDelete:Restrict, onUpdate: NoAction)
  @@index([profileId,createdAt,id])
 }
 model StudyDestinationReviewPolicy {

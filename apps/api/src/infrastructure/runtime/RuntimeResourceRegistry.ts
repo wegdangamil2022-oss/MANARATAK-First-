@@ -59,7 +59,12 @@ export class RuntimeResourceRegistry {
     const databaseUrl = this.readString('DATABASE_URL');
     if (!databaseUrl) return null;
     if (!this.prismaClient) {
-      this.prismaClient = new PrismaClient({ datasources: { db: { url: databaseUrl } } });
+      this.prismaClient = new PrismaClient({
+        datasources: { db: { url: databaseUrl } },
+        // Parallel catalog reads share a bounded pool. Prisma's two-second
+        // acquisition default can reject healthy queued reads against Neon.
+        transactionOptions: { maxWait: 10_000 },
+      });
     }
     return this.prismaClient;
   }

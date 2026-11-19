@@ -44,6 +44,8 @@ test('runtime registry owns one Prisma and Redis client and closes each exactly 
     REDIS_URL: 'redis://localhost:6379',
   });
   assert.equal(registry.getPrismaClient(), registry.getPrismaClient());
+  assert.equal(registry.getPrismaClient().options.transactionOptions.maxWait, 10_000);
+  assert.equal(registry.getPrismaClient().options.transactionOptions.timeout, undefined);
   assert.equal(registry.getRedisClient(), registry.getRedisClient());
   assert.equal(prismaConstructed, 1);
   assert.equal(redisConstructed, 1);
