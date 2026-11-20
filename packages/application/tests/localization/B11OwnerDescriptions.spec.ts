@@ -14,7 +14,7 @@ const input={locale:'en' as const,displayName:'Reviewed title',description:'Revi
 const owner=()=>({id:'owner',publicId:'exact-id',displayName:'Source title',canonicalName:'Canonical source',description:'Source description',version:1,revision:1,status:'DRAFT',completenessStatus:'COMPLETE',originType:'NATIVE_MANARATAK_COURSE',optionalFields:{description:'Source description'}});
 beforeEach(()=>{policy.enabled=true;});
 describe('B11 native owner description pairs',()=>{
- it('does not activate content writes while implementing the source contract',()=>{policy.enabled=false;expect(()=>prepareOwnerDescription('COURSE',owner(),input)).toThrow('CONTENT_AUTHORING_DISABLED');});
+ it('does not activate content writes while implementing the source contract',()=>{policy.enabled=false;expect(()=>prepareOwnerDescription('SCHOLARSHIP',owner(),input)).toThrow('CONTENT_AUTHORING_DISABLED');expect(()=>prepareOwnerDescription('COURSE',owner(),input)).not.toThrow();});
  for(const kind of ['COURSE','SCHOLARSHIP','INTERNATIONAL_TEST'] as const) {
   it(`${kind}: retains one exact owner/checkpoint for both fields, without fabricating missing text`,()=>{
    const source:any=owner();source.optionalFields=prepareOwnerDescription(kind,source,input);

@@ -1,7 +1,7 @@
 const hasArabic = (value?: string | null) => /[\u0600-\u06ff]/.test(value ?? '');
-export function courseNames(course: { displayName?: string; originalSourceTitle?: string }) {
+export function courseNames(course: { displayName?: string; originalSourceTitle?: string;translation?:{displayNameAr?:string} }) {
   return {
-    arabic: hasArabic(course.displayName) ? course.displayName!.trim() : hasArabic(course.originalSourceTitle) ? course.originalSourceTitle!.trim() : '',
+    arabic: course.translation?.displayNameAr || (hasArabic(course.displayName) ? course.displayName!.trim() : hasArabic(course.originalSourceTitle) ? course.originalSourceTitle!.trim() : ''),
     english: !hasArabic(course.originalSourceTitle) && course.originalSourceTitle?.trim() ? course.originalSourceTitle.trim() : !hasArabic(course.displayName) ? course.displayName?.trim() ?? '' : '',
   };
 }

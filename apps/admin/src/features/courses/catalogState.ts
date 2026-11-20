@@ -8,6 +8,7 @@ export interface CatalogRow extends CatalogFacts {
   status: string; completenessStatus: string; providerDisplayName?: string; providerName?: string;
   platformName?: string; instructor?: string; learningLanguage?: string; studyDuration?: string;
   difficultyLevel?: string; certificateType?: string; category?: string; version: number; updatedAt: string;
+  translation?: {state:string;displayNameAr?:string;displayFields?:Record<string,string>};
   relatedMajors?: Array<{ id: string; name: string }>;
 }
 export interface CatalogResult {
@@ -54,7 +55,7 @@ export function catalogQuery(params: URLSearchParams, fixedScope?: CourseScope):
   const page = Number(params.get('page'));
   const size = Number(params.get('pageSize'));
   const query = new URLSearchParams({ page: String(Number.isSafeInteger(page) && page > 0 && page <= 100000 ? page : 1), pageSize: String([20, 50, 100].includes(size) ? size : 20) });
-  const keys = ['status', 'studyAccess', 'certificateState', 'majorId', 'taxonomyNodeId', 'relationshipState', 'category', 'learningLanguage', 'difficultyLevel', 'sort'];
+  const keys = ['translationPresence', 'status', 'studyAccess', 'certificateState', 'majorId', 'taxonomyNodeId', 'relationshipState', 'category', 'learningLanguage', 'difficultyLevel', 'sort'];
   if (scope === 'native') keys.push('cohortFrom', 'cohortTo', 'instructor', 'hasEnrollments');
   if (scope !== 'native') keys.push('platformName', 'completenessStatus', 'linkHealth');
   for (const key of keys) if (params.get(key)) query.set(key, params.get(key)!);

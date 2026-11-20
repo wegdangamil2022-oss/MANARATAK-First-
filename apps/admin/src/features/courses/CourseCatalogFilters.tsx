@@ -25,7 +25,7 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
     hydrate={async value => ({ id: value, label: ar ? arabicCourseValue(value) : value })}
     reloadKey={reloadKey} onChange={value => change({ [key]: value })} load={(q,page)=>related(key,q,page)} />;
   const filterTitles: Record<string, string> = {
-    q: tr('البحث', 'Search'), scope: tr('النطاق', 'Scope'), status: tr('الحالة', 'Status'),
+    translationPresence:tr('وجود الترجمة العربية','Arabic translation presence'), q: tr('البحث', 'Search'), scope: tr('النطاق', 'Scope'), status: tr('الحالة', 'Status'),
     studyAccess: tr('الدراسة', 'Study'), certificateState: tr('الشهادة', 'Certificate'),
     majorId: tr('تخصص معتمد محدد', 'Selected approved major'), provider: tr('مزود خارجي محدد', 'Selected external provider'),
     learningLanguage: tr('اللغة', 'Language'), difficultyLevel: tr('المستوى', 'Level'),
@@ -37,6 +37,7 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
   };
   const active = [...params].filter(([key, value]) => value && filterTitles[key] && !(fixedScope && key === 'scope'));
   const chipValue = (key: string, value: string) => {
+    if (key === 'translationPresence') return value==='HAS_AR'?tr('يوجد نص عربي','Arabic text exists'):tr('لا يوجد نص عربي','No Arabic text');
     if (key === 'provider' || key === 'majorId' || key === 'taxonomyNodeId') return '';
     if (key === 'status') return courseStatusLabels[value]?.[ar ? 0 : 1] ?? tr('حالة محددة', 'Selected status');
     if (key === 'studyAccess') return studyLabels[value as keyof typeof studyLabels]?.[ar ? 0 : 1] ?? '';
@@ -55,6 +56,7 @@ export function CourseCatalogFilters({ params, scope, fixedScope, search, onSear
     <div className="course-filter-grid">
       <label className="course-field course-search-field"><span><Search size={16}/>{tr('البحث بالاسم أو الرمز أو المزود أو الموضوع', 'Search name, code, provider or topic')}</span><input type="search" maxLength={200} value={search} onChange={event => onSearch(event.target.value)} placeholder={tr('ابحث في الكتالوج…', 'Search the catalog…')} /></label>
       {!fixedScope && field('scope', tr('نطاق الدورات', 'Course scope'), [['native', tr('دورات منارتك', 'Manaratak courses')], ['external', tr('الدورات الخارجية', 'External courses')], ['paid', tr('الدورات المدفوعة — لاحقًا', 'Paid courses — later')]])}
+      {field('translationPresence',tr('وجود الترجمة العربية','Arabic translation presence'),[['HAS_AR',tr('يوجد نص عربي','Arabic text exists')],['NO_AR',tr('لا يوجد نص عربي','No Arabic text')]])}
       {field('status', tr('حالة الدورة', 'Course status'), Object.entries(courseStatusLabels).map(([id, labels]) => [id, labels[ar ? 0 : 1]]))}
       {field('studyAccess', tr('إتاحة الدراسة', 'Study access'), Object.entries(studyLabels).map(([id, labels]) => [id, labels[ar ? 0 : 1]]))}
       {field('certificateState', tr('الشهادة', 'Certificate'), Object.entries(certificateLabels).map(([id, labels]) => [id, labels[ar ? 0 : 1]]))}

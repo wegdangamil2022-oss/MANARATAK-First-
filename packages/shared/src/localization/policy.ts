@@ -46,11 +46,11 @@ export interface TranslationDomainPolicy {
 /**
  * Global project safety switch.
  *
- * This remains INFRASTRUCTURE_ONLY until a later, explicit content-translation
- * work package is opened. Keeping this source-controlled prevents an offline
- * source-preparation cycle from accidentally becoming a content mutation cycle.
+ * Course translation authoring was explicitly requested by the owner.
+ * Other domains retain their individual disabled policies.
  */
 export const TRANSLATION_CONTENT_MODE: TranslationContentMode = 'INFRASTRUCTURE_ONLY';
+export const TRANSLATION_DOMAIN_CONTENT_MODES: Partial<Record<TranslationDomainKey, TranslationContentMode>> = { COURSE: 'CONTENT_AUTHORING_ENABLED' };
 
 export const TRANSLATION_DOMAIN_POLICIES: Readonly<Record<TranslationDomainKey, TranslationDomainPolicy>> = {
   SCHOLARSHIP: {
@@ -94,7 +94,7 @@ export const TRANSLATION_DOMAIN_POLICIES: Readonly<Record<TranslationDomainKey, 
     owner: 'COURSES',
     storage: 'COMPATIBILITY_OVERLAY',
     runtimeRequirement: 'MIGRATION_DESIGN_REQUIRED',
-    contentAuthoringAllowed: false,
+    contentAuthoringAllowed: true,
     canonicalIdentityImmutable: true,
     supportedLocales: ['ar', 'en'],
   },
@@ -135,9 +135,9 @@ export function isTranslationContentAuthoringEnabled(
 
 export function canAuthorDomainTranslations(
   domain: TranslationDomainKey,
-  mode: TranslationContentMode = TRANSLATION_CONTENT_MODE,
+  mode?: TranslationContentMode,
 ): boolean {
-  return isTranslationContentAuthoringEnabled(mode) && TRANSLATION_DOMAIN_POLICIES[domain].contentAuthoringAllowed;
+  return isTranslationContentAuthoringEnabled(mode ?? TRANSLATION_DOMAIN_CONTENT_MODES[domain] ?? TRANSLATION_CONTENT_MODE) && TRANSLATION_DOMAIN_POLICIES[domain].contentAuthoringAllowed;
 }
 
 
@@ -150,9 +150,9 @@ export class TranslationContentMutationDisabledError extends Error {
 
 export function assertTranslationContentAuthoringEnabled(
   domain?: TranslationDomainKey,
-  mode: TranslationContentMode = TRANSLATION_CONTENT_MODE,
+  mode?: TranslationContentMode,
 ): void {
-  if (!isTranslationContentAuthoringEnabled(mode)) {
+  if (domain ? !canAuthorDomainTranslations(domain, mode) : !isTranslationContentAuthoringEnabled(mode)) {
     throw new TranslationContentMutationDisabledError(domain);
   }
   if (domain && !TRANSLATION_DOMAIN_POLICIES[domain].contentAuthoringAllowed) {
@@ -167,5 +167,6 @@ export function assertNoTranslationPayloadFields(
 ): void {
   if (!payload) return;
   const attempted = fields.some((field) => payload[field] !== undefined);
+  if (attempted && domain === 'COURSE') throw new Error('TRANSLATION_OWNER_DESCRIPTION_COMMAND_REQUIRED');
   if (attempted) assertTranslationContentAuthoringEnabled(domain);
 }

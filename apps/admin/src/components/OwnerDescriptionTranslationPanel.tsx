@@ -1,6 +1,6 @@
 import {adminOptionLabel} from './adminOptionLabels';
 import { useEffect, useRef, useState } from 'react';
-import { canAuthorDomainTranslations, type TranslationDomainKey } from '@manaratak/shared';
+import { canAuthorDomainTranslations, reviewReasonHeaders, type TranslationDomainKey } from '@manaratak/shared';
 import { adminApiClient } from '../api/client';
 export function OwnerDescriptionTranslationPanel({
   domain,
@@ -25,6 +25,8 @@ export function OwnerDescriptionTranslationPanel({
   const [locale, setLocale] = useState<'ar' | 'en'>('ar');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [displayFields,setDisplayFields]=useState<Record<string,string>>({});
+  const fieldLabels:Record<string,string>={platformName:'المنصة / الجامعة',studyDuration:'المدة',difficultyLevel:'المستوى الدراسي',certificateType:'نوع الشهادة',learningLanguageLabel:'اسم لغة التدريس (ترجمة التسمية فقط)',shortTopics:'الموضوعات المختصرة'};
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -37,9 +39,10 @@ export function OwnerDescriptionTranslationPanel({
     (domain === 'INTERNATIONAL_TEST' || status !== 'PUBLISHED');
   useEffect(() => {
     const pairs = optionalFields?.ownerLocalizedDescriptions as
-      Record<string, { displayName?: string; description?: string }> | undefined;
+      Record<string, { displayName?: string; description?: string; displayFields?:Record<string,string> }> | undefined;
     setTitle(pairs?.[locale]?.displayName ?? '');
     setDescription(pairs?.[locale]?.description ?? '');
+    setDisplayFields(pairs?.[locale]?.displayFields ?? {});
     setError('');
     setNotice('');
     setReloadRequired(false);
@@ -52,18 +55,18 @@ export function OwnerDescriptionTranslationPanel({
     setNotice('');
     let written = false;
     try {
-      if (domain === 'SCHOLARSHIP' && (!Number.isSafeInteger(revision) || revision! < 1))
+      if ((domain === 'SCHOLARSHIP' || domain === 'COURSE') && (!Number.isSafeInteger(revision) || revision! < 1))
         throw new Error('SCHOLARSHIP_REVISION_PRECONDITION_REQUIRED');
       await adminApiClient.request(
         `${endpoint}/${encodeURIComponent(ownerId)}/localized-description`,
         {
           method: 'POST',
           headers: {
-            'X-Review-Reason': reason,
-            ...(domain === 'SCHOLARSHIP' ? { 'If-Match': String(revision) } : {}),
+            ...reviewReasonHeaders(reason),
+            ...((domain === 'SCHOLARSHIP' || domain === 'COURSE') ? { 'If-Match': String(revision) } : {}),
           },
           body: JSON.stringify(
-            remove ? { locale, remove: true } : { locale, displayName: title, description },
+            remove ? { locale, remove: true } : { locale, displayName: title, description, ...(domain==='COURSE'?{displayFields:Object.fromEntries(Object.entries(displayFields).filter(([,value])=>value.trim()))}:{}) },
           ),
         },
       );
@@ -157,8 +160,9 @@ export function OwnerDescriptionTranslationPanel({
           onChange={(event) => setDescription(event.target.value)}
         />
       </label>
+      {domain==='COURSE' && Object.entries(fieldLabels).map(([key,label])=><label key={key}>{label}<textarea disabled={!enabled||busy} value={displayFields[key]??''} maxLength={10000} onChange={event=>setDisplayFields(previous=>({...previous,[key]:event.target.value}))}/></label>)}
       <label>
-        {tr('سبب التعديل', 'Edit reason')}
+        {tr('سبب التعديل' , 'Edit reason')}
         <input
           disabled={!enabled || busy}
           value={reason}

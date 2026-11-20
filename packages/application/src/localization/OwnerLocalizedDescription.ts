@@ -1,8 +1,16 @@
 import {createHash} from 'node:crypto';
 import {assertTranslationContentAuthoringEnabled} from '@manaratak/shared';
 export type DescriptionOwner = 'INTERNATIONAL_TEST' | 'SCHOLARSHIP' | 'COURSE';
-export interface OwnerDescriptionEvidence {ownerId:string;sourceRevision:string;sourceDigest:string;valueDigest:string;locale:'ar'|'en';displayName:string;description:string}
-export interface OwnerDescriptionInput {locale:'ar'|'en'; displayName?:string; description?:string; remove?:boolean}
+export interface OwnerDescriptionEvidence {ownerId:string;sourceRevision:string;sourceDigest:string;valueDigest:string;locale:'ar'|'en';displayName:string;description:string;displayFields?:Record<string,string>}
+export interface OwnerDescriptionInput {locale:'ar'|'en'; displayName?:string; description?:string; remove?:boolean; displayFields?:Record<string,string>}
+export const COURSE_TRANSLATED_DISPLAY_FIELDS = ['platformName','studyDuration','difficultyLevel','certificateType','learningLanguageLabel','shortTopics'] as const;
+function displayFieldsFor(kind:DescriptionOwner,value:unknown):Record<string,string>|undefined {
+  if(value===undefined)return undefined;
+  if(kind!=='COURSE'||!value||typeof value!=='object'||Array.isArray(value))throw Error('TRANSLATION_DISPLAY_FIELDS_INVALID');
+  const fields=Object.entries(value);
+  if(fields.some(([key,text])=>!COURSE_TRANSLATED_DISPLAY_FIELDS.includes(key as typeof COURSE_TRANSLATED_DISPLAY_FIELDS[number])||typeof text!=='string'||!text.trim()||text.length>10000))throw Error('TRANSLATION_DISPLAY_FIELDS_INVALID');
+  return Object.fromEntries(fields.map(([key,text])=>[key,(text as string).trim()]));
+}
 type RecordValue = Record<string, any>;
 const record=(value:unknown):RecordValue=>value && typeof value==='object' && !Array.isArray(value) ? value as RecordValue : {};
 const stable=(value:unknown):unknown=>value instanceof Date ? value.toISOString() : Array.isArray(value) ? value.map(stable) : value && typeof value==='object' ? Object.fromEntries(Object.entries(value).sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>[k,stable(v)])) : value??null;
@@ -27,8 +35,9 @@ export function prepareOwnerDescription(kind:DescriptionOwner,owner:RecordValue,
     const revision=owner.revision??owner.version;
     if(typeof owner.id!=='string'||!owner.id||!Number.isSafeInteger(revision)||revision<(kind==='INTERNATIONAL_TEST'?0:1)) throw new Error('TRANSLATION_OWNER_REVISION_REQUIRED');
     const source=ownerDescriptionSource(kind,owner);
+    const displayFields=displayFieldsFor(kind,input.displayFields??record(pairs[input.locale]).displayFields);
     pairs[input.locale]={ownerId:owner.id,sourceRevision:String(revision),
-      sourceDigest:hash(source),locale:input.locale,displayName:input.displayName.trim(),description:input.description.trim(),valueDigest:hash([input.locale,input.displayName.trim(),input.description.trim()])};
+      sourceDigest:hash(source),locale:input.locale,displayName:input.displayName.trim(),description:input.description.trim(),...(displayFields?{displayFields}:{}),valueDigest:hash([input.locale,input.displayName.trim(),input.description.trim(),...(displayFields?[displayFields]:[])])};
   }
   return {...optional,ownerLocalizedDescriptions:pairs};
 }
@@ -36,16 +45,24 @@ export function assertNoForgedOwnerDescriptions(optional:unknown):void {
   if(record(optional).ownerLocalizedDescriptions!==undefined) throw new Error('TRANSLATION_OWNER_DESCRIPTION_COMMAND_REQUIRED');
 }
 /** Data has no independent publication status: the owner's review and published version are authoritative. */
-export function approvedOwnerDescriptions(kind:DescriptionOwner,owner:RecordValue):Partial<Record<'ar'|'en',{displayName:string;description:string}>> {
-  const result:Partial<Record<'ar'|'en',{displayName:string;description:string}>>={};
+export function approvedOwnerDescriptions(kind:DescriptionOwner,owner:RecordValue):Partial<Record<'ar'|'en',{displayName:string;description:string;displayFields?:Record<string,string>}>> {
+  const result:Partial<Record<'ar'|'en',{displayName:string;description:string;displayFields?:Record<string,string>}>>={};
   const sourceDigest=hash(ownerDescriptionSource(kind,owner));
   for(const [locale,raw] of Object.entries(record(record(owner.optionalFields).ownerLocalizedDescriptions))) {
     const pair=record(raw);
-    if((locale==='ar'||locale==='en') && pair.locale===locale && pair.ownerId===owner.id && typeof pair.sourceRevision==='string' && pair.sourceRevision && pair.sourceDigest===sourceDigest && pair.valueDigest===hash([locale,pair.displayName,pair.description]) && typeof pair.displayName==='string' && pair.displayName.trim() && typeof pair.description==='string' && pair.description.trim()) result[locale]={displayName:pair.displayName,description:pair.description};
+    let displayFields:Record<string,string>|undefined;
+    try{displayFields=displayFieldsFor(kind,pair.displayFields);}catch{continue;}
+    if((locale==='ar'||locale==='en') && pair.locale===locale && pair.ownerId===owner.id && typeof pair.sourceRevision==='string' && pair.sourceRevision && pair.sourceDigest===sourceDigest && pair.valueDigest===hash([locale,pair.displayName,pair.description,...(displayFields?[displayFields]:[])]) && typeof pair.displayName==='string' && pair.displayName.trim() && typeof pair.description==='string' && pair.description.trim()) result[locale]={displayName:pair.displayName,description:pair.description,...(displayFields?{displayFields}:{})};
   }
   return result;
 }
 export function assertOwnerDescriptionsCurrent(kind:DescriptionOwner,owner:RecordValue):void {
   const raw=record(record(owner.optionalFields).ownerLocalizedDescriptions);
   if(Object.keys(raw).length!==Object.keys(approvedOwnerDescriptions(kind,owner)).length) throw new Error('TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED');
+}
+
+export function courseTranslationSummary(owner:RecordValue) {
+  const pair=approvedOwnerDescriptions('COURSE',owner).ar;
+  const present=Boolean(record(record(owner.optionalFields).ownerLocalizedDescriptions).ar);
+  return {state:pair?'TRANSLATED':present?'SOURCE_CHANGED':'NOT_TRANSLATED',...(pair?{displayNameAr:pair.displayName,displayFields:pair.displayFields}:{})};
 }

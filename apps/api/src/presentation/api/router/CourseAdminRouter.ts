@@ -1,3 +1,4 @@
+import { courseTranslationSummary } from '@manaratak/application';
 import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory.js';
 import type { CourseAccessService, CourseCertificateBindingOwner } from '@manaratak/application';
 import type { AuthorizationEvaluatorService } from '@manaratak/domain';
@@ -217,6 +218,7 @@ export class CourseAdminRouter {
       majorId: z.string().trim().min(1).max(200).optional(),
       taxonomyNodeId: z.string().trim().min(1).max(200).optional(),
       relationshipState: z.enum(['CLASSIFIED', 'UNCLASSIFIED', 'HAS_MAJORS', 'NO_MAJORS']).optional(),
+      translationPresence: z.enum(['HAS_AR', 'NO_AR']).optional(),
       category: z.string().trim().max(200).optional(),
       learningLanguage: z.string().trim().max(200).optional(),
       difficultyLevel: z.string().trim().max(200).optional(),
@@ -255,6 +257,7 @@ export class CourseAdminRouter {
         const result = await adminCourseUseCases.listCourses({ ...filters, includeStatistics: true });
         res.json({ ...result, data: result.data.map(course => ({
           id: course.id, publicId: course.publicId, displayName: course.displayName, originalSourceTitle: course.originalSourceTitle,
+          translation: courseTranslationSummary(course),
           originType: course.originType, accessType: course.accessType, status: course.status, completenessStatus: course.completenessStatus,
           providerDisplayName: course.providerDisplayName, providerName: course.providerName, platformName: course.platformName,
           learningLanguage: course.learningLanguage ?? course.learningLanguageRaw, studyDuration: course.studyDuration ?? course.studyDurationRaw, difficultyLevel: course.difficultyLevel ?? course.studyLevelRaw,
@@ -267,7 +270,7 @@ export class CourseAdminRouter {
     }
 
     router.post('/:id/localized-description',asyncHandler(async(req,res,{adminCourseUseCases})=>{
-      res.json(await adminCourseUseCases.saveLocalizedDescription(req.params.id,z.object({locale:z.enum(['ar','en']),displayName:z.string().trim().min(1).max(500).optional(),description:z.string().trim().min(1).max(100000).optional(),remove:z.boolean().optional()}).strict().parse(req.body)));
+      res.json(await adminCourseUseCases.saveLocalizedDescription(req.params.id,z.object({locale:z.enum(['ar','en']),displayName:z.string().trim().min(1).max(500).optional(),description:z.string().trim().min(1).max(100000).optional(),remove:z.boolean().optional(),displayFields:z.object({platformName:z.string().trim().min(1).max(10000).optional(),studyDuration:z.string().trim().min(1).max(10000).optional(),difficultyLevel:z.string().trim().min(1).max(10000).optional(),certificateType:z.string().trim().min(1).max(10000).optional(),learningLanguageLabel:z.string().trim().min(1).max(10000).optional(),shortTopics:z.string().trim().min(1).max(10000).optional()}).strict().optional()}).strict().parse(req.body)));
     }));
 
     const updateBodySchema = z.object({
@@ -475,7 +478,7 @@ export class CourseAdminRouter {
       const {adminCourseUseCases}=scope;
       const course = await adminCourseUseCases.getCourse(req.params.id);
       res.setHeader('ETag', `"${course.version}"`);
-      res.json(course);
+      res.json({...course,translation:courseTranslationSummary(course)});
     }));
 
     router.get('/:id/curriculum', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {

@@ -114,7 +114,7 @@ function safeZipPath(name: string): boolean {
   return !normalized.split('/').some((segment) => segment === '..');
 }
 
-function inspectXlsxArchive(bytes: Uint8Array): XlsxSecuritySummary {
+export function inspectXlsxArchive(bytes: Uint8Array): XlsxSecuritySummary {
   const buffer = Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   if (buffer.length < 4 || buffer.readUInt32LE(0) !== 0x04034b50) {
     throw new Error('COURSE_XLSX_ZIP_SIGNATURE_INVALID');

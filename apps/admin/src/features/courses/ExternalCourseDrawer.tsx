@@ -1,3 +1,4 @@
+import {OwnerDescriptionTranslationPanel} from '../../components/OwnerDescriptionTranslationPanel';
 import { CourseSourceApprovalPanel } from '../../components/CourseSourceApprovalPanel';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 
@@ -25,7 +26,7 @@ export function ExternalCourseDrawer({ id, onClose, onSaved }: { id?: string; re
   const mutation=useRef(false);
   const [unverifiedId,setUnverifiedId]=useState('');
   const creating = !id;
-  const [course, setCourse] = useState<CourseDto>();
+  const [course, setCourse] = useState<CourseDto & {translation?:{state:string;displayNameAr?:string;displayFields?:Record<string,string>}}>();
   const [source, setSource] = useState<ImportedCourseAdminDetail>();
   const [loadError, setLoadError] = useState('');
   const [sourceError, setSourceError] = useState(false);
@@ -125,13 +126,14 @@ export function ExternalCourseDrawer({ id, onClose, onSaved }: { id?: string; re
   const displayed: Record<string, string> = {
     displayName: names.arabic || tr('لم يُضف الاسم العربي', 'Arabic name not added'),
     originalSourceTitle: names.english || tr('غير مذكور', 'Not stated'),
-    providerName: provider.arabic || tr('لم يُضف الاسم العربي للجهة', 'Arabic provider name not added'),
+    providerName: (ar?course?.translation?.displayFields?.platformName:undefined) || provider.arabic || tr('لم يُضف الاسم العربي للجهة', 'Arabic provider name not added'),
     platformName: provider.english || tr('غير مذكور', 'Not stated'),
     directCourseUrl: course?.directCourseUrl ?? '',
   };
   const readValue = (key: string) => {
     if (key in displayed) return displayed[key];
-    const content = course?.[key as keyof CourseDto];
+    const translatedKey:Record<string,string>={studyDurationRaw:'studyDuration',studyLevelRaw:'difficultyLevel',certificateType:'certificateType',learningLanguageRaw:'learningLanguageLabel',shortCourseTopicsRaw:'shortTopics'};
+    const content = ar && translatedKey[key] && course?.translation?.state==='TRANSLATED' ? course.translation.displayFields?.[translatedKey[key]] ?? course?.[key as keyof CourseDto] : course?.[key as keyof CourseDto];
     if (typeof content === 'boolean') return content ? tr('نعم', 'Yes') : tr('لا', 'No');
     return ar ? arabicCourseValue(typeof content === 'string' ? content : undefined) : typeof content === 'string' && content.trim() ? content : 'Not stated in the file';
   };
@@ -148,6 +150,7 @@ export function ExternalCourseDrawer({ id, onClose, onSaved }: { id?: string; re
           {reasonField}<div className="course-drawer-toolbar"><button type="submit" className="course-primary" disabled={busy || reason.trim().length < 3 || (creating && !form.externalProviderId)}><Save size={16}/>{tr('حفظ بيانات الدورة', 'Save course details')}</button>{!creating && <button type="button" disabled={busy} onClick={cancel}><X size={16}/>{tr('إلغاء', 'Cancel')}</button>}</div>
         </form> : <dl className="course-master-fields"><div className="course-detail-value"><dt>{tr('الرقم في الملف', 'Source number')}</dt><dd>{String(source?.originalSourceRow?.sourceOrder ?? course?.optionalFields?.sourceOrder ?? '—')}</dd></div>{fields.map(field => <div className={`course-detail-value ${field.kind === 'textarea' || field.key === 'directCourseUrl' ? 'course-wide-field' : ''}`} key={field.key}><dt>{ar ? field.ar : field.en}</dt><dd dir={['originalSourceTitle', 'platformName', 'directCourseUrl'].includes(field.key) ? 'ltr' : 'auto'}>{field.key === 'directCourseUrl' && directUrl ? <a href={directUrl} target="_blank" rel="noopener noreferrer"><ExternalLink size={14}/>{directUrl}</a> : readValue(field.key)}</dd></div>)}</dl>}
       </section>
+      {!creating && course && !edit && hasPermission('admin:courses:manage') && <details className="course-panel"><summary>الترجمة العربية وتعديلها</summary><p>مصدر الترجمة: {String((course.optionalFields?.metadata as {courseTranslationImport?:{file?:string}}|undefined)?.courseTranslationImport?.file ?? 'إدخال يدوي')}</p><p>الترجمة تخص عرض البيانات؛ لغة التدريس ومعلومات المصدر الأصلية محفوظة. بعض الموضوعات في الملف مستنتجة من العناوين ولم تُتحقق من المنهج الرسمي.</p><OwnerDescriptionTranslationPanel domain="COURSE" revision={course.version} ownerId={course.id} endpoint="/admin/courses" optionalFields={course.optionalFields} status={course.status} onSaved={afterChange}/></details>}
       {!creating && course && <CourseAcademicLinks id={course.id} editable={Boolean(editable && !edit)} busy={busy} reviewReason={!actions ? reasonField : undefined} command={(action, body) => command(action, '', body)}/>}
       {!creating && actions && <section className="course-panel course-operations"><h3><ShieldCheck size={17}/>{tr('المراجعة والنشر', 'Review and publication')}</h3>{!edit && reasonField}<div className="course-drawer-toolbar">
         <button type="button" disabled={busy || !editable} onClick={() => void command('verify-source')}><ShieldCheck size={15}/>{tr('تحقق من المصدر', 'Verify source')}</button><button type="button" disabled={busy || !editable} onClick={() => void command('check-link')}><ExternalLink size={15}/>{tr('فحص الرابط', 'Check link')}</button><button type="button" disabled={busy} onClick={() => void checkReadiness()}><CheckCircle2 size={15}/>{tr('فحص جاهزية النشر', 'Check publication readiness')}</button>

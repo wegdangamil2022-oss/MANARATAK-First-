@@ -137,7 +137,7 @@ export class ImportedCourseAdminRouter {
     const bulkFilters = z.object({ search: filterText, externalProviderId: filterText, majorId: filterText, category: filterText,
       learningLanguage: filterText, difficultyLevel: filterText, platformName: filterText, status: z.nativeEnum(CourseStatus).optional(),
       completenessStatus: z.nativeEnum(CourseImportCompletenessState).optional(), studyAccess: z.enum(['FREE', 'PAID', 'UNKNOWN']).optional(),
-      certificateState: z.enum(['FREE', 'NON_FREE', 'UNAVAILABLE', 'UNKNOWN']).optional(), linkHealth: z.enum(['VERIFIED', 'BROKEN', 'NEEDS_REVIEW', 'UNKNOWN']).optional() }).strict();
+      translationPresence:z.enum(['HAS_AR','NO_AR']).optional(), certificateState: z.enum(['FREE', 'NON_FREE', 'UNAVAILABLE', 'UNKNOWN']).optional(), linkHealth: z.enum(['VERIFIED', 'BROKEN', 'NEEDS_REVIEW', 'UNKNOWN']).optional() }).strict();
     const selectionSchema = z.discriminatedUnion('mode', [
       z.object({ mode: z.literal('IDS'), ids: z.array(z.string().uuid()).min(1).max(20000) }).strict(),
       z.object({ mode: z.literal('FILTER'), filters: bulkFilters }).strict(),

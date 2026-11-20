@@ -14,7 +14,7 @@ describe('translation infrastructure policy', () => {
     expect(isTranslationContentAuthoringEnabled()).toBe(false);
   });
 
-  it('registers every translatable platform area without opening content writes', () => {
+  it('opens owner-authorized course translations only', () => {
     expect(Object.keys(TRANSLATION_DOMAIN_POLICIES).sort()).toEqual([
       'CMS',
       'COURSE',
@@ -29,8 +29,9 @@ describe('translation infrastructure policy', () => {
     for (const [domain, policy] of Object.entries(TRANSLATION_DOMAIN_POLICIES)) {
       expect(policy.canonicalIdentityImmutable).toBe(true);
       expect(policy.supportedLocales).toEqual(['ar', 'en']);
-      expect(policy.contentAuthoringAllowed).toBe(false);
-      expect(canAuthorDomainTranslations(domain as keyof typeof TRANSLATION_DOMAIN_POLICIES)).toBe(false);
+      expect(policy.contentAuthoringAllowed).toBe(domain==='COURSE');
+      expect(canAuthorDomainTranslations(domain as keyof typeof TRANSLATION_DOMAIN_POLICIES)).toBe(domain==='COURSE');
+      expect(canAuthorDomainTranslations(domain as keyof typeof TRANSLATION_DOMAIN_POLICIES,'INFRASTRUCTURE_ONLY')).toBe(false);
     }
   });
 
@@ -43,9 +44,11 @@ describe('translation infrastructure policy', () => {
       assertNoTranslationPayloadFields('COURSE', { displayName: 'Canonical title' }, ['localizedNames', 'titleEn']),
     ).not.toThrow();
     expect(() =>
-      assertNoTranslationPayloadFields('COURSE', { localizedNames: { en: 'Deferred' } }, ['localizedNames']),
-    ).toThrow('TRANSLATION_CONTENT_AUTHORING_DISABLED:COURSE');
+      assertNoTranslationPayloadFields('SCHOLARSHIP', { localizedNames: { en: 'Deferred' } }, ['localizedNames']),
+    ).toThrow('TRANSLATION_CONTENT_AUTHORING_DISABLED:SCHOLARSHIP');
   });
+
+  it('rejects unversioned course translation payloads',()=>{expect(()=>assertNoTranslationPayloadFields('COURSE',{localizedNames:{ar:'عنوان'}},['localizedNames'])).toThrow('TRANSLATION_OWNER_DESCRIPTION_COMMAND_REQUIRED');});
 
   it('preserves domain ownership and storage boundaries', () => {
     expect(TRANSLATION_DOMAIN_POLICIES.UNIVERSITY.storage).toBe('NORMALIZED');

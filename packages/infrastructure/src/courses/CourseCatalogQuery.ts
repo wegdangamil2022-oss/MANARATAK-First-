@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import type { CourseFilters } from '@manaratak/domain';
 
 const external = { originType: 'EXTERNAL_LINKED_COURSE' };
@@ -44,6 +44,14 @@ export function courseCatalogWhere(filters: CourseFilters): Prisma.CourseWhereIn
   } };
   if (filters.majorId) where.majorProjections = { some: { majorId: filters.majorId, projectionState: 'APPROVED' } };
   const and: Prisma.CourseWhereInput[] = [];
+  if (filters.translationPresence) {
+    const missing = (key: string): Prisma.CourseWhereInput => ({ OR: [
+      { optionalFields: { equals: Prisma.DbNull } },
+      { optionalFields: { path: ['ownerLocalizedDescriptions', 'ar', key], equals: Prisma.AnyNull } },
+      { optionalFields: { path: ['ownerLocalizedDescriptions', 'ar', key], equals: '' } },
+    ] });
+    and.push(filters.translationPresence === 'NO_AR' ? { OR: [missing('displayName'), missing('description')] } : { AND: [{ NOT: missing('displayName') }, { NOT: missing('description') }] });
+  }
   if (filters.relationshipState === 'CLASSIFIED' || filters.relationshipState === 'UNCLASSIFIED') and.push({ academicTaxonomyLinks: {
     [filters.relationshipState === 'CLASSIFIED' ? 'some' : 'none']: { reviewState: 'APPROVED', taxonomyNode: { status: 'ACTIVE' } },
   } });
@@ -72,6 +80,7 @@ export function courseCatalogWhere(filters: CourseFilters): Prisma.CourseWhereIn
   if (filters.studyAccess) and.push(courseStudyWhere(filters.studyAccess));
   if (filters.certificateState) and.push(courseCertificateWhere(filters.certificateState));
   if (filters.search) and.push({ OR: [
+    { optionalFields: { path: ['ownerLocalizedDescriptions', 'ar', 'displayName'], string_contains: filters.search } },
     ...['displayName', 'canonicalName', 'publicId', 'platformName', 'providerName', 'originalSourceTitle', 'shortCourseTopicsRaw']
       .map(key => ({ [key]: { contains: filters.search, mode: 'insensitive' as const } })),
     { externalProvider: { is: { OR: [

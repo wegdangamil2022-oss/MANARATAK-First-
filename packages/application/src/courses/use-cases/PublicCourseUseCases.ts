@@ -218,7 +218,13 @@ export class PublicCourseUseCases {
       studyDurationRaw: course.studyDurationRaw ?? null,
       learningLanguageRaw: course.learningLanguageRaw ?? null,
       ...optionalPublic,
-      ...(pair ? {displayName:pair.displayName,description:pair.description} : {}),
+      ...(pair ? {displayName:pair.displayName,description:pair.description,
+        ...(pair.displayFields?.platformName?{platformName:pair.displayFields.platformName}:{}),
+        ...(pair.displayFields?.studyDuration?{studyDuration:pair.displayFields.studyDuration,studyDurationRaw:pair.displayFields.studyDuration}:{}),
+        ...(pair.displayFields?.difficultyLevel?{difficultyLevel:pair.displayFields.difficultyLevel,studyLevelRaw:pair.displayFields.difficultyLevel}:{}),
+        ...(pair.displayFields?.certificateType?{certificateType:pair.displayFields.certificateType}:{}),
+        ...(pair.displayFields?.shortTopics?{shortCourseTopicsRaw:pair.displayFields.shortTopics}:{}),
+      } : {}),
       updatedAt: course.updatedAt,
     };
   }

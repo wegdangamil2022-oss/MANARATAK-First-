@@ -10,6 +10,8 @@ export interface CourseFilters {
   /** Internal owner-scoped read boundary, never a public catalog query parameter. */
   courseId?: string;
   search?: string;
+  /** Presence of an Arabic name/description pair; source validity is reported separately. */
+  translationPresence?: 'HAS_AR' | 'NO_AR';
   externalProviderId?: string;
   majorId?: string;
   /** Approved academic field, including active descendants. */

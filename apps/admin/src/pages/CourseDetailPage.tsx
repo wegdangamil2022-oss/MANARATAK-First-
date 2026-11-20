@@ -650,7 +650,7 @@ function CourseDetailWorkspace() {
           )}
         </div>
       </div>
-      <details className="admin-section-tools"><summary>ترجمة الاسم والوصف</summary><OwnerDescriptionTranslationPanel domain="COURSE" ownerId={course!.id} endpoint="/admin/courses" optionalFields={course!.optionalFields} status={course!.status} onSaved={()=>fetchCourse()}/></details>
+      <details className="admin-section-tools"><summary>ترجمة الاسم والوصف</summary><OwnerDescriptionTranslationPanel domain="COURSE" revision={course!.version} ownerId={course!.id} endpoint="/admin/courses" optionalFields={course!.optionalFields} status={course!.status} onSaved={()=>fetchCourse()}/></details>
 
 
       {course.status === 'PUBLISHED' && (
