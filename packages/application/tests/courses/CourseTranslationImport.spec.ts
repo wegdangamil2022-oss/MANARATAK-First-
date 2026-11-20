@@ -1,3 +1,4 @@
+import {PublicCourseUseCases} from '../../src/courses/use-cases/PublicCourseUseCases';
 import {describe,it,expect} from 'vitest';
 import {parseCourseTranslationMatrix,COURSE_TRANSLATION_HEADERS} from '../../src/courses/parsers/CourseTranslationArtifactParser';
 import {groupCourseTranslations,prepareCourseTranslation} from '../../../../scripts/import/CourseTranslationImport';
@@ -26,6 +27,20 @@ describe('owner supplied course translations',()=>{
   expect(courseTranslationSummary(translated).state).toBe('TRANSLATED');
   expect(courseTranslationSummary({...translated,displayName:'Changed source'}).state).toBe('SOURCE_CHANGED');
   expect(approvedOwnerDescriptions('COURSE',{...translated,directCourseUrl:'https://other.test/'}).ar).toBeUndefined();
+ });
+ it('projects both display languages without exposing source evidence or changing teaching language',async()=>{
+  const original={...owner(),originalSourceTitle:'English source',accessType:'FREE_STUDY',isStudyFree:true};
+  const optionalFields=prepareCourseTranslation(original,rows(),source);
+  const repository={
+   findPublishedBySlug:async()=>({...original,status:'PUBLISHED',completenessStatus:'COMPLETE',optionalFields}),
+   isPubliclyEligible:async()=>true,
+  };
+  const reader=new PublicCourseUseCases(repository as never);
+  const arabic=await reader.getCourse('course','ar');
+  const english=await reader.getCourse('course','en');
+  expect(arabic).toMatchObject({displayName:'اسم عربي',titleEn:'English source',learningLanguageRaw:'English'});
+  expect(english).toMatchObject({displayName:'English source',learningLanguageRaw:'English'});
+  expect(JSON.stringify(arabic)).not.toMatch(/ownerLocalizedDescriptions|sourceRows|previousTranslationEvidence|sourceDigest/);
  });
  it('preserves display fields on title/description edits and rejects forged fields',()=>{
   const original=owner(),optionalFields=prepareCourseTranslation(original,rows(),source),translated={...original,optionalFields};

@@ -50,3 +50,24 @@ admin/API/public/parser tests after fixes. Also validate JSON presence-filter nu
 semantics, editor readback and concurrency, authorization, and public metadata
 allowlisting. Do not merge or import until the remaining work is reviewed and
 validated under a later explicit instruction.
+
+## Follow-up verification
+
+The course dashboard uses **Courses → External courses**. Its Arabic text
+presence filter checks for stored title and description values; the row badge
+also checks the stored source and value evidence. Open a course and expand
+**Arabic translation** to edit those values through the versioned command.
+The Translation Workspace reads the stored course title/description and marks
+the translation as saved, independently of publication.
+
+Before applying, the Neon project `manaratak-platform-start-20261022`, default
+branch `main`, database `neondb` had 21,559 course records matching the workbook
+URL set. All were `IMPORTED`. The Arabic presence filter counted zero with both
+text values and 21,559 without them. No database writes were performed in this
+verification. The official app-role bootstrap, private frozen plan, and
+execution wrapper from the original workstation are required to continue that
+run.
+
+The public Arabic route is `/ar/courses`. The English route `/en/courses`
+depends on the site's existing English release switch. The teaching-language
+filter uses the original course language in either locale.

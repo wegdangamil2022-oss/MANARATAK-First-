@@ -59,7 +59,7 @@ async function mount() {
   await act(async () => button('Source and review operations').props.onClick());
   await act(async () =>
     tree.root
-      .findAllByType('textarea')[0]
+      .findByProps({ 'aria-label': 'Operation reason' })
       .props.onChange({ target: { value: 'Reviewed official source' } }),
   );
   await act(async () => button('Check publication readiness').props.onClick());

@@ -273,6 +273,7 @@ export function mapCourse(dto: PublicCourseDto): {
           publicId: dto.publicId,
           slug: dto.slug,
           title: dto.displayName,
+          titleEn: dto.titleEn,
           provider,
           platform: dto.platformName ?? provider,
           relatedMajors: dto.relatedMajors,

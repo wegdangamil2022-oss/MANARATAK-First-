@@ -296,6 +296,7 @@ export function AdminTranslationWorkspacePage() {
         'قيمة محفوظة؛ النشر غير مثبت',
         'Value present; publication unverified',
       ],
+      COURSE_TRANSLATION_SAVED: ['ترجمة الدورة محفوظة', 'Course translation saved'],
     };
     return state && labels[state]
       ? labels[state][ar ? 0 : 1]

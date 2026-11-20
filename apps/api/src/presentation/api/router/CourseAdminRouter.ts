@@ -373,7 +373,7 @@ export class CourseAdminRouter {
       learningLanguage: z.string().trim().optional(),
       category: z.string().trim().optional(),
       difficultyLevel: z.string().trim().optional(),
-    });
+    }).strict();
 
     const enrollmentPolicySchema = z.object({
       isCapacityLimited: z.boolean().optional(),

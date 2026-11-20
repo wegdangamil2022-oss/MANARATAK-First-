@@ -87,10 +87,11 @@ export class AdminCourseUseCases {
 
   public async updateCourse(id: string, updates: UpdateCourseDto): Promise<CourseDto> {
     await assertAssetReferenceUsable(this.assetReferences, updates.thumbnailAssetId, { purpose: 'COURSE_THUMBNAIL' });
+    assertNoTranslationPayloadFields('COURSE', updates as unknown as Record<string, unknown>, ['localizedNames', 'titleEn', 'ownerLocalizedDescriptions']);
     assertNoTranslationPayloadFields('COURSE', updates.optionalFields, ['localizedNames', 'titleEn']);
     assertNoForgedOwnerDescriptions(updates.optionalFields);
     const existing = await this.getCourse(id);
-    if(updates.optionalFields){const editorial={...updates.optionalFields};for(const key of ['localizedNames','titleEn'])if(key in editorial && JSON.stringify(editorial[key])===JSON.stringify(existing.optionalFields?.[key]))delete editorial[key];assertNoTranslationPayloadFields('COURSE',editorial,['localizedNames','titleEn']);updates={...updates,optionalFields:editorial};}
+
     if ([CourseStatus.ARCHIVED, CourseStatus.REJECTED].includes(existing.status)) throw new Error('COURSE_INACTIVE_IMMUTABLE');
     if (existing.originType === CourseOriginType.NATIVE_MANARATAK_COURSE && updates.learningLanguage !== undefined && updates.learningLanguage !== existing.learningLanguage) {
       updates = { ...updates, learningLanguageRaw: updates.learningLanguage };

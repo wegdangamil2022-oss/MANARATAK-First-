@@ -86,6 +86,10 @@ describe('Translation workspace global owner projection contracts', () => {
     expect(query.sql).not.toContain(q);
     expect(query.values).toContain('%' + q + '%');
     expect(query.sql).toContain('"Course"');
+    expect(query.sql).toContain('ownerLocalizedDescriptions');
+    expect(query.sql).toContain("->>'description'");
+    expect(query.sql).toContain("'COURSE_TRANSLATION_SAVED'");
+    expect(query.sql).toContain('o."originType"');
     expect(result).toMatchObject({
       publicationReadiness: 'UNKNOWN_OWNER_FIELD_EVIDENCE',
       migrationRequired: true,

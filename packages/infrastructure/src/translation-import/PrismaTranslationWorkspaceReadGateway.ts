@@ -17,6 +17,12 @@ export class PrismaTranslationWorkspaceReadGateway implements ITranslationWorksp
     } as const;
     const table = Prisma.raw(tables[input.domain]);
     const university = input.domain === 'UNIVERSITY';
+    const course = input.domain === 'COURSE';
+    const courseName = (locale: 'ar' | 'en') => {
+      const pair = Prisma.sql`o."optionalFields"->'ownerLocalizedDescriptions'->${locale}`;
+      return Prisma.sql`CASE WHEN NULLIF(btrim(${pair}->>'description'), '') IS NOT NULL
+        THEN NULLIF(btrim(${pair}->>'displayName'), '') END`;
+    };
     const explicit = input.domain === 'MAJOR' || input.domain === 'INTERNATIONAL_TEST';
     const name = (locale: 'ar' | 'en') =>
       university
@@ -25,13 +31,19 @@ export class PrismaTranslationWorkspaceReadGateway implements ITranslationWorksp
           ? Prisma.sql`COALESCE(o."optionalFields"->'translationNameCandidates'->${locale}->>'value',${Prisma.raw(locale === 'ar' ? 'o."localizedNameAr"' : 'o."localizedNameEn"')})`
           : explicit
             ? Prisma.raw(locale === 'ar' ? 'o."localizedNameAr"' : 'o."localizedNameEn"')
-            : Prisma.sql`o."optionalFields"->'localizedNames'->>${locale}`;
+            : course
+              ? Prisma.sql`COALESCE(${courseName(locale)}, o."optionalFields"->'localizedNames'->>${locale})`
+              : Prisma.sql`o."optionalFields"->'localizedNames'->>${locale}`;
     const state = (locale: 'ar' | 'en') =>
       university
         ? Prisma.sql`COALESCE((SELECT CASE WHEN t.metadata->'pendingTranslationFields'->'displayName' IS NOT NULL OR t.metadata->'pendingTranslationFields'->'description' IS NOT NULL THEN 'APPROVED' ELSE t."reviewStatus" END FROM "UniversityTranslation" t WHERE t."universityId"=o.id AND t.locale=${locale}), 'MISSING')`
         : input.domain === 'MAJOR'
           ? Prisma.sql`COALESCE(o."optionalFields"->'translationNameCandidates'->${locale}->>'reviewStatus',CASE WHEN NULLIF(trim(${name(locale)}),'') IS NULL THEN 'MISSING' ELSE 'VALUE_PRESENT_NOT_PUBLIC_READY' END)`
-          : Prisma.sql`CASE WHEN NULLIF(trim(${name(locale)}), '') IS NULL THEN 'MISSING' ELSE 'VALUE_PRESENT_NOT_PUBLIC_READY' END`;
+          : course
+            ? Prisma.sql`CASE WHEN ${courseName(locale)} IS NOT NULL THEN 'COURSE_TRANSLATION_SAVED'
+                WHEN NULLIF(trim(${name(locale)}), '') IS NOT NULL THEN 'VALUE_PRESENT_NOT_PUBLIC_READY'
+                ELSE 'MISSING' END`
+            : Prisma.sql`CASE WHEN NULLIF(trim(${name(locale)}), '') IS NULL THEN 'MISSING' ELSE 'VALUE_PRESENT_NOT_PUBLIC_READY' END`;
     // This SQL coverage projection does not compute the owner source/value proof.
     // A stored PUBLISHED state is never promoted into verified public readiness here.
     const published = () => Prisma.sql`false`;
@@ -63,7 +75,7 @@ export class PrismaTranslationWorkspaceReadGateway implements ITranslationWorksp
         : input.sort === 'NAME_ASC'
           ? Prisma.sql`COALESCE(NULLIF(${input.locale === 'ar' ? Prisma.raw('"localizedNameAr"') : Prisma.raw('"localizedNameEn"')},''),"displayName") ASC,id ASC`
           : Prisma.sql`"updatedAt" DESC,id ASC`;
-    const cte = Prisma.sql`WITH source AS (SELECT o.id,o."publicId",o.slug,o."displayName",o.status,o."updatedAt", ${name('ar')} AS "localizedNameAr",${name('en')} AS "localizedNameEn",${state('ar')} AS "translationStateAr",${state('en')} AS "translationStateEn", ${published()} AS "publicReadyAr",${published()} AS "publicReadyEn" FROM ${table} o), coverage AS (SELECT *,NULLIF(trim("localizedNameAr"),'') IS NOT NULL AS "hasAr",NULLIF(trim("localizedNameEn"),'') IS NOT NULL AS "hasEn" FROM source)`;
+    const cte = Prisma.sql`WITH source AS (SELECT o.id,o."publicId",o.slug,o."displayName",o.status,o."updatedAt", ${course ? Prisma.sql`o."originType",` : Prisma.empty} ${name('ar')} AS "localizedNameAr",${name('en')} AS "localizedNameEn",${state('ar')} AS "translationStateAr",${state('en')} AS "translationStateEn", ${published()} AS "publicReadyAr",${published()} AS "publicReadyEn" FROM ${table} o), coverage AS (SELECT *,NULLIF(trim("localizedNameAr"),'') IS NOT NULL AS "hasAr",NULLIF(trim("localizedNameEn"),'') IS NOT NULL AS "hasEn" FROM source)`;
     // Stable owner ordering, server-side filtering before count and pagination.
     return this.prisma.$transaction(
       async (tx) => {
@@ -83,7 +95,7 @@ export class PrismaTranslationWorkspaceReadGateway implements ITranslationWorksp
             published: bigint;
           }>
         >(
-          Prisma.sql`${cte} SELECT count(*) AS total,count(*) FILTER(WHERE "hasAr" AND "hasEn") AS complete,count(*) FILTER(WHERE ${statusField} IN ('APPROVED','NEEDS_REVIEW','VALUE_PRESENT_NOT_PUBLIC_READY')) AS pending,count(*) FILTER(WHERE ${statusField}='REJECTED') AS rejected,count(*) FILTER(WHERE ${statusField}='PUBLISHED') AS published,count(*) FILTER(WHERE NOT "hasAr") AS "missingAr",count(*) FILTER(WHERE NOT "hasEn") AS "missingEn",count(*) FILTER(WHERE "publicReadyAr") AS "publicReadyAr",count(*) FILTER(WHERE "publicReadyEn") AS "publicReadyEn" FROM coverage WHERE ${where}`,
+          Prisma.sql`${cte} SELECT count(*) AS total,count(*) FILTER(WHERE "hasAr" AND "hasEn") AS complete,count(*) FILTER(WHERE ${statusField} IN ('APPROVED','NEEDS_REVIEW','VALUE_PRESENT_NOT_PUBLIC_READY','COURSE_TRANSLATION_SAVED')) AS pending,count(*) FILTER(WHERE ${statusField}='REJECTED') AS rejected,count(*) FILTER(WHERE ${statusField}='PUBLISHED') AS published,count(*) FILTER(WHERE NOT "hasAr") AS "missingAr",count(*) FILTER(WHERE NOT "hasEn") AS "missingEn",count(*) FILTER(WHERE "publicReadyAr") AS "publicReadyAr",count(*) FILTER(WHERE "publicReadyEn") AS "publicReadyEn" FROM coverage WHERE ${where}`,
         );
         const total = Number(counts.total);
         return {

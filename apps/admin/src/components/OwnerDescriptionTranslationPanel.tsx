@@ -11,6 +11,9 @@ export function OwnerDescriptionTranslationPanel({
   onSaved,
   revision,
   uiLanguage = 'ar',
+  blocked = false,
+  beginMutation,
+  onUnverified,
 }: {
   domain: Extract<TranslationDomainKey, 'COURSE' | 'SCHOLARSHIP' | 'INTERNATIONAL_TEST'>;
   ownerId: string;
@@ -20,6 +23,9 @@ export function OwnerDescriptionTranslationPanel({
   onSaved: () => void | Promise<void>;
   revision?: number;
   uiLanguage?: string;
+  blocked?: boolean;
+  beginMutation?: () => (() => void) | undefined;
+  onUnverified?: () => void;
 }) {
   const tr = (ar: string, en: string) => (uiLanguage === 'ar' ? ar : en);
   const [locale, setLocale] = useState<'ar' | 'en'>('ar');
@@ -34,7 +40,7 @@ export function OwnerDescriptionTranslationPanel({
   const [reloadRequired, setReloadRequired] = useState(false);
   const saving = useRef(false);
   const enabled =
-    canAuthorDomainTranslations(domain) &&
+    !blocked && canAuthorDomainTranslations(domain) &&
     !['ARCHIVED', 'REJECTED'].includes(status) &&
     (domain === 'INTERNATIONAL_TEST' || status !== 'PUBLISHED');
   useEffect(() => {
@@ -49,6 +55,8 @@ export function OwnerDescriptionTranslationPanel({
   }, [ownerId, locale, optionalFields]);
   async function save(remove = false) {
     if (saving.current || !enabled || reloadRequired) return;
+    const release = beginMutation?.();
+    if (beginMutation && !release) return;
     saving.current = true;
     setBusy(true);
     setError('');
@@ -56,8 +64,9 @@ export function OwnerDescriptionTranslationPanel({
     let written = false;
     try {
       if ((domain === 'SCHOLARSHIP' || domain === 'COURSE') && (!Number.isSafeInteger(revision) || revision! < 1))
-        throw new Error('SCHOLARSHIP_REVISION_PRECONDITION_REQUIRED');
-      await adminApiClient.request(
+        throw new Error(domain + '_REVISION_PRECONDITION_REQUIRED');
+      const desiredFields = Object.fromEntries(Object.entries(displayFields).map(([key, value]) => [key, value.trim()]).filter(([, value]) => value));
+      const saved = await adminApiClient.request<{ version?: number; status?: string }>(
         `${endpoint}/${encodeURIComponent(ownerId)}/localized-description`,
         {
           method: 'POST',
@@ -66,40 +75,50 @@ export function OwnerDescriptionTranslationPanel({
             ...((domain === 'SCHOLARSHIP' || domain === 'COURSE') ? { 'If-Match': String(revision) } : {}),
           },
           body: JSON.stringify(
-            remove ? { locale, remove: true } : { locale, displayName: title, description, ...(domain==='COURSE'?{displayFields:Object.fromEntries(Object.entries(displayFields).filter(([,value])=>value.trim()))}:{}) },
+            remove ? { locale, remove: true } : { locale, displayName: title, description, ...(domain==='COURSE'?{displayFields:desiredFields}:{}) },
           ),
         },
       );
       written = true;
       const response = await adminApiClient.request<Record<string, unknown>>(
         `${endpoint}/${encodeURIComponent(ownerId)}`,
+        { cache: 'no-store' },
       );
       const readback = (response.scholarship ?? response) as {
         id?: string;
+        version?: number;
+        status?: string;
         optionalFields?: {
           ownerLocalizedDescriptions?: Record<
             string,
-            { displayName?: string; description?: string }
+            { displayName?: string; description?: string; displayFields?: Record<string, string> }
           >;
         };
       };
       const pair = readback.optionalFields?.ownerLocalizedDescriptions?.[locale];
       if (
         readback.id !== ownerId ||
+        (domain === 'COURSE' && (saved.version === undefined || saved.version <= revision! || readback.version !== saved.version || readback.status !== saved.status)) ||
         (remove
           ? pair !== undefined
-          : pair?.displayName !== title.trim() || pair?.description !== description.trim())
+          : pair?.displayName !== title.trim() || pair?.description !== description.trim() ||
+            (domain === 'COURSE' && (Object.keys(pair?.displayFields ?? {}).length !== Object.keys(desiredFields).length ||
+              Object.entries(desiredFields).some(([key, value]) => pair?.displayFields?.[key] !== value))))
       )
         throw new Error('تعذّر التحقق من القيم المحفوظة.');
       await onSaved();
       setNotice('حُفظ زوج الاسم والوصف في نسخة المالك؛ يلزم مسار المراجعة والنشر الأصلي.');
     } catch (error) {
-      if (written) setReloadRequired(true);
+      if (written) {
+        setReloadRequired(true);
+        onUnverified?.();
+      }
       setError(
         (written ? 'نجح الحفظ وتعذرت إعادة القراءة؛ أعد تحميل السجل قبل المحاولة. ' : '') +
           (error instanceof Error ? error.message : 'تعذر الحفظ'),
       );
     } finally {
+      release?.();
       saving.current = false;
       setBusy(false);
     }

@@ -193,7 +193,9 @@ export class PublicCourseUseCases {
       slug: course.slug,
       displayName: this.resolveDisplayName(course.displayName, optional.localizedNames, locale),
       canonicalName: course.canonicalName,
-      titleEn: descriptions.en?.displayName ?? (typeof optional.titleEn === "string" ? optional.titleEn : undefined),
+      titleEn: descriptions.en?.displayName ??
+        (typeof optional.titleEn === 'string' ? optional.titleEn : undefined) ??
+        (descriptions.ar && course.originType === 'EXTERNAL_LINKED_COURSE' ? course.originalSourceTitle || course.displayName : undefined),
       relatedMajors: course.relatedMajors ?? [],
       accessType: course.accessType,
       originType: course.originType,

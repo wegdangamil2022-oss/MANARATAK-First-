@@ -41,9 +41,10 @@ export function ExternalCourseDrawer({ id, onClose, onSaved }: { id?: string; re
   const [notice, setNotice] = useState('');
   const [readiness, setReadiness] = useState<Readiness>();
   const [actions, setActions] = useState(false);
+  const [translationOpen, setTranslationOpen] = useState(false);
   const dirty = !busy && (creating || edit !== null) && (JSON.stringify(form) !== initial || Boolean(reason));
   const editable = !unverifiedId && hasPermission('admin:courses:manage') && course && !['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(course.status);
-  useEffect(()=>{mutation.current=false;setBusy(false);setEdit(null);setError('');setNotice('');setReason('');setUnverifiedId('');},[scope]);
+  useEffect(()=>{mutation.current=false;setBusy(false);setEdit(null);setError('');setNotice('');setReason('');setUnverifiedId('');setTranslationOpen(false);},[scope]);
   useEffect(() => {
     if (!id) return;
     const controller = new AbortController(); setLoadError(''); setSourceError(false); setCourse(undefined); setSource(undefined); setReadiness(undefined);
@@ -64,6 +65,16 @@ export function ExternalCourseDrawer({ id, onClose, onSaved }: { id?: string; re
   };
   const cancel = () => { if (!dirty || window.confirm(tr('تجاهل التعديلات غير المحفوظة؟', 'Discard unsaved changes?'))) { setEdit(null); setError(''); setRefresh(value => value + 1); } };
   const afterChange = () => { setReadiness(undefined); setRefresh(value => value + 1); if (id) onSaved?.(id); };
+  const beginTranslation = () => {
+    if (busy || mutation.current || unverifiedId || !scope.isCurrent() || !hasPermission('admin:courses:manage')) return;
+    mutation.current = true;
+    setBusy(true);
+    return () => {
+      if (!scope.isCurrent()) return;
+      mutation.current = false;
+      setBusy(false);
+    };
+  };
   const save = async (event: FormEvent) => {
     event.preventDefault(); if (busy || mutation.current || unverifiedId || !scope.isCurrent() || !hasPermission('admin:courses:manage') || reason.trim().length < 3) return;
     mutation.current=true;
@@ -104,7 +115,7 @@ export function ExternalCourseDrawer({ id, onClose, onSaved }: { id?: string; re
     finally { if(scope.isCurrent()){mutation.current=false;setBusy(false);} }
   };
   const checkReadiness = async () => {
-    if (!id || busy) return; setBusy(true); setError('');
+    if (!id || busy || mutation.current) return; setBusy(true); setError('');
     try { const next=await adminApiClient.request<Readiness>(`/admin/courses/imported/${encodeURIComponent(id)}/readiness`);if(scope.isCurrent()){if(next.version!==course?.version)throw Error('COURSE_READINESS_VERSION_MISMATCH');setReadiness(next);} }
     catch (error) { if(scope.isCurrent())setError(error instanceof Error ? error.message : 'READINESS_FAILED'); }
     finally { if(scope.isCurrent())setBusy(false); }
@@ -150,7 +161,20 @@ export function ExternalCourseDrawer({ id, onClose, onSaved }: { id?: string; re
           {reasonField}<div className="course-drawer-toolbar"><button type="submit" className="course-primary" disabled={busy || reason.trim().length < 3 || (creating && !form.externalProviderId)}><Save size={16}/>{tr('حفظ بيانات الدورة', 'Save course details')}</button>{!creating && <button type="button" disabled={busy} onClick={cancel}><X size={16}/>{tr('إلغاء', 'Cancel')}</button>}</div>
         </form> : <dl className="course-master-fields"><div className="course-detail-value"><dt>{tr('الرقم في الملف', 'Source number')}</dt><dd>{String(source?.originalSourceRow?.sourceOrder ?? course?.optionalFields?.sourceOrder ?? '—')}</dd></div>{fields.map(field => <div className={`course-detail-value ${field.kind === 'textarea' || field.key === 'directCourseUrl' ? 'course-wide-field' : ''}`} key={field.key}><dt>{ar ? field.ar : field.en}</dt><dd dir={['originalSourceTitle', 'platformName', 'directCourseUrl'].includes(field.key) ? 'ltr' : 'auto'}>{field.key === 'directCourseUrl' && directUrl ? <a href={directUrl} target="_blank" rel="noopener noreferrer"><ExternalLink size={14}/>{directUrl}</a> : readValue(field.key)}</dd></div>)}</dl>}
       </section>
-      {!creating && course && !edit && hasPermission('admin:courses:manage') && <details className="course-panel"><summary>الترجمة العربية وتعديلها</summary><p>مصدر الترجمة: {String((course.optionalFields?.metadata as {courseTranslationImport?:{file?:string}}|undefined)?.courseTranslationImport?.file ?? 'إدخال يدوي')}</p><p>الترجمة تخص عرض البيانات؛ لغة التدريس ومعلومات المصدر الأصلية محفوظة. بعض الموضوعات في الملف مستنتجة من العناوين ولم تُتحقق من المنهج الرسمي.</p><OwnerDescriptionTranslationPanel domain="COURSE" revision={course.version} ownerId={course.id} endpoint="/admin/courses" optionalFields={course.optionalFields} status={course.status} onSaved={afterChange}/></details>}
+      {!creating && course && !edit && hasPermission('admin:courses:manage') && (
+        <details className="course-panel" open={translationOpen} onToggle={event => setTranslationOpen(event.currentTarget.open)}>
+          <summary>{tr('الترجمة العربية وتعديلها', 'Arabic translation')}</summary>
+          {translationOpen && <>
+            <p>{tr('مصدر الترجمة', 'Translation source')}{' · '}{String((course.optionalFields?.metadata as {courseTranslationImport?:{file?:string}} | undefined)?.courseTranslationImport?.file ?? tr('إدخال يدوي', 'Manual entry'))}</p>
+            <p>{tr('قد تتضمن ترجمة الموضوعات أوصافًا مستنتجة من العناوين.', 'Translated topics may include descriptions inferred from titles.')}</p>
+            <OwnerDescriptionTranslationPanel domain="COURSE" revision={course.version} ownerId={course.id}
+              endpoint="/admin/courses" optionalFields={course.optionalFields} status={course.status}
+              uiLanguage={ar ? 'ar' : 'en'} blocked={busy || Boolean(unverifiedId)} beginMutation={beginTranslation}
+              onUnverified={() => { if (scope.isCurrent()) setUnverifiedId(course.id); }}
+              onSaved={() => { if (scope.isCurrent()) afterChange(); }}/>
+          </>}
+        </details>
+      )}
       {!creating && course && <CourseAcademicLinks id={course.id} editable={Boolean(editable && !edit)} busy={busy} reviewReason={!actions ? reasonField : undefined} command={(action, body) => command(action, '', body)}/>}
       {!creating && actions && <section className="course-panel course-operations"><h3><ShieldCheck size={17}/>{tr('المراجعة والنشر', 'Review and publication')}</h3>{!edit && reasonField}<div className="course-drawer-toolbar">
         <button type="button" disabled={busy || !editable} onClick={() => void command('verify-source')}><ShieldCheck size={15}/>{tr('تحقق من المصدر', 'Verify source')}</button><button type="button" disabled={busy || !editable} onClick={() => void command('check-link')}><ExternalLink size={15}/>{tr('فحص الرابط', 'Check link')}</button><button type="button" disabled={busy} onClick={() => void checkReadiness()}><CheckCircle2 size={15}/>{tr('فحص جاهزية النشر', 'Check publication readiness')}</button>

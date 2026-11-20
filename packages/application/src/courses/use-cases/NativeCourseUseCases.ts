@@ -40,7 +40,9 @@ export class NativeCourseUseCases {
   ) {}
 
   public async create(input: CreateNativeCourseDto): Promise<CourseDto> {
-    assertNoTranslationPayloadFields('COURSE',input as unknown as Record<string,unknown>,['titleEn']);
+    assertNoTranslationPayloadFields('COURSE', input as unknown as Record<string, unknown>, [
+      'titleEn', 'localizedNames', 'ownerLocalizedDescriptions',
+    ]);
     const titleAr = CourseNamingService.normalize(input.titleAr);
     if (!titleAr) throw new Error('NATIVE_COURSE_TITLE_REQUIRED');
 
@@ -53,7 +55,7 @@ export class NativeCourseUseCases {
     const identity = randomUUID().replace(/-/g, '');
     const publicId = `CRS-NAT-${identity.slice(0, 12).toUpperCase()}`;
     const slugBase =
-      CourseNamingService.normalize(input.titleEn || titleAr)
+      CourseNamingService.normalize(titleAr)
         .toLocaleLowerCase('en')
         .replace(/[^\p{L}\p{N}]+/gu, '-')
         .replace(/^-|-$/g, '')
@@ -79,7 +81,6 @@ export class NativeCourseUseCases {
       difficultyLevel: input.difficultyLevel,
       optionalFields: {
         titleAr,
-        ...(input.titleEn?.trim() ? { titleEn: input.titleEn.trim() } : {}),
       },
     });
   }
