@@ -99,7 +99,7 @@ export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
                   }}
                   className={`absolute top-1.5 left-1.5 sm:top-2 sm:left-2 p-1.5 rounded-full backdrop-blur-xs border transition-colors z-10 cursor-pointer ${
                     isFav
-                      ? 'bg-white/95 dark:bg-[#111E38]/95 border-[#0E7C86]/45 dark:border-[#38C6D4]/55 shadow-xs'
+                      ? 'bg-[var(--mn-surface)] dark:bg-[#111E38]/95 border-[#0E7C86]/45 dark:border-[#38C6D4]/55 shadow-xs'
                       : 'bg-[#142B5F]/70 hover:bg-[#0E7C86] text-white border-white/25'
                   }`}
                   aria-label={publicT('public_add_to_favorites_2')}

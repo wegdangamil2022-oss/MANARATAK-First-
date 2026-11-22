@@ -6,27 +6,27 @@
 @media (max-width: 639px) {
   #manaratak-header > div {
     padding-inline: var(--mn-container-mobile);
-    min-height: 58px !important;
+    min-height: 58px;
     height: 58px;
   }
   #manaratak-header .mn-header-row { min-width: 0; gap: 5px; }
   #manaratak-header .mn-header-brand { min-width: 0; flex: 1; gap: 6px; }
   #manaratak-header .mn-header-brand > button,
   #manaratak-header .mn-header-brand > div:first-child {
-    width: 52px !important;
-    height: 52px !important;
-    min-width: 52px !important;
-    min-height: 52px !important;
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    min-height: 52px;
   }
   #manaratak-header .mn-header-brand > div { min-width: 0; }
   #manaratak-header .mn-header-brand span:first-child { font-size: 15px; letter-spacing: .3px; }
   #manaratak-header .mn-header-brand span:last-child { font-size: 9px; overflow: hidden; text-overflow: ellipsis; }
   #manaratak-header .mn-header-actions { flex-shrink: 0; gap: 3px; }
   #manaratak-header .mn-header-actions > button {
-    width: 35px !important;
-    min-width: 35px !important;
-    height: 35px !important;
-    min-height: 35px !important;
+    width: 35px;
+    min-width: 35px;
+    height: 35px;
+    min-height: 35px;
     padding-inline: 0;
     justify-content: center;
   }
@@ -35,28 +35,28 @@
   #manaratak-header input { font-size: 11px; }
 
   .manaratak-public .mn-search-control {
-    height: 35px !important;
-    min-height: 35px !important;
+    height: 35px;
+    min-height: 35px;
   }
   .manaratak-public [data-mn-design="56ab29fe6d"] {
-    height: 35px !important;
-    min-height: 35px !important;
-    max-height: 35px !important;
+    height: 35px;
+    min-height: 35px;
+    max-height: 35px;
   }
   .manaratak-public section[id^="featured-"] {
-    padding-block: 3px !important;
+    padding-block: 3px;
   }
   .manaratak-public button[id^="btn-view-all-"] {
-    min-height: 34px !important;
-    padding-block: 6px !important;
+    min-height: 34px;
+    padding-block: 6px;
   }
   .manaratak-public .mn-filter-chip {
-    min-height: 30px !important;
-    padding: 4px 10px !important;
+    min-height: 30px;
+    padding: 4px 10px;
   }
   .manaratak-public .mn-external-link {
-    min-height: 34px !important;
-    padding: 5px 10px !important;
+    min-height: 34px;
+    padding: 5px 10px;
   }
 }
 @media (max-width: 359px) {

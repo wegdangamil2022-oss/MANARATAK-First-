@@ -465,7 +465,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
           <div className="flex justify-center mt-2 relative z-10">
             <button
               onClick={resetFilters}
-              className="text-[10px] md:text-xs font-bold text-[#142B5F] dark:text-[#F2CD78] bg-white/95 dark:bg-[#111E38]/95 hover:bg-white dark:hover:bg-[#162747] border border-[#142B5F]/15 dark:border-[#F2CD78]/30 px-2.5 md:px-3.5 py-0.5 md:py-1 rounded-full shadow-xs transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif]"
+              className="text-[10px] md:text-xs font-bold text-[#142B5F] dark:text-[#F2CD78] bg-[var(--mn-surface)] dark:bg-[#111E38]/95 hover:bg-white dark:hover:bg-[#162747] border border-[#142B5F]/15 dark:border-[#F2CD78]/30 px-2.5 md:px-3.5 py-0.5 md:py-1 rounded-full shadow-xs transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif]"
             >
               <RotateCcw className="w-3 h-3 text-[#0E7C86] dark:text-[#34BFC9]" />
               <span>{publicT('public_reset_filters')}{activeFiltersCount})</span>

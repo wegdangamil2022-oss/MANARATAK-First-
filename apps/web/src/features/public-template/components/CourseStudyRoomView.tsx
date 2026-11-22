@@ -9362,7 +9362,7 @@ export function CourseStudyRoomView({
                         className={`w-7 h-7 rounded-lg text-[11.5px] font-bold flex items-center justify-center shrink-0 ${
                           isCurrentLecture
                             ? 'bg-gradient-to-br from-[#142B5F] to-[#0E7C86] text-white shadow-2xs'
-                            : 'bg-[var(--mn-surface)] text-[#142B5F] dark:text-slate-200 border border-[var(--mn-border)]'
+                            : 'bg-[var(--mn-surface)] text-[#142B5F] dark:text-[var(--mn-text)] border border-[var(--mn-border)]'
                         }`}
                       >
                         {lecture.id}
@@ -9386,8 +9386,8 @@ export function CourseStudyRoomView({
                               {publicT('public_course_available_to_read_1134')}
                             </span>
                           ) : (
-                            <span className="text-[9.5px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 shrink-0 inline-flex items-center gap-1">
-                              <Lock className="w-2.5 h-2.5 text-slate-500 dark:text-slate-400" />
+                            <span className="text-[9.5px] font-bold text-slate-600 dark:text-[var(--mn-text-muted)] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 shrink-0 inline-flex items-center gap-1">
+                              <Lock className="w-2.5 h-2.5 text-slate-500 dark:text-[var(--mn-text-muted)]" />
                               <span>{publicT('public_course_locked_1135')}</span>
                             </span>
                           )}
@@ -9410,7 +9410,7 @@ export function CourseStudyRoomView({
                         />
                       </div>
                     ) : (
-                      <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 text-slate-400 dark:text-slate-500">
+                      <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 text-slate-400 dark:text-[var(--mn-text-muted)]">
                         <Lock className="w-3.5 h-3.5" />
                       </div>
                     )}
@@ -9505,7 +9505,7 @@ export function CourseStudyRoomView({
                               )}
 
                               {isLocked ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-[9.5px] font-bold shrink-0">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-[var(--mn-text-muted)] text-[9.5px] font-bold shrink-0">
                                   <Lock className="w-2.5 h-2.5 shrink-0" />
                                   <span>{publicT('public_course_locked_1137')}</span>
                                 </span>
