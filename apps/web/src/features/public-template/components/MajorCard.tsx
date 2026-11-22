@@ -177,85 +177,89 @@ export const MajorCard: React.FC<MajorCardProps> = ({
         }
       }}
       onClick={() => onSelectMajor && onSelectMajor(major)}
-      className="group relative overflow-hidden bg-[var(--mn-surface)] rounded-r-[4px] rounded-l-2xl border border-[#142B5F]/30 dark:border-[var(--mn-border)] border-r-3 border-r-[#142B5F] dark:border-r-[var(--mn-accent)] hover:border-[#142B5F]/50 dark:hover:border-[var(--mn-accent)]/40 hover:shadow-xs transition-all duration-200 p-2.5 sm:p-3 md:p-4 h-full flex flex-col justify-between text-start cursor-pointer select-none mn-panel "
+      className="h-full bg-white dark:bg-[#111E38] rounded-r-[4px] rounded-l-2xl border border-[#142B5F]/12 dark:border-white/10 border-r-3 border-r-[#142B5F] dark:border-r-[#F2CD78]/85 hover:border-[#142B5F]/28 dark:hover:border-[#F2CD78]/45 shadow-[0_4px_16px_rgba(20,43,95,0.04)] hover:shadow-[0_8px_24px_rgba(20,43,95,0.08)] dark:shadow-[0_6px_20px_rgba(0,0,0,0.28)] transition-all duration-150 active:scale-[0.985] p-2.5 sm:p-3 md:p-4 relative overflow-hidden group cursor-pointer flex flex-col justify-between gap-2 sm:gap-2.5 text-start select-none mn-panel "
       dir={publicDir}
     >
-      {/* Top Header Row: Icon + Title + Favorite Button */}
-      <div className="flex items-start justify-between gap-2.5">
-        {/* Right Info Flow: Icon + Names */}
-        <div className="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
-          {/* Circular icon wrapper with solid petrol outer ring */}
-          <div className="w-10.5 h-10.5 sm:w-11 sm:h-11 rounded-full p-0.5 bg-[#0E7C86] flex items-center justify-center shrink-0 relative shadow-xs">
-            <div className="w-full h-full rounded-full bg-[#142B5F] dark:bg-[var(--mn-surface)] border border-white flex items-center justify-center">
-              {renderSpecialtyIcon('w-5 h-5 sm:w-5.5 sm:h-5.5 text-[#D6A43B] dark:text-[var(--mn-accent)] stroke-[2]')}
+      {/* Top Row: Right Info & Circular Specialty Badge | Left Favorite Button */}
+      <div className="flex items-center justify-between gap-2">
+        {/* Visual Right (RTL): Circular Specialty Emblem + Major Names */}
+        <div className="flex items-center gap-2 sm:gap-2.5 text-start min-w-0 flex-1">
+          {/* Circular Badge matching Scholarships gradient ring */}
+          <div className="w-9.5 h-9.5 sm:w-10.5 sm:h-10.5 rounded-full p-0.5 bg-gradient-to-br from-[#142B5F] to-[#0E7C86] dark:from-[#0E7C86] dark:to-[#21A7B4] shadow-xs shrink-0 flex items-center justify-center mn-inverse ">
+            <div className="w-full h-full rounded-full bg-[#142B5F] dark:bg-[#0B1529] border border-white dark:border-[#111E38] flex items-center justify-center shadow-inner">
+              {renderSpecialtyIcon('w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#F2CD78] stroke-[1.9]')}
             </div>
           </div>
 
-          <div className="flex-1 min-w-0 space-y-0.5">
-            <h3 className="text-[13.5px] sm:text-[14.5px] font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif] truncate leading-tight">
+          <div className="flex flex-col items-start text-start min-w-0 flex-1">
+            <h3 className="text-[11.5px] sm:text-[12.5px] md:text-[14px] font-bold text-[#142B5F] dark:text-[#F1F5F9] font-['Cairo',sans-serif] leading-snug line-clamp-2 break-words w-full">
               {major.name}
             </h3>
             {major.nameEn && (
-              <p className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] font-['Cairo',sans-serif] tracking-wide truncate">
+              <span className="text-[10px] sm:text-[11px] font-medium text-[#5C707C] dark:text-[#9BB4C7] font-['Cairo',sans-serif] truncate w-full mt-0.5">
                 {major.nameEn}
-              </p>
+              </span>
             )}
           </div>
         </div>
 
-        {/* Top-Left Favorite Button */}
+        {/* Visual Left (RTL): Favorite Button */}
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             if (onToggleFavorite) onToggleFavorite(major.id);
           }}
-          className="w-8 h-8 rounded-full bg-[var(--mn-page)] hover:bg-[var(--mn-surface-muted)] border border-[var(--mn-border)] flex items-center justify-center transition-all active:scale-90 cursor-pointer shadow-2xs shrink-0 mn-panel hover:mn-panel "
+          className="w-8 h-8 rounded-full bg-[#F6F8FA] dark:bg-[#0B1529] hover:bg-[#DDEFF2]/75 dark:hover:bg-[#172A4D] border border-[#142B5F]/10 dark:border-white/10 flex items-center justify-center transition-all active:scale-90 cursor-pointer shadow-2xs shrink-0"
           title={publicT('public_add_to_favorites')}
         >
           <Heart
-            className={`w-4 h-4 transition-colors stroke-[2] ${
-              isFavorited ? 'fill-[#0E7C86] text-[#0E7C86] dark:fill-[#38C6D4] dark:text-[#38C6D4]' : 'text-[var(--mn-text-muted)]'
+            className={`w-4 h-4 transition-colors ${
+              isFavorited
+                ? 'fill-[#0E7C86] text-[#0E7C86] dark:fill-[#34BFC9] dark:text-[#34BFC9]'
+                : 'text-[#5C707C] dark:text-[#7E96AA]'
             }`}
           />
         </button>
       </div>
 
-      {/* Bottom Section: Structured Boxes for Faculty, Degree, Duration + View Details CTA */}
-      <div className="mt-1.5 md:mt-3 pt-1.5 md:pt-2.5 border-t border-[var(--mn-border)]/50 flex flex-wrap items-center justify-between gap-2">
-        {/* Pills / Boxes Flow */}
-        <div className="flex items-center gap-1.5 flex-wrap flex-1 min-w-0">
-          {/* Faculty / College Badge */}
-          <span className="inline-flex items-center gap-1.5 bg-[var(--mn-page)] text-[var(--mn-text)] border border-[var(--mn-border)] rounded-lg px-2 py-1 text-[10px] sm:text-[10.5px] font-bold font-['Cairo',sans-serif] leading-tight mn-panel shrink-0">
-            <School className="w-3 h-3 text-[var(--mn-link)] shrink-0" />
-            <span className="truncate">{facultyCategory}</span>
-          </span>
-
-          {/* Degree Level Badge */}
-          <span className="inline-flex items-center gap-1 bg-[var(--mn-page)] text-[var(--mn-text)] border border-[var(--mn-border)] rounded-lg px-2 py-1 text-[9.5px] sm:text-[10.5px] font-bold font-['Cairo',sans-serif] shrink-0 mn-panel">
-            <GraduationCap className="w-3 h-3 text-[var(--mn-link)] shrink-0" />
-            <span>{primaryDegree}</span>
-          </span>
-
-          {/* Duration Badge */}
-          <span className="inline-flex items-center gap-1 bg-[var(--mn-page)] text-[var(--mn-text)] border border-[var(--mn-border)] rounded-lg px-2 py-1 text-[9.5px] sm:text-[10.5px] font-bold font-['Cairo',sans-serif] shrink-0 mn-panel">
-            <Clock className="w-3 h-3 text-[var(--mn-link)] shrink-0" />
-            <span>{durationText}</span>
-          </span>
+      {/* Bottom Row: 4 Structured Tiles (Faculty, Degree, Duration + View Details CTA) in 2x2 Grid matching Scholarships */}
+      <div className="grid grid-cols-2 gap-1.5 pt-1.5 border-t border-[#142B5F]/8 dark:border-white/8 mt-auto">
+        {/* 1. الكلية / المجال الأكاديمي */}
+        <div
+          className="min-w-0 overflow-hidden bg-[#F6F8FA] dark:bg-[#0B1529]/85 border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center justify-start gap-1.5 text-[9.5px] sm:text-[10.5px] font-bold text-[#203442] dark:text-[#DCE7F0] font-['Cairo',sans-serif]"
+          title={facultyCategory}
+        >
+          <School className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#34BFC9] shrink-0" />
+          <span className="min-w-0 leading-tight line-clamp-2 break-words">{facultyCategory}</span>
         </div>
 
-        {/* View Details Button (Slightly more compact padding px-2 py-1, font size stays 10.5px bold) */}
+        {/* 2. الدرجة العلمية */}
+        <div className="min-w-0 overflow-hidden bg-[#F6F8FA] dark:bg-[#0B1529]/85 border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center justify-start gap-1.5 text-[9.5px] sm:text-[10.5px] font-bold text-[#203442] dark:text-[#DCE7F0] font-['Cairo',sans-serif]">
+          <GraduationCap className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#34BFC9] shrink-0" />
+          <span className="min-w-0 truncate">{primaryDegree}</span>
+        </div>
+
+        {/* 3. المدة الدراسية */}
+        <div className="min-w-0 overflow-hidden bg-[#F6F8FA] dark:bg-[#0B1529]/85 border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center justify-start gap-1.5 text-[9.5px] sm:text-[10.5px] font-bold text-[#203442] dark:text-[#DCE7F0] font-['Cairo',sans-serif]">
+          <Clock className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#34BFC9] shrink-0" />
+          <span className="min-w-0 truncate">{durationText}</span>
+        </div>
+
+        {/* 4. زر عرض التفاصيل */}
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             if (onSelectMajor) onSelectMajor(major);
           }}
-          className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2 py-1 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs mn-inverse hover:mn-inverse shrink-0"
+          className="min-w-0 overflow-hidden bg-[#142B5F] hover:bg-[#0E7C86] dark:bg-[#162A52] dark:hover:bg-[#1C3566] text-white dark:text-[#F2CD78] border border-transparent dark:border-[#F2CD78]/35 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs"
           data-mn-design="26ecd1db9e"
         >
-          <span className="text-[10px] sm:text-[11px] font-bold text-center font-['Cairo',sans-serif] leading-tight text-[var(--mn-accent-soft)]">{publicT('public_view_details')}</span>
-          <ChevronLeft className="w-3 h-3 rotate-180 text-[var(--mn-accent-soft)]" />
+          <span className="text-[10px] sm:text-[11px] font-bold text-center font-['Cairo',sans-serif] leading-tight text-white dark:text-[#F2CD78] truncate">
+            {publicT('public_view_details')}
+          </span>
+          <ChevronLeft className="w-3.5 h-3.5 rotate-180 text-[#F2CD78] shrink-0" />
         </button>
       </div>
     </div>

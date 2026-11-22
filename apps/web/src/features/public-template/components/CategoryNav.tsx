@@ -217,61 +217,76 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
   ];
 
   return (
-    <section id="categories-section" className="w-full py-2 md:py-4">
-      {/* Section Title */}
-      <div className="flex items-center justify-between mb-2 md:mb-4 px-1">
-        <h3 className="text-sm md:text-base lg:text-lg font-bold text-[var(--mn-heading)] flex items-center gap-1.5">
-          <span>{publicT('public_browse_by_category')}</span>
-        </h3>
-        {selectedCategory !== 'all' && (
-          <button
-            onClick={() => onSelectCategory('all')}
-            className="text-[11px] md:text-xs text-[var(--mn-heading)] font-bold hover:underline cursor-pointer"
-          >{publicT('public_view_all')}</button>
-        )}
-      </div>
+    <section id="categories-section" className="w-full py-1 md:py-3 font-['Cairo',sans-serif]">
+      {/* Approved White Section Frame */}
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-white dark:bg-[#111E38] border border-[#142B5F]/10 dark:border-white/10 px-2 py-2 sm:p-3.5 md:p-4 shadow-[0_2px_12px_rgba(20,43,95,0.04)]">
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#142B5F]/32 dark:via-[#D6A43B]/35 to-transparent"
+        />
 
-      {/* Grid of 10 Category Cards */}
-      <div className="grid grid-cols-5 lg:grid-cols-10 gap-1 sm:gap-2 md:gap-2.5 text-center items-stretch">
-        {categories.map((cat) => {
-          const isActive = selectedCategory === cat.id;
-
-          return (
+        {/* Section Title Row */}
+        <div className="flex items-center justify-between mb-1.5 sm:mb-2.5 md:mb-3.5 px-0.5">
+          <h3 className="text-[13.5px] sm:text-[14.5px] md:text-[16px] font-extrabold text-[#142B5F] dark:text-[#F1F5F9] flex items-center gap-2">
+            <span className="w-[3px] h-4 rounded-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86] dark:from-[#38C6D4] dark:to-[#D6A43B] shrink-0" />
+            <span>{publicT('public_browse_by_category')}</span>
+          </h3>
+          {selectedCategory !== 'all' && (
             <button
-              key={cat.id}
-              onClick={() => onSelectCategory(isActive ? 'all' : cat.id)}
-              className={`h-full flex min-w-0 flex-col items-center justify-center p-1 sm:p-2 md:p-3 rounded-xl sm:rounded-2xl transition-all active:scale-95 group cursor-pointer ${
-                isActive
-                  ? 'bg-[var(--mn-primary)] text-[var(--mn-accent-text)] shadow-sm ring-2 ring-[var(--mn-focus)] mn-inverse '
-                  : 'bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-page)] border border-[var(--mn-border)] shadow-2xs hover:border-[var(--mn-accent)]/50 mn-panel hover:mn-panel '
-              }`}
+              type="button"
+              onClick={() => onSelectCategory('all')}
+              className="text-[11px] md:text-xs text-[#0E7C86] dark:text-[#38C6D4] font-bold hover:underline cursor-pointer"
             >
-              {/* Circular Icon Container */}
-              <div
-                className={`w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center mb-1 sm:mb-1.5 md:mb-2 transition-transform group-hover:scale-110 ${
-                  isActive
-                    ? 'bg-[#D6A43B] text-[#142B5F] border border-[#D6A43B] shadow-xs'
-                    : 'bg-[#142B5F] text-[#D6A43B] border border-[#142B5F] group-hover:border-[#D6A43B]/60'
-                }`}
-              >
-                {cat.icon(
-                  isActive
-                    ? 'w-4 h-4 sm:w-5 sm:h-5 md:w-5.5 md:h-5.5 text-[#142B5F]'
-                    : 'w-4 h-4 sm:w-5 sm:h-5 md:w-5.5 md:h-5.5 text-[#D6A43B]'
-                )}
-              </div>
-
-              {/* Label */}
-              <span
-                className={`text-[10px] sm:text-[11px] md:text-xs font-bold leading-tight break-words ${
-                  isActive ? 'text-[var(--mn-accent-text)] font-bold' : 'text-[var(--mn-text)]'
-                }`}
-              >
-                {cat.label}
-              </span>
+              {publicT('public_view_all')}
             </button>
-          );
-        })}
+          )}
+        </div>
+
+        {/* Grid of 10 Category Tiles — Approved Frost #F6F8FA Inner Boxes, Circular Icons Preserved */}
+        <div className="grid grid-cols-5 lg:grid-cols-10 gap-1.5 sm:gap-2 md:gap-2.5 text-center items-stretch">
+          {categories.map((cat) => {
+            const isActive = selectedCategory === cat.id;
+
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => onSelectCategory(isActive ? 'all' : cat.id)}
+                className={`relative h-full flex min-w-0 flex-col items-center justify-center px-1 py-1.5 sm:px-1.5 sm:py-2.5 md:px-2 md:py-3 rounded-xl sm:rounded-2xl transition-all duration-200 active:scale-95 group cursor-pointer overflow-hidden ${
+                  isActive
+                    ? 'bg-gradient-to-br from-[#142B5F] via-[#133A6A] to-[#0E7C86] text-white shadow-[0_4px_14px_rgba(20,43,95,0.22)] border border-[#D6A43B]/70'
+                    : 'bg-[#F6F8FA] dark:bg-[#0B1529]/80 hover:bg-white dark:hover:bg-[#142342] border border-[#142B5F]/10 dark:border-white/10 hover:border-[#0E7C86]/45 dark:hover:border-[#38C6D4]/50 shadow-[0_1px_3px_rgba(20,43,95,0.03)] hover:shadow-[0_4px_12px_rgba(20,43,95,0.08)] hover:-translate-y-0.5'
+                }`}
+              >
+                {/* Preserved Official Circular Icon Container */}
+                <div
+                  className={`w-7.5 h-7.5 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center mb-1 sm:mb-2 transition-transform group-hover:scale-106 ${
+                    isActive
+                      ? 'bg-[#D6A43B] text-[#142B5F] border border-[#D6A43B] shadow-xs'
+                      : 'bg-[#142B5F] text-[#D6A43B] border border-[#142B5F] group-hover:border-[#D6A43B]/60'
+                  }`}
+                >
+                  {cat.icon(
+                    isActive
+                      ? 'w-3.5 h-3.5 sm:w-5 sm:h-5 md:w-5.5 md:h-5.5 text-[#142B5F]'
+                      : 'w-3.5 h-3.5 sm:w-5 sm:h-5 md:w-5.5 md:h-5.5 text-[#D6A43B]'
+                  )}
+                </div>
+
+                {/* Label */}
+                <span
+                  className={`text-[10px] sm:text-[11px] md:text-xs font-extrabold leading-tight break-words font-['Cairo',sans-serif] ${
+                    isActive
+                      ? 'text-white'
+                      : 'text-[#142B5F] dark:text-[#EDF5F5] group-hover:text-[#0E7C86] dark:group-hover:text-[#38C6D4]'
+                  }`}
+                >
+                  {cat.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </section>
   );

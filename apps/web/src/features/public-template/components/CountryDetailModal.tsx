@@ -28,7 +28,7 @@ import { CountryDestination } from '../types';
 import { RelatedArticlesStrip } from './RelatedArticlesStrip';
 import { FavoriteButton } from './FavoriteButton';
 import { DetailBackButton, DetailSectionHeader, useDetailSearchTarget } from './DetailUi';
-import { CountryFlagImage } from './CountryFlagImage';
+import { CountryFlagImage } from './CountriesSearchPage';
 
 interface CountryDetailModalProps {
   country: CountryDestination;
@@ -158,7 +158,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
         </div>
 
         {/* Hero Background Card */}
-        <div className="relative w-full bg-gradient-to-br from-[#142B5F] via-[#153B75] to-[#0E7C86] pt-4 pb-3.5 px-3.5 md:px-8 md:py-6 border-b-[2.5px] border-[#D6A43B] shadow-md overflow-hidden">
+        <div className="relative w-full bg-gradient-to-bl from-[#142B5F] via-[#153B75] to-[#0E7C86] pt-4 pb-3.5 px-3.5 md:px-8 md:py-6 border-b-[2.5px] border-[#D6A43B] shadow-md overflow-hidden">
           {/* Subtle Architectural Gold Arches & Compass Geometry */}
           <svg
             viewBox="0 0 500 210"
@@ -966,7 +966,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
             <button
               type="button"
               onClick={() => onBrowseScholarships(country.id)}
-              className="w-full min-h-11 rounded-2xl bg-gradient-to-r from-[#142B5F] via-[#153B75] to-[#0E7C86] border border-[#D6A43B]/75 text-white font-extrabold text-[11.5px] flex items-center justify-center gap-2 shadow-md active:scale-[0.99] cursor-pointer mn-inverse"
+              className="w-full min-h-11 rounded-2xl bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] border border-[#D6A43B]/75 text-white font-extrabold text-[11.5px] flex items-center justify-center gap-2 shadow-md active:scale-[0.99] cursor-pointer mn-inverse"
             >
               <GraduationCap className="w-4 h-4 text-[#F2CD78]" />
               <span>

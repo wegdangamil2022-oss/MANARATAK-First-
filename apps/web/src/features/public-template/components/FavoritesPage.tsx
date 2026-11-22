@@ -194,14 +194,14 @@ export const FavoritesPage: React.FC<FavoritesPageProps> = ({
       <section className="mn-search-hero text-white mn-inverse ">
         <div className="max-w-5xl mx-auto mn-inline-gutter py-5 sm:py-7">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
-              <Heart className="w-5 h-5 fill-[var(--mn-accent)] text-[var(--mn-accent)]" />
+            <div className="w-11 h-11 rounded-2xl bg-[#142B5F]/85 border border-[#38C6D4]/45 flex items-center justify-center shrink-0 shadow-xs">
+              <Heart className="w-5 h-5 fill-[#38C6D4] text-[#38C6D4]" />
             </div>
             <div>
-              <div className="text-[10px] sm:text-xs text-white font-bold">{publicT('public_your_saved_items_from_across_manaratak')}</div>
+              <div className="text-[10px] sm:text-xs text-[#DDEFF2] font-bold">{publicT('public_your_saved_items_from_across_manaratak')}</div>
               <h1 className="mt-0.5 text-xl sm:text-2xl font-bold font-['Cairo',sans-serif]">{publicT('public_favorites')}</h1>
             </div>
-            <span className="mr-auto rounded-full bg-white/10 border border-white/20 px-2.5 py-1 text-[10px] font-bold">{resolvedItems.length}{' '}{publicT('public_saved')}</span>
+            <span className="mr-auto rounded-full bg-white/12 border border-[#38C6D4]/35 px-2.5 py-1 text-[10px] font-bold text-[#DDEFF2]">{resolvedItems.length}{' '}{publicT('public_saved')}</span>
           </div>
         </div>
       </section>
@@ -209,10 +209,10 @@ export const FavoritesPage: React.FC<FavoritesPageProps> = ({
       <div className="max-w-5xl mx-auto mn-inline-gutter py-4 space-y-4">
         {resolvedItems.length > 0 && (
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-            <button onClick={() => setSelectedKind('all')} className={`px-3 py-2 rounded-xl whitespace-nowrap text-[10px] font-bold border cursor-pointer ${selectedKind === 'all' ? 'bg-[var(--mn-primary)] text-white border-[var(--mn-primary)] mn-inverse ' : 'bg-[var(--mn-surface)] text-[var(--mn-text-muted)] border-[var(--mn-border)] mn-panel '}`}>{publicT('public_all_2')}{' '}{resolvedItems.length}
+            <button onClick={() => setSelectedKind('all')} className={`px-3 py-2 rounded-xl whitespace-nowrap text-[10px] font-bold border cursor-pointer transition-colors ${selectedKind === 'all' ? 'bg-gradient-to-l from-[#142B5F] via-[#133A6A] to-[#0E7C86] text-white border-transparent mn-inverse ' : 'bg-white dark:bg-[#111E38] text-[#5C707C] dark:text-[#9BB4C7] border-[#142B5F]/12 dark:border-white/10 hover:border-[#0E7C86]/40 mn-panel '}`}>{publicT('public_all_2')}{' '}{resolvedItems.length}
             </button>
             {activeKinds.map((kind) => (
-              <button key={kind} onClick={() => setSelectedKind(kind)} className={`px-3 py-2 rounded-xl whitespace-nowrap text-[10px] font-bold border flex items-center gap-1.5 cursor-pointer ${selectedKind === kind ? 'bg-[var(--mn-primary)] text-white border-[var(--mn-primary)] mn-inverse ' : 'bg-[var(--mn-surface)] text-[var(--mn-text-muted)] border-[var(--mn-border)] mn-panel '}`}>
+              <button key={kind} onClick={() => setSelectedKind(kind)} className={`px-3 py-2 rounded-xl whitespace-nowrap text-[10px] font-bold border flex items-center gap-1.5 cursor-pointer transition-colors ${selectedKind === kind ? 'bg-gradient-to-l from-[#142B5F] via-[#133A6A] to-[#0E7C86] text-white border-transparent mn-inverse ' : 'bg-white dark:bg-[#111E38] text-[#5C707C] dark:text-[#9BB4C7] border-[#142B5F]/12 dark:border-white/10 hover:border-[#0E7C86]/40 mn-panel '}`}>
                 {META[kind].icon}
                 {publicT(META[kind].label)} · {counts[kind]}
               </button>
@@ -221,31 +221,31 @@ export const FavoritesPage: React.FC<FavoritesPageProps> = ({
         )}
 
         {resolvedItems.length === 0 ? (
-          <div className="py-16 text-center rounded-3xl border border-dashed border-[var(--mn-border)] bg-[var(--mn-surface)] mn-panel ">
-            <Heart className="w-10 h-10 mx-auto text-[var(--mn-text-muted)]" />
-            <div className="mt-2 text-xs font-bold text-[var(--mn-heading)]">{publicT('public_no_saved_items_yet')}</div>
-            <div className="mt-1 text-[10px] text-[var(--mn-text-muted)]">{publicT('public_save_a_scholarship_university_major_course_tool_or')}</div>
-            <button onClick={() => onNavigateCategory('scholarships')} className="mt-3 px-4 py-2 rounded-xl bg-[var(--mn-primary)] text-white text-[10px] font-bold cursor-pointer mn-inverse ">{publicT('public_start_exploring')}</button>
+          <div className="py-16 text-center rounded-3xl border border-dashed border-[#142B5F]/18 dark:border-white/14 bg-white dark:bg-[#111E38] mn-panel ">
+            <Heart className="w-10 h-10 mx-auto text-[#0E7C86]/45 dark:text-[#38C6D4]/55" />
+            <div className="mt-2 text-xs font-bold text-[#142B5F] dark:text-[#F1F5F9]">{publicT('public_no_saved_items_yet')}</div>
+            <div className="mt-1 text-[10px] text-[#5C707C] dark:text-[#9BB4C7]">{publicT('public_save_a_scholarship_university_major_course_tool_or')}</div>
+            <button onClick={() => onNavigateCategory('scholarships')} className="mt-3 px-4 py-2 rounded-xl bg-gradient-to-l from-[#142B5F] via-[#133A6A] to-[#0E7C86] text-white text-[10px] font-bold cursor-pointer mn-inverse ">{publicT('public_start_exploring')}</button>
           </div>
         ) : visible.length === 0 ? (
-          <div className="py-12 text-center text-[11px] text-[var(--mn-text-muted)]">{publicT('public_no_saved_items_in_this_category')}</div>
+          <div className="py-12 text-center text-[11px] text-[#5C707C] dark:text-[#9BB4C7]">{publicT('public_no_saved_items_in_this_category')}</div>
         ) : (
           <div className="space-y-2.5">
             {paginatedVisible.map((item) => (
-              <article key={item.key} onClick={() => openItem(item)} className="w-full rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 text-start shadow-2xs hover:border-[var(--mn-accent)]/60 hover:shadow-sm transition-all active:scale-[0.99] cursor-pointer mn-panel ">
+              <article key={item.key} onClick={() => openItem(item)} className="w-full rounded-2xl border border-[#142B5F]/12 dark:border-white/10 bg-white dark:bg-[#111E38] p-3.5 text-start shadow-2xs hover:border-[#0E7C86]/45 dark:hover:border-[#38C6D4]/45 hover:shadow-sm transition-all active:scale-[0.99] cursor-pointer mn-panel ">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-[var(--mn-primary)] text-white flex items-center justify-center shrink-0 mn-inverse ">{META[item.kind].icon}</div>
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#142B5F] via-[#133A6A] to-[#0E7C86] text-white flex items-center justify-center shrink-0 mn-inverse ">{META[item.kind].icon}</div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-bold text-[var(--mn-accent-text)]">{publicT(META[item.kind].label)}</span>
-                      {item.meta && <span className="text-[9px] text-[var(--mn-text-muted)] font-bold truncate">{item.meta}</span>}
+                      <span className="text-[9.5px] font-bold text-[#0E7C86] dark:text-[#38C6D4]">{publicT(META[item.kind].label)}</span>
+                      {item.meta && <span className="text-[9.5px] text-[#5C707C] dark:text-[#9BB4C7] font-bold truncate">{item.meta}</span>}
                     </div>
-                    <h2 className="mt-0.5 text-[13px] sm:text-sm leading-snug font-bold text-[var(--mn-heading)]">{item.title}</h2>
-                    <p className="mt-1 text-[10px] sm:text-[11px] leading-5 text-[var(--mn-text-muted)] line-clamp-2">{item.subtitle}</p>
+                    <h2 className="mt-0.5 text-[12.5px] sm:text-sm leading-snug font-bold text-[#142B5F] dark:text-[#F1F5F9]">{item.title}</h2>
+                    <p className="mt-1 text-[10px] sm:text-[11px] leading-5 text-[#5C707C] dark:text-[#9BB4C7] line-clamp-2">{item.subtitle}</p>
                   </div>
                   <div className="flex flex-col items-center gap-1.5 shrink-0">
                     <FavoriteButton active onToggle={(event) => { event.stopPropagation(); onToggleFavorite(item.kind, item.id); }} />
-                    <ChevronLeft className="w-4 h-4 text-[var(--mn-accent-text)]" />
+                    <ChevronLeft className="w-4 h-4 text-[#0E7C86] dark:text-[#38C6D4]" />
                   </div>
                 </div>
               </article>

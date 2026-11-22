@@ -31,8 +31,8 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
         <Home
           className={`w-5 h-5 transition-transform duration-200 ${
             isActive
-              ? 'stroke-[2.5] text-[#142B51] dark:text-[#E5BF65] scale-110'
-              : 'stroke-[1.8] text-[#526672] dark:text-[#cad8e0]/80'
+              ? 'stroke-[2.5] text-[#142B5F] dark:text-[#F2CD78] scale-110'
+              : 'stroke-[1.8] text-[#5C707C] dark:text-[#9BB4C7]'
           }`}
         />
       ),
@@ -44,8 +44,8 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
         <Search
           className={`w-5 h-5 transition-transform duration-200 ${
             isActive
-              ? 'stroke-[2.5] text-[#142B51] dark:text-[#E5BF65] scale-110'
-              : 'stroke-[1.8] text-[#526672] dark:text-[#cad8e0]/80'
+              ? 'stroke-[2.5] text-[#142B5F] dark:text-[#F2CD78] scale-110'
+              : 'stroke-[1.8] text-[#5C707C] dark:text-[#9BB4C7]'
           }`}
         />
       ),
@@ -58,12 +58,12 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
           <Heart
             className={`w-5 h-5 transition-transform duration-200 ${
               isActive
-                ? 'stroke-[2.5] fill-[#D4A846] text-[#142B51] dark:fill-[#E5BF65] dark:text-[#E5BF65] scale-110'
-                : 'stroke-[1.8] text-[#526672] dark:text-[#cad8e0]/80'
+                ? 'stroke-[2.4] fill-[#0E7C86] text-[#0E7C86] dark:fill-[#38C6D4] dark:text-[#38C6D4] scale-110'
+                : 'stroke-[1.8] text-[#5C707C] dark:text-[#9BB4C7]'
             }`}
           />
           {favoritesCount > 0 && (
-            <span className="absolute -top-1.5 -right-2 min-w-[15px] h-[15px] px-1 bg-[#D4A846] dark:bg-[#E5BF65] text-[#142B51] font-bold text-[8px] rounded-full flex items-center justify-center shadow-xs mn-gold ">
+            <span className="absolute -top-1.5 -right-2 min-w-[15px] h-[15px] px-1 bg-[#0E7C86] dark:bg-[#38C6D4] text-white dark:text-[#0B1529] font-bold text-[8px] rounded-full flex items-center justify-center shadow-xs">
               {favoritesCount}
             </span>
           )}
@@ -93,12 +93,12 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
           <Bell
             className={`w-5 h-5 transition-transform duration-200 ${
               isActive
-                ? 'stroke-[2.5] text-[#142B51] dark:text-[#E5BF65] scale-110'
-                : 'stroke-[1.8] text-[#526672] dark:text-[#cad8e0]/80'
+                ? 'stroke-[2.5] text-[#142B5F] dark:text-[#F2CD78] scale-110'
+                : 'stroke-[1.8] text-[#5C707C] dark:text-[#9BB4C7]'
             }`}
           />
           {unreadNotificationsCount > 0 && (
-            <span className="absolute -top-1.5 -right-2 min-w-[15px] h-[15px] px-1 bg-[#D4A846] dark:bg-[#E5BF65] text-[#142B51] font-bold text-[8px] rounded-full flex items-center justify-center shadow-xs mn-gold ">
+            <span className="absolute -top-1.5 -right-2 min-w-[15px] h-[15px] px-1 bg-[#142B5F] dark:bg-[#D6A43B] text-[#F2CD78] dark:text-[#142B5F] font-bold text-[8px] rounded-full flex items-center justify-center shadow-xs">
               {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
             </span>
           )}
@@ -110,7 +110,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
   return (
     <nav
       id="manaratak-bottom-nav"
-      className="w-full select-none fixed bottom-0 left-0 right-0 z-30 bg-[#FFFFFF] dark:bg-[#142B51] border-t border-[#E3E7E7] dark:border-[#E5BF65]/22 shadow-[0_-4px_18px_rgba(20,43,81,0.06)] dark:shadow-[0_-6px_22px_rgba(0,0,0,0.35)] pt-1.5 pb-[max(8px,env(safe-area-inset-bottom,8px))] transition-colors mn-panel dark:mn-panel "
+      className="w-full select-none fixed bottom-0 left-0 right-0 z-30 bg-[#FFFFFF] dark:bg-[#111E38] border-t border-[#142B5F]/10 dark:border-white/10 shadow-[0_-4px_18px_rgba(20,43,95,0.06)] dark:shadow-[0_-6px_22px_rgba(0,0,0,0.35)] pt-1.5 pb-[max(8px,env(safe-area-inset-bottom,8px))] transition-colors mn-panel dark:mn-panel "
     >
       <div className="max-w-md mx-auto flex items-stretch justify-around w-full px-[var(--mn-container-mobile)]">
         {tabs.map((tab) => {
@@ -128,8 +128,10 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
               onClick={() => onTabChange(tab.id)}
               className={`flex min-w-0 flex-1 flex-col items-center justify-center min-h-[52px] py-1.5 px-1 rounded-xl transition-all duration-150 active:scale-90 relative cursor-pointer ${
                 isActive
-                  ? 'text-[#142B51] dark:text-[#E5BF65] font-bold'
-                  : 'text-[#526672] dark:text-[#cad8e0]/80 hover:text-[#142B51] dark:hover:text-[#F2F5F7]'
+                  ? tab.id === 'favorites'
+                    ? 'text-[#0E7C86] dark:text-[#38C6D4] font-bold'
+                    : 'text-[#142B5F] dark:text-[#F2CD78] font-bold'
+                  : 'text-[#5C707C] dark:text-[#9BB4C7] hover:text-[#142B5F] dark:hover:text-[#F1F5F9]'
               }`}
             >
               {/* Icon */}
@@ -141,16 +143,18 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
               <span
                 className={`text-[10px] sm:text-[11px] leading-tight font-medium ${
                   isActive
-                    ? 'text-[#142B51] dark:text-[#E5BF65] font-bold'
-                    : 'text-[#526672] dark:text-[#cad8e0]/80'
+                    ? tab.id === 'favorites'
+                      ? 'text-[#0E7C86] dark:text-[#38C6D4] font-bold'
+                      : 'text-[#142B5F] dark:text-[#F2CD78] font-bold'
+                    : 'text-[#5C707C] dark:text-[#9BB4C7]'
                 }`}
               >
                 {tab.label}
               </span>
 
-              {/* Active Tab Dot Indicator */}
+              {/* Active Tab Indicator */}
               {isActive && (
-                <span className="w-1.5 h-1.5 bg-[#D4A846] dark:bg-[#E5BF65] rounded-full mt-0.5 mn-gold " />
+                <span className="w-1.5 h-1.5 bg-[#0E7C86] dark:bg-[#38C6D4] rounded-full mt-0.5" />
               )}
             </button>
           );

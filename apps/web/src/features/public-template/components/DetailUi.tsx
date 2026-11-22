@@ -1,11 +1,130 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useEffect, useState, useMemo } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, SlidersHorizontal, X } from 'lucide-react';
+import { ArrowRight, Check, ChevronDown, ChevronLeft, ChevronRight, SlidersHorizontal, X } from 'lucide-react';
 
 export interface PublicFilterSelectOption {
   value: string;
   label: string;
+}
+
+export function PublicInlineFilterPanel({
+  isOpen,
+  title,
+  icon: Icon,
+  options,
+  selectedValue,
+  value,
+  onSelect,
+  onChange,
+  onClose,
+  dir = 'rtl',
+  maxWidthClass = 'max-w-4xl md:max-w-[1120px] lg:max-w-[1160px]',
+}: {
+  isOpen: boolean;
+  title: string;
+  icon?: LucideIcon;
+  options: PublicFilterSelectOption[];
+  selectedValue?: string;
+  value?: string;
+  onSelect?: (value: string) => void;
+  onChange?: (value: string) => void;
+  onClose: () => void;
+  dir?: 'rtl' | 'ltr';
+  maxWidthClass?: string;
+}) {
+  const { t: publicT } = usePublicTemplateTranslation();
+  if (!isOpen) return null;
+  const HeaderIcon = Icon || SlidersHorizontal;
+  const currentValue = selectedValue !== undefined ? selectedValue : value;
+  const handleSelect = onSelect || onChange;
+  const hasLongOption = options.some((opt) => (opt.label || '').trim().length > 15);
+  const showScrollHint = hasLongOption ? options.length > 5 : options.length > 8;
+
+  return (
+    <div
+      dir={dir}
+      className={`w-full ${maxWidthClass} mx-auto px-1.5 sm:px-2 md:px-4 -mt-1.5 sm:-mt-2.5 mb-2.5 sm:mb-3`}
+    >
+      <div className="relative overflow-hidden bg-white dark:bg-[#111E38] border border-[#142B5F]/10 dark:border-white/10 rounded-xl shadow-[0_1px_6px_rgba(20,43,95,0.035)] dark:shadow-[0_2px_10px_rgba(0,0,0,0.2)] px-2.5 py-2 sm:px-3.5 sm:py-2.5 font-['Cairo',sans-serif] select-none mn-panel">
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#0E7C86]/45 to-transparent"
+        />
+
+        {/* Compact Header */}
+        <div className="flex items-center justify-between gap-2 pb-1.5 mb-1.5 border-b border-[#142B5F]/8 dark:border-white/8">
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <span className="relative w-6 h-6 rounded-md bg-[#142B5F] text-[#F2CD78] flex items-center justify-center shrink-0 overflow-hidden">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute top-0 right-0 w-1.5 h-1.5 bg-[#D6A43B] rounded-bl-[3px]"
+              />
+              <HeaderIcon className="w-3 h-3 text-[#F2CD78] relative z-10" />
+            </span>
+            <h4 className="text-[11px] sm:text-[12px] font-extrabold text-[#142B5F] dark:text-[#F1F5F9] truncate font-['Cairo',sans-serif]">
+              {title}
+            </h4>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={publicT('public_close')}
+            className="w-6 h-6 !min-h-[24px] rounded-md bg-[#F6F8FA] dark:bg-[#0B1529] border border-[#142B5F]/10 dark:border-white/10 text-[#142B5F] dark:text-[#EDF5F5] hover:border-[#0E7C86] hover:text-[#0E7C86] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+
+        {/* Adaptive Compact Options Grid — 1 col on mobile when labels are long so text never clips or overflows */}
+        <div
+          className={`grid ${hasLongOption ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2 sm:grid-cols-3'} gap-1.5 max-h-[212px] sm:max-h-[232px] overflow-y-auto overscroll-contain scroll-smooth py-0.5 pe-0.5`}
+          style={{ scrollbarWidth: 'thin', scrollbarColor: '#0E7C86 transparent' }}
+        >
+          {options.map((opt) => {
+            const isSelected = opt.value === currentValue;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  handleSelect?.(opt.value);
+                  onClose();
+                }}
+                className={`w-full min-w-0 overflow-hidden !min-h-[34px] flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg text-[10.5px] sm:text-[11.5px] font-bold font-['Cairo',sans-serif] transition-colors cursor-pointer text-start ${
+                  isSelected
+                    ? 'bg-gradient-to-l from-[#142B5F] via-[#133A6A] to-[#0E7C86] text-white'
+                    : 'bg-[#F6F8FA] dark:bg-[#0B1529]/80 hover:bg-white dark:hover:bg-[#162747] text-[#142B5F] dark:text-[#DCE7F0] border border-[#142B5F]/8 dark:border-white/8 hover:border-[#0E7C86]/40'
+                }`}
+              >
+                <span
+                  className={`min-w-0 flex-1 font-['Cairo',sans-serif] ${
+                    hasLongOption ? 'leading-snug break-words whitespace-normal' : 'truncate'
+                  }`}
+                >
+                  {opt.label}
+                </span>
+                {isSelected ? (
+                  <Check className="w-3 h-3 text-[#38C6D4] shrink-0" />
+                ) : (
+                  <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#142B5F]/18 dark:bg-white/20" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Compact Scroll Hint only when list scrolls */}
+        {showScrollHint && (
+          <div className="mt-1.5 pt-1 border-t border-[#142B5F]/8 dark:border-white/8 flex items-center justify-center gap-1 text-[9px] font-bold text-[#0E7C86] dark:text-[#38C6D4] font-['Cairo',sans-serif]">
+            <ChevronDown className="w-2.5 h-2.5" />
+            <span>{dir === 'ltr' ? `Scroll for more (${options.length})` : `اسحب لعرض بقية الخيارات (${options.length})`}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export function PublicFilterSelectModal({
@@ -31,83 +150,19 @@ export function PublicFilterSelectModal({
   onClose: () => void;
   dir?: 'rtl' | 'ltr';
 }) {
-  const { t: publicT } = usePublicTemplateTranslation();
-  if (!isOpen) return null;
-  const HeaderIcon = Icon || SlidersHorizontal;
-  const currentValue = selectedValue !== undefined ? selectedValue : value;
-  const handleSelect = onSelect || onChange;
-
   return (
-    <>
-      <button
-        type="button"
-        aria-label={publicT('public_close')}
-        className="fixed inset-0 bg-black/55 backdrop-blur-xs z-50 transition-opacity animate-fade-in"
-        onClick={onClose}
-      />
-
-      <div
-        dir={dir}
-        className="fixed top-14 inset-x-3 mx-auto max-w-xs md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full bg-[var(--mn-surface)] border-1.5 border-[#142B5F]/35 dark:border-[#D6A43B]/45 rounded-2xl shadow-2xl z-50 flex flex-col p-3.5 font-['Cairo',sans-serif] select-none mn-panel transition-all"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-[var(--mn-border)] shrink-0 font-['Cairo',sans-serif]">
-          <h4 className="text-[12px] font-bold text-[var(--mn-heading)] flex items-center gap-1.5 font-['Cairo',sans-serif]">
-            <span className="w-6 h-6 rounded-lg bg-[#142B5F] text-white flex items-center justify-center shrink-0 shadow-2xs">
-              <HeaderIcon className="w-3.5 h-3.5 text-white" />
-            </span>
-            <span>{title}</span>
-          </h4>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-[10.5px] font-bold text-white bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] px-3 py-1 rounded-lg hover:opacity-95 transition-all cursor-pointer active:scale-95 shadow-2xs font-['Cairo',sans-serif]"
-          >
-            {publicT('public_close')}
-          </button>
-        </div>
-
-        {/* Compact Scrollable Options List (يعرض قليل منها ثم عملية سحب) */}
-        <div
-          className="max-h-[144px] overflow-y-auto overscroll-contain pr-1 pl-0.5 space-y-1 font-['Cairo',sans-serif] scroll-smooth"
-          data-mn-scrollbar
-        >
-          {options.map((opt) => {
-            const isSelected = opt.value === currentValue;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => {
-                  handleSelect?.(opt.value);
-                  onClose();
-                }}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold font-['Cairo',sans-serif] transition-all cursor-pointer text-start ${
-                  isSelected
-                    ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] text-white shadow-2xs'
-                    : 'bg-[var(--mn-page)]/80 hover:bg-[var(--mn-surface-muted)] text-[var(--mn-heading)] border border-[var(--mn-border)]/60'
-                }`}
-              >
-                <span className="truncate font-['Cairo',sans-serif]">{opt.label}</span>
-                <span
-                  className={`w-2 h-2 rounded-full shrink-0 transition-all ${
-                    isSelected ? 'bg-[#F2CD78]' : 'bg-[#142B5F]/20 dark:bg-white/20'
-                  }`}
-                />
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Scroll Indicator Footer when list has more than 3 items */}
-        {options.length > 3 && (
-          <div className="mt-2 pt-1.5 border-t border-[var(--mn-border)]/60 flex items-center justify-center gap-1 text-[9.5px] font-bold text-[#0E7C86] dark:text-[#38C6D4] font-['Cairo',sans-serif]">
-            <ChevronDown className="w-3 h-3 animate-bounce" />
-            <span>{dir === 'ltr' ? `Scroll for more options (${options.length})` : `اسحب لأسفل لعرض بقية الخيارات (${options.length})`}</span>
-          </div>
-        )}
-      </div>
-    </>
+    <PublicInlineFilterPanel
+      isOpen={isOpen}
+      title={title}
+      icon={Icon}
+      options={options}
+      selectedValue={selectedValue}
+      value={value}
+      onSelect={onSelect}
+      onChange={onChange}
+      onClose={onClose}
+      dir={dir}
+    />
   );
 }
 

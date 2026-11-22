@@ -436,7 +436,7 @@ export const CommunityChannelsModal: React.FC<CommunityChannelsModalProps> = ({
         className="flex max-h-[82vh] sm:max-h-[84vh] w-full max-w-full sm:max-w-[650px] flex-col overflow-hidden rounded-t-2xl sm:rounded-2xl border-y sm:border border-[var(--mn-border-brand)] bg-[#EAEEF3] dark:bg-[#0B1733] shadow-xl transition-all"
       >
         {/* القسم العلوي: البترولي في الجهة اليمنى والنيلي في الجهة اليسرى (90deg) مع لمسات ذهبية والوصف باللون الأبيض */}
-        <div className="relative shrink-0 overflow-hidden px-3.5 pt-4 pb-4 sm:px-5 sm:pt-4.5 sm:pb-4.5 bg-[linear-gradient(90deg,#142B5F_0%,#142B5F_42%,#0D5C6E_74%,#0E7C86_100%)] text-white border-b border-[#D6A43B]/60">
+        <div className="relative shrink-0 overflow-hidden px-3.5 pt-4 pb-4 sm:px-5 sm:pt-4.5 sm:pb-4.5 bg-[linear-gradient(270deg,#142B5F_0%,#142B5F_42%,#0D5C6E_74%,#0E7C86_100%)] text-white border-b border-[#D6A43B]/60">
           {/* زخارف ولمسات ذهبية هادئة في الخلفية */}
           <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
             <div className="absolute top-2.5 left-14 grid grid-cols-4 gap-1 opacity-25">
@@ -543,7 +543,10 @@ export const CommunityChannelsModal: React.FC<CommunityChannelsModalProps> = ({
           >
             <div
               className="absolute inset-y-0 rounded-full bg-[linear-gradient(90deg,#142B5F_0%,#142B5F_42%,#0E7C86_100%)] dark:from-[#F2CD78] dark:to-[#0E7C86] transition-all duration-150"
-              data-mn-width={Math.round(Math.max(0, Math.min(100, Number(tabsScrollMeta.thumbWidthPct) || 0)))} data-mn-right={Math.round(Math.max(0, Math.min(100, Number(tabsScrollMeta.thumbRightPct) || 0)))}
+              style={{
+                width: `${tabsScrollMeta.thumbWidthPct}%`,
+                right: `${tabsScrollMeta.thumbRightPct}%`,
+              }}
             />
           </div>
         </div>
@@ -557,7 +560,10 @@ export const CommunityChannelsModal: React.FC<CommunityChannelsModalProps> = ({
             >
               <div
                 className="absolute inset-x-0 rounded-full bg-gradient-to-b from-[#0E7C86] to-[#142B5F] dark:from-[#F2CD78] dark:to-[#0E7C86] transition-all duration-75"
-                data-mn-height={Math.round(Math.max(0, Math.min(100, Number(listScrollMeta.thumbHeightPct) || 0)))} data-mn-top={Math.round(Math.max(0, Math.min(100, Number(listScrollMeta.thumbTopPct) || 0)))}
+                style={{
+                  height: `${listScrollMeta.thumbHeightPct}%`,
+                  top: `${listScrollMeta.thumbTopPct}%`,
+                }}
               />
             </div>
           )}

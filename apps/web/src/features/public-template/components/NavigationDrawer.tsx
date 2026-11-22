@@ -71,7 +71,8 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
   useOverlayDialog(isOpen, onClose, 'mn-navigation-dialog');
   if (!isOpen) return null;
 
-  const activeProfile: UserProfile | null = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' && previewVisitorMode ? null : userProfile ?? null;
+  const activeProfile = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' && previewVisitorMode
+    ? null : userProfile ?? null;
 
   const studentName = (activeProfile?.name || '').trim();
   const isLatinName =

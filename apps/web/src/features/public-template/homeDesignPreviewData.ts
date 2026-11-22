@@ -38,7 +38,7 @@ export const HOME_DESIGN_COUNTRIES = [
 
 export const HOME_DESIGN_COURSES = [
   { id: 'home-preview-ai', title: 'دورة مقدمة في الذكاء الاصطناعي وتطبيقاته', provider: 'منصات عالمية • Stanford Online',
-    imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=600&q=80' },
+    imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80' },
   { id: 'home-preview-cs', title: 'دورة شاملة في مبادئ علوم الحاسوب والبرمجة', provider: 'منصات عالمية • Harvard University',
     imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=600&q=80' },
   { id: 'home-preview-data', title: 'دورة أساسيات علم البيانات وتعلم الآلة', provider: 'منصات عالمية • Google Career Certificates',

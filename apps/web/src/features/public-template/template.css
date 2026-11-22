@@ -44,16 +44,11 @@
     max-height: 35px !important;
   }
   .manaratak-public section[id^="featured-"] {
-    padding-block: 6px !important;
-  }
-  .manaratak-public section[id^="featured-"] > div.rounded-3xl {
-    padding-block: 11px !important;
-    padding-inline: 9px !important;
-    border-radius: 20px !important;
+    padding-block: 3px !important;
   }
   .manaratak-public button[id^="btn-view-all-"] {
-    min-height: 36px !important;
-    padding-block: 7px !important;
+    min-height: 34px !important;
+    padding-block: 6px !important;
   }
   .manaratak-public .mn-filter-chip {
     min-height: 30px !important;
@@ -293,7 +288,7 @@
   --mn-border: #e1e5e8;
   --mn-border-strong: var(--mn-border-brand);
   --mn-border-brand: rgb(14 124 134 / 28%);
-  --mn-focus: rgb(214 164 59 / 42%);
+  --mn-focus: rgb(14 124 134 / 28%);
   --mn-on-primary: #ffffff;
   --mn-on-accent: #142b5f;
   --mn-shadow-card: 0 6px 22px rgb(20 43 95 / 6%);
@@ -346,7 +341,7 @@
   --mn-border: rgb(242 205 120 / 42%);
   --mn-border-brand: rgb(242 205 120 / 62%);
   --mn-border-gold: rgb(242 205 120 / 68%);
-  --mn-focus: rgb(242 205 120 / 46%);
+  --mn-focus: rgb(56 198 212 / 34%);
   --mn-on-primary: #ffffff;
   --mn-on-accent: #142b5f;
   --mn-shadow-card: 0 6px 22px rgb(0 0 0 / 18%);
@@ -359,13 +354,17 @@
 
 .manaratak-public :where(input, textarea, select):focus-visible,
 .manaratak-public :where(button, a):focus-visible {
-  outline: 2px solid var(--mn-accent);
+  outline: 2px solid #0E7C86;
   outline-offset: 2px;
   box-shadow: 0 0 0 3px var(--mn-focus);
 }
+.dark .manaratak-public :where(input, textarea, select):focus-visible,
+.dark .manaratak-public :where(button, a):focus-visible {
+  outline-color: #38C6D4;
+}
 
 .manaratak-public .mn-search-hero {
-  background: linear-gradient(110deg, #142b5f 0%, #142b5f 42%, var(--mn-hero-secondary) 82%, var(--mn-hero-secondary) 100%);
+  background: linear-gradient(250deg, #142b5f 0%, #142b5f 42%, var(--mn-hero-secondary) 82%, var(--mn-hero-secondary) 100%);
 }
 
 .manaratak-public .mn-card-shadow {

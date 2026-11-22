@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import type { Course } from '../types';
 import { FavoriteButton } from './FavoriteButton';
-import { PublicCardsPagination, PublicFilterSelectModal, usePaginatedCatalog } from './DetailUi';
+import { PublicCardsPagination, PublicInlineFilterPanel, usePaginatedCatalog } from './DetailUi';
 
 interface CourseTrackPreviewProps {
   track: 'native' | 'paid';
@@ -198,7 +198,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
             </div>
 
             {/* Subtitle */}
-            <p className="text-[11px] sm:text-xs md:text-sm text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-md md:max-w-2xl mx-auto truncate">
+            <p className="text-[10px] sm:text-xs md:text-sm text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-md md:max-w-2xl mx-auto px-2 line-clamp-2">
               {pageSubtitle}
             </p>
           </div>
@@ -244,77 +244,78 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
         {/* ========================================================================= */}
         {/* 2 SEPARATE FLOATING FILTER TILES (المجال • المستوى) INSIDE HERO           */}
         {/* ========================================================================= */}
-        <div className="max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto mn-inline-gutter mt-2.5 md:mt-3.5 relative z-20 pb-0">
+        <div className="max-w-[256px] sm:max-w-[350px] md:max-w-[454px] lg:max-w-[522px] mx-auto mn-inline-gutter mt-2.5 md:mt-3.5 relative z-20 pb-0">
           <div className="grid grid-cols-2 gap-2 sm:gap-2.5 md:gap-3.5">
             {/* Tile 1: المجال / التصنيف */}
             <button
               type="button"
-              onClick={() => setOpenFilterModal('category')}
-              className={`relative border-1.5 rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer ${
+              onClick={() => setOpenFilterModal((prev) => (prev === 'category' ? null : 'category'))}
+              className={`relative min-w-0 overflow-hidden border-1.5 rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer ${
                 openFilterModal === 'category' || selectedCategory !== 'الكل'
                   ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] border-[#142B5F] text-white mn-inverse'
                   : 'bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] mn-panel'
               }`}
             >
-              <div className="flex items-center justify-center gap-1 font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
+              <div className="min-w-0 flex items-center justify-center gap-1 font-bold text-[10px] sm:text-xs font-['Cairo',sans-serif] w-full">
                 <Layers className={`w-3.5 h-3.5 shrink-0 ${openFilterModal === 'category' || selectedCategory !== 'الكل' ? 'text-[#F2CD78]' : 'text-[#142B5F] dark:text-[#D6A43B]'}`} />
-                <span className="truncate">
+                <span className="min-w-0 truncate">
                   {selectedCategory === 'الكل' ? publicT('public_all_domains_2') : selectedCategory}
                 </span>
               </div>
-              <ChevronDown className={`w-3.5 h-3.5 mt-0.5 ${openFilterModal === 'category' || selectedCategory !== 'الكل' ? 'text-white/85' : 'text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)]'}`} />
+              <ChevronDown className={`w-3.5 h-3.5 mt-0.5 shrink-0 transition-transform duration-200 ${openFilterModal === 'category' ? 'rotate-180 text-white' : selectedCategory !== 'الكل' ? 'text-white/85' : 'text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)]'}`} />
             </button>
 
             {/* Tile 2: المستوى */}
             <button
               type="button"
-              onClick={() => setOpenFilterModal('level')}
-              className={`relative border-1.5 rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer ${
+              onClick={() => setOpenFilterModal((prev) => (prev === 'level' ? null : 'level'))}
+              className={`relative min-w-0 overflow-hidden border-1.5 rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer ${
                 openFilterModal === 'level' || selectedLevel !== 'الكل'
                   ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] border-[#142B5F] text-white mn-inverse'
                   : 'bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] mn-panel'
               }`}
             >
-              <div className="flex items-center justify-center gap-1 font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
+              <div className="min-w-0 flex items-center justify-center gap-1 font-bold text-[10px] sm:text-xs font-['Cairo',sans-serif] w-full">
                 <GraduationCap className={`w-3.5 h-3.5 shrink-0 ${openFilterModal === 'level' || selectedLevel !== 'الكل' ? 'text-[#F2CD78]' : 'text-[#142B5F] dark:text-[#D6A43B]'}`} />
-                <span className="truncate">
+                <span className="min-w-0 truncate">
                   {selectedLevel === 'الكل' ? publicT('public_all_levels_2') : selectedLevel}
                 </span>
               </div>
-              <ChevronDown className={`w-3.5 h-3.5 mt-0.5 ${openFilterModal === 'level' || selectedLevel !== 'الكل' ? 'text-white/85' : 'text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)]'}`} />
+              <ChevronDown className={`w-3.5 h-3.5 mt-0.5 shrink-0 transition-transform duration-200 ${openFilterModal === 'level' ? 'rotate-180 text-white' : selectedLevel !== 'الكل' ? 'text-white/85' : 'text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)]'}`} />
             </button>
           </div>
         </div>
-
-        <PublicFilterSelectModal
-          isOpen={openFilterModal === 'category'}
-          onClose={() => setOpenFilterModal(null)}
-          title={publicT('public_choose_domain')}
-          icon={Layers}
-          selectedValue={selectedCategory}
-          onSelect={setSelectedCategory}
-          options={categories.map((cat) => ({
-            value: cat,
-            label: cat === 'الكل' ? publicT('public_all_domains_2') : cat,
-          }))}
-        />
-
-        <PublicFilterSelectModal
-          isOpen={openFilterModal === 'level'}
-          onClose={() => setOpenFilterModal(null)}
-          title={publicT('public_choose_level')}
-          icon={GraduationCap}
-          selectedValue={selectedLevel}
-          onSelect={setSelectedLevel}
-          options={levels.map((lvl) => ({
-            value: lvl,
-            label: lvl === 'الكل' ? publicT('public_all_levels_2') : lvl,
-          }))}
-        />
       </div>
 
       {/* Gold Divider Ribbon Line */}
-      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--mn-accent-text)] via-[var(--mn-accent-soft)] to-[var(--mn-accent-text)] shadow-xs mb-1" />
+      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--mn-accent-text)] via-[var(--mn-accent-soft)] to-[var(--mn-accent-text)] shadow-xs mb-3" />
+
+      {/* Inline Attached Filter Panels */}
+      <PublicInlineFilterPanel
+        isOpen={openFilterModal === 'category'}
+        onClose={() => setOpenFilterModal(null)}
+        title={publicT('public_choose_domain')}
+        icon={Layers}
+        selectedValue={selectedCategory}
+        onSelect={setSelectedCategory}
+        options={categories.map((cat) => ({
+          value: cat,
+          label: cat === 'الكل' ? publicT('public_all_domains_2') : cat,
+        }))}
+      />
+
+      <PublicInlineFilterPanel
+        isOpen={openFilterModal === 'level'}
+        onClose={() => setOpenFilterModal(null)}
+        title={publicT('public_choose_level')}
+        icon={GraduationCap}
+        selectedValue={selectedLevel}
+        onSelect={setSelectedLevel}
+        options={levels.map((lvl) => ({
+          value: lvl,
+          label: lvl === 'الكل' ? publicT('public_all_levels_2') : lvl,
+        }))}
+      />
 
       {/* ========================================================================= */}
       {/* RESULTS COUNT */}
@@ -370,7 +371,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                     </div>
 
                     <div className="min-w-0 flex-1 space-y-1">
-                      <h3 className="text-[12px] sm:text-[13px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-primary)] dark:group-hover:text-[#E5B54F] transition-colors line-clamp-1 font-['Cairo',sans-serif]">
+                      <h3 className="text-[12px] sm:text-[13px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-primary)] dark:group-hover:text-[#E5B54F] transition-colors line-clamp-2 break-words font-['Cairo',sans-serif]">
                         {course.title}
                       </h3>
 

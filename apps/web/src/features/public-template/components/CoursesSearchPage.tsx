@@ -6,6 +6,7 @@ import {
   BadgeCheck,
   BookOpen,
   Building2,
+  Check,
   CheckCircle2,
   Briefcase,
   ChevronDown,
@@ -25,7 +26,7 @@ import {
 } from 'lucide-react';
 import { Course, ImportedCourse } from '../types';
 import { FavoriteButton } from './FavoriteButton';
-import { PublicCardsPagination, PublicFilterSelectModal, usePaginatedCatalog } from './DetailUi';
+import { PublicCardsPagination, PublicInlineFilterPanel, usePaginatedCatalog } from './DetailUi';
 
 const KNOWN_EN_TO_AR_TITLES: Record<string, string> = {
   'introduction to python': 'مقدمة في برمجة بايثون',
@@ -382,32 +383,29 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
 
   return (
     <div
-      className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel "
+      className="min-h-screen bg-[#F6F8FA] dark:bg-[#0A1326] text-[#203442] dark:text-[#EDF5F5] pb-24 font-['Cairo',sans-serif] select-none mn-panel dark:[--mn-border:rgba(255,255,255,0.12)]"
       dir={publicDir}
     >
-      {/* HERO — same visual language as Scholarships / Universities / Majors */}
-      <div className="relative mn-search-hero text-white px-3 sm:px-4 pt-4 pb-3 overflow-hidden shadow-xs mn-inverse ">
+      {/* HERO — compact balanced visual language matching Scholarships & Majors */}
+      <div className="relative mn-search-hero text-white px-3 sm:px-4 pt-2.5 pb-2.5 sm:pt-4 sm:pb-3 overflow-hidden shadow-xs mn-inverse ">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none opacity-20">
-            <svg className="w-full h-full" viewBox="0 0 400 220" fill="none" preserveAspectRatio="none">
-              <path d="M-50,50 Q100,-20 250,60 T550,40" stroke="var(--mn-accent)" strokeWidth="1.5" fill="none" />
-              <path d="M-20,125 Q150,45 300,145 T600,105" stroke="var(--mn-accent)" strokeWidth="1" fill="none" />
-              <circle cx="30" cy="30" r="1" fill="var(--mn-accent)" />
-              <circle cx="45" cy="30" r="1" fill="var(--mn-accent)" />
-              <circle cx="60" cy="30" r="1" fill="var(--mn-accent)" />
-              <circle cx="30" cy="45" r="1" fill="var(--mn-accent)" />
-              <circle cx="45" cy="45" r="1" fill="var(--mn-accent)" />
-              <circle cx="60" cy="45" r="1" fill="var(--mn-accent)" />
-            </svg>
+          <div className="absolute top-3 left-5 grid grid-cols-5 gap-1.5 opacity-20">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <div key={i} className="w-1 h-1 rounded-full bg-[#F2CD78]" />
+            ))}
           </div>
 
-          <div className="absolute top-0 right-10 w-64 h-64 bg-[var(--mn-accent)] rounded-full mix-blend-screen filter blur-[120px] opacity-10 mn-gold " />
-          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-[var(--mn-primary)] rounded-full mix-blend-screen filter blur-[100px] opacity-20 mn-inverse " />
+          <div className="absolute -top-12 -left-12 w-56 h-56 rounded-full border border-[#F2CD78]/20 pointer-events-none" />
+          <div className="absolute -top-6 -left-6 w-72 h-72 rounded-full border border-[#F2CD78]/12 pointer-events-none" />
 
-          <PlayCircle className="imported-course-float mn-anim-10 w-16 h-16 left-[15%] top-[60%]" />
-          <TrendingUp className="imported-course-float mn-anim-12-delay-4 w-12 h-12 left-[80%] top-[40%]" />
-          <Briefcase className="imported-course-float mn-anim-14-delay-2 w-10 h-10 left-[40%] top-[70%]" />
-          <Sparkles className="imported-course-float mn-anim-9-delay-7 w-8 h-8 left-[60%] top-[30%]" />
+          <svg
+            className="absolute bottom-0 inset-x-0 w-full h-12 opacity-25"
+            viewBox="0 0 500 80"
+            fill="none"
+            preserveAspectRatio="none"
+          >
+            <path d="M-20,70 Q250,-20 520,70" stroke="#F2CD78" strokeWidth="2" fill="none" />
+          </svg>
         </div>
 
         {onBack && (
@@ -421,42 +419,39 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
           </button>
         )}
 
-        <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto text-center relative z-10 space-y-2 md:space-y-3 pt-1 md:pt-2">
-          {/* Top 4-pointed Gold Sparkle Star */}
+        <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto text-center relative z-10 space-y-1.5 sm:space-y-2 md:space-y-3 pt-0.5 md:pt-2">
           <div className="flex justify-center">
-            <Sparkles className="h-5 w-5 text-[var(--mn-accent-text)] drop-shadow-[0_0_8px_rgba(214,164,59,0.8)]" aria-hidden="true" />
+            <Sparkles className="h-4.5 w-4.5 sm:h-5 sm:w-5 md:h-6 md:w-6 text-[#F2CD78] drop-shadow-[0_0_8px_rgba(214,164,59,0.75)]" aria-hidden="true" />
           </div>
 
           <div className="space-y-0.5 md:space-y-1">
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-[32px] font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">
-              {publicT('public_courses')}{' '}<span className="text-[var(--mn-accent-text)]">{publicT('public_worldwide')}</span>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">
+              {publicT('public_courses')}{' '}<span className="text-[#F2CD78]">{publicT('public_worldwide')}</span>
             </h1>
 
-            {/* Small Gold Horizontal Divider */}
-            <div className="flex justify-center pt-1 pb-0.5">
-              <div className="w-10 md:w-14 h-0.5 bg-[var(--mn-accent)] rounded-full mn-gold " />
+            <div className="flex justify-center pt-0.5 pb-0.5">
+              <div className="w-10 md:w-14 h-0.5 bg-gradient-to-r from-[#D6A43B] via-[#F2CD78] to-[#D6A43B] rounded-full" />
             </div>
 
-            <p className="text-[11px] sm:text-xs md:text-sm text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-md md:max-w-2xl mx-auto truncate">
+            <p className="text-[10px] sm:text-xs md:text-sm text-[#DDEFF2] font-medium font-['Cairo',sans-serif] leading-relaxed max-w-md md:max-w-2xl mx-auto px-2 line-clamp-2">
               {publicT('public_search_free_courses_from_leading_global_platforms_and')}
             </p>
           </div>
 
-          {/* Search stays inside the upper section, matching Scholarships. */}
-          <div className="pt-1 max-w-sm sm:max-w-md md:max-w-xl lg:max-w-2xl mx-auto px-1">
+          <div className="pt-0.5 sm:pt-1 max-w-sm sm:max-w-md md:max-w-xl mx-auto px-1">
             <div className="relative">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder={publicT('public_enter_a_course_name_domain_or_platform')}
-                className="w-full py-2.5 md:py-3 pl-4 pr-10 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-[12px] md:text-sm font-bold placeholder:text-[var(--mn-text-muted)] placeholder:text-[12px] md:placeholder:text-sm placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel "
+                className="w-full py-2 sm:py-2.5 md:py-3 pl-4 pr-10 md:pr-11 bg-white dark:bg-[#111E38] text-[#203442] dark:text-[#EDF5F5] rounded-full text-[12px] md:text-sm font-bold placeholder:text-[#5C707C] dark:placeholder:text-[#9BB4C7] placeholder:text-[12px] md:placeholder:text-sm placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[#142B5F]/12 dark:border-white/14 focus:border-[#0E7C86] dark:focus:border-[#34BFC9] transition-all text-center font-['Cairo',sans-serif] mn-panel "
               />
-              <Search className="w-4 h-4 text-[var(--mn-accent-text)] absolute right-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 md:w-4.5 md:h-4.5 text-[#0E7C86] dark:text-[#34BFC9] absolute right-3.5 md:right-4 top-1/2 -translate-y-1/2" />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 p-1 text-[var(--mn-text-muted)] hover:text-[var(--mn-text)] cursor-pointer"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 p-1 text-[#5C707C] dark:text-[#9BB4C7] hover:text-[#142B5F] dark:hover:text-white cursor-pointer"
                   title={publicT('public_clear_search')}
                 >
                   <X className="w-3.5 h-3.5" />
@@ -470,271 +465,419 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
           <div className="flex justify-center mt-2 relative z-10">
             <button
               onClick={resetFilters}
-              className="text-[10px] font-bold text-[var(--mn-danger-text)] hover:text-[var(--mn-danger-text)] bg-[var(--mn-surface-elevated)]/95 px-2.5 py-0.5 rounded-full shadow-xs transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif] mn-panel "
+              className="text-[10px] md:text-xs font-bold text-[#142B5F] dark:text-[#F2CD78] bg-white/95 dark:bg-[#111E38]/95 hover:bg-white dark:hover:bg-[#162747] border border-[#142B5F]/15 dark:border-[#F2CD78]/30 px-2.5 md:px-3.5 py-0.5 md:py-1 rounded-full shadow-xs transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif]"
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-3 h-3 text-[#0E7C86] dark:text-[#34BFC9]" />
               <span>{publicT('public_reset_filters')}{activeFiltersCount})</span>
             </button>
           </div>
         )}
 
-        {/* Three visible filters inside the Navy-Petrol-Turquoise hero container */}
-        <div className="max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto mn-inline-gutter mt-2.5 md:mt-3.5 relative z-20 pb-0">
-          <div className="grid grid-cols-3 gap-2 sm:gap-2.5 md:gap-3.5">
-            {/* 1. تصفية (في الجانب الأيمن) */}
+        {/* 3 balanced filter tiles matching Scholarships & Majors */}
+        <div className="max-w-md md:max-w-2xl mx-auto mn-inline-gutter mt-2 sm:mt-2.5 md:mt-3.5 relative z-20 pb-0 md:pb-1">
+          <div className="grid grid-cols-3 gap-2 md:gap-3.5">
+            {/* 1. تصفية */}
             <button
               type="button"
-              onClick={() => setShowAdvancedFilters((current) => !current)}
-              className={`relative border-1.5 rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer ${
-                showAdvancedFilters || advancedFiltersCount > 0
-                  ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] border-[#142B5F] text-white mn-inverse '
-                  : 'bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] mn-panel '
-              }`}
+              onClick={() => {
+                setShowAdvancedFilters((current) => {
+                  const next = !current;
+                  setOpenFilterModal(null);
+                  return next;
+                });
+              }}
+              className={`relative min-w-0 overflow-hidden bg-white dark:bg-[#111E38] hover:bg-[#F6F8FA] dark:hover:bg-[#162747] border-1.5 ${
+                showAdvancedFilters
+                  ? 'border-[#0E7C86] dark:border-[#38C6D4] ring-1 ring-[#0E7C86]/25 dark:ring-[#38C6D4]/25'
+                  : advancedFiltersCount > 0
+                    ? 'border-[#D6A43B] dark:border-[#F2CD78]/75 ring-1 ring-[#D6A43B]/25 dark:ring-[#F2CD78]/20'
+                    : 'border-[#142B5F]/18 dark:border-white/14 hover:border-[#0E7C86]/50 dark:hover:border-[#34BFC9]/45'
+              } rounded-xl sm:rounded-2xl p-1.5 sm:p-2.5 md:p-3 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(14,30,64,0.08)] transition-all h-[48px] sm:h-[62px] md:h-[70px] cursor-pointer mn-panel font-['Cairo',sans-serif]`}
             >
-              <div className="flex items-center justify-center gap-1 font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
-                <SlidersHorizontal className={`w-3.5 h-3.5 shrink-0 ${showAdvancedFilters || advancedFiltersCount > 0 ? 'text-[#F2CD78]' : 'text-[#142B5F] dark:text-[#D6A43B]'}`} />
-                <span className="truncate">{advancedFiltersCount > 0 ? publicT('public_filter_count', { v0: advancedFiltersCount }) : publicT('public_filter')}</span>
+              <div className="min-w-0 flex items-center justify-center gap-1 sm:gap-1.5 text-[#142B5F] dark:text-[#EDF5F5] font-bold text-[10px] sm:text-xs md:text-sm font-['Cairo',sans-serif] w-full">
+                <SlidersHorizontal className={`w-3.5 h-3.5 md:w-4 md:h-4 shrink-0 ${advancedFiltersCount > 0 ? 'text-[#D6A43B] dark:text-[#F2CD78]' : 'text-[#0E7C86] dark:text-[#34BFC9]'}`} />
+                <span className="min-w-0 truncate">{advancedFiltersCount > 0 ? publicT('public_filter_count', { v0: advancedFiltersCount }) : publicT('public_filter')}</span>
               </div>
-              <ChevronDown className={`w-3.5 h-3.5 mt-0.5 transition-transform ${showAdvancedFilters ? 'rotate-180' : ''} ${showAdvancedFilters || advancedFiltersCount > 0 ? 'text-white/85' : 'text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)]'}`} />
+              <ChevronDown className={`w-3.5 h-3.5 mt-0.5 shrink-0 transition-transform duration-200 ${showAdvancedFilters ? 'rotate-180 text-[#0E7C86] dark:text-[#38C6D4]' : 'text-[#5C707C] dark:text-[#9BB4C7]'}`} />
             </button>
 
             {/* 2. المنصة */}
             <button
               type="button"
-              onClick={() => setOpenFilterModal('platform')}
-              className={`relative border-1.5 rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer ${
-                openFilterModal === 'platform' || selectedPlatform !== 'all'
-                  ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] border-[#142B5F] text-white mn-inverse '
-                  : 'bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] mn-panel '
-              }`}
+              onClick={() => {
+                setShowAdvancedFilters(false);
+                setOpenFilterModal((prev) => (prev === 'platform' ? null : 'platform'));
+              }}
+              className={`relative min-w-0 overflow-hidden bg-white dark:bg-[#111E38] hover:bg-[#F6F8FA] dark:hover:bg-[#162747] border-1.5 ${
+                openFilterModal === 'platform'
+                  ? 'border-[#0E7C86] dark:border-[#38C6D4] ring-1 ring-[#0E7C86]/25 dark:ring-[#38C6D4]/25'
+                  : selectedPlatform !== 'all'
+                    ? 'border-[#D6A43B] dark:border-[#F2CD78]/75 ring-1 ring-[#D6A43B]/25 dark:ring-[#F2CD78]/20'
+                    : 'border-[#142B5F]/18 dark:border-white/14 hover:border-[#0E7C86]/50 dark:hover:border-[#34BFC9]/45'
+              } rounded-xl sm:rounded-2xl p-1.5 sm:p-2.5 md:p-3 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(14,30,64,0.08)] transition-all h-[48px] sm:h-[62px] md:h-[70px] cursor-pointer mn-panel font-['Cairo',sans-serif]`}
             >
-              <div className="flex items-center justify-center gap-1 font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
-                <Globe2 className={`w-3.5 h-3.5 shrink-0 ${openFilterModal === 'platform' || selectedPlatform !== 'all' ? 'text-[#F2CD78]' : 'text-[#142B5F] dark:text-[#D6A43B]'}`} />
-                <span className="truncate">{selectedPlatform === 'all' ? publicT('public_platform') : selectedPlatform}</span>
+              <div className="min-w-0 flex items-center justify-center gap-1 sm:gap-1.5 text-[#142B5F] dark:text-[#EDF5F5] font-bold text-[10px] sm:text-xs md:text-sm font-['Cairo',sans-serif] w-full">
+                <Globe2 className={`w-3.5 h-3.5 md:w-4 md:h-4 shrink-0 ${selectedPlatform !== 'all' ? 'text-[#D6A43B] dark:text-[#F2CD78]' : 'text-[#0E7C86] dark:text-[#34BFC9]'}`} />
+                <span className="min-w-0 truncate">{selectedPlatform === 'all' ? publicT('public_platform') : selectedPlatform}</span>
               </div>
-              <ChevronDown className={`w-3.5 h-3.5 mt-0.5 ${openFilterModal === 'platform' || selectedPlatform !== 'all' ? 'text-white/85' : 'text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)]'}`} />
+              <ChevronDown className={`w-3.5 h-3.5 mt-0.5 shrink-0 transition-transform duration-200 ${openFilterModal === 'platform' ? 'rotate-180 text-[#0E7C86] dark:text-[#38C6D4]' : 'text-[#5C707C] dark:text-[#9BB4C7]'}`} />
             </button>
 
-            {/* 3. نوع الدورة (في الأخير) */}
+            {/* 3. نوع الدورة */}
             <button
               type="button"
-              onClick={() => setOpenFilterModal('courseType')}
-              className={`relative border-1.5 rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer ${
-                openFilterModal === 'courseType' || freeCourseMode !== 'all'
-                  ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] border-[#142B5F] text-white mn-inverse '
-                  : 'bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] mn-panel '
-              }`}
+              onClick={() => {
+                setShowAdvancedFilters(false);
+                setOpenFilterModal((prev) => (prev === 'courseType' ? null : 'courseType'));
+              }}
+              className={`relative min-w-0 overflow-hidden bg-white dark:bg-[#111E38] hover:bg-[#F6F8FA] dark:hover:bg-[#162747] border-1.5 ${
+                openFilterModal === 'courseType'
+                  ? 'border-[#0E7C86] dark:border-[#38C6D4] ring-1 ring-[#0E7C86]/25 dark:ring-[#38C6D4]/25'
+                  : freeCourseMode !== 'all'
+                    ? 'border-[#D6A43B] dark:border-[#F2CD78]/75 ring-1 ring-[#D6A43B]/25 dark:ring-[#F2CD78]/20'
+                    : 'border-[#142B5F]/18 dark:border-white/14 hover:border-[#0E7C86]/50 dark:hover:border-[#34BFC9]/45'
+              } rounded-xl sm:rounded-2xl p-1.5 sm:p-2.5 md:p-3 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(14,30,64,0.08)] transition-all h-[48px] sm:h-[62px] md:h-[70px] cursor-pointer mn-panel font-['Cairo',sans-serif]`}
             >
-              <div className="flex items-center justify-center gap-1 font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
-                <Award className={`w-3.5 h-3.5 shrink-0 ${openFilterModal === 'courseType' || freeCourseMode !== 'all' ? 'text-[#F2CD78]' : 'text-[#142B5F] dark:text-[#D6A43B]'}`} />
-                <span className="truncate">{freeCourseMode === 'all' ? publicT('public_course_type') : publicT(selectedFreeCourseLabel)}</span>
+              <div className="min-w-0 flex items-center justify-center gap-1 sm:gap-1.5 text-[#142B5F] dark:text-[#EDF5F5] font-bold text-[10px] sm:text-xs md:text-sm font-['Cairo',sans-serif] w-full">
+                <Award className={`w-3.5 h-3.5 md:w-4 md:h-4 shrink-0 ${freeCourseMode !== 'all' ? 'text-[#D6A43B] dark:text-[#F2CD78]' : 'text-[#0E7C86] dark:text-[#34BFC9]'}`} />
+                <span className="min-w-0 truncate">{freeCourseMode === 'all' ? publicT('public_course_type') : publicT(selectedFreeCourseLabel)}</span>
               </div>
-              <ChevronDown className={`w-3.5 h-3.5 mt-0.5 ${openFilterModal === 'courseType' || freeCourseMode !== 'all' ? 'text-white/85' : 'text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)]'}`} />
+              <ChevronDown className={`w-3.5 h-3.5 mt-0.5 shrink-0 transition-transform duration-200 ${openFilterModal === 'courseType' ? 'rotate-180 text-[#0E7C86] dark:text-[#38C6D4]' : 'text-[#5C707C] dark:text-[#9BB4C7]'}`} />
             </button>
           </div>
-
-          <PublicFilterSelectModal
-            isOpen={openFilterModal === 'courseType'}
-            onClose={() => setOpenFilterModal(null)}
-            title={publicT('public_choose_course_type')}
-            icon={Award}
-            selectedValue={freeCourseMode}
-            onSelect={(val) => setFreeCourseMode(val as FreeCourseMode)}
-            options={FREE_COURSE_OPTIONS.map((option) => ({
-              value: option.value,
-              label: publicT(option.label),
-            }))}
-          />
-
-          <PublicFilterSelectModal
-            isOpen={openFilterModal === 'platform'}
-            onClose={() => setOpenFilterModal(null)}
-            title={publicT('public_choose_platform')}
-            icon={Globe2}
-            selectedValue={selectedPlatform}
-            onSelect={setSelectedPlatform}
-            options={[
-              { value: 'all', label: publicT('public_all_platforms') },
-              ...IMPORTED_PLATFORM_OPTIONS.map((platform) => ({
-                value: platform,
-                label: platform,
-              })),
-            ]}
-          />
-
-          <PublicFilterSelectModal
-            isOpen={openFilterModal === 'field'}
-            onClose={() => setOpenFilterModal(null)}
-            title={publicT('public_domain_or_specialization')}
-            icon={BookOpen}
-            selectedValue={selectedField}
-            onSelect={setSelectedField}
-            options={[
-              { value: 'all', label: publicT('public_all_domains_and_specializations') },
-              ...COURSE_FIELD_OPTIONS.map((field) => ({
-                value: field.value,
-                label: field.label,
-              })),
-            ]}
-          />
-
-          <PublicFilterSelectModal
-            isOpen={openFilterModal === 'language'}
-            onClose={() => setOpenFilterModal(null)}
-            title={publicT('public_language')}
-            icon={Languages}
-            selectedValue={selectedLanguage}
-            onSelect={setSelectedLanguage}
-            options={[
-              { value: 'all', label: publicT('public_all_languages') },
-              ...LANGUAGE_OPTIONS.map((language) => ({
-                value: language,
-                label: language,
-              })),
-            ]}
-          />
-
-          <PublicFilterSelectModal
-            isOpen={openFilterModal === 'level'}
-            onClose={() => setOpenFilterModal(null)}
-            title={publicT('public_level')}
-            icon={GraduationCap}
-            selectedValue={selectedLevel}
-            onSelect={setSelectedLevel}
-            options={[
-              { value: 'all', label: publicT('public_all_levels') },
-              ...LEVEL_OPTIONS.map((level) => ({
-                value: level,
-                label: level,
-              })),
-            ]}
-          />
-
-          <PublicFilterSelectModal
-            isOpen={openFilterModal === 'certificate'}
-            onClose={() => setOpenFilterModal(null)}
-            title={publicT('public_certificate_type')}
-            icon={Award}
-            selectedValue={selectedCertificate}
-            onSelect={setSelectedCertificate}
-            options={[
-              { value: 'all', label: publicT('public_all_certificate_types') },
-              ...CERTIFICATE_OPTIONS.map((certificate) => ({
-                value: certificate,
-                label: certificate,
-              })),
-            ]}
-          />
-
-          {/* Hidden-by-default advanced filters: opened from the first tile (تصفية) */}
-          {showAdvancedFilters && (
-            <div className="mt-2.5 rounded-2xl border border-[#142B5F]/35 dark:border-[var(--mn-accent)]/45 bg-[var(--mn-surface)] p-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.07)] font-['Cairo',sans-serif] mn-panel ">
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setOpenFilterModal('field')}
-                  className={`relative flex min-h-[50px] items-center justify-between rounded-xl border px-2.5 pr-8 cursor-pointer font-['Cairo',sans-serif] transition-all ${
-                    openFilterModal === 'field' || selectedField !== 'all'
-                      ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] border-[#142B5F] text-white shadow-2xs'
-                      : 'border-[var(--mn-border)] bg-[var(--mn-page)] text-[var(--mn-heading)] hover:border-[#142B5F]/50 mn-panel'
-                  }`}
-                >
-                  <BookOpen className={`absolute right-2.5 w-3.5 h-3.5 ${openFilterModal === 'field' || selectedField !== 'all' ? 'text-[#F2CD78]' : 'text-[#142B5F] dark:text-[#F2CD78]'}`} />
-                  <span className="truncate text-[11px] sm:text-xs font-bold font-['Cairo',sans-serif]">{selectedField === 'all' ? publicT('public_domain_or_specialization') : COURSE_FIELD_OPTIONS.find(option => option.value === selectedField)?.label || initialField}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setOpenFilterModal('language')}
-                  className={`relative flex min-h-[50px] items-center justify-between rounded-xl border px-2.5 pr-8 cursor-pointer font-['Cairo',sans-serif] transition-all ${
-                    openFilterModal === 'language' || selectedLanguage !== 'all'
-                      ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] border-[#142B5F] text-white shadow-2xs'
-                      : 'border-[var(--mn-border)] bg-[var(--mn-page)] text-[var(--mn-heading)] hover:border-[#142B5F]/50 mn-panel'
-                  }`}
-                >
-                  <Languages className={`absolute right-2.5 w-3.5 h-3.5 ${openFilterModal === 'language' || selectedLanguage !== 'all' ? 'text-[#F2CD78]' : 'text-[#142B5F] dark:text-[#F2CD78]'}`} />
-                  <span className="truncate text-[11px] sm:text-xs font-bold font-['Cairo',sans-serif]">{selectedLanguage === 'all' ? publicT('public_language') : selectedLanguage}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setOpenFilterModal('level')}
-                  className={`relative flex min-h-[50px] items-center justify-between rounded-xl border px-2.5 pr-8 cursor-pointer font-['Cairo',sans-serif] transition-all ${
-                    openFilterModal === 'level' || selectedLevel !== 'all'
-                      ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] border-[#142B5F] text-white shadow-2xs'
-                      : 'border-[var(--mn-border)] bg-[var(--mn-page)] text-[var(--mn-heading)] hover:border-[#142B5F]/50 mn-panel'
-                  }`}
-                >
-                  <GraduationCap className={`absolute right-2.5 w-3.5 h-3.5 ${openFilterModal === 'level' || selectedLevel !== 'all' ? 'text-[#F2CD78]' : 'text-[#142B5F] dark:text-[#F2CD78]'}`} />
-                  <span className="truncate text-[11px] sm:text-xs font-bold font-['Cairo',sans-serif]">{selectedLevel === 'all' ? publicT('public_level') : selectedLevel}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setOpenFilterModal('certificate')}
-                  className={`relative flex min-h-[50px] items-center justify-between rounded-xl border px-2.5 pr-8 cursor-pointer font-['Cairo',sans-serif] transition-all ${
-                    openFilterModal === 'certificate' || selectedCertificate !== 'all'
-                      ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] border-[#142B5F] text-white shadow-2xs'
-                      : 'border-[var(--mn-border)] bg-[var(--mn-page)] text-[var(--mn-heading)] hover:border-[#142B5F]/50 mn-panel'
-                  }`}
-                >
-                  <Award className={`absolute right-2.5 w-3.5 h-3.5 ${openFilterModal === 'certificate' || selectedCertificate !== 'all' ? 'text-[#F2CD78]' : 'text-[#142B5F] dark:text-[#F2CD78]'}`} />
-                  <span className="truncate text-[11px] sm:text-xs font-bold font-['Cairo',sans-serif]">{selectedCertificate === 'all' ? publicT('public_certificate_type') : selectedCertificate}</span>
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Gold Divider Ribbon Line */}
-      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--mn-accent-text)] via-[var(--mn-accent-soft)] to-[var(--mn-accent-text)] shadow-xs mb-1" />
+      {/* Official Gold Divider Ribbon */}
+      <div className="w-full h-[1.5px] bg-gradient-to-r from-[#D6A43B]/45 via-[#F2CD78] to-[#D6A43B]/45 dark:from-[#D6A43B]/30 dark:via-[#F2CD78]/65 dark:to-[#D6A43B]/30 mb-3 md:mb-5" />
+
+      {/* Inline Attached Quick Filter Panels */}
+      <PublicInlineFilterPanel
+        isOpen={!showAdvancedFilters && openFilterModal === 'platform'}
+        onClose={() => setOpenFilterModal(null)}
+        title={publicT('public_choose_platform')}
+        icon={Globe2}
+        selectedValue={selectedPlatform}
+        onSelect={setSelectedPlatform}
+        dir={publicDir}
+        options={[
+          { value: 'all', label: publicT('public_all_platforms') },
+          ...IMPORTED_PLATFORM_OPTIONS.map((platform) => ({
+            value: platform,
+            label: platform,
+          })),
+        ]}
+      />
+
+      <PublicInlineFilterPanel
+        isOpen={!showAdvancedFilters && openFilterModal === 'courseType'}
+        onClose={() => setOpenFilterModal(null)}
+        title={publicT('public_choose_course_type')}
+        icon={Award}
+        selectedValue={freeCourseMode}
+        onSelect={(val) => setFreeCourseMode(val as FreeCourseMode)}
+        dir={publicDir}
+        options={FREE_COURSE_OPTIONS.map((option) => ({
+          value: option.value,
+          label: publicT(option.label),
+        }))}
+      />
+
+      {/* Inline Attached Smart Advanced Filter Panel (Collapsed Accordions by Default) */}
+      {showAdvancedFilters && (
+        <div className="w-full max-w-4xl md:max-w-[1120px] lg:max-w-[1160px] mx-auto px-1.5 sm:px-2 md:px-4 -mt-1.5 sm:-mt-2.5 mb-2.5 sm:mb-3">
+          <div className="relative overflow-hidden bg-white dark:bg-[#111E38] border border-[#142B5F]/10 dark:border-white/10 rounded-xl shadow-[0_1px_6px_rgba(20,43,95,0.035)] dark:shadow-[0_2px_10px_rgba(0,0,0,0.2)] px-2.5 py-2 sm:px-3.5 sm:py-2.5 font-['Cairo',sans-serif] mn-panel">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#0E7C86]/45 to-transparent"
+            />
+            <div className="flex items-center justify-between gap-2 pb-1.5 mb-1.5 border-b border-[#142B5F]/8 dark:border-white/8">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="relative w-6 h-6 rounded-md bg-[#142B5F] text-[#F2CD78] flex items-center justify-center shrink-0 overflow-hidden">
+                  <span aria-hidden="true" className="pointer-events-none absolute top-0 right-0 w-1.5 h-1.5 bg-[#D6A43B] rounded-bl-[3px]" />
+                  <SlidersHorizontal className="w-3 h-3 relative z-10" />
+                </span>
+                <h4 className="text-[11px] sm:text-[12px] font-extrabold text-[#142B5F] dark:text-[#F1F5F9] truncate">
+                  {publicT('public_filter')}
+                </h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAdvancedFilters(false);
+                  setOpenFilterModal(null);
+                }}
+                aria-label={publicT('public_close')}
+                className="w-6 h-6 !min-h-[24px] rounded-md bg-[#F6F8FA] dark:bg-[#0B1529] border border-[#142B5F]/10 dark:border-white/10 text-[#142B5F] dark:text-[#EDF5F5] hover:border-[#0E7C86] hover:text-[#0E7C86] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+
+            <div className="space-y-1.5">
+              {/* Field Accordion */}
+              <div className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => setOpenFilterModal((prev) => (prev === 'field' ? null : 'field'))}
+                  className={`w-full !min-h-[34px] flex items-center justify-between gap-2 py-1.5 px-2.5 rounded-lg border transition-colors cursor-pointer ${
+                    openFilterModal === 'field'
+                      ? 'bg-gradient-to-l from-[#142B5F] via-[#133A6A] to-[#0E7C86] text-white border-transparent'
+                      : 'bg-[#F6F8FA] dark:bg-[#0B1529]/80 hover:bg-white dark:hover:bg-[#162747] text-[#142B5F] dark:text-[#EDF5F5] border-[#142B5F]/8 dark:border-white/8'
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5 min-w-0">
+                    <BookOpen className={`w-3.5 h-3.5 shrink-0 ${openFilterModal === 'field' ? 'text-[#F2CD78]' : 'text-[#0E7C86] dark:text-[#38C6D4]'}`} />
+                    <span className="text-[10.5px] sm:text-[11px] font-bold truncate">{publicT('public_domain_or_specialization')}</span>
+                  </span>
+                  <span className="flex items-center gap-1.5 shrink-0">
+                    {selectedField !== 'all' && (
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded truncate max-w-[90px] ${openFilterModal === 'field' ? 'bg-white/15 text-[#F2CD78]' : 'bg-[#0E7C86]/10 text-[#0E7C86] dark:bg-[#38C6D4]/15 dark:text-[#38C6D4]'}`}>
+                        {COURSE_FIELD_OPTIONS.find((option) => option.value === selectedField)?.label || selectedField}
+                      </span>
+                    )}
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${openFilterModal === 'field' ? 'rotate-180 text-[#F2CD78]' : 'text-[#5C707C] dark:text-[#9BB4C7]'}`} />
+                  </span>
+                </button>
+                {openFilterModal === 'field' && (
+                  <div className="rounded-lg bg-[#F6F8FA] dark:bg-[#0B1529]/65 border border-[#142B5F]/8 dark:border-white/8 p-1.5">
+                    <div className="max-h-[188px] overflow-y-auto overscroll-contain grid grid-cols-1 sm:grid-cols-2 gap-1.5 py-0.5 pe-0.5" style={{ scrollbarWidth: 'thin', scrollbarColor: '#0E7C86 transparent' }}>
+                      {[{ value: 'all', label: publicT('public_all_domains_and_specializations') }, ...COURSE_FIELD_OPTIONS].map((opt) => {
+                        const isSelected = selectedField === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => {
+                              setSelectedField(opt.value);
+                              setOpenFilterModal(null);
+                            }}
+                            className={`min-w-0 w-full overflow-hidden !min-h-[34px] flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-md text-[10px] sm:text-[10.5px] font-bold transition-colors cursor-pointer text-start ${
+                              isSelected
+                                ? 'bg-gradient-to-l from-[#142B5F] via-[#133A6A] to-[#0E7C86] text-white'
+                                : 'bg-white dark:bg-[#111E38] hover:border-[#0E7C86]/40 text-[#142B5F] dark:text-[#E2ECF4] border border-[#142B5F]/8 dark:border-white/8'
+                            }`}
+                          >
+                            <span className="min-w-0 flex-1 leading-snug break-words">{opt.label}</span>
+                            {isSelected ? <Check className="w-3 h-3 text-[#38C6D4] shrink-0" /> : <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#142B5F]/18 dark:bg-white/20" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Language Accordion */}
+              <div className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => setOpenFilterModal((prev) => (prev === 'language' ? null : 'language'))}
+                  className={`w-full !min-h-[34px] flex items-center justify-between gap-2 py-1.5 px-2.5 rounded-lg border transition-colors cursor-pointer ${
+                    openFilterModal === 'language'
+                      ? 'bg-gradient-to-l from-[#142B5F] via-[#133A6A] to-[#0E7C86] text-white border-transparent'
+                      : 'bg-[#F6F8FA] dark:bg-[#0B1529]/80 hover:bg-white dark:hover:bg-[#162747] text-[#142B5F] dark:text-[#EDF5F5] border-[#142B5F]/8 dark:border-white/8'
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5 min-w-0">
+                    <Languages className={`w-3.5 h-3.5 shrink-0 ${openFilterModal === 'language' ? 'text-[#F2CD78]' : 'text-[#0E7C86] dark:text-[#38C6D4]'}`} />
+                    <span className="text-[10.5px] sm:text-[11px] font-bold truncate">{publicT('public_language')}</span>
+                  </span>
+                  <span className="flex items-center gap-1.5 shrink-0">
+                    {selectedLanguage !== 'all' && (
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded truncate max-w-[90px] ${openFilterModal === 'language' ? 'bg-white/15 text-[#F2CD78]' : 'bg-[#0E7C86]/10 text-[#0E7C86] dark:bg-[#38C6D4]/15 dark:text-[#38C6D4]'}`}>
+                        {selectedLanguage}
+                      </span>
+                    )}
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${openFilterModal === 'language' ? 'rotate-180 text-[#F2CD78]' : 'text-[#5C707C] dark:text-[#9BB4C7]'}`} />
+                  </span>
+                </button>
+                {openFilterModal === 'language' && (
+                  <div className="rounded-lg bg-[#F6F8FA] dark:bg-[#0B1529]/65 border border-[#142B5F]/8 dark:border-white/8 p-1.5">
+                    <div className="max-h-[188px] overflow-y-auto overscroll-contain grid grid-cols-2 sm:grid-cols-3 gap-1.5 py-0.5 pe-0.5" style={{ scrollbarWidth: 'thin', scrollbarColor: '#0E7C86 transparent' }}>
+                      {[{ value: 'all', label: publicT('public_all_languages') }, ...LANGUAGE_OPTIONS.map((language) => ({ value: language, label: language }))].map((opt) => {
+                        const isSelected = selectedLanguage === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => {
+                              setSelectedLanguage(opt.value);
+                              setOpenFilterModal(null);
+                            }}
+                            className={`min-w-0 w-full overflow-hidden !min-h-[32px] flex items-center justify-between gap-1 px-2 py-1 rounded-md text-[10px] sm:text-[10.5px] font-bold transition-colors cursor-pointer text-start ${
+                              isSelected
+                                ? 'bg-gradient-to-l from-[#142B5F] via-[#133A6A] to-[#0E7C86] text-white'
+                                : 'bg-white dark:bg-[#111E38] hover:border-[#0E7C86]/40 text-[#142B5F] dark:text-[#E2ECF4] border border-[#142B5F]/8 dark:border-white/8'
+                            }`}
+                          >
+                            <span className="min-w-0 flex-1 leading-snug break-words">{opt.label}</span>
+                            {isSelected ? <Check className="w-3 h-3 text-[#38C6D4] shrink-0" /> : <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#142B5F]/18 dark:bg-white/20" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Level Accordion */}
+              <div className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => setOpenFilterModal((prev) => (prev === 'level' ? null : 'level'))}
+                  className={`w-full !min-h-[34px] flex items-center justify-between gap-2 py-1.5 px-2.5 rounded-lg border transition-colors cursor-pointer ${
+                    openFilterModal === 'level'
+                      ? 'bg-gradient-to-l from-[#142B5F] via-[#133A6A] to-[#0E7C86] text-white border-transparent'
+                      : 'bg-[#F6F8FA] dark:bg-[#0B1529]/80 hover:bg-white dark:hover:bg-[#162747] text-[#142B5F] dark:text-[#EDF5F5] border-[#142B5F]/8 dark:border-white/8'
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5 min-w-0">
+                    <GraduationCap className={`w-3.5 h-3.5 shrink-0 ${openFilterModal === 'level' ? 'text-[#F2CD78]' : 'text-[#0E7C86] dark:text-[#38C6D4]'}`} />
+                    <span className="text-[10.5px] sm:text-[11px] font-bold truncate">{publicT('public_level')}</span>
+                  </span>
+                  <span className="flex items-center gap-1.5 shrink-0">
+                    {selectedLevel !== 'all' && (
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded truncate max-w-[90px] ${openFilterModal === 'level' ? 'bg-white/15 text-[#F2CD78]' : 'bg-[#0E7C86]/10 text-[#0E7C86] dark:bg-[#38C6D4]/15 dark:text-[#38C6D4]'}`}>
+                        {selectedLevel}
+                      </span>
+                    )}
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${openFilterModal === 'level' ? 'rotate-180 text-[#F2CD78]' : 'text-[#5C707C] dark:text-[#9BB4C7]'}`} />
+                  </span>
+                </button>
+                {openFilterModal === 'level' && (
+                  <div className="rounded-lg bg-[#F6F8FA] dark:bg-[#0B1529]/65 border border-[#142B5F]/8 dark:border-white/8 p-1.5">
+                    <div className="max-h-[188px] overflow-y-auto overscroll-contain grid grid-cols-2 sm:grid-cols-3 gap-1.5 py-0.5 pe-0.5" style={{ scrollbarWidth: 'thin', scrollbarColor: '#0E7C86 transparent' }}>
+                      {[{ value: 'all', label: publicT('public_all_levels') }, ...LEVEL_OPTIONS.map((level) => ({ value: level, label: level }))].map((opt) => {
+                        const isSelected = selectedLevel === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => {
+                              setSelectedLevel(opt.value);
+                              setOpenFilterModal(null);
+                            }}
+                            className={`min-w-0 w-full overflow-hidden !min-h-[32px] flex items-center justify-between gap-1 px-2 py-1 rounded-md text-[10px] sm:text-[10.5px] font-bold transition-colors cursor-pointer text-start ${
+                              isSelected
+                                ? 'bg-gradient-to-l from-[#142B5F] via-[#133A6A] to-[#0E7C86] text-white'
+                                : 'bg-white dark:bg-[#111E38] hover:border-[#0E7C86]/40 text-[#142B5F] dark:text-[#E2ECF4] border border-[#142B5F]/8 dark:border-white/8'
+                            }`}
+                          >
+                            <span className="min-w-0 flex-1 leading-snug break-words">{opt.label}</span>
+                            {isSelected ? <Check className="w-3 h-3 text-[#38C6D4] shrink-0" /> : <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#142B5F]/18 dark:bg-white/20" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Certificate Accordion */}
+              <div className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => setOpenFilterModal((prev) => (prev === 'certificate' ? null : 'certificate'))}
+                  className={`w-full !min-h-[34px] flex items-center justify-between gap-2 py-1.5 px-2.5 rounded-lg border transition-colors cursor-pointer ${
+                    openFilterModal === 'certificate'
+                      ? 'bg-gradient-to-l from-[#142B5F] via-[#133A6A] to-[#0E7C86] text-white border-transparent'
+                      : 'bg-[#F6F8FA] dark:bg-[#0B1529]/80 hover:bg-white dark:hover:bg-[#162747] text-[#142B5F] dark:text-[#EDF5F5] border-[#142B5F]/8 dark:border-white/8'
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5 min-w-0">
+                    <Award className={`w-3.5 h-3.5 shrink-0 ${openFilterModal === 'certificate' ? 'text-[#F2CD78]' : 'text-[#0E7C86] dark:text-[#38C6D4]'}`} />
+                    <span className="text-[10.5px] sm:text-[11px] font-bold truncate">{publicT('public_certificate_type')}</span>
+                  </span>
+                  <span className="flex items-center gap-1.5 shrink-0">
+                    {selectedCertificate !== 'all' && (
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded truncate max-w-[90px] ${openFilterModal === 'certificate' ? 'bg-white/15 text-[#F2CD78]' : 'bg-[#0E7C86]/10 text-[#0E7C86] dark:bg-[#38C6D4]/15 dark:text-[#38C6D4]'}`}>
+                        {selectedCertificate}
+                      </span>
+                    )}
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${openFilterModal === 'certificate' ? 'rotate-180 text-[#F2CD78]' : 'text-[#5C707C] dark:text-[#9BB4C7]'}`} />
+                  </span>
+                </button>
+                {openFilterModal === 'certificate' && (
+                  <div className="rounded-lg bg-[#F6F8FA] dark:bg-[#0B1529]/65 border border-[#142B5F]/8 dark:border-white/8 p-1.5">
+                    <div className="max-h-[188px] overflow-y-auto overscroll-contain grid grid-cols-1 sm:grid-cols-2 gap-1.5 py-0.5 pe-0.5" style={{ scrollbarWidth: 'thin', scrollbarColor: '#0E7C86 transparent' }}>
+                      {[{ value: 'all', label: publicT('public_all_certificate_types') }, ...CERTIFICATE_OPTIONS.map((certificate) => ({ value: certificate, label: certificate }))].map((opt) => {
+                        const isSelected = selectedCertificate === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => {
+                              setSelectedCertificate(opt.value);
+                              setOpenFilterModal(null);
+                            }}
+                            className={`min-w-0 w-full overflow-hidden !min-h-[34px] flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-md text-[10px] sm:text-[10.5px] font-bold transition-colors cursor-pointer text-start ${
+                              isSelected
+                                ? 'bg-gradient-to-l from-[#142B5F] via-[#133A6A] to-[#0E7C86] text-white'
+                                : 'bg-white dark:bg-[#111E38] hover:border-[#0E7C86]/40 text-[#142B5F] dark:text-[#E2ECF4] border border-[#142B5F]/8 dark:border-white/8'
+                            }`}
+                          >
+                            <span className="min-w-0 flex-1 leading-snug break-words">{opt.label}</span>
+                            {isSelected ? <Check className="w-3 h-3 text-[#38C6D4] shrink-0" /> : <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#142B5F]/18 dark:bg-white/20" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* External Course Cards */}
       {visibleImportedCourses.length > 0 ? (
-        <section className="max-w-lg md:max-w-[1120px] lg:max-w-[1160px] mx-auto mn-inline-gutter pt-2 md:pt-5 pb-5 space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 items-stretch">
-          {paginatedImportedCourses.map((course) => {
-            const { titleAr, titleEn } = resolveCourseBilingualTitle(course);
-            const certificateLabel = course.freeCertificate
-              ? 'شهادة مجانية'
-              : 'بدون شهادة مجانية';
+        <section className="max-w-4xl md:max-w-[1120px] lg:max-w-[1160px] mx-auto px-1 sm:px-2 md:px-4 pt-1 pb-5 space-y-3 md:space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-1.5 text-[#142B5F] dark:text-[#EDF5F5] font-semibold text-xs sm:text-sm md:text-base font-['Cairo',sans-serif]">
+              <BookOpen className="w-3.5 h-3.5 md:w-4.5 md:h-4.5 text-[#0E7C86] dark:text-[#34BFC9]" />
+              <span>{publicT('public_courses')} ({visibleImportedCourses.length})</span>
+            </div>
+            <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] md:text-xs font-bold text-[#0E7C86] dark:text-[#7FD4DE] bg-[#DDEFF2]/85 dark:bg-[#0E7C86]/20 px-2.5 md:px-3 py-0.5 md:py-1 rounded-full border border-[#0E7C86]/20 dark:border-[#34BFC9]/25 font-['Cairo',sans-serif]">
+              <Globe2 className="w-2.5 h-2.5 md:w-3 md:h-3 text-[#0E7C86] dark:text-[#34BFC9]" />
+              <span>{publicT('public_global_platforms')}</span>
+            </span>
+          </div>
 
-            return (
-              <article
-                key={course.id}
-                onClick={() => onSelectCourse?.(course)}
-                className="group relative overflow-hidden rounded-[22px] border border-[#142B5F]/65 dark:border-[#D6A43B]/60 hover:border-[#142B5F] bg-[var(--mn-surface)] shadow-[0_8px_24px_rgba(20,43,95,0.08)] transition-all duration-150 cursor-pointer h-full flex flex-col justify-between mn-panel"
-              >
-                {/* Top Thin Navy-only Accent Line */}
-                <div className="absolute inset-x-0 top-0 h-[2px] bg-[#142B5F]" />
+          <div className="flex flex-col gap-2.5 sm:gap-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 items-stretch">
+            {paginatedImportedCourses.map((course) => {
+              const { titleAr, titleEn } = resolveCourseBilingualTitle(course);
+              const certificateLabel = course.freeCertificate
+                ? 'شهادة مجانية'
+                : 'بدون شهادة مجانية';
 
-                {/* Subtle Right Accent Bar on Hover */}
-                <div className="absolute top-0 right-0 w-1.5 h-full bg-gradient-to-b from-[#142B5F] dark:from-[#D6A43B] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                <div className="p-3 pt-3.5 md:p-4 flex-1 flex flex-col justify-between">
-                  {/* Header Row: Circular Provider Logo + Arabic Title & English Subtitle + Favorite Button */}
-                  <div className="flex items-start justify-between gap-2.5">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      {/* Circular Provider Emblem with Thin Navy Circle Frame */}
-                      <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-full overflow-hidden bg-[var(--mn-surface)] border border-[#142B5F]/80 shadow-2xs shrink-0 flex items-center justify-center">
+              return (
+                <article
+                  key={course.id}
+                  onClick={() => onSelectCourse?.(course)}
+                  className="group relative overflow-hidden rounded-r-[4px] rounded-l-2xl border border-[#142B5F]/12 dark:border-white/10 border-r-3 border-r-[#142B5F] dark:border-r-[#F2CD78]/85 hover:border-[#142B5F]/28 dark:hover:border-[#F2CD78]/45 bg-white dark:bg-[#111E38] shadow-[0_4px_16px_rgba(20,43,95,0.04)] hover:shadow-[0_8px_24px_rgba(20,43,95,0.08)] dark:shadow-[0_6px_20px_rgba(0,0,0,0.28)] transition-all duration-150 active:scale-[0.985] cursor-pointer h-full flex flex-col justify-between p-2.5 sm:p-3 md:p-4 gap-2 sm:gap-2.5 mn-panel"
+                >
+                  {/* Header Row: Circular Natural Provider Logo + Title + Favorite */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden bg-white border border-[#142B5F]/18 dark:border-white/15 shadow-2xs shrink-0 flex items-center justify-center">
                         <CourseProviderLogo provider={course.provider} className="w-full h-full" />
                       </div>
 
-                      {/* Course Name in Arabic on top, English underneath */}
                       <div className="min-w-0 flex-1 text-start">
-                        <h2 className="line-clamp-2 text-[13.5px] sm:text-[14.5px] font-bold leading-snug text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-['Cairo',sans-serif]">
+                        <h2 className="line-clamp-2 text-[11.5px] sm:text-[12.5px] md:text-[14px] font-bold leading-snug text-[#142B5F] dark:text-[#F1F5F9] font-['Cairo',sans-serif]">
                           {titleAr}
                         </h2>
                         <p
                           dir="ltr"
-                          className="mt-0.5 truncate text-[11px] sm:text-[11.5px] font-semibold text-[var(--mn-text-muted)] font-['Cairo',sans-serif] text-end"
+                          className="mt-0.5 truncate text-[10px] sm:text-[11px] font-medium text-[#5C707C] dark:text-[#9BB4C7] font-['Cairo',sans-serif] text-end"
                         >
                           {titleEn}
                         </p>
                       </div>
                     </div>
 
-                    {/* Favorite Button */}
                     {onToggleFavorite && (
                       <div className="shrink-0">
                         <FavoriteButton
@@ -748,111 +891,98 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
                     )}
                   </div>
 
-                  {/* Sleek Provider & Domain Ribbon (المكان المخصص للمزود والمجال) */}
-                  <div className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-muted)]/70 px-2.5 py-1.5">
+                  {/* Provider & Domain Ribbon */}
+                  <div className="flex items-center justify-between gap-2 rounded-lg border border-[#142B5F]/8 dark:border-white/8 bg-[#F6F8FA] dark:bg-[#0B1529]/85 px-2.5 py-1.5">
                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                      <Layers3 className="h-3.5 w-3.5 shrink-0 text-[#142B5F] dark:text-[#F2CD78]" />
-                      <span className="truncate text-[10px] sm:text-[10.5px] font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">
+                      <Layers3 className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#34BFC9]" />
+                      <span className="truncate text-[10px] sm:text-[10.5px] font-bold text-[#203442] dark:text-[#DCE7F0] font-['Cairo',sans-serif]">
                         {course.field}
                       </span>
                     </div>
 
                     <div
                       dir={HAS_ARABIC_REGEX.test(course.provider || '') ? 'rtl' : 'ltr'}
-                      className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-[#142B5F]/20 dark:border-[#D6A43B]/35 bg-[var(--mn-surface)] px-2.5 py-0.5 shadow-2xs"
+                      className="shrink-0 inline-flex items-center gap-1 rounded-md border border-[#0E7C86]/20 dark:border-[#34BFC9]/25 bg-white dark:bg-[#111E38] px-2 py-0.5"
                     >
-                      <Building2 className="h-3 w-3 shrink-0 text-[#142B5F] dark:text-[#F2CD78]" />
-                      <span className="text-[9.5px] sm:text-[10px] font-bold text-[#142B5F] dark:text-[#D6A43B] font-['Cairo',sans-serif]">
+                      <Building2 className="h-3 w-3 shrink-0 text-[#0E7C86] dark:text-[#34BFC9]" />
+                      <span className="text-[9.5px] sm:text-[10px] font-bold text-[#142B5F] dark:text-[#EDF5F5] font-['Cairo',sans-serif]">
                         {course.provider}
                       </span>
                     </div>
                   </div>
 
-                  {/* 2×2 Compact Single-Line Info Grid with Right-Aligned Parallel Icons */}
-                  <div className="mt-2 grid grid-cols-2 gap-1.5">
-                    {/* Box 1: اللغة */}
-                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-3 pl-2 py-1.5 flex items-center justify-start gap-1.5 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel">
-                      <Languages className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#239BA6]" />
-                      <span className="truncate">
-                        {course.language}
-                      </span>
+                  {/* 2×2 Compact Info Grid */}
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <div className="min-w-0 overflow-hidden bg-[#F6F8FA] dark:bg-[#0B1529]/85 border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center justify-start gap-1.5 text-[9.5px] sm:text-[10.5px] font-bold text-[#203442] dark:text-[#DCE7F0] font-['Cairo',sans-serif] mn-panel">
+                      <Languages className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#34BFC9]" />
+                      <span className="min-w-0 leading-tight line-clamp-2 break-words">{course.language}</span>
                     </div>
 
-                    {/* Box 2: المستوى */}
-                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-3 pl-2 py-1.5 flex items-center justify-start gap-1.5 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel">
-                      <GraduationCap className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#239BA6]" />
-                      <span className="truncate">
-                        {course.level}
-                      </span>
+                    <div className="min-w-0 overflow-hidden bg-[#F6F8FA] dark:bg-[#0B1529]/85 border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center justify-start gap-1.5 text-[9.5px] sm:text-[10.5px] font-bold text-[#203442] dark:text-[#DCE7F0] font-['Cairo',sans-serif] mn-panel">
+                      <GraduationCap className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#34BFC9]" />
+                      <span className="min-w-0 leading-tight line-clamp-2 break-words">{course.level}</span>
                     </div>
 
-                    {/* Box 3: دورة مجانية */}
-                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-3 pl-2 py-1.5 flex items-center justify-start gap-1.5 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel">
-                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#239BA6]" />
-                      <span className="truncate">
-                        {course.studyFree ? 'دورة مجانية' : 'دورة مدفوعة'}
-                      </span>
+                    <div className="min-w-0 overflow-hidden bg-[#F6F8FA] dark:bg-[#0B1529]/85 border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center justify-start gap-1.5 text-[9.5px] sm:text-[10.5px] font-bold text-[#203442] dark:text-[#DCE7F0] font-['Cairo',sans-serif] mn-panel">
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#34BFC9]" />
+                      <span className="min-w-0 leading-tight line-clamp-2 break-words">{course.studyFree ? 'دورة مجانية' : 'دورة مدفوعة'}</span>
                     </div>
 
-                    {/* Box 4: شهادة مجانية */}
-                    <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-3 pl-2 py-1.5 flex items-center justify-start gap-1.5 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel">
-                      <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#239BA6]" />
-                      <span className="truncate">
-                        {certificateLabel}
-                      </span>
+                    <div className="min-w-0 overflow-hidden bg-[#F6F8FA] dark:bg-[#0B1529]/85 border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center justify-start gap-1.5 text-[9.5px] sm:text-[10.5px] font-bold text-[#203442] dark:text-[#DCE7F0] font-['Cairo',sans-serif] mn-panel">
+                      <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#34BFC9]" />
+                      <span className="min-w-0 leading-tight line-clamp-2 break-words">{certificateLabel}</span>
                     </div>
                   </div>
 
-                  {/* Bottom CTA Button (Navy-to-Petrol Gradient) */}
-                  <div className="mt-3 border-t border-[var(--mn-border)] pt-2.5">
+                  {/* Bottom Action Row */}
+                  <div className="pt-1.5 border-t border-[#142B5F]/8 dark:border-white/8 flex items-center justify-between gap-2">
+                    {course.duration ? (
+                      <span className="inline-flex items-center gap-1 rounded-lg bg-[#F6F8FA] dark:bg-[#0B1529]/85 border border-[#142B5F]/8 dark:border-white/8 px-2.5 py-1 text-[10px] font-bold text-[#5C707C] dark:text-[#9BB4C7] font-['Cairo',sans-serif]">
+                        <Clock3 className="h-3 w-3 shrink-0 text-[#0E7C86] dark:text-[#34BFC9]" />
+                        <span>{course.duration}</span>
+                      </span>
+                    ) : (
+                      <span />
+                    )}
+
                     <button
                       type="button"
                       onClick={(event) => {
                         event.stopPropagation();
                         onSelectCourse?.(course);
                       }}
-                      className="flex w-full items-center justify-between rounded-xl bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] px-3.5 py-2.5 text-white shadow-sm transition-transform active:scale-[0.99] mn-inverse cursor-pointer"
+                      className="bg-[#142B5F] hover:bg-[#0E7C86] dark:bg-[#162A52] dark:hover:bg-[#1C3566] text-white dark:text-[#F2CD78] border border-transparent dark:border-[#F2CD78]/35 rounded-lg px-3 py-1.5 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs mn-inverse"
                     >
-                      <div className="flex items-center">
-                        {course.duration && (
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-2.5 py-0.5 text-[10px] font-bold text-[var(--mn-accent-soft)] font-['Cairo',sans-serif]">
-                            <Clock3 className="h-3 w-3 shrink-0" />
-                            <span>{course.duration}</span>
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[11.5px] font-bold font-['Cairo',sans-serif]">
-                          {publicT('public_view_details')}
-                        </span>
-                        <ArrowLeft className="h-4 w-4 text-[var(--mn-accent-soft)]" />
-                      </div>
+                      <span className="text-[10px] sm:text-[11px] font-bold font-['Cairo',sans-serif] text-white dark:text-[#F2CD78]">
+                        {publicT('public_view_details')}
+                      </span>
+                      <ChevronLeft className="h-3.5 w-3.5 rotate-180 text-[#F2CD78]" />
                     </button>
                   </div>
-                </div>
-              </article>
-            );
-          })}
+                </article>
+              );
+            })}
 
-          <div className="col-span-full">
-            <PublicCardsPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              dir={publicDir}
-            />
+            <div className="col-span-full">
+              <PublicCardsPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => {
+                  setCurrentPage(page);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                dir={publicDir}
+              />
+            </div>
           </div>
         </section>
       ) : (
-        <div className="max-w-lg md:max-w-[1120px] lg:max-w-[1160px] mx-auto mn-inline-gutter pt-2 pb-5">
-          <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-5 text-center text-[11px] font-bold text-[var(--mn-text-muted)] shadow-sm mn-panel ">{publicT('public_no_courses_match_the_current_filters')}</div>
+        <div className="max-w-4xl md:max-w-[1120px] lg:max-w-[1160px] mx-auto px-1 sm:px-2 md:px-4 pt-2 pb-5">
+          <div className="rounded-2xl border border-[#142B5F]/12 dark:border-white/10 bg-white dark:bg-[#111E38] p-5 text-center text-[11px] font-bold text-[#5C707C] dark:text-[#9BB4C7] shadow-sm mn-panel ">
+            {publicT('public_no_courses_match_the_current_filters')}
+          </div>
         </div>
       )}
-
-      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--mn-accent-text)] via-[var(--mn-accent-soft)] to-[var(--mn-accent-text)] shadow-xs" />
     </div>
   );
 };

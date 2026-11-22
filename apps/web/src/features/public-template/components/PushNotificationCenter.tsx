@@ -353,7 +353,10 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
               >
                 <div
                   className="absolute inset-y-0 rounded-full bg-[linear-gradient(90deg,#142B5F_0%,#142B5F_42%,#0E7C86_100%)] dark:from-[#F2CD78] dark:to-[#0E7C86] transition-all duration-150"
-                  data-mn-width={Math.round(Math.max(0, Math.min(100, Number(tabsScrollMeta.thumbWidthPct) || 0)))} data-mn-right={Math.round(Math.max(0, Math.min(100, Number(tabsScrollMeta.thumbRightPct) || 0)))}
+                  style={{
+                    width: `${tabsScrollMeta.thumbWidthPct}%`,
+                    right: `${tabsScrollMeta.thumbRightPct}%`,
+                  }}
                 />
               </div>
             </div>
@@ -368,7 +371,10 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
                 >
                   <div
                     className="absolute inset-x-0 rounded-full bg-gradient-to-b from-[#0E7C86] to-[#142B5F] dark:from-[#F2CD78] dark:to-[#0E7C86] transition-all duration-75"
-                    data-mn-height={Math.round(Math.max(0, Math.min(100, Number(scrollMeta.thumbHeightPct) || 0)))} data-mn-top={Math.round(Math.max(0, Math.min(100, Number(scrollMeta.thumbTopPct) || 0)))}
+                    style={{
+                      height: `${scrollMeta.thumbHeightPct}%`,
+                      top: `${scrollMeta.thumbTopPct}%`,
+                    }}
                   />
                 </div>
               )}

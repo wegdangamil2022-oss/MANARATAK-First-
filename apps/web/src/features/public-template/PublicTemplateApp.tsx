@@ -1651,8 +1651,8 @@ export default function App() {
           <>
             {/* TAB 1: HOME VIEW (Exactly as in Reference Screenshot) */}
             {activeTab === 'home' && selectedCategory === 'all' && (
-              <div className="mn-public-container flex flex-col items-center pt-2 sm:pt-3">
-                <div className="w-full space-y-1">
+              <div className="mn-public-container flex flex-col items-center pt-1 sm:pt-3">
+                <div className="w-full space-y-0.5 sm:space-y-1">
                   {/* Global Search + Smart Search now live persistently in the Header. */}
                   {/* Hero Banner matching Mockup */}
                   <HeroBanner
@@ -1667,14 +1667,9 @@ export default function App() {
                   />
                 </div>
 
-                {/* --- Timeline Container for All Sections --- */}
-                <div className="w-full relative mt-2 pb-4">
-                  {/* Subtle gold timeline track */}
-                  <div className="absolute right-0 sm:-right-2 top-8 bottom-12 w-[3px] z-0">
-                    <div className="sticky top-1/2 w-full h-24 -mt-12 bg-gradient-to-b from-transparent via-[var(--mn-accent-soft)]/80 to-transparent rounded-full animate-pulse-subtle shadow-[0_0_8px_rgba(214,164,59,0.6)]"></div>
-                  </div>
-
-                  <div className="space-y-5 relative z-10 w-full">
+                {/* --- Curated Vertical Showcase Flow --- */}
+                <div className="w-full relative mt-1 pb-3">
+                  <div className="space-y-2 sm:space-y-3.5 md:space-y-5 relative z-10 w-full">
                     {/* 1. Featured Scholarships */}
                     <div className="relative w-full">
                       <FeaturedScholarships
@@ -1710,7 +1705,7 @@ export default function App() {
                       />
                     </div>
 
-                    {/* 4. Featured Countries */}
+                    {/* 4. Featured Countries (Executive Navy-Petrol Band) */}
                     <div className="relative w-full">
                       <FeaturedCountries
                         countries={countries}
@@ -1732,7 +1727,7 @@ export default function App() {
                     </div>
 
                     {/* 6. Roadmap Preview */}
-                    <div className="relative w-full pb-2">
+                    <div className="relative w-full">
                       <RoadmapPreview
                         onNavigate={(target) => {
                           if (target === 'student') {
@@ -1817,7 +1812,7 @@ export default function App() {
                       />
                     </div>
 
-                    {/* 10. Featured Articles (Magazine Style) */}
+                    {/* 9. Featured Articles */}
                     <div className="relative w-full">
                       <FeaturedArticles
                         articles={articles}
@@ -1834,7 +1829,7 @@ export default function App() {
                       />
                     </div>
 
-                    {/* 11. Featured Services (Students & General Support) */}
+                    {/* 10. Featured Services */}
                     <div className="relative w-full">
                       <FeaturedServices
                         services={services}
@@ -1849,25 +1844,21 @@ export default function App() {
                       />
                     </div>
 
-                    {/* 12. Featured Jobs & Internships (Placed after Services) */}
-                    <div className="relative w-full pb-2">
+                    {/* 11. Featured Jobs & Internships */}
+                    <div className="relative w-full">
                       <FeaturedJobs
                         onViewAllClick={() => openSection('jobs')}
                       />
                     </div>
 
-                    {/* 12. FAQ Preview */}
-                    <div className="relative w-full pb-2">
+                    {/* 12. Support & Global Reach Pair (Side-by-side on Desktop, Stacked on Mobile) */}
+                    <div className="relative w-full grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 items-stretch">
                       <FaqPreview onOpen={() => navigate({ auxiliaryPage: 'faq' })} />
-                    </div>
-
-                    {/* 13. Contact & Branches Section */}
-                    <div className="relative w-full pb-2">
                       <ContactSection onOpen={() => navigate({ auxiliaryPage: 'contact' })} />
                     </div>
 
-                    {/* 14. Manaratak Design Showcase Preview Section (Opens full Design & Interfaces page) */}
-                    <div className="relative w-full pb-4">
+                    {/* 13. Manaratak Design Showcase Closing Banner */}
+                    <div className="relative w-full pb-2">
                       <DesignShowcasePreviewSection
                         onOpen={() => {
                           navigate({ auxiliaryPage: 'design-showcase' });

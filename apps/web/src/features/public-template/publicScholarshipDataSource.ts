@@ -48,11 +48,12 @@ export function mapPublicScholarshipDto(dto: PublicScholarshipDto, now = new Dat
   const canonicalUniversityLinks = (dto.universityLinks ?? []).filter((link) => Boolean(link.universityId));
   const canonicalMajorTargets = (dto.majorTargets ?? []).filter((target) => Boolean(target.majorId));
   const hasProgramProjection = dto.fundedProgramPairs !== undefined;
-  const canonicalDegrees = hasProgramProjection
-    ? (dto.fundedProgramPairs ?? []).flatMap(pair => normalizeDegreeLevels(pair.degreeLabel ?? ''))
-    : (dto.degreeTargets ?? []).flatMap((target) => normalizeDegreeLevels(target.degreeLevel?.canonicalCode ?? target.sourceLabel ?? ''));
+  const canonicalDegrees = [
+    ...(dto.fundedProgramPairs ?? []).flatMap(pair => normalizeDegreeLevels(pair.degreeLabel ?? '')),
+    ...(dto.degreeTargets ?? []).flatMap(target => normalizeDegreeLevels(target.degreeLevel?.canonicalCode ?? target.sourceLabel ?? '')),
+  ];
   const legacyDegrees = hasProgramProjection ? [] : normalizeDegreeLevels(dto.degreeLevel ?? '');
-  const deadline = dto.applicationDeadline ?? '';
+  const deadline = dto.deadlineType === 'NOT_STATED_IN_SOURCE' ? '' : dto.applicationDeadline ?? '';
   const deadlineDate = deadline ? new Date(deadline) : null;
   const isClosed = deadlineDate !== null && !Number.isNaN(deadlineDate.getTime()) && deadlineDate < now;
   const requirements = (dto.requiredDocumentItems ?? []).map((item) => item.displayName).filter(Boolean);
@@ -125,11 +126,11 @@ export function mapPublicScholarshipDto(dto: PublicScholarshipDto, now = new Dat
 }
 
 /** Reads the published Phase 12 projection without any prototype-data fallback. */
-export async function loadPublishedScholarships(): Promise<Scholarship[]> {
+export async function loadPublishedScholarships(locale?: 'ar' | 'en', signal?: AbortSignal): Promise<Scholarship[]> {
   const items: PublicScholarshipDto[] = [];
   let cursor: string | undefined;
   for (let guard = 0; guard < 10000; guard += 1) {
-    const page = await ApiClient.getScholarships({ cursor, limit: 100 });
+    const page = await ApiClient.getScholarships({ cursor, limit: 100 }, locale, signal);
     items.push(...page.data);
     if (!page.hasMore || !page.nextCursor) break;
     if (page.nextCursor === cursor) throw new Error('PUBLIC_SCHOLARSHIP_CURSOR_DID_NOT_ADVANCE');

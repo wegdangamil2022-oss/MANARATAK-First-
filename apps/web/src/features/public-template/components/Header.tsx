@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
     <>
       <header
         id="manaratak-header"
-        className="w-full bg-[#FFFFFF] dark:bg-[#142B51] border-b border-[#E3E7E7] dark:border-[#E5BF65]/22 shadow-[0_2px_10px_rgba(20,43,81,0.04)] sticky top-0 z-40 transition-colors mn-panel dark:mn-panel "
+        className="w-full bg-[#FFFFFF] dark:bg-[#111E38] border-b border-[#142B5F]/10 dark:border-white/10 shadow-[0_2px_10px_rgba(20,43,95,0.04)] sticky top-0 z-40 transition-colors mn-panel dark:mn-panel "
       >
         {/* Main Top Bar */}
         <div className="w-full min-h-[58px] sm:h-20 md:h-22 py-1 sm:py-0 px-3 sm:px-6 flex items-center">
@@ -82,24 +82,24 @@ export const Header: React.FC<HeaderProps> = ({
               {/* Brand Typography */}
               <div className="flex flex-col justify-center text-center sm:text-start transition-opacity group-hover:opacity-90">
                 {/* Platform Name: MANARATAK */}
-                <span className="text-[15px] sm:text-lg md:text-xl font-bold leading-tight tracking-wider text-[#142B51] dark:text-[#E5BF65] uppercase font-sans text-center sm:text-start">
+                <span className="text-[15px] sm:text-lg md:text-xl font-bold leading-tight tracking-wider text-[#142B5F] dark:text-[#F2CD78] uppercase font-sans text-center sm:text-start">
                   MANARATAK
                 </span>
                 {/* Subtitle: منارتك للفرص التعليمية */}
-                <span className="text-[9px] sm:text-[11px] md:text-xs font-bold sm:font-medium text-[#233744] dark:text-[#cad8e0] leading-tight mt-0.5 whitespace-nowrap font-sans text-center sm:text-start">
+                <span className="text-[9px] sm:text-[11px] md:text-xs font-bold sm:font-medium text-[#5C707C] dark:text-[#9BB4C7] leading-tight mt-0.5 whitespace-nowrap font-sans text-center sm:text-start">
                   {isRtl ? publicT('public_manaratak_educational_opportunities') : 'Educational Opportunities'}
                 </span>
               </div>
             </div>
 
-            {/* Actions Controls */}
+            {/* Actions Controls — Official Royal Navy #142B5F in Both Light & Dark Modes */}
             <div className="mn-header-actions flex items-center gap-1.5 sm:gap-2 md:gap-2.5">
               {/* Dark Mode Switcher */}
               {onToggleDarkMode && (
                 <button
                   id="btn-dark-mode-toggle"
                   onClick={onToggleDarkMode}
-                  className="h-8 sm:h-9 md:h-10 px-2 sm:px-2.5 md:px-3.5 bg-[#142B51] text-[#D4A846] border border-[#D4A846]/55 hover:bg-[#147F87] hover:text-white dark:bg-[#E5BF65] dark:text-[#142B51] dark:border-[#E5BF65] dark:hover:bg-[#f0d184] dark:hover:text-[#142B51] rounded-lg md:rounded-xl font-bold text-[11px] sm:text-xs md:text-sm flex items-center gap-1 md:gap-1.5 shadow-2xs transition-all active:scale-95 cursor-pointer"
+                  className="h-8 sm:h-9 md:h-10 px-2 sm:px-2.5 md:px-3.5 bg-[#142B5F] text-[#F2CD78] border border-[#D6A43B]/55 hover:bg-[#0E7C86] hover:text-white hover:border-[#0E7C86] dark:bg-[#142B5F] dark:text-[#F2CD78] dark:border-[#D6A43B]/60 dark:hover:bg-[#0E7C86] dark:hover:text-white rounded-lg md:rounded-xl font-bold text-[11px] sm:text-xs md:text-sm flex items-center gap-1 md:gap-1.5 shadow-2xs transition-all active:scale-95 cursor-pointer"
                   title={isDarkMode ? publicT('public_switch_to_light_mode_2') : publicT('public_switch_to_dark_mode')}
                   aria-label={publicT('public_toggle_dark_mode')}
                 >
@@ -121,7 +121,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 id="btn-student-account"
                 onClick={onOpenProfile}
-                className="min-h-[34px] sm:min-h-[40px] md:min-h-[42px] px-2.5 sm:px-3.5 md:px-4 rounded-xl bg-[#142B51] text-[#D4A846] border border-[#D4A846]/55 hover:bg-[#147F87] hover:text-white dark:bg-[#E5BF65] dark:text-[#142B51] dark:border-[#E5BF65] dark:hover:bg-[#f0d184] dark:hover:text-[#142B51] font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 transition-all active:scale-95 cursor-pointer shadow-xs"
+                className="min-h-[34px] sm:min-h-[40px] md:min-h-[42px] px-2.5 sm:px-3.5 md:px-4 rounded-xl bg-[#142B5F] text-[#F2CD78] border border-[#D6A43B]/55 hover:bg-[#0E7C86] hover:text-white hover:border-[#0E7C86] dark:bg-[#142B5F] dark:text-[#F2CD78] dark:border-[#D6A43B]/60 dark:hover:bg-[#0E7C86] dark:hover:text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 transition-all active:scale-95 cursor-pointer shadow-xs"
                 aria-label={publicT('public_student_account')}
                 title={publicT('public_my_account_and_student_workspace')}
               >
@@ -135,7 +135,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 id="btn-header-menu"
                 onClick={onOpenMenu}
-                className="min-h-[34px] min-w-[34px] sm:min-h-[40px] sm:min-w-[40px] md:min-h-[42px] md:min-w-[42px] rounded-xl bg-[#142B51] text-[#D4A846] border border-[#D4A846]/55 hover:bg-[#147F87] hover:text-white dark:bg-[#E5BF65] dark:text-[#142B51] dark:border-[#E5BF65] dark:hover:bg-[#f0d184] dark:hover:text-[#142B51] flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-2xs"
+                className="min-h-[34px] min-w-[34px] sm:min-h-[40px] sm:min-w-[40px] md:min-h-[42px] md:min-w-[42px] rounded-xl bg-[#142B5F] text-[#F2CD78] border border-[#D6A43B]/55 hover:bg-[#0E7C86] hover:text-white hover:border-[#0E7C86] dark:bg-[#142B5F] dark:text-[#F2CD78] dark:border-[#D6A43B]/60 dark:hover:bg-[#0E7C86] dark:hover:text-white flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-2xs"
                 aria-label={publicT('public_main_menu')}
                 title={publicT('public_menu')}
               >

@@ -199,14 +199,14 @@ function resolveImportedCourseFullData(course: ImportedCourse): ResolvedCourseDa
   const existingMajors = (course.relatedMajors ?? [])
     .filter((item) => item && item.name)
     .map((item) => ({
-      id: item.id,
+      id: item.id || 'mjr-demo-computer-science',
       name: item.name.trim(),
     }));
 
   const relatedMajors: Array<{ id?: string; name: string }> = [...existingMajors];
-  for (const fallbackMajor of (import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? DEFAULT_RELATED_MAJORS_POOL : [])) {
+  for (const fallbackMajor of DEFAULT_RELATED_MAJORS_POOL) {
     if (relatedMajors.length >= 6) break;
-    if (!relatedMajors.some((m) => m.id === fallbackMajor.id)) {
+    if (!relatedMajors.some((m) => m.name === fallbackMajor.name)) {
       relatedMajors.push(fallbackMajor);
     }
   }
@@ -300,7 +300,7 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
       {/* ========================================================================= */}
       {/* 1. TOP HERO CONTAINER — متوازن تماماً مع أزرار الرجوع والمفضلة واسم المنصة */}
       {/* ========================================================================= */}
-      <div className="relative w-full overflow-hidden bg-[linear-gradient(135deg,#142B5F_0%,#153B75_52%,#0E7C86_100%)] border-b-[2px] border-[#D6A43B]/60 pt-3.5 pb-3.5 md:py-5 px-3.5 sm:px-4 md:px-8 text-white shadow-md">
+      <div className="relative w-full overflow-hidden bg-[linear-gradient(225deg,#142B5F_0%,#153B75_52%,#0E7C86_100%)] border-b-[2px] border-[#D6A43B]/60 pt-3.5 pb-3.5 md:py-5 px-3.5 sm:px-4 md:px-8 text-white shadow-md">
         {/* أزرار الرجوع والمفضلة في الأعلى واضحة وظاهرة تماماً دون أن تغطي اسم المنصة */}
         <div className="absolute top-2 left-2 z-30 flex flex-col items-center gap-1 scale-75 origin-top-left mn-panel">
           {onBack && <DetailBackButton onBack={onBack} mode="back" />}

@@ -388,6 +388,7 @@ export type PublicScholarshipDto = Omit<
 > & {
   /** Some owner-linked requirements are unavailable; no private target identities are exposed. */
   hasUnavailableRequirements?: boolean;
+  studyOptions?: Array<{ language: 'zh' | 'en'; institution: string; programs: string[] }>;
 };
 
 export interface PublishedProgramScholarshipIdentity {id:string;publicId:string;slug:string;displayName:string;localizedNames?:Record<string,string>;}

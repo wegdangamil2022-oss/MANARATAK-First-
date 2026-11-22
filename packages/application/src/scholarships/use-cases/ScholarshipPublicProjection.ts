@@ -22,7 +22,17 @@ export function projectPublishedScholarship(source: ScholarshipDto, displayName:
     (!e.majorId || majorPublished(e)) && (!e.internationalTestId || testPublished(e)));
   const publicDocuments = (source.requiredDocumentItems ?? []).filter(d =>
     !d.internationalTestId || (resolved(d.resolutionStatus) && testPublished(d)));
+  const rawStudyOptions = source.optionalFields?.publishedStudyOptions;
+  const studyOptions = Array.isArray(rawStudyOptions) ? rawStudyOptions.flatMap((value: unknown) => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return [];
+    const { language, institution, programs } = value as Record<string, unknown>;
+    if ((language !== 'zh' && language !== 'en') || typeof institution !== 'string' ||
+        !institution.trim() || !Array.isArray(programs)) return [];
+    const labels = programs.filter((label): label is string => typeof label === 'string' && Boolean(label.trim()));
+    return labels.length ? [{ language, institution: institution.trim(), programs: labels }] : [];
+  }) : [];
   return {
+    ...(studyOptions.length ? { studyOptions } : {}),
     hasUnavailableRequirements: publicEligibility.length !== (source.eligibilityItems ?? []).length ||
       publicDocuments.length !== (source.requiredDocumentItems ?? []).length,
     publicId: source.publicId, slug: source.slug, canonicalName: source.canonicalName,

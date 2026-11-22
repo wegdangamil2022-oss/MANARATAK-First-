@@ -564,6 +564,7 @@ export interface PublicSearchResponseDto {
 }
 
 export interface PublicScholarshipDto {
+  studyOptions?: Array<{ language: 'zh' | 'en'; institution: string; programs: string[] }>;
   hasUnavailableRequirements?: boolean;
   studyCountryLabel?: string;
   providerName?: string | null;
@@ -641,6 +642,7 @@ export interface PublicScholarshipDto {
     resolutionStatus?: string;
   }>;
   benefits?: Array<{
+    coverageTypeCode?: string | null;
     currency?: { isoCode?: string; nameAr?: string; name?: string };
     isOptional?: boolean;
     isCovered?: boolean;

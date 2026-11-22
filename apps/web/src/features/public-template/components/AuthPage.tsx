@@ -117,11 +117,11 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
   };
 
   return (
-    <div dir="rtl" className="w-full max-w-[324px] sm:max-w-[370px] mx-auto py-2.5 sm:py-6 px-2.5">
-      <div className="bg-[var(--mn-surface)] rounded-2xl shadow-lg overflow-hidden border border-[var(--mn-border)] transition-all duration-300">
-        {/* Top Header matching GlobalSearchPage (نتائج البحث العام) gradient & decorative waves */}
-        <div className="relative mn-search-hero bg-gradient-to-r from-[#142B5F] via-[#12496B] to-[#0E7C86] text-white px-3.5 pt-3 pb-3 overflow-hidden mn-inverse">
-          {/* Background Decorative Gold Waves & Dot Patterns matching GlobalSearchPage */}
+    <div dir="rtl" className="w-full max-w-[440px] mx-auto py-2.5 sm:py-6 px-2 sm:px-4 font-['Cairo',sans-serif]">
+      <div className="bg-white dark:bg-[#111E38] rounded-2xl shadow-[0_6px_24px_rgba(20,43,95,0.08)] dark:shadow-[0_10px_28px_rgba(0,0,0,0.35)] overflow-hidden border border-[#142B5F]/12 dark:border-white/10 transition-all duration-300">
+        {/* Top Header matching Manaratak Official Navy-to-Petrol Gradient */}
+        <div className="relative mn-search-hero bg-gradient-to-l from-[#142B5F] via-[#133A6A] to-[#0E7C86] text-white px-4 pt-3.5 pb-3.5 overflow-hidden mn-inverse">
+          {/* Background Decorative Gold Waves & Dot Patterns */}
           <div className="absolute inset-0 pointer-events-none opacity-20" aria-hidden="true">
             <svg
               className="w-full h-full"
@@ -158,7 +158,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
               />
             </div>
 
-            <h2 className="text-[15px] sm:text-[17px] font-bold text-white leading-tight font-['Cairo',sans-serif]">
+            <h2 className="!text-[15px] sm:!text-[17px] font-bold text-white leading-tight font-['Cairo',sans-serif] outline-none">
               {isLogin ? (
                 <>
                   تسجيل الدخول <span className="text-[#F2CD78]">إلى حسابك</span>
@@ -171,10 +171,10 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
             </h2>
 
             <div className="flex justify-center pt-0.5">
-              <div className="w-8 h-0.5 bg-[#D6A43B] rounded-full" />
+              <div className="w-8 h-0.5 bg-gradient-to-r from-[#D6A43B] via-[#F2CD78] to-[#D6A43B] rounded-full" />
             </div>
 
-            <p className="text-[10px] sm:text-[11px] text-white/90 font-medium leading-snug">
+            <p className="text-[10px] sm:text-[11px] text-[#DDEFF2] font-medium leading-snug">
               {isLogin
                 ? 'تابع فرصك وطلباتك ومسارك التعليمي في منارتك'
                 : 'احفظ فرصك وأدر طلباتك وتابع مسارك التعليمي'}
@@ -182,13 +182,13 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
           </div>
 
           {/* Compact Mode Switcher Tabs */}
-          <div className="relative z-10 mt-2.5 grid grid-cols-2 gap-1 rounded-xl bg-[#0D2149]/65 p-1 border border-white/15">
+          <div className="relative z-10 mt-3 grid grid-cols-2 gap-1 rounded-xl bg-[#0B1529]/50 p-1 border border-white/15">
             <button
               type="button"
               onClick={() => switchMode(false)}
-              className={`!min-h-[30px] h-[30px] rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${
+              className={`!min-h-[32px] h-[32px] rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                 !isLogin
-                  ? 'bg-white/15 text-[#F2CD78] border border-[#F2CD78]/45 shadow-xs'
+                  ? 'bg-white text-[#142B5F] shadow-xs'
                   : 'text-white/85 hover:text-white'
               }`}
             >
@@ -198,9 +198,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
             <button
               type="button"
               onClick={() => switchMode(true)}
-              className={`!min-h-[30px] h-[30px] rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${
+              className={`!min-h-[32px] h-[32px] rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                 isLogin
-                  ? 'bg-white/15 text-[#F2CD78] border border-[#F2CD78]/45 shadow-xs'
+                  ? 'bg-white text-[#142B5F] shadow-xs'
                   : 'text-white/85 hover:text-white'
               }`}
             >
@@ -209,20 +209,20 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
             </button>
           </div>
 
-          {/* Gold Divider Ribbon Line matching GlobalSearchPage */}
+          {/* Thin Official Gold Divider Ribbon */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-[#B38018] via-[#F2CE75] to-[#B38018]"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[1.5px] bg-gradient-to-r from-[#D6A43B]/50 via-[#F2CD78] to-[#D6A43B]/50"
           />
         </div>
 
         {/* Compact Form Body */}
-        <div className="p-3 sm:p-4">
+        <div className="p-3.5 sm:p-5">
           {/* Google Sign-In / Sign-Up Button */}
           <button
             type="button"
             onClick={handleGoogleAuth}
-            className="w-full !min-h-[36px] h-[36px] flex items-center justify-center gap-2 px-3 bg-[var(--mn-page)] hover:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] text-[var(--mn-heading)] text-[11.5px] font-bold rounded-xl shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
+            className="w-full !min-h-[38px] h-[38px] flex items-center justify-center gap-2 px-3 bg-[#F6F8FA] dark:bg-[#0B1529]/80 hover:bg-white dark:hover:bg-[#142342] border border-[#142B5F]/14 dark:border-white/12 hover:border-[#0E7C86]/45 text-[#142B5F] dark:text-[#F1F5F9] text-[11.5px] font-bold rounded-xl shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
           >
             <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
               <path
@@ -245,10 +245,10 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
             <span>{isLogin ? 'المتابعة عن طريق جوجل' : 'سجّل عن طريق جوجل'}</span>
           </button>
 
-          {/* Compact Divider */}
-          <div className="my-2.5 relative flex items-center justify-center">
-            <div className="w-full border-t border-[var(--mn-border)]" />
-            <span className="relative px-2 bg-[var(--mn-surface)] text-[10px] font-bold text-[var(--mn-text-muted)] whitespace-nowrap">
+          {/* Centered Compact Divider */}
+          <div className="my-3 relative flex items-center justify-center">
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-t border-[#142B5F]/12 dark:border-white/10" />
+            <span className="relative px-2.5 bg-white dark:bg-[#111E38] text-[10px] font-bold text-[#5C707C] dark:text-[#9BB4C7] whitespace-nowrap">
               {publicT('public_or_use_email')}
             </span>
           </div>
@@ -256,7 +256,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
           {errorMessage && (
             <p
               role="alert"
-              className="mb-2.5 rounded-xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] px-2.5 py-1.5 text-[10.5px] font-bold text-[var(--mn-danger-text)]"
+              className="mb-2.5 rounded-xl border border-[#D6A43B]/45 bg-[#D6A43B]/10 px-3 py-2 text-[10.5px] font-bold text-[#142B5F] dark:text-[#F2CD78]"
             >
               {errorMessage}
             </p>
@@ -264,27 +264,27 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
           {infoMessage && (
             <p
               role="status"
-              className="mb-2.5 rounded-xl border border-[#76ADBE]/45 bg-[#142B5F]/5 px-2.5 py-1.5 text-[10.5px] font-bold text-[var(--mn-heading)]"
+              className="mb-2.5 rounded-xl border border-[#0E7C86]/35 bg-[#0E7C86]/8 dark:bg-[#38C6D4]/12 px-3 py-2 text-[10.5px] font-bold text-[#0E7C86] dark:text-[#38C6D4]"
             >
               {infoMessage}
             </p>
           )}
 
-          <form className="space-y-2" onSubmit={handleSubmit}>
+          <form className="space-y-2.5" onSubmit={handleSubmit}>
             {!isLogin && (
               <div>
-                <label className="block text-[10.5px] font-bold text-[var(--mn-heading)] mb-0.5">
+                <label className="block text-[10.5px] font-bold text-[#142B5F] dark:text-[#EDF5F5] mb-1">
                   الاسم الكامل
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
-                    <User className="h-3.5 w-3.5 text-[var(--mn-text-muted)]" />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <User className="h-3.5 w-3.5 text-[#0E7C86] dark:text-[#38C6D4]" />
                   </div>
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="block w-full !min-h-[34px] h-[34px] pl-2.5 pr-8 py-1 !text-[11.5px] border border-[var(--mn-border)] rounded-xl bg-[var(--mn-page)] text-[var(--mn-heading)] placeholder-[var(--mn-text-muted)] focus:outline-none focus:ring-1 focus:ring-[#0E7C86] focus:border-[#0E7C86] transition-all"
+                    className="block w-full !min-h-[36px] h-[36px] pl-3 pr-9 py-1 !text-[11.5px] placeholder:!text-[11.5px] border border-[#142B5F]/14 dark:border-white/12 rounded-xl bg-[#F6F8FA] dark:bg-[#0B1529]/80 text-[#142B5F] dark:text-[#F1F5F9] placeholder-[#5C707C]/70 dark:placeholder-[#9BB4C7]/65 focus:bg-white dark:focus:bg-[#0B1529] focus:outline-none focus-visible:!outline-none focus-visible:!shadow-none focus:ring-2 focus:ring-[#0E7C86]/25 dark:focus:ring-[#38C6D4]/28 focus:border-[#0E7C86] dark:focus:border-[#38C6D4] transition-all"
                     placeholder="أدخل اسمك الكامل"
                   />
                 </div>
@@ -292,26 +292,26 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
             )}
 
             <div>
-              <label className="block text-[10.5px] font-bold text-[var(--mn-heading)] mb-0.5">
+              <label className="block text-[10.5px] font-bold text-[#142B5F] dark:text-[#EDF5F5] mb-1">
                 البريد الإلكتروني
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
-                  <Mail className="h-3.5 w-3.5 text-[var(--mn-text-muted)]" />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <Mail className="h-3.5 w-3.5 text-[#0E7C86] dark:text-[#38C6D4]" />
                 </div>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full !min-h-[34px] h-[34px] pl-2.5 pr-8 py-1 !text-[11.5px] border border-[var(--mn-border)] rounded-xl bg-[var(--mn-page)] text-[var(--mn-heading)] placeholder-[var(--mn-text-muted)] focus:outline-none focus:ring-1 focus:ring-[#0E7C86] focus:border-[#0E7C86] transition-all"
+                  className="block w-full !min-h-[36px] h-[36px] pl-3 pr-9 py-1 !text-[11.5px] placeholder:!text-[11.5px] border border-[#142B5F]/14 dark:border-white/12 rounded-xl bg-[#F6F8FA] dark:bg-[#0B1529]/80 text-[#142B5F] dark:text-[#F1F5F9] placeholder-[#5C707C]/70 dark:placeholder-[#9BB4C7]/65 focus:bg-white dark:focus:bg-[#0B1529] focus:outline-none focus-visible:!outline-none focus-visible:!shadow-none focus:ring-2 focus:ring-[#0E7C86]/25 dark:focus:ring-[#38C6D4]/28 focus:border-[#0E7C86] dark:focus:border-[#38C6D4] transition-all"
                   placeholder="name@example.com"
                 />
               </div>
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-0.5">
-                <label className="block text-[10.5px] font-bold text-[var(--mn-heading)]">
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[10.5px] font-bold text-[#142B5F] dark:text-[#EDF5F5]">
                   كلمة المرور
                 </label>
                 {isLogin && (
@@ -320,21 +320,21 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
                     onClick={() =>
                       setInfoMessage('أدخل بريدك الإلكتروني وسنرسل لك رابط استعادة كلمة المرور.')
                     }
-                    className="!min-h-0 text-[10px] font-bold text-[var(--mn-heading)] hover:underline cursor-pointer"
+                    className="!min-h-0 text-[10px] font-bold text-[#0E7C86] dark:text-[#38C6D4] hover:underline cursor-pointer"
                   >
                     {publicT('public_forgot_password')}
                   </button>
                 )}
               </div>
               <div className="relative">
-                <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
-                  <Lock className="h-3.5 w-3.5 text-[var(--mn-text-muted)]" />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <Lock className="h-3.5 w-3.5 text-[#0E7C86] dark:text-[#38C6D4]" />
                 </div>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full !min-h-[34px] h-[34px] pl-2.5 pr-8 py-1 !text-[11.5px] border border-[var(--mn-border)] rounded-xl bg-[var(--mn-page)] text-[var(--mn-heading)] placeholder-[var(--mn-text-muted)] focus:outline-none focus:ring-1 focus:ring-[#0E7C86] focus:border-[#0E7C86] transition-all"
+                  className="block w-full !min-h-[36px] h-[36px] pl-3 pr-9 py-1 !text-[11.5px] placeholder:!text-[11.5px] border border-[#142B5F]/14 dark:border-white/12 rounded-xl bg-[#F6F8FA] dark:bg-[#0B1529]/80 text-[#142B5F] dark:text-[#F1F5F9] placeholder-[#5C707C]/70 dark:placeholder-[#9BB4C7]/65 focus:bg-white dark:focus:bg-[#0B1529] focus:outline-none focus-visible:!outline-none focus-visible:!shadow-none focus:ring-2 focus:ring-[#0E7C86]/25 dark:focus:ring-[#38C6D4]/28 focus:border-[#0E7C86] dark:focus:border-[#38C6D4] transition-all"
                   placeholder={isLogin ? '••••••••' : '8 أحرف على الأقل'}
                 />
               </div>
@@ -343,45 +343,45 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
             {!isLogin && (
               <>
                 <div>
-                  <label className="block text-[10.5px] font-bold text-[var(--mn-heading)] mb-0.5">
+                  <label className="block text-[10.5px] font-bold text-[#142B5F] dark:text-[#EDF5F5] mb-1">
                     تأكيد كلمة المرور
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
-                      <Lock className="h-3.5 w-3.5 text-[var(--mn-text-muted)]" />
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <Lock className="h-3.5 w-3.5 text-[#0E7C86] dark:text-[#38C6D4]" />
                     </div>
                     <input
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="block w-full !min-h-[34px] h-[34px] pl-2.5 pr-8 py-1 !text-[11.5px] border border-[var(--mn-border)] rounded-xl bg-[var(--mn-page)] text-[var(--mn-heading)] placeholder-[var(--mn-text-muted)] focus:outline-none focus:ring-1 focus:ring-[#0E7C86] focus:border-[#0E7C86] transition-all"
+                      className="block w-full !min-h-[36px] h-[36px] pl-3 pr-9 py-1 !text-[11.5px] placeholder:!text-[11.5px] border border-[#142B5F]/14 dark:border-white/12 rounded-xl bg-[#F6F8FA] dark:bg-[#0B1529]/80 text-[#142B5F] dark:text-[#F1F5F9] placeholder-[#5C707C]/70 dark:placeholder-[#9BB4C7]/65 focus:bg-white dark:focus:bg-[#0B1529] focus:outline-none focus-visible:!outline-none focus-visible:!shadow-none focus:ring-2 focus:ring-[#0E7C86]/25 dark:focus:ring-[#38C6D4]/28 focus:border-[#0E7C86] dark:focus:border-[#38C6D4] transition-all"
                       placeholder="أعد كتابة كلمة المرور"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[10.5px] font-bold text-[var(--mn-heading)] mb-0.5">
+                  <label className="block text-[10.5px] font-bold text-[#142B5F] dark:text-[#EDF5F5] mb-1">
                     رمز التحقق
                   </label>
                   <div className="flex items-center gap-1.5">
                     <div className="relative flex-1 min-w-0">
-                      <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
-                        <KeyRound className="h-3.5 w-3.5 text-[var(--mn-text-muted)]" />
+                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <KeyRound className="h-3.5 w-3.5 text-[#0E7C86] dark:text-[#38C6D4]" />
                       </div>
                       <input
                         type="text"
                         inputMode="numeric"
                         value={verificationCode}
                         onChange={(e) => setVerificationCode(e.target.value)}
-                        className="block w-full !min-h-[34px] h-[34px] pl-2.5 pr-8 py-1 !text-[11.5px] border border-[var(--mn-border)] rounded-xl bg-[var(--mn-page)] text-[var(--mn-heading)] placeholder-[var(--mn-text-muted)] focus:outline-none focus:ring-1 focus:ring-[#0E7C86] focus:border-[#0E7C86] transition-all"
+                        className="block w-full !min-h-[36px] h-[36px] pl-3 pr-9 py-1 !text-[11.5px] placeholder:!text-[11.5px] border border-[#142B5F]/14 dark:border-white/12 rounded-xl bg-[#F6F8FA] dark:bg-[#0B1529]/80 text-[#142B5F] dark:text-[#F1F5F9] placeholder-[#5C707C]/70 dark:placeholder-[#9BB4C7]/65 focus:bg-white dark:focus:bg-[#0B1529] focus:outline-none focus-visible:!outline-none focus-visible:!shadow-none focus:ring-2 focus:ring-[#0E7C86]/25 dark:focus:ring-[#38C6D4]/28 focus:border-[#0E7C86] dark:focus:border-[#38C6D4] transition-all"
                         placeholder="أدخل رمز التحقق"
                       />
                     </div>
                     <button
                       type="button"
                       onClick={handleSendVerificationCode}
-                      className="shrink-0 !min-h-[34px] h-[34px] px-2.5 rounded-xl bg-[var(--mn-page)] hover:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] text-[10px] font-bold text-[var(--mn-heading)] transition-colors cursor-pointer whitespace-nowrap"
+                      className="shrink-0 !min-h-[36px] h-[36px] px-3 rounded-xl bg-[#F6F8FA] dark:bg-[#0B1529]/80 hover:bg-white dark:hover:bg-[#142342] border border-[#0E7C86]/30 dark:border-[#38C6D4]/35 text-[10.5px] font-bold text-[#142B5F] dark:text-[#38C6D4] transition-colors cursor-pointer whitespace-nowrap"
                     >
                       {codeSent ? 'إعادة الإرسال' : 'إرسال الرمز'}
                     </button>
@@ -390,24 +390,20 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
               </>
             )}
 
-            <div className="pt-1">
+            <div className="pt-1.5">
               <button
                 type="submit"
-                className={`w-full !min-h-[36px] h-[36px] px-4 text-xs font-bold rounded-xl shadow-xs transition-all duration-150 active:scale-[0.99] cursor-pointer flex items-center justify-center gap-1.5 ${
-                  isLogin
-                    ? 'bg-gradient-to-r from-[#142B5F] to-[#0E7C86] hover:opacity-95 text-white border border-[#76ADBE]/40'
-                    : 'bg-[#C8962C] hover:bg-[#D4A134] text-[#0F224A] border border-[#DDA93B] mn-gold'
-                }`}
+                className="w-full !min-h-[38px] h-[38px] px-4 text-[12px] font-bold rounded-xl shadow-[0_4px_14px_rgba(20,43,95,0.2)] transition-all duration-150 active:scale-[0.99] cursor-pointer flex items-center justify-center gap-1.5 bg-gradient-to-l from-[#142B5F] via-[#133A6A] to-[#0E7C86] hover:opacity-95 text-white border border-white/10 mn-inverse"
               >
                 {isLogin ? (
                   <>
-                    <LogIn className="w-3.5 h-3.5" />
+                    <LogIn className="w-3.5 h-3.5 text-[#F2CD78]" />
                     <span>{publicT('public_sign_in')}</span>
                   </>
                 ) : (
                   <>
-                    <UserPlus className="w-3.5 h-3.5 text-[#0F224A]" />
-                    <span className="text-[#0F224A] font-bold">إنشاء حساب</span>
+                    <UserPlus className="w-3.5 h-3.5 text-[#F2CD78]" />
+                    <span>إنشاء حساب</span>
                   </>
                 )}
               </button>
@@ -415,15 +411,15 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
           </form>
 
           {/* Footer Toggle & Back to Student Workspace */}
-          <div className="mt-3 pt-2.5 border-t border-[var(--mn-border)] text-center space-y-1.5">
-            <p className="text-[11px] text-[var(--mn-text-muted)] font-bold">
+          <div className="mt-3.5 pt-3 border-t border-[#142B5F]/10 dark:border-white/10 text-center space-y-1.5">
+            <p className="text-[11px] text-[#5C707C] dark:text-[#9BB4C7] font-bold">
               {isLogin
                 ? publicT('public_do_not_have_an_account')
                 : publicT('public_already_have_an_account')}{' '}
               <button
                 type="button"
                 onClick={() => switchMode(!isLogin)}
-                className="!min-h-0 font-bold text-[var(--mn-heading)] hover:underline cursor-pointer"
+                className="!min-h-0 font-bold text-[#0E7C86] dark:text-[#38C6D4] hover:underline cursor-pointer"
               >
                 {isLogin ? publicT('public_create_account') : publicT('public_sign_in')}
               </button>
@@ -433,7 +429,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
               <button
                 type="button"
                 onClick={onBackToWorkspace}
-                className="!min-h-0 inline-flex items-center justify-center gap-1 text-[10.5px] font-bold text-[var(--mn-text-muted)] hover:text-[var(--mn-heading)] transition-colors cursor-pointer"
+                className="!min-h-0 inline-flex items-center justify-center gap-1 text-[10.5px] font-bold text-[#5C707C] dark:text-[#9BB4C7] hover:text-[#142B5F] dark:hover:text-[#F1F5F9] transition-colors cursor-pointer"
               >
                 <ArrowRight className="w-3 h-3" />
                 <span>العودة إلى حساب الطالب</span>

@@ -31,7 +31,7 @@ import {
   StudentToolPreview,
 } from '../types';
 import { FavoriteButton } from './FavoriteButton';
-import { DetailBackButton, DetailSectionHeader, PublicCardsPagination, PublicFilterSelectModal, useDetailSearchTarget, usePaginatedCatalog } from './DetailUi';
+import { DetailBackButton, DetailSectionHeader, PublicCardsPagination, PublicInlineFilterPanel, useDetailSearchTarget, usePaginatedCatalog } from './DetailUi';
 
 interface AIToolsPageProps {
   dataMode?: 'prototype' | 'api';
@@ -286,117 +286,100 @@ const StudentToolCard: React.FC<{
         }
       }}
       onClick={() => onOpen(tool)}
-      className="group relative overflow-hidden rounded-[22px] border border-[#142B5F]/65 dark:border-[#D6A43B]/60 hover:border-[#142B5F] bg-[var(--mn-surface)] shadow-[0_8px_24px_rgba(20,43,95,0.08)] transition-all duration-150 cursor-pointer select-none mn-panel h-full flex flex-col justify-between"
+      className="group relative overflow-hidden rounded-r-[4px] rounded-l-2xl border border-[#142B5F]/12 dark:border-white/10 border-r-3 border-r-[#142B5F] dark:border-r-[#F2CD78]/85 hover:border-[#142B5F]/28 dark:hover:border-[#F2CD78]/45 bg-white dark:bg-[#111E38] shadow-[0_4px_16px_rgba(20,43,95,0.04)] hover:shadow-[0_8px_24px_rgba(20,43,95,0.08)] dark:shadow-[0_6px_20px_rgba(0,0,0,0.28)] transition-all duration-150 active:scale-[0.985] cursor-pointer select-none mn-panel h-full flex flex-col justify-between p-2.5 sm:p-3 md:p-4 gap-2 sm:gap-2.5"
       dir={publicDir}
     >
-      {/* Top Navy Accent Line (small/thin Navy only) */}
-      <div className="absolute inset-x-0 top-0 h-[2px] bg-[#142B5F]" />
-
-      {/* Subtle AI Radial Glow in Corner (Clean, never overlapping text) */}
-      <div className="pointer-events-none absolute -top-10 -left-10 h-28 w-28 rounded-full bg-[#D6A43B]/10 blur-2xl" />
-      <div className="pointer-events-none absolute -bottom-10 -right-10 h-28 w-28 rounded-full bg-[#142B5F]/10 blur-2xl" />
-
-      <div className="p-3 pt-3.5 md:p-4 relative z-10 h-full flex flex-col justify-between">
-        {/* Header Row: Custom AI Emblem + Arabic Title & English Subtitle + Favorite Button */}
-        <div className="flex items-start justify-between gap-2.5">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            {/* Circular AI Emblem with Navy circle frame */}
-            <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-full p-[2px] bg-[#142B5F] border border-[#142B5F] shadow-sm shrink-0 flex items-center justify-center">
-              <div className="w-full h-full rounded-full overflow-hidden bg-[#142B5F] border border-[#142B5F] flex items-center justify-center shadow-inner">
-                <AIToolEmblem toolKey={tool.toolKey} className="w-full h-full" />
-              </div>
-            </div>
-
-            {/* Arabic Title on top, English Subtitle underneath */}
-            <div className="min-w-0 flex-1 text-start">
-              <h2 className="line-clamp-1 text-[13px] sm:text-[13.5px] font-bold leading-snug text-[#142B5F] dark:text-[var(--mn-accent-soft)] font-['Cairo',sans-serif]">
-                {tool.title}
-              </h2>
-              {tool.titleEn && (
-                <p
-                  dir="ltr"
-                  className="mt-0.5 truncate text-[10.5px] sm:text-[11px] font-semibold text-[var(--mn-text-muted)] font-['Cairo',sans-serif] text-end"
-                >
-                  {tool.titleEn}
-                </p>
-              )}
+      {/* Header Row: Circular AI Emblem + Arabic Title & English Subtitle + Favorite Button */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full p-0.5 bg-gradient-to-br from-[#142B5F] to-[#0E7C86] dark:from-[#0E7C86] dark:to-[#21A7B4] shadow-xs shrink-0 flex items-center justify-center">
+            <div className="w-full h-full rounded-full overflow-hidden bg-[#142B5F] border border-white/70 dark:border-white/15 flex items-center justify-center shadow-inner">
+              <AIToolEmblem toolKey={tool.toolKey} className="w-full h-full" />
             </div>
           </div>
 
-          {/* Favorite Button */}
-          {onToggleFavorite && (
-            <div className="shrink-0">
-              <FavoriteButton
-                active={isFavorite}
-                onToggle={(event) => {
-                  event.stopPropagation();
-                  onToggleFavorite(tool.id);
-                }}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Brief Tool Description (نبذة مختصرة ومرتبة وواضحة عن الأداة) */}
-        <div className="mt-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 py-2">
-          <p className="text-[11px] sm:text-[11.5px] leading-relaxed font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif] line-clamp-2">
-            {tool.shortDescription}
-          </p>
-        </div>
-
-        {/* 2×2 Parallel Info Boxes with Right-Aligned Icons at the start of each box matching Country Cards */}
-        <div className="mt-2 grid grid-cols-2 gap-1.5">
-          {/* Box 1 (Top-Right): المجال */}
-          <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-3 pl-2 py-1.5 flex items-center justify-start gap-1.5 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel">
-            <Layers3 className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#239BA6]" />
-            <span className="truncate">{tool.category}</span>
-          </div>
-
-          {/* Box 2 (Top-Left): نوع الأداة */}
-          <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-3 pl-2 py-1.5 flex items-center justify-start gap-1.5 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel">
-            <Sparkles className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#239BA6]" />
-            <span className="truncate">{publicEnumLabel(tool.executionLabel, publicT)}</span>
-          </div>
-
-          {/* Box 3 (Bottom-Right - Directly under Domain icon): آلية الذكاء الاصطناعي */}
-          <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-3 pl-2 py-1.5 flex items-center justify-start gap-1.5 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel">
-            <Wand2 className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#239BA6]" />
-            <span className="truncate">{aiModeLabel}</span>
-          </div>
-
-          {/* Box 4 (Bottom-Left - Directly under Tool Type icon): المخرج النهائي للطالب */}
-          <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg pr-3 pl-2 py-1.5 flex items-center justify-start gap-1.5 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel">
-            <FileCheck2 className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#239BA6]" />
-            <span className="truncate">{outputLabel}</span>
+          <div className="min-w-0 flex-1 text-start">
+            <h2 className="line-clamp-1 text-[11.5px] sm:text-[12.5px] md:text-[14px] font-bold leading-snug text-[#142B5F] dark:text-[#F1F5F9] font-['Cairo',sans-serif]">
+              {tool.title}
+            </h2>
+            {tool.titleEn && (
+              <p
+                dir="ltr"
+                className="mt-0.5 truncate text-[10px] sm:text-[11px] font-medium text-[#5C707C] dark:text-[#9BB4C7] font-['Cairo',sans-serif] text-end"
+              >
+                {tool.titleEn}
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Bottom CTA Button: Duration on the Right, View Details on the Left (Navy-to-Petrol Gradient) */}
-        <div className="mt-2.5 border-t border-[var(--mn-border)] pt-2.5">
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              onOpen(tool);
-            }}
-            className="flex w-full items-center justify-between rounded-xl bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] px-3.5 py-2.5 text-white shadow-sm transition-transform active:scale-[0.99] mn-inverse cursor-pointer"
-          >
-            <div className="flex items-center">
-              {tool.estimatedTime && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-2.5 py-0.5 text-[10px] font-bold text-[var(--mn-accent-soft)] font-['Cairo',sans-serif]">
-                  <Clock3 className="h-3 w-3 shrink-0" />
-                  <span>{tool.estimatedTime}</span>
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11.5px] font-bold font-['Cairo',sans-serif]">
-                {publicT('public_view_details')}
-              </span>
-              <ArrowLeft className="h-4 w-4 text-[var(--mn-accent-soft)]" />
-            </div>
-          </button>
+        {onToggleFavorite && (
+          <div className="shrink-0">
+            <FavoriteButton
+              active={isFavorite}
+              onToggle={(event) => {
+                event.stopPropagation();
+                onToggleFavorite(tool.id);
+              }}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Brief Tool Description */}
+      <div className="rounded-lg border border-[#142B5F]/8 dark:border-white/8 bg-[#F6F8FA] dark:bg-[#0B1529]/85 px-2.5 py-1.5">
+        <p className="text-[10.5px] sm:text-[11px] leading-relaxed font-semibold text-[#203442] dark:text-[#DCE7F0] font-['Cairo',sans-serif] line-clamp-2">
+          {tool.shortDescription}
+        </p>
+      </div>
+
+      {/* 2×2 Parallel Info Boxes */}
+      <div className="grid grid-cols-2 gap-1.5">
+        <div className="min-w-0 overflow-hidden bg-[#F6F8FA] dark:bg-[#0B1529]/85 border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center justify-start gap-1.5 text-[9.5px] sm:text-[10.5px] font-bold text-[#203442] dark:text-[#DCE7F0] font-['Cairo',sans-serif] mn-panel">
+          <Layers3 className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#34BFC9]" />
+          <span className="min-w-0 leading-tight line-clamp-2 break-words">{tool.category}</span>
         </div>
+
+        <div className="min-w-0 overflow-hidden bg-[#F6F8FA] dark:bg-[#0B1529]/85 border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center justify-start gap-1.5 text-[9.5px] sm:text-[10.5px] font-bold text-[#203442] dark:text-[#DCE7F0] font-['Cairo',sans-serif] mn-panel">
+          <Sparkles className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#34BFC9]" />
+          <span className="min-w-0 leading-tight line-clamp-2 break-words">{publicEnumLabel(tool.executionLabel, publicT)}</span>
+        </div>
+
+        <div className="min-w-0 overflow-hidden bg-[#F6F8FA] dark:bg-[#0B1529]/85 border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center justify-start gap-1.5 text-[9.5px] sm:text-[10.5px] font-bold text-[#203442] dark:text-[#DCE7F0] font-['Cairo',sans-serif] mn-panel">
+          <Wand2 className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#34BFC9]" />
+          <span className="min-w-0 leading-tight line-clamp-2 break-words">{aiModeLabel}</span>
+        </div>
+
+        <div className="min-w-0 overflow-hidden bg-[#F6F8FA] dark:bg-[#0B1529]/85 border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center justify-start gap-1.5 text-[9.5px] sm:text-[10.5px] font-bold text-[#203442] dark:text-[#DCE7F0] font-['Cairo',sans-serif] mn-panel">
+          <FileCheck2 className="h-3.5 w-3.5 shrink-0 text-[#0E7C86] dark:text-[#34BFC9]" />
+          <span className="min-w-0 leading-tight line-clamp-2 break-words">{outputLabel}</span>
+        </div>
+      </div>
+
+      {/* Bottom Action Row */}
+      <div className="pt-1.5 border-t border-[#142B5F]/8 dark:border-white/8 flex items-center justify-between gap-2">
+        {tool.estimatedTime ? (
+          <span className="inline-flex items-center gap-1 rounded-lg bg-[#F6F8FA] dark:bg-[#0B1529]/85 border border-[#142B5F]/8 dark:border-white/8 px-2.5 py-1 text-[10px] font-bold text-[#5C707C] dark:text-[#9BB4C7] font-['Cairo',sans-serif]">
+            <Clock3 className="h-3 w-3 shrink-0 text-[#0E7C86] dark:text-[#34BFC9]" />
+            <span>{tool.estimatedTime}</span>
+          </span>
+        ) : (
+          <span />
+        )}
+
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpen(tool);
+          }}
+          className="bg-[#142B5F] hover:bg-[#0E7C86] dark:bg-[#162A52] dark:hover:bg-[#1C3566] text-white dark:text-[#F2CD78] border border-transparent dark:border-[#F2CD78]/35 rounded-lg px-3 py-1.5 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs mn-inverse"
+        >
+          <span className="text-[10px] sm:text-[11px] font-bold font-['Cairo',sans-serif] text-white dark:text-[#F2CD78]">
+            {publicT('public_view_details')}
+          </span>
+          <ChevronLeft className="h-3.5 w-3.5 rotate-180 text-[#F2CD78]" />
+        </button>
       </div>
     </article>
   );
@@ -735,11 +718,11 @@ export const AIToolsPage: React.FC<AIToolsPageProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel" dir={publicDir}>
+    <div className="min-h-screen bg-[#F6F8FA] dark:bg-[#0A1326] text-[#203442] dark:text-[#EDF5F5] pb-24 font-['Cairo',sans-serif] select-none mn-panel dark:[--mn-border:rgba(255,255,255,0.12)]" dir={publicDir}>
       {/* ========================================================================= */}
-      {/* HERO SECTION - UNIFIED NAVY-PETROL-TURQUOISE WITH 3 SEPARATE FILTER TILES */}
+      {/* HERO SECTION - COMPACT BALANCED DESIGN MATCHING SCHOLARSHIPS & MAJORS     */}
       {/* ========================================================================= */}
-      <div className="relative mn-search-hero text-white px-3 sm:px-4 pt-4 pb-3 overflow-hidden shadow-xs mn-inverse">
+      <div className="relative mn-search-hero text-white px-3 sm:px-4 pt-2.5 pb-2.5 sm:pt-4 sm:pb-3 overflow-hidden shadow-xs mn-inverse">
         {onBack && (
           <button
             onClick={onBack}
@@ -751,19 +734,19 @@ export const AIToolsPage: React.FC<AIToolsPageProps> = ({
           </button>
         )}
 
-        {/* Background Decorative Mosque Silhouettes, Dot Grid & Gold Arcs */}
+        {/* Background Decorative Silhouettes, Dot Grid & Gold Arcs */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute top-3 left-5 grid grid-cols-5 gap-1.5 opacity-20">
             {Array.from({ length: 20 }).map((_, i) => (
-              <div key={i} className="w-1 h-1 rounded-full bg-[var(--mn-accent)] mn-gold" />
+              <div key={i} className="w-1 h-1 rounded-full bg-[#F2CD78]" />
             ))}
           </div>
 
-          <div className="absolute -top-12 -left-12 w-56 h-56 rounded-full border border-[var(--mn-accent)]/25 pointer-events-none" />
-          <div className="absolute -top-6 -left-6 w-72 h-72 rounded-full border border-[var(--mn-accent)]/15 pointer-events-none" />
+          <div className="absolute -top-12 -left-12 w-56 h-56 rounded-full border border-[#F2CD78]/20 pointer-events-none" />
+          <div className="absolute -top-6 -left-6 w-72 h-72 rounded-full border border-[#F2CD78]/12 pointer-events-none" />
 
           <svg
-            className="absolute -right-4 bottom-0 h-40 w-40 text-white/10 pointer-events-none"
+            className="absolute -right-4 bottom-0 h-36 w-36 text-white/10 pointer-events-none"
             viewBox="0 0 200 200"
             fill="currentColor"
           >
@@ -777,60 +760,60 @@ export const AIToolsPage: React.FC<AIToolsPageProps> = ({
           </svg>
 
           <svg
-            className="absolute bottom-0 inset-x-0 w-full h-12 opacity-30"
+            className="absolute bottom-0 inset-x-0 w-full h-12 opacity-25"
             viewBox="0 0 500 80"
             fill="none"
             preserveAspectRatio="none"
           >
             <path
               d="M-20,70 Q250,-20 520,70"
-              stroke="var(--mn-accent)"
+              stroke="#F2CD78"
               strokeWidth="2"
               fill="none"
             />
           </svg>
         </div>
 
-        <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto text-center relative z-10 space-y-2 pt-1">
-          {/* Top 4-pointed Gold Sparkle Star */}
+        <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto text-center relative z-10 space-y-1.5 sm:space-y-2 md:space-y-3 pt-0.5 md:pt-2">
+          {/* Top 4-pointed Official Gold Sparkle Star */}
           <div className="flex justify-center">
-            <Sparkles className="h-5 w-5 text-[var(--mn-accent-text)] drop-shadow-[0_0_8px_rgba(214,164,59,0.8)]" aria-hidden="true" />
+            <Sparkles className="h-4.5 w-4.5 sm:h-5 sm:w-5 md:h-6 md:w-6 text-[#F2CD78] drop-shadow-[0_0_8px_rgba(214,164,59,0.75)]" aria-hidden="true" />
           </div>
 
           {/* Main Title */}
-          <div className="space-y-0.5">
-            <h1 className="text-xl sm:text-2xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">
+          <div className="space-y-0.5 md:space-y-1">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">
               {publicT('public_explore')}{' '}
-              <span className="text-[var(--mn-accent-text)]">{publicT('public_manaratak_tools')}</span>
+              <span className="text-[#F2CD78]">{publicT('public_manaratak_tools')}</span>
             </h1>
 
-            {/* Small Gold Horizontal Divider */}
-            <div className="flex justify-center pt-1 pb-0.5">
-              <div className="w-10 h-0.5 bg-[var(--mn-accent)] rounded-full mn-gold" />
+            {/* Small Official Gold Horizontal Divider */}
+            <div className="flex justify-center pt-0.5 pb-0.5">
+              <div className="w-10 md:w-14 h-0.5 bg-gradient-to-r from-[#D6A43B] via-[#F2CD78] to-[#D6A43B] rounded-full" />
             </div>
 
-            {/* Subtitle (single-line height matching Scholarships & Majors Hero) */}
-            <p className="text-[11px] sm:text-xs text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-md mx-auto truncate">
+            {/* Subtitle */}
+            <p className="text-[10px] sm:text-xs md:text-sm text-[#DDEFF2] font-medium font-['Cairo',sans-serif] leading-relaxed max-w-md md:max-w-2xl mx-auto px-2 line-clamp-2">
               {publicT('public_smart_academic_tools_and_calculators_for_comparison_planning')}
             </p>
           </div>
 
-          {/* Integrated Clean White Search Bar in Hero */}
-          <div className="pt-1 max-w-sm sm:max-w-md md:max-w-xl mx-auto px-1">
+          {/* Integrated Clean Search Bar in Hero */}
+          <div className="pt-0.5 sm:pt-1 max-w-sm sm:max-w-md md:max-w-xl mx-auto px-1">
             <div className="relative">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={publicT('public_search_by_tool_name_or_purpose')}
-                className="w-full py-2.5 pl-4 pr-10 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-[12px] font-bold placeholder:text-[var(--mn-text-muted)] placeholder:text-[12px] placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel"
+                className="w-full py-2 sm:py-2.5 md:py-3 pl-4 pr-10 md:pr-11 bg-white dark:bg-[#111E38] text-[#203442] dark:text-[#EDF5F5] rounded-full text-[12px] md:text-sm font-bold placeholder:text-[#5C707C] dark:placeholder:text-[#9BB4C7] placeholder:text-[12px] md:placeholder:text-sm placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[#142B5F]/12 dark:border-white/14 focus:border-[#0E7C86] dark:focus:border-[#34BFC9] transition-all text-center font-['Cairo',sans-serif] mn-panel"
                 data-mn-design="8bba664dec"
               />
-              <Search className="w-4 h-4 text-[var(--mn-accent-text)] absolute right-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 md:w-4.5 md:h-4.5 text-[#0E7C86] dark:text-[#34BFC9] absolute right-3.5 md:right-4 top-1/2 -translate-y-1/2" />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 p-1 text-[var(--mn-text-muted)] hover:text-[var(--mn-text)] cursor-pointer"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 p-1 text-[#5C707C] dark:text-[#9BB4C7] hover:text-[#142B5F] dark:hover:text-white cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -843,9 +826,9 @@ export const AIToolsPage: React.FC<AIToolsPageProps> = ({
           <div className="flex justify-center mt-2 relative z-10">
             <button
               onClick={resetFilters}
-              className="text-[10px] font-bold text-[var(--mn-danger-text)] hover:text-[var(--mn-danger-text)] bg-[var(--mn-surface-elevated)]/95 px-2.5 py-0.5 rounded-full shadow-xs transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif] mn-panel"
+              className="text-[10px] md:text-xs font-bold text-[#142B5F] dark:text-[#F2CD78] bg-white/95 dark:bg-[#111E38]/95 hover:bg-white dark:hover:bg-[#162747] border border-[#142B5F]/15 dark:border-[#F2CD78]/30 px-2.5 md:px-3.5 py-0.5 md:py-1 rounded-full shadow-xs transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif]"
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-3 h-3 text-[#0E7C86] dark:text-[#34BFC9]" />
               <span>
                 {publicT('public_reset_filters')}
                 {activeFiltersCount})
@@ -855,126 +838,167 @@ export const AIToolsPage: React.FC<AIToolsPageProps> = ({
         )}
 
         {/* ========================================================================= */}
-        {/* 3 SEPARATE FLOATING FILTER TILES INSIDE THE HERO CONTAINER                */}
+        {/* 3 BALANCED FLOATING FILTER TILES                                          */}
         {/* ========================================================================= */}
-        <div className="max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto mn-inline-gutter mt-2.5 relative z-20 pb-0">
-          <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
+        <div className="max-w-md md:max-w-2xl mx-auto mn-inline-gutter mt-2 sm:mt-2.5 md:mt-3.5 relative z-20 pb-0 md:pb-1">
+          <div className="grid grid-cols-3 gap-2 md:gap-3.5">
             {/* Tile 1: المجال */}
             <button
               type="button"
-              onClick={() => setOpenFilterModal('category')}
-              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel"
+              onClick={() => setOpenFilterModal((prev) => (prev === 'category' ? null : 'category'))}
+              className={`relative min-w-0 overflow-hidden bg-white dark:bg-[#111E38] hover:bg-[#F6F8FA] dark:hover:bg-[#162747] border-1.5 ${
+                openFilterModal === 'category'
+                  ? 'border-[#0E7C86] dark:border-[#38C6D4] ring-1 ring-[#0E7C86]/25 dark:ring-[#38C6D4]/25'
+                  : selectedCategory !== 'الكل'
+                    ? 'border-[#D6A43B] dark:border-[#F2CD78]/75 ring-1 ring-[#D6A43B]/25 dark:ring-[#F2CD78]/20'
+                    : 'border-[#142B5F]/18 dark:border-white/14 hover:border-[#0E7C86]/50 dark:hover:border-[#34BFC9]/45'
+              } rounded-xl sm:rounded-2xl p-1.5 sm:p-2.5 md:p-3 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(14,30,64,0.08)] transition-all h-[48px] sm:h-[62px] md:h-[70px] cursor-pointer mn-panel font-['Cairo',sans-serif]`}
             >
-              <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
-                <Layers3 className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
-                <span className="truncate">{selectedCategory === 'الكل' ? publicT('public_domain') : selectedCategory}</span>
+              <div className="min-w-0 flex items-center justify-center gap-1 sm:gap-1.5 text-[#142B5F] dark:text-[#EDF5F5] font-bold text-[10px] sm:text-xs md:text-sm font-['Cairo',sans-serif] w-full">
+                <Layers3
+                  className={`w-3.5 h-3.5 md:w-4 md:h-4 shrink-0 ${
+                    selectedCategory !== 'الكل'
+                      ? 'text-[#D6A43B] dark:text-[#F2CD78]'
+                      : 'text-[#0E7C86] dark:text-[#34BFC9]'
+                  }`}
+                />
+                <span className="min-w-0 truncate">{selectedCategory === 'الكل' ? publicT('public_domain') : selectedCategory}</span>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
+              <ChevronDown className={`w-3.5 h-3.5 mt-0.5 shrink-0 transition-transform duration-200 ${openFilterModal === 'category' ? 'rotate-180 text-[#0E7C86] dark:text-[#38C6D4]' : 'text-[#5C707C] dark:text-[#9BB4C7]'}`} />
             </button>
 
             {/* Tile 2: التوفر */}
             <button
               type="button"
-              onClick={() => setOpenFilterModal('availability')}
-              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel"
+              onClick={() => setOpenFilterModal((prev) => (prev === 'availability' ? null : 'availability'))}
+              className={`relative min-w-0 overflow-hidden bg-white dark:bg-[#111E38] hover:bg-[#F6F8FA] dark:hover:bg-[#162747] border-1.5 ${
+                openFilterModal === 'availability'
+                  ? 'border-[#0E7C86] dark:border-[#38C6D4] ring-1 ring-[#0E7C86]/25 dark:ring-[#38C6D4]/25'
+                  : selectedAvailability !== 'الكل'
+                    ? 'border-[#D6A43B] dark:border-[#F2CD78]/75 ring-1 ring-[#D6A43B]/25 dark:ring-[#F2CD78]/20'
+                    : 'border-[#142B5F]/18 dark:border-white/14 hover:border-[#0E7C86]/50 dark:hover:border-[#34BFC9]/45'
+              } rounded-xl sm:rounded-2xl p-1.5 sm:p-2.5 md:p-3 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(14,30,64,0.08)] transition-all h-[48px] sm:h-[62px] md:h-[70px] cursor-pointer mn-panel font-['Cairo',sans-serif]`}
             >
-              <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
-                <BookOpenCheck className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
-                <span className="truncate">
+              <div className="min-w-0 flex items-center justify-center gap-1 sm:gap-1.5 text-[#142B5F] dark:text-[#EDF5F5] font-bold text-[10px] sm:text-xs md:text-sm font-['Cairo',sans-serif] w-full">
+                <BookOpenCheck
+                  className={`w-3.5 h-3.5 md:w-4 md:h-4 shrink-0 ${
+                    selectedAvailability !== 'الكل'
+                      ? 'text-[#D6A43B] dark:text-[#F2CD78]'
+                      : 'text-[#0E7C86] dark:text-[#34BFC9]'
+                  }`}
+                />
+                <span className="min-w-0 truncate">
                   {selectedAvailability === 'الكل' ? publicT('public_availability') : publicEnumLabel(selectedAvailability, publicT)}
                 </span>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
+              <ChevronDown className={`w-3.5 h-3.5 mt-0.5 shrink-0 transition-transform duration-200 ${openFilterModal === 'availability' ? 'rotate-180 text-[#0E7C86] dark:text-[#38C6D4]' : 'text-[#5C707C] dark:text-[#9BB4C7]'}`} />
             </button>
 
             {/* Tile 3: نوع الأداة */}
             <button
               type="button"
-              onClick={() => setOpenFilterModal('type')}
-              className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel"
+              onClick={() => setOpenFilterModal((prev) => (prev === 'type' ? null : 'type'))}
+              className={`relative min-w-0 overflow-hidden bg-white dark:bg-[#111E38] hover:bg-[#F6F8FA] dark:hover:bg-[#162747] border-1.5 ${
+                openFilterModal === 'type'
+                  ? 'border-[#0E7C86] dark:border-[#38C6D4] ring-1 ring-[#0E7C86]/25 dark:ring-[#38C6D4]/25'
+                  : selectedType !== 'الكل'
+                    ? 'border-[#D6A43B] dark:border-[#F2CD78]/75 ring-1 ring-[#D6A43B]/25 dark:ring-[#F2CD78]/20'
+                    : 'border-[#142B5F]/18 dark:border-white/14 hover:border-[#0E7C86]/50 dark:hover:border-[#34BFC9]/45'
+              } rounded-xl sm:rounded-2xl p-1.5 sm:p-2.5 md:p-3 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(14,30,64,0.08)] transition-all h-[48px] sm:h-[62px] md:h-[70px] cursor-pointer mn-panel font-['Cairo',sans-serif]`}
             >
-              <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-bold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
-                <Filter className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
-                <span className="truncate">{selectedType === 'الكل' ? publicT('public_tool_type') : publicEnumLabel(selectedType, publicT)}</span>
+              <div className="min-w-0 flex items-center justify-center gap-1 sm:gap-1.5 text-[#142B5F] dark:text-[#EDF5F5] font-bold text-[10px] sm:text-xs md:text-sm font-['Cairo',sans-serif] w-full">
+                <Filter
+                  className={`w-3.5 h-3.5 md:w-4 md:h-4 shrink-0 ${
+                    selectedType !== 'الكل'
+                      ? 'text-[#D6A43B] dark:text-[#F2CD78]'
+                      : 'text-[#0E7C86] dark:text-[#34BFC9]'
+                  }`}
+                />
+                <span className="min-w-0 truncate">{selectedType === 'الكل' ? publicT('public_tool_type') : publicEnumLabel(selectedType, publicT)}</span>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
+              <ChevronDown className={`w-3.5 h-3.5 mt-0.5 shrink-0 transition-transform duration-200 ${openFilterModal === 'type' ? 'rotate-180 text-[#0E7C86] dark:text-[#38C6D4]' : 'text-[#5C707C] dark:text-[#9BB4C7]'}`} />
             </button>
           </div>
         </div>
-
-        <PublicFilterSelectModal
-          isOpen={openFilterModal === 'category'}
-          onClose={() => setOpenFilterModal(null)}
-          title={publicT('public_choose_a_tool_domain')}
-          icon={Layers3}
-          selectedValue={selectedCategory}
-          onSelect={(val) => setSelectedCategory(val as 'الكل' | StudentToolCategory)}
-          options={[
-            { value: 'الكل', label: publicT('public_all_domains') },
-            ...toolCategories.map((category) => ({
-              value: category,
-              label: category,
-            })),
-          ]}
-        />
-
-        <PublicFilterSelectModal
-          isOpen={openFilterModal === 'availability'}
-          onClose={() => setOpenFilterModal(null)}
-          title={publicT('public_choose_availability')}
-          icon={BookOpenCheck}
-          selectedValue={selectedAvailability}
-          onSelect={(val) => setSelectedAvailability(val as 'الكل' | StudentToolAvailability)}
-          options={AVAILABILITY_OPTIONS.map((status) => ({
-            value: status,
-            label: status === 'الكل' ? publicT('public_all_statuses') : publicEnumLabel(status, publicT),
-          }))}
-        />
-
-        <PublicFilterSelectModal
-          isOpen={openFilterModal === 'type'}
-          onClose={() => setOpenFilterModal(null)}
-          title={publicT('public_choose_tool_type')}
-          icon={Filter}
-          selectedValue={selectedType}
-          onSelect={(val) => setSelectedType(val as 'الكل' | StudentToolExecutionLabel)}
-          options={TOOL_TYPES.map((type) => ({
-            value: type,
-            label: type === 'الكل' ? publicT('public_all_types') : publicEnumLabel(type, publicT),
-          }))}
-        />
       </div>
 
-      {/* Gold Divider Ribbon Line */}
-      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--mn-accent-text)] via-[var(--mn-accent-soft)] to-[var(--mn-accent-text)] shadow-xs mb-1" />
+      {/* Official Gold Divider Ribbon */}
+      <div className="w-full h-[1.5px] bg-gradient-to-r from-[#D6A43B]/45 via-[#F2CD78] to-[#D6A43B]/45 dark:from-[#D6A43B]/30 dark:via-[#F2CD78]/65 dark:to-[#D6A43B]/30 mb-3 md:mb-5" />
 
-      <div className="w-full max-w-lg md:max-w-[1120px] lg:max-w-[1160px] mx-auto mn-inline-gutter pt-3 space-y-3 md:space-y-4">
+      {/* Inline Attached Filter Panels */}
+      <PublicInlineFilterPanel
+        isOpen={openFilterModal === 'category'}
+        onClose={() => setOpenFilterModal(null)}
+        title={publicT('public_choose_a_tool_domain')}
+        icon={Layers3}
+        selectedValue={selectedCategory}
+        onSelect={(val) => setSelectedCategory(val as 'الكل' | StudentToolCategory)}
+        dir={publicDir}
+        options={[
+          { value: 'الكل', label: publicT('public_all_domains') },
+          ...toolCategories.map((category) => ({
+            value: category,
+            label: category,
+          })),
+        ]}
+      />
+
+      <PublicInlineFilterPanel
+        isOpen={openFilterModal === 'availability'}
+        onClose={() => setOpenFilterModal(null)}
+        title={publicT('public_choose_availability')}
+        icon={BookOpenCheck}
+        selectedValue={selectedAvailability}
+        onSelect={(val) => setSelectedAvailability(val as 'الكل' | StudentToolAvailability)}
+        dir={publicDir}
+        options={AVAILABILITY_OPTIONS.map((status) => ({
+          value: status,
+          label: status === 'الكل' ? publicT('public_all_statuses') : publicEnumLabel(status, publicT),
+        }))}
+      />
+
+      <PublicInlineFilterPanel
+        isOpen={openFilterModal === 'type'}
+        onClose={() => setOpenFilterModal(null)}
+        title={publicT('public_choose_tool_type')}
+        icon={Filter}
+        selectedValue={selectedType}
+        onSelect={(val) => setSelectedType(val as 'الكل' | StudentToolExecutionLabel)}
+        dir={publicDir}
+        options={TOOL_TYPES.map((type) => ({
+          value: type,
+          label: type === 'الكل' ? publicT('public_all_types') : publicEnumLabel(type, publicT),
+        }))}
+      />
+
+      <div className="w-full max-w-4xl md:max-w-[1120px] lg:max-w-[1160px] mx-auto px-1 sm:px-2 md:px-4 pt-1 space-y-3 md:space-y-4">
         <div className="flex items-center justify-between px-1">
-          <div>
-            <span className="text-xs sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">
+          <div className="flex items-center gap-1.5 text-[#142B5F] dark:text-[#EDF5F5] font-semibold text-xs sm:text-sm md:text-base font-['Cairo',sans-serif]">
+            <BrainCircuit className="w-3.5 h-3.5 md:w-4.5 md:h-4.5 text-[#0E7C86] dark:text-[#34BFC9]" />
+            <span>
               {publicT('public_available_tools')}
               {filteredTools.length})
             </span>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] px-2.5 py-1 text-[10px] text-white font-bold font-['Cairo',sans-serif] shadow-2xs">
-            <Sparkles className="w-3 h-3 text-[#F2CD78]" />
+          <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] md:text-xs font-bold text-[#0E7C86] dark:text-[#7FD4DE] bg-[#DDEFF2]/85 dark:bg-[#0E7C86]/20 px-2.5 md:px-3 py-0.5 md:py-1 rounded-full border border-[#0E7C86]/20 dark:border-[#34BFC9]/25 font-['Cairo',sans-serif]">
+            <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3 text-[#0E7C86] dark:text-[#34BFC9]" />
             <span>{publicT('public_student_tools')}</span>
           </span>
         </div>
 
-        <div className="flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 items-stretch">
+        <div className="flex flex-col gap-2.5 sm:gap-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 items-stretch">
           {filteredTools.length === 0 ? (
-            <div className="col-span-full bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-2 shadow-2xs mn-panel">
-              <div className="w-12 h-12 rounded-full bg-[var(--mn-surface-muted)] flex items-center justify-center text-[var(--mn-text-muted)] mn-panel">
+            <div className="col-span-full bg-white dark:bg-[#111E38] border border-[#142B5F]/12 dark:border-white/10 rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-2 shadow-2xs mn-panel">
+              <div className="w-12 h-12 rounded-full bg-[#F6F8FA] dark:bg-[#0B1529] border border-[#142B5F]/10 flex items-center justify-center text-[#0E7C86] dark:text-[#34BFC9] mn-panel">
                 <Search className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_no_matching_tools')}</h3>
-              <p className="text-xs text-[var(--mn-text-muted)] max-w-xs font-['Cairo',sans-serif]">
+              <h3 className="text-sm font-bold text-[#142B5F] dark:text-[#EDF5F5] font-['Cairo',sans-serif]">{publicT('public_no_matching_tools')}</h3>
+              <p className="text-xs text-[#5C707C] dark:text-[#9BB4C7] max-w-xs font-['Cairo',sans-serif]">
                 {publicT('public_change_the_filters_or_search_the_published_tools')}
               </p>
               <button
                 onClick={resetFilters}
-                className="mt-2 px-4 py-1.5 bg-[var(--mn-primary)] text-white rounded-xl text-xs font-bold cursor-pointer font-['Cairo',sans-serif] mn-inverse"
+                className="mt-2 px-4 py-1.5 bg-[#142B5F] hover:bg-[#0E7C86] text-white rounded-xl text-xs font-bold cursor-pointer font-['Cairo',sans-serif] transition-colors"
               >
                 {publicT('public_clear_filters')}
               </button>

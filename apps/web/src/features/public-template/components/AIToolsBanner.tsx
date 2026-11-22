@@ -1,149 +1,123 @@
-import { ChevronLeft, Database, FileText, Target } from 'lucide-react';
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import {
   ArrowUpLeft,
+  Bot,
+  BrainCircuit,
+  Cpu,
+  ScanSearch,
   Sparkles,
-  Scale,
-  FilePenLine,
-  Calculator,
-  ShieldCheck,
-  FileCheck2,
-  Award,
+  Wand2,
 } from 'lucide-react';
+import {
+  HOME_INNER_CARD_CLASS,
+  HOME_INNER_ICON_CLASS,
+  HomeSectionCta,
+  HomeSectionHeader,
+  HomeSectionShell,
+} from './HomeSectionPrimitives';
 
 interface AIToolsBannerProps {
   dataMode?: 'api' | 'prototype';
   onOpenAiTools: (toolKey?: string) => void;
 }
 
-const TOOL_PAIRS = [
-  // Column 1: 3 cards stacked vertically
-  [
-    {
-      id: 'university-comparison',
-      title: 'public_compare_universities',
-      subtitle: 'public_compare_university_information_before_deciding',
-      icon: Scale,
-    },
-    {
-      id: 'motivation-letter-generator',
-      title: 'public_motivation_letter_generator',
-      subtitle: 'public_create_an_organized_draft_for_review',
-      icon: FilePenLine,
-    },
-    {
-      id: 'gpa-calculator',
-      title: 'public_gpa_calculator',
-      subtitle: 'public_calculate_and_convert_your_academic_gpa',
-      icon: Calculator,
-    },
-  ],
-  // Column 2: 3 cards stacked vertically
-  [
-    {
-      id: 'scholarship-eligibility-checker',
-      title: 'public_scholarship_eligibility_analyzer',
-      subtitle: 'public_assess_how_your_qualifications_match_the_requirements',
-      icon: ShieldCheck,
-    },
-    {
-      id: 'cv-builder',
-      title: 'public_academic_cv_builder',
-      subtitle: 'public_build_a_standard_academic_cv',
-      icon: FileCheck2,
-    },
-    {
-      id: 'recommendation-assistant',
-      title: 'public_recommendation_letter_assistant',
-      subtitle: 'public_prepare_recommendation_templates_and_talking_points_for_your',
-      icon: Award,
-    },
-  ],
+const TOOL_ITEMS = [
+  {
+    id: 'university-comparison',
+    title: 'public_compare_universities',
+    icon: BrainCircuit,
+  },
+  {
+    id: 'motivation-letter-generator',
+    title: 'public_motivation_letter_generator',
+    icon: Wand2,
+  },
+  {
+    id: 'gpa-calculator',
+    title: 'public_gpa_calculator',
+    icon: Cpu,
+  },
+  {
+    id: 'scholarship-eligibility-checker',
+    title: 'public_scholarship_eligibility_analyzer',
+    icon: ScanSearch,
+  },
+  {
+    id: 'cv-builder',
+    title: 'public_academic_cv_builder',
+    icon: Bot,
+  },
+  {
+    id: 'recommendation-assistant',
+    title: 'public_recommendation_letter_assistant',
+    icon: Sparkles,
+  },
 ];
 
 export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools, dataMode = 'api' }) => {
   const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
 
   return (
-    <section id="ai-tools-section" className="px-0 py-3 w-full">
-      <div className="relative rounded-3xl p-3.5 sm:p-4 bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)]/80 border border-[var(--mn-border)] shadow-sm overflow-hidden mn-panel ">
-        {/* Elegant top gradient border line */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
+    <HomeSectionShell id="ai-tools-section">
+      <HomeSectionHeader
+        title={publicT('public_manaratak_tools')}
+        subtitle={publicT('public_smart_tools_and_calculators_for_comparison_planning_applications')}
+        icon={<BrainCircuit className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.1]" />}
+      />
 
-        <div className="relative z-10">
-          <div className="text-center mb-3 sm:mb-3.5">
-            <div className="relative pb-1 mb-1 inline-block">
-              <h3 className="text-[14.5px] sm:text-base font-bold text-[#142B5F] dark:text-[#D6A43B] inline-flex items-center justify-center gap-1.5 font-['Cairo',sans-serif]">
-                <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#142B5F] border border-[#D6A43B]/60 flex items-center justify-center shrink-0 shadow-2xs">
-                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D6A43B]" />
-                </span>
-                <span>{publicT('public_manaratak_tools')}</span>
-              </h3>
-              <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
-            </div>
-            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_smart_tools_and_calculators_for_comparison_planning_applications')}</p>
-          </div>
+      {dataMode !== 'prototype' && (
+        <p
+          id="home-tools-preview-note"
+          role="note"
+          className="mb-2 text-center text-[10px] md:text-xs font-semibold text-[#5C707C] dark:text-[#9BB4C7]"
+        >
+          {publicT('public_home_tools_preview_notice')}
+        </p>
+      )}
 
-          {/* Horizontal Scrollable Container with 2-by-2 Stacked Tools */}
-          {dataMode !== 'prototype' && (
-            <p id="home-tools-preview-note" role="note" className="mb-2 text-center text-[10px] font-medium text-[var(--mn-text-muted)]">{publicT('public_home_tools_preview_notice')}</p>
-          )}
-          <div className="relative w-full">
-            <div className="flex overflow-x-auto gap-2 sm:gap-2.5 pb-2 pt-1 no-scrollbar snap-x snap-mandatory scroll-smooth" dir={publicDir}>
-              {TOOL_PAIRS.map((pair, colIdx) => (
-                <div key={colIdx} className="flex-none w-[230px] sm:w-[260px] space-y-2 snap-start">
-                  {pair.map((tool) => (
-                    <button
-                      key={tool.id}
-                      onClick={() => onOpenAiTools(tool.id)}
-                      disabled={dataMode !== 'prototype'}
-                      aria-describedby={dataMode !== 'prototype' ? 'home-tools-preview-note' : undefined}
-                      className="w-full text-start rounded-2xl border border-[var(--mn-border)] hover:border-[var(--mn-accent)]/60 bg-[var(--mn-surface)] p-2.5 shadow-2xs hover:shadow-sm transition-all active:scale-[0.98] cursor-pointer disabled:cursor-default disabled:opacity-75 min-w-0 mn-panel group flex items-start gap-2.5"
-                    >
-                      <div className="w-8 h-8 rounded-full overflow-hidden p-[1px] bg-[#142B5F] dark:bg-[var(--mn-accent)] border border-[#D6A43B]/60 shrink-0 shadow-2xs flex items-center justify-center">
-                        <img
-                          src={'/preview-art/tools.svg'}
-                          alt={publicT(tool.title)}
-                          className="w-full h-full rounded-full object-cover"
-                          referrerPolicy="no-referrer"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).onerror = null;
-                            (e.target as HTMLImageElement).src = '/preview-art/tools.svg';
-                          }}
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h4 className="text-[11px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug font-['Cairo',sans-serif] group-hover:text-[var(--mn-accent-text)] transition-colors">
-                          {publicT(tool.title)}
-                        </h4>
-                        <p className="mt-0.5 text-[9px] sm:text-[10px] text-[var(--mn-text-muted)] leading-4 font-medium font-['Cairo',sans-serif] line-clamp-1">
-                          {publicT(tool.subtitle)}
-                        </p>
-                      </div>
-                      {/* Navigation Arrow Badge */}
-                      <div className="w-6 h-6 rounded-full bg-[var(--mn-page)] dark:bg-[#142B5F]/50 border border-[var(--mn-border)] dark:border-[#D6A43B]/40 flex items-center justify-center shrink-0 self-center transition-all group-hover:bg-[#142B5F] dark:group-hover:bg-[#D6A43B] group-hover:border-transparent group-hover:scale-105 shadow-2xs">
-                        <ArrowUpLeft className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[#D6A43B] group-hover:text-white dark:group-hover:text-[#142B5F] transition-colors" />
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* Responsive Tool Matrix: Approved Frost Cards + Unified Navy-Petrol Gradient AI Icons */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-1.5 sm:gap-2.5 md:gap-3.5 w-full items-stretch" dir={publicDir}>
+        {TOOL_ITEMS.map((tool) => {
+          const ToolIcon = tool.icon;
 
-          <div className="mt-3 flex justify-center">
+          return (
             <button
-              id="btn-view-all-ai-tools"
-              onClick={() => onOpenAiTools()}
-              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs "
+              key={tool.id}
+              type="button"
+              onClick={() => onOpenAiTools(tool.id)}
+              disabled={dataMode !== 'prototype'}
+              aria-describedby={dataMode !== 'prototype' ? 'home-tools-preview-note' : undefined}
+              className={`group relative h-full min-h-[46px] sm:min-h-[54px] md:min-h-[58px] w-full text-start rounded-xl md:rounded-2xl px-2 py-2 sm:px-3 sm:py-2.5 md:px-3.5 md:py-3 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer disabled:cursor-default disabled:opacity-80 min-w-0 flex items-center gap-2 sm:gap-2.5 md:gap-3 ${HOME_INNER_CARD_CLASS}`}
             >
-              <span className="text-[12px] sm:text-sm font-bold">{publicT('public_browse_manaratak_tools')}</span>
-              <ChevronLeft className="w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />
+              <div
+                className={`w-7.5 h-7.5 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-lg sm:rounded-xl shrink-0 flex items-center justify-center relative overflow-hidden transition-transform group-hover:scale-105 ${HOME_INNER_ICON_CLASS}`}
+              >
+                <ToolIcon className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 text-white stroke-[2]" />
+              </div>
+
+              <div className="min-w-0 flex-1 flex items-center">
+                <h4 className="w-full text-[10.5px] sm:text-[11.5px] md:text-[12.5px] font-extrabold text-[#142B5F] dark:text-[#F1F5F9] leading-snug line-clamp-2 font-['Cairo',sans-serif] group-hover:text-[#0E7C86] dark:group-hover:text-[#38C6D4] transition-colors">
+                  {publicT(tool.title)}
+                </h4>
+              </div>
+
+              <div className="hidden md:flex w-6.5 h-6.5 rounded-full bg-white dark:bg-[#162749] border border-[#142B5F]/10 group-hover:bg-[#0E7C86] group-hover:border-[#0E7C86] text-[#142B5F] group-hover:text-white dark:text-[#38C6D4] items-center justify-center shrink-0 self-center transition-colors">
+                <ArrowUpLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" />
+              </div>
             </button>
-          </div>
-        </div>
+          );
+        })}
       </div>
-    </section>
+
+      {/* Full-Width View All Button */}
+      <div className="mt-2.5 md:mt-4 w-full">
+        <HomeSectionCta
+          id="btn-view-all-ai-tools"
+          label={publicT('public_browse_manaratak_tools')}
+          onClick={() => onOpenAiTools()}
+        />
+      </div>
+    </HomeSectionShell>
   );
 };

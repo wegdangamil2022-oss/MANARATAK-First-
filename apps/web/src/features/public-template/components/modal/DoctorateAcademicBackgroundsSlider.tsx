@@ -1,9 +1,14 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../../i18n/I18nProvider';
 import React, { useState } from 'react';
-import { Check, ArrowUpLeft, GraduationCap, Dna, Zap, Scale, Layers } from 'lucide-react';
+import { ArrowUpLeft, GraduationCap, Dna, Zap, Scale, Layers } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Major } from '../../types';
-import { DetailSectionHeader } from '../DetailUi';
+import {
+  MAJOR_INNER_BOX_CLASS,
+  MAJOR_SECTION_CARD_CLASS,
+  MajorPetrolCheckMarker,
+  MajorSectionHeader,
+} from './MajorDetailPrimitives';
 
 interface DoctorateAcademicBackgroundsSliderProps {
   major: Major;
@@ -17,7 +22,6 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
   const [activeTab, setActiveTab] = useState<number>(0);
   const [direction, setDirection] = useState<number>(0);
 
-  // Clean 4 tabs without confusing micro-badges or clipped texts
   const tabs = [
     {
       id: 0,
@@ -60,17 +64,14 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
     setActiveTab(index);
   };
 
-  // Drag End handler for touch / swipe gestures
-  const handleDragEnd = (_: any, info: any) => {
+  const handleDragEnd = (_: unknown, info: { offset: { x: number } }) => {
     const swipeThreshold = 40;
     if (info.offset.x > swipeThreshold) {
-      // Swiped right in RTL -> Go to Next
       if (activeTab < tabs.length - 1) {
         setDirection(1);
         setActiveTab((prev) => prev + 1);
       }
     } else if (info.offset.x < -swipeThreshold) {
-      // Swiped left in RTL -> Go to Prev
       if (activeTab > 0) {
         setDirection(-1);
         setActiveTab((prev) => prev - 1);
@@ -79,29 +80,15 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
   };
 
   return (
-    <div
-      className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel font-['Cairo',sans-serif]"
-      dir={publicDir}
-    >
-      {/* Top Royal Navy / Gold Accent Line */}
-      <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
-
-      {/* Section Header */}
-      <DetailSectionHeader
+    <div className={MAJOR_SECTION_CARD_CLASS} dir={publicDir}>
+      <MajorSectionHeader
         id="major-academic-backgrounds"
-        className="mb-3"
+        icon={Layers}
         title={publicT('public_4_suitable_academic_backgrounds_and_entry_paths')}
-        iconClassName="mn-icon-mix02"
-        iconNode={
-          <>
-            <span className="pointer-events-none absolute top-0 right-0 w-2.5 h-2.5 bg-[#D6A43B] rounded-bl-md" />
-            <Layers className="h-4 w-4 relative z-10 text-[#F2CD78]" />
-          </>
-        }
       />
 
-      {/* 4 Clean Segmented Tab Buttons */}
-      <div className="relative mb-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-1.5 font-['Cairo',sans-serif]">
+      {/* 4 Clean Segmented Tab Buttons — Official White / #F6F8FA / Navy-Petrol */}
+      <div className={`relative mb-3 rounded-xl ${MAJOR_INNER_BOX_CLASS} p-1.5 font-['Cairo',sans-serif]`}>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
           {tabs.map((tab, idx) => {
             const Icon = tab.icon;
@@ -113,14 +100,20 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
                 onClick={() => handleSelectTab(idx)}
                 className={`py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer select-none text-center font-['Cairo',sans-serif] ${
                   isActive
-                    ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] text-white border border-[#D6A43B]/75 shadow-sm font-bold mn-inverse'
-                    : 'bg-[var(--mn-surface)] text-[var(--mn-heading)] border border-[var(--mn-border)] hover:border-[#142B5F]/45 dark:hover:border-[#F2CD78] font-bold mn-panel'
+                    ? 'bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] text-white border border-[#142B5F]/20 shadow-[0_3px_10px_rgba(20,43,95,0.18)] font-bold mn-inverse'
+                    : 'bg-white dark:bg-[#111E38] text-[#142B5F] dark:text-[#EDF5F5] border border-[#142B5F]/10 dark:border-white/10 hover:border-[#0E7C86]/40 hover:bg-[#DDEFF2]/25 dark:hover:bg-[#132542] font-bold mn-panel'
                 }`}
               >
-                <span className="w-5 h-5 rounded-md bg-[#142B5F] border border-[#D6A43B]/75 flex items-center justify-center shrink-0 shadow-2xs">
-                  <Icon className="w-3 h-3 text-[#F2CD78]" />
+                <span
+                  className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-colors ${
+                    isActive
+                      ? 'bg-white/15 text-[#F2CD78]'
+                      : 'bg-[#DDEFF2]/70 dark:bg-[#0E7C86]/20 text-[#0E7C86] dark:text-[#34BFC9]'
+                  }`}
+                >
+                  <Icon className="w-3 h-3" />
                 </span>
-                <span className="text-[11px] sm:text-[11.5px] leading-tight truncate font-['Cairo',sans-serif]">
+                <span className="text-[10.5px] sm:text-[11px] leading-tight truncate font-['Cairo',sans-serif]">
                   {tab.tabLabel}
                 </span>
               </button>
@@ -130,7 +123,7 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
       </div>
 
       {/* Swipeable Slide Content Container */}
-      <div className="relative overflow-hidden rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] p-3 font-['Cairo',sans-serif]">
+      <div className={`relative overflow-hidden rounded-xl ${MAJOR_INNER_BOX_CLASS} p-3 sm:p-3.5 font-['Cairo',sans-serif]`}>
         <AnimatePresence mode="wait" initial={false} custom={direction}>
           <motion.div
             key={activeTab}
@@ -146,15 +139,15 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
             className="w-full space-y-2.5 text-start cursor-grab active:cursor-grabbing font-['Cairo',sans-serif]"
           >
             {/* Slide Header */}
-            <div className="flex items-center gap-2.5 pb-2.5 border-b border-[var(--mn-border)]">
-              <div className="w-8 h-8 rounded-xl bg-[#142B5F] border border-[#D6A43B]/75 flex items-center justify-center shadow-2xs shrink-0">
+            <div className="flex items-center gap-2.5 pb-2.5 border-b border-[#142B5F]/10 dark:border-white/10">
+              <div className="w-8 h-8 rounded-xl bg-[#142B5F] text-[#F2CD78] flex items-center justify-center shadow-[0_2px_8px_rgba(20,43,95,0.18)] shrink-0">
                 {React.createElement(currentTab.icon, { className: 'w-4 h-4 text-[#F2CD78]' })}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-[11.5px] sm:text-[12px] font-bold text-[var(--mn-heading)] leading-tight font-['Cairo',sans-serif]">
+                <h3 className="text-[11px] sm:text-xs md:text-[13px] font-extrabold text-[#142B5F] dark:text-[#F1F5F9] leading-snug font-['Cairo',sans-serif]">
                   {currentTab.title}
                 </h3>
-                <p className="text-[10px] sm:text-[10.5px] text-[var(--mn-text-muted)] font-bold mt-0.5 leading-snug font-['Cairo',sans-serif]">
+                <p className="text-[10.5px] sm:text-[11px] text-[#5C707C] dark:text-[#9BB4C7] font-bold mt-0.5 leading-relaxed font-['Cairo',sans-serif]">
                   {currentTab.description}
                 </p>
               </div>
@@ -165,19 +158,20 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
               {currentTab.items.map((item, idx) => (
                 <div
                   key={idx}
-                  className="group flex items-center justify-between gap-2 p-2.5 rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border)] hover:border-[#0E7C86]/55 hover:shadow-2xs transition-all duration-200 text-start h-full mn-panel font-['Cairo',sans-serif]"
+                  className={`group flex items-center justify-between gap-2 p-2.5 rounded-xl bg-white dark:bg-[#111E38] border border-[#142B5F]/10 dark:border-white/10 hover:border-[#0E7C86]/40 hover:bg-[#DDEFF2]/20 dark:hover:bg-[#132542] transition-all duration-200 text-start h-full mn-panel font-['Cairo',sans-serif] ${
+                    idx === currentTab.items.length - 1 && currentTab.items.length % 2 === 1
+                      ? 'sm:col-span-2'
+                      : ''
+                  }`}
                 >
-                  <div className="flex items-start gap-2 min-w-0 flex-1">
-                    {/* B-02: صح بترولي الأفق صافي بحجم متناسق مع الخط */}
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#0E7C86]/12 border border-[#0E7C86] text-[#0E7C86] dark:text-[#38C6D4] flex items-center justify-center shrink-0 mt-0.5">
-                      <Check className="w-2 h-2 stroke-[2.75]" />
-                    </span>
-                    <span className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] leading-snug flex-1 font-['Cairo',sans-serif]">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <MajorPetrolCheckMarker />
+                    <span className="text-[10.5px] sm:text-[11px] font-bold text-[#142B5F] dark:text-[#EDF5F5] leading-snug flex-1 font-['Cairo',sans-serif]">
                       {item}
                     </span>
                   </div>
                   {(activeTab === 0 || activeTab === 1) && (
-                    <ArrowUpLeft className="w-3.5 h-3.5 text-[var(--mn-interactive-arrow)] group-hover:scale-110 transition-transform shrink-0" />
+                    <ArrowUpLeft className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#34BFC9] group-hover:scale-110 transition-transform shrink-0" />
                   )}
                 </div>
               ))}

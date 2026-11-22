@@ -38,6 +38,7 @@ import {
   Info,
 } from 'lucide-react';
 import { DetailSectionHeader } from './DetailUi';
+import { HomeSectionCta, HomeSectionHeader, HomeSectionShell } from './HomeSectionPrimitives';
 
 type ShowcaseCategory =
   | 'all'
@@ -55,41 +56,27 @@ type ShowcaseCategory =
  */
 export const DesignShowcasePreviewSection: React.FC<{ onOpen: () => void }> = ({ onOpen }) => {
   return (
-    <section id="design-showcase-preview" className="px-0 py-3 w-full font-['Cairo',sans-serif]">
-      <div className="relative rounded-3xl p-5 sm:p-6 md:px-6 md:py-5 bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)]/80 border border-[var(--mn-border)] shadow-xs overflow-hidden mn-panel text-center">
-        {/* Top gradient accent line matching ContactSection */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
+    <HomeSectionShell id="design-showcase-preview">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3.5 md:gap-6">
+        <div className="flex-1 min-w-0">
+          <HomeSectionHeader
+            title="قسم التصميمات والواجهات"
+            subtitle="مكتبة الأيقونات والبطاقات بألوان هوية منارتك"
+            icon={<Palette className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.1]" />}
+            align="start-md"
+            className="mb-0"
+          />
+        </div>
 
-        <div className="relative z-10 flex flex-col items-center justify-center">
-          {/* Section Header with Icon and Gold Underline */}
-          <div className="relative pb-1 mb-1.5 inline-block">
-            <h3 className="text-[14.5px] sm:text-base md:text-lg lg:text-xl font-bold text-[#142B5F] dark:text-[#D6A43B] inline-flex items-center justify-center gap-1.5 font-['Cairo',sans-serif]">
-              <span className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-[#142B5F] border border-[#D6A43B]/60 flex items-center justify-center shrink-0 shadow-2xs">
-                <Palette className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 text-[#D6A43B]" />
-              </span>
-              <span>قسم التصميمات والواجهات</span>
-            </h3>
-            <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
-          </div>
-
-          {/* Description Text */}
-          <p className="text-[11px] sm:text-xs md:text-sm text-[var(--mn-text-muted)] font-medium max-w-xl md:max-w-2xl mx-auto leading-relaxed mt-1 mb-4 sm:mb-5">
-            مكتبة شاملة للأيقونات المنفردة والمدمجة، الخطوط الهندسية، المربعات، الأزرار، وتعدد الأقسام بألوان هوية منارتك (النيلي، البترولي، الفيروزي، والذهبي).
-          </p>
-
-          {/* Action Button: عرض التفاصيل */}
-          <button
+        <div className="w-full md:w-[240px] shrink-0">
+          <HomeSectionCta
             id="btn-view-design-showcase"
-            type="button"
+            label="عرض التفاصيل"
             onClick={onOpen}
-            className="group inline-flex items-center justify-center gap-2 px-7 sm:px-9 md:px-11 py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs cursor-pointer"
-          >
-            <span className="text-xs sm:text-sm md:text-base font-bold">عرض التفاصيل</span>
-            <ChevronLeft className="w-4 h-4 md:w-4.5 md:h-4.5 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />
-          </button>
+          />
         </div>
       </div>
-    </section>
+    </HomeSectionShell>
   );
 };
 
@@ -1134,7 +1121,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               {/* BOX-01: White base + calm Petrol whisper from right */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-01')}
                 role="button"
                 tabIndex={0}
@@ -1160,7 +1147,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
               </div>
 
               {/* BOX-02: White base + calm Turquoise whisper from right */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-02')}
                 role="button"
                 tabIndex={0}
@@ -1186,7 +1173,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
               </div>
 
               {/* BOX-03: White base + calm Navy whisper from right */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-03')}
                 role="button"
                 tabIndex={0}
@@ -1212,7 +1199,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
               </div>
 
               {/* BOX-04: White base + calm Gold whisper from right */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-04')}
                 role="button"
                 tabIndex={0}
@@ -1238,7 +1225,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
               </div>
 
               {/* BOX-05: White base + Top-down calm Petrol & Mist breeze */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-05')}
                 role="button"
                 tabIndex={0}
@@ -1264,7 +1251,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
               </div>
 
               {/* BOX-06: White base + Top-Left & Top-Right Corner Petrol Glow */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-06')}
                 role="button"
                 tabIndex={0}
@@ -1291,7 +1278,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
               </div>
 
               {/* BOX-07: White base + Right Vertical Bar + Petrol internal tint */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-07')}
                 role="button"
                 tabIndex={0}
@@ -1312,7 +1299,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
               </div>
 
               {/* BOX-08: White base + Right Vertical Bar + Turquoise internal tint */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-08')}
                 role="button"
                 tabIndex={0}
@@ -1333,7 +1320,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
               </div>
 
               {/* BOX-09: White Center + Dual Edge Whisper (Petrol Right + Turquoise Left) */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-09')}
                 role="button"
                 tabIndex={0}
@@ -1359,7 +1346,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
               </div>
 
               {/* BOX-10: White Center + Dual Edge Whisper (Navy Right + Gold Left) */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-10')}
                 role="button"
                 tabIndex={0}
@@ -1385,7 +1372,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
               </div>
 
               {/* BOX-11: White base + Diagonal Corner Tint (Bottom-Left Petrol/Turquoise) */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-11')}
                 role="button"
                 tabIndex={0}
@@ -1406,7 +1393,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
               </div>
 
               {/* BOX-12: White base + Diagonal Corner Tint (Warm Ivory/Gold + Navy Corner) */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-12')}
                 role="button"
                 tabIndex={0}
@@ -1427,7 +1414,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
               </div>
 
               {/* BOX-13: White base + Bottom-up soft Petrol horizon */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-13')}
                 role="button"
                 tabIndex={0}
@@ -1453,7 +1440,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
               </div>
 
               {/* BOX-14: White base + Soft Center Turquoise-Petrol Halo */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-14')}
                 role="button"
                 tabIndex={0}
@@ -1480,7 +1467,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
               </div>
 
               {/* BOX-15: White base + Triple Soft Ribbon (Navy + Petrol + Turquoise) */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-15')}
                 role="button"
                 tabIndex={0}
@@ -1501,7 +1488,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
               </div>
 
               {/* BOX-16: White base + Framed Inner Header Tint */}
-              <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+              <div
                 onClick={() => handleCopyCode('BOX-16')}
                 role="button"
                 tabIndex={0}
@@ -2061,7 +2048,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* NAV-01 */}
-                <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+                <div
                   onClick={() => handleCopyCode('NAV-01')}
                   role="button"
                   tabIndex={0}
@@ -2077,7 +2064,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
                 </div>
 
                 {/* NAV-02 */}
-                <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+                <div
                   onClick={() => handleCopyCode('NAV-02')}
                   role="button"
                   tabIndex={0}
@@ -2095,7 +2082,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
                 </div>
 
                 {/* NAV-03: Breadcrumb Trail Pill */}
-                <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+                <div
                   onClick={() => handleCopyCode('NAV-03')}
                   role="button"
                   tabIndex={0}
@@ -2117,7 +2104,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
                 </div>
 
                 {/* NAV-04: Combined Back Button + Current Sub-Page Badge */}
-                <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+                <div
                   onClick={() => handleCopyCode('NAV-04')}
                   role="button"
                   tabIndex={0}
@@ -2138,7 +2125,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
                 </div>
 
                 {/* NAV-05: Sub-page Location Strip with Right Petrol Bar */}
-                <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+                <div
                   onClick={() => handleCopyCode('NAV-05')}
                   role="button"
                   tabIndex={0}
@@ -2157,7 +2144,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
                 </div>
 
                 {/* NAV-06: Stepper Sub-Page Progress Indicator */}
-                <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+                <div
                   onClick={() => handleCopyCode('NAV-06')}
                   role="button"
                   tabIndex={0}
@@ -2182,7 +2169,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
                 </div>
 
                 {/* NAV-07: Next / Previous Sub-page Switcher */}
-                <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+                <div
                   onClick={() => handleCopyCode('NAV-07')}
                   role="button"
                   tabIndex={0}
@@ -2205,7 +2192,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
                 </div>
 
                 {/* NAV-08: Corner-Framed Sub-Page Header Pill */}
-                <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+                <div
                   onClick={() => handleCopyCode('NAV-08')}
                   role="button"
                   tabIndex={0}
@@ -2224,7 +2211,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
                 </div>
 
                 {/* NAV-09: Sub-page Quick Jump Bar with Gold Dot */}
-                <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+                <div
                   onClick={() => handleCopyCode('NAV-09')}
                   role="button"
                   tabIndex={0}
@@ -2244,7 +2231,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
                 </div>
 
                 {/* NAV-10: Minimalist Double-Ring Back Button */}
-                <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+                <div
                   onClick={() => handleCopyCode('NAV-10')}
                   role="button"
                   tabIndex={0}
@@ -2265,7 +2252,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
                 </div>
 
                 {/* NAV-11: Sub-page Context Header Bar (Full Width Preview) */}
-                <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+                <div
                   onClick={() => handleCopyCode('NAV-11')}
                   role="button"
                   tabIndex={0}
@@ -2289,7 +2276,7 @@ export const ManaratakDesignShowcase: React.FC<{ onBack?: () => void }> = ({ onB
                 </div>
 
                 {/* NAV-12: Floating Sub-Page Pill with Section Counter */}
-                <div onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click(); } }}
+                <div
                   onClick={() => handleCopyCode('NAV-12')}
                   role="button"
                   tabIndex={0}
