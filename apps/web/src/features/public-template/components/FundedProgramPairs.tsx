@@ -10,6 +10,13 @@ export function FundedProgramPairs({ pairs, language }: { pairs: NonNullable<Pub
   if (!pairs.length) return <p>{language === 'ar' ? 'لم يُحدد اقتران موثق بين الدرجة والتخصص.' : 'No evidenced degree and major pair specified.'}</p>;
   return <div className="space-y-2">
     <label className="block">{label}<select aria-label={label} value={current} onChange={event => setSelected(event.target.value)} className="mx-2 rounded border p-1">{degrees.map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
-    <ul>{visible.map(pair => <li key={pair.linkKey}>{pair.majorLabel || pair.majorId} — {pair.programName}</li>)}</ul>
+    <ul className="grid gap-2 md:grid-cols-2">
+      {visible.map(pair => (
+        <li key={pair.linkKey} className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-muted)] p-2.5">
+          <div>{pair.majorLabel || pair.majorId} — {pair.programName}</div>
+          {Boolean(pair.studyLanguages?.length) && <div className="text-[var(--mn-text-muted)]">{pair.studyLanguages?.map(item => item.name).join('، ')}</div>}
+        </li>
+      ))}
+    </ul>
   </div>;
 }

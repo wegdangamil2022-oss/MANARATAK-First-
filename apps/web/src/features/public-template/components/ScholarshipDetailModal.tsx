@@ -1,6 +1,14 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useState, useRef } from 'react';
-import { PublishedScholarshipDetails } from './PublishedScholarshipDetails';
+import { DirectApplicationSelfReport, ManagedApplicationEntry } from '../../analytics/ManagedApplicationEntry';
+import { FundedProgramPairs } from './FundedProgramPairs';
+import {
+  formatScholarshipFundingAmount,
+  PublishedStudyOptions,
+  publishedBenefitGroups,
+  ScholarshipMarkdown,
+  scholarshipDetailTabClass,
+} from './publishedScholarshipDetailContent';
 import { Scholarship, Service } from '../types';
 import { DetailBackButton, useDetailSearchTarget } from './DetailUi';
 import {
@@ -72,7 +80,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
   searchAnchor,
   searchTerm,
 }) => {
-  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+  const { t: publicT, dir: publicDir, language } = usePublicTemplateTranslation();
 
   const [saveToast, setSaveToast] = useState(false);
   const [activeMajorTab, setActiveMajorTab] = useState<
@@ -102,6 +110,42 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
   useDetailSearchTarget(searchAnchor, searchTerm);
 
   if (!scholarship) return null;
+
+  const published = scholarship.publishedData;
+  const subtitle = scholarship.titleEn.trim();
+  const showSubtitle = subtitle && subtitle !== scholarship.title.trim();
+  const donor = published ? published.providerName || published.sponsorName : scholarship.donorName
+    || (scholarship.id === 'csc-china'
+      ? publicT('public_china_scholarship_council_csc_chinese_ministry_of_education')
+      : scholarship.university || publicT('public_government_funding_organization'));
+  const donorSubtitle = published ? '' : scholarship.donorNameEn
+    || (scholarship.id === 'csc-china'
+      ? 'China Scholarship Council (CSC) - Ministry of Education of PRC'
+      : scholarship.universityEn || 'Official Government Donor');
+  const degrees = published ? scholarship.degreeLevel.join(' • ') : scholarship.degreesShortLabel || 'BSc • MSc • PhD';
+  const programPairs = published?.fundedProgramPairs ?? [];
+  const studyOptions = published?.studyOptions ?? [];
+  const studyLanguages = [...new Set([
+    ...studyOptions.map(option => publicT(option.language === 'zh' ? 'public_scholarship_chinese' : 'public_scholarship_english')),
+    ...programPairs.flatMap(pair => pair.studyLanguages?.map(item => item.name) ?? []),
+  ])];
+  const studyLanguage = published
+    ? studyLanguages.join(' / ') || published.studyLanguageSourceLabel || published.studyLanguage
+    : scholarship.studyLanguageLabel || publicT('public_english_chinese');
+  const deadline = published
+    ? scholarship.deadline || (published.deadlineType === 'OPEN_ALL_YEAR' ? publicT('public_applications_accepted_throughout_the_year') : '')
+    : scholarship.id === 'csc-china' ? '31-03-2027' : scholarship.deadline;
+  const benefits = published ? publishedBenefitGroups(published, publicT) : scholarship.benefitGroups;
+  const publishedFundingDetails = published ? [
+    (published.benefits?.length ?? 0) === 0 ? published.coverageDetails : '',
+    [published.fundingAmount, published.currency].filter(Boolean).join(' '),
+    formatScholarshipFundingAmount(published.amountMinorUnits, published.amountCurrencyCode, language),
+    published.duration,
+  ].filter(Boolean).join('\n\n') : '';
+  const hasApplicationWindow = published && published.deadlineType !== 'NOT_STATED_IN_SOURCE';
+  const applicationUrl = /^https?:\/\//i.test(scholarship.applicationUrl) ? scholarship.applicationUrl : '';
+  const officialSourceUrl = published?.officialSourceUrl || published?.officialWebsite || published?.sourceUrl || '';
+  const distinctSourceUrl = /^https?:\/\//i.test(officialSourceUrl) && officialSourceUrl !== applicationUrl ? officialSourceUrl : '';
 
   // Unified Aligned Section Header: Consistent Right Inset + Proportional Navy/Gold Emblem + Navy-to-Petrol Hairline Underline
   const renderSectionHeader = ({
@@ -185,15 +229,30 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
     Shield,
     FileCheck,
   ];
-  const resolvedDocuments = scholarship.requiredDocumentsList?.length
+  const publishedDocuments = published?.requiredDocumentItems ?? [];
+  const resolvedDocuments: Array<{ name: string; icon: typeof Globe2; testId?: string | null }> = published
+    ? publishedDocuments.map((doc, idx) => ({
+        name: [doc.displayName, doc.description, doc.isRequired === false ? publicT('public_published_optional') : ''].filter(Boolean).join(' — '),
+        icon: documentIcons[idx % documentIcons.length],
+        testId: doc.internationalTestId,
+      }))
+    : scholarship.requiredDocumentsList?.length
     ? scholarship.requiredDocumentsList.map((name, idx) => ({
         name,
         icon: documentIcons[idx % documentIcons.length],
       }))
     : defaultDocuments;
 
-  const resolvedRequirements =
-    scholarship.id !== 'csc-china' && scholarship.requirements?.length
+  const resolvedRequirements = published
+    ? (published.eligibilityItems ?? []).map(item => ({
+        text: [
+          item.valueText || item.itemTypeCode, item.countryLabel, item.countryLabel ? item.operatorCode : '',
+          item.minimumValue != null ? publicT('public_minimum_value', { v0: item.minimumValue }) : '',
+          item.maximumValue != null ? publicT('public_maximum_value', { v0: item.maximumValue }) : '',
+          item.isRequired === false ? publicT('public_published_optional') : '',
+        ].filter(Boolean).join(' — '),
+      }))
+    : scholarship.id !== 'csc-china' && scholarship.requirements?.length
       ? scholarship.requirements.map((text) => ({ text }))
       : [
           { text: 'ألا يكون المتقدم حاملاً للجنسية الصينية ويتمتع بصحة جيدة.' },
@@ -202,7 +261,8 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
           { text: 'ألا يكون حاصلاً على منحة دراسية أخرى في الصين بنفس الوقت.' },
         ];
 
-  const resolvedNotes = scholarship.importantNotes?.length
+  const exams = (scholarship.requiredExams ?? []).filter(exam => !publishedDocuments.some(doc => doc.internationalTestId === exam.id));
+  const resolvedNotes = published ? [] : scholarship.importantNotes?.length
     ? scholarship.importantNotes
     : [
         {
@@ -307,24 +367,19 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
               <h1 className="text-[13.5px] sm:text-[14.5px] md:text-lg lg:text-xl font-bold text-white leading-snug line-clamp-2 break-words drop-shadow-2xs">
                 {scholarship.title}
               </h1>
-              <p className="text-[9.5px] sm:text-[10.5px] md:text-xs font-semibold text-[#DDEFF2] font-['Cairo',sans-serif] mt-0.5 tracking-wide truncate">
-                {scholarship.titleEn}
-              </p>
+              {showSubtitle && (
+                <p className="text-[9.5px] sm:text-[10.5px] md:text-xs font-semibold text-[#DDEFF2] font-['Cairo',sans-serif] mt-0.5 tracking-wide truncate">
+                  {subtitle}
+                </p>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {scholarship.publishedData ? (
-        <PublishedScholarshipDetails
-          scholarship={scholarship}
-          onOpenUniversity={onOpenUniversity}
-          onOpenExam={onOpenExam}
-        />
-      ) : (
-        <div className="px-2.5 sm:px-3 md:px-4 space-y-3.5 md:space-y-4.5 z-20 relative -mt-3">
+      <div className="px-2.5 sm:px-3 md:px-4 space-y-3.5 md:space-y-4.5 z-20 relative -mt-3">
           {/* 2. DONOR AUTHORITY CARD */}
-          <div
+          {donor && <div
             className="relative w-full bg-white dark:bg-[#111E38] rounded-2xl py-2.5 md:py-3.5 pl-3 pr-2.5 sm:px-4 md:px-5 border border-[#142B5F]/10 dark:border-white/10 shadow-[0_4px_16px_rgba(20,43,95,0.06)] dark:shadow-[0_6px_20px_rgba(0,0,0,0.28)] flex items-center gap-2 md:gap-3.5 overflow-hidden mn-panel"
             dir={publicDir}
           >
@@ -344,37 +399,30 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             <div className="space-y-0.5 min-w-0 flex-1 text-start">
               <div className="flex items-center gap-1.5 min-w-0">
                 <h2 className="text-[10.5px] sm:text-xs md:text-[14.5px] font-bold text-[#142B5F] dark:text-[#F1F5F9] leading-snug line-clamp-2 font-['Cairo',sans-serif]">
-                  {scholarship.donorName
-                    ? scholarship.donorName
-                    : scholarship.id === 'csc-china'
-                      ? publicT('public_china_scholarship_council_csc_chinese_ministry_of_education')
-                      : scholarship.university || publicT('public_government_funding_organization')}
+                  {donor}
                 </h2>
               </div>
-              <p className="text-[9px] sm:text-[9.5px] md:text-[11.5px] font-medium text-[#5C707C] dark:text-[#9BB4C7] font-['Cairo',sans-serif] truncate">
-                {scholarship.donorNameEn
-                  ? scholarship.donorNameEn
-                  : scholarship.id === 'csc-china'
-                    ? 'China Scholarship Council (CSC) - Ministry of Education of PRC'
-                    : scholarship.universityEn || 'Official Government Donor'}
-              </p>
+              {donorSubtitle && <p className="text-[9px] sm:text-[9.5px] md:text-[11.5px] font-medium text-[#5C707C] dark:text-[#9BB4C7] font-['Cairo',sans-serif] truncate">
+                {donorSubtitle}
+              </p>}
             </div>
 
             {/* Clean Official Donor Pill */}
-            <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-[#DDEFF2]/85 dark:bg-[#0E7C86]/20 border border-[#0E7C86]/15 dark:border-[#34BFC9]/25 text-[9.5px] font-bold text-[#0E7C86] dark:text-[#7FD4DE] shrink-0">
+            {(!published || published.officialSourceUrl) && <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-[#DDEFF2]/85 dark:bg-[#0E7C86]/20 border border-[#0E7C86]/15 dark:border-[#34BFC9]/25 text-[9.5px] font-bold text-[#0E7C86] dark:text-[#7FD4DE] shrink-0">
               {publicDir === 'ltr' ? 'Official' : 'جهة رسمية'}
-            </span>
-          </div>
+            </span>}
+          </div>}
 
           {/* 3. CLEAN 2x3 QUICK INFO GRID (No yellow diamonds — crisp soft-square icons) */}
           <div className="grid grid-cols-2 gap-2 md:gap-3" dir={publicDir}>
             {/* 1. دولة الدراسة */}
-            <button
+            {scholarship.country && <button
               type="button"
               onClick={() =>
                 scholarship.countryReferenceId && onOpenCountry?.(scholarship.countryReferenceId)
               }
               className="bg-white dark:bg-[#111E38] rounded-2xl p-2.5 md:p-3.5 border border-[#142B5F]/10 dark:border-white/10 shadow-[0_2px_10px_rgba(20,43,95,0.035)] flex items-center gap-2.5 md:gap-3 min-w-0 hover:border-[#0E7C86]/45 dark:hover:border-[#34BFC9]/45 hover:shadow-[0_4px_14px_rgba(20,43,95,0.07)] active:scale-[0.99] transition-all text-start group cursor-pointer mn-panel"
+              disabled={Boolean(published) && (!scholarship.countryReferenceId || !onOpenCountry)}
               title={publicT('public_explore_country_name', { v0: scholarship.country })}
             >
               <div className="w-8.5 h-8.5 md:w-10 md:h-10 rounded-xl bg-[#DDEFF2]/75 dark:bg-[#0E7C86]/20 text-[#0E7C86] dark:text-[#34BFC9] flex items-center justify-center shrink-0 group-hover:bg-[#142B5F] group-hover:text-white transition-colors">
@@ -387,14 +435,15 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 <span className="text-[11px] sm:text-[11.5px] md:text-sm font-bold text-[#142B5F] dark:text-[#F1F5F9] leading-tight truncate mt-0.5">
                   {scholarship.country}
                 </span>
+                {published?.countryScope && <span className="mt-0.5 break-words text-[10px] text-[#5C707C] dark:text-[#9BB4C7]">{published.countryScope}</span>}
               </div>
               <span className="w-6 h-6 md:w-6.5 md:h-6.5 rounded-full bg-[#142B5F] dark:bg-[#1B3A78] text-[#F2CD78] shadow-[0_2px_8px_rgba(20,43,95,0.22)] group-hover:bg-[#0E7C86] group-hover:text-white group-hover:scale-105 flex items-center justify-center shrink-0 transition-all">
                 <ArrowUpLeft className="w-3.25 h-3.25 md:w-3.5 md:h-3.5 stroke-[2.4]" />
               </span>
-            </button>
+            </button>}
 
             {/* 2. الدرجات العلمية */}
-            <div className="bg-white dark:bg-[#111E38] rounded-2xl p-2.5 md:p-3.5 border border-[#142B5F]/10 dark:border-white/10 shadow-[0_2px_10px_rgba(20,43,95,0.035)] flex items-center gap-2.5 md:gap-3 min-w-0 mn-panel">
+            {degrees && <div className="bg-white dark:bg-[#111E38] rounded-2xl p-2.5 md:p-3.5 border border-[#142B5F]/10 dark:border-white/10 shadow-[0_2px_10px_rgba(20,43,95,0.035)] flex items-center gap-2.5 md:gap-3 min-w-0 mn-panel">
               <div className="w-8.5 h-8.5 md:w-10 md:h-10 rounded-xl bg-[#DDEFF2]/75 dark:bg-[#0E7C86]/20 text-[#0E7C86] dark:text-[#34BFC9] flex items-center justify-center shrink-0">
                 <GraduationCap className="w-4 h-4 md:w-5 md:h-5" />
               </div>
@@ -403,13 +452,13 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                   {publicT('public_degrees')}
                 </span>
                 <span className="text-[10.5px] sm:text-[11px] md:text-sm font-bold text-[#142B5F] dark:text-[#F1F5F9] font-['Cairo',sans-serif] tracking-tight leading-tight truncate mt-0.5">
-                  {scholarship.degreesShortLabel || 'BSc • MSc • PhD'}
+                  {degrees}
                 </span>
               </div>
-            </div>
+            </div>}
 
             {/* 3. انتهاء التقديم */}
-            <div className="bg-white dark:bg-[#111E38] rounded-2xl p-2.5 md:p-3.5 border border-[#142B5F]/10 dark:border-white/10 shadow-[0_2px_10px_rgba(20,43,95,0.035)] flex items-center gap-2.5 md:gap-3 min-w-0 mn-panel">
+            {(!published || deadline) && <div className="bg-white dark:bg-[#111E38] rounded-2xl p-2.5 md:p-3.5 border border-[#142B5F]/10 dark:border-white/10 shadow-[0_2px_10px_rgba(20,43,95,0.035)] flex items-center gap-2.5 md:gap-3 min-w-0 mn-panel">
               <div className="w-8.5 h-8.5 md:w-10 md:h-10 rounded-xl bg-[#DDEFF2]/75 dark:bg-[#0E7C86]/20 text-[#0E7C86] dark:text-[#34BFC9] flex items-center justify-center shrink-0">
                 <CalendarClock className="w-4 h-4 md:w-5 md:h-5" />
               </div>
@@ -418,10 +467,13 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                   {publicT('public_application_deadline')}
                 </span>
                 <span className="text-[10.5px] sm:text-[11px] md:text-sm font-bold text-[#142B5F] dark:text-[#F1F5F9] font-['Cairo',sans-serif] leading-tight truncate mt-0.5">
-                  {scholarship.id === 'csc-china' ? '31-03-2027' : scholarship.deadline}
+                  {deadline}
                 </span>
+                {published && (published.academicYear || published.cycleName) && <span className="mt-0.5 text-[10px] text-[#5C707C] dark:text-[#9BB4C7]">
+                  {[published.academicYear, published.cycleName].filter(Boolean).join(' · ')}
+                </span>}
               </div>
-            </div>
+            </div>}
 
             {/* 4. نوع التمويل */}
             <div className="bg-white dark:bg-[#111E38] rounded-2xl p-2.5 md:p-3.5 border border-[#142B5F]/10 dark:border-white/10 shadow-[0_2px_10px_rgba(20,43,95,0.035)] flex items-center gap-2.5 md:gap-3 min-w-0 mn-panel">
@@ -439,7 +491,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             </div>
 
             {/* 5. لغة الدراسة */}
-            <div className="bg-white dark:bg-[#111E38] rounded-2xl p-2.5 md:p-3.5 border border-[#142B5F]/10 dark:border-white/10 shadow-[0_2px_10px_rgba(20,43,95,0.035)] flex items-center gap-2.5 md:gap-3 min-w-0 mn-panel">
+            {studyLanguage && <div className="bg-white dark:bg-[#111E38] rounded-2xl p-2.5 md:p-3.5 border border-[#142B5F]/10 dark:border-white/10 shadow-[0_2px_10px_rgba(20,43,95,0.035)] flex items-center gap-2.5 md:gap-3 min-w-0 mn-panel">
               <div className="w-8.5 h-8.5 md:w-10 md:h-10 rounded-xl bg-[#DDEFF2]/75 dark:bg-[#0E7C86]/20 text-[#0E7C86] dark:text-[#34BFC9] flex items-center justify-center shrink-0">
                 <Languages className="w-4 h-4 md:w-5 md:h-5" />
               </div>
@@ -448,13 +500,13 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                   {publicT('public_study_language')}
                 </span>
                 <span className="text-[10.5px] sm:text-[11px] md:text-sm font-bold text-[#142B5F] dark:text-[#F1F5F9] leading-tight truncate mt-0.5">
-                  {scholarship.studyLanguageLabel || publicT('public_english_chinese')}
+                  {studyLanguage}
                 </span>
               </div>
-            </div>
+            </div>}
 
             {/* 6. الجهة المانحة */}
-            <div className="bg-white dark:bg-[#111E38] rounded-2xl p-2.5 md:p-3.5 border border-[#142B5F]/10 dark:border-white/10 shadow-[0_2px_10px_rgba(20,43,95,0.035)] flex items-center gap-2.5 md:gap-3 min-w-0 mn-panel">
+            {!published && <div className="bg-white dark:bg-[#111E38] rounded-2xl p-2.5 md:p-3.5 border border-[#142B5F]/10 dark:border-white/10 shadow-[0_2px_10px_rgba(20,43,95,0.035)] flex items-center gap-2.5 md:gap-3 min-w-0 mn-panel">
               <div className="w-8.5 h-8.5 md:w-10 md:h-10 rounded-xl bg-[#DDEFF2]/75 dark:bg-[#0E7C86]/20 text-[#0E7C86] dark:text-[#34BFC9] flex items-center justify-center shrink-0">
                 <Landmark className="w-4 h-4 md:w-5 md:h-5" />
               </div>
@@ -466,7 +518,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                   {scholarship.donorTypeLabel || publicT('public_government')}
                 </span>
               </div>
-            </div>
+            </div>}
           </div>
 
           {/* 4. ABOUT SCHOLARSHIP SECTION (نبذة عن المنحة) */}
@@ -480,9 +532,9 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
 
             <div className="relative overflow-hidden rounded-xl bg-[#F6F9FB] dark:bg-[#0B1529]/70 border border-[#142B5F]/8 dark:border-white/8 pl-3.5 pr-4 py-3 md:p-4">
               <div className="absolute top-2.5 right-0 bottom-2.5 w-[3px] rounded-l-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86] dark:from-[#34BFC9] dark:to-[#F2CD78]" />
-              <p className="text-[11px] sm:text-[11.5px] md:text-xs font-bold text-[#203442] dark:text-[#DCE7F0] leading-[1.9] text-start font-['Cairo',sans-serif] pr-1">
-                {scholarship.description}
-              </p>
+              <div className="text-[11px] sm:text-[11.5px] md:text-xs font-bold text-[#203442] dark:text-[#DCE7F0] leading-[1.9] text-start font-['Cairo',sans-serif] pr-1">
+                {published ? <ScholarshipMarkdown value={published.description || scholarship.description} /> : <p>{scholarship.description}</p>}
+              </div>
             </div>
           </div>
 
@@ -495,9 +547,9 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
               level: 3,
             })}
 
-            {scholarship.benefitGroups && scholarship.benefitGroups.length > 0 ? (
+            {benefits?.length ? (
               <div className="space-y-3.5 md:space-y-4">
-                {scholarship.benefitGroups.map((group, groupIdx) => (
+                {benefits.map((group, groupIdx) => (
                   <div
                     key={group.id}
                     className={
@@ -505,7 +557,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                     }
                   >
                     {/* Distinct Navy + White Sub-header */}
-                    <div className="flex items-center justify-between gap-2 mb-2.5 px-0.5">
+                    {group.title && <div className="flex items-center justify-between gap-2 mb-2.5 px-0.5">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="w-5.5 h-5.5 rounded-md bg-[#142B5F] text-white flex items-center justify-center shrink-0 shadow-[0_2px_6px_rgba(20,43,95,0.16)]">
                           <Coins className="w-3 h-3 text-white" />
@@ -519,7 +571,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                           {group.badge}
                         </span>
                       )}
-                    </div>
+                    </div>}
 
                     {/* Clean Benefit Items Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-2.5 items-stretch">
@@ -531,16 +583,16 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                           <span className="w-4 h-4 rounded-full bg-[#0E7C86] text-white flex items-center justify-center shrink-0">
                             <Check className="w-2.5 h-2.5 stroke-[3]" />
                           </span>
-                          <span className="text-[10.5px] sm:text-[11px] font-bold leading-snug text-[#203442] dark:text-[#E2ECF4]">
-                            {label}
-                          </span>
+                          <div className="text-[10.5px] sm:text-[11px] font-bold leading-snug text-[#203442] dark:text-[#E2ECF4]">
+                            {published ? <ScholarshipMarkdown value={label} /> : label}
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
                 ))}
               </div>
-            ) : (
+            ) : !published && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-2.5 items-stretch">
                 {(scholarship.id !== 'csc-china' && scholarship.financialCoverage?.length
                   ? scholarship.financialCoverage.map((label) => ({ label }))
@@ -567,6 +619,11 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 ))}
               </div>
             )}
+            {published && (publishedFundingDetails || !benefits?.length) && (
+              <div className="mt-2.5 text-[11px] font-bold text-[#203442] dark:text-[#DCE7F0]">
+                <ScholarshipMarkdown value={publishedFundingDetails} />
+              </div>
+            )}
           </div>
 
           {/* 6. MAJORS SECTION (التخصصات المتاحة) */}
@@ -578,6 +635,13 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
               level: 3,
             })}
 
+            {published ? (
+              <div key={scholarship.id} className="space-y-3.5 md:space-y-4">
+                {programPairs.length > 0 && <FundedProgramPairs pairs={programPairs} language={language} />}
+                {studyOptions.length > 0 && <PublishedStudyOptions options={studyOptions} />}
+                {!programPairs.length && !studyOptions.length && <ScholarshipMarkdown />}
+              </div>
+            ) : <>
             {/* Clean Next-Gen Degree Switcher (Solid Navy + Crisp White Active State) */}
             <div className="flex gap-1.5 md:gap-2 mb-3.5 md:mb-4 overflow-x-auto hide-scrollbar pb-0.5">
               {(
@@ -594,11 +658,8 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveMajorTab(tab.id)}
-                    className={`px-3.5 md:px-5 py-1.5 md:py-2 text-[10.5px] sm:text-[11px] font-bold rounded-xl transition-all whitespace-nowrap border cursor-pointer ${
-                      isActive
-                        ? 'bg-[#142B5F] dark:bg-[#1B3A78] text-white border-[#142B5F] dark:border-[#F2CD78]/40 shadow-[0_3px_10px_rgba(20,43,95,0.18)]'
-                        : 'bg-[#F4F7FA] dark:bg-[#0B1529] text-[#5C707C] dark:text-[#9BB4C7] border-[#142B5F]/10 dark:border-white/10 hover:border-[#0E7C86]/40 hover:text-[#142B5F] dark:hover:text-white'
-                    }`}
+                    aria-pressed={isActive}
+                    className={scholarshipDetailTabClass(isActive)}
                     data-mn-design="98e8ac3671"
                   >
                     {tab.label}
@@ -753,6 +814,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                   ))}
               </div>
             )}
+            </>}
           </div>
 
           {/* 7. PARTICIPATING UNIVERSITIES SECTION (الجامعات المشاركة) */}
@@ -832,6 +894,12 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             </div>
           )}
 
+          {published?.hasUnavailableRequirements && (
+            <p role="status" className="rounded-xl border border-[var(--mn-border)] p-3 text-[var(--mn-heading)]">
+              {publicT('public_requirements_partial')}
+            </p>
+          )}
+
           {/* 8. ELIGIBILITY SECTION (الشروط ومعايير التقديم) */}
           <div className={sectionCardClass} dir={publicDir}>
             {renderSectionHeader({
@@ -852,16 +920,18 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                     <span className="w-1 h-4 rounded-full bg-[#142B5F] dark:bg-[#F2CD78]" />
                     <span className="w-1 h-2.5 rounded-full bg-[#0E7C86] dark:bg-[#34BFC9]" />
                   </span>
-                  <span className="text-[10.5px] sm:text-[11px] font-bold text-[#203442] dark:text-[#E2ECF4] leading-relaxed">
-                    {condition.text}
-                  </span>
+                  <div className="text-[10.5px] sm:text-[11px] font-bold text-[#203442] dark:text-[#E2ECF4] leading-relaxed">
+                    {published ? <ScholarshipMarkdown value={condition.text} /> : condition.text}
+                  </div>
                 </div>
               ))}
             </div>
+            {published && !resolvedRequirements.length && <ScholarshipMarkdown value={published.eligibilityCriteria} />}
           </div>
 
           {/* 9. REQUIRED DOCUMENTS SECTION (المستندات المطلوبة) */}
           <div className={sectionCardClass} dir={publicDir}>
+            <span id="scholarship-exams" className="absolute top-0 scroll-mt-28" aria-hidden="true" />
             {renderSectionHeader({
               id: 'scholarship-documents',
               icon: FileCheck,
@@ -876,14 +946,21 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                   className="flex items-center gap-2 px-3 py-2 md:px-3.5 md:py-2.5 bg-[#F6F8FA] dark:bg-[#0B1529]/75 border border-[#142B5F]/8 dark:border-white/8 rounded-xl hover:border-[#0E7C86]/35 transition-all group cursor-default text-start w-fit md:w-full h-full"
                 >
                   <doc.icon className="w-3.75 h-3.75 text-[#0E7C86] dark:text-[#34BFC9] shrink-0 stroke-[2]" />
-                  <span className="text-[10.5px] font-bold text-[#203442] dark:text-[#E2ECF4] leading-tight">
-                    {doc.name}
-                  </span>
+                  <div className="text-[10.5px] font-bold text-[#203442] dark:text-[#E2ECF4] leading-tight">
+                    {published ? <ScholarshipMarkdown value={doc.name} /> : doc.name}
+                    {doc.testId && onOpenExam && (
+                      <button type="button"
+                        aria-label={`${publicT('public_view_linked_test')}: ${doc.name}`}
+                        className="mt-1.5 underline text-[var(--mn-primary)]"
+                        onClick={() => doc.testId && onOpenExam(doc.testId)}>
+                        {publicT('public_view_linked_test')}
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
 
-              <span id="scholarship-exams" className="scroll-mt-28 hidden" aria-hidden="true" />
-              {(scholarship.requiredExams || []).map((exam) => (
+              {exams.map((exam) => (
                 <button
                   key={exam.id}
                   type="button"
@@ -903,16 +980,18 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 </button>
               ))}
             </div>
+            {published && !resolvedDocuments.length && <ScholarshipMarkdown value={published.requiredDocuments} />}
           </div>
 
           {/* 10. IMPORTANT NOTES SECTION (ملاحظات مهمة — Warm Ivory #FAF7F0 + Gold #D6A43B) */}
-          <div className={sectionCardClass} dir={publicDir}>
+          {(!published || published.notes) && <div className={sectionCardClass} dir={publicDir}>
             {renderSectionHeader({
               icon: Info,
               title: publicT('public_important_note'),
               level: 3,
             })}
 
+            {published && <ScholarshipMarkdown value={published.notes} />}
             <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3.5 items-stretch">
               {resolvedNotes.map((note, idx) => (
                 <div
@@ -928,7 +1007,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 </div>
               ))}
             </div>
-          </div>
+          </div>}
 
           {/* 11. CONTEXTUAL SERVICES SECTION (خدمات تساعدك بالتقديم) */}
           {contextualServices && contextualServices.length > 0 && (
@@ -976,7 +1055,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
           )}
 
           {/* 12. RELATED ARTICLES SECTION (مقالات وأدلة مرتبطة — Stacked Cards with Navy+White Icon) */}
-          <section className={sectionCardClass} dir={publicDir}>
+          {(!published || Boolean(scholarship.relatedArticles?.length)) && <section className={sectionCardClass} dir={publicDir}>
             {renderSectionHeader({
               icon: BookOpenText,
               title: publicT('public_related_articles_and_guides'),
@@ -1019,7 +1098,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 </button>
               ))}
             </div>
-          </section>
+          </section>}
 
           {/* 13. APPLICATION LINKS SECTION (طريقة التقديم — Calm Platform Card First, Prominent Official CTA Pulled Down Below) */}
           <div className={sectionCardClass} dir={publicDir}>
@@ -1030,9 +1109,10 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
               level: 3,
             })}
 
+            {published?.applicationMethod && <ScholarshipMarkdown value={published.applicationMethod} />}
             <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3.5 items-stretch">
               {/* Calm Secondary Card: Apply via Manaratak (Coming Soon) */}
-              <div
+              {!published && <div
                 aria-label={publicT('public_applications_through_manaratak_are_currently_unavailable')}
                 className="h-full relative overflow-hidden inline-flex items-center justify-between gap-3 rounded-2xl px-4 py-3 md:py-3.5 bg-[#F6F8FA] dark:bg-[#0B1529]/80 border border-[#142B5F]/12 dark:border-white/10 transition-all cursor-default"
               >
@@ -1052,11 +1132,11 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 <span className="px-2.5 py-1 rounded-full bg-[#FBF9F4] dark:bg-[#F2CD78]/15 border border-[#D6A43B]/35 dark:border-[#F2CD78]/30 text-[9.5px] font-bold text-[#B48524] dark:text-[#F2CD78] shrink-0">
                   {publicDir === 'ltr' ? 'Soon' : 'قريباً'}
                 </span>
-              </div>
+              </div>}
 
               {/* Primary CTA Pulled Slightly Lower for Visual Weight Balance */}
-              <a
-                href={scholarship?.applicationUrl || '#'}
+              {(applicationUrl || !published) && <a
+                href={applicationUrl || '#'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-1.5 md:mt-0 h-full relative overflow-hidden inline-flex items-center justify-between gap-3 rounded-2xl px-4 py-3 md:py-3.5 bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] hover:brightness-105 text-white shadow-[0_6px_18px_rgba(20,43,95,0.18)] active:scale-[0.99] transition-all group cursor-pointer"
@@ -1067,22 +1147,33 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                   </span>
                   <div className="flex flex-col text-start min-w-0">
                     <span className="text-[11px] sm:text-[11.5px] md:text-xs font-bold text-white leading-tight truncate font-['Cairo',sans-serif]">
-                      {publicT('public_apply_through_the_official_scholarship_website')}
+                      {publicT(published && !hasApplicationWindow ? 'public_scholarship_program_website' : 'public_apply_through_the_official_scholarship_website')}
                     </span>
-                    <span className="text-[9.5px] font-medium text-[#DDEFF2] mt-0.5 truncate font-['Cairo',sans-serif]">
+                    {(!published || hasApplicationWindow) && <span className="text-[9.5px] font-medium text-[#DDEFF2] mt-0.5 truncate font-['Cairo',sans-serif]">
                       {publicDir === 'ltr' ? 'Direct official portal' : 'البوابة الرسمية المباشرة للتقديم'}
-                    </span>
+                    </span>}
                   </div>
                 </div>
                 <span className="w-7 h-7 rounded-full bg-white/14 group-hover:bg-white/22 text-[#F2CD78] flex items-center justify-center shrink-0 transition-transform group-hover:-translate-x-0.5">
                   <ArrowUpLeft className="w-3.5 h-3.5 stroke-[2.25]" />
                 </span>
-              </a>
+              </a>}
+              {distinctSourceUrl && (
+                <a href={distinctSourceUrl} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-[var(--mn-border)] px-4 py-3 text-xs font-bold text-[var(--mn-primary)]">
+                  <ExternalLink className="w-4 h-4" />
+                  {publicT('public_official_source')}
+                </a>
+              )}
             </div>
+            {hasApplicationWindow && <>
+              <DirectApplicationSelfReport opportunityId={scholarship.slug} />
+              <ManagedApplicationEntry opportunityId={scholarship.slug} />
+            </>}
           </div>
 
           {/* 14. SIMILAR SCHOLARSHIPS SECTION */}
-          <div className={`${sectionCardClass} mb-1`} dir={publicDir}>
+          {!published && <div className={`${sectionCardClass} mb-1`} dir={publicDir}>
             {renderSectionHeader({
               icon: LayoutGrid,
               title: publicT('public_similar_scholarships_you_may_like'),
@@ -1200,11 +1291,11 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 </div>
               );
             })()}
-          </div>
+          </div>}
 
           {/* 15. ACTIONS BUTTONS (SHARE & SAVE) */}
           <div className="px-1 pt-2 pb-2 flex justify-center gap-3 md:gap-4 w-full">
-            <button
+            {!published && <button
               type="button"
               onClick={() => {
                 // Share functionality placeholder
@@ -1214,7 +1305,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             >
               <span>{publicT('public_share_scholarship')}</span>
               <Share2 className="w-4 h-4 text-[#0E7C86] dark:text-[#34BFC9]" />
-            </button>
+            </button>}
 
             <button
               type="button"
@@ -1232,23 +1323,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
               />
             </button>
           </div>
-        </div>
-      )}
-
-      {scholarship.publishedData && (
-        <div className="px-3 py-4 flex justify-center">
-          <button
-            type="button"
-            onClick={handleSaveClick}
-            className="flex items-center gap-2 rounded-2xl bg-[#142B5F] hover:bg-[#0E7C86] px-5 py-3 text-xs font-bold text-white shadow-[0_6px_16px_rgba(20,43,95,0.18)] transition-colors cursor-pointer"
-          >
-            <Bookmark
-              className={`w-4 h-4 ${isFavorite ? 'fill-[#38C6D4] text-[#38C6D4]' : 'text-[#38C6D4]'}`}
-            />
-            {isFavorite ? publicT('public_saved_3') : publicT('public_save_scholarship')}
-          </button>
-        </div>
-      )}
+      </div>
 
       {/* Save Notification Toast */}
       {saveToast && (
