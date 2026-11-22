@@ -45,6 +45,62 @@ import {
   Heart,
 } from 'lucide-react';
 
+interface SimilarScholarshipCard {
+  id: string;
+  title: string;
+  country: string;
+  flagUrl?: string;
+  degreesLabel: string;
+  fundingLabel: string;
+  deadline?: string;
+}
+
+const previewRelatedArticles = [
+  {
+    id: 'art_104',
+    title: 'تحديثات معايير الكفاءة اللغوية المطلوبة باختبار IELTS لعام 2026',
+  },
+  {
+    id: 'art_cultural_exchange',
+    title: 'الدليل الشامل لمنح التبادل الثقافي ومسارات القبول الدولية 2026',
+  },
+];
+
+const previewSimilarScholarships = [
+  {
+    id: 'turkiye-burslari',
+    country: 'تركيا',
+    flagUrl: 'https://flagcdn.com/w80/tr.png',
+    title: 'منحة الحكومة التركية',
+    degreesLabel: 'BSc • MSc • PhD',
+    deadline: 'ينتهي 20 فبراير',
+  },
+  {
+    id: 'chevening-uk',
+    country: 'المملكة المتحدة',
+    flagUrl: 'https://flagcdn.com/w80/gb.png',
+    title: 'منحة تشيفنينغ للدراسات العليا',
+    degreesLabel: 'ماجستير',
+    deadline: 'ينتهي 5 نوفمبر',
+  },
+  {
+    id: 'daad-germany',
+    country: 'ألمانيا',
+    flagUrl: 'https://flagcdn.com/w80/de.png',
+    title: 'منح DAAD للدراسات العليا',
+    degreesLabel: 'MSc • PhD',
+    deadline: 'ينتهي 31 أكتوبر',
+  },
+  {
+    id: 'csc-china',
+    country: 'الصين',
+    flagUrl: 'https://flagcdn.com/w80/cn.png',
+    title: 'منحة الحكومة الصينية',
+    degreesLabel: 'BSc • MSc • PhD',
+    deadline: 'ينتهي 31 مارس',
+  },
+];
+
 interface ScholarshipDetailModalProps {
   scholarship: Scholarship | null;
   onClose: () => void;
@@ -60,6 +116,7 @@ interface ScholarshipDetailModalProps {
   onOpenArticle?: (articleId: string) => void;
   onOpenService?: (service: Service) => void;
   contextualServices?: Service[];
+  similarScholarships?: SimilarScholarshipCard[];
   searchAnchor?: string;
   searchTerm?: string;
 }
@@ -77,6 +134,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
   onOpenArticle,
   onOpenService,
   contextualServices = [],
+  similarScholarships,
   searchAnchor,
   searchTerm,
 }) => {
@@ -86,7 +144,6 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
   const [activeMajorTab, setActiveMajorTab] = useState<
     'bachelor' | 'master' | 'phd' | 'fellowship'
   >('bachelor');
-  const similarScrollRef = useRef<HTMLDivElement>(null);
   const universitiesScrollRef = useRef<HTMLDivElement>(null);
   const [uniScrollProgress, setUniScrollProgress] = useState({ ratio: 0.35, offset: 0 });
 
@@ -132,9 +189,11 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
   const studyLanguage = published
     ? studyLanguages.join(' / ') || published.studyLanguageSourceLabel || published.studyLanguage
     : scholarship.studyLanguageLabel || publicT('public_english_chinese');
-  const deadline = published
-    ? scholarship.deadline || (published.deadlineType === 'OPEN_ALL_YEAR' ? publicT('public_applications_accepted_throughout_the_year') : '')
-    : scholarship.id === 'csc-china' ? '31-03-2027' : scholarship.deadline;
+  const deadline = scholarship.deadline || (
+    published?.deadlineType === 'OPEN_ALL_YEAR'
+      ? publicT('public_applications_accepted_throughout_the_year')
+      : publicT('public_not_specified_2')
+  );
   const benefits = published ? publishedBenefitGroups(published, publicT) : scholarship.benefitGroups;
   const publishedFundingDetails = published ? [
     (published.benefits?.length ?? 0) === 0 ? published.coverageDetails : '',
@@ -146,6 +205,16 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
   const applicationUrl = /^https?:\/\//i.test(scholarship.applicationUrl) ? scholarship.applicationUrl : '';
   const officialSourceUrl = published?.officialSourceUrl || published?.officialWebsite || published?.sourceUrl || '';
   const distinctSourceUrl = /^https?:\/\//i.test(officialSourceUrl) && officialSourceUrl !== applicationUrl ? officialSourceUrl : '';
+
+  const relatedArticles = scholarship.relatedArticles?.length
+    ? scholarship.relatedArticles
+    : published ? [] : previewRelatedArticles;
+  const similarItems = (similarScholarships ?? (published ? [] : previewSimilarScholarships.map(item => ({
+    ...item,
+    fundingLabel: publicT('public_fully_funded'),
+  }))))
+    .filter(item => item.id !== scholarship.id)
+    .slice(0, 3);
 
   // Unified Aligned Section Header: Consistent Right Inset + Proportional Navy/Gold Emblem + Navy-to-Petrol Hairline Underline
   const renderSectionHeader = ({
@@ -458,7 +527,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             </div>}
 
             {/* 3. انتهاء التقديم */}
-            {(!published || deadline) && <div className="bg-white dark:bg-[#111E38] rounded-2xl p-2.5 md:p-3.5 border border-[#142B5F]/10 dark:border-white/10 shadow-[0_2px_10px_rgba(20,43,95,0.035)] flex items-center gap-2.5 md:gap-3 min-w-0 mn-panel">
+            <div className="bg-white dark:bg-[#111E38] rounded-2xl p-2.5 md:p-3.5 border border-[#142B5F]/10 dark:border-white/10 shadow-[0_2px_10px_rgba(20,43,95,0.035)] flex items-center gap-2.5 md:gap-3 min-w-0 mn-panel">
               <div className="w-8.5 h-8.5 md:w-10 md:h-10 rounded-xl bg-[#DDEFF2]/75 dark:bg-[#0E7C86]/20 text-[#0E7C86] dark:text-[#34BFC9] flex items-center justify-center shrink-0">
                 <CalendarClock className="w-4 h-4 md:w-5 md:h-5" />
               </div>
@@ -473,7 +542,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                   {[published.academicYear, published.cycleName].filter(Boolean).join(' · ')}
                 </span>}
               </div>
-            </div>}
+            </div>
 
             {/* 4. نوع التمويل */}
             <div className="bg-white dark:bg-[#111E38] rounded-2xl p-2.5 md:p-3.5 border border-[#142B5F]/10 dark:border-white/10 shadow-[0_2px_10px_rgba(20,43,95,0.035)] flex items-center gap-2.5 md:gap-3 min-w-0 mn-panel">
@@ -1055,7 +1124,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
           )}
 
           {/* 12. RELATED ARTICLES SECTION (مقالات وأدلة مرتبطة — Stacked Cards with Navy+White Icon) */}
-          {(!published || Boolean(scholarship.relatedArticles?.length)) && <section className={sectionCardClass} dir={publicDir}>
+          {relatedArticles.length > 0 && <section className={sectionCardClass} dir={publicDir}>
             {renderSectionHeader({
               icon: BookOpenText,
               title: publicT('public_related_articles_and_guides'),
@@ -1063,19 +1132,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             })}
 
             <div className="flex flex-col gap-2 md:gap-2.5">
-              {(scholarship.relatedArticles && scholarship.relatedArticles.length > 0
-                ? scholarship.relatedArticles
-                : [
-                    {
-                      id: 'art_104',
-                      title: 'تحديثات معايير الكفاءة اللغوية المطلوبة باختبار IELTS لعام 2026',
-                    },
-                    {
-                      id: 'art_cultural_exchange',
-                      title: 'الدليل الشامل لمنح التبادل الثقافي ومسارات القبول الدولية 2026',
-                    },
-                  ]
-              ).map((article) => (
+              {relatedArticles.map((article) => (
                 <button
                   key={article.id}
                   type="button"
@@ -1173,124 +1230,78 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
           </div>
 
           {/* 14. SIMILAR SCHOLARSHIPS SECTION */}
-          {!published && <div className={`${sectionCardClass} mb-1`} dir={publicDir}>
+          {similarItems.length > 0 && <div className={`${sectionCardClass} mb-1`} dir={publicDir}>
             {renderSectionHeader({
               icon: LayoutGrid,
               title: publicT('public_similar_scholarships_you_may_like'),
               level: 3,
             })}
 
-            {(() => {
-              const similarItems = [
-                {
-                  id: 'turkiye-burslari',
-                  country: 'تركيا',
-                  flagUrl: 'https://flagcdn.com/w80/tr.png',
-                  title: 'منحة الحكومة التركية',
-                  degreesLabel: 'BSc • MSc • PhD',
-                  fundingLabel: publicT('public_fully_funded'),
-                  deadline: 'ينتهي 20 فبراير',
-                },
-                {
-                  id: 'chevening-uk',
-                  country: 'المملكة المتحدة',
-                  flagUrl: 'https://flagcdn.com/w80/gb.png',
-                  title: 'منحة تشيفنينغ للدراسات العليا',
-                  degreesLabel: 'ماجستير',
-                  fundingLabel: publicT('public_fully_funded'),
-                  deadline: 'ينتهي 5 نوفمبر',
-                },
-                {
-                  id: 'daad-germany',
-                  country: 'ألمانيا',
-                  flagUrl: 'https://flagcdn.com/w80/de.png',
-                  title: 'منح DAAD للدراسات العليا',
-                  degreesLabel: 'MSc • PhD',
-                  fundingLabel: publicT('public_fully_funded'),
-                  deadline: 'ينتهي 31 أكتوبر',
-                },
-                {
-                  id: 'csc-china',
-                  country: 'الصين',
-                  flagUrl: 'https://flagcdn.com/w80/cn.png',
-                  title: 'منحة الحكومة الصينية',
-                  degreesLabel: 'BSc • MSc • PhD',
-                  fundingLabel: publicT('public_fully_funded'),
-                  deadline: 'ينتهي 31 مارس',
-                },
-              ].filter((item) => item.id !== scholarship.id).slice(0, 3);
-
-              return (
-                <div>
-                  <div
-                    ref={similarScrollRef}
-                    className="flex gap-2.5 overflow-x-auto mn-similar-scroll pb-2 pt-0.5 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:pb-0 items-stretch"
-                  >
-                    {similarItems.map((item) => (
-                      <button
-                        type="button"
-                        key={item.id}
-                        onClick={() => onOpenScholarship?.(item.id)}
-                        className="relative overflow-hidden w-[246px] sm:w-[260px] md:w-full h-full shrink-0 bg-[#F6F8FA] dark:bg-[#0B1529]/75 border border-[#142B5F]/10 dark:border-white/10 rounded-2xl p-3 md:p-3.5 flex flex-col justify-between gap-2.5 snap-center transition-all hover:bg-white dark:hover:bg-[#162747] hover:border-[#0E7C86]/35 hover:shadow-[0_6px_16px_rgba(20,43,95,0.07)] cursor-pointer text-start active:scale-[0.99] group"
-                      >
-                        {/* 1. Card Header: Navy Right -> Petrol Left */}
-                        <div className="rounded-xl px-2.5 py-2 md:px-3 md:py-2.5 bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] text-white shadow-2xs flex items-center gap-2 min-w-0">
-                          <div className="w-7 h-7 md:w-8 md:h-8 rounded-full p-0.5 bg-white/15 ring-1 ring-white/35 flex items-center justify-center shrink-0 overflow-hidden">
-                            <img
-                              src={item.flagUrl}
-                              alt={item.country}
-                              className="w-full h-full rounded-full object-cover"
-                            />
-                          </div>
-                          <h4 className="text-[10.5px] font-bold text-white leading-snug line-clamp-2 break-words flex-1 font-['Cairo',sans-serif]">
-                            {item.title}
-                          </h4>
-                        </div>
-
-                        {/* 2. Unified Petrol Icons 2x2 Key Details Grid */}
-                        <div className="grid grid-cols-2 gap-1.5">
-                          <div className="bg-white dark:bg-[#111E38] border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center gap-1.5 min-w-0">
-                            <MapPin className="w-3.25 h-3.25 text-[#0E7C86] dark:text-[#34BFC9] shrink-0" />
-                            <span className="text-[9.5px] font-bold text-[#203442] dark:text-[#DCE7F0] truncate">
-                              {item.country}
-                            </span>
-                          </div>
-
-                          <div className="bg-white dark:bg-[#111E38] border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center gap-1.5 min-w-0">
-                            <Coins className="w-3.25 h-3.25 text-[#0E7C86] dark:text-[#34BFC9] shrink-0" />
-                            <span className="text-[9.5px] font-bold text-[#203442] dark:text-[#DCE7F0] truncate">
-                              {item.fundingLabel}
-                            </span>
-                          </div>
-
-                          <div className="bg-white dark:bg-[#111E38] border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center gap-1.5 min-w-0">
-                            <GraduationCap className="w-3.25 h-3.25 text-[#0E7C86] dark:text-[#34BFC9] shrink-0" />
-                            <span className="text-[9px] font-bold text-[#203442] dark:text-[#DCE7F0] truncate">
-                              {item.degreesLabel}
-                            </span>
-                          </div>
-
-                          <div className="bg-white dark:bg-[#111E38] border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center gap-1.5 min-w-0">
-                            <Calendar className="w-3.25 h-3.25 text-[#0E7C86] dark:text-[#34BFC9] shrink-0" />
-                            <span className="text-[9px] font-bold text-[#203442] dark:text-[#DCE7F0] truncate">
-                              {item.deadline}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* 3. Card Footer: Calm Light View Details CTA (balances the bold gradient header) */}
-                        <div className="pt-0.5 mt-auto">
-                          <div className="w-full rounded-xl py-1.5 md:py-2 px-3 bg-white dark:bg-[#111E38] border border-[#142B5F]/18 dark:border-[#F2CD78]/30 group-hover:bg-[#142B5F] group-hover:border-[#142B5F] text-[10px] font-bold text-[#142B5F] dark:text-[#F2CD78] group-hover:text-white flex items-center justify-center gap-1 shadow-2xs transition-colors font-['Cairo',sans-serif]">
-                            <span>{publicT('public_view_details')}</span>
-                            <ArrowUpLeft className="w-3 h-3 text-[#0E7C86] dark:text-[#F2CD78] group-hover:text-[#F2CD78] transition-colors" />
-                          </div>
-                        </div>
-                      </button>
-                    ))}
+            <div
+              className="flex gap-2.5 overflow-x-auto mn-similar-scroll pb-2 pt-0.5 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:pb-0 items-stretch"
+            >
+              {similarItems.map((item) => (
+                <button
+                  type="button"
+                  key={item.id}
+                  onClick={() => onOpenScholarship?.(item.id)}
+                  className="relative overflow-hidden w-[246px] sm:w-[260px] md:w-full h-full shrink-0 bg-[#F6F8FA] dark:bg-[#0B1529]/75 border border-[#142B5F]/10 dark:border-white/10 rounded-2xl p-3 md:p-3.5 flex flex-col justify-between gap-2.5 snap-center transition-all hover:bg-white dark:hover:bg-[#162747] hover:border-[#0E7C86]/35 hover:shadow-[0_6px_16px_rgba(20,43,95,0.07)] cursor-pointer text-start active:scale-[0.99] group"
+                >
+                  {/* 1. Card Header: Navy Right -> Petrol Left */}
+                  <div className="rounded-xl px-2.5 py-2 md:px-3 md:py-2.5 bg-gradient-to-l from-[#142B5F] via-[#153B75] to-[#0E7C86] text-white shadow-2xs flex items-center gap-2 min-w-0">
+                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full p-0.5 bg-white/15 ring-1 ring-white/35 flex items-center justify-center shrink-0 overflow-hidden">
+                      {item.flagUrl ? (
+                        <img src={item.flagUrl} alt={item.country} className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        <Globe2 className="w-3.5 h-3.5" aria-hidden="true" />
+                      )}
+                    </div>
+                    <h4 className="text-[10.5px] font-bold text-white leading-snug line-clamp-2 break-words flex-1 font-['Cairo',sans-serif]">
+                      {item.title}
+                    </h4>
                   </div>
-                </div>
-              );
-            })()}
+
+                  {/* 2. Unified Petrol Icons 2x2 Key Details Grid */}
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <div className="bg-white dark:bg-[#111E38] border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center gap-1.5 min-w-0">
+                      <MapPin className="w-3.25 h-3.25 text-[#0E7C86] dark:text-[#34BFC9] shrink-0" />
+                      <span className="text-[9.5px] font-bold text-[#203442] dark:text-[#DCE7F0] truncate">
+                        {item.country}
+                      </span>
+                    </div>
+
+                    <div className="bg-white dark:bg-[#111E38] border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center gap-1.5 min-w-0">
+                      <Coins className="w-3.25 h-3.25 text-[#0E7C86] dark:text-[#34BFC9] shrink-0" />
+                      <span className="text-[9.5px] font-bold text-[#203442] dark:text-[#DCE7F0] truncate">
+                        {item.fundingLabel}
+                      </span>
+                    </div>
+
+                    <div className="bg-white dark:bg-[#111E38] border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center gap-1.5 min-w-0">
+                      <GraduationCap className="w-3.25 h-3.25 text-[#0E7C86] dark:text-[#34BFC9] shrink-0" />
+                      <span className="text-[9px] font-bold text-[#203442] dark:text-[#DCE7F0] truncate">
+                        {item.degreesLabel}
+                      </span>
+                    </div>
+
+                    <div className="bg-white dark:bg-[#111E38] border border-[#142B5F]/8 dark:border-white/8 rounded-lg px-2 py-1.5 flex items-center gap-1.5 min-w-0">
+                      <Calendar className="w-3.25 h-3.25 text-[#0E7C86] dark:text-[#34BFC9] shrink-0" />
+                      <span className="text-[9px] font-bold text-[#203442] dark:text-[#DCE7F0] truncate">
+                        {item.deadline || publicT('public_not_specified_2')}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 3. Card Footer: Calm Light View Details CTA (balances the bold gradient header) */}
+                  <div className="pt-0.5 mt-auto">
+                    <div className="w-full rounded-xl py-1.5 md:py-2 px-3 bg-white dark:bg-[#111E38] border border-[#142B5F]/18 dark:border-[#F2CD78]/30 group-hover:bg-[#142B5F] group-hover:border-[#142B5F] text-[10px] font-bold text-[#142B5F] dark:text-[#F2CD78] group-hover:text-white flex items-center justify-center gap-1 shadow-2xs transition-colors font-['Cairo',sans-serif]">
+                      <span>{publicT('public_view_details')}</span>
+                      <ArrowUpLeft className="w-3 h-3 text-[#0E7C86] dark:text-[#F2CD78] group-hover:text-[#F2CD78] transition-colors" />
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>}
 
           {/* 15. ACTIONS BUTTONS (SHARE & SAVE) */}

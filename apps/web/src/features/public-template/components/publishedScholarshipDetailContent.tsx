@@ -74,14 +74,16 @@ export function PublishedStudyOptions({ options }: { options: NonNullable<Public
 
   return (
     <div className="space-y-3.5 md:space-y-4">
-      <div className="flex flex-wrap gap-1.5 md:gap-2">
-        {languages.map(code => (
-          <button key={code} type="button" aria-pressed={code === active}
-            className={scholarshipDetailTabClass(code === active)} onClick={() => setSelected(code)}>
-            {t(code === 'zh' ? 'public_scholarship_chinese' : 'public_scholarship_english')}
-          </button>
-        ))}
-      </div>
+      {languages.length > 1 && (
+        <div className="flex flex-wrap gap-1.5 md:gap-2">
+          {languages.map(code => (
+            <button key={code} type="button" aria-pressed={code === active}
+              className={scholarshipDetailTabClass(code === active)} onClick={() => setSelected(code)}>
+              {t(code === 'zh' ? 'public_scholarship_chinese' : 'public_scholarship_english')}
+            </button>
+          ))}
+        </div>
+      )}
       {options.filter(option => option.language === active).map(option => (
         <div key={option.institution} className="space-y-2.5">
           <h4 className="flex items-center gap-2 text-[11px] sm:text-xs md:text-[13px] font-bold text-[#142B5F] dark:text-[#F1F5F9]">

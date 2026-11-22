@@ -65,9 +65,51 @@ describe('published scholarship template', () => {
     expect(html).toMatch(/<h1[^>]*>S<\/h1>/);
     expect(html).not.toMatch(/<p[^>]*>S<\/p>/);
     expect(html).not.toContain('BSc • MSc • PhD');
-    expect(html).not.toContain('public_application_deadline');
+    expect(html).toContain('public_application_deadline');
+    expect(html).toContain('public_not_specified_2');
     expect(html).not.toContain('public_apply_through_manaratak');
     expect(html).not.toContain('الطب والجراحة');
+  });
+
+  it('keeps the saved deadline when one is available', () => {
+    const publishedData = { ...scholarship.publishedData!, deadlineType: 'FIXED_DATE', applicationDeadline: '2027-03-01' };
+    const dated = mapPublicScholarshipDto(publishedData);
+    const html = renderToStaticMarkup(details({ scholarship: dated }));
+    expect(html).toContain('2027-03-01');
+    expect(html).not.toContain('public_not_specified_2');
+  });
+
+  it('shows the approved article and scholarship cards only when supplied', () => {
+    const empty = renderToStaticMarkup(details());
+    expect(empty).not.toContain('public_related_articles_and_guides');
+    expect(empty).not.toContain('public_similar_scholarships_you_may_like');
+
+    const html = renderToStaticMarkup(details({
+      scholarship: { ...scholarship, relatedArticles: [{ id: 'guide', title: 'Published application guide' }] },
+      similarScholarships: [{
+        id: 'related', title: 'Published related scholarship', country: 'Germany',
+        degreesLabel: 'Masters', fundingLabel: 'Full funding',
+      }],
+    }));
+    expect(html).toContain('public_related_articles_and_guides');
+    expect(html).toContain('Published application guide');
+    expect(html).toContain('public_similar_scholarships_you_may_like');
+    expect(html).toContain('mn-similar-scroll');
+    expect(html).toContain('Published related scholarship');
+    expect(html).not.toContain('منحة الحكومة التركية');
+  });
+
+  it('uses language controls only when the published scholarship has multiple teaching languages', () => {
+    const english = { language: 'en' as const, institution: 'University', programs: ['Civil Engineering'] };
+    const chinese = { language: 'zh' as const, institution: 'University', programs: ['Mining'] };
+    const publishedData = scholarship.publishedData!;
+    const single = renderToStaticMarkup(details({ scholarship: { ...scholarship, publishedData: { ...publishedData, studyOptions: [english] } } }));
+    expect(single).toContain('Civil Engineering');
+    expect(single).not.toContain('aria-pressed');
+
+    const multilingual = renderToStaticMarkup(details({ scholarship: { ...scholarship, publishedData: { ...publishedData, studyOptions: [english, chinese] } } }));
+    expect(multilingual).toContain('aria-pressed="true"');
+    expect(multilingual).toContain('aria-pressed="false"');
   });
 
   it('keeps distinct translated titles and displays funding packages in the template', () => {
